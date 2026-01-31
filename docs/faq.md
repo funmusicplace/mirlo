@@ -24,6 +24,8 @@ As we develop our project and come to terms with the costs of running it, we wil
 
 For now, please pitch in to [help cover our costs](https://mirlo.space/team/support).
 
+:::
+
 ::: details What are some of Mirlo's features?
 
 For a full list of features, see our [features](./features/index.md) section. Below is a high level overview of how we compare with Bandcamp and Patreon.
@@ -146,6 +148,7 @@ Our goals, informed by our [Observations and Intent](https://funmusic.place/obse
 That said, we would like to make it easier for other groups (like music labels or other co-ops) to install the software. We’d also like to look into building plug-ins and other tools that are useful for artists (for example, plug-ins that help to make your music available on aggregators like Distrokids or other platforms).
 
 Eventually, we hope to [exit to our community](https://blog.fracturedatlas.org/exit-to-community), by bringing in musicians and other key stakeholders into the decision making process.
+
 :::
 
 ::: details What's on your product roadmap?
@@ -172,9 +175,9 @@ No you don't. You can make your music available to download for free, or just up
 
 For upload we support lossless file formats (flac, wav). Upon request we convert files across formats to be available to purchasers, as well as converting them to HLS and a couple of mp3 bitrates. We store the original file you upload without changing it.
 
-When someone <strong>streams</strong> an album on our site, they are listening to a 320k stream, using the libmp3lame codec. For streaming, fmmpeg mixes channels down to 2.
+When someone <strong>streams</strong> an album on our site, they are listening to a 320k stream, using the libmp3lame codec. For streaming, ffmpeg mixes channels down to 2.
 
-When someone <strong>downloads</strong> a digital album, they can choose what format to download. Downloading WAV and FLAC files will be lossless, and will preserver multichannel audio. MP3 and OPUS files will not support multichannel audio.
+When someone <strong>downloads</strong> a digital album, they can choose what format to download. Downloading WAV and FLAC files will be lossless, and will preserve multichannel audio. MP3 and OPUS files will not support multichannel audio.
 
 :::
 
@@ -184,7 +187,7 @@ When someone buys a digital album they get to choose what format to download it 
 
 :::
 
-::: details Can an artist make a listern account? Will that be a problem in the future?
+::: details Can an artist make a listener account? Will that be a problem in the future?
 
 There’s only one account type on Mirlo! Any user can make an artist to upload music to at any point. To do so, click on the top right menu and click on “Manage Artist”, this will let you add new artists.
 
@@ -195,6 +198,8 @@ Whether or not you want to maintain a separation between your artist account and
 ::: details Can I sell individual tracks?
 
 Yes! To do so, simply add a price to each track in your album, or set a price for all tracks.
+
+:::
 
 ::: details Will you use my music for AI training purposes?
 
@@ -207,6 +212,8 @@ No!
 No. We follow [Bandcamp's example on this](https://get.bandcamp.help/hc/en-us/articles/23020694021655-Does-Bandcamp-support-30-second-snippets).
 
 You can limit the amount of times a listener can listen to the entire song though. If you want to get creative about it, you could upload a preview of the song as a 30 second snippet, and then attach the full song to the same album, but list it as "only listenable when purchased".
+
+:::
 
 ## Technical details
 
@@ -259,7 +266,7 @@ Our community is primarily hanging out on [the Discord](https://discord.gg/XuV7F
 
 :::
 
-::: details do you have brand / logo guidelines?
+::: details Do you have brand / logo guidelines?
 
 Yes! Check out our
 <a href="https://public.3.basecamp.com/p/jJKu6kzsJFLS7n9s6uua688B">
@@ -274,13 +281,13 @@ png logo, black and white (285x285)</a>.
 
 ## Support
 
-::: details Can people see my personal informations when they buy things from my artist page on Mirlo ?
+::: details Can people see my personal information when they buy things from my artist page on Mirlo?
 
-No ! When people buy things from your artist page, all they see during and after the Stripe checkout process is your Mirlo shop and artist name, none of the personal information you provide Stripes when setting up your account are shared with customers. We understand that this is a priority for many people, since a lot of artists tend to have pseudonyms, or don't necessarily operate from a business location and want to avoid their personnal address to be disclosed.
+No! When people buy things from your artist page, all they see during and after the Stripe checkout process is your Mirlo shop and artist name, none of the personal information you provide Stripes when setting up your account are shared with customers. We understand that this is a priority for many people, since a lot of artists tend to have pseudonyms, or don't necessarily operate from a business location and want to avoid their personnal address to be disclosed.
 
 :::
 
-::: details
+::: details How do I add support tiers?
 
 You can add support tiers by going to your artist's profile,
 clicking “edit page” (or navigating to it through the top
