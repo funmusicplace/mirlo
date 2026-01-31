@@ -4,6 +4,7 @@ import cleanUpFiles from "../../../jobs/tasks/clean-up-files";
 import initiateUserNotifcations from "../../../jobs/tasks/initiate-user-notifications";
 import { startMovingFiles } from "../../../queues/moving-files-to-backblaze";
 import logger from "../../../logger";
+import { cleanUpDeletedUsers } from "../../../utils/user";
 
 export default function () {
   const operations = {
@@ -39,6 +40,10 @@ export default function () {
         }
         if (jobName === "initiateUserNotifications") {
           await initiateUserNotifcations();
+          result[jobName] = "Success";
+        }
+        if (jobName === "cleanUpDeletedUsers") {
+          await cleanUpDeletedUsers();
           result[jobName] = "Success";
         }
       }
