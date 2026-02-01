@@ -74,7 +74,7 @@ export default defineConfig({
     },
     fr: {
       label: 'French',
-      title: 'test title'
+      title: 'test title',
       description: 'test description'
       // dir: 'rtl' // uncomment for right-to-left languages. also see https://vitepress.dev/guide/i18n#rtl-support-experimental
     }
