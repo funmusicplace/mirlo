@@ -67,4 +67,17 @@ export default defineConfig({
       { icon: "github", link: "https://github.com/funmusicplace/mirlo" },
     ],
   },
+  locales: {
+    root: {
+      label: 'English',
+      lang: 'en'
+    },
+    fr: {
+      label: 'French',
+      title: 'test title'
+      description: 'test description'
+      // dir: 'rtl' // uncomment for right-to-left languages. also see https://vitepress.dev/guide/i18n#rtl-support-experimental
+    }
+    // insert other locales above
+  }
 });
