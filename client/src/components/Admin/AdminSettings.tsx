@@ -36,7 +36,7 @@ interface SettingsFromAPI {
         background?: string;
         foreground?: string;
       };
-      artistId?: number;
+      artistId?: string;
       title?: string;
       supportEmail?: string;
       purchaseEmail?: string;
