@@ -70,8 +70,9 @@ export default function () {
         }
 
         const settings = await getSiteSettings();
-        const instanceArtistId =
-          settings.settings?.instanceCustomization?.artistId;
+        const instanceArtistId = Number(
+          settings.settings?.instanceCustomization?.artistId
+        );
 
         if (
           user &&
