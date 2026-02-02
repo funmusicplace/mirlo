@@ -48,7 +48,10 @@ export default function () {
 
       if (
         setting === "instanceArtist" &&
-        settings.settings?.instanceCustomization?.artistId
+        settings.settings?.instanceCustomization?.artistId &&
+        Number.isFinite(
+          Number(settings.settings.instanceCustomization.artistId)
+        )
       ) {
         const artist = await prisma.artist.findFirst({
           where: {
