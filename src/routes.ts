@@ -62,6 +62,7 @@ const routes = [
   "users",
   "users/testExistence",
   "users/{userId}",
+  "users/{userId}/artists",
   "users/{userId}/confirmEmail",
   "users/{userId}/avatar",
   "users/{userId}/banner",
@@ -79,6 +80,7 @@ const routes = [
   "manage/subscriptions",
   "manage/subscriptions/{subscriptionId}",
   "manage/artists",
+  "manage/bulkTrackUpload",
   "manage/label",
   "manage/label/artists/{artistId}",
   "manage/artists/{artistId}",
@@ -152,7 +154,6 @@ const routes = [
   "admin/send-email",
   "admin/chargePledges",
   "admin/fundraiserPledges",
-  "admin/bulkTrackUpload",
   "oembed",
   "flag",
 ];

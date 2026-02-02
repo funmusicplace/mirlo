@@ -35,9 +35,6 @@ export const Admin: React.FC = () => {
           <NavLink to="tracks">{t("tracks")}</NavLink>
         </li>
         <li>
-          <NavLink to="tracks/bulk-upload">{t("bulkTrackUpload")}</NavLink>
-        </li>
-        <li>
           <NavLink to="transactions">{t("transactions")}</NavLink>
         </li>
         <li>

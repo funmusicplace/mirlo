@@ -55,6 +55,13 @@ export default function () {
       };
       const artists = await prisma.artist.findMany({
         where,
+        include: {
+          trackGroups: {
+            select: {
+              title: true,
+            },
+          },
+        },
       });
       res.json({ results: artists });
     } catch (e) {
