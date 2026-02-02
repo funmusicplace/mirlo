@@ -51,6 +51,21 @@ export function queryManagedArtists(opts?: {}) {
   });
 }
 
+const fetchUserArtists: QueryFunction<
+  { results: Artist[] },
+  ["fetchUserArtists", { userId?: number }, ...any]
+> = ({ queryKey: [_, { userId }], signal }) => {
+  return api.get(`v1/users/${userId}/artists`, { signal });
+};
+
+export function queryUserArtists(opts: { userId?: number }) {
+  return queryOptions({
+    queryKey: ["fetchUserArtists", opts, QUERY_KEY_ARTISTS],
+    queryFn: fetchUserArtists,
+    enabled: !!opts.userId,
+  });
+}
+
 const fetchManagedArtistTrackGroups: QueryFunction<
   { results: TrackGroup[] },
   ["fetchUserTrackGroups", { artistId?: number }, ...any]

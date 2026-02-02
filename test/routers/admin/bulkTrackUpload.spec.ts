@@ -1,15 +1,16 @@
 import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it, beforeEach } from "mocha";
-import request from "supertest";
-import { clearTables, createUser, createArtist } from "../../utils";
+
+import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
+import request from "supertest";
+import { clearTables, createArtist, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("admin/bulk-track-upload", () => {
+describe("admin/bulkTrackUpload", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -21,10 +22,9 @@ describe("admin/bulk-track-upload", () => {
   describe("POST /", () => {
     it("should return 401 without user", async () => {
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .send({
-          trackGroups: [],
-          mapping: {},
+          artists: [],
         })
         .set("Accept", "application/json");
 
@@ -37,72 +37,72 @@ describe("admin/bulk-track-upload", () => {
       });
 
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups: [],
-          mapping: {},
+          artists: [],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 401);
+      assert.equal(response.body.error, "Unauthorized");
     });
 
-    it("should return 400 with empty trackGroups", async () => {
+    it("should return 400 with empty artists", async () => {
       const { accessToken } = await createUser({
         email: "admin@admin.com",
         isAdmin: true,
       });
 
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups: [],
-          mapping: {},
+          artists: [],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 400);
+      assert.equal(response.body.error, "At least one artist is required");
     });
 
     it("should create a simple track group with one track", async () => {
-      const { accessToken, user } = await createUser({
+      const { accessToken } = await createUser({
         email: "admin@admin.com",
         isAdmin: true,
       });
 
-      const trackGroups = [
-        {
-          release_title: "Test Album",
-          release_artist: "Test Artist",
-          tracks: [
-            {
-              track_title: "Test Track",
-              track_number: "1",
-              artists: [],
-              other_fields: {},
-            },
-          ],
-          metadata: {},
-        },
-      ];
-
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups,
-          mapping: {},
+          artists: [
+            {
+              name: "Test Artist",
+              trackGroups: [
+                {
+                  title: "Test Album",
+                  tracks: [
+                    {
+                      title: "Test Track",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.artistsCreated, 1);
-      assert.equal(response.body.trackGroupsCreated, 1);
-      assert.equal(response.body.tracksCreated, 1);
+      assert.equal(response.body.result.artistsCreated, 1);
+      assert.equal(response.body.result.trackGroupsCreated, 1);
+      assert.equal(response.body.result.tracksCreated, 1);
+      assert.deepEqual(response.body.result.partialErrors, []);
 
-      // Verify the album exists in database
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           title: "Test Album",
@@ -118,57 +118,56 @@ describe("admin/bulk-track-upload", () => {
       assert.equal(trackGroup.tracks[0].title, "Test Track");
     });
 
-    it("should create multiple tracks with different artist roles", async () => {
-      const { accessToken, user } = await createUser({
+    it("should create track artist rows for different artist roles", async () => {
+      const { accessToken } = await createUser({
         email: "admin@admin.com",
         isAdmin: true,
       });
 
-      const trackGroups = [
-        {
-          release_title: "Album With Roles",
-          release_artist: "Main Artist",
-          tracks: [
-            {
-              track_title: "Collaborated Track",
-              track_number: "1",
-              artists: [
-                {
-                  name: "Composer Name",
-                  role: "composer",
-                },
-                {
-                  name: "Producer Name",
-                  role: "producer",
-                },
-                {
-                  name: "Featured Artist",
-                  role: "featured_artist",
-                },
-              ],
-              isrc: "ISRC123456",
-              other_fields: { genre: "Electronic" },
-            },
-          ],
-          metadata: { catalogNumber: "CAT-001" },
-        },
-      ];
-
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups,
-          mapping: {},
+          artists: [
+            {
+              name: "Main Artist",
+              trackGroups: [
+                {
+                  title: "Album With Roles",
+                  tracks: [
+                    {
+                      title: "Collaborated Track",
+                      order: 1,
+                      artists: [
+                        {
+                          artistName: "Composer Name",
+                          role: "composer",
+                        },
+                        {
+                          artistName: "Producer Name",
+                          role: "producer",
+                        },
+                        {
+                          artistName: "Featured Artist",
+                          role: "featured_artist",
+                        },
+                      ],
+                      isrc: "ISRC123456",
+                      metadata: { genre: "Electronic" },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.artistsCreated, 4); // Main + 3 collaborators
-      assert.equal(response.body.trackGroupsCreated, 1);
-      assert.equal(response.body.tracksCreated, 1);
+      assert.equal(response.body.result.artistsCreated, 1);
+      assert.equal(response.body.result.trackGroupsCreated, 1);
+      assert.equal(response.body.result.tracksCreated, 1);
 
-      // Verify track artists were created with correct roles
       const track = await prisma.track.findFirst({
         where: {
           title: "Collaborated Track",
@@ -180,157 +179,182 @@ describe("admin/bulk-track-upload", () => {
 
       assert(track);
       assert.equal(track.trackArtists.length, 3);
+      assert(
+        track.trackArtists.some((ta) => ta.artistName === "Composer Name")
+      );
+      assert(
+        track.trackArtists.some((ta) => ta.artistName === "Producer Name")
+      );
+      assert(
+        track.trackArtists.some((ta) => ta.artistName === "Featured Artist")
+      );
       assert(track.trackArtists.some((ta) => ta.role === "composer"));
       assert(track.trackArtists.some((ta) => ta.role === "producer"));
       assert(track.trackArtists.some((ta) => ta.role === "featured_artist"));
       assert.equal(track.isrc, "ISRC123456");
+
+      const collaboratorArtists = await prisma.artist.findMany({
+        where: {
+          name: {
+            in: ["Composer Name", "Producer Name", "Featured Artist"],
+          },
+        },
+      });
+
+      assert.equal(collaboratorArtists.length, 0);
     });
 
-    it("should reuse existing artists", async () => {
-      const { accessToken } = await createUser({
+    it("should reuse existing artists for the target user", async () => {
+      const { accessToken, user } = await createUser({
         email: "admin@admin.com",
         isAdmin: true,
       });
 
-      // Create an artist first - just create one in the database
-      await prisma.artist.create({
-        data: {
-          name: "Existing Artist",
-          urlSlug: "existing-artist",
-          userId: 1,
-        },
+      const existingArtist = await createArtist(user.id, {
+        name: "Existing Artist",
       });
 
-      const trackGroups = [
-        {
-          release_title: "Album 1",
-          release_artist: "Existing Artist",
-          tracks: [
+      const response = await requestApp
+        .post("admin/bulkTrackUpload")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .send({
+          artists: [
             {
-              track_title: "Track 1",
-              track_number: "1",
-              artists: [
+              name: "Existing Artist",
+              trackGroups: [
                 {
-                  name: "Existing Artist",
-                  role: "producer",
+                  title: "Album 1",
+                  tracks: [
+                    {
+                      title: "Track 1",
+                      order: 1,
+                      artists: [
+                        {
+                          artistName: "Existing Artist",
+                          role: "producer",
+                        },
+                      ],
+                      metadata: {},
+                    },
+                  ],
                 },
               ],
-              other_fields: {},
             },
           ],
-          metadata: {},
-        },
-      ];
-
-      const response = await requestApp
-        .post("admin/bulk-track-upload")
-        .set("Cookie", [`jwt=${accessToken}`])
-        .send({
-          trackGroups,
-          mapping: {},
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.artistsCreated, 0); // No new artists, reused existing
-      assert.equal(response.body.trackGroupsCreated, 1);
-      assert.equal(response.body.tracksCreated, 1);
+      assert.equal(response.body.result.artistsCreated, 0);
+      assert.equal(response.body.result.trackGroupsCreated, 1);
+      assert.equal(response.body.result.tracksCreated, 1);
+
+      const track = await prisma.track.findFirst({
+        where: { title: "Track 1" },
+        include: { trackArtists: true },
+      });
+
+      assert(track);
+      assert.equal(track.trackArtists.length, 1);
+      assert.equal(track.trackArtists[0].artistId, existingArtist.id);
     });
 
-    it("should create multiple track groups", async () => {
+    it("should create multiple artists and track groups", async () => {
       const { accessToken } = await createUser({
         email: "admin@admin.com",
         isAdmin: true,
       });
 
-      const trackGroups = [
-        {
-          release_title: "Album 1",
-          release_artist: "Artist A",
-          tracks: [
-            {
-              track_title: "Track 1",
-              track_number: "1",
-              artists: [],
-              other_fields: {},
-            },
-          ],
-          metadata: {},
-        },
-        {
-          release_title: "Album 2",
-          release_artist: "Artist B",
-          tracks: [
-            {
-              track_title: "Track 2",
-              track_number: "1",
-              artists: [],
-              other_fields: {},
-            },
-            {
-              track_title: "Track 3",
-              track_number: "2",
-              artists: [],
-              other_fields: {},
-            },
-          ],
-          metadata: {},
-        },
-      ];
-
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups,
-          mapping: {},
+          artists: [
+            {
+              name: "Artist A",
+              trackGroups: [
+                {
+                  title: "Album 1",
+                  tracks: [
+                    {
+                      title: "Track 1",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "Artist B",
+              trackGroups: [
+                {
+                  title: "Album 2",
+                  tracks: [
+                    {
+                      title: "Track 2",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                    {
+                      title: "Track 3",
+                      order: 2,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.artistsCreated, 2);
-      assert.equal(response.body.trackGroupsCreated, 2);
-      assert.equal(response.body.tracksCreated, 3);
+      assert.equal(response.body.result.artistsCreated, 2);
+      assert.equal(response.body.result.trackGroupsCreated, 2);
+      assert.equal(response.body.result.tracksCreated, 3);
     });
 
-    it("should handle metadata and unmapped fields", async () => {
+    it("should store track metadata and lyrics", async () => {
       const { accessToken } = await createUser({
         email: "admin@admin.com",
         isAdmin: true,
       });
 
-      const trackGroups = [
-        {
-          release_title: "Album",
-          release_artist: "Artist",
-          tracks: [
-            {
-              track_title: "Track",
-              track_number: "1",
-              artists: [],
-              lyrics: "Sample lyrics",
-              other_fields: {
-                customField1: "value1",
-                customField2: "value2",
-              },
-            },
-          ],
-          metadata: {},
-        },
-      ];
-
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups,
-          mapping: {},
+          artists: [
+            {
+              name: "Artist",
+              trackGroups: [
+                {
+                  title: "Album",
+                  tracks: [
+                    {
+                      title: "Track",
+                      order: 1,
+                      artists: [],
+                      lyrics: "Sample lyrics",
+                      metadata: {
+                        customField1: "value1",
+                        customField2: "value2",
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
 
-      // Verify track metadata was stored
       const track = await prisma.track.findFirst({
         where: {
           title: "Track",
@@ -345,57 +369,57 @@ describe("admin/bulk-track-upload", () => {
       });
     });
 
-    it("should generate unique URL slugs", async () => {
+    it("should generate unique URL slugs per artist", async () => {
       const { accessToken } = await createUser({
         email: "admin@admin.com",
         isAdmin: true,
       });
 
-      const trackGroups = [
-        {
-          release_title: "My Album",
-          release_artist: "Artist",
-          tracks: [
-            {
-              track_title: "Track 1",
-              track_number: "1",
-              artists: [],
-              other_fields: {},
-            },
-          ],
-          metadata: {},
-        },
-        {
-          release_title: "My Album",
-          release_artist: "Artist",
-          tracks: [
-            {
-              track_title: "Track 2",
-              track_number: "1",
-              artists: [],
-              other_fields: {},
-            },
-          ],
-          metadata: {},
-        },
-      ];
-
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups,
-          mapping: {},
+          artists: [
+            {
+              name: "Artist",
+              trackGroups: [
+                {
+                  title: "My Album",
+                  tracks: [
+                    {
+                      title: "Track 1",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+                {
+                  title: "My Album",
+                  tracks: [
+                    {
+                      title: "Track 2",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.trackGroupsCreated, 2);
+      assert.equal(response.body.result.trackGroupsCreated, 2);
 
-      // Verify both albums exist with different slugs
       const albums = await prisma.trackGroup.findMany({
         where: {
           title: "My Album",
+        },
+        orderBy: {
+          id: "asc",
         },
       });
 
@@ -409,47 +433,107 @@ describe("admin/bulk-track-upload", () => {
         isAdmin: true,
       });
 
-      const trackGroups = [
-        {
-          release_title: "Album 1",
-          release_artist: "Artist A",
-          tracks: [
-            {
-              track_title: "Good Track",
-              track_number: "1",
-              artists: [],
-              other_fields: {},
-            },
-          ],
-          metadata: {},
-        },
-        {
-          release_title: "Album 2",
-          release_artist: "Artist B",
-          tracks: [
-            {
-              track_title: "Track 2",
-              track_number: "1",
-              artists: [],
-              other_fields: {},
-            },
-          ],
-          metadata: {},
-        },
-      ];
+      // This passes OpenAPI `number` validation but exceeds Postgres Int range.
+      const invalidTrack = {
+        title: "Invalid Order Track",
+        order: 2147483648,
+        artists: [],
+        metadata: {},
+      };
 
       const response = await requestApp
-        .post("admin/bulk-track-upload")
+        .post("admin/bulkTrackUpload")
         .set("Cookie", [`jwt=${accessToken}`])
         .send({
-          trackGroups,
-          mapping: {},
+          artists: [
+            {
+              name: "Artist A",
+              trackGroups: [
+                {
+                  title: "Album 1",
+                  tracks: [invalidTrack],
+                },
+              ],
+            },
+            {
+              name: "Artist B",
+              trackGroups: [
+                {
+                  title: "Album 2",
+                  tracks: [
+                    {
+                      title: "Track 2",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.trackGroupsCreated, 2);
-      assert.equal(response.body.tracksCreated, 2);
+      assert.equal(response.body.result.artistsCreated, 2);
+      assert.equal(response.body.result.trackGroupsCreated, 2);
+      assert.equal(response.body.result.tracksCreated, 1);
+      assert.equal(response.body.result.partialErrors.length, 1);
+      assert.match(response.body.result.partialErrors[0], /album "Album 1"/i);
+    });
+
+    it("should create artists under the provided target user", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+      const { user: targetUser } = await createUser({
+        email: "target@user.com",
+      });
+
+      const response = await requestApp
+        .post("admin/bulkTrackUpload")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .send({
+          userId: targetUser.id,
+          artists: [
+            {
+              name: "Target Artist",
+              trackGroups: [
+                {
+                  title: "Target Album",
+                  tracks: [
+                    {
+                      title: "Target Track",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.artistsCreated, 1);
+
+      const createdArtist = await prisma.artist.findFirst({
+        where: {
+          userId: targetUser.id,
+          name: "Target Artist",
+        },
+        include: {
+          trackGroups: true,
+        },
+      });
+
+      assert(createdArtist);
+      assert.equal(createdArtist.userId, targetUser.id);
+      assert.equal(createdArtist.trackGroups.length, 1);
     });
   });
 });

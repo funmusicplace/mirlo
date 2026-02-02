@@ -497,7 +497,6 @@ const routes: RouteObject[] = [
               return { Component };
             },
           },
-
           {
             path: "users",
             async lazy() {
@@ -593,7 +592,7 @@ const routes: RouteObject[] = [
             path: "tracks/bulk-upload",
             async lazy() {
               const { default: Component } = await import(
-                "components/Admin/BulkTrackUpload"
+                "components/Admin/TrackUpload/BulkTrackUpload"
               );
               return { Component };
             },
