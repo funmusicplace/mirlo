@@ -6,32 +6,33 @@ import { AppError, HttpCode } from "../../../utils/error";
 import { slug } from "github-slugger";
 import { User } from "@mirlo/prisma/client";
 
-interface PreviewTrack {
-  track_title: string;
-  track_number: string;
-  artists: Array<{
-    name: string;
-    role: string;
-  }>;
+interface TrackArtistData {
+  artistName: string;
+  role?: string;
+}
+
+interface TrackData {
+  title: string;
+  order: number;
   isrc?: string;
   lyrics?: string;
-  other_fields: Record<string, string>;
+  artists: TrackArtistData[];
+  metadata?: Record<string, unknown>;
 }
 
-interface PreviewTrackGroup {
-  release_title: string;
-  release_artist: string;
-  tracks: PreviewTrack[];
-  metadata: Record<string, string>;
-}
-
-interface ColumnMapping {
-  [columnIndex: number]: string;
+interface TrackGroupData {
+  title: string;
+  tracks: TrackData[];
+  about?: string;
+  catalogNumber?: string;
 }
 
 interface BulkUploadRequest {
-  trackGroups: PreviewTrackGroup[];
-  mapping: ColumnMapping;
+  artists: Array<{
+    name: string;
+    trackGroups: TrackGroupData[];
+  }>;
+  userId?: number;
 }
 
 export default function () {
@@ -40,23 +41,32 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { trackGroups } = req.body as BulkUploadRequest;
-    const loggedInUser = req.user as User | undefined;
+    const { artists, userId } = req.body as BulkUploadRequest;
+    const loggedInUser = req.user as User;
 
-    if (!loggedInUser) {
-      return next(
-        new AppError({
-          httpCode: HttpCode.UNAUTHORIZED,
-          description: "User not authenticated",
-        })
-      );
+    const targetUserId = userId || loggedInUser.id;
+
+    // Verify that the target user exists
+    if (userId && userId !== loggedInUser.id) {
+      const targetUser = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!targetUser) {
+        return next(
+          new AppError({
+            httpCode: HttpCode.BAD_REQUEST,
+            description: `User with ID ${userId} not found`,
+          })
+        );
+      }
     }
 
-    if (!Array.isArray(trackGroups) || trackGroups.length === 0) {
+    if (!Array.isArray(artists) || artists.length === 0) {
       return next(
         new AppError({
           httpCode: HttpCode.BAD_REQUEST,
-          description: "No track groups provided",
+          description: "At least one artist is required",
         })
       );
     }
@@ -69,158 +79,170 @@ export default function () {
     };
 
     try {
-      for (const trackGroup of trackGroups) {
+      // Process each artist
+      for (const artistData of artists) {
         try {
-          // Find or create the release artist
-          let releaseArtist = await prisma.artist.findFirst({
+          if (!artistData.name || typeof artistData.name !== "string") {
+            result.partialErrors.push("Artist name is required");
+            continue;
+          }
+
+          if (
+            !Array.isArray(artistData.trackGroups) ||
+            artistData.trackGroups.length === 0
+          ) {
+            result.partialErrors.push(
+              `Artist "${artistData.name}": No track groups provided`
+            );
+            continue;
+          }
+
+          const artistName = artistData.name;
+
+          // Find or create the artist
+          let artist = await prisma.artist.findFirst({
             where: {
-              name: trackGroup.release_artist,
+              name: artistName,
               user: {
-                id: loggedInUser.id,
+                id: targetUserId,
               },
             },
           });
 
-          if (!releaseArtist) {
-            releaseArtist = await prisma.artist.create({
+          if (!artist) {
+            artist = await prisma.artist.create({
               data: {
-                name: trackGroup.release_artist,
-                urlSlug: slug(trackGroup.release_artist),
-                userId: loggedInUser.id,
+                name: artistName,
+                urlSlug: slug(artistName),
+                userId: targetUserId,
               },
             });
             result.artistsCreated++;
           }
 
-          // Generate URL slug for the track group
-          const urlSlug = slug(trackGroup.release_title);
-
-          // Check if URL slug is unique for this artist
-          let slugCounter = 0;
-          let finalSlug = urlSlug;
-          let existingTrackGroup = await prisma.trackGroup.findUnique({
-            where: {
-              artistId_urlSlug: {
-                artistId: releaseArtist.id,
-                urlSlug: finalSlug,
-              },
-            },
-          });
-
-          while (existingTrackGroup) {
-            slugCounter++;
-            finalSlug = `${urlSlug}-${slugCounter}`;
-            existingTrackGroup = await prisma.trackGroup.findUnique({
-              where: {
-                artistId_urlSlug: {
-                  artistId: releaseArtist.id,
-                  urlSlug: finalSlug,
-                },
-              },
-            });
-          }
-
-          // Create the track group
-          const createdTrackGroup = await prisma.trackGroup.create({
-            data: {
-              title: trackGroup.release_title,
-              artistId: releaseArtist.id,
-              urlSlug: finalSlug,
-              // Store metadata in the about field for now
-              about: trackGroup.metadata?.catalogNumber || undefined,
-              published: false,
-            },
-          });
-          result.trackGroupsCreated++;
-
-          // Process tracks
-          for (
-            let trackIdx = 0;
-            trackIdx < trackGroup.tracks.length;
-            trackIdx++
-          ) {
-            const track = trackGroup.tracks[trackIdx];
-
+          // Process all track groups for this artist
+          for (const trackGroup of artistData.trackGroups) {
             try {
-              const createdTrack = await prisma.track.create({
-                data: {
-                  title: track.track_title,
-                  trackGroupId: createdTrackGroup.id,
-                  isrc: track.isrc,
-                  lyrics: track.lyrics,
-                  order: trackIdx,
-                  metadata: track.other_fields || {},
+              // Generate URL slug for the track group
+              const urlSlug = slug(trackGroup.title);
+
+              // Check if URL slug is unique for this artist
+              let slugCounter = 0;
+              let finalSlug = urlSlug;
+              let existingTrackGroup = await prisma.trackGroup.findUnique({
+                where: {
+                  artistId_urlSlug: {
+                    artistId: artist.id,
+                    urlSlug: finalSlug,
+                  },
                 },
               });
-              result.tracksCreated++;
 
-              // Create track artists (multiple roles)
-              const artistsToCreate = new Set<string>();
+              while (existingTrackGroup) {
+                slugCounter++;
+                finalSlug = `${urlSlug}-${slugCounter}`;
+                existingTrackGroup = await prisma.trackGroup.findUnique({
+                  where: {
+                    artistId_urlSlug: {
+                      artistId: artist.id,
+                      urlSlug: finalSlug,
+                    },
+                  },
+                });
+              }
 
-              for (const artist of track.artists) {
-                const artistKey = `${artist.name}|${artist.role}`;
-                if (!artistsToCreate.has(artistKey)) {
-                  artistsToCreate.add(artistKey);
+              // Create the track group
+              const createdTrackGroup = await prisma.trackGroup.create({
+                data: {
+                  title: trackGroup.title,
+                  artistId: artist.id,
+                  urlSlug: finalSlug,
+                  about: trackGroup.about,
+                  catalogNumber: trackGroup.catalogNumber,
+                  published: false,
+                },
+              });
+              result.trackGroupsCreated++;
 
-                  // Find or create the artist
-                  let trackArtist = await prisma.artist.findFirst({
-                    where: {
-                      name: artist.name,
+              // Process tracks
+              for (const track of trackGroup.tracks) {
+                try {
+                  const createdTrack = await prisma.track.create({
+                    data: {
+                      title: track.title,
+                      trackGroupId: createdTrackGroup.id,
+                      isrc: track.isrc,
+                      lyrics: track.lyrics,
+                      order: track.order,
+                      metadata: track.metadata || {},
                     },
                   });
+                  result.tracksCreated++;
 
-                  if (!trackArtist) {
-                    trackArtist = await prisma.artist.create({
+                  // Create track artists
+                  for (const trackArtist of track.artists) {
+                    // Find or create the artist if artistName is provided
+                    let contributingArtist = undefined;
+                    if (trackArtist.artistName) {
+                      contributingArtist = await prisma.artist.findFirst({
+                        where: {
+                          name: trackArtist.artistName,
+                        },
+                      });
+                    }
+
+                    // Create track artist relationship
+                    await prisma.trackArtist.create({
                       data: {
-                        name: artist.name,
-                        urlSlug: slug(artist.name),
-                        userId: loggedInUser.id,
+                        trackId: createdTrack.id,
+                        artistId: contributingArtist?.id,
+                        artistName: trackArtist.artistName,
+                        role: trackArtist.role,
+                        order: 0,
                       },
                     });
-                    result.artistsCreated++;
                   }
-
-                  // Create track artist relationship
-                  await prisma.trackArtist.create({
-                    data: {
-                      trackId: createdTrack.id,
-                      artistId: trackArtist.id,
-                      artistName: artist.name,
-                      role: artist.role,
-                      order: 0,
-                    },
-                  });
+                } catch (trackError) {
+                  result.partialErrors.push(
+                    `Track "${track.title}" in album "${trackGroup.title}": ${
+                      trackError instanceof Error
+                        ? trackError.message
+                        : "Unknown error"
+                    }`
+                  );
                 }
               }
-            } catch (trackError) {
+            } catch (groupError) {
               result.partialErrors.push(
-                `Track "${track.track_title}" in album "${trackGroup.release_title}": ${
-                  trackError instanceof Error
-                    ? trackError.message
+                `Album "${trackGroup.title}": ${
+                  groupError instanceof Error
+                    ? groupError.message
                     : "Unknown error"
                 }`
               );
             }
           }
-        } catch (groupError) {
+        } catch (artistError) {
           result.partialErrors.push(
-            `Album "${trackGroup.release_title}": ${
-              groupError instanceof Error ? groupError.message : "Unknown error"
+            `Artist "${artistData.name}": ${
+              artistError instanceof Error
+                ? artistError.message
+                : "Unknown error"
             }`
           );
         }
       }
 
-      res.json(result);
+      res.json({ result });
     } catch (error) {
       next(error);
     }
   }
 
   POST.apiDoc = {
-    summary: "Bulk upload tracks from CSV data",
+    summary: "Bulk upload tracks for one or more artists",
     description:
-      "Creates track groups, tracks, and artists from validated CSV data",
+      "Creates track groups and tracks for one or more artists in a single request. All mapping should be done on the frontend before sending to this endpoint.",
     parameters: [
       {
         name: "body",
@@ -229,43 +251,62 @@ export default function () {
         schema: {
           type: "object",
           properties: {
-            trackGroups: {
+            artists: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
-                  release_title: { type: "string" },
-                  release_artist: { type: "string" },
-                  tracks: {
+                  name: {
+                    type: "string",
+                    description: "Name of the artist to create or use",
+                  },
+                  trackGroups: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        track_title: { type: "string" },
-                        track_number: { type: "string" },
-                        artists: {
+                        title: { type: "string" },
+                        tracks: {
                           type: "array",
                           items: {
                             type: "object",
                             properties: {
-                              name: { type: "string" },
-                              role: { type: "string" },
+                              title: { type: "string" },
+                              order: { type: "number" },
+                              artists: {
+                                type: "array",
+                                items: {
+                                  type: "object",
+                                  properties: {
+                                    artistName: { type: "string" },
+                                    role: { type: "string" },
+                                  },
+                                },
+                              },
+                              isrc: { type: "string" },
+                              lyrics: { type: "string" },
+                              metadata: { type: "object" },
                             },
+                            required: ["title", "order"],
                           },
                         },
-                        isrc: { type: "string" },
-                        lyrics: { type: "string" },
-                        other_fields: { type: "object" },
+                        about: { type: "string" },
+                        catalogNumber: { type: "string" },
                       },
+                      required: ["title", "tracks"],
                     },
                   },
-                  metadata: { type: "object" },
                 },
+                required: ["name", "trackGroups"],
               },
             },
-            mapping: { type: "object" },
+            userId: {
+              type: "number",
+              description:
+                "ID of the user to create the artists under (admin only). Defaults to current user.",
+            },
           },
-          required: ["trackGroups"],
+          required: ["artists"],
         },
       },
     ],

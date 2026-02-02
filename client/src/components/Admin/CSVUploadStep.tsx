@@ -3,9 +3,16 @@ import { css } from "@emotion/css";
 import Button from "../common/Button";
 import { Input } from "../common/Input";
 import { Select } from "../common/Select";
+import { read, utils } from "xlsx";
+import Papa from "papaparse";
+import api from "services/api";
 
 interface CSVUploadProps {
-  onMappingComplete: (mapping: ColumnMapping, data: ParsedRow[]) => void;
+  onMappingComplete: (
+    mapping: ColumnMapping,
+    data: ParsedRow[],
+    userId?: number
+  ) => void;
 }
 
 export interface ColumnMapping {
@@ -22,79 +29,126 @@ const FIELD_OPTIONS = [
   { value: "release_artist", label: "Release Display Artist" },
   { value: "track_title", label: "Track Title" },
   { value: "track_number", label: "Track Number" },
-  { value: "composer", label: "Composer" },
-  { value: "songwriter", label: "Songwriter" },
-  { value: "publisher", label: "Publisher" },
-  { value: "producer", label: "Producer" },
-  { value: "featured_artist", label: "Featured Artist" },
+  { value: "catalogNumber", label: "Catalog Number" },
   { value: "track_artist_role", label: "Track Artist Role (custom)" },
   { value: "isrc", label: "ISRC Code" },
   { value: "genre", label: "Genre" },
   { value: "description", label: "Description" },
   { value: "lyrics", label: "Lyrics" },
   { value: "release_date", label: "Release Date" },
+  { value: "published_date", label: "Published Date" },
   { value: "min_price", label: "Minimum Price (cents)" },
+  { value: "tags", label: "Tags (comma separated)" },
 ];
 
 const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
   const [csvData, setCSVData] = useState<ParsedRow[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [mapping, setMapping] = useState<ColumnMapping>({});
-  const [step, setStep] = useState<"upload" | "mapping" | "review">("upload");
+  const [step, setStep] = useState<
+    "selectUser" | "upload" | "mapping" | "review"
+  >("selectUser");
   const [error, setError] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userId, setUserId] = useState<number | undefined>();
+  const [userLoading, setUserLoading] = useState(false);
+  const [selectedUserEmail, setSelectedUserEmail] = useState<string>("");
 
-  const parseCSV = (text: string): { headers: string[]; data: ParsedRow[] } => {
-    const lines = text.split("\n").filter((line) => line.trim());
-    if (lines.length === 0) return { headers: [], data: [] };
-
-    const headers = lines[0].split(",").map((h) => h.trim());
-    const data: ParsedRow[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(",").map((v) => v.trim());
-      const row: ParsedRow = {};
-      headers.forEach((header, index) => {
-        row[header] = values[index] || "";
-      });
-      if (Object.values(row).some((v) => v)) {
-        data.push(row);
-      }
+  const handleSelectUser = async () => {
+    if (!userEmail.trim()) {
+      setError("Please enter an email address");
+      return;
     }
 
-    return { headers, data };
+    setUserLoading(true);
+    setError("");
+
+    try {
+      const response = await api.getMany<User>(
+        `admin/users?email=${encodeURIComponent(userEmail)}`
+      );
+      if (!response.results || response.results.length === 0) {
+        setError("User not found");
+        setUserLoading(false);
+        return;
+      }
+
+      const user = response.results[0];
+      setUserId(user.id);
+      setSelectedUserEmail(user.email);
+      setStep("upload");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error searching for user");
+    } finally {
+      setUserLoading(false);
+    }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const text = event.target?.result as string;
-        const { headers, data } = parseCSV(text);
+    try {
+      if (file.name.endsWith(".csv")) {
+        // Parse CSV
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const text = event.target?.result as string;
+            const result = Papa.parse(text, { header: true });
+            const parsedData = (result.data as any[]).filter((row: any) =>
+              Object.values(row).some((v) => v)
+            );
 
-        if (headers.length === 0) {
-          setError("No data found in CSV file");
+            if (
+              !result.data?.[0] ||
+              Object.keys(result.data[0] as any).length === 0
+            ) {
+              setError("No data found in CSV file");
+              return;
+            }
+
+            if (parsedData.length === 0) {
+              setError("No rows found in CSV file");
+              return;
+            }
+
+            setHeaders(Object.keys(result.data[0] as any));
+            setCSVData(parsedData as ParsedRow[]);
+            setStep("mapping");
+            setError("");
+          } catch (err) {
+            setError(
+              `Error parsing CSV: ${err instanceof Error ? err.message : "Unknown error"}`
+            );
+          }
+        };
+        reader.readAsText(file);
+      } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+        // Parse Excel
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = read(arrayBuffer, { type: "array" });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const excelData = utils.sheet_to_json(worksheet, {
+          defval: "",
+        }) as any[];
+        if (excelData.length === 0) {
+          setError("No rows found in Excel file");
           return;
         }
 
-        if (data.length === 0) {
-          setError("No rows found in CSV file");
-          return;
-        }
-
-        setHeaders(headers);
-        setCSVData(data);
+        setHeaders(Object.keys(excelData[0] as any));
+        setCSVData(excelData as ParsedRow[]);
         setStep("mapping");
         setError("");
-      } catch (err) {
-        setError(
-          `Error parsing CSV: ${err instanceof Error ? err.message : "Unknown error"}`
-        );
+      } else {
+        setError("Please upload a CSV, XLSX, or XLS file");
       }
-    };
-    reader.readAsText(file);
+    } catch (err) {
+      setError(
+        `Error processing file: ${err instanceof Error ? err.message : "Unknown error"}`
+      );
+    }
   };
 
   const handleMappingChange = (columnIndex: number, value: string) => {
@@ -123,8 +177,62 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
       return;
     }
 
-    onMappingComplete(mapping, csvData);
+    onMappingComplete(mapping, csvData, userId);
   };
+
+  if (step === "selectUser") {
+    return (
+      <div
+        className={css`
+          padding: 2rem;
+          background: #f5f5f5;
+          border-radius: 8px;
+          max-width: 500px;
+        `}
+      >
+        <h3>Select User</h3>
+        <p>Enter the email address of the user to attach these albums to.</p>
+
+        <div
+          className={css`
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+          `}
+        >
+          <Input
+            type="email"
+            placeholder="user@example.com"
+            value={userEmail}
+            onChange={(e) => setUserEmail(e.target.value)}
+            name="user-email"
+          />
+          <Button
+            onClick={handleSelectUser}
+            buttonRole="primary"
+            disabled={userLoading}
+          >
+            {userLoading ? "Searching..." : "Search"}
+          </Button>
+        </div>
+
+        {error && (
+          <div
+            className={css`
+              margin-top: 1rem;
+              padding: 1rem;
+              background: #ffebee;
+              border: 1px solid #ef5350;
+              border-radius: 4px;
+              color: #c62828;
+            `}
+          >
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (step === "upload") {
     return (
@@ -135,12 +243,12 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
           border-radius: 8px;
         `}
       >
-        <h3>Upload CSV File</h3>
-        <p>Upload a CSV file with track data to get started.</p>
+        <h3>Upload Spreadsheet File</h3>
+        <p>Upload a CSV, XLSX, or XLS file with track data to get started.</p>
 
         <Input
           type="file"
-          accept=".csv"
+          accept=".csv,.xlsx,.xls"
           onChange={handleFileUpload}
           name="csv-file"
         />
@@ -209,6 +317,9 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
                 padding: 1rem;
                 background: white;
                 border-radius: 4px;
+                ${mapping[index]
+                  ? "background-color: var(--mi-primary-color)"
+                  : ""}
               `}
             >
               <label
@@ -216,7 +327,7 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
                   font-weight: 500;
                 `}
               >
-                {header}
+                {index + 1}. {header}
               </label>
               <Select
                 value={mapping[index] || ""}

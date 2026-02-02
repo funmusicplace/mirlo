@@ -1,28 +1,28 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { css } from "@emotion/css";
 import Button from "../common/Button";
 import { ColumnMapping, ParsedRow } from "./CSVUploadStep";
 import Table from "components/common/Table";
 
-interface PreviewTrackGroup {
-  release_title: string;
-  release_artist: string;
+export interface PreviewTrackGroup {
+  title: string;
   tracks: PreviewTrack[];
-  metadata: Record<string, string>;
+  about?: string;
+  catalogNumber?: string;
 }
 
 interface PreviewTrack {
-  track_title: string;
-  track_number: string;
+  title: string;
+  order: number;
   artists: ArtistRole[];
   isrc?: string;
   lyrics?: string;
-  other_fields: Record<string, string>;
+  metadata?: Record<string, unknown>;
 }
 
 interface ArtistRole {
-  name: string;
-  role: string;
+  artistName: string;
+  role?: string;
 }
 
 interface TrackGroupPreviewProps {
@@ -30,7 +30,10 @@ interface TrackGroupPreviewProps {
   mapping: ColumnMapping;
   headers: string[];
   onBack: () => void;
-  onSubmit: (trackGroups: PreviewTrackGroup[]) => void;
+  onSubmit: (
+    artists: Array<{ name: string; trackGroups: PreviewTrackGroup[] }>
+  ) => Promise<void>;
+  onDone?: () => void;
 }
 
 const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
@@ -39,80 +42,122 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
   headers,
   onBack,
   onSubmit,
+  onDone,
 }) => {
-  const trackGroups = useMemo(() => {
+  const [uploadedArtists, setUploadedArtists] = useState<Set<string>>(
+    new Set()
+  );
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { trackGroups, artistGroups } = useMemo(() => {
     const grouped: Record<string, PreviewTrackGroup> = {};
 
-    csvData.forEach((row) => {
+    csvData.forEach((row, rowIndex) => {
       const releaseTitle = getMappedValue(
         row,
         "release_title",
         mapping,
         headers
       );
-      const releaseArtist = getMappedValue(
-        row,
-        "release_artist",
-        mapping,
-        headers
-      );
 
-      if (!releaseTitle || !releaseArtist) return;
+      if (!releaseTitle) return;
 
-      const key = `${releaseTitle}|${releaseArtist}`;
+      const key = `${releaseTitle}`;
 
       if (!grouped[key]) {
         grouped[key] = {
-          release_title: releaseTitle,
-          release_artist: releaseArtist,
+          title: releaseTitle,
           tracks: [],
-          metadata: {},
+          about: getMappedValue(row, "about", mapping, headers),
+          catalogNumber: getMappedValue(row, "catalogNumber", mapping, headers),
         };
       }
 
       const artists: ArtistRole[] = [];
-      const artistRoles = [
-        "composer",
-        "songwriter",
-        "publisher",
-        "producer",
-        "featured_artist",
-      ];
 
-      artistRoles.forEach((role) => {
-        const artistName = getMappedValue(row, role, mapping, headers);
-        if (artistName) {
-          artists.push({ name: artistName, role });
-        }
-      });
-
-      // Handle custom track artist roles (where column header becomes the role)
+      // Collect all columns mapped as track_artist_role
       headers.forEach((header, index) => {
         const fieldType = mapping[index];
         if (fieldType === "track_artist_role") {
           const artistName = row[header];
           if (artistName) {
-            artists.push({ name: artistName, role: header });
+            // The column header is the role name
+            artists.push({ artistName, role: header });
           }
         }
       });
 
       const track: PreviewTrack = {
-        track_title:
+        title:
           getMappedValue(row, "track_title", mapping, headers) || "Untitled",
-        track_number:
-          getMappedValue(row, "track_number", mapping, headers) || "",
+        order: rowIndex,
         artists,
         isrc: getMappedValue(row, "isrc", mapping, headers),
         lyrics: getMappedValue(row, "lyrics", mapping, headers),
-        other_fields: getUnmappedFields(row, mapping, headers),
+        metadata: getUnmappedFields(row, mapping, headers),
       };
 
       grouped[key].tracks.push(track);
     });
 
-    return Object.values(grouped);
+    const allTrackGroups = Object.values(grouped);
+
+    const byArtist: Record<string, PreviewTrackGroup[]> = {};
+    allTrackGroups.forEach((tg) => {
+      // Get the release artist from the first track
+      if (tg.tracks.length > 0) {
+        const artistName = getMappedValue(
+          csvData[tg.tracks[0].order],
+          "release_artist",
+          mapping,
+          headers
+        );
+        if (artistName) {
+          if (!byArtist[artistName]) {
+            byArtist[artistName] = [];
+          }
+          byArtist[artistName].push(tg);
+        }
+      }
+    });
+
+    return {
+      trackGroups: allTrackGroups,
+      artistGroups: byArtist,
+    };
   }, [csvData, mapping, headers]);
+
+  const handleUploadArtist = async (artistName: string) => {
+    const artistTrackGroups = artistGroups[artistName];
+    if (!artistTrackGroups) return;
+
+    setIsUploading(true);
+    try {
+      await onSubmit([
+        {
+          name: artistName,
+          trackGroups: artistTrackGroups,
+        },
+      ]);
+      setUploadedArtists((prev) => new Set(prev).add(artistName));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const remainingArtists = Object.keys(artistGroups).filter(
+    (artist) => !uploadedArtists.has(artist)
+  );
+  const totalAlbums = trackGroups.length;
+  const uploadedAlbums = trackGroups.filter((tg) => {
+    // Find which artist this track group belongs to
+    for (const [artist, groups] of Object.entries(artistGroups)) {
+      if (groups.includes(tg) && uploadedArtists.has(artist)) {
+        return true;
+      }
+    }
+    return false;
+  }).length;
 
   return (
     <div
@@ -125,9 +170,28 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
       <h3>Review Album Data</h3>
       <p>
         Found {trackGroups.length} album{trackGroups.length !== 1 ? "s" : ""}{" "}
-        with {trackGroups.reduce((sum, tg) => sum + tg.tracks.length, 0)} total
+        from {Object.keys(artistGroups).length} artist
+        {Object.keys(artistGroups).length !== 1 ? "s" : ""} with{" "}
+        {trackGroups.reduce((sum, tg) => sum + tg.tracks.length, 0)} total
         tracks.
       </p>
+
+      {uploadedArtists.size > 0 && (
+        <div
+          className={css`
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: 4px;
+            color: #2e7d32;
+          `}
+        >
+          <strong>Progress:</strong> {uploadedAlbums}/{totalAlbums} albums
+          uploaded from {uploadedArtists.size}/
+          {Object.keys(artistGroups).length} artists
+        </div>
+      )}
 
       <div
         className={css`
@@ -137,9 +201,19 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
           gap: 2rem;
         `}
       >
-        {trackGroups.map((tg, index) => (
-          <TrackGroupCard key={index} trackGroup={tg} index={index} />
-        ))}
+        {Object.entries(artistGroups).map(([artistName, albums]) => {
+          const isUploaded = uploadedArtists.has(artistName);
+          return (
+            <ArtistGroup
+              key={artistName}
+              artistName={artistName}
+              albums={albums}
+              isUploaded={isUploaded}
+              isUploading={isUploading}
+              onUpload={() => handleUploadArtist(artistName)}
+            />
+          );
+        })}
       </div>
 
       <div
@@ -149,13 +223,159 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
           gap: 1rem;
         `}
       >
-        <Button onClick={onBack} variant="outlined">
+        <Button
+          onClick={onBack}
+          variant="outlined"
+          disabled={isUploading || uploadedArtists.size > 0}
+        >
           Back
         </Button>
-        <Button onClick={() => onSubmit(trackGroups)} buttonRole="primary">
-          Create {trackGroups.length} Album{trackGroups.length !== 1 ? "s" : ""}
-        </Button>
+        {remainingArtists.length === 0 && uploadedArtists.size > 0 && (
+          <>
+            <div
+              className={css`
+                padding: 1rem;
+                background: #e8f5e9;
+                border: 1px solid #4caf50;
+                border-radius: 4px;
+                color: #2e7d32;
+                font-weight: bold;
+              `}
+            >
+              ✓ All artists uploaded successfully!
+            </div>
+            {onDone && (
+              <Button onClick={onDone} buttonRole="primary">
+                Done
+              </Button>
+            )}
+          </>
+        )}
       </div>
+    </div>
+  );
+};
+
+const ArtistGroup: React.FC<{
+  artistName: string;
+  albums: PreviewTrackGroup[];
+  isUploaded: boolean;
+  isUploading: boolean;
+  onUpload: () => Promise<void>;
+}> = ({ artistName, albums, isUploaded, isUploading, onUpload }) => {
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <div
+      className={css`
+        background: white;
+        border-radius: 8px;
+        border: 2px solid ${isUploaded ? "#4caf50" : "#ddd"};
+        overflow: hidden;
+      `}
+    >
+      <div
+        onClick={() => setExpanded(!expanded)}
+        className={css`
+          padding: 1.5rem;
+          background: ${isUploaded ? "#e8f5e9" : "#f9f9f9"};
+          border-bottom: 1px solid ${isUploaded ? "#4caf50" : "#ddd"};
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          &:hover {
+            background: ${isUploaded ? "#e0f2f1" : "#f0f0f0"};
+          }
+        `}
+      >
+        <div
+          className={css`
+            flex: 1;
+          `}
+        >
+          <div
+            className={css`
+              display: flex;
+              align-items: center;
+              gap: 1rem;
+            `}
+          >
+            {isUploaded && (
+              <span
+                className={css`
+                  font-size: 1.5rem;
+                  color: #4caf50;
+                `}
+              >
+                ✓
+              </span>
+            )}
+            <div>
+              <h4
+                className={css`
+                  margin: 0 0 0.5rem 0;
+                  font-size: 1.1rem;
+                `}
+              >
+                {artistName}
+              </h4>
+              <p
+                className={css`
+                  margin: 0;
+                  color: #666;
+                  font-size: 0.9rem;
+                `}
+              >
+                {albums.length} album{albums.length !== 1 ? "s" : ""} •{" "}
+                {albums.reduce((sum, tg) => sum + tg.tracks.length, 0)} total
+                tracks
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          className={css`
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+          `}
+        >
+          {!isUploaded && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpload();
+              }}
+              buttonRole="primary"
+              disabled={isUploading}
+            >
+              {isUploading ? "Uploading..." : "Upload Artist"}
+            </Button>
+          )}
+          <span
+            className={css`
+              font-size: 1.5rem;
+              color: #999;
+            `}
+          >
+            {expanded ? "−" : "+"}
+          </span>
+        </div>
+      </div>
+
+      {expanded && (
+        <div
+          className={css`
+            padding: 1.5rem;
+          `}
+        >
+          {albums.map((tg, index) => (
+            <TrackGroupCard key={index} trackGroup={tg} index={index} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -164,7 +384,7 @@ const TrackGroupCard: React.FC<{
   trackGroup: PreviewTrackGroup;
   index: number;
 }> = ({ trackGroup, index }) => {
-  const [expanded, setExpanded] = React.useState(true);
+  const [expanded, setExpanded] = useState(true);
 
   return (
     <div
@@ -198,7 +418,7 @@ const TrackGroupCard: React.FC<{
               font-size: 1.1rem;
             `}
           >
-            {trackGroup.release_title}
+            {trackGroup.title}
           </h4>
           <p
             className={css`
@@ -207,7 +427,7 @@ const TrackGroupCard: React.FC<{
               font-size: 0.9rem;
             `}
           >
-            {trackGroup.release_artist} • {trackGroup.tracks.length} track
+            {trackGroup.tracks.length} track
             {trackGroup.tracks.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -239,8 +459,8 @@ const TrackGroupCard: React.FC<{
             <tbody>
               {trackGroup.tracks.map((track, idx) => (
                 <tr key={idx}>
-                  <td>{track.track_number || idx + 1}</td>
-                  <td>{track.track_title}</td>
+                  <td>{track.order + 1}</td>
+                  <td>{track.title}</td>
                   <td>
                     {track.artists.length > 0 ? (
                       <ul
@@ -252,7 +472,8 @@ const TrackGroupCard: React.FC<{
                       >
                         {track.artists.map((artist, aidx) => (
                           <li key={aidx}>
-                            <strong>{artist.name}</strong> ({artist.role})
+                            <strong>{artist.artistName}</strong>{" "}
+                            {artist.role && `(${artist.role})`}
                           </li>
                         ))}
                       </ul>
@@ -265,31 +486,6 @@ const TrackGroupCard: React.FC<{
               ))}
             </tbody>
           </Table>
-
-          {trackGroup.metadata &&
-            Object.keys(trackGroup.metadata).length > 0 && (
-              <div
-                className={css`
-                  margin-top: 1rem;
-                  padding: 1rem;
-                  background: #f5f5f5;
-                  border-radius: 4px;
-                  font-size: 0.85rem;
-                `}
-              >
-                <strong>Additional Metadata:</strong>
-                <pre
-                  className={css`
-                    margin: 0.5rem 0 0 0;
-                    white-space: pre-wrap;
-                    word-break: break-all;
-                    font-size: 0.8rem;
-                  `}
-                >
-                  {JSON.stringify(trackGroup.metadata, null, 2)}
-                </pre>
-              </div>
-            )}
         </div>
       )}
     </div>

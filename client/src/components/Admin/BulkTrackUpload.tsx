@@ -1,34 +1,29 @@
 import React, { useState } from "react";
 import { css } from "@emotion/css";
 import Button, { ButtonAnchor } from "../common/Button";
-import LoadingSpinner from "../common/LoadingSpinner";
 import CSVUploadStep, { ColumnMapping, ParsedRow } from "./CSVUploadStep";
-import TrackGroupPreview from "./TrackGroupPreview";
-
-interface PreviewTrackGroup {
-  release_title: string;
-  release_artist: string;
-  tracks: any[];
-  metadata: Record<string, string>;
-}
+import TrackGroupPreview, { PreviewTrackGroup } from "./TrackGroupPreview";
+import api from "services/api";
+import Box from "components/common/Box";
 
 const BulkTrackUpload: React.FC = () => {
-  const [step, setStep] = useState<
-    "upload" | "preview" | "uploading" | "complete"
-  >("upload");
+  const [step, setStep] = useState<"upload" | "preview" | "complete">("upload");
   const [mapping, setMapping] = useState<ColumnMapping>({});
   const [csvData, setCsvData] = useState<ParsedRow[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [uploadResult, setUploadResult] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<number | undefined>();
 
   const handleMappingComplete = (
     newMapping: ColumnMapping,
-    data: ParsedRow[]
+    data: ParsedRow[],
+    targetUserId?: number
   ) => {
     setMapping(newMapping);
     setCsvData(data);
+    setUserId(targetUserId);
     // Get headers by re-parsing from the data
     if (data.length > 0) {
       setHeaders(Object.keys(data[0]));
@@ -37,34 +32,46 @@ const BulkTrackUpload: React.FC = () => {
     setError("");
   };
 
-  const handleSubmitTrackGroups = async (trackGroups: PreviewTrackGroup[]) => {
-    setStep("uploading");
+  const handleSubmitTrackGroups = async (
+    artists: Array<{ name: string; trackGroups: PreviewTrackGroup[] }>
+  ) => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch("/api/v1/admin/bulk-track-upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          trackGroups,
-          mapping,
-        }),
+      const response = await api.post<
+        any,
+        {
+          result: {
+            artistsCreated: number;
+            trackGroupsCreated: number;
+            tracksCreated: number;
+            partialErrors: string[];
+          };
+        }
+      >("admin/bulkTrackUpload", {
+        artists,
+        ...(userId && { userId }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to upload tracks");
-      }
-
-      const result = await response.json();
-      setUploadResult(result);
-      setStep("complete");
+      setUploadResult((prev: any) => ({
+        ...prev,
+        ...(response.result.artistsCreated && {
+          artistsCreated: response.result.artistsCreated,
+        }),
+        ...(response.result.trackGroupsCreated && {
+          trackGroupsCreated: response.result.trackGroupsCreated,
+        }),
+        ...(response.result.tracksCreated && {
+          tracksCreated: response.result.tracksCreated,
+        }),
+        ...(response.result.partialErrors && {
+          partialErrors: response.result.partialErrors,
+        }),
+      }));
+      // Stay on preview to allow uploading more artists
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
-      setStep("preview");
     } finally {
       setLoading(false);
     }
@@ -93,38 +100,22 @@ const BulkTrackUpload: React.FC = () => {
         `}
       >
         <h2>Bulk Track Upload</h2>
+        {error && <Box variant="warning">{error}</Box>}
+        {uploadResult && (
+          <Box variant="info">
+            <strong>Uploaded so far:</strong> {uploadResult.artistsCreated || 0}
+            artists, {uploadResult.trackGroupsCreated || 0} albums,{" "}
+            {uploadResult.tracksCreated || 0} tracks
+          </Box>
+        )}
         <TrackGroupPreview
           csvData={csvData}
           mapping={mapping}
           headers={headers}
           onBack={() => setStep("upload")}
           onSubmit={handleSubmitTrackGroups}
+          onDone={() => setStep("complete")}
         />
-      </div>
-    );
-  }
-
-  if (step === "uploading") {
-    return (
-      <div
-        className={css`
-          max-width: 600px;
-          margin: 4rem auto;
-          text-align: center;
-        `}
-      >
-        <h2>Uploading...</h2>
-        <div
-          className={css`
-            margin: 2rem 0;
-            padding: 2rem;
-            background: #f5f5f5;
-            border-radius: 8px;
-          `}
-        >
-          <LoadingSpinner size="large" />
-          <p>Creating artists, albums, and tracks...</p>
-        </div>
       </div>
     );
   }
@@ -154,15 +145,7 @@ const BulkTrackUpload: React.FC = () => {
         )}
 
         {uploadResult && (
-          <div
-            className={css`
-              padding: 2rem;
-              background: #e8f5e9;
-              border: 1px solid #4caf50;
-              border-radius: 8px;
-              margin-bottom: 2rem;
-            `}
-          >
+          <Box variant="success">
             <h3
               className={css`
                 color: #2e7d32;
@@ -188,16 +171,7 @@ const BulkTrackUpload: React.FC = () => {
 
             {uploadResult.partialErrors &&
               uploadResult.partialErrors.length > 0 && (
-                <div
-                  className={css`
-                    margin-top: 1rem;
-                    padding: 1rem;
-                    background: #fff3cd;
-                    border: 1px solid #ffc107;
-                    border-radius: 4px;
-                    color: #856404;
-                  `}
-                >
+                <Box variant="warning">
                   <strong>Warnings:</strong>
                   <ul
                     className={css`
@@ -210,9 +184,9 @@ const BulkTrackUpload: React.FC = () => {
                       )
                     )}
                   </ul>
-                </div>
+                </Box>
               )}
-          </div>
+          </Box>
         )}
 
         <div

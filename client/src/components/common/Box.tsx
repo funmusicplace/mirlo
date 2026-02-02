@@ -26,6 +26,11 @@ export const ArtistBox: React.FC<{
         background: ${colors?.foreground} !important;
         color: ${colors?.background} !important;
         `;
+      case "info":
+        return `
+        background: ${colors?.secondary} !important;
+        color: ${colors?.background} !important;
+        `;
       case "warning":
         return `
         background: ${colors?.primary} !important;
