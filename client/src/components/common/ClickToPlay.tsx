@@ -16,6 +16,7 @@ import { determineItemLink } from "components/Artist/ArtistItemLink";
 import FavoriteTrack from "components/TrackGroup/Favorite";
 import useErrorHandler from "services/useErrorHandler";
 import { css } from "@emotion/css";
+import Thermometer from "components/TrackGroup/Thermometer";
 
 const TrackgroupButtons = styled.div`
   width: 100%;
@@ -280,6 +281,7 @@ const ClickToPlay: React.FC<
 
   const url = linkTarget && determineItemLink(trackGroup.artist, linkTarget);
 
+  console.log(trackGroup);
   return (
     <ClickToPlayWrapper>
       <Wrapper className={className}>
@@ -344,6 +346,13 @@ const ClickToPlay: React.FC<
           />
         )}
       </Wrapper>
+      {trackGroup.fundraiser && (
+        <Thermometer
+          goal={trackGroup?.fundraiser?.goalAmount ?? 0}
+          trackGroupId={trackGroup.id}
+          artist={trackGroup.artist}
+        />
+      )}
       {children}
     </ClickToPlayWrapper>
   );

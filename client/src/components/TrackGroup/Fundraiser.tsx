@@ -1,10 +1,9 @@
 import React from "react";
-import Thermometer from "./Thermometer";
-import { css } from "@emotion/css";
 import useArtistQuery from "utils/useArtistQuery";
 import { queryTrackGroup } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import CampaignSummary from "./CampaignSummary";
 
 const Fundraiser: React.FC = () => {
   const { artistId, trackGroupId } = useParams<{
@@ -21,8 +20,8 @@ const Fundraiser: React.FC = () => {
   if (!trackGroup.fundraiser) return null;
 
   return (
-    <Thermometer
-      goal={trackGroup.fundraiser.goalAmount / 100}
+    <CampaignSummary
+      goal={trackGroup.fundraiser.goalAmount}
       artist={artist}
       trackGroup={trackGroup}
     />
