@@ -1,4 +1,5 @@
 import prisma from "@mirlo/prisma";
+import { Request } from "express";
 import {
   Artist,
   ArtistAvatar,
@@ -8,7 +9,7 @@ import {
   TrackGroup,
 } from "@mirlo/prisma/client";
 import { AppError } from "../utils/error";
-import crypto from "crypto";
+import crypto, { createVerify } from "crypto";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
@@ -17,6 +18,7 @@ import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
 import { IncomingHttpHeaders } from "http";
+
 const { REACT_APP_CLIENT_DOMAIN } = process.env;
 
 export const root = new URL(REACT_APP_CLIENT_DOMAIN || "http://localhost:3000")
@@ -226,4 +228,96 @@ export const turnSubscribersIntoFollowers = (
     },
     "@context": ["https://www.w3.org/ns/activitystreams"],
   };
+};
+
+export async function fetchRemotePublicKey(keyId: string): Promise<string> {
+  try {
+    const response = await fetch(keyId, {
+      headers: {
+        Accept: "application/activity+json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch public key: ${response.statusText}`);
+    }
+
+    const data = (await response.json()) as { publicKeyPem?: string };
+
+    if (data.publicKeyPem) {
+      return data.publicKeyPem;
+    }
+
+    throw new Error("No publicKeyPem found in actor document");
+  } catch (e) {
+    throw new AppError({
+      httpCode: 401,
+      description: `Failed to verify signature: ${e instanceof Error ? e.message : "Unknown error"}`,
+    });
+  }
+}
+
+export const verifySignature = async (
+  req: Request,
+  signatureHeader: string
+): Promise<boolean> => {
+  if (process.env.SKIP_ACTIVITYPUB_SIGNATURE === "true") {
+    return true;
+  }
+
+  // Parse signature header: keyId="...",headers="...",signature="..."
+  const keyIdMatch = signatureHeader.match(/keyId="([^"]+)"/);
+  const headersMatch = signatureHeader.match(/headers="([^"]+)"/);
+  const signatureMatch = signatureHeader.match(/signature="([^"]+)"/);
+
+  if (!keyIdMatch || !headersMatch || !signatureMatch) {
+    throw new AppError({
+      httpCode: 401,
+      description: "Invalid signature header format",
+    });
+  }
+
+  const keyId = keyIdMatch[1];
+  const signedHeaders = headersMatch[1].split(" ");
+  const signatureB64 = signatureMatch[1];
+
+  // Get the public key from the remote actor
+  const publicKey = await fetchRemotePublicKey(keyId);
+
+  // Reconstruct the signed string
+  let signedString = "";
+  for (const headerName of signedHeaders) {
+    if (headerName === "(request-target)") {
+      const path = req.path;
+      const method = req.method.toLowerCase();
+      signedString += `(request-target): ${method} ${path}\n`;
+    } else {
+      const headerValue = req.headers[headerName.toLowerCase()];
+      if (!headerValue) {
+        throw new AppError({
+          httpCode: 401,
+          description: `Missing required header for signature: ${headerName}`,
+        });
+      }
+      signedString += `${headerName}: ${headerValue}`;
+      if (headerName !== signedHeaders[signedHeaders.length - 1]) {
+        signedString += "\n";
+      }
+    }
+  }
+
+  // Verify the signature
+  const verifier = createVerify("RSA-SHA256");
+  verifier.update(signedString);
+  const signatureBuffer = Buffer.from(signatureB64, "base64");
+  const isValid = verifier.verify(publicKey, signatureBuffer);
+
+  if (!isValid) {
+    throw new AppError({
+      httpCode: 401,
+      description: "Signature verification failed",
+    });
+  }
+
+  return true;
 };

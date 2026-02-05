@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import {
   generateKeysForSiteIfNeeded,
   headersAreForActivityPub,
-  root,
+  rootArtist,
+  verifySignature,
 } from "./utils";
 import prisma from "@mirlo/prisma";
 import crypto from "crypto";
@@ -35,7 +36,7 @@ async function signAndSend(
     signer.end();
     const signature = signer.sign(privateKey);
     const signature_b64 = signature.toString("base64");
-    let header = `keyId="${root}/${artistUrlSlug}",headers="(request-target) host date digest",signature="${signature_b64}"`;
+    let header = `keyId="${rootArtist}${artistUrlSlug}#main-key",headers="(request-target) host date digest",signature="${signature_b64}"`;
 
     const requestBody = {
       url: destinationInbox,
@@ -63,12 +64,15 @@ async function sendAcceptMessage(
   targetDomain: string
 ) {
   const guid = crypto.randomBytes(16).toString("hex");
+  const now = new Date();
   let message = {
     "@context": "https://www.w3.org/ns/activitystreams",
-    id: `${root}${guid}`,
+    id: `${rootArtist}${artistUrlSlug}#activity-${guid}`,
     type: "Accept",
-    actor: `${root}${artistUrlSlug}`,
+    actor: `${rootArtist}${artistUrlSlug}`,
     object: thebody,
+    to: [thebody.actor],
+    published: now.toISOString(),
   };
   await signAndSend(message, artistUrlSlug, targetDomain);
 }
@@ -86,6 +90,18 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
         description: "Only accepts ActivityPub headers",
       });
     }
+
+    // Verify HTTP signature
+    const signatureHeader = req.headers.signature as string;
+    if (!signatureHeader) {
+      throw new AppError({
+        httpCode: 401,
+        description: "Missing HTTP signature",
+      });
+    }
+
+    await verifySignature(req, signatureHeader);
+
     const parsedId = await findArtistIdForURLSlug(id);
 
     const artist = await prisma.artist.findFirst({
