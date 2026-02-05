@@ -331,6 +331,7 @@ const ClickToPlay: React.FC<
           goal={trackGroup?.fundraiser?.goalAmount ?? 0}
           trackGroupId={trackGroup.id}
           artist={trackGroup.artist}
+          hideIfUnder10Percent
         />
       )}
       {children}
