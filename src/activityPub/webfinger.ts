@@ -32,7 +32,7 @@ const webfinger = async (req: Request, res: Response) => {
   res
     .json({
       subject: `acct:${artist.urlSlug}@${root}`,
-      aliases: [`${root}/${artist.urlSlug}`],
+      aliases: [`${client.applicationUrl}/${artist.urlSlug}`],
       links: [
         {
           rel: "self",
