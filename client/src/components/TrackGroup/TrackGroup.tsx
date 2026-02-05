@@ -313,7 +313,9 @@ function TrackGroup() {
                 )}
                 <SmallScreenPlayWrapper>
                   <ClickToPlayTracks
-                    trackIds={trackGroup.tracks.map((t) => t.id)}
+                    trackIds={trackGroup.tracks
+                      .filter((t) => t.isPlayable)
+                      .map((t) => t.id)}
                     className={css`
                       width: 50px !important;
                       margin-right: 10px;

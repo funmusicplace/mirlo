@@ -1,7 +1,4 @@
-import Money, {
-  getCurrencySymbol,
-  moneyDisplay,
-} from "components/common/Money";
+import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -43,6 +40,10 @@ const PaymentInputElement: React.FC<{
       isFinite(+chosenPrice) && Number(chosenPrice) < minPrice / 100;
   }
 
+  const showGenerous =
+    isFinite(+chosenPrice) &&
+    Number(chosenPrice) > ((minPrice || 200) / 100) * 10;
+
   return (
     <>
       {" "}
@@ -58,7 +59,7 @@ const PaymentInputElement: React.FC<{
         step="0.01"
         id="priceInput"
       />
-      {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
+      {showGenerous && (
         <Box variant="success">
           {t("thatsGenerous", {
             chosenPrice: moneyDisplay({

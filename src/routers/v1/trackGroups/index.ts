@@ -1,4 +1,4 @@
-import { Prisma } from "@mirlo/prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import processor, {
@@ -7,10 +7,11 @@ import processor, {
 } from "../../../utils/trackGroup";
 import { turnItemsIntoRSS } from "../../../utils/rss";
 import { set } from "lodash";
+import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -27,6 +28,7 @@ export default function () {
       isReleased,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
+    const loggedInUser = req.user as User | null;
 
     try {
       let skip = Number(skipQuery);
@@ -160,8 +162,29 @@ export default function () {
               userId: true,
             },
           },
+          ...(loggedInUser
+            ? {
+                userTrackGroupPurchases: {
+                  where: { userId: loggedInUser.id },
+                  select: { userId: true },
+                },
+              }
+            : {}),
           fundraiser: true,
-          tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
+          tracks: {
+            orderBy: { order: "asc" },
+            where: { deletedAt: null },
+            include: {
+              ...(loggedInUser
+                ? {
+                    userTrackPurchases: {
+                      where: { userId: loggedInUser.id },
+                      select: { userId: true },
+                    },
+                  }
+                : {}),
+            },
+          },
           cover: true,
         },
       });
@@ -180,7 +203,11 @@ export default function () {
         res.send(feed.xml());
       } else {
         res.json({
-          results: trackGroups.map(processor.single),
+          results: trackGroups.map((tg) =>
+            processor.single(tg, {
+              loggedInUserId: loggedInUser?.id,
+            })
+          ),
           total: itemCount,
         });
       }

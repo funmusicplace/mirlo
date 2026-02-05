@@ -2,11 +2,10 @@ import React from "react";
 import { css } from "@emotion/css";
 
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
-import AddToCollection from "./AddToCollection";
 import { useAuthContext } from "state/AuthContext";
 
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryUserStripeStatus } from "queries";
+import { queryArtist } from "queries";
 import BackingThisProject from "./BackingThisProject";
 import PurchaseAlbumModal from "./PurchaseAlbumModal";
 import { bp } from "../../constants";
@@ -83,11 +82,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const showDownload = isOwned && !isBeforeReleaseDate;
 
-  const addToCollection =
-    !isOwned &&
-    userId &&
-    (trackGroup.minPrice === 0 || trackGroup.minPrice === null);
-
   return (
     <>
       <div
@@ -101,7 +95,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
           }
         `}
       >
-        {showPurchase && !addToCollection && (
+        {showPurchase && (
           <PurchaseAlbumModal
             trackGroup={trackGroup}
             track={track}
@@ -109,9 +103,9 @@ const PurchaseOrDownloadAlbum: React.FC<{
             collapse={collapse}
           />
         )}
-        {addToCollection && (
+        {/* {showPurchase && (
           <AddToCollection trackGroup={trackGroup} fixed={fixed} />
-        )}
+        )} */}
         {showDownload && !fixed && (
           <DownloadAlbumButton trackGroup={trackGroup} onlyIcon track={track} />
         )}

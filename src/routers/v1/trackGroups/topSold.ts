@@ -1,17 +1,20 @@
-import { Prisma } from "@mirlo/prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import processor, {
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
+import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { take = 50, datePurchased } = req.query;
+    const loggedInUser = req.user as User | null;
+
     try {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
       let topWhere: Prisma.UserTransactionWhereInput = {
@@ -90,7 +93,9 @@ export default function () {
 
       res.json({
         results: sortedTrackGroups.map((tg) => ({
-          ...processor.single(tg),
+          ...processor.single(tg, {
+            loggedInUserId: loggedInUser?.id,
+          }),
           purchaseCount: purchaseCountMap.get(tg.id)?.trackGroupId,
         })),
       });

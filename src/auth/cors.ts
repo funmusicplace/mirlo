@@ -5,9 +5,36 @@ import { Client } from "@mirlo/prisma/client";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/error";
+import { headersAreForActivityPub } from "../activityPub/utils";
 
 const isTest = process.env.NODE_ENV === "test" || process.env.CI;
 const MIRLO_API_KEY_HEADER = "mirlo-api-key";
+
+const checkForPrivateEndpoint = (path: string, query?: { format?: string }) => {
+  return (
+    path.startsWith("/v1") &&
+    !(
+      path.startsWith("/v1/checkout") ||
+      path.startsWith("/v1/webhooks") ||
+      path.endsWith("/stripe/connect") ||
+      path.endsWith("/stripe/connectComplete") ||
+      // FIXME: This needs to be improved probably.
+      // Exclude artist feed endpoints
+      (path.startsWith("/v1/artists/") &&
+        path.endsWith("/feed") &&
+        query?.format === "rss") ||
+      (path.startsWith("/v1/trackGroups") && query?.format === "rss") ||
+      // confirmFollow is public cause it comes from an email
+      (path.startsWith("/v1/artists/") && path.endsWith("/confirmFollow"))
+    )
+  );
+};
+
+const isValidActivityPubEndpoints = (path: string) => {
+  return /^\/v1\/artists\/[\w-]+(?:\/(?:feed|followers|following|confirmFollow))?$/.test(
+    path
+  );
+};
 
 export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
   const [req, _res, next] = args;
@@ -25,26 +52,16 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     if (isHealthCheck || isTest || isRSSFormat) {
       // do nothing
     } else {
-      const isAPIEndpointPrivate =
-        req.path.startsWith("/v1") &&
-        !(
-          req.path.startsWith("/v1/checkout") ||
-          req.path.startsWith("/v1/webhooks") ||
-          req.path.endsWith("/stripe/connect") ||
-          req.path.endsWith("/stripe/connectComplete") ||
-          // FIXME: This needs to be improved probably.
-          // Exclude artist feed endpoints
-          (req.path.startsWith("/v1/artists/") &&
-            req.path.endsWith("/feed") &&
-            req.query?.format === "rss") ||
-          (req.path.startsWith("/v1/trackGroups") &&
-            req.query?.format === "rss") ||
-          // confirmFollow is public cause it comes from an email
-          (req.path.startsWith("/v1/artists/") &&
-            req.path.endsWith("/confirmFollow"))
-        );
+      const isAPIEndpointPrivate = checkForPrivateEndpoint(req.path, req.query);
+      const isActivityPubRequest = headersAreForActivityPub(
+        req.headers,
+        "accept"
+      );
+      const validActivityPubEndpoints = isValidActivityPubEndpoints(req.path);
       // We only care about the API key for API requests
       if (isSameSite || !isAPIEndpointPrivate) {
+        clients = await prisma.client.findMany();
+      } else if (isActivityPubRequest && validActivityPubEndpoints) {
         clients = await prisma.client.findMany();
       } else if (!apiHeader || typeof apiHeader !== "string") {
         throw new AppError({

@@ -1,8 +1,6 @@
 import React, { createContext } from "react";
 import produce from "immer";
 import { clone, pullAt, shuffle } from "lodash";
-import { useDebouncedCallback } from "use-debounce";
-import { sendToPlayableEndpoint } from "utils/tracks";
 
 export interface GlobalState {
   playerQueueIds: number[];
@@ -15,7 +13,6 @@ export interface GlobalState {
   // userPlaylists?: { id: string; title: string }[];
   checkFavoriteStatusFlag?: number;
   cookieDisclaimerRead?: boolean;
-  tracksPlayableTracker?: { [trackId: number]: boolean | undefined };
 }
 
 type setCookieDisclaimerRead = {
@@ -97,12 +94,6 @@ type SetUserCredits = {
   credits: number;
 };
 
-type AddToPlayableTracksTracker = {
-  type: "addToPlayableTracksTracker";
-  trackIds: number[];
-  playable?: boolean;
-};
-
 type Actions =
   | SetState
   | AddToBackQueue
@@ -120,8 +111,7 @@ type Actions =
   | DecrementCurrentlyPlayingIndex
   | SetUserCredits
   | IncrementFavoriteStatusFlag
-  | setCookieDisclaimerRead
-  | AddToPlayableTracksTracker;
+  | setCookieDisclaimerRead;
 
 export const stateReducer = produce((draft: GlobalState, action: Actions) => {
   switch (action.type) {
@@ -222,15 +212,6 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
     case "setCookieDisclaimerRead":
       draft.cookieDisclaimerRead = true;
       break;
-    case "addToPlayableTracksTracker": {
-      if (!draft.tracksPlayableTracker) {
-        draft.tracksPlayableTracker = {};
-      }
-      for (const id of action.trackIds) {
-        draft.tracksPlayableTracker[id] = action.playable;
-      }
-      break;
-    }
 
     default:
       break;
@@ -275,19 +256,6 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     stateReducer,
     storedState ?? { playerQueueIds: [] }
   );
-
-  const callback = useDebouncedCallback(async (trackIds: number[]) => {
-    const results = await sendToPlayableEndpoint(trackIds);
-    dispatch({
-      type: "addToPlayableTracksTracker",
-      trackIds: results,
-      playable: true,
-    });
-  }, 2000);
-
-  React.useEffect(() => {
-    callback(Object.keys(state.tracksPlayableTracker || {}).map(Number));
-  }, [state.tracksPlayableTracker]);
 
   return (
     <GlobalContext.Provider value={[state, dispatch]}>

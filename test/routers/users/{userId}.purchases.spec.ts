@@ -113,5 +113,102 @@ describe("users/{userId}/purchases", () => {
       );
       assert.equal(response.body.results[0].merchPurchases.length, 0);
     });
+
+    it("should return isPlayable true for purchased trackGroups", async () => {
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@testcom",
+      });
+
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const transaction = await prisma.userTransaction.create({
+        data: {
+          userId: purchaser.id,
+          amount: 10,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+        },
+      });
+
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          trackGroupId: trackGroup.id,
+          userId: purchaser.id,
+          userTransactionId: transaction.id,
+        },
+      });
+
+      const response = await requestApp
+        .get(`users/${purchaser.id}/purchases`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].trackGroupPurchases.length, 1);
+
+      const purchasedTrackGroup =
+        response.body.results[0].trackGroupPurchases[0].trackGroup;
+      assert.equal(purchasedTrackGroup.tracks.length, 1);
+      assert.equal(purchasedTrackGroup.tracks[0].isPlayable, true);
+    });
+
+    it("should return isPlayable true for purchased individual tracks", async () => {
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@testcom",
+      });
+
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        tracks: [
+          { title: "Track 1", audio: { create: { uploadState: "SUCCESS" } } },
+          {
+            title: "Track 2",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const tracks = await prisma.track.findMany({
+        where: { trackGroupId: trackGroup.id },
+        orderBy: { order: "asc" },
+      });
+
+      const transaction = await prisma.userTransaction.create({
+        data: {
+          userId: purchaser.id,
+          amount: 10,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+        },
+      });
+
+      // Purchase only the first track
+      await prisma.userTrackPurchase.create({
+        data: {
+          trackId: tracks[0].id,
+          userId: purchaser.id,
+          transactionId: transaction.id,
+        },
+      });
+
+      const response = await requestApp
+        .get(`users/${purchaser.id}/purchases`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].trackPurchases.length, 1);
+
+      const purchasedTrack = response.body.results[0].trackPurchases[0].track;
+      assert.equal(purchasedTrack.isPlayable, true);
+    });
   });
 });

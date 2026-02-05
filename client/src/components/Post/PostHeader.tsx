@@ -57,7 +57,9 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
 
   const featuredImage = post.featuredImage?.src;
 
-  const trackIds = post.tracks?.map((track) => track.trackId);
+  const trackIds = post.tracks
+    ?.filter((track) => track.isPlayable)
+    .map((track) => track.trackId);
 
   return (
     <div

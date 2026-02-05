@@ -12,7 +12,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
-    const loggedInUser = req.user as User;
+    const loggedInUser = req.user as User | undefined;
     try {
       const track = await prisma.track.findFirst({
         where: { id: Number(id) },
@@ -39,6 +39,16 @@ export default function () {
           },
           trackArtists: true,
           audio: true,
+          ...(loggedInUser
+            ? {
+                userTrackPurchases: {
+                  where: { userId: loggedInUser.id },
+                  select: {
+                    userId: true,
+                  },
+                },
+              }
+            : {}),
         },
       });
 
@@ -49,7 +59,15 @@ export default function () {
       res.json({
         result: {
           ...track,
-          trackGroup: track ? processor.single(track.trackGroup) : {},
+          isPlayable:
+            track.isPreview ||
+            track.userTrackPurchases.length > 0 ||
+            track.trackGroup.userTrackGroupPurchases.length > 0,
+          trackGroup: track
+            ? processor.single(track.trackGroup, {
+                loggedInUserId: loggedInUser?.id,
+              })
+            : {},
         },
       });
     } catch (e) {

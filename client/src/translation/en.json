@@ -241,7 +241,7 @@
     "price": "Price:",
     "addToCollection": "Add to collection",
     "addToCollectionDescription": "You'll add this free album to your collection.",
-    "addAlbumToCollection": "Add {{ title }} to your collection",
+    "addAlbumToCollection": "Or, add {{ title }} to your collection",
     "getDownloadLink": "Get download link in email",
     "email": "Email",
     "success": "Success",

@@ -101,7 +101,9 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
             height: length,
             url: trackGroup.cover?.sizes?.[size === "small" ? 300 : 300] ?? "",
           }}
-          trackIds={trackGroup.tracks.map((t) => t.id)}
+          trackIds={trackGroup.tracks
+            .filter((t) => t.isPlayable)
+            .map((t) => t.id)}
           title={trackGroup.title ?? ""}
           trackGroup={trackGroup}
           showWishlist={!showTrackFavorite}

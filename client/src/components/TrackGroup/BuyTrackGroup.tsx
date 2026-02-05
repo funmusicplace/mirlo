@@ -19,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
 import PaymentInputElement from "./PaymentInputElement";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import AddToCollection from "./AddToCollection";
 
 interface FormData {
   chosenPrice: string;
@@ -47,6 +48,7 @@ const BuyTrackGroup: React.FC<{
   const { data: stripeAccountStatus, isPending } = useQuery(
     queryUserStripeStatus(trackGroup.artist?.userId ?? 0)
   );
+
   const { watch, handleSubmit, formState } = methods;
   const { isValid } = formState;
   const chosenPrice = watch("chosenPrice");
@@ -251,6 +253,14 @@ const BuyTrackGroup: React.FC<{
             )}
           </>
         )}
+        <hr />
+        <div className="mt-4">
+          <p className="mb-2">
+            {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
+          </p>
+          <AddToCollection trackGroup={trackGroup} />{" "}
+          <p className="mt-2">{t("addToCollectionDescription")}</p>
+        </div>
       </div>
     </FormProvider>
   );

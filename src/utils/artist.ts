@@ -571,7 +571,11 @@ export const processSingleArtist = (
     merch: artist?.merch?.map(processSingleMerch),
     banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
-    trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),
+    trackGroups: artist?.trackGroups?.map((tg) =>
+      processSingleTrackGroup(tg, {
+        loggedInUserId: userId,
+      })
+    ),
     subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
       ...tier,
       images: tier.images?.map((img) => ({

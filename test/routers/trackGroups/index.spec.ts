@@ -8,7 +8,9 @@ import {
   createArtist,
   createTrackGroup,
   createUser,
+  createUserTrackGroupPurchase,
 } from "../../utils";
+import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../utils";
 import Parser from "rss-parser";
@@ -98,6 +100,56 @@ describe("trackGroups", () => {
       assert.equal(response.body.results[2].id, oldest.id);
       assert.equal(response.body.total, 3);
 
+      assert(response.statusCode === 200);
+    });
+
+    it("should GET / with isPlayable false when user hasn't purchased", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        tracks: [
+          {
+            title: "Track 1",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@testcom",
+      });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].tracks.length, 1);
+      assert.equal(response.body.results[0].tracks[0].isPlayable, false);
+      assert(response.statusCode === 200);
+    });
+
+    it("should GET / with isPlayable true when user has purchased", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@testcom",
+      });
+
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get("trackGroups")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].tracks.length, 1);
+      assert.equal(response.body.results[0].tracks[0].isPlayable, true);
       assert(response.statusCode === 200);
     });
 

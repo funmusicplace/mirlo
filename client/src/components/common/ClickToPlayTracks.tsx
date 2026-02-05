@@ -49,45 +49,26 @@ const ClickToPlayTracks: React.FC<{
   className?: string;
 }> = ({ trackIds, className }) => {
   const {
-    state: {
-      playing,
-      playerQueueIds,
-      currentlyPlayingIndex,
-      tracksPlayableTracker,
-    },
+    state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
   const params = useParams();
-
-  const playableTracks = React.useMemo(() => {
-    return trackIds?.filter((id) => tracksPlayableTracker?.[id]) ?? [];
-  }, [tracksPlayableTracker, trackIds]);
 
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: params.artistId ?? "" })
   );
 
-  React.useEffect(() => {
-    if (trackIds?.length) {
-      dispatch({
-        type: "addToPlayableTracksTracker",
-        trackIds,
-        playable: false,
-      });
-    }
-  }, [trackIds, dispatch]);
-
   const onClickPlay = React.useCallback(async () => {
     dispatch({
       type: "startPlayingIds",
-      playerQueueIds: playableTracks,
+      playerQueueIds: trackIds,
     });
-  }, [dispatch, playableTracks]);
+  }, [dispatch, trackIds]);
 
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
-    playableTracks.includes(playerQueueIds[currentlyPlayingIndex]);
+    trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
   if (!artist) {
     return null;
@@ -98,7 +79,7 @@ const ClickToPlayTracks: React.FC<{
       <PlayControlButton
         onPlay={onClickPlay}
         isPlaying={currentlyPlaying}
-        disabled={playableTracks.length === 0}
+        disabled={trackIds.length === 0}
         onArtistPage
       />
     </Wrapper>

@@ -15,7 +15,6 @@ const AddToCollection: React.FC<{
   trackGroup: TrackGroup;
   fixed?: boolean;
 }> = ({ trackGroup, fixed }) => {
-  const [isAddingToCollection, setIsAddingToCollection] = React.useState(false);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
@@ -36,65 +35,37 @@ const AddToCollection: React.FC<{
     }
   }, [navigate, snackbar, t, trackGroup.id]);
 
-  const button = fixed ? (
-    <FixedButton
-      rounded
-      onClick={() => setIsAddingToCollection(true)}
-      startIcon={<IoAddSharp />}
-    >
-      {t("addToCollection")}
-    </FixedButton>
-  ) : (
-    <ArtistButton
-      variant="outlined"
-      onClick={() => setIsAddingToCollection(true)}
-      className={css`
-        font-size: 1rem !important;
-
-        .children {
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        @media screen and (max-width: ${bp.medium}px) {
-          width: 100%;
-        }
-      `}
-      startIcon={<IoAddSharp />}
-    >
-      {t("addToCollection")}
-    </ArtistButton>
-  );
-
   return (
     <>
-      <div
-        className={css`
-          margin-top: 0rem;
-          z-index: 2;
-        `}
-      >
-        {button}
-      </div>
-      <Modal
-        size="small"
-        open={isAddingToCollection}
-        onClose={() => setIsAddingToCollection(false)}
-        title={t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
-      >
-        <div
+      {fixed ? (
+        <FixedButton
+          rounded
+          onClick={() => purchaseAlbum()}
+          startIcon={<IoAddSharp />}
+        >
+          {t("addToCollection")}
+        </FixedButton>
+      ) : (
+        <ArtistButton
+          variant="outlined"
+          onClick={() => purchaseAlbum()}
           className={css`
-            p {
-              margin-bottom: 1rem;
+            font-size: 1rem !important;
+
+            .children {
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+
+            @media screen and (max-width: ${bp.medium}px) {
+              width: 100%;
             }
           `}
+          startIcon={<IoAddSharp />}
         >
-          <p>{t("addToCollectionDescription")}</p>
-          <ArtistButton onClick={() => purchaseAlbum()}>
-            {t("addToCollection")}
-          </ArtistButton>
-        </div>
-      </Modal>
+          {t("addToCollection")}
+        </ArtistButton>
+      )}
     </>
   );
 };

@@ -24,7 +24,11 @@ const CollectionPurchaseSquare: React.FC<{
             url: trackGroup.cover?.sizes?.[600] ?? "",
           }}
           trackIds={
-            track ? [track.id] : trackGroup.tracks.map((track) => track.id)
+            track
+              ? [track.id]
+              : trackGroup.tracks
+                  .filter((track) => track.isPlayable)
+                  .map((track) => track.id)
           }
           title={track?.title ?? trackGroup.title ?? ""}
           trackGroup={trackGroup}

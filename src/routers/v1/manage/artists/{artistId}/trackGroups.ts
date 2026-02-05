@@ -50,7 +50,11 @@ export default function () {
       });
 
       res.json({
-        results: results.map(processor.single),
+        results: results.map((tg) =>
+          processor.single(tg, {
+            loggedInUserId: (req.user as User)?.id,
+          })
+        ),
       });
     } catch (e) {
       next(e);

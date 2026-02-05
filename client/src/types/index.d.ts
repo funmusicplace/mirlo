@@ -50,6 +50,7 @@ interface LoggedInUser {
 
 interface Track {
   title?: string;
+  isPlayable?: boolean;
   id: number;
   status: "preview" | "must-own";
   artistId: number;
@@ -160,7 +161,7 @@ interface Post {
   featuredImageId?: string;
   featuredImage?: { src: string };
   isDraft: boolean;
-  tracks?: { postId: number; trackId: number }[];
+  tracks?: { postId: number; trackId: number; isPlayable?: boolean }[];
 }
 
 interface PostImage {
