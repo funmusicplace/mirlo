@@ -22,7 +22,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
     const { includeDefaultTier }: { includeDefaultTier?: boolean } = req.query;
-    const user = req.user as User;
+    const loggedInUser = req.user as User;
     if (!id || id === "undefined") {
       return res.status(400);
     }
@@ -38,7 +38,7 @@ export default function () {
           include: singleInclude({ includeDefaultTier }),
         });
 
-        isUserSubscriber = await checkIsUserSubscriber(user, parsedId);
+        isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);
 
         if (!artist) {
           res.status(404);
@@ -68,7 +68,7 @@ export default function () {
           res.json({
             result: processSingleArtist(
               artist as any,
-              user?.id,
+              loggedInUser?.id,
               isUserSubscriber
             ),
           });

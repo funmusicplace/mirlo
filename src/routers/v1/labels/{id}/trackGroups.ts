@@ -7,6 +7,7 @@ import {
   whereForPublishedTrackGroups,
 } from "../../../../utils/trackGroup";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { User } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {
@@ -15,6 +16,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
+    const loggedInUser = req.user as User | undefined;
 
     try {
       const artistId = await findArtistIdForURLSlug(id);
@@ -47,7 +49,9 @@ export default function () {
         },
       });
       res.json({
-        results: trackGroups.map(processSingleTrackGroup),
+        results: trackGroups.map((tg) =>
+          processSingleTrackGroup(tg, { loggedInUserId: loggedInUser?.id })
+        ),
       });
     } catch (e) {
       next(e);

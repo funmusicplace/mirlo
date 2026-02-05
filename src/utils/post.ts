@@ -10,10 +10,33 @@ import { generateFullStaticImageUrl } from "./images";
 export const processSinglePost = (
   post: Partial<Post> & {
     artist?: (Partial<Artist> & { avatar?: ArtistAvatar | null }) | null;
-  } & { featuredImage?: { extension: string; id: string } | null },
+  } & { featuredImage?: { extension: string; id: string } | null } & {
+    tracks?: {
+      trackId: number;
+      track?: {
+        isPreview: boolean;
+        trackGroup?: {
+          userTrackGroupPurchases?: { userId: number }[];
+        };
+        userTrackPurchases?: { userId: number }[];
+      };
+    }[];
+  },
   isUserSubscriber?: boolean
 ) => ({
   ...post,
+  tracks: post.tracks?.map((pt) => ({
+    isPlayable:
+      pt.track?.isPreview ||
+      pt.track?.trackGroup?.userTrackGroupPurchases?.some(
+        (purchase) => purchase.userId === pt.trackId
+      ) ||
+      pt.track?.userTrackPurchases?.some(
+        (purchase) => purchase.userId === pt.trackId
+      ) ||
+      isUserSubscriber,
+    ...pt,
+  })),
   artist: {
     ...post.artist,
     avatar: post.artist

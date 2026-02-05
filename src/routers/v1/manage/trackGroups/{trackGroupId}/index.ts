@@ -78,7 +78,11 @@ export default function () {
         });
       }
 
-      return res.status(200).json({ result: processor.single(trackGroup) });
+      return res.status(200).json({
+        result: processor.single(trackGroup, {
+          loggedInUserId: loggedInUser.id,
+        }),
+      });
     } catch (e) {
       next(e);
     }

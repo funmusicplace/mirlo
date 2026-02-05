@@ -44,7 +44,9 @@ export default function () {
       res.json({
         results: purchases.map((p) => ({
           ...p,
-          trackGroup: trackGroupProcessor.single(p.trackGroup),
+          trackGroup: trackGroupProcessor.single(p.trackGroup, {
+            loggedInUserId: loggedInUser.id,
+          }),
         })),
       });
     } else {

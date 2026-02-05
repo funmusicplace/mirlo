@@ -3,7 +3,8 @@ import { Request, Response } from "express";
 import { getClient, root } from "./utils";
 const { REACT_APP_CLIENT_DOMAIN } = process.env;
 
-const mirloDomain = REACT_APP_CLIENT_DOMAIN?.split("//")[1];
+const mirloDomain = new URL(REACT_APP_CLIENT_DOMAIN || "http://localhost:3000")
+  .host;
 
 const webfinger = async (req: Request, res: Response) => {
   const client = await getClient();
@@ -18,7 +19,7 @@ const webfinger = async (req: Request, res: Response) => {
   }
   const name = resource
     .replace("acct:", "")
-    .replace("@mirlo.space", "")
+    .replace(`@${mirloDomain}`, "")
     .replace("@", "");
 
   const artist = await prisma.artist.findFirst({

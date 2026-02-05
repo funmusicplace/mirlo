@@ -91,7 +91,7 @@ const ManageArtistButtons: React.FC = () => {
         <div
           className={css`
             z-index: 999999;
-            bottom: 80px;
+            bottom: 90px;
             left: 1rem;
             position: fixed;
             display: flex;

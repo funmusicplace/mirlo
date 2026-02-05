@@ -229,12 +229,7 @@ const ClickToPlay: React.FC<
   children,
 }) => {
   const {
-    state: {
-      playing,
-      playerQueueIds,
-      currentlyPlayingIndex,
-      tracksPlayableTracker,
-    },
+    state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
 
@@ -243,30 +238,16 @@ const ClickToPlay: React.FC<
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
   const errorHandler = useErrorHandler();
 
-  const playableTracks = React.useMemo(() => {
-    return trackIds?.filter((id) => tracksPlayableTracker?.[id]) ?? [];
-  }, [tracksPlayableTracker, trackIds]);
-
-  React.useEffect(() => {
-    if (trackIds?.length) {
-      dispatch({
-        type: "addToPlayableTracksTracker",
-        trackIds,
-        playable: false,
-      });
-    }
-  }, [trackIds, dispatch]);
-
   const onClickPlay = React.useCallback(async () => {
     try {
       dispatch({
         type: "startPlayingIds",
-        playerQueueIds: playableTracks,
+        playerQueueIds: trackIds ?? [],
       });
     } catch (e) {
       errorHandler(e, true);
     }
-  }, [dispatch, playableTracks]);
+  }, [dispatch, trackIds]);
 
   const isSingleTrackGroup = !track && trackGroup.tracks?.length === 1;
 
@@ -277,11 +258,10 @@ const ClickToPlay: React.FC<
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
-    playableTracks.includes(playerQueueIds[currentlyPlayingIndex]);
+    trackIds?.includes(playerQueueIds[currentlyPlayingIndex]);
 
   const url = linkTarget && determineItemLink(trackGroup.artist, linkTarget);
 
-  console.log(trackGroup);
   return (
     <ClickToPlayWrapper>
       <Wrapper className={className}>
@@ -316,7 +296,7 @@ const ClickToPlay: React.FC<
 
             {!currentlyPlaying && (
               <PlayButton
-                disabled={playableTracks.length === 0}
+                disabled={trackIds?.length === 0}
                 onPlay={onClickPlay}
               />
             )}

@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import { FaPen } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 import { useTranslation } from "react-i18next";
@@ -19,7 +18,8 @@ import { queryArtist } from "queries";
 export const ItemViewTitle: React.FC<{
   title: string;
   trackIds?: number[];
-}> = ({ title, trackIds }) => {
+  showPlayButton?: boolean;
+}> = ({ title, trackIds, showPlayButton }) => {
   return (
     <div
       className={css`
@@ -31,7 +31,7 @@ export const ItemViewTitle: React.FC<{
         max-width: 80%;
       `}
     >
-      {trackIds && trackIds.length > 0 && (
+      {showPlayButton && (
         <div
           className={css`
             @media screen and (max-width: ${bp.small}px) {
@@ -40,7 +40,7 @@ export const ItemViewTitle: React.FC<{
           `}
         >
           <ClickToPlayTracks
-            trackIds={trackIds}
+            trackIds={trackIds ?? []}
             className={css`
               width: 50px !important;
               margin-right: 10px;
@@ -86,8 +86,11 @@ const TrackGroupTitle: React.FC<{
   return (
     <>
       <ItemViewTitle
-        trackIds={trackGroup.tracks.map((t) => t.id)}
+        trackIds={trackGroup.tracks
+          .filter((t) => t.isPlayable)
+          .map((t) => t.id)}
         title={title}
+        showPlayButton={trackGroup.tracks.length > 0}
       />
       <div
         className={css`

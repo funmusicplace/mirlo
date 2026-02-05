@@ -36,19 +36,6 @@ export default function () {
             ...trackGroupSingleInclude({
               loggedInUserId: loggedInUser?.id,
             }),
-            merch: {
-              where: { isPublic: true },
-              include: {
-                images: true,
-                shippingDestinations: true,
-                optionTypes: { include: { options: true } },
-              },
-            },
-            downloadableContent: {
-              include: {
-                downloadableContent: true,
-              },
-            },
           },
         });
       }
@@ -72,7 +59,11 @@ export default function () {
           .json({ error: `TrackGroup with id ${actualId} not found` });
         return next();
       }
-      res.json({ result: processor.single(trackGroup) });
+      res.json({
+        result: processor.single(trackGroup, {
+          loggedInUserId: loggedInUser?.id,
+        }),
+      });
     } catch (e) {
       next(e);
     }

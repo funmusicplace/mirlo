@@ -52,6 +52,33 @@ export default function () {
         },
         include: {
           tracks: {
+            include: {
+              track: {
+                select: {
+                  isPreview: true,
+                  trackGroup: {
+                    select: {
+                      userTrackGroupPurchases: {
+                        where: {
+                          userId: user?.id,
+                        },
+                        select: {
+                          userId: true,
+                        },
+                      },
+                    },
+                  },
+                  userTrackPurchases: {
+                    where: {
+                      userId: user?.id,
+                    },
+                    select: {
+                      userId: true,
+                    },
+                  },
+                },
+              },
+            },
             orderBy: {
               order: "asc",
             },

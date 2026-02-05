@@ -76,7 +76,9 @@ export default function () {
           ...p,
           trackGroupPurchases: p.trackGroupPurchases?.map((tgp) => ({
             ...tgp,
-            trackGroup: trackGroupProcessor.single(tgp.trackGroup),
+            trackGroup: trackGroupProcessor.single(tgp.trackGroup, {
+              loggedInUserId: loggedInUser.id,
+            }),
           })),
           merchPurchases: p.merchPurchases?.map((mp) => ({
             ...mp,
@@ -86,7 +88,10 @@ export default function () {
             ...tp,
             track: {
               ...tp.track,
-              trackGroup: trackGroupProcessor.single(tp.track.trackGroup),
+              isPlayable: true,
+              trackGroup: trackGroupProcessor.single(tp.track.trackGroup, {
+                loggedInUserId: loggedInUser.id,
+              }),
             },
           })),
         })),

@@ -4,14 +4,6 @@ import {
   userHasPermission,
 } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
-
-import {
-  deleteArtist,
-  findArtistIdForURLSlug,
-  processSingleArtist,
-  singleInclude,
-} from "../../../../utils/artist";
 
 type Params = {
   id: string;

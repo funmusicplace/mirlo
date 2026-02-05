@@ -11,6 +11,7 @@ import {
   Artist,
   ArtistAvatar,
   UploadState,
+  UserTrackPurchase,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { generateFullStaticImageUrl } from "./images";
@@ -171,7 +172,7 @@ export const findTrackGroupIdForSlug = async (
 export const trackGroupSingleInclude = (options: {
   loggedInUserId?: number;
   ownerId?: number;
-}): Prisma.TrackGroupInclude<DefaultArgs> => {
+}) => {
   return {
     tracks: {
       where: {
@@ -188,6 +189,18 @@ export const trackGroupSingleInclude = (options: {
         audio: true,
         trackArtists: true,
         license: true,
+        ...(options.loggedInUserId
+          ? {
+              userTrackPurchases: {
+                where: {
+                  userId: options.loggedInUserId,
+                },
+                select: {
+                  userId: true,
+                },
+              },
+            }
+          : {}),
       },
       orderBy: { order: "asc" },
     },
@@ -206,8 +219,11 @@ export const trackGroupSingleInclude = (options: {
     },
     artist: true,
     merch: {
+      where: { isPublic: true },
       include: {
         images: true,
+        shippingDestinations: true,
+        optionTypes: { include: { options: true } },
       },
     },
     fundraiser: true,
@@ -231,7 +247,7 @@ export const trackGroupSingleInclude = (options: {
           },
         }
       : {}),
-  };
+  } satisfies Prisma.TrackGroupInclude<DefaultArgs>;
 };
 
 export type FormatOptions =
@@ -754,15 +770,28 @@ export const processSingleTrackGroup = (
     cover?: TrackGroupCover | null;
     artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
     merch?: (Merch & { images: MerchImage[] })[];
-    tracks?: Track[];
+    tracks?: (Track & { userTrackPurchases?: { userId: number }[] })[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
     downloadableContent?: {
       downloadableContent: Record<string, unknown>;
       downloadableContentId: string;
     }[];
-  }
+    trackGroupPurchases?: { userId: number }[];
+  },
+  options?: { loggedInUserId?: number }
 ) => ({
   ...tg,
+  tracks: tg.tracks?.map((track) => ({
+    ...track,
+    isPlayable:
+      track.isPreview ||
+      tg.trackGroupPurchases?.some(
+        (purchase) => purchase.userId === options?.loggedInUserId
+      ) ||
+      track.userTrackPurchases?.some(
+        (purchase) => purchase.userId === options?.loggedInUserId
+      ),
+  })),
   artist: tg.artist
     ? {
         ...tg.artist,

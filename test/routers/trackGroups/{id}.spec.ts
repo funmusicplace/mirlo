@@ -7,6 +7,8 @@ import {
   createArtist,
   createTrackGroup,
   createUser,
+  createUserTrackGroupPurchase,
+  createUserTrackPurchase,
 } from "../../utils";
 import prisma from "@mirlo/prisma";
 
@@ -27,6 +29,128 @@ describe("trackGroups/{id}", () => {
         .get("trackGroups/1")
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET / 200 with isPlayable false when user hasn't purchased", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        tracks: [
+          {
+            title: "Track 1",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const { accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks.length, 1);
+      assert.equal(response.body.result.tracks[0].isPlayable, false);
+    });
+
+    it("should GET / 200 with isPlayable true when user purchased trackGroup", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks.length, 1);
+      assert.equal(response.body.result.tracks[0].isPlayable, true);
+    });
+
+    it("should GET / 200 with isPlayable true when user purchased individual track", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const tracks = await prisma.track.findMany({
+        where: { trackGroupId: trackGroup.id },
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      await createUserTrackPurchase(purchaser.id, tracks[0].id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks.length, 1);
+      assert.equal(response.body.result.tracks[0].isPlayable, true);
+    });
+
+    it("should GET / 200 with mixed isPlayable when user purchased only some tracks", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        tracks: [
+          {
+            title: "Track 1",
+            isPreview: true,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+          {
+            title: "Track 2",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const tracks = await prisma.track.findMany({
+        where: { trackGroupId: trackGroup.id },
+        orderBy: { order: "asc" },
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      // Only purchase the first track
+      await createUserTrackPurchase(purchaser.id, tracks[0].id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks.length, 2);
+      assert.equal(response.body.result.tracks[0].isPlayable, true);
+      assert.equal(response.body.result.tracks[1].isPlayable, false);
     });
   });
 
