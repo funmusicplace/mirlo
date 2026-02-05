@@ -17,9 +17,12 @@ import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
 import { IncomingHttpHeaders } from "http";
-const { API_DOMAIN } = process.env;
+const { REACT_APP_CLIENT_DOMAIN } = process.env;
 
-export const root = `${API_DOMAIN}/v1/artists/`.replace("api.", "");
+export const root = new URL(REACT_APP_CLIENT_DOMAIN || "http://localhost:3000")
+  .hostname;
+
+const rootArtist = `${root}/v1/artists/`;
 
 export const generateKeysForSiteIfNeeded = async () => {
   const settings = await getSiteSettings();
@@ -108,16 +111,16 @@ export const turnArtistIntoActor = async (
       "https://w3id.org/security/v1",
     ],
 
-    id: `${root}${artist.urlSlug}`, // This is where someone can find this actor
+    id: `${rootArtist}${artist.urlSlug}`, // This is where someone can find this actor
     url: `${domain}/${artist.urlSlug}`, // This is the visible profile
     type: "Person",
     preferredUsername: `${artist.urlSlug}`,
     name: artist.name,
     summary: artist.bio,
     discoverable: artist.activityPub,
-    inbox: `${root}${artist.urlSlug}/inbox`,
-    outbox: `${root}${artist.urlSlug}/feed`,
-    followers: `${root}${artist.urlSlug}/followers`,
+    inbox: `${rootArtist}${artist.urlSlug}/inbox`,
+    outbox: `${rootArtist}${artist.urlSlug}/feed`,
+    followers: `${rootArtist}${artist.urlSlug}/followers`,
     ...(artist.avatar
       ? {
           icon: {
@@ -143,8 +146,8 @@ export const turnArtistIntoActor = async (
         }
       : {}),
     publicKey: {
-      id: `${root}${artist.urlSlug}#main-key`,
-      owner: `${root}${artist.urlSlug}`,
+      id: `${rootArtist}${artist.urlSlug}#main-key`,
+      owner: `${rootArtist}${artist.urlSlug}`,
       publicKeyPem: publicKey,
     },
   };
@@ -161,24 +164,24 @@ export const turnFeedIntoOutbox = async (
   return {
     type: "OrderedCollection",
     totalItems: feed.length,
-    id: `${root}${artist.urlSlug}/feed`,
+    id: `${rootArtist}${artist.urlSlug}/feed`,
     first: {
       type: "OrderedCollectionPage",
       totalItems: feed.length,
-      partOf: `${root}${artist.urlSlug}/feed`,
+      partOf: `${rootArtist}${artist.urlSlug}/feed`,
       orderedItems: feed.map((f) => ({
         "@context": "https://www.w3.org/ns/activitystreams",
         id: isTrackGroup(f)
-          ? `${root}${f.artist?.urlSlug}/trackGroups/${f.urlSlug}`
-          : `${root}${f.artist?.urlSlug}/posts/${f.id}`,
+          ? `${rootArtist}${f.artist?.urlSlug}/trackGroups/${f.urlSlug}`
+          : `${rootArtist}${f.artist?.urlSlug}/posts/${f.id}`,
         type: "Note",
         content: isTrackGroup(f)
           ? `<h2>An album release by artist ${f.artist.name}.</h2>`
           : f.content,
         url: isTrackGroup(f)
-          ? `${client.applicationUrl}/${f.artist?.urlSlug}/releases/${f.urlSlug}`
-          : `${client.applicationUrl}/${f.artist?.urlSlug}/posts/${f.id}`,
-        attributedTo: `${client.applicationUrl}/${f.artist?.urlSlug}`,
+          ? `${rootArtist}${f.artist?.urlSlug}/releases/${f.urlSlug}`
+          : `${rootArtist}${f.artist?.urlSlug}/posts/${f.id}`,
+        attributedTo: `${rootArtist}${f.artist?.urlSlug}`,
         to: ["https://www.w3.org/ns/activitystreams#Public"],
         cc: [],
         published: isTrackGroup(f) ? f.releaseDate : f.publishedAt,
@@ -195,7 +198,7 @@ export const turnFeedIntoOutbox = async (
         //   },
         // },
       })),
-      id: `${root}${artist.urlSlug}/feed?page=1`,
+      id: `${rootArtist}${artist.urlSlug}/feed?page=1`,
     },
     "@context": ["https://www.w3.org/ns/activitystreams"],
   };
@@ -208,13 +211,13 @@ export const turnSubscribersIntoFollowers = (
   return {
     type: "OrderedCollection",
     totalItems: followers.length,
-    id: `${root}${artist.urlSlug}/followers`,
+    id: `${rootArtist}${artist.urlSlug}/followers`,
     first: {
       type: "OrderedCollectionPage",
       totalItems: followers.length,
-      partOf: `${root}${artist.urlSlug}/followers`,
+      partOf: `${rootArtist}${artist.urlSlug}/followers`,
       orderedItems: [],
-      id: `${root}${artist.urlSlug}/followers?page=1`,
+      id: `${rootArtist}${artist.urlSlug}/followers?page=1`,
     },
     "@context": ["https://www.w3.org/ns/activitystreams"],
   };
