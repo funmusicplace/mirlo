@@ -22,7 +22,7 @@ const { REACT_APP_CLIENT_DOMAIN } = process.env;
 export const root = new URL(REACT_APP_CLIENT_DOMAIN || "http://localhost:3000")
   .hostname;
 
-const rootArtist = `${root}/v1/artists/`;
+export const rootArtist = `https://${root}/v1/artists/`;
 
 export const generateKeysForSiteIfNeeded = async () => {
   const settings = await getSiteSettings();

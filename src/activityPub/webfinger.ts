@@ -1,6 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
-import { getClient, root } from "./utils";
+import { getClient, root, rootArtist } from "./utils";
 
 const webfinger = async (req: Request, res: Response) => {
   const client = await getClient();
@@ -37,7 +37,7 @@ const webfinger = async (req: Request, res: Response) => {
         {
           rel: "self",
           type: "application/activity+json",
-          href: `${root}/${artist.urlSlug}`,
+          href: `${rootArtist}${artist.urlSlug}`,
         },
         {
           rel: "http://webfinger.net/rel/profile-page",
