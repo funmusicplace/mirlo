@@ -32,12 +32,12 @@ const webfinger = async (req: Request, res: Response) => {
   res
     .json({
       subject: `acct:${artist.urlSlug}@${root}`,
-      aliases: [`${root}${artist.urlSlug}`],
+      aliases: [`${root}/${artist.urlSlug}`],
       links: [
         {
           rel: "self",
           type: "application/activity+json",
-          href: `${root}${artist.urlSlug}`,
+          href: `${root}/${artist.urlSlug}`,
         },
         {
           rel: "http://webfinger.net/rel/profile-page",
