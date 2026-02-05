@@ -444,33 +444,49 @@ describe("artists/{id}/feed", () => {
         response.body["@context"][0],
         "https://www.w3.org/ns/activitystreams"
       );
-      const firstItem = first.orderedItems[0];
+      const createItem = first.orderedItems[0];
       assert(
-        firstItem.id.endsWith(
-          `v1/artists/${artist.urlSlug}/trackGroups/${trackGroup.urlSlug}`
+        createItem.id.endsWith(
+          `v1/artists/${artist.urlSlug}/trackGroups/${trackGroup.urlSlug}#activity`
         )
       );
+      assert.equal(createItem.type, "Create");
       assert(
-        firstItem.url.endsWith(
+        createItem.object.url.endsWith(
           `${artist.urlSlug}/releases/${trackGroup.urlSlug}`
         )
       );
-      assert(firstItem.attributedTo.endsWith(`/${artist.urlSlug}`));
-      assert.equal(firstItem.type, "Note");
+      assert(createItem.object.attributedTo.endsWith(`/${artist.urlSlug}`));
+      assert.equal(createItem.object.type, "Note");
       assert.equal(
-        firstItem.content,
-        `<h2>An album release by artist ${artist.name}.</h2>`
+        createItem.object.content,
+        `<h2>A release by ${artist.name}.</h2>`
       );
-      assert.equal(firstItem.published, trackGroup.releaseDate.toISOString());
-      const secondItem = first.orderedItems[1];
+      assert.equal(
+        createItem.object.published,
+        trackGroup.releaseDate.toISOString()
+      );
+      const secondCreateItem = first.orderedItems[1];
       assert(
-        secondItem.id.endsWith(`v1/artists/${artist.urlSlug}/posts/${post.id}`)
+        secondCreateItem.id.endsWith(
+          `v1/artists/${artist.urlSlug}/posts/${post.id}#activity`
+        )
       );
-      assert(secondItem.url.endsWith(`${artist.urlSlug}/posts/${post.id}`));
-      assert(secondItem.attributedTo.endsWith(`/${artist.urlSlug}`));
-      assert.equal(secondItem.type, "Note");
-      assert.equal(secondItem.content, post.content);
-      assert.equal(secondItem.published, post.publishedAt.toISOString());
+      assert.equal(secondCreateItem.type, "Create");
+      assert(
+        secondCreateItem.object.url.endsWith(
+          `${artist.urlSlug}/posts/${post.id}`
+        )
+      );
+      assert(
+        secondCreateItem.object.attributedTo.endsWith(`/${artist.urlSlug}`)
+      );
+      assert.equal(secondCreateItem.object.type, "Note");
+      assert.equal(secondCreateItem.object.content, post.content);
+      assert.equal(
+        secondCreateItem.object.published,
+        post.publishedAt.toISOString()
+      );
     });
   });
 });

@@ -169,35 +169,40 @@ export const turnFeedIntoOutbox = async (
       type: "OrderedCollectionPage",
       totalItems: feed.length,
       partOf: `${rootArtist}${artist.urlSlug}/feed`,
-      orderedItems: feed.map((f) => ({
-        "@context": "https://www.w3.org/ns/activitystreams",
-        id: isTrackGroup(f)
+      orderedItems: feed.map((f) => {
+        const actorId = `${rootArtist}${f.artist?.urlSlug}`;
+        const isRelease = isTrackGroup(f);
+        const noteId = isRelease
           ? `${rootArtist}${f.artist?.urlSlug}/trackGroups/${f.urlSlug}`
-          : `${rootArtist}${f.artist?.urlSlug}/posts/${f.id}`,
-        type: "Note",
-        content: isTrackGroup(f)
-          ? `<h2>An album release by artist ${f.artist.name}.</h2>`
-          : f.content,
-        url: isTrackGroup(f)
-          ? `${rootArtist}${f.artist?.urlSlug}/releases/${f.urlSlug}`
-          : `${rootArtist}${f.artist?.urlSlug}/posts/${f.id}`,
-        attributedTo: `${rootArtist}${f.artist?.urlSlug}`,
-        to: ["https://www.w3.org/ns/activitystreams#Public"],
-        cc: [],
-        published: isTrackGroup(f) ? f.releaseDate : f.publishedAt,
-        // TODO: Should we allow replies?
-        // replies: {
-        //   id: "https://maho.dev/socialweb/replies/1dff22b5faf3fbebc5aaf2bb5b5dbe2c",
-        //   type: "Collection",
-        //   first: {
-        //     type: "CollectionPage",
-        //     next: "https://maho.dev/socialweb/replies/1dff22b5faf3fbebc5aaf2bb5b5dbe2c?page=true",
-        //     partOf:
-        //       "https://maho.dev/socialweb/replies/1dff22b5faf3fbebc5aaf2bb5b5dbe2c",
-        //     items: [],
-        //   },
-        // },
-      })),
+          : `${rootArtist}${f.artist?.urlSlug}/posts/${f.id}`;
+        const noteUrl = isRelease
+          ? `${client.applicationUrl}/${f.artist?.urlSlug}/releases/${f.urlSlug}`
+          : `${client.applicationUrl}/${f.artist?.urlSlug}/posts/${f.id}`;
+        const publishedAt = isRelease ? f.releaseDate : f.publishedAt;
+        const note = {
+          id: noteId,
+          type: "Note",
+          attributedTo: actorId,
+          content: isRelease
+            ? `<h2>A release by ${f.artist.name}.</h2>`
+            : f.content,
+          url: noteUrl,
+          to: ["https://www.w3.org/ns/activitystreams#Public"],
+          cc: [],
+          published: publishedAt,
+        };
+
+        return {
+          "@context": "https://www.w3.org/ns/activitystreams",
+          id: `${noteId}#activity`, // Create activity needs a distinct id from the note itself
+          type: "Create",
+          actor: actorId,
+          to: ["https://www.w3.org/ns/activitystreams#Public"],
+          cc: [],
+          published: publishedAt,
+          object: note,
+        };
+      }),
       id: `${rootArtist}${artist.urlSlug}/feed?page=1`,
     },
     "@context": ["https://www.w3.org/ns/activitystreams"],
