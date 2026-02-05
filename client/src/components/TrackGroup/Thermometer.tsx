@@ -8,10 +8,12 @@ function Thermometer({
   goal,
   artist,
   trackGroupId,
+  hideIfUnder10Percent,
 }: {
   goal: number;
   trackGroupId: number;
   artist: Artist;
+  hideIfUnder10Percent?: boolean;
 }) {
   const {
     data: { totalAmount } = {
@@ -27,6 +29,10 @@ function Thermometer({
   const atLeast1 = atMost100 < 1 && atMost100 !== 0 ? 1 : atMost100;
 
   const displayPercent = atLeast1;
+
+  if (hideIfUnder10Percent && displayPercent < 10) {
+    return null;
+  }
 
   return (
     <div
