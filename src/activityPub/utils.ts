@@ -338,6 +338,8 @@ export const verifySignature = async (
   req: Request,
   signatureHeader: string
 ): Promise<boolean> => {
+  // @ts-ignore - requestId added by middleware
+  const log = req.logger || logger;
   // Parse signature header: keyId="...",headers="...",signature="..."
   const keyIdMatch = signatureHeader.match(/keyId="([^"]+)"/);
   const headersMatch = signatureHeader.match(/headers="([^"]+)"/);
@@ -359,11 +361,16 @@ export const verifySignature = async (
 
   // Reconstruct the signed string
   let signedString = "";
-  for (const headerName of signedHeaders) {
+  const signedParts = [];
+
+  for (let i = 0; i < signedHeaders.length; i++) {
+    const headerName = signedHeaders[i];
+    let headerLine = "";
+
     if (headerName === "(request-target)") {
       const path = req.path;
       const method = req.method.toLowerCase();
-      signedString += `(request-target): ${method} ${path}\n`;
+      headerLine = `(request-target): ${method} ${path}`;
     } else {
       const headerValue = req.headers[headerName.toLowerCase()];
       if (!headerValue) {
@@ -372,12 +379,19 @@ export const verifySignature = async (
           description: `Missing required header for signature: ${headerName}`,
         });
       }
-      signedString += `${headerName}: ${headerValue}`;
-      if (headerName !== signedHeaders[signedHeaders.length - 1]) {
-        signedString += "\n";
-      }
+      headerLine = `${headerName}: ${headerValue}`;
     }
+
+    signedParts.push(headerLine);
   }
+
+  signedString = signedParts.join("\n");
+
+  log.info("DEBUG verifySignature:");
+  log.info("  keyId:", keyId);
+  log.info("  signedHeaders:", signedHeaders);
+  log.info("  reconstructedString:", JSON.stringify(signedString));
+  log.info("  publicKey length:", publicKey.length);
 
   // Verify the signature
   const verifier = createVerify("RSA-SHA256");

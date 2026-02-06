@@ -58,8 +58,10 @@ apiApp.use((req, res, next) => {
     next();
     return;
   }
+  // @ts-ignore - Create child logger with request ID
+  const log = req.logger || logger;
   // Basic logging for API requests
-  logger.info(
+  log.info(
     `API: ${req.method} ${req.path} - query: ${JSON.stringify(req.query)} - body: ${JSON.stringify(req.body)} - headers: ${JSON.stringify(req.headers)}`
   );
   next();
