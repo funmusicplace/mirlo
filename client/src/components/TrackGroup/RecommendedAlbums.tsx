@@ -25,7 +25,9 @@ const RecommendedAlbums: React.FC<{
   return (
     <div className="mt-12">
       <h2>{t("artistRecommends", { artistName: artist.name })}</h2>
-      <div className={`grid gap-6 mt-4`}>
+      <div
+        className={`grid grid-flow-col grid-cols-2 md:grid-cols-4 gap-6 mt-4`}
+      >
         {recommendedTrackGroups.results.map((rec: TrackGroup) => (
           <ArtistRouterLink
             key={rec.id}
