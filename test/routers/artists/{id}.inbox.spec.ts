@@ -5,8 +5,11 @@ import { describe, it, beforeEach, afterEach } from "mocha";
 import { clearTables, createArtist, createUser } from "../../utils";
 import prisma from "@mirlo/prisma";
 import crypto from "crypto";
+import sinon from "sinon";
+import { Request, Response } from "express";
 
-import { requestApp } from "../utils";
+import inboxPOST from "../../../src/activityPub/inboxPOST";
+import * as utilsModule from "../../../src/activityPub/utils";
 
 function generateHttpSignature(
   method: string,
@@ -35,9 +38,11 @@ function generateHttpSignature(
   };
 }
 
-describe("artists/{id}/inbox", () => {
+describe("inboxPOST", () => {
   let testPublicKey: string;
   let testPrivateKey: string;
+  let fetchStub: sinon.SinonStub;
+  let nextStub: sinon.SinonStub;
 
   beforeEach(async () => {
     try {
@@ -61,163 +66,282 @@ describe("artists/{id}/inbox", () => {
 
     testPublicKey = publicKey;
     testPrivateKey = privateKey;
+
+    // Stub fetch globally for fetchRemotePublicKey
+    fetchStub = sinon.stub(global, "fetch" as any);
+    nextStub = sinon.stub();
   });
 
-  describe("POST", () => {
-    it("should reject requests without signature", async () => {
-      const { user: artistUser } = await createUser({
-        email: "test@test.com",
-      });
+  afterEach(() => {
+    if (fetchStub) {
+      fetchStub.restore();
+    }
+    sinon.restore();
+  });
 
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
-
-      const response = await requestApp
-        .post(`artists/${artist.urlSlug}/inbox`)
-        .send({
-          actor: "https://test-actor.com/remote-actor",
-          type: "Follow",
-        })
-        .set("content-type", "application/activity+json");
-
-      assert.equal(response.statusCode, 401);
-      assert(response.body.error?.includes("Missing HTTP signature"));
+  it("should reject requests without signature", async () => {
+    const { user: artistUser } = await createUser({
+      email: "test@test.com",
     });
 
-    it("should reject requests with wrong content-type", async () => {
-      const { user: artistUser } = await createUser({
-        email: "test@test.com",
-      });
-
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
-
-      // Add dummy signature header to pass signature check
-      const response = await requestApp
-        .post(`artists/${artist.urlSlug}/inbox`)
-        .send({
-          actor: "https://test-actor.com/remote-actor",
-          type: "Follow",
-        })
-        .set("content-type", "application/json")
-        .set(
-          "signature",
-          'keyId="test",headers="(request-target) host date digest",signature="test"'
-        );
-
-      assert.equal(response.statusCode, 400);
-      assert(response.body.error?.includes("Only accepts ActivityPub headers"));
+    const artist = await createArtist(artistUser.id, {
+      name: "Test artist",
+      userId: artistUser.id,
+      enabled: true,
     });
 
-    it("should reject Activities without actor or type", async () => {
-      const { user: artistUser } = await createUser({
-        email: "test@test.com",
-      });
+    const req = {
+      params: { id: artist.urlSlug },
+      headers: {
+        "content-type": "application/activity+json",
+      },
+      body: {
+        actor: "https://test-actor.com/remote-actor",
+        type: "Follow",
+      },
+    } as any as Request;
 
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub().returnsThis(),
+      set: sinon.stub().returnsThis(),
+    } as any as Response;
 
-      const response = await requestApp
-        .post(`artists/${artist.urlSlug}/inbox`)
-        .send({
-          actor: "https://test-actor.com/remote-actor",
-        })
-        .set("content-type", "application/activity+json")
-        .set(
-          "signature",
-          'keyId="test",headers="(request-target) host date digest",signature="test"'
-        );
+    await inboxPOST(req, res, nextStub);
 
-      console.log("response", response.body);
-      assert.equal(response.statusCode, 400);
-      assert(response.body.error?.includes("Not a valid Activity"));
+    assert(nextStub.calledOnce);
+    const error = nextStub.getCall(0).args[0];
+    assert(error.description.includes("Missing HTTP signature"));
+  });
+
+  it("should reject requests with wrong content-type", async () => {
+    const { user: artistUser } = await createUser({
+      email: "test@test.com",
     });
 
-    it("should reject unimplemented activity types", async () => {
-      const { user: artistUser } = await createUser({
-        email: "test@test.com",
-      });
-
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
-
-      const response = await requestApp
-        .post(`artists/${artist.urlSlug}/inbox`)
-        .send({
-          actor: "https://test-actor.com/remote-actor",
-          type: "Create",
-        })
-        .set("content-type", "application/activity+json")
-        .set(
-          "signature",
-          'keyId="test",headers="(request-target) host date digest",signature="test"'
-        );
-
-      assert.equal(response.statusCode, 501);
-      assert(response.body.error?.includes("not implemented"));
+    const artist = await createArtist(artistUser.id, {
+      name: "Test artist",
+      userId: artistUser.id,
+      enabled: true,
     });
 
-    it("should accept a valid Follow activity with correct signature", async () => {
-      const { user: artistUser } = await createUser({
-        email: "test@test.com",
-      });
+    const req = {
+      params: { id: artist.urlSlug },
+      headers: {
+        "content-type": "application/json",
+        signature:
+          'keyId="test",headers="(request-target) host date digest",signature="test"',
+      },
+      body: {
+        actor: "https://test-actor.com/remote-actor",
+        type: "Follow",
+      },
+    } as any as Request;
 
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub().returnsThis(),
+      set: sinon.stub().returnsThis(),
+    } as any as Response;
 
-      const actorUrl = `https://localhost/v1/artists/${artist.urlSlug}`;
-      const body = JSON.stringify({
+    await inboxPOST(req, res, nextStub);
+
+    assert(nextStub.calledOnce);
+    const error = nextStub.getCall(0).args[0];
+    assert(error.description.includes("Only accepts ActivityPub headers"));
+  });
+
+  it("should reject Activities without actor or type", async () => {
+    const { user: artistUser } = await createUser({
+      email: "test@test.com",
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      name: "Test artist",
+      userId: artistUser.id,
+      enabled: true,
+    });
+
+    const body = JSON.stringify({
+      actor: "https://test-actor.com/remote-actor",
+    });
+
+    const sigInfo = generateHttpSignature(
+      "POST",
+      `/v1/artists/${artist.urlSlug}/inbox`,
+      body,
+      "localhost",
+      testPrivateKey
+    );
+
+    // Mock fetchRemotePublicKey to return our test public key
+    sinon.stub(utilsModule, "fetchRemotePublicKey").resolves(testPublicKey);
+
+    const req = {
+      params: { id: artist.urlSlug },
+      method: "POST",
+      path: `/v1/artists/${artist.urlSlug}/inbox`,
+      headers: {
+        "content-type": "application/activity+json",
+        signature: sigInfo.signature,
+        digest: sigInfo.digest,
+        date: sigInfo.date,
+        host: "localhost",
+      },
+      body: {
+        actor: "https://test-actor.com/remote-actor",
+      },
+      rawBody: body,
+    } as any as Request;
+
+    const res = {
+      status: sinon.stub().returnsThis() as any,
+      json: sinon.stub().returnsThis() as any,
+      set: sinon.stub().returnsThis() as any,
+    } as any as Response;
+
+    await inboxPOST(req, res, nextStub);
+
+    assert(nextStub.calledOnce);
+    const error = nextStub.getCall(0).args[0];
+    assert(error.description.includes("Not a valid Activity"));
+  });
+
+  it("should reject unimplemented activity types", async () => {
+    const { user: artistUser } = await createUser({
+      email: "test@test.com",
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      name: "Test artist",
+      userId: artistUser.id,
+      enabled: true,
+    });
+
+    const body = JSON.stringify({
+      actor: "https://test-actor.com/remote-actor",
+      type: "Create",
+    });
+
+    const sigInfo = generateHttpSignature(
+      "POST",
+      `/v1/artists/${artist.urlSlug}/inbox`,
+      body,
+      "localhost",
+      testPrivateKey
+    );
+
+    sinon.stub(utilsModule, "fetchRemotePublicKey").resolves(testPublicKey);
+
+    const req = {
+      params: { id: artist.urlSlug },
+      method: "POST",
+      path: `/v1/artists/${artist.urlSlug}/inbox`,
+      headers: {
+        "content-type": "application/activity+json",
+        signature: sigInfo.signature,
+        digest: sigInfo.digest,
+        date: sigInfo.date,
+        host: "localhost",
+      },
+      body: {
+        actor: "https://test-actor.com/remote-actor",
+        type: "Create",
+      },
+      rawBody: body,
+    } as any as Request;
+
+    const res = {
+      status: sinon.stub().returnsThis() as any,
+      json: sinon.stub().returnsThis() as any,
+      set: sinon.stub().returnsThis() as any,
+    } as any as Response;
+
+    await inboxPOST(req, res, nextStub);
+
+    assert(nextStub.calledOnce);
+    const error = nextStub.getCall(0).args[0];
+    assert(error.description.includes("not implemented"));
+  });
+
+  it("should accept a valid Follow activity with correct signature", async () => {
+    const { user: artistUser } = await createUser({
+      email: "test@test.com",
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      name: "Test artist",
+      userId: artistUser.id,
+      enabled: true,
+    });
+
+    const actorUrl = `https://localhost/v1/artists/${artist.urlSlug}`;
+    const body = JSON.stringify({
+      actor: "https://test-actor.com/remote-actor",
+      type: "Follow",
+      object: actorUrl,
+    });
+
+    const sigInfo = generateHttpSignature(
+      "POST",
+      `/v1/artists/${artist.urlSlug}/inbox`,
+      body,
+      "localhost",
+      testPrivateKey
+    );
+
+    // Mock fetchRemotePublicKey to return our test public key
+    sinon.stub(utilsModule, "fetchRemotePublicKey").resolves(testPublicKey);
+
+    // Mock fetch for sending Accept message
+    fetchStub.resolves({
+      ok: true,
+      text: async () => "",
+    });
+
+    const req = {
+      params: { id: artist.urlSlug },
+      method: "POST",
+      path: `/v1/artists/${artist.urlSlug}/inbox`,
+      headers: {
+        "content-type": "application/activity+json",
+        signature: sigInfo.signature,
+        digest: sigInfo.digest,
+        date: sigInfo.date,
+        host: "localhost",
+        accept: "application/activity+json",
+      },
+      body: {
         actor: "https://test-actor.com/remote-actor",
         type: "Follow",
         object: actorUrl,
-      });
+      },
+      rawBody: body,
+    } as any as Request;
 
-      const sigInfo = generateHttpSignature(
-        "POST",
-        `/v1/artists/${artist.urlSlug}/inbox`,
-        body,
-        "localhost",
-        testPrivateKey
-      );
+    const res = {
+      status: sinon.stub().returnsThis() as any,
+      json: sinon.stub().returnsThis() as any,
+      set: sinon.stub().returnsThis() as any,
+    } as any as Response;
 
-      const response = await requestApp
-        .post(`artists/${artist.urlSlug}/inbox`)
-        .send({
-          actor: "https://test-actor.com/remote-actor",
-          type: "Follow",
-          object: actorUrl,
-        })
-        .set("content-type", "application/activity+json")
-        .set("signature", sigInfo.signature)
-        .set("digest", sigInfo.digest)
-        .set("date", sigInfo.date)
-        .set("host", "localhost");
+    await inboxPOST(req, res, nextStub);
 
-      assert.equal(response.statusCode, 200);
+    // Should call res.status(200) and res.json()
+    assert((res.status as any).called);
+    assert((res.json as any).called);
 
-      const result = await prisma.activityPubArtistFollowers.findFirst({
-        where: {
-          artistId: artist.id,
-        },
-      });
-
-      assert(result, "Follower should be created");
-      assert.equal(result?.actor, "https://test-actor.com/remote-actor");
+    // Verify follower was created
+    const follower = await prisma.activityPubArtistFollowers.findFirst({
+      where: {
+        artistId: artist.id,
+      },
     });
+
+    assert(follower);
+    assert.equal(follower.actor, "https://test-actor.com/remote-actor");
+
+    // Verify Accept message was sent (fetch called)
+    assert(fetchStub.called);
   });
 });

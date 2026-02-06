@@ -86,6 +86,7 @@ export const createArtist = async (
       userId: userId,
       enabled: data?.enabled ?? true,
       subscriptionTiers: data?.subscriptionTiers,
+      activityPub: data?.activityPub ?? false,
     },
     include: {
       subscriptionTiers: true,
@@ -107,6 +108,7 @@ export const createPost = async (
       content: data?.content ?? "The content",
       shouldSendEmail: data?.shouldSendEmail,
       isDraft: data?.isDraft ?? true,
+      publishedAt: data?.publishedAt ?? new Date(),
     },
   });
   return post;
