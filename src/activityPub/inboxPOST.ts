@@ -9,6 +9,7 @@ import prisma from "@mirlo/prisma";
 import crypto from "crypto";
 import { AppError } from "../utils/error";
 import { findArtistIdForURLSlug } from "../utils/artist";
+import logger from "../logger";
 
 async function sendAcceptMessage(
   thebody: { [key: string]: unknown },
@@ -36,6 +37,8 @@ async function sendAcceptMessage(
 }
 
 const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
+  // @ts-ignore - requestId added by middleware
+  const log = req.logger || logger;
   let { id }: { id?: string } = req.params;
   if (!id || id === "undefined") {
     return res.status(400);
@@ -89,9 +92,12 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
     const remoteActorId = new URL(req.body.actor);
     const remoteActorDomain = remoteActorId.hostname;
     if (req.body.type === "Follow") {
+      log.info(
+        `inboxPOST: Processing Follow from ${req.body.actor} for artist ${artist.urlSlug}`
+      );
       await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
       // update followers
-      await prisma.activityPubArtistFollowers.upsert({
+      const follower = await prisma.activityPubArtistFollowers.upsert({
         where: {
           actor_artistId: { artistId: artist.id, actor: req.body.actor },
         },
@@ -104,6 +110,9 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
           actor: req.body.actor,
         },
       });
+      log.info(
+        `inboxPOST: Follow registered successfully for ${req.body.actor} -> artist ${artist.id}`
+      );
     }
     if (req.body.type === "Unfollow") {
       await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
@@ -123,6 +132,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       message: "success",
     });
   } catch (e) {
+    log.error(`inboxPOST error:`, e);
     next(e);
   }
 };

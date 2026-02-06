@@ -13,6 +13,7 @@ import routes from "./routes";
 import qs from "qs";
 import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
+import crypto from "crypto";
 const isDev = process.env.NODE_ENV === "development";
 
 const apiApp = express();
@@ -41,6 +42,16 @@ apiApp.use(
     delayMs: () => 500, // add 500ms delay per request after the first
   })
 );
+
+// Add request ID to each request for tracing
+apiApp.use((req, res, next) => {
+  const requestId = crypto.randomBytes(8).toString("hex");
+  // @ts-ignore
+  req.requestId = requestId;
+  // @ts-ignore - Create child logger with request ID
+  req.logger = logger.child({ requestId });
+  next();
+});
 
 apiApp.use((req, res, next) => {
   if (isDev) {
