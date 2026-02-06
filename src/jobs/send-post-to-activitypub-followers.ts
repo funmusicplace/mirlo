@@ -14,32 +14,47 @@ import {
 const sendPostToActivityPubFollowers = async () => {
   const date = new Date();
 
-  // Find posts that haven't been sent to ActivityPub yet
-  const posts = await prisma.post.findMany({
+  // Find notifications for posts that need to be sent to ActivityPub
+  const notifications = await prisma.notification.findMany({
     where: {
-      publishedAt: {
+      isRead: false,
+      createdAt: {
         lte: date,
       },
-      hasBeenSentToActivityPub: false,
-      deletedAt: null,
-      isDraft: false,
-      isPublic: true,
+      notificationType: "NEW_ARTIST_POST",
+      deliveryMethod: {
+        in: ["ACTIVITYPUB", "BOTH"],
+      },
+      post: {
+        deletedAt: null,
+        isDraft: false,
+        isPublic: true,
+        publishedAt: {
+          lte: date,
+        },
+      },
     },
     select: {
       id: true,
-      title: true,
-      content: true,
-      urlSlug: true,
-      publishedAt: true,
-      artistId: true,
-      artist: {
+      post: {
         select: {
           id: true,
+          title: true,
+          content: true,
           urlSlug: true,
-          name: true,
-          activityPubArtistFollowers: {
+          publishedAt: true,
+          artistId: true,
+          artist: {
             select: {
-              actor: true,
+              id: true,
+              urlSlug: true,
+              name: true,
+              activityPub: true,
+              activityPubArtistFollowers: {
+                select: {
+                  actor: true,
+                },
+              },
             },
           },
         },
@@ -48,25 +63,71 @@ const sendPostToActivityPubFollowers = async () => {
   });
 
   logger.info(
-    `sendPostToActivityPubFollowers: found ${posts.length} posts to send`
+    `sendPostToActivityPubFollowers: found ${notifications.length} notifications to process`
   );
 
-  for (const post of posts) {
-    if (!post.artist) {
+  // Group notifications by post to avoid sending the same post multiple times
+  const postMap = new Map<
+    number,
+    {
+      post: (typeof notifications)[0]["post"];
+      notificationIds: string[];
+    }
+  >();
+
+  for (const notif of notifications) {
+    if (!notif.post) continue;
+
+    const postId = notif.post.id;
+    if (!postMap.has(postId)) {
+      postMap.set(postId, {
+        post: notif.post,
+        notificationIds: [notif.id],
+      });
+    } else {
+      postMap.get(postId)!.notificationIds.push(notif.id);
+    }
+  }
+
+  const postValues = Array.from(postMap.values());
+  logger.info(
+    `sendPostToActivityPubFollowers: grouped into ${postMap.size} unique posts`
+  );
+
+  for (const { post, notificationIds } of postValues) {
+    if (!post || !post.artist) {
       logger.warn(
-        `sendPostToActivityPubFollowers: post ${post.id} has no artist`
+        `sendPostToActivityPubFollowers: post ${post?.id} has no artist`
       );
+      // Mark notifications as read even if post has no artist
+      await prisma.notification.updateMany({
+        where: { id: { in: notificationIds } },
+        data: { isRead: true },
+      });
+      continue;
+    }
+
+    if (!post.artist.activityPub) {
+      logger.info(
+        `sendPostToActivityPubFollowers: artist ${post.artist.urlSlug} does not have ActivityPub enabled`
+      );
+      // Mark notifications as read since AP is not enabled
+      await prisma.notification.updateMany({
+        where: { id: { in: notificationIds } },
+        data: { isRead: true },
+      });
       continue;
     }
 
     const followers = post.artist.activityPubArtistFollowers;
     if (followers.length === 0) {
       logger.info(
-        `sendPostToActivityPubFollowers: artist ${post.artist.urlSlug} has no followers, marking as sent`
+        `sendPostToActivityPubFollowers: artist ${post.artist.urlSlug} has no followers`
       );
-      await prisma.post.update({
-        where: { id: post.id },
-        data: { hasBeenSentToActivityPub: true },
+      // Mark notifications as read even if no followers
+      await prisma.notification.updateMany({
+        where: { id: { in: notificationIds } },
+        data: { isRead: true },
       });
       continue;
     }
@@ -133,11 +194,11 @@ const sendPostToActivityPubFollowers = async () => {
       `sendPostToActivityPubFollowers: post ${post.id} - ${successCount} successful, ${errorCount} failed`
     );
 
-    // Mark the post as sent even if some deliveries failed
+    // Mark all notifications for this post as read even if some deliveries failed
     // (we don't want to retry forever)
-    await prisma.post.update({
-      where: { id: post.id },
-      data: { hasBeenSentToActivityPub: true },
+    await prisma.notification.updateMany({
+      where: { id: { in: notificationIds } },
+      data: { isRead: true },
     });
   }
 };

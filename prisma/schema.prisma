@@ -175,25 +175,26 @@ model ActivityPubArtistFollowers {
 }
 
 model Notification {
-  id               String                  @id @default(uuid())
-  isRead           Boolean                 @default(false)
+  id               String                     @id @default(uuid())
+  isRead           Boolean                    @default(false)
   userId           Int
-  user             User                    @relation(fields: [userId], references: [id], name: "receivingUser")
+  user             User                       @relation(fields: [userId], references: [id], name: "receivingUser")
   notificationType NotificationType
-  createdAt        DateTime                @default(now())
+  deliveryMethod   NotificationDeliveryMethod @default(EMAIL)
+  createdAt        DateTime                   @default(now())
   content          String?
   trackGroupId     Int?
-  trackGroup       TrackGroup?             @relation(fields: [trackGroupId], references: [id])
+  trackGroup       TrackGroup?                @relation(fields: [trackGroupId], references: [id])
   trackId          Int?
-  track            Track?                  @relation(fields: [trackId], references: [id])
+  track            Track?                     @relation(fields: [trackId], references: [id])
   subscriptionId   Int?
-  subscription     ArtistUserSubscription? @relation(fields: [subscriptionId], references: [id])
+  subscription     ArtistUserSubscription?    @relation(fields: [subscriptionId], references: [id])
   postId           Int?
-  post             Post?                   @relation(fields: [postId], references: [id])
+  post             Post?                      @relation(fields: [postId], references: [id])
   artistId         Int?
-  artist           Artist?                 @relation(fields: [artistId], references: [id])
+  artist           Artist?                    @relation(fields: [artistId], references: [id])
   relatedUserId    Int?
-  relatedUser      User?                   @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
+  relatedUser      User?                      @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
 }
 
 enum NotificationType {
@@ -207,6 +208,12 @@ enum NotificationType {
   SYSTEM_MESSAGE
   LABEL_ADDED_ARTIST
   FUNDRAISER_PLEDGE_CHARGED
+}
+
+enum NotificationDeliveryMethod {
+  EMAIL
+  ACTIVITYPUB
+  BOTH
 }
 
 model Post {
@@ -226,7 +233,6 @@ model Post {
   minimumSubscriptionTierId Int?
   minimumSubscriptionTier   ArtistSubscriptionTier? @relation(fields: [minimumSubscriptionTierId], references: [id])
   hasAnnounceEmailBeenSent  Boolean                 @default(false)
-  hasBeenSentToActivityPub  Boolean                 @default(false)
   postSubscriptionTiers     PostSubscriptionTier[]
   notifications             Notification[]
   shouldSendEmail           Boolean                 @default(true)

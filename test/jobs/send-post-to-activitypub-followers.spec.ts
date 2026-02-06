@@ -39,13 +39,37 @@ describe("send-post-to-activitypub-followers", () => {
       activityPub: true,
     });
 
-    // Create a published post that hasn't been sent
+    // Create a published post
     const post = await createPost(artist.id, {
       title: "Test Post",
       content: "This is a test post",
       isDraft: false,
       isPublic: true,
       publishedAt: new Date(),
+    });
+
+    // Create notifications for the post (simulating subscribers)
+    const subscriber1 = await createUser({ email: "sub1@test.com" });
+    const subscriber2 = await createUser({ email: "sub2@test.com" });
+
+    const notif1 = await prisma.notification.create({
+      data: {
+        postId: post.id,
+        userId: subscriber1.user.id,
+        notificationType: "NEW_ARTIST_POST",
+        deliveryMethod: "BOTH",
+        isRead: false,
+      },
+    });
+
+    const notif2 = await prisma.notification.create({
+      data: {
+        postId: post.id,
+        userId: subscriber2.user.id,
+        notificationType: "NEW_ARTIST_POST",
+        deliveryMethod: "BOTH",
+        isRead: false,
+      },
     });
 
     // Add ActivityPub followers
@@ -64,7 +88,6 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     // Mock fetch responses
-    // First calls fetch the follower actor documents
     const follower1ActorResponse = {
       ok: true,
       json: async () => ({
@@ -79,7 +102,6 @@ describe("send-post-to-activitypub-followers", () => {
       }),
     };
 
-    // Inbox POST responses
     const inboxResponse = {
       ok: true,
       text: async () => "",
@@ -101,12 +123,16 @@ describe("send-post-to-activitypub-followers", () => {
     // Run the job
     await sendPostToActivityPubFollowers();
 
-    // Verify post was marked as sent
-    const updatedPost = await prisma.post.findFirst({
-      where: { id: post.id },
+    // Verify notifications were marked as read
+    const updatedNotif1 = await prisma.notification.findUnique({
+      where: { id: notif1.id },
+    });
+    const updatedNotif2 = await prisma.notification.findUnique({
+      where: { id: notif2.id },
     });
 
-    assert.strictEqual(updatedPost?.hasBeenSentToActivityPub, true);
+    assert.strictEqual(updatedNotif1?.isRead, true);
+    assert.strictEqual(updatedNotif2?.isRead, true);
 
     // Verify fetch was called for actor documents
     assert(
@@ -146,19 +172,6 @@ describe("send-post-to-activitypub-followers", () => {
       activityPub: true,
     });
 
-    const artist2 = await createArtist(artistUser.id, {
-      name: "Test Artist 2",
-      urlSlug: "test-artist-2",
-      activityPub: true,
-    });
-
-    await prisma.activityPubArtistFollowers.create({
-      data: {
-        artistId: artist2.id,
-        actor: "https://pixelfed.example/users/follower2",
-      },
-    });
-
     const post = await createPost(artist.id, {
       title: "Lonely Post",
       content: "This post has no followers",
@@ -167,20 +180,32 @@ describe("send-post-to-activitypub-followers", () => {
       publishedAt: new Date(),
     });
 
-    await sendPostToActivityPubFollowers();
+    const subscriber = await createUser({ email: "sub@test.com" });
 
-    // Post should be marked as sent even with no followers
-    const updatedPost = await prisma.post.findFirst({
-      where: { id: post.id },
+    const notification = await prisma.notification.create({
+      data: {
+        postId: post.id,
+        userId: subscriber.user.id,
+        notificationType: "NEW_ARTIST_POST",
+        deliveryMethod: "BOTH",
+        isRead: false,
+      },
     });
 
-    assert.strictEqual(updatedPost?.hasBeenSentToActivityPub, true);
+    await sendPostToActivityPubFollowers();
+
+    // Notification should be marked as read even with no followers
+    const updatedNotif = await prisma.notification.findUnique({
+      where: { id: notification.id },
+    });
+
+    assert.strictEqual(updatedNotif?.isRead, true);
 
     // No fetch calls should be made
     assert.strictEqual(fetchStub.callCount, 0);
   });
 
-  it("should skip draft posts", async () => {
+  it("should skip notifications with deliveryMethod EMAIL only", async () => {
     const { user: artistUser } = await createUser({
       email: "artist3@test.com",
     });
@@ -191,12 +216,24 @@ describe("send-post-to-activitypub-followers", () => {
       activityPub: true,
     });
 
-    // Create a draft post
-    const draftPost = await createPost(artist.id, {
-      title: "Draft Post",
-      content: "This is a draft",
-      isDraft: true,
+    const post = await createPost(artist.id, {
+      title: "Email Only Post",
+      content: "This notification is email only",
+      isDraft: false,
       isPublic: true,
+      publishedAt: new Date(),
+    });
+
+    const subscriber = await createUser({ email: "sub@test.com" });
+
+    await prisma.notification.create({
+      data: {
+        postId: post.id,
+        userId: subscriber.user.id,
+        notificationType: "NEW_ARTIST_POST",
+        deliveryMethod: "EMAIL", // Not ACTIVITYPUB or BOTH
+        isRead: false,
+      },
     });
 
     // Add a follower
@@ -209,15 +246,11 @@ describe("send-post-to-activitypub-followers", () => {
 
     await sendPostToActivityPubFollowers();
 
-    // Draft post should NOT be marked as sent
-    const updatedPost = await prisma.post.findFirst({
-      where: { id: draftPost.id },
-    });
-
-    assert.strictEqual(updatedPost?.hasBeenSentToActivityPub, false);
+    // No fetch calls should be made since no ACTIVITYPUB notifications exist
+    assert.strictEqual(fetchStub.callCount, 0);
   });
 
-  it("should skip posts already sent to ActivityPub", async () => {
+  it("should pass activity pub disabled artists", async () => {
     const { user: artistUser } = await createUser({
       email: "artist4@test.com",
     });
@@ -225,30 +258,51 @@ describe("send-post-to-activitypub-followers", () => {
     const artist = await createArtist(artistUser.id, {
       name: "Test Artist 4",
       urlSlug: "test-artist-4",
-      activityPub: true,
+      activityPub: false, // ActivityPub disabled
     });
 
-    // Create a post that's already been sent
-    const sentPost = await createPost(artist.id, {
-      title: "Already Sent",
-      content: "Already delivered",
+    const post = await createPost(artist.id, {
+      title: "No ActivityPub",
+      content: "Artist has AP disabled",
       isDraft: false,
       isPublic: true,
       publishedAt: new Date(),
     });
 
-    await prisma.post.update({
-      where: { id: sentPost.id },
-      data: { hasBeenSentToActivityPub: true },
+    const subscriber = await createUser({ email: "sub@test.com" });
+
+    const notification = await prisma.notification.create({
+      data: {
+        postId: post.id,
+        userId: subscriber.user.id,
+        notificationType: "NEW_ARTIST_POST",
+        deliveryMethod: "BOTH",
+        isRead: false,
+      },
+    });
+
+    // Add a follower (won't be used)
+    await prisma.activityPubArtistFollowers.create({
+      data: {
+        artistId: artist.id,
+        actor: "https://example.com/user",
+      },
     });
 
     await sendPostToActivityPubFollowers();
+
+    // Notification should be marked as read even if artist has AP disabled
+    const updatedNotif = await prisma.notification.findUnique({
+      where: { id: notification.id },
+    });
+
+    assert.strictEqual(updatedNotif?.isRead, true);
 
     // No fetch calls should be made
     assert.strictEqual(fetchStub.callCount, 0);
   });
 
-  it("should handle follower inbox fetch errors gracefully", async () => {
+  it("should skip already read notifications", async () => {
     const { user: artistUser } = await createUser({
       email: "artist5@test.com",
     });
@@ -260,11 +314,60 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     const post = await createPost(artist.id, {
+      title: "Already Read",
+      content: "This notification is already read",
+      isDraft: false,
+      isPublic: true,
+      publishedAt: new Date(),
+    });
+
+    const subscriber = await createUser({ email: "sub@test.com" });
+
+    await prisma.notification.create({
+      data: {
+        postId: post.id,
+        userId: subscriber.user.id,
+        notificationType: "NEW_ARTIST_POST",
+        deliveryMethod: "BOTH",
+        isRead: true, // Already read
+      },
+    });
+
+    await sendPostToActivityPubFollowers();
+
+    // No fetch calls should be made
+    assert.strictEqual(fetchStub.callCount, 0);
+  });
+
+  it("should handle follower inbox fetch errors gracefully", async () => {
+    const { user: artistUser } = await createUser({
+      email: "artist6@test.com",
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      name: "Test Artist 6",
+      urlSlug: "test-artist-6",
+      activityPub: true,
+    });
+
+    const post = await createPost(artist.id, {
       title: "Error Test",
       content: "Testing error handling",
       isDraft: false,
       isPublic: true,
       publishedAt: new Date(),
+    });
+
+    const subscriber = await createUser({ email: "sub@test.com" });
+
+    const notification = await prisma.notification.create({
+      data: {
+        postId: post.id,
+        userId: subscriber.user.id,
+        notificationType: "NEW_ARTIST_POST",
+        deliveryMethod: "BOTH",
+        isRead: false,
+      },
     });
 
     // Add a follower
@@ -282,11 +385,11 @@ describe("send-post-to-activitypub-followers", () => {
 
     await sendPostToActivityPubFollowers();
 
-    // Post should still be marked as sent (we don't retry indefinitely)
-    const updatedPost = await prisma.post.findFirst({
-      where: { id: post.id },
+    // Notification should still be marked as read (we don't retry indefinitely)
+    const updatedNotif = await prisma.notification.findUnique({
+      where: { id: notification.id },
     });
 
-    assert.strictEqual(updatedPost?.hasBeenSentToActivityPub, true);
+    assert.strictEqual(updatedNotif?.isRead, true);
   });
 });
