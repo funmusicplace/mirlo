@@ -390,7 +390,7 @@ export const verifySignature = async (
   log.info("=========== DEBUG verifySignature ===========");
   log.info("keyId: " + keyId);
   log.info("signedHeaders: " + JSON.stringify(signedHeaders));
-  log.info("reconstructedString:\n" + signedString);
+  log.info("reconstructedString (escaped): " + JSON.stringify(signedString));
   log.info("publicKey (first 150 chars): " + publicKey.substring(0, 150));
   log.info("signatureB64 (first 50 chars): " + signatureB64.substring(0, 50));
   log.info("==========================================");
