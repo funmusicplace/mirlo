@@ -3,6 +3,7 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
 import { NextFunction, Request, Response } from "express";
+import logger from "../logger";
 
 export enum HttpCode {
   OK = 200,
@@ -52,9 +53,12 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  // @ts-ignore - req.logger added by middleware
+  const log = req.logger || logger;
+
   if (err instanceof AppError) {
     if (err.httpCode >= 500) {
-      console.error(
+      log.error(
         "Found instance of unhandled AppError",
         req.path,
         req.method,
@@ -69,7 +73,7 @@ const errorHandler = (
   }
 
   // Errors we should probably know about
-  console.error(
+  log.error(
     `ERROR: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`,
     err,
     err.captureStackTrace ? err.captureStackTrace() : ""
@@ -89,7 +93,7 @@ const errorHandler = (
     err.name === "NotFoundError" ||
     err.name === "PrismaClientKnownRequestError"
   ) {
-    console.error("err", err.cause, err.name, err.code, err.meta);
+    log.error("err", err.cause, err.name, err.code, err.meta);
     let message = `Something went wrong with the data supplied. Admin should check the logs`;
 
     if (err.meta && err.code === "P2002") {
