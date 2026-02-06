@@ -18,6 +18,7 @@ import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
 import { IncomingHttpHeaders } from "http";
+import { logger } from "../logger";
 
 const { REACT_APP_CLIENT_DOMAIN } = process.env;
 
@@ -300,7 +301,11 @@ export const turnSubscribersIntoFollowers = (
   };
 };
 
-export async function fetchRemotePublicKey(keyId: string): Promise<string> {
+export async function fetchRemotePublicKey(
+  keyId: string,
+  log?: typeof logger
+): Promise<string> {
+  const localLog = log || logger;
   try {
     const response = await fetch(keyId, {
       headers: {
@@ -317,11 +322,30 @@ export async function fetchRemotePublicKey(keyId: string): Promise<string> {
       publicKey?: { publicKeyPem?: string };
     };
 
+    localLog.info(
+      "fetchRemotePublicKey for " +
+        keyId +
+        " - response keys: " +
+        Object.keys(data).join(", ")
+    );
+    if (data.publicKey) {
+      localLog.info(
+        "data.publicKey keys: " + Object.keys(data.publicKey).join(", ")
+      );
+    }
+
     if (data.publicKeyPem) {
+      localLog.info(
+        "Found publicKeyPem at root level, length: " + data.publicKeyPem.length
+      );
       return data.publicKeyPem;
     }
 
     if (data.publicKey?.publicKeyPem) {
+      localLog.info(
+        "Found publicKeyPem in nested publicKey, length: " +
+          data.publicKey.publicKeyPem.length
+      );
       return data.publicKey.publicKeyPem;
     }
 
@@ -357,7 +381,7 @@ export const verifySignature = async (
   const signatureB64 = signatureMatch[1];
 
   // Get the public key from the remote actor
-  const publicKey = await fetchRemotePublicKey(keyId);
+  const publicKey = await fetchRemotePublicKey(keyId, log);
 
   // Reconstruct the signed string
   let signedString = "";
@@ -391,7 +415,12 @@ export const verifySignature = async (
   log.info("keyId: " + keyId);
   log.info("signedHeaders: " + JSON.stringify(signedHeaders));
   log.info("reconstructedString (escaped): " + JSON.stringify(signedString));
-  log.info("publicKey (first 150 chars): " + publicKey.substring(0, 150));
+  log.info(
+    "publicKey length: " +
+      publicKey.length +
+      " starts with: " +
+      publicKey.substring(0, 30)
+  );
   log.info("signatureB64 (first 50 chars): " + signatureB64.substring(0, 50));
   log.info("==========================================");
 
