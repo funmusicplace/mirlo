@@ -387,11 +387,13 @@ export const verifySignature = async (
 
   signedString = signedParts.join("\n");
 
-  log.info("DEBUG verifySignature:");
-  log.info("  keyId:", keyId);
-  log.info("  signedHeaders:", signedHeaders);
-  log.info("  reconstructedString:", JSON.stringify(signedString));
-  log.info("  publicKey length:", publicKey.length);
+  log.info("=========== DEBUG verifySignature ===========");
+  log.info("keyId: " + keyId);
+  log.info("signedHeaders: " + JSON.stringify(signedHeaders));
+  log.info("reconstructedString:\n" + signedString);
+  log.info("publicKey (first 150 chars): " + publicKey.substring(0, 150));
+  log.info("signatureB64 (first 50 chars): " + signatureB64.substring(0, 50));
+  log.info("==========================================");
 
   // Verify the signature
   const verifier = createVerify("RSA-SHA256");
