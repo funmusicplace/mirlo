@@ -55,7 +55,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       const isAPIEndpointPrivate = checkForPrivateEndpoint(req.path, req.query);
       const isActivityPubRequest = headersAreForActivityPub(
         req.headers,
-        "accept"
+        req.method as "POST" | "GET" | "PUT" | "DELETE"
       );
       const validActivityPubEndpoints = isValidActivityPubEndpoints(req.path);
       // We only care about the API key for API requests

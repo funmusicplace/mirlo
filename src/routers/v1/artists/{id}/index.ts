@@ -57,7 +57,7 @@ export default function () {
           });
         }
 
-        if (headersAreForActivityPub(req.headers, "accept")) {
+        if (headersAreForActivityPub(req.headers, "GET")) {
           if (req.headers.accept) {
             res.set("content-type", "application/activity+json");
           }

@@ -25,7 +25,8 @@ const AdminManageArtist = () => {
   const PREFILL_CONTENT_POLICY =
     "Your artist account has been disabled due to a violation of our Content Policy regarding AI-generated content: http://mirlo.space/pages/content-policy" +
     "\n\nThis determination was made after reviewing the artwork and/or music associated with your account. " +
-    "\n\nIf you believe this decision was made in error, you can contest it by emailing support@mirlo.space with evidence supporting your appeal.";
+    "\n\nIf you believe this decision was made in error, you can contest it by emailing support@mirlo.space with evidence supporting your appeal." +
+    "\n\nWe recognize that for many in our community, they rely on AI tools because they don't have specific skills. We suggest joining our community or tagging us on socials, and we'll boost your post to connect you with people who might want to help.";
 
   const callback = React.useCallback(async () => {
     const response = await api.get<ArtistFromAdmin>(`admin/artists/${id}`);

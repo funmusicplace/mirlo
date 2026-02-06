@@ -1,62 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  generateKeysForSiteIfNeeded,
   headersAreForActivityPub,
   rootArtist,
   verifySignature,
+  signAndSendActivityPubMessage,
 } from "./utils";
 import prisma from "@mirlo/prisma";
 import crypto from "crypto";
 import { AppError } from "../utils/error";
 import { findArtistIdForURLSlug } from "../utils/artist";
-
-async function signAndSend(
-  message: any,
-  artistUrlSlug: string,
-  destinationDomain: string
-) {
-  // get the URI of the actor object and append 'inbox' to it
-  let destinationInbox = message.object.actor + "/inbox";
-  let destinationInboxFragment = destinationInbox.replace(
-    "https://" + destinationDomain,
-    ""
-  );
-  // get the private key
-  const { privateKey } = await generateKeysForSiteIfNeeded();
-
-  if (privateKey) {
-    const digestHash = crypto
-      .createHash("sha256")
-      .update(JSON.stringify(message))
-      .digest("base64");
-    const signer = crypto.createSign("sha256");
-    let d = new Date();
-    let stringToSign = `(request-target): post ${destinationInboxFragment}\nhost: ${destinationDomain}\ndate: ${d.toUTCString()}\ndigest: SHA-256=${digestHash}`;
-    signer.update(stringToSign);
-    signer.end();
-    const signature = signer.sign(privateKey);
-    const signature_b64 = signature.toString("base64");
-    let header = `keyId="${rootArtist}${artistUrlSlug}#main-key",headers="(request-target) host date digest",signature="${signature_b64}"`;
-
-    const requestBody = {
-      url: destinationInbox,
-      headers: {
-        Host: destinationDomain,
-        Date: d.toUTCString(),
-        Digest: `SHA-256=${digestHash}`,
-        Signature: header,
-      },
-      method: "POST",
-      body: JSON.stringify(message),
-    };
-
-    try {
-      const response = await fetch(requestBody.url, requestBody);
-    } catch (e) {
-      console.log("had an error", e);
-    }
-  }
-}
 
 async function sendAcceptMessage(
   thebody: { [key: string]: unknown },
@@ -74,7 +26,13 @@ async function sendAcceptMessage(
     to: [thebody.actor],
     published: now.toISOString(),
   };
-  await signAndSend(message, artistUrlSlug, targetDomain);
+  const inboxUrl = thebody.actor + "/inbox";
+  await signAndSendActivityPubMessage(
+    message,
+    artistUrlSlug,
+    inboxUrl as string,
+    targetDomain
+  );
 }
 
 const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
@@ -84,7 +42,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    if (!headersAreForActivityPub(req.headers, "content-type")) {
+    if (!headersAreForActivityPub(req.headers, "POST")) {
       throw new AppError({
         httpCode: 400,
         description: "Only accepts ActivityPub headers",

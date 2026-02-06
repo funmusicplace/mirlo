@@ -72,14 +72,25 @@ export const generateKeysForSiteIfNeeded = async () => {
 
 export const headersAreForActivityPub = (
   headers: IncomingHttpHeaders,
-  type: "accept" | "content-type"
+  method: "POST" | "GET" | "PUT" | "DELETE"
 ) => {
-  return (
-    headers[type]?.includes("application/activity+json") ||
-    headers[type]?.includes(
+  const contentType = headers["content-type"];
+  const accept = headers["accept"];
+
+  const isActivityPubMimeType = (header: string | undefined) =>
+    header?.includes("application/activity+json") ||
+    header?.includes(
       'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-    )
-  );
+    );
+
+  // POST/PUT check Content-Type (what's being sent)
+  // All methods can check Accept (what format is wanted back)
+  if (method === "POST" || method === "PUT") {
+    return isActivityPubMimeType(contentType) || isActivityPubMimeType(accept);
+  }
+
+  // GET/DELETE check Accept header
+  return isActivityPubMimeType(accept);
 };
 
 export const getClient = async () => {
@@ -155,6 +166,73 @@ export const turnArtistIntoActor = async (
   };
 };
 
+export const createPostActivity = async (
+  post: Pick<Post, "id" | "urlSlug" | "content" | "title" | "publishedAt">,
+  artist: Pick<Artist, "urlSlug">,
+  activityIdSuffix?: string
+) => {
+  const client = await getClient();
+  const actorId = `${rootArtist}${artist.urlSlug}`;
+  const noteId = `${rootArtist}${artist.urlSlug}/posts/${post.urlSlug || post.id}`;
+  const noteUrl = `${client.applicationUrl}/${artist.urlSlug}/posts/${post.urlSlug || post.id}`;
+
+  const note = {
+    id: noteId,
+    type: "Note",
+    attributedTo: actorId,
+    content: post.content,
+    name: post.title,
+    url: noteUrl,
+    to: ["https://www.w3.org/ns/activitystreams#Public"],
+    cc: [`${actorId}/followers`],
+    published: post.publishedAt?.toISOString(),
+  };
+
+  return {
+    "@context": "https://www.w3.org/ns/activitystreams",
+    id: `${noteId}#activity${activityIdSuffix ? `-${activityIdSuffix}` : ""}`,
+    type: "Create",
+    actor: actorId,
+    to: ["https://www.w3.org/ns/activitystreams#Public"],
+    cc: [`${actorId}/followers`],
+    published: post.publishedAt?.toISOString(),
+    object: note,
+  };
+};
+
+export const createTrackGroupActivity = async (
+  trackGroup: Pick<TrackGroup, "urlSlug" | "releaseDate">,
+  artist: Pick<Artist, "urlSlug" | "name">,
+  activityIdSuffix?: string
+) => {
+  const client = await getClient();
+  const actorId = `${rootArtist}${artist.urlSlug}`;
+  const noteId = `${rootArtist}${artist.urlSlug}/trackGroups/${trackGroup.urlSlug}`;
+  const noteUrl = `${client.applicationUrl}/${artist.urlSlug}/releases/${trackGroup.urlSlug}`;
+
+  const note = {
+    id: noteId,
+    type: "Note",
+    attributedTo: actorId,
+    content: `<h2>A release by ${artist.name}.</h2>`,
+    url: noteUrl,
+    to: ["https://www.w3.org/ns/activitystreams#Public"],
+    cc: [],
+    published: trackGroup.releaseDate?.toISOString(),
+  };
+
+  return {
+    "@context": "https://www.w3.org/ns/activitystreams",
+    id: `${noteId}#activity${activityIdSuffix ? `-${activityIdSuffix}` : ""}`,
+    type: "Create",
+    actor: actorId,
+    to: ["https://www.w3.org/ns/activitystreams#Public"],
+    cc: [],
+    published: trackGroup.releaseDate?.toISOString(),
+    object: note,
+  };
+};
+
 export const turnFeedIntoOutbox = async (
   artist: Artist,
   feed: (
@@ -163,6 +241,31 @@ export const turnFeedIntoOutbox = async (
   )[]
 ) => {
   const client = await getClient();
+
+  const orderedItems = await Promise.all(
+    feed.map(async (f) => {
+      const isRelease = isTrackGroup(f);
+
+      if (!isRelease && f.artist) {
+        // Use createPostActivity for posts
+        const activity = await createPostActivity(f as Post, f.artist);
+        // Override to match outbox format (no activity suffix)
+        activity.id = `${activity.id.split("#")[0]}#activity`;
+        return activity;
+      } else if (isRelease && f.artist) {
+        // Use createTrackGroupActivity for releases
+        const activity = await createTrackGroupActivity(
+          f as TrackGroup,
+          f.artist
+        );
+        return activity;
+      }
+
+      // Fallback (shouldn't happen)
+      throw new Error(`Feed item has no artist: ${f.id}`);
+    })
+  );
+
   return {
     type: "OrderedCollection",
     totalItems: feed.length,
@@ -171,40 +274,7 @@ export const turnFeedIntoOutbox = async (
       type: "OrderedCollectionPage",
       totalItems: feed.length,
       partOf: `${rootArtist}${artist.urlSlug}/feed`,
-      orderedItems: feed.map((f) => {
-        const actorId = `${rootArtist}${f.artist?.urlSlug}`;
-        const isRelease = isTrackGroup(f);
-        const noteId = isRelease
-          ? `${rootArtist}${f.artist?.urlSlug}/trackGroups/${f.urlSlug}`
-          : `${rootArtist}${f.artist?.urlSlug}/posts/${f.id}`;
-        const noteUrl = isRelease
-          ? `${client.applicationUrl}/${f.artist?.urlSlug}/releases/${f.urlSlug}`
-          : `${client.applicationUrl}/${f.artist?.urlSlug}/posts/${f.id}`;
-        const publishedAt = isRelease ? f.releaseDate : f.publishedAt;
-        const note = {
-          id: noteId,
-          type: "Note",
-          attributedTo: actorId,
-          content: isRelease
-            ? `<h2>A release by ${f.artist.name}.</h2>`
-            : f.content,
-          url: noteUrl,
-          to: ["https://www.w3.org/ns/activitystreams#Public"],
-          cc: [],
-          published: publishedAt,
-        };
-
-        return {
-          "@context": "https://www.w3.org/ns/activitystreams",
-          id: `${noteId}#activity`, // Create activity needs a distinct id from the note itself
-          type: "Create",
-          actor: actorId,
-          to: ["https://www.w3.org/ns/activitystreams#Public"],
-          cc: [],
-          published: publishedAt,
-          object: note,
-        };
-      }),
+      orderedItems,
       id: `${rootArtist}${artist.urlSlug}/feed?page=1`,
     },
     "@context": ["https://www.w3.org/ns/activitystreams"],
@@ -320,4 +390,61 @@ export const verifySignature = async (
   }
 
   return true;
+};
+
+/**
+ * Sign and send an ActivityPub message to a specific inbox
+ * Used for both Accept messages and post delivery
+ */
+export const signAndSendActivityPubMessage = async (
+  message: any,
+  artistUrlSlug: string,
+  inboxUrl: string,
+  destinationDomain: string
+) => {
+  const { privateKey } = await generateKeysForSiteIfNeeded();
+
+  if (!privateKey) {
+    throw new Error("No private key available for signing");
+  }
+
+  const inboxPath = new URL(inboxUrl).pathname;
+
+  const digestHash = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(message))
+    .digest("base64");
+
+  const signer = crypto.createSign("sha256");
+  const date = new Date();
+  const stringToSign = `(request-target): post ${inboxPath}\nhost: ${destinationDomain}\ndate: ${date.toUTCString()}\ndigest: SHA-256=${digestHash}`;
+
+  signer.update(stringToSign);
+  signer.end();
+
+  const signature = signer.sign(privateKey);
+  const signature_b64 = signature.toString("base64");
+
+  const header = `keyId="${rootArtist}${artistUrlSlug}#main-key",headers="(request-target) host date digest",signature="${signature_b64}"`;
+
+  const response = await fetch(inboxUrl, {
+    method: "POST",
+    headers: {
+      Host: destinationDomain,
+      Date: date.toUTCString(),
+      Digest: `SHA-256=${digestHash}`,
+      Signature: header,
+      "Content-Type": "application/activity+json",
+    },
+    body: JSON.stringify(message),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to deliver to ${inboxUrl}: ${response.status} ${errorText}`
+    );
+  }
+
+  return response;
 };

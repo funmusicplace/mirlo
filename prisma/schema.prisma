@@ -226,6 +226,7 @@ model Post {
   minimumSubscriptionTierId Int?
   minimumSubscriptionTier   ArtistSubscriptionTier? @relation(fields: [minimumSubscriptionTierId], references: [id])
   hasAnnounceEmailBeenSent  Boolean                 @default(false)
+  hasBeenSentToActivityPub  Boolean                 @default(false)
   postSubscriptionTiers     PostSubscriptionTier[]
   notifications             Notification[]
   shouldSendEmail           Boolean                 @default(true)
