@@ -70,6 +70,9 @@ describe("inboxPOST", () => {
     // Stub fetch globally for fetchRemotePublicKey
     fetchStub = sinon.stub(global, "fetch" as any);
     nextStub = sinon.stub();
+
+    // Stub verifySignature to skip HTTP signature verification in tests
+    sinon.stub(utilsModule, "verifySignature").resolves();
   });
 
   afterEach(() => {
@@ -204,6 +207,7 @@ describe("inboxPOST", () => {
 
     assert(nextStub.calledOnce);
     const error = nextStub.getCall(0).args[0];
+    console.log("error", error);
     assert(error.description.includes("Not a valid Activity"));
   });
 

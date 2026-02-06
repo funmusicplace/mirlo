@@ -292,6 +292,9 @@ const sendNotificationEmail = async () => {
       notificationType: {
         in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE"],
       },
+      deliveryMethod: {
+        in: ["EMAIL", "BOTH"],
+      },
     },
     select: {
       id: true,
@@ -360,6 +363,9 @@ const sendNotificationEmail = async () => {
       },
       notificationType: {
         in: ["LABEL_ADDED_ARTIST"],
+      },
+      deliveryMethod: {
+        in: ["EMAIL", "BOTH"],
       },
     },
     include: {

@@ -331,10 +331,6 @@ export const verifySignature = async (
   req: Request,
   signatureHeader: string
 ): Promise<boolean> => {
-  if (process.env.SKIP_ACTIVITYPUB_SIGNATURE === "true") {
-    return true;
-  }
-
   // Parse signature header: keyId="...",headers="...",signature="..."
   const keyIdMatch = signatureHeader.match(/keyId="([^"]+)"/);
   const headersMatch = signatureHeader.match(/headers="([^"]+)"/);

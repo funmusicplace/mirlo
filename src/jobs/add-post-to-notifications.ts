@@ -49,6 +49,7 @@ const addPostToNotifications = async () => {
           deletedAt: null,
         },
         select: {
+          activityPub: true,
           subscriptionTiers: {
             where: {
               deletedAt: null,
@@ -93,6 +94,7 @@ const addPostToNotifications = async () => {
               postId: post.id,
               userId: s.userId,
               notificationType: "NEW_ARTIST_POST",
+              deliveryMethod: post.artist?.activityPub ? "BOTH" : "EMAIL",
             })),
             skipDuplicates: true,
           });

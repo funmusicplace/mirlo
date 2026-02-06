@@ -80,7 +80,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    if (!["Follow"].includes(req.body.type)) {
+    if (!["Follow", "Unfollow"].includes(req.body.type)) {
       throw new AppError({
         httpCode: 501,
         description: `${req.body.type} not implemented`,
@@ -100,6 +100,16 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
           actor: req.body.actor,
         },
         update: {
+          artistId: artist.id,
+          actor: req.body.actor,
+        },
+      });
+    }
+    if (req.body.type === "Unfollow") {
+      await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
+      // Remove from followers
+      await prisma.activityPubArtistFollowers.deleteMany({
+        where: {
           artistId: artist.id,
           actor: req.body.actor,
         },
