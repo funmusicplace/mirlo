@@ -38,6 +38,7 @@ services:
       STRIPE_PORT: 12111
       STRIPE_PROTOCOL: http
       STRIPE_KEY: sk_test_123
+      SKIP_ACTIVITYPUB_SIGNATURE: "true"
     profiles: [test]
 
   minio-test:
@@ -83,6 +84,7 @@ services:
       NODE_ENV: test
       CI: "${CI:-false}"
       API_DOMAIN: http://api:3000
+      SKIP_ACTIVITYPUB_SIGNATURE: "true"
     command: yarn api:test
     restart: no
     profiles: [test]
