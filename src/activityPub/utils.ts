@@ -312,10 +312,17 @@ export async function fetchRemotePublicKey(keyId: string): Promise<string> {
       throw new Error(`Failed to fetch public key: ${response.statusText}`);
     }
 
-    const data = (await response.json()) as { publicKeyPem?: string };
+    const data = (await response.json()) as {
+      publicKeyPem?: string;
+      publicKey?: { publicKeyPem?: string };
+    };
 
     if (data.publicKeyPem) {
       return data.publicKeyPem;
+    }
+
+    if (data.publicKey?.publicKeyPem) {
+      return data.publicKey.publicKeyPem;
     }
 
     throw new Error("No publicKeyPem found in actor document");

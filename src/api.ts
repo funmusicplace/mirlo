@@ -60,7 +60,7 @@ apiApp.use((req, res, next) => {
   }
   // Basic logging for API requests
   logger.info(
-    `API: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.headers)}`
+    `API: ${req.method} ${req.path} - query: ${JSON.stringify(req.query)} - body: ${JSON.stringify(req.body)} - headers: ${JSON.stringify(req.headers)}`
   );
   next();
 });
