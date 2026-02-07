@@ -404,6 +404,9 @@ export const verifySignature = async (
         });
       }
       headerLine = `${headerName}: ${headerValue}`;
+      log.info(
+        `Header ${headerName}: [${headerValue}] (length: ${String(headerValue).length})`
+      );
     }
 
     signedParts.push(headerLine);
@@ -431,6 +434,12 @@ export const verifySignature = async (
   const isValid = verifier.verify(publicKey, signatureBuffer);
 
   if (!isValid) {
+    log.info("Signature verification FAILED");
+    log.info("stringToSign length: " + signedString.length);
+    log.info(
+      "stringToSign hex (first 200): " +
+        Buffer.from(signedString).toString("hex").substring(0, 200)
+    );
     throw new AppError({
       httpCode: 401,
       description: "Signature verification failed",
