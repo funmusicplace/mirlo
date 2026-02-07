@@ -387,14 +387,20 @@ export const verifySignature = async (
   let signedString = "";
   const signedParts = [];
 
+  log.info("DEBUG: req.path=" + req.path);
+  log.info("DEBUG: req.url=" + req.url);
+  log.info("DEBUG: req.originalUrl=" + req.originalUrl);
+  log.info("DEBUG: req.baseUrl=" + req.baseUrl);
+
   for (let i = 0; i < signedHeaders.length; i++) {
     const headerName = signedHeaders[i];
     let headerLine = "";
 
     if (headerName === "(request-target)") {
-      const path = req.path;
+      const path = req.originalUrl || req.url || req.path;
       const method = req.method.toLowerCase();
       headerLine = `(request-target): ${method} ${path}`;
+      log.info(`DEBUG: Using path for (request-target): ${path}`);
     } else {
       const headerValue = req.headers[headerName.toLowerCase()];
       if (!headerValue) {
