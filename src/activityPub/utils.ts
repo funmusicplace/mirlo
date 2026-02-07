@@ -418,44 +418,55 @@ export const verifySignature = async (
   log.info("keyId: " + keyId);
   log.info("signedHeaders: " + JSON.stringify(signedHeaders));
   log.info("reconstructedString (escaped): " + JSON.stringify(signedString));
+  log.info("publicKey length: " + publicKey.length);
   log.info(
-    "publicKey length: " +
-      publicKey.length +
-      " starts with: " +
-      publicKey.substring(0, 30)
+    "publicKey first 60 chars (JSON): " +
+      JSON.stringify(publicKey.substring(0, 60))
   );
+  log.info(
+    "publicKey has BEGIN marker: " + publicKey.includes("BEGIN PUBLIC KEY")
+  );
+  log.info("publicKey has END marker: " + publicKey.includes("END PUBLIC KEY"));
   log.info("signatureB64 (first 50 chars): " + signatureB64.substring(0, 50));
   log.info("==========================================");
 
-  // Verify the signature
-  const verifier = createVerify("sha256");
-  verifier.update(signedString);
-  const signatureBuffer = Buffer.from(signatureB64, "base64");
-  let isValid = verifier.verify(publicKey, signatureBuffer);
+  // Verify the signature - try multiple algorithm specifications
+  const algorithms = ["sha256", "RSA-SHA256", "rsa-sha256", "RSA-SHA-256"];
+  let isValid = false;
+  let successAlgorithm = "";
+
+  for (const alg of algorithms) {
+    try {
+      const verifier = createVerify(alg);
+      verifier.update(signedString);
+      const signatureBuffer = Buffer.from(signatureB64, "base64");
+      if (verifier.verify(publicKey, signatureBuffer)) {
+        isValid = true;
+        successAlgorithm = alg;
+        break;
+      }
+    } catch (e) {
+      log.info(`Algorithm ${alg} threw error: ${e}`);
+    }
+  }
 
   if (!isValid) {
-    log.info("Signature verification FAILED with sha256, trying RSA-SHA256");
-    const verifier2 = createVerify("RSA-SHA256");
-    verifier2.update(signedString);
-    isValid = verifier2.verify(publicKey, signatureBuffer);
-
-    if (!isValid) {
-      log.info("Signature verification FAILED with RSA-SHA256 too");
-      log.info("stringToSign length: " + signedString.length);
-      log.info(
-        "stringToSign hex (first 200): " +
-          Buffer.from(signedString).toString("hex").substring(0, 200)
-      );
-      log.info("publicKey substring 0-100: " + publicKey.substring(0, 100));
-      throw new AppError({
-        httpCode: 401,
-        description: "Signature verification failed",
-      });
-    } else {
-      log.info("SUCCESS with RSA-SHA256!");
-    }
+    log.info("Signature verification FAILED with all algorithms");
+    log.info("stringToSign length: " + signedString.length);
+    log.info(
+      "stringToSign hex (first 200): " +
+        Buffer.from(signedString).toString("hex").substring(0, 200)
+    );
+    log.info(
+      "publicKey (JSON, first 150): " +
+        JSON.stringify(publicKey.substring(0, 150))
+    );
+    throw new AppError({
+      httpCode: 401,
+      description: "Signature verification failed",
+    });
   } else {
-    log.info("SUCCESS with sha256!");
+    log.info(`SUCCESS with algorithm: ${successAlgorithm}!`);
   }
 
   return true;
