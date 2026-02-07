@@ -92,12 +92,9 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
     const remoteActorId = new URL(req.body.actor);
     const remoteActorDomain = remoteActorId.hostname;
     if (req.body.type === "Follow") {
-      log.info(
-        `inboxPOST: Processing Follow from ${req.body.actor} for artist ${artist.urlSlug}`
-      );
       await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
       // update followers
-      const follower = await prisma.activityPubArtistFollowers.upsert({
+      await prisma.activityPubArtistFollowers.upsert({
         where: {
           actor_artistId: { artistId: artist.id, actor: req.body.actor },
         },
@@ -110,9 +107,6 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
           actor: req.body.actor,
         },
       });
-      log.info(
-        `inboxPOST: Follow registered successfully for ${req.body.actor} -> artist ${artist.id}`
-      );
     }
     if (req.body.type === "Unfollow") {
       await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);

@@ -301,11 +301,7 @@ export const turnSubscribersIntoFollowers = (
   };
 };
 
-export async function fetchRemotePublicKey(
-  keyId: string,
-  log?: typeof logger
-): Promise<string> {
-  const localLog = log || logger;
+export async function fetchRemotePublicKey(keyId: string): Promise<string> {
   try {
     const response = await fetch(keyId, {
       headers: {
@@ -322,30 +318,11 @@ export async function fetchRemotePublicKey(
       publicKey?: { publicKeyPem?: string };
     };
 
-    localLog.info(
-      "fetchRemotePublicKey for " +
-        keyId +
-        " - response keys: " +
-        Object.keys(data).join(", ")
-    );
-    if (data.publicKey) {
-      localLog.info(
-        "data.publicKey keys: " + Object.keys(data.publicKey).join(", ")
-      );
-    }
-
     if (data.publicKeyPem) {
-      localLog.info(
-        "Found publicKeyPem at root level, length: " + data.publicKeyPem.length
-      );
       return data.publicKeyPem;
     }
 
     if (data.publicKey?.publicKeyPem) {
-      localLog.info(
-        "Found publicKeyPem in nested publicKey, length: " +
-          data.publicKey.publicKeyPem.length
-      );
       return data.publicKey.publicKeyPem;
     }
 
@@ -362,8 +339,6 @@ export const verifySignature = async (
   req: Request,
   signatureHeader: string
 ): Promise<boolean> => {
-  // @ts-ignore - requestId added by middleware
-  const log = req.logger || logger;
   // Parse signature header: keyId="...",headers="...",signature="..."
   const keyIdMatch = signatureHeader.match(/keyId="([^"]+)"/);
   const headersMatch = signatureHeader.match(/headers="([^"]+)"/);
@@ -381,26 +356,21 @@ export const verifySignature = async (
   const signatureB64 = signatureMatch[1];
 
   // Get the public key from the remote actor
-  const publicKey = await fetchRemotePublicKey(keyId, log);
+  const publicKey = await fetchRemotePublicKey(keyId);
 
   // Reconstruct the signed string
   let signedString = "";
   const signedParts = [];
-
-  log.info("DEBUG: req.path=" + req.path);
-  log.info("DEBUG: req.url=" + req.url);
-  log.info("DEBUG: req.originalUrl=" + req.originalUrl);
-  log.info("DEBUG: req.baseUrl=" + req.baseUrl);
 
   for (let i = 0; i < signedHeaders.length; i++) {
     const headerName = signedHeaders[i];
     let headerLine = "";
 
     if (headerName === "(request-target)") {
+      // Use originalUrl to get the full path including any base URL (e.g., /v1)
       const path = req.originalUrl || req.url || req.path;
       const method = req.method.toLowerCase();
       headerLine = `(request-target): ${method} ${path}`;
-      log.info(`DEBUG: Using path for (request-target): ${path}`);
     } else {
       const headerValue = req.headers[headerName.toLowerCase()];
       if (!headerValue) {
@@ -410,9 +380,6 @@ export const verifySignature = async (
         });
       }
       headerLine = `${headerName}: ${headerValue}`;
-      log.info(
-        `Header ${headerName}: [${headerValue}] (length: ${String(headerValue).length})`
-      );
     }
 
     signedParts.push(headerLine);
@@ -420,59 +387,17 @@ export const verifySignature = async (
 
   signedString = signedParts.join("\n");
 
-  log.info("=========== DEBUG verifySignature ===========");
-  log.info("keyId: " + keyId);
-  log.info("signedHeaders: " + JSON.stringify(signedHeaders));
-  log.info("reconstructedString (escaped): " + JSON.stringify(signedString));
-  log.info("publicKey length: " + publicKey.length);
-  log.info(
-    "publicKey first 60 chars (JSON): " +
-      JSON.stringify(publicKey.substring(0, 60))
-  );
-  log.info(
-    "publicKey has BEGIN marker: " + publicKey.includes("BEGIN PUBLIC KEY")
-  );
-  log.info("publicKey has END marker: " + publicKey.includes("END PUBLIC KEY"));
-  log.info("signatureB64 (first 50 chars): " + signatureB64.substring(0, 50));
-  log.info("==========================================");
-
-  // Verify the signature - try multiple algorithm specifications
-  const algorithms = ["sha256", "RSA-SHA256", "rsa-sha256", "RSA-SHA-256"];
-  let isValid = false;
-  let successAlgorithm = "";
-
-  for (const alg of algorithms) {
-    try {
-      const verifier = createVerify(alg);
-      verifier.update(signedString);
-      const signatureBuffer = Buffer.from(signatureB64, "base64");
-      if (verifier.verify(publicKey, signatureBuffer)) {
-        isValid = true;
-        successAlgorithm = alg;
-        break;
-      }
-    } catch (e) {
-      log.info(`Algorithm ${alg} threw error: ${e}`);
-    }
-  }
+  // Verify the signature
+  const verifier = createVerify("sha256");
+  verifier.update(signedString);
+  const signatureBuffer = Buffer.from(signatureB64, "base64");
+  const isValid = verifier.verify(publicKey, signatureBuffer);
 
   if (!isValid) {
-    log.info("Signature verification FAILED with all algorithms");
-    log.info("stringToSign length: " + signedString.length);
-    log.info(
-      "stringToSign hex (first 200): " +
-        Buffer.from(signedString).toString("hex").substring(0, 200)
-    );
-    log.info(
-      "publicKey (JSON, first 150): " +
-        JSON.stringify(publicKey.substring(0, 150))
-    );
     throw new AppError({
       httpCode: 401,
       description: "Signature verification failed",
     });
-  } else {
-    log.info(`SUCCESS with algorithm: ${successAlgorithm}!`);
   }
 
   return true;
