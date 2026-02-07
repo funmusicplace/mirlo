@@ -83,7 +83,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    if (!["Follow", "Unfollow"].includes(req.body.type)) {
+    if (!["Follow", "Undo"].includes(req.body.type)) {
       throw new AppError({
         httpCode: 501,
         description: `${req.body.type} not implemented`,
@@ -108,15 +108,18 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
         },
       });
     }
-    if (req.body.type === "Unfollow") {
-      await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
-      // Remove from followers
-      await prisma.activityPubArtistFollowers.deleteMany({
-        where: {
-          artistId: artist.id,
-          actor: req.body.actor,
-        },
-      });
+    if (req.body.type === "Undo") {
+      // Undo activities have the original activity wrapped in the "object" field
+      if (req.body.object?.type === "Follow") {
+        await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
+        // Remove from followers
+        await prisma.activityPubArtistFollowers.deleteMany({
+          where: {
+            artistId: artist.id,
+            actor: req.body.actor,
+          },
+        });
+      }
     }
     if (req.headers.accept) {
       res.set("content-type", "application/activity+json");
