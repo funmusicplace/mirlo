@@ -428,22 +428,34 @@ export const verifySignature = async (
   log.info("==========================================");
 
   // Verify the signature
-  const verifier = createVerify("RSA-SHA256");
+  const verifier = createVerify("sha256");
   verifier.update(signedString);
   const signatureBuffer = Buffer.from(signatureB64, "base64");
-  const isValid = verifier.verify(publicKey, signatureBuffer);
+  let isValid = verifier.verify(publicKey, signatureBuffer);
 
   if (!isValid) {
-    log.info("Signature verification FAILED");
-    log.info("stringToSign length: " + signedString.length);
-    log.info(
-      "stringToSign hex (first 200): " +
-        Buffer.from(signedString).toString("hex").substring(0, 200)
-    );
-    throw new AppError({
-      httpCode: 401,
-      description: "Signature verification failed",
-    });
+    log.info("Signature verification FAILED with sha256, trying RSA-SHA256");
+    const verifier2 = createVerify("RSA-SHA256");
+    verifier2.update(signedString);
+    isValid = verifier2.verify(publicKey, signatureBuffer);
+
+    if (!isValid) {
+      log.info("Signature verification FAILED with RSA-SHA256 too");
+      log.info("stringToSign length: " + signedString.length);
+      log.info(
+        "stringToSign hex (first 200): " +
+          Buffer.from(signedString).toString("hex").substring(0, 200)
+      );
+      log.info("publicKey substring 0-100: " + publicKey.substring(0, 100));
+      throw new AppError({
+        httpCode: 401,
+        description: "Signature verification failed",
+      });
+    } else {
+      log.info("SUCCESS with RSA-SHA256!");
+    }
+  } else {
+    log.info("SUCCESS with sha256!");
   }
 
   return true;
