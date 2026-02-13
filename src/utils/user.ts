@@ -5,6 +5,24 @@ import logger from "../logger";
 import { deleteArtist, deleteStripeSubscriptions } from "./artist";
 import countries from "./country-codes-currencies";
 
+import { v4 as uuid } from "uuid";
+
+const anonymiseDeletedUser = async (userId: number) => {
+  // Currently this means:
+  // replace the email address with a randomstring@deleted (the @deleted is important)
+  // clear name, and all stripe related info
+  const scrambledEmail = uuid() + "@deleted";
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name: null,
+      email: scrambledEmail,
+      stripeCustomerId: null,
+      stripeAccountId: null
+    }
+  });
+}
+
 export const deleteUser = async (userId: number) => {
   const userArtists = await prisma.artist.findMany({
     where: { userId: Number(userId) },
@@ -21,6 +39,10 @@ export const deleteUser = async (userId: number) => {
       userId: userId,
     },
   });
+
+  // The User object will be retained, so we scramble the email and remove other
+  // personal identifiers.
+  await anonymiseDeletedUser(userId);
   await prisma.user.delete({ where: { id: userId } });
 };
 
@@ -168,4 +190,22 @@ export const updateCurrencies = async (userId: number, currency: string) => {
       currency,
     },
   });
+};
+
+export const cleanUpDeletedUsers = async () => {
+  const candidates = await prisma.user.findMany(
+    {
+      where: {
+        deletedAt: {
+          not: null
+        }
+      }
+    }
+  );
+
+  for (const candidate of candidates) {
+    if (!candidate.email.endsWith("@deleted")) {
+      await anonymiseDeletedUser(candidate.id);
+    }
+  }
 };
