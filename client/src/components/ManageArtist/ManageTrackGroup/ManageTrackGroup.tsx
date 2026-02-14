@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import AlbumForm from "../AlbumForm";
 import BulkTrackUpload from "./BulkTrackUpload";
@@ -12,14 +12,20 @@ import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "../BackToArtistLink";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryManagedTrackGroup } from "queries";
+import {
+  queryArtist,
+  queryManagedTrackGroup,
+  useDeleteTrackGroupMutation,
+} from "queries";
 import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "./AlbumFormComponents/ManageTrackDefaults";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import { ArtistButton, ArtistButtonLink } from "components/Artist/ArtistButtons";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
+import { FaTrash } from "react-icons/fa";
 import { getArtistManageUrl } from "utils/artist";
 import DownloadableContent from "../Merch/DownloadableContent";
 import RecommendedTrackGroups from "./AlbumFormComponents/RecommendedTrackGroups";
+import { useSnackbar } from "state/SnackbarContext";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -36,6 +42,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageAlbum",
   });
+  const { t: manageArtistT } = useTranslation("translation", {
+    keyPrefix: "manageArtist",
+  });
+  const snackbar = useSnackbar();
+  const navigate = useNavigate();
 
   const { artistId: artistParamId, trackGroupId: trackGroupParamId } =
     useParams();
@@ -49,6 +60,40 @@ const ManageTrackGroup: React.FC<{}> = () => {
     isLoading: isLoadingTrackGroup,
     refetch,
   } = useQuery(queryManagedTrackGroup(Number(trackGroupParamId)));
+  const { mutateAsync: deleteTrackGroup, isPending: isDeletingTrackGroup } =
+    useDeleteTrackGroupMutation();
+
+  const handleDeleteTrackGroup = React.useCallback(async () => {
+    if (!trackGroup || !artist) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      manageArtistT("deleteTrackGroupConfirm") ?? ""
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteTrackGroup({
+        userId: artist.userId,
+        trackGroupId: trackGroup.id,
+      });
+      snackbar(manageArtistT("albumDeleted"), { type: "success" });
+      navigate(getArtistManageUrl(artist.id) + "/releases");
+    } catch (error) {
+      console.error(error);
+      snackbar(manageArtistT("somethingWentWrong"), { type: "warning" });
+    }
+  }, [
+    artist,
+    deleteTrackGroup,
+    manageArtistT,
+    navigate,
+    snackbar,
+    trackGroup,
+  ]);
 
   if (!artist && isLoading) {
     return <LoadingBlocks />;
@@ -115,6 +160,15 @@ const ManageTrackGroup: React.FC<{}> = () => {
             >
               {t("downloadCodes")}
             </ArtistButtonLink>
+            <ArtistButton
+              startIcon={<FaTrash />}
+              onClick={() => {
+                void handleDeleteTrackGroup();
+              }}
+              isLoading={isDeletingTrackGroup}
+            >
+              {manageArtistT("delete")}
+            </ArtistButton>
           </div>
         </SpaceBetweenDiv>
       </div>
@@ -158,7 +212,26 @@ const ManageTrackGroup: React.FC<{}> = () => {
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
       <RecommendedTrackGroups trackGroupId={trackGroup.id} />
 
-      <PublishButton trackGroup={trackGroup} reload={refetch} />
+      <div
+        className={css`
+          display: flex;
+          gap: 0.75rem;
+          align-items: center;
+          flex-wrap: wrap;
+        `}
+      >
+        <PublishButton trackGroup={trackGroup} reload={refetch} />
+        <ArtistButton
+          startIcon={<FaTrash />}
+          onClick={() => {
+            void handleDeleteTrackGroup();
+          }}
+          isLoading={isDeletingTrackGroup}
+          variant="outlined"
+        >
+          {manageArtistT("delete")}
+        </ArtistButton>
+      </div>
     </ManageSectionWrapper>
   );
 };
