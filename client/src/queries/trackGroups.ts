@@ -276,6 +276,7 @@ const fetchTrackGroupSupporters: QueryFunction<
     total: number;
     totalAmount: number;
     totalSupporters: number;
+    totalPledges?: number;
   },
   [
     "fetchTrackGroupSupporters",

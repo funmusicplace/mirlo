@@ -761,6 +761,12 @@
     "manageRelease": "Manage"
   },
   "manageAlbum": {
+    "removingFundraiserWithPledgesWarning": "This album has an active fundraiser with {{ count }} pledges. Are you sure you want to remove the fundraiser? This will cancel all active pledges.",
+    "removeFundraiser": "Remove fundraiser",
+    "viewPledges": "View pledges",
+    "cancelFundraiser": "Cancel fundraiser",
+    "removalFailed": "Failed to remove fundraiser",
+    "fundraiserRemoved": "Fundraiser removed",
     "allowMirloPromoLabel": "Allow Mirlo to use it for promotion?",
     "defaultTrackAllowIndividualSale": "By default, tracks will be available for individual sale.",
     "defaultTrackMinPrice": "By default, tracks will have this minimum price.",

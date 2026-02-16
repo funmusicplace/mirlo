@@ -37,18 +37,19 @@ const FundraisingGoal: React.FC<{
   const isAllOrNothing = watch("isAllOrNothing");
 
   const {
-    data: { totalAmount, totalSupporters } = {
+    data: { totalAmount, totalPledges } = {
       results: [],
       total: 0,
       totalAmount: 0,
       totalSupporters: 0,
+      totalPledges: 0,
     },
   } = useQuery(queryTrackGroupSupporters(trackGroupId));
 
+  const hasPledges = (totalPledges ?? 0) > 0;
+
   const chargePledgesVisible =
     isAllOrNothing && totalAmount > 0 && Number(goal) < totalAmount;
-
-  const canRemoveFundraiser = totalSupporters === 0;
 
   const onChargePledges = async () => {
     try {
@@ -85,6 +86,17 @@ const FundraisingGoal: React.FC<{
       setIsLoading(true);
       if (!fundraiser) {
         return;
+      }
+
+      if (hasPledges) {
+        const result = confirm(
+          t("removingFundraiserWithPledgesWarning", {
+            count: totalPledges ?? 0,
+          })
+        );
+        if (!result) {
+          return;
+        }
       }
       await api.delete(`manage/trackGroups/${trackGroupId}/fundraiser`);
       snackbar(t("fundraiserRemoved"), {
@@ -123,7 +135,7 @@ const FundraisingGoal: React.FC<{
               to={`/manage/fundraiser/${fundraiser.id}/pledges`}
               className="flex items-center gap-1"
             >
-              {t("viewPledges", { defaultValue: "View pledges" })}
+              {t("viewPledges")}
             </ButtonLink>
           )}
           {chargePledgesVisible && (
@@ -140,17 +152,9 @@ const FundraisingGoal: React.FC<{
               type="button"
               onClick={onRemoveFundraiser}
               isLoading={isLoading}
-              disabled={!canRemoveFundraiser}
-              title={
-                !canRemoveFundraiser
-                  ? t("cannotRemoveFundraiserWithPledges", {
-                      defaultValue: "Cannot remove fundraiser with pledges",
-                    })
-                  : ""
-              }
               startIcon={<FaTrash />}
             >
-              {t("removeFundraiser", { defaultValue: "Remove fundraiser" })}
+              {t(hasPledges ? "cancelFundraiser" : "removeFundraiser")}
             </Button>
           )}
         </div>

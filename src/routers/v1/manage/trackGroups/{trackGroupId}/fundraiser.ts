@@ -113,19 +113,11 @@ export default function () {
         });
       }
 
-      // Check if there are any pledges
-      const pledgeCount = await prisma.fundraiserPledge.count({
+      await prisma.fundraiserPledge.deleteMany({
         where: {
           fundraiserId: trackGroup.fundraiser.id,
         },
       });
-
-      if (pledgeCount > 0) {
-        throw new AppError({
-          httpCode: 400,
-          description: "Cannot delete a fundraiser with pledges",
-        });
-      }
 
       await prisma.fundraiser.delete({
         where: {
