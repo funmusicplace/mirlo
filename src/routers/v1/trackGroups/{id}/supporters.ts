@@ -21,6 +21,7 @@ export default function () {
     };
 
     try {
+      let pledges = [];
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(id),
@@ -50,7 +51,7 @@ export default function () {
         trackGroup.fundraiser.isAllOrNothing
       ) {
         // Handle all-or-nothing fundraising logic
-        const pledges = await prisma.fundraiserPledge.findMany({
+        pledges = await prisma.fundraiserPledge.findMany({
           where: {
             fundraiserId: Number(trackGroup.fundraiser.id),
             cancelledAt: null,
@@ -91,6 +92,7 @@ export default function () {
             {} as Record<number, number>
           )
         ).length,
+        totalPledges: pledges.length,
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/followers ${e}`);

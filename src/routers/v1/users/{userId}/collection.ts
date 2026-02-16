@@ -4,8 +4,9 @@ import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import trackGroupProcessor, {
   processSingleTrackGroup,
+  whereForPublishedTrackGroups,
 } from "../../../../utils/trackGroup";
-import { merge } from "lodash";
+import { merge, set } from "lodash";
 import { isTrackGroup } from "../../../../utils/typeguards";
 
 type Params = {
@@ -29,6 +30,9 @@ export default function () {
       if (trackGroupId) {
         where.trackGroupId = Number(trackGroupId);
       }
+
+      where.trackGroup = whereForPublishedTrackGroups();
+
       const tgPurchases = await prisma.userTrackGroupPurchase.findMany({
         where,
         include: {
@@ -53,6 +57,8 @@ export default function () {
       if (trackGroupId) {
         whereTrack.track = { trackGroupId: Number(trackGroupId) };
       }
+
+      set(whereTrack, "track.trackGroup", whereForPublishedTrackGroups());
 
       const trackPurchases = await prisma.userTrackPurchase.findMany({
         where: whereTrack,
@@ -108,7 +114,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns user's purchased trackgroups",
+    summary: "Returns user's purchased tracks and trackgroups",
     parameters: [
       {
         in: "path",
@@ -119,7 +125,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Trackgroups that belong to the user",
+        description: "Tracks and trackgroups that belong to the user",
         schema: {
           type: "array",
           items: {
