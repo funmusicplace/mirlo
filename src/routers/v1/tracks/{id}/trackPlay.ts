@@ -1,23 +1,7 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import { logger } from "../../../../logger";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-
-import {
-  FormatOptions,
-  basicTrackGroupInclude,
-  findTrackPurchaseAndVoidToken,
-  findTrackPurchaseBasedOnTokenAndUpdate,
-} from "../../../../utils/trackGroup";
-import {
-  getReadStream,
-  statFile,
-  trackFormatBucket,
-} from "../../../../utils/minio";
-import filenamify from "filenamify";
-import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
-import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {

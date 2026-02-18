@@ -82,12 +82,7 @@ export const AudioWrapper: React.FC<{
   const onListen = React.useCallback(
     async (e: any) => {
       // setCurrentTime(fmtMSS(e.target.currentTime.toFixed()));
-      if (
-        !mostlyListened &&
-        currentTrack &&
-        userId &&
-        e.target.currentTime > 45
-      ) {
+      if (!mostlyListened && currentTrack && e.target.currentTime > 45) {
         setMostlyListened(true);
         try {
           await api.get(`tracks/${currentTrack.id}/trackPlay`);
@@ -98,7 +93,7 @@ export const AudioWrapper: React.FC<{
       setHasShownBuyModalBeenShown(false);
       setCurrentSeconds(e.target.currentTime);
     },
-    [currentTrack, mostlyListened, userId]
+    [currentTrack, mostlyListened]
   );
 
   const determineIfShouldPlay = React.useCallback(() => {

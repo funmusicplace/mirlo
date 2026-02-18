@@ -267,7 +267,7 @@ const ManageTrackRow: React.FC<{
           href={getDownloadOriginalUrl()}
           title={t("downloadOriginal") ?? ""}
           style={{ marginRight: ".25rem" }}
-        ></ArtistButtonAnchor>
+        />
         <ArtistButton
           size="compact"
           startIcon={<FaPen />}
