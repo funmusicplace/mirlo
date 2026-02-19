@@ -7,7 +7,6 @@ import {
 
 import prisma from "@mirlo/prisma";
 import { AppError } from "./error";
-import { trackGroupSingleInclude } from "./trackGroup";
 
 export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,
@@ -177,7 +176,11 @@ export const doesTrackBelongToUser = async (trackId: number, user: User) => {
   }
 };
 
-export const canUserListenToTrack = async (trackId?: number, user?: User) => {
+export const canUserListenToTrack = async (
+  trackId?: number,
+  user?: User,
+  ip?: string
+) => {
   if (!trackId) {
     return false;
   }
@@ -240,6 +243,19 @@ export const canUserListenToTrack = async (trackId?: number, user?: User) => {
           },
         });
         if (userPlays >= maxFreePlays) {
+          return "exceeded";
+        }
+      }
+    } else if (ip) {
+      const maxFreePlays = track.trackGroup?.artist?.maxFreePlays;
+      if (!!maxFreePlays) {
+        const ipPlays = await prisma.trackPlay.count({
+          where: {
+            ip,
+            trackId: track.id,
+          },
+        });
+        if (ipPlays >= maxFreePlays) {
           return "exceeded";
         }
       }
