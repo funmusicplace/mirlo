@@ -71,21 +71,29 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
             className={css`
               width: 100%;
               display: flex;
+              gap: 0.5rem;
+              align-items: flex-start;
+              min-width: 0;
             `}
           >
             {bio && (
-              <div>
+              <div
+                className={css`
+                  flex: 1 1 auto;
+                  min-width: 0;
+                `}
+              >
                 <MarkdownContent
                   content={bio}
                   className={css`
-                    width: auto;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    width: 100%;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
 
                     p img {
                       float: left;
                       margin: 0 1rem 1rem 0;
-                      width: 150px;
+                      width: min(150px, 40vw);
                     }
                   `}
                 />
@@ -95,8 +103,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
             {isManage && (
               <div
                 className={css`
-                  max-width: 5%;
-                  flex: 5%;
+                  flex: 0 0 auto;
                   margin-right: 0.2rem;
                   margin-left: 0.2rem;
                 `}
@@ -104,7 +111,9 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
                 <ArtistButton
                   size="compact"
                   className={css`
-                    white-space: nowrap;
+                    white-space: normal;
+                    word-break: break-word;
+                    max-width: 16rem;
                   `}
                   onlyIcon={!!bio}
                   variant="dashed"
