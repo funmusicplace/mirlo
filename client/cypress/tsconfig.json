@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["cypress", "node"],
+    "baseUrl": "../src",
+    "noEmit": true
+  },
+  "include": ["./**/*.ts", "./**/*.tsx", "../cypress.config.ts"]
+}

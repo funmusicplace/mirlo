@@ -676,6 +676,7 @@ model TrackGroup {
   updatedAt                       DateTime                        @updatedAt
   deletedAt                       DateTime?
   minPrice                        Int? // in cents
+  suggestedPrice                  Int? // in cents
   currency                        String?                         @default("usd")
   isPriceFixed                    Boolean                         @default(false)
   defaultTrackMinPrice            Int? // in cents

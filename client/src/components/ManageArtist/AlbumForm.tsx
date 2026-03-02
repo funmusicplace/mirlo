@@ -24,18 +24,23 @@ const AlbumForm: React.FC<{
   const { user } = useAuthContext();
   const userId = user?.id;
   const client = useQueryClient();
-
+  console.log('gettable"', trackGroup.isGettable);
   React.useEffect(() => {
-    const trackGroupIsGettable = trackGroup?.isGettable ?? true;
+    const trackGroupIsGettable = trackGroup?.isGettable ?? false;
     const defaultValues = {
       ...trackGroup,
       releaseDate: trackGroup?.releaseDate.split("T")[0],
       catalogNumber: trackGroup?.catalogNumber ?? "",
       publishedAt: trackGroup?.publishedAt?.split("T")[0],
-      platformPercent: trackGroup?.platformPercent ?? 7,
-      isGettable: !trackGroupIsGettable,
+      platformPercent: `${trackGroup?.platformPercent ?? 7}`,
+      isGettable: trackGroupIsGettable,
       minPrice: `${
         trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
+      }`,
+      suggestedPrice: `${
+        trackGroup?.suggestedPrice !== undefined
+          ? trackGroup.suggestedPrice / 100
+          : ""
       }`,
       goalAmount: `${
         trackGroup?.fundraiser?.goalAmount

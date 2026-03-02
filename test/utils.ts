@@ -143,11 +143,13 @@ export const createTrackGroup = async (
   const tg = await prisma.trackGroup.create({
     data: {
       minPrice: data?.minPrice,
+      suggestedPrice: data?.suggestedPrice,
       title: data?.title ?? "Test trackGroup",
       urlSlug:
         data?.urlSlug || (data?.title ? slug(data?.title) : "test-trackgroup"),
       artistId: artistId,
       published: data?.published ?? true,
+      isGettable: data?.isGettable ?? true,
       stripeProductKey: data?.stripeProductKey ?? null,
       paymentToUserId: data?.paymentToUserId,
       releaseDate: data?.releaseDate,

@@ -100,6 +100,7 @@ export default function () {
         "about",
         "published",
         "minPrice",
+        "suggestedPrice",
         "credits",
         "platformPercent",
         "isGettable",

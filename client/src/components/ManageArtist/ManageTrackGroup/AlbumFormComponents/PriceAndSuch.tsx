@@ -15,10 +15,17 @@ import PaymentSlider from "./PaymentSlider";
 import { getCurrencySymbol } from "components/common/Money";
 import { useAuthContext } from "state/AuthContext";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
-import { CheckBoxLabel } from "components/common/FormCheckbox";
 import { FormSection } from "./AlbumFormContent";
-import Tooltip from "components/common/Tooltip";
-import { FaInfo } from "react-icons/fa";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
+import { InputEl } from "components/common/Input";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
+import { TrackGroupFormData } from "../ManageTrackGroup";
+
+type PricingMode = "free-or-donate" | "paid" | "no-payments";
 
 const PriceAndSuch: React.FC<{
   existingObject: TrackGroup;
@@ -26,14 +33,154 @@ const PriceAndSuch: React.FC<{
 }> = ({ existingObject, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { artistId, trackGroupId } = useParams();
+  const errorHandler = useErrorHandler();
+  const { colors } = useGetArtistColors();
   const {
     formState: { errors },
     watch,
-  } = useFormContext();
+    setValue,
+    getValues,
+  } = useFormContext<TrackGroupFormData>();
   const { user } = useAuthContext();
+  const [isUpdatingPricingMode, setIsUpdatingPricingMode] =
+    React.useState(false);
 
-  const preventAlbumPurchase = watch("isGettable", false);
-  const isAlbumGettable = !preventAlbumPurchase;
+  const isAlbumGettable = watch("isGettable", false);
+  const minPrice = Number(watch("minPrice") || 0);
+  const suggestedPrice = watch("suggestedPrice");
+  const hasSuggestedPrice =
+    suggestedPrice !== undefined &&
+    suggestedPrice !== null &&
+    suggestedPrice !== "";
+
+  const selectedPricingMode: PricingMode = !isAlbumGettable
+    ? "no-payments"
+    : minPrice > 0
+      ? "paid"
+      : "free-or-donate";
+
+  const savePricingState = React.useCallback(
+    async ({
+      isGettable,
+      nextMinPrice,
+      nextSuggestedPrice,
+    }: {
+      isGettable: boolean;
+      nextMinPrice: number;
+      nextSuggestedPrice?: number | null;
+    }) => {
+      if (!trackGroupId) {
+        return;
+      }
+
+      await api.put(`manage/trackGroups/${trackGroupId}`, {
+        artistId: Number(artistId),
+        isGettable: isGettable,
+        minPrice: Math.round(nextMinPrice * 100),
+        suggestedPrice:
+          nextSuggestedPrice === null || nextSuggestedPrice === undefined
+            ? null
+            : Math.round(nextSuggestedPrice * 100),
+      });
+    },
+    [artistId, trackGroupId]
+  );
+
+  /* We toggle some defaults on selecting of a new pricing mode */
+  const onSelectPricingMode = React.useCallback(
+    async (mode: PricingMode) => {
+      const currentMinPrice = Number(getValues("minPrice") || 0);
+      const currentSuggestedPrice = Number(getValues("suggestedPrice") || 0);
+
+      let isGettable = true;
+      let nextMinPrice = currentMinPrice;
+      let nextSuggestedPrice: number | null | undefined = hasSuggestedPrice
+        ? currentSuggestedPrice
+        : null;
+
+      if (mode === "no-payments") {
+        isGettable = false;
+        nextMinPrice = 0;
+        nextSuggestedPrice = null;
+      }
+
+      if (mode === "free-or-donate") {
+        isGettable = true;
+        nextMinPrice = 0;
+      }
+
+      if (mode === "paid") {
+        isGettable = true;
+        if (nextMinPrice <= 0) {
+          nextMinPrice = currentSuggestedPrice > 0 ? currentSuggestedPrice : 1;
+        }
+      }
+
+      setIsUpdatingPricingMode(true);
+      try {
+        setValue("isGettable", isGettable);
+        setValue("minPrice", `${nextMinPrice}`);
+        setValue(
+          "suggestedPrice",
+          nextSuggestedPrice === null || nextSuggestedPrice === undefined
+            ? ""
+            : `${nextSuggestedPrice}`
+        );
+
+        await savePricingState({
+          isGettable,
+          nextMinPrice,
+          nextSuggestedPrice,
+        });
+      } catch (e) {
+        errorHandler(e);
+      } finally {
+        setIsUpdatingPricingMode(false);
+      }
+    },
+    [errorHandler, getValues, hasSuggestedPrice, savePricingState, setValue]
+  );
+
+  const onToggleSuggestedPrice = React.useCallback(
+    async (checked: boolean) => {
+      if (!isAlbumGettable || selectedPricingMode === "no-payments") {
+        return;
+      }
+
+      const currentMinPrice = Number(getValues("minPrice") || 0);
+      const nextSuggestedPrice = checked
+        ? Math.max(
+            currentMinPrice,
+            Number(getValues("suggestedPrice") || 0) ||
+              (currentMinPrice > 0 ? currentMinPrice : 1)
+          )
+        : null;
+
+      try {
+        setValue(
+          "suggestedPrice",
+          nextSuggestedPrice === null ? "" : `${nextSuggestedPrice}`
+        );
+
+        await savePricingState({
+          isGettable: isAlbumGettable,
+          nextMinPrice: currentMinPrice,
+          nextSuggestedPrice,
+        });
+      } catch (e) {
+        errorHandler(e);
+      } finally {
+      }
+    },
+    [
+      errorHandler,
+      getValues,
+      isAlbumGettable,
+      savePricingState,
+      selectedPricingMode,
+      setValue,
+    ]
+  );
 
   return (
     <FormSection>
@@ -44,22 +191,36 @@ const PriceAndSuch: React.FC<{
         `}
       >
         <FormComponent>
-          <CheckBoxLabel htmlFor="isGettable">
-            <SavingInput
-              timer={0}
-              formKey="isGettable"
-              id="isGettable"
-              type="checkbox"
-              url={`manage/trackGroups/${trackGroupId}`}
-              extraData={{ artistId: Number(artistId) }}
-              valueTransform={(value) => !value}
-            />
-            {t("isGettable")}
-            <Tooltip hoverText={t("isGettableTooltip")}>
-              <FaInfo />
-            </Tooltip>
-          </CheckBoxLabel>
-          <small>{t("isGettableInfo")}</small>
+          <label>{t("pricing")}</label>
+          <div
+            className={css`
+              display: grid;
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+              gap: 0.75rem;
+            `}
+          >
+            {[
+              { key: "free-or-donate", label: t("pricingFreeOrDonate") },
+              { key: "paid", label: t("pricingPaid") },
+              { key: "no-payments", label: t("pricingNoPayments") },
+            ].map((pricing) => {
+              const isSelected = selectedPricingMode === pricing.key;
+              return (
+                <ArtistButton
+                  key={pricing.key}
+                  type="button"
+                  onClick={() =>
+                    onSelectPricingMode(pricing.key as PricingMode)
+                  }
+                  disabled={isUpdatingPricingMode}
+                  variant={isSelected ? "default" : "outlined"}
+                >
+                  {pricing.label}
+                </ArtistButton>
+              );
+            })}
+          </div>
+          <small>{t("pricingHelp")}</small>
         </FormComponent>
 
         <div
@@ -78,7 +239,8 @@ const PriceAndSuch: React.FC<{
                   flex-grow: 1;
                 `}
               >
-                <label>{t("price")}</label>
+                <label>{t("minimumPrice")}</label>
+                <small>{t("minimumPriceDescription")}</small>
                 <div
                   className={css`
                     display: flex;
@@ -119,6 +281,68 @@ const PriceAndSuch: React.FC<{
                   {t("currencyIsSetOnManageArtist")}
                 </small>
               </FormComponent>
+
+              <FormComponent
+                className={css`
+                  flex-grow: 1;
+                `}
+              >
+                <label
+                  htmlFor="hasSuggestedPrice"
+                  className={css`
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                  `}
+                >
+                  <InputEl
+                    id="hasSuggestedPrice"
+                    colors={colors}
+                    type="checkbox"
+                    checked={hasSuggestedPrice}
+                    onChange={(event) => {
+                      onToggleSuggestedPrice(event.target.checked);
+                    }}
+                  />
+                  {t("suggestAlternateDefaultPrice")}
+                </label>
+
+                {hasSuggestedPrice && (
+                  <>
+                    <small>{t("suggestedPriceDescription")}</small>
+                    <div
+                      className={css`
+                        display: flex;
+                        align-items: center;
+                      `}
+                    >
+                      {user?.currency && (
+                        <div
+                          className={css`
+                            width: 2rem;
+                            height: 89%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-bottom: 0.25rem;
+                          `}
+                        >
+                          {getCurrencySymbol(user?.currency)}
+                        </div>
+                      )}
+                      <SavingInput
+                        formKey="suggestedPrice"
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        url={`manage/trackGroups/${trackGroupId}`}
+                        extraData={{ artistId: Number(artistId) }}
+                      />
+                    </div>
+                  </>
+                )}
+              </FormComponent>
+
               <FormComponent
                 className={css`
                   flex-grow: 1;
