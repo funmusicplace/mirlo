@@ -52,6 +52,11 @@ html {
 html {
   font-size: 16px;
   min-height: 100%;
+  scrollbar-gutter: stable;
+}
+
+html:has([open]:modal) {
+  overflow: hidden;
 }
 
 body {
@@ -154,8 +159,8 @@ h6,
 
 a {
   transition:
-    0.25s color,
-    0.25s background-color;
+    0.1s color,
+    0.1s background-color;
   color: var(--mi-primary-color);
   text-decoration: underline;
   word-break: break-word;
