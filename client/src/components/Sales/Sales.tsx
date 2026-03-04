@@ -47,13 +47,13 @@ export const Sales: React.FC = () => {
       variant={"big"}
     >
       <SpaceBetweenDiv>
-        <h3
+        <h1
           className={css`
             margin: 0.5rem 0;
           `}
         >
           {t("sales")}
-        </h3>
+        </h1>
         <div
           className={css`
             display: flex;

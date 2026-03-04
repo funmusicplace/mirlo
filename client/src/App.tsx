@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import PageBanner from "components/common/ArtistBanner";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
 import useWidgetListener from "utils/useWidgetListener";
@@ -15,7 +15,6 @@ import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
 import ScrollToTop from "components/ScrollToTop";
 import UserBanner from "components/common/UserBanner";
-import React from "react";
 import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 
 function App() {
@@ -31,7 +30,7 @@ function App() {
     return <Outlet />;
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (search.get("message")) {
       const message = search.get("message");
       if (message) {
@@ -43,6 +42,13 @@ function App() {
       }
     }
   }, [search]);
+
+  useEffect(() => {
+    const h1 = document.querySelector("h1");
+    const tabIndex = h1?.getAttribute("tabindex");
+    h1?.setAttribute("tabindex", tabIndex ?? "-1");
+    h1?.focus();
+  }, [location]);
 
   return (
     <>
