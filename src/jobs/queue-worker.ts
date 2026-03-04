@@ -11,10 +11,12 @@ import verifyAudioJob from "./verify-audio";
 import generateAlbumJob from "./generate-album";
 import optimizeImage from "./optimize-image";
 import cleanUpOldFilesJob from "./clean-up-old-files";
+import sendPostNotification from "./send-post-notification";
 
 import sendMail from "./send-mail";
 
 import "../queues/send-mail-queue";
+import "../queues/send-post-notification-queue";
 
 import { REDIS_CONFIG } from "../config/redis";
 import { moveFilesToBackblazeJob } from "../queues/moving-files-to-backblaze";
@@ -49,6 +51,7 @@ yargs // eslint-disable-line
     imageQueue();
     generateAlbumQueueWorker();
     sendMailQueue();
+    sendPostNotificationQueue();
     cleanUpFilesQueue();
   })
   .help().argv;
@@ -86,6 +89,25 @@ async function sendMailQueue() {
 
   worker.on("error", (err: any) => {
     logger.error("error:send-mail", err);
+  });
+}
+
+async function sendPostNotificationQueue() {
+  const worker = new Worker("send-post-notification", sendPostNotification, {
+    ...workerOptions,
+  });
+  logger.info("Send post notification worker started");
+
+  worker.on("completed", (job: Job) => {
+    logger.info("completed:send-post-notification");
+  });
+
+  worker.on("failed", (job?: Job, err?: any) => {
+    logger.error("failed:send-post-notification", err);
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error("error:send-post-notification", err);
   });
 }
 

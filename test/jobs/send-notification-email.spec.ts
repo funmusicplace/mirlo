@@ -40,236 +40,34 @@ describe("send-notification-email", () => {
     await sendMailQueueEvents.close();
   });
 
-  describe("NEW_ARTIST_POST", () => {
-    it("should send email based on NEW_ARTIST_POST notification", async () => {
-      // const stub = sinon.stub(sendMail, "default");
-      const stub = sinon.stub(sendMailQueue, "add");
-
+  describe("parseOutIframes", () => {
+    it("should replace iframe with trackGroup", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",
       });
 
-      const followerEmail = "follower+subscription@follower.com";
+      const artist = await createArtist(artistUser.id);
+      const trackGroup = await createTrackGroup(artist.id);
 
-      const { user: followerUser } = await createUser({
-        email: followerEmail,
-        emailConfirmationToken: null,
-      });
-
-      const artist = await prisma.artist.create({
-        data: {
-          name: "Test artist",
-          urlSlug: "test-artist",
-          userId: artistUser.id,
-          enabled: true,
-        },
-      });
-
-      const post = await createPost(artist.id, {
-        title: "Our Custom Title",
-        content: `<h2 id="hi">HI</h2>`,
-      });
-
-      await prisma.notification.create({
-        data: {
-          userId: followerUser.id,
-          postId: post.id,
-          isRead: false,
-          notificationType: "NEW_ARTIST_POST",
-        },
-      });
-
-      await sendNotificationEmail();
-
-      assert.equal(stub.calledOnce, true);
-      const args = stub.getCall(0).args;
-      assert.equal(args[0], "send-mail");
-      const data = args[1];
-      assert.equal(data.template, "announce-post-published");
-      assert.equal(data.message.to, followerEmail);
-      assert.equal(data.locals.post.id, post.id);
-      assert.equal(data.locals.post.title, post.title);
-      assert.equal(data.locals.post.htmlContent.trim(), '<h2 id="hi">HI</h2>');
-      assert.equal(data.locals.artist.urlSlug, artist.urlSlug);
-      assert.equal(data.locals.post.urlSlug, post.urlSlug);
-      assert.equal(data.locals.artist.id, artist.id);
-      assert.equal(data.locals.artist.name, artist.name);
-      assert.equal(data.featuredImageId, null);
-      assert.equal(data.featuredImage, null);
-      assert.equal(data.locals.email, encodeURIComponent(followerEmail));
+      const content = `<iframe src="https://mirlo.space/widget/trackGroup/${trackGroup.id}"></iframe>`;
+      const result = await parseOutIframes(content);
+      assert(
+        result.includes(
+          `<div data-type="trackGroup" data-id="${trackGroup.id}"`
+        )
+      );
     });
 
-    it("should not send email if post is marked as not shouldSendEmail", async () => {
-      const stub = sinon.stub(sendMailQueue, "add");
-
-      const { user: artistUser } = await createUser({
-        email: "artist@artist.com",
-      });
-
-      const { user: followerUser } = await createUser({
-        email: "follower@follower.com",
-        emailConfirmationToken: null,
-      });
-
-      const artist = await prisma.artist.create({
-        data: {
-          name: "Test artist",
-          urlSlug: "test-artist",
-          userId: artistUser.id,
-          enabled: true,
-        },
-      });
-
-      const post = await createPost(artist.id, {
-        title: "Our Custom Title",
-        content: "# HI",
-        shouldSendEmail: false,
-      });
-
-      await prisma.notification.create({
-        data: {
-          userId: followerUser.id,
-          postId: post.id,
-          isRead: false,
-          notificationType: "NEW_ARTIST_POST",
-        },
-      });
-
-      await sendNotificationEmail();
-
-      assert.equal(stub.called, false);
+    it("should replace iframe with track", async () => {
+      const content = `<iframe src="https://mirlo.space/widget/track/67890"></iframe>`;
+      const result = await parseOutIframes(content);
+      assert(result.includes('<div data-type="track" data-id="67890">'));
     });
 
-    it("should send email with post that has a featured image", async () => {
-      const stub = sinon.stub(sendMailQueue, "add");
-
-      const { user: artistUser } = await createUser({
-        email: "artist@artist.com",
-      });
-
-      const { user: followerUser } = await createUser({
-        email: "follower@follower.com",
-        emailConfirmationToken: null,
-      });
-
-      const artist = await prisma.artist.create({
-        data: {
-          name: "Test artist",
-          urlSlug: "test-artist",
-          userId: artistUser.id,
-          enabled: true,
-        },
-      });
-
-      const post = await createPost(artist.id, {
-        title: "Our Custom Title",
-        content: "# HI",
-      });
-
-      const image = await prisma.postImage.create({
-        data: {
-          postId: post.id,
-          extension: "jpg",
-          mimeType: "image/jpeg",
-        },
-      });
-
-      await prisma.post.update({
-        where: {
-          id: post.id,
-        },
-        data: {
-          featuredImageId: image.id,
-        },
-      });
-
-      await prisma.notification.create({
-        data: {
-          userId: followerUser.id,
-          postId: post.id,
-          isRead: false,
-          notificationType: "NEW_ARTIST_POST",
-        },
-      });
-
-      await sendNotificationEmail();
-
-      assert.equal(stub.called, true);
-      const args = stub.getCall(0).args;
-      const src: string = args[1].locals.post.featuredImage.src;
-      assert(src.endsWith(`/post-images/${image.id}.${image.extension}`));
-    });
-
-    it("should not send email if post content is blank", async () => {
-      const stub = sinon.stub(sendMailQueue, "add");
-
-      const { user: artistUser } = await createUser({
-        email: "artist@artist.com",
-      });
-
-      const { user: followerUser } = await createUser({
-        email: "follower@follower.com",
-        emailConfirmationToken: null,
-      });
-
-      const artist = await prisma.artist.create({
-        data: {
-          name: "Test artist",
-          urlSlug: "test-artist",
-          userId: artistUser.id,
-          enabled: true,
-        },
-      });
-
-      const post = await createPost(artist.id, {
-        title: "Our Custom Title",
-        content: "",
-        shouldSendEmail: false,
-      });
-
-      await prisma.notification.create({
-        data: {
-          userId: followerUser.id,
-          postId: post.id,
-          isRead: false,
-          notificationType: "NEW_ARTIST_POST",
-        },
-      });
-
-      await sendNotificationEmail();
-
-      assert.equal(stub.called, false);
-    });
-
-    describe("parseOutIframes", () => {
-      it("should replace iframe with trackGroup", async () => {
-        const { user: artistUser } = await createUser({
-          email: "artist@artist.com",
-        });
-
-        const artist = await createArtist(artistUser.id);
-        const trackGroup = await createTrackGroup(artist.id);
-
-        const content = `<iframe src="https://mirlo.space/widget/trackGroup/${trackGroup.id}"></iframe>`;
-        const result = await parseOutIframes(content);
-        assert(
-          result.includes(
-            `<div data-type="trackGroup" data-id="${trackGroup.id}"`
-          )
-        );
-      });
-
-      it("should replace iframe with track", async () => {
-        const content = `<iframe src="https://mirlo.space/widget/track/67890"></iframe>`;
-        const result = await parseOutIframes(content);
-        assert(result.includes('<div data-type="track" data-id="67890">'));
-      });
-
-      it("should not modify content without iframes", async () => {
-        const content = `<p>No iframes here!</p>`;
-        const result = await parseOutIframes(content);
-        assert.equal(result, content);
-      });
+    it("should not modify content without iframes", async () => {
+      const content = `<p>No iframes here!</p>`;
+      const result = await parseOutIframes(content);
+      assert.equal(result, content);
     });
   });
 
