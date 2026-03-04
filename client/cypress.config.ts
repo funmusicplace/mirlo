@@ -28,6 +28,10 @@ export default defineConfig({
           title: string;
           urlSlug: string;
           artistId: number;
+          minPrice?: number;
+          suggestedPrice?: number;
+          published?: boolean;
+          isGettable?: boolean;
         }) => {
           return pkg.createTrackGroup(query.artistId, query);
         },

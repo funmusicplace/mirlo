@@ -84,6 +84,8 @@ export default function () {
           priceNumber,
           message,
           stripeAccountId,
+          tipName: `One Time Gift for ${artist.name}`,
+          description: `A one time gift that supports ${artist.name}.`,
           artistId: Number(artistId),
           currency: artist.user.currency ?? "usd",
         });

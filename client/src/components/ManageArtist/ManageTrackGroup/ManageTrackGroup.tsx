@@ -19,7 +19,10 @@ import {
 } from "queries";
 import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "./AlbumFormComponents/ManageTrackDefaults";
-import { ArtistButton, ArtistButtonLink } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { FaTrash } from "react-icons/fa";
 import { getArtistManageUrl } from "utils/artist";
@@ -31,6 +34,9 @@ export interface TrackGroupFormData {
   published: boolean;
   title: string;
   minPrice: string;
+  suggestedPrice?: string;
+  isGettable?: boolean;
+  platformPercent?: string;
   releaseDate: string;
   credits: string;
   about: string;
@@ -86,14 +92,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
       console.error(error);
       snackbar(manageArtistT("somethingWentWrong"), { type: "warning" });
     }
-  }, [
-    artist,
-    deleteTrackGroup,
-    manageArtistT,
-    navigate,
-    snackbar,
-    trackGroup,
-  ]);
+  }, [artist, deleteTrackGroup, manageArtistT, navigate, snackbar, trackGroup]);
 
   if (!artist && isLoading) {
     return <LoadingBlocks />;

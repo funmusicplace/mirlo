@@ -38,10 +38,13 @@ const BuyTrackGroup: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
+  const initialChosenPriceCents = track
+    ? (minPrice ?? 0)
+    : Math.max(trackGroup.suggestedPrice ?? 0, minPrice ?? 0);
   const [verifiedEmail, setVerifiedEmail] = React.useState<string | null>(null);
   const methods = useForm<FormData>({
     defaultValues: {
-      chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
+      chosenPrice: `${initialChosenPriceCents ? initialChosenPriceCents / 100 : ""}`,
     },
     reValidateMode: "onChange",
   });

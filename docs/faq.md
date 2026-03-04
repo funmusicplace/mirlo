@@ -269,13 +269,11 @@ Our community is primarily hanging out on [the Discord](https://discord.gg/XuV7F
 ::: details Do you have brand / logo guidelines?
 
 Yes! Check out our
-<a href="https://public.3.basecamp.com/p/jJKu6kzsJFLS7n9s6uua688B">
+<a href="https://public.3.basecamp.com/p/7GrFZAJM6wvaLLQhMrnHrJSv">
 logo guidelines as of June 30, 2024
 </a>.
 
-Logo downloads: <a href="/Logo-With-Wordmark.svg">SVG with wordmark</a>, <a href="/Logo_Mirlo_Transparent_RedCircle.svg">SVG logo, red</a>,
-<a href="/android-chrome-512x512.png"> png logo, red (512x512)</a>, <a href="/Logo_Mirlo_Transparent_BlackCircle.png">
-png logo, black and white (285x285)</a>.
+You can download <a href="https://public.3.basecamp.com/p/qLsVJNENzJgTTsPcxKmWcZVm/vault">our available assets for usage here</a>.
 
 :::
 

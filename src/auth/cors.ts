@@ -6,6 +6,7 @@ import cors from "cors";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/error";
 import { headersAreForActivityPub } from "../activityPub/utils";
+import logger from "../logger";
 
 const isTest = process.env.NODE_ENV === "test" || process.env.CI;
 const MIRLO_API_KEY_HEADER = "mirlo-api-key";
@@ -38,7 +39,8 @@ const isValidActivityPubEndpoints = (path: string) => {
 
 export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
   const [req, _res, next] = args;
-
+  // @ts-ignore - req.logger added by middleware
+  const log = req.logger || logger;
   try {
     const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
     const isSameSite =
@@ -69,11 +71,13 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
           description: "Missing API Code",
         });
       } else if (typeof apiHeader === "string" && !isSameSite) {
+        log.info(`Looking for client with API key: ${apiHeader}`);
         clients = await prisma.client.findMany({
           where: {
             key: apiHeader,
           },
         });
+        log.info(`Found ${clients.length} clients with that API key`);
       }
     }
 
@@ -94,6 +98,8 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     if (process.env.NODE_ENV === "development") {
       origin.push("http://localhost:8080"); // Just... for ease of coding
     }
+
+    log.info(`CORS origins: ${origin.join(", ")}`);
 
     return cors({
       origin,

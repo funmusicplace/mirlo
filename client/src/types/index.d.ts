@@ -134,6 +134,7 @@ interface TrackGroup {
     sizes?: { [key: number]: string };
   };
   minPrice?: number; // in cents
+  suggestedPrice?: number; // in cents
   urlSlug?: string;
   userTrackGroupPurchases?: { userId: number }[];
   userTrackGroupWishlist?: { userId: number }[];

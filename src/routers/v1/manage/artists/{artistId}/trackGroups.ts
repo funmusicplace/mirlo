@@ -100,6 +100,7 @@ export default function () {
       credits,
       type,
       minPrice,
+      suggestedPrice,
       urlSlug,
     } = req.body;
     const user = req.user as User;
@@ -166,6 +167,7 @@ export default function () {
           published,
           publishedAt: publishedAt ? new Date(publishedAt) : undefined,
           minPrice,
+          suggestedPrice,
           paymentToUser: paymentToUserId
             ? { connect: { id: paymentToUserId } }
             : undefined,
