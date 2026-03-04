@@ -582,7 +582,8 @@ export const createStripeCheckoutSessionForTip = async ({
             currency: currency?.toLowerCase() ?? "usd",
             product_data: {
               name: tipName ?? `One Time Gift`,
-              description: `A one time gift to support ${tipName ?? "the artist"}`,
+              description:
+                description ?? `A one time gift to support the artist`,
             },
           },
           quantity: 1,
