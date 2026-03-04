@@ -18,30 +18,6 @@ const isDev = process.env.NODE_ENV === "development";
 
 const apiApp = express();
 apiApp.set("query parser", (str: string) => qs.parse(str));
-apiApp.use(corsCheck);
-apiApp.use(cookieParser());
-apiApp.use(express.urlencoded({ extended: true }));
-
-apiApp.use(
-  express.json({
-    limit: "5mb",
-    type: ["application/*+json", "application/json"],
-    verify: (req, res, buf) => {
-      // See https://stackoverflow.com/a/70951912/154392
-      // @ts-ignore
-      req.rawBody = buf.toString();
-    },
-  })
-);
-
-apiApp.use(rateLimiter);
-apiApp.use(
-  slowDown({
-    windowMs: 60 * 1000, // 1 minute
-    delayAfter: 20, // allow 20 requests per minute, then start slowing down
-    delayMs: () => 500, // add 500ms delay per request after the first
-  })
-);
 
 // Add request ID to each request for tracing
 apiApp.use((req, res, next) => {
@@ -66,6 +42,31 @@ apiApp.use((req, res, next) => {
   );
   next();
 });
+
+apiApp.use(corsCheck);
+apiApp.use(cookieParser());
+apiApp.use(express.urlencoded({ extended: true }));
+
+apiApp.use(
+  express.json({
+    limit: "5mb",
+    type: ["application/*+json", "application/json"],
+    verify: (req, res, buf) => {
+      // See https://stackoverflow.com/a/70951912/154392
+      // @ts-ignore
+      req.rawBody = buf.toString();
+    },
+  })
+);
+
+apiApp.use(rateLimiter);
+apiApp.use(
+  slowDown({
+    windowMs: 60 * 1000, // 1 minute
+    delayAfter: 20, // allow 20 requests per minute, then start slowing down
+    delayMs: () => 500, // add 500ms delay per request after the first
+  })
+);
 
 initialize({
   app: apiApp,

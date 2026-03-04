@@ -536,6 +536,8 @@ export const createStripeCheckoutSessionForTip = async ({
   currency,
   message,
   artistId,
+  description,
+  tipName,
 }: {
   loggedInUser?: User;
   email?: string;
@@ -544,6 +546,8 @@ export const createStripeCheckoutSessionForTip = async ({
   stripeAccountId: string;
   artistId: number;
   message?: string;
+  tipName?: string;
+  description?: string;
 }) => {
   const client = await prisma.client.findFirst({
     where: {
@@ -576,7 +580,10 @@ export const createStripeCheckoutSessionForTip = async ({
             tax_behavior: "exclusive",
             unit_amount: castToFixed(priceNumber),
             currency: currency?.toLowerCase() ?? "usd",
-            product_data: { name: "Mirlo One Time Tip" },
+            product_data: {
+              name: tipName ?? `One Time Gift`,
+              description: `A one time gift to support ${tipName ?? "the artist"}`,
+            },
           },
           quantity: 1,
         },
