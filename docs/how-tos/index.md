@@ -8,3 +8,4 @@ If there's anything you notice that is out of date, please e-mail us at hi@mirlo
 
 - [Customizing Mirlo](./customizing-mirlo.md) - How to customize the appearance and functionality of your Mirlo instance
 - [Label Accounts](./label-accounts.md) - Setting up and managing label accounts
+- [Making your own album art](./making-your-own-album-art.md) - How to make your own album art and not use AI to do so.
