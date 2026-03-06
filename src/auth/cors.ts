@@ -77,7 +77,9 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
             key: apiHeader,
           },
         });
-        log.info(`Found ${clients.length} clients with that API key`);
+        log.info(
+          `Found ${clients.length} clients with that API key: ${clients.map((c) => c.allowedCorsOrigins.join(", ")).join(", ")}`
+        );
       }
     }
 
@@ -98,8 +100,6 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     if (process.env.NODE_ENV === "development") {
       origin.push("http://localhost:8080"); // Just... for ease of coding
     }
-
-    log.info(`CORS origins: ${origin.join(", ")}`);
 
     return cors({
       origin,

@@ -1,8 +1,7 @@
 import prisma from "@mirlo/prisma";
-import { Artist, Notification, Post } from "@mirlo/prisma/client";
+import { Artist, Notification } from "@mirlo/prisma/client";
 import logger from "../logger";
 import { sendMailQueue, sendMailQueueEvents } from "../queues/send-mail-queue";
-import { processSinglePost } from "../utils/post";
 
 export const parseOutIframes = async (content: string) => {
   // Replace <iframe src="https://mirlo.space/widget/trackGroup/:id"> or <iframe src="https://mirlo.space/widget/track/:id">
@@ -145,75 +144,6 @@ export const parseOutIframes = async (content: string) => {
   return htmlContent;
 };
 
-const sendPostNotifications = async (
-  notification: { id: string; notificationType: string } & {
-    post: Partial<Post> | null;
-  } & {
-    user: { email: string };
-  }
-) => {
-  if (!notification.post) {
-    return;
-  }
-  const post = processSinglePost(notification.post);
-
-  if (!post.shouldSendEmail) {
-    logger.info(
-      `sendNotificationEmail: post asked not to be emailed: ${post.title} to ${notification.user.email}`
-    );
-    await prisma.notification.update({
-      where: {
-        id: notification.id,
-      },
-      data: {
-        isRead: true,
-      },
-    });
-    logger.info(`sendNotificationEmail: updated notification`);
-  } else if (!!post.content) {
-    // If the post doesn't have content we shouldn't send it.
-    // It's likely an error
-    logger.info(
-      `sendNotificationEmail: sending to queue notification for: ${post.title} to ${notification.user.email}`
-    );
-    const htmlContent = await parseOutIframes(post.content);
-
-    try {
-      await sendMailQueue.add("send-mail", {
-        template: "announce-post-published",
-        message: {
-          to: notification.user.email,
-        },
-        locals: {
-          artist: post.artist,
-          post: {
-            ...post,
-            htmlContent,
-          },
-          email: encodeURIComponent(notification.user.email),
-          host: process.env.API_DOMAIN,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
-        },
-      });
-
-      await prisma.notification.update({
-        where: {
-          id: notification.id,
-        },
-        data: {
-          isRead: true,
-        },
-      });
-      logger.info(`sendNotificationEmail: updated notification`);
-    } catch (e) {
-      logger.error(
-        `sendNotificationEmail: failed to send to queue notification ${notification.id} to ${notification.user.email}`
-      );
-      logger.error(e);
-    }
-  }
-};
-
 const sendLabelInviteNotification = async (
   notification: Notification & { artist: Partial<Artist> | null } & {
     user: { email: string } | null;
@@ -282,78 +212,6 @@ const sendLabelInviteNotification = async (
 
 const sendNotificationEmail = async () => {
   logger.info(`sendNotificationEmail: sending notifications`);
-
-  const postNotifciations = await prisma.notification.findMany({
-    where: {
-      isRead: false,
-      createdAt: {
-        lte: new Date(),
-      },
-      notificationType: {
-        in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE"],
-      },
-      deliveryMethod: {
-        in: ["EMAIL", "BOTH"],
-      },
-    },
-    select: {
-      id: true,
-      notificationType: true,
-      post: {
-        select: {
-          id: true,
-          title: true,
-          urlSlug: true,
-          featuredImageId: true,
-          content: true,
-          artist: {
-            select: {
-              id: true,
-              name: true,
-              urlSlug: true,
-              avatar: {
-                select: {
-                  url: true,
-                },
-              },
-              user: {
-                select: { email: true },
-              },
-            },
-          },
-          shouldSendEmail: true,
-          featuredImage: true,
-        },
-      },
-      user: {
-        select: { email: true },
-      },
-    },
-  });
-
-  logger.info(
-    `sendNotificationEmail: found ${postNotifciations.length} post notifications`
-  );
-
-  try {
-    for await (const notification of postNotifciations) {
-      logger.info(
-        `sendNotificationEmail: checking for post notification ${notification.id}`
-      );
-      if (
-        notification.post &&
-        notification.notificationType === "NEW_ARTIST_POST" &&
-        notification.post.artist
-      ) {
-        sendPostNotifications(notification);
-      }
-    }
-  } catch (e) {
-    logger.error(
-      `sendNotificationEmail: failed to send out all post notifications`
-    );
-    logger.error(e);
-  }
 
   const labelNotifications = await prisma.notification.findMany({
     where: {
