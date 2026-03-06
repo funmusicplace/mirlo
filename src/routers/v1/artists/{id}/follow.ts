@@ -11,7 +11,6 @@ import {
 } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { getSiteSettings } from "../../../../utils/settings";
-import { checkCloudFlareTurnstile } from "../../../../utils/cloudflare";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,7 +27,7 @@ export default function () {
     const { id: artistId } = req.params as unknown as Params;
     const loggedInuser = req.user as User | undefined;
 
-    const { email, cfTurnstile } = req.body ?? {};
+    const { email, message, cfTurnstile } = req.body ?? {};
     const normalisedEmail =
       typeof email === "string" ? email.trim().toLowerCase() : undefined;
 
@@ -46,16 +45,6 @@ export default function () {
         throw new AppError({
           httpCode: 400,
           description: "Email must be valid",
-        });
-      }
-
-      if (!isLoggedIn) {
-        const connectingIP =
-          req.get("cf-connecting-ip") ?? req.ip ?? req.socket.remoteAddress;
-        await checkCloudFlareTurnstile({
-          token: cfTurnstile,
-          ip: connectingIP ?? undefined,
-          skipIfNoSecret: true,
         });
       }
 
@@ -84,7 +73,6 @@ export default function () {
         instanceArtistId !== undefined && instanceArtistId !== null
           ? artist.id === instanceArtistId
           : false;
-      const requiresVerifiedEmail = true;
 
       const userSelect = {
         id: true,
@@ -116,7 +104,7 @@ export default function () {
           });
         }
 
-        if (requiresVerifiedEmail && user.emailConfirmationToken) {
+        if (user.emailConfirmationToken) {
           throw new AppError({
             httpCode: 401,
             description: "Please verify your email before subscribing.",
@@ -131,10 +119,14 @@ export default function () {
           });
         }
 
-        const results = await subscribeUserToArtist(artist, {
-          id: user.id,
-          currency: user.currency,
-        });
+        const results = await subscribeUserToArtist(
+          artist,
+          {
+            id: user.id,
+            currency: user.currency,
+          },
+          message
+        );
 
         res.status(200).json({
           results,
@@ -155,7 +147,6 @@ export default function () {
       });
 
       if (
-        requiresVerifiedEmail &&
         user?.email &&
         user.email.toLowerCase() === normalisedEmail &&
         user.emailConfirmationToken

@@ -451,6 +451,7 @@ model ArtistUserSubscriptionConfirmation {
   email           String
   artistId        Int
   artist          Artist    @relation(fields: [artistId], references: [id])
+  message         String?
   token           String    @default(uuid())
   tokenExpiration DateTime? @default(dbgenerated("(NOW() + '06:00:00'::interval)"))
 

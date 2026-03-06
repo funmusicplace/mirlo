@@ -88,7 +88,7 @@ export default function () {
         }
 
         if (artist) {
-          await subscribeUserToArtist(artist, user);
+          await subscribeUserToArtist(artist, user, confirmation.message);
           await prisma.artistUserSubscriptionConfirmation.delete({
             where: {
               id: confirmation.id,
