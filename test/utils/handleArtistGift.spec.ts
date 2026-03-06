@@ -70,4 +70,44 @@ describe("handleArtistGift", () => {
     assert.equal(locals1.transactions[0].tips?.[0].artist.id, tip?.artistId);
     assert.equal(locals1.transactions[0].amount, 0);
   });
+
+  it("should add the user to the artist's subscribers at the follow tier", async () => {
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    await handleArtistGift(purchaser.id, artist.id);
+
+    const subscription = await prisma.artistUserSubscription.findFirst({
+      where: {
+        userId: purchaser.id,
+        artistSubscriptionTier: {
+          artistId: artist.id,
+        },
+      },
+      include: {
+        artistSubscriptionTier: true,
+      },
+    });
+
+    assert.ok(subscription, "Subscription should exist");
+    assert.equal(subscription?.userId, purchaser.id);
+    assert.equal(subscription?.artistSubscriptionTier.artistId, artist.id);
+    assert.equal(subscription?.artistSubscriptionTier.isDefaultTier, true);
+    assert.equal(subscription?.artistSubscriptionTier.name, "follow");
+  });
 });
