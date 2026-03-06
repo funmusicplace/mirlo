@@ -146,12 +146,14 @@ export const findArtistIdForURLSlug = async (id: string) => {
 
 export const createSubscriptionConfirmation = async (
   email: string,
-  artist: Artist
+  artist: Artist,
+  message?: string
 ) => {
   try {
     const subscriptionConfirmation =
       await prisma.artistUserSubscriptionConfirmation.create({
         data: {
+          message,
           email: email,
           artistId: artist.id,
         },
@@ -190,7 +192,8 @@ export const subscribeUserToArtist = async (
     subscriptionTiers: ArtistSubscriptionTier[];
     id: number;
   },
-  user?: { currency: string | null; id: number } | null
+  user?: { currency: string | null; id: number } | null,
+  message?: string | null
 ) => {
   let defaultTier = artist.subscriptionTiers.find((tier) => tier.isDefaultTier);
 
@@ -211,6 +214,7 @@ export const subscribeUserToArtist = async (
     const isSubscribed = await prisma.artistUserSubscription.findFirst({
       where: {
         userId: user.id,
+        message,
         artistSubscriptionTier: {
           artistId: artist.id,
         },

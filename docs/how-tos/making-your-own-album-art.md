@@ -1,4 +1,4 @@
-# Album Art Without AI\*\*
+# Album Art Without AI
 
 We asked our community for resources on how to put together album art without relying on AI, and this is what they responded.
 
