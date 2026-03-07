@@ -19,6 +19,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { sendBasecampAMessage } from "./basecamp";
 import { calculateAppFee } from "./processingPayments";
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { subscribeUserToArtist } from "./artist";
 
 const getPaymentIntent = async (
   paymentIntentId: string,
@@ -631,7 +632,7 @@ export const handleArtistGift = async (
       where: {
         id: createdTip.id,
       },
-      include: { artist: { include: { user: true } } },
+      include: { artist: { include: { user: true, subscriptionTiers: true } } },
     });
 
     const user = await prisma.user.findFirst({
@@ -639,6 +640,10 @@ export const handleArtistGift = async (
         id: userId,
       },
     });
+
+    if (tip) {
+      subscribeUserToArtist(tip.artist, user);
+    }
 
     if (user && tip) {
       await sendSaleEmails(tip.artist, user, [transaction.id]);
