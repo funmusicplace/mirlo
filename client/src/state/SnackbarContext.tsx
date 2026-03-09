@@ -1,6 +1,6 @@
 import React from "react";
 
-export type Variant = "success" | "warning" | undefined;
+export type Variant = "success" | "warning" | "error" | undefined;
 
 export type Position = "center" | undefined;
 

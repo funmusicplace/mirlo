@@ -513,6 +513,11 @@ export const singleInclude = (queryOptions?: {
         },
       },
     },
+    artistLocationTags: {
+      include: {
+        locationTag: true,
+      },
+    },
     posts: {
       where: {
         publishedAt: {

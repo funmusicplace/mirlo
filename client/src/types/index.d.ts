@@ -224,6 +224,16 @@ interface ArtistLabel {
   isArtistApproved: boolean;
 }
 
+interface LocationTag {
+  id: number;
+  city: string;
+  region?: string;
+  country: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Artist {
   name: string;
   maxFreePlays?: number;
@@ -250,6 +260,9 @@ interface Artist {
     ticketsUrl: string;
   }[];
   subscriptionTiers: ArtistSubscriptionTier[];
+  artistLocationTags?: {
+    locationTag: LocationTag;
+  }[];
   properties?: {
     colors?: ArtistColors;
     tileBackgroundImage?: boolean;

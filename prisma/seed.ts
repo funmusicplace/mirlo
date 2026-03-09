@@ -5,6 +5,7 @@ import { clients } from "./seeds/clients";
 import { artists } from "./seeds/artists";
 import { trackGroups } from "./seeds/trackGroups";
 import { fundraisers } from "./seeds/fundraisers";
+import { seedLocationTags } from "./seeds/seedLocationTags";
 
 const prisma = new PrismaClient();
 
@@ -81,10 +82,18 @@ async function main() {
       });
       console.log(`...updated trackGroup with id: ${updated.id}`);
     } else {
-      const trackGroup = await prisma.trackGroup.create({
-        data: t,
-      });
-      console.log(`Created trackGroup with id: ${trackGroup.id}`);
+      console.log("t", t);
+      try {
+        const trackGroup = await prisma.trackGroup.create({
+          data: t,
+        });
+        console.log(`Created trackGroup with id: ${trackGroup.id}`);
+      } catch (error) {
+        console.error(
+          `❌ Error creating trackGroup with urlSlug ${t.urlSlug}:`,
+          error
+        );
+      }
     }
   }
 
@@ -96,11 +105,17 @@ async function main() {
       console.log(`Fundraiser with name ${f.name} already exists, skipping...`);
       continue;
     }
-    const fundraiser = await prisma.fundraiser.create({
-      data: f,
-    });
-    console.log(`Created fundraiser with id: ${fundraiser.id}`);
+    try {
+      const fundraiser = await prisma.fundraiser.create({
+        data: f,
+      });
+      console.log(`Created fundraiser with id: ${fundraiser.id}`);
+    } catch (error) {
+      console.error(`❌ Error creating fundraiser with name ${f.name}:`, error);
+    }
   }
+
+  await seedLocationTags();
 
   console.log(`Seeding finished.`);
 }

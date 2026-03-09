@@ -8,6 +8,7 @@ import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_ARTISTS,
   QUERY_KEY_AUTH,
+  QUERY_KEY_MERCH,
   QUERY_KEY_PURCHASES,
   QUERY_KEY_SALES,
   queryKeyIncludes,
@@ -35,7 +36,7 @@ export function queryUserStripeStatus(userId?: number) {
 
 const fetchManagedArtist: QueryFunction<
   Artist,
-  ["fetchManagedArtist", { artistId: number }]
+  ["fetchManagedArtist", { artistId: number }, ...any]
 > = ({ queryKey: [_, { artistId }], signal }) => {
   return api
     .get<{
@@ -46,7 +47,7 @@ const fetchManagedArtist: QueryFunction<
 
 export function queryManagedArtist(artistId: number) {
   return queryOptions({
-    queryKey: ["fetchManagedArtist", { artistId }],
+    queryKey: ["fetchManagedArtist", { artistId }, QUERY_KEY_ARTISTS],
     queryFn: fetchManagedArtist,
     enabled: isFinite(artistId),
   });
@@ -73,7 +74,7 @@ export function queryManagedTrackGroup(trackGroupId: number) {
 
 const fetchManagedMerch: QueryFunction<
   Merch,
-  ["fetchManagedMerch", { merchId: string }]
+  ["fetchManagedMerch", { merchId: string }, ...any]
 > = ({ queryKey: [_, { merchId }], signal }) => {
   return api
     .get<{
@@ -84,7 +85,7 @@ const fetchManagedMerch: QueryFunction<
 
 export function queryManagedMerch(merchId: string) {
   return queryOptions({
-    queryKey: ["fetchManagedMerch", { merchId }],
+    queryKey: ["fetchManagedMerch", { merchId }, QUERY_KEY_MERCH],
     queryFn: fetchManagedMerch,
   });
 }

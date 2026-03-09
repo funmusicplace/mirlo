@@ -107,7 +107,6 @@ export const ArtistTitleText = styled.div`
 export const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   align-items: flex-end;
   justify-content: space-around;
   border-bottom: solid 1px

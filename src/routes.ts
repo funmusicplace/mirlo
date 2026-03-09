@@ -2,6 +2,7 @@
 // API docs needs this to mount them
 const routes = [
   "tags",
+  "locationTags",
   "trackGroups",
   "trackGroups/topSold",
   "trackGroups/mostPlayed",
@@ -92,6 +93,8 @@ const routes = [
   "manage/artists/{artistId}/avatar",
   "manage/artists/{artistId}/drafts",
   "manage/artists/{artistId}/trackGroupOrder",
+  "manage/artists/{artistId}/locationTags",
+  "manage/artists/{artistId}/locationTags/{locationTagId}",
   "manage/artists/{artistId}/subscriptionTiers",
   "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}",
   "manage/downloadableContent",

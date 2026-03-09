@@ -307,6 +307,7 @@ model Artist {
   paymentToUserId                    Int? // User to which the payments for this artist go
   paymentToUser                      User?                                @relation(fields: [paymentToUserId], references: [id], name: "paymentToUser")
   isLabelProfile                     Boolean                              @default(false)
+  artistLocationTags                 ArtistLocationTag[]
 }
 
 model ArtistAvatar {
@@ -882,6 +883,28 @@ model Tag {
   id             Int             @id @default(autoincrement())
   tag            String          @unique
   trackGroupTags TrackGroupTag[]
+}
+
+model LocationTag {
+  id                   Int                 @id @default(autoincrement())
+  city                 String
+  region               String? // State, province, etc.
+  country              String
+  slug                 String              @unique // For URLs and consistent querying
+  artistLocationTags   ArtistLocationTag[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@unique([city, region, country]) // Ensure no duplicate locations
+}
+
+model ArtistLocationTag {
+  artistId      Int
+  artist        Artist      @relation(fields: [artistId], references: [id])
+  locationTagId Int
+  locationTag   LocationTag @relation(fields: [locationTagId], references: [id])
+
+  @@unique([artistId, locationTagId])
 }
 
 model DownloadableContent {

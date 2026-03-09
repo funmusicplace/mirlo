@@ -16,6 +16,8 @@ import { BsGrid, BsList } from "react-icons/bs";
 import { getArtistUrl } from "utils/artist";
 import { Link, useSearchParams } from "react-router-dom";
 import LoadingBlocks from "./Artist/LoadingBlocks";
+import { useQuery } from "@tanstack/react-query";
+import { queryLocationTags } from "queries/locationTags";
 
 const Artists = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artists" });
@@ -29,6 +31,8 @@ const Artists = () => {
   const [pageSize, setPageSize] = React.useState(20);
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [orderBy, setOrderBy] = React.useState("createdAt");
+  const [locationSlug, setLocationSlug] = React.useState("");
+  const { data: locationTags } = useQuery(queryLocationTags());
 
   const [viewAsTiles, setViewAsTiles] = React.useState(true);
 
@@ -46,6 +50,9 @@ const Artists = () => {
       params.append("isLabel", isLabel);
       params.append("skip", `${pageSize * page}`);
       params.append("take", `${pageSize}`);
+      if (locationSlug) {
+        params.append("locationSlug", locationSlug);
+      }
       const results = await api.getMany<Artist>(`artists?${params.toString()}`);
       setArtists(results.results);
       setArtistsTotal(results.total);
@@ -53,7 +60,7 @@ const Artists = () => {
     };
 
     callback();
-  }, [page, orderBy, pageSize, isLabel]);
+  }, [page, orderBy, pageSize, isLabel, locationSlug]);
 
   return (
     <div
@@ -112,6 +119,29 @@ const Artists = () => {
               >
                 <option value="createdAt">{t("sortByLatest")}</option>
                 <option value="name">{t("sortByName")}</option>
+              </SelectEl>
+            </div>
+            <div
+              className={css`
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
+              `}
+            >
+              <label htmlFor="location">{t("location") || "Location"}</label>
+              <SelectEl
+                value={locationSlug}
+                id="location"
+                onChange={(e) => setLocationSlug(e.target.value)}
+              >
+                <option value="">{t("allLocations") || "All locations"}</option>
+                {locationTags?.map((tag) => (
+                  <option key={tag.slug} value={tag.slug}>
+                    {tag.city}
+                    {tag.region && `, ${tag.region}`}, {tag.country}
+                  </option>
+                ))}
               </SelectEl>
             </div>
             <ButtonAnchor
