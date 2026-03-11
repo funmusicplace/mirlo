@@ -20,6 +20,7 @@ export default function () {
       orderBy,
       isLabel,
       includeUnpublished,
+      locationSlug,
     } = req.query;
 
     try {
@@ -37,6 +38,16 @@ export default function () {
 
       if (name && typeof name === "string") {
         where.name = { contains: name, mode: "insensitive" };
+      }
+
+      if (locationSlug && typeof locationSlug === "string") {
+        where.artistLocationTags = {
+          some: {
+            locationTag: {
+              slug: locationSlug,
+            },
+          },
+        };
       }
 
       const count = await prisma.artist.count({
@@ -74,6 +85,11 @@ export default function () {
           banner: {
             where: {
               deletedAt: null,
+            },
+          },
+          artistLocationTags: {
+            include: {
+              locationTag: true,
             },
           },
           user: {

@@ -16,7 +16,7 @@ const SearchResultsDiv = styled.div`
   background: var(--mi-normal-background-color);
   border: 1px solid var(--mi-darken-xx-background-color);
   width: 100%;
-  z-index: 999;
+  z-index: 1000;
   word-break: break-word;
   color: var(--mi-normal-foreground-color);
   border-radius: 5px;

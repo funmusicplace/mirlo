@@ -1,23 +1,22 @@
 import { useId } from "react";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { css } from "@emotion/css";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { bp } from "../constants";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
 
 import usePagination from "utils/usePagination";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   queryArtists,
-  queryLabels,
   queryTrackGroups,
   TrackGroupQueryOptions,
 } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
-import Button, { ButtonLink } from "./common/Button";
+import { ButtonLink } from "./common/Button";
 import { FaChevronRight } from "react-icons/fa";
 import React from "react";
 import ArtistSquare from "./Artist/ArtistSquare";

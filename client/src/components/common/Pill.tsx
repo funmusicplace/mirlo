@@ -6,13 +6,16 @@ const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
   border-radius: var(--mi-border-radius-x);
   border: var(--mi-border);
   padding: 0.25rem 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   align-items: center;
   transition: 0.25s background-color;
 
   button {
     margin-left: 0.25rem;
     padding: 0;
+    font-size: 0.8rem;
+    height: 1.75rem;
+    width: 1.75rem;
   }
   @media (prefers-color-scheme: dark) {
     background-color: var(--mi-lighten-background-color);

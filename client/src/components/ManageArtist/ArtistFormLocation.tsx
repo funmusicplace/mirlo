@@ -1,15 +1,19 @@
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
-import { InputEl } from "components/common/Input";
-import Button from "components/common/Button";
 import { css } from "@emotion/css";
 import { FaSave, FaTimes } from "react-icons/fa";
-import { IoLocationSharp } from "react-icons/io5";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { FaPen } from "react-icons/fa";
-import { bp } from "../../constants";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useQuery } from "@tanstack/react-query";
+import {
+  queryLocationTags,
+  useAddLocationTag,
+  useRemoveLocationTag,
+} from "queries/locationTags";
+import AutoComplete from "components/common/AutoComplete";
+import Pill from "components/common/Pill";
 
 interface FormData {
   location: string;
@@ -17,7 +21,7 @@ interface FormData {
 
 interface ArtistLocationProps {
   isManage: boolean;
-  artist: Pick<Artist, "location" | "properties">;
+  artist: Pick<Artist, "location" | "properties" | "id" | "artistLocationTags">;
   onSubmit: (data: FormData) => Promise<void>;
 }
 
@@ -29,36 +33,88 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
   const [isEditing, setIsEditing] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const { register, handleSubmit, reset } = useForm<FormData>({
-    values: { location: artist?.location ?? "" },
+  const { handleSubmit, watch, reset, setValue } = useForm<FormData>({
+    defaultValues: { location: artist?.location ?? "" },
   });
+
+  const { data: allTags } = useQuery(queryLocationTags());
+  const { mutate: addTag } = useAddLocationTag();
+  const { mutate: removeTag } = useRemoveLocationTag();
+
+  const currentTags =
+    artist.artistLocationTags?.map((alt) => alt.locationTag) || [];
+  const availableTags =
+    allTags?.filter(
+      (tag) => !currentTags.some((current) => current.id === tag.id)
+    ) || [];
 
   const handleSave = React.useCallback(
     async (data: FormData) => {
       await onSubmit(data);
-      snackbar("Updated location", { type: "success" });
+      snackbar(t("locationUpdated"), { type: "success" });
       setIsEditing(false);
     },
-    [onSubmit, snackbar]
+    [onSubmit, snackbar, t]
   );
+
+  React.useEffect(() => {
+    if (isEditing) {
+      reset({ location: artist?.location ?? "" });
+    }
+  }, [isEditing, artist?.location, reset]);
+
+  const handleAddTag = (tagId: number) => {
+    addTag(
+      { artistId: artist.id, locationTagId: tagId },
+      {
+        onSuccess: async () => {
+          snackbar(t("locationAdded"), { type: "success" });
+        },
+        onError: () => {
+          snackbar(t("failedToAddLocation"), { type: "warning" });
+        },
+      }
+    );
+  };
+
+  const handleRemoveTag = (tagId: number) => {
+    removeTag(
+      { artistId: artist.id, locationTagId: tagId },
+      {
+        onSuccess: () => {
+          snackbar(t("locationRemoved"), { type: "success" });
+        },
+        onError: () => {
+          snackbar(t("failedToRemoveLocation"), { type: "warning" });
+        },
+      }
+    );
+  };
+
+  const handleSearchLocations = async (searchString: string) => {
+    if (!searchString.trim()) {
+      return availableTags.map((tag) => ({
+        id: tag.id,
+        name: `${tag.city}${tag.region ? `, ${tag.region}` : ""}, ${tag.country}`,
+      }));
+    }
+    const lowerSearch = searchString.toLowerCase();
+    return availableTags
+      .filter(
+        (tag) =>
+          tag.city.toLowerCase().includes(lowerSearch) ||
+          (tag.region && tag.region.toLowerCase().includes(lowerSearch)) ||
+          tag.country.toLowerCase().includes(lowerSearch)
+      )
+      .map((tag) => ({
+        id: tag.id,
+        name: `${tag.city}${tag.region ? `, ${tag.region}` : ""}, ${tag.country}`,
+      }));
+  };
 
   if (!isEditing) {
     return (
-      <div
-        className={css`
-          display: flex;
-          align-items: center;
-          margin-top: 0.2rem;
-          button {
-            margin-left: 0.3rem;
-            margin-top: -0.5rem;
-          }
-
-          @media screen and (max-width: ${bp.medium}px) {
-            margin-top: 0rem;
-          }
-        `}
-      >
+      <div className="flex items-center mt-1 md:mt-1 gap-2">
         {artist?.location && (
           <div
             className={css`
@@ -68,6 +124,13 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             {artist?.location}
           </div>
         )}
+        {artist?.artistLocationTags?.map((tag) => (
+          <Pill key={tag.locationTag.id}>
+            {tag.locationTag.city}
+            {tag.locationTag.region && `, ${tag.locationTag.region}`},{" "}
+            {tag.locationTag.country}
+          </Pill>
+        ))}
         {!artist?.location && isManage && (
           <div
             className={css`
@@ -85,71 +148,87 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             smallIcon
             onClick={() => setIsEditing(true)}
             className={css``}
+            title={t("editLocation")}
             startIcon={<FaPen />}
-          ></ArtistButton>
+          />
         )}
       </div>
     );
   }
 
-  return (
-    <>
-      <div
-        className={css`
-          display: flex;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-        `}
-      >
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-width: 300px;
-            font-size: 1.4rem;
+  const watchedLocation = watch("location");
 
-            @media screen and (max-width: ${bp.medium}px) {
-              max-width: 200px;
+  return (
+    <div className="flex w-full items-start">
+      <div className="flex flex-col items-start gap-2">
+        {currentTags.length === 0 ? (
+          <p
+            className={css`
+              color: var(--mi-lighten-text-color);
+              font-size: 0.9rem;
+            `}
+          >
+            {t("noLocationsAdded")}
+          </p>
+        ) : (
+          currentTags.map((tag) => (
+            <Pill>
+              <span>
+                {tag.city}
+                {tag.region && `, ${tag.region}`}, {tag.country}
+              </span>
+              <ArtistButton
+                smallIcon
+                size="compact"
+                onClick={() => handleRemoveTag(tag.id)}
+                startIcon={<FaTimes />}
+                title={t("removeLocationTag")}
+              />
+            </Pill>
+          ))
+        )}
+        {watchedLocation ? <>Custom location: {watchedLocation}</> : null}
+        <AutoComplete
+          placeholder={t("searchLocations")}
+          getOptions={handleSearchLocations}
+          onSelect={(result) => {
+            if (typeof result === "object" && result !== null) {
+              if (result.isNew) {
+                // User entered a custom location
+                setValue("location", result.name);
+              } else {
+                // User selected an existing location tag
+                handleAddTag(Number(result.id));
+              }
             }
-          `}
-        >
-          <IoLocationSharp />
-          <InputEl
-            {...register(`location`)}
-            placeholder={t("exampleLocation") ?? ""}
-            colors={artist.properties?.colors}
-          />
-        </div>
-        <div
-          className={css`
-            display: flex;
-            gap: 0.5rem;
-          `}
-        >
-          <ArtistButton
-            collapsible
-            size="compact"
-            startIcon={<FaSave />}
-            onClick={handleSubmit(handleSave)}
-          >
-            <p>{t("saveLocation")}</p>
-          </ArtistButton>
-          <ArtistButton
-            size="compact"
-            collapsible
-            startIcon={<FaTimes />}
-            onClick={() => {
-              reset();
-              setIsEditing(false);
-            }}
-          >
-            <p>{t("cancel")}</p>
-          </ArtistButton>
-        </div>
+          }}
+          allowNew={true}
+        />
       </div>
-    </>
+      <div className="flex gap-1">
+        <ArtistButton
+          collapsible
+          size="compact"
+          startIcon={<FaSave />}
+          onClick={handleSubmit(handleSave)}
+          title={t("saveLocation")}
+        >
+          <p>{t("saveLocation")}</p>
+        </ArtistButton>
+        <ArtistButton
+          size="compact"
+          collapsible
+          startIcon={<FaTimes />}
+          title={t("cancel")}
+          onClick={() => {
+            reset();
+            setIsEditing(false);
+          }}
+        >
+          <p>{t("cancel")}</p>
+        </ArtistButton>
+      </div>
+    </div>
   );
 };
 
