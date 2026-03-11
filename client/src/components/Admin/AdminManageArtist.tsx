@@ -112,7 +112,7 @@ const AdminManageArtist = () => {
           </div>
           <div>
             <Link to={getArtistManageUrl(artist.id)}>
-              <Button>{t("manageArtist") ?? "Manage Artist"}</Button>
+              <Button>{t("manageArtist")}</Button>
             </Link>
           </div>
         </SpaceBetweenDiv>

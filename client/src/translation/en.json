@@ -299,6 +299,7 @@
     "address": "Address",
     "totalResults": "Total results: {{count}}",
     "lastUpdated": "Last updated",
+    "updateSuccess": "Order updated",
     "noProgress": "No progress",
     "no_progress": "No progress",
     "started": "Started",
@@ -353,6 +354,7 @@
     "viewLabelPage": "View label page",
     "manageArtists": "Manage your artists",
     "manage": "Manage artist",
+    "notALabel": "You are not a label",
     "isArtistConfirmed": "Has artist confirmed relationship?",
     "isLabelConfirmed": "Has label confirmed relationship?",
     "askArtist": "Ask artist to grant permission",
@@ -366,7 +368,8 @@
     "createNewArtist": "Create new artist page",
     "addNewArtistToRoster": "Create a new artist page and add them to your roster",
     "roster": "Roster",
-    "releases": "Releases"
+    "releases": "Releases",
+    "labelNotFound": "Label not found"
   },
   "artist": {
     "failedToAddLocation": "Failed to add location tag",
@@ -374,6 +377,11 @@
     "locationAdded": "Location tag added",
     "locationRemoved": "Location tag removed",
     "locationUpdated": "Location updated",
+    "removeLocationTag": "Remove location tag",
+    "locations": "Locations",
+    "hideLocations": "Hide locations",
+    "addLocations": "Add locations",
+    "allLocationsAdded": "All available locations have been added",
     "merch": "Merch",
     "noLocationsAdded": "No locations yet.",
     "searchLocations": "Search locations...",
@@ -666,6 +674,7 @@
     "saveDestinations": "Save destinations",
     "updatedShippingDestinations": "Updated shipping destinations",
     "catalogNumber": "Catalog number",
+    "catalogNumberInvalid": "Invalid catalog number",
     "saveOptions": "Save options",
     "backToMerchList": "Back to merch list",
     "homeCountry": "Home country",
@@ -980,6 +989,7 @@
   },
   "manageSubscriptions": {
     "uploadSuscribers": "Upload subscriber e-mail adresses",
+    "uploadSubscribers": "Upload subscriber e-mail addresses",
     "waysToAddEmails": "Two ways to add emails",
     "pasteEmailsHere": "If you have a list of e-mail addresses, paste them here:",
     "downloadSubscriberData": "Download subscriber data",
@@ -1063,7 +1073,7 @@
     "inviteToJoinLabel": "<linkToLabel>{{labelName}}</linkToLabel> has invited you to join their label/collective.",
     "followedYourArtist": "{{relatedUser}} followed your artist",
     "boughtYourAlbum": "{{relatedUser}} bought your album",
-    "atSubcriptionTier": "at {{subscriptionTier}}",
+    "atSubscriptionTier": "at {{subscriptionTier}}",
     "manageOnArtistPage": "Manage on artist page"
   },
   "kickstarter": {
@@ -1181,7 +1191,8 @@
     "isEnabled": "Is enabled?",
     "saveTrackGroupButton": "Save album",
     "doesNotExist": "This album does not exist or it does not have a public presence.",
-    "artistRecommends": "{{ artistName }} recommends"
+    "artistRecommends": "{{ artistName }} recommends",
+    "trackDoesntExist": "That track doesn't exist"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",
@@ -1265,7 +1276,9 @@
     "sortByName": "Name",
     "sortByLatest": "Latest",
     "labels": "All labels",
-    "noResultsFound": "No results found"
+    "noResultsFound": "No results found",
+    "allLocations": "All locations",
+    "location": "Location"
   },
   "postForm": {
     "imagesInPost": "Manage images in post",
@@ -1337,5 +1350,12 @@
     "bestSelling": "Best Selling",
     "topListened": "Most Listened To",
     "searchByPopular": "Search By Popular Tags"
+  },
+  "labelWidget": {
+    "trackDoesntExist": "That track doesn't exist"
+  },
+  "billing": {
+    "noPaymentFound": "No payment found",
+    "completePayment": "Complete Your Payment"
   }
 }

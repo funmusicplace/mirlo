@@ -72,7 +72,7 @@ function RedeemCode() {
             }&email=${result.user?.email ?? user?.email ?? email}`
           );
         } catch (e) {
-          snackbar(t("codeRedeemError"), { type: "warning" });
+          snackbar(t("redeemCodeError"), { type: "warning" });
         }
       }
     },

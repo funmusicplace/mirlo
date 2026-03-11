@@ -130,13 +130,13 @@ const Artists = () => {
                 gap: 1rem;
               `}
             >
-              <label htmlFor="location">{t("location") || "Location"}</label>
+              <label htmlFor="location">{t("location")}</label>
               <SelectEl
                 value={locationSlug}
                 id="location"
                 onChange={(e) => setLocationSlug(e.target.value)}
               >
-                <option value="">{t("allLocations") || "All locations"}</option>
+                <option value="">{t("allLocations")}</option>
                 {locationTags?.map((tag) => (
                   <option key={tag.slug} value={tag.slug}>
                     {tag.city}
