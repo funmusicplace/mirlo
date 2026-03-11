@@ -229,7 +229,8 @@ const Splash = () => {
                   features: (
                     <Link to="https://docs.mirlo.space/features/"></Link>
                   ),
-                  about: <Link to="/pages/about"></Link>,
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
+                  about: <a href="https://docs.mirlo.space"></a>,
                 }}
               />
             </p>

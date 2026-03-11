@@ -4,3 +4,38 @@
 
   --vp-button-brand-bg: #be3455;
 }
+
+.team-bio {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.team-bio__photo {
+  width: 9rem;
+  height: 9rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  flex: none;
+}
+
+.team-bio__content h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.team-bio__content p {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .team-bio {
+    flex-direction: column;
+  }
+
+  .team-bio__photo {
+    width: 7rem;
+    height: 7rem;
+  }
+}
