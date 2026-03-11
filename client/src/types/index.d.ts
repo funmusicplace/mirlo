@@ -22,7 +22,7 @@ interface LoggedInUser {
   isAdmin: boolean;
   currency?: string;
   featureFlags?: string[];
-  isLabelAccount?: boolean;
+  isLabelAccount: boolean;
   properties?: { tileBackgroundImage?: boolean };
   trackFavorites?: {
     userId: number;

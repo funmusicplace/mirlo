@@ -1,25 +1,24 @@
-import { css } from "@emotion/css";
-import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useRef } from "react";
+import { Link, useParams } from "react-router-dom";
 import usePublicArtist from "utils/usePublicObjectById";
 import PageBanner from "components/common/ArtistBanner";
 import { bp } from "../../constants";
 import HeaderSearch from "./HeaderSearch";
-import Menu from "./Menu";
 import Logo from "components/common/Logo";
-import DropdownMenu from "components/common/DropdownMenu";
 import { ImMenu } from "react-icons/im";
 import styled from "@emotion/styled";
 import useShow from "utils/useShow";
 import LogInPopup from "./LogInPopup";
 import { useAuthContext } from "state/AuthContext";
-import { ButtonLink } from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { FaHandHoldingHeart } from "react-icons/fa";
 import { queryInstanceArtist } from "queries/settings";
 import { useQuery } from "@tanstack/react-query";
+import { createPortal } from "react-dom";
 import { getArtistUrl } from "utils/artist";
 import UserBanner from "components/common/UserBanner";
+import Menu from "components/Header/Menu";
 
 const HeaderWrapper = styled.div<{
   artistBanner?: boolean;
@@ -104,44 +103,18 @@ const HeaderWrapper = styled.div<{
 
 const LogoWrapper = () => {
   return (
-    <h1
-      className={css`
-        margin-top: -0.1rem;
-        line-height: 0;
-        font-size: 1.5rem;
-      `}
+    <Link
+      to="/"
+      aria-label="Mirlo"
+      className="mt-[-.1rem] leading-none text-[1.5rem] flex justify-start items-center"
     >
-      <Link
-        to="/"
-        aria-label="Mirlo"
-        className={css`
-          display: flex;
-          justify-content: flex-start;
-          align-items: center;
-        `}
-      >
-        <span
-          aria-hidden
-          className={css`
-            @media (max-width: ${bp.medium}px) {
-              display: none;
-            }
-          `}
-        >
-          <Logo />
-        </span>
-        <span
-          aria-hidden
-          className={css`
-            @media (min-width: ${bp.medium}px) {
-              display: none;
-            }
-          `}
-        >
-          <Logo noWordmark />
-        </span>
-      </Link>
-    </h1>
+      <span aria-hidden className="max-md:hidden">
+        <Logo />
+      </span>
+      <span aria-hidden className="md:hidden">
+        <Logo noWordmark />
+      </span>
+    </Link>
   );
 };
 
@@ -171,7 +144,7 @@ const Content = styled.div<{ artistId?: string }>`
 `;
 
 const Header = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "kickstarter" });
+  const { t } = useTranslation();
 
   const { user } = useAuthContext();
   const isLoggedIn = !!user?.id;
@@ -186,6 +159,23 @@ const Header = () => {
   const transparent = !!artistBanner && !!artistId;
 
   const { data: instanceArtist } = useQuery(queryInstanceArtist());
+
+  const menuRef = useRef<HTMLDialogElement | null>(null);
+  const menuButtonId = "menu-button";
+  const menuDialogId = "menu-dialog";
+
+  const openMenu = () => {
+    if (menuRef.current) {
+      menuRef.current.showModal();
+    }
+  };
+
+  const closeMenu = () => {
+    if (menuRef.current) {
+      menuRef.current.close();
+    }
+  };
+
   return (
     <HeaderWrapper
       transparent={transparent}
@@ -195,73 +185,52 @@ const Header = () => {
       artistId={!!artistId}
       colors={colors}
     >
-      <div
-        className={css`
-          @media screen and (min-width: ${bp.medium}px) {
-            display: none !important;
-          }
-        `}
-      >
+      <div className="md:hidden!">
         <PageBanner />
         <UserBanner />
       </div>
-      <div
-        className={css`
-          position: absolute;
-          height: 100%;
-          width: 100%;
-          @media screen and (min-width: ${bp.medium}px) {
-            display: none !important;
-          }
-        `}
-      ></div>
+      <div className="absolute w-full h-full md:hidden!"></div>
       <Content artistId={artistId}>
         <LogoWrapper />
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-          `}
-        >
+        <div className="flex items-center">
           <HeaderSearch />
-
-          {isLoggedIn && (
-            <DropdownMenu icon={<ImMenu />}>
-              <Menu />
-            </DropdownMenu>
-          )}
-          {!isLoggedIn && <LogInPopup />}
           {instanceArtist && (
             <ButtonLink
               to={getArtistUrl(instanceArtist) + "/support"}
               collapsible
               startIcon={<FaHandHoldingHeart />}
-              className={css`
-                display: block;
-                ${artistId ? "display: none !important;" : ""}
-                margin-left: 0.75rem;
-                text-decoration: none;
-                text-align: center;
-                &:hover {
-                  text-decoration: underline;
-                }
-
-                color: var(--mi-white) !important;
-
-                svg {
-                  fill: white !important;
-                }
-
-                background-color: var(--mi-black) !important;
-
-                @media screen and (max-width: ${bp.medium}px) {
-                  font-size: var(--mi-font-size-xsmall) !important;
-                }
-              `}
+              className="block me-[.75rem] no-underline text-center hover:underline! color-white! &_svg:fill-white! bg-black! max-md:text-(--mi-font-size-xsmall)!"
             >
-              <p>{t("donateNow")}</p>
+              <p>{t("donateNow", { keyPrefix: "kickstarter" })}</p>
             </ButtonLink>
           )}
+          {!isLoggedIn && <LogInPopup />}
+          {isLoggedIn && (
+            <Button
+              aria-controls={menuDialogId}
+              // @ts-ignore React doesn't support Invoker Commands API
+              command="show-modal"
+              commandfor={menuDialogId}
+              id={menuButtonId}
+              onClick={() => openMenu()}
+              startIcon={<ImMenu />}
+              variant="transparent"
+            >
+              Menu
+            </Button>
+          )}
+          {isLoggedIn &&
+            createPortal(
+              <Menu
+                buttonId={menuButtonId}
+                dialogId={menuDialogId}
+                isAdmin={user.isAdmin}
+                isLabelAccount={user.isLabelAccount}
+                onClose={() => closeMenu()}
+                ref={menuRef}
+              />,
+              document.body
+            )}
         </div>
       </Content>
     </HeaderWrapper>

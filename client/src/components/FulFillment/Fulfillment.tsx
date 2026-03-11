@@ -44,13 +44,13 @@ export const Fulfillment: React.FC = () => {
       `}
     >
       <SpaceBetweenDiv>
-        <h3
+        <h1
           className={css`
             margin: 0.5rem 0;
           `}
         >
           {t("ordersAndFulfillment")}
-        </h3>
+        </h1>
         <div
           className={css`
             align-items: center;

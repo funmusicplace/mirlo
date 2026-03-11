@@ -1,25 +1,28 @@
-import { css } from "@emotion/css";
-import React from "react";
+import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
-import { useSnackbar } from "state/SnackbarContext";
-import Button from "../common/Button";
-import { useAuthContext } from "state/AuthContext";
-import { queryManagedArtists, useLogoutMutation } from "queries";
-import { getArtistManageUrl } from "utils/artist";
+import { FaTimes } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
+
+import Button from "components/common/Button";
 import CanCreateArtists from "components/CanCreateArtists";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import MenuLink from "components/Header/MenuLink";
+import { queryManagedArtists, useLogoutMutation } from "queries";
+import { useSnackbar } from "state/SnackbarContext";
+import { getArtistManageUrl } from "utils/artist";
 
-const Menu: React.FC = (props) => {
-  const { setIsMenuOpen } = props as {
-    setIsMenuOpen: (val: boolean) => void;
-  };
+const Menu = forwardRef<
+  HTMLDialogElement,
+  {
+    buttonId: string;
+    dialogId: string;
+    isAdmin: boolean;
+    isLabelAccount: boolean;
+    onClose: () => void;
+  }
+>(({ buttonId, dialogId, isAdmin, isLabelAccount, onClose }, ref) => {
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
-  const navigate = useNavigate();
-  const snackbar = useSnackbar();
-
-  const { user } = useAuthContext();
 
   const {
     data: { results: artists } = {},
@@ -27,190 +30,145 @@ const Menu: React.FC = (props) => {
     refetch,
   } = useQuery(queryManagedArtists());
 
+  const seeOrderPages = isLabelAccount || !!artists?.length;
+
+  const snackbar = useSnackbar();
+
+  const navigate = useNavigate();
   const { mutate: logout } = useLogoutMutation();
 
-  const onLogOut = React.useCallback(() => {
+  const onLogOut = useCallback(() => {
     logout(undefined, {
       onSuccess() {
         refetch();
         snackbar(t("logOutSuccess"), { type: "success" });
         navigate("/");
-        setIsMenuOpen(false);
       },
     });
-  }, [logout, navigate, setIsMenuOpen, snackbar, t]);
+  }, [logout, navigate, snackbar, t]);
 
-  const seeOrderPages = user?.isLabelAccount || !!artists?.length;
+  // Need to use ref in `onClick`, see https://stackoverflow.com/a/77055468
+  // This ref can be removed once `closedby` is baseline
+  const refHandle = useRef<HTMLDialogElement>(null);
+  useImperativeHandle(ref, () => refHandle.current!, []);
 
   return (
-    <menu data-nosnippet>
-      {user && (
-        <>
-          <li>
-            <Button
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/profile");
-              }}
-            >
-              {t("profile")}
-            </Button>
-          </li>
-          {user.isLabelAccount && (
+    <dialog
+      aria-labelledby={buttonId}
+      className="inset-e-0 inset-s-auto max-w-full max-h-full w-full sm:w-[300px] h-full backdrop:bg-[rgba(0,0,0,.5)]"
+      closedby="any"
+      data-nosnippet
+      id={dialogId}
+      ref={refHandle}
+      onClick={(event) => {
+        // Workaround to close on click backdrop, part of dialog
+        // Click on dialog itself blocked by nested div
+        // This handler can be removed once `closedby` is baseline
+        const didClickBackdrop = event.target === refHandle.current;
+        didClickBackdrop && onClose();
+      }}
+      onKeyDown={(event) => {
+        event.key === "Escape" && onClose();
+      }}
+    >
+      {/* This div can be removed once `closedby` is baseline*/}
+      <div className="flex flex-col h-full p-[1rem]">
+        <Button
+          aria-label="Close menu"
+          autoFocus
+          className="border-none bg-transparent pointer leading-[1.5rem] h-[2rem]! text-[1rem]! self-end hover:no-underline focus:no-underline"
+          // @ts-ignore React doesn't support Invoker Commands API
+          command="close"
+          commandfor={dialogId}
+          onClick={() => onClose()}
+          size="compact"
+          startIcon={<FaTimes />}
+        ></Button>
+        <nav className="flex-auto">
+          <ul>
             <li>
-              <Button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate("/profile/label");
-                }}
-              >
+              <MenuLink onClick={onClose} to="/profile">
+                {t("profile")}
+              </MenuLink>
+            </li>
+            <li>
+              <MenuLink onClick={onClose} to="/profile/label">
                 {t("label")}
-              </Button>
+              </MenuLink>
             </li>
-          )}
-          <li>
-            <Button
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/profile/collection");
-              }}
-            >
-              {t("collection")}
-            </Button>
-          </li>
-          <CanCreateArtists>
             <li>
-              <Button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate("/manage");
-                }}
-              >
-                {t("manage")}
-              </Button>
+              <MenuLink onClick={onClose} to="/profile/collection">
+                {t("collection")}
+              </MenuLink>
             </li>
-            <li
-              className={css`
-                padding: 0;
-              `}
-            >
-              <ul
-                className={css`
-                  border-bottom: 1px solid var(--mi-normal-foreground-color) !important;
-                  border-top: 1px solid var(--mi-normal-foreground-color) !important;
-                  margin: 0;
-                  padding: 0 !important ;
-                  max-height: 190px;
-                  overflow: auto;
-                  flex-direction: column;
-                `}
-              >
-                {isLoading && (
-                  <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
-                )}
-                {artists
-                  ?.filter((a) => !a.isLabelProfile)
-                  .map((a) => {
-                    return (
-                      <li key={a.id}>
-                        <Link
-                          title={a.name}
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                          }}
-                          to={getArtistManageUrl(a.id)}
-                        >
-                          <div
-                            className={css`
-                              font-weight: bold;
-                              opacity: 0.7;
-                              font-size: 0.9rem;
-                            `}
+            <CanCreateArtists>
+              <li>
+                <MenuLink onClick={onClose} to="/manage">
+                  {t("manage")}
+                </MenuLink>
+              </li>
+              <li>
+                <ul className="border-y border-y-(--mi-normal-foreground-color)! m-0 p-0! max-h-[190px] overflow-auto">
+                  {isLoading && (
+                    <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
+                  )}
+                  {artists
+                    ?.filter((a) => !a.isLabelProfile)
+                    .map((a) => {
+                      return (
+                        <li key={a.id}>
+                          <MenuLink
+                            onClick={onClose}
+                            title={a.name}
+                            to={getArtistManageUrl(a.id)}
                           >
                             {a.name}
-                          </div>
-                        </Link>
-                      </li>
-                    );
-                  })}
-              </ul>
-            </li>
-          </CanCreateArtists>
-          {user?.isAdmin && (
-            <li>
-              <Button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate("/admin");
-                }}
-              >
-                {t("admin")}
-              </Button>
-            </li>
-          )}
-          {seeOrderPages && (
-            <>
-              <li>
-                <Button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate("/fulfillment");
-                  }}
-                >
-                  {t("fulfillment")}
-                </Button>
-              </li>{" "}
-              <li>
-                <Button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate("/sales");
-                  }}
-                >
-                  {t("viewSalesPage")}
-                </Button>
+                          </MenuLink>
+                        </li>
+                      );
+                    })}
+                </ul>
               </li>
-            </>
-          )}
-          <li>
-            <Button
-              onClick={onLogOut}
-              className={css`
-                border-top: solid 1px var(--mi-lighter-foreground-color);
-              `}
-            >
-              {t("logOut")}
-            </Button>
-          </li>
-        </>
-      )}
-      {!user && (
-        <>
-          <li>
-            <Button
-              className={css`
-                margin-right: 0.75rem;
-              `}
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/login");
-              }}
-            >
-              {t("logIn")}
-            </Button>
-          </li>
-        </>
-      )}
-      <li
-        onClick={() => {
-          setIsMenuOpen(false);
-          navigate("/pages/about");
-        }}
-      >
-        <Button>{t("about")}</Button>
-      </li>
-    </menu>
+            </CanCreateArtists>
+            {isAdmin && (
+              <li>
+                <MenuLink onClick={onClose} to="/admin">
+                  {t("admin")}
+                </MenuLink>
+              </li>
+            )}
+            {seeOrderPages && (
+              <>
+                <li>
+                  <MenuLink onClick={onClose} to="/fulfillment">
+                    {t("fulfillment")}
+                  </MenuLink>
+                </li>
+                <li>
+                  <MenuLink onClick={onClose} to="/sales">
+                    {t("viewSalesPage")}
+                  </MenuLink>
+                </li>
+              </>
+            )}
+            <li>
+              <MenuLink onClick={onClose} to="/pages/about">
+                {t("about")}
+              </MenuLink>
+            </li>
+          </ul>
+        </nav>
+        <Button
+          onClick={() => {
+            onClose();
+            onLogOut();
+          }}
+        >
+          {t("logOut")}
+        </Button>
+      </div>
+    </dialog>
   );
-};
+});
 
 export default Menu;
