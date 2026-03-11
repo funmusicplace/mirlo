@@ -7,13 +7,26 @@ import {
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_ARTISTS } from "./queryKeys";
 
-const fetchLocationTags: QueryFunction<LocationTag[]> = ({ signal }) => {
-  return api.get<LocationTag[]>("v1/locationTags", { signal });
+const fetchLocationTags: QueryFunction<LocationTag[], [string, string]> = ({
+  queryKey: [_, query],
+  signal,
+}) => {
+  const params = new URLSearchParams();
+  if (query.trim()) {
+    params.set("query", query.trim());
+  }
+
+  const queryString = params.toString();
+  const endpoint = queryString
+    ? `v1/locationTags?${queryString}`
+    : "v1/locationTags";
+
+  return api.get<LocationTag[]>(endpoint, { signal });
 };
 
-export function queryLocationTags() {
+export function queryLocationTags(searchQuery: string = "") {
   return queryOptions({
-    queryKey: ["locationTags"],
+    queryKey: ["locationTags", searchQuery],
     queryFn: fetchLocationTags,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
