@@ -1264,7 +1264,8 @@
     "sortBy": "Sort by",
     "sortByName": "Name",
     "sortByLatest": "Latest",
-    "labels": "All labels"
+    "labels": "All labels",
+    "noResultsFound": "No results found"
   },
   "postForm": {
     "imagesInPost": "Manage images in post",

@@ -28,6 +28,7 @@ const Artists = () => {
   const [isLoadingArtists, setIsLoadingArtists] = React.useState(false);
   const [searchParams] = useSearchParams();
   const isLabel = searchParams.get("isLabel") ?? "all";
+  const isViewingLabels = isLabel === "true";
   const [pageSize, setPageSize] = React.useState(20);
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [orderBy, setOrderBy] = React.useState("createdAt");
@@ -85,7 +86,7 @@ const Artists = () => {
           `}
         >
           <h2 className="h5 section-header__heading">
-            {t(isLabel ? "labels" : "artists")}
+            {t(isViewingLabels ? "labels" : "artists")}
           </h2>
           <div
             className={css`
@@ -175,7 +176,7 @@ const Artists = () => {
             {isLoadingArtists && (
               <LoadingBlocks squares={viewAsTiles} margin="1rem" />
             )}
-            {!isLoadingArtists && !artists?.length && t("No results found")}
+            {!isLoadingArtists && !artists?.length && t("noResultsFound")}
             {viewAsTiles && (
               <TrackgroupGrid gridNumber="4">
                 {artists?.map((artist) => (
