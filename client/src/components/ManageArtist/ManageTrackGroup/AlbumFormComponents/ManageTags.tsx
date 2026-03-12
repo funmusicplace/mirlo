@@ -100,13 +100,21 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   const saveTags = React.useCallback(
     async (newValue: unknown) => {
       if (hasId(newValue)) {
-        const newTags = uniq([
+        const newTags = `${newValue.id}`.split(",").map((t) => t.trim());
+        const finalTags = uniq([
           ...tags,
-          `${newValue.id}`.toLowerCase().split(" ").join("-"),
+          newTags
+            .map((t) =>
+              t
+                .split(" ")
+                .map((s) => s.trim())
+                .join("-")
+            )
+            .join(","),
         ]);
 
-        update(newTags);
-        setTags(newTags);
+        update(finalTags);
+        setTags(finalTags);
       }
     },
     [tags, update]

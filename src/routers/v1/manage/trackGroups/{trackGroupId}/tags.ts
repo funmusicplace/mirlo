@@ -34,12 +34,14 @@ export default function () {
         },
       });
 
-      const splitTags = uniq(
-        flatten(tags.map((tag) => tag.split(",").map((t) => t.trim())))
+      const splitTags = flatten(tags.map((t) => t.split(",")));
+
+      const trimmedTags = uniq(splitTags.map((t) => t.trim())).map((t) =>
+        t.trim().toLowerCase()
       );
 
       const newTagIds = [];
-      for (const tag of splitTags) {
+      for (const tag of trimmedTags) {
         const tagObject = await prisma.tag.upsert({
           create: {
             tag,

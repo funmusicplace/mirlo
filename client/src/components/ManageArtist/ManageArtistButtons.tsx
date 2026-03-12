@@ -53,6 +53,8 @@ const PlayingTrack: React.FC = () => {
 const ManageArtistButtons: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { pathname } = useLocation();
+  const { state } = useGlobalStateContext();
+  const isPlaying = state.playing;
   const { artistId, trackGroupId } = useParams();
   const isManagePage =
     pathname.includes("/manage/artists") && !pathname.includes("/customize");
@@ -91,7 +93,7 @@ const ManageArtistButtons: React.FC = () => {
         <div
           className={css`
             z-index: 999999;
-            bottom: 90px;
+            bottom: ${isPlaying ? "90px" : "20px"};
             left: 1rem;
             position: fixed;
             display: flex;

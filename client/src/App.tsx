@@ -84,14 +84,8 @@ function App() {
               min-height: calc(100vh - 65px);
             `}
           >
-            <div
-              className={css`
-                flex-grow: 1;
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-              `}
-            >
+            <ManageArtistButtons />
+            <div className="w-full flex flex-col min-h-screen">
               <div
                 className={css`
                   margin: 0 auto;
@@ -104,8 +98,6 @@ function App() {
                   flex-grow: 1;
                 `}
               >
-                {" "}
-                <ManageArtistButtons />
                 <Outlet />
               </div>
               <Footer />
