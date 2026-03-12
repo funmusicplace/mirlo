@@ -319,11 +319,11 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             <SpaceBetweenDiv>
               <p>{t("noLabelsFound")}</p>
               <ButtonLink
-                to="/releases"
+                to="/artists?isLabel=true"
                 variant="outlined"
                 endIcon={<FaChevronRight />}
               >
-                {t("viewAllReleases")}
+                {t("viewAllLabels")}
               </ButtonLink>
             </SpaceBetweenDiv>
           )}

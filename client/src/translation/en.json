@@ -47,6 +47,7 @@
     "noTracksFound": "No tracks found for your search.",
     "noTagsFound": "No tags matching your search.",
     "viewAllArtists": "Explore all artists",
+    "viewAllLabels": "Explore all labels",
     "popularTags": "Popular Tags",
     "publicDomain": "Public Domain",
     "creativeCommons": "Creative Commons",
@@ -543,6 +544,7 @@
     "edit": "Edit",
     "notAvailable": "This post was made private.",
     "publishedAt": "Published {{ date }}",
+    "likedThisPost": "Liked this post?",
     "willPublishAt": "Will publish at {{ date }}"
   },
   "manage": {
@@ -760,10 +762,10 @@
     "pledges": "Pledges",
     "fundraiserFor": "Fundraiser for",
     "filterPledges": "Filter pledges",
-    "activePledgesOnly": "Active Pledges Only",
+    "activePledgesOnly": "Current Pledges Only",
     "allPledges": "All Pledges",
     "totalPledges": "Total Pledges",
-    "activePledgers": "Active Pledgers",
+    "activePledgers": "Current Pledgers",
     "noPledges": "No pledges yet.",
     "name": "Name",
     "email": "Email",
@@ -777,7 +779,7 @@
     "manageRelease": "Manage"
   },
   "manageAlbum": {
-    "removingFundraiserWithPledgesWarning": "This album has an active fundraiser with {{ count }} pledges. Are you sure you want to remove the fundraiser? This will cancel all active pledges.",
+    "removingFundraiserWithPledgesWarning": "This album has an active fundraiser with {{ count }} pledges. Are you sure you want to remove the fundraiser? This will cancel all current pledges.",
     "removeFundraiser": "Remove fundraiser",
     "viewPledges": "View pledges",
     "cancelFundraiser": "Cancel fundraiser",
@@ -788,7 +790,7 @@
     "defaultTrackMinPrice": "By default, tracks will have this minimum price.",
     "publishedAt": "Publication date",
     "downloadCodes": "Promo codes",
-    "chargePledgesSuccess": "Successfully charged all active pledges for this fundraiser.",
+    "chargePledgesSuccess": "Successfully charged all current pledges for this fundraiser.",
     "keyDetails": "Key details",
     "chargePledges": "Charge pledges now",
     "addFundraiser": "Add fundraiser",

@@ -19,7 +19,8 @@ const SupportArtistPopUp: React.FC<{
     Artist,
     "id" | "name" | "userId" | "urlSlug" | "subscriptionTiers"
   >;
-}> = ({ artist }) => {
+  prefaceText?: string;
+}> = ({ artist, prefaceText }) => {
   const { data: artistData } = useArtistQuery();
   const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -62,10 +63,21 @@ const SupportArtistPopUp: React.FC<{
       className={css`
         text-align: center;
         display: flex;
+        flex-direction: column;
+        align-items: center;
         justify-content: center;
         margin: 3rem 1rem 1rem;
       `}
     >
+      {prefaceText && (
+        <p
+          className={css`
+            margin: 0 0 0.75rem;
+          `}
+        >
+          {prefaceText}
+        </p>
+      )}
       <ArtistButton size="big" rounded onClick={() => setIsOpen(true)}>
         {isSubscribed
           ? t("manageArtistSubscription")
