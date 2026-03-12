@@ -544,6 +544,7 @@
     "edit": "Edit",
     "notAvailable": "This post was made private.",
     "publishedAt": "Published {{ date }}",
+    "likedThisPost": "Liked this post?",
     "willPublishAt": "Will publish at {{ date }}"
   },
   "manage": {

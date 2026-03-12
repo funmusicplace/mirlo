@@ -144,7 +144,12 @@ const Post: React.FC = () => {
           <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
         )}
       </PageMarkdownWrapper>
-      {post.artist && <SupportArtistPopUp artist={post.artist} />}
+      {post.artist && (
+        <SupportArtistPopUp
+          artist={post.artist}
+          prefaceText={t("likedThisPost")}
+        />
+      )}
     </div>
   );
 };
