@@ -45,7 +45,7 @@ export const TrackDetails: React.FC = () => {
         try {
           setIsLoading(true);
           await api.put<Track, Track>(`tracks/${trackId}`, data as Track);
-          snackbar("sucessfullyUpdated", { type: "success" });
+          snackbar(t("successfullyUpdated"), { type: "success" });
         } catch (e) {
           errorHandler(e);
         } finally {
@@ -69,12 +69,14 @@ export const TrackDetails: React.FC = () => {
           {t("saveTrackForm.status")}
           <SelectEl defaultValue="paid" {...register("status")}>
             <option value="free+paid">
-              {t("saveTrackForm.option.freePaid")}
+              {t("saveTrackForm.options.freePaid")}
             </option>
-            <option value="hidden">{t("saveTrackForm.option.hidden")}</option>
-            <option value="free">{t("saveTrackForm.option.free")}</option>
-            <option value="paid">{t("saveTrackForm.option.paid")}</option>
-            <option value="deleted">{t("saveTrackForm.option.deleted")}</option>
+            <option value="hidden">{t("saveTrackForm.options.hidden")}</option>
+            <option value="free">{t("saveTrackForm.options.free")}</option>
+            <option value="paid">{t("saveTrackForm.options.paid")}</option>
+            <option value="deleted">
+              {t("saveTrackForm.options.deleted")}
+            </option>
           </SelectEl>
         </div>
 

@@ -63,7 +63,8 @@ export const Footer = () => {
               i18nKey="aboutUs"
               components={{
                 documentation: <Link to="https://docs.mirlo.space"></Link>,
-                about: <Link to="/pages/about"></Link>,
+                // eslint-disable-next-line jsx-a11y/anchor-has-content
+                about: <a href="https://docs.mirlo.space"></a>,
                 terms: <Link to="/pages/terms"></Link>,
                 privacy: <Link to="/pages/privacy"></Link>,
                 cookie: <Link to="/pages/cookie-policy"></Link>,

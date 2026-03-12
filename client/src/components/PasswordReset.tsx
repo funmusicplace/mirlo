@@ -84,7 +84,7 @@ function PasswordReset() {
             margin-top: 1rem;
           `}
         >
-          {t("setAPasswordToFinishAccountSetUp")}
+          {t("accountIncomplete")}
         </Box>
       )}
       {error && (

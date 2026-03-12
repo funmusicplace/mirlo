@@ -105,7 +105,7 @@ const FundraisingGoal: React.FC<{
       refetch();
     } catch (e) {
       console.error(e);
-      snackbar(t("fundraiserRemovalFailed"), {
+      snackbar(t("removalFailed"), {
         type: "warning",
       });
     } finally {

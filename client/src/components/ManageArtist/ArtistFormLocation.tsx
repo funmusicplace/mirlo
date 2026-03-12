@@ -6,7 +6,7 @@ import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { FaPen } from "react-icons/fa";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   queryLocationTags,
   useAddLocationTag,
@@ -33,20 +33,16 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
   const [isEditing, setIsEditing] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const queryClient = useQueryClient();
   const { handleSubmit, watch, reset, setValue } = useForm<FormData>({
     defaultValues: { location: artist?.location ?? "" },
   });
 
-  const { data: allTags } = useQuery(queryLocationTags());
   const { mutate: addTag } = useAddLocationTag();
   const { mutate: removeTag } = useRemoveLocationTag();
 
   const currentTags =
     artist.artistLocationTags?.map((alt) => alt.locationTag) || [];
-  const availableTags =
-    allTags?.filter(
-      (tag) => !currentTags.some((current) => current.id === tag.id)
-    ) || [];
 
   const handleSave = React.useCallback(
     async (data: FormData) => {
@@ -92,24 +88,24 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
   };
 
   const handleSearchLocations = async (searchString: string) => {
-    if (!searchString.trim()) {
-      return availableTags.map((tag) => ({
-        id: tag.id,
-        name: `${tag.city}${tag.region ? `, ${tag.region}` : ""}, ${tag.country}`,
-      }));
+    const trimmedSearch = searchString.trim();
+
+    if (!trimmedSearch) {
+      return [];
     }
-    const lowerSearch = searchString.toLowerCase();
-    return availableTags
-      .filter(
-        (tag) =>
-          tag.city.toLowerCase().includes(lowerSearch) ||
-          (tag.region && tag.region.toLowerCase().includes(lowerSearch)) ||
-          tag.country.toLowerCase().includes(lowerSearch)
-      )
-      .map((tag) => ({
-        id: tag.id,
-        name: `${tag.city}${tag.region ? `, ${tag.region}` : ""}, ${tag.country}`,
-      }));
+
+    const matchingTags = await queryClient.ensureQueryData(
+      queryLocationTags(trimmedSearch)
+    );
+
+    const availableTags = matchingTags.filter(
+      (tag) => !currentTags.some((current) => current.id === tag.id)
+    );
+
+    return availableTags.map((tag) => ({
+      id: tag.id,
+      name: `${tag.city}${tag.region ? `, ${tag.region}` : ""}, ${tag.country}`,
+    }));
   };
 
   if (!isEditing) {

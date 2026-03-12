@@ -215,8 +215,8 @@ const BuyTrackGroup: React.FC<{
                 title={
                   isDisabled
                     ? user
-                      ? (t("ensurePrice") ?? "")
-                      : (t("ensurePriceAndEmail") ?? "")
+                      ? t("ensurePrice")
+                      : t("ensurePriceAndEmail")
                     : ""
                 }
                 disabled={isDisabled}

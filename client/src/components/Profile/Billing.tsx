@@ -21,7 +21,7 @@ const Billing: React.FC = () => {
             padding: 2rem;
           `}
         >
-          <p>{t("noPaymentFound") ?? "No payment found"}</p>
+          <p>{t("noPaymentFound")}</p>
         </div>
       </WidthContainer>
     );
@@ -34,7 +34,7 @@ const Billing: React.FC = () => {
           padding: 2rem 0;
         `}
       >
-        <h2>{t("completePayment") ?? "Complete Your Payment"}</h2>
+        <h2>{t("completePayment")}</h2>
         <div
           className={css`
             margin-top: 2rem;

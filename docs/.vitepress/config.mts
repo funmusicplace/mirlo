@@ -37,6 +37,10 @@ export default defineConfig({
         items: [
           { text: "Label Guide", link: "/how-tos/label-accounts" },
           {
+            text: "Making your own album art",
+            link: "/how-tos/making-your-own-album-art",
+          },
+          {
             text: "Customizing your profile",
             link: "/how-tos/customizing-mirlo",
           },

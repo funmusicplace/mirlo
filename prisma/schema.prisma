@@ -886,14 +886,14 @@ model Tag {
 }
 
 model LocationTag {
-  id                   Int                 @id @default(autoincrement())
-  city                 String
-  region               String? // State, province, etc.
-  country              String
-  slug                 String              @unique // For URLs and consistent querying
-  artistLocationTags   ArtistLocationTag[]
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
+  id                 Int                 @id @default(autoincrement())
+  city               String?
+  region             String? // State, province, etc.
+  country            String
+  slug               String              @unique // For URLs and consistent querying
+  artistLocationTags ArtistLocationTag[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
   @@unique([city, region, country]) // Ensure no duplicate locations
 }

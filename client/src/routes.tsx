@@ -37,8 +37,12 @@ const routes: RouteObject[] = [
       {
         path: "pages/about",
         async lazy() {
-          const { default: Component } = await import("components/pages/About");
-          return { Component };
+          return {
+            Component: () => {
+              window.location.assign("https://docs.mirlo.space");
+              return null;
+            },
+          };
         },
       },
       {

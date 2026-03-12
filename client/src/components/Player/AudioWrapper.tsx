@@ -57,9 +57,7 @@ export const AudioWrapper: React.FC<{
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
   } = useGlobalStateContext();
-  const { user } = useAuthContext();
   const [mostlyListened, setMostlyListened] = React.useState(false);
-  const userId = user?.id;
   const playerRef = React.useRef<HTMLVideoElement>(null);
 
   const onEnded = React.useCallback(async () => {
@@ -146,12 +144,48 @@ export const AudioWrapper: React.FC<{
           album: currentTrack.trackGroup?.title ?? "",
           artwork: [
             {
+              src: currentTrack.trackGroup.cover?.sizes?.[120] ?? "",
+              sizes: "96x96",
+              type: "image/png",
+            },
+            {
+              src: currentTrack.trackGroup.cover?.sizes?.[120] ?? "",
+              sizes: "128x128",
+              type: "image/png",
+            },
+            {
+              src: currentTrack.trackGroup.cover?.sizes?.[300] ?? "",
+              sizes: "192x192",
+              type: "image/png",
+            },
+            {
+              src: currentTrack.trackGroup.cover?.sizes?.[300] ?? "",
+              sizes: "256x256",
+              type: "image/png",
+            },
+            {
+              src: currentTrack.trackGroup.cover?.sizes?.[600] ?? "",
+              sizes: "384x384",
+              type: "image/png",
+            },
+            {
+              src: currentTrack.trackGroup.cover?.sizes?.[600] ?? "",
+              sizes: "512x512",
+              type: "image/png",
+            },
+            {
               src: currentTrack.trackGroup.cover?.sizes?.[1200] ?? "",
-              type: "image/jpeg",
               sizes: "1200x1200",
+              type: "image/png",
             },
           ],
         });
+        navigator.mediaSession.setActionHandler("play", () =>
+          dispatch({ type: "setPlaying", playing: true })
+        );
+        navigator.mediaSession.setActionHandler("pause", () =>
+          dispatch({ type: "setPlaying", playing: false })
+        );
         navigator.mediaSession.setActionHandler("previoustrack", () =>
           dispatch({ type: "decrementCurrentlyPlayingIndex" })
         );

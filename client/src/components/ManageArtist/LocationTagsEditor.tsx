@@ -38,14 +38,14 @@ const LocationTagsEditor: React.FC<LocationTagsEditorProps> = ({
       { artistId, locationTagId: tagId },
       {
         onSuccess: () => {
-          snackbar("Location added", { type: "success" });
+          snackbar(t("locationAdded"), { type: "success" });
           queryClient.invalidateQueries({
             queryKey: ["artistLocationTags", artistId],
           });
           onTagsChange?.();
         },
         onError: () => {
-          snackbar("Failed to add location", { type: "error" });
+          snackbar(t("failedToAddLocation"), { type: "error" });
         },
       }
     );
@@ -56,14 +56,14 @@ const LocationTagsEditor: React.FC<LocationTagsEditorProps> = ({
       { artistId, locationTagId: tagId },
       {
         onSuccess: () => {
-          snackbar("Location removed", { type: "success" });
+          snackbar(t("locationRemoved"), { type: "success" });
           queryClient.invalidateQueries({
             queryKey: ["artistLocationTags", artistId],
           });
           onTagsChange?.();
         },
         onError: () => {
-          snackbar("Failed to remove location", { type: "error" });
+          snackbar(t("failedToRemoveLocation"), { type: "error" });
         },
       }
     );
@@ -83,7 +83,7 @@ const LocationTagsEditor: React.FC<LocationTagsEditorProps> = ({
       `}
     >
       <div>
-        <h3>{t("locations") || "Locations"}</h3>
+        <h3>{t("locations")}</h3>
         <div
           className={css`
             display: flex;
@@ -98,7 +98,7 @@ const LocationTagsEditor: React.FC<LocationTagsEditorProps> = ({
                 color: var(--mi-lighten-text-color);
               `}
             >
-              {t("noLocationsAdded") || "No locations added yet"}
+              {t("noLocationsAdded")}
             </p>
           ) : (
             currentTags.map((tag) => (
@@ -145,9 +145,7 @@ const LocationTagsEditor: React.FC<LocationTagsEditorProps> = ({
 
       <div>
         <Button onClick={() => setIsOpen(!isOpen)}>
-          {isOpen
-            ? t("hideLocations") || "Hide locations"
-            : t("addLocations") || "Add locations"}
+          {isOpen ? t("hideLocations") : t("addLocations")}
         </Button>
       </div>
 
@@ -184,7 +182,7 @@ const LocationTagsEditor: React.FC<LocationTagsEditorProps> = ({
             font-size: 0.9rem;
           `}
         >
-          {t("allLocationsAdded") || "All available locations have been added"}
+          {t("allLocationsAdded")}
         </p>
       )}
     </div>

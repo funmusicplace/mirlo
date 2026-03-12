@@ -152,7 +152,7 @@ const Menu = forwardRef<
               </>
             )}
             <li>
-              <MenuLink onClick={onClose} to="/pages/about">
+              <MenuLink onClick={onClose} to="https://docs.mirlo.space">
                 {t("about")}
               </MenuLink>
             </li>
