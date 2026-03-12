@@ -36,7 +36,7 @@ We are building an online audio distribution and patronage platform that aims to
 
 ## Features and FAQ
 
-Want a full product walkthrough? See [Mirlo features](/features).
+Want a full product walkthrough? See [Mirlo features](/features/index.md).
 
 Looking for common questions? Read the [FAQ](/faq).
 
