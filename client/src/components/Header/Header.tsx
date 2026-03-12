@@ -194,7 +194,7 @@ const Header = () => {
         <LogoWrapper />
         <div className="flex items-center">
           <HeaderSearch />
-          {instanceArtist && (
+          {instanceArtist && !artistId && (
             <ButtonLink
               to={getArtistUrl(instanceArtist) + "/support"}
               collapsible
