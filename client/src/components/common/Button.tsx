@@ -21,55 +21,6 @@ export interface Sizable {
   smallIcon?: boolean;
 }
 
-function lightOrDark(color: string) {
-  let matchedColor: string | RegExpMatchArray | null | number = color;
-
-  // Variables for red, green, blue values
-  var r, g, b, hsp;
-
-  // Check the format of the color, HEX or RGB?
-  if (color.match(/^rgb/)) {
-    // If RGB --> store the red, green, blue values in separate variables
-    matchedColor = color.match(
-      /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/
-    );
-
-    if (matchedColor) {
-      r = matchedColor[1];
-      g = matchedColor[2];
-      b = matchedColor[3];
-    }
-  } else if (typeof color === "string") {
-    // If hex --> Convert it to RGB: http://gist.github.com/983661
-    matchedColor = +(
-      "0x" + color.slice(1).replace(color.length < 5 ? /./g : "", "$&$&")
-    );
-
-    r = matchedColor >> 16;
-    g = (matchedColor >> 8) & 255;
-    b = matchedColor & 255;
-  }
-
-  if (typeof r === "number" && typeof g === "number" && typeof b === "number") {
-    const rSquared = r * r;
-    // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
-    hsp = Math.sqrt(0.299 * rSquared + 0.587 * (g * g) + 0.114 * (b * b));
-  }
-  // Using the HSP value, determine whether the color is light or dark
-  if (hsp && hsp > 127.5) {
-    return "light";
-  } else {
-    return "dark";
-  }
-}
-
-const isDarkMode = () => {
-  return (
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
-};
-
 const CustomButton = styled.button<Sizable>(
   {},
   ({ buttonRole, size, ...props }) => {

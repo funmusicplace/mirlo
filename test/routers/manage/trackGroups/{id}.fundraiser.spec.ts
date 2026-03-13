@@ -201,7 +201,6 @@ describe("manage/trackGroups/{trackGroupId}/fundraiser", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 404);
-      console.log(response.body);
       assert.equal(
         response.body.error,
         "TrackGroup does not exist or does not belong to user"

@@ -17,6 +17,7 @@ export type TrackGroupQueryOptions = {
   take?: number;
   orderBy?: "random";
   tag?: string;
+  locationSlug?: string;
   title?: string;
   distinctArtists?: boolean;
   isReleased?: "released" | "not-released";
@@ -29,7 +30,17 @@ const fetchTrackGroups: QueryFunction<
 > = ({
   queryKey: [
     _,
-    { skip, take, orderBy, title, tag, distinctArtists, isReleased, license },
+    {
+      skip,
+      take,
+      orderBy,
+      title,
+      tag,
+      locationSlug,
+      distinctArtists,
+      isReleased,
+      license,
+    },
   ],
   signal,
 }) => {
@@ -39,6 +50,7 @@ const fetchTrackGroups: QueryFunction<
   if (orderBy) params.append("orderBy", orderBy);
   if (tag) params.append("tag", tag);
   if (title) params.append("title", title);
+  if (locationSlug) params.append("locationSlug", locationSlug);
   if (isReleased) params.append("isReleased", isReleased);
   if (license) params.append("license", license);
 

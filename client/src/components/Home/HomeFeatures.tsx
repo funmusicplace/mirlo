@@ -16,15 +16,11 @@ const SupportMirlo = () => {
     <div
       className={css`
         width: 100%;
-        background-color: #be3455;
+        background-color: var(--mi-primary-color);
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {
           margin: 0;
-        }
-
-        @media (min-width: 768px) and (prefers-color-scheme: dark) {
-          background-color: var(--mi-secondary-color);
         }
       `}
     >

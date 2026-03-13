@@ -170,17 +170,22 @@ export type ArtistQueryOptions = {
   orderBy?: "random";
   name?: string;
   isLabel?: boolean;
+  locationSlug?: string;
 };
 
 const fetchArtists: QueryFunction<
   { results: Artist[]; total?: number },
   ["fetchArtists", ArtistQueryOptions, ...any]
-> = ({ queryKey: [_, { skip, take, orderBy, name, isLabel }], signal }) => {
+> = ({
+  queryKey: [_, { skip, take, orderBy, name, locationSlug, isLabel }],
+  signal,
+}) => {
   const params = new URLSearchParams();
   if (skip) params.append("skip", String(skip));
   if (take) params.append("take", String(take));
   if (orderBy) params.append("orderBy", orderBy);
   if (name) params.append("name", name);
+  if (locationSlug) params.append("locationSlug", locationSlug);
   if (isLabel) params.append("isLabel", String(isLabel));
 
   return api.get(`v1/artists?${params}`, { signal });

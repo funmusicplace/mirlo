@@ -7,6 +7,23 @@ import {
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_ARTISTS } from "./queryKeys";
 
+const fetchLocationTagBySlug: QueryFunction<LocationTag, [string, string]> = ({
+  queryKey: [_, locationSlug],
+  signal,
+}) => {
+  return api
+    .get<{ result: LocationTag }>(`v1/locationTags/${locationSlug}`, { signal })
+    .then((response) => response.result);
+};
+
+export function getLocationTagBySlug(locationSlug: string = "") {
+  return queryOptions({
+    queryKey: ["locationTags", locationSlug],
+    queryFn: fetchLocationTagBySlug,
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+}
+
 const fetchLocationTags: QueryFunction<LocationTag[], [string, string]> = ({
   queryKey: [_, query],
   signal,

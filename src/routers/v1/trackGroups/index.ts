@@ -8,6 +8,7 @@ import processor, {
 import { turnItemsIntoRSS } from "../../../utils/rss";
 import { set } from "lodash";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
+import { locationQuery } from "../locationTags";
 
 export default function () {
   const operations = {
@@ -25,6 +26,7 @@ export default function () {
       artistId,
       license,
       title,
+      locationSlug,
       isReleased,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
@@ -57,6 +59,18 @@ export default function () {
 
       if (artistId) {
         where.artistId = Number(artistId);
+      }
+
+      if (locationSlug && typeof locationSlug === "string") {
+        where.artist = {
+          artistLocationTags: {
+            some: {
+              locationTag: {
+                slug: { endsWith: locationSlug },
+              },
+            },
+          },
+        };
       }
 
       if (license && license !== "" && license !== "all") {

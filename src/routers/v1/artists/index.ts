@@ -19,8 +19,8 @@ export default function () {
       name,
       orderBy,
       isLabel,
-      includeUnpublished,
       locationSlug,
+      includeUnpublished,
     } = req.query;
 
     try {
@@ -44,7 +44,7 @@ export default function () {
         where.artistLocationTags = {
           some: {
             locationTag: {
-              slug: locationSlug,
+              slug: { endsWith: locationSlug },
             },
           },
         };

@@ -43,62 +43,68 @@ export const ArtistButton: React.FC<
   const { colors } = useGetArtistColors();
 
   let variantStyles = () => {
+    let primaryColor = colors?.primary ?? `var(--mi-primary-color)`;
+    let secondaryColor = colors?.secondary ?? `var(--mi-secondary-color)`;
+
+    if (props.color === "foreground") {
+      primaryColor = colors?.foreground ?? `var(--mi-foreground-color)`;
+    }
     switch (props.variant) {
       case "link":
         return `
         display: inline-flex !important;
-        color: ${colors?.primary} !important;
+        color: ${primaryColor} !important;
 
         svg {
-          fill: ${colors?.primary} !important;
+          fill: ${primaryColor} !important;
         }
 
       `;
       case "outlined":
       case "dashed":
         return `
-        color: ${colors?.primary} !important;
-        border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${colors?.primary} !important;
+        color: ${primaryColor} !important;
+        border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${primaryColor} !important;
 
         svg {
-          fill: ${colors?.primary} !important;
+          fill: ${primaryColor} !important;
         }
 
         &:hover:not(:disabled) {
-          color: ${colors?.primary} !important;
-          background-color: ${colors?.secondary} !important;
+          color: ${primaryColor} !important;
+          background-color: ${secondaryColor} !important;
 
           svg {
-            fill: ${colors?.primary} !important;
+            fill: ${primaryColor} !important;
           }
         }
       `;
       case "transparent":
-        return `color: ${colors?.primary} !important;
+        return `color: ${primaryColor} !important;
 
         svg {
-          fill: ${colors?.primary} !important;
+          fill: ${primaryColor} !important;
         }
 
         &:hover:not(:disabled) {
-          color: ${colors?.secondary} !important;
+          color: ${secondaryColor} !important;
           background-color: transparent !important;
 
           svg {
-            fill: ${colors?.secondary} !important;
+            fill: ${secondaryColor} !important;
           }
         }`;
       default:
         return `
-        background-color: ${colors?.primary} !important;
-        color: ${colors?.secondary} !important;
-        border: 1px solid ${colors?.primary} !important;
+        background-color: ${primaryColor} !important;
+        color: ${secondaryColor} !important;
+        border: 1px solid ${primaryColor} !important;
 
         svg {
-          fill: ${colors?.secondary} !important;
+          fill: ${secondaryColor} !important;
            
           @media (prefers-color-scheme: dark) {
-            fill: ${colors?.secondary} !important;
+            fill: ${secondaryColor} !important;
           }
         }
       `;

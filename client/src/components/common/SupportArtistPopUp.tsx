@@ -1,8 +1,6 @@
 import React from "react";
-import Button from "./Button";
 import Modal from "./Modal";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
-import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import FollowArtist from "./FollowArtist";
 

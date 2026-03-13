@@ -31,6 +31,10 @@
     "cancel": "Cancel",
     "yes": "Yes"
   },
+  "notFound": {
+    "pageNotFound": "Sorry, we couldn't find anything for that.",
+    "goHome": "Go home"
+  },
   "releases": {
     "recentReleases": "Recent releases",
     "futureReleases": "Future releases",
@@ -40,7 +44,9 @@
     "moreReleases": "More releases",
     "noArtistsFound": "No artists found for your search.",
     "viewAllReleases": "Explore all releases",
+    "releases": "Releases",
     "noReleasesFound": "No releases found for your search.",
+    "resultsForLocation": "Results for <strong>{{ location }}</strong>.",
     "noLabelsFound": "No labels found for your search.",
     "tracksForSearch": "Tracks for '{{ search }}'",
     "recentTracks": "Recent tracks",
