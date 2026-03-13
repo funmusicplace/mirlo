@@ -2,6 +2,31 @@ import { Request, Response, NextFunction } from "express";
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 
+export const locationQuery = (query: string): Prisma.LocationTagWhereInput => {
+  return {
+    OR: [
+      {
+        city: {
+          contains: query.trim(),
+          mode: "insensitive",
+        },
+      },
+      {
+        region: {
+          contains: query.trim(),
+          mode: "insensitive",
+        },
+      },
+      {
+        country: {
+          contains: query.trim(),
+          mode: "insensitive",
+        },
+      },
+    ],
+  };
+};
+
 export default function () {
   const operations = {
     GET,
@@ -14,28 +39,7 @@ export default function () {
       let where: Prisma.LocationTagWhereInput | undefined;
 
       if (typeof query === "string" && query.trim().length > 0) {
-        where = {
-          OR: [
-            {
-              city: {
-                contains: query.trim(),
-                mode: "insensitive",
-              },
-            },
-            {
-              region: {
-                contains: query.trim(),
-                mode: "insensitive",
-              },
-            },
-            {
-              country: {
-                contains: query.trim(),
-                mode: "insensitive",
-              },
-            },
-          ],
-        };
+        where = locationQuery(query);
       }
 
       const locationTags = await prisma.locationTag.findMany({

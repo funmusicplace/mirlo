@@ -224,8 +224,6 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    console.log("charge date", charge.createdAt);
-
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledOnce, false);
@@ -289,8 +287,6 @@ describe("send-out-monthly-income-report", () => {
         transactionId: transaction.id,
       },
     });
-
-    console.log("charge date", charge.createdAt);
 
     await sendOutMonthlyIncomeReport();
 

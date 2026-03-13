@@ -3,6 +3,7 @@
 const routes = [
   "tags",
   "locationTags",
+  "locationTags/{slug}",
   "trackGroups",
   "trackGroups/topSold",
   "trackGroups/mostPlayed",

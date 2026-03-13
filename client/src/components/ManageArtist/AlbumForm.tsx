@@ -24,7 +24,7 @@ const AlbumForm: React.FC<{
   const { user } = useAuthContext();
   const userId = user?.id;
   const client = useQueryClient();
-  console.log('gettable"', trackGroup.isGettable);
+
   React.useEffect(() => {
     const trackGroupIsGettable = trackGroup?.isGettable ?? false;
     const defaultValues = {

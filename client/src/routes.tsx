@@ -64,10 +64,12 @@ const routes: RouteObject[] = [
       {
         path: "pages/features",
         async lazy() {
-          const { default: Component } = await import(
-            "components/Home/Features"
-          );
-          return { Component };
+          return {
+            Component: () => {
+              window.location.assign("https://docs.mirlo.space/features");
+              return null;
+            },
+          };
         },
       },
       {
@@ -665,22 +667,46 @@ const routes: RouteObject[] = [
       },
       {
         path: "search",
-        async lazy() {
-          const { default: SearchResults } = await import(
-            "components/SearchResults"
-          );
-          return {
-            Component: () => (
-              <div
-                className={css`
-                  width: 100%;
-                `}
-              >
-                <SearchResults />
-              </div>
-            ),
-          };
-        },
+        children: [
+          {
+            path: "",
+            async lazy() {
+              const { default: SearchResults } = await import(
+                "components/SearchResults"
+              );
+              return {
+                Component: () => (
+                  <div
+                    className={css`
+                      width: 100%;
+                    `}
+                  >
+                    <SearchResults />
+                  </div>
+                ),
+              };
+            },
+          },
+          {
+            path: "locations/:locationSlug",
+            async lazy() {
+              const { default: LocationResults } = await import(
+                "components/LocationResults"
+              );
+              return {
+                Component: () => (
+                  <div
+                    className={css`
+                      width: 100%;
+                    `}
+                  >
+                    <LocationResults />
+                  </div>
+                ),
+              };
+            },
+          },
+        ],
       },
       {
         path: "tags",

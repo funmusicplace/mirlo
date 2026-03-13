@@ -1,10 +1,8 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import { ButtonAnchor } from "components/common/Button";
 import MarkdownContent from "components/common/MarkdownContent";
 import { queryInstanceArtist } from "queries/settings";
 import React from "react";
-import { FaArrowRight } from "react-icons/fa";
 
 const Announcement: React.FC = () => {
   const { data: instanceArtist } = useQuery(queryInstanceArtist());

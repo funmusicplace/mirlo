@@ -139,8 +139,9 @@ const Artists = () => {
                 <option value="">{t("allLocations")}</option>
                 {locationTags?.map((tag) => (
                   <option key={tag.slug} value={tag.slug}>
-                    {tag.city}
-                    {tag.region && `, ${tag.region}`}, {tag.country}
+                    {[tag.city, tag.region, tag.country]
+                      .filter(Boolean)
+                      .join(", ")}
                   </option>
                 ))}
               </SelectEl>

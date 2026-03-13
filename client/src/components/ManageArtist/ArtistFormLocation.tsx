@@ -5,7 +5,10 @@ import { FaSave, FaTimes } from "react-icons/fa";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { FaPen } from "react-icons/fa";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   queryLocationTags,
@@ -104,7 +107,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
 
     return availableTags.map((tag) => ({
       id: tag.id,
-      name: `${tag.city}${tag.region ? `, ${tag.region}` : ""}, ${tag.country}`,
+      name: [tag.city, tag.region, tag.country].filter(Boolean).join(", "),
     }));
   };
 
@@ -121,21 +124,32 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           </div>
         )}
         {artist?.artistLocationTags?.map((tag) => (
-          <Pill key={tag.locationTag.id}>
-            {tag.locationTag.city}
-            {tag.locationTag.region && `, ${tag.locationTag.region}`},{" "}
-            {tag.locationTag.country}
-          </Pill>
-        ))}
-        {!artist?.location && isManage && (
-          <div
-            className={css`
-              opacity: 0.5;
-            `}
+          <ArtistButtonLink
+            key={tag.locationTag.id}
+            variant="link"
+            color="foreground"
+            to={`/search/locations/${tag.locationTag.slug}`}
           >
-            {t("editLocation")}
-          </div>
-        )}
+            {[
+              tag.locationTag.city,
+              tag.locationTag.region,
+              tag.locationTag.country,
+            ]
+              .filter(Boolean)
+              .join(", ")}
+          </ArtistButtonLink>
+        ))}
+        {!artist?.location &&
+          isManage &&
+          artist?.artistLocationTags?.length === 0 && (
+            <div
+              className={css`
+                opacity: 0.5;
+              `}
+            >
+              {t("editLocation")}
+            </div>
+          )}
         {isManage && (
           <ArtistButton
             variant="dashed"
@@ -143,7 +157,6 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             onlyIcon
             smallIcon
             onClick={() => setIsEditing(true)}
-            className={css``}
             title={t("editLocation")}
             startIcon={<FaPen />}
           />
@@ -170,8 +183,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           currentTags.map((tag) => (
             <Pill>
               <span>
-                {tag.city}
-                {tag.region && `, ${tag.region}`}, {tag.country}
+                {[tag.city, tag.region, tag.country].filter(Boolean).join(", ")}
               </span>
               <ArtistButton
                 smallIcon
@@ -183,7 +195,18 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             </Pill>
           ))
         )}
-        {watchedLocation ? <>Custom location: {watchedLocation}</> : null}
+        {watchedLocation ? (
+          <div className="flex items-center gap-1">
+            Custom location: {watchedLocation}{" "}
+            <ArtistButton
+              title={t("removeCustomLocation")}
+              smallIcon
+              size="compact"
+              onClick={() => setValue("location", "")}
+              startIcon={<FaTimes />}
+            />
+          </div>
+        ) : null}
         <AutoComplete
           placeholder={t("searchLocations")}
           getOptions={handleSearchLocations}

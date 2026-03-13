@@ -118,9 +118,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           `}
         >
           {!!tags?.results.length && (
-            <TrackgroupGrid gridNumber="4">
-              <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />
-            </TrackgroupGrid>
+            <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />
           )}
           {isLoadingTags && <LoadingBlocks squares />}
           {!isLoadingTags && !tags?.results.length && (
