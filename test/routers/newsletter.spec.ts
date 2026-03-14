@@ -23,7 +23,7 @@ async function createInstanceArtist() {
       settings: {
         platformPercent: 10,
         instanceCustomization: {
-          artistId: artist.id,
+          artistId: `${artist.id}`,
         },
       },
     },

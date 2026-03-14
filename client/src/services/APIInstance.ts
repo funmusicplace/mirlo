@@ -65,7 +65,8 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
       }
 
       if (resp.status >= 400) {
-        const message = json?.error ?? "There was a problem with the API";
+        const message =
+          JSON.stringify(json?.error) ?? "There was a problem with the API";
         throw new APIResponseError(message, resp.status, json);
       }
       return json;
