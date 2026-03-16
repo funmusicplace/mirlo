@@ -21,12 +21,34 @@ const PaymentInputElement: React.FC<{
   platformPercent: number;
   minPrice?: number;
   artistName?: string;
-}> = ({ currency, platformPercent, minPrice, artistName }) => {
+  discountPercent?: number;
+}> = ({
+  currency,
+  platformPercent,
+  minPrice,
+  artistName,
+  discountPercent = 0,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
   const { register, setValue, watch } = useFormContext<FormData>();
 
   const chosenPrice = watch("chosenPrice");
+  const numericChosenPrice = Number(chosenPrice);
+  const normalizedDiscountPercent = Math.min(
+    100,
+    Math.max(0, Number(discountPercent) || 0)
+  );
+  const discountAmount =
+    isFinite(numericChosenPrice) &&
+    numericChosenPrice > 0 &&
+    normalizedDiscountPercent > 0
+      ? (numericChosenPrice * normalizedDiscountPercent) / 100
+      : 0;
+  const finalPrice =
+    isFinite(numericChosenPrice) && normalizedDiscountPercent > 0
+      ? Math.max(0, numericChosenPrice - discountAmount)
+      : numericChosenPrice;
 
   const addMoneyAmount = (val: number) => {
     const currentPrice = Number(chosenPrice || 0);
@@ -83,9 +105,23 @@ const PaymentInputElement: React.FC<{
         addMoneyAmount={addMoneyAmount}
         currency={currency}
       />
+      {isFinite(numericChosenPrice) &&
+        numericChosenPrice > 0 &&
+        normalizedDiscountPercent > 0 && (
+          <div className="w-full align-center mt-2 rounded border p-3 text-sm bg-(--mi-primary-color) text-(--mi-normal-background-color)">
+            {t("discountSummary", {
+              discountPercent: normalizedDiscountPercent,
+              discountAmount: moneyDisplay({
+                amount: discountAmount,
+                currency,
+              }),
+              finalPrice: moneyDisplay({ amount: finalPrice, currency }),
+            })}
+          </div>
+        )}
       <PlatformPercent
         percent={platformPercent}
-        chosenPrice={chosenPrice}
+        chosenPrice={finalPrice}
         currency={currency}
         artistName={artistName}
       />

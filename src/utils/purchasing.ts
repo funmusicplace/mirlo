@@ -20,3 +20,44 @@ export const determinePrice = (
 
   return { priceNumber, isPriceZero };
 };
+
+export const normalizeDiscountPercent = (
+  discountPercent: unknown
+): number | undefined => {
+  if (
+    discountPercent === undefined ||
+    discountPercent === null ||
+    discountPercent === ""
+  ) {
+    return undefined;
+  }
+
+  const parsed = Number(discountPercent);
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+
+  return Math.min(100, Math.max(0, Math.round(parsed)));
+};
+
+export const calculateDiscountedPrice = (
+  priceNumber: number,
+  discountPercent: unknown
+) => {
+  const normalizedDiscountPercent =
+    normalizeDiscountPercent(discountPercent) ?? 0;
+  const roundedDiscountAmount = Number(
+    ((priceNumber * normalizedDiscountPercent) / 100).toFixed()
+  );
+  const discountAmount =
+    normalizedDiscountPercent > 0
+      ? Math.min(roundedDiscountAmount, priceNumber)
+      : 0;
+  const discountedPriceNumber = Math.max(0, priceNumber - discountAmount);
+
+  return {
+    normalizedDiscountPercent,
+    discountAmount,
+    discountedPriceNumber,
+  };
+};

@@ -29,9 +29,8 @@ import { subscribeUserToArtist } from "../artist";
 import { createOrUpdatePledge } from "../trackGroup";
 import { getClient } from "../../activityPub/utils";
 import { calculateAppFee } from "../processingPayments";
-import { Session } from "inspector";
 
-const { STRIPE_KEY, API_DOMAIN } = process.env;
+const { STRIPE_KEY } = process.env;
 
 export const OPTION_JOINER = ";;";
 

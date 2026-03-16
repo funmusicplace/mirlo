@@ -9,14 +9,12 @@ import { bp } from "../../constants";
 import PlatformPercent from "components/common/PlatformPercent";
 import LoadingBlocks from "./LoadingBlocks";
 import styled from "@emotion/styled";
-import ArtistVariableSupport, {
-  SupportBoxButton,
-} from "./ArtistVariableSupport";
+import ArtistVariableSupport from "./ArtistVariableSupport";
 import { useAuthContext } from "state/AuthContext";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { useGetArtistColors } from "./ArtistButtons";
+import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
 import useErrorHandler from "services/useErrorHandler";
 
 const StyledSupportBox = styled(Box)`
@@ -150,6 +148,11 @@ const ArtistSupportBox: React.FC<{
         `}
       >
         <MarkdownContent content={subscriptionTier.description} />
+        <p className="mt-3 text-sm opacity-80">
+          {t("tierStoreDiscount", {
+            discountPercent: subscriptionTier.discountPercent ?? 0,
+          })}
+        </p>
       </div>
       <div
         className={css`
@@ -210,17 +213,17 @@ const ArtistSupportBox: React.FC<{
               `}
             >
               {user && isSubscribedToArtist && !isSubscribedToTier && (
-                <SupportBoxButton
+                <ArtistButton
                   onClick={() => subscribeToTier(subscriptionTier)}
                   isLoading={isCheckingForSubscription}
                 >
                   {t("chooseThisSubscription")}
-                </SupportBoxButton>
+                </ArtistButton>
               )}
               {user && isSubscribedToTier && (
-                <SupportBoxButton onClick={() => cancelSubscription()}>
+                <ArtistButton onClick={() => cancelSubscription()}>
                   {t("cancelSubscription")}
-                </SupportBoxButton>
+                </ArtistButton>
               )}
             </div>
           </Box>

@@ -90,6 +90,7 @@ export default function () {
         allowVariable,
         defaultAmount,
         autoPurchaseAlbums,
+        discountPercent,
         imageId,
       } = req.body;
       const subscription = await prisma.artistSubscriptionTier.create({
@@ -106,6 +107,7 @@ export default function () {
           currency: userForCurrency?.currency ?? "usd",
           allowVariable,
           defaultAmount,
+          discountPercent,
         },
       });
       if (imageId) {

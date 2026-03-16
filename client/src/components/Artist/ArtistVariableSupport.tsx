@@ -1,7 +1,5 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
-import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { isEmpty } from "lodash";
@@ -11,15 +9,10 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useArtistContext } from "state/ArtistContext";
 import { useAuthContext } from "state/AuthContext";
-import { useSnackbar } from "state/SnackbarContext";
 import useErrorHandler from "services/useErrorHandler";
-
-export const SupportBoxButton = styled(Button)`
-  white-space: normal !important;
-  padding: 0.5rem 0.5rem;
-`;
+import { getCurrencySymbol } from "components/common/Money";
+import { ArtistButton } from "./ArtistButtons";
 
 const ArtistVariableSupport: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -61,7 +54,7 @@ const ArtistVariableSupport: React.FC<{
 
   return (
     <>
-      <SupportBoxButton
+      <ArtistButton
         size="big"
         rounded
         uppercase
@@ -75,7 +68,7 @@ const ArtistVariableSupport: React.FC<{
         `}
       >
         {t("support")}
-      </SupportBoxButton>
+      </ArtistButton>
       <Modal
         size="small"
         open={open}
@@ -83,27 +76,20 @@ const ArtistVariableSupport: React.FC<{
         title={t("howMuch") ?? ""}
       >
         <form onSubmit={handleSubmit(() => subscribeToTier(tier))}>
-          <p>{tier.description}</p>
-          <div
-            className={css`
-              display: flex;
-              align-items: center;
-              margin-bottom: 1rem;
-              margin-top: 1rem;
-
-              input {
-                margin-right: 1rem;
-              }
-            `}
-          >
+          <p className="py-2">{tier.description}</p>
+          <div className="flex items-center my-1 gap-2 ">
+            <span className="whitespace-nowrap">
+              {getCurrencySymbol(tier.currency)}
+            </span>
             <InputEl
               {...register("amount", {
                 min: tier.minAmount ? tier.minAmount / 100 : undefined,
                 required: true,
               })}
             />
-            {tier.currency}{" "}
-            {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
+            <span className="whitespace-nowrap">
+              {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
+            </span>
             {!!tier.minAmount && formState.errors?.amount && (
               <small>
                 {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
@@ -111,24 +97,19 @@ const ArtistVariableSupport: React.FC<{
             )}
           </div>
 
-          <div
-            className={css`
-              width: 100%;
-              padding: 0.5rem 0m;
-            `}
-          >
-            {t("includesNewReleasesLong")}
-          </div>
+          <div className="w-full py-2">{t("includesNewReleasesLong")}</div>
 
-          <SupportBoxButton
+          <ArtistButton
             isLoading={isCheckingForSubscription}
             disabled={isCheckingForSubscription || !isEmpty(formState.errors)}
-            size="compact"
+            size="big"
             uppercase
+            rounded
             type="submit"
+            className="w-full mt-2"
           >
             {t("letsSupport")}
-          </SupportBoxButton>
+          </ArtistButton>
           <div
             className={css`
               margin-top: 1rem;

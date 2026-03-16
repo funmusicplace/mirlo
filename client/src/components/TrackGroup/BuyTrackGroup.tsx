@@ -37,6 +37,12 @@ const BuyTrackGroup: React.FC<{
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
+  const activeSubscriptionForArtist = user?.artistUserSubscriptions?.find(
+    (subscription) =>
+      subscription.artistSubscriptionTier.artistId === trackGroup.artistId
+  );
+  const discountPercent =
+    activeSubscriptionForArtist?.artistSubscriptionTier.discountPercent ?? 0;
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
   const initialChosenPriceCents = track
     ? (minPrice ?? 0)
@@ -145,15 +151,7 @@ const BuyTrackGroup: React.FC<{
 
   return (
     <FormProvider {...methods}>
-      <div
-        className={
-          noPadding
-            ? ""
-            : css`
-                padding: 1.5rem 2rem 2rem;
-              `
-        }
-      >
+      <div className={noPadding ? "" : "p-4"}>
         {trackGroup.fundraiser?.isAllOrNothing && (
           <p
             className={css`
@@ -169,13 +167,14 @@ const BuyTrackGroup: React.FC<{
             <Money amount={minPrice / 100} currency={trackGroup.currency} />, or
           </p>
         )}
-        <form onSubmit={handleSubmit(purchaseAlbum)}>
+        <form className="flex flex-col" onSubmit={handleSubmit(purchaseAlbum)}>
           <FormComponent>
             <PaymentInputElement
               currency={trackGroup.currency}
               platformPercent={trackGroup.platformPercent}
               minPrice={minPrice}
               artistName={trackGroup.artist?.name}
+              discountPercent={discountPercent}
             />
           </FormComponent>
 
@@ -211,6 +210,7 @@ const BuyTrackGroup: React.FC<{
                 rounded
                 type="submit"
                 endIcon={<FaArrowRight />}
+                className="self-end"
                 isLoading={stripeLoading}
                 title={
                   isDisabled

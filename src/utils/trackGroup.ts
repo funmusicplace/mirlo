@@ -439,6 +439,7 @@ export const registerTrackPurchase = async ({
   paymentProcessorKey,
   message,
   platformCut = null,
+  discountPercent,
 }: {
   userId: number;
   pricePaid: number;
@@ -447,6 +448,7 @@ export const registerTrackPurchase = async ({
   message?: string | null;
   trackId: number;
   platformCut?: number | null;
+  discountPercent?: number;
 }) => {
   const token = randomUUID();
 
@@ -467,6 +469,7 @@ export const registerTrackPurchase = async ({
           currency: currencyPaid,
           stripeId: paymentProcessorKey,
           platformCut: platformCut,
+          discountPercent: discountPercent,
           paymentStatus: "COMPLETED",
         },
       });
