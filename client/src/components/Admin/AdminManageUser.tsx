@@ -11,10 +11,12 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
+import { InputEl } from "components/common/Input";
 
 const AdminManageUser = () => {
   const { id } = useParams();
   const [user, setUser] = React.useState<UserFromAdmin>();
+  const [stripeAccountId, setStripeAccountId] = React.useState<string>("");
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ const AdminManageUser = () => {
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);
     setUser(response.result);
+    setStripeAccountId(response.result.stripeAccountId || "");
     setFeatureFlags(response.result.featureFlags);
   }, [id]);
 
@@ -204,8 +207,27 @@ const AdminManageUser = () => {
                 </td>
               </tr>
               <tr>
-                <td>stripe linked</td>
-                <td>{user.stripeAccountId ? <FaCheck /> : <FaTimes />}</td>
+                <td>
+                  <label htmlFor="input-stripe-account-id">
+                    Stripe account ID
+                  </label>
+                </td>
+                <td className="flex">
+                  <InputEl
+                    id="input-stripe-account-id"
+                    onChange={(event) => setStripeAccountId(event.target.value)}
+                    type="text"
+                    value={stripeAccountId}
+                  />
+                  <Button
+                    onClick={async () => {
+                      await api.put(`admin/users/${id}`, { stripeAccountId });
+                      callback();
+                    }}
+                  >
+                    Save
+                  </Button>
+                </td>
               </tr>
               <tr>
                 <td>receive mailing list</td>

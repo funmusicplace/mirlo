@@ -16,14 +16,21 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { email, isLabelAccount, isAdmin, featureFlags, canCreateArtists } =
-      req.body as {
-        email: string;
-        isLabelAccount: boolean;
-        featureFlags: string[];
-        isAdmin: boolean;
-        canCreateArtists: boolean;
-      };
+    const {
+      email,
+      isLabelAccount,
+      isAdmin,
+      featureFlags,
+      canCreateArtists,
+      stripeAccountId,
+    } = req.body as {
+      email: string;
+      isLabelAccount: boolean;
+      featureFlags: string[];
+      isAdmin: boolean;
+      canCreateArtists: boolean;
+      stripeAccountId: string;
+    };
     try {
       await prisma.user.update({
         where: { id: Number(req.params.id) },
@@ -33,6 +40,7 @@ export default function () {
           featureFlags,
           isAdmin,
           canCreateArtists,
+          stripeAccountId,
         },
       });
       res.json({
@@ -61,6 +69,7 @@ export default function () {
           isLabelAccount: true,
           isAdmin: true,
           featureFlags: true,
+          stripeAccountId: true,
         },
       });
       if (!user) {
