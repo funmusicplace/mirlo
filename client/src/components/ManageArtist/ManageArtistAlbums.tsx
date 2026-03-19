@@ -84,13 +84,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       {(unpublishedReleases.length ?? 0) > 0 && (
         <>
           <h3>{t("unpublishedReleases")}</h3>
-          <div
-            className={css`
-              padding-bottom: 1rem;
-              display: flex;
-              flex-wrap: wrap;
-            `}
-          >
+          <div className="flex flex-wrap gap-4">
             {artist &&
               unpublishedReleases.map((album) => (
                 <TrackGroupCard artist={artist} album={album} key={album.id} />
@@ -101,13 +95,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       {(publishedReleases.length ?? 0) > 0 && (
         <>
           <h3>{t("publishedReleases")}</h3>
-          <div
-            className={css`
-              padding-bottom: 1rem;
-              display: flex;
-              flex-wrap: wrap;
-            `}
-          >
+          <div className="flex flex-wrap gap-4">
             {artist &&
               publishedReleases.map((album) => (
                 <TrackGroupCard artist={artist} album={album} key={album.id} />

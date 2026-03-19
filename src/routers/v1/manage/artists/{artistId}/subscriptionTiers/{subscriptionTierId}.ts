@@ -9,6 +9,19 @@ import { doesSubscriptionTierBelongToUser } from "../../../../../../utils/owners
 import prisma from "@mirlo/prisma";
 import { getSiteSettings } from "../../../../../../utils/settings";
 
+const normalizeDiscountPercent = (value: unknown): number | undefined => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+
+  return Math.min(100, Math.max(0, Math.round(parsed)));
+};
+
 export default function () {
   const operations = {
     PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
@@ -94,6 +107,7 @@ export default function () {
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
           autoPurchaseAlbums: !!req.body.autoPurchaseAlbums,
+          discountPercent: normalizeDiscountPercent(req.body.discountPercent),
         },
       });
 

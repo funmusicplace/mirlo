@@ -12,6 +12,7 @@ import Button from "components/common/Button";
 import { useSnackbar } from "state/SnackbarContext";
 import { useDeletePledgeMutation, useUpdatePledgeMutation } from "queries";
 import { useConfirm } from "utils/useConfirm";
+import { useAuthContext } from "state/AuthContext";
 
 interface FormData {
   chosenPrice: string;
@@ -33,6 +34,13 @@ const BackingThisProject: React.FC<{
   const { mutateAsync: updatePledge } = useUpdatePledgeMutation();
   const { mutateAsync: deletePledge } = useDeletePledgeMutation();
   const { ask } = useConfirm();
+  const { user } = useAuthContext();
+  const activeSubscriptionForArtist = user?.artistUserSubscriptions?.find(
+    (subscription) =>
+      subscription.artistSubscriptionTier.artistId === trackGroup.artistId
+  );
+  const discountPercent =
+    activeSubscriptionForArtist?.artistSubscriptionTier.discountPercent ?? 0;
 
   const [isSavingPledge, setIsSavingPledge] = React.useState(false);
 
@@ -111,6 +119,7 @@ const BackingThisProject: React.FC<{
                 platformPercent={trackGroup.platformPercent}
                 minPrice={trackGroup.minPrice}
                 artistName={trackGroup.artist?.name}
+                discountPercent={discountPercent}
               />
             </FormComponent>
             <div className="flex justify-between">

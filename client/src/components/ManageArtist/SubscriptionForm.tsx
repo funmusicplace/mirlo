@@ -43,6 +43,7 @@ type FormData = {
   name: string;
   description: string;
   minAmount: string;
+  discountPercent?: number;
   allowVariable: boolean;
   autoPurchaseAlbums: boolean;
   platformPercent?: number;
@@ -92,6 +93,10 @@ const SubscriptionForm: React.FC<{
               "imageId",
             ]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
+            discountPercent:
+              data.discountPercent !== undefined
+                ? Number(data.discountPercent)
+                : undefined,
           };
           if (localExistingId) {
             const result = await api.put<
@@ -164,23 +169,14 @@ const SubscriptionForm: React.FC<{
           <h2>{t("theMoneyBit")}</h2>
           <FormComponent>
             {t("minimumAmount")}
-            <div
-              className={css`
-                display: flex;
-                width: 100%;
-
-                span {
-                  margin-left: 1rem;
-                }
-              `}
-            >
+            <div className="flex w-full items-center gap-2">
               <InputEl
                 step={0.01}
                 type="number"
                 {...register("minAmount", { min: 1 })}
                 min={0}
               />
-              <span>
+              <span className="whitespace-nowrap">
                 {t("inCurrency", { currency: user?.currency ?? "usd" })}
               </span>
             </div>
@@ -190,6 +186,11 @@ const SubscriptionForm: React.FC<{
                   t("minAmountError")}
               </FormError>
             )}
+            <FormCheckbox
+              idPrefix={`${localExistingId}`}
+              keyName="allowVariable"
+              description={t("allowVariableDescription")}
+            />
           </FormComponent>
 
           {localExistingId && (
@@ -206,13 +207,6 @@ const SubscriptionForm: React.FC<{
           )}
 
           <FormComponent>
-            <FormCheckbox
-              idPrefix={`${localExistingId}`}
-              keyName="allowVariable"
-              description={t("allowVariableDescription")}
-            />
-          </FormComponent>
-          <FormComponent>
             <label>{t("interval")}</label>
             <SelectEl defaultValue="paid" {...register("interval")}>
               <option value="MONTH">{t("monthly")}</option>
@@ -220,8 +214,25 @@ const SubscriptionForm: React.FC<{
             </SelectEl>
           </FormComponent>
         </FormSection>
+
         <FormSection>
           <h2>{t("rewards")}</h2>
+          <FormComponent>
+            <label>{t("discountPercent")}</label>
+            <div className="flex w-full items-center">
+              <InputEl
+                step={1}
+                type="number"
+                {...register("discountPercent", { min: 0, max: 100 })}
+                min={0}
+                max={100}
+              />
+              <span className="ml-1">%</span>
+            </div>
+            {formState.errors.discountPercent && (
+              <FormError>{t("discountPercentError")}</FormError>
+            )}
+          </FormComponent>
           <FormComponent>
             <FormCheckbox
               idPrefix={`${localExistingId}`}

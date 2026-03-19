@@ -191,6 +191,9 @@ export const handleTrackGroupPurchase = async (
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
         paymentStatus: "COMPLETED",
+        discountPercent: session?.metadata?.discountPercent
+          ? Number(session.metadata.discountPercent)
+          : undefined,
       },
     });
 
@@ -404,6 +407,9 @@ export const handleTrackPurchase = async (
       currencyPaid: session?.currency ?? "USD",
       paymentProcessorKey: session?.id ?? null,
       platformCut: applicationFee ?? null,
+      discountPercent: session?.metadata?.discountPercent
+        ? Number(session.metadata.discountPercent)
+        : undefined,
     });
 
     const user = await prisma.user.findFirst({
@@ -783,6 +789,9 @@ export const handleArtistMerchPurchase = async (
                   stripeId: session?.id ?? "",
                   shippingFeeAmount: session.shipping_cost?.amount_total ?? 0,
                   paymentStatus: "COMPLETED",
+                  discountPercent: session?.metadata?.discountPercent
+                    ? Number(session.metadata.discountPercent)
+                    : undefined,
                 },
               });
 

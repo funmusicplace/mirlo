@@ -57,25 +57,8 @@ const SupportArtistPopUp: React.FC<{
   }
 
   return (
-    <div
-      className={css`
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 3rem 1rem 1rem;
-      `}
-    >
-      {prefaceText && (
-        <p
-          className={css`
-            margin: 0 0 0.75rem;
-          `}
-        >
-          {prefaceText}
-        </p>
-      )}
+    <div className="flex flex-col items-center justify-center text-center mx-4 mt-12 mb-4">
+      {prefaceText && <p className="mb-3">{prefaceText}</p>}
       <ArtistButton size="big" rounded onClick={() => setIsOpen(true)}>
         {isSubscribed
           ? t("manageArtistSubscription")

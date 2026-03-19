@@ -91,6 +91,32 @@ export const findOrCreateUserBasedOnEmail = async (
   return { userId, newUser, user };
 };
 
+export const findUserDiscountPercentsForArtist = async (
+  userId: number,
+  artistId: number
+) => {
+  const activeSubscriptions = await prisma.artistUserSubscription.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+      artistSubscriptionTier: {
+        artistId,
+      },
+    },
+    select: {
+      artistSubscriptionTier: {
+        select: {
+          discountPercent: true,
+        },
+      },
+    },
+  });
+
+  return activeSubscriptions.map(
+    (subscription) => subscription.artistSubscriptionTier.discountPercent ?? 0
+  );
+};
+
 export const updateCurrencies = async (userId: number, currency: string) => {
   await prisma.user.update({
     where: {

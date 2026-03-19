@@ -62,12 +62,13 @@ export default function () {
       }
 
       if (locationSlug && typeof locationSlug === "string") {
-        where.artist = {
-          artistLocationTags: {
-            some: {
-              locationTag: {
-                slug: { endsWith: locationSlug },
-              },
+        if (!where.artist) {
+          where.artist = {};
+        }
+        where.artist.artistLocationTags = {
+          some: {
+            locationTag: {
+              slug: { endsWith: locationSlug },
             },
           },
         };

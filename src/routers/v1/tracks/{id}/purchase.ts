@@ -7,6 +7,7 @@ import { createStripeCheckoutSessionForTrackPurchase } from "../../../../utils/s
 import { handleTrackPurchase } from "../../../../utils/handleFinishedTransactions";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
 
 type Params = {
   id: string;
@@ -71,6 +72,18 @@ export default function () {
         await subscribeUserToArtist(track.trackGroup?.artist, loggedInUser);
       }
 
+      let discountPercent: number | undefined;
+      if (loggedInUser) {
+        const discounts = await findUserDiscountPercentsForArtist(
+          loggedInUser.id,
+          track.trackGroup.artistId
+        );
+
+        discountPercent = discounts.reduce((max, discount) => {
+          return Math.max(max, discount);
+        }, 0);
+      }
+
       const stripeAccountId =
         track.trackGroup.paymentToUser?.stripeAccountId ??
         track.trackGroup.artist.paymentToUser?.stripeAccountId ??
@@ -114,6 +127,7 @@ export default function () {
           message,
           track,
           stripeAccountId,
+          discountPercent,
         });
         res.status(200).json({
           redirectUrl: session.url,

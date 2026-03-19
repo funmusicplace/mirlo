@@ -377,6 +377,7 @@ model ArtistSubscriptionTier {
   postSubscriptionTiers PostSubscriptionTier[]
   isDefaultTier         Boolean                  @default(false)
   platformPercent       Int?                     @default(7)
+  discountPercent       Int?                     @default(0)
   autoPurchaseAlbums    Boolean                  @default(false)
   collectAddress        Boolean?                 @default(false)
   images                SubscriptionTierImage[]
@@ -617,6 +618,7 @@ model UserTransaction {
   associatedPledge              FundraiserPledge?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
   paymentStatus                 PaymentStatus                  @default(PENDING)
+  discountPercent               Int?                           @default(0)
 }
 
 enum PaymentStatus {

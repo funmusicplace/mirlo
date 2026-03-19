@@ -46,14 +46,13 @@ const TrackGroupCard: React.FC<{
     (album.publishedAt && new Date(album.publishedAt) < new Date());
 
   return (
-    <Box
+    <div
       key={album.id}
       className={css`
         display: flex;
         width: auto;
         flex-basis: 49%;
         flex-grow: 0;
-        padding: 0 2rem 0 0;
         align-items: center;
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -249,7 +248,7 @@ const TrackGroupCard: React.FC<{
           </ArtistButton>
         </div>
       </div>
-    </Box>
+    </div>
   );
 };
 

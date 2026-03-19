@@ -15,6 +15,7 @@ import {
   calculatePlatformPercent,
   castToFixed,
 } from "../processingPayments";
+import { calculateDiscountedPrice } from "../purchasing";
 import stripe, {
   createMerchStripeProduct,
   createSubscriptionStripeProduct,
@@ -47,6 +48,41 @@ const buildCheckoutCancelSearchParams = ({
   return params;
 };
 
+const buildCheckoutLineItemsWithDiscount = ({
+  priceNumber,
+  currency,
+  productKey,
+  quantity = 1,
+  discountPercent,
+}: {
+  priceNumber: number;
+  currency: string;
+  productKey: string;
+  quantity?: number;
+  discountPercent?: number | null;
+}) => {
+  const { normalizedDiscountPercent, discountAmount, discountedPriceNumber } =
+    calculateDiscountedPrice(priceNumber, discountPercent);
+
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    {
+      price_data: {
+        unit_amount: castToFixed(priceNumber - (discountAmount ?? 0)),
+        currency,
+        product: productKey,
+      },
+      quantity,
+    },
+  ];
+
+  return {
+    lineItems,
+    normalizedDiscountPercent,
+    discountAmount,
+    discountedPriceNumber,
+  };
+};
+
 export const createStripeCheckoutSessionForTrackPurchase = async ({
   loggedInUser,
   email,
@@ -54,6 +90,7 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
   priceNumber,
   track,
   stripeAccountId,
+  discountPercent,
 }: {
   loggedInUser?: User;
   email?: string;
@@ -66,6 +103,7 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
     };
   }>;
   stripeAccountId: string;
+  discountPercent?: number | null;
 }) => {
   const client = await prisma.client.findFirst({
     where: {
@@ -89,29 +127,31 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
       track.trackGroup.currency?.toLowerCase()) ??
     "usd";
 
+  const {
+    lineItems,
+    normalizedDiscountPercent,
+    discountAmount,
+    discountedPriceNumber,
+  } = buildCheckoutLineItemsWithDiscount({
+    priceNumber,
+    currency,
+    productKey,
+    discountPercent,
+  });
+
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
         application_fee_amount: await calculateAppFee(
-          priceNumber,
+          discountedPriceNumber,
           currency,
           track.trackGroup.platformPercent
         ),
       },
       ui_mode: "embedded",
-      line_items: [
-        {
-          price_data: {
-            tax_behavior: "exclusive",
-            unit_amount: castToFixed(priceNumber),
-            currency,
-            product: productKey,
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       metadata: {
         clientId: client?.id ?? null,
         purchaseType: "track",
@@ -122,6 +162,8 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
         userEmail: email ?? null,
         stripeAccountId,
         message: message ?? null,
+        discountPercent: normalizedDiscountPercent,
+        discountAmount: discountAmount,
       },
       mode: "payment",
       return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
@@ -221,6 +263,7 @@ export const createStripeCheckoutSessionForPurchase = async ({
   trackGroup,
   stripeAccountId,
   message,
+  discountPercent,
 }: {
   loggedInUser?: User;
   email?: string;
@@ -230,6 +273,7 @@ export const createStripeCheckoutSessionForPurchase = async ({
     include: { artist: true; cover: true };
   }>;
   stripeAccountId: string;
+  discountPercent?: number | null;
 }) => {
   const client = await prisma.client.findFirst({
     where: {
@@ -253,6 +297,18 @@ export const createStripeCheckoutSessionForPurchase = async ({
     stripeAccount.default_currency ??
     trackGroup.currency?.toLowerCase() ??
     "usd";
+
+  const {
+    lineItems,
+    normalizedDiscountPercent,
+    discountAmount,
+    discountedPriceNumber,
+  } = buildCheckoutLineItemsWithDiscount({
+    priceNumber,
+    currency,
+    productKey,
+    discountPercent,
+  });
 
   const customer = await findOrCreateStripeCustomer(
     stripeAccountId,
@@ -296,23 +352,13 @@ export const createStripeCheckoutSessionForPurchase = async ({
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
         application_fee_amount: await calculateAppFee(
-          priceNumber,
+          discountedPriceNumber,
           currency,
           trackGroup.platformPercent
         ),
       },
       ui_mode: "embedded",
-      line_items: [
-        {
-          price_data: {
-            tax_behavior: "exclusive",
-            unit_amount: castToFixed(priceNumber),
-            currency,
-            product: productKey,
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       metadata: {
         clientId: client?.id ?? null,
         purchaseType: "trackGroup",
@@ -322,6 +368,8 @@ export const createStripeCheckoutSessionForPurchase = async ({
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
         stripeAccountId,
+        discountPercent: normalizedDiscountPercent,
+        discountAmount: discountAmount,
       },
       mode: "payment",
       return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
@@ -479,6 +527,18 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
     quantity
   );
 
+  const {
+    lineItems,
+    discountedPriceNumber,
+    normalizedDiscountPercent,
+    discountAmount,
+  } = buildCheckoutLineItemsWithDiscount({
+    priceNumber,
+    currency,
+    productKey,
+    quantity,
+  });
+
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "required",
@@ -492,22 +552,12 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
         application_fee_amount: await calculateAppFee(
-          priceNumber,
+          discountedPriceNumber,
           currency,
           merch.platformPercent
         ),
       },
-      line_items: [
-        {
-          price_data: {
-            tax_behavior: "exclusive",
-            unit_amount: castToFixed(priceNumber),
-            currency,
-            product: productKey,
-          },
-          quantity,
-        },
-      ],
+      line_items: lineItems,
       metadata: {
         clientId: client?.id ?? null,
         merchId: merch.id,
@@ -517,6 +567,8 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
         userEmail: email ?? null,
         stripeAccountId,
         message: message ?? null,
+        discountPercent: normalizedDiscountPercent,
+        discountAmount: discountAmount,
       },
       mode: "payment",
       ui_mode: "embedded",

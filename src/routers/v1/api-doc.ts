@@ -120,6 +120,11 @@ const apiDoc = {
           description: "minimum amount of the subscription",
           type: "number",
         },
+        discountPercent: {
+          description:
+            "discount percentage applied for subscribers on purchases",
+          type: "number",
+        },
       },
     },
     ArtistSubscriptionTierCreate: {
@@ -138,6 +143,11 @@ const apiDoc = {
           description: "minimum amount of the subscription",
           type: "number",
         },
+        discountPercent: {
+          description:
+            "discount percentage applied for subscribers on purchases",
+          type: "number",
+        },
       },
     },
     ArtistSubscriptionTierUpdate: {
@@ -153,6 +163,11 @@ const apiDoc = {
         },
         minAmount: {
           description: "minimum amount of the subscription",
+          type: "number",
+        },
+        discountPercent: {
+          description:
+            "discount percentage applied for subscribers on purchases",
           type: "number",
         },
       },
