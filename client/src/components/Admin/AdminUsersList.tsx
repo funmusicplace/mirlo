@@ -63,7 +63,7 @@ export const AdminUsers: React.FC = () => {
               <th>Created at</th>
               <th>Updated at</th>
               <th>Artists</th>
-              <th>Stripe set up</th>
+              <th>Stripe account ID</th>
               <th />
             </tr>
           </thead>
@@ -84,7 +84,7 @@ export const AdminUsers: React.FC = () => {
                     </React.Fragment>
                   ))}
                 </td>
-                <td>{user.stripeAccountId ? <FaCheck /> : ""}</td>
+                <td>{user.stripeAccountId ?? ""}</td>
                 <td className="alignRight">
                   <ButtonLink
                     size="compact"
