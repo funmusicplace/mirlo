@@ -281,7 +281,7 @@ function Signup() {
           `}
           onSubmit={handleSubmit(onSubmit)}
         >
-          <h2>{t("register")}</h2>
+          <h1>{t("register")}</h1>
           {invitedBy && (
             <Box
               className={css`
@@ -430,7 +430,7 @@ function Signup() {
           {t("logIn")}
         </Link>
         <img
-          alt="a blackbird"
+          alt=""
           src="/static/images/blackbird.png"
           className={css`
             width: 100%;

@@ -108,7 +108,7 @@ function PasswordReset() {
           `}
           onSubmit={initSubmit(onInitPasswordReset)}
         >
-          <h2>{t("title")}</h2>
+          <h1>{t("title")}</h1>
 
           <label>{t("email")}</label>
           <InputEl type="email" {...initRegister("email")} />
@@ -132,9 +132,9 @@ function PasswordReset() {
           `}
           onSubmit={newSubmit(onNewPassword)}
         >
-          <h2>
+          <h1>
             {accountIncomplete ? t("accountIncompleteTitle") : t("title")}
-          </h2>
+          </h1>
 
           <label>{t("password")}</label>
           <InputEl type="password" {...newRegister("password")} />
@@ -149,7 +149,7 @@ function PasswordReset() {
         </form>
       )}
       <img
-        alt="a blackbird"
+        alt=""
         src="/static/images/blackbird.png"
         className={css`
           width: 50%;
