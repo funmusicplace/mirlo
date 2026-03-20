@@ -274,7 +274,7 @@ export const Button: React.FC<
       onClick={onClick}
       disabled={disabled}
       onlyIcon={!children || onlyIcon}
-      title={children ? children.toString() : ""}
+      title={children ? children.toString() : undefined}
       aria-label={children ? children.toString() : ""}
       {...props}
     >
