@@ -103,8 +103,8 @@ function Signup() {
         accountType === "artist"
           ? "artist"
           : accountType === "label"
-          ? "label"
-          : "listener",
+            ? "label"
+            : "listener",
       promoCode: search.get("promo") ?? "",
       emailInvited: search.get("email") ?? "",
     },
@@ -156,7 +156,8 @@ function Signup() {
             setPendingVerification({
               email: data.email,
               accountType: data.accountType,
-              emailConfirmationExpired: errorBody.emailConfirmationExpired ?? false,
+              emailConfirmationExpired:
+                errorBody.emailConfirmationExpired ?? false,
               emailConfirmationExpiresAt:
                 errorBody.emailConfirmationExpiresAt ?? null,
             });
@@ -207,9 +208,12 @@ function Signup() {
         client: import.meta.env.VITE_CLIENT_DOMAIN,
         accountType: pendingVerification.accountType,
       });
-      snackbar(t("pendingVerificationResent", { email: pendingVerification.email }), {
-        type: "success",
-      });
+      snackbar(
+        t("pendingVerificationResent", { email: pendingVerification.email }),
+        {
+          type: "success",
+        }
+      );
       setPendingVerification((prev) =>
         prev
           ? {
@@ -303,7 +307,11 @@ function Signup() {
           )}
           {pendingVerification && (
             <Box
-              variant={pendingVerification.emailConfirmationExpired ? "warning" : "info"}
+              variant={
+                pendingVerification.emailConfirmationExpired
+                  ? "warning"
+                  : "info"
+              }
               className={css`
                 display: flex;
                 flex-direction: column;
