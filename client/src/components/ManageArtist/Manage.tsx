@@ -56,7 +56,16 @@ export const Manage: React.FC = () => {
         `}
       >
         <WidthContainer variant="medium" justify="center">
-          <h1 className={css``}>{t("manageArtists")}</h1>
+          <div className="flex justify-between items-center gap-1">
+            <h1 className={css``}>{t("manageArtists")}</h1>
+            <ButtonLink
+              to="/manage/bulkTrackUpload"
+              variant="outlined"
+              size="compact"
+            >
+              Add from CSV
+            </ButtonLink>
+          </div>
 
           <div
             className={css`

@@ -15,6 +15,7 @@ import usePagination from "utils/usePagination";
 import useAdminFilters from "./useAdminFilters";
 import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
 import { getTrackUrl } from "utils/artist";
+import { useTranslation } from "react-i18next";
 
 const pageSize = 100;
 
@@ -25,6 +26,7 @@ export const AdminTracks: React.FC = () => {
   const [results, setResults] = React.useState<Track[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
 
   const callback = React.useCallback(async () => {
     const params =
@@ -61,12 +63,11 @@ export const AdminTracks: React.FC = () => {
   );
 
   return (
-    <div
-      className={css`
-        flex-grow: 1;
-      `}
-    >
-      <h3>Tracks</h3>
+    <div className="grow">
+      <div className="flex justify-between align-center">
+        <h3>Tracks</h3>
+        <ButtonLink to="bulk-upload">{t("bulkTrackUpload")}</ButtonLink>
+      </div>
       <Filters />
       {results.length > 0 && (
         <Table>

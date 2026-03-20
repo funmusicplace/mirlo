@@ -143,10 +143,16 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       }
       if (receiveMailingList) {
         const settings = await prisma.settings.findFirst();
-        if (settings?.settings?.instanceCustomization?.artistId) {
+        if (
+          settings?.settings?.instanceCustomization?.artistId &&
+          Number.isFinite(
+            Number(settings.settings.instanceCustomization.artistId)
+          )
+        ) {
           const artist = await prisma.artist.findFirst({
             where: {
-              id: settings.settings.instanceCustomization.artistId || -1,
+              id:
+                Number(settings.settings.instanceCustomization.artistId) || -1,
             },
             include: {
               user: true,

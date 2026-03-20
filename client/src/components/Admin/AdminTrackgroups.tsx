@@ -78,7 +78,6 @@ export const AdminTrackGroups: React.FC = () => {
             <tr>
               <th />
               <th>Title</th>
-
               <th>Artist</th>
               <th>Release date</th>
               <th>Created date</th>
