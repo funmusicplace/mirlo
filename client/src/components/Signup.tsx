@@ -55,10 +55,17 @@ const ArtistToggle = styled(FormComponent)`
   align-items: stretch;
 
   input {
-    display: none;
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
   }
 
-  label {
+  div {
     width: 50%;
     margin: 0 0.5rem 0 0;
     border: 1px solid var(--mi-lighten-x-background-color);
@@ -67,11 +74,11 @@ const ArtistToggle = styled(FormComponent)`
     justify-content: center;
   }
 
-  input:checked + span {
-    background: var(--mi-info-background-color);
+  input:checked + label {
+    background-color: var(--mi-info-background-color);
   }
 
-  span {
+  label {
     text-align: center;
     display: block;
     padding: 0.75rem;
@@ -80,6 +87,12 @@ const ArtistToggle = styled(FormComponent)`
     align-items: center;
     height: 100%;
     cursor: pointer;
+    border: 2px solid var(--mi-white);
+  }
+
+  input:focus-visible + label {
+    outline: 5px auto Highlight;
+    outline: 5px auto -webkit-focus-ring-color;
   }
 `;
 
@@ -366,32 +379,35 @@ function Signup() {
 
           {!isClosedToPublicArtistSignup && !isFetching && (
             <>
-              <div
-                className={css`
-                  margin-bottom: 1rem;
-                `}
-              >
-                <strong>{t("howUse")}</strong>
-              </div>
-
-              <ArtistToggle>
-                <label>
-                  <input
-                    type="radio"
-                    value="listener"
-                    {...register("accountType")}
-                  />
-                  <span>{t("imJustHereToListen")}</span>
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="artist"
-                    {...register("accountType")}
-                  />
-                  <span>{t("shareMyMusic")}</span>
-                </label>
-              </ArtistToggle>
+              <fieldset>
+                <legend className="font-bold mbe-[1rem]">{t("howUse")}</legend>
+                <ArtistToggle>
+                  <div>
+                    <input
+                      id="input-account-type-listener"
+                      required
+                      type="radio"
+                      value="listener"
+                      {...register("accountType")}
+                    />
+                    <label htmlFor="input-account-type-listener">
+                      {t("imJustHereToListen")}
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      id="input-account-type-artist"
+                      required
+                      type="radio"
+                      value="artist"
+                      {...register("accountType")}
+                    />
+                    <label htmlFor="input-account-type-artist">
+                      {t("shareMyMusic")}
+                    </label>
+                  </div>
+                </ArtistToggle>
+              </fieldset>
 
               <small
                 className={css`
