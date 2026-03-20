@@ -345,12 +345,23 @@ function Signup() {
             </Box>
           )}
           <FormComponent>
-            <label>{t("email")}</label>
-            <InputEl type="email" {...register("email")} />
+            <label htmlFor="input-email">{t("email")}</label>
+            <InputEl
+              autoComplete="true"
+              id="input-email"
+              required
+              type="email"
+              {...register("email")}
+            />
           </FormComponent>
           <FormComponent>
-            <label>{t("password")}</label>
-            <InputEl {...register("password")} type="password" />
+            <label htmlFor="input-password">{t("password")}</label>
+            <InputEl
+              id="input-password"
+              required
+              type="password"
+              {...register("password")}
+            />
           </FormComponent>
 
           {!isClosedToPublicArtistSignup && !isFetching && (
