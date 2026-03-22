@@ -8,4 +8,8 @@ router.get("/.well-known/assetlinks", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(JSON.stringify([]));
 });
+router.get("/.well-known/assetlinks.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(JSON.stringify([]));
+});
 export default router;

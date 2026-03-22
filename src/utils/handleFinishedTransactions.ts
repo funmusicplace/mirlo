@@ -378,6 +378,7 @@ export const handleCataloguePurchase = async (
             to: artist.user.email,
           },
           locals: {
+            artist,
             pricePaid,
             currencyPaid: session?.currency ?? "usd",
             platformCut:
