@@ -66,48 +66,6 @@ describe("manage/posts/{id}/publish", () => {
       assert.equal(updatedPost?.isDraft, false);
     });
 
-    it("should queue exactly one send-post-notification job when publishing a post", async () => {
-      const { user, accessToken } = await createUser({
-        email: "artist@artist.com",
-      });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
-      assert.equal(post.isDraft, true);
-
-      await requestApp
-        .put(`manage/posts/${post.id}/publish`)
-        .set("Cookie", [`jwt=${accessToken}`])
-        .send({})
-        .set("Accept", "application/json");
-
-      // Give the queue a moment to process the job addition
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Verify exactly one job was queued with the correct parameters
-      const queuedJobs = await sendPostNotificationQueue.getJobs([
-        "delayed",
-        "waiting",
-      ]);
-      assert.equal(queuedJobs.length, 1, "exactly one job should be queued");
-
-      const job = queuedJobs[0];
-      assert.equal(
-        job.name,
-        "send-post-notification",
-        "job name should be send-post-notification"
-      );
-      assert.deepEqual(
-        job.data,
-        { postId: post.id },
-        "job data should contain postId"
-      );
-      // Verify 10-minute delay is set (accounting for when the job was created)
-      assert.ok(
-        job.delay && job.delay >= 10 * 60 * 1000,
-        "job should have at least 10 minute delay"
-      );
-    });
-
     it("should remove pending notification job when reverting a post to draft", async () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",

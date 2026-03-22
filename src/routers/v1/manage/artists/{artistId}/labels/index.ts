@@ -11,6 +11,82 @@ import { AppError } from "../../../../../../utils/error";
 import { addSizesToImage } from "../../../../../../utils/artist";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
 import { getClient } from "../../../../../../activityPub/utils";
+import { sendMailQueue } from "../../../../../../queues/send-mail-queue";
+
+const sendArtistNotificationOfLabel = async (
+  artist: Artist,
+  labelUser: User
+) => {
+  const client = await getClient();
+  const existingNotification = await prisma.notification.findFirst({
+    where: {
+      userId: artist.userId,
+      notificationType: "LABEL_ADDED_ARTIST",
+      relatedUserId: labelUser.id,
+      artistId: artist.id,
+    },
+  });
+  if (!existingNotification) {
+    await prisma.notification.create({
+      data: {
+        userId: artist.userId,
+        notificationType: "LABEL_ADDED_ARTIST",
+        content: `
+          <p>
+            The label <strong>${labelUser.name}</strong> 
+            has invited you to join their roster.
+          </p>
+          <p>To accept their invitation, 
+            <a href="${client}/manage/artists/${artist.id}/customize#labels">
+            manage your artist account on Mirlo</a>.
+          </p>
+          <p>
+          If you do not wish to be associated with this label,
+          you can ignore this message.
+          </p>
+        `,
+        artistId: artist.id,
+        relatedUserId: labelUser.id,
+      },
+    });
+  }
+
+  // Queue email immediately to artist
+  try {
+    const artistUser = await prisma.user.findUnique({
+      where: { id: artist.userId },
+    });
+
+    if (artistUser?.email) {
+      const labelProfile = await prisma.artist.findFirst({
+        where: {
+          userId: labelUser.id,
+          isLabelProfile: true,
+        },
+      });
+
+      await sendMailQueue.add("send-mail", {
+        template: "announce-label-invite",
+        message: {
+          to: artistUser.email,
+        },
+        locals: {
+          artist,
+          email: encodeURIComponent(artistUser.email),
+          host: process.env.API_DOMAIN,
+          label: labelProfile,
+          client: process.env.REACT_APP_CLIENT_DOMAIN,
+        },
+      });
+    }
+  } catch (error) {
+    console.error(
+      `Failed to queue label invite email for artist ${artist.id}`,
+      error
+    );
+    // Don't fail if email queuing fails
+  }
+};
 
 export default function () {
   const operations = {
@@ -76,45 +152,6 @@ export default function () {
     },
   };
 
-  const sendArtistNotificationOfLabel = async (
-    artist: Artist,
-    labelUser: User
-  ) => {
-    const client = await getClient();
-    const existingNotification = await prisma.notification.findFirst({
-      where: {
-        userId: artist.userId,
-        notificationType: "LABEL_ADDED_ARTIST",
-        relatedUserId: labelUser.id,
-        artistId: artist.id,
-      },
-    });
-    if (!existingNotification) {
-      await prisma.notification.create({
-        data: {
-          userId: artist.userId,
-          notificationType: "LABEL_ADDED_ARTIST",
-          content: `
-          <p>
-            The label <strong>${labelUser.name}</strong> 
-            has invited you to join their roster.
-          </p>
-          <p>To accept their invitation, 
-            <a href="${client}/manage/artists/${artist.id}/customize#labels">
-            manage your artist account on Mirlo</a>.
-          </p>
-          <p>
-          If you do not wish to be associated with this label,
-          you can ignore this message.
-          </p>
-        `,
-          artistId: artist.id,
-          relatedUserId: labelUser.id,
-        },
-      });
-    }
-  };
-
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { artistId }: { artistId?: string } = req.params;
     const { labelUserId, isLabelApproved } = req.body as {
@@ -169,7 +206,7 @@ export default function () {
       });
 
       if (isLabelAddingArtist) {
-        sendArtistNotificationOfLabel(artist, loggedInUser);
+        await sendArtistNotificationOfLabel(artist, loggedInUser);
       }
       res.json({
         results: labels,
