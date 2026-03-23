@@ -35,7 +35,7 @@ export default function () {
             id: parsedId,
             enabled: true,
           },
-          include: singleInclude({ includeDefaultTier }),
+          include: singleInclude({ includeDefaultTier }) as any,
         });
 
         isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);
@@ -61,7 +61,7 @@ export default function () {
           if (req.headers.accept) {
             res.set("content-type", "application/activity+json");
           }
-          res.json(await turnArtistIntoActor(artist));
+          res.json(await turnArtistIntoActor(artist as any));
 
           return next();
         } else {

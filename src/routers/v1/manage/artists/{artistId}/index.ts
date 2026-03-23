@@ -161,7 +161,7 @@ export default function () {
             },
             include: { images: true, includePurchaseTrackGroup: true },
           },
-        },
+        } as any,
       });
 
       if (!artist) {

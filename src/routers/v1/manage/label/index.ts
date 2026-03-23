@@ -26,7 +26,7 @@ export default function () {
           artist: {
             include: singleInclude(),
           },
-        },
+        } as any,
       });
 
       return res.json({
