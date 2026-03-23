@@ -12,14 +12,15 @@ import generateAlbumJob from "./generate-album";
 import optimizeImage from "./optimize-image";
 import cleanUpOldFilesJob from "./clean-up-old-files";
 import sendPostNotification from "./send-post-notification";
+import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
 
 import sendMail from "./send-mail";
 
 import "../queues/send-mail-queue";
 import "../queues/send-post-notification-queue";
+import "../queues/auto-purchase-new-albums-queue";
 
 import { REDIS_CONFIG } from "../config/redis";
-import { moveFilesToBackblazeJob } from "../queues/moving-files-to-backblaze";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -52,6 +53,7 @@ yargs // eslint-disable-line
     generateAlbumQueueWorker();
     sendMailQueue();
     sendPostNotificationQueue();
+    autoPurchaseNewAlbumsQueue();
     cleanUpFilesQueue();
   })
   .help().argv;
@@ -111,6 +113,29 @@ async function sendPostNotificationQueue() {
   });
 }
 
+async function autoPurchaseNewAlbumsQueue() {
+  const worker = new Worker(
+    "auto-purchase-new-albums",
+    autoPurchaseNewAlbumsProcessor,
+    {
+      ...workerOptions,
+    }
+  );
+  logger.info("Auto-purchase new albums worker started");
+
+  worker.on("completed", (job: Job) => {
+    logger.info("completed:auto-purchase-new-albums");
+  });
+
+  worker.on("failed", (job?: Job, err?: any) => {
+    logger.error("failed:auto-purchase-new-albums", err);
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error("error:auto-purchase-new-albums", err);
+  });
+}
+
 async function audioQueue() {
   const worker = new Worker("upload-audio", uploadAudioJob, workerOptions);
   logger.info("Upload Audio worker started");
@@ -146,7 +171,11 @@ async function verifyAudioQueue() {
 }
 
 export async function generateAlbumQueueWorker() {
-  const worker = new Worker("generate-album", generateAlbumJob, workerOptions);
+  const worker = new Worker("generate-album", generateAlbumJob, {
+    ...workerOptions,
+    lockDuration: 10 * 60 * 1000, // 10 minutes
+    lockRenewTime: 5 * 60 * 1000, // Renew every 5 minutes
+  });
   logger.info("Generate Album worker started");
 
   worker.on("active", (job: any) => {
@@ -184,25 +213,5 @@ export async function cleanUpFilesQueue() {
 
   worker.on("error", (err: any) => {
     logger.error("error:clean-up-old-files", err);
-  });
-}
-export async function moveFilesToBackBlazeWorker() {
-  const worker = new Worker(
-    "move-file-to-backblaze",
-    moveFilesToBackblazeJob,
-    workerOptions
-  );
-  logger.info("Move Files to Backblaze worker started");
-
-  worker.on("completed", (job: any) => {
-    logger.info("completed:move-file-to-backblaze");
-  });
-
-  worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:move-file-to-backblaze", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:move-file-to-backblaze", err);
   });
 }

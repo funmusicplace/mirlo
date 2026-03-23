@@ -1,7 +1,6 @@
 import { Queue, QueueEvents } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
-import prisma from "@mirlo/prisma";
 import { Track, TrackAudio, TrackGroup } from "@mirlo/prisma/client";
 import { trackFormatBucket, trackGroupFormatBucket } from "../utils/minio";
 

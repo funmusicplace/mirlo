@@ -398,10 +398,10 @@ export default async (job: Job) => {
     format: string;
     destinationBucket: DestinationBucket;
   };
-  let tempFolder = `/data/media/trackGroup/${trackGroup.id}`;
+  let tempFolder = `/data/media/trackGroup/${trackGroup.id}/${formatString}`;
 
   if (destinationBucket === "track-format") {
-    tempFolder = `/data/media/track/${tracks[0].id}`;
+    tempFolder = `/data/media/track/${tracks[0].id}/${formatString}`;
   }
 
   try {
