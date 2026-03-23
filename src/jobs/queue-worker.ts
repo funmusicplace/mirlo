@@ -171,7 +171,11 @@ async function verifyAudioQueue() {
 }
 
 export async function generateAlbumQueueWorker() {
-  const worker = new Worker("generate-album", generateAlbumJob, workerOptions);
+  const worker = new Worker("generate-album", generateAlbumJob, {
+    ...workerOptions,
+    lockDuration: 10 * 60 * 1000, // 10 minutes
+    lockRenewTime: 5 * 60 * 1000, // Renew every 5 minutes
+  });
   logger.info("Generate Album worker started");
 
   worker.on("active", (job: any) => {

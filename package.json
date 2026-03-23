@@ -4,7 +4,7 @@
   "license": "AGPL-3.0",
   "module": "commonjs",
   "scripts": {
-    "api:test": "tsc --noEmit && mocha test",
+    "api:test": "tsc --noEmit && mocha test --exit --extension ts",
     "api:watch": "NODE_ENV=development PORT=3000 nodemon src/index.ts",
     "api:start": "ts-node src/index.ts",
     "prepare": "husky install",
