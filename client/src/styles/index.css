@@ -70,6 +70,17 @@ root {
   background-color: transparent;
 }
 
+/* Using mouse, hide focus ring from h1 focus on window.location change */
+h1:focus {
+  outline: none;
+}
+
+/* Using keyboard, show focus ring from h1 focus on window.location change */
+h1:focus-visible {
+  outline: 5px auto Highlight;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
 h1,
 .h1 {
   word-break: break-word;
