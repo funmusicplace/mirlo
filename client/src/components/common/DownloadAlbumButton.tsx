@@ -147,7 +147,7 @@ const DownloadAlbumButton: React.FC<{
                 <p
                   className={css`
                     svg {
-                      margin-right: 0.5rem;
+                      margin-right: 0 auto;
                     }
                   `}
                 >
