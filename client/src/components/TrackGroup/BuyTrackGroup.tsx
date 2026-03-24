@@ -130,6 +130,17 @@ const BuyTrackGroup: React.FC<{
   }
 
   if (!stripeAccountStatus?.chargesEnabled) {
+    if (minPrice === 0) {
+      return (
+        <div>
+          <p className="mb-2">
+            {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
+          </p>
+          <AddToCollection trackGroup={trackGroup} />{" "}
+          <p className="mt-2">{t("addToCollectionDescription")}</p>
+        </div>
+      );
+    }
     return (
       <div className="p-4">
         {t("artistNotSetUp", {

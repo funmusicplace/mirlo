@@ -78,7 +78,7 @@ with your merch or send it to your press contacts.
 You decide how much it costs.
 
 Artists get to choose how much of each sale goes to us. So if
-you want 10% of your album sale to go Mirlo, and you sell it for
+you want 10% of your release sale to go Mirlo, and you sell it for
 $10, we will get $1. If, instead, you need 100% of the sale, you
 get to keep it! Our payment processor (Stripe) takes a 2.9% +
 30c cut. We trust artists to know how much of their sales they
