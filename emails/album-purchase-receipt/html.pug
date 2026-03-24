@@ -11,9 +11,9 @@ block content
       p #{trackGroup.title}
       p #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.amount / 100).toFixed(2)}
     if isBeforeReleaseDate
-      p The album will become available in your collection for unlimited listening and downloading once it is released.
+      p The release will become available in your collection for unlimited listening and downloading once it is released.
     else 
-      p The album is now available in your collection for unlimited listening and downloading.
+      p The release is now available in your collection for unlimited listening and downloading.
     - const purchaseMessage = trackGroup.artist?.properties?.emails?.purchase
     if purchaseMessage
       div!= purchaseMessage

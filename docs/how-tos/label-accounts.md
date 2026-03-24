@@ -24,7 +24,7 @@ Label pages work much the same way as artist pages, where you can do the followi
 
 - You can view pages for both sales and order fulfilment.
 
-- You can generate album and track codes for press, friends and family.
+- You can generate release and track codes for press, friends and family.
 
 - You can add catalogue numbers to better organise your releases.
 
