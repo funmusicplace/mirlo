@@ -915,7 +915,7 @@
     "trackArtists": "Track artists",
     "done": "Done",
     "pricing": "Pricing",
-    "pricingFreeOrDonate": "$0 or donate",
+    "pricingFreeOrDonate": "{{currency}}0 or donate",
     "pricingPaid": "Paid",
     "pricingNoPayments": "No payments",
     "pricingHelp": "Setting a minimum price will only restrict access to downloadable files. Embedded content is freely available.",

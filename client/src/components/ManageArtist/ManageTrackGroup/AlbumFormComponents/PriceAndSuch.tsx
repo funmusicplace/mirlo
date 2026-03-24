@@ -200,7 +200,14 @@ const PriceAndSuch: React.FC<{
             `}
           >
             {[
-              { key: "free-or-donate", label: t("pricingFreeOrDonate") },
+              {
+                key: "free-or-donate",
+                label: t("pricingFreeOrDonate", {
+                  currency: user?.currency
+                    ? getCurrencySymbol(user?.currency)
+                    : "",
+                }),
+              },
               { key: "paid", label: t("pricingPaid") },
               { key: "no-payments", label: t("pricingNoPayments") },
             ].map((pricing) => {
