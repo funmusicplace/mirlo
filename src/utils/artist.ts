@@ -538,7 +538,7 @@ export const singleInclude = (queryOptions?: {
         currency: true,
       },
     },
-  };
+  } as any;
 };
 
 interface LocalArtist extends Artist {
