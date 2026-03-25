@@ -70,6 +70,29 @@ export const startGeneratingZip = async (
     | typeof trackFormatBucket
     | typeof trackGroupFormatBucket = trackGroupFormatBucket
 ) => {
+  const jobKey = `${trackGroup.id}-${format}`;
+
+  // Check if a job for this trackGroup/format combination is already pending or active
+  const existingJobs = await generateAlbumQueue.getJobs(
+    ["active", "waiting", "delayed"],
+    0,
+    -1
+  );
+
+  const duplicateJob = existingJobs.find((job) => {
+    const jobData = job.data as any;
+    return (
+      jobData.trackGroup?.id === trackGroup.id && jobData.format === format
+    );
+  });
+
+  if (duplicateJob) {
+    logger.info(
+      `Job for trackGroup ${trackGroup.id} format ${format} already queued (jobId: ${duplicateJob.id}). Returning existing job.`
+    );
+    return duplicateJob.id;
+  }
+
   const job = await generateAlbumQueue.add(
     "generate-album",
     {
@@ -78,7 +101,11 @@ export const startGeneratingZip = async (
       format,
       destinationBucket,
     },
-    { deduplication: { id: `${trackGroup.id}-${format}`, ttl: 5000 } }
+    { deduplication: { id: jobKey, ttl: 5000 } }
+  );
+
+  logger.info(
+    `Created new generate-album job ${job.id} for trackGroup ${trackGroup.id} format ${format}`
   );
 
   return job.id;
