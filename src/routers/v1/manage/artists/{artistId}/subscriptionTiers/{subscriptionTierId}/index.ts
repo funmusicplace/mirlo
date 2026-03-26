@@ -4,10 +4,10 @@ import { NextFunction, Request, Response } from "express";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
-} from "../../../../../../auth/passport";
-import { doesSubscriptionTierBelongToUser } from "../../../../../../utils/ownership";
+} from "../../../../../../../auth/passport";
+import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
-import { getSiteSettings } from "../../../../../../utils/settings";
+import { getSiteSettings } from "../../../../../../../utils/settings";
 
 const normalizeDiscountPercent = (value: unknown): number | undefined => {
   if (value === undefined || value === null || value === "") {

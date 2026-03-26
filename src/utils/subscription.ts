@@ -78,6 +78,26 @@ export const manageSubscriptionReceipt = async ({
       `invoice.paid: ${processorPaymentReferenceId} created subscription charge: ${created.id}`
     );
 
+    const hasProGrataTrackGroups =
+      await prisma.subscriptionTierRelease.findMany({
+        where: {
+          tierId: artistUserSubscription.artistSubscriptionTierId,
+        },
+      });
+    if (hasProGrataTrackGroups.length > 0) {
+      logger.info(
+        `invoice.paid: ${processorPaymentReferenceId} has ${hasProGrataTrackGroups.length} pro grata track groups, granting access`
+      );
+      await prisma.userTrackGroupPurchase.createMany({
+        data: hasProGrataTrackGroups.map((release) => ({
+          userId: artistUserSubscription.userId,
+          trackGroupId: release.trackGroupId,
+          userTransactionId: transaction.id ?? undefined,
+          createdAt: new Date(),
+        })),
+      });
+    }
+
     logger.info(
       `invoice.paid: ${processorPaymentReferenceId} found subscription, sending receipt`
     );

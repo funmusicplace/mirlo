@@ -50,6 +50,16 @@ export default function () {
           images: {
             include: { image: true },
           },
+          releases: {
+            include: {
+              trackGroup: {
+                include: {
+                  cover: true,
+                  artist: true,
+                },
+              },
+            },
+          },
         },
       });
 

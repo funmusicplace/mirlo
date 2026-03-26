@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { FaWrench } from "react-icons/fa";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { NewAlbumButton } from "./NewAlbumButton";

@@ -22,11 +22,21 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params;
+    const { includeLabelReleases } = req.query;
+    const loggedInUser = req.user as User | undefined;
+
     try {
       const results = await prisma.trackGroup.findMany({
         where: {
-          artistId: Number(artistId),
-          isDrafts: false,
+          ...(includeLabelReleases === "true"
+            ? {
+                OR: [
+                  { paymentToUserId: loggedInUser?.id },
+                  { artist: { userId: loggedInUser?.id } },
+                ],
+              }
+            : { artistId: Number(artistId) }),
+          publishedAt: { lte: new Date() },
         },
         orderBy: {
           releaseDate: "desc",

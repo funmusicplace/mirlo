@@ -31,6 +31,7 @@ export default function () {
           OR: [
             { paymentToUserId: labelProfile?.userId },
             { artist: { userId: labelProfile?.userId } },
+            { artistId: artistId },
           ],
         },
         include: {

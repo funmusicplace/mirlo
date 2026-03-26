@@ -366,6 +366,14 @@ interface ArtistSubscriptionTier {
       updatedAt: string;
     };
   }[];
+  releases?: SubscriptionTierRelease[];
+}
+
+interface SubscriptionTierRelease {
+  tierId: number;
+  trackGroupId: number;
+  trackGroup: TrackGroup & { artist: Artist };
+  createdAt: string;
 }
 
 interface ArtistUserSubscription {
