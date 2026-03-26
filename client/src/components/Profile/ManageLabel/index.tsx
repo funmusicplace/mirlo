@@ -12,7 +12,7 @@ import AddArtistToRoster from "./AddArtistToRoster";
 import { useFieldArray, useForm } from "react-hook-form";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import Button, { ButtonLink } from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import { FaChevronRight } from "react-icons/fa";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { css } from "@emotion/css";
@@ -25,12 +25,29 @@ const ProfileLabel: React.FC = () => {
     useQuery(queryLabelArtists());
   const { user } = useAuthContext();
 
-  const { control, setValue } = useForm<{ relationships: ArtistLabel[] }>({
+  const { control, setValue } = useForm<{
+    relationships: {
+      artist: {
+        id: number;
+        name: string;
+        avatar?: {
+          sizes?: {
+            [key: number]: string;
+          };
+        };
+      };
+      isLabelApproved: boolean;
+      isArtistApproved: boolean;
+      canLabelManageArtist: boolean;
+      canLabelAddReleases: boolean;
+      artistId: number;
+    }[];
+  }>({
     defaultValues: {
       relationships,
     },
   });
-  const { fields, remove } = useFieldArray({
+  const { fields } = useFieldArray({
     control,
     name: "relationships",
   });

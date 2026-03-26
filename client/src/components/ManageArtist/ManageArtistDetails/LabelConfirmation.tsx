@@ -11,7 +11,6 @@ import { useParams } from "react-router-dom";
 import api from "services/api";
 import ArtistLabels from "./ArtistLabels";
 import { css } from "@emotion/css";
-import FeatureFlag from "components/common/FeatureFlag";
 
 const LabelConfirmation: React.FC = () => {
   const { artistId } = useParams();
@@ -28,7 +27,25 @@ const LabelConfirmation: React.FC = () => {
     queryArtistLabels(Number(artistId))
   );
 
-  const { control, setValue } = useForm<{ relationships: ArtistLabel[] }>({
+  const { control, setValue } = useForm<{
+    relationships: {
+      labelUser: {
+        id: number;
+        userAvatar?: {
+          sizes: {
+            [key: number]: string;
+          };
+        };
+        name: string;
+        email: string;
+      };
+      isLabelApproved: boolean;
+      isArtistApproved: boolean;
+      canLabelManageArtist: boolean;
+      canLabelAddReleases: boolean;
+      labelUserId: number;
+    }[];
+  }>({
     defaultValues: {
       relationships: labelRelationships,
     },
