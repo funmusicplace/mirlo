@@ -148,11 +148,13 @@ const ArtistSupportBox: React.FC<{
         `}
       >
         <MarkdownContent content={subscriptionTier.description} />
-        <p className="mt-3 text-sm opacity-80">
-          {t("tierStoreDiscount", {
-            discountPercent: subscriptionTier.discountPercent ?? 0,
-          })}
-        </p>
+        {subscriptionTier.discountPercent && (
+          <p className="mt-3 text-sm opacity-80">
+            {t("tierStoreDiscount", {
+              discountPercent: subscriptionTier.discountPercent ?? 0,
+            })}
+          </p>
+        )}
       </div>
       <div
         className={css`
