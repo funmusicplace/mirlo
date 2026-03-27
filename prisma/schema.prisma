@@ -686,6 +686,8 @@ model TrackGroup {
   defaultTrackMinPrice            Int? // in cents
   defaultTrackAllowIndividualSale Boolean                         @default(false)
   defaultAllowMirloPromo          Boolean                         @default(false)
+  isPinned                        Boolean?                        @default(false)
+  videoURL                        String?
   userTrackGroupPurchases         UserTrackGroupPurchase[]
   stripeProductKey                String?
   urlSlug                         String
@@ -708,10 +710,29 @@ model TrackGroup {
   hideFromSearch                  Boolean                         @default(false)
   fundraiser                      Fundraiser?                     @relation(fields: [fundraiserId], references: [id])
   fundraiserId                    Int?
-  recommendedTrackGroups          RecommendedTrackGroup[]         @relation("trackGroupRecommendations")
-  recommendedByTrackGroups        RecommendedTrackGroup[]         @relation("recommendedByTrackGroups")
+
+  recommendedTrackGroups   RecommendedTrackGroup[]  @relation("trackGroupRecommendations")
+  recommendedByTrackGroups RecommendedTrackGroup[]  @relation("recommendedByTrackGroups")
+  categoryLink             TrackGroupCategoryLink[] @relation("trackGroupCategoryLinks")
 
   @@unique([artistId, urlSlug])
+}
+
+model TrackGroupCategoryLink {
+  trackGroupId         Int
+  trackGroup           TrackGroup         @relation(fields: [trackGroupId], references: [id])
+  trackGroupCategoryId String
+  trackGroupCategory   TrackGroupCategory @relation(fields: [trackGroupCategoryId], references: [id])
+  orderIndex           Int
+
+  @@unique([trackGroupId, trackGroupCategoryId])
+}
+
+model TrackGroupCategory {
+  id          String                   @id @default(uuid()) @db.Uuid
+  trackGroups TrackGroupCategoryLink[]
+  orderIndex  Int
+  title       String
 }
 
 model Fundraiser {
