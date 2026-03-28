@@ -66,7 +66,7 @@ describe("most played trackGroups", () => {
   it("should GET /mostPlayed not get an unpublished", async () => {
     const { user } = await createUser({ email: "test@testcom" });
     const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, { published: false });
+    const trackGroup = await createTrackGroup(artist.id, { publishedAt: null });
     const track = await createTrack(trackGroup.id);
     await createTrackPlay(track.id);
     const response = await requestApp

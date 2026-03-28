@@ -52,7 +52,7 @@ describe("manage/trackGroups/{id}/trackOrder", () => {
         artistId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
-        published: true,
+        publishedAt: new Date(),
       },
     });
 

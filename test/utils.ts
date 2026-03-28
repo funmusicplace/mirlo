@@ -5,7 +5,7 @@ import { buildTokens, hashPassword } from "../src/routers/auth/utils";
 import { slug } from "github-slugger";
 
 export const clearTables = async () => {
-  await prisma.$executeRaw`DELETE FROM "RecommendedTrackGroup";`;
+  await prisma.$executeRaw`DELETE FROM "SubscriptionTierRelease";`;
   await prisma.$executeRaw`DELETE FROM "FundraiserPledge";`;
   await prisma.$executeRaw`DELETE FROM "RecommendedTrackGroup";`;
   await prisma.$executeRaw`DELETE FROM "Fundraiser";`;
@@ -149,7 +149,8 @@ export const createTrackGroup = async (
       urlSlug:
         data?.urlSlug || (data?.title ? slug(data?.title) : "test-trackgroup"),
       artistId: artistId,
-      published: data?.published ?? true,
+      publishedAt:
+        data?.publishedAt === null ? null : (data?.publishedAt ?? new Date()),
       isGettable: data?.isGettable ?? true,
       stripeProductKey: data?.stripeProductKey ?? null,
       paymentToUserId: data?.paymentToUserId,

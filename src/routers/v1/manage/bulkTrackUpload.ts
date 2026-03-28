@@ -145,7 +145,6 @@ export default function () {
                   releaseDate: trackGroup.releaseDate,
                   publishedAt: trackGroup.publishedAt,
                   catalogNumber: trackGroup.catalogNumber,
-                  published: false,
                 },
               });
               result.trackGroupsCreated++;

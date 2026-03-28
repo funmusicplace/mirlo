@@ -27,14 +27,14 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
       const { user } = await createUser({ email: "test@test.com" });
       const artist = await createArtist(user.id);
       const mainTrackGroup = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
       });
       const recommendedTrackGroup1 = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         urlSlug: "recommended-album-1",
       });
       const recommendedTrackGroup2 = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         urlSlug: "recommended-album-2",
       });
 
@@ -74,7 +74,9 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
     it("should return empty array when no recommendations exist", async () => {
       const { user } = await createUser({ email: "test@test.com" });
       const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, { published: true });
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date(),
+      });
 
       const response = await requestApp
         .get(`trackGroups/${trackGroup.id}/recommendedTrackGroups`)
@@ -97,10 +99,10 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
       const { user } = await createUser({ email: "test@test.com" });
       const artist = await createArtist(user.id);
       const mainTrackGroup = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
       });
       const recommendedTrackGroup = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         title: "Recommended Album",
         urlSlug: "recommended-album",
       });

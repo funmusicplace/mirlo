@@ -70,7 +70,7 @@ describe("users/{userId}/collection", () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
-        published: false,
+        publishedAt: null,
       });
 
       const transaction = await prisma.userTransaction.create({
@@ -109,7 +109,7 @@ describe("users/{userId}/collection", () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         hideFromSearch: true,
       });
 

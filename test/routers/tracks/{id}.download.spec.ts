@@ -189,7 +189,9 @@ describe("tracks/{id}/download", () => {
         email: "artist@artist.com",
       });
       const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, { published: true });
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date(),
+      });
       const track = await createTrack(trackGroup.id);
 
       const { user: purchaser, accessToken } = await createUser({

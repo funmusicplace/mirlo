@@ -220,13 +220,16 @@ const SubscriptionForm: React.FC<{
         <FormSection>
           <h2>{t("rewards")}</h2>
           <FormComponent>
-            <label>{t("discountPercent")}</label>
+            <label htmlFor="digitalDiscountPercent">
+              {t("discountPercent")}
+            </label>
             <div className="flex w-full items-center">
               <InputEl
                 step={1}
                 type="number"
                 {...register("discountPercent", { min: 0, max: 100 })}
                 min={0}
+                id="digitalDiscountPercent"
                 max={100}
               />
               <span className="ml-1">%</span>

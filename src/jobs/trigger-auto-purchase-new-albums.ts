@@ -18,7 +18,7 @@ export async function triggerAutoPurchaseNewAlbums() {
         gte: oneHourAgo,
         lte: currentDate,
       },
-      OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
+      publishedAt: { lte: new Date() },
       deletedAt: null,
     },
   });

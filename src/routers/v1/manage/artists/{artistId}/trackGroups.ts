@@ -36,7 +36,6 @@ export default function () {
                 ],
               }
             : { artistId: Number(artistId) }),
-          publishedAt: { lte: new Date() },
         },
         orderBy: {
           releaseDate: "desc",
@@ -104,7 +103,6 @@ export default function () {
       title,
       about,
       artistId,
-      published,
       releaseDate,
       publishedAt,
       credits,
@@ -174,7 +172,6 @@ export default function () {
           credits,
           type,
           artist: { connect: { id: artistId } },
-          published,
           publishedAt: publishedAt ? new Date(publishedAt) : undefined,
           minPrice,
           suggestedPrice,

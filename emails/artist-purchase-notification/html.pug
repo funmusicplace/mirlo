@@ -1,25 +1,30 @@
 extends ../layout.pug
 
-mixin purchaseRow(title, transaction)
+mixin purchaseRow(title, sku, transaction)
   tr
     td #{title}
+    td #{sku}
     td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
     td #{transaction.platformFee / 100 ? `(Platform fee: ${transaction.platformFee / 100})` : ''}
     td #{transaction.stripeCut / 100 ? `(Payment processor fee: ${transaction.stripeCut / 100})` : ''}
 
 block content
-  p Someone supported you via Mirlo:
+  p Someone bought something from you via Mirlo:
     
   table 
     each transaction in transactions
-      each purchase in transaction.trackGroupPurchases
-        +purchaseRow(purchase.trackGroup.title, transaction)
-      each purchase in transaction.trackPurchases
-        +purchaseRow(purchase.track.title, transaction)
-      each purchase in transaction.merchPurchases
-        +purchaseRow(purchase.merch.title, transaction)
-      each tip in transaction.tips
-        +purchaseRow('Tip', transaction)
+      if transaction.trackGroupPurchases
+        each purchase in transaction.trackGroupPurchases
+          +purchaseRow(`${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`, purchase.trackGroup.catalogNumber, transaction)
+      if transaction.trackPurchases
+        each purchase in transaction.trackPurchases
+          +purchaseRow(purchase.track.title, purchase.track.isrc, transaction)
+      if transaction.merchPurchases
+        each purchase in transaction.merchPurchases
+          +purchaseRow(`${purchase.merch.artist.name} \ ${purchase.merch.title}`, purchase.merch.sku, transaction)
+      if transaction.tips
+        each tip in transaction.tips
+          +purchaseRow('Tip', '', transaction)
 
   p You can view your sales in your 
     a(href!=`${client}/sales`) artist dashboard

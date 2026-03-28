@@ -96,7 +96,7 @@ export const AdminTrackGroups: React.FC = () => {
                 <td>{trackgroup.artist?.name}</td>
                 <td>{trackgroup.releaseDate}</td>
                 <td>{trackgroup.createdAt}</td>
-                <td>{trackgroup.published ? <FaCheck /> : undefined}</td>
+                <td>{trackgroup.publishedAt ? <FaCheck /> : undefined}</td>
                 <td className="alignRight">
                   <Button
                     size="compact"

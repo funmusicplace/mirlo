@@ -198,8 +198,7 @@ function TrackGroup() {
   }
 
   const isPublished =
-    trackGroup.published ||
-    (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
+    trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
 
   const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;

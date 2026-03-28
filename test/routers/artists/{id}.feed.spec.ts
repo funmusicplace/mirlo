@@ -328,7 +328,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    await createTrackGroup(artist.id, { published: false });
+    await createTrackGroup(artist.id, { publishedAt: null });
 
     const response = await requestApp
       .get(`artists/${artist.id}/feed?format=rss`)

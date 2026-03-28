@@ -357,29 +357,29 @@ model ArtistTourDate {
 }
 
 model ArtistSubscriptionTier {
-  id                    Int                      @id @default(autoincrement())
+  id                    Int                       @id @default(autoincrement())
   name                  String
-  description           String                   @default("")
+  description           String                    @default("")
   artistId              Int
-  artist                Artist                   @relation(fields: [artistId], references: [id])
+  artist                Artist                    @relation(fields: [artistId], references: [id])
   minAmount             Int? // in cents
   allowVariable         Boolean?
   maxAmount             Int? // in cents
   defaultAmount         Int? // in cents
-  currency              String                   @default("USD")
-  interval              Interval                 @default(MONTH)
+  currency              String                    @default("USD")
+  interval              Interval                  @default(MONTH)
   userSubscriptions     ArtistUserSubscription[]
   stripeProductKey      String?
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @default(now()) @updatedAt
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @default(now()) @updatedAt
   deletedAt             DateTime?
   minimumTierForPost    Post[]
   postSubscriptionTiers PostSubscriptionTier[]
-  isDefaultTier         Boolean                  @default(false)
-  platformPercent       Int?                     @default(7)
-  discountPercent       Int?                     @default(0)
-  autoPurchaseAlbums    Boolean                  @default(false)
-  collectAddress        Boolean?                 @default(false)
+  isDefaultTier         Boolean                   @default(false)
+  platformPercent       Int?                      @default(7)
+  discountPercent       Int?                      @default(0)
+  autoPurchaseAlbums    Boolean                   @default(false)
+  collectAddress        Boolean?                  @default(false)
   images                SubscriptionTierImage[]
   releases              SubscriptionTierRelease[]
 }
@@ -394,11 +394,11 @@ model SubscriptionTierImage {
 }
 
 model SubscriptionTierRelease {
-  tierId      Int
-  tier        ArtistSubscriptionTier @relation(fields: [tierId], references: [id])
+  tierId       Int
+  tier         ArtistSubscriptionTier @relation(fields: [tierId], references: [id])
   trackGroupId Int
-  trackGroup  TrackGroup @relation(fields: [trackGroupId], references: [id])
-  createdAt   DateTime   @default(now())
+  trackGroup   TrackGroup             @relation(fields: [trackGroupId], references: [id])
+  createdAt    DateTime               @default(now())
 
   @@unique([tierId, trackGroupId])
 }
@@ -681,7 +681,6 @@ model TrackGroup {
   isDrafts                        Boolean                         @default(false)
   tracks                          Track[]
   cover                           TrackGroupCover?
-  published                       Boolean                         @default(false) // Deprecated: use publishedAt instead
   publishedAt                     DateTime?
   type                            String?
   isGettable                      Boolean                         @default(true)

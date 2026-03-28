@@ -58,7 +58,20 @@ describe("manage/artists/{artistId}/trackGroups", () => {
     it("should GET / get an unpublished", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, { published: false });
+      await createTrackGroup(artist.id, { publishedAt: null });
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/trackGroups`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert(response.statusCode === 200);
+    });
+
+    it("should GET / get a published album", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      await createTrackGroup(artist.id, { publishedAt: new Date() });
       const response = await requestApp
         .get(`manage/artists/${artist.id}/trackGroups`)
         .set("Cookie", [`jwt=${accessToken}`])

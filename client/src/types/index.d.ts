@@ -96,7 +96,6 @@ interface Tag {
 
 interface TrackGroup {
   title?: string;
-  published: boolean;
   adminEnabled: boolean;
   catalogNumber?: string;
   id: number;
