@@ -210,6 +210,11 @@ const ArtistSupportBox: React.FC<{
         {subscriptionTier.autoPurchaseAlbums && (
           <p>{t("includesNewReleases")}</p>
         )}
+        {subscriptionTier.releases && subscriptionTier.releases.length > 0 && (
+          <p>
+            {t("includesReleases", { count: subscriptionTier.releases.length })}
+          </p>
+        )}
         <p>
           {subscriptionTier.digitalDiscountPercent &&
             !subscriptionTier.merchDiscountPercent &&
