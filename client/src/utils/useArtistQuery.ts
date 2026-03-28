@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryManagedArtist } from "queries";
+import { queryArtist } from "queries";
 import { useParams } from "react-router-dom";
 
 const useArtistQuery = () => {
