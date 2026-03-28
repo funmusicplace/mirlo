@@ -357,31 +357,32 @@ model ArtistTourDate {
 }
 
 model ArtistSubscriptionTier {
-  id                    Int                       @id @default(autoincrement())
-  name                  String
-  description           String                    @default("")
-  artistId              Int
-  artist                Artist                    @relation(fields: [artistId], references: [id])
-  minAmount             Int? // in cents
-  allowVariable         Boolean?
-  maxAmount             Int? // in cents
-  defaultAmount         Int? // in cents
-  currency              String                    @default("USD")
-  interval              Interval                  @default(MONTH)
-  userSubscriptions     ArtistUserSubscription[]
-  stripeProductKey      String?
-  createdAt             DateTime                  @default(now())
-  updatedAt             DateTime                  @default(now()) @updatedAt
-  deletedAt             DateTime?
-  minimumTierForPost    Post[]
-  postSubscriptionTiers PostSubscriptionTier[]
-  isDefaultTier         Boolean                   @default(false)
-  platformPercent       Int?                      @default(7)
-  discountPercent       Int?                      @default(0)
-  autoPurchaseAlbums    Boolean                   @default(false)
-  collectAddress        Boolean?                  @default(false)
-  images                SubscriptionTierImage[]
-  releases              SubscriptionTierRelease[]
+  id                     Int                       @id @default(autoincrement())
+  name                   String
+  description            String                    @default("")
+  artistId               Int
+  artist                 Artist                    @relation(fields: [artistId], references: [id])
+  minAmount              Int? // in cents
+  allowVariable          Boolean?
+  maxAmount              Int? // in cents
+  defaultAmount          Int? // in cents
+  currency               String                    @default("USD")
+  interval               Interval                  @default(MONTH)
+  userSubscriptions      ArtistUserSubscription[]
+  stripeProductKey       String?
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @default(now()) @updatedAt
+  deletedAt              DateTime?
+  minimumTierForPost     Post[]
+  postSubscriptionTiers  PostSubscriptionTier[]
+  isDefaultTier          Boolean                   @default(false)
+  platformPercent        Int?                      @default(7)
+  digitalDiscountPercent Int?                      @default(0)
+  merchDiscountPercent   Int?                      @default(0)
+  autoPurchaseAlbums     Boolean                   @default(false)
+  collectAddress         Boolean?                  @default(false)
+  images                 SubscriptionTierImage[]
+  releases               SubscriptionTierRelease[]
 }
 
 model SubscriptionTierImage {

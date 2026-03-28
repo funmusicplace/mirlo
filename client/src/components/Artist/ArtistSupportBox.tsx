@@ -148,13 +148,52 @@ const ArtistSupportBox: React.FC<{
         `}
       >
         <MarkdownContent content={subscriptionTier.description} />
-        {subscriptionTier.discountPercent && (
-          <p className="mt-3 text-sm opacity-80">
-            {t("tierStoreDiscount", {
-              discountPercent: subscriptionTier.discountPercent ?? 0,
-            })}
-          </p>
-        )}
+        {subscriptionTier.digitalDiscountPercent &&
+          !subscriptionTier.merchDiscountPercent && (
+            <p className="mt-3 text-sm opacity-80">
+              {t("tierStoreDigitalDiscount", {
+                discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
+            </p>
+          )}
+        {!subscriptionTier.digitalDiscountPercent &&
+          subscriptionTier.merchDiscountPercent && (
+            <p className="mt-3 text-sm opacity-80">
+              {t("tierStoreMerchDiscount", {
+                discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
+            </p>
+          )}
+        {subscriptionTier.digitalDiscountPercent &&
+          subscriptionTier.merchDiscountPercent &&
+          subscriptionTier.digitalDiscountPercent !==
+            subscriptionTier.merchDiscountPercent && (
+            <p className="mt-3 text-sm opacity-80">
+              {t("differentTierStoreDiscount", {
+                digitalDiscountPercent:
+                  subscriptionTier.digitalDiscountPercent ?? 0,
+                merchDiscountPercent:
+                  subscriptionTier.merchDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
+            </p>
+          )}
+        {subscriptionTier.digitalDiscountPercent &&
+          subscriptionTier.merchDiscountPercent &&
+          subscriptionTier.digitalDiscountPercent ===
+            subscriptionTier.merchDiscountPercent && (
+            <p className="mt-3 text-sm opacity-80">
+              {t("sameTierStoreDiscount", {
+                digitalDiscountPercent:
+                  subscriptionTier.digitalDiscountPercent ?? 0,
+                merchDiscountPercent:
+                  subscriptionTier.merchDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
+            </p>
+          )}
       </div>
       <div
         className={css`

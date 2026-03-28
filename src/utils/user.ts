@@ -106,15 +106,19 @@ export const findUserDiscountPercentsForArtist = async (
     select: {
       artistSubscriptionTier: {
         select: {
-          discountPercent: true,
+          digitalDiscountPercent: true,
+          merchDiscountPercent: true,
         },
       },
     },
   });
 
-  return activeSubscriptions.map(
-    (subscription) => subscription.artistSubscriptionTier.discountPercent ?? 0
-  );
+  return activeSubscriptions.map((subscription) => ({
+    digitalDiscountPercent:
+      subscription.artistSubscriptionTier.digitalDiscountPercent ?? 0,
+    merchDiscountPercent:
+      subscription.artistSubscriptionTier.merchDiscountPercent ?? 0,
+  }));
 };
 
 export const updateCurrencies = async (userId: number, currency: string) => {

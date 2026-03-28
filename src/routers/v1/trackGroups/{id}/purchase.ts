@@ -75,7 +75,7 @@ export default function () {
         );
 
         discountPercent = discounts.reduce((max, discount) => {
-          return Math.max(max, discount);
+          return Math.max(max, discount.digitalDiscountPercent ?? 0);
         }, 0);
       }
 

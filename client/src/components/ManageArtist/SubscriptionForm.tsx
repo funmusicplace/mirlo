@@ -45,7 +45,8 @@ type FormData = {
   name: string;
   description: string;
   minAmount: string;
-  discountPercent?: number;
+  digitalDiscountPercent?: number;
+  merchDiscountPercent?: number;
   allowVariable: boolean;
   autoPurchaseAlbums: boolean;
   platformPercent?: number;
@@ -95,9 +96,13 @@ const SubscriptionForm: React.FC<{
               "imageId",
             ]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
-            discountPercent:
-              data.discountPercent !== undefined
-                ? Number(data.discountPercent)
+            digitalDiscountPercent:
+              data.digitalDiscountPercent !== undefined
+                ? Number(data.digitalDiscountPercent)
+                : undefined,
+            merchDiscountPercent:
+              data.merchDiscountPercent !== undefined
+                ? Number(data.merchDiscountPercent)
                 : undefined,
           };
           if (localExistingId) {
@@ -221,21 +226,40 @@ const SubscriptionForm: React.FC<{
           <h2>{t("rewards")}</h2>
           <FormComponent>
             <label htmlFor="digitalDiscountPercent">
-              {t("discountPercent")}
+              {t("digitalDiscountPercent")}
             </label>
             <div className="flex w-full items-center">
               <InputEl
                 step={1}
                 type="number"
-                {...register("discountPercent", { min: 0, max: 100 })}
+                {...register("digitalDiscountPercent", { min: 0, max: 100 })}
                 min={0}
                 id="digitalDiscountPercent"
                 max={100}
               />
               <span className="ml-1">%</span>
             </div>
-            {formState.errors.discountPercent && (
-              <FormError>{t("discountPercentError")}</FormError>
+            {formState.errors.digitalDiscountPercent && (
+              <FormError>{t("digitalDiscountPercentError")}</FormError>
+            )}
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="merchDiscountPercent">
+              {t("merchDiscountPercent")}
+            </label>
+            <div className="flex w-full items-center">
+              <InputEl
+                step={1}
+                type="number"
+                {...register("merchDiscountPercent", { min: 0, max: 100 })}
+                min={0}
+                id="merchDiscountPercent"
+                max={100}
+              />
+              <span className="ml-1">%</span>
+            </div>
+            {formState.errors.merchDiscountPercent && (
+              <FormError>{t("merchDiscountPercentError")}</FormError>
             )}
           </FormComponent>
           <FormComponent>

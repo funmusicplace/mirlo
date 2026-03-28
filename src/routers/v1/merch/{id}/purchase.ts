@@ -7,6 +7,7 @@ import { createStripeCheckoutSessionForMerchPurchase } from "../../../../utils/s
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { determinePrice } from "../../../../utils/purchasing";
+import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
 
 type Params = {
   id: string;
@@ -96,6 +97,18 @@ export default function () {
         0
       );
 
+      let discountPercent: number | undefined;
+      if (loggedInUser) {
+        const discounts = await findUserDiscountPercentsForArtist(
+          loggedInUser.id,
+          merch.artistId
+        );
+
+        discountPercent = discounts.reduce((max, discount) => {
+          return Math.max(max, discount.merchDiscountPercent ?? 0);
+        }, 0);
+      }
+
       if (loggedInUser) {
         await subscribeUserToArtist(merch?.artist, loggedInUser);
       }
@@ -126,6 +139,7 @@ export default function () {
           quantity: quantity ?? 0,
           stripeAccountId,
           shippingDestinationId,
+          discountPercent,
           options: { merchOptionIds: finalOptionIds },
         });
         res.status(200).json({

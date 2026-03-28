@@ -42,7 +42,8 @@ const BuyTrackGroup: React.FC<{
       subscription.artistSubscriptionTier.artistId === trackGroup.artistId
   );
   const discountPercent =
-    activeSubscriptionForArtist?.artistSubscriptionTier.discountPercent ?? 0;
+    activeSubscriptionForArtist?.artistSubscriptionTier
+      .digitalDiscountPercent ?? 0;
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
   const initialChosenPriceCents = track
     ? (minPrice ?? 0)

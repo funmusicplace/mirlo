@@ -120,9 +120,14 @@ const apiDoc = {
           description: "minimum amount of the subscription",
           type: "number",
         },
-        discountPercent: {
+        digitalDiscountPercent: {
           description:
-            "discount percentage applied for subscribers on purchases",
+            "discount percentage applied for subscribers on digital purchases",
+          type: "number",
+        },
+        merchDiscountPercent: {
+          description:
+            "discount percentage applied for subscribers on merch purchases",
           type: "number",
         },
       },
@@ -143,9 +148,14 @@ const apiDoc = {
           description: "minimum amount of the subscription",
           type: "number",
         },
-        discountPercent: {
+        digitalDiscountPercent: {
           description:
-            "discount percentage applied for subscribers on purchases",
+            "discount percentage applied for subscribers on digital purchases",
+          type: "number",
+        },
+        merchDiscountPercent: {
+          description:
+            "discount percentage applied for subscribers on merch purchases",
           type: "number",
         },
       },
@@ -165,9 +175,14 @@ const apiDoc = {
           description: "minimum amount of the subscription",
           type: "number",
         },
-        discountPercent: {
+        digitalDiscountPercent: {
           description:
-            "discount percentage applied for subscribers on purchases",
+            "discount percentage applied for subscribers on digital purchases",
+          type: "number",
+        },
+        merchDiscountPercent: {
+          description:
+            "discount percentage applied for subscribers on merch purchases",
           type: "number",
         },
       },

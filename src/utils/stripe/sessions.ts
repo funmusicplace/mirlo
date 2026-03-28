@@ -483,6 +483,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   options,
   stripeAccountId,
   shippingDestinationId,
+  discountPercent,
 }: {
   loggedInUser?: User;
   email?: string;
@@ -497,6 +498,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   };
   shippingDestinationId: string;
   stripeAccountId: string;
+  discountPercent?: number | null;
 }) => {
   const client = await prisma.client.findFirst({
     where: {
@@ -537,6 +539,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
     currency,
     productKey,
     quantity,
+    discountPercent,
   });
 
   const session = await stripe.checkout.sessions.create(
