@@ -41,8 +41,7 @@ export default function () {
       }
 
       const isPublished =
-        trackGroup?.published ||
-        (trackGroup?.publishedAt && trackGroup.publishedAt < new Date());
+        trackGroup?.publishedAt && trackGroup.publishedAt < new Date();
 
       const canSeeUnpublished =
         loggedInUser?.isAdmin || loggedInUser?.id === trackGroup?.artist.userId;

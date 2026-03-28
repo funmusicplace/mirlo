@@ -28,7 +28,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
-        published: false,
+        publishedAt: null,
       });
 
       const response = await requestApp
@@ -42,7 +42,6 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
         where: { id: trackGroup.id },
       });
 
-      assert.equal(updatedTrackGroup?.published, true);
       assert.ok(updatedTrackGroup?.publishedAt);
     });
 
@@ -52,7 +51,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
-        published: false,
+        publishedAt: null,
       });
 
       await prisma.trackGroupCover.delete({
@@ -70,7 +69,6 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
         where: { id: trackGroup.id },
       });
 
-      assert.equal(unchangedTrackGroup?.published, false);
       assert.equal(unchangedTrackGroup?.publishedAt, null);
     });
 
@@ -80,7 +78,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
-        published: false,
+        publishedAt: null,
         tracks: [],
         fundraisingGoal: 1000,
       });
@@ -96,7 +94,6 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
         where: { id: trackGroup.id },
       });
 
-      assert.equal(updatedTrackGroup?.published, true);
       assert.ok(updatedTrackGroup?.publishedAt);
     });
 
@@ -106,7 +103,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
-        published: false,
+        publishedAt: null,
       });
 
       const track = await prisma.track.findFirst({
@@ -129,7 +126,6 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
         where: { id: trackGroup.id },
       });
 
-      assert.equal(updatedTrackGroup?.published, true);
       assert.ok(updatedTrackGroup?.publishedAt);
     });
   });

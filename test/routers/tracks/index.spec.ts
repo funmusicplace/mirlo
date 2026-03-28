@@ -48,7 +48,7 @@ describe("trackGroups", () => {
     it("should GET / not get an unpublished", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, { published: false });
+      await createTrackGroup(artist.id, { publishedAt: null });
       const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");

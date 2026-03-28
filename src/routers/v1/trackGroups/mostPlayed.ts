@@ -25,7 +25,7 @@ export default function () {
       INNER JOIN "Track" AS tr ON tg.id = tr."trackGroupId"
       INNER JOIN "TrackPlay" AS tp ON tr.id = tp."trackId"
       INNER JOIN "TrackGroupCover" AS tgc ON tg.id = tgc."trackGroupId"
-      WHERE tg.published = true 
+      WHERE tg."publishedAt" <= NOW() 
       AND tg."isDrafts" = false 
       AND tg."deletedAt" IS NULL 
       AND tgc.url IS NOT NULL 

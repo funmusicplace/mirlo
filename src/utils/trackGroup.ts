@@ -37,7 +37,7 @@ import { deleteDownloadableContent } from "./content";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
-    OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
+    publishedAt: { lte: new Date() },
     isDrafts: false,
     adminEnabled: true,
     artist: {
@@ -591,7 +591,7 @@ export const findTrackPurchaseAndVoidToken = async (
             userId: Number(user.id),
             track: {
               trackGroup: {
-                published: true,
+                publishedAt: { lte: new Date() },
               },
             },
           }
@@ -641,7 +641,7 @@ export const findPurchaseAndVoidToken = async (
         ? {
             userId: Number(user.id),
             trackGroup: {
-              published: true,
+              publishedAt: { lte: new Date() },
             },
           }
         : {}),
@@ -707,11 +707,11 @@ export const findTrackPurchaseBasedOnTokenAndUpdate = async (
   return purchase.track;
 };
 
-export const trackGroupPublishedObject = {
-  OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
+export const trackGroupPublishedObject = () => ({
+  publishedAt: { lte: new Date() },
   deletedAt: null,
   isDrafts: false,
-};
+});
 
 export const findPurchaseBasedOnTokenAndUpdate = async (
   trackGroupId: number,
@@ -724,7 +724,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
       singleDownloadToken: token,
       trackGroupId: Number(trackGroupId),
       trackGroup: {
-        ...trackGroupPublishedObject,
+        ...trackGroupPublishedObject(),
       },
     },
     include: {

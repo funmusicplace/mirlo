@@ -43,7 +43,7 @@ export default function () {
         where.artist = { name: { contains: artistName, mode: "insensitive" } };
       }
       if (isPublished) {
-        where.published = true;
+        where.publishedAt = { lte: new Date() };
       }
       const itemCount = await prisma.trackGroup.count({ where });
 

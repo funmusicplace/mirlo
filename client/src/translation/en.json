@@ -248,7 +248,7 @@
     "price": "Price:",
     "addToCollection": "Add to collection",
     "addToCollectionDescription": "You'll add this free release to your collection.",
-    "addAlbumToCollection": "Or, add {{ title }} to your collection",
+    "addAlbumToCollection": "Add {{ title }} to your collection",
     "getDownloadLink": "Get download link in email",
     "email": "Email",
     "success": "Success",
@@ -646,7 +646,16 @@
     "isLabelConfirmed": "Has label confirmed relationship?",
     "confirmRelationship": "Confirm relationship",
     "willPublishAt": "Will publish at {{ date }}",
-    "publishedSuccess": "Your release has been published. People will be able to buy it after the release date!"
+    "publishedSuccess": "Your release has been published. People will be able to buy it after the release date!",
+    "subscriptionTierReleases": "Releases included with subscription",
+    "subscriptionTierReleasesHint": "Select albums that subscribers will automatically receive",
+    "subscriptionTierReleaseAdded": "Release added",
+    "subscriptionTierReleaseRemoved": "Release removed",
+    "releaseSelectionUpdated": "Release selection updated",
+    "searchAlbums": "Search releases",
+    "noReleases": "No releases found",
+    "selected": "Selected",
+    "saving": "Saving changes..."
   },
   "managePost": {
     "managePost": "Manage post",

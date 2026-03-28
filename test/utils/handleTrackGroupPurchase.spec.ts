@@ -11,6 +11,7 @@ import * as sendMail from "../../src/jobs/send-mail";
 import {
   AlbumPurchaseArtistNotificationEmailType,
   AlbumPurchaseEmailType,
+  ArtistPurchaseNotificationEmailType,
   handleTrackGroupPurchase,
 } from "../../src/utils/handleFinishedTransactions";
 
@@ -62,13 +63,16 @@ describe("handleTrackGroupPurchase", () => {
     assert.equal(locals0.trackGroup.id, trackGroup.id);
     assert.equal(locals0.purchase.transaction?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "album-purchase-artist-notification");
+    assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
-    const locals1 = data1.locals as AlbumPurchaseArtistNotificationEmailType;
-    assert.equal(locals1.trackGroup.id, trackGroup.id);
-    assert.equal(locals1.purchase.transaction?.amount, 0);
-    assert.equal(locals1.purchase.transaction?.platformCut, 0);
-    assert.equal(locals1.purchase.transaction?.stripeCut, 0);
+    const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
+    assert.equal(
+      locals1.transactions[0].trackGroupPurchases?.[0].trackGroup.id,
+      trackGroup.id
+    );
+    assert.equal(locals1.transactions[0]?.amount, 0);
+    assert.equal(locals1.transactions[0]?.platformCut, 0);
+    assert.equal(locals1.transactions[0]?.stripeCut, 0);
   });
 
   it("should send out emails for track group purchase without log-in", async () => {
@@ -111,10 +115,15 @@ describe("handleTrackGroupPurchase", () => {
     assert.equal(locals0.trackGroup.id, trackGroup.id);
     assert.equal(locals0.purchase.transaction?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "album-purchase-artist-notification");
+    assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
-    const locals1 = data1.locals as AlbumPurchaseArtistNotificationEmailType;
-    assert.equal(locals1.trackGroup.id, trackGroup.id);
-    assert.equal(locals1.purchase.transaction?.amount, 0);
+    const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
+    assert.equal(
+      locals1.transactions[0].trackGroupPurchases?.[0].trackGroup.id,
+      trackGroup.id
+    );
+    assert.equal(locals1.transactions[0]?.amount, 0);
+    assert.equal(locals1.transactions[0]?.platformCut, 0);
+    assert.equal(locals1.transactions[0]?.stripeCut, 0);
   });
 });

@@ -434,7 +434,7 @@ export const singleInclude = (queryOptions?: {
   return {
     trackGroups: {
       where: {
-        ...trackGroupPublishedObject,
+        ...trackGroupPublishedObject(),
       },
       orderBy: [
         {

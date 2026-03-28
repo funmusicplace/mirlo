@@ -2,7 +2,6 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
   id: 1,
   artistId: 1,
   title: "Example Album",
-  published: true,
   releaseDate: "1999-09-09T09:09:09Z",
   adminEnabled: true,
   createdAt: "1999-09-09T09:09:09Z",

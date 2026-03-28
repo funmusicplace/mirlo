@@ -250,17 +250,43 @@ export const handleTrackGroupPurchase = async (
         },
       } as Job);
 
-      await sendMail<AlbumPurchaseArtistNotificationEmailType>({
+      const transactions = await prisma.userTransaction.findMany({
+        where: {
+          id: transaction.id,
+        },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          trackGroupPurchases: {
+            include: {
+              trackGroup: {
+                include: {
+                  artist: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      await sendMail<ArtistPurchaseNotificationEmailType>({
         data: {
-          template: "album-purchase-artist-notification",
+          template: "artist-purchase-notification",
           message: {
             to: trackGroup.paymentToUser?.email ?? trackGroup.artist.user.email,
           },
           locals: {
-            trackGroup,
-            purchase,
+            transactions,
+            total: transactions.reduce((acc, t) => acc + t.amount, 0),
+            currency: transactions[0]?.currency ?? "USD",
+            message: session?.metadata?.message,
             email: user.email,
-          } as AlbumPurchaseArtistNotificationEmailType,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+          } as ArtistPurchaseNotificationEmailType,
         },
       } as Job);
 
@@ -297,7 +323,7 @@ export const handleCataloguePurchase = async (
           lte: new Date(),
         },
         isDrafts: false,
-        published: true,
+        publishedAt: { lte: new Date() },
         isGettable: true,
         adminEnabled: true,
       },
@@ -490,13 +516,12 @@ export type PurchaseReceiptEmailType = {
 };
 
 export type ArtistPurchaseNotificationEmailType = {
-  artist: {
-    user: User;
-    properties?: { emails?: { purchase?: string } } | null;
-  };
   transactions: PurchaseTransaction[];
   message: string | null;
   email: string;
+  total: number;
+  currency: string;
+  client: string;
 };
 
 const sendSaleEmails = async (
@@ -596,6 +621,8 @@ const sendSaleEmails = async (
       locals: {
         artist,
         transactions,
+        total: transactions.reduce((acc, t) => acc + t.amount, 0),
+        currency: transactions[0]?.currency ?? "USD",
         message: message ?? null,
         email: purchaser.email,
         client: process.env.REACT_APP_CLIENT_DOMAIN,
@@ -688,6 +715,7 @@ export type TellArtistAboutMerchPurchaseEmailType = {
     merchId: string;
     merch: {
       title: string;
+      sku: string;
     };
     transaction: {
       amount: number;

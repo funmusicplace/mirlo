@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { FaWrench } from "react-icons/fa";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { NewAlbumButton } from "./NewAlbumButton";
@@ -36,15 +35,12 @@ const ManageArtistAlbums: React.FC<{}> = () => {
 
   const publishedReleases =
     trackGroups?.results.filter(
-      (album) =>
-        album.published ||
-        (album.publishedAt && new Date(album.publishedAt) < new Date())
+      (album) => album.publishedAt && new Date(album.publishedAt) < new Date()
     ) ?? [];
 
   const unpublishedReleases =
     trackGroups?.results.filter(
       (album) =>
-        !album.published &&
         !(album.publishedAt && new Date(album.publishedAt) < new Date())
     ) ?? [];
 

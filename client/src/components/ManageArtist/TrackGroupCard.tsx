@@ -42,8 +42,7 @@ const TrackGroupCard: React.FC<{
   }, [artist, album, t]);
 
   const isPublished =
-    album.published ||
-    (album.publishedAt && new Date(album.publishedAt) < new Date());
+    album.publishedAt && new Date(album.publishedAt) < new Date();
 
   return (
     <div
@@ -77,7 +76,7 @@ const TrackGroupCard: React.FC<{
       >
         <ArtistRouterLink
           to={
-            album.published
+            album.publishedAt && new Date(album.publishedAt) <= new Date()
               ? getReleaseUrl(artist, album)
               : getManageReleaseUrl(artist, album)
           }

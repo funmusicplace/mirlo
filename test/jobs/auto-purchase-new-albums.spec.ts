@@ -75,7 +75,7 @@ describe("auto-purchase-new-albums", () => {
 
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call the job processor with the specific album and subscription
@@ -136,7 +136,7 @@ describe("auto-purchase-new-albums", () => {
 
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call the job processor twice with the same album and subscription
@@ -229,7 +229,7 @@ describe("auto-purchase-new-albums", () => {
 
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call with non-existent subscription
@@ -285,7 +285,7 @@ describe("auto-purchase-new-albums", () => {
 
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call the job processor
@@ -363,7 +363,7 @@ describe("auto-purchase-new-albums", () => {
 
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call for both subscribers
@@ -443,7 +443,7 @@ describe("auto-purchase-new-albums", () => {
     // Album released in last hour
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call trigger
@@ -498,7 +498,7 @@ describe("auto-purchase-new-albums", () => {
     // Album released in last hour
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call trigger
@@ -551,7 +551,7 @@ describe("auto-purchase-new-albums", () => {
     // Album released in last hour
     const tg = await createTrackGroup(artist.id, {
       releaseDate: new Date(),
-      published: true,
+      publishedAt: new Date(),
     });
 
     // Call trigger

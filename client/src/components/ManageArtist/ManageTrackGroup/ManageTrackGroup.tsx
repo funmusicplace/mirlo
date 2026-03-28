@@ -31,7 +31,6 @@ import RecommendedTrackGroups from "./AlbumFormComponents/RecommendedTrackGroups
 import { useSnackbar } from "state/SnackbarContext";
 
 export interface TrackGroupFormData {
-  published: boolean;
   title: string;
   minPrice: string;
   suggestedPrice?: string;

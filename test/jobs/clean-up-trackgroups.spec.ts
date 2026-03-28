@@ -34,7 +34,7 @@ describe("clean-up-trackgroups", () => {
         artistId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
-        published: true,
+        publishedAt: new Date(),
         deletedAt: new Date(sevenMonthsAgo),
       },
     });
@@ -59,7 +59,7 @@ describe("clean-up-trackgroups", () => {
         artistId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
-        published: true,
+        publishedAt: new Date(),
         deletedAt: new Date(fourMonthsAgo),
       },
     });
@@ -84,7 +84,7 @@ describe("clean-up-trackgroups", () => {
         artistId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
-        published: true,
+        publishedAt: new Date(),
         deletedAt: new Date(sevenMonthsAgo),
       },
     });

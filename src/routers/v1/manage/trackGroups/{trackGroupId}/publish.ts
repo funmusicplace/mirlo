@@ -19,9 +19,8 @@ export default function () {
         Number(trackGroupId),
         loggedInUser
       );
-      const isCurrentlyPublished = Boolean(
-        trackGroup?.published || trackGroup.publishedAt
-      );
+      const isCurrentlyPublished =
+        trackGroup.publishedAt && trackGroup.publishedAt <= new Date();
       if (!isCurrentlyPublished) {
         const hasCover = Boolean(trackGroup?.cover?.url?.length);
 
@@ -36,11 +35,10 @@ export default function () {
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },
         data: {
-          published: !isCurrentlyPublished,
           publishedAt: isCurrentlyPublished ? null : new Date(),
         },
       });
-      if (updatedTrackgroup.published) {
+      if (updatedTrackgroup.publishedAt) {
         const artistFollowers = await prisma.artistUserSubscription.findMany({
           where: {
             artistSubscriptionTier: {

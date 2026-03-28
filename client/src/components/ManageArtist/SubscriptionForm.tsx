@@ -18,6 +18,8 @@ import { SelectEl } from "components/common/Select";
 import PaymentSlider from "./ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import styled from "@emotion/styled";
 import UploadGeneralImage from "./UploadGeneralImage";
+import ManageSubscriptionTierReleases from "./ManageSubscriptionTierReleases";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -218,13 +220,16 @@ const SubscriptionForm: React.FC<{
         <FormSection>
           <h2>{t("rewards")}</h2>
           <FormComponent>
-            <label>{t("discountPercent")}</label>
+            <label htmlFor="digitalDiscountPercent">
+              {t("discountPercent")}
+            </label>
             <div className="flex w-full items-center">
               <InputEl
                 step={1}
                 type="number"
                 {...register("discountPercent", { min: 0, max: 100 })}
                 min={0}
+                id="digitalDiscountPercent"
                 max={100}
               />
               <span className="ml-1">%</span>
@@ -247,11 +252,18 @@ const SubscriptionForm: React.FC<{
               description={t("collectAddress")}
             />
           </FormComponent>
+          {existing && (
+            <ManageSubscriptionTierReleases
+              tier={existing}
+              artistId={artist.id}
+              reload={reload}
+            />
+          )}
         </FormSection>
         <FormComponent>
-          <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+          <ArtistButton type="submit" disabled={isSaving} isLoading={isSaving}>
             {localExistingId ? t("saveSubscription") : t("createSubscription")}
-          </Button>
+          </ArtistButton>
         </FormComponent>
       </form>
     </FormProvider>

@@ -22,7 +22,7 @@ export default function () {
 
         trackGroup: {
           deletedAt: null,
-          published: true,
+          publishedAt: { lte: new Date() },
           artist: {
             deletedAt: null,
           },

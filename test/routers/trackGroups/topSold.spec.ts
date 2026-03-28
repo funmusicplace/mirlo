@@ -66,7 +66,7 @@ describe("Top sold trackGroups", () => {
   it("should GET /topSold not get an unpublished", async () => {
     const { user } = await createUser({ email: "test@testcom" });
     const artist = await createArtist(user.id);
-    await createTrackGroup(artist.id, { published: false });
+    await createTrackGroup(artist.id, { publishedAt: null });
     const response = await requestApp
       .get("trackGroups/topSold")
       .set("Accept", "application/json");

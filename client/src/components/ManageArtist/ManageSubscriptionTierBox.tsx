@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
+import ManageSubscriptionTierReleases from "./ManageSubscriptionTierReleases";
 import MarkdownContent from "components/common/MarkdownContent";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useAuthContext } from "state/AuthContext";
@@ -64,11 +65,7 @@ const ManageSubscriptionTierBox: React.FC<{
           `}
         />
       )}
-      <div
-        className={css`
-          padding: 0.25rem 1rem;
-        `}
-      >
+      <div className="p-4">
         <SpaceBetweenDiv
           className={css`
             flex-direction: column;
@@ -126,11 +123,11 @@ const ManageSubscriptionTierBox: React.FC<{
         </SpaceBetweenDiv>
 
         <MarkdownContent content={tier.description} />
+
         <Modal
           open={!!manageTier}
           title={t("editTier")}
           onClose={() => setManageTier(undefined)}
-          size="small"
         >
           {/* There is some overly complex state management going on here with the reloads being passed around */}
           <SubscriptionForm existing={tier} reload={reload} artist={artist} />

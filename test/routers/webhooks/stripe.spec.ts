@@ -9,6 +9,7 @@ import {
   createArtist,
   createTrackGroup,
   createUser,
+  createTier,
 } from "../../utils";
 import sinon from "sinon";
 
@@ -19,6 +20,7 @@ import * as handleFinishedTransactions from "../../../src/utils/handleFinishedTr
 import * as sendMailQueueModule from "../../../src/queues/send-mail-queue";
 import * as subscriptionModule from "../../../src/utils/subscription";
 import Stripe from "stripe";
+import { handleInvoicePaid } from "../../../src/utils/stripe";
 
 describe("Stripe Webhooks - Failed Payments", () => {
   beforeEach(async () => {
@@ -286,6 +288,246 @@ describe("Stripe Webhooks - Failed Payments", () => {
       );
 
       assert.equal(handleFundraiserPledgePaymentFailureStub.calledOnce, false);
+    });
+  });
+
+  describe("invoice.paid webhook for subscription", () => {
+    it("should grant user access to subscription tier releases when invoice is paid", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+
+      const artist = await createArtist(artistUser.id);
+
+      // Create subscription tier with releases using utility function
+      const tier = await createTier(artist.id, {
+        name: "Premium Tier",
+      });
+
+      // Create multiple releases for the artist using utility function
+      const release1 = await createTrackGroup(artist.id, {
+        title: "Album 1",
+        urlSlug: "album-1",
+      });
+
+      const release2 = await createTrackGroup(artist.id, {
+        title: "Album 2",
+        urlSlug: "album-2",
+      });
+
+      // Add releases to the subscription tier
+      await prisma.subscriptionTierRelease.createMany({
+        data: [
+          {
+            tierId: tier.id,
+            trackGroupId: release1.id,
+          },
+          {
+            tierId: tier.id,
+            trackGroupId: release2.id,
+          },
+        ],
+      });
+
+      // Create a subscription for the user
+      const subscriptionKey = "sub_test123";
+      const subscription = await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: subscriptionKey,
+          deletedAt: null,
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 10,
+        },
+      });
+
+      // Mock stripe paymentIntents.retrieve to avoid actual API calls
+      const paymentIntentsStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "retrieve")
+        .resolves({
+          id: "pi_test_123",
+          client_secret: "secret_123",
+          latest_charge: {
+            balance_transaction: {
+              fee_details: [{ type: "stripe_fee", amount: 30 }],
+            },
+          },
+        } as any);
+
+      // Simulate the Stripe invoice.paid webhook with proper typing
+      const mockInvoice = {
+        id: "in_test_invoice_123",
+        subscription: subscriptionKey,
+        amount_paid: 1000,
+        currency: "usd",
+        application_fee_amount: 200,
+        payment_intent: "pi_test_123",
+      } as any;
+
+      // Handle the invoice paid event
+      await handleInvoicePaid(mockInvoice, "acct_test_account");
+
+      // Verify a subscription charge transaction was created
+      const transaction = await prisma.userTransaction.findFirst({
+        where: {
+          stripeId: "in_test_invoice_123",
+        },
+        include: {
+          artistUserSubscriptionCharges: true,
+        },
+      });
+
+      assert.ok(transaction, "Transaction should be created");
+      assert.equal(transaction.amount, 1000, "Amount should be 1000");
+      assert.equal(transaction.userId, subscriber.id, "User ID should match");
+      assert.equal(
+        transaction.artistUserSubscriptionCharges.length,
+        1,
+        "Should have one subscription charge"
+      );
+      assert.equal(
+        transaction.artistUserSubscriptionCharges[0].artistUserSubscriptionId,
+        subscription.id,
+        "Charge should be linked to correct subscription"
+      );
+
+      // Verify user got access to both releases
+      const userPurchases = await prisma.userTrackGroupPurchase.findMany({
+        where: {
+          userId: subscriber.id,
+        },
+      });
+
+      assert.equal(
+        userPurchases.length,
+        2,
+        "User should have access to 2 releases"
+      );
+      assert.ok(
+        userPurchases.some((p) => p.trackGroupId === release1.id),
+        "User should have access to first release"
+      );
+      assert.ok(
+        userPurchases.some((p) => p.trackGroupId === release2.id),
+        "User should have access to second release"
+      );
+      assert.ok(
+        userPurchases.every((p) => p.userTransactionId === transaction.id),
+        "All purchases should link back to the transaction"
+      );
+
+      // Verify receipt email was sent
+      assert.equal(sendMailStub.calledOnce, true, "Email should be queued");
+      const emailCall = sendMailStub.getCall(0).args[1];
+      assert.equal(
+        emailCall.template,
+        "artist-subscription-receipt",
+        "Should send subscription receipt"
+      );
+      assert.equal(
+        emailCall.message.to,
+        subscriber.email,
+        "Email should go to subscriber"
+      );
+
+      paymentIntentsStub.restore();
+    });
+
+    it("should handle invoice.paid with no subscription tier releases", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+
+      const artist = await createArtist(artistUser.id);
+
+      // Create subscription tier WITHOUT releases using utility function
+      const tier = await createTier(artist.id, {
+        name: "Basic Tier",
+      });
+
+      // Create a subscription for the user
+      const subscriptionKey = "sub_test456";
+      const subscription = await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: subscriptionKey,
+          deletedAt: null,
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 5,
+        },
+      });
+
+      // Mock stripe paymentIntents.retrieve
+      const paymentIntentsStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "retrieve")
+        .resolves({
+          id: "pi_test_456",
+          client_secret: "secret_456",
+          latest_charge: {
+            balance_transaction: {
+              fee_details: [{ type: "stripe_fee", amount: 15 }],
+            },
+          },
+        } as any);
+
+      // Simulate the Stripe invoice.paid webhook
+      const mockInvoice = {
+        id: "in_test_invoice_456",
+        subscription: subscriptionKey,
+        amount_paid: 500,
+        currency: "usd",
+        application_fee_amount: 100,
+        payment_intent: "pi_test_456",
+      } as any;
+
+      // Handle the invoice paid event
+      await handleInvoicePaid(mockInvoice, "acct_test_account");
+
+      // Verify transaction was created
+      const transaction = await prisma.userTransaction.findFirst({
+        where: {
+          stripeId: "in_test_invoice_456",
+        },
+      });
+
+      assert.ok(transaction, "Transaction should be created");
+      assert.equal(transaction.amount, 500);
+
+      // Verify NO purchases were created (since tier has no releases)
+      const userPurchases = await prisma.userTrackGroupPurchase.findMany({
+        where: {
+          userId: subscriber.id,
+        },
+      });
+
+      assert.equal(
+        userPurchases.length,
+        0,
+        "User should have no track group purchases (tier has no releases)"
+      );
+
+      // Verify email was still sent
+      assert.equal(sendMailStub.calledOnce, true);
+
+      paymentIntentsStub.restore();
     });
   });
 

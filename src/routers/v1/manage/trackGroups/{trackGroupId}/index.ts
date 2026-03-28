@@ -98,7 +98,6 @@ export default function () {
         "releaseDate",
         "type",
         "about",
-        "published",
         "minPrice",
         "suggestedPrice",
         "credits",
@@ -114,10 +113,6 @@ export default function () {
         "defaultTrackMinPrice",
         "catalogNumber",
       ]);
-
-      if (newValues.publishedAt) {
-        newValues.published = new Date(newValues.publishedAt) <= new Date();
-      }
 
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId) },

@@ -14,7 +14,6 @@ import useErrorHandler from "services/useErrorHandler";
 interface TrackGroupFormData {
   coverFile: File[];
   title: string;
-  published: boolean;
   enabled: boolean;
   id: number;
   releaseDate: string;

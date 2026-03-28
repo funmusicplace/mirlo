@@ -69,8 +69,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   }
 
   const isPublished =
-    trackGroup.published ||
-    (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
+    trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
 
   if (!isPublished) {
     return null;

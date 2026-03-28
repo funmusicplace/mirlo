@@ -134,7 +134,7 @@ export default function () {
               FROM "TrackGroup"
               WHERE "releaseDate" <= NOW()
                 AND "releaseDate" >= NOW() - INTERVAL '3 months'
-                AND "published" = true
+                AND "publishedAt" <= NOW()
                 AND "adminEnabled" = true
                 AND "hideFromSearch" = false
                 and exists (

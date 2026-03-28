@@ -74,9 +74,12 @@ const PublishButton: React.FC<{
     try {
       if (artistUserId && trackGroupId) {
         await api.put(`manage/trackGroups/${trackGroupId}/publish`, {});
-        snackbar(t(trackGroup.published ? "madePrivate" : "publishedSuccess"), {
-          type: "success",
-        });
+        snackbar(
+          t(trackGroup.publishedAt ? "madePrivate" : "publishedSuccess"),
+          {
+            type: "success",
+          }
+        );
       }
     } catch (e) {
       console.error(e);
@@ -86,7 +89,7 @@ const PublishButton: React.FC<{
     }
   }, [
     trackGroup.tracks,
-    trackGroup.published,
+    trackGroup.publishedAt,
     t,
     artistUserId,
     trackGroupId,
@@ -103,8 +106,7 @@ const PublishButton: React.FC<{
   }
 
   const isPublished =
-    trackGroup.published ||
-    (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
+    trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
 
   const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 

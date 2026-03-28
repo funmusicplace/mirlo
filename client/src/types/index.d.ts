@@ -96,7 +96,6 @@ interface Tag {
 
 interface TrackGroup {
   title?: string;
-  published: boolean;
   adminEnabled: boolean;
   catalogNumber?: string;
   id: number;
@@ -366,6 +365,14 @@ interface ArtistSubscriptionTier {
       updatedAt: string;
     };
   }[];
+  releases?: SubscriptionTierRelease[];
+}
+
+interface SubscriptionTierRelease {
+  tierId: number;
+  trackGroupId: number;
+  trackGroup: TrackGroup & { artist: Artist };
+  createdAt: string;
 }
 
 interface ArtistUserSubscription {

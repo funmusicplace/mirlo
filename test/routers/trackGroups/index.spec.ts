@@ -65,7 +65,7 @@ describe("trackGroups", () => {
     it("should GET / not get an unpublished", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, { published: false });
+      await createTrackGroup(artist.id, { publishedAt: null });
       const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
@@ -233,7 +233,7 @@ describe("trackGroups", () => {
     it("should not display an unpublished album in an RSS feed", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, { published: false });
+      await createTrackGroup(artist.id, { publishedAt: null });
       const response = await requestApp
         .get("trackGroups?format=rss")
         .set("Accept", "application/json");
@@ -256,7 +256,7 @@ describe("trackGroups", () => {
       const artist = await createArtist(user.id);
       const releaseDate = faker.date.past();
       const tg = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         isDrafts: false,
         releaseDate,
       });
@@ -282,7 +282,7 @@ describe("trackGroups", () => {
       const artist = await createArtist(user.id);
       const releaseDate = faker.date.past();
       const tg = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         isDrafts: false,
         releaseDate,
       });
@@ -308,7 +308,7 @@ describe("trackGroups", () => {
       const artist = await createArtist(user.id);
       const releaseDate = faker.date.future();
       const tg = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         isDrafts: false,
         releaseDate,
       });
@@ -333,7 +333,7 @@ describe("trackGroups", () => {
       const artist = await createArtist(user.id);
       const releaseDate = faker.date.future();
       const tg = await createTrackGroup(artist.id, {
-        published: true,
+        publishedAt: new Date(),
         isDrafts: false,
         releaseDate,
       });
