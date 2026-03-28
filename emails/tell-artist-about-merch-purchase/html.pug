@@ -19,6 +19,7 @@ block content
           each purchase in purchases 
             tr
               td #{purchase.merch.title}
+              td #{purchase.merch.sku}
               td #{purchase.quantity}
               td #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.amount / 100).toFixed(2)}
               td #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.platformCut / 100).toFixed(2)}
