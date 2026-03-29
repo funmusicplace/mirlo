@@ -22,6 +22,7 @@ import TextArea from "components/common/TextArea";
 import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import BuyMerchItemDestinations from "./BuyMerchItemDestinations";
 import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
+import PaymentInputElement from "components/TrackGroup/PaymentInputElement";
 
 export type BuyMerchFormData = {
   quantity: number;
@@ -30,14 +31,6 @@ export type BuyMerchFormData = {
   shippingDestinationId: string;
   message?: string;
 };
-
-const codeToCountryMap = countryCodesCurrencies.reduce(
-  (aggr, country) => {
-    aggr[country.countryCode] = country;
-    return aggr;
-  },
-  {} as { [key: string]: any }
-);
 
 const BuyMerchItem: React.FC<{
   merch: Merch;
@@ -222,48 +215,31 @@ const BuyMerchItem: React.FC<{
               </Box>
             )}
           </FormComponent>
-          <FormComponent>
-            <label htmlFor="price">
-              {t("howMuch", { currency: getCurrencySymbol(merch.currency) })}
-            </label>
-            <InputEl
-              {...methods.register("price", { min: minPrice })}
-              type="number"
-              id="price"
-              min={minPrice ? minPrice : 0}
-              step={0.01}
-            />
-            {price < minPrice && (
-              <Box variant="warning" compact>
-                {t("priceMustBeAtLeast", {
-                  price: moneyDisplay({
-                    amount: minPrice,
-                    currency: merch.currency,
-                  }),
-                })}
-              </Box>
-            )}
-          </FormComponent>
         </div>
-        <AddMoneyValueButtons
-          addMoneyAmount={addMoneyAmount}
-          currency={merch.currency}
-        />
+        <FormComponent>
+          <PaymentInputElement
+            currency={merch.currency}
+            platformPercent={artist.defaultPlatformFee ?? 0}
+            artistName={artist.name}
+            minPrice={minPrice}
+          />
+        </FormComponent>
         <div
-          className={css`
-            @media screen and (min-width: ${bp.medium}px) {
-              display: flex;
-              flex-direction: row;
-            }
-            margin-top: 1rem;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--mi-darken-x-background-color);
-            > div {
-              width: 49%;
-              margin-right: 1rem;
-            }
-          `}
+          className={
+            "mt-2 pb-2 mb-2 " +
+            css`
+              @media screen and (min-width: ${bp.medium}px) {
+                display: flex;
+                flex-direction: row;
+              }
+
+              border-bottom: 1px solid var(--mi-darken-x-background-color);
+              > div {
+                width: 49%;
+                margin-right: 1rem;
+              }
+            `
+          }
         >
           {merch.optionTypes?.map((optionType, idx) => (
             <FormComponent>

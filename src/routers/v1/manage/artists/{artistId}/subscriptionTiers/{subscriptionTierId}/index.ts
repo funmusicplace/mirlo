@@ -107,7 +107,12 @@ export default function () {
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
           autoPurchaseAlbums: !!req.body.autoPurchaseAlbums,
-          discountPercent: normalizeDiscountPercent(req.body.discountPercent),
+          digitalDiscountPercent: normalizeDiscountPercent(
+            req.body.digitalDiscountPercent
+          ),
+          merchDiscountPercent: normalizeDiscountPercent(
+            req.body.merchDiscountPercent
+          ),
         },
       });
 

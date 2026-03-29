@@ -353,7 +353,8 @@ interface ArtistSubscriptionTier {
   interval: "MONTH" | "YEAR";
   isDefaultTier: boolean;
   platformPercent: number;
-  discountPercent?: number;
+  digitalDiscountPercent?: number;
+  merchDiscountPercent?: number;
   allowVariable?: boolean;
   autoPurchaseAlbums?: boolean;
   images: {

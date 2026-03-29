@@ -21,13 +21,7 @@ const PlatformPercent: React.FC<{
   const paymentAmount = chosenNumber * 0.029 + 0.3;
 
   return (
-    <div
-      className={css`
-        margin-bottom: 0.5rem;
-        margin-top: 0.5rem;
-        font-size: 0.8rem;
-      `}
-    >
+    <div className="text-sm">
       {t("platformPercent", {
         percent: (100 - percent).toFixed(),
         artistName: artistName ?? "the artist",

@@ -36,7 +36,7 @@ const ArtistSupportGrid = styled.div`
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
   const { data: artist } = useArtistQuery();
-  const { data: userStripeStatus } = useQuery(
+  const { data: userStripeStatus, isPending } = useQuery(
     queryUserStripeStatus(artist?.userId || 0)
   );
 
@@ -98,7 +98,7 @@ const ArtistSupport: React.FC = () => {
     return null;
   }
 
-  if (!userStripeStatus?.chargesEnabled) {
+  if (!isPending && !userStripeStatus?.chargesEnabled) {
     return (
       <div
         className={css`

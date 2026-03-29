@@ -7,9 +7,10 @@ mixin purchaseRow(title, sku, transaction)
     td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
     td #{transaction.platformFee / 100 ? `(Platform fee: ${transaction.platformFee / 100})` : ''}
     td #{transaction.stripeCut / 100 ? `(Payment processor fee: ${transaction.stripeCut / 100})` : ''}
+    td Final: #{transaction.currency} #{((transaction.amount - transaction.platformFee - transaction.stripeCut) / 100).toFixed(2)}
 
 block content
-  p Someone bought something from you via Mirlo:
+  p New purchases on your Mirlo store!
     
   table 
     each transaction in transactions
@@ -25,6 +26,10 @@ block content
       if transaction.tips
         each tip in transaction.tips
           +purchaseRow('Tip', '', transaction)
+    tr 
+      td(colSpan=5) #{total}
+      td Final: #{currency} #{(total / 100).toFixed(2)}
+
 
   p You can view your sales in your 
     a(href!=`${client}/sales`) artist dashboard

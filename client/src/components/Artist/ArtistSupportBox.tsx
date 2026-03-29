@@ -47,8 +47,6 @@ const ArtistSupportBox: React.FC<{
     queryArtist({ artistSlug: artistId })
   );
 
-  const { colors } = useGetArtistColors();
-
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
 
@@ -148,36 +146,23 @@ const ArtistSupportBox: React.FC<{
         `}
       >
         <MarkdownContent content={subscriptionTier.description} />
-        {subscriptionTier.discountPercent && (
-          <p className="mt-3 text-sm opacity-80">
-            {t("tierStoreDiscount", {
-              discountPercent: subscriptionTier.discountPercent ?? 0,
-            })}
-          </p>
-        )}
       </div>
       <div
-        className={css`
-          padding: 0 1.5rem;
-          margin: 0.5rem 0 1.25rem;
+        className={
+          "py-0 px-5 " +
+          css`
+            margin: 0.5rem 0 1.25rem;
 
-          button:hover {
-            background-color: var(--mi-normal-foreground-color) !important;
-            color: var(--mi-normal-background-color);
-          }
-        `}
+            button:hover {
+              background-color: var(--mi-normal-foreground-color) !important;
+              color: var(--mi-normal-background-color);
+            }
+          `
+        }
       >
         {!isSubscribedToTier && !isSubscribedToArtist && (
-          <div className={css``}>
-            <div
-              className={css`
-                display: flex;
-                align-items: center;
-                align-items: stretch;
-                justify-content: center;
-                margin-bottom: 0.5rem;
-              `}
-            >
+          <div className="flex gap-3 flex-col">
+            <div className="flex items-center content-center">
               <ArtistVariableSupport tier={subscriptionTier} />
             </div>
             <PlatformPercent
@@ -193,27 +178,14 @@ const ArtistSupportBox: React.FC<{
           </div>
         )}
         {(isSubscribedToTier || isSubscribedToArtist) && (
-          <Box
-            className={css`
-              padding: 0 1.5rem;
-              text-align: center;
-              background-color: var(--mi-darken-background-color);
-              margin-bottom: 0;
-            `}
-          >
+          <Box className="px-3 py-0 text-center bg-(--mi-darken-background-color) mb-0">
             <p>
               {isSubscribedToArtist &&
                 !isSubscribedToTier &&
                 t("areSupporting", { artistName: artist.name })}
               {isSubscribedToTier && t("supportAtThisTier")}
             </p>
-            <div
-              className={css`
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              `}
-            >
+            <div className="flex items-center justify-center">
               {user && isSubscribedToArtist && !isSubscribedToTier && (
                 <ArtistButton
                   onClick={() => subscribeToTier(subscriptionTier)}
@@ -231,20 +203,53 @@ const ArtistSupportBox: React.FC<{
           </Box>
         )}
       </div>
-      {subscriptionTier.autoPurchaseAlbums && (
-        <div
-          className={css`
-            padding: 1.5rem;
-            width: 100%;
-            background-color: ${colors?.background};
-            border-top: 1px solid ${colors?.foreground};
-            padding: 0.5rem 0.75rem;
-            text-align: center;
-          `}
-        >
-          {t("includesNewReleases")}
-        </div>
-      )}
+      <div
+        className="w-full flex gap-2 flex-col my-2 p-5 text-sm"
+        style={{ borderTop: "var(--mi-border)" }}
+      >
+        {subscriptionTier.autoPurchaseAlbums && (
+          <p>{t("includesNewReleases")}</p>
+        )}
+        {subscriptionTier.releases && subscriptionTier.releases.length > 0 && (
+          <p>
+            {t("includesReleases", { count: subscriptionTier.releases.length })}
+          </p>
+        )}
+        <p>
+          {subscriptionTier.digitalDiscountPercent &&
+            !subscriptionTier.merchDiscountPercent &&
+            t("tierStoreDigitalDiscount", {
+              discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
+              artistName: artist.name,
+            })}
+          {!subscriptionTier.digitalDiscountPercent &&
+            subscriptionTier.merchDiscountPercent &&
+            t("tierStoreMerchDiscount", {
+              discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
+              artistName: artist.name,
+            })}
+          {subscriptionTier.digitalDiscountPercent &&
+            subscriptionTier.merchDiscountPercent &&
+            subscriptionTier.digitalDiscountPercent !==
+              subscriptionTier.merchDiscountPercent &&
+            t("differentTierStoreDiscount", {
+              digitalDiscountPercent:
+                subscriptionTier.digitalDiscountPercent ?? 0,
+              merchDiscountPercent: subscriptionTier.merchDiscountPercent ?? 0,
+              artistName: artist.name,
+            })}
+          {subscriptionTier.digitalDiscountPercent &&
+            subscriptionTier.merchDiscountPercent &&
+            subscriptionTier.digitalDiscountPercent ===
+              subscriptionTier.merchDiscountPercent &&
+            t("sameTierStoreDiscount", {
+              digitalDiscountPercent:
+                subscriptionTier.digitalDiscountPercent ?? 0,
+              merchDiscountPercent: subscriptionTier.merchDiscountPercent ?? 0,
+              artistName: artist.name,
+            })}
+        </p>
+      </div>
     </StyledSupportBox>
   );
 };

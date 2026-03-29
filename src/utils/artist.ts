@@ -25,6 +25,7 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
+  finalCoversBucket,
   finalImageBucket,
   finalUserAvatarBucket,
   removeObjectsFromBucket,
@@ -494,6 +495,25 @@ export const singleInclude = (queryOptions?: {
             image: true,
           },
         },
+        releases: {
+          select: {
+            trackGroup: {
+              select: {
+                cover: true,
+                id: true,
+                title: true,
+                urlSlug: true,
+                artist: {
+                  select: {
+                    name: true,
+                    id: true,
+                    urlSlug: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
     artistLabels: {
@@ -552,6 +572,7 @@ interface LocalArtist extends Artist {
   merch?: (Merch & { images?: MerchImage[] })[];
   subscriptionTiers?: (ArtistSubscriptionTier & {
     images?: { image: Image }[];
+    releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
   })[];
 }
 
@@ -590,6 +611,13 @@ export const processSingleArtist = (
       images: tier.images?.map((img) => ({
         ...img,
         image: addSizesToImage(finalImageBucket, img.image),
+      })),
+      releases: tier.releases?.map((rel) => ({
+        ...rel,
+        trackGroup: {
+          ...rel.trackGroup,
+          cover: addSizesToImage(finalCoversBucket, rel.trackGroup.cover),
+        },
       })),
     })),
   };

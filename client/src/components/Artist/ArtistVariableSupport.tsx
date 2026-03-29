@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { isEmpty } from "lodash";
 import { queryArtist } from "queries";
 import React from "react";
@@ -12,7 +13,9 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import useErrorHandler from "services/useErrorHandler";
 import { getCurrencySymbol } from "components/common/Money";
-import { ArtistButton } from "./ArtistButtons";
+import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
+import ArtistTrackGroup from "./ArtistTrackGroup";
+import useArtistQuery from "utils/useArtistQuery";
 
 const ArtistVariableSupport: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -24,6 +27,7 @@ const ArtistVariableSupport: React.FC<{
       amount: tier.minAmount ? tier.minAmount / 100 : 0,
     },
   });
+  const { colors } = useGetArtistColors();
   const { refreshLoggedInUser } = useAuthContext();
   const [open, setOpen] = React.useState(false);
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
@@ -75,9 +79,13 @@ const ArtistVariableSupport: React.FC<{
         onClose={() => setOpen(false)}
         title={t("howMuch") ?? ""}
       >
-        <form onSubmit={handleSubmit(() => subscribeToTier(tier))}>
-          <p className="py-2">{tier.description}</p>
-          <div className="flex items-center my-1 gap-2 ">
+        <form
+          onSubmit={handleSubmit(() => subscribeToTier(tier))}
+          className="flex flex-col gap-3"
+        >
+          <p>{tier.description}</p>
+          <strong>{t("chooseAnAmount")}</strong>
+          <div className="flex items-center gap-2 ">
             <span className="whitespace-nowrap">
               {getCurrencySymbol(tier.currency)}
             </span>
@@ -97,7 +105,41 @@ const ArtistVariableSupport: React.FC<{
             )}
           </div>
 
-          <div className="w-full py-2">{t("includesNewReleasesLong")}</div>
+          <div className="w-full">{t("includesNewReleasesLong")}</div>
+
+          {tier.releases && tier.releases.length > 0 && (
+            <div className="flex gap-2 flex-col ">
+              <strong>{t("includesTheseReleases")}</strong>
+              <div className="grid gap-2 grid-cols-4">
+                {tier.releases.map((release) => (
+                  <div key={release.trackGroupId} className="flex flex-col">
+                    {release.trackGroup.cover && (
+                      <img
+                        src={
+                          release.trackGroup.cover.sizes?.[120] ??
+                          release.trackGroup.cover.url?.[0]
+                        }
+                        alt={release.trackGroup.title}
+                        className="w-8 h-8 object-cover flex-shrink-0"
+                      />
+                    )}
+                    {!release.trackGroup.cover && (
+                      <div
+                        className="w-10 h-10 flex-shrink-0"
+                        style={{ backgroundColor: colors?.secondary }}
+                      />
+                    )}
+                    <span className="flex-1 truncate text-sm">
+                      {release.trackGroup.artist.name}
+                    </span>
+                    <span className="flex-1 truncate text-sm">
+                      {release.trackGroup.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <ArtistButton
             isLoading={isCheckingForSubscription}

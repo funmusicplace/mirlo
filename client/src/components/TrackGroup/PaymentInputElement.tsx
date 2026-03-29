@@ -68,7 +68,6 @@ const PaymentInputElement: React.FC<{
 
   return (
     <>
-      {" "}
       <label htmlFor="priceInput">
         {t("nameYourPrice", {
           currency: getCurrencySymbol(currency, undefined),
