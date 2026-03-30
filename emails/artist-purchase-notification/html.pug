@@ -5,14 +5,22 @@ mixin purchaseRow(title, sku, transaction)
     td #{title}
     td #{sku}
     td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
-    td #{transaction.platformFee / 100 ? `(Platform fee: ${transaction.platformFee / 100})` : ''}
-    td #{transaction.stripeCut / 100 ? `(Payment processor fee: ${transaction.stripeCut / 100})` : ''}
-    td Final: #{transaction.currency} #{((transaction.amount - transaction.platformFee - transaction.stripeCut) / 100).toFixed(2)}
+    td #{transaction.platformFee / 100 ? (transaction.platformFee / 100).toFixed(2) : ''}
+    td #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
+    td #{transaction.currency} #{(((transaction.amount || 0) - (transaction.platformFee || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
 
 block content
   p New purchases on your Mirlo store!
     
   table 
+    thead
+      tr
+        th Item
+        th SKU/ISRC
+        th Gross Amount
+        th Platform Fee
+        th Payment Processor Fee
+        th Net Amount
     each transaction in transactions
       if transaction.trackGroupPurchases
         each purchase in transaction.trackGroupPurchases
@@ -27,8 +35,11 @@ block content
         each tip in transaction.tips
           +purchaseRow('Tip', '', transaction)
     tr 
-      td(colSpan=5) #{total}
-      td Final: #{currency} #{(total / 100).toFixed(2)}
+      td Total
+      td Gross
+      td #{currency} #{(totalGross / 100).toFixed(2)}
+      td(colspan="2") Net
+      td #{currency} #{(totalNet / 100).toFixed(2)}
 
 
   p You can view your sales in your 

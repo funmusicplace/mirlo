@@ -281,7 +281,12 @@ export const handleTrackGroupPurchase = async (
           },
           locals: {
             transactions,
-            total: transactions.reduce((acc, t) => acc + t.amount, 0),
+            totalGross: transactions.reduce((acc, t) => acc + t.amount, 0),
+            totalNet: transactions.reduce(
+              (acc, t) =>
+                acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
+              0
+            ),
             currency: transactions[0]?.currency ?? "USD",
             message: session?.metadata?.message,
             email: user.email,
@@ -519,7 +524,8 @@ export type ArtistPurchaseNotificationEmailType = {
   transactions: PurchaseTransaction[];
   message: string | null;
   email: string;
-  total: number;
+  totalGross: number;
+  totalNet: number;
   currency: string;
   client: string;
 };
@@ -621,7 +627,12 @@ const sendSaleEmails = async (
       locals: {
         artist,
         transactions,
-        total: transactions.reduce((acc, t) => acc + t.amount, 0),
+        totalGross: transactions.reduce((acc, t) => acc + t.amount, 0),
+        totalNet: transactions.reduce(
+          (acc, t) =>
+            acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
+          0
+        ),
         currency: transactions[0]?.currency ?? "USD",
         message: message ?? null,
         email: purchaser.email,
