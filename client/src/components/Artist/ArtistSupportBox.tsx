@@ -14,7 +14,7 @@ import { useAuthContext } from "state/AuthContext";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
+import { ArtistButton } from "./ArtistButtons";
 import useErrorHandler from "services/useErrorHandler";
 
 const StyledSupportBox = styled(Box)`
