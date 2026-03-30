@@ -45,11 +45,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
   return (
     <div>
       <form
-        className={css`
-          display: flex;
-          flex-direction: column;
-          text-align: left;
-        `}
+        className="flex flex-col text-left"
         onSubmit={handleSubmit(onSubmit)}
       >
         <FormComponent>
@@ -69,58 +65,37 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
         </Button>
       </form>
 
-      <span
-        className={css`
-          display: flex;
-          justify-content: stretch;
-          align-items: center;
-          margin: 1rem 0;
-          width: 100%;
-
-          hr {
-            flex-grow: 1;
-            margin: 1rem;
-            border-color: var(--mi-darken-x-background-color);
-          }
-        `}
-      >
-        <hr />
+      <div className="flex justify-stretch items-center my-4 w-full">
+        <div className="h-px m-4 flex-auto bg-(--mi-darken-x-background-color)"></div>
         {t("or")}
-        <hr />
-      </span>
+        <div className="h-px m-4 flex-auto bg-(--mi-darken-x-background-color)"></div>
+      </div>
 
       <EmailVerification
         setVerifiedEmail={afterLogIn}
         smallText={"weWillSendACodeToYourEmail"}
       />
 
-      <Link
-        to="/password-reset"
-        onClick={() => {
-          afterLogIn();
-        }}
-        className={css`
-          margin: 0 auto;
-          display: inline-block;
-          margin-top: 1rem;
-        `}
-      >
-        {t("passwordReset")}
-      </Link>
-      <br />
-      <Link
-        to="/signup"
-        onClick={() => {
-          afterLogIn();
-        }}
-        className={css`
-          margin: 0 auto;
-          display: inline-block;
-          margin-top: 1rem;
-        `}
-      >
-        {t("signUp")}
-      </Link>
+      <p>
+        <Link
+          to="/password-reset"
+          onClick={() => {
+            afterLogIn();
+          }}
+        >
+          {t("passwordReset")}
+        </Link>
+      </p>
+      <p className="mbs-4">
+        <Link
+          to="/signup"
+          onClick={() => {
+            afterLogIn();
+          }}
+        >
+          {t("signUp")}
+        </Link>
+      </p>
     </div>
   );
 };
