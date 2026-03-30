@@ -12,11 +12,20 @@ import api from "services/api";
 import { slug } from "github-slugger";
 
 const SlugInput: React.FC<{
+  ariaDescribedBy?: string;
+  id: string;
   isDisabled?: boolean;
   type: "user" | "artist";
   currentArtistId?: number;
   currentName?: string;
-}> = ({ currentArtistId, isDisabled, type, currentName }) => {
+}> = ({
+  ariaDescribedBy,
+  currentArtistId,
+  id,
+  isDisabled,
+  type,
+  currentName,
+}) => {
   const { colors } = useGetArtistColors();
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "manageArtist",
@@ -64,6 +73,7 @@ const SlugInput: React.FC<{
   return (
     <>
       <InputEl
+        aria-describedby={`hint-slug error-slug ${ariaDescribedBy}`}
         colors={colors}
         {...register("urlSlug", {
           validate: { unique: validation },
@@ -72,10 +82,11 @@ const SlugInput: React.FC<{
         className={css`
           margin-bottom: 0.5rem;
         `}
+        id={id}
       />
-      <small>{t("mustBeUnique")}</small>
+      <small id="hint-slug">{t("mustBeUnique")}</small>
       {errors.urlSlug && (
-        <small className="error">
+        <small className="error" id="error-slug">
           {errors.urlSlug.type === "unique" && t("needsToBeUnique")}
         </small>
       )}

@@ -98,15 +98,18 @@ const Welcome = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onClickNext)}>
         <PageWrapper>
-          <h2>{t("welcome")}</h2>
+          <h1>{t("welcome")}</h1>
 
           <FormComponent>
-            <label>{t("whatPublicName")}</label>
+            <label htmlFor="input-name">{t("whatPublicName")}</label>
             <InputEl
+              aria-describedby="hint-name"
+              autoComplete="off"
+              id="input-name"
               {...register("name")}
               placeholder={t("placeholderName") ?? ""}
             />
-            <small>{t("youCanChangeThis")}</small>
+            <small id="hint-name">{t("youCanChangeThis")}</small>
           </FormComponent>
 
           <FormComponent>
@@ -147,8 +150,8 @@ const Welcome = () => {
 
           {step > 0 && (
             <FormComponent>
-              <label>{t("showInTheURL")}</label>
-              <small>
+              <label htmlFor="input-slug">{t("showInTheURL")}</label>
+              <small id="description-slug">
                 <Trans
                   i18nKey="thisWillLookLikeURL"
                   t={t}
@@ -161,6 +164,8 @@ const Welcome = () => {
                 />
               </small>
               <ArtistSlugInput
+                ariaDescribedBy="description-slug"
+                id="input-slug"
                 type="artist"
                 currentArtistId={localArtist?.id}
               />
