@@ -216,20 +216,20 @@ const ArtistSupportBox: React.FC<{
           </p>
         )}
         <p>
-          {subscriptionTier.digitalDiscountPercent &&
+          {!!subscriptionTier.digitalDiscountPercent &&
             !subscriptionTier.merchDiscountPercent &&
             t("tierStoreDigitalDiscount", {
               discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
               artistName: artist.name,
             })}
           {!subscriptionTier.digitalDiscountPercent &&
-            subscriptionTier.merchDiscountPercent &&
+            !!subscriptionTier.merchDiscountPercent &&
             t("tierStoreMerchDiscount", {
               discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
               artistName: artist.name,
             })}
-          {subscriptionTier.digitalDiscountPercent &&
-            subscriptionTier.merchDiscountPercent &&
+          {!!subscriptionTier.digitalDiscountPercent &&
+            !!subscriptionTier.merchDiscountPercent &&
             subscriptionTier.digitalDiscountPercent !==
               subscriptionTier.merchDiscountPercent &&
             t("differentTierStoreDiscount", {
@@ -238,8 +238,8 @@ const ArtistSupportBox: React.FC<{
               merchDiscountPercent: subscriptionTier.merchDiscountPercent ?? 0,
               artistName: artist.name,
             })}
-          {subscriptionTier.digitalDiscountPercent &&
-            subscriptionTier.merchDiscountPercent &&
+          {!!subscriptionTier.digitalDiscountPercent &&
+            !!subscriptionTier.merchDiscountPercent &&
             subscriptionTier.digitalDiscountPercent ===
               subscriptionTier.merchDiscountPercent &&
             t("sameTierStoreDiscount", {
