@@ -110,8 +110,8 @@ function PasswordReset() {
         >
           <h1>{t("title")}</h1>
 
-          <label>{t("email")}</label>
-          <InputEl type="email" {...initRegister("email")} />
+          <label htmlFor="input-email">{t("email")}</label>
+          <InputEl id="input-email" type="email" {...initRegister("email")} />
           <Button
             type="submit"
             className={css`
@@ -136,8 +136,12 @@ function PasswordReset() {
             {accountIncomplete ? t("accountIncompleteTitle") : t("title")}
           </h1>
 
-          <label>{t("password")}</label>
-          <InputEl type="password" {...newRegister("password")} />
+          <label htmlFor="input-new-password">{t("password")}</label>
+          <InputEl
+            id="input-new-password"
+            type="password"
+            {...newRegister("password")}
+          />
           <Button
             className={css`
               margin-top: 1rem;
