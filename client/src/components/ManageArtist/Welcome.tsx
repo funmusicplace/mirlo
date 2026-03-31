@@ -184,8 +184,8 @@ const Welcome = () => {
           )}
 
           {step > 0 && (
-            <ButtonLink
-              to={localArtistLink}
+            <Button
+              onClick={() => navigate(localArtistLink)}
               isLoading={isLoading}
               variant="outlined"
               endIcon={<FaArrowRight />}
@@ -194,7 +194,7 @@ const Welcome = () => {
               `}
             >
               {t("takeMeToTheArtistPage")}
-            </ButtonLink>
+            </Button>
           )}
         </PageWrapper>
       </form>
