@@ -23,7 +23,6 @@ const PageWrapper = styled.div`
 interface FormData {
   name: string;
   urlSlug: string;
-  theme: string;
   confirmContentPolicy: boolean;
 }
 
@@ -46,6 +45,7 @@ const Welcome = () => {
     urlSlug: watch("urlSlug"),
     name: watch("name"),
     theme: watch("theme"),
+    confirmContentPolicy: watch("confirmContentPolicy"),
   };
   const localArtistLink = `/${localArtist?.urlSlug}`;
 
@@ -138,7 +138,6 @@ const Welcome = () => {
           {step === 0 && (
             <Button
               isLoading={isLoading}
-              size="compact"
               type="submit"
               disabled={!contentPolicy}
               onClick={handleSubmit(onClickNext)}
@@ -175,7 +174,6 @@ const Welcome = () => {
           {step === 1 && (
             <Button
               isLoading={isLoading}
-              size="compact"
               type="submit"
               disabled={!contentPolicy}
               onClick={handleSubmit(onClickNext)}
