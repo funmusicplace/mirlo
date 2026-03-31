@@ -89,7 +89,16 @@ const Welcome = () => {
         setIsLoading(false);
       }
     },
-    [errorHandler, localArtist, localArtistLink, navigate, reset, step, userId]
+    [
+      vals.confirmContentPolicy,
+      errorHandler,
+      localArtist,
+      localArtistLink,
+      navigate,
+      reset,
+      step,
+      userId,
+    ]
   );
 
   const nameValue = watch("name");

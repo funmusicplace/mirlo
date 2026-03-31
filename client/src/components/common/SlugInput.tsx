@@ -11,14 +11,14 @@ import api from "services/api";
 // @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
 
-const SlugInput: React.FC<{
+const SlugInput = React.forwardRef<{ focus: () => void; }, {
   ariaDescribedBy?: string;
   id: string;
   isDisabled?: boolean;
   type: "user" | "artist";
   currentArtistId?: number;
   currentName?: string;
-}> = React.forwardRef(
+}>(
   (
     { ariaDescribedBy, currentArtistId, id, isDisabled, type, currentName },
     ref
@@ -70,7 +70,7 @@ const SlugInput: React.FC<{
     React.useImperativeHandle(ref, () => {
       return {
         focus() {
-          inputRef.current.focus();
+          inputRef.current?.focus();
         },
       };
     }, []);
