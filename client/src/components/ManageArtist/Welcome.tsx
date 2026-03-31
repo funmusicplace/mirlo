@@ -171,7 +171,7 @@ const Welcome = () => {
                   i18nKey="thisWillLookLikeURL"
                   t={t}
                   components={{
-                    strong: <strong></strong>,
+                    span: <span className="font-bold p-1 bg-gray-200"></span>,
                   }}
                   values={{
                     url: `${window.location.host}/${vals.urlSlug}`,
