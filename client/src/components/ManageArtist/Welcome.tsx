@@ -40,6 +40,7 @@ const Welcome = () => {
   const methods = useForm<FormData>();
   const { register, handleSubmit, reset, formState, watch, getValues } =
     methods;
+  const slugInputRef = React.useRef<HTMLInputElement>(null);
 
   const vals = {
     urlSlug: watch("urlSlug"),
@@ -93,6 +94,12 @@ const Welcome = () => {
 
   const nameValue = watch("name");
   const contentPolicy = watch("confirmContentPolicy");
+
+  React.useEffect(() => {
+    if (step > 0) {
+      slugInputRef.current?.focus();
+    }
+  }, [slugInputRef.current, step]);
 
   return (
     <FormProvider {...methods}>
@@ -165,6 +172,7 @@ const Welcome = () => {
               <ArtistSlugInput
                 ariaDescribedBy="description-slug"
                 id="input-slug"
+                ref={slugInputRef}
                 type="artist"
                 currentArtistId={localArtist?.id}
               />

@@ -253,8 +253,12 @@ export const CustomizeLook: React.FC = () => {
                     width: 100%;
                   `}
                 >
-                  <label>{t("urlSlug")} </label>
-                  <ArtistSlugInput currentArtistId={existingId} type="artist" />
+                  <label htmlFor="input-slug">{t("urlSlug")} </label>
+                  <ArtistSlugInput
+                    currentArtistId={existingId}
+                    id="input-slug"
+                    type="artist"
+                  />
                 </FormComponent>
                 <FormComponent>
                   <label>{t("shortDescription")}</label>
