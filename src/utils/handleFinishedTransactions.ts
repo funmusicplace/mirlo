@@ -487,7 +487,14 @@ type PurchaseTransaction = {
     name: string;
     email: string;
   };
-  trackGroupPurchases?: { trackGroup: { title: string; id: number } }[];
+  trackGroupPurchases?: {
+    trackGroup: {
+      title: string;
+      id: number;
+      urlSlug: string;
+      artist: { name: string; urlSlug: string };
+    };
+  }[];
   trackPurchases?: {
     track: {
       trackGroup: { title: string; id: number };
@@ -496,6 +503,8 @@ type PurchaseTransaction = {
     };
   }[];
   merchPurchases?: {
+    merchId: string;
+    options: { name: string }[];
     merch: { title: string; id: string };
     quantity: number;
   }[];
@@ -539,58 +548,84 @@ const sendSaleEmails = async (
   transactionIds: string[],
   message?: string
 ) => {
-  const transactions = await prisma.userTransaction.findMany({
-    where: {
-      id: {
-        in: transactionIds,
-      },
-    },
-    include: {
-      user: true,
-      tips: {
-        include: {
-          artist: {
-            include: {
-              user: true,
-            },
-          },
+  try {
+    const transactions = await prisma.userTransaction.findMany({
+      where: {
+        id: {
+          in: transactionIds,
         },
       },
-      trackGroupPurchases: {
-        include: {
-          trackGroup: {
-            include: {
-              artist: {
-                include: {
-                  user: true,
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        tips: {
+          include: {
+            artist: {
+              include: {
+                user: {
+                  select: {
+                    name: true,
+                    email: true,
+                  },
                 },
               },
             },
           },
         },
-      },
-      merchPurchases: {
-        include: {
-          merch: {
-            include: {
-              artist: {
-                include: {
-                  user: true,
+        trackGroupPurchases: {
+          include: {
+            trackGroup: {
+              select: {
+                id: true,
+                title: true,
+                urlSlug: true,
+                artist: {
+                  include: {
+                    user: {
+                      select: {
+                        name: true,
+                        email: true,
+                        urlSlug: true,
+                      },
+                    },
+                  },
                 },
               },
             },
           },
         },
-      },
-      trackPurchases: {
-        include: {
-          track: {
-            include: {
-              trackGroup: {
-                include: {
-                  artist: {
-                    include: {
-                      user: true,
+        merchPurchases: {
+          include: {
+            options: {
+              select: {
+                name: true,
+              },
+            },
+            merch: {
+              include: {
+                artist: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        trackPurchases: {
+          include: {
+            track: {
+              include: {
+                trackGroup: {
+                  include: {
+                    artist: {
+                      include: {
+                        user: true,
+                      },
                     },
                   },
                 },
@@ -599,48 +634,50 @@ const sendSaleEmails = async (
           },
         },
       },
-    },
-  });
+    });
 
-  await sendMail<PurchaseReceiptEmailType>({
-    data: {
-      template: "purchase-receipt",
-      message: {
-        to: purchaser.email,
+    await sendMail<PurchaseReceiptEmailType>({
+      data: {
+        template: "purchase-receipt",
+        message: {
+          to: purchaser.email,
+        },
+        locals: {
+          artist,
+          transactions,
+          email: purchaser.email,
+          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          host: process.env.API_DOMAIN,
+        } as PurchaseReceiptEmailType,
       },
-      locals: {
-        artist,
-        transactions,
-        email: purchaser.email,
-        client: process.env.REACT_APP_CLIENT_DOMAIN,
-        host: process.env.API_DOMAIN,
-      } as PurchaseReceiptEmailType,
-    },
-  } as Job);
+    } as Job);
 
-  await sendMail<ArtistPurchaseNotificationEmailType>({
-    data: {
-      template: "artist-purchase-notification",
-      message: {
-        to: artist.user.email,
+    await sendMail<ArtistPurchaseNotificationEmailType>({
+      data: {
+        template: "artist-purchase-notification",
+        message: {
+          to: artist.user.email,
+        },
+        locals: {
+          artist,
+          transactions,
+          totalGross: transactions.reduce((acc, t) => acc + t.amount, 0),
+          totalNet: transactions.reduce(
+            (acc, t) =>
+              acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
+            0
+          ),
+          currency: transactions[0]?.currency ?? "USD",
+          message: message ?? null,
+          email: purchaser.email,
+          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          host: process.env.API_DOMAIN,
+        } as ArtistPurchaseNotificationEmailType,
       },
-      locals: {
-        artist,
-        transactions,
-        totalGross: transactions.reduce((acc, t) => acc + t.amount, 0),
-        totalNet: transactions.reduce(
-          (acc, t) =>
-            acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
-          0
-        ),
-        currency: transactions[0]?.currency ?? "USD",
-        message: message ?? null,
-        email: purchaser.email,
-        client: process.env.REACT_APP_CLIENT_DOMAIN,
-        host: process.env.API_DOMAIN,
-      } as ArtistPurchaseNotificationEmailType,
-    },
-  } as Job);
+    } as Job);
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export const handleArtistGift = async (
@@ -701,44 +738,6 @@ export const handleArtistGift = async (
   }
 };
 
-export type ArtistMerchPurchaseReceiptEmailType = {
-  artist: Artist;
-  purchases: {
-    artistCut: number;
-    platformCut: number;
-    options: MerchOption[];
-    merchId: string;
-    merch: {
-      title: string;
-    };
-    transaction: {
-      amount: number;
-      currency: string;
-    };
-    quantity: string;
-  }[];
-};
-
-export type TellArtistAboutMerchPurchaseEmailType = {
-  artist: Artist;
-  email: string;
-  purchases: {
-    merchId: string;
-    merch: {
-      title: string;
-      sku: string;
-    };
-    transaction: {
-      amount: number;
-      currency: string;
-    };
-    options: MerchOption[];
-    quantity: string;
-  }[];
-};
-
-// FIXME: is it possible to refactor all checkout sessions to use line_items
-// so that we can use the same email etc for everything?
 export const handleArtistMerchPurchase = async (
   userId: number,
   session: Stripe.Checkout.Session,
@@ -863,6 +862,7 @@ export const handleArtistMerchPurchase = async (
                     data: {
                       trackGroupId: merchProduct.includePurchaseTrackGroupId,
                       userId: createdMerchPurchase.userId,
+                      proGratis: true,
                     },
                   });
                 } catch (e: any) {
@@ -953,36 +953,14 @@ export const handleArtistMerchPurchase = async (
     });
 
     if (purchaser && purchases.length > 0 && purchases?.[0]?.merch?.artist) {
-      await sendMail<ArtistMerchPurchaseReceiptEmailType>({
-        data: {
-          template: "artist-merch-purchase-receipt",
-          message: {
-            to: purchaser.email,
-          },
-          locals: {
-            purchases,
-            email: purchaser.email,
-            artist: purchases?.[0].merch.artist,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
-            host: process.env.API_DOMAIN,
-          },
-        },
-      } as Job);
-
-      await sendMail<TellArtistAboutMerchPurchaseEmailType>({
-        data: {
-          template: "tell-artist-about-merch-purchase",
-          message: {
-            to: purchases?.[0]?.merch?.artist.user.email,
-          },
-          locals: {
-            message: session?.metadata?.message ?? null,
-            purchases,
-            artist: purchases[0].merch.artist,
-            email: purchaser.email,
-          },
-        },
-      } as Job);
+      await sendSaleEmails(
+        purchases[0].merch.artist,
+        purchaser,
+        (purchases
+          .map((p) => p?.transaction?.id)
+          .filter((id) => !!id) as string[]) ?? [],
+        session?.metadata?.message
+      );
     }
 
     return purchases;

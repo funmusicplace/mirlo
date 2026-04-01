@@ -94,6 +94,7 @@ export const manageSubscriptionReceipt = async ({
           trackGroupId: release.trackGroupId,
           userTransactionId: transaction.id ?? undefined,
           createdAt: new Date(),
+          proGratis: true,
         })),
       });
     }
