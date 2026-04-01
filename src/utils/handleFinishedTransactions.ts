@@ -82,6 +82,7 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
       paymentProcessorFee: stripeFee?.amount ?? 0,
     };
   } catch (error) {
+    console.trace(error);
     logger.error(`Error retrieving application fee: ${error}`);
     throw new Error("Failed to retrieve application fee");
   }
@@ -818,6 +819,7 @@ export const handleArtistMerchPurchase = async (
               const { applicationFee, paymentProcessorFee } =
                 await getApplicationFee(session);
 
+              console.log("get", applicationFee, paymentProcessorFee);
               const transaction = await prisma.userTransaction.create({
                 data: {
                   userId,

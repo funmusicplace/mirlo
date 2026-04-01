@@ -235,6 +235,22 @@ describe("handleArtistMerchPurchase", () => {
 
   it("should send correct price in emails", async () => {
     const stub = sinon.spy(sendMail, "default");
+    sinon.stub(stripe.paymentIntents, "retrieve").returns({
+      // @ts-ignore
+      latest_charge: "ch_123",
+      application_fee_amount: 200,
+    });
+    sinon.stub(stripe.charges, "retrieve").returns({
+      // @ts-ignore
+      balance_transaction: {
+        fee_details: [
+          {
+            type: "stripe_fee",
+            amount: 100,
+          },
+        ],
+      },
+    });
     sinon
       .stub(stripe.products, "retrieve")
       // @ts-ignore
@@ -268,6 +284,10 @@ describe("handleArtistMerchPurchase", () => {
     await handleArtistMerchPurchase(
       purchaser.id,
       {
+        payment_intent: "pi_123",
+        metadata: {
+          stripeAccountId: stripeAccountId,
+        },
         line_items: {
           data: [
             {
@@ -276,7 +296,7 @@ describe("handleArtistMerchPurchase", () => {
             } as Stripe.LineItem,
           ],
         } as Stripe.ApiList<Stripe.LineItem>,
-      } as Stripe.Checkout.Session,
+      } as unknown as Stripe.Checkout.Session,
       stripeAccountId
     );
 
@@ -473,9 +493,30 @@ describe("handleArtistMerchPurchase", () => {
       },
     });
 
+    sinon.stub(stripe.paymentIntents, "retrieve").returns({
+      // @ts-ignore
+      latest_charge: "ch_123",
+      application_fee_amount: 200,
+    });
+    sinon.stub(stripe.charges, "retrieve").returns({
+      // @ts-ignore
+      balance_transaction: {
+        fee_details: [
+          {
+            type: "stripe_fee",
+            amount: 100,
+          },
+        ],
+      },
+    });
+
     await handleArtistMerchPurchase(
       purchaser.id,
       {
+        payment_intent: "pi_123",
+        metadata: {
+          stripeAccountId: stripeAccountId,
+        },
         line_items: {
           data: [
             {
@@ -484,7 +525,7 @@ describe("handleArtistMerchPurchase", () => {
             } as Stripe.LineItem,
           ],
         } as Stripe.ApiList<Stripe.LineItem>,
-      } as Stripe.Checkout.Session,
+      } as unknown as Stripe.Checkout.Session,
       stripeAccountId
     );
 
