@@ -1,0 +1,9 @@
+include:
+  - docker-compose.api.yml
+
+services:
+  redis:
+    ports: []
+  
+  pgsql:
+    ports: []
