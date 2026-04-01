@@ -141,6 +141,15 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "email-confirmation",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/EmailConfirmation"
+          );
+          return { Component };
+        },
+      },
+      {
         path: "profile",
         async lazy() {
           const { default: ProfileContainer } = await import(
