@@ -23,6 +23,7 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
     "verify-email",
     "verify-password",
     "signup",
+    "confirm-email-token",
     "resend-verification-email",
     "password-reset/initiate",
     "password-reset/set-password",

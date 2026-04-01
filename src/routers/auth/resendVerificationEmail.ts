@@ -8,7 +8,7 @@ import {
   sendVerificationEmail,
 } from "./sendVerificationEmail";
 
-const RESEND_EXPIRATION_MINUTES = 20;
+const RESEND_EXPIRATION_MINUTES = 60;
 
 const resendVerificationEmail = async (
   req: Request,
@@ -91,13 +91,11 @@ const resendVerificationEmail = async (
       accountType: accountTypeValue,
     });
 
-    return res
-      .status(200)
-      .json({
-        message: "Success! Verification email sent.",
-        emailConfirmationExpiresAt:
-          updatedUser.emailConfirmationExpiration?.toISOString() ?? null,
-      });
+    return res.status(200).json({
+      message: "Success! Verification email sent.",
+      emailConfirmationExpiresAt:
+        updatedUser.emailConfirmationExpiration?.toISOString() ?? null,
+    });
   } catch (error) {
     next(error);
   }

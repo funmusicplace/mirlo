@@ -8,6 +8,7 @@ import refresh from "./refresh";
 import login from "./login";
 import verifyEmail from "./verifyEmail";
 import resendVerificationEmail from "./resendVerificationEmail";
+import confirmEmailToken from "./confirmEmailToken";
 import {
   passwordResetConfirmation,
   passwordResetInitiate,
@@ -21,72 +22,9 @@ router.post(`/signup`, signup);
 
 router.post(`/verify-email`, verifyEmail);
 
+router.post(`/confirm-email-token`, confirmEmailToken);
+
 router.post(`/resend-verification-email`, resendVerificationEmail);
-
-router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
-  try {
-    let { emailConfirmationToken } = req.params;
-
-    // FIXME: should the client be changed from a URL to an id. Probably
-    // And then check that the client exists in the DB.
-    let {
-      client: clientID,
-      user: userId,
-      accountType,
-    } = req.query as {
-      client: string;
-      accountType: "artist" | "listener";
-      user: string;
-    };
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: Number(userId),
-        emailConfirmationToken,
-      },
-    });
-
-    const client = await prisma.client.findFirst({
-      where: {
-        id: Number(clientID),
-      },
-    });
-
-    if (!client) {
-      return res.status(404).json({ error: "This client does not exist" });
-    }
-    if (!user) {
-      return res.status(404).json({ error: "This user does not exist" });
-    } else if (
-      user.emailConfirmationExpiration &&
-      user.emailConfirmationExpiration < new Date()
-    ) {
-      return res.status(404).json({ error: "Token expired" });
-    } else {
-      const updatedUser = await prisma.user.update({
-        data: {
-          emailConfirmationToken: null,
-          emailConfirmationExpiration: null,
-        },
-        where: {
-          id: user.id,
-        },
-        select: {
-          email: true,
-          id: true,
-        },
-      });
-      setTokens(res, updatedUser);
-      if (accountType === "artist") {
-        return res.redirect(`${client.applicationUrl}/manage/welcome`);
-      }
-      return res.redirect(`${client.applicationUrl}/profile/collection`);
-    }
-  } catch (e) {
-    console.error(e);
-    res.status(500);
-  }
-});
 
 router.get("/password-reset/confirmation/:token", passwordResetConfirmation);
 

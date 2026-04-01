@@ -38,6 +38,7 @@ export const sendVerificationEmail = async <UserType extends { email: string }>(
         user,
         host: process.env.API_DOMAIN,
         client: clientId,
+        clientDomain: process.env.REACT_APP_CLIENT_DOMAIN,
       },
     },
   } as Job);

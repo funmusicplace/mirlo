@@ -105,6 +105,18 @@
     "confirmNewPassword": "Set password",
     "accountIncomplete": "Set a password to finish claiming this account"
   },
+  "emailConfirmation": {
+    "title": "Verify your email",
+    "confirmed": "Email verified! Redirecting...",
+    "confirming": "Verifying your email...",
+    "confirmationFailed": "Email verification failed",
+    "invalidLink": "Invalid verification link",
+    "tryAgain": "Try again",
+    "redirecting": "Redirecting to your account...",
+    "resendEmail": "Resend verification email",
+    "emailResent": "Verification email sent! Check your inbox.",
+    "resendFailed": "Failed to resend verification email"
+  },
   "headerMenu": {
     "logOutSuccess": "Logged out!",
     "collection": "Collection",

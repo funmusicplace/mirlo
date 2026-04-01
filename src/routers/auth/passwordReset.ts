@@ -85,7 +85,7 @@ export const passwordResetInitiate = async (
       return res.status(404).json({ error: "This user does not exist" });
     } else {
       const expirationDate = new Date();
-      expirationDate.setMinutes(new Date().getMinutes() + 30);
+      expirationDate.setMinutes(new Date().getMinutes() + 60);
       const token = randomUUID();
       const result = await prisma.user.update({
         where: {
@@ -110,6 +110,7 @@ export const passwordResetInitiate = async (
           locals: {
             user: result,
             host: process.env.API_DOMAIN,
+            clientDomain: process.env.REACT_APP_CLIENT_DOMAIN,
             redirectClient,
             accountIncomplete,
             token,
