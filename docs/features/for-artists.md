@@ -2,6 +2,10 @@
 
 An artist's profile page is incredibly flexible.
 
+::: tip
+Want more information on how to set up an Artist profile? [Read our guide here](../how-tos/setting-up-an-artist-account.md).
+:::
+
 ## Have aliases, several bands or unrelated projects?
 
 From a single user account login, you can generate as many

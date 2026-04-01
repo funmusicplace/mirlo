@@ -35,6 +35,10 @@ export default defineConfig({
         text: "How Tos",
         link: "/how-tos",
         items: [
+          {
+            text: "Setting up an artist account",
+            link: "/how-tos/setting-up-an-artist-account",
+          },
           { text: "Label Guide", link: "/how-tos/label-accounts" },
           {
             text: "Making your own album art",
