@@ -417,10 +417,14 @@ Configure environment variables (adjust `MEDIA_LOCATION` if using mounted volume
 
 **6. Start Services**
 
+Use the production Docker Compose file to avoid exposing database/cache ports to the internet:
+
 ```bash
-docker compose up -d
-docker compose exec api yarn prisma:migrate:deploy
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml exec api yarn prisma:migrate:deploy
 ```
+
+**Note:** `docker-compose.prod.yml` disables ports on PostgreSQL and Redis to prevent unauthorized access. Only the API (port 3000) is exposed.
 
 **8. Setup Hetzner Object Storage (S3-Compatible)**
 
