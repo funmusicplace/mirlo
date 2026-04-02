@@ -253,7 +253,7 @@ function Signup() {
           text-align: center;
         `}
       >
-        {t("accountIncomplete")}
+        <p>{t("accountIncomplete")}</p>
       </Box>
     );
   }
@@ -280,7 +280,7 @@ function Signup() {
           style={{ width: 100, height: 100 }}
           height={100}
         />
-        {t("hasRegistered")}
+        <p>{t("hasRegistered")}</p>
       </Box>
     );
   }
