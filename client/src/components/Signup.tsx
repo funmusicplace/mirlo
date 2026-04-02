@@ -384,6 +384,7 @@ function Signup() {
                 <ArtistToggle>
                   <div>
                     <input
+                      aria-describedby="hint-account-type"
                       id="input-account-type-listener"
                       required
                       type="radio"
@@ -396,6 +397,7 @@ function Signup() {
                   </div>
                   <div>
                     <input
+                      aria-describedby="hint-account-type"
                       id="input-account-type-artist"
                       required
                       type="radio"
@@ -413,6 +415,7 @@ function Signup() {
                 className={css`
                   margin-bottom: 1rem;
                 `}
+                id="hint-account-type"
               >
                 {t("alwaysCreateLater")}
               </small>
