@@ -683,6 +683,24 @@ export const handleInvoicePaid = async (
   if (typeof subscription === "string") {
     const { stripeFee } = await getFeeDetailsFromInvoice(invoice, accountId);
 
+    // Fetch subscription to get next billing date
+    let nextBillingDate: Date | undefined;
+    try {
+      const stripeSubscription = await stripe.subscriptions.retrieve(
+        subscription,
+        { stripeAccount: accountId }
+      );
+      if (stripeSubscription.current_period_end) {
+        nextBillingDate = new Date(
+          stripeSubscription.current_period_end * 1000
+        );
+      }
+    } catch (error) {
+      logger.error(
+        `invoice.paid: Failed to fetch subscription ${subscription}: ${error}`
+      );
+    }
+
     await manageSubscriptionReceipt({
       processorPaymentReferenceId: invoice.id,
       processorSubscriptionReferenceId: subscription,
@@ -691,6 +709,7 @@ export const handleInvoicePaid = async (
       platformCut: invoice.application_fee_amount || 0,
       paymentProcessorFee: stripeFee?.amount || 0,
       status: "COMPLETED",
+      nextBillingDate,
     });
   }
 };

@@ -13,11 +13,11 @@ We've had a weird instance where things in Cloudflare seem to not be connecting 
 
 It could be that something is repeatedly going wrong at a very regular interval--the most obvious indication of this is if an e-mail is getting sent out every x minutes. This likely means that a cron job is breaking and not completing, and the next time it runs it tries to do it with the same set of information. See: the famous April 13 incident with the April Update Email, which some users received 11 times.
 
-We've got two cron jobs: every-minute-tasks (runs every 10 minutes) and monthly-tasks (runs every month). These are controlled by two separate Render services, which you can find on [the dashboard](https://dashboard.render.com/).
+We've got two cron jobs: every-minute-tasks (runs every 10 minutes) and every-month-tasks (runs every month). These are controlled by two separate Render services, which you can find on [the dashboard](https://dashboard.render.com/).
 
 ![repeating tasks](../images/repeating-tasks-screenshot.png)
 
-You can see what these jobs do in the `src/jobs/monthly-tasks.ts` and `src/jobs/every-minute-tasks.ts` files.
+You can see what these jobs do in the `src/jobs/every-month-tasks.ts` and `src/jobs/every-minute-tasks.ts` files.
 
 Currently there's nothing critical that a cron job does that needs to run every ten minutes, so it is safe to suspend both of these jobs until we're able to figure out what is wrong. Here's how:
 

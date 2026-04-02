@@ -1,22 +1,28 @@
-doctype html
-html
-  head
-    block head
-      meta(charset="utf-8")
-      meta(name="viewport", content="width=device-width")
-      meta(http-equiv="X-UA-Compatible", content="IE=edge")
-      meta(name="x-apple-disable-message-reformatting")
-      style 
-        include ../style.css
-  body.sans-serif
-    p Wow! 
+extends ../layout.pug
+
+block content
+  p Wow! 
+  p
+    | Someone new is supporting #{artist.name} on Mirlo with a #{interval === 'MONTH' ? 'monthly': 'yearly'} 
+    | contribution at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
+  table 
+    tr 
+      td #{artist.name}
+      td #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
+      td #{user.email} #{user.name}
+  if transaction
     p
-      | Someone new is supporting #{artist.name} on Mirlo with a #{interval === 'MONTH' ? 'monthly': 'yearly'} 
-      | contribution at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
     table 
-      tr 
-        td #{artist.name}
-        td #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
-        td #{user.email} #{user.name}
-    p To view all your supporters log in to Mirlo and go to your artist supporter page.
-    p Enjoy!
+      thead
+        tr
+          th Gross Amount
+          th Platform Fee
+          th Payment Processor Fee
+          th Net Amount
+      tr
+        td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
+        td #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : ''}
+        td #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
+        td #{transaction.currency} #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
+  p To view all your supporters log in to Mirlo and go to your artist supporter page.
+  p Enjoy!

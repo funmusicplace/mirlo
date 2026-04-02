@@ -1,0 +1,27 @@
+extends ../layout.pug
+
+block content
+    p Hi,
+    p
+      | Your subscription to #{artist.name}'s "#{artistUserSubscription.artistSubscriptionTier.name}" tier will renew on #{renewalDate}.
+    
+    table 
+      tr 
+        td #{artist.name}
+        td.pa3 #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency} / #{interval === 'month' ? 'month': 'year'}
+    
+    p
+      | If you'd like to make any changes to your subscription before the renewal, you can:
+    ul 
+      li Modify your subscription amount at 
+        a(href=`${client}/${artist.urlSlug}/support`) on #{artist.name}'s support page.
+      li Cancel your subscription if you no longer wish to support them.
+    
+    p
+      | Thank you for supporting #{artist.name}!
+    
+    - const supportMessage = artist?.properties?.emails?.support
+    if supportMessage
+      div!= supportMessage
+    else
+      p Enjoy!
