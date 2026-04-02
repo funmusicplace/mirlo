@@ -1,8 +1,12 @@
 extends ../layout.pug
 
-mixin purchaseRow(title, sku, transaction)
+mixin purchaseRow(title, sku, transaction, url)
   tr
-    td #{title}
+    td 
+      if url 
+        a(href!=url) #{title}
+      else 
+        #{title}
     td #{sku}
     td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
     td #{transaction.platformFee / 100 ? (transaction.platformFee / 100).toFixed(2) : ''}
@@ -24,7 +28,9 @@ block content
     each transaction in transactions
       if transaction.trackGroupPurchases
         each purchase in transaction.trackGroupPurchases
-          +purchaseRow(`${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`, purchase.trackGroup.catalogNumber, transaction)
+          if !purchase.proGratis
+            +purchaseRow(`${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`, purchase.trackGroup.catalogNumber, transaction,
+              `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`)
       if transaction.trackPurchases
         each purchase in transaction.trackPurchases
           +purchaseRow(purchase.track.title, purchase.track.isrc, transaction)

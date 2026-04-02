@@ -2,7 +2,7 @@ import React from "react";
 import { useAuthContext } from "state/AuthContext";
 
 interface FeatureFlagProps {
-  featureFlag: "activityPub" | "subscriptionFulfillment" | "fundraiser";
+  featureFlag: "activityPub" | "fundraiser";
   children: React.ReactNode;
 }
 

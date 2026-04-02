@@ -14,9 +14,9 @@ import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 import {
-  ArtistMerchPurchaseReceiptEmailType,
+  ArtistPurchaseNotificationEmailType,
   handleArtistMerchPurchase,
-  TellArtistAboutMerchPurchaseEmailType,
+  PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
 import Stripe from "stripe";
 import stripe from "../../src/utils/stripe";
@@ -80,18 +80,18 @@ describe("handleArtistMerchPurchase", () => {
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
-    assert.equal(data0.template, "artist-merch-purchase-receipt");
+    assert.equal(data0.template, "purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
-    const locals = data0.locals as ArtistMerchPurchaseReceiptEmailType;
-    assert.equal(locals.purchases[0].merchId, merch.id);
-    assert.equal(locals.purchases[0].transaction.amount, 0);
+    const locals = data0.locals as PurchaseReceiptEmailType;
+    assert.equal(locals.transactions[0].merchPurchases?.[0].merchId, merch.id);
+    assert.equal(locals.transactions[0].amount, 0);
 
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "tell-artist-about-merch-purchase");
+    assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
-    const locals1 = data1.locals as TellArtistAboutMerchPurchaseEmailType;
-    assert.equal(locals1.purchases[0].merchId, merch.id);
-    assert.equal(locals1.purchases[0].transaction.amount, 0);
+    const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
+    assert.equal(locals1.transactions[0].merchPurchases?.[0].merchId, merch.id);
+    assert.equal(locals1.transactions[0]?.amount, 0);
   });
 
   it("should reduce quantity from merch.quantityRemaining", async () => {
@@ -235,6 +235,22 @@ describe("handleArtistMerchPurchase", () => {
 
   it("should send correct price in emails", async () => {
     const stub = sinon.spy(sendMail, "default");
+    sinon.stub(stripe.paymentIntents, "retrieve").returns({
+      // @ts-ignore
+      latest_charge: "ch_123",
+      application_fee_amount: 200,
+    });
+    sinon.stub(stripe.charges, "retrieve").returns({
+      // @ts-ignore
+      balance_transaction: {
+        fee_details: [
+          {
+            type: "stripe_fee",
+            amount: 100,
+          },
+        ],
+      },
+    });
     sinon
       .stub(stripe.products, "retrieve")
       // @ts-ignore
@@ -268,6 +284,10 @@ describe("handleArtistMerchPurchase", () => {
     await handleArtistMerchPurchase(
       purchaser.id,
       {
+        payment_intent: "pi_123",
+        metadata: {
+          stripeAccountId: stripeAccountId,
+        },
         line_items: {
           data: [
             {
@@ -276,26 +296,25 @@ describe("handleArtistMerchPurchase", () => {
             } as Stripe.LineItem,
           ],
         } as Stripe.ApiList<Stripe.LineItem>,
-      } as Stripe.Checkout.Session,
+      } as unknown as Stripe.Checkout.Session,
       stripeAccountId
     );
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
-    assert.equal(data0.template, "artist-merch-purchase-receipt");
+    assert.equal(data0.template, "purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
-    const locals = data0.locals as ArtistMerchPurchaseReceiptEmailType;
-    assert.equal(locals.purchases[0].merchId, merch.id);
-    assert.equal(locals.purchases[0].transaction.amount, 2000);
-    assert.equal(locals.purchases[0].artistCut, 1800);
-    assert.equal(locals.purchases[0].platformCut, 200);
+    const locals = data0.locals as PurchaseReceiptEmailType;
+    assert.equal(locals.transactions[0].merchPurchases?.[0].merchId, merch.id);
+    assert.equal(locals.transactions[0].amount, 2000);
+    assert.equal(locals.transactions[0].platformCut, 200);
 
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "tell-artist-about-merch-purchase");
+    assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
-    const locals1 = data1.locals as TellArtistAboutMerchPurchaseEmailType;
-    assert.equal(locals1.purchases[0].merchId, merch.id);
-    assert.equal(locals1.purchases[0].transaction.amount, 2000);
+    const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
+    assert.equal(locals1.transactions[0].merchPurchases?.[0].merchId, merch.id);
+    assert.equal(locals1.transactions[0].amount, 2000);
   });
 
   it("should add a related trackgroup to the users' collection", async () => {
@@ -474,9 +493,30 @@ describe("handleArtistMerchPurchase", () => {
       },
     });
 
+    sinon.stub(stripe.paymentIntents, "retrieve").returns({
+      // @ts-ignore
+      latest_charge: "ch_123",
+      application_fee_amount: 200,
+    });
+    sinon.stub(stripe.charges, "retrieve").returns({
+      // @ts-ignore
+      balance_transaction: {
+        fee_details: [
+          {
+            type: "stripe_fee",
+            amount: 100,
+          },
+        ],
+      },
+    });
+
     await handleArtistMerchPurchase(
       purchaser.id,
       {
+        payment_intent: "pi_123",
+        metadata: {
+          stripeAccountId: stripeAccountId,
+        },
         line_items: {
           data: [
             {
@@ -485,28 +525,30 @@ describe("handleArtistMerchPurchase", () => {
             } as Stripe.LineItem,
           ],
         } as Stripe.ApiList<Stripe.LineItem>,
-      } as Stripe.Checkout.Session,
+      } as unknown as Stripe.Checkout.Session,
       stripeAccountId
     );
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
-    assert.equal(data0.template, "artist-merch-purchase-receipt");
+    assert.equal(data0.template, "purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
-    const locals = data0.locals as ArtistMerchPurchaseReceiptEmailType;
-    assert.equal(locals.purchases[0].merchId, merch.id);
-    assert.equal(locals.purchases[0].transaction.amount, 2000);
-    assert.equal(locals.purchases[0].artistCut, 1800);
-    assert.equal(locals.purchases[0].platformCut, 200);
-    assert.equal(locals.purchases[0].options[0].name, "small");
-    assert.equal(locals.purchases[0].options.length, 1);
+    const locals = data0.locals as PurchaseReceiptEmailType;
+    assert.equal(locals.transactions[0].merchPurchases?.[0].merchId, merch.id);
+    assert.equal(locals.transactions[0].amount, 2000);
+    assert.equal(locals.transactions[0].platformCut, 200);
+    assert.equal(
+      locals.transactions[0].merchPurchases?.[0].options?.[0].name,
+      "small"
+    );
+    assert.equal(locals.transactions[0].merchPurchases?.[0].options?.length, 1);
 
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "tell-artist-about-merch-purchase");
+    assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
-    const locals1 = data1.locals as TellArtistAboutMerchPurchaseEmailType;
-    assert.equal(locals1.purchases[0].merchId, merch.id);
-    assert.equal(locals1.purchases[0].transaction.amount, 2000);
+    const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
+    assert.equal(locals1.transactions[0].merchPurchases?.[0].merchId, merch.id);
+    assert.equal(locals1.transactions[0].amount, 2000);
 
     const purchase = await prisma.merchPurchase.findFirst({
       where: { userId: purchaser.id },

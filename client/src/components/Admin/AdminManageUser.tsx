@@ -181,12 +181,7 @@ const AdminManageUser = () => {
                       setFeatureFlags(selectedOptions);
                     }}
                   >
-                    {[
-                      "label",
-                      "activityPub",
-                      "subscriptionFulfillment",
-                      "fundraiser",
-                    ].map((flag) => (
+                    {["activityPub"].map((flag) => (
                       <option key={flag} value={flag}>
                         {flag}
                       </option>

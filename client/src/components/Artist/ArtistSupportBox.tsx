@@ -98,6 +98,12 @@ const ArtistSupportBox: React.FC<{
       !sub.artistSubscriptionTier.isDefaultTier
   );
 
+  const hasRewards =
+    subscriptionTier.autoPurchaseAlbums ||
+    (subscriptionTier.releases && subscriptionTier.releases.length > 0) ||
+    !!subscriptionTier.digitalDiscountPercent ||
+    !!subscriptionTier.merchDiscountPercent;
+
   return (
     <StyledSupportBox>
       {subscriptionTier.images?.[0]?.image.sizes?.[625] && (
@@ -203,53 +209,60 @@ const ArtistSupportBox: React.FC<{
           </Box>
         )}
       </div>
-      <div
-        className="w-full flex gap-2 flex-col my-2 p-5 text-sm"
-        style={{ borderTop: "var(--mi-border)" }}
-      >
-        {subscriptionTier.autoPurchaseAlbums && (
-          <p>{t("includesNewReleases")}</p>
-        )}
-        {subscriptionTier.releases && subscriptionTier.releases.length > 0 && (
+      {hasRewards && (
+        <div
+          className="w-full flex gap-2 flex-col my-2 p-5 text-sm"
+          style={{ borderTop: "var(--mi-border)" }}
+        >
+          {subscriptionTier.autoPurchaseAlbums && (
+            <p>{t("includesNewReleases")}</p>
+          )}
+          {subscriptionTier.releases &&
+            subscriptionTier.releases.length > 0 && (
+              <p>
+                {t("includesReleases", {
+                  count: subscriptionTier.releases.length,
+                })}
+              </p>
+            )}
           <p>
-            {t("includesReleases", { count: subscriptionTier.releases.length })}
+            {!!subscriptionTier.digitalDiscountPercent &&
+              !subscriptionTier.merchDiscountPercent &&
+              t("tierStoreDigitalDiscount", {
+                discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
+            {!subscriptionTier.digitalDiscountPercent &&
+              !!subscriptionTier.merchDiscountPercent &&
+              t("tierStoreMerchDiscount", {
+                discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
+            {!!subscriptionTier.digitalDiscountPercent &&
+              !!subscriptionTier.merchDiscountPercent &&
+              subscriptionTier.digitalDiscountPercent !==
+                subscriptionTier.merchDiscountPercent &&
+              t("differentTierStoreDiscount", {
+                digitalDiscountPercent:
+                  subscriptionTier.digitalDiscountPercent ?? 0,
+                merchDiscountPercent:
+                  subscriptionTier.merchDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
+            {!!subscriptionTier.digitalDiscountPercent &&
+              !!subscriptionTier.merchDiscountPercent &&
+              subscriptionTier.digitalDiscountPercent ===
+                subscriptionTier.merchDiscountPercent &&
+              t("sameTierStoreDiscount", {
+                digitalDiscountPercent:
+                  subscriptionTier.digitalDiscountPercent ?? 0,
+                merchDiscountPercent:
+                  subscriptionTier.merchDiscountPercent ?? 0,
+                artistName: artist.name,
+              })}
           </p>
-        )}
-        <p>
-          {!!subscriptionTier.digitalDiscountPercent &&
-            !subscriptionTier.merchDiscountPercent &&
-            t("tierStoreDigitalDiscount", {
-              discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
-              artistName: artist.name,
-            })}
-          {!subscriptionTier.digitalDiscountPercent &&
-            !!subscriptionTier.merchDiscountPercent &&
-            t("tierStoreMerchDiscount", {
-              discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
-              artistName: artist.name,
-            })}
-          {!!subscriptionTier.digitalDiscountPercent &&
-            !!subscriptionTier.merchDiscountPercent &&
-            subscriptionTier.digitalDiscountPercent !==
-              subscriptionTier.merchDiscountPercent &&
-            t("differentTierStoreDiscount", {
-              digitalDiscountPercent:
-                subscriptionTier.digitalDiscountPercent ?? 0,
-              merchDiscountPercent: subscriptionTier.merchDiscountPercent ?? 0,
-              artistName: artist.name,
-            })}
-          {!!subscriptionTier.digitalDiscountPercent &&
-            !!subscriptionTier.merchDiscountPercent &&
-            subscriptionTier.digitalDiscountPercent ===
-              subscriptionTier.merchDiscountPercent &&
-            t("sameTierStoreDiscount", {
-              digitalDiscountPercent:
-                subscriptionTier.digitalDiscountPercent ?? 0,
-              merchDiscountPercent: subscriptionTier.merchDiscountPercent ?? 0,
-              artistName: artist.name,
-            })}
-        </p>
-      </div>
+        </div>
+      )}
     </StyledSupportBox>
   );
 };

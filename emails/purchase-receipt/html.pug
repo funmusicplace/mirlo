@@ -16,18 +16,14 @@ block content
         +purchaseRow(purchase.trackGroup.title, transaction)
         tr 
           td(colspan="4")
-            | See the release in 
-            a(href!=`${client}/profile/collection`) your collection
-            | .
+            a(href!=`${client}/profile/collection`) Collection
       each purchase in transaction.trackPurchases
         +purchaseRow(purchase.track.title, transaction)
         tr 
           td(colspan="4")
-            | See the release in 
-            a(href=`${client}/profile/collection`) your collection
-            | .
+            a(href=`${client}/profile/collection`) Collection
       each purchase in transaction.merchPurchases
-        +purchaseRow(purchase.merch.title, transaction)
+        +purchaseRow(`${purchase.merch.title} ${purchase.options.map((o) => o.name).join(', ')}: ${purchase.quantity}`, transaction)
       each tip in transaction.tips
         +purchaseRow('Tip', transaction)
   - const supportMessage = artist?.properties?.emails?.purchase

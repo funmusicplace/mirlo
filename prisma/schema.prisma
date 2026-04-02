@@ -608,6 +608,7 @@ model UserTrackGroupPurchase {
   userTransactionId   String?
   createdAt           DateTime         @default(now())
   transaction         UserTransaction? @relation(fields: [userTransactionId], references: [id])
+  proGratis           Boolean          @default(false) // Whether the user got this for free through a subscription or merch purchase.
 
   @@unique([userId, trackGroupId])
 }

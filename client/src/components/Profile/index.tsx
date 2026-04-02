@@ -11,8 +11,6 @@ import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import ProfileForm from "./ProfileForm";
 import styled from "@emotion/styled";
-import FeatureFlag from "components/common/FeatureFlag";
-import ProfileImages from "./ProfileImages";
 import CanCreateArtists from "components/CanCreateArtists";
 
 export const ProfileSection = styled.div`
