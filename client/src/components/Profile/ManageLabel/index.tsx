@@ -75,97 +75,126 @@ const RelationshipsTable: React.FC = () => {
   return (
     <>
       <h3>{t("artistsOnYourRoster")}</h3>
-      <Table
-        className={
-          "my-8 " +
-          css`
-            a {
-              white-space: nowrap;
-            }
-          `
-        }
-      >
-        <thead>
-          <tr>
-            <th aria-label="Avatar"></th>
-            <th>{t("artist")}</th>
-            <th>{t("manage")}</th>
-            {/* <th>{t("manage")}</th> */}
-            <th>{t("canLabelAddReleases")}</th>
-            <th>{t("isArtistConfirmed")}</th>
-            <th>{t("isLabelConfirmed")}</th>
-            <th aria-label="Actions"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {relationships.map((relationship, idx) => (
-            <tr key={relationship.artist.id}>
-              <td>
-                <img
-                  src={relationship.artist.avatar?.sizes?.[120]}
-                  className="w-10 h-10 object-cover flex-shrink-0"
-                />
-              </td>
-              <td>{relationship.artist.name}</td>
+      <div className="my-8 space-y-1 divide-y-1 divide-(--mi-darken-background-color)">
+        {relationships.length === 0 ? (
+          <div className="text-center py-4 bg-(--mi-darken-background-color) rounded">
+            {t("noArtists")}
+          </div>
+        ) : (
+          <>
+            <div className="hidden md:flex flex-col md:flex-row md:items-center gap-4 p-3 md:p-1 md:px-3 bg-(--mi-darken-background-color) text-xs">
+              <div className="flex-1 col-span-2">{t("artist")}</div>
 
-              <td>
-                {relationship.canLabelManageArtist ? (
-                  <>
-                    <Link to={getArtistManageUrl(relationship.artist.id)}>
-                      {t("manage")}
-                    </Link>
-                  </>
-                ) : (
-                  t("askArtist")
-                )}
-              </td>
-              <td>
-                {relationship.canLabelAddReleases ? <MdCheckBox /> : null}
-              </td>
-              <td>
-                {relationship.isArtistApproved ? (
-                  <MdCheckBox />
-                ) : (
-                  t("askArtist")
-                )}
-              </td>
-              <td>
-                <Toggle
-                  toggled={relationship.isLabelApproved}
-                  onClick={() => {
-                    const newValue = !fields[idx].isLabelApproved;
-                    setValue(`relationships.${idx}.isLabelApproved`, newValue);
-                    handleConfirm(fields[idx].artistId, newValue);
-                  }}
-                  label={t("showOnPage")}
-                />
-              </td>
-              <td className="justify-end! flex gap-2">
-                {relationship.canLabelManageArtist && (
-                  <NewAlbumButton artist={relationship.artist} />
-                )}
-                <ButtonLink
-                  size="compact"
-                  variant="link"
-                  to={getArtistUrl(relationship.artist)}
-                >
-                  {t("viewPage")}
-                </ButtonLink>
-              </td>
-            </tr>
-          ))}
-          {relationships.length === 0 && (
-            <tr>
-              <td
-                colSpan={8}
-                className="text-center py-4! bg-(--mi-darken-background-color)"
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 flex-3 items-center">
+                <div>{t("manage")}</div>
+                <div>{t("canLabelAddReleases")}</div>
+                <div>{t("isArtistConfirmed")}</div>
+                <div>{t("showOnRoster")}</div>
+                <div className="col-span-2 text-right">{t("actions")}</div>
+              </div>
+            </div>
+            {relationships.map((relationship, idx) => (
+              <div
+                key={relationship.artist.id}
+                className="flex flex-col md:flex-row md:items-center gap-4 p-3 md:p-1 md:px-3"
               >
-                {t("noArtists")}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
+                <div className="flex items-center gap-3 flex-1">
+                  <img
+                    src={relationship.artist.avatar?.sizes?.[120]}
+                    className="w-10 h-10 object-cover flex-shrink-0 rounded"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold">{relationship.artist.name}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 flex-3">
+                  <div className="flex flex-col gap-1 justify-center">
+                    <label className="md:sr-only text-sm opacity-70">
+                      {t("manage")}
+                    </label>
+                    {relationship.canLabelManageArtist ? (
+                      <Link to={getArtistManageUrl(relationship.artist.id)}>
+                        {t("manage")}
+                      </Link>
+                    ) : (
+                      <span>{t("askArtist")}</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1 justify-center">
+                    <label
+                      id="canLabelAddReleases"
+                      className="md:sr-only text-sm opacity-70"
+                    >
+                      {t("canLabelAddReleases")}
+                    </label>
+                    <div aria-labelledby="canLabelAddReleases">
+                      {relationship.canLabelAddReleases ? <MdCheckBox /> : null}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1 justify-center">
+                    <label
+                      id="isArtistConfirmed"
+                      className="md:sr-only text-sm opacity-70"
+                    >
+                      {t("isArtistConfirmed")}
+                    </label>
+                    <div aria-labelledby="isArtistConfirmed">
+                      {relationship.isArtistApproved ? (
+                        <MdCheckBox />
+                      ) : (
+                        <span className="text-sm">{t("askArtist")}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1 justify-center">
+                    <label
+                      id="isLabelConfirmed"
+                      className="md:sr-only text-sm opacity-70"
+                    >
+                      {t("isLabelConfirmed")}
+                    </label>
+                    <Toggle
+                      id="isLabelConfirmed"
+                      labelId="isLabelConfirmed"
+                      toggled={relationship.isLabelApproved}
+                      onClick={() => {
+                        const newValue = !fields[idx].isLabelApproved;
+                        setValue(
+                          `relationships.${idx}.isLabelApproved`,
+                          newValue
+                        );
+                        handleConfirm(fields[idx].artistId, newValue);
+                      }}
+                      labelClassName="text-sm"
+                      label={t("showOnPage")}
+                    />
+                  </div>
+
+                  <div
+                    className="col-span-2 items-end md:items-center justify-end 
+                 flex flex-col md:flex-row gap-2"
+                  >
+                    {relationship.canLabelManageArtist && (
+                      <NewAlbumButton artist={relationship.artist} />
+                    )}
+                    <ButtonLink
+                      size="compact"
+                      variant="link"
+                      to={getArtistUrl(relationship.artist)}
+                    >
+                      {t("viewPage")}
+                    </ButtonLink>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
       <AddArtistToRoster refresh={refetch} />
     </>
   );
@@ -226,49 +255,44 @@ const OtherArtistsTable: React.FC = () => {
     <ProfileSection>
       <h3>{t("otherArtists")}</h3>
       <p>{t("otherArtistsDescription")}</p>
-      <Table
-        className={
-          "my-8 " +
-          css`
-            a {
-              white-space: nowrap;
-            }
-          `
-        }
-      >
-        <thead>
-          <tr>
-            <th aria-label="Avatar"></th>
-            <th>{t("artist")}</th>
-            <th aria-label="actions"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredArtists.map((artist, idx) => (
-            <tr key={artist.id}>
-              <td>
-                <img
-                  src={artist.avatar?.sizes?.[120]}
-                  className="w-10 h-10 object-cover flex-shrink-0"
-                />
-              </td>
-              <td>{artist.name}</td>
-              <td className="justify-end! flex gap-2">
-                <ButtonLink size="compact" to={getArtistUrl(artist)}>
-                  {t("viewPage")}
-                </ButtonLink>
+      <div className="my-8 space-y-1 divide-y-1 divide-(--mi-darken-background-color)">
+        <div className="flex text-sm flex-col md:flex-row md:items-center gap-4 p-1 bg-(--mi-darken-background-color) rounded">
+          <div>{t("artist")}</div>
 
-                <Button
-                  size="compact"
-                  onClick={() => onAddArtistToRoster(artist.id)}
-                >
-                  {t("addToRoster")}
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+          <div className="text-end">{t("actions")}</div>
+        </div>
+        {filteredArtists.map((artist, idx) => (
+          <div
+            key={artist.id}
+            className="flex flex-col md:flex-row md:items-center gap-4 p-1 bg-(--mi-darken-background-color) rounded"
+          >
+            {/* Avatar & Name */}
+            <div className="flex items-center gap-3 flex-1">
+              <img
+                src={artist.avatar?.sizes?.[120]}
+                className="w-10 h-10 object-cover flex-shrink-0 rounded"
+              />
+              <div className="flex-1">
+                <p className="font-semibold">{artist.name}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col md:flex-row gap-2">
+              <ButtonLink size="compact" to={getArtistUrl(artist)}>
+                {t("viewPage")}
+              </ButtonLink>
+
+              <Button
+                size="compact"
+                onClick={() => onAddArtistToRoster(artist.id)}
+              >
+                {t("addToRoster")}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </ProfileSection>
   );
 };
@@ -290,7 +314,7 @@ const ProfileLabel: React.FC = () => {
 
   return (
     <WidthContainer variant="big" justify="center">
-      <div className="flex gap-2 flex-col">
+      <div className="flex gap-2 flex-col p-4">
         <div className="flex justify-between items-center">
           <h1>{t("manageLabel")}</h1>
           <div className="flex flex-wrap gap-4">
@@ -327,10 +351,10 @@ const ProfileLabel: React.FC = () => {
           <RelationshipsTable />
         </ProfileSection>
         <OtherArtistsTable />
-        <ProfileSection>
-          <div className="flex justify-between items-center">
+        <ProfileSection className="flex flex-col gap-2">
+          <div className="gap-2 flex flex-col md:flex-row justify-between md:items-center">
             <h2>{t("managePayment")}</h2>
-            <div className="flex gap-2">
+            <div className="flex gap-2 ">
               <ButtonLink variant="outlined" to="/sales" size="compact">
                 {t("viewSalesPage")}
               </ButtonLink>

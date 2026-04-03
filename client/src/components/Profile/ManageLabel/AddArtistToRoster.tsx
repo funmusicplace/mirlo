@@ -57,6 +57,7 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
         <ArtistButtonLink
           variant="outlined"
           to="/manage/welcome"
+          size="compact"
           endIcon={<FaChevronRight />}
         >
           {t("createNewArtist")}
