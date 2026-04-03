@@ -43,16 +43,24 @@ const fetchPublicLabelTrackGroups: QueryFunction<
   {
     results: TrackGroup[];
   },
-  ["fetchLabelTrackGroups", { labelSlug?: string }]
-> = ({ queryKey: [_, { labelSlug }], signal }) => {
+  ["fetchLabelTrackGroups", { labelSlug?: string; excludeArtistId?: number }]
+> = ({ queryKey: [_, { labelSlug, excludeArtistId }], signal }) => {
+  const params = new URLSearchParams();
+  if (excludeArtistId)
+    params.append("excludeArtistId", String(excludeArtistId));
   return api.get<{
     results: TrackGroup[];
-  }>(`v1/labels/${labelSlug}/trackGroups`, { signal });
+  }>(`v1/labels/${labelSlug}/trackGroups?${params}`, {
+    signal,
+  });
 };
 
-export function queryPublicLabelTrackGroups(labelSlug?: string) {
+export function queryPublicLabelTrackGroups(
+  labelSlug?: string,
+  options: { excludeArtistId?: number } = {}
+) {
   return queryOptions({
-    queryKey: ["fetchLabelTrackGroups", { labelSlug }],
+    queryKey: ["fetchLabelTrackGroups", { labelSlug, ...options }],
     queryFn: fetchPublicLabelTrackGroups,
     enabled: !!labelSlug,
   });

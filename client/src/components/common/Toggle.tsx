@@ -5,7 +5,10 @@ export const Toggle: React.FC<{
   label: string;
   toggled: boolean;
   onClick: (newVal: boolean) => void;
-}> = ({ label, toggled, onClick }) => {
+  labelClassName?: string;
+  id?: string;
+  labelId?: string;
+}> = ({ label, toggled, onClick, labelClassName, id, labelId }) => {
   const [isToggled, toggle] = useState(toggled);
 
   const callback = () => {
@@ -30,6 +33,8 @@ export const Toggle: React.FC<{
         defaultChecked={isToggled}
         checked={isToggled}
         onClick={callback}
+        aria-labelledby={labelId}
+        id={id}
         className={css`
           opacity: 0;
           width: 0;
@@ -40,7 +45,7 @@ export const Toggle: React.FC<{
           }
 
           &:checked + .toggle:before {
-            transform: translateX(29px);
+            transform: translateX(14px);
           }
         `}
       />
@@ -50,8 +55,8 @@ export const Toggle: React.FC<{
           css`
             display: inline-flex;
             align-items: center;
-            width: 60px;
-            height: 30px;
+            width: 30px;
+            height: 15px;
 
             transition: 0.3s;
             cursor: pointer;
@@ -61,9 +66,9 @@ export const Toggle: React.FC<{
             &:before {
               position: absolute;
               content: "";
-              height: 25px;
-              width: 25px;
-              left: 3px;
+              height: 12px;
+              width: 12px;
+              left: 2px;
               background-color: #fff;
               border-radius: 50%;
               transition: 0.3s;
@@ -72,9 +77,14 @@ export const Toggle: React.FC<{
         }
       />
       <span
-        className={css`
-          margin-left: 1rem;
-        `}
+        id={labelId}
+        className={
+          labelClassName +
+          " " +
+          css`
+            margin-left: 1rem;
+          `
+        }
       >
         {label}
       </span>

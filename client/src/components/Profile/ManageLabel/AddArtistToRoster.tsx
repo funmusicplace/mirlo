@@ -45,22 +45,21 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
   }, []);
 
   return (
-    <form
-      className={css`
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-        justify-content: space-between;
-      `}
-    >
-      <FormComponent>
+    <form className="flex w-full flex-row items-start justify-between gap-4">
+      <FormComponent className="w-1/2">
         <label>{t("addExistingArtistToRoster")}</label>
+        <small>{t("addExistingArtistExplanation")}</small>
         <AutoComplete getOptions={searchArtists} onSelect={setLabel} />
       </FormComponent>
-      <FormComponent>
+      <FormComponent className="w-1/2">
         <label>{t("addNewArtistToRoster")}</label>
-        <ArtistButtonLink to="/manage/welcome" endIcon={<FaChevronRight />}>
+        <small>{t("addNewArtistExplanation")}</small>
+        <ArtistButtonLink
+          variant="outlined"
+          to="/manage/welcome"
+          size="compact"
+          endIcon={<FaChevronRight />}
+        >
           {t("createNewArtist")}
         </ArtistButtonLink>
       </FormComponent>

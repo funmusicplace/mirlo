@@ -33,13 +33,13 @@ const TrackGroupCard: React.FC<{
     if (!confirmed) return;
 
     try {
-      await deleteTrackGroup({ userId: artist.userId, trackGroupId: album.id });
+      await deleteTrackGroup({ trackGroupId: album.id });
       snackbar(t("albumDeleted"), { type: "success" });
     } catch (e) {
       console.error(e);
       snackbar(t("somethingWentWrong"), { type: "warning" });
     }
-  }, [artist, album, t]);
+  }, [album, t]);
 
   const isPublished =
     album.publishedAt && new Date(album.publishedAt) < new Date();
@@ -154,7 +154,6 @@ const TrackGroupCard: React.FC<{
           }
         `}
       >
-        {" "}
         <ImageWithPlaceholder
           src={album.cover?.sizes?.[300]}
           alt={album.title ?? "Untitled release"}

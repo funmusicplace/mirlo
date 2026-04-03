@@ -201,10 +201,7 @@ export function useDeletePledgeMutation() {
   });
 }
 
-async function deleteTrackGroup(opts: {
-  userId: number;
-  trackGroupId: number;
-}) {
+async function deleteTrackGroup(opts: { trackGroupId: number }) {
   await api.del(`v1/manage/trackGroups/${opts.trackGroupId}`);
 }
 

@@ -2,25 +2,20 @@ import { css } from "@emotion/css";
 import React from "react";
 
 import api from "services/api";
-import Button, { ButtonLink } from "../common/Button";
+import { ButtonLink } from "../common/Button";
 import { bp } from "../../constants";
 import { useTranslation } from "react-i18next";
-import Box from "components/common/Box";
 import CountrySelect from "./CountrySelectForm";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
-import { queryUserStripeStatus } from "queries";
-import { useQuery } from "@tanstack/react-query";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
+
 import { FaPlus } from "react-icons/fa";
+import StripeStatus from "components/common/stripe/StripeStatusAndButton";
 
 export const Manage: React.FC = () => {
   const { user } = useAuthContext();
   const [artists, setArtists] = React.useState<Artist[]>([]);
 
-  const { data: stripeAccountStatus, isLoading: isLoadingStripe } = useQuery(
-    queryUserStripeStatus(user?.id)
-  );
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = user?.id;
@@ -116,29 +111,7 @@ export const Manage: React.FC = () => {
           >
             <h2>{t("managePayment")}</h2>
             <CountrySelect />
-            {isLoadingStripe && <LoadingBlocks rows={2} height="2rem" />}
-            {!isLoadingStripe && (
-              <>
-                {stripeAccountStatus?.detailsSubmitted && (
-                  <Box variant="info">
-                    {!stripeAccountStatus?.chargesEnabled &&
-                      stripeAccountStatus?.detailsSubmitted &&
-                      t("waitingStripeAccountVerification")}
-                    {stripeAccountStatus?.chargesEnabled &&
-                      t("stripeAccountVerified")}
-                  </Box>
-                )}
-                {userId && (
-                  <a href={api.paymentProcessor.stripeConnect(userId)}>
-                    <Button>
-                      {stripeAccountStatus?.detailsSubmitted
-                        ? t("updateBankAccount")
-                        : t("setUpBankAccount")}
-                    </Button>
-                  </a>
-                )}
-              </>
-            )}
+            <StripeStatus />
           </div>
         </WidthContainer>
       </div>

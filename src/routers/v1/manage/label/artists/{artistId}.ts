@@ -25,6 +25,12 @@ export default function () {
         });
       }
 
+      const artist = await prisma.artist.findUnique({
+        where: {
+          id: Number(artistId),
+        },
+      });
+
       await prisma.artistLabel.updateMany({
         where: {
           labelUserId: Number(labelUserId),
@@ -32,6 +38,12 @@ export default function () {
         },
         data: {
           isLabelApproved,
+          canLabelAddReleases:
+            Number(labelUserId) === loggedInUser.id &&
+            loggedInUser.id === artist?.userId,
+          canLabelManageArtist:
+            Number(labelUserId) === loggedInUser.id &&
+            loggedInUser.id === artist?.userId,
         },
       });
 

@@ -120,7 +120,7 @@ const ArtistVariableSupport: React.FC<{
                           release.trackGroup.cover.url?.[0]
                         }
                         alt={release.trackGroup.title}
-                        className="w-8 h-8 object-cover flex-shrink-0"
+                        className="w-10 h-10 object-cover flex-shrink-0"
                       />
                     )}
                     {!release.trackGroup.cover && (
