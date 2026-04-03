@@ -126,4 +126,55 @@ describe("handleTrackGroupPurchase", () => {
     assert.equal(locals1.transactions[0]?.platformCut, 0);
     assert.equal(locals1.transactions[0]?.stripeCut, 0);
   });
+
+  it("should send artist notification to paymentToUser if set", async () => {
+    const stub = sinon.spy(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: paymentRecipient } = await createUser({
+      email: "payments@manager.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+        paymentToUserId: paymentRecipient.id,
+      },
+    });
+
+    const trackGroup = await createTrackGroup(artist.id, {
+      title: "Our Custom Title",
+    });
+
+    await handleTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+    assert.equal(stub.calledTwice, true);
+    const data0 = stub.getCall(0).args[0].data;
+    assert.equal(data0.template, "album-purchase-receipt");
+    assert.equal(data0.message.to, "follower@follower.com");
+
+    const data1 = stub.getCall(1).args[0].data;
+    assert.equal(data1.template, "artist-purchase-notification");
+    assert.equal(
+      data1.message.to,
+      "payments@manager.com",
+      "artist notification should go to paymentToUser email"
+    );
+    const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
+    assert.equal(
+      locals1.transactions[0].trackGroupPurchases?.[0].trackGroup.id,
+      trackGroup.id
+    );
+  });
 });

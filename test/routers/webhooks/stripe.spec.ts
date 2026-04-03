@@ -293,10 +293,6 @@ describe("Stripe Webhooks - Failed Payments", () => {
 
   describe("invoice.paid webhook for subscription", () => {
     it("should grant user access to subscription tier releases when invoice is paid", async () => {
-      const sendMailStub = sinon
-        .stub(sendMailQueueModule.sendMailQueue, "add")
-        .resolves({} as any);
-
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",
       });
@@ -350,6 +346,11 @@ describe("Stripe Webhooks - Failed Payments", () => {
         },
       });
 
+      // Mock stripe subscriptions.retrieve to get nextBillingDate
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30 days from now
+      } as any);
+
       // Mock stripe paymentIntents.retrieve to avoid actual API calls
       const paymentIntentsStub = sinon
         .stub(stripeUtils.stripe.paymentIntents, "retrieve")
@@ -362,6 +363,11 @@ describe("Stripe Webhooks - Failed Payments", () => {
             },
           },
         } as any);
+
+      // Mock sendMailQueue to verify emails are queued (not sent synchronously)
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
 
       // Simulate the Stripe invoice.paid webhook with proper typing
       const mockInvoice = {
@@ -425,18 +431,46 @@ describe("Stripe Webhooks - Failed Payments", () => {
         "All purchases should link back to the transaction"
       );
 
-      // Verify receipt email was sent
-      assert.equal(sendMailStub.calledOnce, true, "Email should be queued");
-      const emailCall = sendMailStub.getCall(0).args[1];
+      // Verify nextBillingDate was stored on subscription
+      const updatedSubscription = await prisma.artistUserSubscription.findFirst(
+        {
+          where: { id: subscription.id },
+        }
+      );
+      assert.ok(
+        updatedSubscription?.nextBillingDate,
+        "Next billing date should be set"
+      );
+
+      // Verify emails were queued (not sent synchronously)
       assert.equal(
-        emailCall.template,
+        sendMailStub.calledTwice,
+        true,
+        "Should queue two emails: receipt + artist notification"
+      );
+
+      const receiptCall = sendMailStub.getCall(0).args[1];
+      assert.equal(
+        receiptCall.template,
         "artist-subscription-receipt",
-        "Should send subscription receipt"
+        "First email should be subscription receipt"
       );
       assert.equal(
-        emailCall.message.to,
+        receiptCall.message.to,
         subscriber.email,
-        "Email should go to subscriber"
+        "Receipt should go to subscriber"
+      );
+
+      const artistNotificationCall = sendMailStub.getCall(1).args[1];
+      assert.equal(
+        artistNotificationCall.template,
+        "artist-new-subscriber-announce",
+        "Second email should be artist notification"
+      );
+      assert.equal(
+        artistNotificationCall.message.to,
+        artistUser.email,
+        "Artist notification should go to artist"
       );
 
       paymentIntentsStub.restore();
@@ -455,7 +489,10 @@ describe("Stripe Webhooks - Failed Payments", () => {
         email: "subscriber@subscriber.com",
         emailConfirmationToken: null,
       });
-
+      // Mock stripe subscriptions.retrieve to get nextBillingDate
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30 days from now
+      } as any);
       const artist = await createArtist(artistUser.id);
 
       // Create subscription tier WITHOUT releases using utility function
@@ -524,8 +561,26 @@ describe("Stripe Webhooks - Failed Payments", () => {
         "User should have no track group purchases (tier has no releases)"
       );
 
-      // Verify email was still sent
-      assert.equal(sendMailStub.calledOnce, true);
+      // Verify emails were still queued (subscription receipt + artist notification)
+      assert.equal(
+        sendMailStub.calledTwice,
+        true,
+        "Should queue two emails: receipt + artist notification"
+      );
+
+      const receiptCall = sendMailStub.getCall(0).args[1];
+      assert.equal(
+        receiptCall.template,
+        "artist-subscription-receipt",
+        "First email should be subscription receipt"
+      );
+
+      const artistNotificationCall = sendMailStub.getCall(1).args[1];
+      assert.equal(
+        artistNotificationCall.template,
+        "artist-new-subscriber-announce",
+        "Second email should be artist notification"
+      );
 
       paymentIntentsStub.restore();
     });

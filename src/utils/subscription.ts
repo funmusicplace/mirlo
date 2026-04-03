@@ -18,6 +18,33 @@ export type ArtistSubscriptionReceiptEmailType = {
   };
 };
 
+export type ArtistNewSubscriberAnnounceEmailType = {
+  interval: "MONTH" | "YEAR";
+  artist: Artist;
+  artistUserSubscription: {
+    artistSubscriptionTierId: number;
+    id: number;
+    amount: number;
+    currency: string;
+    artistSubscriptionTier: {
+      name: string;
+    };
+  };
+  user: {
+    name: string;
+    email: string;
+  };
+  transaction?: {
+    amount: number;
+    currency: string;
+    platformCut: number | null;
+    stripeCut: number | null;
+  };
+  email: string;
+  client: string;
+  host: string;
+};
+
 /**
  * We'll probably want to change this to be more neutral. Right now we assume the payment processor is Stripe.
  * @param processorPaymentReferenceId
@@ -32,6 +59,7 @@ export const manageSubscriptionReceipt = async ({
   paymentProcessorFee,
   status,
   urlParams,
+  nextBillingDate,
 }: {
   processorPaymentReferenceId: string;
   processorSubscriptionReferenceId: string;
@@ -41,6 +69,7 @@ export const manageSubscriptionReceipt = async ({
   paymentProcessorFee: number;
   status: "FAILED" | "COMPLETED";
   urlParams?: string;
+  nextBillingDate?: Date;
 }) => {
   const artistUserSubscription = await prisma.artistUserSubscription.findFirst({
     where: {
@@ -51,7 +80,12 @@ export const manageSubscriptionReceipt = async ({
       user: true,
       artistSubscriptionTier: {
         include: {
-          artist: true,
+          artist: {
+            include: {
+              user: true,
+              paymentToUser: true,
+            },
+          },
         },
       },
     },
@@ -77,6 +111,14 @@ export const manageSubscriptionReceipt = async ({
     logger.info(
       `invoice.paid: ${processorPaymentReferenceId} created subscription charge: ${created.id}`
     );
+
+    // Update next billing date if provided
+    if (status === "COMPLETED" && nextBillingDate) {
+      await prisma.artistUserSubscription.update({
+        where: { id: artistUserSubscription.id },
+        data: { nextBillingDate },
+      });
+    }
 
     const hasProGrataTrackGroups =
       await prisma.subscriptionTierRelease.findMany({
@@ -115,6 +157,46 @@ export const manageSubscriptionReceipt = async ({
           host: process.env.API_DOMAIN,
           client: process.env.REACT_APP_CLIENT_DOMAIN,
         } as ArtistSubscriptionReceiptEmailType,
+      });
+
+      // Notify the artist (or payment-to user if set) of the subscription payment/renewal
+      const artistNotificationEmail =
+        artistUserSubscription.artistSubscriptionTier.artist.paymentToUser
+          ?.email ??
+        artistUserSubscription.artistSubscriptionTier.artist.user.email;
+
+      await sendMailQueue.add("send-mail", {
+        template: "artist-new-subscriber-announce",
+        message: {
+          to: artistNotificationEmail,
+        },
+        locals: {
+          interval: artistUserSubscription.artistSubscriptionTier.interval,
+          artist: artistUserSubscription.artistSubscriptionTier.artist,
+          artistUserSubscription: {
+            id: artistUserSubscription.id,
+            amount: artistUserSubscription.amount,
+            currency: artistUserSubscription.currency,
+            artistSubscriptionTierId:
+              artistUserSubscription.artistSubscriptionTierId,
+            artistSubscriptionTier: {
+              name: artistUserSubscription.artistSubscriptionTier.name,
+            },
+          },
+          user: {
+            name: artistUserSubscription.user.name || "A supporter",
+            email: artistUserSubscription.user.email,
+          },
+          transaction: {
+            amount: transaction.amount,
+            currency: transaction.currency,
+            platformCut: transaction.platformCut,
+            stripeCut: transaction.stripeCut,
+          },
+          email: artistUserSubscription.user.email,
+          host: process.env.API_DOMAIN,
+          client: process.env.REACT_APP_CLIENT_DOMAIN,
+        } as ArtistNewSubscriberAnnounceEmailType,
       });
     } else if (urlParams && status === "FAILED") {
       await sendMailQueue.add("send-mail", {

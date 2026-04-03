@@ -224,6 +224,8 @@ export const handleTrackGroupPurchase = async (
           include: {
             subscriptionTiers: true,
             user: true,
+
+            paymentToUser: true,
           },
         },
         paymentToUser: true,
@@ -278,7 +280,10 @@ export const handleTrackGroupPurchase = async (
         data: {
           template: "artist-purchase-notification",
           message: {
-            to: trackGroup.paymentToUser?.email ?? trackGroup.artist.user.email,
+            to:
+              trackGroup.paymentToUser?.email ??
+              trackGroup.artist.paymentToUser?.email ??
+              trackGroup.artist.user.email,
           },
           locals: {
             transactions,
