@@ -83,7 +83,7 @@ const Menu = forwardRef<
           onClick={() => onClose()}
           size="compact"
           startIcon={<FaTimes />}
-        ></Button>
+        />
         <nav className="flex-auto">
           <ul>
             <li>
@@ -91,22 +91,27 @@ const Menu = forwardRef<
                 {t("profile")}
               </MenuLink>
             </li>
-            <li>
-              <MenuLink onClick={onClose} to="/profile/label">
-                {t("label")}
-              </MenuLink>
-            </li>
+
             <li>
               <MenuLink onClick={onClose} to="/profile/collection">
                 {t("collection")}
               </MenuLink>
             </li>
             <CanCreateArtists>
-              <li>
-                <MenuLink onClick={onClose} to="/manage">
-                  {t("manage")}
-                </MenuLink>
-              </li>
+              {isLabelAccount && (
+                <li>
+                  <MenuLink onClick={onClose} to="/profile/label">
+                    {t("manageLabel")}
+                  </MenuLink>
+                </li>
+              )}
+              {!isLabelAccount && (
+                <li>
+                  <MenuLink onClick={onClose} to="/manage">
+                    {t("manage")}
+                  </MenuLink>
+                </li>
+              )}
               <li>
                 <ul className="border-y border-y-(--mi-normal-foreground-color)! m-0 p-0! max-h-[190px] overflow-auto">
                   {isLoading && (

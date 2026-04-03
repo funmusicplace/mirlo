@@ -82,7 +82,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
 
     try {
       await deleteTrackGroup({
-        userId: artist.userId,
         trackGroupId: trackGroup.id,
       });
       snackbar(manageArtistT("albumDeleted"), { type: "success" });

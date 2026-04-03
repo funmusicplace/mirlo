@@ -96,7 +96,7 @@ h1,
 
 h2,
 .h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   line-height: 1.8rem;
   font-weight: normal;
   margin-bottom: 0.7rem;
@@ -106,7 +106,7 @@ h3,
 .h3 {
   font-size: 1.4rem;
   line-height: unset;
-  font-weight: bold;
+  font-weight: normal;
   margin-bottom: unset;
 }
 

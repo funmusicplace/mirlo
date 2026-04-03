@@ -40,7 +40,7 @@ export const Toggle: React.FC<{
           }
 
           &:checked + .toggle:before {
-            transform: translateX(29px);
+            transform: translateX(14px);
           }
         `}
       />
@@ -50,8 +50,8 @@ export const Toggle: React.FC<{
           css`
             display: inline-flex;
             align-items: center;
-            width: 60px;
-            height: 30px;
+            width: 30px;
+            height: 15px;
 
             transition: 0.3s;
             cursor: pointer;
@@ -61,9 +61,9 @@ export const Toggle: React.FC<{
             &:before {
               position: absolute;
               content: "";
-              height: 25px;
-              width: 25px;
-              left: 3px;
+              height: 12px;
+              width: 12px;
+              left: 2px;
               background-color: #fff;
               border-radius: 50%;
               transition: 0.3s;

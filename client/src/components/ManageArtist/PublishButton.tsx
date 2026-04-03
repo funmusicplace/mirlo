@@ -83,6 +83,9 @@ const PublishButton: React.FC<{
       }
     } catch (e) {
       console.error(e);
+      snackbar((e as { message: string }).message ?? t("somethingWentWrong"), {
+        type: "warning",
+      });
     } finally {
       await reload();
       setIsPublishing(false);

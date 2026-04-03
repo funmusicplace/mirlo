@@ -16,6 +16,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
+    const { excludeArtistId }: { excludeArtistId?: string } = req.query;
     const loggedInUser = req.user as User | undefined;
 
     try {
@@ -24,6 +25,10 @@ export default function () {
         where: { id: artistId, isLabelProfile: true },
       });
       const where = whereForPublishedTrackGroups();
+
+      if (excludeArtistId) {
+        where.artistId = { not: Number(excludeArtistId) };
+      }
 
       const trackGroups = await prisma.trackGroup.findMany({
         where: {
@@ -42,6 +47,7 @@ export default function () {
               name: true,
               urlSlug: true,
               id: true,
+              userId: true,
             },
           },
         },
