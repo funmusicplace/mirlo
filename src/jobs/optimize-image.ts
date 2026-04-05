@@ -291,8 +291,10 @@ const optimizeImage = async (job: Job) => {
       }
     }
   } catch (err) {
-    logger.error(`optimizeImage ${JSON.stringify(err)}`);
-    return { error: err };
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    const errorStack = err instanceof Error ? err.stack : "";
+    logger.error(`optimizeImage error: ${errorMessage}`, { stack: errorStack });
+    return { error: errorMessage };
   }
 };
 
