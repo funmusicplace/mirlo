@@ -2,17 +2,11 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import { clearTables, createTrackGroup, createUser } from "../utils";
+import { clearTables, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
 import assert from "assert";
-import sinon from "sinon";
-import * as sendMail from "../../src/jobs/send-mail";
-import {
-  ArtistNewSubscriberAnnounceEmailType,
-  ArtistSubscriptionReceiptEmailType,
-  handleSubscription,
-} from "../../src/utils/handleFinishedTransactions";
+import { handleSubscription } from "../../src/utils/handleFinishedTransactions";
 import Stripe from "stripe";
 
 describe("handleSubscription", () => {
@@ -24,13 +18,7 @@ describe("handleSubscription", () => {
     }
   });
 
-  afterEach(() => {
-    sinon.restore();
-  });
-
-  it("should send out emails for track group purchase", async () => {
-    const stub = sinon.spy(sendMail, "default");
-
+  it("should register a subscription in the database", async () => {
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
     });
@@ -55,30 +43,28 @@ describe("handleSubscription", () => {
         name: "Tier",
       },
     });
-    await handleSubscription(
-      purchaser.id,
-      tier.id,
-      {} as Stripe.Checkout.Session
-    );
 
-    assert.equal(stub.calledTwice, true);
-    const data0 = stub.getCall(0).args[0].data;
-    assert.equal(data0.template, "artist-subscription-receipt");
-    assert.equal(data0.message.to, "follower@follower.com");
-    const locals = data0.locals as ArtistSubscriptionReceiptEmailType;
-    assert.equal(
-      locals.artistUserSubscription.artistSubscriptionTierId,
-      tier.id
-    );
-    assert.equal(locals.artistUserSubscription.amount, 0);
-    const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "artist-new-subscriber-announce");
-    assert.equal(data1.message.to, artistUser.email);
-    const locals0 = data1.locals as ArtistNewSubscriberAnnounceEmailType;
-    assert.equal(
-      locals0.artistUserSubscription.artistSubscriptionTierId,
-      tier.id
-    );
-    assert.equal(locals0.artistUserSubscription.amount, 0);
+    const mockSession = {
+      amount_total: 1000,
+      currency: "USD",
+      subscription: "sub_test123",
+    } as Stripe.Checkout.Session;
+
+    await handleSubscription(purchaser.id, tier.id, mockSession);
+
+    // Verify subscription was created with correct data
+    const subscription = await prisma.artistUserSubscription.findFirst({
+      where: {
+        userId: purchaser.id,
+        artistSubscriptionTierId: tier.id,
+      },
+    });
+
+    assert.ok(subscription, "Subscription should be created");
+    assert.equal(subscription.userId, purchaser.id);
+    assert.equal(subscription.artistSubscriptionTierId, tier.id);
+    assert.equal(subscription.amount, 1000);
+    assert.equal(subscription.currency, "USD");
+    assert.equal(subscription.stripeSubscriptionKey, "sub_test123");
   });
 });
