@@ -1024,7 +1024,7 @@ export const handleSubscription = async (
 ) => {
   try {
     const { applicationFee } = await getApplicationFee(session);
-    const artistUserSubscription = await registerSubscription({
+    await registerSubscription({
       userId: Number(userId),
       tierId: Number(tierId),
       amount: session.amount_total ?? 0,
@@ -1033,44 +1033,6 @@ export const handleSubscription = async (
       platformCut: applicationFee ?? null,
       shippingAddress: session.shipping_details ?? null,
     });
-
-    if (artistUserSubscription) {
-      await sendMail<ArtistSubscriptionReceiptEmailType>({
-        data: {
-          template: "artist-subscription-receipt",
-          message: {
-            to: artistUserSubscription.user.email,
-          },
-          locals: {
-            interval: artistUserSubscription.artistSubscriptionTier.interval,
-            artist: artistUserSubscription.artistSubscriptionTier.artist,
-            artistUserSubscription,
-            user: artistUserSubscription.user,
-            email: artistUserSubscription.user.email,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
-            host: process.env.API_DOMAIN,
-          },
-        },
-      } as Job);
-
-      await sendMail<ArtistNewSubscriberAnnounceEmailType>({
-        data: {
-          template: "artist-new-subscriber-announce",
-          message: {
-            to: artistUserSubscription.artistSubscriptionTier.artist.user.email,
-          },
-          locals: {
-            interval: artistUserSubscription.artistSubscriptionTier.interval,
-            artist: artistUserSubscription.artistSubscriptionTier.artist,
-            artistUserSubscription,
-            user: artistUserSubscription.user,
-            email: artistUserSubscription.user.email,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
-            host: process.env.API_DOMAIN,
-          },
-        },
-      } as Job);
-    }
   } catch (e) {
     logger.error(`Error creating subscription: ${e}`);
   }
