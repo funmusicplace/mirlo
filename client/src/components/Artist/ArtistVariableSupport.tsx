@@ -120,12 +120,12 @@ const ArtistVariableSupport: React.FC<{
                           release.trackGroup.cover.url?.[0]
                         }
                         alt={release.trackGroup.title}
-                        className="w-10 h-10 object-cover flex-shrink-0"
+                        className="w-12 h-12 object-cover flex-shrink-0"
                       />
                     )}
                     {!release.trackGroup.cover && (
                       <div
-                        className="w-10 h-10 flex-shrink-0"
+                        className="w-12 h-12 flex-shrink-0"
                         style={{ backgroundColor: colors?.secondary }}
                       />
                     )}
