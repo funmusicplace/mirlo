@@ -682,7 +682,7 @@ const sendSaleEmails = async (
       },
     } as Job);
   } catch (e) {
-    console.log(e);
+    logger.error(`Error creating sale emails: ${e}`);
   }
 };
 
@@ -824,7 +824,6 @@ export const handleArtistMerchPurchase = async (
               const { applicationFee, paymentProcessorFee } =
                 await getApplicationFee(session);
 
-              console.log("get", applicationFee, paymentProcessorFee);
               const transaction = await prisma.userTransaction.create({
                 data: {
                   userId,

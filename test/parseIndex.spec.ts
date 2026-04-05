@@ -1,9 +1,7 @@
 import assert from "node:assert";
 import * as dotenv from "dotenv";
-import { describe, it, beforeEach, afterEach } from "mocha";
+import { describe, it, beforeEach } from "mocha";
 import * as cheerio from "cheerio";
-import * as sinon from "sinon";
-import * as fs from "fs";
 
 dotenv.config();
 
@@ -46,7 +44,6 @@ describe("analyzePathAndGenerateHTML", () => {
 
       const $ = cheerio.load("<html></html>");
       await analyzePathAndGenerateHTML("/test-artist/release/test-album", $);
-
       const ogType = $('meta[property="og:type"]').attr("content");
       assert.equal(ogType, "music.album");
     });
@@ -152,6 +149,7 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/test-artist/releases", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
+      console.log("ogTitle:", ogTitle);
       assert(ogTitle?.includes("My Artist"));
       assert(ogTitle?.includes("releases"));
     });
@@ -166,6 +164,7 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/test-artist/posts", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
+      console.log("ogTitle:", ogTitle);
       assert(ogTitle?.includes("My Artist"));
 
       const rssLink = $('link[type="application/rss+xml"]').attr("href");

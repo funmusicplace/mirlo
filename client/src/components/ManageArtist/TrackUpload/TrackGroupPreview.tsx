@@ -115,10 +115,6 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
 
         const key = `${releaseTitle}`;
 
-        console.log(
-          getMappedValue(row, "release_date", mapping, headers).toString()
-        );
-
         if (!grouped[key]) {
           grouped[key] = {
             title: `${releaseTitle}`,
@@ -146,8 +142,6 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
               headers
             ),
           };
-
-          console.log("grouped", grouped[key]);
         }
 
         const artists: ArtistRole[] = [];

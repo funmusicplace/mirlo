@@ -107,7 +107,6 @@ function EmailConfirmation() {
   }, [isTokenExpired, isResending, resendCountdown]);
 
   React.useEffect(() => {
-    console.log({ token, userId, client, error });
     if (token && userId && client && !error) {
       onConfirmEmail();
     }
