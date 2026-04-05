@@ -15,6 +15,7 @@ const checkForPrivateEndpoint = (path: string, query?: { format?: string }) => {
   return (
     path.startsWith("/v1") &&
     !(
+      path.includes("/oembed") ||
       path.startsWith("/v1/checkout") ||
       path.startsWith("/v1/webhooks") ||
       path.endsWith("/stripe/connect") ||

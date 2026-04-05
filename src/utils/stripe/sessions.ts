@@ -23,6 +23,7 @@ import stripe, {
   createTrackStripeProduct,
   findOrCreateStripeCustomer,
 } from ".";
+import generateSlug from "../generateSlug";
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
 const buildCheckoutCancelSearchParams = ({
@@ -554,6 +555,9 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
       ],
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
+        statement_descriptor_suffix: merch.title
+          .substring(0, 20)
+          .replace(/^[a-zA-Z0-9 \-=_+,.;:!@#$%^&()/]+$/gu, ""),
         application_fee_amount: await calculateAppFee(
           discountedPriceNumber,
           currency,

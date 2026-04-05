@@ -367,24 +367,22 @@ export const CustomizeLook: React.FC = () => {
                 <small>{t("maxFreePlaysDescription")}</small>
               </FormComponent>
             </ArtistFormSection>
-            <FeatureFlag featureFlag="activityPub">
-              <ArtistFormSection
-                className={css`
-                  flex-direction: column;
-                `}
-              >
-                <FormComponent>
-                  <Toggle
-                    label={t("enableActivityPub")}
-                    toggled={activityPub}
-                    onClick={() => {
-                      methods.setValue("activityPub", !activityPub);
-                    }}
-                  />
-                  <small>{t("makeSearchable")}</small>
-                </FormComponent>
-              </ArtistFormSection>
-            </FeatureFlag>
+            <ArtistFormSection
+              className={css`
+                flex-direction: column;
+              `}
+            >
+              <FormComponent>
+                <Toggle
+                  label={t("enableActivityPub")}
+                  toggled={activityPub}
+                  onClick={() => {
+                    methods.setValue("activityPub", !activityPub);
+                  }}
+                />
+                <small>{t("makeSearchable")}</small>
+              </FormComponent>
+            </ArtistFormSection>
             <CustomNamesForTabs />
             <ArtistFormSection isOdd>
               <ThankYouMessageEditors
