@@ -12,10 +12,32 @@ import {
   finalUserAvatarBucket,
 } from "./utils/minio";
 import { Client } from "@mirlo/prisma/client";
-import { isNumber } from "lodash";
+import { isNumber, isString, isUndefined } from "lodash";
 import { getSiteSettings } from "./utils/settings";
+import uuid from "uuid";
+import {
+  fetchArtistMetadata,
+  fetchAlbumMetadata,
+  fetchTrackMetadata,
+  fetchPostMetadata,
+  fetchMerchMetadata,
+} from "./parseIndex/metadata";
+import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
 
-type Options = {
+type RouteParams = Record<string, string | number | undefined>;
+
+type RouteContext<T extends RouteParams = RouteParams> = {
+  $: cheerio.CheerioAPI;
+  client: Client;
+  avatarUrl?: string;
+  params: T;
+};
+
+type RouteHandler<T extends RouteParams = RouteParams> = (
+  context: RouteContext<T>
+) => Promise<void>;
+
+type PageMetadata = {
   title: string;
   description: string;
   url: string;
@@ -25,16 +47,143 @@ type Options = {
   isPlayer?: string;
   rss?: string;
   color?: string;
+  artistName?: string;
+  artistUrl?: string;
+  releaseDate?: string;
+  duration?: number;
+  trackCount?: number;
+  tracks?: Array<{ title: string; duration?: number; url: string }>;
+  schemas?: string[];
 };
 
-const determineType = (options: Options) => {
-  if (options.isAlbum) {
+const determineType = (metadata: PageMetadata) => {
+  if (metadata.isAlbum) {
     return "music.album";
   }
-  if (options.isSong) {
+  if (metadata.isSong) {
     return "music.song";
   }
   return "article";
+};
+
+// Helper function to safely escape strings for JSON
+const escapeJsonString = (str: string): string => {
+  return str
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+};
+
+// Build MusicAlbum schema for albums
+const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
+  const {
+    title,
+    description,
+    url,
+    imageUrl,
+    artistName,
+    artistUrl,
+    releaseDate,
+    trackCount = 0,
+    tracks = [],
+  } = metadata;
+
+  const trackListItems = tracks
+    .map(
+      (track, index) => `{
+      "@type": "MusicRecording",
+      "position": ${index + 1},
+      "name": "${escapeJsonString(track.title)}",
+      "url": "${track.url}"
+      ${track.duration ? `,"duration": "PT${track.duration}S"` : ""}
+    }`
+    )
+    .join(",");
+
+  return `{
+    "@context": "https://schema.org",
+    "@type": "MusicAlbum",
+    "name": "${escapeJsonString(title)}",
+    "description": "${escapeJsonString(description)}",
+    "url": "${url}",
+    "image": "${imageUrl || ""}",
+    "byArtist": {
+      "@type": "MusicGroup",
+      "name": "${escapeJsonString(artistName || "")}",
+      "url": "${artistUrl || ""}"
+    },
+    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}",
+    "numberOfTracks": ${trackCount},
+    "track": [${trackListItems}]
+  }`;
+};
+
+// Build MusicRecording schema for individual tracks
+const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
+  const {
+    title,
+    description,
+    url,
+    imageUrl,
+    artistName,
+    artistUrl,
+    releaseDate,
+    duration,
+  } = metadata;
+
+  const durationString = duration ? `"duration": "PT${duration}S",` : "";
+
+  return `{
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    "name": "${escapeJsonString(title)}",
+    "description": "${escapeJsonString(description)}",
+    "url": "${url}",
+    "image": "${imageUrl || ""}",
+    ${durationString}
+    "byArtist": {
+      "@type": "MusicGroup",
+      "name": "${escapeJsonString(artistName || "")}",
+      "url": "${artistUrl || ""}"
+    },
+    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
+  }`;
+};
+
+// Build MusicGroup schema for artist profiles
+const buildMusicGroupSchema = (metadata: PageMetadata): string => {
+  const { title, description, url, imageUrl, artistUrl } = metadata;
+
+  return `{
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    "name": "${escapeJsonString(title)}",
+    "description": "${escapeJsonString(description)}",
+    "url": "${artistUrl || url}",
+    "image": "${imageUrl || ""}"
+  }`;
+};
+
+// Build BlogPosting schema for posts and general articles
+const buildArticleSchema = (metadata: PageMetadata): string => {
+  const { title, description, url, imageUrl, artistName, releaseDate } =
+    metadata;
+
+  return `{
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "${escapeJsonString(title)}",
+    "description": "${escapeJsonString(description)}",
+    "url": "${url}",
+    "image": "${imageUrl || ""}",
+    "author": {
+      "@type": "Person",
+      "name": "${escapeJsonString(artistName || "Mirlo Artist")}"
+    },
+    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
+  }`;
 };
 
 export const getTrackGroupWidget = (client: Client, trackGroupId: number) => {
@@ -45,7 +194,7 @@ export const getTrackWidget = (client: Client, trackId: number) => {
   return `${client.applicationUrl}/widget/track/${trackId}`;
 };
 
-const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
+const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
   const {
     title,
     description,
@@ -55,11 +204,21 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
     isAlbum,
     isPlayer,
     color = "#be3455",
-  } = options;
+    schemas = [],
+  } = metadata;
+
+  // Truncate description to 160 chars for meta description (SERP snippet)
+  const metaDescription =
+    description.length > 160
+      ? description.substring(0, 160) + "..."
+      : description;
+
   $("head").append(`
-    <meta property="og:type" content="${determineType(options)}">
+    <link rel="canonical" href="${url}" />
+    <meta property="og:type" content="${determineType(metadata)}">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
+    <meta name="description" content="${metaDescription}">
     <meta property="og:site_name" content="${title}">
     <meta property="og:url" content="${url}">
     <meta name="twitter:title" content="${title}" />
@@ -68,10 +227,11 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
 
     <meta property="og:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
     <meta name="twitter:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
-    <meta name="theme-color" content="${options.color}" />
-    <meta name="msapplication-TileColor" content="${options.color}" />
+    <meta name="theme-color" content="${metadata.color}" />
+    <meta name="msapplication-TileColor" content="${metadata.color}" />
 
     ${rss ? `<link rel="alternate" type="application/rss+xml" href="${rss}" />` : ""}
+    <link rel="alternate" type="application/json+oembed" href="${process.env.API_DOMAIN}/v1/oembed?url=${encodeURIComponent(url)}" title="oEmbed" />
     ${
       isPlayer
         ? `
@@ -91,262 +251,486 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
     `
         : ""
     }
+    ${schemas.map((schema) => `<script type="application/ld+json">${schema}</script>`).join("\n    ")}
   `);
 };
 
 const mirloDefaultDescription = "Buy and sell music directly from musicians.";
 
+const handleReleasesPage: RouteHandler<{}> = async ({ $, client }) => {
+  buildOpenGraphTags($, {
+    title: "Mirlo Releases",
+    description: "The latest releases on Mirlo",
+    url: `${client.applicationUrl}/releases`,
+    imageUrl: `${client.applicationUrl}/images/mirlo-typeface.png`,
+    rss: `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`,
+  });
+};
+
+type ArtistParams = { artistSlug: string };
+const handleArtistProfile: RouteHandler<ArtistParams> = async ({
+  $,
+  client,
+  avatarUrl,
+  params: { artistSlug },
+}) => {
+  const artist = await fetchArtistMetadata(artistSlug);
+  if (!artist) return;
+
+  const artistUrl = `${client.applicationUrl}/${artist.urlSlug}`;
+  const schema = buildMusicGroupSchema({
+    title: artist.name ?? "A Mirlo Artist",
+    description: artist.bio ?? "An artist on Mirlo",
+    url: artistUrl,
+    imageUrl: avatarUrl,
+    artistUrl: artistUrl,
+  });
+
+  buildOpenGraphTags($, {
+    title: artist.name ?? "A Mirlo Artist",
+    description: artist.bio ?? "An artist on Mirlo",
+    url: artistUrl,
+    imageUrl: avatarUrl,
+    artistName: artist.name,
+    schemas: [schema],
+  });
+};
+
+type PostParams = { artistSlug: string; postId?: number; postSlug?: string };
+const handlePost: RouteHandler<PostParams> = async ({
+  $,
+  client,
+  avatarUrl,
+  params: { artistSlug, postId, postSlug },
+}) => {
+  const artist = await fetchArtistMetadata(artistSlug);
+  if (!artist) return;
+
+  const artistName = artist.name ?? "A Mirlo Artist";
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+
+  // Try to find specific post
+  const post = postId
+    ? await fetchPostMetadata(artistSlug, { id: postId })
+    : postSlug
+      ? await fetchPostMetadata(artistSlug, { slug: postSlug })
+      : null;
+
+  if (post) {
+    const hasTracks = post.tracks.length > 0;
+    const postUrl = `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`;
+    const postDescription = `A post by ${artistName}`;
+    const postCreatedDate = post.createdAt
+      ? post.createdAt.toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0];
+
+    const schema = buildArticleSchema({
+      title: post.title,
+      description: postDescription,
+      url: postUrl,
+      imageUrl: post.featuredImage
+        ? generateFullStaticImageUrl(
+            post.featuredImage.id,
+            finalPostImageBucket,
+            post.featuredImage.extension
+          )
+        : avatarUrl,
+      artistName: artistName,
+      releaseDate: postCreatedDate,
+    });
+
+    buildOpenGraphTags($, {
+      title: post.title,
+      rss,
+      description: postDescription,
+      url: postUrl,
+      imageUrl: post.featuredImage
+        ? generateFullStaticImageUrl(
+            post.featuredImage.id,
+            finalPostImageBucket,
+            post.featuredImage.extension
+          )
+        : avatarUrl,
+      isPlayer: hasTracks
+        ? getTrackWidget(client, post.tracks[0].trackId)
+        : undefined,
+      artistName: artistName,
+      releaseDate: postCreatedDate,
+      schemas: [schema],
+    });
+  } else {
+    // Index of all posts
+    buildOpenGraphTags($, {
+      title: artistName,
+      rss,
+      description: `All posts by ${artistName} on Mirlo`,
+      url: `${client.applicationUrl}/${artist?.urlSlug}/posts`,
+      imageUrl: avatarUrl,
+    });
+  }
+};
+
+type MerchParams = { artistSlug: string; merchId?: string };
+const handleMerch: RouteHandler<MerchParams> = async ({
+  $,
+  client,
+  avatarUrl,
+  params: { artistSlug, merchId },
+}) => {
+  const artist = await fetchArtistMetadata(artistSlug);
+  if (!artist) return;
+
+  const artistName = artist.name ?? "A Mirlo Artist";
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+
+  // Try to find specific merch - first try as ID, then as slug
+  let merch = null;
+  if (merchId) {
+    try {
+      merch = await fetchMerchMetadata(artistSlug, { id: merchId });
+    } catch {
+      // ID format invalid (not a UUID), try as slug
+      merch = await fetchMerchMetadata(artistSlug, { slug: merchId });
+    }
+  }
+
+  if (merch) {
+    const coverString = merch.images?.[0]?.url.find((u) => u.includes("x600"));
+    const merchUrl = `${client.applicationUrl}/${merch.artist?.urlSlug}/merch/${merch.id}`;
+    const merchDescription = `Merch by ${artistName}`;
+
+    const schema = buildArticleSchema({
+      title: merch.title,
+      description: merchDescription,
+      url: merchUrl,
+      imageUrl: coverString
+        ? generateFullStaticImageUrl(coverString, finalMerchImageBucket)
+        : avatarUrl,
+      artistName: artistName,
+    });
+
+    buildOpenGraphTags($, {
+      title: merch.title,
+      description: merchDescription,
+      url: merchUrl,
+      imageUrl: coverString
+        ? generateFullStaticImageUrl(coverString, finalMerchImageBucket)
+        : avatarUrl,
+      rss,
+      artistName: artistName,
+      schemas: [schema],
+    });
+  } else {
+    // Index of all merch
+    buildOpenGraphTags($, {
+      title: `${artistName} merch`,
+      description: `All merch by ${artistName} on Mirlo`,
+      url: `${client.applicationUrl}/${artist?.urlSlug}/merch`,
+      imageUrl: avatarUrl,
+      rss,
+    });
+  }
+};
+
+type AlbumParams = {
+  artistSlug: string;
+  albumSlug?: string;
+  trackId?: number;
+};
+const handleAlbum: RouteHandler<AlbumParams> = async ({
+  $,
+  client,
+  avatarUrl,
+  params: { artistSlug, albumSlug, trackId },
+}) => {
+  if (!albumSlug) {
+    // /artist/releases index - handled by artist profile
+    return;
+  }
+
+  const tg = await fetchAlbumMetadata(artistSlug, albumSlug);
+  if (!tg) return;
+
+  // Check if it's a specific track
+  if (trackId) {
+    const track = tg.tracks.find((t) => t.id === trackId);
+    if (!track) return;
+
+    const coverString = tg.cover?.url.find((u) => u.includes("x600"));
+    const trackUrl = `${client.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`;
+    const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
+
+    const schema = buildMusicRecordingSchema({
+      title: track.title ?? "A track on Mirlo",
+      description: `A track by ${tg.artist.name}\nReleased ${releaseDate}`,
+      url: trackUrl,
+      imageUrl: coverString
+        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        : undefined,
+      artistName: tg.artist.name,
+      artistUrl: `${client.applicationUrl}/${tg.artist?.urlSlug}`,
+      releaseDate: releaseDate,
+      duration: track.audio?.duration || undefined,
+    });
+
+    buildOpenGraphTags($, {
+      title: track.title ?? "A track on Mirlo",
+      description: `A track by ${tg.artist.name}\nReleased ${releaseDate}`,
+      url: trackUrl,
+      imageUrl: coverString
+        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        : undefined,
+      isSong: true,
+      isPlayer: getTrackWidget(client, track.id),
+      artistName: tg.artist.name,
+      releaseDate: releaseDate,
+      schemas: [schema],
+    });
+  } else {
+    // Album page
+    const coverString = tg.cover?.url.find((u) => u.includes("x600"));
+    const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
+    const albumUrl = `${client.applicationUrl}/${tg.artist?.urlSlug}/releases/${tg.urlSlug}`;
+
+    const tracksList = tg.tracks.map((track) => ({
+      title: track.title ?? "Untitled Track",
+      duration: track.audio?.duration || undefined,
+      url: `${albumUrl}/tracks/${track.id}`,
+    }));
+
+    let description = `An album by ${tg.artist.name}\nReleased ${releaseDate}`;
+    if (tg.tracks.length > 0) {
+      description += `\n\nTracks:\n`;
+      tg.tracks.forEach((track, index) => {
+        description += `${index + 1}. ${track.title}\n`;
+      });
+    }
+    if (tg.about) {
+      description += `\n${tg.about}`;
+    }
+
+    const schema = buildMusicAlbumSchema({
+      title: tg.title ?? "Mirlo Album",
+      description: description,
+      url: albumUrl,
+      imageUrl: coverString
+        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        : undefined,
+      artistName: tg.artist.name,
+      artistUrl: `${client.applicationUrl}/${tg.artist?.urlSlug}`,
+      releaseDate: releaseDate,
+      trackCount: tg.tracks.length,
+      tracks: tracksList,
+    });
+
+    buildOpenGraphTags($, {
+      title: tg.title ?? "Mirlo Album",
+      description: description,
+      url: albumUrl,
+      imageUrl: coverString
+        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        : undefined,
+      isAlbum: true,
+      isPlayer: getTrackGroupWidget(client, tg.id),
+      artistName: tg.artist.name,
+      releaseDate: releaseDate,
+      schemas: [schema],
+    });
+  }
+};
+
+type SupportParams = { artistSlug: string };
+const handleSupport: RouteHandler<SupportParams> = async ({
+  $,
+  client,
+  avatarUrl,
+  params: { artistSlug },
+}) => {
+  const artist = await fetchArtistMetadata(artistSlug);
+  if (!artist) return;
+
+  const artistName = artist.name ?? "A Mirlo Artist";
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+
+  buildOpenGraphTags($, {
+    title: artistName,
+    description: `Support ${artistName} on Mirlo`,
+    url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+    imageUrl: avatarUrl,
+    rss,
+  });
+};
+
+type ArtistReleasesParams = { artistSlug: string };
+const handleArtistReleases: RouteHandler<ArtistReleasesParams> = async ({
+  $,
+  client,
+  avatarUrl,
+  params: { artistSlug },
+}) => {
+  const artist = await fetchArtistMetadata(artistSlug);
+  if (!artist) return;
+
+  const artistName = artist.name ?? "A Mirlo Artist";
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+
+  buildOpenGraphTags($, {
+    title: `${artistName} releases`,
+    description: `All releases by ${artistName} on Mirlo`,
+    url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+    imageUrl: avatarUrl,
+    rss,
+  });
+};
+
+type AuthPageType = "login" | "signup";
+type AuthParams = { pageType: AuthPageType };
+const handleAuthPage: RouteHandler<AuthParams> = async ({
+  $,
+  client,
+  params: { pageType },
+}) => {
+  const title = pageType === "login" ? "Log in to Mirlo" : "Sign up to Mirlo";
+  buildOpenGraphTags($, {
+    title,
+    description: mirloDefaultDescription,
+    url: `${client.applicationUrl}/${pageType}`,
+  });
+};
+
+const handleDefault: RouteHandler<{}> = async ({ $, client }) => {
+  buildOpenGraphTags($, {
+    title: "Mirlo",
+    description: mirloDefaultDescription,
+    url: client.applicationUrl,
+  });
+};
+
+const dispatchRoute = async (
+  routeParams: Record<string, any>,
+  context: Omit<RouteContext, "params">
+): Promise<void> => {
+  const routeType = routeParams.type as string;
+
+  switch (routeType) {
+    case "releases":
+      await handleReleasesPage(context as RouteContext);
+      break;
+    case "auth":
+      await handleAuthPage({
+        ...context,
+        params: { pageType: routeParams.pageType as AuthPageType },
+      });
+      break;
+    case "track":
+      await handleAlbum({
+        ...context,
+        params: {
+          artistSlug: routeParams.artistSlug,
+          albumSlug: routeParams.albumSlug,
+          trackId: routeParams.trackId,
+        },
+      });
+      break;
+    case "album":
+      await handleAlbum({
+        ...context,
+        params: {
+          artistSlug: routeParams.artistSlug,
+          albumSlug: routeParams.albumSlug,
+        },
+      });
+      break;
+    case "post":
+      await handlePost({
+        ...context,
+        params: {
+          artistSlug: routeParams.artistSlug,
+          postId: routeParams.postId,
+          postSlug: routeParams.postSlug,
+        },
+      });
+      break;
+    case "posts-index":
+      await handlePost({
+        ...context,
+        params: { artistSlug: routeParams.artistSlug },
+      });
+      break;
+    case "merch":
+      await handleMerch({
+        ...context,
+        params: {
+          artistSlug: routeParams.artistSlug,
+          merchId: routeParams.merchId,
+        },
+      });
+      break;
+    case "merch-index":
+      await handleMerch({
+        ...context,
+        params: { artistSlug: routeParams.artistSlug },
+      });
+      break;
+    case "support":
+      await handleSupport({
+        ...context,
+        params: { artistSlug: routeParams.artistSlug },
+      });
+      break;
+    case "artist-releases":
+      await handleArtistReleases({
+        ...context,
+        params: { artistSlug: routeParams.artistSlug },
+      });
+      break;
+    case "artist":
+      await handleArtistProfile({
+        ...context,
+        params: { artistSlug: routeParams.artistSlug },
+      });
+      break;
+    default:
+      // Unknown route type
+      break;
+  }
+};
+
 export const analyzePathAndGenerateHTML = async (
   pathname: string,
   $: cheerio.CheerioAPI
 ) => {
-  const route = pathname.split("/");
-
+  const segments = pathname.split("/").filter(Boolean);
   try {
     const client = await getClient();
 
-    if (route[1] === "releases") {
-      // Recent releases
-      buildOpenGraphTags($, {
-        title: "Mirlo Releases",
-        description: "The latest releases on Mirlo",
-        url: `${client.applicationUrl}${route.join("/")}`,
-        imageUrl: `${client.applicationUrl}/images/mirlo-typeface.png`,
-        rss: `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`,
-      });
-    }
-
+    // Try to fetch avatar if artist exists
+    let avatarUrl: string | undefined;
     const artist = await prisma.artist.findFirst({
-      where: { urlSlug: route[1] },
-      include: {
-        avatar: true,
-      },
+      where: { urlSlug: segments[0] },
+      include: { avatar: true },
     });
-    const avatarString = artist?.avatar?.url.find((u) => u.includes("x600"));
-    const avatarUrl = avatarString
-      ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
-      : undefined;
-    if (artist && route.length === 2) {
-      buildOpenGraphTags($, {
-        title: artist.name ?? "A Mirlo Artist",
-        description: artist.bio ?? "An artist on Mirlo",
-        url: `${client.applicationUrl}${route.join("/")}`,
-        imageUrl: avatarUrl,
-      });
-    } else if (
-      (route[2] === "releases" ||
-        route[2] === "posts" ||
-        route[2] === "merch" ||
-        route[2] === "support") &&
-      artist
-    ) {
-      const artistName = artist.name ?? "A Mirlo Artist";
-
-      const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
-      if (route[2] === "posts") {
-        let post;
-        if (isNumber(route[3])) {
-          post = await prisma.post.findFirst({
-            where: { id: Number(route[3]) },
-            include: {
-              artist: true,
-              featuredImage: true,
-              tracks: {
-                orderBy: {
-                  order: "asc",
-                },
-              },
-            },
-          });
-        } else if (route[3]) {
-          post = await prisma.post.findFirst({
-            where: { urlSlug: { equals: route[3], mode: "insensitive" } },
-            include: {
-              artist: true,
-              featuredImage: true,
-              tracks: {
-                orderBy: {
-                  order: "asc",
-                },
-              },
-            },
-          });
-        }
-
-        if (post) {
-          const hasTracks = post.tracks.length > 0;
-          // it's a post
-          buildOpenGraphTags($, {
-            title: post.title,
-            rss,
-            description: `A post by ${artistName}`,
-            url: `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`,
-            imageUrl: post.featuredImage
-              ? generateFullStaticImageUrl(
-                  post.featuredImage.id,
-                  finalPostImageBucket,
-                  post.featuredImage.extension
-                )
-              : avatarUrl,
-            isPlayer: hasTracks
-              ? getTrackWidget(client, post.tracks[0].trackId)
-              : undefined,
-          });
-        } else {
-          buildOpenGraphTags($, {
-            title: artistName,
-            rss,
-            description: `All posts by ${artistName} on Mirlo`,
-            url: `${client.applicationUrl}/${artist?.urlSlug}/posts`,
-            imageUrl: avatarUrl,
-          });
-        }
-      } else if (route[2] === "support") {
-        buildOpenGraphTags($, {
-          title: artistName,
-          description: `Support ${artistName} on Mirlo`,
-          url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
-          imageUrl: avatarUrl,
-          rss,
-        });
-      } else if (route[2] === "merch") {
-        let merch;
-        if (route[3] && isNumber(route[3])) {
-          merch = await prisma.merch.findFirst({
-            where: { id: route[3] },
-            include: {
-              artist: true,
-              images: true,
-            },
-          });
-        } else if (route[3]) {
-          // it is about a merch item
-          merch = await prisma.merch.findFirst({
-            where: { urlSlug: { equals: route[3], mode: "insensitive" } },
-            include: {
-              artist: true,
-              images: true,
-            },
-          });
-        }
-
-        if (merch) {
-          const coverString = merch.images?.[0]?.url.find((u) =>
-            u.includes("x600")
-          );
-
-          // it's a merch
-          buildOpenGraphTags($, {
-            title: merch.title,
-            description: `Merch by ${artistName}`,
-            url: `${client.applicationUrl}/${merch.artist?.urlSlug}/merch/${merch.id}`,
-            imageUrl: coverString
-              ? generateFullStaticImageUrl(coverString, finalMerchImageBucket)
-              : avatarUrl,
-            rss,
-          });
-        } else {
-          buildOpenGraphTags($, {
-            title: `${artistName} merch`,
-            description: `All merch by ${artistName} on Mirlo`,
-            url: `${client.applicationUrl}/${artist?.urlSlug}/merch`,
-            imageUrl: avatarUrl,
-            rss,
-          });
-        }
-      } else {
-        // it's about the artist in general
-        buildOpenGraphTags($, {
-          title: `${artistName} ${route[2]}`,
-          description: `All ${route[2]} by ${artistName} on Mirlo`,
-          url: `${client.applicationUrl}/${artist?.urlSlug}/${route[2]}`,
-          imageUrl: avatarUrl,
-          rss,
-        });
+    if (artist) {
+      const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
+      if (avatarString) {
+        avatarUrl = generateFullStaticImageUrl(
+          avatarString,
+          finalArtistAvatarBucket
+        );
       }
-    } else if (artist && route[2] === "release") {
-      // it is about n individual release
-      const tg = await prisma.trackGroup.findFirst({
-        where: {
-          urlSlug: route[3],
-          artist: {
-            urlSlug: route[1],
-          },
-        },
-        include: {
-          artist: true,
-          cover: true,
-          tracks: true,
-        },
-      });
-      if (tg && route[4] === "tracks") {
-        // it's a track
-        const track = await prisma.track.findFirst({
-          where: {
-            id: Number(route[5]),
-            trackGroup: {
-              artist: {
-                urlSlug: route[1],
-              },
-            },
-          },
-        });
-        if (track) {
-          const coverString = tg.cover?.url.find((u) => u.includes("x600"));
-          buildOpenGraphTags($, {
-            title: track.title ?? "A track on Mirlo",
-            description: `A track by ${tg.artist.name}\nReleased ${tg.releaseDate?.toISOString().split("T")[0]}`,
-            url: `${client.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`,
-            imageUrl: coverString
-              ? generateFullStaticImageUrl(coverString, finalCoversBucket)
-              : undefined,
-            isSong: true,
-            isPlayer: getTrackWidget(client, track.id),
-          });
-        }
-      } else if (tg) {
-        const coverString = tg.cover?.url.find((u) => u.includes("x600"));
-        //render a text tracklist to display in the description
-        const tracklist = "";
-        for (const [index, value] of tg.tracks.entries()) {
-          const trackListItem = `${index + 1}. ${value.title} by ${tg.artist}`;
-          tracklist.concat("\n", trackListItem);
-        }
-        buildOpenGraphTags($, {
-          title: tg.title ?? "Mirlo Album",
-          //Add artist, trackist, and blurb to description. I'm guessing that the blurb that appear's on an album's page is from tg.about but I don't actually know.
-          description: `An album by ${tg.artist.name}\nReleased ${tg.releaseDate?.toISOString().split("T")[0]}\n${tracklist}\n${tg.about}`,
-          url: `${client.applicationUrl}/${tg.artist?.urlSlug}/releases/${tg.urlSlug}`,
-          imageUrl: coverString
-            ? generateFullStaticImageUrl(coverString, finalCoversBucket)
-            : undefined,
-          isAlbum: true,
-          isPlayer: getTrackGroupWidget(client, tg.id),
-        });
-      }
-    } else if (route[1] === "widget") {
-    } else if (route[1] === "login") {
-      buildOpenGraphTags($, {
-        title: "Log in to Mirlo",
-        description: mirloDefaultDescription,
-        url: `${client.applicationUrl}/${route.join("/")}`,
-      });
-      // it's about a widget
-    } else if (["signup"].includes(route[1])) {
-      buildOpenGraphTags($, {
-        title: "Sign up to Mirlo",
-        description: mirloDefaultDescription,
-        url: `${client.applicationUrl}/${route.join("/")}`,
-      });
-    } else {
-      buildOpenGraphTags($, {
-        title: "Mirlo",
-        description: mirloDefaultDescription,
-        url: `${client.applicationUrl}/${route.join("/")}`,
-      });
     }
-  } catch (e) {
-    console.error("e", e);
+
+    // Match against route patterns using shared matcher
+    const routeParams = matchRoutePattern(segments);
+    if (routeParams) {
+      await dispatchRoute(routeParams, { $, client, avatarUrl });
+    } else {
+      // No matching route - use default
+      await handleDefault({ $, client, params: {} });
+    }
+  } catch (error) {
+    console.error("Error in analyzePathAndGenerateHTML:", error);
+    // Silently fail - don't crash page rendering
   }
 
   const settings = await getSiteSettings();

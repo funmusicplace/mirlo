@@ -145,7 +145,6 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
           try {
             const text = event.target?.result as string;
             const result = Papa.parse(text, { header: true });
-            console.log("result", result);
             const parsedData = (result.data as any[]).filter((row: any) =>
               Object.values(row).some((v) => v)
             );
@@ -189,7 +188,6 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
           setError("No rows found in Excel file");
           return;
         }
-        console.log("excel", excelData);
 
         const newHeaders = Object.keys(excelData[0] as any);
         setHeaders(newHeaders);
@@ -248,8 +246,6 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
       setError(`Please map all required fields: ${missingLabels}`);
       return;
     }
-
-    console.log("on mapping complete", mapping, csvData, userId);
 
     onMappingComplete(mapping, csvData, userId);
   };
