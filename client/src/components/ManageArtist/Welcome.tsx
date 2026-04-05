@@ -27,21 +27,6 @@ interface FormData {
   confirmContentPolicy: boolean;
 }
 
-const nextButtonText = (step: number, currentStepValue?: unknown) => {
-  switch (steps[step]) {
-    case "name":
-      if (currentStepValue) {
-        return "next";
-      }
-      return "enterANameToGetStarted";
-    case "urlSlug":
-      return "customizeYourPage";
-
-    default:
-      return "next";
-  }
-};
-
 const steps: ("name" | "urlSlug")[] = ["name", "urlSlug"];
 
 const Welcome = () => {
@@ -61,7 +46,6 @@ const Welcome = () => {
     urlSlug: watch("urlSlug"),
     name: watch("name"),
     theme: watch("theme"),
-    confirmContentPolicy: watch("confirmContentPolicy"),
   };
   const localArtistLink = `/${localArtist?.urlSlug}`;
 
@@ -78,7 +62,11 @@ const Welcome = () => {
             }
           );
           setLocalArtist(response.result);
-          reset(response.result);
+          reset({
+            name: response.result.name,
+            urlSlug: response.result.urlSlug,
+            confirmContentPolicy: true,
+          });
         } else if (localArtist && step > 1) {
           const response = await api.put<Partial<Artist>, { result: Artist }>(
             `manage/artists/${localArtist.id}`,
@@ -103,12 +91,8 @@ const Welcome = () => {
     [errorHandler, localArtist, localArtistLink, navigate, reset, step, userId]
   );
 
-  const currentStepValue = getValues(steps[step] as keyof FormData);
-
-  const isButtonDisabled =
-    !formState.isValid ||
-    vals[steps[step] as keyof FormData] === "" ||
-    !vals.confirmContentPolicy;
+  const nameValue = watch("name");
+  const contentPolicy = watch("confirmContentPolicy");
 
   return (
     <FormProvider {...methods}>
@@ -148,6 +132,19 @@ const Welcome = () => {
             />
           </FormComponent>
 
+          {step === 0 && (
+            <Button
+              isLoading={isLoading}
+              size="compact"
+              type="submit"
+              disabled={!contentPolicy}
+              onClick={handleSubmit(onClickNext)}
+              endIcon={<FaArrowRight />}
+            >
+              {t(nameValue !== "" ? "next" : "enterANameToGetStarted")}
+            </Button>
+          )}
+
           {step > 0 && (
             <FormComponent>
               <label>{t("showInTheURL")}</label>
@@ -170,32 +167,24 @@ const Welcome = () => {
             </FormComponent>
           )}
 
-          <div
-            className={css`
-              display: flex;
-
-              button {
-                margin-right: 1rem;
-              }
-            `}
-          >
+          {step === 1 && (
             <Button
               isLoading={isLoading}
               size="compact"
-              disabled={isButtonDisabled}
               type="submit"
+              disabled={!contentPolicy}
               onClick={handleSubmit(onClickNext)}
               endIcon={<FaArrowRight />}
             >
-              {t(nextButtonText(step, currentStepValue))}
+              {t("customizeYourPage")}
             </Button>
-          </div>
+          )}
+
           {step > 0 && (
             <ButtonLink
               to={localArtistLink}
               isLoading={isLoading}
               variant="outlined"
-              disabled={isButtonDisabled}
               endIcon={<FaArrowRight />}
               className={css`
                 margin-top: 1rem;
