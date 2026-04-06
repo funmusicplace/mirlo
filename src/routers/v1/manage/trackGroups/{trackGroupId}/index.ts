@@ -112,6 +112,7 @@ export default function () {
         "defaultTrackAllowIndividualSale",
         "defaultTrackMinPrice",
         "catalogNumber",
+        "urlSlug",
       ]);
 
       await prisma.trackGroup.updateMany({
