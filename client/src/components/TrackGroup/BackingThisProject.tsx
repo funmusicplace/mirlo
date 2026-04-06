@@ -120,7 +120,6 @@ const BackingThisProject: React.FC<{
                 platformPercent={trackGroup.platformPercent}
                 minPrice={trackGroup.minPrice}
                 artistName={trackGroup.artist?.name}
-                discountPercent={discountPercent}
               />
             </FormComponent>
             <div className="flex justify-between">

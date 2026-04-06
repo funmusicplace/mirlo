@@ -543,6 +543,8 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
     discountPercent,
   });
 
+  const suffix = merch.title.replace(/[^a-zA-Z]/g, "").substring(0, 20);
+
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "required",
@@ -555,9 +557,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
       ],
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
-        statement_descriptor_suffix: merch.title
-          .substring(0, 20)
-          .replace(/^[a-zA-Z0-9 \-=_+,.;:!@#$%^&()/]+$/gu, ""),
+        ...(!!suffix && { statement_descriptor_suffix: suffix }),
         application_fee_amount: await calculateAppFee(
           discountedPriceNumber,
           currency,

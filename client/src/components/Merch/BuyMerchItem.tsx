@@ -12,21 +12,20 @@ import React from "react";
 import { css } from "@emotion/css";
 import api from "services/api";
 import { SelectEl } from "components/common/Select";
-import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
+import { moneyDisplay } from "components/common/Money";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 import { FaChevronRight } from "react-icons/fa";
-import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-currencies";
 import { flatten } from "lodash";
 import Box from "components/common/Box";
 import TextArea from "components/common/TextArea";
 import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import BuyMerchItemDestinations from "./BuyMerchItemDestinations";
-import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
 import PaymentInputElement from "components/TrackGroup/PaymentInputElement";
+import { useSnackbar } from "state/SnackbarContext";
 
 export type BuyMerchFormData = {
   quantity: number;
-  price: number;
+  chosenPrice: number;
   merchOptionIds: string[];
   shippingDestinationId: string;
   message?: string;
@@ -40,6 +39,7 @@ const BuyMerchItem: React.FC<{
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
+  const snackbar = useSnackbar();
   const [isLoadingStripe, setIsLoadingStripe] = React.useState(false);
 
   const { data: stripeAccountStatus } = useQuery(
@@ -50,15 +50,15 @@ const BuyMerchItem: React.FC<{
 
   const methods = useForm<BuyMerchFormData>({
     defaultValues: {
-      price: minPrice,
+      chosenPrice: minPrice,
       quantity: 1,
       merchOptionIds: [],
     },
   });
 
-  const { formState, setError, setValue } = methods;
+  const { formState, setError } = methods;
 
-  const currentPrice = methods.watch("price");
+  const currentPrice = methods.watch("chosenPrice");
   const quantity = methods.watch("quantity");
   const shippingDestination = methods.watch("shippingDestinationId");
   const merchOptionIds = methods.watch("merchOptionIds");
@@ -102,7 +102,9 @@ const BuyMerchItem: React.FC<{
             {},
             { redirectUrl: string; clientSecret: string }
           >(`merch/${merch.id}/purchase`, {
-            price: data.price ? Number(data.price) * 100 : undefined,
+            price: data.chosenPrice
+              ? Number(data.chosenPrice) * 100
+              : undefined,
             quantity: data.quantity,
             merchOptionIds: data.merchOptionIds,
             shippingDestinationId: data.shippingDestinationId,
@@ -117,6 +119,9 @@ const BuyMerchItem: React.FC<{
         }
       } catch (e) {
         setIsLoadingStripe(false);
+        snackbar(t("errorOccurred"), {
+          type: "warning",
+        });
       }
     },
     [setIsLoadingStripe, merch?.id]
@@ -149,12 +154,6 @@ const BuyMerchItem: React.FC<{
       price += costUnit + costExtraUnit;
     }
   });
-
-  const addMoneyAmount = (val: number) => {
-    const whatsCurrentlyThePrice = Number(currentPrice || 0);
-    const newPrice = whatsCurrentlyThePrice + val;
-    methods.setValue("price", newPrice);
-  };
 
   const exceedsAvailable = Number.isFinite(amountAvailable)
     ? amountAvailable < Number(quantity)
@@ -221,7 +220,8 @@ const BuyMerchItem: React.FC<{
             currency={merch.currency}
             platformPercent={artist.defaultPlatformFee ?? 0}
             artistName={artist.name}
-            minPrice={minPrice}
+            minPrice={minPrice * 100}
+            artistId={artist.id}
           />
         </FormComponent>
         <div
