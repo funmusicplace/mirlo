@@ -23,7 +23,8 @@ const FormCheckbox: React.FC<{
   keyName: string;
   description: string | React.ReactNode;
   disabled?: boolean;
-}> = ({ keyName, description, disabled, idPrefix = "" }) => {
+  required?: boolean;
+}> = ({ keyName, description, disabled, idPrefix = "", required }) => {
   const { register } = useFormContext();
 
   return (
@@ -33,6 +34,7 @@ const FormCheckbox: React.FC<{
         type="checkbox"
         {...register(keyName)}
         disabled={disabled}
+        required={required}
       />
       {description}
     </CheckBoxLabel>

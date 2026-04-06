@@ -11,7 +11,6 @@ import api from "services/api";
 import { FaArrowRight } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { Link, useNavigate } from "react-router-dom";
-import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 
 const PageWrapper = styled.div`
@@ -30,7 +29,6 @@ const steps: ("name" | "urlSlug")[] = ["name", "urlSlug"];
 
 const Welcome = () => {
   const { user } = useAuthContext();
-  const errorHandler = useErrorHandler();
   const navigate = useNavigate();
   const userId = user?.id;
   const [isLoading, setIsLoading] = React.useState(false);
@@ -82,7 +80,6 @@ const Welcome = () => {
           setStep((s) => s + 1);
         }
       } catch (e) {
-        errorHandler(e);
         console.error(e);
       } finally {
         setIsLoading(false);
@@ -90,7 +87,6 @@ const Welcome = () => {
     },
     [
       vals.confirmContentPolicy,
-      errorHandler,
       localArtist,
       localArtistLink,
       navigate,
@@ -123,6 +119,7 @@ const Welcome = () => {
               id="input-name"
               {...register("name")}
               placeholder={t("placeholderName") ?? ""}
+              required
             />
             <small id="hint-name">{t("youCanChangeThis")}</small>
           </FormComponent>
@@ -147,6 +144,8 @@ const Welcome = () => {
                   />
                 </span>
               }
+              disabled={step > 0}
+              required
             />
           </FormComponent>
 
@@ -154,11 +153,9 @@ const Welcome = () => {
             <Button
               isLoading={isLoading}
               type="submit"
-              disabled={!contentPolicy}
-              onClick={handleSubmit(onClickNext)}
               endIcon={<FaArrowRight />}
             >
-              {t(nameValue !== "" ? "next" : "enterANameToGetStarted")}
+              {t("next")}
             </Button>
           )}
 
@@ -191,8 +188,6 @@ const Welcome = () => {
             <Button
               isLoading={isLoading}
               type="submit"
-              disabled={!contentPolicy}
-              onClick={handleSubmit(onClickNext)}
               endIcon={<FaArrowRight />}
             >
               {t("customizeYourPage")}
@@ -200,9 +195,8 @@ const Welcome = () => {
           )}
 
           {step > 0 && (
-            <Button
-              onClick={() => navigate(localArtistLink)}
-              isLoading={isLoading}
+            <ButtonLink
+              to={localArtistLink}
               variant="outlined"
               endIcon={<FaArrowRight />}
               className={css`
@@ -210,7 +204,7 @@ const Welcome = () => {
               `}
             >
               {t("takeMeToTheArtistPage")}
-            </Button>
+            </ButtonLink>
           )}
         </PageWrapper>
       </form>

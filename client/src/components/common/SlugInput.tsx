@@ -11,14 +11,17 @@ import api from "services/api";
 // @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
 
-const SlugInput = React.forwardRef<{ focus: () => void; }, {
-  ariaDescribedBy?: string;
-  id: string;
-  isDisabled?: boolean;
-  type: "user" | "artist";
-  currentArtistId?: number;
-  currentName?: string;
-}>(
+const SlugInput = React.forwardRef<
+  { focus: () => void },
+  {
+    ariaDescribedBy?: string;
+    id: string;
+    isDisabled?: boolean;
+    type: "user" | "artist";
+    currentArtistId?: number;
+    currentName?: string;
+  }
+>(
   (
     { ariaDescribedBy, currentArtistId, id, isDisabled, type, currentName },
     ref
@@ -57,16 +60,16 @@ const SlugInput = React.forwardRef<{ focus: () => void; }, {
       [currentArtistId]
     );
 
-		// This ref gets passed to the `input`
+    // This ref gets passed to the `input`
     const inputRef = React.useRef<HTMLInputElement>(null);
 
-		// React Hook Form uses a ref to handle changes/errors
+    // React Hook Form uses a ref to handle changes/errors
     const { ref: registerRef, ...rest } = register("urlSlug", {
       validate: { unique: validation },
       disabled: isDisabled,
     });
 
-		// One imperative handle for the forwarded ref, for parent usage
+    // One imperative handle for the forwarded ref, for parent usage
     React.useImperativeHandle(ref, () => {
       return {
         focus() {
@@ -75,7 +78,7 @@ const SlugInput = React.forwardRef<{ focus: () => void; }, {
       };
     }, []);
 
-		// Another for React Hook Form
+    // Another for React Hook Form
     React.useImperativeHandle(registerRef, () => inputRef.current);
 
     const useCurrentNameAsSlug = React.useCallback(() => {
@@ -99,6 +102,7 @@ const SlugInput = React.forwardRef<{ focus: () => void; }, {
           id={id}
           {...rest}
           ref={inputRef}
+          required
         />
         <small id="hint-slug">{t("mustBeUnique")}</small>
         {errors.urlSlug && (
