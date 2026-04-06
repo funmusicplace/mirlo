@@ -1,5 +1,6 @@
 import { Job } from "bullmq";
 import { sendMail } from "../../jobs/send-mail";
+import { getClient } from "../../activityPub/utils";
 
 export type VerificationAccountType = "artist" | "listener" | "label";
 
@@ -27,6 +28,8 @@ export const sendVerificationEmail = async <UserType extends { email: string }>(
 ) => {
   const { user, clientId, accountType } = params;
 
+  const client = await getClient();
+
   await sendMail({
     data: {
       template: "new-user",
@@ -38,7 +41,7 @@ export const sendVerificationEmail = async <UserType extends { email: string }>(
         user,
         host: process.env.API_DOMAIN,
         client: clientId,
-        clientDomain: process.env.REACT_APP_CLIENT_DOMAIN,
+        clientDomain: client.applicationUrl,
       },
     },
   } as Job);
