@@ -16,12 +16,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { ArtistButton } from "./ArtistButtons";
 import useErrorHandler from "services/useErrorHandler";
+import IncludedReleases from "./IncludedReleases";
 
 const StyledSupportBox = styled(Box)`
   background-color: var(--mi-darken-background-color);
   margin-bottom: 1rem;
   padding: 0 !important;
-  display: flex;
   flex-direction: column;
   justify-content: space-between;
   outline: var(--mi-border);
@@ -39,7 +39,8 @@ const StyledSupportBox = styled(Box)`
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
-}> = ({ subscriptionTier }) => {
+  className?: string;
+}> = ({ subscriptionTier, className }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const { artistId } = useParams();
@@ -105,165 +106,156 @@ const ArtistSupportBox: React.FC<{
     !!subscriptionTier.merchDiscountPercent;
 
   return (
-    <StyledSupportBox>
-      {subscriptionTier.images?.[0]?.image.sizes?.[625] && (
-        <img
-          src={
-            subscriptionTier.images[0].image.sizes[625] +
-            `?updatedAt=${Date.now()}`
-          }
-          width="100%"
-          height="180px"
-          className={css`
-            object-fit: cover;
-          `}
-        />
-      )}
-      <div
-        className={css`
-          padding: 1.5rem 0.25rem;
-          border-bottom: var(--mi-border);
-          text-align: center;
-          h3 {
-            font-size: 1.2rem;
-            padding-bottom: 0.5rem;
-          }
-          @media screen and (max-width: ${bp.small}px) {
-            padding: 1rem;
-          }
-        `}
-      >
-        <h3>{subscriptionTier.name}</h3>
-        <Money
-          amount={
-            subscriptionTier.minAmount ? subscriptionTier.minAmount / 100 : 0
-          }
-          currency={subscriptionTier.currency}
-        />{" "}
-        / {t(subscriptionTier.interval === "MONTH" ? "monthly" : "yearly")}
-      </div>
-      <div
-        className={css`
-          padding: 1rem 1.5rem 0;
-          height: 100%;
-          p {
-            align-items: flex-start;
-          }
-        `}
-      >
-        <MarkdownContent content={subscriptionTier.description} />
-      </div>
-      <div
-        className={
-          "py-0 px-5 " +
-          css`
-            margin: 0.5rem 0 1.25rem;
-
-            button:hover {
-              background-color: var(--mi-normal-foreground-color) !important;
-              color: var(--mi-normal-background-color);
+    <div>
+      <StyledSupportBox className={className}>
+        {subscriptionTier.images?.[0]?.image.sizes?.[625] && (
+          <img
+            src={
+              subscriptionTier.images[0].image.sizes[625] +
+              `?updatedAt=${Date.now()}`
             }
-          `
-        }
-      >
-        {!isSubscribedToTier && !isSubscribedToArtist && (
-          <div className="flex gap-3 flex-col">
-            <div className="flex items-center content-center">
-              <ArtistVariableSupport tier={subscriptionTier} />
-            </div>
-            <PlatformPercent
-              percent={subscriptionTier.platformPercent}
-              chosenPrice={
-                subscriptionTier?.minAmount
-                  ? subscriptionTier.minAmount / 100
-                  : 0
-              }
-              artistName={artist?.name}
-              currency={subscriptionTier.currency}
-            />
-          </div>
+            width="100%"
+            height="180px"
+            className="cover max-h-[180px] w-full"
+          />
         )}
-        {(isSubscribedToTier || isSubscribedToArtist) && (
-          <Box className="px-3 py-0 text-center bg-(--mi-darken-background-color) mb-0">
-            <p>
-              {isSubscribedToArtist &&
-                !isSubscribedToTier &&
-                t("areSupporting", { artistName: artist.name })}
-              {isSubscribedToTier && t("supportAtThisTier")}
-            </p>
-            <div className="flex items-center justify-center">
-              {user && isSubscribedToArtist && !isSubscribedToTier && (
-                <ArtistButton
-                  onClick={() => subscribeToTier(subscriptionTier)}
-                  isLoading={isCheckingForSubscription}
-                >
-                  {t("chooseThisSubscription")}
-                </ArtistButton>
-              )}
-              {user && isSubscribedToTier && (
-                <ArtistButton onClick={() => cancelSubscription()}>
-                  {t("cancelSubscription")}
-                </ArtistButton>
-              )}
-            </div>
-          </Box>
-        )}
-      </div>
-      {hasRewards && (
         <div
-          className="w-full flex gap-2 flex-col my-2 p-5 text-sm"
-          style={{ borderTop: "var(--mi-border)" }}
+          className={css`
+            padding: 1.5rem 0.25rem;
+            border-bottom: var(--mi-border);
+            text-align: center;
+            h3 {
+              font-size: 1.2rem;
+              padding-bottom: 0.5rem;
+            }
+            @media screen and (max-width: ${bp.small}px) {
+              padding: 1rem;
+            }
+          `}
         >
-          {subscriptionTier.autoPurchaseAlbums && (
-            <p>{t("includesNewReleases")}</p>
-          )}
-          {subscriptionTier.releases &&
-            subscriptionTier.releases.length > 0 && (
-              <p>
-                {t("includesReleases", {
-                  count: subscriptionTier.releases.length,
-                })}
-              </p>
-            )}
-          <p>
-            {!!subscriptionTier.digitalDiscountPercent &&
-              !subscriptionTier.merchDiscountPercent &&
-              t("tierStoreDigitalDiscount", {
-                discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
-                artistName: artist.name,
-              })}
-            {!subscriptionTier.digitalDiscountPercent &&
-              !!subscriptionTier.merchDiscountPercent &&
-              t("tierStoreMerchDiscount", {
-                discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
-                artistName: artist.name,
-              })}
-            {!!subscriptionTier.digitalDiscountPercent &&
-              !!subscriptionTier.merchDiscountPercent &&
-              subscriptionTier.digitalDiscountPercent !==
-                subscriptionTier.merchDiscountPercent &&
-              t("differentTierStoreDiscount", {
-                digitalDiscountPercent:
-                  subscriptionTier.digitalDiscountPercent ?? 0,
-                merchDiscountPercent:
-                  subscriptionTier.merchDiscountPercent ?? 0,
-                artistName: artist.name,
-              })}
-            {!!subscriptionTier.digitalDiscountPercent &&
-              !!subscriptionTier.merchDiscountPercent &&
-              subscriptionTier.digitalDiscountPercent ===
-                subscriptionTier.merchDiscountPercent &&
-              t("sameTierStoreDiscount", {
-                digitalDiscountPercent:
-                  subscriptionTier.digitalDiscountPercent ?? 0,
-                merchDiscountPercent:
-                  subscriptionTier.merchDiscountPercent ?? 0,
-                artistName: artist.name,
-              })}
-          </p>
+          <h3>{subscriptionTier.name}</h3>
+          <Money
+            amount={
+              subscriptionTier.minAmount ? subscriptionTier.minAmount / 100 : 0
+            }
+            currency={subscriptionTier.currency}
+          />{" "}
+          / {t(subscriptionTier.interval === "MONTH" ? "monthly" : "yearly")}
         </div>
-      )}
-    </StyledSupportBox>
+        <div className="px-5 py-2">
+          <MarkdownContent content={subscriptionTier.description} />
+        </div>
+        <div
+          className={
+            "py-0 px-5 " +
+            css`
+              margin: 0.5rem 0 1.25rem;
+
+              button:hover {
+                background-color: var(--mi-normal-foreground-color) !important;
+                color: var(--mi-normal-background-color);
+              }
+            `
+          }
+        >
+          {!isSubscribedToTier && !isSubscribedToArtist && (
+            <div className="flex gap-3 flex-col">
+              <div className="flex items-center content-center">
+                <ArtistVariableSupport tier={subscriptionTier} />
+              </div>
+              <PlatformPercent
+                percent={subscriptionTier.platformPercent}
+                chosenPrice={
+                  subscriptionTier?.minAmount
+                    ? subscriptionTier.minAmount / 100
+                    : 0
+                }
+                artistName={artist?.name}
+                currency={subscriptionTier.currency}
+              />
+            </div>
+          )}
+          {(isSubscribedToTier || isSubscribedToArtist) && (
+            <Box className="px-3 py-0 text-center bg-(--mi-darken-background-color) mb-0">
+              <p>
+                {isSubscribedToArtist &&
+                  !isSubscribedToTier &&
+                  t("areSupporting", { artistName: artist.name })}
+                {isSubscribedToTier && t("supportAtThisTier")}
+              </p>
+              <div className="flex items-center justify-center">
+                {user && isSubscribedToArtist && !isSubscribedToTier && (
+                  <ArtistButton
+                    onClick={() => subscribeToTier(subscriptionTier)}
+                    isLoading={isCheckingForSubscription}
+                  >
+                    {t("chooseThisSubscription")}
+                  </ArtistButton>
+                )}
+                {user && isSubscribedToTier && (
+                  <ArtistButton onClick={() => cancelSubscription()}>
+                    {t("cancelSubscription")}
+                  </ArtistButton>
+                )}
+              </div>
+            </Box>
+          )}
+        </div>
+        {hasRewards && (
+          <ul
+            className="w-full flex gap-2 flex-col my-2 p-5 text-sm"
+            style={{ borderTop: "var(--mi-border)" }}
+          >
+            {subscriptionTier.releases &&
+              subscriptionTier.releases.length > 0 && (
+                <li>
+                  <IncludedReleases tier={subscriptionTier} />
+                </li>
+              )}
+            {subscriptionTier.autoPurchaseAlbums && (
+              <li>{t("includesNewReleases")}</li>
+            )}
+
+            <li>
+              {!!subscriptionTier.digitalDiscountPercent &&
+                !subscriptionTier.merchDiscountPercent &&
+                t("tierStoreDigitalDiscount", {
+                  discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
+                  artistName: artist.name,
+                })}
+              {!subscriptionTier.digitalDiscountPercent &&
+                !!subscriptionTier.merchDiscountPercent &&
+                t("tierStoreMerchDiscount", {
+                  discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
+                  artistName: artist.name,
+                })}
+              {!!subscriptionTier.digitalDiscountPercent &&
+                !!subscriptionTier.merchDiscountPercent &&
+                subscriptionTier.digitalDiscountPercent !==
+                  subscriptionTier.merchDiscountPercent &&
+                t("differentTierStoreDiscount", {
+                  digitalDiscountPercent:
+                    subscriptionTier.digitalDiscountPercent ?? 0,
+                  merchDiscountPercent:
+                    subscriptionTier.merchDiscountPercent ?? 0,
+                  artistName: artist.name,
+                })}
+              {!!subscriptionTier.digitalDiscountPercent &&
+                !!subscriptionTier.merchDiscountPercent &&
+                subscriptionTier.digitalDiscountPercent ===
+                  subscriptionTier.merchDiscountPercent &&
+                t("sameTierStoreDiscount", {
+                  digitalDiscountPercent:
+                    subscriptionTier.digitalDiscountPercent ?? 0,
+                  merchDiscountPercent:
+                    subscriptionTier.merchDiscountPercent ?? 0,
+                  artistName: artist.name,
+                })}
+            </li>
+          </ul>
+        )}
+      </StyledSupportBox>
+    </div>
   );
 };
 

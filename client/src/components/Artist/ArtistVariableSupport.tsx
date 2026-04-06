@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { isEmpty } from "lodash";
 import { queryArtist } from "queries";
 import React from "react";
@@ -14,8 +13,7 @@ import { useAuthContext } from "state/AuthContext";
 import useErrorHandler from "services/useErrorHandler";
 import { getCurrencySymbol } from "components/common/Money";
 import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
-import ArtistTrackGroup from "./ArtistTrackGroup";
-import useArtistQuery from "utils/useArtistQuery";
+import IncludedReleases from "./IncludedReleases";
 
 const ArtistVariableSupport: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -107,39 +105,7 @@ const ArtistVariableSupport: React.FC<{
 
           <div className="w-full">{t("includesNewReleasesLong")}</div>
 
-          {tier.releases && tier.releases.length > 0 && (
-            <div className="flex gap-2 flex-col ">
-              <strong>{t("includesTheseReleases")}</strong>
-              <div className="grid gap-2 grid-cols-4">
-                {tier.releases.map((release) => (
-                  <div key={release.trackGroupId} className="flex flex-col">
-                    {release.trackGroup.cover && (
-                      <img
-                        src={
-                          release.trackGroup.cover.sizes?.[120] ??
-                          release.trackGroup.cover.url?.[0]
-                        }
-                        alt={release.trackGroup.title}
-                        className="w-12 h-12 object-cover flex-shrink-0"
-                      />
-                    )}
-                    {!release.trackGroup.cover && (
-                      <div
-                        className="w-12 h-12 flex-shrink-0"
-                        style={{ backgroundColor: colors?.secondary }}
-                      />
-                    )}
-                    <span className="flex-1 truncate text-sm">
-                      {release.trackGroup.artist.name}
-                    </span>
-                    <span className="flex-1 truncate text-sm">
-                      {release.trackGroup.title}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <IncludedReleases tier={tier} />
 
           <ArtistButton
             isLoading={isCheckingForSubscription}
