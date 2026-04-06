@@ -45,7 +45,6 @@ const Welcome = () => {
   const vals = {
     urlSlug: watch("urlSlug"),
     name: watch("name"),
-    theme: watch("theme"),
     confirmContentPolicy: watch("confirmContentPolicy"),
   };
   const localArtistLink = `/${localArtist?.urlSlug}`;
