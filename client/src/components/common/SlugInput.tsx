@@ -11,99 +11,132 @@ import api from "services/api";
 // @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
 
-const SlugInput: React.FC<{
-  isDisabled?: boolean;
-  type: "user" | "artist";
-  currentArtistId?: number;
-  currentName?: string;
-}> = ({ currentArtistId, isDisabled, type, currentName }) => {
-  const { colors } = useGetArtistColors();
-  const { i18n, t } = useTranslation("translation", {
-    keyPrefix: "manageArtist",
-  });
-  const {
-    register,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useFormContext();
+const SlugInput = React.forwardRef<
+  { focus: () => void },
+  {
+    ariaDescribedBy?: string;
+    id: string;
+    isDisabled?: boolean;
+    type: "user" | "artist";
+    currentArtistId?: number;
+    currentName?: string;
+  }
+>(
+  (
+    { ariaDescribedBy, currentArtistId, id, isDisabled, type, currentName },
+    ref
+  ) => {
+    const { colors } = useGetArtistColors();
+    const { i18n, t } = useTranslation("translation", {
+      keyPrefix: "manageArtist",
+    });
+    const {
+      register,
+      watch,
+      setValue,
+      formState: { errors },
+    } = useFormContext();
 
-  const validation = React.useCallback(
-    async (value: string) => {
-      try {
-        let url = "";
-        if (type === "artist") {
-          let artistIdString = currentArtistId
-            ? `&forArtistId=${currentArtistId}`
-            : "";
-          url = `artists/testExistence?urlSlug=${value.toLowerCase()}${artistIdString}`;
-        } else if (type === "user") {
-          url = `users/testExistence?urlSlug=${value}`;
+    const validation = React.useCallback(
+      async (value: string) => {
+        try {
+          let url = "";
+          if (type === "artist") {
+            let artistIdString = currentArtistId
+              ? `&forArtistId=${currentArtistId}`
+              : "";
+            url = `artists/testExistence?urlSlug=${value.toLowerCase()}${artistIdString}`;
+          } else if (type === "user") {
+            url = `users/testExistence?urlSlug=${value}`;
+          }
+
+          const response = await api.get<{ exists: boolean }>(url);
+          return !response.result.exists;
+        } catch (e) {
+          console.error("Error checking slug uniqueness", e);
+          return true;
         }
+      },
+      [currentArtistId]
+    );
 
-        const response = await api.get<{ exists: boolean }>(url);
-        return !response.result.exists;
-      } catch (e) {
-        console.error("Error checking slug uniqueness", e);
-        return true;
+    // This ref gets passed to the `input`
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    // React Hook Form uses a ref to handle changes/errors
+    const { ref: registerRef, ...rest } = register("urlSlug", {
+      validate: { unique: validation },
+      disabled: isDisabled,
+    });
+
+    // One imperative handle for the forwarded ref, for parent usage
+    React.useImperativeHandle(ref, () => {
+      return {
+        focus() {
+          inputRef.current?.focus();
+        },
+      };
+    }, []);
+
+    // Another for React Hook Form
+    React.useImperativeHandle(registerRef, () => inputRef.current);
+
+    const useCurrentNameAsSlug = React.useCallback(() => {
+      if (currentName) {
+        const newSlug = slug(currentName);
+        setValue("urlSlug", newSlug);
       }
-    },
-    [currentArtistId]
-  );
+      return "";
+    }, [currentName]);
 
-  const useCurrentNameAsSlug = React.useCallback(() => {
-    if (currentName) {
-      const newSlug = slug(currentName);
-      setValue("urlSlug", newSlug);
-    }
-    return "";
-  }, [currentName]);
+    const urlSlug = watch("urlSlug");
 
-  const urlSlug = watch("urlSlug");
-
-  return (
-    <>
-      <InputEl
-        colors={colors}
-        {...register("urlSlug", {
-          validate: { unique: validation },
-          disabled: isDisabled,
-        })}
-        className={css`
-          margin-bottom: 0.5rem;
-        `}
-      />
-      <small>{t("mustBeUnique")}</small>
-      {errors.urlSlug && (
-        <small className="error">
-          {errors.urlSlug.type === "unique" && t("needsToBeUnique")}
-        </small>
-      )}
-      {!urlSlug && currentName && (
-        <small
+    return (
+      <>
+        <InputEl
+          aria-describedby={`hint-slug error-slug${ariaDescribedBy ? " " + ariaDescribedBy : ""}`}
+          colors={colors}
           className={css`
-            display: flex;
-            align-items: center;
+            margin-bottom: 0.5rem;
           `}
-        >
-          {t("useUrlSlug", {
-            suggestedUrlSlug: slug(currentName.toLowerCase()),
-          })}
-          <ArtistButton
-            variant="link"
-            size="compact"
-            type="button"
-            onClick={useCurrentNameAsSlug}
+          id={id}
+          {...rest}
+          ref={inputRef}
+          required
+        />
+        <small id="hint-slug">{t("mustBeUnique")}</small>
+        {errors.urlSlug && (
+          <small className="error" id="error-slug">
+            {errors.urlSlug.type === "unique" && t("needsToBeUnique")}
+          </small>
+        )}
+        {!urlSlug && currentName && (
+          <small
             className={css`
-              width: 10rem;
-              margin-left: 0 !important;
+              display: flex;
+              align-items: center;
             `}
           >
-            {t("useIt")}
-          </ArtistButton>
-        </small>
-      )}
-    </>
-  );
-};
+            {t("useUrlSlug", {
+              suggestedUrlSlug: slug(currentName.toLowerCase()),
+            })}
+            <ArtistButton
+              variant="link"
+              size="compact"
+              type="button"
+              onClick={useCurrentNameAsSlug}
+              className={css`
+                width: 10rem;
+                margin-left: 0 !important;
+              `}
+            >
+              {t("useIt")}
+            </ArtistButton>
+          </small>
+        )}
+      </>
+    );
+  }
+);
+
 export default SlugInput;

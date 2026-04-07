@@ -84,8 +84,11 @@ const EmailVerification: React.FC<{
         <Box variant="info">
           {t("checkEmail")}
           <FormComponent>
-            <label>{t("verificationCode")}</label>
+            <label htmlFor="input-verification-code">
+              {t("verificationCode")}
+            </label>
             <InputEl
+              id="input-verification-code"
               required
               value={code}
               onChange={(e) => setCode(e.target.value)}
@@ -101,9 +104,11 @@ const EmailVerification: React.FC<{
             width: 100%;
           `}
         >
-          <label>{t("email")}</label>
+          <label htmlFor="input-email-verify">{t("email")}</label>
           <div className="inline-button">
             <Input
+              autoComplete="on"
+              id="input-email-verify"
               name="email"
               type="email"
               value={email}

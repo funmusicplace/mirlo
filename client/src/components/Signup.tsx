@@ -55,10 +55,17 @@ const ArtistToggle = styled(FormComponent)`
   align-items: stretch;
 
   input {
-    display: none;
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
   }
 
-  label {
+  div {
     width: 50%;
     margin: 0 0.5rem 0 0;
     border: 1px solid var(--mi-lighten-x-background-color);
@@ -67,11 +74,11 @@ const ArtistToggle = styled(FormComponent)`
     justify-content: center;
   }
 
-  input:checked + span {
-    background: var(--mi-info-background-color);
+  input:checked + label {
+    background-color: var(--mi-info-background-color);
   }
 
-  span {
+  label {
     text-align: center;
     display: block;
     padding: 0.75rem;
@@ -80,6 +87,12 @@ const ArtistToggle = styled(FormComponent)`
     align-items: center;
     height: 100%;
     cursor: pointer;
+    border: 2px solid var(--mi-white);
+  }
+
+  input:focus-visible + label {
+    outline: 5px auto Highlight;
+    outline: 5px auto -webkit-focus-ring-color;
   }
 `;
 
@@ -103,8 +116,8 @@ function Signup() {
         accountType === "artist"
           ? "artist"
           : accountType === "label"
-          ? "label"
-          : "listener",
+            ? "label"
+            : "listener",
       promoCode: search.get("promo") ?? "",
       emailInvited: search.get("email") ?? "",
     },
@@ -156,7 +169,8 @@ function Signup() {
             setPendingVerification({
               email: data.email,
               accountType: data.accountType,
-              emailConfirmationExpired: errorBody.emailConfirmationExpired ?? false,
+              emailConfirmationExpired:
+                errorBody.emailConfirmationExpired ?? false,
               emailConfirmationExpiresAt:
                 errorBody.emailConfirmationExpiresAt ?? null,
             });
@@ -207,9 +221,12 @@ function Signup() {
         client: import.meta.env.VITE_CLIENT_DOMAIN,
         accountType: pendingVerification.accountType,
       });
-      snackbar(t("pendingVerificationResent", { email: pendingVerification.email }), {
-        type: "success",
-      });
+      snackbar(
+        t("pendingVerificationResent", { email: pendingVerification.email }),
+        {
+          type: "success",
+        }
+      );
       setPendingVerification((prev) =>
         prev
           ? {
@@ -236,7 +253,7 @@ function Signup() {
           text-align: center;
         `}
       >
-        {t("accountIncomplete")}
+        <p>{t("accountIncomplete")}</p>
       </Box>
     );
   }
@@ -263,7 +280,7 @@ function Signup() {
           style={{ width: 100, height: 100 }}
           height={100}
         />
-        {t("hasRegistered")}
+        <p>{t("hasRegistered")}</p>
       </Box>
     );
   }
@@ -281,7 +298,7 @@ function Signup() {
           `}
           onSubmit={handleSubmit(onSubmit)}
         >
-          <h2>{t("register")}</h2>
+          <h1>{t("register")}</h1>
           {invitedBy && (
             <Box
               className={css`
@@ -303,7 +320,11 @@ function Signup() {
           )}
           {pendingVerification && (
             <Box
-              variant={pendingVerification.emailConfirmationExpired ? "warning" : "info"}
+              variant={
+                pendingVerification.emailConfirmationExpired
+                  ? "warning"
+                  : "info"
+              }
               className={css`
                 display: flex;
                 flex-direction: column;
@@ -337,47 +358,64 @@ function Signup() {
             </Box>
           )}
           <FormComponent>
-            <label>{t("email")}</label>
-            <InputEl type="email" {...register("email")} />
+            <label htmlFor="input-email">{t("email")}</label>
+            <InputEl
+              autoComplete="true"
+              id="input-email"
+              required
+              type="email"
+              {...register("email")}
+            />
           </FormComponent>
           <FormComponent>
-            <label>{t("password")}</label>
-            <InputEl {...register("password")} type="password" />
+            <label htmlFor="input-password">{t("password")}</label>
+            <InputEl
+              id="input-password"
+              required
+              type="password"
+              {...register("password")}
+            />
           </FormComponent>
 
           {!isClosedToPublicArtistSignup && !isFetching && (
             <>
-              <div
-                className={css`
-                  margin-bottom: 1rem;
-                `}
-              >
-                <strong>{t("howUse")}</strong>
-              </div>
-
-              <ArtistToggle>
-                <label>
-                  <input
-                    type="radio"
-                    value="listener"
-                    {...register("accountType")}
-                  />
-                  <span>{t("imJustHereToListen")}</span>
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="artist"
-                    {...register("accountType")}
-                  />
-                  <span>{t("shareMyMusic")}</span>
-                </label>
-              </ArtistToggle>
+              <fieldset>
+                <legend className="font-bold mbe-[1rem]">{t("howUse")}</legend>
+                <ArtistToggle>
+                  <div>
+                    <input
+                      aria-describedby="hint-account-type"
+                      id="input-account-type-listener"
+                      required
+                      type="radio"
+                      value="listener"
+                      {...register("accountType")}
+                    />
+                    <label htmlFor="input-account-type-listener">
+                      {t("imJustHereToListen")}
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      aria-describedby="hint-account-type"
+                      id="input-account-type-artist"
+                      required
+                      type="radio"
+                      value="artist"
+                      {...register("accountType")}
+                    />
+                    <label htmlFor="input-account-type-artist">
+                      {t("shareMyMusic")}
+                    </label>
+                  </div>
+                </ArtistToggle>
+              </fieldset>
 
               <small
                 className={css`
                   margin-bottom: 1rem;
                 `}
+                id="hint-account-type"
               >
                 {t("alwaysCreateLater")}
               </small>
@@ -430,7 +468,7 @@ function Signup() {
           {t("logIn")}
         </Link>
         <img
-          alt="a blackbird"
+          alt=""
           src="/static/images/blackbird.png"
           className={css`
             width: 100%;

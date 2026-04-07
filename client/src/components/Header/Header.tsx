@@ -8,11 +8,10 @@ import Logo from "components/common/Logo";
 import { ImMenu } from "react-icons/im";
 import styled from "@emotion/styled";
 import useShow from "utils/useShow";
-import LogInPopup from "./LogInPopup";
 import { useAuthContext } from "state/AuthContext";
 import Button, { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
-import { FaHandHoldingHeart } from "react-icons/fa";
+import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
 import { queryInstanceArtist } from "queries/settings";
 import { useQuery } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
@@ -204,7 +203,13 @@ const Header = () => {
               <p>{t("donateNow", { keyPrefix: "kickstarter" })}</p>
             </ButtonLink>
           )}
-          {!isLoggedIn && <LogInPopup />}
+          {!isLoggedIn && (
+            <ButtonLink
+              aria-label={t("logIn", { keyPrefix: "logIn" })}
+              startIcon={<FaUserAlt />}
+              to="/login"
+            />
+          )}
           {isLoggedIn && (
             <Button
               aria-controls={menuDialogId}

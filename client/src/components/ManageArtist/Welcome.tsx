@@ -11,7 +11,6 @@ import api from "services/api";
 import { FaArrowRight } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { Link, useNavigate } from "react-router-dom";
-import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 
 const PageWrapper = styled.div`
@@ -23,7 +22,6 @@ const PageWrapper = styled.div`
 interface FormData {
   name: string;
   urlSlug: string;
-  theme: string;
   confirmContentPolicy: boolean;
 }
 
@@ -31,7 +29,6 @@ const steps: ("name" | "urlSlug")[] = ["name", "urlSlug"];
 
 const Welcome = () => {
   const { user } = useAuthContext();
-  const errorHandler = useErrorHandler();
   const navigate = useNavigate();
   const userId = user?.id;
   const [isLoading, setIsLoading] = React.useState(false);
@@ -41,11 +38,12 @@ const Welcome = () => {
   const methods = useForm<FormData>();
   const { register, handleSubmit, reset, formState, watch, getValues } =
     methods;
+  const slugInputRef = React.useRef<HTMLInputElement>(null);
 
   const vals = {
     urlSlug: watch("urlSlug"),
     name: watch("name"),
-    theme: watch("theme"),
+    confirmContentPolicy: watch("confirmContentPolicy"),
   };
   const localArtistLink = `/${localArtist?.urlSlug}`;
 
@@ -82,31 +80,48 @@ const Welcome = () => {
           setStep((s) => s + 1);
         }
       } catch (e) {
-        errorHandler(e);
         console.error(e);
       } finally {
         setIsLoading(false);
       }
     },
-    [errorHandler, localArtist, localArtistLink, navigate, reset, step, userId]
+    [
+      vals.confirmContentPolicy,
+      localArtist,
+      localArtistLink,
+      navigate,
+      reset,
+      step,
+      userId,
+    ]
   );
 
   const nameValue = watch("name");
   const contentPolicy = watch("confirmContentPolicy");
 
+  React.useEffect(() => {
+    if (step > 0) {
+      slugInputRef.current?.focus();
+    }
+  }, [slugInputRef.current, step]);
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onClickNext)}>
         <PageWrapper>
-          <h2>{t("welcome")}</h2>
+          <h1>{t("welcome")}</h1>
 
           <FormComponent>
-            <label>{t("whatPublicName")}</label>
+            <label htmlFor="input-name">{t("whatPublicName")}</label>
             <InputEl
+              aria-describedby="hint-name"
+              autoComplete="off"
+              id="input-name"
               {...register("name")}
               placeholder={t("placeholderName") ?? ""}
+              required
             />
-            <small>{t("youCanChangeThis")}</small>
+            <small id="hint-name">{t("youCanChangeThis")}</small>
           </FormComponent>
 
           <FormComponent>
@@ -129,31 +144,30 @@ const Welcome = () => {
                   />
                 </span>
               }
+              disabled={step > 0}
+              required
             />
           </FormComponent>
 
           {step === 0 && (
             <Button
               isLoading={isLoading}
-              size="compact"
               type="submit"
-              disabled={!contentPolicy}
-              onClick={handleSubmit(onClickNext)}
               endIcon={<FaArrowRight />}
             >
-              {t(nameValue !== "" ? "next" : "enterANameToGetStarted")}
+              {t("next")}
             </Button>
           )}
 
           {step > 0 && (
             <FormComponent>
-              <label>{t("showInTheURL")}</label>
-              <small>
+              <label htmlFor="input-slug">{t("showInTheURL")}</label>
+              <small id="description-slug">
                 <Trans
                   i18nKey="thisWillLookLikeURL"
                   t={t}
                   components={{
-                    strong: <strong></strong>,
+                    span: <span className="font-bold p-1 bg-gray-200"></span>,
                   }}
                   values={{
                     url: `${window.location.host}/${vals.urlSlug}`,
@@ -161,6 +175,9 @@ const Welcome = () => {
                 />
               </small>
               <ArtistSlugInput
+                ariaDescribedBy="description-slug"
+                id="input-slug"
+                ref={slugInputRef}
                 type="artist"
                 currentArtistId={localArtist?.id}
               />
@@ -170,10 +187,7 @@ const Welcome = () => {
           {step === 1 && (
             <Button
               isLoading={isLoading}
-              size="compact"
               type="submit"
-              disabled={!contentPolicy}
-              onClick={handleSubmit(onClickNext)}
               endIcon={<FaArrowRight />}
             >
               {t("customizeYourPage")}
@@ -183,7 +197,6 @@ const Welcome = () => {
           {step > 0 && (
             <ButtonLink
               to={localArtistLink}
-              isLoading={isLoading}
               variant="outlined"
               endIcon={<FaArrowRight />}
               className={css`
