@@ -107,6 +107,7 @@ const EmailVerification: React.FC<{
           <label htmlFor="input-email-verify">{t("email")}</label>
           <div className="inline-button">
             <Input
+              autoComplete="on"
               id="input-email-verify"
               name="email"
               type="email"

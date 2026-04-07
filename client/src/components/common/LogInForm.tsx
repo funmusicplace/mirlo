@@ -50,7 +50,12 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
       >
         <FormComponent>
           <label htmlFor="input-email">{t("email")}</label>
-          <InputEl id="input-email" type="email" {...register("email")} />
+          <InputEl
+            autoComplete="on"
+            id="input-email"
+            type="email"
+            {...register("email")}
+          />
         </FormComponent>
         <FormComponent>
           <label htmlFor="input-password">{t("password")}</label>
