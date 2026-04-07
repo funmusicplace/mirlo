@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 
 import FormComponent from "components/common/FormComponent";
 
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import FormError from "components/common/FormError";
 import { useParams } from "react-router-dom";
@@ -19,11 +19,13 @@ import { FormSection } from "./AlbumFormContent";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { InputEl } from "components/common/Input";
-import {
+import ArtistRouterLink, {
   ArtistButton,
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
 import { TrackGroupFormData } from "../ManageTrackGroup";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
+import { getArtistManageTiersUrl } from "utils/artist";
 
 type PricingMode = "free-or-donate" | "paid" | "no-payments";
 
@@ -33,6 +35,7 @@ const PriceAndSuch: React.FC<{
 }> = ({ existingObject, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { artistId, trackGroupId } = useParams();
+  const { data: artist } = useManagedArtistQuery();
   const errorHandler = useErrorHandler();
   const { colors } = useGetArtistColors();
   const {
@@ -182,14 +185,24 @@ const PriceAndSuch: React.FC<{
     ]
   );
 
+  const artistHasTiersThatGrantThisAlbum =
+    artist?.subscriptionTiers.filter((tier) =>
+      tier.releases?.some(
+        (release) => release.trackGroupId === Number(trackGroupId)
+      )
+    ) ?? [];
+
+  const artistHasTiersThatGrantNewAlbums =
+    artist?.subscriptionTiers.filter((tier) => tier.autoPurchaseAlbums) ?? [];
+
+  if (!artist) {
+    return null;
+  }
+
   return (
     <FormSection>
       <h2>{t("priceAndSuch")}</h2>
-      <div
-        className={css`
-          flex-grow: 1;
-        `}
-      >
+      <div className="flex flex-col gap-2">
         <FormComponent>
           <label>{t("pricing")}</label>
           <div
@@ -227,146 +240,174 @@ const PriceAndSuch: React.FC<{
               );
             })}
           </div>
-          <small>{t("pricingHelp")}</small>
         </FormComponent>
+        <div className="w-full flex flex-col gap-2 border-1 border-(--mi-darken-x-background-color) px-4 py-3">
+          <p>
+            <Trans
+              i18nKey="manageOnSubscription"
+              t={t}
+              components={{
+                subscriptionLink: (
+                  <ArtistRouterLink
+                    to={getArtistManageTiersUrl(artist.id)}
+                  ></ArtistRouterLink>
+                ),
+              }}
+            />
+          </p>
 
-        <div
-          className={css`
-            width: 100%;
-            @media screen and (min-width: ${bp.medium}px) {
-              display: grid;
-              grid-template-columns: repeat(2, 1fr);
-            }
-          `}
-        >
-          {isAlbumGettable && (
+          {!isAlbumGettable && (
             <>
-              <FormComponent
-                className={css`
-                  flex-grow: 1;
-                `}
-              >
-                <label>{t("minimumPrice")}</label>
-                <small>{t("minimumPriceDescription")}</small>
-                <div
-                  className={css`
-                    display: flex;
-                    align-items: center;
-                  `}
-                >
-                  {user?.currency && (
-                    <div
-                      className={css`
-                        width: 2rem;
-                        height: 89%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-bottom: 0.25rem;
-                      `}
-                    >
-                      {getCurrencySymbol(user?.currency)}
-                    </div>
-                  )}
-                  <SavingInput
-                    formKey="minPrice"
-                    type="number"
-                    step="0.01"
-                    min={0}
-                    url={`manage/trackGroups/${trackGroupId}`}
-                    extraData={{ artistId: Number(artistId) }}
-                  />
-                </div>
-                {errors.minPrice && (
-                  <FormError>{t("priceZeroOrMore")}</FormError>
-                )}
-                <small
-                  className={css`
-                    max-width: 200px;
-                  `}
-                >
-                  {t("currencyIsSetOnManageArtist")}
-                </small>
-              </FormComponent>
-
-              <FormComponent
-                className={css`
-                  flex-grow: 1;
-                `}
-              >
-                <label
-                  htmlFor="hasSuggestedPrice"
-                  className={css`
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                  `}
-                >
-                  <InputEl
-                    id="hasSuggestedPrice"
-                    colors={colors}
-                    type="checkbox"
-                    checked={hasSuggestedPrice}
-                    onChange={(event) => {
-                      onToggleSuggestedPrice(event.target.checked);
-                    }}
-                  />
-                  {t("suggestAlternateDefaultPrice")}
-                </label>
-
-                {hasSuggestedPrice && (
-                  <>
-                    <small>{t("suggestedPriceDescription")}</small>
-                    <div
-                      className={css`
-                        display: flex;
-                        align-items: center;
-                      `}
-                    >
-                      {user?.currency && (
-                        <div
-                          className={css`
-                            width: 2rem;
-                            height: 89%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin-bottom: 0.25rem;
-                          `}
-                        >
-                          {getCurrencySymbol(user?.currency)}
-                        </div>
-                      )}
-                      <SavingInput
-                        formKey="suggestedPrice"
-                        type="number"
-                        step="0.01"
-                        min={0}
-                        url={`manage/trackGroups/${trackGroupId}`}
-                        extraData={{ artistId: Number(artistId) }}
-                      />
-                    </div>
-                  </>
-                )}
-              </FormComponent>
-
-              <FormComponent
-                className={css`
-                  flex-grow: 1;
-                `}
-              >
-                <label>{t("platformPercent")}</label>
-                <PaymentSlider
-                  url={`manage/trackGroups/${trackGroupId}`}
-                  extraData={{ artistId: Number(artistId) }}
-                />
-                {errors.platformPercent && (
-                  <FormError>{t("platformPercent")}</FormError>
-                )}
-              </FormComponent>
+              <p>{t("albumNotAvailableForPurchase")}</p>
+              {artistHasTiersThatGrantThisAlbum.length > 0 && (
+                <p>
+                  {t("albumGrantedBySubscriptionTier", {
+                    tiers: artistHasTiersThatGrantThisAlbum
+                      .map((tier) => tier.name)
+                      .join(", "),
+                  })}
+                </p>
+              )}
+              {artistHasTiersThatGrantNewAlbums.length > 0 && (
+                <p>
+                  {t("albumGrantedToSubscriptionTiersWhenPublished", {
+                    tiers: artistHasTiersThatGrantNewAlbums
+                      .map((tier) => tier.name)
+                      .join(", "),
+                  })}
+                </p>
+              )}
             </>
           )}
         </div>
+        {isAlbumGettable && (
+          <div
+            className={css`
+              width: 100%;
+              @media screen and (min-width: ${bp.medium}px) {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+              }
+            `}
+          >
+            <FormComponent
+              className={css`
+                flex-grow: 1;
+              `}
+            >
+              <label>{t("minimumPrice")}</label>
+              <small>{t("minimumPriceDescription")}</small>
+              <div
+                className={css`
+                  display: flex;
+                  align-items: center;
+                `}
+              >
+                {user?.currency && (
+                  <div
+                    className={css`
+                      width: 2rem;
+                      height: 89%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      margin-bottom: 0.25rem;
+                    `}
+                  >
+                    {getCurrencySymbol(user?.currency)}
+                  </div>
+                )}
+                <SavingInput
+                  formKey="minPrice"
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  url={`manage/trackGroups/${trackGroupId}`}
+                  extraData={{ artistId: Number(artistId) }}
+                />
+              </div>{" "}
+              <small>{t("pricingHelp")}</small>
+              {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
+              <small>{t("currencyIsSetOnManageArtist")}</small>
+            </FormComponent>
+
+            <FormComponent
+              className={css`
+                flex-grow: 1;
+              `}
+            >
+              <label
+                htmlFor="hasSuggestedPrice"
+                className={css`
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                `}
+              >
+                <InputEl
+                  id="hasSuggestedPrice"
+                  colors={colors}
+                  type="checkbox"
+                  checked={hasSuggestedPrice}
+                  onChange={(event) => {
+                    onToggleSuggestedPrice(event.target.checked);
+                  }}
+                />
+                {t("suggestAlternateDefaultPrice")}
+              </label>
+
+              {hasSuggestedPrice && (
+                <>
+                  <small>{t("suggestedPriceDescription")}</small>
+                  <div
+                    className={css`
+                      display: flex;
+                      align-items: center;
+                    `}
+                  >
+                    {user?.currency && (
+                      <div
+                        className={css`
+                          width: 2rem;
+                          height: 89%;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          margin-bottom: 0.25rem;
+                        `}
+                      >
+                        {getCurrencySymbol(user?.currency)}
+                      </div>
+                    )}
+                    <SavingInput
+                      formKey="suggestedPrice"
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      url={`manage/trackGroups/${trackGroupId}`}
+                      extraData={{ artistId: Number(artistId) }}
+                    />
+                  </div>
+                </>
+              )}
+            </FormComponent>
+
+            <FormComponent
+              className={css`
+                flex-grow: 1;
+              `}
+            >
+              <label>{t("platformPercent")}</label>
+              <PaymentSlider
+                url={`manage/trackGroups/${trackGroupId}`}
+                extraData={{ artistId: Number(artistId) }}
+              />
+              {errors.platformPercent && (
+                <FormError>{t("platformPercent")}</FormError>
+              )}
+            </FormComponent>
+          </div>
+        )}
         {existingObject && existingObject?.tracks?.length > 0 && (
           <SetPriceOfAllTracks tracks={existingObject.tracks} reload={reload} />
         )}
