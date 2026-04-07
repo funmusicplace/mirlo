@@ -490,7 +490,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     // Album page
     const coverString = tg.cover?.url.find((u) => u.includes("x600"));
     const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
-    const albumUrl = `${client.applicationUrl}/${tg.artist?.urlSlug}/releases/${tg.urlSlug}`;
+    const albumUrl = `${client.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}`;
 
     const tracksList = tg.tracks.map((track) => ({
       title: track.title ?? "Untitled Track",
@@ -555,7 +555,7 @@ const handleSupport: RouteHandler<SupportParams> = async ({
   buildOpenGraphTags($, {
     title: artistName,
     description: `Support ${artistName} on Mirlo`,
-    url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+    url: `${client.applicationUrl}/${artist?.urlSlug}/support`,
     imageUrl: avatarUrl,
     rss,
   });

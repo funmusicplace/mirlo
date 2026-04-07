@@ -112,7 +112,27 @@ export default function () {
         "defaultTrackAllowIndividualSale",
         "defaultTrackMinPrice",
         "catalogNumber",
+        "urlSlug",
       ]);
+
+      const allTrackGroups = await prisma.trackGroup.findMany({
+        where: {
+          artistId: Number(data.artistId),
+        },
+      });
+
+      if (
+        newValues.urlSlug &&
+        allTrackGroups.some(
+          (tg) =>
+            tg.urlSlug === newValues.urlSlug && tg.id !== Number(trackGroupId)
+        )
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Can't re-use URL for existing album",
+        });
+      }
 
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId) },

@@ -16,23 +16,6 @@ import useErrorHandler from "services/useErrorHandler";
 import useArtistQuery from "utils/useArtistQuery";
 import { queryUserStripeStatus } from "queries";
 
-const ArtistSupportGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 31.6%);
-  gap: 1rem 2.5%;
-  max-width: 100%;
-  list-style-type: none;
-
-  @media screen and (max-width: ${bp.large}px) {
-    grid-template-columns: repeat(2, 48.75%);
-  }
-
-  @media screen and (max-width: ${bp.medium}px) {
-    grid-template-columns: repeat(1, 100%);
-    gap: 1rem 2%;
-  }
-`;
-
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
   const { data: artist } = useArtistQuery();
@@ -124,6 +107,11 @@ const ArtistSupport: React.FC = () => {
     );
   }
 
+  const onlyOneTier =
+    artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length === 1;
+
+  console.log("artist.subscriptionTiers", onlyOneTier);
+
   return (
     <>
       <SpaceBetweenDiv>
@@ -147,13 +135,22 @@ const ArtistSupport: React.FC = () => {
           {t("noSubscriptionTiersYet", { artistName: artist.name })}
         </Box>
       )}
-      <ArtistSupportGrid>
+      <div
+        className={
+          "list-none gap-3 grid grid-cols-1 md:grid-cols-3 gap-1 list-none" +
+          (onlyOneTier ? ` md:grid-cols-7` : ``)
+        }
+      >
         {artist.subscriptionTiers
           ?.filter((p) => !p.isDefaultTier)
           .map((p) => (
-            <ArtistSupportBox key={p.id} subscriptionTier={p} />
+            <ArtistSupportBox
+              key={p.id}
+              subscriptionTier={p}
+              className={onlyOneTier ? `col-start-3 col-span-3` : ``}
+            />
           ))}
-      </ArtistSupportGrid>
+      </div>
     </>
   );
 };

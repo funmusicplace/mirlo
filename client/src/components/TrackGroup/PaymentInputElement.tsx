@@ -8,6 +8,8 @@ import PlatformPercent from "components/common/PlatformPercent";
 import Box from "components/common/Box";
 
 import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
+import { useAuthContext } from "state/AuthContext";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 interface FormData {
   chosenPrice: string;
@@ -18,23 +20,34 @@ interface FormData {
 
 const PaymentInputElement: React.FC<{
   currency: string;
+  isDigital?: boolean;
   platformPercent: number;
-  minPrice?: number;
+  minPrice?: number; // in cents
   artistName?: string;
-  discountPercent?: number;
+  artistId?: number;
 }> = ({
   currency,
+  isDigital,
   platformPercent,
   minPrice,
   artistName,
-  discountPercent = 0,
+  artistId,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-
+  const colors = useGetArtistColors();
   const { register, setValue, watch } = useFormContext<FormData>();
 
   const chosenPrice = watch("chosenPrice");
   const numericChosenPrice = Number(chosenPrice);
+  const { user } = useAuthContext();
+  const activeSubscriptionForArtist = user?.artistUserSubscriptions?.find(
+    (subscription) => subscription.artistSubscriptionTier.artistId === artistId
+  );
+
+  const discountPercent =
+    activeSubscriptionForArtist?.artistSubscriptionTier[
+      isDigital ? "digitalDiscountPercent" : "merchDiscountPercent"
+    ] ?? 0;
   const normalizedDiscountPercent = Math.min(
     100,
     Math.max(0, Number(discountPercent) || 0)
@@ -81,14 +94,14 @@ const PaymentInputElement: React.FC<{
         id="priceInput"
       />
       {showGenerous && (
-        <Box variant="success">
+        <span className="ml-2 text-sm text-green-600">
           {t("thatsGenerous", {
             chosenPrice: moneyDisplay({
               amount: chosenPrice,
               currency: currency,
             }),
           })}
-        </Box>
+        </span>
       )}
       {lessThanMin && (
         <small>
@@ -107,7 +120,9 @@ const PaymentInputElement: React.FC<{
       {isFinite(numericChosenPrice) &&
         numericChosenPrice > 0 &&
         normalizedDiscountPercent > 0 && (
-          <div className="w-full align-center mt-2 rounded border p-3 text-sm bg-(--mi-primary-color) text-(--mi-normal-background-color)">
+          <div
+            className={`w-full align-center mt-2 rounded border p-3 text-sm border-[${colors.colors?.primary ?? "--mi-primary-color"}]`}
+          >
             {t("discountSummary", {
               discountPercent: normalizedDiscountPercent,
               discountAmount: moneyDisplay({

@@ -37,13 +37,7 @@ const BuyTrackGroup: React.FC<{
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
-  const activeSubscriptionForArtist = user?.artistUserSubscriptions?.find(
-    (subscription) =>
-      subscription.artistSubscriptionTier.artistId === trackGroup.artistId
-  );
-  const discountPercent =
-    activeSubscriptionForArtist?.artistSubscriptionTier
-      .digitalDiscountPercent ?? 0;
+
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
   const initialChosenPriceCents = track
     ? (minPrice ?? 0)
@@ -186,7 +180,8 @@ const BuyTrackGroup: React.FC<{
               platformPercent={trackGroup.platformPercent}
               minPrice={minPrice}
               artistName={trackGroup.artist?.name}
-              discountPercent={discountPercent}
+              artistId={trackGroup.artistId}
+              isDigital
             />
           </FormComponent>
 
@@ -269,15 +264,16 @@ const BuyTrackGroup: React.FC<{
           </>
         )}
         <hr />
-        {minPrice === 0 && (
-          <div className="mt-4">
-            <p className="mb-2">
-              {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
-            </p>
-            <AddToCollection trackGroup={trackGroup} />{" "}
-            <p className="mt-2">{t("addToCollectionDescription")}</p>
-          </div>
-        )}
+        {minPrice === 0 ||
+          (minPrice === null && (
+            <div className="mt-4">
+              <p className="mb-2">
+                {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
+              </p>
+              <AddToCollection trackGroup={trackGroup} />{" "}
+              <p className="mt-2">{t("addToCollectionDescription")}</p>
+            </div>
+          ))}
       </div>
     </FormProvider>
   );

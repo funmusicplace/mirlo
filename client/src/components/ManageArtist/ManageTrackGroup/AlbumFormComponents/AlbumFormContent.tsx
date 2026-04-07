@@ -17,6 +17,7 @@ import styled from "@emotion/styled";
 
 import PriceAndSuch from "./PriceAndSuch";
 import FundraisingGoal from "./FundraisingGoal";
+import Box from "components/common/Box";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -28,22 +29,48 @@ const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
   reload: () => void;
 }> = ({ existingObject, reload }) => {
+  const { watch } = useFormContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
   const { artistId, trackGroupId } = useParams();
+  const urlSlug = watch("urlSlug");
 
   return (
     <>
       <FormSection>
         <h2>{t("keyDetails")}</h2>
-        <FormComponent>
-          <label>{t("title")}</label>
-          <SavingInput
-            formKey="title"
-            url={`manage/trackGroups/${trackGroupId}`}
-            extraData={{ artistId: Number(artistId) }}
-          />
-        </FormComponent>
+        <div className="md:grid md:grid-cols-2 gap-4">
+          <FormComponent>
+            <label>{t("title")}</label>
+            <SavingInput
+              formKey="title"
+              url={`manage/trackGroups/${trackGroupId}`}
+              extraData={{ artistId: Number(artistId) }}
+            />
+          </FormComponent>
+          <FormComponent>
+            <label>{t("urlSlug")}</label>
+            <SavingInput
+              formKey="urlSlug"
+              url={`manage/trackGroups/${trackGroupId}`}
+              extraData={{ artistId: Number(artistId) }}
+            />
+            {existingObject.publishedAt &&
+              new Date(existingObject.publishedAt) < new Date() && (
+                <small>
+                  <span>
+                    {t("fullUrlIs", {
+                      currentUrlSlug: `${window.location.origin}/${existingObject.artist.urlSlug}/release/${urlSlug}`,
+                    })}
+                    .{" "}
+                  </span>
+                  <span className="bg-(--mi-normal-background-color) text-(--mi-warning-color)">
+                    {t("urlSlugWarning")}
+                  </span>
+                </small>
+              )}
+          </FormComponent>
+        </div>
         <div
           className={css`
             @media screen and (min-width: ${bp.medium}px) {

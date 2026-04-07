@@ -23,9 +23,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
 
   const { artistId } = useParams();
 
-  const { data: artist } = useQuery(
-    queryManagedArtist(Number(artistId))
-  );
+  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
 
   const { data: tiers, refetch: refetchTiers } = useQuery({
     ...queryManagedArtistSubscriptionTiers({
@@ -72,14 +70,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
             </Button>
           </div>
         </SpaceBetweenDiv>
-        <div
-          className={css`
-            margin-bottom: 1rem;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-          `}
-        >
+        <div className="grid md:grid-cols-3 gap-1">
           {tiers?.results.map((tier) => (
             <ManageSubscriptionTierBox
               tier={tier}
