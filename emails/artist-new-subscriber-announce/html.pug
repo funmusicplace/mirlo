@@ -3,13 +3,13 @@ extends ../layout.pug
 block content
   p Wow! 
   p
-    | Someone new is supporting #{artist.name} on Mirlo with a #{interval === 'MONTH' ? 'monthly': 'yearly'} 
+    if isNewSubscription
+      | (#{user.email}) #{user.name} started supporting your on Mirlo.
+    else
+      | (#{user.email}) #{user.name} is supporting your on Mirlo!
+  p 
+    | Support for #{artist.name} on Mirlo with a #{interval === 'MONTH' ? 'monthly': 'yearly'} 
     | contribution at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
-  table 
-    tr 
-      td #{artist.name}
-      td #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
-      td #{user.email} #{user.name}
   if transaction
     p
     table 

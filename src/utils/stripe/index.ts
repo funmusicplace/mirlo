@@ -701,6 +701,8 @@ export const handleInvoicePaid = async (
       );
     }
 
+    invoice.billing_reason === "subscription_create";
+
     await manageSubscriptionReceipt({
       processorPaymentReferenceId: invoice.id,
       processorSubscriptionReferenceId: subscription,
@@ -708,6 +710,7 @@ export const handleInvoicePaid = async (
       currency: invoice.currency,
       platformCut: invoice.application_fee_amount || 0,
       paymentProcessorFee: stripeFee?.amount || 0,
+      billingReason: invoice.billing_reason,
       status: "COMPLETED",
       nextBillingDate,
     });
@@ -743,6 +746,7 @@ export const handleInvoicePaymentFailed = async (
       processorSubscriptionReferenceId: subscription,
       amountPaid: invoice.amount_paid,
       currency: invoice.currency,
+      billingReason: invoice.billing_reason,
       platformCut: invoice.application_fee_amount || 0,
       paymentProcessorFee: stripeFee?.amount || 0,
     });

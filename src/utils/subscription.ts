@@ -10,6 +10,7 @@ export type ArtistSubscriptionReceiptEmailType = {
   interval: "MONTH" | "YEAR";
   artist: Artist;
   host: string;
+  isNewSubscription: boolean;
   client: string;
   artistUserSubscription: {
     id: number;
@@ -21,6 +22,7 @@ export type ArtistSubscriptionReceiptEmailType = {
 export type ArtistNewSubscriberAnnounceEmailType = {
   interval: "MONTH" | "YEAR";
   artist: Artist;
+  isNewSubscription: boolean;
   artistUserSubscription: {
     artistSubscriptionTierId: number;
     id: number;
@@ -60,6 +62,7 @@ export const manageSubscriptionReceipt = async ({
   status,
   urlParams,
   nextBillingDate,
+  billingReason,
 }: {
   processorPaymentReferenceId: string;
   processorSubscriptionReferenceId: string;
@@ -70,7 +73,9 @@ export const manageSubscriptionReceipt = async ({
   status: "FAILED" | "COMPLETED";
   urlParams?: string;
   nextBillingDate?: Date;
+  billingReason: null | string;
 }) => {
+  const isNewSubscription = billingReason === "subscription_create";
   const artistUserSubscription = await prisma.artistUserSubscription.findFirst({
     where: {
       stripeSubscriptionKey: processorSubscriptionReferenceId,
@@ -118,27 +123,40 @@ export const manageSubscriptionReceipt = async ({
         where: { id: artistUserSubscription.id },
         data: { nextBillingDate },
       });
-    }
 
-    const hasProGrataTrackGroups =
-      await prisma.subscriptionTierRelease.findMany({
-        where: {
-          tierId: artistUserSubscription.artistSubscriptionTierId,
-        },
-      });
-    if (hasProGrataTrackGroups.length > 0) {
-      logger.info(
-        `invoice.paid: ${processorPaymentReferenceId} has ${hasProGrataTrackGroups.length} pro grata track groups, granting access`
-      );
-      await prisma.userTrackGroupPurchase.createMany({
-        data: hasProGrataTrackGroups.map((release) => ({
-          userId: artistUserSubscription.userId,
-          trackGroupId: release.trackGroupId,
-          userTransactionId: transaction.id ?? undefined,
-          createdAt: new Date(),
-          proGratis: true,
-        })),
-      });
+      if (isNewSubscription) {
+        const hasProGrataTrackGroups =
+          await prisma.subscriptionTierRelease.findMany({
+            where: {
+              tierId: artistUserSubscription.artistSubscriptionTierId,
+            },
+          });
+        if (hasProGrataTrackGroups.length > 0) {
+          logger.info(
+            `invoice.paid: ${processorPaymentReferenceId} has ${hasProGrataTrackGroups.length} pro grata track groups, granting access`
+          );
+          await Promise.all(
+            hasProGrataTrackGroups.map((release) =>
+              prisma.userTrackGroupPurchase.upsert({
+                where: {
+                  userId_trackGroupId: {
+                    userId: artistUserSubscription.userId,
+                    trackGroupId: release.trackGroupId,
+                  },
+                },
+                update: {},
+                create: {
+                  userId: artistUserSubscription.userId,
+                  trackGroupId: release.trackGroupId,
+                  userTransactionId: transaction.id ?? undefined,
+                  createdAt: new Date(),
+                  proGratis: true,
+                },
+              })
+            )
+          );
+        }
+      }
     }
 
     logger.info(
@@ -151,6 +169,7 @@ export const manageSubscriptionReceipt = async ({
           to: artistUserSubscription.user.email,
         },
         locals: {
+          isNewSubscription,
           interval: artistUserSubscription.artistSubscriptionTier.interval,
           artist: artistUserSubscription.artistSubscriptionTier.artist,
           artistUserSubscription,
@@ -171,6 +190,7 @@ export const manageSubscriptionReceipt = async ({
           to: artistNotificationEmail,
         },
         locals: {
+          isNewSubscription,
           interval: artistUserSubscription.artistSubscriptionTier.interval,
           artist: artistUserSubscription.artistSubscriptionTier.artist,
           artistUserSubscription: {
