@@ -26,6 +26,10 @@ export const getArtistManageUrl = (artistId: number) => {
   return `/manage/artists/${artistId}`;
 };
 
+export const getArtistManageTiersUrl = (artistId: number) => {
+  return getArtistManageUrl(artistId) + "/tiers";
+};
+
 export const getArtistManageMerchUrl = (artistId: number, merchId: string) => {
   return `/manage/artists/${artistId}/merch/${merchId}`;
 };
