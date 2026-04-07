@@ -256,11 +256,7 @@ const PriceAndSuch: React.FC<{
             />
           </p>
 
-          {!isAlbumGettable && (
-            <>
-              <p>{t("albumNotAvailableForPurchase")}</p>
-            </>
-          )}
+          {!isAlbumGettable && <p>{t("albumNotAvailableForPurchase")}</p>}
           {artistHasTiersThatGrantThisAlbum.length > 0 && (
             <p>
               {t("albumGrantedBySubscriptionTier", {
