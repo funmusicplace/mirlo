@@ -78,6 +78,7 @@ describe("subscription", () => {
         currency: "usd",
         platformCut: 2,
         paymentProcessorFee: 0.3,
+        billingReason: "subscription_create",
         status: "COMPLETED",
       });
 
@@ -160,6 +161,7 @@ describe("subscription", () => {
         platformCut: 240,
         paymentProcessorFee: 30,
         status: "COMPLETED",
+        billingReason: "subscription_create",
         nextBillingDate,
       });
 
@@ -223,6 +225,7 @@ describe("subscription", () => {
         platformCut: 0,
         paymentProcessorFee: 0,
         status: "FAILED",
+        billingReason: "subscription_cycle",
         nextBillingDate,
       });
 
@@ -282,6 +285,7 @@ describe("subscription", () => {
         amountPaid: 1200,
         currency: "usd",
         platformCut: 240,
+        billingReason: "subscription_create",
         paymentProcessorFee: 30,
         status: "COMPLETED",
       });
@@ -344,6 +348,7 @@ describe("subscription", () => {
         currency: "usd",
         platformCut: 240,
         paymentProcessorFee: 30,
+        billingReason: "subscription_create",
         status: "COMPLETED",
       });
 
@@ -420,6 +425,7 @@ describe("subscription", () => {
         currency: "usd",
         platformCut: 240,
         paymentProcessorFee: 30,
+        billingReason: "subscription_create",
         status: "COMPLETED",
       });
 

@@ -13,7 +13,7 @@ const IncludedReleases: React.FC<{
     <>
       {tier.releases && tier.releases.length > 0 && (
         <div className="flex gap-2 flex-col ">
-          <strong>{t("includesTheseReleases")}</strong>
+          <span>{t("includesTheseReleases")}</span>
           <div className="grid gap-2 grid-cols-4">
             {tier.releases.map((release) => (
               <div key={release.trackGroupId} className="flex flex-col">

@@ -74,43 +74,66 @@ const Supporters = () => {
     loadSupporters();
   }, [loadSupporters]);
 
-  const amount = sumBy([...monthlySupporters, ...annualSupporters], "amount");
+  const amountMonthly = sumBy(monthlySupporters, "amount");
+  const amountAnnual = sumBy(annualSupporters, "amount");
 
   return (
     <>
-      <ArtistSection>
-        <SpaceBetweenDiv>
-          <div>
-            <h4>{t("supporters")}</h4>
-            {t("totalComingInMonthly")}:{" "}
-            <Money
-              amount={amount / 100}
-              currency={
-                monthlySupporters[0]?.artistSubscriptionTier.currency ??
-                artist?.user?.currency ??
-                "usd"
-              }
-            />
-            <br />
-            {t("totalComingInAnnually")}:{" "}
-            <Money
-              amount={amount / 100}
-              currency={
-                annualSupporters[0]?.artistSubscriptionTier.currency ??
-                artist?.user?.currency ??
-                "usd"
-              }
-            />
-            <br />
-            {t("totalSupporters", {
-              count: monthlySupporters.length + annualSupporters.length,
-            })}
-          </div>
+      <div className="flex flex-col gap-5">
+        <div className="flex items-center justify-between">
+          <h4>{t("supporters")}</h4>
+
           <DropdownMenu dashed>
             <ArtistSubscriberDataDownload />
             <ArtistSubscriberUploadData onDone={loadSupporters} />
           </DropdownMenu>
-        </SpaceBetweenDiv>
+        </div>
+        <div className="flex gap-1 flex-col max-w-1/2">
+          <p className="grid gap-4 grid-cols-2">
+            {t("totalComingInMonthly")}:{" "}
+            <strong className="text-right">
+              <Money
+                amount={amountMonthly / 100}
+                currency={
+                  monthlySupporters[0]?.artistSubscriptionTier.currency ??
+                  artist?.user?.currency ??
+                  "usd"
+                }
+              />
+            </strong>
+          </p>
+          <p className="grid gap-4 grid-cols-2">
+            {t("totalComingInAnnually")}:{" "}
+            <strong className="text-right">
+              <Money
+                amount={amountAnnual / 100}
+                currency={
+                  annualSupporters[0]?.artistSubscriptionTier.currency ??
+                  artist?.user?.currency ??
+                  "usd"
+                }
+              />
+            </strong>
+          </p>
+          <p className="grid gap-4 grid-cols-2">
+            {t("totalProjectedAnnual")}:{" "}
+            <strong className="text-right">
+              <Money
+                amount={(amountAnnual + amountMonthly * 12) / 100}
+                currency={
+                  annualSupporters[0]?.artistSubscriptionTier.currency ??
+                  artist?.user?.currency ??
+                  "usd"
+                }
+              />
+            </strong>
+          </p>
+          <p>
+            {t("totalSupporters", {
+              count: monthlySupporters.length + annualSupporters.length,
+            })}
+          </p>
+        </div>
         <SupporterTable>
           <thead>
             <tr>
@@ -158,7 +181,7 @@ const Supporters = () => {
             {t("noSupportersYet")}
           </div>
         )}
-      </ArtistSection>
+      </div>
       <ArtistSection>
         <SpaceBetweenDiv>
           <h4>{t("followers", { count: followers.length })}</h4>
