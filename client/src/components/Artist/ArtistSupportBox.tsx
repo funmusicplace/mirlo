@@ -210,10 +210,8 @@ const ArtistSupportBox: React.FC<{
                   subscriptionTier.digitalDiscountPercent ===
                     subscriptionTier.merchDiscountPercent &&
                   t("sameTierStoreDiscount", {
-                    digitalDiscountPercent:
+                    discountPercent:
                       subscriptionTier.digitalDiscountPercent ?? 0,
-                    merchDiscountPercent:
-                      subscriptionTier.merchDiscountPercent ?? 0,
                     artistName: artist.name,
                   })}
               </li>

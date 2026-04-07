@@ -256,28 +256,24 @@ const PriceAndSuch: React.FC<{
             />
           </p>
 
-          {!isAlbumGettable && (
-            <>
-              <p>{t("albumNotAvailableForPurchase")}</p>
-              {artistHasTiersThatGrantThisAlbum.length > 0 && (
-                <p>
-                  {t("albumGrantedBySubscriptionTier", {
-                    tiers: artistHasTiersThatGrantThisAlbum
-                      .map((tier) => tier.name)
-                      .join(", "),
-                  })}
-                </p>
-              )}
-              {artistHasTiersThatGrantNewAlbums.length > 0 && (
-                <p>
-                  {t("albumGrantedToSubscriptionTiersWhenPublished", {
-                    tiers: artistHasTiersThatGrantNewAlbums
-                      .map((tier) => tier.name)
-                      .join(", "),
-                  })}
-                </p>
-              )}
-            </>
+          {!isAlbumGettable && <p>{t("albumNotAvailableForPurchase")}</p>}
+          {artistHasTiersThatGrantThisAlbum.length > 0 && (
+            <p>
+              {t("albumGrantedBySubscriptionTier", {
+                tiers: artistHasTiersThatGrantThisAlbum
+                  .map((tier) => tier.name)
+                  .join(", "),
+              })}
+            </p>
+          )}
+          {artistHasTiersThatGrantNewAlbums.length > 0 && (
+            <p>
+              {t("albumGrantedToSubscriptionTiersWhenPublished", {
+                tiers: artistHasTiersThatGrantNewAlbums
+                  .map((tier) => tier.name)
+                  .join(", "),
+              })}
+            </p>
           )}
         </div>
         {isAlbumGettable && (
