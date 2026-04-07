@@ -377,6 +377,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         currency: "usd",
         application_fee_amount: 200,
         payment_intent: "pi_test_123",
+        billing_reason: "subscription_create",
       } as any;
 
       // Handle the invoice paid event
