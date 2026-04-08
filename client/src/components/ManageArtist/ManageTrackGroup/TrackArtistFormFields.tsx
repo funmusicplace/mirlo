@@ -84,6 +84,7 @@ const TrackArtistFormFields: React.FC<{
           <AutoComplete
             colors={colors}
             getOptions={getOptions}
+            id="input-track-artist"
             showBackground
             allowNew
             placeholder={t("searchArtists")}

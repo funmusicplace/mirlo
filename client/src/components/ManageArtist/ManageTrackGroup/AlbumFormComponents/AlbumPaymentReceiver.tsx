@@ -126,6 +126,7 @@ const AlbumPaymentReceiver = () => {
         {!trackGroup?.paymentToUser && (
           <AutoComplete
             getOptions={searchUsers}
+            id="input-payment-receiver"
             onSelect={setLabelForPayment}
           />
         )}

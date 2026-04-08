@@ -8,7 +8,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
 import useAdminFilters from "./useAdminFilters";
-import { FormSection } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
 import FormComponent from "components/common/FormComponent";
 import { SelectEl } from "components/common/Select";
 

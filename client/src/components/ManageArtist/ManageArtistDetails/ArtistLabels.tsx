@@ -66,6 +66,7 @@ const ArtistLabels: React.FC<{ refetch: () => void }> = ({ refetch }) => {
         <label>{t("whatLabelsisThisArtistPartOf")}</label>
         <AutoComplete
           getOptions={searchLabels}
+          id="input-label"
           onSelect={setLabel}
           colors={colors}
         />
