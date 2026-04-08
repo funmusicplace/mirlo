@@ -132,34 +132,3 @@ export const parse = async (files: File[]): Promise<ParsedItem[]> => {
   );
   return parsed;
 };
-
-export const UploadLabelWrapper = styled("label")`
-  position: relative;
-  display: flex;
-  gap: 10px;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  padding: 20px;
-  border-radius: 10px;
-  border: 2px dashed #555;
-  width: 100%;
-  color: var(--mi-foreground-color);
-  cursor: pointer;
-  transition:
-    background 0.2s ease-in-out,
-    border 0.2s ease-in-out;
-`;
-
-export const UploadField = styled(InputEl)`
-  height: 100%;
-  position: absolute;
-  border: none !important;
-
-  transition: 0.25s opacity;
-
-  &:hover {
-    opacity: 0.8;
-  }
-`;
