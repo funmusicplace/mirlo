@@ -87,7 +87,7 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
   myRef,
   ...props
 }) => {
-  const length = size === "small" ? 300 : 300;
+  const length = size === "small" ? 300 : 600;
   return (
     <TrackGroupWrapper as={as} ref={myRef} {...props}>
       <div
@@ -99,7 +99,7 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
           image={{
             width: length,
             height: length,
-            url: trackGroup.cover?.sizes?.[size === "small" ? 300 : 300] ?? "",
+            url: trackGroup.cover?.sizes?.[size === "small" ? 300 : 600] ?? "",
           }}
           trackIds={trackGroup.tracks
             .filter((t) => t.isPlayable)
