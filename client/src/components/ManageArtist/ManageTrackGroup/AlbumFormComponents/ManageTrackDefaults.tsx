@@ -53,13 +53,14 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
       <FormProvider {...methods}>
         <ToggleFormComponent>
           <SavingInput
+            id="input-allow-mirlo-promo"
             type="checkbox"
             formKey="defaultAllowMirloPromo"
             url={`manage/trackGroups/${trackGroup.id}`}
             timer={0}
             width="auto"
           />
-          <label htmlFor="allowMirloPromo">
+          <label htmlFor="input-allow-mirlo-promo">
             <Trans
               t={t}
               i18nKey={"allowMirloPromo"}
