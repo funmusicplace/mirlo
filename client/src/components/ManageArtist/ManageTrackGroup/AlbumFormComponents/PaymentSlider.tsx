@@ -68,6 +68,8 @@ const PaymentSlider: React.FC<{
     <div className="w-full">
       <div className="flex gap-1">
         <input
+          aria-hidden="true"
+          tabIndex={-1}
           type="range"
           step="1"
           min={0}
@@ -113,9 +115,13 @@ const PaymentSlider: React.FC<{
           `}
         />
         <InputEl
+          aria-describedby="output-platform-percent"
+          id="input-platform-percent"
+          min={0}
+          max={100}
           type="number"
           name={field.name}
-          value={current}
+          value={current.toString()}
           onChange={(event) => field.onChange(Number(event.target.value))}
           onBlur={() => {
             field.onBlur();
@@ -124,24 +130,14 @@ const PaymentSlider: React.FC<{
           className="w-[100px]!"
         />
       </div>
-      <div
-        className={css`
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-
-          > div {
-            display: flex;
-
-            button {
-              margin-left: 0.5rem;
-            }
-          }
-        `}
-      >
-        {t("platformCut", { percent: current })}
-        <div>
+      <div className="flex gap-2 items-center justify-between">
+        <output
+          aria-atomic="true"
+          className="flex flex-auto gap-2 items-center justify-between"
+          htmlFor="input-platform-percent"
+          id="output-platform-percent"
+        >
+          <span>{current}%</span>
           <Pill>
             {current == 0 && t("none")}
             {current > 0 && current < 5 && t("solidarity")}
@@ -149,153 +145,152 @@ const PaymentSlider: React.FC<{
             {current >= 10 && current < 15 && t("fullCost")}
             {current >= 15 && t("redistribution")}
           </Pill>
-          <ArtistButton
-            startIcon={<IoHelp />}
-            type="button"
-            onClick={() => setIsInfoOpen(true)}
-          />
+        </output>
+        <ArtistButton
+          aria-label={t("platformCutTierWhatIsThis")}
+          startIcon={<IoHelp />}
+          type="button"
+          onClick={() => setIsInfoOpen(true)}
+        />
+      </div>
 
-          <Modal
-            size="medium"
-            open={isOpen}
-            onClose={() => setIsInfoOpen(false)}
+      <Modal
+        size="medium"
+        open={isOpen}
+        onClose={() => setIsInfoOpen(false)}
+        className={css`
+          p {
+            margin-bottom: 1rem;
+          }
+        `}
+      >
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+          `}
+        >
+          <div
             className={css`
-              p {
-                margin-bottom: 1rem;
-              }
+              background-color: var(--mi-primary-color);
+              color: var(--mi-white);
+              padding: 1rem;
+              border-radius: 0.5rem;
+              text-align: center;
             `}
           >
-            <div
+            <h2
               className={css`
-                display: flex;
-                align-items: center;
-                flex-direction: column;
+                padding-top: 0.5rem;
               `}
             >
-              <div
-                className={css`
-                  background-color: var(--mi-primary-color);
-                  color: var(--mi-white);
-                  padding: 1rem;
-                  border-radius: 0.5rem;
-                  text-align: center;
-                `}
-              >
-                <h2
-                  className={css`
-                    padding-top: 0.5rem;
-                  `}
-                >
-                  {t("howMuchGoesToMirlo")}
-                </h2>
-                <i
-                  className={css`
-                    padding: 0.5rem;
-                    padding-bottom: 1rem;
-                  `}
-                >
-                  {t("howMuchModalText")}
-                </i>
-                <p></p>
-                <i
-                  className={css`
-                    padding: 0.5rem;
-                  `}
-                >
-                  <Trans
-                    t={t}
-                    i18nKey="howMuchModalCalculator"
-                    components={{
-                      link: (
-                        <a
-                          href="https://aorta.coop/public-program-rates"
-                          target="_blank"
-                          rel="noreferrer"
-                        />
-                      ),
-                    }}
-                  />
-                </i>
-              </div>
-            </div>
-
-            <div
+              {t("howMuchGoesToMirlo")}
+            </h2>
+            <i
               className={css`
-                display: flex;
-                flex-direction: column;
-                align-items: left;
-                margin-top: 1rem;
-                gap: 0.5rem;
+                padding: 0.5rem;
+                padding-bottom: 1rem;
               `}
             >
-              {modalRows.map((row) => (
-                <div
-                  className={css`
-                    display: flex;
-                    flex-direction: row;
-                    gap: 1rem;
-                    width: 100%;
-                  `}
-                  key={row.key}
-                >
-                  <span
-                    className={css`
-                      min-width: 2rem;
-                    `}
-                  >
-                    <span
-                      className={css`
-                        padding-right: ${Number.parseInt(
-                          row.percent.slice(0, -1)
-                        ) * 0.5}rem;
-                        margin-right: ${Number.parseInt(
-                          row.percent.slice(0, -1)
-                        ) * -0.5}rem;
-                        background-color: var(--mi-primary-color);
-                      `}
-                    ></span>
-                    {row.percent}
-                  </span>
-                  <span
-                    className={css`
-                      min-width: 7rem;
-                    `}
-                  >
-                    {row.label}
-                  </span>
-                  <span
-                    className={css`
-                      min-width: 2rem;
-                    `}
-                  >
-                    {row.description}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <p
+              {t("howMuchModalText")}
+            </i>
+            <p></p>
+            <i
               className={css`
-                margin-top: 1rem;
+                padding: 0.5rem;
               `}
             >
               <Trans
                 t={t}
-                i18nKey="howMuchModalFinances"
+                i18nKey="howMuchModalCalculator"
                 components={{
                   link: (
                     <a
-                      href="https://mirlo.space/team/posts?tag=finances"
+                      href="https://aorta.coop/public-program-rates"
                       target="_blank"
                       rel="noreferrer"
                     />
                   ),
                 }}
               />
-            </p>
-          </Modal>
+            </i>
+          </div>
         </div>
-      </div>
+
+        <div
+          className={css`
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            margin-top: 1rem;
+            gap: 0.5rem;
+          `}
+        >
+          {modalRows.map((row) => (
+            <div
+              className={css`
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+                width: 100%;
+              `}
+              key={row.key}
+            >
+              <span
+                className={css`
+                  min-width: 2rem;
+                `}
+              >
+                <span
+                  className={css`
+                    padding-right: ${Number.parseInt(row.percent.slice(0, -1)) *
+                    0.5}rem;
+                    margin-right: ${Number.parseInt(row.percent.slice(0, -1)) *
+                    -0.5}rem;
+                    background-color: var(--mi-primary-color);
+                  `}
+                ></span>
+                {row.percent}
+              </span>
+              <span
+                className={css`
+                  min-width: 7rem;
+                `}
+              >
+                {row.label}
+              </span>
+              <span
+                className={css`
+                  min-width: 2rem;
+                `}
+              >
+                {row.description}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <p
+          className={css`
+            margin-top: 1rem;
+          `}
+        >
+          <Trans
+            t={t}
+            i18nKey="howMuchModalFinances"
+            components={{
+              link: (
+                <a
+                  href="https://mirlo.space/team/posts?tag=finances"
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              ),
+            }}
+          />
+        </p>
+      </Modal>
     </div>
   );
 };
