@@ -61,6 +61,7 @@ const TrackRowPlayControl: React.FC<{
           </span>
           {canPlayTrack && !isDisabled && (
             <Button
+              aria-label="Play track"
               size="compact"
               startIcon={<VscPlay />}
               className="play-button"
@@ -71,6 +72,7 @@ const TrackRowPlayControl: React.FC<{
       )}
       {playing && currentPlayingTrackId === trackId && (
         <Button
+          aria-label="Pause track"
           size="compact"
           startIcon={<TfiControlPause />}
           className="pause-button"
