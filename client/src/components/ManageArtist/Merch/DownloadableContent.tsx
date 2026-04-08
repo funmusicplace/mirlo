@@ -9,13 +9,13 @@ import { css } from "@emotion/css";
 import { FaDownload, FaTimes } from "react-icons/fa";
 import FormComponent from "components/common/FormComponent";
 import Pill from "components/common/Pill";
-import { UploadField, UploadLabelWrapper } from "../utils";
 import {
   ArtistButton,
   ArtistButtonAnchor,
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import UploadFiles from "components/ManageArtist/UploadFiles";
 
 const DownloadableContent: React.FC<{
   item: Merch | TrackGroup;
@@ -103,7 +103,6 @@ const DownloadableContent: React.FC<{
 
   return (
     <FormComponent>
-      <label>{t("downloadableContent")}</label>
       {isSaving && (
         <div>
           <LoadingSpinner size="small" fill={colors?.primary} />
@@ -134,34 +133,17 @@ const DownloadableContent: React.FC<{
           />
         </Pill>
       ))}
-
-      <UploadLabelWrapper
-        htmlFor="downloadableContent"
-        className={css`
-          height: 100px !important;
-          width: 100%;
-        `}
-      >
-        <div>{t("dropFilesHere")}</div>
-
-        <UploadField
-          type="file"
-          className="w-full"
-          id="downloadableContent"
-          multiple
-          onChange={(e) => handleFileChange(e.target.files)}
-          accept="application/pdf,image/*"
-        />
-      </UploadLabelWrapper>
-      <small
-        className={css`
-          margin-top: 1rem;
-        `}
-      >
-        {itemType === "release"
-          ? t("relatedDownloadableContentInfo")
-          : t("trackGroupRelatedDownloadableContent")}
-      </small>
+      <UploadFiles
+        accept="application/pdf,image/*"
+        hint={
+          itemType === "release"
+            ? t("relatedDownloadableContentInfo")
+            : t("trackGroupRelatedDownloadableContent")
+        }
+        label={t("downloadableContent")}
+        nameForId="other-files"
+        onChange={(e) => handleFileChange(e.target.files)}
+      />
     </FormComponent>
   );
 };
