@@ -5,6 +5,7 @@ import sendMail from "../jobs/send-mail";
 import { Job } from "bullmq";
 import { Artist } from "@mirlo/prisma/client";
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { getClient } from "../activityPub/utils";
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "MONTH" | "YEAR";
@@ -162,6 +163,8 @@ export const manageSubscriptionReceipt = async ({
     logger.info(
       `invoice.paid: ${processorPaymentReferenceId} found subscription, sending receipt`
     );
+
+    const client = await getClient();
     if (status === "COMPLETED") {
       await sendMailQueue.add("send-mail", {
         template: "artist-subscription-receipt",
@@ -174,7 +177,7 @@ export const manageSubscriptionReceipt = async ({
           artist: artistUserSubscription.artistSubscriptionTier.artist,
           artistUserSubscription,
           host: process.env.API_DOMAIN,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          client: client.applicationUrl,
         } as ArtistSubscriptionReceiptEmailType,
       });
 
@@ -215,7 +218,7 @@ export const manageSubscriptionReceipt = async ({
           },
           email: artistUserSubscription.user.email,
           host: process.env.API_DOMAIN,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          client: client.applicationUrl,
         } as ArtistNewSubscriberAnnounceEmailType,
       });
     } else if (urlParams && status === "FAILED") {
@@ -231,7 +234,7 @@ export const manageSubscriptionReceipt = async ({
           cardChargeContext: `your subscription to "${artistUserSubscription.artistSubscriptionTier.artist.name}'s ${artistUserSubscription.artistSubscriptionTier.name}" tier`,
           currency: artistUserSubscription.currency,
           pledgedAmountFormatted: artistUserSubscription.amount / 100,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          client: client.applicationUrl,
           urlParams,
         },
       });
