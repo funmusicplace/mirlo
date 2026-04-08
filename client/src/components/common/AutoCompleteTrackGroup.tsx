@@ -5,11 +5,18 @@ import api from "services/api";
 import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 const AutoCompleteTrackGroup: React.FC<{
+  id: string;
   onSelect: (val: number) => void;
   filterByArtistId?: number;
   placeholder?: string;
   includeLabelReleases?: boolean;
-}> = ({ onSelect, filterByArtistId, placeholder, includeLabelReleases }) => {
+}> = ({
+  id,
+  onSelect,
+  filterByArtistId,
+  placeholder,
+  includeLabelReleases,
+}) => {
   const getTrackGroupOptions = React.useCallback(
     async (searchString: string) => {
       if (filterByArtistId && includeLabelReleases) {
@@ -43,6 +50,7 @@ const AutoCompleteTrackGroup: React.FC<{
   return (
     <AutoComplete
       getOptions={getTrackGroupOptions}
+      id={id}
       placeholder={placeholder}
       onSelect={(val) => {
         if (typeof val === "number") {

@@ -49,7 +49,11 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
       <FormComponent className="w-1/2">
         <label>{t("addExistingArtistToRoster")}</label>
         <small>{t("addExistingArtistExplanation")}</small>
-        <AutoComplete getOptions={searchArtists} onSelect={setLabel} />
+        <AutoComplete
+          getOptions={searchArtists}
+          id="input-existing-artist"
+          onSelect={setLabel}
+        />
       </FormComponent>
       <FormComponent className="w-1/2">
         <label>{t("addNewArtistToRoster")}</label>

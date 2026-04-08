@@ -139,6 +139,7 @@ const HeaderSearch: React.FC = () => {
     >
       <AutoComplete
         getOptions={getOptions}
+        id="input-header-search"
         showBackground
         placeholder={t("search") ?? ""}
         usesNavigation

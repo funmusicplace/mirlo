@@ -157,6 +157,7 @@ const RecommendedTrackGroups: React.FC<{
               <label>{t("searchAlbums")}</label>
               <AutoComplete
                 getOptions={searchTrackGroups}
+                id="input-track-group"
                 onSelect={handleAddRecommendation}
                 placeholder={t("searchPlaceholder")}
               />

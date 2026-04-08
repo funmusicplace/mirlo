@@ -115,6 +115,7 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
             <label>{t("chooseAnAlbum")}</label>
             <AutoComplete
               getOptions={getTrackGroupOptions}
+              id="input-track-group"
               onSelect={(val) => {
                 if (hasId(val) && typeof val.id === "number") {
                   onChooseAlbum(val.id);

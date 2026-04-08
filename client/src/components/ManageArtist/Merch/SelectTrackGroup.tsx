@@ -78,6 +78,7 @@ const SelectTrackGroup: React.FC<{
         `}
       >
         <AutoCompleteTrackGroup
+          id="input-track-group"
           onSelect={(val) => doSave(val)}
           filterByArtistId={merch.artistId}
           includeLabelReleases

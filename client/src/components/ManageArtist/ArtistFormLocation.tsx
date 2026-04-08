@@ -210,6 +210,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
         <AutoComplete
           placeholder={t("searchLocations")}
           getOptions={handleSearchLocations}
+          id="input-location"
           onSelect={(result) => {
             if (typeof result === "object" && result !== null) {
               if (result.isNew) {
