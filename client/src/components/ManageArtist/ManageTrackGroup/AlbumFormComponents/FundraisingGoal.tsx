@@ -4,7 +4,6 @@ import SavingInput from "./SavingInput";
 import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
 import { useParams, Link } from "react-router-dom";
-import { FormSection } from "./AlbumFormContent";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
 import Button, { ButtonLink } from "components/common/Button";
@@ -126,7 +125,7 @@ const FundraisingGoal: React.FC<{
   }
 
   return (
-    <FormSection>
+    <>
       <div className="flex justify-between items-center w-full">
         <h2>{t("fundraisingGoal")}</h2>
         <div className="flex gap-2">
@@ -215,7 +214,7 @@ const FundraisingGoal: React.FC<{
           </small>
         </div>
       </FormComponent>
-    </FormSection>
+    </>
   );
 };
 

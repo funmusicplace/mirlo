@@ -1018,7 +1018,8 @@
     "labelReceivePaymentDescription": "You are a label who can manage releases for this artist. This is the account that will receive payments for this release. Go to your <labelPage>label page</labelPage> to manage these relationships. If you leave this blank, payments will go to the artist's personal account.",
     "thereWasAnError": "There was an error uploading this track.",
     "doneUploading": "Uploaded all tracks. We still need to process them on our servers, but you can now safely close the browser.",
-    "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
+    "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser.",
+    "downloadableContent": "Downloadable content"
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist page",

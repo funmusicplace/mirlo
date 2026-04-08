@@ -9,6 +9,7 @@ import { bp } from "../../../constants";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "../BackToArtistLink";
 import { useQuery } from "@tanstack/react-query";
@@ -42,6 +43,12 @@ export interface TrackGroupFormData {
   coverFile: File[];
   catalogNumber?: string;
 }
+
+export const FormSection = styled.div`
+  margin: 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--mi-darken-x-background-color);
+`;
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", {
@@ -175,39 +182,38 @@ const ManageTrackGroup: React.FC<{}> = () => {
         artist={artist}
         reload={() => refetch()}
       />
-      <h2
-        className={css`
-          margin-top: 1.5rem;
-        `}
-      >
-        {t("uploadTracks")}
-      </h2>
-      <ManageTrackDefaults reload={refetch} trackGroup={trackGroup} />
-      {trackGroup && trackGroup?.tracks?.length > 0 && (
-        <ManageTrackTable
-          tracks={trackGroup.tracks}
-          editable
-          trackGroupId={trackGroup.id}
-          artistId={artist.id}
-          owned
+      <FormSection>
+        <h2>{t("uploadTracks")}</h2>
+        <ManageTrackDefaults reload={refetch} trackGroup={trackGroup} />
+        {trackGroup && trackGroup?.tracks?.length > 0 && (
+          <ManageTrackTable
+            tracks={trackGroup.tracks}
+            editable
+            trackGroupId={trackGroup.id}
+            artistId={artist.id}
+            owned
+            reload={refetch}
+          />
+        )}
+        {trackGroup && (
+          <BulkTrackUpload
+            trackgroup={trackGroup}
+            reload={() => refetch()}
+            multiple
+          />
+        )}
+      </FormSection>
+      <FormSection>
+        <h2>{t("downloadableContent")}</h2>
+        <DownloadableContent
           reload={refetch}
+          item={trackGroup}
+          itemType="release"
         />
-      )}
-      {trackGroup && (
-        <BulkTrackUpload
-          trackgroup={trackGroup}
-          reload={() => refetch()}
-          multiple
-        />
-      )}
-      <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
-      <DownloadableContent
-        reload={refetch}
-        item={trackGroup}
-        itemType="release"
-      />
-      <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
-      <RecommendedTrackGroups trackGroupId={trackGroup.id} />
+      </FormSection>
+      <FormSection>
+        <RecommendedTrackGroups trackGroupId={trackGroup.id} />
+      </FormSection>
 
       <div
         className={css`
