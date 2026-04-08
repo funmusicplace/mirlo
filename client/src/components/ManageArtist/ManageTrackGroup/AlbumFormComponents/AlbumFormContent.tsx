@@ -41,17 +41,19 @@ const AlbumFormContent: React.FC<{
         <h2>{t("keyDetails")}</h2>
         <div className="md:grid md:grid-cols-2 gap-4">
           <FormComponent>
-            <label>{t("title")}</label>
+            <label htmlFor="input-title">{t("title")}</label>
             <SavingInput
               formKey="title"
+              id="input-title"
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
             />
           </FormComponent>
           <FormComponent>
-            <label>{t("urlSlug")}</label>
+            <label htmlFor="input-slug">{t("urlSlug")}</label>
             <SavingInput
               formKey="urlSlug"
+              id="input-slug"
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
             />
@@ -84,27 +86,31 @@ const AlbumFormContent: React.FC<{
           `}
         >
           <FormComponent>
-            <label>{t("publishedAt")}</label>
+            <label htmlFor="input-published-at">{t("publishedAt")}</label>
             <SavingInput
+              ariaDescribedBy="hint-published-at"
               formKey="publishedAt"
+              id="input-published-at"
               type="date"
               required
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
               reload={reload}
             />
-            <small>{t("publishedAtHint")}</small>
+            <small id="hint-published-at">{t("publishedAtHint")}</small>
           </FormComponent>
           <FormComponent>
-            <label>{t("releaseDate")}</label>
+            <label htmlFor="input-release-date">{t("releaseDate")}</label>
             <SavingInput
+              ariaDescribedBy="hint-release-date"
               formKey="releaseDate"
+              id="input-release-date"
               type="date"
               required
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
             />{" "}
-            <small>{t("releasedAtHint")}</small>
+            <small id="hint-release-date">{t("releasedAtHint")}</small>
           </FormComponent>
 
           <ManageTags tags={existingObject.tags} />
@@ -120,8 +126,6 @@ const AlbumFormContent: React.FC<{
             alignItems: "flex-start",
           }}
         >
-          <label>{t("cover")}</label>
-
           <UploadArtistImage
             imageTypeDescription={t("anAlbumCover")}
             existing={existingObject}
@@ -137,18 +141,20 @@ const AlbumFormContent: React.FC<{
       <FormSection>
         <h2>{t("aboutTheAlbum")}</h2>
         <FormComponent>
-          <label>{t("about")} </label>
+          <label htmlFor="input-about">{t("about")} </label>
           <SavingInput
             formKey="about"
+            id="input-about"
             rows={5}
             url={`manage/trackGroups/${trackGroupId}`}
             extraData={{ artistId: Number(artistId) }}
           />
         </FormComponent>
         <FormComponent>
-          <label>{t("credits")} </label>
+          <label htmlFor="input-credits">{t("credits")} </label>
           <SavingInput
             formKey="credits"
+            id="input-credits"
             rows={5}
             url={`manage/trackGroups/${trackGroupId}`}
             extraData={{ artistId: Number(artistId) }}
@@ -166,9 +172,10 @@ const AlbumFormContent: React.FC<{
           `}
         >
           <FormComponent>
-            <label>{t("catalogNumber")}</label>
+            <label htmlFor="input-catalog-number">{t("catalogNumber")}</label>
             <SavingInput
               formKey="catalogNumber"
+              id="input-catalog-number"
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
             />
