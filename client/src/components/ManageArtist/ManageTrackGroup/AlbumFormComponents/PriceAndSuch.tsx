@@ -15,7 +15,7 @@ import PaymentSlider from "./PaymentSlider";
 import { getCurrencySymbol } from "components/common/Money";
 import { useAuthContext } from "state/AuthContext";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
-import { FormSection } from "./AlbumFormContent";
+import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { InputEl } from "components/common/Input";

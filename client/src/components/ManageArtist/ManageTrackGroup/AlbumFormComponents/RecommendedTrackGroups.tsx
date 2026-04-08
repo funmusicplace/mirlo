@@ -6,7 +6,6 @@ import api from "services/api";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
-import { FormSection } from "./AlbumFormContent";
 import { FaTrash } from "react-icons/fa";
 import AutoComplete from "components/common/AutoComplete";
 import {
@@ -104,12 +103,11 @@ const RecommendedTrackGroups: React.FC<{
   };
 
   return (
-    <FormSection>
+    <>
       <h2>{t("recommendedAlbums")}</h2>
 
       {(results?.length ?? 0) > 0 && (
         <div className="mb-8">
-          <h3>{t("currentRecommendations")}</h3>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 mt-4">
             {results?.map((rec: TrackGroup) => (
               <div
@@ -175,7 +173,7 @@ const RecommendedTrackGroups: React.FC<{
           </>
         )}
       </div>
-    </FormSection>
+    </>
   );
 };
 
