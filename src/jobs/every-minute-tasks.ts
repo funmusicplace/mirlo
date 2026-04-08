@@ -13,4 +13,12 @@ const everyMinuteTasks = async () => {
   await triggerAutoPurchaseNewAlbums();
 };
 
-everyMinuteTasks();
+everyMinuteTasks()
+  .then(() => {
+    console.log("Every minute tasks completed successfully");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Every minute tasks failed:", error);
+    process.exit(1);
+  });
