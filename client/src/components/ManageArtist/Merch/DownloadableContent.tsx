@@ -136,7 +136,7 @@ const DownloadableContent: React.FC<{
       <UploadFiles
         accept="application/pdf,image/*"
         hint={
-          itemType === "release"
+          itemType !== "release"
             ? t("relatedDownloadableContentInfo")
             : t("trackGroupRelatedDownloadableContent")
         }
