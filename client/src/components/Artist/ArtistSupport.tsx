@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import ArtistManageSubscription from "./ArtistManageSubscription";
 import ArtistSupportBox from "./ArtistSupportBox";
+import ScrollButton from "./ScrollButton";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import FollowArtist from "components/common/FollowArtist";
@@ -110,7 +111,8 @@ const ArtistSupport: React.FC = () => {
   const onlyOneTier =
     artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length === 1;
 
-  console.log("artist.subscriptionTiers", onlyOneTier);
+  const moreThanThreeTiers =
+    artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length > 3;
 
   return (
     <>
@@ -135,21 +137,44 @@ const ArtistSupport: React.FC = () => {
           {t("noSubscriptionTiersYet", { artistName: artist.name })}
         </Box>
       )}
-      <div
-        className={
-          "list-none gap-3 grid grid-cols-1 md:grid-cols-3 gap-1 list-none" +
-          (onlyOneTier ? ` md:grid-cols-7` : ``)
-        }
-      >
-        {artist.subscriptionTiers
-          ?.filter((p) => !p.isDefaultTier)
-          .map((p) => (
-            <ArtistSupportBox
-              key={p.id}
-              subscriptionTier={p}
-              className={onlyOneTier ? `col-start-3 col-span-3` : ``}
-            />
-          ))}
+      <div className="relative">
+        {moreThanThreeTiers && (
+          <ScrollButton
+            direction="left"
+            scrollElementId="artist-support-tiers-scroll"
+            ariaLabel={t("scrollLeft")}
+          />
+        )}
+
+        <div
+          id="artist-support-tiers-scroll"
+          className={
+            "list-none gap-3 grid " +
+            (onlyOneTier
+              ? `md:grid-cols-7`
+              : moreThanThreeTiers
+                ? `grid-cols-1 md:grid-cols-none md:grid-flow-col md:auto-cols-[30%] md:snap-x md:snap-mandatory md:overflow-y-scroll`
+                : `grid-cols-1 md:grid-cols-3`)
+          }
+        >
+          {artist.subscriptionTiers
+            ?.filter((p) => !p.isDefaultTier)
+            .map((p) => (
+              <ArtistSupportBox
+                key={p.id}
+                subscriptionTier={p}
+                className={onlyOneTier ? `col-start-3 col-span-3` : ``}
+              />
+            ))}
+        </div>
+
+        {moreThanThreeTiers && (
+          <ScrollButton
+            direction="right"
+            scrollElementId="artist-support-tiers-scroll"
+            ariaLabel={t("scrollRight")}
+          />
+        )}
       </div>
     </>
   );
