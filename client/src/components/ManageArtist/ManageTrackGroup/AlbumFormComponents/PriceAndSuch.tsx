@@ -472,9 +472,14 @@ const PriceAndSuch: React.FC<{
             </FormComponent>
           </div>
         )}
-        {existingObject && existingObject?.tracks?.length > 0 && (
-          <SetPriceOfAllTracks tracks={existingObject.tracks} reload={reload} />
-        )}
+        {existingObject &&
+          existingObject?.tracks?.length > 0 &&
+          selectedPricingMode !== "no-payments" && (
+            <SetPriceOfAllTracks
+              tracks={existingObject.tracks}
+              reload={reload}
+            />
+          )}
       </div>
     </FormSection>
   );
