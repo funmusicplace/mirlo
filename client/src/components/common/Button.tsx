@@ -275,7 +275,7 @@ export const Button: React.FC<
       disabled={disabled}
       onlyIcon={!children || onlyIcon}
       title={children ? children.toString() : undefined}
-      aria-label={children ? children.toString() : ""}
+      aria-label={props["aria-label"] || (children ? children.toString() : "")}
       {...props}
     >
       {isLoading && (
