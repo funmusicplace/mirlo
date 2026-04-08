@@ -81,7 +81,7 @@ describe("manage album pricing", () => {
         });
       });
 
-    cy.get("#hasSuggestedPrice").check({ force: true });
+    cy.get("#input-has-suggested-price").check({ force: true });
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
@@ -105,7 +105,7 @@ describe("manage album pricing", () => {
         });
       });
 
-    cy.get("#hasSuggestedPrice").uncheck({ force: true });
+    cy.get("#input-has-suggested-price").uncheck({ force: true });
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {

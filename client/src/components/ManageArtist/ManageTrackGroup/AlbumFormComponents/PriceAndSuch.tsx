@@ -351,8 +351,10 @@ const PriceAndSuch: React.FC<{
                 flex-grow: 1;
               `}
             >
-              <label>{t("minimumPrice")}</label>
-              <small>{t("minimumPriceDescription")}</small>
+              <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
+              <small id="description-minimum-price">
+                {t("minimumPriceDescription")}
+              </small>
               <div
                 className={css`
                   display: flex;
@@ -374,34 +376,28 @@ const PriceAndSuch: React.FC<{
                   </div>
                 )}
                 <SavingInput
+                  ariaDescribedBy="description-minimum-price hint-minimum-price-access hint-minimum-price-currency"
                   formKey="minPrice"
+                  id="input-minimum-price"
                   type="number"
                   step="0.01"
                   min={0}
                   url={`manage/trackGroups/${trackGroupId}`}
                   extraData={{ artistId: Number(artistId) }}
                 />
-              </div>{" "}
-              <small>{t("pricingHelp")}</small>
+              </div>
+              <small id="hint-minimum-price-access">{t("pricingHelp")}</small>
               {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
-              <small>{t("currencyIsSetOnManageArtist")}</small>
+              <small id="hint-minimum-price-currency">
+                {t("currencyIsSetOnManageArtist")}
+              </small>
             </FormComponent>
 
-            <FormComponent
-              className={css`
-                flex-grow: 1;
-              `}
-            >
-              <label
-                htmlFor="hasSuggestedPrice"
-                className={css`
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                `}
-              >
+            <FormComponent className="grow">
+              <div className="flex items-center gap-1">
                 <InputEl
-                  id="hasSuggestedPrice"
+                  aria-describedby="hint-has-suggested-price hint-has-suggested-price-clarifier"
+                  id="input-has-suggested-price"
                   colors={colors}
                   type="checkbox"
                   checked={hasSuggestedPrice}
@@ -409,13 +405,22 @@ const PriceAndSuch: React.FC<{
                     onToggleSuggestedPrice(event.target.checked);
                   }}
                 />
-                {t("suggestAlternateDefaultPrice")}
-              </label>
+                <label
+                  htmlFor="input-has-suggested-price"
+                  id="label-has-suggested-price"
+                >
+                  {t("suggestAlternateDefaultPrice")}
+                </label>
+              </div>
 
               {hasSuggestedPrice && (
                 <>
-                  <small>{t("suggestedPriceDescription")}</small>
-                  <small>{t("suggestedPriceDescriptionClarifier")}</small>
+                  <small id="hint-has-suggested-price">
+                    {t("suggestedPriceDescription")}
+                  </small>
+                  <small id="hint-has-suggested-price-clarifier">
+                    {t("suggestedPriceDescriptionClarifier")}
+                  </small>
                   <div
                     className={css`
                       display: flex;
@@ -437,7 +442,9 @@ const PriceAndSuch: React.FC<{
                       </div>
                     )}
                     <SavingInput
+                      ariaLabelledBy="label-has-suggested-price"
                       formKey="suggestedPrice"
+                      id="input-suggested-price"
                       type="number"
                       step="0.01"
                       min={0}
