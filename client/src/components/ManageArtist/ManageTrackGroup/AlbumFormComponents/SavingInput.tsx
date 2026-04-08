@@ -16,6 +16,8 @@ import { getCurrencySymbol } from "components/common/Money";
 import TextEditor from "components/common/TextEditor";
 
 const SavingInput: React.FC<{
+  ariaDescribedBy?: string;
+  ariaLabelledBy?: string;
   formKey: string;
   url: string;
   extraData?: Object;
@@ -38,6 +40,8 @@ const SavingInput: React.FC<{
   textEditor?: boolean;
   textEditorProps?: { disableFloatingToolbar?: boolean; basicStyles?: boolean };
 }> = ({
+  ariaDescribedBy,
+  ariaLabelledBy,
   formKey,
   textEditor,
   textEditorProps,
@@ -157,6 +161,8 @@ const SavingInput: React.FC<{
         <>
           {!rows && (
             <InputEl
+              aria-describedby={ariaDescribedBy}
+              aria-labelledby={ariaLabelledBy}
               colors={colors}
               {...register(formKey)}
               onInput={saveOnInputDebounced}
@@ -177,6 +183,9 @@ const SavingInput: React.FC<{
           )}
           {rows && (
             <TextArea
+              aria-describedby={ariaDescribedBy}
+              aria-labelledby={ariaLabelledBy}
+              id={id}
               {...register(formKey)}
               rows={rows}
               colors={colors}
