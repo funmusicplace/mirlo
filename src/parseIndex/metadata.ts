@@ -19,12 +19,17 @@ export async function fetchAlbumMetadata(
   return await prisma.trackGroup.findFirst({
     where: {
       urlSlug: albumSlug,
+      deletedAt: null,
       artist: { urlSlug: artistSlug },
     },
     include: {
       artist: true,
       cover: true,
-      tracks: { include: { audio: true } },
+      tracks: {
+        where: { deletedAt: null },
+        include: { audio: true },
+        orderBy: { order: "asc" },
+      },
     },
   });
 }

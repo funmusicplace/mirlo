@@ -6,8 +6,7 @@ import trackGroupProcessor, {
   processSingleTrackGroup,
   whereForPublishedTrackGroups,
 } from "../../../../utils/trackGroup";
-import { merge, set } from "lodash";
-import { isTrackGroup } from "../../../../utils/typeguards";
+import { set } from "lodash";
 
 type Params = {
   userId: string;
