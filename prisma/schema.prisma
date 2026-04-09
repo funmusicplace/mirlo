@@ -168,9 +168,10 @@ model UserArtistNotificationSetting {
 }
 
 model ActivityPubArtistFollowers {
-  artistId Int
-  artist   Artist @relation(fields: [artistId], references: [id])
-  actor    String
+  artistId  Int
+  artist    Artist   @relation(fields: [artistId], references: [id])
+  actor     String
+  createdAt DateTime @default(now())
 
   @@unique([actor, artistId])
 }
@@ -196,6 +197,8 @@ model Notification {
   artist           Artist?                    @relation(fields: [artistId], references: [id])
   relatedUserId    Int?
   relatedUser      User?                      @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
+  /// NotificationMetaData
+  metadata         Json?
 }
 
 enum NotificationType {
@@ -209,6 +212,7 @@ enum NotificationType {
   SYSTEM_MESSAGE
   LABEL_ADDED_ARTIST
   FUNDRAISER_PLEDGE_CHARGED
+  AP_FOLLOW
 }
 
 enum NotificationDeliveryMethod {

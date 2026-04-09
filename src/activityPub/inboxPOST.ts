@@ -107,6 +107,15 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
           actor: req.body.actor,
         },
       });
+      await prisma.notification.create({
+        data: {
+          notificationType: "AP_FOLLOW",
+          userId: artist.userId,
+          metadata: {
+            ap: { actor: req.body.actor },
+          },
+        },
+      });
     }
     if (req.body.type === "Undo") {
       // Undo activities have the original activity wrapped in the "object" field
