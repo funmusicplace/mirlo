@@ -437,5 +437,70 @@ describe("subscription", () => {
       assert.equal(artistCall.template, "artist-new-subscriber-announce");
       assert.equal(artistCall.message.to, "payments@manager.com");
     });
+
+    it("should CC accounting email to artist notification if provided", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+        accountingEmail: "accounting@artist.com",
+      });
+
+      const { user: subscriber } = await createUser({
+        email: "follower@follower.com",
+        emailConfirmationToken: null,
+      });
+
+      const artist = await prisma.artist.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist-accounting",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: {
+          artistId: artist.id,
+          name: "Tier",
+        },
+      });
+
+      const subscriptionKey = "test-key-accounting-cc";
+      const invoiceId = "invoice-key-accounting-cc";
+
+      await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: subscriptionKey,
+          deletedAt: null,
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 1200,
+        },
+      });
+
+      await manageSubscriptionReceipt({
+        processorPaymentReferenceId: invoiceId,
+        processorSubscriptionReferenceId: subscriptionKey,
+        amountPaid: 1200,
+        currency: "usd",
+        platformCut: 240,
+        paymentProcessorFee: 30,
+        billingReason: "subscription_create",
+        status: "COMPLETED",
+      });
+
+      // Should have sent 2 emails
+      assert.equal(sendMailStub.callCount, 2);
+
+      // Second call: artist notification should have accounting email in CC
+      const artistCall = sendMailStub.getCall(1).args[1];
+      assert.equal(artistCall.template, "artist-new-subscriber-announce");
+      assert.equal(artistCall.message.to, "artist@artist.com");
+      assert.equal(artistCall.message.cc, "accounting@artist.com");
+    });
   });
 });

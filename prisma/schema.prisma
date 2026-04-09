@@ -78,6 +78,7 @@ model User {
   trustLevel                          Int?                            @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
   stripeCustomerId                    String?
   canCreateArtists                    Boolean                         @default(true)
+  accountingEmail                     String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
@@ -167,9 +168,10 @@ model UserArtistNotificationSetting {
 }
 
 model ActivityPubArtistFollowers {
-  artistId Int
-  artist   Artist @relation(fields: [artistId], references: [id])
-  actor    String
+  artistId  Int
+  artist    Artist   @relation(fields: [artistId], references: [id])
+  actor     String
+  createdAt DateTime @default(now())
 
   @@unique([actor, artistId])
 }
@@ -195,6 +197,8 @@ model Notification {
   artist           Artist?                    @relation(fields: [artistId], references: [id])
   relatedUserId    Int?
   relatedUser      User?                      @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
+  /// NotificationMetaData
+  metadata         Json?
 }
 
 enum NotificationType {
@@ -208,6 +212,7 @@ enum NotificationType {
   SYSTEM_MESSAGE
   LABEL_ADDED_ARTIST
   FUNDRAISER_PLEDGE_CHARGED
+  AP_FOLLOW
 }
 
 enum NotificationDeliveryMethod {
@@ -456,8 +461,8 @@ model ArtistUserSubscription {
   message                       String?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
   shippingAddress               Json?
-  renewalReminderSentAt         DateTime?                      // When renewal reminder was last sent
-  nextBillingDate               DateTime?                      // When Stripe will charge next (from invoice)
+  renewalReminderSentAt         DateTime? // When renewal reminder was last sent
+  nextBillingDate               DateTime? // When Stripe will charge next (from invoice)
 
   @@unique([userId, artistSubscriptionTierId])
 }

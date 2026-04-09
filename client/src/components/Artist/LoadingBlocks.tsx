@@ -17,10 +17,6 @@ const Shine = styled("div")`
   border-radius: 5px;
   background-size: 200% 100%;
 
-  @media (max-width: ${bp.small}px) {
-    margin: 1rem;
-  }
-
   @keyframes shine {
     to {
       background-position-x: -200%;
@@ -47,9 +43,10 @@ const LoadingBlocks: React.FC<{
         width: 100%;
         display: ${squares ? "grid" : "flex"};
         flex-direction: ${squares ? "none" : "column"};
-        grid-template-columns: ${squares
-          ? "repeat(auto-fit, minmax(150px, 1fr))"
-          : "none"};
+        grid-template-columns: ${squares ? `repeat(${rows}, 1fr)` : "none"};
+        @media screen and (max-width: ${bp.small}px) {
+          grid-template-columns: ${squares ? `repeat(2, 1fr)` : "none"};
+        }
         gap: ${margin};
       `}
     >
@@ -57,8 +54,9 @@ const LoadingBlocks: React.FC<{
         <Shine
           key={r}
           style={{
-            width: "100%",
-            height,
+            // width: squares ? height : "100%",
+            // height,
+            aspectRatio: squares ? "1 / 1" : "auto",
           }}
         />
       ))}

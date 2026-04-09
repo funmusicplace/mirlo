@@ -284,6 +284,10 @@ export const handleTrackGroupPurchase = async (
               trackGroup.paymentToUser?.email ??
               trackGroup.artist.paymentToUser?.email ??
               trackGroup.artist.user.email,
+            cc:
+              trackGroup.paymentToUser?.accountingEmail ??
+              trackGroup.artist.paymentToUser?.accountingEmail ??
+              trackGroup.artist.user.accountingEmail,
           },
           locals: {
             transactions,

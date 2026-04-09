@@ -2,6 +2,9 @@ extends ../layout.pug
 
 block content
     p Hi,
+    - const supportMessage = artist?.properties?.emails?.support
+    if supportMessage
+      div!= supportMessage
     p
       | Thank you for supporting #{artist.name} with your #{interval === 'month' ? 'monthly': 'yearly'} 
       | support at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
@@ -10,8 +13,6 @@ block content
         td #{artist.name}
         td.pa3 #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
     p To view all your subscriptions log in or create an account with this email address.
-    - const supportMessage = artist?.properties?.emails?.support
-    if supportMessage
-      div!= supportMessage
+    
     else
       p Enjoy!

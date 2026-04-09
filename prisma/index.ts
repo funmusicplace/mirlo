@@ -60,6 +60,11 @@ declare global {
       };
       tileBackgroundImage?: boolean;
     };
+    type NotificationMetaData = {
+      ap: {
+        actor: string;
+      };
+    };
   }
 }
 
