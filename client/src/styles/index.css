@@ -9,6 +9,10 @@ body {
   margin: 0;
 }
 
+h1[tabindex="-1"]:focus {
+  outline: none;
+}
+
 #root {
   min-height: 100vh;
 }
