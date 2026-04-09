@@ -67,4 +67,58 @@ describe("handleSubscription", () => {
     assert.equal(subscription.currency, "USD");
     assert.equal(subscription.stripeSubscriptionKey, "sub_test123");
   });
+
+  it("should create a USER_SUBSCRIBED_TO_YOU notification with subscriptionId set", async () => {
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const tier = await prisma.artistSubscriptionTier.create({
+      data: {
+        artistId: artist.id,
+        name: "Tier",
+      },
+    });
+
+    const mockSession = {
+      amount_total: 1000,
+      currency: "USD",
+      subscription: "sub_test123",
+    } as Stripe.Checkout.Session;
+
+    await handleSubscription(purchaser.id, tier.id, mockSession);
+
+    const subscription = await prisma.artistUserSubscription.findFirst({
+      where: { userId: purchaser.id, artistSubscriptionTierId: tier.id },
+    });
+    assert.ok(subscription, "Subscription should be created");
+
+    const notification = await prisma.notification.findFirst({
+      where: {
+        notificationType: "USER_SUBSCRIBED_TO_YOU",
+        relatedUserId: purchaser.id,
+      },
+    });
+
+    assert.ok(notification, "Notification should be created");
+    assert.equal(
+      notification.subscriptionId,
+      subscription.id,
+      "Notification should have subscriptionId set to the subscription id"
+    );
+  });
 });
