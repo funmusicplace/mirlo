@@ -17,10 +17,10 @@ function Label() {
     return <div>{t("labelNotFound")}</div>;
   }
 
-  const { data: label, isFetching } = useQuery(queryLabelBySlug(artistId));
+  const { data: label, isPending } = useQuery(queryLabelBySlug(artistId));
 
-  if (isFetching) {
-    return <LoadingBlocks />;
+  if (isPending) {
+    return <LoadingBlocks squares margin="1rem" />;
   }
 
   if (!label) {
@@ -28,13 +28,11 @@ function Label() {
   }
 
   return (
-    <>
-      <TrackgroupGrid gridNumber="4" as="ul" role="list">
-        {label?.artistLabels?.map((al) => (
-          <ArtistSquare key={al.artist.id} artist={al.artist} />
-        ))}
-      </TrackgroupGrid>
-    </>
+    <TrackgroupGrid gridNumber="4" as="ul" role="list">
+      {label?.artistLabels?.map((al) => (
+        <ArtistSquare key={al.artist.id} artist={al.artist} />
+      ))}
+    </TrackgroupGrid>
   );
 }
 

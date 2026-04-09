@@ -14,7 +14,7 @@ import { useAuthContext } from "state/AuthContext";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { ArtistButton } from "./ArtistButtons";
+import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
 import useErrorHandler from "services/useErrorHandler";
 import IncludedReleases from "./IncludedReleases";
 
@@ -28,6 +28,8 @@ const ArtistSupportBox: React.FC<{
   const { data: artist, refetch: refresh } = useQuery(
     queryArtist({ artistSlug: artistId })
   );
+
+  const { colors } = useGetArtistColors();
 
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
@@ -87,13 +89,30 @@ const ArtistSupportBox: React.FC<{
     !!subscriptionTier.merchDiscountPercent;
 
   return (
-    <div>
+    <div className="snap-center">
       <div
         className={
           className +
-          " border-1 border-(--mi-darken-xx-background-color) pb-5 mb-1 gap-5 bg-(--mi-darken-background-color) flex flex-col text-sm"
+          (isSubscribedToTier
+            ? css`
+                border-width: 4px;
+                border-color: ${colors?.primary ?? "var(--mi-primary-color)"};
+              `
+            : "border-(--mi-darken-xx-background-color) border-1") +
+          " relative border-inset pb-5 mb-1 gap-5 bg-(--mi-darken-background-color) flex flex-col text-sm"
         }
       >
+        {isSubscribedToTier && (
+          <div
+            className={`absolute top-0 right-0 w-0 h-0 border-t-[44px] border-l-[44px] border-t-[${colors?.primary ?? "var(--mi-primary-color)"}] border-l-transparent z-10`}
+          >
+            <span
+              className={`absolute -top-[40px] right-[6px] text-[${colors?.secondary ?? "var(--mi-secondary-color)"}] text-base leading-none`}
+            >
+              ♥
+            </span>
+          </div>
+        )}
         {subscriptionTier.images?.[0]?.image.sizes?.[625] && (
           <img
             src={
@@ -147,29 +166,28 @@ const ArtistSupportBox: React.FC<{
             </div>
           )}
           {(isSubscribedToTier || isSubscribedToArtist) && (
-            <Box className="px-3 py-0 text-center bg-(--mi-darken-background-color) mb-0">
+            <div className="flex items-center justify-center gap-3 flex-col">
+              {user && isSubscribedToArtist && !isSubscribedToTier && (
+                <ArtistButton
+                  onClick={() => subscribeToTier(subscriptionTier)}
+                  isLoading={isCheckingForSubscription}
+                >
+                  {t("chooseThisSubscription")}
+                </ArtistButton>
+              )}
+              {user && isSubscribedToTier && (
+                <ArtistButton
+                  onClick={() => cancelSubscription()}
+                  variant="outlined"
+                >
+                  {t("cancelSubscription")}
+                </ArtistButton>
+              )}
               <p>
-                {isSubscribedToArtist &&
-                  !isSubscribedToTier &&
-                  t("areSupporting", { artistName: artist.name })}
-                {isSubscribedToTier && t("supportAtThisTier")}
+                {isSubscribedToTier &&
+                  t("thankYouForSupporting", { artistName: artist.name })}
               </p>
-              <div className="flex items-center justify-center">
-                {user && isSubscribedToArtist && !isSubscribedToTier && (
-                  <ArtistButton
-                    onClick={() => subscribeToTier(subscriptionTier)}
-                    isLoading={isCheckingForSubscription}
-                  >
-                    {t("chooseThisSubscription")}
-                  </ArtistButton>
-                )}
-                {user && isSubscribedToTier && (
-                  <ArtistButton onClick={() => cancelSubscription()}>
-                    {t("cancelSubscription")}
-                  </ArtistButton>
-                )}
-              </div>
-            </Box>
+            </div>
           )}
         </div>
         {hasRewards && (

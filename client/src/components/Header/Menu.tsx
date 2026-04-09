@@ -135,6 +135,11 @@ const Menu = forwardRef<
                 </ul>
               </li>
             </CanCreateArtists>
+            <li>
+              <MenuLink onClick={onClose} to="/account">
+                {t("account")}
+              </MenuLink>
+            </li>
             {isAdmin && (
               <li>
                 <MenuLink onClick={onClose} to="/admin">

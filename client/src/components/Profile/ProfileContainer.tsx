@@ -29,11 +29,7 @@ const ProfileContainer: React.FC = () => {
           }
         `}
       >
-        <div
-          className={css`
-            margin-bottom: 1rem;
-          `}
-        >
+        <div className="mb-4">
           <WidthContainer variant="big" justify="center">
             <Tabs
               className={css`

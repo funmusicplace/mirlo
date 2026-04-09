@@ -7,6 +7,7 @@ interface Paginated<T> {
 
 interface LoggedInUser {
   email: string;
+  accountingEmail?: string;
   name: string;
   id: number;
   urlSlug?: string;
