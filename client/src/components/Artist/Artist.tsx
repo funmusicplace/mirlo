@@ -75,7 +75,7 @@ function Artist() {
 
   const artistId = params?.artistId ?? "";
 
-  const { data: artist, isLoading } = useQuery(
+  const { data: artist, isPending } = useQuery(
     queryArtist({ artistSlug: artistId })
   );
 
@@ -130,7 +130,7 @@ function Artist() {
     canReceivePayments,
   ]);
 
-  if (!artist && !isLoading) {
+  if (!artist && !isPending) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;

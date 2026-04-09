@@ -4,6 +4,7 @@ import prisma from "@mirlo/prisma";
 import { processSingleArtist } from "../../../utils/artist";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 import { turnItemsIntoRSS } from "../../../utils/rss";
+import { some } from "lodash";
 
 export default function () {
   const operations = {
@@ -29,11 +30,43 @@ export default function () {
           isLabel === "true" ? true : isLabel === "false" ? false : false,
       };
       if (!includeUnpublished) {
-        where.trackGroups = where.isLabelProfile
-          ? undefined
-          : {
-              some: whereForPublishedTrackGroups(),
-            };
+        if (where.isLabelProfile) {
+          where.OR = [
+            {
+              trackGroups: {
+                some: whereForPublishedTrackGroups(),
+              },
+            },
+            {
+              user: {
+                artistLabels: {
+                  some: {
+                    artist: {
+                      trackGroups: {
+                        some: whereForPublishedTrackGroups(),
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              user: {
+                artists: {
+                  some: {
+                    trackGroups: {
+                      some: whereForPublishedTrackGroups(),
+                    },
+                  },
+                },
+              },
+            },
+          ];
+        } else {
+          where.trackGroups = {
+            some: whereForPublishedTrackGroups(),
+          };
+        }
       }
 
       if (name && typeof name === "string") {
@@ -63,6 +96,8 @@ export default function () {
           orderByClause.createdAt = "desc";
         }
       }
+
+      console.log("where", where);
 
       const artists = await prisma.artist.findMany({
         where,

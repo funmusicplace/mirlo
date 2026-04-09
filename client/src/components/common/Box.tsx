@@ -14,7 +14,7 @@ export const ArtistBox: React.FC<{
 }> = (props) => {
   const { artistId } = useParams();
 
-  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+  const { data: artist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
 

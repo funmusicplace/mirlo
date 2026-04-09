@@ -17,10 +17,10 @@ function CheckoutComplete() {
   });
 
   const { artistId, merchId } = useParams();
-  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+  const { data: artist, isPending: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
-  const { data: merch, isLoading: isLoadingMerch } = useQuery(
+  const { data: merch, isPending: isLoadingMerch } = useQuery(
     queryMerch({ merchId: merchId ?? "", artistId: artistId ?? "" })
   );
 

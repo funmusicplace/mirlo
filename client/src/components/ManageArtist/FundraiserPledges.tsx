@@ -22,18 +22,18 @@ const FundraiserPledges: React.FC = () => {
   }>();
   const [includeCancelled, setIncludeCancelled] = React.useState(false);
 
-  const { data: fundraiser, isLoading: fundraiserLoading } = useQuery(
+  const { data: fundraiser, isPending: fundraiserLoading } = useQuery(
     queryManagedFundraiser(Number(fundraiserId))
   );
 
-  const { data: pledgesData, isLoading } = useQuery(
+  const { data: pledgesData, isPending } = useQuery(
     queryFundraiserPledges({
       fundraiserId: Number(fundraiserId),
       includeCancelled,
     })
   );
 
-  if (isLoading || fundraiserLoading) {
+  if (isPending || fundraiserLoading) {
     return <LoadingBlocks />;
   }
 

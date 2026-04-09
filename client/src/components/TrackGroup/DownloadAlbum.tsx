@@ -30,7 +30,7 @@ function DownloadAlbum() {
   const email = params.get("email");
   const { trackGroupId, artistId } = useParams();
 
-  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+  const { data: artist, isPending: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
