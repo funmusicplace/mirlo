@@ -1,27 +1,39 @@
-import { css } from "@emotion/css";
-import LinkWithIcon from "components/common/LinkWithIcon";
+import { Link, useSearchParams } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { useSearchParams } from "react-router-dom";
 
-const usePagination = ({ pageSize }: { pageSize: number }) => {
-  const [search] = useSearchParams();
+const usePagination = ({
+  pageSize,
+  pageParam = "page",
+}: {
+  pageSize: number;
+  pageParam?: string;
+}) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const pageSearch = search.get("page");
+  const pageSearch = searchParams.get(pageParam);
   const page = pageSearch ? +pageSearch : 0;
 
   const previousPage = new URLSearchParams({
     ...Object.fromEntries(searchParams),
-    page: `${page - 1}`,
+    [pageParam]: `${page - 1}`,
   });
 
   const nextPage = new URLSearchParams({
     ...Object.fromEntries(searchParams),
-    page: `${page + 1}`,
+    [pageParam]: `${page + 1}`,
   });
+
+  const resetPage = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete(pageParam);
+      return next;
+    });
+  };
 
   return {
     page,
+    resetPage,
     PaginationComponent: ({
       amount,
       total,
@@ -30,37 +42,30 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
       total?: number;
     }) => {
       const showNextPage = total && total > pageSize * (page + 1);
+      const showPrev = page > 0;
+      const showNext = amount === pageSize || !!showNextPage;
+
+      if (!showPrev && !showNext) return null;
 
       return (
-        <div
-          className={css`
-            display: flex;
-            width: 100%;
-            justify-content: center;
-            flex-direction: row;
-            flex-wrap: wrap;
-            padding: var(--mi-side-paddings-xsmall);
-          `}
-        >
-          {page > 0 && (
-            <LinkWithIcon to={`?${previousPage.toString()}`}>
-              <FaChevronLeft /> Previous page
-            </LinkWithIcon>
-          )}
-          {page > 0 && amount === pageSize && (
-            <span
-              className={css`
-                padding: 0 1rem;
-              `}
+        <div className="flex items-center justify-between py-3 text-sm">
+          {showPrev ? (
+            <Link
+              to={`?${previousPage.toString()}`}
+              className="inline-flex items-center gap-1.5 text-(--mi-light-foreground-color) hover:text-(--mi-normal-foreground-color) no-underline transition-colors"
             >
-              {" "}
-              -{" "}
-            </span>
+              <FaChevronLeft /> Previous
+            </Link>
+          ) : (
+            <span />
           )}
-          {(amount === pageSize || !!showNextPage) && (
-            <LinkWithIcon to={`?${nextPage.toString()}`}>
-              Next page <FaChevronRight />
-            </LinkWithIcon>
+          {showNext && (
+            <Link
+              to={`?${nextPage.toString()}`}
+              className="inline-flex items-center gap-1.5 text-(--mi-light-foreground-color) hover:text-(--mi-normal-foreground-color) no-underline transition-colors"
+            >
+              Next <FaChevronRight />
+            </Link>
           )}
         </div>
       );
