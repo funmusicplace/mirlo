@@ -18,7 +18,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { css } from "@emotion/css";
 import Thermometer from "components/TrackGroup/Thermometer";
 
-const TrackgroupButtons = styled.div`
+const TrackgroupButtons = styled.div<{ compact?: boolean }>`
   width: 100%;
   position: absolute;
   bottom: 0;
@@ -31,10 +31,10 @@ const TrackgroupButtons = styled.div`
     flex-grow: 1;
 
     button {
-      height: 3rem;
+      height: ${(props) => (props.compact ? "2rem" : "3rem")};
       color: white !important;
       font-weight: normal;
-      font-size: 1.3rem;
+      font-size: ${(props) => (props.compact ? "1rem" : "1.3rem")};
       text-overflow: ellipsis;
       overflow: hidden;
       text-transform: uppercase;
@@ -53,28 +53,32 @@ const TrackgroupButtons = styled.div`
 
   button {
     background-color: rgba(0, 0, 0, 0.6) !important;
-    min-height: 3rem;
-    min-width: 3rem;
+    min-height: ${(props) => (props.compact ? "2rem" : "3rem")};
+    min-width: ${(props) => (props.compact ? "2rem" : "3rem")};
   }
 
-  @media (max-width: ${bp.large}px) {
-    & > div:first-of-type {
+  ${(props) =>
+    !props.compact &&
+    `
+    @media (max-width: ${bp.large}px) {
+      & > div:first-of-type {
+        button {
+          height: 2rem;
+          font-size: 1rem;
+        }
+      }
+
       button {
-        height: 2rem;
-        font-size: 1rem;
+        font-size: 1.1rem;
+        min-width: 2rem;
+        min-height: 2rem;
       }
     }
-
-    button {
-      font-size: 1.1rem;
-      min-width: 2rem;
-      min-height: 2rem;
-    }
-  }
+  `}
 
   @media (max-width: ${bp.small}px) {
     & > div:first-of-type {
-      display: none;
+      display: ${(props) => (props.compact ? "none" : "none")};
     }
     button {
       font-size: 1.1rem;
@@ -216,6 +220,7 @@ const ClickToPlay: React.FC<
     title: string;
     image?: { width: number; height: number; url: string };
     className?: string;
+    compact?: boolean;
   }>
 > = ({
   trackGroup,
@@ -226,6 +231,7 @@ const ClickToPlay: React.FC<
   title,
   image,
   className,
+  compact,
   children,
 }) => {
   const {
@@ -274,7 +280,7 @@ const ClickToPlay: React.FC<
           {trackGroup.artist && url && (
             <Link to={url} aria-hidden tabIndex={-1}></Link>
           )}
-          <TrackgroupButtons>
+          <TrackgroupButtons compact={compact}>
             <div
               className={css`
                 text-overflow: ellipsis;
