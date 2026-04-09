@@ -542,6 +542,7 @@ export const registerTrackPurchase = async ({
         userId: refreshedPurchase?.track.trackGroup.artist.userId,
         relatedUserId: Number(userId),
         trackId: Number(trackId),
+        trackGroupId: refreshedPurchase?.track.trackGroup.id,
         artistId: refreshedPurchase?.track.trackGroup.artistId,
       },
     });

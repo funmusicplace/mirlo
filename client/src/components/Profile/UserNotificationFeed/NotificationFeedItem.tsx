@@ -1,94 +1,69 @@
-import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { WidthWrapper } from "components/common/WidthContainer";
 import React from "react";
-import { useTranslation } from "react-i18next";
-import api from "services/api";
 
 import UserBoughtYourAlbum from "./UserBoughtYourAlbum";
 import NewArtistPost from "./NewArtistPost";
 import NewArtistAlbum from "./NewArtistAlbum";
 import UserFollowedYou from "./UserFollowedYou";
-import { useAuthContext } from "state/AuthContext";
-
+import FundraiserPledge from "./FundraiserPledge";
 import LabelInvite from "./LabelInvite";
-import { set } from "lodash";
 
-const LI = styled.li<{ isRead: boolean }>`
+const categoryBorderColor = (type: Notification["notificationType"]) => {
+  switch (type) {
+    case "NEW_ARTIST_ALBUM":
+      return "#BE3455"; // Red 500
+    case "NEW_ARTIST_POST":
+      return "#5C899C"; // Blue
+    default:
+      return "transparent";
+  }
+};
+
+const LI = styled.li<{
+  isRead: boolean;
+  notificationType: Notification["notificationType"];
+  compact?: boolean;
+}>`
   background-color: ${(props) =>
-    props.isRead
-      ? `var(--mi-background-color)`
-      : `var(--mi-darken-background-color)`};
-  transition: background 0.5s;
-  padding: 0.75rem 1rem;
+    props.compact
+      ? `rgba(255, 255, 255, 0.5)`
+      : props.isRead
+        ? `rgba(0, 0, 0, 0.01)`
+        : `rgba(0, 0, 0, 0.025)`};
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   position: relative;
-
-  @keyframes roundtime {
-    to {
-      transform: scaleX(0);
-    }
-  }
-
-  .bar {
-    position: absolute;
-    height: 0.25rem;
-    width: 100%;
-    background-color: var(--mi-primary-color);
-    bottom: 0;
-    border-radius: 4px;
-    transition: opacity 0.3s;
-
-    transform-origin: left center;
-    animation: roundtime calc(2.5s) linear forwards;
-  }
+  overflow: hidden;
+  border-left: 3px solid
+    ${(props) => categoryBorderColor(props.notificationType)};
 `;
 
 const NotificationFeedItem: React.FC<{
   notification: Notification;
-  refetch: () => void;
-}> = ({ notification, refetch }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "notifications" });
-  const hoverRef = React.useRef<NodeJS.Timeout>();
-  const [isHovering, setIsHovering] = React.useState(false);
-  const { user } = useAuthContext();
-
-  const userId = user?.id;
-
-  const markNotificationAsRead = React.useCallback(
-    (id: string) => {
-      setIsHovering(true);
-      const timeout = setTimeout(async () => {
-        await api.put(`users/${userId}/notifications/${id}`, {});
-        refetch();
-        setIsHovering(false);
-      }, 2500);
-      hoverRef.current = timeout;
-    },
-    [userId]
-  );
-
+  compact?: boolean;
+}> = ({ notification, compact }) => {
   return (
     <LI
-      onMouseEnter={() => markNotificationAsRead(notification.id)}
-      onMouseLeave={() => {
-        if (hoverRef.current) {
-          clearTimeout(hoverRef.current);
-          setIsHovering(false);
-        }
-      }}
       isRead={notification.isRead}
+      notificationType={notification.notificationType}
+      compact={compact}
     >
       {notification.notificationType === "USER_BOUGHT_YOUR_ALBUM" && (
-        <UserBoughtYourAlbum notification={notification} />
+        <UserBoughtYourAlbum notification={notification} compact={compact} />
+      )}
+      {notification.notificationType === "USER_BOUGHT_YOUR_TRACK" && (
+        <UserBoughtYourAlbum notification={notification} compact={compact} />
+      )}
+      {notification.notificationType === "FUNDRAISER_PLEDGE_CHARGED" && (
+        <FundraiserPledge notification={notification} compact={compact} />
       )}
       {notification.notificationType === "USER_FOLLOWED_YOU" && (
-        <UserFollowedYou notification={notification} />
+        <UserFollowedYou notification={notification} compact={compact} />
       )}
       {notification.notificationType === "USER_SUBSCRIBED_TO_YOU" && (
-        <UserFollowedYou notification={notification} />
+        <UserFollowedYou notification={notification} compact={compact} />
       )}
       {notification.notificationType === "NEW_ARTIST_POST" && (
         <NewArtistPost notification={notification} />
@@ -99,7 +74,6 @@ const NotificationFeedItem: React.FC<{
       {notification.notificationType === "LABEL_ADDED_ARTIST" && (
         <LabelInvite notification={notification} />
       )}
-      <div className={!notification.isRead && isHovering ? "bar" : ""}></div>
     </LI>
   );
 };
