@@ -218,8 +218,8 @@ export const manageSubscriptionReceipt = async ({
           transaction: {
             amount: transaction.amount,
             currency: transaction.currency,
-            platformCut: transaction.platformCut,
-            stripeCut: transaction.stripeCut,
+            platformCut: transaction.platformCut ?? 0,
+            stripeCut: transaction.stripeCut ?? 0,
           },
           email: artistUserSubscription.user.email,
           host: process.env.API_DOMAIN,

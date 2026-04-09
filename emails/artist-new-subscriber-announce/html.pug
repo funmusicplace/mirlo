@@ -21,8 +21,8 @@ block content
           th Net Amount
       tr
         td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
-        td #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : ''}
-        td #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
-        td #{transaction.currency} #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
+        td #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : 0}
+        td #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : 0}
+        td #{transaction.currency.toUpperCase()} #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
   p To view all your supporters log in to Mirlo and go to your artist supporter page.
   p Enjoy!
