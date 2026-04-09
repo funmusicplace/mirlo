@@ -191,6 +191,11 @@ export const manageSubscriptionReceipt = async ({
         template: "artist-new-subscriber-announce",
         message: {
           to: artistNotificationEmail,
+          cc:
+            artistUserSubscription.artistSubscriptionTier.artist.paymentToUser
+              ?.accountingEmail ??
+            artistUserSubscription.artistSubscriptionTier.artist.user
+              .accountingEmail,
         },
         locals: {
           isNewSubscription,

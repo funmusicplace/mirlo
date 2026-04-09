@@ -69,6 +69,7 @@ export default function () {
     const { userId } = req.params as unknown as { userId: string };
     const {
       newEmail,
+      accountingEmail,
       name,
       properties,
       currency,
@@ -95,6 +96,7 @@ export default function () {
       let data: Prisma.UserUpdateInput = {
         name,
         currency,
+        accountingEmail,
         language,
         isLabelAccount,
         urlSlug,

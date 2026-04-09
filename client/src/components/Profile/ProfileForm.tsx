@@ -27,6 +27,7 @@ type FormData = {
   password?: string;
   urlSlug?: string;
   properties?: LoggedInUser["properties"];
+  accountingEmail?: string;
 };
 
 function ProfileForm() {
@@ -43,6 +44,7 @@ function ProfileForm() {
       isLabelAccount: user?.isLabelAccount,
       urlSlug: user?.urlSlug,
       properties: user?.properties || {},
+      accountingEmail: user?.accountingEmail,
     },
   });
   const { register, handleSubmit, watch, setValue } = methods;
@@ -127,6 +129,10 @@ function ProfileForm() {
               }}
             />
             <small>{t("makeSearchable")}</small>
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="accountingEmail">{t("accountingEmail")}</label>
+            <InputEl id="accountingEmail" {...register("accountingEmail")} />
           </FormComponent>
         </CanCreateArtists>
         {isLabelAccount && (

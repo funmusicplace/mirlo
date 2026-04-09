@@ -78,6 +78,7 @@ model User {
   trustLevel                          Int?                            @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
   stripeCustomerId                    String?
   canCreateArtists                    Boolean                         @default(true)
+  accountingEmail                     String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
@@ -456,8 +457,8 @@ model ArtistUserSubscription {
   message                       String?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
   shippingAddress               Json?
-  renewalReminderSentAt         DateTime?                      // When renewal reminder was last sent
-  nextBillingDate               DateTime?                      // When Stripe will charge next (from invoice)
+  renewalReminderSentAt         DateTime? // When renewal reminder was last sent
+  nextBillingDate               DateTime? // When Stripe will charge next (from invoice)
 
   @@unique([userId, artistSubscriptionTierId])
 }
