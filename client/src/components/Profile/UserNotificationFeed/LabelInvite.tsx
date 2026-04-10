@@ -43,17 +43,17 @@ const LabelInvite: React.FC<{ notification: Notification }> = ({
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="text-xs font-bold uppercase tracking-[0.08em] text-[#8B8083] mb-1">
+      <div className="flex-1 min-w-0 flex flex-col gap-2">
+        <div className="text-xs font-bold uppercase tracking-[0.08em] text-[#8B8083]">
           {t("labelTag")}
         </div>
-        <p className="mb-2 inline-block">
+        <p>
           <Link to={getArtistUrl(labelArtist)} className="font-bold">
             {labelArtist.name}
           </Link>{" "}
           {t("inviteToJoinLabel")}
         </p>
-        <p className="mb-2 inline-block">
+        <p>
           {t("manageOnArtistPage")}{" "}
           <ButtonLink
             endIcon={<FaChevronRight />}
@@ -66,7 +66,7 @@ const LabelInvite: React.FC<{ notification: Notification }> = ({
             {notification.artist?.name}
           </ButtonLink>
         </p>
-        <div className="text-xs text-(--mi-light-foreground-color) mt-1">
+        <div className="text-xs text-(--mi-light-foreground-color)">
           {formatRelativeTime({ date: notification.createdAt, i18n })}
         </div>
       </div>
