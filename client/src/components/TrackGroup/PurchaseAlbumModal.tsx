@@ -44,7 +44,7 @@ const PurchaseAlbumModal: React.FC<{
 
   const preOrderOrBuyText =
     trackGroup.minPrice === null
-      ? "saveAlbum"
+      ? "addToCollection"
       : trackGroup.fundraiser?.isAllOrNothing
         ? "backThisProject"
         : isBeforeReleaseDate
