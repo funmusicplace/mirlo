@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
   display: inline-flex;
-  background-color: var(--mi-darken-x-background-color);
+  background-color: var(--mi-lighten-x-background-color);
   border-radius: var(--mi-border-radius-x);
   border: var(--mi-border);
   padding: 0.25rem 0.5rem;
@@ -17,10 +17,6 @@ const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
     height: 1.75rem;
     width: 1.75rem;
   }
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--mi-lighten-background-color);
-  }
-
   ${(props) => {
     switch (props.variant) {
       case "warning":
