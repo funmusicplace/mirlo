@@ -39,7 +39,6 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
     amount: merch.minPrice / 100,
     currency: merch.currency,
   });
-  console.log("merch", merch.minPrice);
   return (
     <>
       <ArtistButton onClick={() => setIsOpen(true)}>

@@ -71,7 +71,6 @@ export default function () {
 
       // Match against shared route patterns
       const routeParams = matchRoute(pathSegments);
-      console.log("routeParams", routeParams);
 
       if (!routeParams) {
         throw new AppError({
@@ -150,7 +149,6 @@ export default function () {
             : postSlug
               ? await fetchPostMetadata(artistSlug, { slug: postSlug })
               : null;
-          console.log("post", post);
 
           if (post) {
             let imageUrl = post.featuredImage

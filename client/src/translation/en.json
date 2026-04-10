@@ -136,7 +136,8 @@
     "admin": "Admin",
     "manageLabel": "Manage label",
     "fulfillment": "Order fulfillment",
-    "viewSalesPage": "View sales"
+    "viewSalesPage": "View sales",
+    "accountingEmail": "Accounting email"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",
