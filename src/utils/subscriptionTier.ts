@@ -65,6 +65,7 @@ export const registerSubscription = async ({
       artistId: artistUserSubscription.artistSubscriptionTier.artistId,
       userId: artistUserSubscription.artistSubscriptionTier.artist.userId,
       relatedUserId: Number(userId),
+      subscriptionId: artistUserSubscription.id,
     },
   });
 

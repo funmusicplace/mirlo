@@ -183,19 +183,27 @@ interface Notification {
   content: string;
   isRead: boolean;
   id: string;
+  createdAt: string;
   notificationType:
     | "NEW_ARTIST_POST"
     | "NEW_ARTIST_ALBUM"
     | "USER_BOUGHT_YOUR_ALBUM"
+    | "USER_BOUGHT_YOUR_TRACK"
     | "USER_FOLLOWED_YOU"
     | "USER_SUBSCRIBED_TO_YOU"
-    | "LABEL_ADDED_ARTIST";
+    | "LABEL_ADDED_ARTIST"
+    | "FUNDRAISER_PLEDGE_CHARGED";
   post?: Post;
-  relatedUser?: User;
+  relatedUser?: User & {
+    userAvatar?: { sizes?: { [key: number]: string } };
+  };
   artist?: Artist;
   artistId?: number;
   subscription?: ArtistUserSubscription;
-  trackGroup?: TrackGroup & { artist: Artist };
+  trackGroup?: TrackGroup & {
+    artist: Artist;
+    purchase?: { transaction?: UserTransaction } | null;
+  };
 }
 
 interface Link {

@@ -1,6 +1,10 @@
 import { QueryFunction, queryOptions } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
-import { QUERY_KEY_NOTIFICATIONS, QUERY_KEY_TAGS } from "./queryKeys";
+import { QUERY_KEY_NOTIFICATIONS } from "./queryKeys";
+
+export const markAllNotificationsRead = (userId: number) => {
+  return api.put(`v1/users/${userId}/notifications/markAllRead`, {});
+};
 
 const fetchNotifications: QueryFunction<
   { results: Notification[]; total?: number },
@@ -10,15 +14,17 @@ const fetchNotifications: QueryFunction<
       userId?: number;
       skip?: number;
       take?: number;
-      orderBy?: "asc" | "count";
+      notificationType?: string[];
     },
     ...any,
   ]
-> = ({ queryKey: [_, { userId, skip, take, orderBy }], signal }) => {
+> = ({ queryKey: [_, { userId, skip, take, notificationType }], signal }) => {
   const params = new URLSearchParams();
   if (skip) params.append("skip", String(skip));
   if (take) params.append("take", String(take));
-  if (orderBy) params.append("orderBy", orderBy);
+  if (notificationType) {
+    notificationType.forEach((t) => params.append("notificationType", t));
+  }
 
   return api.get(`v1/users/${userId}/notifications?${params}`, { signal });
 };
@@ -28,7 +34,7 @@ export function queryNotifications(
   opts?: {
     skip?: number;
     take?: number;
-    orderBy?: "asc" | "count";
+    notificationType?: string[];
   }
 ) {
   return queryOptions({

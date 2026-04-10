@@ -27,6 +27,36 @@ export const formatDate = ({
   return releaseFormat;
 };
 
+export const formatRelativeTime = ({
+  date,
+  i18n,
+}: {
+  date: string;
+  i18n: i18n;
+}): string => {
+  const now = Date.now();
+  const then = new Date(date).getTime();
+  const diffSeconds = Math.round((then - now) / 1000);
+  const diffMinutes = Math.round(diffSeconds / 60);
+  const diffHours = Math.round(diffMinutes / 60);
+  const diffDays = Math.round(diffHours / 24);
+  const diffWeeks = Math.round(diffDays / 7);
+  const diffMonths = Math.round(diffDays / 30);
+  const diffYears = Math.round(diffDays / 365);
+
+  const rtf = new Intl.RelativeTimeFormat(i18n.resolvedLanguage, {
+    numeric: "auto",
+  });
+
+  if (Math.abs(diffSeconds) < 60) return rtf.format(diffSeconds, "second");
+  if (Math.abs(diffMinutes) < 60) return rtf.format(diffMinutes, "minute");
+  if (Math.abs(diffHours) < 24) return rtf.format(diffHours, "hour");
+  if (Math.abs(diffDays) < 7) return rtf.format(diffDays, "day");
+  if (Math.abs(diffWeeks) < 5) return rtf.format(diffWeeks, "week");
+  if (Math.abs(diffMonths) < 12) return rtf.format(diffMonths, "month");
+  return rtf.format(diffYears, "year");
+};
+
 export const calculateDateWithTimezoneOffset = (dateString: string) => {
   const date = new Date(dateString.split("T")[0]);
   const userTimezoneOffset = date.getTimezoneOffset() * 60000;

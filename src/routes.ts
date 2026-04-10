@@ -69,6 +69,7 @@ const routes = [
   "users/{userId}/banner",
   "users/{userId}/notifications",
   "users/{userId}/notifications/unreadCount",
+  "users/{userId}/notifications/markAllRead",
   "users/{userId}/notifications/{notificationId}",
   "users/{userId}/purchases",
   "users/{userId}/wishlist",
