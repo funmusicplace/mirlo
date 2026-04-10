@@ -133,26 +133,24 @@ const UserNotificationFeed = () => {
         {t("skipToActivity")}
       </a>
       <div className="flex flex-wrap md:flex-nowrap gap-8 items-start p-4">
-        <div className="w-full md-flex">
-          <NotificationColumn
-            title={t("timelineFollowing")}
-            userId={user.id}
-            baseTypes={FOLLOW_TYPES}
-            filterName="follow-filter"
-            filterOptions={[
-              {
-                value: "albums",
-                label: t("categoryAlbums"),
-                types: ["NEW_ARTIST_ALBUM"],
-              },
-              {
-                value: "posts",
-                label: t("categoryPosts"),
-                types: ["NEW_ARTIST_POST"],
-              },
-            ]}
-          />
-        </div>
+        <NotificationColumn
+          title={t("timelineFollowing")}
+          userId={user.id}
+          baseTypes={FOLLOW_TYPES}
+          filterName="follow-filter"
+          filterOptions={[
+            {
+              value: "albums",
+              label: t("categoryAlbums"),
+              types: ["NEW_ARTIST_ALBUM"],
+            },
+            {
+              value: "posts",
+              label: t("categoryPosts"),
+              types: ["NEW_ARTIST_POST"],
+            },
+          ]}
+        />
 
         <div
           id="activity-column"
