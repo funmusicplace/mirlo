@@ -4,6 +4,7 @@ import { sendMailQueue } from "../queues/send-mail-queue";
 import { parseOutIframes } from "./send-notification-email";
 import { processSinglePost } from "../utils/post";
 import { flatten, uniqBy } from "lodash";
+import { getClient } from "../activityPub/utils";
 
 /**
  * Job processor: Sends notification emails when a post is published
@@ -133,7 +134,7 @@ export default async function sendPostNotification(job: {
             },
             email: encodeURIComponent(notification.user?.email || ""),
             host: process.env.API_DOMAIN,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: (await getClient()).applicationUrl,
           },
         });
       }

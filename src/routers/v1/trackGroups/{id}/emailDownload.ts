@@ -8,6 +8,7 @@ import prisma from "@mirlo/prisma";
 
 import sendMail from "../../../../jobs/send-mail";
 import { randomUUID } from "crypto";
+import { getClient } from "../../../../activityPub/utils";
 import { Job } from "bullmq";
 
 export default function () {
@@ -84,7 +85,7 @@ export default function () {
               trackGroup,
               email,
               host: process.env.API_DOMAIN,
-              client: process.env.REACT_APP_CLIENT_DOMAIN,
+              client: (await getClient()).applicationUrl,
               token: purchase.singleDownloadToken,
             },
           },

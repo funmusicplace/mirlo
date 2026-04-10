@@ -3,6 +3,7 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { getClient } from "../activityPub/utils";
 
 const sendOnboardingEmail = async () => {
   const date = new Date();
@@ -64,7 +65,7 @@ const sendOnboardingEmail = async () => {
                 <p>If you have any questions or need assistance, feel free to reach out to us at hi@mirlo.space.</p>`,
 
                 host: process.env.API_DOMAIN,
-                client: process.env.REACT_APP_CLIENT_DOMAIN,
+                client: (await getClient()).applicationUrl,
               },
             });
             await prisma.user.update({

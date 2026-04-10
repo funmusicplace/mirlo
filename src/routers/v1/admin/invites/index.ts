@@ -8,6 +8,7 @@ import {
 } from "../../../../auth/passport";
 import { uniqBy } from "lodash";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
+import { getClient } from "../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -65,7 +66,7 @@ export default function () {
             ...newUser,
             email: encodeURIComponent(newUser.email),
             host: process.env.API_DOMAIN,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: (await getClient()).applicationUrl,
           },
         });
       });

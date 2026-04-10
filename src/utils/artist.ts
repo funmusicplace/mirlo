@@ -42,6 +42,7 @@ import { Job } from "bullmq";
 import { deleteMerch, processSingleMerch } from "./merch";
 import { getSiteSettings } from "./settings";
 import subscriptionTiers from "../routers/v1/manage/artists/{artistId}/subscriptionTiers";
+import { getClient } from "../activityPub/utils";
 
 type Params = {
   id: string;
@@ -171,7 +172,7 @@ export const createSubscriptionConfirmation = async (
           email,
           token: subscriptionConfirmation.token,
           host: process.env.API_DOMAIN,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          client: (await getClient()).applicationUrl,
         },
       },
     } as Job);

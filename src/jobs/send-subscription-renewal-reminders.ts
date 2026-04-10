@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import { Artist } from "@mirlo/prisma/client";
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { getClient } from "../activityPub/utils";
 
 export type SubscriptionRenewalReminderEmailType = {
   interval: "MONTH" | "YEAR";
@@ -111,7 +112,7 @@ const sendSubscriptionRenewalReminders = async () => {
                 updatedAt: subscription.updatedAt,
               },
               host: process.env.API_DOMAIN,
-              client: process.env.REACT_APP_CLIENT_DOMAIN,
+              client: (await getClient()).applicationUrl,
               renewalDate,
             } as SubscriptionRenewalReminderEmailType,
           });

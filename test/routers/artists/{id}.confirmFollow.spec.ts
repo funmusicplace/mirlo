@@ -68,8 +68,7 @@ describe("artists/{id}/confirmFollow", () => {
 
       assert.equal(response.status, 302);
       const redirectTo =
-        process.env.REACT_APP_CLIENT_DOMAIN +
-        `/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
+        `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =
@@ -126,8 +125,7 @@ describe("artists/{id}/confirmFollow", () => {
 
       assert.equal(response.status, 302);
       const redirectTo =
-        process.env.REACT_APP_CLIENT_DOMAIN +
-        `/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
+        `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =

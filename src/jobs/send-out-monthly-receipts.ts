@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import sendMail from "./send-mail";
 
 import logger from "../logger";
+import { getClient } from "../activityPub/utils";
 import { groupBy } from "lodash";
 import { Job } from "bullmq";
 
@@ -64,7 +65,7 @@ const sendOutMonthlyReceipts = async () => {
                 userSubscriptions,
                 user: userSubscriptions[0].user,
                 host: process.env.API_DOMAIN,
-                client: process.env.REACT_APP_CLIENT_DOMAIN,
+                client: (await getClient()).applicationUrl,
               } as AnnounceMonthlyReceiptsEmailType,
             },
           } as Job);

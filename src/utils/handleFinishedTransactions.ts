@@ -11,6 +11,7 @@ import {
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
+import { getClient } from "../activityPub/utils";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
 import { Job } from "bullmq";
@@ -176,6 +177,7 @@ export const handleTrackGroupPurchase = async (
   newUser?: boolean
 ) => {
   try {
+    const { applicationUrl } = await getClient();
     const { applicationFee, paymentProcessorFee } =
       await getApplicationFee(session);
     const amount = session?.amount_total ?? 0;
@@ -247,7 +249,7 @@ export const handleTrackGroupPurchase = async (
             isBeforeReleaseDate,
             token: purchase.singleDownloadToken,
             email: user.email,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: applicationUrl,
             host: process.env.API_DOMAIN,
           },
         },
@@ -300,7 +302,7 @@ export const handleTrackGroupPurchase = async (
             currency: transactions[0]?.currency ?? "USD",
             message: session?.metadata?.message,
             email: user.email,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: applicationUrl,
           } as ArtistPurchaseNotificationEmailType,
         },
       } as Job);
@@ -322,6 +324,7 @@ export const handleCataloguePurchase = async (
   session?: Stripe.Checkout.Session
 ) => {
   try {
+    const { applicationUrl } = await getClient();
     const artist = await prisma.artist.findFirst({
       where: {
         id: artistId,
@@ -405,7 +408,7 @@ export const handleCataloguePurchase = async (
             artist,
             trackGroups: artistTrackGroups,
             email: user.email,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: applicationUrl,
             host: process.env.API_DOMAIN,
           },
         },
@@ -559,6 +562,7 @@ const sendSaleEmails = async (
   message?: string
 ) => {
   try {
+    const { applicationUrl } = await getClient();
     const transactions = await prisma.userTransaction.findMany({
       where: {
         id: {
@@ -656,7 +660,7 @@ const sendSaleEmails = async (
           artist,
           transactions,
           email: purchaser.email,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          client: applicationUrl,
           host: process.env.API_DOMAIN,
         } as PurchaseReceiptEmailType,
       },
@@ -680,7 +684,7 @@ const sendSaleEmails = async (
           currency: transactions[0]?.currency ?? "USD",
           message: message ?? null,
           email: purchaser.email,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          client: applicationUrl,
           host: process.env.API_DOMAIN,
         } as ArtistPurchaseNotificationEmailType,
       },
@@ -1067,6 +1071,7 @@ export const handleFundraiserPledge = async (
 export const handleFundraiserPledgePaymentSuccess = async (
   transactionId: string
 ) => {
+  const { applicationUrl } = await getClient();
   const transaction = await prisma.userTransaction.findFirst({
     where: {
       id: transactionId,
@@ -1174,7 +1179,7 @@ export const handleFundraiserPledgePaymentSuccess = async (
       currency: pledge.fundraiser.trackGroups[0].currency,
       pledgedAmountFormatted: pledge.amount / 100,
       fundraisingGoalFormatted: (pledge.fundraiser.goalAmount ?? 0) / 100,
-      client: process.env.REACT_APP_CLIENT_DOMAIN,
+      client: applicationUrl,
     },
   });
 };
@@ -1183,6 +1188,7 @@ export const handleFundraiserPledgePaymentFailure = async (
   transactionId: string,
   urlParams: string
 ) => {
+  const { applicationUrl } = await getClient();
   const transaction = await prisma.userTransaction.findFirst({
     where: {
       id: transactionId,
@@ -1234,7 +1240,7 @@ export const handleFundraiserPledgePaymentFailure = async (
       cardChargeContext: `your pledge to "${transaction.associatedPledge.fundraiser.trackGroups[0].artist.name}'s ${transaction.associatedPledge.fundraiser.trackGroups[0].title}" fundraiser`,
       currency: transaction.associatedPledge.fundraiser.trackGroups[0].currency,
       pledgedAmountFormatted: transaction.associatedPledge.amount / 100,
-      client: process.env.REACT_APP_CLIENT_DOMAIN,
+      client: applicationUrl,
       urlParams,
     },
   });

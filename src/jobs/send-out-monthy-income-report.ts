@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
+import { getClient } from "../activityPub/utils";
 import { findSales } from "../routers/v1/artists/{id}/supporters";
 import { groupBy, keyBy } from "lodash";
 import sendMail from "./send-mail";
@@ -70,7 +71,7 @@ const sendOutMonthlyIncomeReport = async () => {
               userSales,
               totalIncome,
               host: process.env.API_DOMAIN,
-              client: process.env.REACT_APP_CLIENT_DOMAIN,
+              client: (await getClient()).applicationUrl,
             },
           },
         } as Job);

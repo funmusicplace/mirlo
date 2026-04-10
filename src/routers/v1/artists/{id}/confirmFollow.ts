@@ -7,6 +7,7 @@ import {
   subscribeUserToArtist,
 } from "../../../../utils/artist";
 import { getSiteSettings } from "../../../../utils/settings";
+import { getClient } from "../../../../activityPub/utils";
 
 type Params = {
   id: string;
@@ -26,6 +27,7 @@ export default function () {
     };
 
     try {
+      const { applicationUrl } = await getClient();
       const artist = await prisma.artist.findFirst({
         where: {
           id: Number(artistId),
@@ -48,7 +50,7 @@ export default function () {
 
       if (!confirmation) {
         res.redirect(
-          process.env.REACT_APP_CLIENT_DOMAIN + `/?message=Something went wrong`
+          applicationUrl + `/?message=Something went wrong`
         );
       }
 
@@ -96,7 +98,7 @@ export default function () {
           });
 
           res.redirect(
-            process.env.REACT_APP_CLIENT_DOMAIN +
+            applicationUrl +
               `/${artist.urlSlug}/checkout-complete?purchaseType=follow`
           );
         }

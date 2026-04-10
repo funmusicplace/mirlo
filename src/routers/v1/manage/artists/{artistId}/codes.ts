@@ -7,6 +7,7 @@ import {
 
 import prisma from "@mirlo/prisma";
 import { downloadCSVFile } from "../../../../../utils/download";
+import { getClient } from "../../../../../activityPub/utils";
 
 type Params = {
   artistId: string;
@@ -53,6 +54,7 @@ export default function () {
     const { group } = req.query as unknown as { group: string };
 
     try {
+      const { applicationUrl } = await getClient();
       const where: Prisma.TrackGroupDownloadCodesWhereInput = {
         trackGroup: {
           artistId: Number(artistId),
@@ -82,7 +84,7 @@ export default function () {
           csvColumns,
           artistCodes.map((c) => ({
             ...c,
-            url: `${process.env.REACT_APP_CLIENT_DOMAIN}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+            url: `${applicationUrl}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
           }))
         );
       }
@@ -90,7 +92,7 @@ export default function () {
       res.json({
         results: artistCodes.map((c) => ({
           ...c,
-          url: `${process.env.REACT_APP_CLIENT_DOMAIN}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+          url: `${applicationUrl}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
         })),
       });
     } catch (error) {
