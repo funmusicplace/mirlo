@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
+import { moneyDisplay } from "components/common/Money";
 
 const UserBoughtYourAlbum: React.FC<{
   notification: Notification;
@@ -91,10 +92,9 @@ const UserBoughtYourAlbum: React.FC<{
                   : "inline-block text-xs font-semibold py-0.5 px-2 rounded-full bg-[#E1F4FC] text-[#34515C] mt-1 whitespace-nowrap"
               }
             >
-              {(
-                notification.trackGroup.purchase.transaction.amount / 100
-              ).toLocaleString(undefined, {
-                style: "currency",
+              {moneyDisplay({
+                amount:
+                  notification.trackGroup.purchase.transaction.amount / 100,
                 currency:
                   notification.trackGroup.purchase.transaction.currency.toUpperCase(),
               })}
