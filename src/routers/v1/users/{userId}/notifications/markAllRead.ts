@@ -1,8 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { AppError } from "../../../../../utils/error";
 
 type Params = {
   userId: string;
@@ -10,16 +11,11 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, PUT],
+    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
   };
 
   async function PUT(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
-
-    if (Number(userId) !== Number(loggedInUser.id)) {
-      throw new AppError({ httpCode: 401, description: "Invalid access" });
-    }
 
     await prisma.notification.updateMany({
       where: { userId: Number(userId), isRead: false },
