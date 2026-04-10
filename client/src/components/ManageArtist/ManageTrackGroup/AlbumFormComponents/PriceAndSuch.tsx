@@ -394,8 +394,8 @@ const PriceAndSuch: React.FC<{
                 flex-grow: 1;
               `}
             >
-              <label>{t("platformPercent")}</label>
               <PaymentSlider
+                label={t("platformPercent")}
                 url={`manage/trackGroups/${trackGroupId}`}
                 extraData={{ artistId: Number(artistId) }}
               />
