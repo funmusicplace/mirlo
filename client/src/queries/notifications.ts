@@ -2,8 +2,9 @@ import { QueryFunction, queryOptions } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_NOTIFICATIONS } from "./queryKeys";
 
-export const markAllNotificationsRead = (userId: number) =>
-  api.put(`v1/users/${userId}/notifications/markAllRead`, {});
+export const markAllNotificationsRead = (userId: number) => {
+  return api.put(`v1/users/${userId}/notifications/markAllRead`, {});
+};
 
 const fetchNotifications: QueryFunction<
   { results: Notification[]; total?: number },
