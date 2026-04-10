@@ -31,8 +31,8 @@ const UserFollowedYou: React.FC<{
       <div
         className={
           compact
-            ? "w-7 h-7 rounded-full shrink-0 bg-[#BE3455] flex items-center justify-center font-bold text-xs text-white"
-            : "w-11 h-11 rounded-full shrink-0 bg-[#BE3455] flex items-center justify-center font-bold text-base text-white"
+            ? "w-7 h-7 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-xs text-white"
+            : "w-11 h-11 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-base text-white"
         }
       >
         {(userName?.[0] ?? "?").toUpperCase()}
@@ -40,7 +40,7 @@ const UserFollowedYou: React.FC<{
 
       <div className="flex-1 min-w-0">
         {!compact && (
-          <div className="text-xs font-bold uppercase tracking-[0.08em] text-[#BE3455] mb-1">
+          <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-pink) mb-1">
             {isSubscription ? t("newSubscriber") : t("newFollower")}
           </div>
         )}
@@ -66,8 +66,8 @@ const UserFollowedYou: React.FC<{
           <span
             className={
               compact
-                ? "inline-block text-xs font-semibold py-0 px-1.5 rounded-full bg-[#FFE5EA] text-[#6E162D] mt-0.5 whitespace-nowrap"
-                : "inline-block text-xs font-semibold py-0.5 px-2 rounded-full bg-[#FFE5EA] text-[#6E162D] mt-1 whitespace-nowrap"
+                ? "inline-block text-xs font-semibold py-0 px-1.5 rounded-full bg-(--mi-red-100) text-(--mi-red-700) mt-0.5 whitespace-nowrap"
+                : "inline-block text-xs font-semibold py-0.5 px-2 rounded-full bg-(--mi-red-100) text-(--mi-red-700) mt-1 whitespace-nowrap"
             }
           >
             {notification.subscription.artistSubscriptionTier.name}

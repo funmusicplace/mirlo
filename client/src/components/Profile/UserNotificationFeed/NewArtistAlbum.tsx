@@ -37,7 +37,7 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-bold uppercase tracking-[0.08em] text-[#BE3455] mb-1">
+        <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-pink) mb-1">
           {t("newRelease")}
         </div>
         <div className="text-sm font-semibold truncate text-(--mi-normal-foreground-color)">

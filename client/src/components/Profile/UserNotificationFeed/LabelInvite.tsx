@@ -28,7 +28,7 @@ const LabelInvite: React.FC<{ notification: Notification }> = ({
 
   return (
     <div className="flex items-start gap-3.5 py-3.5 px-4">
-      <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-[#8B8083] flex items-center justify-center font-bold text-sm text-white">
+      <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-(--mi-neutral-500) flex items-center justify-center font-bold text-sm text-white">
         {avatarUrl ? (
           <ImageWithPlaceholder
             src={avatarUrl}
@@ -44,7 +44,7 @@ const LabelInvite: React.FC<{ notification: Notification }> = ({
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col gap-2">
-        <div className="text-xs font-bold uppercase tracking-[0.08em] text-[#8B8083]">
+        <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-neutral-500)">
           {t("labelTag")}
         </div>
         <p>

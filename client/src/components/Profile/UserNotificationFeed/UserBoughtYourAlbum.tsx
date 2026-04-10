@@ -50,8 +50,8 @@ const UserBoughtYourAlbum: React.FC<{
           <div
             className={
               compact
-                ? "w-7 h-7 rounded bg-[#E1F4FC] opacity-40"
-                : "w-10 h-10 rounded bg-[#E1F4FC] opacity-40"
+                ? "w-7 h-7 rounded bg-(--mi-blue-100) opacity-40"
+                : "w-10 h-10 rounded bg-(--mi-blue-100) opacity-40"
             }
           />
         )}
@@ -59,7 +59,7 @@ const UserBoughtYourAlbum: React.FC<{
 
       <div className="flex-1 min-w-0">
         {!compact && (
-          <div className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C899C] mb-1">
+          <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-info-background-color) mb-1">
             {t("purchaseTag")}
           </div>
         )}
@@ -88,8 +88,8 @@ const UserBoughtYourAlbum: React.FC<{
             <span
               className={
                 compact
-                  ? "inline-block text-xs font-semibold py-0 px-1.5 rounded-full bg-[#E1F4FC] text-[#34515C] mt-0.5 whitespace-nowrap"
-                  : "inline-block text-xs font-semibold py-0.5 px-2 rounded-full bg-[#E1F4FC] text-[#34515C] mt-1 whitespace-nowrap"
+                  ? "inline-block text-xs font-semibold py-0 px-1.5 rounded-full bg-(--mi-blue-100) text-(--mi-blue-700) mt-0.5 whitespace-nowrap"
+                  : "inline-block text-xs font-semibold py-0.5 px-2 rounded-full bg-(--mi-blue-100) text-(--mi-blue-700) mt-1 whitespace-nowrap"
               }
             >
               {moneyDisplay({

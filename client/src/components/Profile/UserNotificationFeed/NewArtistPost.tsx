@@ -35,7 +35,7 @@ const NewArtistPost: React.FC<{ notification: Notification }> = ({
       )}
       <div className="py-3 px-4">
         {!featuredImageSrc && (
-          <div className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C899C] mb-1">
+          <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-info-background-color) mb-1">
             {t("newPost")}
           </div>
         )}

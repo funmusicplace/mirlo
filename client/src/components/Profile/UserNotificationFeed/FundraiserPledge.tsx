@@ -44,8 +44,8 @@ const FundraiserPledge: React.FC<{
             <div
               className={
                 compact
-                  ? "w-7 h-7 rounded bg-[#DFF2DC] opacity-40"
-                  : "w-10 h-10 rounded bg-[#DFF2DC] opacity-40"
+                  ? "w-7 h-7 rounded bg-(--mi-green-100) opacity-40"
+                  : "w-10 h-10 rounded bg-(--mi-green-100) opacity-40"
               }
             />
           )}
