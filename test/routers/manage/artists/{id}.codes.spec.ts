@@ -93,7 +93,7 @@ describe("manage/artists/{artistId}/codes", () => {
       assert.equal(rows[1].split(",")[0], codes[0].trackGroupId);
       assert.equal(
         rows[1].split(",")[6].replaceAll('"', ""),
-        `${process.env.REACT_APP_CLIENT_DOMAIN}/${artist.urlSlug}/release/${trackGroup.urlSlug}/redeem?code=${codes[0].downloadCode}`
+        `http://localhost:8080/${artist.urlSlug}/release/${trackGroup.urlSlug}/redeem?code=${codes[0].downloadCode}`
       );
     });
   });
