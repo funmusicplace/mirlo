@@ -17,8 +17,10 @@ COPY prisma/package.json ./prisma/package.json
 COPY client/package.json ./client/package.json
 RUN --mount=type=cache,target=/root/.yarn,sharing=locked YARN_CACHE_FOLDER=/root/.yarn yarn install --immutable
 
-COPY . .
+COPY prisma ./prisma
 RUN yarn prisma:build
+
+COPY . .
 
 EXPOSE 3000
 
