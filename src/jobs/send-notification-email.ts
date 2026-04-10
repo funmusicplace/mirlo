@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { Artist, Notification } from "@mirlo/prisma/client";
 import logger from "../logger";
 import { sendMailQueue, sendMailQueueEvents } from "../queues/send-mail-queue";
+import { getClient } from "../activityPub/utils";
 
 export const parseOutIframes = async (content: string) => {
   // Replace <iframe src="https://mirlo.space/widget/trackGroup/:id"> or <iframe src="https://mirlo.space/widget/track/:id">
@@ -54,6 +55,7 @@ export const parseOutIframes = async (content: string) => {
     const trackMap = Object.fromEntries(tracks.map((t) => [t.id, t]));
 
     // Replace iframes with divs containing info
+    const { applicationUrl } = await getClient();
     htmlContent = htmlContent.replace(
       iframeRegex,
       (_match, _before, type, id, _after) => {
@@ -66,7 +68,7 @@ export const parseOutIframes = async (content: string) => {
           const foreground = tg.artist.properties?.colors?.foreground || "#111";
           return `<div data-type="trackGroup" data-id="${id}" style="display:flex;flex-direction:row;gap:8px;background-color:${background};border-radius:8px;padding:16px;">
                     <div>
-                      <a href="${process.env.REACT_APP_CLIENT_DOMAIN}/${tg.artist.urlSlug}/release/${tg.urlSlug}" style="
+                      <a href="${applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}" style="
                       display:inline-block;
                       text-decoration:none;
                       background:${primary};
@@ -86,7 +88,7 @@ export const parseOutIframes = async (content: string) => {
                     </div>
                     <div>
                       <strong>${tg.title}</strong><br/>
-                      <a href="${process.env.REACT_APP_CLIENT_DOMAIN}/${tg.artist.urlSlug}" style="color:${primary};text-decoration:none;">
+                      <a href="${applicationUrl}/${tg.artist.urlSlug}" style="color:${primary};text-decoration:none;">
                         ${tg.artist?.name || "Unknown"}
                       </a><br/>
                       <ol>
@@ -106,7 +108,7 @@ export const parseOutIframes = async (content: string) => {
             t.trackGroup.artist.properties?.colors?.foreground || "#111";
           return `<div data-type="track" data-id="${id}" style="display:flex;flex-direction:column;gap:8px;background-color:${background};border-radius:8px;padding:16px;">
                   <div>
-                    <a href="${process.env.REACT_APP_CLIENT_DOMAIN}/${t.trackGroup.artist.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}" style="display:inline-block;
+                    <a href="${applicationUrl}/${t.trackGroup.artist.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}" style="display:inline-block;
                       text-decoration:none;
                       background:${primary};
                       color:${foreground};
@@ -125,7 +127,7 @@ export const parseOutIframes = async (content: string) => {
                   </div>
                   <div>
                     <strong>${t.title}</strong><br/>
-                    <a href="${process.env.REACT_APP_CLIENT_DOMAIN}/${t.trackGroup.artist.urlSlug}" style="color:${foreground}; text-decoration:none;">
+                    <a href="${applicationUrl}/${t.trackGroup.artist.urlSlug}" style="color:${foreground}; text-decoration:none;">
                       ${t.trackGroup.artist?.name || "Unknown"}
                     </a>
                   </div>
@@ -177,6 +179,7 @@ const sendLabelInviteNotification = async (
       isLabelProfile: true,
     },
   });
+  const { applicationUrl } = await getClient();
 
   try {
     await sendMailQueue.add("send-mail", {
@@ -189,7 +192,7 @@ const sendLabelInviteNotification = async (
         email: encodeURIComponent(notification.user.email),
         host: process.env.API_DOMAIN,
         label: labelProfile,
-        client: process.env.REACT_APP_CLIENT_DOMAIN,
+        client: applicationUrl,
       },
     });
 

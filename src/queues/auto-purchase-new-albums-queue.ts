@@ -4,6 +4,7 @@ import { logger } from "../logger";
 import prisma from "@mirlo/prisma";
 import { sendMailQueue } from "./send-mail-queue";
 import { registerPurchase } from "../utils/trackGroup";
+import { getClient } from "../activityPub/utils";
 
 export type AutomaticallyReceivedAlbumEmailType = {
   trackGroup: {
@@ -148,7 +149,7 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
         trackGroup: album,
         artist: subscription.artistSubscriptionTier.artist,
         host: process.env.API_DOMAIN,
-        client: process.env.REACT_APP_CLIENT_DOMAIN,
+        client: (await getClient()).applicationUrl,
       } as AutomaticallyReceivedAlbumEmailType,
     });
 

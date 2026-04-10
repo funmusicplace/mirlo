@@ -4,6 +4,7 @@ import sendMail from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import prisma from "@mirlo/prisma";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
+import { getClient } from "../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -48,7 +49,7 @@ export default function () {
             to: "hi@mirlo.space",
           },
           locals: {
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: (await getClient()).applicationUrl,
             email,
             reason,
             description,

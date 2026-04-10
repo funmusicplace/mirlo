@@ -4,6 +4,7 @@ import prisma from "@mirlo/prisma";
 
 import sendMail from "../../../../jobs/send-mail";
 import { Job } from "bullmq";
+import { getClient } from "../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -36,7 +37,7 @@ export default function () {
           },
           locals: {
             trackGroup,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: (await getClient()).applicationUrl,
           },
         },
       } as Job);

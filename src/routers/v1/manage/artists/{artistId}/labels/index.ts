@@ -37,7 +37,7 @@ const sendArtistNotificationOfLabel = async (
             has invited you to join their roster.
           </p>
           <p>To accept their invitation, 
-            <a href="${client}/manage/artists/${artist.id}/customize#labels">
+            <a href="${client.applicationUrl}/manage/artists/${artist.id}/customize#labels">
             manage your artist account on Mirlo</a>.
           </p>
           <p>
@@ -75,7 +75,7 @@ const sendArtistNotificationOfLabel = async (
           email: encodeURIComponent(artistUser.email),
           host: process.env.API_DOMAIN,
           label: labelProfile,
-          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          client: client.applicationUrl,
         },
       });
     }

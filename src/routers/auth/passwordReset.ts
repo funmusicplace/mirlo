@@ -4,6 +4,7 @@ import { hashPassword, setTokens } from "./utils";
 import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import logger from "../../logger";
+import { getClient } from "../../activityPub/utils";
 
 import { randomUUID } from "crypto";
 
@@ -110,7 +111,7 @@ export const passwordResetInitiate = async (
           locals: {
             user: result,
             host: process.env.API_DOMAIN,
-            clientDomain: process.env.REACT_APP_CLIENT_DOMAIN,
+            clientDomain: (await getClient()).applicationUrl,
             redirectClient,
             accountIncomplete,
             token,
