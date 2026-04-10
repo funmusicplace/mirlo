@@ -182,7 +182,7 @@
     "label": "Label",
     "makeSearchable": "Enabling this will let artists find your label and request to be added to your roster. Artists will then be able to say for which albums payments will be sent to the payment processor linked to this Stripe account.",
     "isLabelAccount": "Label/Collective account",
-    "notifications": "Notifications",
+    "yourFeed": "Your feed",
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API.",
     "email": "Email:",
@@ -1148,7 +1148,7 @@
     "socialBlueSky": "{{username}} on BlueSky"
   },
   "notifications": {
-    "notifications": "Notifications",
+    "yourFeed": "Your feed",
     "readPost": "Read post",
     "viewAlbum": "View release",
     "newReleaseCount": "{{count}} tracks release",

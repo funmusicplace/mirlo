@@ -68,8 +68,8 @@ const ProfileContainer: React.FC = () => {
                 </li>
               )}
               <li>
-                <NavLink to="/profile/notifications">
-                  {t("notifications")}
+                <NavLink to="/profile/feed">
+                  {t("yourFeed")}
                   <UnreadCountPill />
                 </NavLink>
               </li>

@@ -218,7 +218,7 @@ const routes: RouteObject[] = [
             },
           },
           {
-            path: "notifications",
+            path: "feed",
             async lazy() {
               const { default: Component } = await import(
                 "components/Profile/UserNotificationFeed"
