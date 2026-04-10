@@ -74,7 +74,6 @@ const NotificationColumn: React.FC<{
     value: string;
     label: string;
     types: Notification["notificationType"][];
-    checkExists?: boolean;
   }[];
   filterName: string;
   compact?: boolean;
@@ -85,39 +84,6 @@ const NotificationColumn: React.FC<{
     pageSize,
     pageParam: filterName,
   });
-
-  // Conditional options need individual existence checks (can't call hooks in a loop)
-  const cOpts = filterOptions.filter((o) => o.checkExists);
-  const cOpt0 = cOpts[0];
-  const cOpt1 = cOpts[1];
-
-  const { data: cData0 } = useQuery({
-    ...queryNotifications(userId, {
-      take: 1,
-      notificationType: cOpt0?.types ?? [],
-    }),
-    enabled: !!cOpt0,
-  });
-  const { data: cData1 } = useQuery({
-    ...queryNotifications(userId, {
-      take: 1,
-      notificationType: cOpt1?.types ?? [],
-    }),
-    enabled: !!cOpt1,
-  });
-
-  const existenceMap = new Map<string, boolean>([
-    ...(cOpt0
-      ? ([[cOpt0.value, (cData0?.total ?? 0) > 0]] as [string, boolean][])
-      : []),
-    ...(cOpt1
-      ? ([[cOpt1.value, (cData1?.total ?? 0) > 0]] as [string, boolean][])
-      : []),
-  ]);
-
-  const visibleFilterOptions = filterOptions.filter((o) =>
-    o.checkExists ? (existenceMap.get(o.value) ?? false) : true
-  );
 
   const activeTypes =
     filter === "all"
@@ -149,10 +115,7 @@ const NotificationColumn: React.FC<{
     ? results.findIndex((n) => !unreadIdsAtMount.current!.has(n.id))
     : -1;
 
-  const options = [
-    { value: "all", label: t("filterAll") },
-    ...visibleFilterOptions,
-  ];
+  const options = [{ value: "all", label: t("filterAll") }, ...filterOptions];
 
   return (
     <div className="flex-1 min-w-0">
@@ -210,6 +173,88 @@ const UserNotificationFeed = () => {
   const { t } = useTranslation("translation", { keyPrefix: "notifications" });
   const { user } = useAuthContext();
 
+  const hasNotifications = (data: { total?: number } | undefined): boolean =>
+    (data?.total ?? 0) > 0;
+
+  const { data: followerCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["USER_FOLLOWED_YOU", "USER_SUBSCRIBED_TO_YOU"],
+    }),
+    enabled: !!user?.id,
+  });
+
+  const { data: purchaseCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["USER_BOUGHT_YOUR_ALBUM", "USER_BOUGHT_YOUR_TRACK"],
+    }),
+    enabled: !!user?.id,
+  });
+
+  const { data: pledgeCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["FUNDRAISER_PLEDGE_CHARGED"],
+    }),
+    enabled: !!user?.id,
+  });
+
+  const { data: labelCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["LABEL_ADDED_ARTIST"],
+    }),
+    enabled: !!user?.id,
+  });
+
+  const activityFilterOptions = [
+    ...(hasNotifications(followerCheck)
+      ? [
+          {
+            value: "followers",
+            label: t("categoryFollowers"),
+            types: [
+              "USER_FOLLOWED_YOU",
+              "USER_SUBSCRIBED_TO_YOU",
+            ] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+    ...(hasNotifications(purchaseCheck)
+      ? [
+          {
+            value: "purchases",
+            label: t("categoryPurchases"),
+            types: [
+              "USER_BOUGHT_YOUR_ALBUM",
+              "USER_BOUGHT_YOUR_TRACK",
+            ] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+    ...(hasNotifications(pledgeCheck)
+      ? [
+          {
+            value: "pledges",
+            label: t("categoryPledges"),
+            types: [
+              "FUNDRAISER_PLEDGE_CHARGED",
+            ] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+    ...(hasNotifications(labelCheck)
+      ? [
+          {
+            value: "labels",
+            label: t("categoryLabels"),
+            types: ["LABEL_ADDED_ARTIST"] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+  ];
+
   React.useEffect(() => {
     if (!user?.id) return;
     return () => {
@@ -263,30 +308,7 @@ const UserNotificationFeed = () => {
             userId={user.id}
             baseTypes={ACTIVITY_TYPES}
             filterName="activity-filter"
-            filterOptions={[
-              {
-                value: "followers",
-                label: t("categoryFollowers"),
-                types: ["USER_FOLLOWED_YOU", "USER_SUBSCRIBED_TO_YOU"],
-              },
-              {
-                value: "purchases",
-                label: t("categoryPurchases"),
-                types: ["USER_BOUGHT_YOUR_ALBUM", "USER_BOUGHT_YOUR_TRACK"],
-              },
-              {
-                value: "pledges",
-                label: t("categoryPledges"),
-                types: ["FUNDRAISER_PLEDGE_CHARGED"],
-                checkExists: true,
-              },
-              {
-                value: "labels",
-                label: t("categoryLabels"),
-                types: ["LABEL_ADDED_ARTIST"],
-                checkExists: true,
-              },
-            ]}
+            filterOptions={activityFilterOptions}
             compact
           />
         </div>
