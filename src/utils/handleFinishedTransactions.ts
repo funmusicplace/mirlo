@@ -1188,6 +1188,7 @@ export const handleFundraiserPledgePaymentFailure = async (
   transactionId: string,
   urlParams: string
 ) => {
+  const { applicationUrl } = await getClient();
   const transaction = await prisma.userTransaction.findFirst({
     where: {
       id: transactionId,
