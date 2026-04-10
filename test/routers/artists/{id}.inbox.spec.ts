@@ -207,7 +207,6 @@ describe("inboxPOST", () => {
 
     assert(nextStub.calledOnce);
     const error = nextStub.getCall(0).args[0];
-    console.log("error", error);
     assert(error.description.includes("Not a valid Activity"));
   });
 

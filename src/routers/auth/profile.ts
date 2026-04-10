@@ -17,6 +17,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
       },
       select: {
         email: true,
+        accountingEmail: true,
         id: true,
         name: true,
         artists: true,

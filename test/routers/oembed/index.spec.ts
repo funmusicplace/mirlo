@@ -126,8 +126,6 @@ describe("oembed", () => {
           .get(`oembed/?url=${url}`)
           .set("Accept", "application/json");
 
-        console.log("response.body", response.body);
-
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.type, "rich");
         assert.equal(response.body.width, 400);
@@ -183,7 +181,6 @@ describe("oembed", () => {
           .set("Accept", "application/json");
 
         assert.equal(response.statusCode, 200);
-        console.log("response", response.body);
         assert.equal(response.body.type, "rich");
         assert.equal(response.body.width, 400);
         assert.equal(response.body.height, 300);
@@ -210,7 +207,6 @@ describe("oembed", () => {
           .set("Accept", "application/json");
 
         assert.equal(response.statusCode, 200);
-        console.log("response", response.body);
         assert.equal(response.body.type, "rich");
         assert.equal(response.body.title, post.title);
       });
@@ -228,8 +224,6 @@ describe("oembed", () => {
         const response = await requestApp
           .get(`oembed/?url=${url}`)
           .set("Accept", "application/json");
-
-        console.log("body", response.body);
 
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.type, "rich");
@@ -298,8 +292,6 @@ describe("oembed", () => {
           .get(`oembed/?url=${url}`)
           .set("Accept", "application/json");
 
-        console.log("response.body", response.body);
-
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.type, "link");
         assert.equal(response.body.width, 400);
@@ -330,7 +322,6 @@ describe("oembed", () => {
           .set("Accept", "application/json");
 
         assert.equal(response.statusCode, 200);
-        console.log("response.body", response.body);
         assert(response.body.thumbnail_url);
         assert.equal(response.body.thumbnail_width, 300);
         assert.equal(response.body.thumbnail_height, 300);

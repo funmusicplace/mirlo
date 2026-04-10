@@ -355,7 +355,6 @@ describe("artists", () => {
       // Create a signed artist under the label
       const signedArtist = await createArtist(signedArtistUser.id, {
         name: "Signed Artist",
-        isLabelProfile: false,
       });
 
       // Create the ArtistLabel relationship

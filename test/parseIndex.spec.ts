@@ -149,7 +149,6 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/test-artist/releases", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
-      console.log("ogTitle:", ogTitle);
       assert(ogTitle?.includes("My Artist"));
       assert(ogTitle?.includes("releases"));
     });
@@ -164,7 +163,6 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/test-artist/posts", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
-      console.log("ogTitle:", ogTitle);
       assert(ogTitle?.includes("My Artist"));
 
       const rssLink = $('link[type="application/rss+xml"]').attr("href");
