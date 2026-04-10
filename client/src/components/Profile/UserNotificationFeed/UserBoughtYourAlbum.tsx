@@ -66,8 +66,8 @@ const UserBoughtYourAlbum: React.FC<{
         <div
           className={
             compact
-              ? "text-xs text-(--mi-normal-foreground-color) leading-snug"
-              : "text-sm text-(--mi-normal-foreground-color)"
+              ? "text-xs text-(--mi-normal-foreground-color) leading-snug truncate"
+              : "text-sm text-(--mi-normal-foreground-color) truncate"
           }
         >
           <strong>{buyerName}</strong> {t("bought")}{" "}

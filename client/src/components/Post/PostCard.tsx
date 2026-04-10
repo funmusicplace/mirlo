@@ -4,7 +4,6 @@ import { css } from "@emotion/css";
 import Box from "components/common/Box";
 import { Link, useParams } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
-import Overlay from "components/common/Overlay";
 import { useLinkContainer } from "utils/useLinkContainer";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Trans, useTranslation } from "react-i18next";
@@ -68,11 +67,11 @@ const PostContainer = styled.li<{
 }>`
   display: flex;
   border-radius: 5px;
+  border: var(--mi-border);
   background-color: ${(props) =>
     (props.isOnArtistPage && props.artistBackground) ??
     "var(--mi-normal-background-color)"};
   position: relative;
-  filter: brightness(98%);
   width: 100%;
   cursor: pointer;
 
@@ -81,7 +80,6 @@ const PostContainer = styled.li<{
     overflow: hidden;
     display: inline-block;
     text-align: left;
-    height: 1.5rem;
     width: 100%;
     font-weight: normal;
     justify-content: flex-start;
@@ -94,11 +92,22 @@ const PostContainer = styled.li<{
     }
   }
 
-  &:hover {
-    transition: 0.2s ease-in-out;
-    background-color: rgba(50, 0, 0, 0.07);
-    filter: brightness(90%);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 5px;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0);
+    transition: 0.2s background;
+    pointer-events: none;
+  }
 
+  &:hover::after {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:hover {
     .post-container__link {
       text-decoration: underline;
     }
@@ -106,13 +115,6 @@ const PostContainer = styled.li<{
 
   &:focus-within {
     outline: 1px solid var(--mi-normal-foreground-color);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    &:hover {
-      filter: brightness(120%);
-      background-color: rgba(100, 100, 100, 0.2);
-    }
   }
 `;
 
@@ -136,11 +138,6 @@ const PostCard: React.FC<{
       artistBackground={isOnArtistPage ? artistBackground : undefined}
       {...postContainerProps}
     >
-      <Overlay
-        width="100%"
-        height="100%"
-        backgroundColor={isOnArtistPage ? artistBackground : undefined}
-      />
       <Box
         noPadding
         className={css`
@@ -282,6 +279,11 @@ const PostCard: React.FC<{
               {formatDate({
                 date: post.publishedAt,
                 i18n,
+                options: {
+                  day: "numeric",
+                  month: "numeric",
+                  year: "numeric",
+                },
               })}
             </p>
           </div>

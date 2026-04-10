@@ -33,6 +33,8 @@ const LI = styled.li<{
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  width: 100%;
   margin-bottom: 0.75rem;
   position: relative;
   overflow: hidden;
