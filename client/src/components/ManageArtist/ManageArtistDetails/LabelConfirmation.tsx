@@ -19,7 +19,7 @@ const LabelConfirmation: React.FC = () => {
 
   const {
     data: artist,
-    isLoading: isArtistLoading,
+    isPending: isArtistLoading,
     refetch,
   } = useQuery(queryManagedArtist(Number(artistId)));
 

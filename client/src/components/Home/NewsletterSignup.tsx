@@ -120,7 +120,7 @@ const NewsletterSignup: React.FC = () => {
     null
   );
   const [verificationKey, setVerificationKey] = React.useState(0);
-  const { data: instanceArtist, isLoading } = useQuery(queryInstanceArtist());
+  const { data: instanceArtist, isPending } = useQuery(queryInstanceArtist());
   const turnstileSiteKey = import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY;
 
   const handleVerifiedEmail = React.useCallback((value: string) => {
@@ -196,7 +196,7 @@ const NewsletterSignup: React.FC = () => {
 
   const hasVerifiedEmail = Boolean(verifiedEmail);
 
-  if (!instanceArtist && !isLoading) {
+  if (!instanceArtist && !isPending) {
     return null;
   }
 

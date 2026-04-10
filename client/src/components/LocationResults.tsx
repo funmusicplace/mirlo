@@ -31,7 +31,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     getLocationTagBySlug(locationSlug)
   );
 
-  const { data: newReleases, isFetching: isLoadingReleases } = useQuery(
+  const { data: newReleases, isPending: isLoadingReleases } = useQuery(
     queryTrackGroups({
       skip: limit * page,
       take: limit,
@@ -39,14 +39,14 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const { data: artists, isFetching: isLoadingArtists } = useQuery(
+  const { data: artists, isPending: isLoadingArtists } = useQuery(
     queryArtists({
       take: 20,
       locationSlug: locationSlug || undefined,
     })
   );
 
-  const { data: labels, isFetching: isLoadingLabels } = useQuery(
+  const { data: labels, isPending: isLoadingLabels } = useQuery(
     queryArtists({
       isLabel: true,
       locationSlug: locationSlug || undefined,

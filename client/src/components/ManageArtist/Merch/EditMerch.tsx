@@ -68,13 +68,13 @@ const EditMerch: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const { artistId: artistParamId, merchId: merchParamId } = useParams();
 
-  const { data: artist, isLoading: isLoading } = useQuery(
+  const { data: artist, isPending: isLoading } = useQuery(
     queryArtist({ artistSlug: artistParamId ?? "" })
   );
 
   const {
     data: merch,
-    isLoading: isLoadingMerch,
+    isPending: isLoadingMerch,
     refetch,
   } = useQuery(queryManagedMerch(merchParamId ?? ""));
 

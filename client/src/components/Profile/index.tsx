@@ -2,16 +2,12 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { API_ROOT } from "../../constants";
 
-import api from "../../services/api";
-import Button, { ButtonLink } from "../common/Button";
 import UserSupports from "./UserSupports";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import ProfileForm from "./ProfileForm";
 import styled from "@emotion/styled";
-import CanCreateArtists from "components/CanCreateArtists";
 
 export const ProfileSection = styled.div`
   border-top: 1px solid var(--mi-darken-x-background-color);
@@ -21,23 +17,7 @@ export const ProfileSection = styled.div`
 
 function Profile() {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
-  const { user, refreshLoggedInUser } = useAuthContext();
-  const navigate = useNavigate();
-
-  const userId = user?.id;
-
-  const deleteAccount = React.useCallback(async () => {
-    const confirmed = window.confirm(t("areYouSureDeleteAccount") ?? "");
-    if (confirmed) {
-      await api.delete(`users/${userId}`);
-      await fetch(API_ROOT + "/auth/logout", {
-        method: "GET",
-        credentials: "include",
-      });
-      refreshLoggedInUser();
-      navigate("/");
-    }
-  }, [t, userId, navigate, refreshLoggedInUser]);
+  const { user } = useAuthContext();
 
   if (!user) {
     return null;
@@ -56,43 +36,13 @@ function Profile() {
 
         <ProfileForm />
 
-        <div
-          className={css`
-            button {
-              margin-top: 0.5rem;
-            }
-          `}
-        >
-          <ProfileSection>
-            {user.artistUserSubscriptions && (
-              <UserSupports
-                artistUserSubscriptions={user.artistUserSubscriptions}
-              />
-            )}
-          </ProfileSection>
-          <CanCreateArtists>
-            <ProfileSection>
-              <h2>{t("manageArtists")}</h2>
-              <p>{t("manageArtistsDescription")}</p>
-              <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
-                {t("manageArtists")}
-              </ButtonLink>
-            </ProfileSection>
-          </CanCreateArtists>
-          <ProfileSection>
-            <h2>{t("deleteYourAccount")}</h2>
-            <Button
-              style={{
-                width: "100%",
-                marginTop: "1rem",
-              }}
-              buttonRole="warning"
-              onClick={deleteAccount}
-            >
-              {t("deleteAccount")}
-            </Button>
-          </ProfileSection>
-        </div>
+        <ProfileSection>
+          {user.artistUserSubscriptions && (
+            <UserSupports
+              artistUserSubscriptions={user.artistUserSubscriptions}
+            />
+          )}
+        </ProfileSection>
       </WidthContainer>
     </div>
   );

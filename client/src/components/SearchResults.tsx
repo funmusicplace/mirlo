@@ -38,7 +38,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     (params.get("license") as TrackGroupQueryOptions["license"]) ?? ""
   );
 
-  const { data: newReleases, isFetching: isLoadingReleases } = useQuery(
+  const { data: newReleases, isPending: isLoadingReleases } = useQuery(
     queryTrackGroups({
       skip: limit * page,
       take: limit,
@@ -48,7 +48,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const { data: tags, isFetching: isLoadingTags } = useQuery(
+  const { data: tags, isPending: isLoadingTags } = useQuery(
     queryTags({
       orderBy: "count",
       tag: search ?? undefined,
@@ -56,14 +56,14 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const { data: artists, isFetching: isLoadingArtists } = useQuery(
+  const { data: artists, isPending: isLoadingArtists } = useQuery(
     queryArtists({
       name: search ?? undefined,
       take: 20,
     })
   );
 
-  const { data: labels, isFetching: isLoadingLabels } = useQuery(
+  const { data: labels, isPending: isLoadingLabels } = useQuery(
     queryArtists({
       name: search ?? undefined,
       isLabel: true,
@@ -71,7 +71,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const { data: tracks, isFetching: isLoadingTracks } = useQuery(
+  const { data: tracks, isPending: isLoadingTracks } = useQuery(
     queryTracks({
       title: search ?? undefined,
       take: 20,

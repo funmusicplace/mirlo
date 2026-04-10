@@ -150,6 +150,21 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "account",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Account/AccountContainer"
+          );
+          return {
+            Component: () => (
+              <AuthWrapper>
+                <Component />
+              </AuthWrapper>
+            ),
+          };
+        },
+      },
+      {
         path: "profile",
         async lazy() {
           const { default: ProfileContainer } = await import(

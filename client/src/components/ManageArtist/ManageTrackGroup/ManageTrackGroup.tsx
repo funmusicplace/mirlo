@@ -56,13 +56,13 @@ const ManageTrackGroup: React.FC<{}> = () => {
   const { artistId: artistParamId, trackGroupId: trackGroupParamId } =
     useParams();
 
-  const { data: artist, isLoading: isLoading } = useQuery(
+  const { data: artist, isPending: isLoading } = useQuery(
     queryArtist({ artistSlug: artistParamId ?? "" })
   );
 
   const {
     data: trackGroup,
-    isLoading: isLoadingTrackGroup,
+    isPending: isLoadingTrackGroup,
     refetch,
   } = useQuery(queryManagedTrackGroup(Number(trackGroupParamId)));
   const { mutateAsync: deleteTrackGroup, isPending: isDeletingTrackGroup } =

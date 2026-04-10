@@ -6,14 +6,13 @@ import { useTranslation } from "react-i18next";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
-import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 
 const ArtistContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const { artistId, trackGroupId, postId } = useParams();
 
-  const { data: artist, isLoading: isArtistLoading } = useQuery(
+  const { data: artist, isPending: isArtistLoading } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
