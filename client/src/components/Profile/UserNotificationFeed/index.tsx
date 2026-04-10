@@ -24,12 +24,12 @@ const ACTIVITY_TYPES: Notification["notificationType"][] = [
   "FUNDRAISER_PLEDGE_CHARGED",
 ];
 
+const hasNotifications = (data: { total?: number } | undefined): boolean =>
+  (data?.total ?? 0) > 0;
+
 const UserNotificationFeed = () => {
   const { t } = useTranslation("translation", { keyPrefix: "notifications" });
   const { user } = useAuthContext();
-
-  const hasNotifications = (data: { total?: number } | undefined): boolean =>
-    (data?.total ?? 0) > 0;
 
   const { data: followerCheck } = useQuery({
     ...queryNotifications(user?.id, {
