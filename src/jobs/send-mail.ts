@@ -10,13 +10,22 @@ const viewsDir = path.join(__dirname, "../emails");
 
 /**
  * Creates a nodemailer transport based on site settings
- * Supports SendGrid and Mailgun providers
+ * Supports SendGrid, Mailgun, and MailHog (development) providers
  * Falls back to JSON transport if no provider is configured
  */
 async function createTransport(): Promise<Transporter> {
   try {
     const settings = await getSiteSettings();
     const emailSettings = settings.settings?.emailProvider;
+
+    if (process.env.NODE_ENV !== "production") {
+      logger.info("Creating MailHog transport");
+      return nodemailer.createTransport({
+        host: "mailhog",
+        port: parseInt(process.env.MAILHOG_PORT || "1025"),
+        secure: false,
+      });
+    }
 
     // If emailSettings has a provider, use it; otherwise check for legacy settings
     if (
@@ -91,7 +100,6 @@ async function getFromEmail(): Promise<string> {
   try {
     const settings = await getSiteSettings();
     const emailSettings = settings.settings?.emailProvider;
-    console.log("settings", settings);
 
     return (
       emailSettings?.fromEmail ??
@@ -115,7 +123,6 @@ export const sendMail = async <T>(job: {
   try {
     const transport = await createTransport();
     const fromEmail = await getFromEmail();
-    console.log("fromEmail", fromEmail);
 
     const email = new Email({
       message: {
@@ -133,13 +140,14 @@ export const sendMail = async <T>(job: {
       transport,
     });
 
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === "production" || process.env.MAILHOG_PORT) {
       await email.send({
         template: job.data.template,
         message: job.data.message,
         locals: job.data.locals,
       });
     } else {
+      // If there was a problem with mailhog, print to logs
       await email
         .render(job.data.template + "/html", job.data.locals)
         .then(logger.info);

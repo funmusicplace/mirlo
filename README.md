@@ -52,7 +52,7 @@ test1234
 
 ## Email
 
-On production email gets sent by sendgrid. During local development emails appear in the docker logs for the api.
+On production email gets sent by sendgrid or mailgun. To see e-mails during development, navigate to http://localhost:8025 to view all emails. Emails will appear in real-time as they're sent through the queue.
 
 ## Background Jobs
 
