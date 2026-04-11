@@ -2,6 +2,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { getDateRange } from "../../../utils/dateRange";
 
 export default function () {
   const operations = {
@@ -25,25 +26,9 @@ export default function () {
     try {
       let where: Prisma.UserTransactionWhereInput = {};
 
-      if (datePurchased && datePurchased === "thisMonth") {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        where.createdAt = {
-          gte: startOfMonth.toISOString(),
-        };
-      } else if (datePurchased && datePurchased === "previousMonth") {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setMonth(startOfMonth.getMonth() - 1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        const endOfMonth = new Date();
-        endOfMonth.setDate(1);
-        endOfMonth.setHours(0, 0, 0, 0);
-        where.createdAt = {
-          gte: startOfMonth.toISOString(),
-          lt: endOfMonth.toISOString(),
-        };
+      const dateRange = getDateRange(datePurchased);
+      if (dateRange) {
+        where.createdAt = dateRange;
       }
 
       if (pricePaid && pricePaid === "paid") {

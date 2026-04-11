@@ -116,6 +116,8 @@ const useAdminFilters = ({
               <option value="">All</option>
               <option value="thisMonth">Current month to date</option>
               <option value="previousMonth">Previous month</option>
+              <option value="thisYear">Current year to date</option>
+              <option value="lastYear">Last year</option>
             </SelectEl>
           </FormComponent>
         )}
@@ -126,6 +128,8 @@ const useAdminFilters = ({
               <option value="">All</option>
               <option value="thisMonth">Current month to date</option>
               <option value="previousMonth">Previous month</option>
+              <option value="thisYear">Current year to date</option>
+              <option value="lastYear">Last year</option>
             </SelectEl>
           </FormComponent>
         )}

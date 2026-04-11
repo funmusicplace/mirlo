@@ -31,13 +31,18 @@ export const Sales: React.FC = () => {
     setIsDownloading(true);
     try {
       const params = filteredArtistId ? `&artistIds=${filteredArtistId}` : "";
-      await api.getFile("sales", `manage/sales?format=csv${params}`, "text/csv");
+      await api.getFile(
+        "sales",
+        `manage/sales?format=csv${params}`,
+        "text/csv"
+      );
     } catch (e) {
       console.error(e);
     } finally {
       setIsDownloading(false);
     }
   }, [filteredArtistId]);
+  const [datePurchased, setDatePurchased] = React.useState<string>("");
 
   const {
     data: { results, total, totalAmount, totalSupporters } = {
@@ -48,6 +53,7 @@ export const Sales: React.FC = () => {
   } = useQuery(
     queryUserSales({
       artistIds: filteredArtistId ? [filteredArtistId] : undefined,
+      datePurchased: datePurchased || undefined,
       take: pageSize,
       skip: page * pageSize,
     })
@@ -92,6 +98,18 @@ export const Sales: React.FC = () => {
               </option>
             ))}
           </SelectEl>
+          <SelectEl
+            onChange={(e) => {
+              setDatePurchased(e.target.value);
+            }}
+            value={datePurchased}
+          >
+            <option value="">All dates</option>
+            <option value="thisMonth">Current month to date</option>
+            <option value="previousMonth">Previous month</option>
+            <option value="thisYear">Current year to date</option>
+            <option value="lastYear">Last year</option>
+          </SelectEl>
           <ButtonLink variant="outlined" to="/fulfillment">
             {t("viewFulfillment")}
           </ButtonLink>
@@ -111,7 +129,9 @@ export const Sales: React.FC = () => {
           </DropdownMenu>
         </div>
       </SpaceBetweenDiv>
-      {results.length === 0 && !isLoading && <p>{t("noSales")}</p>}
+      {results.length === 0 && !isLoading && (
+        <p>{t(datePurchased ? "noSalesForThisPeriod" : "noSales")}</p>
+      )}
       {isLoading && <LoadingBlocks rows={5} height="2rem" margin=".5rem" />}
       {(totalAmount ?? 0) > 0 && (
         <div

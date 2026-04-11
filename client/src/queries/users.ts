@@ -284,11 +284,16 @@ const fetchUserSales: QueryFunction<
   },
   [
     "fetchUserSales",
-    opts: { artistIds?: number[]; take?: number; skip?: number },
+    opts: {
+      artistIds?: number[];
+      take?: number;
+      skip?: number;
+      datePurchased?: string;
+    },
     ...any,
   ]
 > = ({ queryKey: [_, opts], signal }) => {
-  const { artistIds } = opts;
+  const { artistIds, datePurchased } = opts;
   const params = new URLSearchParams();
   if (artistIds) {
     artistIds.forEach((id) => {
@@ -303,6 +308,9 @@ const fetchUserSales: QueryFunction<
   if (opts.skip) {
     params.append("skip", String(opts.skip));
   }
+  if (datePurchased) {
+    params.append("datePurchased", datePurchased);
+  }
   return api.get(`v1/manage/sales/?${params.toString()}`, { signal });
 };
 
@@ -312,6 +320,7 @@ export function queryUserSales(
     take?: number;
     skip?: number;
     trackGroupIds?: number[];
+    datePurchased?: string;
   } = {}
 ) {
   return queryOptions({

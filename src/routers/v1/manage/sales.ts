@@ -5,6 +5,7 @@ import { userAuthenticated } from "../../../auth/passport";
 import { findSales } from "../artists/{id}/supporters";
 import { User } from "@mirlo/prisma/client";
 import { downloadCSVFile } from "../../../utils/download";
+import { getDateRange } from "../../../utils/dateRange";
 
 export default function () {
   const operations = {
@@ -17,11 +18,13 @@ export default function () {
       skip = 0,
       artistIds = undefined,
       trackGroupIds = undefined,
+      datePurchased = undefined,
     } = req.query as {
       take: number | string;
       skip: number | string;
       artistIds?: string | string[] | number[] | undefined;
       trackGroupIds?: string | string[] | number[] | undefined;
+      datePurchased?: string;
     };
 
     const user = req.user as User;
@@ -45,8 +48,19 @@ export default function () {
         trackGroupIds = trackGroupIds.split(",");
       }
 
+      let sinceDate: string | undefined;
+      let untilDate: string | undefined;
+
+      const dateRange = getDateRange(datePurchased);
+      if (dateRange) {
+        sinceDate = dateRange.gte;
+        untilDate = dateRange.lt;
+      }
+
       const results = await findSales({
         artistId: artistIds.map((a) => Number(a)),
+        sinceDate,
+        untilDate,
         filters: trackGroupIds
           ? {
               trackGroupIds: trackGroupIds.map((tg) => Number(tg)),
