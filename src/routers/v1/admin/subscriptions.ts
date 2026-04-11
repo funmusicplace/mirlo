@@ -53,7 +53,11 @@ export default function () {
               artist: true,
             },
           },
-          artistUserSubscriptionCharges: true,
+          artistUserSubscriptionCharges: {
+            include: {
+              transaction: true,
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",

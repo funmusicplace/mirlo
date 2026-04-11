@@ -49,6 +49,7 @@ export default function () {
         include: {
           user: true,
           artist: true,
+          transaction: true,
         },
         orderBy: {
           datePurchased: "desc",
