@@ -19,7 +19,7 @@ const AutoCompleteTrackGroup: React.FC<{
         );
         return results.results
           .filter((r) =>
-            r.title.toLowerCase().includes(searchString.toLowerCase())
+            r.title?.toLowerCase().includes(searchString.toLowerCase())
           )
           .slice(0, 10)
           .map((r) => ({
