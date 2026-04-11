@@ -2,6 +2,7 @@ extends ../layout.pug
 
 mixin purchaseRow(title, sku, transaction, url)
   tr
+    td #{transaction.userFriendlyId || '---'}
     td 
       if url 
         a(href!=url) #{title}
@@ -20,6 +21,7 @@ block content
   table 
     thead
       tr
+        th Transaction ID
         th Item
         th SKU/ISRC
         th Gross Amount

@@ -254,6 +254,7 @@ export type Sale = {
   paymentProcessorCut: number;
   platformCut: number;
   shippingFeeAmount?: number;
+  userFriendlyId?: string | null;
   trackGroupPurchases?: {
     message: string;
     trackGroupId: number;

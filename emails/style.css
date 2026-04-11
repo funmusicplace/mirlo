@@ -44,6 +44,12 @@ p {
   background-color: #fff;
 }
 
+.border {
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
 .pa3 {
   padding: 1rem;
 }

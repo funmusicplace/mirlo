@@ -529,6 +529,7 @@ type PurchaseTransaction = {
   id: string;
   stripeCut: number;
   platformCut: number;
+  userFriendlyId?: string | null;
 };
 
 export type PurchaseReceiptEmailType = {

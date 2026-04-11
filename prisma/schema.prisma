@@ -1,8 +1,8 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres"]
   output          = "./__generated__"
   binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 /// Always after the prisma-client-js generator
@@ -623,6 +623,7 @@ model UserTrackGroupPurchase {
 model UserTransaction {
   id                            String                         @id @default(uuid())
   userId                        Int
+  userFriendlyId                String? // e.g., "MIRLO-0001"
   user                          User                           @relation(fields: [userId], references: [id])
   createdAt                     DateTime                       @default(now())
   amount                        Int // in cents
