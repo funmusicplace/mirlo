@@ -802,7 +802,7 @@
     "merchFulfillmentParagraph": "To manage orders for merch, check your fulfillment page",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
-  "platformSlider": {
+  "paymentSlider": {
     "howMuchGoesToMirlo": "How much goes to Mirlo?",
     "none": "None",
     "solidarity": "Solidarity",
