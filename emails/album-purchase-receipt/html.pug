@@ -7,8 +7,9 @@ block content
     else
       p Thank you for supporting #{trackGroup.artist.name} with your purchase of #{trackGroup.title}.
      
-    div 
-      p #{trackGroup.title}
+    div
+      p
+        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`) #{trackGroup.title}
       p #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.amount / 100).toFixed(2)}
     if isBeforeReleaseDate
       p The release will become available in your collection for unlimited listening and downloading once it is released.

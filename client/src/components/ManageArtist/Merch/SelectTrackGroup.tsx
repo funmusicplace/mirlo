@@ -80,6 +80,7 @@ const SelectTrackGroup: React.FC<{
         <AutoCompleteTrackGroup
           onSelect={(val) => doSave(val)}
           filterByArtistId={merch.artistId}
+          includeLabelReleases
           placeholder={t("typeAlbumName") ?? ""}
         />
         {isSaving && <LoadingSpinner size="small" />}

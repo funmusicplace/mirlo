@@ -17,7 +17,7 @@ const PaymentSlider: React.FC<{
   extraData?: { artistId: number };
 }> = ({ url, extraData, keyName = "platformPercent" }) => {
   const { artistId } = useParams();
-  const { t } = useTranslation("translation", { keyPrefix: "platformSlider" });
+  const { t } = useTranslation("translation", { keyPrefix: "paymentSlider" });
   const [isOpen, setIsInfoOpen] = React.useState(false);
 
   const { data: artist } = useQuery(
