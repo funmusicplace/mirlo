@@ -8,6 +8,7 @@ import ArtistSupportBox from "./ArtistSupportBox";
 import ScrollButton from "./ScrollButton";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
+import { useGetArtistColors } from "./ArtistButtons";
 import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useAuthContext } from "state/AuthContext";
@@ -20,6 +21,9 @@ import { queryUserStripeStatus } from "queries";
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
   const { data: artist } = useArtistQuery();
+  const { colors } = useGetArtistColors();
+  const pageBackground =
+    colors?.background ?? "var(--mi-normal-background-color)";
   const { data: userStripeStatus, isPending } = useQuery(
     queryUserStripeStatus(artist?.userId || 0)
   );
@@ -143,28 +147,35 @@ const ArtistSupport: React.FC = () => {
             direction="left"
             scrollElementId="artist-support-tiers-scroll"
             ariaLabel={t("scrollLeft")}
+            pageBackground={pageBackground}
           />
         )}
 
         <div
           id="artist-support-tiers-scroll"
           className={
-            "list-none gap-3 grid " +
+            "list-none gap-3 " +
             (onlyOneTier
-              ? `md:grid-cols-7`
+              ? `flex justify-center`
               : moreThanThreeTiers
-                ? `grid-cols-1 md:grid-cols-none md:grid-flow-col md:auto-cols-[30%] md:snap-x md:snap-mandatory md:overflow-y-scroll`
-                : `grid-cols-1 md:grid-cols-3`)
+                ? `grid grid-cols-1 md:grid-cols-none md:grid-flow-col md:auto-cols-[30%] md:snap-x md:snap-mandatory md:overflow-x-scroll ${css`
+                    &::-webkit-scrollbar {
+                      display: none;
+                    }
+                    scrollbar-width: none;
+                  `}`
+                : `grid grid-cols-1 md:grid-cols-3`)
           }
         >
           {artist.subscriptionTiers
             ?.filter((p) => !p.isDefaultTier)
             .map((p) => (
-              <ArtistSupportBox
+              <div
                 key={p.id}
-                subscriptionTier={p}
-                className={onlyOneTier ? `col-start-3 col-span-3` : ``}
-              />
+                className={`snap-center${onlyOneTier ? " w-full max-w-sm" : ""}`}
+              >
+                <ArtistSupportBox subscriptionTier={p} />
+              </div>
             ))}
         </div>
 
@@ -173,6 +184,7 @@ const ArtistSupport: React.FC = () => {
             direction="right"
             scrollElementId="artist-support-tiers-scroll"
             ariaLabel={t("scrollRight")}
+            pageBackground={pageBackground}
           />
         )}
       </div>
