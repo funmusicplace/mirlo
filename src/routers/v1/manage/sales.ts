@@ -4,6 +4,7 @@ import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../auth/passport";
 import { findSales } from "../artists/{id}/supporters";
 import { User } from "@mirlo/prisma/client";
+import { downloadCSVFile } from "../../../utils/download";
 
 export default function () {
   const operations = {
@@ -57,6 +58,20 @@ export default function () {
         Number(skip),
         Number(skip) + Number(take)
       );
+
+      if (req.query?.format === "csv") {
+        const csvData = slicedResults.map((r) => ({
+          ...r,
+          artist: Array.isArray(r.artist)
+            ? r.artist
+                .map((a: any) => a?.name)
+                .filter(Boolean)
+                .join(", ")
+            : r.artist,
+        }));
+        return downloadCSVFile(res, "sales.csv", csvColumns, csvData);
+      }
+
       res.json({
         results: slicedResults.map((r) => {
           // Strip user ids from results
@@ -112,3 +127,14 @@ export default function () {
 
   return operations;
 }
+
+const csvColumns = [
+  { label: "Date", value: "datePurchased" },
+  { label: "Artist", value: "artist" },
+  { label: "Type", value: "saleType" },
+  { label: "Title", value: "title" },
+  { label: "Amount", value: "amount" },
+  { label: "Platform Cut", value: "platformCut" },
+  { label: "Payment Processor Cut", value: "paymentProcessorCut" },
+  { label: "Currency", value: "currency" },
+];

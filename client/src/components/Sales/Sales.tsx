@@ -9,9 +9,12 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import WidthContainer from "components/common/WidthContainer";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { SelectEl } from "components/common/Select";
-import { ButtonLink } from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import usePagination from "utils/usePagination";
 import { moneyDisplay } from "components/common/Money";
+import { FaDownload } from "react-icons/fa";
+import api from "services/api";
+import DropdownMenu from "components/common/DropdownMenu";
 
 const pageSize = 50;
 
@@ -22,6 +25,19 @@ export const Sales: React.FC = () => {
 
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [filteredArtistId, setFilteredArtistId] = React.useState<number>();
+  const [isDownloading, setIsDownloading] = React.useState(false);
+
+  const downloadSalesData = React.useCallback(async () => {
+    setIsDownloading(true);
+    try {
+      const params = filteredArtistId ? `&artistIds=${filteredArtistId}` : "";
+      await api.getFile("sales", `manage/sales?format=csv${params}`, "text/csv");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [filteredArtistId]);
 
   const {
     data: { results, total, totalAmount, totalSupporters } = {
@@ -79,6 +95,20 @@ export const Sales: React.FC = () => {
           <ButtonLink variant="outlined" to="/fulfillment">
             {t("viewFulfillment")}
           </ButtonLink>
+          <DropdownMenu>
+            <ul>
+              <li>
+                <Button
+                  onClick={downloadSalesData}
+                  size="compact"
+                  startIcon={<FaDownload />}
+                  isLoading={isDownloading}
+                >
+                  {t("downloadSalesData")}
+                </Button>
+              </li>
+            </ul>
+          </DropdownMenu>
         </div>
       </SpaceBetweenDiv>
       {results.length === 0 && !isLoading && <p>{t("noSales")}</p>}
