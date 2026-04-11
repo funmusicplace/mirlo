@@ -15,6 +15,7 @@ mixin purchaseRow(title, sku, transaction, url)
 
 block content
   p New purchases on your Mirlo store!
+  p Purchased by: #{email}
     
   table 
     thead
@@ -48,6 +49,9 @@ block content
       td #{currency} #{(totalNet / 100).toFixed(2)}
 
 
-  p You can view your sales in your 
+  p You can view your sales in your
     a(href!=`${client}/sales`) artist dashboard
+    | .
+  p Learn more about
+    a(href="https://docs.mirlo.space") how payouts work on Mirlo
     | .
