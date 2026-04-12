@@ -14,14 +14,14 @@ block content
     each transaction in transactions
       each purchase in transaction.trackGroupPurchases
         +purchaseRow(purchase.trackGroup.title, transaction)
-        tr 
+        tr
           td(colspan="4")
-            a(href!=`${client}/profile/collection`) Collection
+            a(href!=`${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`) View release
       each purchase in transaction.trackPurchases
         +purchaseRow(purchase.track.title, transaction)
-        tr 
+        tr
           td(colspan="4")
-            a(href=`${client}/profile/collection`) Collection
+            a(href!=`${client}/${purchase.track.trackGroup.artist.urlSlug}/release/${purchase.track.trackGroup.urlSlug}`) View release
       each purchase in transaction.merchPurchases
         +purchaseRow(`${purchase.merch.title} ${purchase.options.map((o) => o.name).join(', ')}: ${purchase.quantity}`, transaction)
       each tip in transaction.tips

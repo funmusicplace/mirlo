@@ -55,6 +55,10 @@ export default defineConfig({
         link: "/api",
       },
       {
+        text: "Payouts",
+        link: "/payouts",
+      },
+      {
         text: "Hosting Mirlo",
         link: "/hosting",
       },
