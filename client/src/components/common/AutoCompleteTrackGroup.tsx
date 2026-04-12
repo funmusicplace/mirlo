@@ -8,9 +8,25 @@ const AutoCompleteTrackGroup: React.FC<{
   onSelect: (val: number) => void;
   filterByArtistId?: number;
   placeholder?: string;
-}> = ({ onSelect, filterByArtistId, placeholder }) => {
+  includeLabelReleases?: boolean;
+}> = ({ onSelect, filterByArtistId, placeholder, includeLabelReleases }) => {
   const getTrackGroupOptions = React.useCallback(
     async (searchString: string) => {
+      if (filterByArtistId && includeLabelReleases) {
+        const results = await api.getMany<TrackGroup>(
+          `manage/artists/${filterByArtistId}/trackGroups`,
+          { includeLabelReleases: "true" }
+        );
+        return results.results
+          .filter((r) =>
+            r.title?.toLowerCase().includes(searchString.toLowerCase())
+          )
+          .slice(0, 10)
+          .map((r) => ({
+            name: `${r.artist?.name} - ${r.title}`,
+            id: r.id,
+          }));
+      }
       const results = await api.getMany<TrackGroup>("trackGroups", {
         title: searchString,
         take: "10",
@@ -21,7 +37,7 @@ const AutoCompleteTrackGroup: React.FC<{
         id: r.id,
       }));
     },
-    [filterByArtistId]
+    [filterByArtistId, includeLabelReleases]
   );
 
   return (
