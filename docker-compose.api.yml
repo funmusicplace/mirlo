@@ -113,6 +113,15 @@ services:
     ports:
       - "${POSTGRES_LOCAL_MACHINE_PORT:-5432}:5432"
 
+  mailhog:
+    container_name: blackbird-mailhog
+    image: mailhog/mailhog:latest
+    networks: [api-network]
+    ports:
+      - "1025:1025" # SMTP Port
+      - "8025:8025" # Web UI Port
+    restart: unless-stopped
+
 networks:
   api-network:
     driver: bridge

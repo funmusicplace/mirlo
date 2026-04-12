@@ -13,9 +13,16 @@ declare global {
         webhookSigningSecret?: string;
         webhookConnectSigningSecret?: string;
       };
-      sendgrid?: {
-        apiKey?: string;
+      emailProvider?: {
+        provider?: "sendgrid" | "mailgun";
         fromEmail?: string;
+        sendgrid?: {
+          apiKey?: string;
+        };
+        mailgun?: {
+          apiKey?: string;
+          domain?: string;
+        };
       };
       s3?: {
         keyId?: string;

@@ -7908,6 +7908,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/nodemailer-mailgun-transport@npm:^1.4.6":
+  version: 1.4.6
+  resolution: "@types/nodemailer-mailgun-transport@npm:1.4.6"
+  dependencies:
+    "@types/nodemailer": "npm:*"
+  checksum: 10/639f0f0f24cbd8a06910f5e1fae8909768bbf42f066c3ead388fd827f7189e6c6e9ad83641873937e137e5815ac158dfd6cece2d8d5092e4f9ef67879704e861
+  languageName: node
+  linkType: hard
+
 "@types/nodemailer-sendgrid@npm:^1.0.0":
   version: 1.0.3
   resolution: "@types/nodemailer-sendgrid@npm:1.0.3"
@@ -9429,6 +9438,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^1.3.3":
+  version: 1.15.0
+  resolution: "axios@npm:1.15.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.11"
+    form-data: "npm:^4.0.5"
+    proxy-from-env: "npm:^2.1.0"
+  checksum: 10/d39a2c0ebc7ff4739401b282e726cc2673377949d6c46d60eb619458f8d7a2f7eadbcada7097f4dbc7d5c59abb4d3bf6fac33d474412bc3415d3f5aa7ed45530
+  languageName: node
+  linkType: hard
+
 "b4a@npm:^1.6.4":
   version: 1.7.3
   resolution: "b4a@npm:1.7.3"
@@ -9542,6 +9562,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-64@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "base-64@npm:1.0.0"
+  checksum: 10/d10b64a1fc9b2c5a5f39f1ce1e6c9d1c5b249222bbfa3a0604c592d90623caf74419983feadd8a170f27dc0c3389704f72faafa3e645aeb56bfc030c93ff074a
+  languageName: node
+  linkType: hard
+
 "base64-js@npm:^1.0.2, base64-js@npm:^1.3.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
@@ -9620,7 +9647,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bluebird@npm:^3.7.2":
+"bluebird@npm:^3.1.1, bluebird@npm:^3.7.2":
   version: 3.7.2
   resolution: "bluebird@npm:3.7.2"
   checksum: 10/007c7bad22c5d799c8dd49c85b47d012a1fe3045be57447721e6afbd1d5be43237af1db62e26cb9b0d9ba812d2e4ca3bac82f6d7e016b6b88de06ee25ceb96e7
@@ -10705,6 +10732,15 @@ __metadata:
   version: 3.4.2
   resolution: "consola@npm:3.4.2"
   checksum: 10/32192c9f50d7cac27c5d7c4ecd3ff3679aea863e6bf5bd6a9cc2b05d1cd78addf5dae71df08c54330c142be8e7fbd46f051030129b57c6aacdd771efe409c4b2
+  languageName: node
+  linkType: hard
+
+"consolidate@npm:^0.15.1":
+  version: 0.15.1
+  resolution: "consolidate@npm:0.15.1"
+  dependencies:
+    bluebird: "npm:^3.1.1"
+  checksum: 10/7653a4894fb9d2ab61d7cb5f4c20da0e794956fea741f0b965ad045e091ba3977d977d409d57cc5b934cb4350fe05a6f185a32cb87cc5316bdf3fee406610608
   languageName: node
   linkType: hard
 
@@ -12890,7 +12926,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.9, follow-redirects@npm:^1.15.6":
+"follow-redirects@npm:^1.14.9, follow-redirects@npm:^1.15.11, follow-redirects@npm:^1.15.6":
   version: 1.15.11
   resolution: "follow-redirects@npm:1.15.11"
   peerDependenciesMeta:
@@ -12950,6 +12986,19 @@ __metadata:
     hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
   checksum: 10/a4b62e21932f48702bc468cc26fb276d186e6b07b557e3dd7cc455872bdbb82db7db066844a64ad3cf40eaf3a753c830538183570462d3649fdfd705601cbcfb
+  languageName: node
+  linkType: hard
+
+"form-data@npm:^4.0.5":
+  version: 4.0.5
+  resolution: "form-data@npm:4.0.5"
+  dependencies:
+    asynckit: "npm:^0.4.0"
+    combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
+    mime-types: "npm:^2.1.12"
+  checksum: 10/52ecd6e927c8c4e215e68a7ad5e0f7c1031397439672fd9741654b4a94722c4182e74cc815b225dcb5be3f4180f36428f67c6dd39eaa98af0dcfdd26c00c19cd
   languageName: node
   linkType: hard
 
@@ -15633,6 +15682,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mailgun.js@npm:^8.0.1":
+  version: 8.2.2
+  resolution: "mailgun.js@npm:8.2.2"
+  dependencies:
+    axios: "npm:^1.3.3"
+    base-64: "npm:^1.0.0"
+    url-join: "npm:^4.0.1"
+  checksum: 10/a981e5798f09422521cd11dc993f176eec5099ebc34247054321ed9f32f9d193dbddeddaf13210300ba489e5e893ab53b1688d059be21773f5b37ac04966dd9f
+  languageName: node
+  linkType: hard
+
 "mailparser@npm:^3.7.1":
   version: 3.9.0
   resolution: "mailparser@npm:3.9.0"
@@ -16688,6 +16748,7 @@ __metadata:
     "@types/node": "npm:22"
     "@types/node-fetch": "npm:^2.6.11"
     "@types/nodemailer": "npm:^6.4.14"
+    "@types/nodemailer-mailgun-transport": "npm:^1.4.6"
     "@types/nodemailer-sendgrid": "npm:^1.0.0"
     "@types/passport": "npm:^1.0.17"
     "@types/passport-jwt": "npm:^4.0.1"
@@ -16735,6 +16796,7 @@ __metadata:
     music-metadata: "npm:7.13.3"
     node-fetch: "npm:2"
     nodemailer: "npm:^6.9.1"
+    nodemailer-mailgun-transport: "npm:^2.1.5"
     nodemailer-sendgrid: "npm:^1.0.3"
     nodemon: "npm:^2.0.20"
     passport: "npm:^0.7.0"
@@ -17105,6 +17167,17 @@ __metadata:
   version: 2.0.27
   resolution: "node-releases@npm:2.0.27"
   checksum: 10/f6c78ddb392ae500719644afcbe68a9ea533242c02312eb6a34e8478506eb7482a3fb709c70235b01c32fe65625b68dfa9665113f816d87f163bc3819b62b106
+  languageName: node
+  linkType: hard
+
+"nodemailer-mailgun-transport@npm:^2.1.5":
+  version: 2.1.5
+  resolution: "nodemailer-mailgun-transport@npm:2.1.5"
+  dependencies:
+    consolidate: "npm:^0.15.1"
+    form-data: "npm:^4.0.0"
+    mailgun.js: "npm:^8.0.1"
+  checksum: 10/b9eca4822acfca3910e60aea673baced26ee76e16a1302df5598fa147e3e6c837dc4285be0f8ca3e6adcdd12ee94debd377bfb27c71da7cd912d8f8fa7fca8d8
   languageName: node
   linkType: hard
 
@@ -18450,6 +18523,13 @@ __metadata:
   version: 1.1.0
   resolution: "proxy-from-env@npm:1.1.0"
   checksum: 10/f0bb4a87cfd18f77bc2fba23ae49c3b378fb35143af16cc478171c623eebe181678f09439707ad80081d340d1593cd54a33a0113f3ccb3f4bc9451488780ee23
+  languageName: node
+  linkType: hard
+
+"proxy-from-env@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "proxy-from-env@npm:2.1.0"
+  checksum: 10/fbbaf4dab2a6231dc9e394903a5f66f20475e36b734335790b46feb9da07c37d6b32e2c02e3e2ea4d4b23774c53d8562e5b7cc73282cb43f4a597b7eacaee2ee
   languageName: node
   linkType: hard
 
@@ -22099,6 +22179,13 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10/b271ca7e3d46b7160222e3afa3e531505161c9a4e097febae9664e4b59912f4cbe94861361a4175edac3a03fee99d91e44b6a58c17a634bc5a664b19fc76fbcb
+  languageName: node
+  linkType: hard
+
+"url-join@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "url-join@npm:4.0.1"
+  checksum: 10/b53b256a9a36ed6b0f6768101e78ca97f32d7b935283fd29ce19d0bbfb6f88aa80aa6c03fd87f2f8978ab463a6539f597a63051e7086f3379685319a7495f709
   languageName: node
   linkType: hard
 

@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { SelectEl } from "components/common/Select";
 import Table from "components/common/Table";
 import TextArea from "components/common/TextArea";
 import React from "react";
@@ -19,7 +20,7 @@ interface FormSettings {
   stripe?: SettingsFromAPI["settings"]["stripe"];
   isClosedToPublicArtistSignup: boolean;
   showQueueDashboard: boolean;
-  sendgrid?: SettingsFromAPI["settings"]["sendgrid"];
+  emailProvider?: SettingsFromAPI["settings"]["emailProvider"];
   s3?: SettingsFromAPI["settings"]["s3"];
   cloudflareTurnstileSecret?: string;
   defconLevel?: number;
@@ -47,9 +48,16 @@ interface SettingsFromAPI {
       webhookSigningSecret?: string;
       webhookConnectSigningSecret?: string;
     };
-    sendgrid?: {
-      apiKey?: string;
+    emailProvider?: {
+      provider?: "sendgrid" | "mailgun";
       fromEmail?: string;
+      sendgrid?: {
+        apiKey?: string;
+      };
+      mailgun?: {
+        apiKey?: string;
+        domain?: string;
+      };
     };
     s3?: {
       keyId?: string;
@@ -97,8 +105,8 @@ const AdminSettings = () => {
         stripe: {
           ...response.result.settings?.stripe,
         },
-        sendgrid: {
-          ...response.result.settings?.sendgrid,
+        emailProvider: {
+          ...response.result.settings?.emailProvider,
         },
         s3: {
           ...response.result.settings?.s3,
@@ -129,8 +137,8 @@ const AdminSettings = () => {
             stripe: {
               ...data.stripe,
             },
-            sendgrid: {
-              ...data.sendgrid,
+            emailProvider: {
+              ...data.emailProvider,
             },
             s3: {
               ...data.s3,
@@ -296,14 +304,60 @@ const AdminSettings = () => {
           </tr>
           <tr>
             <td>
-              <h3>SendGrid Settings</h3>
+              <h3>Email Provider Settings</h3>
             </td>
           </tr>
           <tr>
-            <td>apiKey</td>
+            <td>Email Provider</td>
+            <td>
+              <SelectEl {...register("emailProvider.provider")}>
+                <option value="">None</option>
+                <option value="sendgrid">SendGrid</option>
+                <option value="mailgun">Mailgun</option>
+              </SelectEl>
+            </td>
+          </tr>
+          <tr>
+            <td>From Email</td>
             <td>
               <InputEl
-                {...register("sendgrid.apiKey")}
+                {...register("emailProvider.fromEmail")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          {/* SendGrid Settings */}
+          <tr>
+            <td colSpan={2}>
+              <h4>SendGrid Settings</h4>
+            </td>
+          </tr>
+          <tr>
+            <td>API Key</td>
+            <td>
+              <InputEl
+                {...register("emailProvider.sendgrid.apiKey")}
+                type="password"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          {/* Mailgun Settings */}
+          <tr>
+            <td colSpan={2}>
+              <h4>Mailgun Settings</h4>
+            </td>
+          </tr>
+          <tr>
+            <td>API Key</td>
+            <td>
+              <InputEl
+                {...register("emailProvider.mailgun.apiKey")}
+                type="password"
                 className={css`
                   text-align: right;
                 `}
@@ -311,10 +365,10 @@ const AdminSettings = () => {
             </td>
           </tr>
           <tr>
-            <td>fromEmail</td>
+            <td>Domain</td>
             <td>
               <InputEl
-                {...register("sendgrid.fromEmail")}
+                {...register("emailProvider.mailgun.domain")}
                 className={css`
                   text-align: right;
                 `}
