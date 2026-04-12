@@ -81,12 +81,17 @@ export default function () {
 
       if (newValues.includePurchaseTrackGroupId) {
         // check that the artist who owns this merch also
-        // owns this trackgroup
-
+        // owns this trackgroup, or that the logged-in user
+        // is the label owner of the trackgroup
+        const user = req.user as User;
         const trackGroup = await prisma.trackGroup.findFirst({
           where: {
-            artistId: merch?.artistId,
             id: Number(newValues.includePurchaseTrackGroupId),
+            OR: [
+              { artistId: merch?.artistId },
+              { paymentToUserId: user.id },
+              { artist: { userId: user.id } },
+            ],
           },
         });
 
@@ -99,7 +104,6 @@ export default function () {
         }
       }
 
-      const user = req.user as User;
       await prisma.merch.updateMany({
         where: { id: merchId },
         data: {
