@@ -288,6 +288,7 @@ const UploadArtistImage: React.FC<{
       </div>
       {existingImage && (
         <ArtistButton
+          aria-label={t("deleteImage")}
           onClick={deleteImage}
           variant="dashed"
           onlyIcon
