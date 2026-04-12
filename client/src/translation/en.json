@@ -623,7 +623,8 @@
     "countryCurrencyCode": "Country currency code:",
     "saveCountryCode": "Save",
     "success": "Details saved!",
-    "label": "(Label)"
+    "label": "(Label)",
+    "payoutsInfo": "See our documentation for more information on payouts and fees: <link>https://docs.mirlo.com/payouts</link>"
   },
   "manageArtist": {
     "albumTags": "Release tags",
