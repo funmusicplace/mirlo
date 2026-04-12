@@ -6,7 +6,7 @@ block content
     if supportMessage
       div!= supportMessage
     p
-      | Thank you for supporting #{artist.name} with your #{interval === 'month' ? 'monthly': 'yearly'} 
+      | Thank you for supporting #{artist.name} with your #{interval === 'MONTH' ? 'monthly': 'yearly'} 
       | support at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
     table 
       tr 
