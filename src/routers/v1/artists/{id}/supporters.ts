@@ -90,6 +90,8 @@ const queryUserTransactions = (
       platformCut: true,
       shippingFeeAmount: true,
       userFriendlyId: true,
+      stripeId: true,
+      discountPercent: true,
 
       trackGroupPurchases: {
         select: {

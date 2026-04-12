@@ -25,24 +25,9 @@ export const Sales: React.FC = () => {
 
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [filteredArtistId, setFilteredArtistId] = React.useState<number>();
-  const [isDownloading, setIsDownloading] = React.useState(false);
 
-  const downloadSalesData = React.useCallback(async () => {
-    setIsDownloading(true);
-    try {
-      const params = filteredArtistId ? `&artistIds=${filteredArtistId}` : "";
-      await api.getFile(
-        "sales",
-        `manage/sales?format=csv${params}`,
-        "text/csv"
-      );
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsDownloading(false);
-    }
-  }, [filteredArtistId]);
   const [datePurchased, setDatePurchased] = React.useState<string>("");
+  const [isDownloadingCsv, setIsDownloadingCsv] = React.useState(false);
 
   const {
     data: { results, total, totalAmount, totalSupporters } = {
@@ -60,6 +45,30 @@ export const Sales: React.FC = () => {
   );
 
   const { data: managedArtists } = useQuery(queryManagedArtists());
+
+  const downloadSalesData = React.useCallback(async () => {
+    setIsDownloadingCsv(true);
+    try {
+      const params = new URLSearchParams();
+      if (filteredArtistId) {
+        params.append("artistIds", String(filteredArtistId));
+      }
+      if (datePurchased) {
+        params.append("datePurchased", datePurchased);
+      }
+      params.append("format", "csv");
+
+      await api.getFile(
+        "sales",
+        `manage/sales?${params.toString()}`,
+        "text/csv"
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsDownloadingCsv(false);
+    }
+  }, [filteredArtistId, datePurchased]);
 
   return (
     <WidthContainer
@@ -110,6 +119,7 @@ export const Sales: React.FC = () => {
             <option value="thisYear">Current year to date</option>
             <option value="lastYear">Last year</option>
           </SelectEl>
+
           <ButtonLink variant="outlined" to="/fulfillment">
             {t("viewFulfillment")}
           </ButtonLink>
@@ -120,7 +130,7 @@ export const Sales: React.FC = () => {
                   onClick={downloadSalesData}
                   size="compact"
                   startIcon={<FaDownload />}
-                  isLoading={isDownloading}
+                  isLoading={isDownloadingCsv}
                 >
                   {t("downloadSalesData")}
                 </Button>

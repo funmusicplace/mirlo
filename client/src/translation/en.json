@@ -320,7 +320,8 @@
     "tip": "Tip",
     "viewFulfillment": "View Fulfillment",
     "platformCut": "Platform cut",
-    "paymentProcessorCut": "Payment processor cut"
+    "paymentProcessorCut": "Payment processor cut",
+    "downloadCsv": "Download CSV"
   },
   "fulfillment": {
     "artist": "Artist",

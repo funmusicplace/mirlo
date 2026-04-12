@@ -34,6 +34,7 @@ block content
           tr 
             td(colspan="4")
               a(href!=`${client}/${purchase.track.trackGroup.artist.urlSlug}/release/${purchase.track.trackGroup.urlSlug}`) View release
+              
         each purchase in transaction.merchPurchases
           +purchaseRow(`${purchase.merch.title} ${purchase.options.map((o) => o.name).join(', ')}: ${purchase.quantity}`, transaction)
         each tip in transaction.tips

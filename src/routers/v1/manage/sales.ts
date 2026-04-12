@@ -4,8 +4,8 @@ import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../auth/passport";
 import { findSales } from "../artists/{id}/supporters";
 import { User } from "@mirlo/prisma/client";
-import { downloadCSVFile } from "../../../utils/download";
 import { getDateRange } from "../../../utils/dateRange";
+import { downloadCSVFile } from "../../../utils/download";
 
 export default function () {
   const operations = {
@@ -67,6 +67,34 @@ export default function () {
             }
           : undefined,
       });
+
+      // If CSV format is requested, fetch additional transaction details
+      if (req.query?.format === "csv") {
+        const transformedResults = results.map((result) => ({
+          ...result,
+          artist: result.artist.map((a) => a.name).join(", "),
+          trackGroupPurchases:
+            result.trackGroupPurchases
+              ?.map((tgp) => tgp.trackGroup.title)
+              .join(", ") || "",
+          trackPurchases:
+            result.trackPurchases?.map((tp) => tp.track.title).join(", ") || "",
+          merchPurchases:
+            result.merchPurchases?.map((mp) => mp.merch.title).join(", ") || "",
+          artistUserSubscriptionCharges:
+            result.artistUserSubscriptionCharges
+              ?.map(
+                (asc) => asc.artistUserSubscription.artistSubscriptionTier.name
+              )
+              .join(", ") || "",
+        }));
+        return downloadCSVFile(
+          res,
+          "sales.csv",
+          csvColumns,
+          transformedResults
+        );
+      }
 
       const slicedResults = results.slice(
         Number(skip),
@@ -143,12 +171,21 @@ export default function () {
 }
 
 const csvColumns = [
+  { label: "User-Friendly ID", value: "userFriendlyId" },
   { label: "Date", value: "datePurchased" },
   { label: "Artist", value: "artist" },
   { label: "Type", value: "saleType" },
-  { label: "Title", value: "title" },
+  { label: "Artist", value: "artist" },
+  { label: "Item", value: "title" },
   { label: "Amount", value: "amount" },
+  { label: "Currency", value: "currency" },
   { label: "Platform Cut", value: "platformCut" },
   { label: "Payment Processor Cut", value: "paymentProcessorCut" },
-  { label: "Currency", value: "currency" },
+  { label: "Shipping Fee", value: "shippingFeeAmount" },
+  { label: "Stripe ID", value: "stripeId" },
+  { label: "Discount Percent", value: "discountPercent" },
+  { label: "Track Group Purchases", value: "trackGroupPurchases" },
+  { label: "Track Purchases", value: "trackPurchases" },
+  { label: "Merch Purchases", value: "merchPurchases" },
+  { label: "Subscription Tier Names", value: "artistUserSubscriptionCharges" },
 ];
