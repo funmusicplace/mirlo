@@ -4,13 +4,17 @@ import Table from "components/common/Table";
 import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
-import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import { getArtistUrl } from "utils/artist";
 import useAdminFilters from "./useAdminFilters";
 import usePagination from "utils/usePagination";
 
 interface AdminPurchase extends UserArtistTip {
   user: User;
   artist: Artist;
+  transaction: {
+    amount: number;
+    currency: string;
+  };
 }
 
 const pageSize = 500;
@@ -116,8 +120,8 @@ export const AdminTips: React.FC = () => {
                 <td>{tip.datePurchased}</td>
                 <td>
                   <Money
-                    amount={tip.pricePaid / 100}
-                    currency={tip.currencyPaid}
+                    amount={tip.transaction.amount / 100}
+                    currency={tip.transaction.currency}
                   />
                 </td>
               </tr>

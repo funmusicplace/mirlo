@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { set } from "lodash";
+import { getDateRange } from "../../../utils/dateRange";
 
 export default function () {
   const operations = {
@@ -10,38 +11,33 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, lastSubscription } = req.query;
+    const {
+      skip: skipQuery,
+      take,
+      lastSubscription,
+    } = req.query as {
+      skip: string;
+      take: string;
+      lastSubscription: string;
+    };
 
     try {
       let where: Prisma.ArtistUserSubscriptionWhereInput = {};
 
-      if (lastSubscription && lastSubscription === "thisMonth") {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+      const dateRange = getDateRange(lastSubscription);
+      if (dateRange) {
         set(
           where,
           "artistUserSubscriptionCharges.some.createdAt.gte",
-          startOfMonth.toISOString()
+          dateRange.gte
         );
-      } else if (lastSubscription && lastSubscription === "previousMonth") {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setMonth(startOfMonth.getMonth() - 1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        const endOfMonth = new Date();
-        endOfMonth.setDate(1);
-        endOfMonth.setHours(0, 0, 0, 0);
-        set(
-          where,
-          "artistUserSubscriptionCharges.some.createdAt.gte",
-          startOfMonth.toISOString()
-        );
-        set(
-          where,
-          "artistUserSubscriptionCharges.some.createdAt.lt",
-          endOfMonth.toISOString()
-        );
+        if (dateRange.lt) {
+          set(
+            where,
+            "artistUserSubscriptionCharges.some.createdAt.lt",
+            dateRange.lt
+          );
+        }
       }
 
       const itemCount = await prisma.artistUserSubscription.count({ where });
@@ -57,7 +53,11 @@ export default function () {
               artist: true,
             },
           },
-          artistUserSubscriptionCharges: true,
+          artistUserSubscriptionCharges: {
+            include: {
+              transaction: true,
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",

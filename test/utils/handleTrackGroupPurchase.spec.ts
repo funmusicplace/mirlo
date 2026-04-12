@@ -177,4 +177,67 @@ describe("handleTrackGroupPurchase", () => {
       trackGroup.id
     );
   });
+
+  it("should increment userFriendlyId per user across multiple purchases", async () => {
+    const stub = sinon.spy(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const trackGroup1 = await createTrackGroup(artist.id, {
+      title: "Album One",
+    });
+
+    const trackGroup2 = await createTrackGroup(artist.id, {
+      title: "Album Two",
+    });
+
+    // Make first purchase
+    await handleTrackGroupPurchase(purchaser.id, trackGroup1.id);
+    const firstTransaction = await prisma.userTransaction.findFirst({
+      where: { userId: purchaser.id },
+      orderBy: { createdAt: "asc" },
+    });
+    assert.equal(
+      firstTransaction?.userFriendlyId,
+      "0001",
+      "first transaction should have ID 0001"
+    );
+
+    // Make second purchase
+    await handleTrackGroupPurchase(purchaser.id, trackGroup2.id);
+    const secondTransaction = await prisma.userTransaction.findFirst({
+      where: { userId: purchaser.id },
+      orderBy: { createdAt: "desc" },
+    });
+    assert.equal(
+      secondTransaction?.userFriendlyId,
+      "0002",
+      "second transaction should have ID 0002"
+    );
+
+    // Verify count is correct
+    const allTransactions = await prisma.userTransaction.findMany({
+      where: { userId: purchaser.id },
+      orderBy: { createdAt: "asc" },
+    });
+    assert.equal(allTransactions.length, 2);
+    assert.equal(allTransactions[0].userFriendlyId, "0001");
+    assert.equal(allTransactions[1].userFriendlyId, "0002");
+  });
 });

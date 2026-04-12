@@ -25,19 +25,9 @@ export const Sales: React.FC = () => {
 
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [filteredArtistId, setFilteredArtistId] = React.useState<number>();
-  const [isDownloading, setIsDownloading] = React.useState(false);
 
-  const downloadSalesData = React.useCallback(async () => {
-    setIsDownloading(true);
-    try {
-      const params = filteredArtistId ? `&artistIds=${filteredArtistId}` : "";
-      await api.getFile("sales", `manage/sales?format=csv${params}`, "text/csv");
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsDownloading(false);
-    }
-  }, [filteredArtistId]);
+  const [datePurchased, setDatePurchased] = React.useState<string>("");
+  const [isDownloadingCsv, setIsDownloadingCsv] = React.useState(false);
 
   const {
     data: { results, total, totalAmount, totalSupporters } = {
@@ -48,12 +38,37 @@ export const Sales: React.FC = () => {
   } = useQuery(
     queryUserSales({
       artistIds: filteredArtistId ? [filteredArtistId] : undefined,
+      datePurchased: datePurchased || undefined,
       take: pageSize,
       skip: page * pageSize,
     })
   );
 
   const { data: managedArtists } = useQuery(queryManagedArtists());
+
+  const downloadSalesData = React.useCallback(async () => {
+    setIsDownloadingCsv(true);
+    try {
+      const params = new URLSearchParams();
+      if (filteredArtistId) {
+        params.append("artistIds", String(filteredArtistId));
+      }
+      if (datePurchased) {
+        params.append("datePurchased", datePurchased);
+      }
+      params.append("format", "csv");
+
+      await api.getFile(
+        "sales",
+        `manage/sales?${params.toString()}`,
+        "text/csv"
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsDownloadingCsv(false);
+    }
+  }, [filteredArtistId, datePurchased]);
 
   return (
     <WidthContainer
@@ -92,6 +107,19 @@ export const Sales: React.FC = () => {
               </option>
             ))}
           </SelectEl>
+          <SelectEl
+            onChange={(e) => {
+              setDatePurchased(e.target.value);
+            }}
+            value={datePurchased}
+          >
+            <option value="">All dates</option>
+            <option value="thisMonth">Current month to date</option>
+            <option value="previousMonth">Previous month</option>
+            <option value="thisYear">Current year to date</option>
+            <option value="lastYear">Last year</option>
+          </SelectEl>
+
           <ButtonLink variant="outlined" to="/fulfillment">
             {t("viewFulfillment")}
           </ButtonLink>
@@ -102,7 +130,7 @@ export const Sales: React.FC = () => {
                   onClick={downloadSalesData}
                   size="compact"
                   startIcon={<FaDownload />}
-                  isLoading={isDownloading}
+                  isLoading={isDownloadingCsv}
                 >
                   {t("downloadSalesData")}
                 </Button>
@@ -111,7 +139,9 @@ export const Sales: React.FC = () => {
           </DropdownMenu>
         </div>
       </SpaceBetweenDiv>
-      {results.length === 0 && !isLoading && <p>{t("noSales")}</p>}
+      {results.length === 0 && !isLoading && (
+        <p>{t(datePurchased ? "noSalesForThisPeriod" : "noSales")}</p>
+      )}
       {isLoading && <LoadingBlocks rows={5} height="2rem" margin=".5rem" />}
       {(totalAmount ?? 0) > 0 && (
         <div
@@ -148,6 +178,7 @@ export const Sales: React.FC = () => {
             <thead>
               <tr>
                 <th />
+                <th>{t("transactionId")}</th>
                 <th>{t("artist")}</th>
                 <th>{t("type")}</th>
                 <th>{t("date")}</th>

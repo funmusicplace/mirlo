@@ -1,17 +1,11 @@
 import { css } from "@emotion/css";
-import Modal from "components/common/Modal";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
-import {
-  Outlet,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import api from "services/api";
 import useAdminFilters from "./useAdminFilters";
-import ReleaseDate, { formatDate } from "components/TrackGroup/ReleaseDate";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { useTranslation } from "react-i18next";
 import usePagination from "utils/usePagination";
 
@@ -29,10 +23,7 @@ interface AdminSubscription extends ArtistUserSubscription {
 const pageSize = 100;
 
 export const AdminSubscriptions: React.FC = () => {
-  const navigate = useNavigate();
-  const { trackgroupId } = useParams();
   const [results, setResults] = React.useState<AdminSubscription[]>([]);
-  const [openModal, setOpenModal] = React.useState(false);
   const [totalCount, setTotal] = React.useState<number>();
   const { i18n } = useTranslation("translation", {
     keyPrefix: "admin",
@@ -63,10 +54,8 @@ export const AdminSubscriptions: React.FC = () => {
   });
 
   React.useEffect(() => {
-    if (trackgroupId) {
-      setOpenModal(true);
-    }
-  }, [trackgroupId]);
+    callback();
+  }, [callback]);
 
   const total = results.reduce((aggr, r) => {
     if (aggr[r.currency]) {
@@ -155,17 +144,6 @@ export const AdminSubscriptions: React.FC = () => {
         </Table>
       )}
       <PaginationComponent amount={results.length} />
-
-      {/* <LoadingButton /> */}
-      <Modal
-        open={openModal}
-        onClose={() => {
-          setOpenModal(false);
-          navigate("/admin/trackgroups");
-        }}
-      >
-        <Outlet />
-      </Modal>
     </div>
   );
 };

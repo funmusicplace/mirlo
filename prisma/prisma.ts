@@ -46,6 +46,15 @@ baseClient.$on("query", (e) => {
  */
 const prisma = baseClient.$extends({
   query: {
+    userTransaction: {
+      async create({ args, query }) {
+        const count = await baseClient.userTransaction.count({
+          where: { userId: args.data.userId },
+        });
+        args.data.userFriendlyId = String(count + 1).padStart(4, "0");
+        return query(args);
+      },
+    },
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
         const hasDeletedAtField = Prisma.dmmf.datamodel.models

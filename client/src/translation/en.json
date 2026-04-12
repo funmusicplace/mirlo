@@ -299,7 +299,9 @@
   "sales": {
     "sales": "Sales",
     "artist": "Artist",
+    "transactionId": "Transaction ID",
     "amount": "Amount",
+    "noSalesForThisPeriod": "No sales for this period.",
     "noSales": "No sales yet.",
     "totalSalesIncome": "Total sales income",
     "totalAmountOfSales": "Total amount of sales",
@@ -318,7 +320,8 @@
     "tip": "Tip",
     "viewFulfillment": "View Fulfillment",
     "platformCut": "Platform cut",
-    "paymentProcessorCut": "Payment processor cut"
+    "paymentProcessorCut": "Payment processor cut",
+    "downloadCsv": "Download CSV"
   },
   "fulfillment": {
     "artist": "Artist",

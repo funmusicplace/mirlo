@@ -42,6 +42,7 @@ const SalesRow: React.FC<{
   return (
     <tr>
       <td />
+      <td>{sale.userFriendlyId || "---"}</td>
       <td>{sale.artist[0].name}</td>
       <td>{t(saleType)}</td>{" "}
       <td>{formatDate({ date: sale.datePurchased, i18n })} </td>

@@ -2,6 +2,7 @@ extends ../layout.pug
 
 mixin purchaseRow(title, transaction)
   tr
+    td #{transaction.userFriendlyId || '---'}
     td #{title}
     td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
     td #{transaction.platformFee / 100 ? `(Platform fee: ${transaction.platformFee / 100})` : ''}
@@ -9,31 +10,40 @@ mixin purchaseRow(title, transaction)
 
 block content
   p Thank you for your purchase!
-    
-  table 
-    each transaction in transactions
-      each purchase in transaction.trackGroupPurchases
-        +purchaseRow(purchase.trackGroup.title, transaction)
-        tr
-          td(colspan="4")
-            a(href!=`${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`) View release
-      each purchase in transaction.trackPurchases
-        +purchaseRow(purchase.track.title, transaction)
-        tr
-          td(colspan="4")
-            a(href!=`${client}/${purchase.track.trackGroup.artist.urlSlug}/release/${purchase.track.trackGroup.urlSlug}`) View release
-      each purchase in transaction.merchPurchases
-        +purchaseRow(`${purchase.merch.title} ${purchase.options.map((o) => o.name).join(', ')}: ${purchase.quantity}`, transaction)
-      each tip in transaction.tips
-        +purchaseRow('Tip', transaction)
   - const supportMessage = artist?.properties?.emails?.purchase
   if supportMessage
-    div!= supportMessage
-  else
-    p Your support keeps our community strong. 
-    hr 
-    p New to mirlo? 
-      | If you want to have access to all your purchases for this e-mail address, 
-      | simply 
-      a(href!=`${client}/password-reset?email=${email}`) set a password for it
-      | .
+    div.border.pa3!= supportMessage
+  table 
+    thead
+      tr
+        th Transaction ID
+        th Item
+        th Amount
+        th Platform Fee
+        th Payment Processor Fee
+    tbody
+      each transaction in transactions
+        each purchase in transaction.trackGroupPurchases
+          +purchaseRow(purchase.trackGroup.title, transaction)
+          tr 
+            td(colspan="4")
+              a(href!=`${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`) View release
+
+        each purchase in transaction.trackPurchases
+          +purchaseRow(purchase.track.title, transaction)
+          tr 
+            td(colspan="4")
+              a(href!=`${client}/${purchase.track.trackGroup.artist.urlSlug}/release/${purchase.track.trackGroup.urlSlug}`) View release
+              
+        each purchase in transaction.merchPurchases
+          +purchaseRow(`${purchase.merch.title} ${purchase.options.map((o) => o.name).join(', ')}: ${purchase.quantity}`, transaction)
+        each tip in transaction.tips
+          +purchaseRow('Tip', transaction)
+  
+  p Your support keeps our community strong. 
+  hr 
+  p New to mirlo? 
+    | If you want to have access to all your purchases for this e-mail address, 
+    | simply 
+    a(href!=`${client}/password-reset?email=${email}`) set a password for it
+    | .
