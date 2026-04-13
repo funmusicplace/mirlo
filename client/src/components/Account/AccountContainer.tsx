@@ -193,7 +193,7 @@ const AccountContainer: React.FC = () => {
             `}
           >
             <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-              {t("updateProfileButton")}
+              {t("updateAccountButton")}
             </Button>
           </FormComponent>
         </form>
