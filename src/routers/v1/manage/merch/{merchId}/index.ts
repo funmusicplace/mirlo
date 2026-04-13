@@ -10,6 +10,7 @@ import { User } from "@mirlo/prisma/client";
 import { AppError } from "../../../../../utils/error";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
 import generateSlug from "../../../../../utils/generateSlug";
+import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
 
 type Params = {
   merchId: string;
@@ -81,12 +82,17 @@ export default function () {
 
       if (newValues.includePurchaseTrackGroupId) {
         // check that the artist who owns this merch also
-        // owns this trackgroup
-
+        // owns this trackgroup, or that the logged-in user
+        // is the label owner of the trackgroup
+        const user = req.user as User;
         const trackGroup = await prisma.trackGroup.findFirst({
           where: {
-            artistId: merch?.artistId,
             id: Number(newValues.includePurchaseTrackGroupId),
+            OR: [
+              { artistId: merch?.artistId },
+              { paymentToUserId: user.id },
+              { artist: whereForAllArtistsThisLabelCanEdit(user.id) },
+            ],
           },
         });
 
@@ -99,7 +105,6 @@ export default function () {
         }
       }
 
-      const user = req.user as User;
       await prisma.merch.updateMany({
         where: { id: merchId },
         data: {

@@ -5,7 +5,10 @@ import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
 import passportJWT, { JwtFromRequestFunction } from "passport-jwt";
 import prisma from "@mirlo/prisma";
-import { findArtistIdForURLSlug } from "../utils/artist";
+import {
+  findArtistIdForURLSlug,
+  whereForAllArtistsThisLabelCanEdit,
+} from "../utils/artist";
 import logger from "../logger";
 import { AppError } from "../utils/error";
 import {
@@ -188,19 +191,7 @@ export const artistBelongsToLoggedInUser = async (
 
       const artist = await prisma.artist.findFirst({
         where: {
-          OR: [
-            {
-              userId: loggedInUser.id,
-            },
-            {
-              artistLabels: {
-                some: {
-                  labelUserId: loggedInUser.id,
-                  canLabelManageArtist: true,
-                },
-              },
-            },
-          ],
+          ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
           id: Number(castArtistId),
         },
       });
