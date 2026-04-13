@@ -4,7 +4,6 @@ import prisma from "@mirlo/prisma";
 import { processSingleArtist } from "../../../utils/artist";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 import { turnItemsIntoRSS } from "../../../utils/rss";
-import { some } from "lodash";
 
 export default function () {
   const operations = {

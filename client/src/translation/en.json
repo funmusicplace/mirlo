@@ -136,8 +136,7 @@
     "admin": "Admin",
     "manageLabel": "Manage label",
     "fulfillment": "Order fulfillment",
-    "viewSalesPage": "View sales",
-    "accountingEmail": "Accounting email"
+    "viewSalesPage": "View sales"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",
@@ -170,6 +169,7 @@
     "yourAvatar": "Your avatar",
     "yourBanner": "Your banner",
     "account": "Account",
+    "accountingEmail": "Accounting email",
     "purchaseDetails": "Purchase details",
     "manageLabel": "Manage label",
     "tileBackgroundImage": "Tile background image",
@@ -199,6 +199,7 @@
     "reimbursals": "Please reach out to the artist from whom you purchased the content if you have concerns or want a reimbursal.",
     "language": "Language:",
     "updateProfileButton": "Update profile",
+    "updateAccountButton": "Update account",
     "viewCollection": "View collection",
     "manageArtists": "Manage artists",
     "artistsYouSupport": "Artists you support",
