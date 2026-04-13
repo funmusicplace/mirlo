@@ -92,14 +92,47 @@ export function queryManagedMerch(merchId: string) {
 
 const fetchUserPurchases: QueryFunction<
   { results: MerchPurchase[]; total: number },
-  ["fetchUserMerchPurchases", ...any]
-> = ({ queryKey: [_], signal }) => {
-  return api.get(`v1/manage/purchases/`, { signal });
+  [
+    "fetchUserMerchPurchases",
+    opts: {
+      artistIds?: number[];
+      take?: number;
+      skip?: number;
+      datePurchased?: string;
+    },
+    ...any,
+  ]
+> = ({ queryKey: [_, opts], signal }) => {
+  const params = new URLSearchParams();
+  if (opts.artistIds?.length) {
+    params.append("artistIds", opts.artistIds.join(","));
+  }
+  if (opts.take) {
+    params.append("take", String(opts.take));
+  }
+  if (opts.skip) {
+    params.append("skip", String(opts.skip));
+  }
+  if (opts.datePurchased) {
+    params.append("datePurchased", opts.datePurchased);
+  }
+  const queryString = params.toString();
+  return api.get(
+    `v1/manage/purchases/${queryString ? "?" + queryString : ""}`,
+    { signal }
+  );
 };
 
-export function queryUserPurchases() {
+export function queryUserPurchases(
+  opts: {
+    artistIds?: number[];
+    take?: number;
+    skip?: number;
+    datePurchased?: string;
+  } = {}
+) {
   return queryOptions({
-    queryKey: ["fetchUserMerchPurchases", QUERY_KEY_PURCHASES],
+    queryKey: ["fetchUserMerchPurchases", opts, QUERY_KEY_PURCHASES],
     queryFn: fetchUserPurchases,
   });
 }

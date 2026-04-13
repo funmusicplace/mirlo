@@ -327,6 +327,7 @@
   },
   "fulfillment": {
     "artist": "Artist",
+    "selectArtist": "Select an artist",
     "messageSent": "Message sent to artist",
     "merchItem": "Merch item",
     "customer": "Customer",

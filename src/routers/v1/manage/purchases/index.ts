@@ -2,10 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
-import { AppError } from "../../../../utils/error";
-import { processSingleMerch } from "../../../../utils/merch";
 import { User } from "@mirlo/prisma/client";
 import { downloadCSVFile } from "../../../../utils/download";
+import { getDateRange } from "../../../../utils/dateRange";
 
 type Params = {
   merchId: string;
@@ -18,17 +17,58 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const user = req.user as User;
+    let {
+      take = 50,
+      skip = 0,
+      artistIds = undefined,
+      datePurchased = undefined,
+    } = req.query as {
+      take: number | string;
+      skip: number | string;
+      artistIds?: string | string[] | number[] | undefined;
+      datePurchased?: string;
+    };
 
     try {
+      if (!artistIds) {
+        artistIds = (
+          await prisma.artist.findMany({
+            where: {
+              userId: user.id,
+            },
+          })
+        ).map((a) => a.id);
+      } else if (typeof artistIds === "string") {
+        // If artistIds is a string, split it into an array
+        artistIds = artistIds.split(",");
+      }
+
+      let sinceDate: string | undefined;
+      let untilDate: string | undefined;
+
+      const dateRange = getDateRange(datePurchased);
+      if (dateRange) {
+        sinceDate = dateRange.gte;
+        untilDate = dateRange.lt;
+      }
+
+      const whereClause: any = {
+        merch: { artist: { id: { in: artistIds.map((a) => Number(a)) } } },
+      };
+
+      if (sinceDate && untilDate) {
+        whereClause.createdAt = {
+          gte: new Date(sinceDate),
+          lt: new Date(untilDate),
+        };
+      }
+
       const total = await prisma.merchPurchase.count({
-        where: {
-          merch: { artist: { userId: user.id } },
-        },
+        where: whereClause,
       });
+
       const purchases = await prisma.merchPurchase.findMany({
-        where: {
-          merch: { artist: { userId: user.id } },
-        },
+        where: whereClause,
         include: {
           merch: {
             include: {
@@ -46,6 +86,8 @@ export default function () {
         orderBy: {
           createdAt: "desc",
         },
+        take: Number(take),
+        skip: Number(skip),
       });
 
       if (req.query?.format === "csv") {
