@@ -129,6 +129,22 @@ export default function () {
               currency: true,
             },
           },
+          artistLabels: {
+            include: {
+              artist: {
+                include: {
+                  trackGroups: {
+                    where: whereForPublishedTrackGroups(),
+                    include: {
+                      cover: true,
+                    },
+                    take: 4,
+                    orderBy: { orderIndex: "asc" },
+                  },
+                },
+              },
+            },
+          },
         },
       });
       if (format === "rss") {

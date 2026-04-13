@@ -85,12 +85,7 @@ export const Sales: React.FC = () => {
         >
           {t("sales")}
         </h1>
-        <div
-          className={css`
-            display: flex;
-            gap: 1rem;
-          `}
-        >
+        <div className="flex gap-2 items-center">
           <SelectEl
             onChange={(e) => {
               const artistId = e.target.value

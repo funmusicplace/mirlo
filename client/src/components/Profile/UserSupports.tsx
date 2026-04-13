@@ -58,7 +58,7 @@ const UserSupports: React.FC<{
             `}
           >
             {notFollows?.map((s) => (
-              <li>
+              <li key={s.artistSubscriptionTier.artist.id}>
                 <Link
                   to={getArtistUrl(s.artistSubscriptionTier.artist)}
                   className={css`
@@ -94,7 +94,7 @@ const UserSupports: React.FC<{
           </UL>
           <UL>
             {follows?.map((s) => (
-              <li>
+              <li key={s.artistSubscriptionTier.artist.id}>
                 <span>
                   <strong>
                     <Link

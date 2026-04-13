@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { findUserIdForURLSlug } from "../../../../utils/user";
 import {
   addSizesToImage,
   findArtistIdForURLSlug,
@@ -11,9 +10,8 @@ import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
   finalCoversBucket,
-  finalUserAvatarBucket,
-  finalUserBannerBucket,
 } from "../../../../utils/minio";
+import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -51,9 +49,18 @@ export default function () {
             include: {
               artist: {
                 include: {
-                  avatar: true,
-                  banner: true,
+                  avatar: {
+                    where: {
+                      deletedAt: null,
+                    },
+                  },
+                  banner: {
+                    where: {
+                      deletedAt: null,
+                    },
+                  },
                   trackGroups: {
+                    where: whereForPublishedTrackGroups(),
                     include: {
                       cover: true,
                       tracks: true,
@@ -73,21 +80,7 @@ export default function () {
           ...label,
           artistLabels: label?.artistLabels.map((al) => ({
             ...al,
-            artist: {
-              ...al.artist,
-              avatar: addSizesToImage(
-                finalArtistAvatarBucket,
-                al.artist.avatar
-              ),
-              banner: addSizesToImage(
-                finalArtistBannerBucket,
-                al.artist.banner
-              ),
-              trackGroups: al.artist.trackGroups.map((tg) => ({
-                ...tg,
-                cover: addSizesToImage(finalCoversBucket, tg.cover),
-              })),
-            },
+            artist: processSingleArtist(al.artist),
           })),
           profile: labelProfile && processSingleArtist(labelProfile),
         },

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { getArtistUrl } from "utils/artist";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import ArtistFallbackComposite from "./ArtistFallbackComposite";
 import {
   TrackGroupWrapper,
   TrackGroupLinks,
@@ -13,21 +14,31 @@ import {
 const ArtistSquare: React.FC<{
   artist: Artist;
 }> = ({ artist }) => {
+  const standardImageSrc =
+    artist.avatar?.sizes?.[300] ?? artist.banner?.sizes?.[625];
+
+  console.log(
+    "ArtistSquare render",
+    artist.name,
+    "standardImageSrc:",
+    standardImageSrc
+  );
+
   return (
     <TrackGroupWrapper>
       <div>
         <Link to={getArtistUrl(artist)} aria-label={artist.name}>
-          <ImageWithPlaceholder
-            src={
-              artist.avatar?.sizes?.[300] ??
-              artist.banner?.sizes?.[625] ??
-              artist.trackGroups?.[0]?.cover?.sizes?.[300]
-            }
-            alt={artist.name}
-            size={300}
-            square
-            objectFit="contain"
-          />
+          {standardImageSrc ? (
+            <ImageWithPlaceholder
+              src={standardImageSrc}
+              alt={artist.name}
+              size={300}
+              square
+              objectFit="contain"
+            />
+          ) : (
+            <ArtistFallbackComposite artist={artist} />
+          )}
         </Link>
 
         <TrackGroupLinks>

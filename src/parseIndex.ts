@@ -6,6 +6,7 @@ import { getClient } from "./activityPub/utils";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
   finalArtistAvatarBucket,
+  finalArtistBannerBucket,
   finalCoversBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
@@ -23,6 +24,7 @@ import {
   fetchMerchMetadata,
 } from "./parseIndex/metadata";
 import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
+import { whereForPublishedTrackGroups } from "./utils/trackGroup";
 
 type RouteParams = Record<string, string | number | undefined>;
 
@@ -606,6 +608,42 @@ const handleDefault: RouteHandler<{}> = async ({ $, client }) => {
   });
 };
 
+/**
+ * Resolve the og:image URL for an artist using a fallback chain
+ */
+const resolveArtistImageUrl = (artist: {
+  avatar?: { url: string[] } | null;
+  banner?: { url: string[] } | null;
+  trackGroups?: Array<{ cover?: { url: string[] } | null }>;
+}): string | undefined => {
+  // Try avatar first
+  const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
+  if (avatarString) {
+    return generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket);
+  }
+
+  // Fall back to banner
+  const bannerString = artist.banner?.url.find((u) => u.includes("x625"));
+  if (bannerString) {
+    return generateFullStaticImageUrl(bannerString, finalArtistBannerBucket);
+  }
+
+  // Fall back to first album cover
+  if (
+    artist.trackGroups?.[0]?.cover?.url &&
+    artist.trackGroups[0].cover.url.length > 0
+  ) {
+    const coverString = artist.trackGroups[0].cover.url.find((u) =>
+      u.includes("x600")
+    );
+    if (coverString) {
+      return generateFullStaticImageUrl(coverString, finalCoversBucket);
+    }
+  }
+
+  return undefined;
+};
+
 const dispatchRoute = async (
   routeParams: Record<string, any>,
   context: Omit<RouteContext, "params">
@@ -708,16 +746,19 @@ export const analyzePathAndGenerateHTML = async (
     let avatarUrl: string | undefined;
     const artist = await prisma.artist.findFirst({
       where: { urlSlug: segments[0] },
-      include: { avatar: true },
+      include: {
+        avatar: true,
+        banner: true,
+        trackGroups: {
+          where: whereForPublishedTrackGroups(),
+          include: { cover: true },
+          take: 1,
+          orderBy: { orderIndex: "asc" },
+        },
+      },
     });
     if (artist) {
-      const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
-      if (avatarString) {
-        avatarUrl = generateFullStaticImageUrl(
-          avatarString,
-          finalArtistAvatarBucket
-        );
-      }
+      avatarUrl = resolveArtistImageUrl(artist);
     }
 
     // Match against route patterns using shared matcher

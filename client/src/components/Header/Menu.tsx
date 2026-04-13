@@ -119,6 +119,7 @@ const Menu = forwardRef<
                   )}
                   {artists
                     ?.filter((a) => !a.isLabelProfile)
+                    .sort((a, b) => a.name.localeCompare(b.name))
                     .map((a) => {
                       return (
                         <li key={a.id}>
