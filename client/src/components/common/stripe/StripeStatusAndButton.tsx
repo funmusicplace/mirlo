@@ -2,7 +2,7 @@ import React from "react";
 
 import api from "services/api";
 import Button from "../Button";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import { useAuthContext } from "state/AuthContext";
 import { queryUserStripeStatus } from "queries";
@@ -40,6 +40,12 @@ const StripeStatus = () => {
           </Button>
         </a>
       )}
+      <p>
+        <Trans
+          i18nKey="payoutsInfo"
+          components={{ link: <a href="https://docs.mirlo.space/payouts"></a> }}
+        />
+      </p>
     </>
   );
 };
