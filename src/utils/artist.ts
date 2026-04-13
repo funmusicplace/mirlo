@@ -131,6 +131,22 @@ export const getPlatformFeeForArtist = async (
   return artist?.defaultPlatformFee ?? settings.platformPercent;
 };
 
+export const whereForAllArtistsThisLabelCanEdit = (
+  userId: number
+): Prisma.ArtistWhereInput => ({
+  OR: [
+    { userId },
+    {
+      artistLabels: {
+        some: {
+          labelUserId: userId,
+          canLabelManageArtist: true,
+        },
+      },
+    },
+  ],
+});
+
 export const findArtistIdForURLSlug = async (id: string) => {
   if (Number.isNaN(Number(id))) {
     const artist = await prisma.artist.findFirst({

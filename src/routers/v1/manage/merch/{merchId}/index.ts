@@ -10,6 +10,7 @@ import { User } from "@mirlo/prisma/client";
 import { AppError } from "../../../../../utils/error";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
 import generateSlug from "../../../../../utils/generateSlug";
+import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
 
 type Params = {
   merchId: string;
@@ -90,7 +91,7 @@ export default function () {
             OR: [
               { artistId: merch?.artistId },
               { paymentToUserId: user.id },
-              { artist: { userId: user.id } },
+              { artist: whereForAllArtistsThisLabelCanEdit(user.id) },
             ],
           },
         });
