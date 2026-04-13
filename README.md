@@ -23,6 +23,8 @@ Once node is installed, you can use [Corepack](https://nodejs.org/api/corepack.h
 corepack enable
 ```
 
+If you'd like to use Nix, we have a basic `shell.nix` that includes Node.js, Yarn, and other tools to develop the client. Activate the shell using `nix-shell` at the top-level of the repository.
+
 #### For the API:
 
 ```sh
