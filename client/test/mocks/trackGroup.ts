@@ -15,6 +15,7 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
   defaultAllowMirloPromo: true,
   defaultTrackAllowIndividualSale: true,
   defaultTrackMinPrice: 0,
+  defaultIsPreview: true,
   artist: {
     name: "Example Artist",
     urlSlug: "example-artist",

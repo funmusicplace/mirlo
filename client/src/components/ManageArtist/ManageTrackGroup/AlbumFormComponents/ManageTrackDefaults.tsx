@@ -1,16 +1,11 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import React, { useState } from "react";
+import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { FormProvider, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
-import {
-  ArtistButton,
-  useGetArtistColors,
-} from "components/Artist/ArtistButtons";
-import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
@@ -35,7 +30,6 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<TrackGroup>({ defaultValues: trackGroup });
-  const { colors } = useGetArtistColors();
   const snackbar = useSnackbar();
 
   const handleSetAllTracksPreview = async (isPreview: boolean) => {
@@ -92,14 +86,10 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
             padding: 0.5rem 0;
           `}
         >
-          <ArtistButton
-            colors={colors}
-            onClick={() => handleSetAllTracksPreview(true)}
-          >
+          <ArtistButton onClick={() => handleSetAllTracksPreview(true)}>
             {t("setAllTracksAsPreview")}
           </ArtistButton>
           <ArtistButton
-            colors={colors}
             variant="dashed"
             onClick={() => handleSetAllTracksPreview(false)}
           >
