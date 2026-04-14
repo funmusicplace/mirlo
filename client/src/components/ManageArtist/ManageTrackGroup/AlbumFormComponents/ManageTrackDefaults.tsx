@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -78,14 +77,7 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
         </ToggleFormComponent>
       </FormProvider>
       {(trackGroup.tracks ?? []).length > 0 && (
-        <div
-          className={css`
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            padding: 0.5rem 0;
-          `}
-        >
+        <div className="flex flex-wrap gap-4 py-2">
           <ArtistButton onClick={() => handleSetAllTracksPreview(true)}>
             {t("setAllTracksAsPreview")}
           </ArtistButton>
