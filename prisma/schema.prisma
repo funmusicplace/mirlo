@@ -706,6 +706,7 @@ model TrackGroup {
   defaultTrackMinPrice            Int? // in cents
   defaultTrackAllowIndividualSale Boolean                         @default(false)
   defaultAllowMirloPromo          Boolean                         @default(false)
+  defaultIsPreview                Boolean                         @default(true)
   userTrackGroupPurchases         UserTrackGroupPurchase[]
   stripeProductKey                String?
   urlSlug                         String

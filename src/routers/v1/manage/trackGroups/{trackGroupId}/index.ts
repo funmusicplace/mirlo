@@ -111,6 +111,7 @@ export default function () {
         "defaultAllowMirloPromo",
         "defaultTrackAllowIndividualSale",
         "defaultTrackMinPrice",
+        "defaultIsPreview",
         "catalogNumber",
         "urlSlug",
       ]);

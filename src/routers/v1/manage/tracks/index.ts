@@ -87,7 +87,7 @@ export default function () {
         data: {
           title,
           order,
-          isPreview,
+          isPreview: isPreview ?? trackGroup?.defaultIsPreview,
           metadata,
           lyrics,
           isrc,

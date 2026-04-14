@@ -1,10 +1,11 @@
 import assert from "node:assert";
-import { Prisma } from "@mirlo/prisma/client";
 
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import {
   clearTables,
   createArtist,
@@ -25,6 +26,23 @@ describe("manage/trackGroups/{trackGroupId}", () => {
   });
 
   describe("PUT", () => {
+    it("should update defaultIsPreview on a track group", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, defaultIsPreview: false })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.defaultIsPreview, false);
+    });
+
     it("should find a new slug for a trackGroup", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
