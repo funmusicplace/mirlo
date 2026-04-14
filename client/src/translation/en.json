@@ -312,6 +312,7 @@
     "item": "Item",
     "type": "Type",
     "merch": "Merch",
+    "downloadSalesData": "Download sales data",
     "trackGroup": "Release",
     "track": "Track",
     "subscription": "Subscription",
