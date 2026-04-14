@@ -43,6 +43,49 @@ const workerOptions = {
   connection: REDIS_CONFIG,
 };
 
+/**
+ * Factory function to create a worker with standard event logging
+ */
+function createWorkerWithLogging(
+  queueName: string,
+  processor: any,
+  options: any,
+  startupMessage: string,
+  includeActiveEvent = false
+): Worker {
+  const worker = new Worker(queueName, processor, options);
+  logger.info(startupMessage);
+
+  if (includeActiveEvent) {
+    worker.on("active", (job: Job) => {
+      logger.info(`active:${queueName}: jobId=${job.id}`);
+    });
+  }
+
+  worker.on("completed", (job: Job) => {
+    logger.info(
+      includeActiveEvent
+        ? `completed:${queueName}: jobId=${job.id}`
+        : `completed:${queueName}`
+    );
+  });
+
+  worker.on("failed", (job?: Job, err?: any) => {
+    logger.error(
+      includeActiveEvent
+        ? `failed:${queueName}: jobId=${job?.id}`
+        : `failed:${queueName}`,
+      err
+    );
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error(`error:${queueName}`, err);
+  });
+
+  return worker;
+}
+
 yargs // eslint-disable-line
   .command("run", "starts file processing queue", (argv: any) => {
     logger.info("STARTING WORKER QUEUE");
@@ -59,159 +102,78 @@ yargs // eslint-disable-line
   .help().argv;
 
 async function imageQueue() {
-  const worker = new Worker("optimize-image", optimizeImage, workerOptions);
-  logger.info("Optimize Image worker started");
-
-  worker.on("completed", (job: Job) => {
-    logger.info("completed:optimize-image");
-  });
-
-  worker.on("failed", (job?: Job, err?: any) => {
-    logger.error("failed:optimize-image", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:optimize-image", err);
-  });
+  createWorkerWithLogging(
+    "optimize-image",
+    optimizeImage,
+    workerOptions,
+    "Optimize Image worker started"
+  );
 }
 
 async function sendMailQueue() {
-  const worker = new Worker("send-mail", sendMail, {
-    ...workerOptions,
-  });
-  logger.info("Send mail worker started");
-
-  worker.on("completed", (job: Job) => {
-    logger.info("completed:send-mail");
-  });
-
-  worker.on("failed", (job?: Job, err?: any) => {
-    logger.error("failed:send-mail", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:send-mail", err);
-  });
+  createWorkerWithLogging(
+    "send-mail",
+    sendMail,
+    workerOptions,
+    "Send mail worker started"
+  );
 }
 
 async function sendPostNotificationQueue() {
-  const worker = new Worker("send-post-notification", sendPostNotification, {
-    ...workerOptions,
-  });
-  logger.info("Send post notification worker started");
-
-  worker.on("completed", (job: Job) => {
-    logger.info("completed:send-post-notification");
-  });
-
-  worker.on("failed", (job?: Job, err?: any) => {
-    logger.error("failed:send-post-notification", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:send-post-notification", err);
-  });
+  createWorkerWithLogging(
+    "send-post-notification",
+    sendPostNotification,
+    workerOptions,
+    "Send post notification worker started"
+  );
 }
 
 async function autoPurchaseNewAlbumsQueue() {
-  const worker = new Worker(
+  createWorkerWithLogging(
     "auto-purchase-new-albums",
     autoPurchaseNewAlbumsProcessor,
-    {
-      ...workerOptions,
-    }
+    workerOptions,
+    "Auto-purchase new albums worker started"
   );
-  logger.info("Auto-purchase new albums worker started");
-
-  worker.on("completed", (job: Job) => {
-    logger.info("completed:auto-purchase-new-albums");
-  });
-
-  worker.on("failed", (job?: Job, err?: any) => {
-    logger.error("failed:auto-purchase-new-albums", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:auto-purchase-new-albums", err);
-  });
 }
 
 async function audioQueue() {
-  const worker = new Worker("upload-audio", uploadAudioJob, workerOptions);
-  logger.info("Upload Audio worker started");
-
-  worker.on("completed", (job: any) => {
-    logger.info("completed:upload-audio");
-  });
-
-  worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:upload-audio", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:upload-audio", err);
-  });
+  createWorkerWithLogging(
+    "upload-audio",
+    uploadAudioJob,
+    workerOptions,
+    "Upload Audio worker started"
+  );
 }
 
 async function verifyAudioQueue() {
-  const worker = new Worker("verify-audio", verifyAudioJob, workerOptions);
-  logger.info("Verify Audio worker started");
-
-  worker.on("completed", (job: any) => {
-    logger.info("completed:verify-audio");
-  });
-
-  worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:verify-audio", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:verify-audio", err);
-  });
+  createWorkerWithLogging(
+    "verify-audio",
+    verifyAudioJob,
+    workerOptions,
+    "Verify Audio worker started"
+  );
 }
 
 export async function generateAlbumQueueWorker() {
-  const worker = new Worker("generate-album", generateAlbumJob, {
-    ...workerOptions,
-    lockDuration: 10 * 60 * 1000, // 10 minutes
-    lockRenewTime: 5 * 60 * 1000, // Renew every 5 minutes
-  });
-  logger.info("Generate Album worker started");
-
-  worker.on("active", (job: any) => {
-    logger.info(`active:generate-album: jobId=${job.id}`);
-  });
-
-  worker.on("completed", (job: any) => {
-    logger.info(`completed:generate-album: jobId=${job.id}`);
-  });
-
-  worker.on("failed", (job: any, err: any) => {
-    logger.error(`failed:generate-album: jobId=${job.id}`, err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:generate-album", err);
-  });
+  createWorkerWithLogging(
+    "generate-album",
+    generateAlbumJob,
+    {
+      ...workerOptions,
+      lockDuration: 10 * 60 * 1000, // 10 minutes
+      lockRenewTime: 5 * 60 * 1000, // Renew every 5 minutes
+    },
+    "Generate Album worker started",
+    true // includeActiveEvent
+  );
 }
 
 export async function cleanUpFilesQueue() {
-  const worker = new Worker(
+  createWorkerWithLogging(
     "clean-up-old-files",
     cleanUpOldFilesJob,
-    workerOptions
+    workerOptions,
+    "clean up old files worker started"
   );
-  logger.info("clean up old files worker started");
-
-  worker.on("completed", (job: any) => {
-    logger.info("completed:clean-up-old-files");
-  });
-
-  worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:clean-up-old-files", err);
-  });
-
-  worker.on("error", (err: any) => {
-    logger.error("error:clean-up-old-files", err);
-  });
 }
