@@ -5,12 +5,16 @@ import { useTranslation } from "react-i18next";
 import api from "services/api";
 import FulfillmentRow from "./FulfillmentRow";
 import { useQuery } from "@tanstack/react-query";
-import { queryUserPurchases } from "queries";
+import { queryUserPurchases, queryManagedArtists } from "queries";
 import WidthContainer from "components/common/WidthContainer";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Button, { ButtonLink } from "components/common/Button";
 import DropdownMenu from "components/common/DropdownMenu";
 import { FaDownload } from "react-icons/fa";
+import usePagination from "utils/usePagination";
+import { SelectEl } from "components/common/Select";
+
+const pageSize = 50;
 
 export const Fulfillment: React.FC = () => {
   const { t } = useTranslation("translation", {
@@ -18,13 +22,25 @@ export const Fulfillment: React.FC = () => {
   });
   const [isLoadingFulfillments, setIsLoadingFulfillments] =
     React.useState(false);
+  const [filteredArtistId, setFilteredArtistId] = React.useState<number>();
+  const [datePurchased, setDatePurchased] = React.useState<string>("");
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
   const downloadOrderData = React.useCallback(async () => {
     setIsLoadingFulfillments(true);
     try {
+      const params = new URLSearchParams();
+      if (filteredArtistId) {
+        params.append("artistIds", String(filteredArtistId));
+      }
+      if (datePurchased) {
+        params.append("datePurchased", datePurchased);
+      }
+      params.append("format", "csv");
+
       await api.getFile(
         "fulfillments",
-        `manage/purchases?format=csv`,
+        `manage/purchases?${params.toString()}`,
         "text/csv"
       );
     } catch (e) {
@@ -32,9 +48,18 @@ export const Fulfillment: React.FC = () => {
     } finally {
       setIsLoadingFulfillments(false);
     }
-  }, []);
+  }, [filteredArtistId, datePurchased]);
 
-  const { data: purchaseResults } = useQuery(queryUserPurchases());
+  const { data: purchaseResults } = useQuery(
+    queryUserPurchases({
+      artistIds: filteredArtistId ? [filteredArtistId] : undefined,
+      datePurchased: datePurchased || undefined,
+      take: pageSize,
+      skip: page * pageSize,
+    })
+  );
+
+  const { data: managedArtists } = useQuery(queryManagedArtists());
 
   return (
     <WidthContainer
@@ -78,6 +103,36 @@ export const Fulfillment: React.FC = () => {
         </div>
       </SpaceBetweenDiv>
       <p>{t("fulfillmentDescription")}</p>
+      <div className="flex gap-1 mb-1">
+        <SelectEl
+          onChange={(e) => {
+            const artistId = e.target.value
+              ? Number(e.target.value)
+              : undefined;
+            setFilteredArtistId(artistId);
+          }}
+          value={filteredArtistId ?? ""}
+        >
+          <option value="">{t("selectArtist")}</option>
+          {managedArtists?.results.map((artist) => (
+            <option key={artist.id} value={artist.id}>
+              {artist.name}
+            </option>
+          ))}
+        </SelectEl>
+        <SelectEl
+          onChange={(e) => {
+            setDatePurchased(e.target.value);
+          }}
+          value={datePurchased}
+        >
+          <option value="">All dates</option>
+          <option value="thisMonth">Current month to date</option>
+          <option value="previousMonth">Previous month</option>
+          <option value="thisYear">Current year to date</option>
+          <option value="lastYear">Last year</option>
+        </SelectEl>
+      </div>
       <h4>{t("totalResults", { count: purchaseResults?.total })}</h4>
       {(purchaseResults?.results.length ?? 0) > 0 && (
         <div
@@ -108,6 +163,10 @@ export const Fulfillment: React.FC = () => {
               ))}
             </tbody>
           </Table>
+          <PaginationComponent
+            amount={purchaseResults?.results.length ?? 0}
+            total={purchaseResults?.total ?? 0}
+          />
         </div>
       )}
     </WidthContainer>
