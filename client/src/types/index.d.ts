@@ -146,6 +146,7 @@ interface TrackGroup {
   defaultAllowMirloPromo: boolean;
   defaultTrackAllowIndividualSale: boolean;
   defaultTrackMinPrice?: number; // in cents
+  defaultIsPreview: boolean;
 }
 
 interface Post {

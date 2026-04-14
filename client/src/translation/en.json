@@ -904,6 +904,8 @@
     "minPriceOnTracks": "Set the min price on tracks",
     "setPriceOfAllTracks": "Set the price on all tracks",
     "dontAllowIndividualSale": "Don't allow individual sale",
+    "setAllTracksAsPreview": "Set all tracks as free listen",
+    "setAllTracksAsMustOwn": "Set all tracks as must own",
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
     "license": "Track license",
     "anAlbumCover": "an release cover",

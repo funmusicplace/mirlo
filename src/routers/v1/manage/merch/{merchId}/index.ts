@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
+import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
+
 import {
   merchBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-
-import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import { AppError } from "../../../../../utils/error";
+import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
 import generateSlug from "../../../../../utils/generateSlug";
-import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
 
 type Params = {
   merchId: string;
