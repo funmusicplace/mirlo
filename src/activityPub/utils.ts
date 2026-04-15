@@ -167,15 +167,23 @@ export const turnArtistIntoActor = async (
   };
 };
 
+export type ApMention = {
+  href: string; // Actor ID URL
+  name: string; // Display handle e.g. @user@server
+};
+
 export const createPostActivity = async (
   post: Pick<Post, "id" | "urlSlug" | "content" | "title" | "publishedAt">,
   artist: Pick<Artist, "urlSlug">,
-  activityIdSuffix?: string
+  activityIdSuffix?: string,
+  mentions: ApMention[] = []
 ) => {
   const client = await getClient();
   const actorId = `${rootArtist}${artist.urlSlug}`;
   const noteId = `${rootArtist}${artist.urlSlug}/posts/${post.urlSlug || post.id}`;
   const noteUrl = `${client.applicationUrl}/${artist.urlSlug}/posts/${post.urlSlug || post.id}`;
+
+  const mentionedActorIds = mentions.map((m) => m.href);
 
   const note = {
     id: noteId,
@@ -185,8 +193,17 @@ export const createPostActivity = async (
     name: post.title,
     url: noteUrl,
     to: ["https://www.w3.org/ns/activitystreams#Public"],
-    cc: [`${actorId}/followers`],
+    cc: [`${actorId}/followers`, ...mentionedActorIds],
     published: post.publishedAt?.toISOString(),
+    ...(mentions.length > 0
+      ? {
+          tag: mentions.map((m) => ({
+            type: "Mention",
+            href: m.href,
+            name: m.name,
+          })),
+        }
+      : {}),
   };
 
   return {
@@ -195,7 +212,7 @@ export const createPostActivity = async (
     type: "Create",
     actor: actorId,
     to: ["https://www.w3.org/ns/activitystreams#Public"],
-    cc: [`${actorId}/followers`],
+    cc: [`${actorId}/followers`, ...mentionedActorIds],
     published: post.publishedAt?.toISOString(),
     object: note,
   };

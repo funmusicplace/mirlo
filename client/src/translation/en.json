@@ -738,7 +738,8 @@
     "addTitleToUpload": "Add track title to upload",
     "useExistingSong": "Use existing track",
     "existingSongDescription": "Sharing a track from an existing release or pre-order? Find it here.",
-    "uploadNewSongDescription": "Sharing a track that's not on one of your releases? A draft or WIP? Upload it here to share."
+    "uploadNewSongDescription": "Sharing a track that's not on one of your releases? A draft or WIP? Upload it here to share.",
+    "noMentionsFound": "No users found"
   },
   "manageLicense": {
     "shortLabelForLicense": "What's a unique short label for this license?",
@@ -1069,10 +1070,10 @@
     "foregroundColor": "Normal text color",
     "deleteImage": "Delete image",
     "warningFeature": "Warning: this is an experimental feature. You shouldn't rely on it.",
-    "enableActivityPub": "Enable ActivityPub",
+    "enableActivityPub": "Enable The Social Web",
     "groupName": "What should we show as the group type? Label? Collective?",
     "label": "Label",
-    "makeSearchable": "Do you want to make this artist searchable on the fediverse? This will enable ActivityPub for this artist."
+    "makeSearchable": "Do you want to make this artist searchable on the social web? This will enable the ActivityPub protocol for this artist."
   },
   "manageSubscriptions": {
     "uploadSuscribers": "Upload subscriber e-mail adresses",

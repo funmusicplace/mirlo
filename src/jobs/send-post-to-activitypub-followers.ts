@@ -2,10 +2,31 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import crypto from "crypto";
 import {
-  rootArtist,
   createPostActivity,
   signAndSendActivityPubMessage,
+  ApMention,
 } from "../activityPub/utils";
+
+/**
+ * Parse <a href="..." data-mention-actor="...">@handle</a> elements from HTML content.
+ * Returns AP mention objects ready for the ActivityPub tag array.
+ */
+export function parseMentionsFromContent(content: string): ApMention[] {
+  const mentions: ApMention[] = [];
+  // Match anchor tags with data-mention-actor attribute
+  const anchorPattern =
+    /<a\s[^>]*data-mention-actor="([^"]+)"[^>]*>(.*?)<\/a>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = anchorPattern.exec(content)) !== null) {
+    const actorId = match[1];
+    // Strip any inner HTML tags from the link text to get the display handle
+    const name = match[2].replace(/<[^>]+>/g, "").trim();
+    if (actorId && name) {
+      mentions.push({ href: actorId, name });
+    }
+  }
+  return mentions;
+}
 
 /**
  * Sends published posts to ActivityPub followers' inboxes
@@ -136,9 +157,17 @@ const sendPostToActivityPubFollowers = async () => {
       `sendPostToActivityPubFollowers: sending post ${post.id} to ${followers.length} followers`
     );
 
-    // Create the Create activity that wraps the Note
+    // Parse @mentions embedded in the post content
+    const mentions = parseMentionsFromContent(post.content ?? "");
+
+    // Create the Create activity that wraps the Note (includes mention tags + cc)
     const guid = crypto.randomBytes(16).toString("hex");
-    const createActivity = await createPostActivity(post, post.artist, guid);
+    const createActivity = await createPostActivity(
+      post,
+      post.artist,
+      guid,
+      mentions
+    );
 
     // Send to each follower's inbox
     let successCount = 0;
@@ -193,6 +222,53 @@ const sendPostToActivityPubFollowers = async () => {
     logger.info(
       `sendPostToActivityPubFollowers: post ${post.id} - ${successCount} successful, ${errorCount} failed`
     );
+
+    // Deliver to mentioned actors (skip any that are already followers to avoid duplicates)
+    const followerActorIds = new Set(followers.map((f) => f.actor));
+    const mentionsToDeliver = mentions.filter(
+      (m) => !followerActorIds.has(m.href)
+    );
+
+    if (mentionsToDeliver.length > 0) {
+      logger.info(
+        `sendPostToActivityPubFollowers: sending post ${post.id} to ${mentionsToDeliver.length} mentioned actor(s)`
+      );
+
+      for (const mention of mentionsToDeliver) {
+        try {
+          const actorRes = await fetch(mention.href, {
+            headers: { Accept: "application/activity+json" },
+          });
+          if (!actorRes.ok) {
+            throw new Error(
+              `Failed to fetch mentioned actor ${mention.href}: ${actorRes.status}`
+            );
+          }
+          const actorDoc: any = await actorRes.json();
+          const inboxUrl: string | undefined = actorDoc.inbox;
+          if (!inboxUrl) {
+            throw new Error(
+              `No inbox found for mentioned actor ${mention.href}`
+            );
+          }
+          const domain = new URL(inboxUrl).hostname;
+          await signAndSendActivityPubMessage(
+            createActivity,
+            post.artist.urlSlug,
+            inboxUrl,
+            domain
+          );
+          logger.info(
+            `sendPostToActivityPubFollowers: sent mention of post ${post.id} to ${mention.href}`
+          );
+        } catch (error) {
+          logger.error(
+            `sendPostToActivityPubFollowers: failed to send mention of post ${post.id} to ${mention.href}:`,
+            error
+          );
+        }
+      }
+    }
 
     // Mark all notifications for this post as read even if some deliveries failed
     // (we don't want to retry forever)

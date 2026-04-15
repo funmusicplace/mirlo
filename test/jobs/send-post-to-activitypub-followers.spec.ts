@@ -4,7 +4,9 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 
 import { clearTables, createArtist, createPost, createUser } from "../utils";
-import sendPostToActivityPubFollowers from "../../src/jobs/send-post-to-activitypub-followers";
+import sendPostToActivityPubFollowers, {
+  parseMentionsFromContent,
+} from "../../src/jobs/send-post-to-activitypub-followers";
 import prisma from "@mirlo/prisma";
 import assert from "assert";
 
@@ -391,5 +393,416 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     assert.strictEqual(updatedNotif?.isRead, true);
+  });
+
+  describe("parseMentionsFromContent", () => {
+    it("should parse single mention from HTML content", () => {
+      const content =
+        'Check this out: <a href="https://mastodon.example/users/alice" data-mention-actor="https://mastodon.example/users/alice">@alice</a>';
+      const mentions = parseMentionsFromContent(content);
+
+      assert.strictEqual(mentions.length, 1);
+      assert.strictEqual(
+        mentions[0].href,
+        "https://mastodon.example/users/alice"
+      );
+      assert.strictEqual(mentions[0].name, "@alice");
+    });
+
+    it("should parse multiple mentions from HTML content", () => {
+      const content =
+        '<a data-mention-actor="https://mastodon.example/users/alice">@alice</a> and <a data-mention-actor="https://pixelfed.example/users/bob" href="#">@bob</a>';
+      const mentions = parseMentionsFromContent(content);
+
+      assert.strictEqual(mentions.length, 2);
+      assert.strictEqual(
+        mentions[0].href,
+        "https://mastodon.example/users/alice"
+      );
+      assert.strictEqual(mentions[0].name, "@alice");
+      assert.strictEqual(
+        mentions[1].href,
+        "https://pixelfed.example/users/bob"
+      );
+      assert.strictEqual(mentions[1].name, "@bob");
+    });
+
+    it("should handle mentions with complex display names", () => {
+      const content =
+        '<a data-mention-actor="https://example.com/users/alice">alice@example.com</a>';
+      const mentions = parseMentionsFromContent(content);
+
+      assert.strictEqual(mentions.length, 1);
+      assert.strictEqual(mentions[0].href, "https://example.com/users/alice");
+      assert.strictEqual(mentions[0].name, "alice@example.com");
+    });
+
+    it("should ignore mentions without data-mention-actor attribute", () => {
+      const content =
+        '<a href="https://example.com">regular link</a> and <a data-mention-actor="https://mastodon.example/users/alice">@alice</a>';
+      const mentions = parseMentionsFromContent(content);
+
+      assert.strictEqual(mentions.length, 1);
+      assert.strictEqual(mentions[0].name, "@alice");
+    });
+
+    it("should handle mentions with inner HTML tags", () => {
+      const content =
+        '<a data-mention-actor="https://mastodon.example/users/alice"><span class="mention">@alice</span></a>';
+      const mentions = parseMentionsFromContent(content);
+
+      assert.strictEqual(mentions.length, 1);
+      assert.strictEqual(mentions[0].name, "@alice");
+    });
+
+    it("should return empty array for content with no mentions", () => {
+      const content = "This is plain text with no mentions at all";
+      const mentions = parseMentionsFromContent(content);
+
+      assert.strictEqual(mentions.length, 0);
+    });
+
+    it("should return empty array for empty content", () => {
+      const mentions = parseMentionsFromContent("");
+      assert.strictEqual(mentions.length, 0);
+    });
+
+    it("should handle case-insensitive matching", () => {
+      const content =
+        '<A data-mention-actor="https://mastodon.example/users/alice">@alice</A>';
+      const mentions = parseMentionsFromContent(content);
+
+      assert.strictEqual(mentions.length, 1);
+      assert.strictEqual(mentions[0].name, "@alice");
+    });
+  });
+
+  describe("post activity with mentions", () => {
+    it("should send post with mentions to mentioned actors", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist-mention@test.com",
+      });
+
+      const artist = await createArtist(artistUser.id, {
+        name: "Test Artist",
+        urlSlug: "test-artist-mention",
+        activityPub: true,
+      });
+
+      const mentionedActorUrl = "https://mastodon.example/users/mentioned";
+
+      const post = await createPost(artist.id, {
+        title: "Post with Mention",
+        content: `Check this out: <a href="${mentionedActorUrl}" data-mention-actor="${mentionedActorUrl}">@mentioned</a>`,
+        isDraft: false,
+        isPublic: true,
+        publishedAt: new Date(),
+      });
+
+      const subscriber = await createUser({ email: "sub-mention@test.com" });
+
+      const notification = await prisma.notification.create({
+        data: {
+          postId: post.id,
+          userId: subscriber.user.id,
+          notificationType: "NEW_ARTIST_POST",
+          deliveryMethod: "BOTH",
+          isRead: false,
+        },
+      });
+
+      // Mock fetch responses for the mentioned actor
+      const mentionedActorResponse = {
+        ok: true,
+        json: async () => ({
+          inbox: "https://mastodon.example/users/mentioned/inbox",
+        }),
+      };
+
+      const inboxResponse = {
+        ok: true,
+        text: async () => "",
+      };
+
+      fetchStub
+        .withArgs("https://mastodon.example/users/mentioned")
+        .resolves(mentionedActorResponse);
+      fetchStub
+        .withArgs("https://mastodon.example/users/mentioned/inbox")
+        .resolves(inboxResponse);
+
+      await sendPostToActivityPubFollowers();
+
+      // Verify notification was marked as read
+      const updatedNotif = await prisma.notification.findUnique({
+        where: { id: notification.id },
+      });
+
+      assert.strictEqual(updatedNotif?.isRead, true);
+
+      // Verify fetch was called to get mentioned actor's inbox
+      assert(
+        fetchStub.calledWith("https://mastodon.example/users/mentioned"),
+        "Should fetch mentioned actor document"
+      );
+
+      // Verify POST was made to mentioned actor's inbox
+      assert(
+        fetchStub.calledWith(
+          "https://mastodon.example/users/mentioned/inbox",
+          sinon.match.object
+        ),
+        "Should POST to mentioned actor inbox"
+      );
+    });
+
+    it("should not send duplicate activity to followers who are also mentioned", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist-dup@test.com",
+      });
+
+      const artist = await createArtist(artistUser.id, {
+        name: "Test Artist",
+        urlSlug: "test-artist-dup",
+        activityPub: true,
+      });
+
+      const followerActorUrl = "https://mastodon.example/users/follower";
+
+      const post = await createPost(artist.id, {
+        title: "Post with Duplicate Mention",
+        content: `Mentioning: <a href="${followerActorUrl}" data-mention-actor="${followerActorUrl}">@follower</a>`,
+        isDraft: false,
+        isPublic: true,
+        publishedAt: new Date(),
+      });
+
+      const subscriber = await createUser({ email: "sub-dup@test.com" });
+
+      const notification = await prisma.notification.create({
+        data: {
+          postId: post.id,
+          userId: subscriber.user.id,
+          notificationType: "NEW_ARTIST_POST",
+          deliveryMethod: "BOTH",
+          isRead: false,
+        },
+      });
+
+      // Add the follower (same as mentioned actor)
+      await prisma.activityPubArtistFollowers.create({
+        data: {
+          artistId: artist.id,
+          actor: followerActorUrl,
+        },
+      });
+
+      const followerActorResponse = {
+        ok: true,
+        json: async () => ({
+          inbox: "https://mastodon.example/users/follower/inbox",
+        }),
+      };
+
+      const inboxResponse = {
+        ok: true,
+        text: async () => "",
+      };
+
+      fetchStub
+        .withArgs("https://mastodon.example/users/follower")
+        .resolves(followerActorResponse);
+      fetchStub
+        .withArgs("https://mastodon.example/users/follower/inbox")
+        .resolves(inboxResponse);
+
+      await sendPostToActivityPubFollowers();
+
+      // Count how many times the inbox was called - should be once, not twice
+      const inboxCalls = fetchStub
+        .getCalls()
+        .filter(
+          (call: any) =>
+            call.args[0] === "https://mastodon.example/users/follower/inbox"
+        );
+
+      assert.strictEqual(
+        inboxCalls.length,
+        1,
+        "Should only send to mentioned actor once (not as both follower and mentioned)"
+      );
+    });
+
+    it("should include mention tags in post activity", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist-tags@test.com",
+      });
+
+      const artist = await createArtist(artistUser.id, {
+        name: "Test Artist",
+        urlSlug: "test-artist-tags",
+        activityPub: true,
+      });
+
+      const mentionedActorUrl = "https://mastodon.example/users/mentioned";
+
+      const post = await createPost(artist.id, {
+        title: "Post with Mention Tags",
+        content: `Hello <a href="${mentionedActorUrl}" data-mention-actor="${mentionedActorUrl}">@mentioned</a>!`,
+        isDraft: false,
+        isPublic: true,
+        publishedAt: new Date(),
+      });
+
+      const subscriber = await createUser({ email: "sub-tags@test.com" });
+
+      const notification = await prisma.notification.create({
+        data: {
+          postId: post.id,
+          userId: subscriber.user.id,
+          notificationType: "NEW_ARTIST_POST",
+          deliveryMethod: "BOTH",
+          isRead: false,
+        },
+      });
+
+      const mentionedActorResponse = {
+        ok: true,
+        json: async () => ({
+          inbox: "https://mastodon.example/users/mentioned/inbox",
+        }),
+      };
+
+      const inboxResponse = {
+        ok: true,
+        text: async () => "",
+        json: async () => ({ success: true }),
+      };
+
+      fetchStub
+        .withArgs("https://mastodon.example/users/mentioned")
+        .resolves(mentionedActorResponse);
+
+      let capturedActivity: any = null;
+      fetchStub
+        .withArgs(
+          "https://mastodon.example/users/mentioned/inbox",
+          sinon.match.object
+        )
+        .callsFake(async (url: string, options: any) => {
+          if (options.body) {
+            capturedActivity = JSON.parse(options.body);
+          }
+          return inboxResponse;
+        });
+
+      await sendPostToActivityPubFollowers();
+
+      // Verify the captured activity includes mention tags
+      assert(capturedActivity, "Activity should have been sent");
+      assert(capturedActivity.object, "Activity should have object (Note)");
+      assert(
+        Array.isArray(capturedActivity.object.tag),
+        "Note should have tag array"
+      );
+
+      const mentionTag = capturedActivity.object.tag.find(
+        (tag: any) => tag.type === "Mention" && tag.href === mentionedActorUrl
+      );
+
+      assert(mentionTag, "Should include mention tag for the mentioned actor");
+      assert.strictEqual(
+        mentionTag.name,
+        "@mentioned",
+        "Mention tag should have correct name"
+      );
+    });
+
+    it("should include mentioned actors in cc field of post activity", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist-cc@test.com",
+      });
+
+      const artist = await createArtist(artistUser.id, {
+        name: "Test Artist",
+        urlSlug: "test-artist-cc",
+        activityPub: true,
+      });
+
+      const mentionedActorUrl = "https://mastodon.example/users/mentioned";
+
+      const post = await createPost(artist.id, {
+        title: "Post with CC Mention",
+        content: `Yo <a href="${mentionedActorUrl}" data-mention-actor="${mentionedActorUrl}">@mentioned</a>!`,
+        isDraft: false,
+        isPublic: true,
+        publishedAt: new Date(),
+      });
+
+      const subscriber = await createUser({ email: "sub-cc@test.com" });
+
+      const notification = await prisma.notification.create({
+        data: {
+          postId: post.id,
+          userId: subscriber.user.id,
+          notificationType: "NEW_ARTIST_POST",
+          deliveryMethod: "BOTH",
+          isRead: false,
+        },
+      });
+
+      const mentionedActorResponse = {
+        ok: true,
+        json: async () => ({
+          inbox: "https://mastodon.example/users/mentioned/inbox",
+        }),
+      };
+
+      const inboxResponse = {
+        ok: true,
+        text: async () => "",
+        json: async () => ({ success: true }),
+      };
+
+      fetchStub
+        .withArgs("https://mastodon.example/users/mentioned")
+        .resolves(mentionedActorResponse);
+
+      let capturedActivity: any = null;
+      fetchStub
+        .withArgs(
+          "https://mastodon.example/users/mentioned/inbox",
+          sinon.match.object
+        )
+        .callsFake(async (url: string, options: any) => {
+          if (options.body) {
+            capturedActivity = JSON.parse(options.body);
+          }
+          return inboxResponse;
+        });
+
+      await sendPostToActivityPubFollowers();
+
+      // Verify the captured activity includes mentioned actor in cc
+      assert(capturedActivity, "Activity should have been sent");
+      assert(
+        Array.isArray(capturedActivity.cc),
+        "Activity should have cc array"
+      );
+      assert(
+        capturedActivity.cc.includes(mentionedActorUrl),
+        "Mentioned actor should be in cc field"
+      );
+
+      // Also check the Note object
+      assert(
+        Array.isArray(capturedActivity.object.cc),
+        "Note should have cc array"
+      );
+      assert(
+        capturedActivity.object.cc.includes(mentionedActorUrl),
+        "Mentioned actor should be in Note cc field"
+      );
+    });
   });
 });

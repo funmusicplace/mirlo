@@ -21,8 +21,15 @@ import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 
 import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
+import SlashCommands from "./SlashCommands";
+import { SlashCommandHighlightExtension } from "./SlashTrackHighlightExtension";
+import SLASH_COMMANDS from "./slashCommandConfigs";
+import MentionCommands from "./MentionCommands";
+import { MentionHighlightExtension } from "./MentionHighlightExtension";
 import api from "services/api";
 import { usePastedImageUpload } from "./usePastedImageUpload";
+
+const SLASH_TRIGGERS = SLASH_COMMANDS.map((c) => c.trigger);
 
 const extensions =
   (placeholder: string, postId?: number, reload?: () => void) => () => [
@@ -48,6 +55,8 @@ const extensions =
     }),
     new IframeExtension({ enableResizing: false }),
     new LinkExtension({ autoLink: true, selectTextOnClick: true }),
+    new SlashCommandHighlightExtension({ triggers: SLASH_TRIGGERS }),
+    new MentionHighlightExtension({}),
     ...wysiwygPreset(),
   ];
 
@@ -163,6 +172,21 @@ const TextEditor: React.FC<{
         border-top: none;
       }
 
+      .slash-command-highlight {
+        background: var(--mi-darken-x-background-color);
+        border-radius: 3px;
+        font-weight: bold;
+        padding: 3px 5px;
+      }
+
+      .mention-highlight {
+        background: var(--mi-darken-x-background-color);
+        border-radius: 3px;
+        font-weight: bold;
+        padding: 3px 5px;
+        color: var(--mi-normal-foreground-color);
+      }
+
       iframe {
         width: 100%;
       }
@@ -217,6 +241,8 @@ const TextEditor: React.FC<{
         <EditorComponent />
         <TableComponents />
         <FloatingLinkToolbar />
+        <SlashCommands commands={SLASH_COMMANDS} />
+        <MentionCommands />
       </Remirror>
     </div>
   );

@@ -5,6 +5,36 @@ import { parseOutIframes } from "./send-notification-email";
 import { processSinglePost } from "../utils/post";
 import { flatten, uniqBy } from "lodash";
 import { getClient } from "../activityPub/utils";
+import * as cheerio from "cheerio";
+
+/**
+ * Parses post HTML content for local artist mentions and returns their userIds.
+ * Mentions are inserted as links with href pointing to /v1/artists/{urlSlug}.
+ */
+async function findMentionedLocalArtistUserIds(
+  content: string
+): Promise<number[]> {
+  const $ = cheerio.load(content);
+  const urlSlugs: string[] = [];
+
+  $("a[href]").each((_, el) => {
+    const href = $(el).attr("href") || "";
+    // Mentions of local artists are inserted as links to /v1/artists/{urlSlug}
+    const match = href.match(/\/v1\/artists\/([\w-]+)$/);
+    if (match) {
+      urlSlugs.push(match[1]);
+    }
+  });
+
+  if (urlSlugs.length === 0) return [];
+
+  const artists = await prisma.artist.findMany({
+    where: { urlSlug: { in: urlSlugs }, deletedAt: null },
+    select: { userId: true },
+  });
+
+  return artists.map((a) => a.userId);
+}
 
 /**
  * Job processor: Sends notification emails when a post is published
@@ -137,6 +167,25 @@ export default async function sendPostNotification(job: {
             client: (await getClient()).applicationUrl,
           },
         });
+      }
+
+      // Create in-app notifications for mentioned local artists
+      const mentionedArtistUserIds = await findMentionedLocalArtistUserIds(
+        post.content || ""
+      );
+      if (mentionedArtistUserIds.length > 0) {
+        await tx.notification.createMany({
+          data: mentionedArtistUserIds.map((userId) => ({
+            postId,
+            userId,
+            notificationType: "MENTION_IN_POST" as const,
+            deliveryMethod: "IN_APP" as const,
+          })),
+          skipDuplicates: true,
+        });
+        logger.info(
+          `sendPostNotification: created ${mentionedArtistUserIds.length} mention notification(s) for post ${postId}`
+        );
       }
 
       // Mark post as having email announcement sent

@@ -213,12 +213,14 @@ enum NotificationType {
   LABEL_ADDED_ARTIST
   FUNDRAISER_PLEDGE_CHARGED
   AP_FOLLOW
+  MENTION_IN_POST
 }
 
 enum NotificationDeliveryMethod {
   EMAIL
   ACTIVITYPUB
   BOTH
+  IN_APP
 }
 
 model Post {

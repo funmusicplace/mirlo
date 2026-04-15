@@ -19,6 +19,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
 import { getReleaseUrl } from "utils/artist";
 import { TrackArtistLinks } from "components/Player/PlayingTrackDetails";
+import { release } from "os";
 
 const TrackWidget = () => {
   const params = useParams();
@@ -28,9 +29,7 @@ const TrackWidget = () => {
   const [track, setTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(true);
   const { t } = useTranslation("translation", { keyPrefix: "trackDetails" });
-  const { t: artistTranslation } = useTranslation("translation", {
-    keyPrefix: "artist",
-  });
+
   const [artist, setArtist] = React.useState<Artist>();
 
   const embeddedInMirlo = inIframe() && inMirlo();
@@ -61,6 +60,10 @@ const TrackWidget = () => {
     return <LoadingBlocks />;
   }
 
+  const trackCoverUrl =
+    track?.trackGroup.cover?.sizes?.[300] ??
+    track?.trackGroup.artist?.avatar?.sizes?.[300];
+
   return (
     <>
       {(!track || !track.id) && !isLoading && (
@@ -88,51 +91,52 @@ const TrackWidget = () => {
             image={track.trackGroup.cover?.sizes?.[300]}
             player={widgetUrl(track.id, "track")}
           />
-          <FlexWrapper
-            className={css`
-              align-items: center;
-              width: 100%;
-            `}
-          >
-            <ImageWithPlaceholder
-              src={
-                track.trackGroup.cover?.sizes?.[300] ??
-                track.trackGroup.artist?.avatar?.sizes?.[300] ??
-                ""
-              }
-              alt={track.title ?? "Untitled track"}
-              size={150}
-              square
-              objectFit="contain"
-              className={css`
-                width: auto !important;
-                border-radius: 0.3rem 0 0 0.3rem;
-              `}
-            />
+          <div className="w-full flex items-center">
+            {trackCoverUrl && (
+              <img
+                src={trackCoverUrl}
+                alt={track.title}
+                className="h-full w-24 object-cover aspect-square grow"
+              />
+            )}
+            {!trackCoverUrl && (
+              <div
+                className="h-full w-24 flex-shrink-0"
+                style={{
+                  backgroundColor: artist?.properties?.colors?.secondary,
+                }}
+              />
+            )}
 
             <FlexWrapper
-              className={css`
-                width: 100%;
-                min-width: 30%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                align-items: center;
-
-                @media screen and (max-width: ${bp.small}px) {
-                  flex-direction: column;
-                  align-items: flex-start;
-                }
-              `}
-            >
-              <FlexWrapper
-                className={css`
-                  flex: 30%;
+              className={
+                " " +
+                css`
+                  width: 100%;
+                  min-width: 30%;
+                  flex-direction: row;
+                  flex-wrap: wrap;
+                  justify-content: space-between;
+                  align-items: center;
 
                   @media screen and (max-width: ${bp.small}px) {
-                    width: 100%;
+                    flex-direction: column;
+                    align-items: flex-start;
                   }
-                `}
+                `
+              }
+            >
+              <FlexWrapper
+                className={
+                  " " +
+                  css`
+                    flex: 30%;
+
+                    @media screen and (max-width: ${bp.small}px) {
+                      width: 100%;
+                    }
+                  `
+                }
               >
                 <SmallTileDetails
                   title={track.title ?? ""}
@@ -228,7 +232,7 @@ const TrackWidget = () => {
                 )}
               </FlexWrapper>
             </FlexWrapper>
-          </FlexWrapper>
+          </div>
         </WidgetWrapper>
       )}
     </>
