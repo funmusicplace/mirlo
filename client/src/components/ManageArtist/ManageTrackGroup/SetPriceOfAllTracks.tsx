@@ -77,6 +77,7 @@ const SetPriceOfAllTracks: React.FC<BulkUpdateTracksProps> = ({
           colors={colors}
           type="number"
           value={minPrice}
+          step="0.01"
           className={css`
             width: 100px;
           `}
