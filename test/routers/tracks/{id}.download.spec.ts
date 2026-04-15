@@ -8,6 +8,7 @@ import {
   createTrack,
   createTrackGroup,
   createUser,
+  createUserTrackGroupPurchase,
 } from "../../utils";
 import prisma from "@mirlo/prisma";
 import { randomUUID } from "crypto";
@@ -182,6 +183,55 @@ describe("tracks/{id}/download", () => {
 
       assert.equal(response.statusCode, 400);
       assert.equal(response.body.error, "Need to generate track folder first");
+    });
+
+    it("should GET / success for isPreview track when user has purchased the album", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date(),
+        tracks: [],
+      });
+      const track = await createTrack(trackGroup.id, { isPreview: true });
+
+      await createBucketIfNotExists(trackFormatBucket);
+      const passthrough = await generateMockArchive();
+      await uploadWrapper(trackFormatBucket, `${track.id}/flac.zip`, passthrough);
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`tracks/${track.id}/download`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.header["content-type"], "application/zip");
+    });
+
+    it("should GET / 404 for non-preview track when user only has album purchase", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date(),
+        tracks: [],
+      });
+      const track = await createTrack(trackGroup.id, { isPreview: false });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`tracks/${track.id}/download`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 404);
     });
 
     it("should GET / fail if not generated with logged in user", async () => {
