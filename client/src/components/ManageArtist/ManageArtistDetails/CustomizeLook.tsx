@@ -320,7 +320,7 @@ export const CustomizeLook: React.FC = () => {
                     <UploadArtistImage
                       existing={artist}
                       imageTypeDescription={t("backgroundImageDescription")}
-                      imageType="banner"
+                      imageType="background"
                       height="auto"
                       width="100%"
                       maxDimensions="2500x2500"

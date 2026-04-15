@@ -17,7 +17,13 @@ import { queryArtist } from "queries";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { useAuthContext } from "state/AuthContext";
 
-type ImageType = "banner" | "avatar" | "cover" | "image" | "profile";
+type ImageType =
+  | "background"
+  | "banner"
+  | "avatar"
+  | "cover"
+  | "image"
+  | "profile";
 
 export function isTrackgroup(entity: unknown): entity is TrackGroup {
   if (!entity) {
@@ -62,15 +68,19 @@ const getExistingImage = (
     } else if (isUser(existing) && imageType === "banner") {
       image = existing.userBanner;
     }
-  } else if (imageType === "avatar" || imageType === "banner") {
-    image = existing[imageType];
+  } else if (imageType === "avatar") {
+    image = (existing as Artist).avatar;
+  } else if (imageType === "background") {
+    image = (existing as Artist).background;
   }
 
   if (!image) {
     return undefined;
   }
   const actualImageLocation =
-    imageType === "banner" ? image?.sizes?.[625] : image?.sizes?.[600];
+    imageType === "banner" || imageType === "background"
+      ? image?.sizes?.[625]
+      : image?.sizes?.[600];
   return `${actualImageLocation}?updatedAt=${image?.updatedAt}`;
 };
 

@@ -62,8 +62,8 @@ const getExistingImage = (
     } else if (isUser(existing) && imageType === "banner") {
       image = existing.userBanner;
     }
-  } else if (imageType === "avatar" || imageType === "banner") {
-    image = existing[imageType];
+  } else if (imageType === "avatar") {
+    image = (existing as Artist).avatar;
   }
 
   if (!image) {

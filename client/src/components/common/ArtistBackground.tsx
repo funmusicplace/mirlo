@@ -29,7 +29,7 @@ export const StretchedImage = styled.img`
   }
 `;
 
-export const BannerWrapper = styled.div`
+export const BackgroundWrapper = styled.div`
   position: fixed;
   height: 100%;
   width: 100%;
@@ -44,7 +44,7 @@ export const BannerWrapper = styled.div`
   }
 `;
 
-const ArtistBanner = () => {
+const ArtistBackground = () => {
   const { pathname } = useLocation();
 
   const isManage = pathname.includes("manage");
@@ -52,30 +52,33 @@ const ArtistBanner = () => {
 
   const { data: artist } = useArtistQuery();
 
-  const artistBanner = artist?.banner;
+  const artistBackground = artist?.background;
 
-  const showBanner = !(trackGroupId || postId) || isManage;
+  const showBackground = !(trackGroupId || postId) || isManage;
 
   return (
     <>
-      {artistBanner && showBanner && (
-        <BannerWrapper>
-          {artistBanner && !artist.properties?.tileBackgroundImage && (
+      {artistBackground && showBackground && (
+        <BackgroundWrapper>
+          {artistBackground && !artist.properties?.tileBackgroundImage && (
             <StretchedImage
-              src={artistBanner?.sizes?.[2500] + `?${artistBanner?.updatedAt}`}
-              alt="Artist banner"
+              src={
+                artistBackground?.sizes?.[2500] +
+                `?${artistBackground?.updatedAt}`
+              }
+              alt="Artist background"
             />
           )}
-          {artistBanner && artist.properties?.tileBackgroundImage && (
+          {artistBackground && artist.properties?.tileBackgroundImage && (
             <TiledImage
-              url={`${artistBanner.sizes?.original}?${artistBanner?.updatedAt}`}
+              url={`${artistBackground.sizes?.original}?${artistBackground?.updatedAt}`}
             />
           )}
-        </BannerWrapper>
+        </BackgroundWrapper>
       )}
-      {(!artistBanner || !showBanner) && <NoMargin />}
+      {(!artistBackground || !showBackground) && <NoMargin />}
     </>
   );
 };
 
-export default ArtistBanner;
+export default ArtistBackground;

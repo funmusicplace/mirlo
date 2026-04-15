@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import PageBanner from "components/common/ArtistBanner";
+import PageBackground from "components/common/ArtistBackground";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import { useContext, useEffect } from "react";
@@ -72,7 +72,7 @@ function App() {
               }
             `}
           >
-            <PageBanner />
+            <PageBackground />
             <UserBanner />
           </div>
           <div

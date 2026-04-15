@@ -1,10 +1,10 @@
 import { useLocation, useParams } from "react-router-dom";
 import {
-  BannerWrapper,
+  BackgroundWrapper,
   StretchedImage,
   TiledImage,
   NoMargin,
-} from "./ArtistBanner";
+} from "./ArtistBackground";
 import { queryLabelBySlug } from "queries";
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,7 +23,7 @@ const UserBanner = () => {
   return (
     <>
       {banner && showBanner && (
-        <BannerWrapper>
+        <BackgroundWrapper>
           {banner && !label.properties?.tileBackgroundImage && (
             <StretchedImage
               src={banner?.sizes?.[2500] + `?${banner?.updatedAt}`}
@@ -35,7 +35,7 @@ const UserBanner = () => {
               url={`${banner.sizes?.original}?${banner?.updatedAt}`}
             />
           )}
-        </BannerWrapper>
+        </BackgroundWrapper>
       )}
       {(!banner || !showBanner) && <NoMargin />}
     </>
