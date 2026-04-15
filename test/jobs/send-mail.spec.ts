@@ -257,5 +257,40 @@ describe("send-mail job", () => {
         "Should use default from email no-reply@mirlo.space"
       );
     });
+
+    it("should use default when configured fromEmail is invalid", async () => {
+      await createSiteSettings({
+        emailProvider: {
+          provider: "sendgrid",
+          fromEmail: "invalid-email-without-at-sign",
+          sendgrid: {
+            apiKey: "sg_test_key_123",
+          },
+        },
+      });
+
+      sandbox.stub(nodemailer, "createTransport").returns({
+        sendMail: () => Promise.resolve({ messageId: "123" }),
+      } as any);
+
+      const result = await sendMail({
+        data: {
+          template: "error-email",
+          locals: {
+            error: "Test error",
+            time: new Date().toDateString(),
+          },
+          message: {
+            to: "test@example.com",
+          },
+        },
+      } as Job);
+
+      assert.equal(
+        result.fromEmail,
+        "no-reply@mirlo.space",
+        "Should fall back to default when configured email is invalid"
+      );
+    });
   });
 });
