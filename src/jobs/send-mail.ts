@@ -94,6 +94,14 @@ export const sendErrorEmail = async (error: Error) => {
 };
 
 /**
+ * Validates if a string is a valid email address
+ */
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+/**
  * Gets the 'from' email address from settings
  */
 async function getFromEmail(): Promise<string> {
@@ -101,11 +109,20 @@ async function getFromEmail(): Promise<string> {
     const settings = await getSiteSettings();
     const emailSettings = settings.settings?.emailProvider;
 
-    return (
+    const fromEmail =
       emailSettings?.fromEmail ??
       process.env.SENDGRID_SENDER ??
-      "no-reply@mirlo.space"
-    );
+      "no-reply@mirlo.space";
+
+    // Validate the email
+    if (!isValidEmail(fromEmail)) {
+      logger.warn(
+        `Invalid from email configured: "${fromEmail}", using default instead`
+      );
+      return "no-reply@mirlo.space";
+    }
+
+    return fromEmail;
   } catch (err) {
     logger.error("Error getting from email, using default", err);
     return process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space";

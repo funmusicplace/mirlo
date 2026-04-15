@@ -321,7 +321,12 @@ const AdminSettings = () => {
             <td>From Email</td>
             <td>
               <InputEl
-                {...register("emailProvider.fromEmail")}
+                {...register("emailProvider.fromEmail", {
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter a valid email address",
+                  },
+                })}
                 className={css`
                   text-align: right;
                 `}
