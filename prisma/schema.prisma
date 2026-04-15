@@ -283,7 +283,7 @@ model Artist {
   updatedAt                          DateTime                             @default(now()) @updatedAt
   deletedAt                          DateTime?
   subscriptionTiers                  ArtistSubscriptionTier[]
-  banner                             ArtistBanner?
+  background                         ArtistBackground?
   avatar                             ArtistAvatar?
   urlSlug                            String
   /// [Properties]                              @unique
@@ -326,7 +326,7 @@ model ArtistAvatar {
   originalFilename String?
 }
 
-model ArtistBanner {
+model ArtistBackground {
   id               String    @id @default(uuid()) @db.Uuid
   url              String[]
   artist           Artist    @relation(fields: [artistId], references: [id])
