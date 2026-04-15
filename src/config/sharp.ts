@@ -75,7 +75,7 @@ export default {
         ],
       },
     },
-    banner: {
+    background: {
       webp: {
         variants: [
           { width: 2500, height: 2500 },

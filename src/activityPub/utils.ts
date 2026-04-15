@@ -3,7 +3,7 @@ import { Request } from "express";
 import {
   Artist,
   ArtistAvatar,
-  ArtistBanner,
+  ArtistBackground,
   ArtistUserSubscription,
   Post,
   TrackGroup,
@@ -12,7 +12,7 @@ import { AppError } from "../utils/error";
 import crypto, { createVerify } from "crypto";
 import {
   finalArtistAvatarBucket,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
 } from "../utils/minio";
 import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
@@ -113,7 +113,10 @@ export const getClient = async () => {
 };
 
 export const turnArtistIntoActor = async (
-  artist: Artist & { avatar: ArtistAvatar | null; banner: ArtistBanner | null }
+  artist: Artist & {
+    avatar: ArtistAvatar | null;
+    background: ArtistBackground | null;
+  }
 ) => {
   const client = await getClient();
   const { publicKey } = await generateKeysForSiteIfNeeded();
@@ -147,14 +150,14 @@ export const turnArtistIntoActor = async (
           },
         }
       : {}),
-    ...(artist.banner
+    ...(artist.background
       ? {
           image: {
             type: "Image",
             mediaType: "image/webp",
             url: generateFullStaticImageUrl(
-              artist.banner.url[0],
-              finalArtistBannerBucket
+              artist.background.url[0],
+              finalArtistBackgroundBucket
             ),
           },
         }

@@ -3,7 +3,7 @@ import {
   ArtistSubscriptionTier,
   Artist,
   Post,
-  ArtistBanner,
+  ArtistBackground,
   ArtistAvatar,
   TrackGroup,
   TrackGroupCover,
@@ -24,7 +24,7 @@ import postProcessor from "./post";
 import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
   finalCoversBucket,
   finalImageBucket,
   finalUserAvatarBucket,
@@ -382,22 +382,22 @@ export const deleteUserAvatar = async (userId: number) => {
   }
 };
 
-export const deleteArtistBanner = async (artistId: number) => {
-  const banner = await prisma.artistBanner.findFirst({
+export const deleteArtistBackground = async (artistId: number) => {
+  const background = await prisma.artistBackground.findFirst({
     where: {
       artistId,
     },
   });
 
-  if (banner) {
-    await prisma.artistBanner.delete({
+  if (background) {
+    await prisma.artistBackground.delete({
       where: {
         artistId,
       },
     });
 
     try {
-      removeObjectsFromBucket(finalArtistBannerBucket, banner.id);
+      removeObjectsFromBucket(finalArtistBackgroundBucket, background.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }
@@ -473,7 +473,7 @@ export const singleInclude = (queryOptions?: {
       },
     },
     tourDates: true,
-    banner: {
+    background: {
       where: {
         deletedAt: null,
       },
@@ -580,7 +580,7 @@ export const singleInclude = (queryOptions?: {
 
 interface LocalArtist extends Artist {
   posts?: Post[];
-  banner?: ArtistBanner | null;
+  background?: ArtistBackground | null;
   avatar?: ArtistAvatar | null;
   trackGroups?: (TrackGroup & {
     cover?: TrackGroupCover | null;
@@ -616,7 +616,10 @@ export const processSingleArtist = (
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
     merch: artist?.merch?.map(processSingleMerch),
-    banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
+    background: addSizesToImage(
+      finalArtistBackgroundBucket,
+      artist?.background
+    ),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map((tg) =>
       processSingleTrackGroup(tg, {

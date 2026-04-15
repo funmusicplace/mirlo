@@ -6,13 +6,13 @@ import { REDIS_CONFIG } from "../config/redis";
 import {
   createBucketIfNotExists,
   finalArtistAvatarBucket,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
   finalUserAvatarBucket,
   finalUserBannerBucket,
   incomingArtistAvatarBucket,
-  incomingArtistBannerBucket,
+  incomingArtistBackgroundBucket,
   incomingMerchImageBucket,
   incomingUserBannerBucket,
   uploadWrapper,
@@ -137,7 +137,7 @@ export const uploadAndSendToImageQueue = async (
       if (finalBucket) {
         logger.info("Adding image to queue");
 
-        const config: "square" | "banner" | "avatar" | "artwork" =
+        const config: "square" | "background" | "avatar" | "artwork" =
           sharpConfigKey === "inFormData"
             ? (fromBody.dimensions ?? "square")
             : sharpConfigKey;
@@ -246,15 +246,15 @@ export const processArtistAvatar = (ctx: APIContext) => {
   };
 };
 
-export const processArtistBanner = (ctx: APIContext) => {
+export const processArtistBackground = (ctx: APIContext) => {
   return async (artistId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistBannerBucket,
-      "artistBanner",
-      "banner",
+      incomingArtistBackgroundBucket,
+      "artistBackground",
+      "background",
       async (fileInfo: { filename: string }) => {
-        return prisma.artistBanner.upsert({
+        return prisma.artistBackground.upsert({
           create: {
             originalFilename: fileInfo.filename,
             artistId: artistId,
@@ -268,7 +268,7 @@ export const processArtistBanner = (ctx: APIContext) => {
           },
         });
       },
-      finalArtistBannerBucket
+      finalArtistBackgroundBucket
     );
   };
 };

@@ -67,7 +67,7 @@ export default function () {
               deletedAt: null,
             },
           },
-          banner: {
+          background: {
             where: {
               deletedAt: null,
             },

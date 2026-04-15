@@ -6,7 +6,7 @@ import { getClient } from "./activityPub/utils";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
   finalArtistAvatarBucket,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
   finalCoversBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
@@ -622,10 +622,13 @@ const resolveArtistImageUrl = (artist: {
     return generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket);
   }
 
-  // Fall back to banner
-  const bannerString = artist.banner?.url.find((u) => u.includes("x625"));
+  // Fall back to background
+  const bannerString = artist.background?.url.find((u) => u.includes("x625"));
   if (bannerString) {
-    return generateFullStaticImageUrl(bannerString, finalArtistBannerBucket);
+    return generateFullStaticImageUrl(
+      bannerString,
+      finalArtistBackgroundBucket
+    );
   }
 
   // Fall back to first album cover
@@ -748,7 +751,7 @@ export const analyzePathAndGenerateHTML = async (
       where: { urlSlug: segments[0] },
       include: {
         avatar: true,
-        banner: true,
+        background: true,
         trackGroups: {
           where: whereForPublishedTrackGroups(),
           include: { cover: true },
