@@ -608,6 +608,13 @@ export const findTrackPurchaseAndVoidToken = async (
   });
 
   if (purchase) {
+    // TODO: do we want a token to be reset after download?
+    // If so we probably want to do this once the download is
+    // complete on the client otherwise there might be errors
+    // await setDownloadTokenToNull({
+    //   userId: purchase.userId,
+    //   trackGroupId: purchase.trackGroupId,
+    // });
     return purchase;
   }
 
