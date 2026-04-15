@@ -607,22 +607,43 @@ export const findTrackPurchaseAndVoidToken = async (
     },
   });
 
-  if (!purchase) {
-    throw new AppError({
-      httpCode: 404,
-      description: `trackId: ${trackId} no purchase found`,
-    });
+  if (purchase) {
+    // TODO: do we want a token to be reset after download?
+    // If so we probably want to do this once the download is
+    // complete on the client otherwise there might be errors
+    // await setDownloadTokenToNull({
+    //   userId: purchase.userId,
+    //   trackGroupId: purchase.trackGroupId,
+    // });
+    return purchase;
   }
 
-  // TODO: do we want a token to be reset after download?
-  // If so we probably want to do this once the download is
-  // complete on the client otherwise there might be errors
-  // await setDownloadTokenToNull({
-  //   userId: purchase.userId,
-  //   trackGroupId: purchase.trackGroupId,
-  // });
+  // Fall back: allow download if the track is isPreview and the user has
+  // purchased the containing track group (covers pre-orders and regular purchases)
+  const previewTrack = await prisma.track.findFirst({
+    where: {
+      id: Number(trackId),
+      isPreview: true,
+      trackGroup: {
+        publishedAt: { lte: new Date() },
+        userTrackGroupPurchases: {
+          some: { userId: Number(user.id) },
+        },
+      },
+    },
+    include: {
+      trackGroup: basicTrackGroupInclude,
+    },
+  });
 
-  return purchase;
+  if (previewTrack) {
+    return { track: previewTrack };
+  }
+
+  throw new AppError({
+    httpCode: 404,
+    description: `trackId: ${trackId} no purchase found`,
+  });
 };
 
 export const findPurchaseAndVoidToken = async (
