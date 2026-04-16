@@ -17,63 +17,6 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import { useAuthContext } from "state/AuthContext";
 import { useFormContext } from "react-hook-form";
 
-type ImageType = "banner" | "avatar" | "cover" | "image" | "profile";
-
-export function isTrackgroup(entity: unknown): entity is TrackGroup {
-  if (!entity) {
-    return false;
-  }
-  return (entity as TrackGroup).cover !== undefined;
-}
-
-export function isUser(entity: unknown): entity is LoggedInUser {
-  if (!entity) {
-    return false;
-  }
-  return (entity as LoggedInUser).userAvatar !== undefined;
-}
-
-export function isTrack(entity: unknown): entity is Track {
-  if (!entity) {
-    return false;
-  }
-  return (entity as Track).trackGroupId !== undefined;
-}
-
-export function isMerch(entity: unknown): entity is Merch {
-  if (!entity) {
-    return false;
-  }
-  return (entity as Merch).quantityRemaining !== undefined;
-}
-
-const getExistingImage = (
-  existing: Artist | TrackGroup | Merch | LoggedInUser,
-  imageType: ImageType
-) => {
-  let image = undefined;
-  if (isTrackgroup(existing)) {
-    image = existing["cover"];
-  } else if (isMerch(existing)) {
-    image = existing.images?.[0];
-  } else if (isUser(existing)) {
-    if (isUser(existing) && imageType === "avatar") {
-      image = existing.userAvatar;
-    } else if (isUser(existing) && imageType === "banner") {
-      image = existing.userBanner;
-    }
-  } else if (imageType === "avatar") {
-    image = (existing as Artist).avatar;
-  }
-
-  if (!image) {
-    return undefined;
-  }
-  const actualImageLocation =
-    imageType === "banner" ? image?.sizes?.[625] : image?.sizes?.[600];
-  return `${actualImageLocation}?updatedAt=${image?.updatedAt}`;
-};
-
 type ExistingImage = {
   sizes: { [key: number]: string };
 };
@@ -87,7 +30,6 @@ const UploadGeneralImage: React.FC<{
   labelFor?: string;
   imageAlt?: string;
   size?: 625 | 1024 | 300 | 600 | 1200;
-  // imageType: ImageType;
   height: string;
   width: string;
   maxDimensions: string;
