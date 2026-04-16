@@ -6,13 +6,13 @@ import { REDIS_CONFIG } from "../config/redis";
 import {
   createBucketIfNotExists,
   finalArtistAvatarBucket,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
   finalUserAvatarBucket,
   finalUserBannerBucket,
   incomingArtistAvatarBucket,
-  incomingArtistBannerBucket,
+  incomingArtistBackgroundBucket,
   incomingMerchImageBucket,
   incomingUserBannerBucket,
   uploadWrapper,
@@ -71,7 +71,7 @@ export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
   incomingBucket: string,
   model: string,
-  sharpConfigKey: "artwork" | "avatar" | "banner" | "inFormData",
+  sharpConfigKey: "artwork" | "avatar" | "background" | "banner" | "inFormData",
   createDatabaseEntry: (
     {
       filename,
@@ -80,7 +80,7 @@ export const uploadAndSendToImageQueue = async (
       filename: string;
       mimeType: string;
     },
-    details: { dimensions: "square" | "banner" }
+    details: { dimensions: "square" | "background" | "banner" }
   ) => Promise<{ id: string } | void>,
   finalBucket?: string, // If this is not supplied, we this basically just uploads to the first bucket,0
   storeWithExtension?: boolean
@@ -92,15 +92,18 @@ export const uploadAndSendToImageQueue = async (
 
   ctx.req.pipe(ctx.req.busboy);
   const fromBody: {
-    dimensions?: "square" | "banner";
+    dimensions?: "square" | "background" | "banner";
     relation?: "subscriptionTierImage";
     imageId?: string;
   } = {};
 
   const details = await new Promise((resolve, reject) => {
     ctx.req.busboy.on("field", function (fieldname, val) {
-      if (fieldname === "dimensions" && ["square", "banner"].includes(val)) {
-        fromBody["dimensions"] = val as "square" | "banner";
+      if (
+        fieldname === "dimensions" &&
+        ["square", "background", "banner"].includes(val)
+      ) {
+        fromBody["dimensions"] = val as "square" | "background" | "banner";
       }
       if (fieldname === "imageId") {
         fromBody["imageId"] = val;
@@ -137,7 +140,12 @@ export const uploadAndSendToImageQueue = async (
       if (finalBucket) {
         logger.info("Adding image to queue");
 
-        const config: "square" | "banner" | "avatar" | "artwork" =
+        const config:
+          | "square"
+          | "background"
+          | "banner"
+          | "avatar"
+          | "artwork" =
           sharpConfigKey === "inFormData"
             ? (fromBody.dimensions ?? "square")
             : sharpConfigKey;
@@ -246,15 +254,15 @@ export const processArtistAvatar = (ctx: APIContext) => {
   };
 };
 
-export const processArtistBanner = (ctx: APIContext) => {
+export const processArtistBackground = (ctx: APIContext) => {
   return async (artistId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistBannerBucket,
-      "artistBanner",
-      "banner",
+      incomingArtistBackgroundBucket,
+      "artistBackground",
+      "background",
       async (fileInfo: { filename: string }) => {
-        return prisma.artistBanner.upsert({
+        return prisma.artistBackground.upsert({
           create: {
             originalFilename: fileInfo.filename,
             artistId: artistId,
@@ -268,7 +276,7 @@ export const processArtistBanner = (ctx: APIContext) => {
           },
         });
       },
-      finalArtistBannerBucket
+      finalArtistBackgroundBucket
     );
   };
 };

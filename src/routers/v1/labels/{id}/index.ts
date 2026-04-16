@@ -8,7 +8,7 @@ import {
 } from "../../../../utils/artist";
 import {
   finalArtistAvatarBucket,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
   finalCoversBucket,
 } from "../../../../utils/minio";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
@@ -27,7 +27,7 @@ export default function () {
       const labelProfile = await prisma.artist.findFirst({
         where: { id: artistId, isLabelProfile: true },
         include: {
-          banner: true,
+          background: true,
           avatar: true,
         },
       });
@@ -54,7 +54,7 @@ export default function () {
                       deletedAt: null,
                     },
                   },
-                  banner: {
+                  background: {
                     where: {
                       deletedAt: null,
                     },

@@ -20,9 +20,9 @@ import { Readable } from "stream";
 
 const s3UniquePrefix = "";
 
-export const incomingArtistBannerBucket =
+export const incomingArtistBackgroundBucket =
   s3UniquePrefix + "incoming-artist-banners";
-export const finalArtistBannerBucket = s3UniquePrefix + "artist-banners";
+export const finalArtistBackgroundBucket = s3UniquePrefix + "artist-banners";
 
 export const incomingArtistAvatarBucket =
   s3UniquePrefix + "incoming-artist-avatars";
