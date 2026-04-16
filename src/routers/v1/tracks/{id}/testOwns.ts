@@ -27,13 +27,30 @@ export default function () {
       if (userEmail) {
         const purchase = await prisma.userTrackPurchase.findFirst({
           where: {
-            user: {
-              email: userEmail,
-            },
+            user: { email: userEmail },
             trackId: Number(id),
           },
         });
-        exists = !!purchase;
+
+        if (purchase) {
+          exists = true;
+        } else {
+          // Also allow download if the track is isPreview and the user has
+          // purchased the containing track group
+          const previewTrack = await prisma.track.findFirst({
+            where: {
+              id: Number(id),
+              isPreview: true,
+              trackGroup: {
+                publishedAt: { lte: new Date() },
+                userTrackGroupPurchases: {
+                  some: { user: { email: userEmail } },
+                },
+              },
+            },
+          });
+          exists = !!previewTrack;
+        }
       }
       res.status(200);
       res.json({ result: { exists } });

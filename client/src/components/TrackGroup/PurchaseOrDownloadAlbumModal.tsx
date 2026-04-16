@@ -31,7 +31,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
     try {
       if (userId) {
         const purchased = track
-          ? trackPurchases?.find((p) => p.trackId === track.id)
+          ? trackPurchases?.find((p) => p.trackId === track.id) ||
+            (track.isPreview &&
+              trackGroupPurchases?.find(
+                (p) => p.trackGroupId === trackGroup.id
+              ))
           : trackGroupPurchases?.find((p) => p.trackGroupId === trackGroup.id);
 
         setIsOwned(!!purchased);
@@ -39,7 +43,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     } catch (e) {
       console.error(e);
     }
-  }, [trackPurchases, trackGroupPurchases, trackGroup.id, userId]);
+  }, [trackPurchases, trackGroupPurchases, trackGroup.id, userId, track]);
 
   React.useEffect(() => {
     checkForAlbumOwnership();
@@ -79,7 +83,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const showPurchase = !isOwned;
 
-  const showDownload = isOwned && !isBeforeReleaseDate;
+  const showDownload = isOwned && (!isBeforeReleaseDate || (track?.isPreview ?? false));
 
   return (
     <>
