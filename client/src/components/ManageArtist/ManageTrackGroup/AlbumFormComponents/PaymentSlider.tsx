@@ -1,11 +1,12 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import Pill from "components/common/Pill";
 import { queryArtist } from "queries";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useController, useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { IoHelp } from "react-icons/io5";
 import { useParams } from "react-router-dom";
@@ -24,7 +25,13 @@ const PaymentSlider: React.FC<{
     queryArtist({ artistSlug: artistId ?? "" })
   );
   const methods = useFormContext();
-  const current = methods.watch(keyName);
+  const { field } = useController({
+    control: methods.control,
+    name: keyName,
+  });
+  const current = Number.isFinite(Number(field.value))
+    ? Number(field.value)
+    : 0;
 
   const onBlur = React.useCallback(async () => {
     try {
@@ -35,7 +42,7 @@ const PaymentSlider: React.FC<{
     } catch (e) {
       console.error(e);
     }
-  }, [current, extraData, url]);
+  }, [current, extraData, keyName, url]);
 
   const modalRows = React.useMemo(() => {
     const tiers = [
@@ -58,49 +65,65 @@ const PaymentSlider: React.FC<{
   }, [t]);
 
   return (
-    <div
-      className={css`
-        width: 100%;
-      `}
-    >
-      <input
-        type="range"
-        step="1"
-        min={0}
-        {...methods.register(keyName)}
-        onMouseUp={onBlur}
-        className={css`
-          -webkit-appearance: none;
-          width: 100%;
-          max-width: 300px;
-          height: 15px;
-          border-radius: 5px;
-          background: #d3d3d3;
-          outline: none;
-          opacity: 0.7;
-          -webkit-transition: 0.2s;
-          transition: opacity 0.2s;
-          margin-top: 0.7rem;
-
-          &::-webkit-slider-thumb {
+    <div className="w-full">
+      <div className="flex gap-1">
+        <input
+          type="range"
+          step="1"
+          min={0}
+          name={field.name}
+          ref={field.ref}
+          value={current}
+          onChange={(event) => field.onChange(Number(event.target.value))}
+          onBlur={() => {
+            field.onBlur();
+            onBlur();
+          }}
+          onMouseUp={onBlur}
+          className={css`
             -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: ${artist?.properties?.colors?.primary};
-            cursor: pointer;
-          }
+            width: 100%;
+            flex-grow: 1;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: 0.2s;
+            transition: opacity 0.2s;
+            margin-top: 0.7rem;
 
-          &::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: ${artist?.properties?.colors?.primary};
-            cursor: pointer;
-          }
-        `}
-      />
+            &::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              appearance: none;
+              width: 25px;
+              height: 25px;
+              border-radius: 50%;
+              background: ${artist?.properties?.colors?.primary};
+              cursor: pointer;
+            }
+
+            &::-moz-range-thumb {
+              width: 25px;
+              height: 25px;
+              border-radius: 50%;
+              background: ${artist?.properties?.colors?.primary};
+              cursor: pointer;
+            }
+          `}
+        />
+        <InputEl
+          type="number"
+          name={field.name}
+          value={current}
+          onChange={(event) => field.onChange(Number(event.target.value))}
+          onBlur={() => {
+            field.onBlur();
+            onBlur();
+          }}
+          className="w-[100px]!"
+        />
+      </div>
       <div
         className={css`
           width: 100%;
