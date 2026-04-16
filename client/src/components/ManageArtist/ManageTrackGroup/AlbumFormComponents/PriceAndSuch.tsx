@@ -355,6 +355,7 @@ const PriceAndSuch: React.FC<{
               {hasSuggestedPrice && (
                 <>
                   <small>{t("suggestedPriceDescription")}</small>
+                  <small>{t("suggestedPriceDescriptionClarifier")}</small>
                   <div
                     className={css`
                       display: flex;
