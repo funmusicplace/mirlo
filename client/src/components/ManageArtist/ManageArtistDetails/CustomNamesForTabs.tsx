@@ -79,6 +79,17 @@ export const CustomNamesForTabs: React.FC = () => {
           </FormComponent>
           {artist.isLabelProfile && (
             <FormComponent>
+              <label>{t("rosterTab")}</label>
+              <InputEl
+                type="text"
+                colors={artist.properties?.colors}
+                placeholder={t("roster") ?? ""}
+                {...methods.register("properties.titles.roster")}
+              />
+            </FormComponent>
+          )}
+          {artist.isLabelProfile && (
+            <FormComponent>
               <label>{t("groupName")}</label>
               <InputEl
                 type="text"
