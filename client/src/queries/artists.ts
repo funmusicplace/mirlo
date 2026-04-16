@@ -1,4 +1,9 @@
-import { QueryFunction, queryOptions } from "@tanstack/react-query";
+import {
+  QueryFunction,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_ARTISTS,
@@ -119,6 +124,61 @@ export function queryManagedArtistSubscriptionTiers(opts: {
       QUERY_KEY_TRACK_GROUPS,
     ],
     queryFn: fetchManagedArtistSubscriptionTiers,
+  });
+}
+
+const fetchManagedArtistSubscriptionTier: QueryFunction<
+  ArtistSubscriptionTier,
+  [
+    "fetchManagedArtistSubscriptionTier",
+    { artistId?: number; tierId?: number },
+    ...any,
+  ]
+> = ({ queryKey: [_, { artistId, tierId }], signal }) => {
+  return api
+    .get<{
+      result: ArtistSubscriptionTier;
+    }>(`v1/manage/artists/${artistId}/subscriptionTiers/${tierId}`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryManagedArtistSubscriptionTier(opts: {
+  artistId?: number;
+  tierId?: number;
+}) {
+  return queryOptions({
+    queryKey: [
+      "fetchManagedArtistSubscriptionTier",
+      opts,
+      QUERY_KEY_TRACK_GROUPS,
+    ],
+    queryFn: fetchManagedArtistSubscriptionTier,
+    enabled: Boolean(opts.artistId && opts.tierId),
+  });
+}
+
+async function createSubscriptionTier(opts: {
+  artistId: number;
+  name: string;
+}): Promise<{ result: ArtistSubscriptionTier }> {
+  return api.post(`v1/manage/artists/${opts.artistId}/subscriptionTiers/`, {
+    name: opts.name,
+  });
+}
+
+export function useCreateSubscriptionTierMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: createSubscriptionTier,
+    async onSuccess(_, { artistId }) {
+      await client.invalidateQueries({
+        queryKey: [
+          "fetchManagedArtistSubscriptionTiers",
+          { artistId },
+          QUERY_KEY_TRACK_GROUPS,
+        ],
+      });
+    },
   });
 }
 

@@ -11,9 +11,14 @@ import { useAuthContext } from "state/AuthContext";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+  useGetArtistColors,
+} from "./ArtistButtons";
 import useErrorHandler from "services/useErrorHandler";
 import IncludedReleases from "./IncludedReleases";
+import { getArtistManageTiersUrl } from "utils/artist";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
@@ -68,6 +73,10 @@ const ArtistSupportBox: React.FC<{
     return <LoadingBlocks rows={2} />;
   }
 
+  if (!subscriptionTier.minAmount || subscriptionTier.minAmount === 0) {
+    return null;
+  }
+
   const isSubscribedToTier = !!user?.artistUserSubscriptions?.find(
     (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
   );
@@ -111,6 +120,30 @@ const ArtistSupportBox: React.FC<{
         </div>
       )}
       <div>
+        <div className="absolute top-2 right-2 flex items-center justify-center gap-2 z-21 ">
+          {user && user.id === artist.userId && (
+            <ArtistButtonLink
+              to={
+                getArtistManageTiersUrl(subscriptionTier.artistId) +
+                "/" +
+                subscriptionTier.id
+              }
+              size="compact"
+              variant="dashed"
+            >
+              {t("editTier")}
+            </ArtistButtonLink>
+          )}
+          <PlatformPercent
+            percent={subscriptionTier.platformPercent}
+            chosenPrice={
+              subscriptionTier?.minAmount ? subscriptionTier.minAmount / 100 : 0
+            }
+            artistName={artist?.name}
+            currency={subscriptionTier.currency}
+            alignRight
+          />
+        </div>
         {subscriptionTier.images?.[0]?.image.sizes?.[625] && (
           <img
             src={
@@ -147,21 +180,7 @@ const ArtistSupportBox: React.FC<{
         }
       >
         {!isSubscribedToTier && !isSubscribedToArtist && (
-          <div className="flex gap-3 flex-col">
-            <div className="flex items-center content-center">
-              <ArtistVariableSupport tier={subscriptionTier} />
-            </div>
-            <PlatformPercent
-              percent={subscriptionTier.platformPercent}
-              chosenPrice={
-                subscriptionTier?.minAmount
-                  ? subscriptionTier.minAmount / 100
-                  : 0
-              }
-              artistName={artist?.name}
-              currency={subscriptionTier.currency}
-            />
-          </div>
+          <ArtistVariableSupport tier={subscriptionTier} />
         )}
         {(isSubscribedToTier || isSubscribedToArtist) && (
           <div className="flex items-center justify-center gap-3 flex-col">
@@ -188,9 +207,11 @@ const ArtistSupportBox: React.FC<{
           </div>
         )}
       </div>
-      <div className="text-base px-5">
-        <MarkdownContent content={subscriptionTier.description} />
-      </div>
+      {subscriptionTier.description && (
+        <div className="text-base px-5">
+          <MarkdownContent content={subscriptionTier.description} />
+        </div>
+      )}
       {hasRewards && (
         <>
           <hr className="border-(--tier-inner-border-color)" />

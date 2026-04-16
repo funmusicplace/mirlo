@@ -80,7 +80,7 @@ const PaymentInputElement: React.FC<{
     Number(chosenPrice) > ((minPrice || 200) / 100) * 10;
 
   return (
-    <>
+    <div className="relative pt-1">
       <label htmlFor="priceInput">
         {t("nameYourPrice", {
           currency: getCurrencySymbol(currency, undefined),
@@ -133,13 +133,16 @@ const PaymentInputElement: React.FC<{
             })}
           </div>
         )}
-      <PlatformPercent
-        percent={platformPercent}
-        chosenPrice={finalPrice}
-        currency={currency}
-        artistName={artistName}
-      />
-    </>
+      <div className="absolute right-0 top-0">
+        <PlatformPercent
+          percent={platformPercent}
+          chosenPrice={finalPrice ?? 0}
+          currency={currency}
+          artistName={artistName}
+          alignRight
+        />
+      </div>
+    </div>
   );
 };
 

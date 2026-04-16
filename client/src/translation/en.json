@@ -430,6 +430,7 @@
     "labelNotFound": "Label not found"
   },
   "artist": {
+    "editTier": "Edit",
     "failedToAddLocation": "Failed to add location tag",
     "failedToRemoveLocation": "Failed to remove location tag",
     "locationAdded": "Location tag added",
@@ -579,6 +580,7 @@
     "chooseToContinue": "Choose a support tier to continue",
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
     "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. The platform will receive {{ mirloCut }}. Their payment processor will take a cut of {{ paymentProcessorCut }}.",
+    "helpTooltip": "Platform percentage breakdown",
     "isSubscribed": "Subscribed",
     "moreLinks": "More links"
   },
@@ -1122,6 +1124,7 @@
     "platformPercent": "Platform cut",
     "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",
+    "tierCreated": "Tier created",
     "interval": "What's the interval for this subscription?",
     "monthly": "Monthly",
     "yearly": "Yearly",
@@ -1132,6 +1135,8 @@
     "allowVariableDescription": "Allow supporters to enter a larger number?",
     "autoAlbumPurchase": "If a user subscribes at this tier, they'll automatically get every new release you release.",
     "newSubscriptionTierFor": "New subscription tier for {{ artistName }}",
+    "newSubscriptionTier": "New subscription tier",
+    "untitledTier": "Untitled Tier",
     "minimumAmount": "Minimum amount: ",
     "digitalDiscountPercent": "Subscriber discount percent on digital purchases",
     "merchDiscountPercent": "Subscriber discount percent on merch",

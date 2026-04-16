@@ -369,6 +369,15 @@ const routes: RouteObject[] = [
                     },
                   },
                   {
+                    path: "tiers/:tierId",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/ManageArtist/ManageSubscriptionTierPage"
+                      );
+                      return { Component };
+                    },
+                  },
+                  {
                     path: "posts",
                     async lazy() {
                       const { default: Component } = await import(
