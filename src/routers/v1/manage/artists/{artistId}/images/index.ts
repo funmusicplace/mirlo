@@ -43,7 +43,7 @@ export default function () {
         async (
           fileInfo: { filename: string },
           details: {
-            dimensions: "square" | "banner";
+            dimensions: "square" | "background" | "banner";
             imageId?: string;
             relation?: string;
             tierId?: number;

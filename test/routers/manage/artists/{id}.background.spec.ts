@@ -7,12 +7,12 @@ import { clearTables, createArtist, createUser } from "../../../utils";
 import prisma from "@mirlo/prisma";
 import {
   createBucketIfNotExists,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
 } from "../../../../src/utils/minio";
 
 import { requestApp } from "../../utils";
 
-describe("manage/artists/{artistId}/banner", () => {
+describe("manage/artists/{artistId}/background", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -25,20 +25,20 @@ describe("manage/artists/{artistId}/banner", () => {
     it("should DELETE with one artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createBucketIfNotExists(finalArtistBannerBucket);
+      await createBucketIfNotExists(finalArtistBackgroundBucket);
 
-      await prisma.artistBanner.create({
+      await prisma.artistBackground.create({
         data: {
           artistId: artist.id,
         },
       });
 
       const response = await requestApp
-        .delete(`manage/artists/${artist.id}/banner`)
+        .delete(`manage/artists/${artist.id}/background`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
-      const foundOld = await prisma.artistBanner.findFirst({
+      const foundOld = await prisma.artistBackground.findFirst({
         where: { artistId: artist.id },
       });
 

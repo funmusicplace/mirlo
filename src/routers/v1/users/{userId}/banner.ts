@@ -4,13 +4,10 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../auth/passport";
-import {
-  processArtistBanner,
-  processUserBanner,
-} from "../../../../queues/processImages";
+import { processUserBanner } from "../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
-import { deleteArtistBanner } from "../../../../utils/artist";
+import { deleteArtistBackground } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { busboyOptions } from "../../../../utils/images";
 
@@ -87,7 +84,7 @@ export default function () {
         throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
-      await deleteArtistBanner(artist.id);
+      await deleteArtistBackground(artist.id);
 
       res.json({ message: "Success" });
     } catch (error) {

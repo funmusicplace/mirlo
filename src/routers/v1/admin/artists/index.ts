@@ -42,7 +42,7 @@ export default function () {
         take: take ? Number(take) : undefined,
         include: {
           avatar: true,
-          banner: true,
+          background: true,
           user: true,
         },
         orderBy: {

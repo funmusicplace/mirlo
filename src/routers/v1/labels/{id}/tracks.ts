@@ -8,7 +8,7 @@ import {
 } from "../../../../utils/artist";
 import {
   finalArtistAvatarBucket,
-  finalArtistBannerBucket,
+  finalArtistBackgroundBucket,
   finalCoversBucket,
   finalUserAvatarBucket,
   finalUserBannerBucket,

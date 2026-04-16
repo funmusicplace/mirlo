@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import usePublicArtist from "utils/usePublicObjectById";
-import PageBanner from "components/common/ArtistBanner";
+import PageBackground from "components/common/ArtistBackground";
 import { bp } from "../../constants";
 import HeaderSearch from "./HeaderSearch";
 import Logo from "components/common/Logo";
@@ -20,7 +20,7 @@ import UserBanner from "components/common/UserBanner";
 import Menu from "components/Header/Menu";
 
 const HeaderWrapper = styled.div<{
-  artistBanner?: boolean;
+  hasBackground?: boolean;
   transparent?: boolean;
   artistId?: boolean;
   show?: string;
@@ -72,26 +72,26 @@ const HeaderWrapper = styled.div<{
     align-items: flex-start;
 
     ${(props) =>
-      props.artistBanner && !props.trackGroupId
-        ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
-           aspect-ratio: 4 / 1; 
-           width: auto; 
-           min-height: auto; 
+      props.hasBackground && !props.trackGroupId
+        ? `top: calc(var(--header-cover-sticky-height) - 25vw);
+           aspect-ratio: 4 / 1;
+           width: auto;
+           min-height: auto;
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
-      props.artistBanner && !props.trackGroupId && props.show === "up"
-        ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
-           aspect-ratio: 4 / 1; 
-           width: auto; 
+      props.hasBackground && !props.trackGroupId && props.show === "up"
+        ? `top: calc(var(--header-cover-sticky-height) - 25vw);
+           aspect-ratio: 4 / 1;
+           width: auto;
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
-      props.artistBanner && !props.trackGroupId && props.show === "down"
-        ? `top: calc(var(--header-cover-sticky-height) - 50vw); 
-           aspect-ratio: 4 / 1; 
-           width: auto; 
-           min-height: auto; 
+      props.hasBackground && !props.trackGroupId && props.show === "down"
+        ? `top: calc(var(--header-cover-sticky-height) - 50vw);
+           aspect-ratio: 4 / 1;
+           width: auto;
+           min-height: auto;
            transition: top 0.4s ease-out;`
         : ""}
 
@@ -151,11 +151,11 @@ const Header = () => {
   const { artistId, trackGroupId } = useParams();
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
-  const artistBanner = artist?.banner?.sizes;
+  const artistBackground = artist?.background?.sizes;
   const colors = artist?.properties?.colors;
 
   const show = useShow();
-  const transparent = !!artistBanner && !!artistId;
+  const transparent = !!artistBackground && !!artistId;
 
   const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
@@ -178,14 +178,14 @@ const Header = () => {
   return (
     <HeaderWrapper
       transparent={transparent}
-      artistBanner={!!artistBanner}
+      hasBackground={!!artistBackground}
       show={show}
       trackGroupId={!!trackGroupId}
       artistId={!!artistId}
       colors={colors}
     >
       <div className="md:hidden!">
-        <PageBanner />
+        <PageBackground />
         <UserBanner />
       </div>
       <div className="absolute w-full h-full md:hidden!"></div>

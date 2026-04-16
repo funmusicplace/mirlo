@@ -205,8 +205,8 @@ const optimizeImage = async (job: Job) => {
         where: { id: destinationId },
         data: { url: urls },
       });
-    } else if (model === "artistBanner") {
-      await prisma.artistBanner.update({
+    } else if (model === "artistBackground") {
+      await prisma.artistBackground.update({
         where: { id: destinationId },
         data: { url: urls },
       });
