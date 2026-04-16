@@ -4,7 +4,8 @@ export default {
       ext: ".webp",
       outputOptions: {
         chromaSubsampling: "4:4:4",
-        lossless: true,
+        lossless: false,
+        quality: 75,
         optimiseCoding: true,
         quantisationTable: 3,
         progressive: false,
@@ -39,6 +40,7 @@ export default {
   config: {
     square: {
       webp: {
+        options: { quality: 80 },
         variants: [
           { width: 3000, height: 3000 },
           { width: 1500, height: 1500 },
@@ -77,6 +79,7 @@ export default {
     },
     background: {
       webp: {
+        options: { quality: 75 },
         variants: [
           { width: 2500, height: 2500 },
           { width: 1250, height: 1250 },
@@ -88,6 +91,7 @@ export default {
     },
     banner: {
       webp: {
+        options: { quality: 70 },
         variants: [
           { width: 2500, height: 2500 },
           { width: 1250, height: 1250 },
@@ -117,6 +121,7 @@ export default {
     },
     avatar: {
       webp: {
+        options: { quality: 75 },
         variants: [
           { width: 3000, height: 3000 },
           { width: 1500, height: 1500 },
@@ -153,6 +158,7 @@ export default {
     },
     artwork: {
       webp: {
+        options: { quality: 80 },
         variants: [
           { width: 1500, height: 1500 },
           { width: 1200, height: 1200 },
