@@ -10,8 +10,6 @@ import { SelectEl } from "components/common/Select";
 import Tabs from "components/common/Tabs";
 import { useTranslation } from "react-i18next";
 
-const pageSize = 100;
-
 export const AdminUsers: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
 

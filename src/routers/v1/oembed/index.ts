@@ -246,7 +246,24 @@ export default function () {
 
       res.json(oembedData);
     } catch (error) {
-      logger.error("Error in oEmbed endpoint:", error);
+      if (error instanceof AppError) {
+        const message = `oEmbed request failed: ${error.description}`;
+        const context = {
+          path: req.path,
+          url: req.query?.url,
+          httpCode: error.httpCode,
+        };
+
+        if (error.httpCode === 404) {
+          logger.info(message, context);
+        } else if (error.httpCode >= 400 && error.httpCode < 500) {
+          logger.warn(message, context);
+        } else {
+          logger.error(message, context);
+        }
+      } else {
+        logger.error("Error in oEmbed endpoint:", error);
+      }
       next(error);
     }
   }

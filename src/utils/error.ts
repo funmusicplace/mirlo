@@ -5,6 +5,23 @@ import {
 import { NextFunction, Request, Response } from "express";
 import logger from "../logger";
 
+const getSafeRequestContext = (req: Request) => {
+  const email =
+    typeof req.body?.email === "string"
+      ? req.body.email.toLowerCase().trim()
+      : undefined;
+  const client =
+    typeof req.body?.client === "string" ? req.body.client : undefined;
+
+  return {
+    method: req.method,
+    path: req.path,
+    params: req.params,
+    ...(email ? { email } : {}),
+    ...(client ? { client } : {}),
+  };
+};
+
 export enum HttpCode {
   OK = 200,
   NO_CONTENT = 204,
@@ -76,7 +93,7 @@ const errorHandler = (
   log.error(
     `ERROR: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`,
     err,
-    err.captureStackTrace ? err.captureStackTrace() : ""
+    err.stack ?? ""
   );
 
   if (
@@ -97,6 +114,28 @@ const errorHandler = (
     let message = `Something went wrong with the data supplied. Admin should check the logs`;
 
     if (err.meta && err.code === "P2002") {
+      const uniqueTarget = Array.isArray(err.meta?.target)
+        ? err.meta.target.join(",")
+        : String(err.meta?.target ?? "unknown");
+      const context = getSafeRequestContext(req);
+
+      if (req.path === "/auth/signup" && uniqueTarget.includes("email")) {
+        log.warn(
+          `Duplicate signup attempt: email already exists (${context.email ?? "unknown email"})`,
+          {
+            modelName: err.meta?.modelName,
+            target: uniqueTarget,
+            ...context,
+          }
+        );
+      } else {
+        log.warn(`Unique constraint violation`, {
+          modelName: err.meta?.modelName,
+          target: uniqueTarget,
+          ...context,
+        });
+      }
+
       message = `Value is not unique: ${err.meta?.target}`;
     }
 

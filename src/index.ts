@@ -140,7 +140,7 @@ app.use((req, res, next) => {
 });
 
 // This has to be the last thing used so that other things don't get over-written
-app.use("/", async (req, res) => {
+app.use("/", async (req, res, next) => {
   if (!res.headersSent) {
     if (req.path.startsWith("/v1")) {
       res.sendStatus(404);
@@ -165,18 +165,35 @@ app.use("/", async (req, res) => {
       const html = await parseIndex(req.path);
       res.send(html);
     } else {
-      try {
-        const fileLocation = path.join(
-          __dirname,
-          "..",
-          "client",
-          "dist",
-          req.path
-        );
-        res.sendFile(fileLocation);
-      } catch (e) {
-        console.error(`didn't find that file`, req.path);
-      }
+      const fileLocation = path.join(
+        __dirname,
+        "..",
+        "client",
+        "dist",
+        req.path
+      );
+
+      res.sendFile(fileLocation, (err) => {
+        if (!err) {
+          return;
+        }
+
+        const fileErr = err as NodeJS.ErrnoException;
+
+        if (fileErr.code === "ENOENT") {
+          // During deploys or browser cache mismatch, hashed asset paths can 404.
+          // Treat this as expected noise instead of an application error.
+          if (req.path.startsWith("/assets/")) {
+            logger.info(`asset not found: ${req.path}`);
+          }
+          if (!res.headersSent) {
+            res.sendStatus(404);
+          }
+          return;
+        }
+
+        next(err);
+      });
     }
   }
 });

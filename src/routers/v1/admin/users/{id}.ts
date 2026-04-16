@@ -23,6 +23,7 @@ export default function () {
       featureFlags,
       canCreateArtists,
       stripeAccountId,
+      accountingEmail,
     } = req.body as {
       email: string;
       isLabelAccount: boolean;
@@ -30,6 +31,7 @@ export default function () {
       isAdmin: boolean;
       canCreateArtists: boolean;
       stripeAccountId: string;
+      accountingEmail?: string;
     };
     try {
       await prisma.user.update({
@@ -41,6 +43,7 @@ export default function () {
           isAdmin,
           canCreateArtists,
           stripeAccountId,
+          accountingEmail,
         },
       });
       res.json({
