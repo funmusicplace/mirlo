@@ -213,6 +213,7 @@ export const createTrack = async (
       stripeProductKey: data?.stripeProductKey,
       minPrice: data?.minPrice,
       isPreview: data?.isPreview,
+      allowIndividualSale: data?.allowIndividualSale,
       order: data?.order,
     },
   });

@@ -32,6 +32,7 @@ export default defineConfig({
           suggestedPrice?: number;
           published?: boolean;
           isGettable?: boolean;
+          releaseDate?: string;
         }) => {
           return pkg.createTrackGroup(query.artistId, query);
         },
@@ -39,6 +40,8 @@ export default defineConfig({
           title: string;
           urlSlug: string;
           trackGroupId: number;
+          isPreview?: boolean;
+          allowIndividualSale?: boolean;
         }) => {
           return createTrack(query.trackGroupId, query);
         },

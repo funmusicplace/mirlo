@@ -188,6 +188,7 @@ const DownloadAlbumButton: React.FC<{
       </Modal>
       <ArtistButton
         onlyIcon={onlyIcon}
+        data-testid="download-button"
         className={css`
           margin-top: 0;
           font-size: 1.2rem;
