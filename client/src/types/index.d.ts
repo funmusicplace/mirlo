@@ -467,6 +467,7 @@ type AccountStatus = {
   chargesEnabled: boolean;
   detailsSubmitted: boolean;
   stripeAccountId: string;
+  defaultCurrency?: string;
 };
 
 interface License {
