@@ -53,7 +53,6 @@ export default function () {
         });
       }
       let validTier;
-      console.log("validTier", validTier, minimumSubscriptionTierId);
       if (minimumSubscriptionTierId) {
         validTier = await prisma.artistSubscriptionTier.findFirst({
           where: {

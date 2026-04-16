@@ -135,6 +135,18 @@ describe("manage/posts", () => {
 
     it("should not POST a post when tier does not belong to artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: otherArtistUser } = await createUser({
+        email: "otherartist@example.com",
+      });
+
+      const otherArtist = await createArtist(otherArtistUser.id, {
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+            isDefaultTier: true,
+          },
+        },
+      });
 
       const artist = await createArtist(user.id);
       const response = await requestApp
@@ -143,6 +155,7 @@ describe("manage/posts", () => {
           artistId: artist.id,
           minPrice: 500,
           title: "A title",
+          minimumSubscriptionTierId: otherArtist.subscriptionTiers[0].id,
         })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
