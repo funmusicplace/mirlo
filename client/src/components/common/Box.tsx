@@ -72,7 +72,6 @@ const Box = styled.div<{
   width: 100%;
   padding: ${(props) =>
     props?.noPadding ? "0" : props.compact ? ".25rem .5rem" : "1.25rem"};
-  margin-bottom: 0.5rem;
   border-radius: 5px;
 
   ${(props) => {

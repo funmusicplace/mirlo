@@ -8,8 +8,16 @@ const PlatformPercent: React.FC<{
   chosenPrice?: string | number;
   currency: string;
   artistName?: string;
-}> = ({ percent, chosenPrice, currency = "USD", artistName }) => {
+  alignRight?: boolean;
+}> = ({
+  percent,
+  chosenPrice,
+  currency = "USD",
+  artistName,
+  alignRight = false,
+}) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipId = `platform-percent-tooltip-${Math.random().toString(36).substr(2, 9)}`;
   const { colors } = useGetArtistColors();
   const chosenNumber =
     chosenPrice && isFinite(+chosenPrice) ? Number(chosenPrice) : null;
@@ -25,19 +33,27 @@ const PlatformPercent: React.FC<{
   return (
     <div className="relative inline-block">
       <button
-        className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer p-0 transition-opacity hover:opacity-80"
+        id={`${tooltipId}-button`}
+        className="w-6 h-6 border-1 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer p-0 transition-opacity hover:opacity-80"
         style={{
-          backgroundColor: colors?.primary ?? "var(--mi-primary-color)",
-          color: colors?.secondary ?? "var(--mi-secondary-color)",
+          borderColor: colors?.primary ?? "var(--mi-primary-color)",
+          color: colors?.primary ?? "var(--mi-primary-color)",
         }}
         onClick={() => setShowTooltip(!showTooltip)}
         type="button"
+        aria-label={t("helpTooltip") || "Platform percentage information"}
+        aria-expanded={showTooltip}
+        aria-describedby={showTooltip ? tooltipId : undefined}
       >
         ?
       </button>
       {showTooltip && (
         <div
-          className="absolute z-10 rounded shadow p-3 text-sm whitespace-normal w-64 top-8 left-0 border"
+          id={tooltipId}
+          className={`absolute z-10 rounded shadow p-3 text-sm whitespace-normal w-64 top-8 border ${
+            alignRight ? "right-0" : "left-0"
+          }`}
+          role="tooltip"
           style={{
             backgroundColor:
               colors?.background ?? "var(--mi-normal-background-color)",

@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import Box from "components/common/Box";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import Modal from "components/common/Modal";
 import { Money } from "components/common/Money";
 import React from "react";
@@ -9,11 +9,11 @@ import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
-import ManageSubscriptionTierReleases from "./ManageSubscriptionTierReleases";
 import MarkdownContent from "components/common/MarkdownContent";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useAuthContext } from "state/AuthContext";
 import { useTranslation } from "react-i18next";
+import { getArtistManageTiersUrl } from "utils/artist";
 
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -50,7 +50,6 @@ const ManageSubscriptionTierBox: React.FC<{
     <Box
       key={tier.id}
       className={css`
-        margin-bottom: 0.5rem;
         background: var(--mi-darken-background-color);
       `}
       noPadding
@@ -105,10 +104,10 @@ const ManageSubscriptionTierBox: React.FC<{
                 display: flex;
               `}
             >
-              <Button
+              <ButtonLink
                 variant="dashed"
                 startIcon={<FaPen />}
-                onClick={() => setManageTier(true)}
+                to={getArtistManageTiersUrl(artist.id) + `/${tier.id}`}
               />
 
               <Button

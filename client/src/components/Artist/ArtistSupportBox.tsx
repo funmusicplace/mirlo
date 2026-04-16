@@ -73,6 +73,10 @@ const ArtistSupportBox: React.FC<{
     return <LoadingBlocks rows={2} />;
   }
 
+  if (!subscriptionTier.minAmount || subscriptionTier.minAmount === 0) {
+    return null;
+  }
+
   const isSubscribedToTier = !!user?.artistUserSubscriptions?.find(
     (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
   );
@@ -116,7 +120,20 @@ const ArtistSupportBox: React.FC<{
         </div>
       )}
       <div>
-        <div className="absolute top-2 right-2 flex items-center justify-center gap-2">
+        <div className="absolute top-2 right-2 flex items-center justify-center gap-2 z-21 ">
+          {user && user.id === artist.userId && (
+            <ArtistButtonLink
+              to={
+                getArtistManageTiersUrl(subscriptionTier.artistId) +
+                "/" +
+                subscriptionTier.id
+              }
+              size="compact"
+              variant="dashed"
+            >
+              {t("editTier")}
+            </ArtistButtonLink>
+          )}
           <PlatformPercent
             percent={subscriptionTier.platformPercent}
             chosenPrice={
@@ -124,14 +141,8 @@ const ArtistSupportBox: React.FC<{
             }
             artistName={artist?.name}
             currency={subscriptionTier.currency}
+            alignRight
           />
-          <ArtistButtonLink
-            to={getArtistManageTiersUrl(subscriptionTier.artistId)}
-            size="compact"
-            variant="dashed"
-          >
-            Edit
-          </ArtistButtonLink>
         </div>
         {subscriptionTier.images?.[0]?.image.sizes?.[625] && (
           <img
@@ -196,9 +207,11 @@ const ArtistSupportBox: React.FC<{
           </div>
         )}
       </div>
-      <div className="text-base px-5">
-        <MarkdownContent content={subscriptionTier.description} />
-      </div>
+      {subscriptionTier.description && (
+        <div className="text-base px-5">
+          <MarkdownContent content={subscriptionTier.description} />
+        </div>
+      )}
       {hasRewards && (
         <>
           <hr className="border-(--tier-inner-border-color)" />

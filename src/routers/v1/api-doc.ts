@@ -134,7 +134,7 @@ const apiDoc = {
     },
     ArtistSubscriptionTierCreate: {
       type: "object",
-      required: ["name", "description"],
+      required: ["name"],
       properties: {
         name: {
           description: "name of the subscription",

@@ -160,7 +160,6 @@ const SubscriptionForm: React.FC<{
           dimensions="banner"
           maxDimensions="700x400"
           maxSize="15mb"
-          afterSave={handleSubmit(doSave)}
         />
         <FormSection>
           <FormComponent>

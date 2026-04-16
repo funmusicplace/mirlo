@@ -73,7 +73,6 @@ export const ArtistFallbackComposite: React.FC<{
       />
     );
   }
-  console.log("showing covers", covers);
 
   return (
     <CompositeContainer coverCount={covers.length}>

@@ -17,13 +17,6 @@ const ArtistSquare: React.FC<{
   const standardImageSrc =
     artist.avatar?.sizes?.[300] ?? artist.banner?.sizes?.[625];
 
-  console.log(
-    "ArtistSquare render",
-    artist.name,
-    "standardImageSrc:",
-    standardImageSrc
-  );
-
   return (
     <TrackGroupWrapper>
       <div>
