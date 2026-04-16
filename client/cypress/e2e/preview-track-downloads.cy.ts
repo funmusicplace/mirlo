@@ -18,6 +18,8 @@ const pastReleaseDate = new Date(
 ).toISOString();
 
 describe("preview track downloads with album purchase", () => {
+  let customerId: number;
+  let artistId: number;
   let preOrderTrackGroupId: number;
   let previewTrackId: number;
   let nonPreviewTrackId: number;
@@ -26,9 +28,6 @@ describe("preview track downloads with album purchase", () => {
   before(() => {
     cy.task("clearTables");
 
-    let customerId: number;
-    let artistId: number;
-
     cy.task("createUser", {
       email: artistOwnerEmail,
       password: artistOwnerPassword,
@@ -36,90 +35,14 @@ describe("preview track downloads with album purchase", () => {
       name: "Preview Download Artist Owner",
       currency: "usd",
     })
-      .then((owner) => {
-        const typedOwner = owner as { user: { id: number } };
-        return cy.task("createArtist", {
-          userId: typedOwner.user.id,
-          name: "Preview Download Artist",
-          urlSlug: artistSlug,
-        });
-      })
-      .then((artist) => {
-        const typedArtist = artist as { id: number };
-        artistId = typedArtist.id;
-        return cy.task("createUser", {
-          email: customerEmail,
-          password: customerPassword,
-          emailConfirmationToken: null,
-          name: "Preview Download Customer",
-          currency: "usd",
-        });
-      })
-      .then((customer) => {
-        const typedCustomer = customer as { user: { id: number } };
-        customerId = typedCustomer.user.id;
-
-        return cy.task("createTrackGroup", {
-          artistId,
-          title: "Preview Download Pre-Order",
-          urlSlug: preOrderReleaseSlug,
-          published: true,
-          isGettable: true,
-          releaseDate: futureReleaseDate,
-        });
-      })
-      .then((trackGroup) => {
-        const tg = trackGroup as { id: number };
-        preOrderTrackGroupId = tg.id;
-
-        return cy.task("createTrack", {
-          title: "Preview Track",
-          urlSlug: "preview-track",
-          trackGroupId: tg.id,
-          isPreview: true,
-          allowIndividualSale: true,
-        });
-      })
-      .then((track) => {
-        const t = track as { id: number };
-        previewTrackId = t.id;
-
-        return cy.task("createTrack", {
-          title: "Non-Preview Track",
-          urlSlug: "non-preview-track",
-          trackGroupId: preOrderTrackGroupId,
-          isPreview: false,
-          allowIndividualSale: true,
-        });
-      })
-      .then((track) => {
-        const t = track as { id: number };
-        nonPreviewTrackId = t.id;
-
-        return cy.task("createUserTrackGroupPurchase", {
-          purchaserUserId: customerId,
-          trackGroupId: preOrderTrackGroupId,
-        });
-      })
-      .then(() => {
-        return cy.task("createTrackGroup", {
-          artistId,
-          title: "Preview Download Released",
-          urlSlug: releasedAlbumSlug,
-          published: true,
-          isGettable: true,
-          releaseDate: pastReleaseDate,
-        });
-      })
-      .then((trackGroup) => {
-        const tg = trackGroup as { id: number };
-        releasedTrackGroupId = tg.id;
-
-        return cy.task("createUserTrackGroupPurchase", {
-          purchaserUserId: customerId,
-          trackGroupId: releasedTrackGroupId,
-        });
-      });
+      .then((owner: any) => cy.task("createArtist", { userId: owner.user.id, name: "Preview Download Artist", urlSlug: artistSlug }))
+      .then((artist: any) => { artistId = artist.id; return cy.task("createUser", { email: customerEmail, password: customerPassword, emailConfirmationToken: null, name: "Preview Download Customer", currency: "usd" }); })
+      .then((customer: any) => { customerId = customer.user.id; return cy.task("createTrackGroup", { artistId, title: "Preview Download Pre-Order", urlSlug: preOrderReleaseSlug, published: true, isGettable: true, releaseDate: futureReleaseDate }); })
+      .then((tg: any) => { preOrderTrackGroupId = tg.id; return cy.task("createTrack", { title: "Preview Track", urlSlug: "preview-track", trackGroupId: tg.id, isPreview: true, allowIndividualSale: true }); })
+      .then((track: any) => { previewTrackId = track.id; return cy.task("createTrack", { title: "Non-Preview Track", urlSlug: "non-preview-track", trackGroupId: preOrderTrackGroupId, isPreview: false, allowIndividualSale: true }); })
+      .then((track: any) => { nonPreviewTrackId = track.id; return cy.task("createUserTrackGroupPurchase", { purchaserUserId: customerId, trackGroupId: preOrderTrackGroupId }); })
+      .then(() => cy.task("createTrackGroup", { artistId, title: "Preview Download Released", urlSlug: releasedAlbumSlug, published: true, isGettable: true, releaseDate: pastReleaseDate }))
+      .then((tg: any) => { releasedTrackGroupId = tg.id; return cy.task("createUserTrackGroupPurchase", { purchaserUserId: customerId, trackGroupId: releasedTrackGroupId }); });
   });
 
   beforeEach(() => {
@@ -129,23 +52,16 @@ describe("preview track downloads with album purchase", () => {
   describe("pre-order album (future release date)", () => {
     it("does not show album download button before release date", () => {
       cy.visit(`/${artistSlug}/release/${preOrderReleaseSlug}`);
-
       cy.get('[data-testid="download-button"]').should("not.exist");
     });
 
     it("shows download button for a preview track when album is purchased", () => {
-      cy.visit(
-        `/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${previewTrackId}`
-      );
-
+      cy.visit(`/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${previewTrackId}`);
       cy.get('[data-testid="download-button"]').should("exist");
     });
 
     it("does not show download button for a non-preview track without direct purchase", () => {
-      cy.visit(
-        `/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${nonPreviewTrackId}`
-      );
-
+      cy.visit(`/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${nonPreviewTrackId}`);
       cy.get('[data-testid="download-button"]').should("not.exist");
     });
   });
@@ -153,7 +69,6 @@ describe("preview track downloads with album purchase", () => {
   describe("released album (past release date)", () => {
     it("shows album download button after release date when album is purchased", () => {
       cy.visit(`/${artistSlug}/release/${releasedAlbumSlug}`);
-
       cy.get('[data-testid="download-button"]').should("exist");
     });
   });
