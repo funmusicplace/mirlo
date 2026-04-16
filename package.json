@@ -59,6 +59,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.0",
     "qs": "^6.14.0",
+    "remark-breaks": "^4.0.0",
     "rss": "^1.2.2",
     "sharp": "^0.34.2",
     "sharp-ico": "^0.1.5",

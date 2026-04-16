@@ -1,6 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 // import remarkEmbedder from "@remark-embedder/core";
 import remarkEmbedder from "utils/remarkEmbedder";
 import MarkdownWrapper from "./MarkdownWrapper";
@@ -65,6 +66,7 @@ const MarkdownContent: React.FC<{
       <ReactMarkdown
         remarkPlugins={[
           remarkGfm,
+          remarkBreaks,
           [remarkEmbedder, { transformers: [BlackbirdTransformer] }],
         ]}
       >
