@@ -345,6 +345,7 @@ interface UserFromAdmin {
   featureFlags: string[];
   trustLevel: number;
   canCreateArtists: boolean;
+  accountingEmail?: string;
 }
 
 interface ArtistFromAdmin {

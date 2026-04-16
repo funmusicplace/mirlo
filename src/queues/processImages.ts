@@ -1,4 +1,6 @@
 import { Queue, QueueEvents } from "bullmq";
+import sharp from "sharp";
+import crypto from "node:crypto";
 
 import sharpConfig from "../config/sharp";
 
@@ -20,6 +22,7 @@ import {
 import prisma from "@mirlo/prisma";
 import { APIContext } from "../utils/file";
 import { logger } from "../jobs/queue-worker";
+import { Readable } from "stream";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -66,6 +69,18 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
 });
 
 export default imageQueue;
+
+const streamToBuffer = async (stream: Readable) => {
+  const chunks: Buffer[] = [];
+
+  return new Promise<Buffer>((resolve, reject) => {
+    stream.on("data", (chunk: Buffer | string) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    });
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
+  });
+};
 
 export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
@@ -310,24 +325,85 @@ export const processMerchImage = (ctx: APIContext) => {
 
 export const processPostImage = (ctx: APIContext) => {
   return async (postId: number) => {
-    return uploadAndSendToImageQueue(
-      ctx,
-      finalPostImageBucket,
-      "postImage",
-      "artwork",
-      async (fileInfo: { filename: string; mimeType: string }) => {
-        const filenameArray = fileInfo.filename.split(".");
+    logger.info("Uploading post image to object storage");
+    await createBucketIfNotExists(finalPostImageBucket, logger);
 
-        return prisma.postImage.create({
-          data: {
-            postId,
-            mimeType: fileInfo.mimeType,
-            extension: filenameArray[filenameArray.length - 1],
-          },
-        });
-      },
-      undefined,
-      true
-    );
+    const postWebpOptions: sharp.WebpOptions = {
+      ...(sharpConfig.defaultOptions.webp.outputOptions as sharp.WebpOptions),
+      ...((sharpConfig.config.artwork.webp.options ?? {}) as sharp.WebpOptions),
+    };
+
+    if (postWebpOptions.quality === undefined) {
+      postWebpOptions.quality = 78;
+    }
+
+    if (postWebpOptions.effort === undefined) {
+      postWebpOptions.effort = 4;
+    }
+
+    ctx.req.pipe(ctx.req.busboy);
+
+    const details = await new Promise((resolve, reject) => {
+      ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
+        try {
+          const sourceBuffer = await streamToBuffer(fileStream as Readable);
+          const sourceExtension =
+            fileInfo.filename.split(".").pop()?.toLowerCase() ?? "jpg";
+          const imageId = crypto.randomUUID();
+
+          let outputBuffer = sourceBuffer;
+          let extension = "webp";
+          let mimeType = "image/webp";
+
+          try {
+            outputBuffer = await sharp(sourceBuffer)
+              .rotate()
+              .resize({
+                width: 1920,
+                height: 1920,
+                fit: "inside",
+                withoutEnlargement: true,
+              })
+              .webp(postWebpOptions)
+              .toBuffer();
+          } catch (error) {
+            logger.warn(
+              `Post image optimization failed for ${fileInfo.filename}. Falling back to original upload format.`,
+              error
+            );
+            extension = sourceExtension;
+            mimeType = fileInfo.mimeType;
+          }
+
+          await prisma.postImage.create({
+            data: {
+              id: imageId,
+              postId,
+              mimeType,
+              extension,
+            },
+          });
+
+          await uploadWrapper(
+            finalPostImageBucket,
+            `${imageId}.${extension}`,
+            outputBuffer,
+            {
+              contentType: mimeType,
+            }
+          );
+
+          resolve({ imageId });
+        } catch (e) {
+          logger.error("There was an error optimizing the post image");
+          reject(e);
+        }
+      });
+    }).catch((e) => {
+      logger.error("There was an error uploading the post image");
+      throw e;
+    });
+
+    return details as { imageId: string };
   };
 };

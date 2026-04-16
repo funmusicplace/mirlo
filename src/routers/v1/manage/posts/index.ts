@@ -37,6 +37,14 @@ export default function () {
           id: artistId,
           userId: user.id,
         },
+        select: {
+          id: true,
+          user: {
+            select: {
+              currency: true,
+            },
+          },
+        },
       });
       if (!artist) {
         throw new AppError({
@@ -45,7 +53,7 @@ export default function () {
         });
       }
       let validTier;
-      if (!minimumSubscriptionTierId) {
+      if (minimumSubscriptionTierId) {
         validTier = await prisma.artistSubscriptionTier.findFirst({
           where: {
             artistId,
@@ -56,6 +64,21 @@ export default function () {
         validTier = await prisma.artistSubscriptionTier.findFirst({
           where: { artistId, isDefaultTier: true },
         });
+        if (!validTier) {
+          await prisma.artistSubscriptionTier.create({
+            data: {
+              name: "follow",
+              description: "follow an artist",
+              minAmount: 0,
+              currency: artist.user.currency ?? "usd",
+              isDefaultTier: true,
+              artistId: artist.id,
+            },
+          });
+          validTier = await prisma.artistSubscriptionTier.findFirst({
+            where: { artistId, isDefaultTier: true },
+          });
+        }
       }
 
       if (validTier) {

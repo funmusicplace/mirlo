@@ -23,8 +23,7 @@ import stripe, {
   createTrackStripeProduct,
   findOrCreateStripeCustomer,
 } from ".";
-import generateSlug from "../generateSlug";
-const { STRIPE_KEY, API_DOMAIN } = process.env;
+const { API_DOMAIN } = process.env;
 
 const buildCheckoutCancelSearchParams = ({
   artistId,
@@ -123,10 +122,11 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
     });
   }
 
-  const currency =
-    (stripeAccount.default_currency ||
-      track.trackGroup.currency?.toLowerCase()) ??
-    "usd";
+  const currency = await getCurrency(
+    track.currency,
+    track.trackGroup.artistId,
+    stripeAccount.default_currency
+  );
 
   const {
     lineItems,
@@ -196,9 +196,11 @@ export const createStripeCheckoutSessionForCatalogue = async ({
     },
   });
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency =
-    (stripeAccount.default_currency || artist.user.currency?.toLowerCase()) ??
-    "usd";
+  const currency = await getCurrency(
+    undefined,
+    artist.id,
+    stripeAccount.default_currency
+  );
 
   const cancelUrlParams = buildCheckoutCancelSearchParams({
     artistId: artist.id,
@@ -294,10 +296,11 @@ export const createStripeCheckoutSessionForPurchase = async ({
     });
   }
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency =
-    stripeAccount.default_currency ??
-    trackGroup.currency?.toLowerCase() ??
-    "usd";
+  const currency = await getCurrency(
+    trackGroup.currency,
+    trackGroup.artistId,
+    stripeAccount.default_currency
+  );
 
   const {
     lineItems,
@@ -521,8 +524,11 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   }
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency =
-    (stripeAccount.default_currency || merch.currency?.toLowerCase()) ?? "usd";
+  const currency = await getCurrency(
+    merch.currency,
+    merch.artistId,
+    stripeAccount.default_currency
+  );
 
   const destinations = determineShipping(
     merch.shippingDestinations,
@@ -620,7 +626,11 @@ export const createStripeCheckoutSessionForTip = async ({
   });
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  currency = stripeAccount.default_currency || currency || "usd";
+  currency = await getCurrency(
+    currency,
+    artistId,
+    stripeAccount.default_currency
+  );
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -668,6 +678,33 @@ export const createStripeCheckoutSessionForTip = async ({
   return session;
 };
 
+const getCurrency = async (
+  purchaseItemCurrency: string | undefined | null,
+  artistId: number,
+  stripeAccountDefaultCurrency: string | undefined
+) => {
+  if (purchaseItemCurrency) {
+    return purchaseItemCurrency.toLowerCase();
+  }
+  const artist = await prisma.artist.findUnique({
+    where: {
+      id: artistId,
+    },
+    select: { paymentToUserId: true, userId: true },
+  });
+  if (artist) {
+    const user = await prisma.user.findFirst({
+      where: {
+        id: artist.paymentToUserId ?? artist.userId,
+      },
+    });
+    if (user?.currency) {
+      return user.currency.toLowerCase();
+    }
+  }
+  return stripeAccountDefaultCurrency ?? "usd";
+};
+
 export const createCheckoutSessionForSubscription = async ({
   loggedInUser,
   email,
@@ -706,8 +743,11 @@ export const createCheckoutSessionForSubscription = async ({
   });
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency =
-    (stripeAccount.default_currency || tier.currency?.toLowerCase()) ?? "usd";
+  const currency = await getCurrency(
+    tier.currency,
+    tier.artistId,
+    stripeAccount.default_currency
+  );
 
   const session = await stripe.checkout.sessions.create(
     {

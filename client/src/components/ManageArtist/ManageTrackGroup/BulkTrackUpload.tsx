@@ -40,7 +40,7 @@ type OrderedTrackData = { order: number; t: TrackData };
 
 const alertUser = (event: any) => {
   event.preventDefault();
-  event.returnValue = "";
+  event.returnValue = "Upload in progress. Are you sure you want to leave?";
 };
 
 export const BulkTrackUpload: React.FC<{

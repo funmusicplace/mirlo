@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
-import CanCreateArtists from "components/CanCreateArtists";
 import Button from "components/common/Button";
-import { Select, SelectEl } from "components/common/Select";
+import { SelectEl } from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
@@ -12,19 +11,24 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 import { InputEl } from "components/common/Input";
+import { formatDate as formatDateForLocale } from "components/TrackGroup/ReleaseDate";
+import { useTranslation } from "react-i18next";
 
 const AdminManageUser = () => {
   const { id } = useParams();
   const [user, setUser] = React.useState<UserFromAdmin>();
   const [stripeAccountId, setStripeAccountId] = React.useState<string>("");
+  const [accountingEmail, setAccountingEmail] = React.useState<string>("");
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
 
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);
     setUser(response.result);
     setStripeAccountId(response.result.stripeAccountId || "");
+    setAccountingEmail(response.result.accountingEmail || "");
     setFeatureFlags(response.result.featureFlags);
   }, [id]);
 
@@ -48,6 +52,19 @@ const AdminManageUser = () => {
   React.useEffect(() => {
     callback();
   }, [callback]);
+
+  const formatDate = (value?: string) => {
+    if (!value) {
+      return "-";
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return value;
+    }
+
+    return `${formatDateForLocale({ date: value, i18n })} (${value})`;
+  };
 
   if (!user) {
     return null;
@@ -84,6 +101,14 @@ const AdminManageUser = () => {
               <tr>
                 <td>name</td>
                 <td>{user.name}</td>
+              </tr>
+              <tr>
+                <td>created at</td>
+                <td>{formatDate(user.createdAt)}</td>
+              </tr>
+              <tr>
+                <td>updated at</td>
+                <td>{formatDate(user.updatedAt)}</td>
               </tr>
               <tr>
                 <td>Trust level</td>
@@ -217,6 +242,29 @@ const AdminManageUser = () => {
                   <Button
                     onClick={async () => {
                       await api.put(`admin/users/${id}`, { stripeAccountId });
+                      callback();
+                    }}
+                  >
+                    Save
+                  </Button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="input-transaction-email">
+                    Transaction email
+                  </label>
+                </td>
+                <td className="flex">
+                  <InputEl
+                    id="input-transaction-email"
+                    onChange={(event) => setAccountingEmail(event.target.value)}
+                    type="text"
+                    value={accountingEmail}
+                  />
+                  <Button
+                    onClick={async () => {
+                      await api.put(`admin/users/${id}`, { accountingEmail });
                       callback();
                     }}
                   >
