@@ -30,13 +30,33 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId, subscriptionTierId } = req.params;
+    const { subscriptionTierId } = req.params;
     const user = req.user as User;
 
     try {
+      let artistUser: { id: number } | undefined | null = user;
+      if (user.isAdmin) {
+        artistUser = await prisma.user.findFirst({
+          where: {
+            artists: {
+              some: {
+                subscriptionTiers: {
+                  some: {
+                    id: Number(subscriptionTierId),
+                  },
+                },
+              },
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+      }
+
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        Number(artistUser?.id)
       );
 
       return res.json({
