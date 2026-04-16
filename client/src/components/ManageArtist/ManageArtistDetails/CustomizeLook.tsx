@@ -64,7 +64,7 @@ export type ArtistFormData = {
   name: string;
   bio: string;
   urlSlug: string;
-  banner: File[];
+  background: File[];
   avatar: File[];
   activityPub: boolean;
   defaultPlatformFee: number;
@@ -320,7 +320,7 @@ export const CustomizeLook: React.FC = () => {
                     <UploadArtistImage
                       existing={artist}
                       imageTypeDescription={t("backgroundImageDescription")}
-                      imageType="banner"
+                      imageType="background"
                       height="auto"
                       width="100%"
                       maxDimensions="2500x2500"

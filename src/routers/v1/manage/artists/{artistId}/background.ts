@@ -4,10 +4,10 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { processArtistBanner } from "../../../../../queues/processImages";
+import { processArtistBackground } from "../../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
-import { deleteArtistBanner } from "../../../../../utils/artist";
+import { deleteArtistBackground } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import { busboyOptions } from "../../../../../utils/images";
 
@@ -31,7 +31,7 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
 
     try {
-      const { jobId, imageId } = await processArtistBanner({ req, res })(
+      const { jobId, imageId } = await processArtistBackground({ req, res })(
         Number(artistId)
       );
 
@@ -42,7 +42,7 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary: "Updates an artist banner belonging to a user",
+    summary: "Updates an artist background belonging to a user",
     parameters: [
       {
         in: "path",
@@ -55,7 +55,7 @@ export default function () {
         name: "file",
         type: "file",
         required: true,
-        description: "The banner to upload",
+        description: "The background image to upload",
       },
     ],
     responses: {
@@ -89,7 +89,7 @@ export default function () {
         throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
-      await deleteArtistBanner(artist.id);
+      await deleteArtistBackground(artist.id);
 
       res.json({ message: "Success" });
     } catch (error) {
@@ -98,7 +98,7 @@ export default function () {
   }
 
   DELETE.apiDoc = {
-    summary: "Deletes an artist banner belonging to a user",
+    summary: "Deletes an artist background belonging to a user",
     parameters: [
       {
         in: "path",

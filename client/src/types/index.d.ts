@@ -290,7 +290,7 @@ interface Artist {
   };
   announcementText?: string;
   user?: Partial<User>;
-  banner?: {
+  background?: {
     url: string;
     sizes?: { [key: number]: string; original: string };
     updatedAt: string;

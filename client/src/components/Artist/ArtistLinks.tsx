@@ -37,7 +37,6 @@ const ArtistLinks: React.FC = () => {
   const isOwningArtist = artist?.userId === user?.id;
 
   return (
-    // <ArtistPageWrapper artistBanner={!!artistBanner}>
     <div
       className={css`
         background-color: ${colors?.background ??

@@ -16,7 +16,7 @@ const ArtistContainer: React.FC = () => {
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
-  const artistBanner = artist?.banner?.sizes;
+  const artistBackground = artist?.background?.sizes;
 
   const isPostOrRelease = trackGroupId || postId;
 
@@ -25,7 +25,7 @@ const ArtistContainer: React.FC = () => {
       {!isPostOrRelease && (
         <>
           <ArtistPageWrapper
-            artistBanner={!!artistBanner}
+            hasBackground={!!artistBackground}
             artistBackground={artist?.properties?.colors?.background}
           >
             <ArtistHeaderSection

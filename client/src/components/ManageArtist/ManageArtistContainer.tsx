@@ -18,11 +18,11 @@ import { useAuthContext } from "state/AuthContext";
 import api from "services/api";
 import { getArtistUrl } from "utils/artist";
 
-const Container = styled.div<{ artistBanner: boolean }>`
+const Container = styled.div<{ hasBackground: boolean }>`
   width: 100%;
   padding: var(--mi-side-paddings-normal);
   ${(props) =>
-    !props.artistBanner ? "margin-top: 0px;" : "margin-top: calc(8vh);"}
+    !props.hasBackground ? "margin-top: 0px;" : "margin-top: calc(8vh);"}
   margin-top: calc(8vh - 39px);
   max-width: var(--mi-container-big);
 
@@ -34,21 +34,21 @@ const Container = styled.div<{ artistBanner: boolean }>`
     padding: var(--mi-side-paddings-xsmall);
     padding: 0rem !important;
     width: 100%;
-    ${(props) => (props.artistBanner ? "margin-top: 0px;" : "")}
-    ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
+    ${(props) => (props.hasBackground ? "margin-top: 0px;" : "")}
+    ${(props) => (!props.hasBackground ? "margin-top: 0px;" : "")}
   }
 `;
 
 export const ArtistPageWrapper: React.FC<{
   children: React.ReactNode;
-  artistBanner?: boolean;
+  hasBackground?: boolean;
   artistBackground?: string;
-}> = ({ children, artistBanner, artistBackground }) => {
+}> = ({ children, hasBackground, artistBackground }) => {
   return (
-    <Container artistBanner={!!artistBanner}>
+    <Container hasBackground={!!hasBackground}>
       <div
         className={css`
-          ${artistBanner
+          ${hasBackground
             ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));"
             : ""}
           background-color: ${artistBackground ?? "transparent"};
@@ -87,7 +87,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
 
   const location = useLocation();
 
-  const artistBanner = artist?.banner?.sizes;
+  const artistBackground = artist?.background?.sizes;
 
   if (!artist) {
     return null;
@@ -108,7 +108,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
 
   return (
     <ArtistPageWrapper
-      artistBanner={!!artistBanner}
+      hasBackground={!!artistBackground}
       artistBackground={artist?.properties?.colors?.background}
     >
       <div
