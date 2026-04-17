@@ -37,6 +37,17 @@ const AdminManageUser = () => {
     callback();
   }, [callback, id]);
 
+  const onLoginAsUserClick = React.useCallback(async () => {
+    if (
+      window.confirm(
+        `Are you sure you want to log in as ${user?.email}? This will replace your current session.`
+      )
+    ) {
+      await api.post(`admin/users/${id}/loginAsUser`, {});
+      window.location.href = "/";
+    }
+  }, [id, user?.email]);
+
   const onDeleteClick = React.useCallback(async () => {
     if (
       window.confirm(
@@ -279,6 +290,7 @@ const AdminManageUser = () => {
             </tbody>
           </Table>
           <Button onClick={onConfirmationEmailClick}>Confirm user email</Button>
+          <Button onClick={onLoginAsUserClick}>Log in as user</Button>
           <Button onClick={onDeleteClick}>Delete user</Button>
         </div>
       </div>

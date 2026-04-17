@@ -152,6 +152,7 @@ const routes = [
   "admin/tips",
   "admin/users",
   "admin/users/{id}",
+  "admin/users/{id}/loginAsUser",
   "admin/invites",
   "admin/invites/{id}",
   "admin/send-email",
