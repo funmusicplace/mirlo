@@ -3650,6 +3650,7 @@ __metadata:
     react-papaparse: "npm:^4.4.0"
     react-router-dom: "npm:^6.22.3"
     recharts: "npm:^2.12.0"
+    remark-breaks: "npm:^4.0.0"
     remark-gfm: "npm:^3.0.1"
     remirror: "npm:^2.0.38"
     rollup: "npm:^4.16.4"
