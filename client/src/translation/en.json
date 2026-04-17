@@ -1414,6 +1414,7 @@
     "titleIsEmpty": "Title is empty, are you sure you want to post?",
     "returnToDraft": "Return to draft",
     "imageIsFeatured": "Which image should be featured?",
+    "imageUploadSizeWarning": "Recommended: keep image files under 15 MB for reliable upload and processing.",
     "featuredImage": "featured image",
     "confirmDelete": "Are you sure you want to delete this post?",
     "title": "Title:",

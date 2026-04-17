@@ -1,6 +1,5 @@
 import { Queue, QueueEvents } from "bullmq";
 import sharp from "sharp";
-import crypto from "node:crypto";
 
 import sharpConfig from "../config/sharp";
 
@@ -22,7 +21,6 @@ import {
 import prisma from "@mirlo/prisma";
 import { APIContext } from "../utils/file";
 import { logger } from "../jobs/queue-worker";
-import { Readable } from "stream";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -70,16 +68,20 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
 
 export default imageQueue;
 
-const streamToBuffer = async (stream: Readable) => {
-  const chunks: Buffer[] = [];
-
-  return new Promise<Buffer>((resolve, reject) => {
-    stream.on("data", (chunk: Buffer | string) => {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-    });
-    stream.on("end", () => resolve(Buffer.concat(chunks)));
-    stream.on("error", reject);
-  });
+const getLargestVariant = (
+  variants: Array<{ width?: number; height?: number }>
+) => {
+  return variants.reduce(
+    (
+      current: { width?: number; height?: number },
+      variant: { width?: number; height?: number }
+    ) => {
+      const currentArea = (current.width ?? 0) * (current.height ?? 0);
+      const variantArea = (variant.width ?? 0) * (variant.height ?? 0);
+      return variantArea > currentArea ? variant : current;
+    },
+    {}
+  );
 };
 
 export const uploadAndSendToImageQueue = async (
@@ -106,6 +108,7 @@ export const uploadAndSendToImageQueue = async (
   logger.info("Made bucket");
 
   ctx.req.pipe(ctx.req.busboy);
+
   const fromBody: {
     dimensions?: "square" | "background" | "banner";
     relation?: "subscriptionTierImage";
@@ -129,6 +132,14 @@ export const uploadAndSendToImageQueue = async (
         reject("Must provide dimensions field in form data");
         return;
       }
+      const config: "square" | "background" | "banner" | "avatar" | "artwork" =
+        sharpConfigKey === "inFormData"
+          ? (fromBody.dimensions ?? "square")
+          : sharpConfigKey;
+
+      const webpConfig = sharpConfig.config[config].webp;
+      const largestVariant = getLargestVariant(webpConfig?.variants ?? []);
+
       const image = await createDatabaseEntry(fileInfo, {
         ...(fromBody as {
           dimensions: "square";
@@ -143,10 +154,24 @@ export const uploadAndSendToImageQueue = async (
 
       try {
         const filenameArray = fileInfo.filename.split(".");
+        const transform = sharp().rotate();
+
+        if (largestVariant.width || largestVariant.height) {
+          transform.resize({
+            width: largestVariant.width,
+            height: largestVariant.height,
+            fit: "inside",
+            withoutEnlargement: true,
+          });
+        }
+
+        const optimizedStream = fileStream.pipe(transform);
         const fileName = storeWithExtension
           ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
           : image.id;
-        await uploadWrapper(incomingBucket, `${fileName}`, fileStream);
+        await uploadWrapper(incomingBucket, `${fileName}`, optimizedStream, {
+          contentType: fileInfo.mimeType || "application/octet-stream",
+        });
       } catch (e) {
         logger.error("There was an error uploading to storage");
         throw e;
@@ -154,16 +179,6 @@ export const uploadAndSendToImageQueue = async (
 
       if (finalBucket) {
         logger.info("Adding image to queue");
-
-        const config:
-          | "square"
-          | "background"
-          | "banner"
-          | "avatar"
-          | "artwork" =
-          sharpConfigKey === "inFormData"
-            ? (fromBody.dimensions ?? "square")
-            : sharpConfigKey;
 
         const job = await imageQueue.add("optimize-image", {
           destinationId: image.id,
@@ -325,85 +340,24 @@ export const processMerchImage = (ctx: APIContext) => {
 
 export const processPostImage = (ctx: APIContext) => {
   return async (postId: number) => {
-    logger.info("Uploading post image to object storage");
-    await createBucketIfNotExists(finalPostImageBucket, logger);
+    return uploadAndSendToImageQueue(
+      ctx,
+      finalPostImageBucket,
+      "postImage",
+      "artwork",
+      async (fileInfo: { filename: string; mimeType: string }) => {
+        const filenameArray = fileInfo.filename.split(".");
 
-    const postWebpOptions: sharp.WebpOptions = {
-      ...(sharpConfig.defaultOptions.webp.outputOptions as sharp.WebpOptions),
-      ...((sharpConfig.config.artwork.webp.options ?? {}) as sharp.WebpOptions),
-    };
-
-    if (postWebpOptions.quality === undefined) {
-      postWebpOptions.quality = 78;
-    }
-
-    if (postWebpOptions.effort === undefined) {
-      postWebpOptions.effort = 4;
-    }
-
-    ctx.req.pipe(ctx.req.busboy);
-
-    const details = await new Promise((resolve, reject) => {
-      ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
-        try {
-          const sourceBuffer = await streamToBuffer(fileStream as Readable);
-          const sourceExtension =
-            fileInfo.filename.split(".").pop()?.toLowerCase() ?? "jpg";
-          const imageId = crypto.randomUUID();
-
-          let outputBuffer = sourceBuffer;
-          let extension = "webp";
-          let mimeType = "image/webp";
-
-          try {
-            outputBuffer = await sharp(sourceBuffer)
-              .rotate()
-              .resize({
-                width: 1920,
-                height: 1920,
-                fit: "inside",
-                withoutEnlargement: true,
-              })
-              .webp(postWebpOptions)
-              .toBuffer();
-          } catch (error) {
-            logger.warn(
-              `Post image optimization failed for ${fileInfo.filename}. Falling back to original upload format.`,
-              error
-            );
-            extension = sourceExtension;
-            mimeType = fileInfo.mimeType;
-          }
-
-          await prisma.postImage.create({
-            data: {
-              id: imageId,
-              postId,
-              mimeType,
-              extension,
-            },
-          });
-
-          await uploadWrapper(
-            finalPostImageBucket,
-            `${imageId}.${extension}`,
-            outputBuffer,
-            {
-              contentType: mimeType,
-            }
-          );
-
-          resolve({ imageId });
-        } catch (e) {
-          logger.error("There was an error optimizing the post image");
-          reject(e);
-        }
-      });
-    }).catch((e) => {
-      logger.error("There was an error uploading the post image");
-      throw e;
-    });
-
-    return details as { imageId: string };
+        return prisma.postImage.create({
+          data: {
+            postId,
+            mimeType: fileInfo.mimeType,
+            extension: filenameArray[filenameArray.length - 1],
+          },
+        });
+      },
+      undefined,
+      true
+    );
   };
 };
