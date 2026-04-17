@@ -49,6 +49,7 @@
     "react-papaparse": "^4.4.0",
     "react-router-dom": "^6.22.3",
     "recharts": "^2.12.0",
+    "remark-breaks": "^4.0.0",
     "remark-gfm": "^3.0.1",
     "remirror": "^2.0.38",
     "slugify": "^1.6.6",
