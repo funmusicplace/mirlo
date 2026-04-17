@@ -16,6 +16,7 @@ import { useAuthContext } from "state/AuthContext";
 import ScrollToTop from "components/ScrollToTop";
 import UserBanner from "components/common/UserBanner";
 import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
+import FailedSubscriptionBanner from "components/common/FailedSubscriptionBanner";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -64,6 +65,7 @@ function App() {
           {isDisplayed && <Snackbar />}
 
           <Header />
+          <FailedSubscriptionBanner />
           <CookieDisclaimer />
           <div
             className={css`

@@ -570,6 +570,8 @@
     "mustBeAtLeast": "Must be at least {{minAmount}}",
     "letsSupport": "Support this artist",
     "cancelSubscription": "Cancel subscription",
+    "subscriptionPaymentFailed": "Your last payment for this subscription failed. Please cancel it and choose again.",
+    "updateBillingInfo": "Update your billing info",
     "chooseThisSubscription": "Choose this subscription",
     "chooseATier": "Choose a tier to support {{artistName}}:",
     "contributionIsMonthly": "Make contribution monthly",
@@ -632,7 +634,7 @@
     "saveCountryCode": "Save",
     "success": "Details saved!",
     "label": "(Label)",
-    "payoutsInfo": "See our documentation for more information on payouts and fees: <link>https://docs.mirlo.com/payouts</link>"
+    "payoutsInfo": "See our documentation for more information <link>on payouts and fees</link>."
   },
   "manageArtist": {
     "albumTags": "Release tags",
@@ -1483,5 +1485,9 @@
   "billing": {
     "noPaymentFound": "No payment found",
     "completePayment": "Complete Your Payment"
+  },
+  "common": {
+    "subscriptionPaymentFailedBanner": "One or more of your subscription payments failed. Go to the artist profiles to renew them.",
+    "updateBillingInfo": "Update your billing info"
   }
 }

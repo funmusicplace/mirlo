@@ -82,6 +82,13 @@ export default function () {
             artistSubscriptionTier: { artistId: Number(artistId) },
             userId,
           });
+          await prisma.artistUserSubscription.updateMany({
+            where: {
+              userId,
+              artistSubscriptionTierId: oldTier.id,
+            },
+            data: { deleteReason: "TIER_SWITCHED" },
+          });
           await prisma.artistUserSubscription.deleteMany({
             where: {
               artistSubscriptionTier: { artistId: Number(artistId) },
@@ -172,6 +179,16 @@ export default function () {
       await deleteStripeSubscriptions({
         artistSubscriptionTier: { artistId: Number(artistId) },
         userId: loggedInUser.id,
+      });
+
+      await prisma.artistUserSubscription.update({
+        where: {
+          userId_artistSubscriptionTierId: {
+            artistSubscriptionTierId: Number(artistId),
+            userId: loggedInUser.id,
+          },
+        },
+        data: { deleteReason: "USER_CANCELLED" },
       });
 
       await prisma.artistUserSubscription.deleteMany({
