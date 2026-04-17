@@ -20,6 +20,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useProfileMutation } from "queries";
 import useErrorHandler from "services/useErrorHandler";
 import { finishedLanguages } from "i18n";
+import CurrencySelect from "components/ManageArtist/CountrySelectForm";
 
 type FormData = {
   name: string;
@@ -197,6 +198,7 @@ const AccountContainer: React.FC = () => {
             </Button>
           </FormComponent>
         </form>
+        <CurrencySelect />
         <Link
           className={css`
             margin-top: 1rem;
