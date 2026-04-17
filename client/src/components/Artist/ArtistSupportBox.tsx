@@ -10,7 +10,7 @@ import ArtistVariableSupport from "./ArtistVariableSupport";
 import { useAuthContext } from "state/AuthContext";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   ArtistButton,
   ArtistButtonLink,
@@ -19,6 +19,7 @@ import {
 import useErrorHandler from "services/useErrorHandler";
 import IncludedReleases from "./IncludedReleases";
 import { getArtistManageTiersUrl } from "utils/artist";
+import Box from "components/common/Box";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
@@ -80,6 +81,14 @@ const ArtistSupportBox: React.FC<{
   const isSubscribedToTier = !!user?.artistUserSubscriptions?.find(
     (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
   );
+
+  const currentSubscription = user?.artistUserSubscriptions?.find(
+    (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
+  );
+
+  const hasFailedPayment =
+    currentSubscription?.artistUserSubscriptionCharges?.[0]?.transaction
+      ?.paymentStatus === "FAILED";
 
   const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
     (sub) =>
@@ -199,6 +208,17 @@ const ArtistSupportBox: React.FC<{
               >
                 {t("cancelSubscription")}
               </ArtistButton>
+            )}
+            {hasFailedPayment && (
+              <Box variant="warning" className="text-sm text-center">
+                {t("subscriptionPaymentFailed")}
+                <ArtistButton
+                  onClick={() => cancelSubscription()}
+                  variant="outlined"
+                >
+                  {t("cancelSubscription")}
+                </ArtistButton>
+              </Box>
             )}
             <p>
               {isSubscribedToTier &&

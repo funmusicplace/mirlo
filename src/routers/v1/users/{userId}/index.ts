@@ -180,7 +180,7 @@ export default function () {
       }
 
       if (data.currency && typeof data.currency === "string") {
-        updateCurrencies(user.id, data.currency);
+        await updateCurrencies(user.id, data.currency);
       }
 
       const refreshedUser = await prisma.user.findFirst({

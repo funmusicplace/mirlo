@@ -21,7 +21,7 @@ const StripeStatus = () => {
 
   if (isLoadingStripe) return <LoadingBlocks rows={2} height="2rem" />;
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <p>{t("manageStripeStatus")}</p>
       {stripeAccountStatus?.detailsSubmitted && (
         <Box variant="info">
@@ -42,11 +42,21 @@ const StripeStatus = () => {
       )}
       <p>
         <Trans
+          t={t}
           i18nKey="payoutsInfo"
-          components={{ link: <a href="https://docs.mirlo.space/payouts"></a> }}
+          components={{
+            link: (
+              <a
+                href="https://docs.mirlo.space/payouts"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:underline"
+              ></a>
+            ),
+          }}
         />
       </p>
-    </>
+    </div>
   );
 };
 

@@ -404,6 +404,12 @@ interface ArtistUserSubscription {
     state?: string;
     country?: string;
   };
+  artistUserSubscriptionCharges?: {
+    id: string;
+    transaction?: {
+      paymentStatus: string;
+    };
+  }[];
 }
 
 interface ArtistUserSubscriptionCharge {

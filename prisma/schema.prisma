@@ -425,6 +425,14 @@ enum Interval {
   YEAR
 }
 
+enum SubscriptionDeleteReason {
+  USER_CANCELLED
+  TIER_SWITCHED
+  USER_ACCOUNT_DELETED
+  ADMIN_REMOVED
+  PAYMENT_FAILURE
+}
+
 model ArtistTipTier {
   id                Int             @id @default(autoincrement())
   name              String
@@ -457,6 +465,7 @@ model ArtistUserSubscription {
   createdAt                     DateTime                       @default(now())
   updatedAt                     DateTime                       @default(now()) @updatedAt
   deletedAt                     DateTime?
+  deleteReason                  SubscriptionDeleteReason?
   notifications                 Notification[]
   message                       String?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]

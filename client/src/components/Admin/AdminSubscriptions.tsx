@@ -12,10 +12,12 @@ import usePagination from "utils/usePagination";
 interface AdminSubscription extends ArtistUserSubscription {
   user: User;
   artistUserSubscriptionCharges: {
+    id: string;
     createdAt: string;
     transaction: {
       amount: number;
       currency: string;
+      paymentStatus: string;
     };
   }[];
 }

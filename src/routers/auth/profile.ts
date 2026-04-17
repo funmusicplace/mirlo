@@ -83,6 +83,20 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
             id: true,
             userId: true,
             amount: true,
+            artistUserSubscriptionCharges: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+              select: {
+                id: true,
+                transaction: {
+                  select: {
+                    paymentStatus: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
