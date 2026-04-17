@@ -79,15 +79,41 @@ const optimizeImage = async (job: Job) => {
           options
         );
 
+        const largestVariant = variants.reduce(
+          (
+            current: { width?: number; height?: number },
+            variant: { width?: number; height?: number }
+          ) => {
+            const currentArea = (current.width ?? 0) * (current.height ?? 0);
+            const variantArea = (variant.width ?? 0) * (variant.height ?? 0);
+            return variantArea > currentArea ? variant : current;
+          },
+          {}
+        );
+
+        const originalResizeOptions =
+          largestVariant.width || largestVariant.height
+            ? {
+                width: largestVariant.width,
+                height: largestVariant.height,
+                fit: "inside" as const,
+                withoutEnlargement: true,
+              }
+            : undefined;
+
         const ar = [1];
 
         return [
           ...ar.map(async () => {
             logger.info(`Optimizing image to ${outputType}`);
-            const originalSize = await sharp(buffer)
-              .rotate()
-              [outputType](outputOptions)
-              .toBuffer();
+            const originalPipeline = sharp(buffer).rotate();
+
+            if (originalResizeOptions) {
+              originalPipeline.resize(originalResizeOptions);
+            }
+
+            const originalSize =
+              await originalPipeline[outputType](outputOptions).toBuffer();
 
             await uploadWrapper(
               finalMinioBucket,

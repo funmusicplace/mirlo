@@ -15,7 +15,6 @@ const ImagesInPostManager: React.FC<{
 }> = ({ postId, reload, images }) => {
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
   const [isSaving, setIsSaving] = React.useState(false);
-  const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
 
   const markImageAsFeatured = React.useCallback(
@@ -65,6 +64,7 @@ const ImagesInPostManager: React.FC<{
     >
       <h3>{t("imagesInPost")}</h3>
       <p>{t("imageIsFeatured")}</p>
+      <small>{t("imageUploadSizeWarning")}</small>
       <div
         className={css`
           display: flex;
@@ -117,7 +117,7 @@ const ImagesInPostManager: React.FC<{
             height: 100px;
           `}
         >
-          <label htmlFor={`featuredImage`}>
+          <label htmlFor="featuredImage">
             <UploadPrompt
               width="100px"
               height="100px"
@@ -126,7 +126,7 @@ const ImagesInPostManager: React.FC<{
           </label>
           <InputEl
             type="file"
-            id={`featuredImage`}
+            id="featuredImage"
             accept="image/*"
             onChange={callback}
             style={{ display: "none" }}
