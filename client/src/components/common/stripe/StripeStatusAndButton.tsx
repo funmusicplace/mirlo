@@ -29,6 +29,13 @@ const StripeStatus = () => {
             stripeAccountStatus?.detailsSubmitted &&
             t("waitingStripeAccountVerification")}
           {stripeAccountStatus?.chargesEnabled && t("stripeAccountVerified")}
+          {stripeAccountStatus?.defaultCurrency && (
+            <p>
+              {t("payoutCurrency", {
+                currency: stripeAccountStatus.defaultCurrency,
+              })}
+            </p>
+          )}
         </Box>
       )}
       {userId && (

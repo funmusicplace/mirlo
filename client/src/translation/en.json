@@ -630,6 +630,7 @@
     "updateBankAccount": "Change bank account information",
     "countryCurrencyCode": "Country currency code:",
     "saveCountryCode": "Save",
+    "payoutCurrency": "Payout currency: {{currency}}",
     "success": "Details saved!",
     "label": "(Label)",
     "payoutsInfo": "See our documentation for more information on payouts and fees: <link>https://docs.mirlo.com/payouts</link>"
