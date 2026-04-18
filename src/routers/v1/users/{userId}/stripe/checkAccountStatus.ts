@@ -42,6 +42,7 @@ export default function () {
             result: {
               chargesEnabled: account?.charges_enabled ?? false,
               stripeAccountId: accountId,
+              defaultCurrency: account?.default_currency?.toUpperCase(),
               ...(loggedInUser
                 ? { detailsSubmitted: account?.details_submitted ?? false }
                 : {}),

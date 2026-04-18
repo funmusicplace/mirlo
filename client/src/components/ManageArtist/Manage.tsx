@@ -5,7 +5,6 @@ import api from "services/api";
 import { ButtonLink } from "../common/Button";
 import { bp } from "../../constants";
 import { useTranslation } from "react-i18next";
-import CountrySelect from "./CountrySelectForm";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 
@@ -110,7 +109,6 @@ export const Manage: React.FC = () => {
             `}
           >
             <h2>{t("managePayment")}</h2>
-            <CountrySelect />
             <StripeStatus />
           </div>
         </WidthContainer>
