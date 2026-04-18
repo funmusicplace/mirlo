@@ -14,6 +14,7 @@ import qs from "qs";
 import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
 import crypto from "crypto";
+import { sanitizeHeadersForLogs } from "./utils/requestLogging";
 const isDev = process.env.NODE_ENV === "development";
 
 const apiApp = express();
@@ -26,20 +27,6 @@ apiApp.use((req, res, next) => {
   req.requestId = requestId;
   // @ts-ignore - Create child logger with request ID
   req.logger = logger.child({ requestId });
-  next();
-});
-
-apiApp.use((req, res, next) => {
-  if (isDev) {
-    next();
-    return;
-  }
-  // @ts-ignore - Create child logger with request ID
-  const log = req.logger || logger;
-  // Basic logging for API requests
-  log.info(
-    `API: ${req.method} ${req.path} - query: ${JSON.stringify(req.query)} - body: ${JSON.stringify(req.body)} - headers: ${JSON.stringify(req.headers)}`
-  );
   next();
 });
 
@@ -58,6 +45,21 @@ apiApp.use(
     },
   })
 );
+
+apiApp.use((req, res, next) => {
+  if (isDev) {
+    next();
+    return;
+  }
+  // @ts-ignore - Create child logger with request ID
+  const log = req.logger || logger;
+  // Basic logging for API requests
+  const sanitizedHeaders = sanitizeHeadersForLogs(req.headers);
+  log.info(
+    `API: ${req.method} ${req.path} - query: ${JSON.stringify(req.query)} - body: ${JSON.stringify(req.body)} - headers: ${JSON.stringify(sanitizedHeaders)}`
+  );
+  next();
+});
 
 apiApp.use(rateLimiter);
 apiApp.use(
