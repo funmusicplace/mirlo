@@ -133,7 +133,6 @@ export default function () {
               SELECT DISTINCT ON ("artistId") id
               FROM "TrackGroup"
               WHERE "releaseDate" <= NOW()
-                AND "releaseDate" >= NOW() - INTERVAL '3 months'
                 AND "publishedAt" <= NOW()
                 AND "adminEnabled" = true
                 AND "hideFromSearch" = false
@@ -149,7 +148,7 @@ export default function () {
               ORDER BY "artistId", "releaseDate" DESC
             ) AS distinct_groups
           ORDER BY RANDOM()
-          LIMIT ${Number(take) * 1.5}
+          LIMIT ${Number(take) * 2}
         `;
 
         const randomIds = rawTrackGroups

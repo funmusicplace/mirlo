@@ -1,15 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { doesTrackBelongToUser } from "../../../../../utils/ownership";
-import {
-  processTrackAudio,
-  startAudioQueueForTrack,
-} from "../../../../../queues/processTrackAudio";
-import busboy from "connect-busboy";
+import { startAudioQueueForTrack } from "../../../../../queues/processTrackAudio";
 
 type Params = {
   trackId: string;
