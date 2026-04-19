@@ -1491,6 +1491,9 @@
   },
   "common": {
     "subscriptionPaymentFailedBanner": "One or more of your subscription payments failed. Go to the artist profiles to renew them.",
-    "updateBillingInfo": "Update your billing info"
+    "updateBillingInfo": "Update your billing info",
+    "newVersionAvailable": "A new version of Mirlo is available.",
+    "reload": "Reload",
+    "dismiss": "Dismiss"
   }
 }

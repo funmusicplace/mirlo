@@ -120,6 +120,7 @@
     "terser": "^5.30.3",
     "typescript": "5.8.2",
     "vite": "^5.2.9",
+    "vite-plugin-pwa": "^1.2.0",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.5.0",
     "wait-on": "^7.2.0"
