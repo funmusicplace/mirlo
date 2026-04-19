@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
 
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
 import {
@@ -17,7 +17,8 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     const tracks = await prisma.track.findMany({
       where: {
@@ -54,7 +55,8 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     const {
       title,

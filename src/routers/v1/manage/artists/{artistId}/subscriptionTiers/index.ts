@@ -4,8 +4,8 @@ import {
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import {
   addSizesToImage,
   getPlatformFeeForArtist,
@@ -79,7 +79,8 @@ export default function () {
 
   async function POST(req: Request, res: Response) {
     const { artistId } = req.params as unknown as Params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const userForCurrency = await prisma.user.findFirst({

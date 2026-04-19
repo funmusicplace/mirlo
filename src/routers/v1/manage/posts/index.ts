@@ -1,6 +1,7 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 
 import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../utils/error";
@@ -30,7 +31,8 @@ export default function () {
       shouldSendEmail: boolean;
     };
 
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
     try {
       const artist = await prisma.artist.findFirst({
         where: {

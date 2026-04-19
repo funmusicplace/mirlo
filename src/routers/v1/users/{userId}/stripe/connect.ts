@@ -1,6 +1,6 @@
-import { User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 
 import stripe from "../../../../../utils/stripe";
@@ -18,7 +18,8 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       if (Number(userId) === Number(loggedInUser.id)) {

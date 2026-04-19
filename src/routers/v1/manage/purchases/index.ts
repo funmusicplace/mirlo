@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
@@ -16,7 +17,8 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
     let {
       take = 50,
       skip = 0,

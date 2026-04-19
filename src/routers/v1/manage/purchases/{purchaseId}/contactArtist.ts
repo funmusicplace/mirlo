@@ -14,7 +14,7 @@ export default function () {
   async function POST(req: Request, res: Response) {
     const { purchaseId } = req.params;
     const { message } = req.body;
-    const user = req.user as User | undefined;
+    const user = req.user;
 
     const purchase = await prisma.merchPurchase.findFirst({
       where: {

@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../auth/passport";
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 
 type Query = {
   urlSlug?: string;
@@ -17,7 +18,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { email, urlSlug } = req.query as unknown as Query;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       let exists = false;
 

@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { User, Prisma } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 
 import postProcessor from "../../../utils/post";
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import { checkIsUserSubscriber } from "../../../utils/artist";
 
 export default function () {
@@ -13,7 +14,8 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
     const { take, skip } = req.query;
     try {
       let where: Prisma.PostWhereInput = {

@@ -1,4 +1,4 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import processor, {
@@ -30,7 +30,7 @@ export default function () {
       isReleased,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
-    const loggedInUser = req.user as User | null;
+    const loggedInUser = req.user;
 
     try {
       let skip = Number(skipQuery);

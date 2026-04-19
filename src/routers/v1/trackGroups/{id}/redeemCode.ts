@@ -1,4 +1,3 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
@@ -58,7 +57,7 @@ export default function () {
 
       const { user: purchaser } = await findOrCreateUserBasedOnEmail(
         notLoggedInUserEmail as string,
-        (req.user as User)?.id
+        req.user?.id
       );
 
       if (purchaser) {

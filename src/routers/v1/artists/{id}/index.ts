@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
   checkIsUserSubscriber,
   findArtistIdForURLSlug,
@@ -22,7 +22,8 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
     const { includeDefaultTier }: { includeDefaultTier?: boolean } = req.query;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     if (!id || id === "undefined") {
       return res.status(400);
     }

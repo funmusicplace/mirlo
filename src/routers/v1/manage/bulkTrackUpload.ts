@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import { AppError, HttpCode } from "../../../utils/error";
 // @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
-import { User } from "@mirlo/prisma/client";
 
 interface TrackArtistData {
   artistName: string;
@@ -43,7 +43,8 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { artists } = req.body as BulkUploadRequest;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     const loggedInUserId = loggedInUser.id;
 
     if (!Array.isArray(artists) || artists.length === 0) {

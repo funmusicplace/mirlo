@@ -7,7 +7,7 @@ import prisma from "@mirlo/prisma";
 import processor, {
   processTrackGroupQueryOrder,
 } from "../../../../utils/trackGroup";
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {
@@ -66,7 +66,7 @@ export default function () {
       res.json({
         results: trackGroups.map((tg) =>
           processor.single(tg, {
-            loggedInUserId: (req.user as User)?.id,
+            loggedInUserId: req.user?.id,
           })
         ),
         total: itemCount,

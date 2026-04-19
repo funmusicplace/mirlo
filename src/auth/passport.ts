@@ -105,7 +105,7 @@ export const userAuthenticated = (
 export const userHasPermission = (role: "admin" | "owner") => {
   return (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params as unknown as { userId: string };
-    const loggedInUser = req.user as User | undefined;
+    const loggedInUser = req.user;
     if (!loggedInUser) {
       res.status(401).json({ error: "Unauthorized" });
       return;
@@ -133,7 +133,7 @@ export const canUserCreateArtists = async (
   res: Response,
   next: NextFunction
 ) => {
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
 
   if (!loggedInUser) {
     res.status(401).json({ error: "Unauthorized" });
@@ -180,7 +180,7 @@ export const artistBelongsToLoggedInUser = async (
   };
   try {
     const castArtistId = await findArtistIdForURLSlug(artistId);
-    const loggedInUser = req.user as User | undefined;
+    const loggedInUser = req.user;
 
     if (!loggedInUser) {
       res.status(401).json({ error: "Unauthorized" });
@@ -219,7 +219,7 @@ export const fundraiserBelongsToLoggedInUser = async (
     fundraiserId: string;
   };
 
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
 
   try {
     if (!loggedInUser) {
@@ -262,7 +262,7 @@ export const trackGroupBelongsToLoggedInUser = async (
     trackGroupId: string;
   };
 
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
 
   try {
     if (!loggedInUser) {
@@ -284,7 +284,7 @@ export const contentBelongsToLoggedInUser = async (
   _res: Response,
   next: NextFunction
 ) => {
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
 
   try {
     if (!loggedInUser) {
@@ -349,7 +349,7 @@ export const merchBelongsToLoggedInUser = async (
     merchId: string;
   };
 
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
 
   try {
     if (!loggedInUser) {
@@ -375,7 +375,7 @@ export const merchPurchaseBelongsToLoggedInUser = async (
     purchaseId: string;
   };
 
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
 
   try {
     if (!loggedInUser) {
@@ -401,7 +401,7 @@ export const trackBelongsToLoggedInUser = async (
     trackId: string;
   };
 
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
 
   try {
     if (!loggedInUser) {

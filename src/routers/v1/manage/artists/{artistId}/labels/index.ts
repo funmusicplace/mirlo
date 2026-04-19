@@ -7,6 +7,7 @@ import {
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import { AppError } from "../../../../../../utils/error";
 import { addSizesToImage } from "../../../../../../utils/artist";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
@@ -159,7 +160,8 @@ export default function () {
       isLabelApproved?: boolean;
     };
 
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       if (!labelUserId) {

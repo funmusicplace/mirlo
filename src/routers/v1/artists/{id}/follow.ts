@@ -25,7 +25,7 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    const loggedInuser = req.user as User | undefined;
+    const loggedInuser = req.user;
 
     const { email, message, cfTurnstile } = req.body ?? {};
     const normalisedEmail =

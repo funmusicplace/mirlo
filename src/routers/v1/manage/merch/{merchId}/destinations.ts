@@ -3,13 +3,13 @@ import {
   userAuthenticated,
   merchBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import countries from "../../../../../utils/country-codes-currencies";
 import {
   getUserCountry,
   getUserCurrencyString,
 } from "../../../../../utils/user";
-import { User } from "@mirlo/prisma/client";
 
 type Params = {
   merchId: string;
@@ -29,7 +29,8 @@ export default function () {
       costUnit: number;
       costExtraUnit: number;
     }[];
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const currencyString = await getUserCurrencyString(user.id);

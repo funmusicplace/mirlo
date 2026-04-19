@@ -4,6 +4,7 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { processUserBanner } from "../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
@@ -23,7 +24,8 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const { jobId, imageId } = await processUserBanner({ req, res })(
@@ -71,7 +73,8 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const artist = await prisma.artist.findFirst({
         where: {

@@ -1,9 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import busboy from "connect-busboy";
 import processTrackGroupCover from "../../../../../utils/processTrackGroupCover";
@@ -32,7 +32,8 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
@@ -81,7 +82,8 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const trackgroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),

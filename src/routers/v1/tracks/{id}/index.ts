@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import processor from "../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 
@@ -12,7 +11,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
-    const loggedInUser = req.user as User | undefined;
+    const loggedInUser = req.user;
     try {
       const track = await prisma.track.findFirst({
         where: { id: Number(id) },

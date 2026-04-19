@@ -3,6 +3,7 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { processUserAvatar } from "../../../../queues/processImages";
 import busboy from "connect-busboy";
 import { User } from "@mirlo/prisma/client";
@@ -17,7 +18,8 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const { jobId, imageId } = await processUserAvatar({ req, res })(
@@ -64,7 +66,8 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       await deleteArtistAvatar(loggedInUser.id);
 

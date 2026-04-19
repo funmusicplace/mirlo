@@ -1,7 +1,7 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../../../../logger";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import contentDisposition from "content-disposition";
 
@@ -41,7 +41,8 @@ export default function () {
       let trackGroup;
 
       if (req.user) {
-        const user = req.user as User;
+        assertLoggedIn(req);
+        const user = req.user;
 
         if (!user.isAdmin) {
           const purchase = await findPurchaseAndVoidToken(

@@ -17,7 +17,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
     const { excludeArtistId }: { excludeArtistId?: string } = req.query;
-    const loggedInUser = req.user as User | undefined;
+    const loggedInUser = req.user;
 
     try {
       const artistId = await findArtistIdForURLSlug(id);

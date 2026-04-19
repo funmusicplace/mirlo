@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../auth/passport";
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 
 import { AppError } from "../../../utils/error";
 import {
@@ -21,7 +21,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: contentId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const hasUserBoughtMerch = await prisma.merchPurchase.findFirst({

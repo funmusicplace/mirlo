@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
 import { AppError } from "../../../../utils/error";
@@ -19,7 +19,8 @@ export default function () {
       skip: string;
       take: string;
     };
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const parsedId = await findArtistIdForURLSlug(id);

@@ -1,6 +1,6 @@
-import { User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import postProcessor from "../../../../utils/post";
 
@@ -16,7 +16,8 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
 
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     if (Number(userId) === Number(loggedInUser.id)) {
       const posts = await prisma.post.findMany({

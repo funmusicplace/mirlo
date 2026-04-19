@@ -1,4 +1,3 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../auth/passport";
 import prisma from "@mirlo/prisma";
@@ -14,7 +13,7 @@ export default function () {
       if (!trackIds || trackIds.length === 0) {
         return res.status(200).json({ results: [] });
       }
-      const loggedInUser = req.user as User | undefined;
+      const loggedInUser = req.user;
       const tracks = await prisma.track.findMany({
         where: {
           id: {

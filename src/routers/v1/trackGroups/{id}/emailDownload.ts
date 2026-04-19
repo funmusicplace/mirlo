@@ -4,6 +4,7 @@ import {
   userAuthenticated,
   userLoggedInWithoutRedirect,
 } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 
 import sendMail from "../../../../jobs/send-mail";
@@ -51,7 +52,8 @@ export default function () {
       }
 
       if (req.user) {
-        const { id: userId, email } = req.user as User;
+        assertLoggedIn(req);
+        const { id: userId, email } = req.user;
 
         const purchaseExists = await prisma.userTrackGroupPurchase.findFirst({
           where: {

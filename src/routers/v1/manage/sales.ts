@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../auth/passport";
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import { findSales } from "../artists/{id}/supporters";
 import { User } from "@mirlo/prisma/client";
 import { getDateRange } from "../../../utils/dateRange";
@@ -27,7 +28,8 @@ export default function () {
       datePurchased?: string;
     };
 
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       if (!artistIds) {

@@ -1,4 +1,3 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
@@ -23,7 +22,7 @@ export default function () {
       email?: string;
       message?: string; // Optional message to the artist
     };
-    const loggedInUser = req.user as User | undefined;
+    const loggedInUser = req.user;
 
     try {
       if (loggedInUser) {

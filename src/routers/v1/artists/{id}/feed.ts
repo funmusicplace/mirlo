@@ -8,6 +8,7 @@ import {
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
@@ -125,7 +126,8 @@ export default function () {
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
     const { format } = req.query;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const parsedId = await findArtistIdForURLSlug(id);

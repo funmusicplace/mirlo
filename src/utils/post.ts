@@ -1,4 +1,4 @@
-import { Artist, ArtistAvatar, Post, User } from "@mirlo/prisma/client";
+import { Artist, ArtistAvatar, Post } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import showdown from "showdown";
@@ -72,7 +72,7 @@ export const doesPostBelongToUser = async (
   next: NextFunction
 ) => {
   const { postId } = req.params;
-  const loggedInUser = req.user as User | undefined;
+  const loggedInUser = req.user;
   try {
     if (postId && loggedInUser) {
       if (loggedInUser.isAdmin) {

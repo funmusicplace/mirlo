@@ -3,8 +3,8 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 
 import {
   deleteArtist,
@@ -44,7 +44,8 @@ export default function () {
       maxFreePlays,
       announcementText,
     } = req.body;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const existingArtist = await prisma.artist.findFirst({
@@ -145,7 +146,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     const castArtistId = await findArtistIdForURLSlug(artistId);
     try {
@@ -206,7 +208,8 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       await deleteArtist(Number(user.id), Number(artistId));

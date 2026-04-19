@@ -1,10 +1,10 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   artistBelongsToLoggedInUser,
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import processor from "../../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
 import { getPlatformFeeForArtist } from "../../../../../utils/artist";
@@ -23,7 +23,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params;
     const { includeLabelReleases } = req.query;
-    const loggedInUser = req.user as User | undefined;
+    const loggedInUser = req.user;
 
     try {
       const results = await prisma.trackGroup.findMany({
@@ -61,7 +61,7 @@ export default function () {
       res.json({
         results: results.map((tg) =>
           processor.single(tg, {
-            loggedInUserId: (req.user as User)?.id,
+            loggedInUserId: req.user?.id,
           })
         ),
       });
@@ -111,7 +111,8 @@ export default function () {
       suggestedPrice,
       urlSlug,
     } = req.body;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     if (!urlSlug) {
       return res.status(400).json({

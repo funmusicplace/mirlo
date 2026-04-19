@@ -1,9 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   trackGroupBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
 import { processSingleTrackGroup } from "../../../../../utils/trackGroup";
@@ -22,7 +22,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
@@ -72,7 +73,8 @@ export default function () {
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
     const { recommendedTrackGroupId } = req.body;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
@@ -148,7 +150,8 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
     const { recommendedTrackGroupId } = req.query;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const trackGroup = await doesTrackGroupBelongToUser(

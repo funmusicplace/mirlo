@@ -1,10 +1,11 @@
-import { Artist, User } from "@mirlo/prisma/client";
+import { Artist } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import processor, {
   trackGroupSingleInclude,
 } from "../../../../../utils/trackGroup";
@@ -45,7 +46,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const trackGroup = await prisma.trackGroup.findFirst({

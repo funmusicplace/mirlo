@@ -5,7 +5,6 @@ import processor, {
   trackGroupSingleInclude,
 } from "../../../../utils/trackGroup";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { User } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {
@@ -14,7 +13,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
-    const loggedInUser = req.user as User | null;
+    const loggedInUser = req.user;
 
     const { artistId }: { artistId: string } = req.query as {
       artistId: string;

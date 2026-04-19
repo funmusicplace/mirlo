@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { User } from "@mirlo/prisma/client";
 import { processSinglePost } from "../../../utils/post";
 import { checkIsUserSubscriber } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
@@ -14,7 +13,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
     const { artistId }: { artistId?: string } = req.query;
-    const user = req.user as User | undefined;
+    const user = req.user;
 
     try {
       let postForURLSlug;
