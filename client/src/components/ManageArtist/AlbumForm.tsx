@@ -37,11 +37,10 @@ const AlbumForm: React.FC<{
       minPrice: `${
         trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
       }`,
-      suggestedPrice: `${
-        trackGroup?.suggestedPrice !== undefined
-          ? trackGroup.suggestedPrice / 100
-          : ""
-      }`,
+      suggestedPrice:
+        trackGroup?.suggestedPrice != null
+          ? `${trackGroup.suggestedPrice / 100}`
+          : "",
       goalAmount: `${
         trackGroup?.fundraiser?.goalAmount
           ? trackGroup.fundraiser.goalAmount / 100
