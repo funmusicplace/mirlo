@@ -43,6 +43,40 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(response.body.result.defaultIsPreview, false);
     });
 
+    it("should update a track group without artistId in the body", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ defaultIsPreview: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.defaultIsPreview, true);
+    });
+
+    it("should reject a duplicate urlSlug for the same artist", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      await createTrackGroup(artist.id, { urlSlug: "taken-slug" });
+      const otherTrackGroup = await createTrackGroup(artist.id, {
+        urlSlug: "another-slug",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${otherTrackGroup.id}`)
+        .send({ urlSlug: "taken-slug" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+    });
+
     it("should find a new slug for a trackGroup", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
