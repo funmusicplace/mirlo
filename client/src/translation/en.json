@@ -1298,6 +1298,8 @@
     "fromXSupporters": "from {{supporters}} supporters",
     "ofGoal": "of <strong>{{goal}}</strong>",
     "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website.",
+    "artistsAndRolesHeading": "Credits",
+    "artistsAndRolesNoRole": "artist",
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
     "coverForTitle": "Cover for '{{ title }}'",
