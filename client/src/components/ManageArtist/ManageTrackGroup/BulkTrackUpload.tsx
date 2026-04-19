@@ -1,6 +1,5 @@
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import api from "services/api";
 import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
@@ -8,18 +7,8 @@ import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 
 import { Buffer } from "buffer";
 import process from "process";
-import { pick } from "lodash";
-import {
-  TrackData,
-  UploadField,
-  UploadLabelWrapper,
-  convertMetaData,
-  fileListIntoArray,
-  parse,
-  produceNewStatus,
-} from "../utils";
-import { useAuthContext } from "state/AuthContext";
-import { useSnackbar } from "state/SnackbarContext";
+import { UploadField, UploadLabelWrapper } from "../utils";
+import { useUpload } from "state/UploadContext";
 
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
@@ -29,190 +18,35 @@ if (typeof window !== "undefined" && typeof window.process === "undefined") {
   window.process = process;
 }
 
-const timeInBetweenUploads = 5000;
-
 interface FormData {
   trackFiles: FileList;
-  tracks: TrackData[];
 }
-
-type OrderedTrackData = { order: number; t: TrackData };
-
-const alertUser = (event: any) => {
-  event.preventDefault();
-  event.returnValue = "Upload in progress. Are you sure you want to leave?";
-};
 
 export const BulkTrackUpload: React.FC<{
   trackgroup: { artistId?: number; id: number; tracks: Track[] };
   reload: (newTrack?: Track) => Promise<unknown>;
   multiple?: boolean;
 }> = ({ trackgroup, reload, multiple }) => {
-  const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
   const { register, watch, reset } = methods;
-  const [uploadQueue, setUploadQueue] = React.useState<
-    { title: string; status: number }[]
-  >([]);
-
-  const { user } = useAuthContext();
+  const { queue, enqueue } = useUpload();
 
   const trackFiles = watch("trackFiles");
 
-  const userId = user?.id;
-
-  const uploadNextTrack = React.useCallback(
-    async (remainingTracks: OrderedTrackData[]) => {
-      const firstTrack = remainingTracks.pop();
-      if (firstTrack) {
-        const metadata = pick(firstTrack.t.metadata, ["format", "common"]);
-        delete metadata.common.picture;
-        const packet = {
-          title: firstTrack.t.title,
-          filename: firstTrack.t.file.name,
-          metadata: metadata,
-          artistId: trackgroup.artistId,
-          isPreview: firstTrack.t.status === "preview",
-          order: firstTrack.order,
-          lyrics: Array.isArray(firstTrack.t.lyrics)
-            ? firstTrack.t.lyrics.join("\n")
-            : firstTrack.t.lyrics,
-          isrc: firstTrack.t.isrc,
-          trackGroupId: trackgroup.id,
-          trackArtists: firstTrack.t.trackArtists.map((a) => ({
-            ...a,
-            artistId:
-              a.artistId && isFinite(+a.artistId) ? +a.artistId : undefined,
-          })),
-        };
-
-        setUploadQueue((queue) =>
-          produceNewStatus(queue, firstTrack.t.title, 15)
-        );
-
-        let newTrack: Track | undefined = undefined;
-
-        try {
-          const response = await api.post<
-            Partial<Track>,
-            { result: Track; uploadUrl: string }
-          >(`manage/tracks`, packet);
-
-          newTrack = response.result;
-          setUploadQueue((queue) =>
-            produceNewStatus(queue, firstTrack.t.title, 25)
-          );
-          if (
-            response.uploadUrl &&
-            // We maintain this specific catch because of CORS issues
-            // with uploading directly to minio. See /docs/FilesStorage.md
-            // for more details.
-            !response.uploadUrl.includes("minio:9000")
-          ) {
-            const result = await fetch(response.uploadUrl, {
-              method: "PUT",
-              body: firstTrack.t.file,
-              headers: {
-                Origin: "http://minio:9000",
-              },
-            });
-            if (result.ok) {
-              // Tell the backend to process the uploaded audio
-              await api.put(`manage/tracks/${newTrack.id}/process`, {
-                source: "upload",
-              });
-              setUploadQueue((queue) =>
-                produceNewStatus(queue, firstTrack.t.title, 90)
-              );
-            }
-          } else {
-            await api.uploadFile(`manage/tracks/${newTrack.id}/audio`, [
-              firstTrack.t.file,
-            ]);
-          }
-        } catch (e) {
-          console.error(e);
-          snackbar(
-            `Something went wrong uploading track ${packet.title}. Please report this incident to hi@mirlo.space`,
-            {
-              type: "warning",
-            }
-          );
-        }
-
-        if (remainingTracks.length !== 0) {
-          setUploadQueue((queue) =>
-            produceNewStatus(queue, firstTrack.t.title, 99)
-          );
-
-          setTimeout(async () => {
-            setUploadQueue((queue) =>
-              produceNewStatus(queue, firstTrack.t.title, 100)
-            );
-            reload(newTrack);
-          }, timeInBetweenUploads / 2);
-
-          setTimeout(async () => {
-            await uploadNextTrack(remainingTracks);
-          }, timeInBetweenUploads);
-        } else {
-          await uploadNextTrack(remainingTracks);
-          reload(newTrack);
-        }
-      } else {
-        setUploadQueue([]);
-        reload();
-        reset();
-      }
-    },
-    [reload, reset, trackgroup.artistId, trackgroup.id, userId]
+  const itemsForThisGroup = React.useMemo(
+    () => queue.filter((q) => q.trackGroupId === trackgroup.id),
+    [queue, trackgroup.id]
   );
 
-  const processUploadedFiles = React.useCallback(
-    (filesToProcess: FileList) => {
-      const filesToParse = fileListIntoArray(filesToProcess);
-      const callback = async () => {
-        const parsed = await parse(filesToParse);
-        const newTracks = parsed
-          .sort((a, b) => {
-            const firstComparable = a.metadata.common.track.no ?? a.file.name;
-            const secondComparable = b.metadata.common.track.no ?? b.file.name;
-
-            return (firstComparable ?? 0) > (secondComparable ?? 0) ? 1 : -1;
-          })
-          .map((p, i) => convertMetaData(p, i, trackgroup))
-          .map((t, i) => ({
-            order: Number.isFinite(+t.order) ? Number(t.order) : i + 1,
-            t,
-          }));
-        setUploadQueue(newTracks.map((t) => ({ title: t.t.title, status: 5 })));
-        uploadNextTrack(newTracks);
-      };
-
-      callback();
-    },
-    [trackgroup, uploadNextTrack]
-  );
+  const hasActiveUpload = itemsForThisGroup.length > 0;
 
   React.useEffect(() => {
-    if (uploadQueue.length === 0 && trackFiles?.length > 0) {
-      processUploadedFiles(trackFiles);
+    if (trackFiles?.length > 0 && !hasActiveUpload) {
+      enqueue({ trackgroup, files: trackFiles, reload });
+      reset();
     }
-  }, [processUploadedFiles, trackFiles, uploadQueue.length]);
-
-  React.useEffect(() => {
-    if (uploadQueue.length > 0) {
-      window.addEventListener("beforeunload", alertUser);
-      return () => {
-        window.removeEventListener("beforeunload", alertUser);
-      };
-    } else {
-      window.removeEventListener("beforeunload", alertUser);
-    }
-  }, [uploadQueue.length]);
-
-  const disableUploadButton = uploadQueue.length > 0;
+  }, [trackFiles, hasActiveUpload, enqueue, trackgroup, reload, reset]);
 
   return (
     <FormProvider {...methods}>
@@ -221,17 +55,17 @@ export const BulkTrackUpload: React.FC<{
           margin-top: 1rem;
         `}
       >
-        {uploadQueue.length > 0 && (
+        {hasActiveUpload && (
           <div
             className={css`
               margin-bottom: 1rem;
             `}
           >
-            {uploadQueue.map((t) => (
-              <BulkTrackUploadRow track={t} key={t.title} />
+            {itemsForThisGroup.map((item) => (
+              <BulkTrackUploadRow track={item} key={item.title} />
             ))}
           </div>
-        )}{" "}
+        )}
         <p>{t("uploadTracksDescription")}</p>
         <FormComponent>
           <UploadLabelWrapper htmlFor="audio">
@@ -240,7 +74,7 @@ export const BulkTrackUpload: React.FC<{
             <UploadField
               type="file"
               id="audio"
-              disabled={disableUploadButton}
+              disabled={hasActiveUpload}
               multiple={multiple}
               {...register("trackFiles")}
               accept="audio/flac,audio/wav,audio/x-wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"

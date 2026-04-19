@@ -17,6 +17,7 @@ import ScrollToTop from "components/ScrollToTop";
 import UserBanner from "components/common/UserBanner";
 import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 import FailedSubscriptionBanner from "components/common/FailedSubscriptionBanner";
+import UploadProgressPanel from "components/common/UploadProgressPanel";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -108,6 +109,7 @@ function App() {
         </>
       </ArtistColorsWrapper>
       <Player />
+      <UploadProgressPanel />
     </>
   );
 }

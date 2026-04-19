@@ -8,6 +8,7 @@ import "./i18n";
 import { GlobalStateProvider } from "./state/GlobalState";
 
 import { SnackBarContextProvider } from "state/SnackbarContext";
+import { UploadContextProvider } from "state/UploadContext";
 
 import routes from "routes";
 import { QueryClientWrapper } from "queries/QueryClientWrapper";
@@ -29,7 +30,9 @@ root.render(
           <ConfirmContextProvider>
             <ConfirmDialog />
             <SnackBarContextProvider>
-              <RouterProvider router={router} />
+              <UploadContextProvider>
+                <RouterProvider router={router} />
+              </UploadContextProvider>
             </SnackBarContextProvider>
           </ConfirmContextProvider>
         </GlobalStateProvider>

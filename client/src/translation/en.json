@@ -1492,5 +1492,11 @@
   "common": {
     "subscriptionPaymentFailedBanner": "One or more of your subscription payments failed. Go to the artist profiles to renew them.",
     "updateBillingInfo": "Update your billing info"
+  },
+  "uploadPanel": {
+    "uploadsInProgress_one": "{{count}} track uploading",
+    "uploadsInProgress_other": "{{count}} tracks uploading",
+    "uploadsComplete": "All tracks uploaded",
+    "keepBrowserOpen": "Keep this tab open until uploads finish. You can keep browsing."
   }
 }
