@@ -5,7 +5,6 @@ import postProcessor from "../../../utils/post";
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import { checkIsUserSubscriber } from "../../../utils/artist";
 
 export default function () {
@@ -14,7 +13,6 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    assertLoggedIn(req);
     const user = req.user;
     const { take, skip } = req.query;
     try {

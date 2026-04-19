@@ -1,8 +1,6 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../utils/error";
 
@@ -17,7 +15,6 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    assertLoggedIn(req);
     const user = req.user;
     const { email } = req.body ?? {};
 

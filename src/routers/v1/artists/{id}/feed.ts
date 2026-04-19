@@ -8,7 +8,6 @@ import {
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
@@ -21,7 +20,7 @@ import { finalPostImageBucket } from "../../../../utils/minio";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
 
 export const getPostsVisibleToUser = async (
-  user: User,
+  user: User | undefined,
   artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] },
   take: number = 20,
   skip: number = 0
@@ -126,7 +125,6 @@ export default function () {
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
     const { format } = req.query;
-    assertLoggedIn(req);
     const user = req.user;
 
     try {

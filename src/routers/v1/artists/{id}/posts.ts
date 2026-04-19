@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
 import { AppError } from "../../../../utils/error";
@@ -19,7 +18,6 @@ export default function () {
       skip: string;
       take: string;
     };
-    assertLoggedIn(req);
     const user = req.user;
 
     try {
