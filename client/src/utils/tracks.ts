@@ -13,6 +13,16 @@ export const determineNewTrackOrder = produce(
   }
 );
 
+export const bulkSetTracksIsPreview = async (
+  trackGroupId: number,
+  isPreview: boolean
+) => {
+  return api.put<{ isPreview: boolean }, { result: TrackGroup }>(
+    `manage/trackGroups/${trackGroupId}/tracks`,
+    { isPreview }
+  );
+};
+
 export const sendToPlayableEndpoint = async (trackIds: number[]) => {
   const params = new URLSearchParams();
   for (const id of trackIds ?? []) {

@@ -6,8 +6,8 @@ import { Link } from "react-router-dom";
 
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
-import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+import { bulkSetTracksIsPreview } from "utils/tracks";
 import SavingInput from "./SavingInput";
 
 interface BulkUpdateTracksProps {
@@ -33,14 +33,7 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
 
   const handleSetAllTracksPreview = async (isPreview: boolean) => {
     try {
-      await Promise.all(
-        (trackGroup.tracks ?? []).map((track) =>
-          api.put(`manage/tracks/${track.id}`, { isPreview })
-        )
-      );
-      await api.put(`manage/trackGroups/${trackGroup.id}`, {
-        defaultIsPreview: isPreview,
-      });
+      await bulkSetTracksIsPreview(trackGroup.id, isPreview);
       snackbar(t("updatedAllTracks"), { type: "success" });
       reload();
     } catch (e) {
