@@ -168,6 +168,7 @@ const InsertMirloWidgetButton: React.FC<{
               {t("insertATrack")}
               <AutoComplete
                 getOptions={getTrackOptions}
+                id="input-mirlo-track"
                 onSelect={(val) => {
                   if (
                     hasId(val) &&
@@ -180,6 +181,7 @@ const InsertMirloWidgetButton: React.FC<{
               <br />
               {t("insertATrackGroup")}
               <AutoCompleteTrackGroup
+                id="input-mirlo-track-group"
                 onSelect={(val) => onAdd(val, "trackGroup")}
               />
             </div>

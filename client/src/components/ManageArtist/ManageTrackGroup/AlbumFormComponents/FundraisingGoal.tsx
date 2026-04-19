@@ -4,7 +4,6 @@ import SavingInput from "./SavingInput";
 import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
 import { useParams, Link } from "react-router-dom";
-import { FormSection } from "./AlbumFormContent";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
 import Button, { ButtonLink } from "components/common/Button";
@@ -126,7 +125,7 @@ const FundraisingGoal: React.FC<{
   }
 
   return (
-    <FormSection>
+    <>
       <div className="flex justify-between items-center w-full">
         <h2>{t("fundraisingGoal")}</h2>
         <div className="flex gap-2">
@@ -159,7 +158,6 @@ const FundraisingGoal: React.FC<{
           )}
         </div>
       </div>
-      <p>{t("fundraisingGoalDescription")}</p>
       <div
         className={css`
           width: 100%;
@@ -179,9 +177,11 @@ const FundraisingGoal: React.FC<{
           />
         </FormComponent> */}
         <FormComponent>
-          <label>{t("goal")}</label>
+          <label htmlFor="input-goal-amount">{t("goal")}</label>
           <SavingInput
+            ariaDescribedBy="description-goal-amount"
             formKey="goalAmount"
+            id="input-goal-amount"
             url={`manage/fundraisers/${fundraiser.id}`}
             extraData={{ artistId: Number(artistId) }}
             type="number"
@@ -190,11 +190,15 @@ const FundraisingGoal: React.FC<{
             step="0.01"
             min={0}
           />
+          <span className="text-sm" id="description-goal-amount">
+            {t("fundraisingGoalDescription")}
+          </span>
         </FormComponent>
       </div>
       <FormComponent direction="row">
         <div>
           <SavingInput
+            ariaDescribedBy="description-all-or-nothing"
             formKey="isAllOrNothing"
             id="isAllOrNothing"
             timer={0}
@@ -205,10 +209,12 @@ const FundraisingGoal: React.FC<{
         </div>
         <div className="flex flex-col pl-2">
           <label htmlFor="isAllOrNothing">{t("isAllOrNothing")}</label>
-          <small>{t("isAllOrNothingDescription")}</small>
+          <small id="description-all-or-nothing">
+            {t("isAllOrNothingDescription")}
+          </small>
         </div>
       </FormComponent>
-    </FormSection>
+    </>
   );
 };
 

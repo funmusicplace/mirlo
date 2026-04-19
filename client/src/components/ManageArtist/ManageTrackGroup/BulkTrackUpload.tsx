@@ -4,11 +4,10 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
 import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
-
 import { Buffer } from "buffer";
 import process from "process";
-import { UploadField, UploadLabelWrapper } from "../utils";
 import { useUpload } from "state/UploadContext";
+import UploadFiles from "components/ManageArtist/UploadFiles";
 
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
@@ -66,20 +65,13 @@ export const BulkTrackUpload: React.FC<{
             ))}
           </div>
         )}
-        <p>{t("uploadTracksDescription")}</p>
         <FormComponent>
-          <UploadLabelWrapper htmlFor="audio">
-            <div>{t("dropFilesHere")}</div>
-
-            <UploadField
-              type="file"
-              id="audio"
-              disabled={hasActiveUpload}
-              multiple={multiple}
-              {...register("trackFiles")}
-              accept="audio/flac,audio/wav,audio/x-wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
-            />
-          </UploadLabelWrapper>
+          <UploadFiles
+            accept="audio/flac,audio/wav,audio/x-wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+            label={t("uploadTracksDescription")}
+            nameForId="track-files"
+            {...register("trackFiles")}
+          />
         </FormComponent>
       </form>
     </FormProvider>

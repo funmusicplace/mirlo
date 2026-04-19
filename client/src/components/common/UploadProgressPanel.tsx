@@ -1,10 +1,8 @@
 import React from "react";
-import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useUpload } from "state/UploadContext";
 import { BulkTrackUploadRow } from "components/ManageArtist/ManageTrackGroup/BulkTrackUploadRow";
-import { bp } from "../../constants";
 
 const UploadProgressPanel: React.FC = () => {
   const { queue, isActive } = useUpload();
@@ -19,70 +17,26 @@ const UploadProgressPanel: React.FC = () => {
     <div
       role="status"
       aria-live="polite"
-      className={css`
-        position: fixed;
-        right: 1rem;
-        bottom: 90px;
-        z-index: 999;
-        width: 360px;
-        max-width: calc(100vw - 2rem);
-        background: var(--mi-normal-background-color);
-        color: var(--mi-normal-foreground-color);
-        border: 1px solid var(--mi-darken-background-color);
-        border-radius: var(--mi-border-radius);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-        overflow: hidden;
-
-        @media (max-width: ${bp.small}px) {
-          right: 0.5rem;
-          left: 0.5rem;
-          width: auto;
-          bottom: 110px;
-        }
-      `}
+      className="fixed right-4 bottom-[90px] z-[999] w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--mi-border-radius)] border border-[var(--mi-darken-background-color)] bg-[var(--mi-normal-background-color)] text-[var(--mi-normal-foreground-color)] shadow-[0_4px_16px_rgba(0,0,0,0.25)] max-sm:right-2 max-sm:bottom-[110px] max-sm:left-2 max-sm:w-auto"
     >
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
-        className={css`
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0.5rem 0.75rem;
-          background: var(--mi-darken-background-color);
-          color: inherit;
-          font-weight: 600;
-          font-size: 0.9rem;
-          border: none;
-          width: 100%;
-          cursor: pointer;
-        `}
+        className="flex w-full cursor-pointer items-center justify-between border-none bg-[var(--mi-darken-background-color)] px-3 py-2 text-[0.9rem] font-semibold text-inherit"
       >
         <span>{t("uploadsInProgress", { count: activeCount })}</span>
         {collapsed ? <FaChevronUp /> : <FaChevronDown />}
       </button>
       {!collapsed && (
-        <div
-          className={css`
-            max-height: 280px;
-            overflow-y: auto;
-            padding: 0.5rem;
-          `}
-        >
+        <div className="max-h-[280px] overflow-y-auto p-2">
           {queue.map((item) => (
             <BulkTrackUploadRow
               key={`${item.trackGroupId}-${item.title}`}
               track={item}
             />
           ))}
-          <p
-            className={css`
-              font-size: 0.75rem;
-              color: var(--mi-lighter-foreground-color);
-              margin: 0.5rem 0 0 0;
-            `}
-          >
+          <p className="mt-2 text-xs text-[var(--mi-lighter-foreground-color)]">
             {t("keepBrowserOpen")}
           </p>
         </div>

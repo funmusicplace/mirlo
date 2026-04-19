@@ -733,7 +733,7 @@
     "uploadImageDescription": "Choose an image to upload",
     "addImage": "Add image",
     "insertATrack": "Insert a track:",
-    "insertATrackGroup": "Insert an release",
+    "insertATrackGroup": "Insert a release",
     "uploadAVideo": "Add a video",
     "addUrl": "Insert a video url",
     "addVideo": "Add video",
@@ -763,7 +763,7 @@
     "saveOptions": "Save options",
     "backToMerchList": "Back to merch list",
     "homeCountry": "Home country",
-    "dropFilesHere": "Drop files here, or click to select files",
+    "dropFilesHere": "Drop files here, or click to select files.",
     "fileUploaded": "File uploaded",
     "fileDeleted": "File deleted",
     "destinationCountry": "Destination country",
@@ -823,8 +823,9 @@
     "solidarity": "Solidarity",
     "sustain": "Sustain",
     "fullCost": "Full cost",
-    "platformCut": "Platform cut: {{percent}}%",
+    "platformCut": "Platform cut:",
     "redistribution": "Redistribution",
+    "platformCutTierWhatIsThis": "What is this?",
     "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of release sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call.",
     "howMuchModalRowSolidarityPercent": "0%",
     "howMuchModalRowSolidarityLabel": "Solidarity",
@@ -915,7 +916,7 @@
     "setAllTracksAsMustOwn": "Set all tracks as must own",
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
     "license": "Track license",
-    "anAlbumCover": "an release cover",
+    "anAlbumCover": "a release cover",
     "addALicense": "Add a license",
     "isrcCode": "ISRC Code",
     "lyrics": "Lyrics",
@@ -986,7 +987,7 @@
     "trackGroupUpdated": "Release updated",
     "trackGroupCreated": "Release created",
     "updatedTrack": "Updated track info",
-    "dropFilesHere": "Drop files here or press \"Browse\"",
+    "dropFilesHere": "Drop files here, or click to select files.",
     "or": "or",
     "optionalType": "The type is optional",
     "replaceTrackAudio": "Replace audio",
@@ -1017,7 +1018,8 @@
     "labelReceivePaymentDescription": "You are a label who can manage releases for this artist. This is the account that will receive payments for this release. Go to your <labelPage>label page</labelPage> to manage these relationships. If you leave this blank, payments will go to the artist's personal account.",
     "thereWasAnError": "There was an error uploading this track.",
     "doneUploading": "Uploaded all tracks. We still need to process them on our servers, but you can now safely close the browser.",
-    "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
+    "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser.",
+    "downloadableContent": "Downloadable content"
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist page",
@@ -1296,6 +1298,8 @@
     "fromXSupporters": "from {{supporters}} supporters",
     "ofGoal": "of <strong>{{goal}}</strong>",
     "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website.",
+    "artistsAndRolesHeading": "Credits",
+    "artistsAndRolesNoRole": "artist",
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
     "coverForTitle": "Cover for '{{ title }}'",
@@ -1491,7 +1495,10 @@
   },
   "common": {
     "subscriptionPaymentFailedBanner": "One or more of your subscription payments failed. Go to the artist profiles to renew them.",
-    "updateBillingInfo": "Update your billing info"
+    "updateBillingInfo": "Update your billing info",
+    "newVersionAvailable": "A new version of Mirlo is available.",
+    "reload": "Reload",
+    "dismiss": "Dismiss"
   },
   "uploadPanel": {
     "uploadsInProgress_one": "{{count}} track uploading",

@@ -1,14 +1,20 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
 import Button from "components/common/Button";
 import TextArea from "components/common/TextArea";
 import React from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import api from "services/api";
-import { FormSection } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
 import FormComponent from "components/common/FormComponent";
 import { SelectEl } from "components/common/Select";
 import Tabs from "components/common/Tabs";
 import { useTranslation } from "react-i18next";
+
+export const FormSection = styled.div`
+  margin: 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--mi-darken-x-background-color);
+`;
 
 export const AdminUsers: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });

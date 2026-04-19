@@ -126,7 +126,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
         margin-top: 1.5rem;
       `}
     >
-      <label>{t("albumTags")}</label>
+      <label htmlFor="input-album-tags">{t("albumTags")}</label>
 
       <div
         className={css`
@@ -141,6 +141,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
       >
         <AutoComplete
           getOptions={findTags}
+          id="input-album-tags"
           colors={colors}
           onSelect={saveTags}
           placeholder={t("typeForTags")}

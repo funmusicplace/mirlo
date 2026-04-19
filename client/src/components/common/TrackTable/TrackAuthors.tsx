@@ -1,6 +1,29 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
+import Tooltip from "../Tooltip";
+
+const AuthorName: React.FC<{
+  artist: NonNullable<Track["trackArtists"]>[number];
+}> = ({ artist }) => {
+  const content = artist.artistId ? (
+    <Link to={`/${artist.artistId}`} id="player-artist-name">
+      {artist.artistName}
+    </Link>
+  ) : (
+    <span>{artist.artistName}</span>
+  );
+
+  if (artist.role) {
+    return (
+      <Tooltip hoverText={artist.role} underline={false}>
+        {content}
+      </Tooltip>
+    );
+  }
+
+  return content;
+};
 
 const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
   track,
@@ -31,13 +54,7 @@ const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
         >
           {coAuthors.map((artist, index) => (
             <React.Fragment key={artist.artistName}>
-              {artist.artistId ? (
-                <Link to={`/${artist.artistId}`} id="player-artist-name">
-                  {artist.artistName}
-                </Link>
-              ) : (
-                artist.artistName
-              )}
+              <AuthorName artist={artist} />
               {index < coAuthors.length - 1 && ", "}
             </React.Fragment>
           ))}

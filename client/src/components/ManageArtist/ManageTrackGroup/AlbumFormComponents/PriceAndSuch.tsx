@@ -15,7 +15,7 @@ import PaymentSlider from "./PaymentSlider";
 import { getCurrencySymbol } from "components/common/Money";
 import { useAuthContext } from "state/AuthContext";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
-import { FormSection } from "./AlbumFormContent";
+import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { InputEl } from "components/common/Input";
@@ -47,6 +47,13 @@ const PriceAndSuch: React.FC<{
   const { user } = useAuthContext();
   const [isUpdatingPricingMode, setIsUpdatingPricingMode] =
     React.useState(false);
+  const pricingModeInputRefs: {
+    [K in PricingMode]: React.RefObject<HTMLInputElement>;
+  } = {
+    "free-or-donate": React.useRef<HTMLInputElement>(null),
+    paid: React.useRef<HTMLInputElement>(null),
+    "no-payments": React.useRef<HTMLInputElement>(null),
+  };
 
   const isAlbumGettable = watch("isGettable", false);
   const minPrice = Number(watch("minPrice") || 0);
@@ -144,6 +151,25 @@ const PriceAndSuch: React.FC<{
     [errorHandler, getValues, hasSuggestedPrice, savePricingState, setValue]
   );
 
+  const [didUpdatePricingMode, setDidUpdatePricingMode] = React.useState(false);
+
+  // Restore focus to selected input after disabling and re-enabling
+  React.useEffect(() => {
+    if (isUpdatingPricingMode) {
+      setDidUpdatePricingMode(true);
+    } else if (!isUpdatingPricingMode && didUpdatePricingMode) {
+      pricingModeInputRefs[selectedPricingMode].current?.focus();
+      setDidUpdatePricingMode(false);
+    }
+  }, [
+    isUpdatingPricingMode,
+    didUpdatePricingMode,
+    pricingModeInputRefs["free-or-donate"].current,
+    pricingModeInputRefs["paid"].current,
+    pricingModeInputRefs["no-payments"].current,
+    selectedPricingMode,
+  ]);
+
   const onToggleSuggestedPrice = React.useCallback(
     async (checked: boolean) => {
       if (!isAlbumGettable || selectedPricingMode === "no-payments") {
@@ -201,16 +227,34 @@ const PriceAndSuch: React.FC<{
 
   return (
     <FormSection>
-      <h2>{t("priceAndSuch")}</h2>
+      <h2 id="label-pricing">{t("priceAndSuch")}</h2>
       <div className="flex flex-col gap-2">
         <FormComponent>
-          <label>{t("pricing")}</label>
           <div
+            aria-labelledby="label-pricing"
             className={css`
-              display: grid;
-              grid-template-columns: repeat(3, minmax(0, 1fr));
-              gap: 0.75rem;
+              display: flex;
+
+              & input:focus-visible + label > button {
+                outline: 5px auto Highlight;
+                outline: 5px auto -webkit-focus-ring-color;
+              }
+
+              & label:first-of-type > button {
+                border-start-end-radius: 0;
+                border-end-end-radius: 0;
+              }
+
+              & label ~ label > button {
+                border-radius: 0;
+              }
+
+              & label:last-of-type > button {
+                border-start-end-radius: var(--mi-border-radius);
+                border-end-end-radius: var(--mi-border-radius);
+              }
             `}
+            role="group"
           >
             {[
               {
@@ -225,18 +269,34 @@ const PriceAndSuch: React.FC<{
               { key: "no-payments", label: t("pricingNoPayments") },
             ].map((pricing) => {
               const isSelected = selectedPricingMode === pricing.key;
+              const id = `pricing-${pricing.key}`;
               return (
-                <ArtistButton
-                  key={pricing.key}
-                  type="button"
-                  onClick={() =>
-                    onSelectPricingMode(pricing.key as PricingMode)
-                  }
-                  disabled={isUpdatingPricingMode}
-                  variant={isSelected ? "default" : "outlined"}
-                >
-                  {pricing.label}
-                </ArtistButton>
+                <React.Fragment key={pricing.key}>
+                  <input
+                    checked={isSelected}
+                    className="sr-only"
+                    disabled={isUpdatingPricingMode}
+                    id={id}
+                    name="pricing"
+                    onChange={() =>
+                      onSelectPricingMode(pricing.key as PricingMode)
+                    }
+                    ref={pricingModeInputRefs[pricing.key as PricingMode]}
+                    type="radio"
+                  />
+                  <label htmlFor={id}>
+                    <ArtistButton
+                      onClick={() =>
+                        onSelectPricingMode(pricing.key as PricingMode)
+                      }
+                      tabIndex={-1}
+                      type="button"
+                      variant={isSelected ? "default" : "outlined"}
+                    >
+                      {pricing.label}
+                    </ArtistButton>
+                  </label>
+                </React.Fragment>
               );
             })}
           </div>
@@ -291,8 +351,10 @@ const PriceAndSuch: React.FC<{
                 flex-grow: 1;
               `}
             >
-              <label>{t("minimumPrice")}</label>
-              <small>{t("minimumPriceDescription")}</small>
+              <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
+              <small id="description-minimum-price">
+                {t("minimumPriceDescription")}
+              </small>
               <div
                 className={css`
                   display: flex;
@@ -314,34 +376,28 @@ const PriceAndSuch: React.FC<{
                   </div>
                 )}
                 <SavingInput
+                  ariaDescribedBy="description-minimum-price hint-minimum-price-access hint-minimum-price-currency"
                   formKey="minPrice"
+                  id="input-minimum-price"
                   type="number"
                   step="0.01"
                   min={0}
                   url={`manage/trackGroups/${trackGroupId}`}
                   extraData={{ artistId: Number(artistId) }}
                 />
-              </div>{" "}
-              <small>{t("pricingHelp")}</small>
+              </div>
+              <small id="hint-minimum-price-access">{t("pricingHelp")}</small>
               {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
-              <small>{t("currencyIsSetOnManageArtist")}</small>
+              <small id="hint-minimum-price-currency">
+                {t("currencyIsSetOnManageArtist")}
+              </small>
             </FormComponent>
 
-            <FormComponent
-              className={css`
-                flex-grow: 1;
-              `}
-            >
-              <label
-                htmlFor="hasSuggestedPrice"
-                className={css`
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                `}
-              >
+            <FormComponent className="grow">
+              <div className="flex items-center gap-1">
                 <InputEl
-                  id="hasSuggestedPrice"
+                  aria-describedby="hint-has-suggested-price hint-has-suggested-price-clarifier"
+                  id="input-has-suggested-price"
                   colors={colors}
                   type="checkbox"
                   checked={hasSuggestedPrice}
@@ -349,13 +405,22 @@ const PriceAndSuch: React.FC<{
                     onToggleSuggestedPrice(event.target.checked);
                   }}
                 />
-                {t("suggestAlternateDefaultPrice")}
-              </label>
+                <label
+                  htmlFor="input-has-suggested-price"
+                  id="label-has-suggested-price"
+                >
+                  {t("suggestAlternateDefaultPrice")}
+                </label>
+              </div>
 
               {hasSuggestedPrice && (
                 <>
-                  <small>{t("suggestedPriceDescription")}</small>
-                  <small>{t("suggestedPriceDescriptionClarifier")}</small>
+                  <small id="hint-has-suggested-price">
+                    {t("suggestedPriceDescription")}
+                  </small>
+                  <small id="hint-has-suggested-price-clarifier">
+                    {t("suggestedPriceDescriptionClarifier")}
+                  </small>
                   <div
                     className={css`
                       display: flex;
@@ -377,7 +442,9 @@ const PriceAndSuch: React.FC<{
                       </div>
                     )}
                     <SavingInput
+                      ariaLabelledBy="label-has-suggested-price"
                       formKey="suggestedPrice"
+                      id="input-suggested-price"
                       type="number"
                       step="0.01"
                       min={0}
@@ -394,8 +461,8 @@ const PriceAndSuch: React.FC<{
                 flex-grow: 1;
               `}
             >
-              <label>{t("platformPercent")}</label>
               <PaymentSlider
+                label={t("platformPercent")}
                 url={`manage/trackGroups/${trackGroupId}`}
                 extraData={{ artistId: Number(artistId) }}
               />
@@ -405,9 +472,14 @@ const PriceAndSuch: React.FC<{
             </FormComponent>
           </div>
         )}
-        {existingObject && existingObject?.tracks?.length > 0 && (
-          <SetPriceOfAllTracks tracks={existingObject.tracks} reload={reload} />
-        )}
+        {existingObject &&
+          existingObject?.tracks?.length > 0 &&
+          selectedPricingMode !== "no-payments" && (
+            <SetPriceOfAllTracks
+              tracks={existingObject.tracks}
+              reload={reload}
+            />
+          )}
       </div>
     </FormSection>
   );

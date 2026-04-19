@@ -116,23 +116,35 @@ export default function () {
         "urlSlug",
       ]);
 
-      const allTrackGroups = await prisma.trackGroup.findMany({
-        where: {
-          artistId: Number(data.artistId),
-        },
+      const existingTrackGroup = await prisma.trackGroup.findFirst({
+        where: { id: Number(trackGroupId) },
       });
+
+      if (!existingTrackGroup) {
+        throw new AppError({
+          httpCode: 404,
+          description: "TrackGroup not found",
+        });
+      }
 
       if (
         newValues.urlSlug &&
-        allTrackGroups.some(
-          (tg) =>
-            tg.urlSlug === newValues.urlSlug && tg.id !== Number(trackGroupId)
-        )
+        newValues.urlSlug !== existingTrackGroup.urlSlug
       ) {
-        throw new AppError({
-          httpCode: 400,
-          description: "Can't re-use URL for existing album",
+        const slugConflict = await prisma.trackGroup.findFirst({
+          where: {
+            artistId: existingTrackGroup.artistId,
+            urlSlug: newValues.urlSlug,
+            id: { not: Number(trackGroupId) },
+            deletedAt: null,
+          },
         });
+        if (slugConflict) {
+          throw new AppError({
+            httpCode: 400,
+            description: "Can't re-use URL for existing album",
+          });
+        }
       }
 
       await prisma.trackGroup.updateMany({

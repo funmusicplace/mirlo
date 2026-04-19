@@ -201,8 +201,8 @@ const SubscriptionForm: React.FC<{
 
           {localExistingId && (
             <FormComponent className="grow backdrop-brightness-95 p-4">
-              <label>{t("platformPercent")}</label>
               <PaymentSlider
+                label={t("platformPercent")}
                 url={`manage/artists/${artistId}/subscriptionTiers/${localExistingId}`}
                 extraData={{ artistId: Number(artistId) }}
               />

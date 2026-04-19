@@ -17,6 +17,7 @@ import ScrollToTop from "components/ScrollToTop";
 import UserBanner from "components/common/UserBanner";
 import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 import FailedSubscriptionBanner from "components/common/FailedSubscriptionBanner";
+import ReloadPrompt from "components/common/ReloadPrompt";
 import UploadProgressPanel from "components/common/UploadProgressPanel";
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
           {isDisplayed && <Snackbar />}
 
           <Header />
+          <ReloadPrompt />
           <FailedSubscriptionBanner />
           <CookieDisclaimer />
           <div

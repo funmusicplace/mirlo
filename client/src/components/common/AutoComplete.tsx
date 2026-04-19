@@ -116,6 +116,7 @@ const AutoComplete: React.FC<{
   showBackground?: boolean;
   onEnter?: (val: string) => void;
   usesNavigation?: boolean;
+  id: string;
 }> = ({
   getOptions,
   resultsPrefix,
@@ -127,6 +128,7 @@ const AutoComplete: React.FC<{
   allowNew,
   showBackground,
   colors,
+  id,
 }) => {
   const [searchValue, setSearchValue] = React.useState("");
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
@@ -205,7 +207,7 @@ const AutoComplete: React.FC<{
         value={searchValue}
         placeholder={placeholder ?? ""}
         data-lpignore="true"
-        id="search"
+        id={id}
         type="search"
         onChange={onChangeValue}
         autoComplete="off"

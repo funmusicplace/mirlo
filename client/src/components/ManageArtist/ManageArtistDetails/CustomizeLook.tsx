@@ -344,8 +344,8 @@ export const CustomizeLook: React.FC = () => {
                   width: 300px;
                 `}
               >
-                <label>{t("defaultPlatformFee")}</label>
                 <PaymentSlider
+                  label={t("defaultPlatformFee")}
                   url={`manage/artists/${artist.id}`}
                   keyName="defaultPlatformFee"
                   extraData={{

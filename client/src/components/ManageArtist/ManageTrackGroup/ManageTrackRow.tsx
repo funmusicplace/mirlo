@@ -26,23 +26,31 @@ import Tooltip from "components/common/Tooltip";
 import ReplaceTrackAudioInput from "./AlbumFormComponents/ReplaceTrackAudioInput";
 
 const TrackRow = styled("tr")`
+  > td {
+    position: relative;
+  }
   > td > .play-button {
-    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
     svg {
       margin-left: 15%;
     }
   }
   > td > .track-number {
-    display: block;
+    opacity: 1;
     padding: 0.4rem;
     font-size: 0.9rem;
   }
-  &:hover > td > .play-button {
-    display: block;
+  &:hover > td > .play-button,
+  .play-button:focus-visible {
+    opacity: 1;
   }
 
   &:hover > td > .track-number {
-    display: none;
+    opacity: 0;
   }
 
   &:hover {

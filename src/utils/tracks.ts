@@ -74,9 +74,20 @@ export const convertAudioToFormat = (
     `audioId ${audioId}: metadata: ${JSON.stringify(content.track.metadata)}`
   );
 
-  const artists = (
-    content.track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? []
-  ).map((artist) => artist.artistName);
+  const sortedTrackArtists = (content.track.trackArtists ?? [])
+    .filter((artist) => artist.artistName)
+    .sort((a, b) => a.order - b.order);
+
+  const formatArtist = (artist: { artistName: string | null; role: string | null }) =>
+    artist.role ? `${artist.artistName} (${artist.role})` : `${artist.artistName}`;
+
+  const artists = sortedTrackArtists
+    .filter((artist) => artist.isCoAuthor)
+    .map(formatArtist);
+
+  const performers = sortedTrackArtists
+    .filter((artist) => !artist.isCoAuthor)
+    .map(formatArtist);
 
   let destination = generateDestination(format, goingTo, audioBitrate);
   logger.info(`audioId ${audioId}: destination: ${destination}`);
@@ -113,6 +124,13 @@ export const convertAudioToFormat = (
 
   if (artists.length) {
     processor.outputOptions("-metadata", `artist=${artists.join(", ")}`);
+  }
+
+  if (performers.length) {
+    processor.outputOptions(
+      "-metadata",
+      `performer=${performers.join(", ")}`
+    );
   }
 
   if (content.track.metadata) {

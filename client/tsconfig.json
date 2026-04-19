@@ -4,6 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "types": [
       "vite/client",
+      "vite-plugin-pwa/react",
       "@testing-library/jest-dom",
       "@testing-library/jest-dom/vitest"
     ],
