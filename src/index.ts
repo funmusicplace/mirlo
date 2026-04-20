@@ -141,6 +141,18 @@ app.use((req, res, next) => {
   next();
 });
 
+const LOW_NOISE_PROBE_PATHS = new Set([
+  "/.env",
+  "/.env.local",
+  "/.env.production",
+  "/.env-config.js",
+  "/.git/config",
+  "/.git/HEAD",
+  "/.aws/credentials",
+  "/wp-login.php",
+  "/wp-admin",
+]);
+
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", async (req, res, next) => {
   if (!res.headersSent) {
@@ -187,6 +199,8 @@ app.use("/", async (req, res, next) => {
           // Treat this as expected noise instead of an application error.
           if (req.path.startsWith("/assets/")) {
             logger.info(`asset not found: ${req.path}`);
+          } else if (LOW_NOISE_PROBE_PATHS.has(req.path)) {
+            logger.info(`probe path not found: ${req.path}`);
           }
           if (!res.headersSent) {
             res.sendStatus(404);
