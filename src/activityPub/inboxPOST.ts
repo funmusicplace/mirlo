@@ -61,7 +61,31 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    await verifySignature(req, signatureHeader);
+    // Check for valid activity structure first
+    if (!req.body.actor || !req.body.type) {
+      throw new AppError({
+        httpCode: 400,
+        description: "Not a valid Activity",
+      });
+    }
+
+    // Verify signature, but allow Delete activities if verification fails due to Gone (410)
+    try {
+      await verifySignature(req, signatureHeader);
+    } catch (e) {
+      // Allow Delete activities from gone accounts (410 status)
+      if (
+        req.body.type === "Delete" &&
+        e instanceof AppError &&
+        e.description?.includes("Gone")
+      ) {
+        log.info(
+          `Allowing Delete activity from gone account: ${req.body.actor}`
+        );
+      } else {
+        throw e;
+      }
+    }
 
     const parsedId = await findArtistIdForURLSlug(id);
 
@@ -74,12 +98,6 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       throw new AppError({
         httpCode: 404,
         description: "Artist not found, must use urlSlug",
-      });
-    }
-    if (!req.body.actor || !req.body.type) {
-      throw new AppError({
-        httpCode: 400,
-        description: "Not a valid Activity",
       });
     }
 
