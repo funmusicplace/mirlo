@@ -3,9 +3,7 @@ import assert from "assert";
 import sinon from "sinon";
 import { Readable } from "stream";
 import { Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
-import * as ffmpegModule from "fluent-ffmpeg";
-import * as fsModule from "fs";
-import { convertAudioToFormat } from "../../src/utils/tracks";
+import * as tracksUtils from "../../src/utils/tracks";
 
 type OutputOptionCall = [string, string?];
 
@@ -99,8 +97,10 @@ describe("utils/tracks.convertAudioToFormat", () => {
 
   it("adds id3 metadata, lyrics, genre, and role-based artist tags", () => {
     const command = new FakeFfmpegCommand();
-    sinon.stub(ffmpegModule, "default").returns(command as any);
-    sinon.stub(fsModule, "existsSync").returns(false);
+    sinon
+      .stub(tracksUtils, "createFfmpegCommand")
+      .returns(command as unknown as any);
+    sinon.stub(tracksUtils, "fileExists").returns(false);
 
     const track = createTrackWithAudio({
       trackArtists: [
@@ -115,7 +115,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
       ],
     });
 
-    convertAudioToFormat(
+    tracksUtils.convertAudioToFormat(
       {
         track,
         artist: { name: "Album Artist" } as any,
@@ -169,10 +169,12 @@ describe("utils/tracks.convertAudioToFormat", () => {
 
   it("attaches cover art for mp3 when a cover file exists", () => {
     const command = new FakeFfmpegCommand();
-    sinon.stub(ffmpegModule, "default").returns(command as any);
-    sinon.stub(fsModule, "existsSync").returns(true);
+    sinon
+      .stub(tracksUtils, "createFfmpegCommand")
+      .returns(command as unknown as any);
+    sinon.stub(tracksUtils, "fileExists").returns(true);
 
-    convertAudioToFormat(
+    tracksUtils.convertAudioToFormat(
       {
         track: createTrackWithAudio(),
         artist: { name: "Album Artist" } as any,
@@ -211,10 +213,12 @@ describe("utils/tracks.convertAudioToFormat", () => {
 
   it("does not try to attach cover art for non-mp3 outputs", () => {
     const command = new FakeFfmpegCommand();
-    sinon.stub(ffmpegModule, "default").returns(command as any);
-    sinon.stub(fsModule, "existsSync").returns(true);
+    sinon
+      .stub(tracksUtils, "createFfmpegCommand")
+      .returns(command as unknown as any);
+    sinon.stub(tracksUtils, "fileExists").returns(true);
 
-    convertAudioToFormat(
+    tracksUtils.convertAudioToFormat(
       {
         track: createTrackWithAudio(),
         artist: { name: "Album Artist" } as any,

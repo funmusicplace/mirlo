@@ -4,6 +4,7 @@ import { promises as fsPromises } from "fs";
 import os from "os";
 import path from "path";
 import { parseFile } from "music-metadata";
+import { ITag } from "music-metadata/lib/type";
 import { Artist, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
 import { convertAudioToFormat } from "../../src/utils/tracks";
 
@@ -38,8 +39,8 @@ const createSilentWavBuffer = (durationSeconds = 0.5) => {
   return wav;
 };
 
-const tinyJpegBase64 =
-  "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQEBUQEBAVFRUVFRUVFRUVFRUVFRUXFxUXFhUVFRUYHSggGBolHRUVITEhJSkrLi4uFx8zODMsNygtLisBCgoKDg0OFxAQGi0fHSUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAAEAAQMBIgACEQEDEQH/xAAXAAADAQAAAAAAAAAAAAAAAAAAAQID/8QAFhABAQEAAAAAAAAAAAAAAAAAAAEC/9oADAMBAAIQAxAAAAG8mQf/xAAYEAADAQEAAAAAAAAAAAAAAAABAgMABP/aAAgBAQABBQKdbJH/xAAVEQEBAAAAAAAAAAAAAAAAAAABAP/aAAgBAwEBPwEf/8QAFREBAQAAAAAAAAAAAAAAAAAAARD/2gAIAQIBAT8BH//EABgQAAMBAQAAAAAAAAAAAAAAAAABEQIh/9oACAEBAAY/ArKSf//EABkQAAMBAQEAAAAAAAAAAAAAAAABERAhMf/aAAgBAQABPyHNMmVxR2mO9f/aAAwDAQACAAMAAAAQ8//EABYRAQEBAAAAAAAAAAAAAAAAAAARAf/aAAgBAwEBPxBf/8QAFhEBAQEAAAAAAAAAAAAAAAAAABEB/9oACAECAQE/EEf/xAAcEAEAAgIDAQAAAAAAAAAAAAABABEhMUFhcaH/2gAIAQEAAT8Q6BfWmCYn2YI8Wn2t6S2wQ5rX/9k=";
+const tinyPngBase64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Zx4kAAAAASUVORK5CYII=";
 
 const createTrackArtist = (overrides?: Partial<TrackArtist>): TrackArtist => {
   return {
@@ -119,6 +120,34 @@ const convertAudio = async ({
   });
 };
 
+const containsLyricsText = (value: unknown, expected: string): boolean => {
+  if (typeof value === "string") {
+    return value.includes(expected);
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((entry) => containsLyricsText(entry, expected));
+  }
+
+  if (value && typeof value === "object") {
+    const maybeText = (value as { text?: unknown }).text;
+    if (typeof maybeText === "string") {
+      return maybeText.includes(expected);
+    }
+  }
+
+  return false;
+};
+
+const hasLyricsInNativeTags = (
+  nativeTags: Record<string, ITag[]>,
+  expected: string
+): boolean => {
+  return Object.values(nativeTags)
+    .flat()
+    .some((tag) => containsLyricsText(tag.value, expected));
+};
+
 describeIf("utils/tracks integration (real ffmpeg)", function () {
   this.timeout(20000);
 
@@ -137,12 +166,12 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
     );
 
     const inputWav = path.join(tempDir, "input.wav");
-    const coverJpg = path.join(tempDir, "cover.jpg");
+    const coverPng = path.join(tempDir, "cover.png");
     const outputBase = path.join(tempDir, "output");
     const outputMp3 = `${outputBase}.mp3`;
 
     await fsPromises.writeFile(inputWav, createSilentWavBuffer());
-    await fsPromises.writeFile(coverJpg, Buffer.from(tinyJpegBase64, "base64"));
+    await fsPromises.writeFile(coverPng, Buffer.from(tinyPngBase64, "base64"));
 
     await convertAudio({
       track: createTrack("audio-integration-1", [
@@ -158,7 +187,7 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
       artist: { name: "Album Artist" } as Artist,
       trackGroup: {
         title: "Integration Album",
-        coverLocation: coverJpg,
+        coverLocation: coverPng,
       },
       inputFile: inputWav,
       outputBasename: outputBase,
@@ -171,8 +200,12 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
     assert.equal(parsed.common.albumartist, "Album Artist");
     assert.equal(parsed.common.artist, "Lead Artist");
     assert.deepEqual(parsed.common.genre, ["Experimental"]);
+    const expectedLyrics = "Integration test lyrics";
+    const hasCommonLyrics = (parsed.common.lyrics ?? []).some((lyrics) =>
+      lyrics.includes(expectedLyrics)
+    );
     assert.ok(
-      (parsed.common.lyrics ?? []).includes("Integration test lyrics"),
+      hasCommonLyrics || hasLyricsInNativeTags(parsed.native, expectedLyrics),
       "expected lyrics to be present"
     );
     assert.ok(

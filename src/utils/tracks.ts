@@ -89,15 +89,17 @@ const addTrackMetadataTags = (
   };
   const common = trackMetadata.common ?? {};
 
+  const lyricsValue =
+    track.lyrics ?? common.lyrics ?? common.unsynchronisedLyrics;
+
   addMetadataTag(processor, "title", track.title);
   addMetadataTag(processor, "album", trackGroupTitle);
   addMetadataTag(processor, "album_artist", albumArtistName);
   addMetadataTag(processor, "track", track.order);
-  addMetadataTag(
-    processor,
-    "lyrics",
-    track.lyrics ?? common.lyrics ?? common.unsynchronisedLyrics
-  );
+  addMetadataTag(processor, "lyrics", lyricsValue);
+  // Different ffmpeg/id3 readers expose lyrics via different frame mappings.
+  addMetadataTag(processor, "unsynchronised_lyrics", lyricsValue);
+  addMetadataTag(processor, "USLT", lyricsValue);
 
   // Preserve common ID3-like metadata fields that often come from uploaded files.
   addMetadataTag(processor, "genre", common.genre);
@@ -191,42 +193,22 @@ export const convertAudioToFormat = (
     `audioId ${audioId}: metadata: ${JSON.stringify(content.track.metadata)}`
   );
 
-  const sortedTrackArtists = (content.track.trackArtists ?? [])
-    .filter((artist) => artist.artistName)
-    .sort((a, b) => a.order - b.order);
-
-  const formatArtist = (artist: {
-    artistName: string | null;
-    role: string | null;
-  }) =>
-    artist.role
-      ? `${artist.artistName} (${artist.role})`
-      : `${artist.artistName}`;
-
-  const artists = sortedTrackArtists
-    .filter((artist) => artist.isCoAuthor)
-    .map(formatArtist);
-
-  const performers = sortedTrackArtists
-    .filter((artist) => !artist.isCoAuthor)
-    .map(formatArtist);
-
   let destination = generateDestination(format, goingTo, audioBitrate);
   logger.info(`audioId ${audioId}: destination: ${destination}`);
 
   const hasCoverArtForMp3 =
     format === "mp3" &&
     !!content.trackGroup.coverLocation &&
-    existsSync(content.trackGroup.coverLocation);
+    fileExists(content.trackGroup.coverLocation);
 
-  const processor = ffmpeg(stream)
+  const processor = createFfmpegCommand(stream)
     .toFormat(format)
     // FIXME why don't these work?
     // .outputOptions("-map_metadata:s:a", "0:s:a")
     // .outputOption("-map_metadata:s:a 0:s:a")
     // .outputOptions("-map_metadata 0:s")
     .outputOptions("-charset", "UTF-8")
-    .outputOptions("-id3v2_version 3")
+    .outputOptions("-id3v2_version", "3")
     .on("stderr", function (stderrLine) {
       // logger.info("Stderr output: " + stderrLine);
       // onError?.(stderrLine);
@@ -260,10 +242,6 @@ export const convertAudioToFormat = (
     content.artist.name
   );
 
-  if (artists.length) {
-    addMetadataTag(processor, "artist", artists.join(", "));
-  }
-
   if (content.track.metadata) {
     processor.outputOptions(
       "-metadata",
@@ -291,6 +269,10 @@ export const convertAudioToFormat = (
 
   processor.save(destination);
 };
+
+export const createFfmpegCommand = (stream: Readable) => ffmpeg(stream);
+
+export const fileExists = (filePath: string) => existsSync(filePath);
 
 export const updateTrackArtists = async (
   trackId: number,
