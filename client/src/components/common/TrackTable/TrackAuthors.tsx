@@ -16,7 +16,12 @@ const AuthorName: React.FC<{
 
   if (artist.role) {
     return (
-      <Tooltip hoverText={artist.role} underline={false}>
+      <Tooltip
+        position="right"
+        hoverText={artist.role}
+        underline={false}
+        compact
+      >
         {content}
       </Tooltip>
     );
