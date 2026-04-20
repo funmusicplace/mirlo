@@ -52,9 +52,31 @@ sendPostNotificationQueueEvents.on(
   }
 );
 
-sendPostNotificationQueueEvents.on("failed", async (result: any) => {
-  logger.error(`jobId ${result.jobId} failed:`, result.failedReason);
-});
+sendPostNotificationQueueEvents.on(
+  "failed",
+  async (result: { jobId: string; failedReason?: string; prev?: string }) => {
+    try {
+      const job = await sendPostNotificationQueue.getJob(result.jobId);
+      const failedReason =
+        result.failedReason || job?.failedReason || "unknown";
+      const latestStack = job?.stacktrace?.[job.stacktrace.length - 1];
+
+      logger.error("send-post-notification job failed", {
+        jobId: result.jobId,
+        previousState: result.prev,
+        failedReason,
+        attemptsMade: job?.attemptsMade,
+        configuredAttempts: job?.opts?.attempts,
+        stack: latestStack,
+      });
+    } catch (error) {
+      logger.error("send-post-notification failed-event handling error", {
+        jobId: result.jobId,
+        ...getSafeErrorContext(error),
+      });
+    }
+  }
+);
 
 sendPostNotificationQueueEvents.on("error", async (error) => {
   logger.error(
