@@ -21,6 +21,7 @@ import {
 import prisma from "@mirlo/prisma";
 import { APIContext } from "../utils/file";
 import { logger } from "../jobs/queue-worker";
+import { AppError, HttpCode } from "../utils/error";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -81,6 +82,18 @@ const getLargestVariant = (
       return variantArea > currentArea ? variant : current;
     },
     {}
+  );
+};
+
+const isUnsupportedImageCodecError = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  const normalized = message.toLowerCase();
+
+  return (
+    normalized.includes("heif") ||
+    normalized.includes("heic") ||
+    normalized.includes("compression format has not been built in") ||
+    normalized.includes("unsupported image format")
   );
 };
 
@@ -173,7 +186,22 @@ export const uploadAndSendToImageQueue = async (
           contentType: fileInfo.mimeType || "application/octet-stream",
         });
       } catch (e) {
-        logger.error("There was an error uploading to storage");
+        const message = e instanceof Error ? e.message : String(e);
+
+        logger.error("There was an error uploading to storage", {
+          mimeType: fileInfo.mimeType,
+          filename: fileInfo.filename,
+          message,
+        });
+
+        if (isUnsupportedImageCodecError(e)) {
+          throw new AppError({
+            httpCode: HttpCode.NOT_ACCEPTABLE,
+            description:
+              "Unsupported image format. Please upload a JPEG, PNG, GIF, or WebP image.",
+          });
+        }
+
         throw e;
       }
 
