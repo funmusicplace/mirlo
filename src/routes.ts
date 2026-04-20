@@ -105,6 +105,7 @@ const routes = [
   "manage/downloadableContent",
   "manage/downloadableContent/{contentId}",
   "manage/trackGroups/{trackGroupId}",
+  "manage/trackGroups/{trackGroupId}/tracks",
   "manage/trackGroups/{trackGroupId}/trackOrder",
   "manage/trackGroups/{trackGroupId}/publish",
   "manage/trackGroups/{trackGroupId}/tags",

@@ -33,14 +33,10 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
 
   const handleSetAllTracksPreview = async (isPreview: boolean) => {
     try {
-      await Promise.all(
-        (trackGroup.tracks ?? []).map((track) =>
-          api.put(`manage/tracks/${track.id}`, { isPreview })
-        )
+      await api.put<{ isPreview: boolean }, { result: TrackGroup }>(
+        `manage/trackGroups/${trackGroup.id}/tracks`,
+        { isPreview }
       );
-      await api.put(`manage/trackGroups/${trackGroup.id}`, {
-        defaultIsPreview: isPreview,
-      });
       snackbar(t("updatedAllTracks"), { type: "success" });
       reload();
     } catch (e) {
