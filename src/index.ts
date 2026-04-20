@@ -23,6 +23,7 @@ import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
 import qs from "qs";
 import { getSiteSettings } from "./utils/settings";
+import { sanitizeHeadersForLogs } from "./utils/requestLogging";
 
 dotenv.config();
 
@@ -132,12 +133,25 @@ app.use((req, res, next) => {
     !req.path.startsWith("/fonts/")
   ) {
     // Don't log requests to static assets
+    const sanitizedHeaders = sanitizeHeadersForLogs(req.headers);
     logger.info(
-      `front-end request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.headers)}`
+      `front-end request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(sanitizedHeaders)}`
     );
   }
   next();
 });
+
+const LOW_NOISE_PROBE_PATHS = new Set([
+  "/.env",
+  "/.env.local",
+  "/.env.production",
+  "/.env-config.js",
+  "/.git/config",
+  "/.git/HEAD",
+  "/.aws/credentials",
+  "/wp-login.php",
+  "/wp-admin",
+]);
 
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", async (req, res, next) => {
@@ -185,6 +199,8 @@ app.use("/", async (req, res, next) => {
           // Treat this as expected noise instead of an application error.
           if (req.path.startsWith("/assets/")) {
             logger.info(`asset not found: ${req.path}`);
+          } else if (LOW_NOISE_PROBE_PATHS.has(req.path)) {
+            logger.info(`probe path not found: ${req.path}`);
           }
           if (!res.headersSent) {
             res.sendStatus(404);

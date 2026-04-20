@@ -18,6 +18,13 @@ async function createTransport(): Promise<Transporter> {
     const settings = await getSiteSettings();
     const emailSettings = settings.settings?.emailProvider;
 
+    if (process.env.NODE_ENV === "test") {
+      logger.info("Creating JSON transport for tests");
+      return nodemailer.createTransport({
+        jsonTransport: true,
+      });
+    }
+
     if (process.env.NODE_ENV !== "production") {
       logger.info("Creating MailHog transport");
       return nodemailer.createTransport({
@@ -101,6 +108,88 @@ function isValidEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
+type RecipientValue = string | Mail.Address;
+
+const splitRecipientString = (value: string): string[] =>
+  value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+const recipientToEmail = (recipient: RecipientValue): string | null => {
+  if (typeof recipient === "string") {
+    const match = recipient.match(/<\s*([^>]+)\s*>/);
+    const email = (match?.[1] ?? recipient).trim().toLowerCase();
+    return isValidEmail(email) ? email : null;
+  }
+
+  const email = recipient.address?.trim().toLowerCase();
+  return email && isValidEmail(email) ? email : null;
+};
+
+const normalizeRecipients = (
+  recipients?: Mail.Address | string | Array<Mail.Address | string>
+): RecipientValue[] => {
+  if (!recipients) {
+    return [];
+  }
+
+  const values = Array.isArray(recipients) ? recipients : [recipients];
+  return values.reduce<RecipientValue[]>((acc, value) => {
+    if (typeof value === "string") {
+      acc.push(...splitRecipientString(value));
+    } else {
+      acc.push(value);
+    }
+
+    return acc;
+  }, []);
+};
+
+const dedupeRecipients = (message: Mail.Options): Mail.Options => {
+  const uniqueEmails = new Set<string>();
+  const nextMessage: Mail.Options = { ...message };
+  const recipientFields: Array<"to" | "cc" | "bcc"> = ["to", "cc", "bcc"];
+  let removedRecipients = 0;
+
+  for (const field of recipientFields) {
+    const recipients = normalizeRecipients(message[field]);
+    const uniqueRecipients: RecipientValue[] = [];
+
+    for (const recipient of recipients) {
+      const email = recipientToEmail(recipient);
+      if (!email) {
+        uniqueRecipients.push(recipient);
+        continue;
+      }
+
+      if (uniqueEmails.has(email)) {
+        removedRecipients += 1;
+        continue;
+      }
+
+      uniqueEmails.add(email);
+      uniqueRecipients.push(recipient);
+    }
+
+    if (uniqueRecipients.length === 0) {
+      delete nextMessage[field];
+    } else if (uniqueRecipients.length === 1) {
+      nextMessage[field] = uniqueRecipients[0];
+    } else {
+      nextMessage[field] = uniqueRecipients;
+    }
+  }
+
+  if (removedRecipients > 0) {
+    logger.warn(
+      `Removed ${removedRecipients} duplicate email recipient(s) for SendGrid compatibility`
+    );
+  }
+
+  return nextMessage;
+};
+
 /**
  * Gets the 'from' email address from settings
  */
@@ -140,6 +229,7 @@ export const sendMail = async <T>(job: {
   try {
     const transport = await createTransport();
     const fromEmail = await getFromEmail();
+    const message = dedupeRecipients(job.data.message);
 
     const email = new Email({
       message: {
@@ -160,7 +250,7 @@ export const sendMail = async <T>(job: {
     if (process.env.NODE_ENV === "production" || process.env.MAILHOG_PORT) {
       await email.send({
         template: job.data.template,
-        message: job.data.message,
+        message,
         locals: job.data.locals,
       });
     } else {

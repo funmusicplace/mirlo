@@ -37,7 +37,15 @@ audioQueueEvents.on(
     try {
       const job = await audioQueue.getJob(result.jobId);
       if (result.returnvalue.error) {
-        console.error("There was an error processing the job");
+        logger.error(
+          `Job ${result.jobId} completed with error: ${JSON.stringify(result.returnvalue.error)}`
+        );
+        if (job) {
+          await prisma.trackAudio.update({
+            where: { id: job.data.audioId },
+            data: { uploadState: "ERROR" },
+          });
+        }
       } else if (job) {
         const audio = await prisma.trackAudio.update({
           where: {
@@ -88,8 +96,30 @@ audioQueueEvents.on("stalled", async (result: { jobId: string }) => {
   }
 });
 
-audioQueueEvents.on("error", async (error) => {
-  logger.error(`jobId ${JSON.stringify(error)} had an error`);
+audioQueueEvents.on(
+  "failed",
+  async (result: { jobId: string; failedReason: string }) => {
+    logger.error(`jobId ${result.jobId} failed: ${result.failedReason}`);
+
+    try {
+      const job = await audioQueue.getJob(result.jobId);
+      if (job) {
+        await prisma.trackAudio.update({
+          where: { id: job.data.audioId },
+          data: { uploadState: "ERROR" },
+        });
+        logger.info(
+          `audioId: ${job.data.audioId} marked as ERROR after job failure`
+        );
+      }
+    } catch (err) {
+      logger.error(`audioQueueEvents.failed ${JSON.stringify(err)}`);
+    }
+  }
+);
+
+audioQueueEvents.on("error", (error) => {
+  logger.error(`audio queue error: ${JSON.stringify(error)}`);
 });
 
 export const startAudioQueueForTrack = async (trackId: number) => {

@@ -65,7 +65,7 @@ const downloadTracks = async ({
   artist,
 }: {
   tracks: (Track & { audio?: TrackAudio; trackArtists: TrackArtist[] })[];
-  trackGroup: { title: string | null };
+  trackGroup: { title: string | null; coverLocation?: string };
   progress: number;
   job: Job;
   tempFolder: string;
@@ -266,6 +266,8 @@ const downloadCover = async ({
   coverId?: string;
   coverDestination: string;
 }) => {
+  let chosenCoverLocation: string | undefined;
+
   if (coverId) {
     logger.info(`downloadCover: ${coverId}: Adding cover`);
 
@@ -276,6 +278,7 @@ const downloadCover = async ({
       );
       if (buffer) {
         await fsPromises.writeFile(coverDestination, buffer);
+        chosenCoverLocation = coverDestination;
       }
     } catch (e) {
       logger.error(
@@ -289,10 +292,10 @@ const downloadCover = async ({
         `${coverId}-x1500.jpg`
       );
       if (buffer2) {
-        await fsPromises.writeFile(
-          coverDestination.replace(".webp", ".jpg"),
-          buffer2
-        );
+        const jpgDestination = coverDestination.replace(".webp", ".jpg");
+        await fsPromises.writeFile(jpgDestination, buffer2);
+        // Prefer jpg for ffmpeg attached_pic compatibility.
+        chosenCoverLocation = jpgDestination;
       }
     } catch (e) {
       logger.error(
@@ -300,6 +303,8 @@ const downloadCover = async ({
       );
     }
   }
+
+  return chosenCoverLocation;
 };
 
 const downloadAndZipTracks = async ({
@@ -340,22 +345,25 @@ const downloadAndZipTracks = async ({
     }
     logger.info(`Have folder locally ${tempFolder}`);
 
+    const coverLocation = await downloadCover({
+      coverId: trackGroup.cover.id,
+      coverDestination,
+    });
+
     await downloadTracks({
       tracks: tracks,
       progress,
       job,
       tempFolder,
       format,
-      trackGroup,
+      trackGroup: {
+        title: trackGroup.title,
+        coverLocation,
+      },
       artist,
     });
 
     logger.info(`Downloaded tracks ${tempFolder}`);
-
-    await downloadCover({
-      coverId: trackGroup.cover.id,
-      coverDestination,
-    });
 
     await downloadTrackGroupContent({
       trackGroupId: trackGroup.id,

@@ -16,6 +16,16 @@ To clean up these containers afterwards, the `--profile=test` argument needs to 
 docker compose --profile=test down
 ```
 
+## ffmpeg integration tests
+
+Some tests (for example [test/utils/tracks.integration.spec.ts](test/utils/tracks.integration.spec.ts)) run real audio conversion and run by default.
+
+If you need to skip them temporarily:
+
+```bash
+SKIP_FFMPEG_INTEGRATION_TESTS=1 yarn api:test
+```
+
 ## Cypress tests
 
 See the `client/cypress` folder.
