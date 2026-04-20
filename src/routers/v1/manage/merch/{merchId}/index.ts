@@ -73,6 +73,7 @@ export default function () {
         "includePurchaseTrackGroupId",
         "urlSlug",
         "catalogNumber",
+        "platformPercent",
       ]);
       const merch = await prisma.merch.findFirst({
         where: {

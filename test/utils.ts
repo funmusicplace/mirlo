@@ -36,6 +36,7 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "TrackGroup";`;
   await prisma.$executeRaw`DELETE FROM "ArtistBackground";`;
   await prisma.$executeRaw`DELETE FROM "UserArtistTip";`;
+  await prisma.$executeRaw`DELETE FROM "ArtistTipTier";`;
   await prisma.$executeRaw`DELETE FROM "ArtistAvatar";`;
   await prisma.$executeRaw`DELETE FROM "ArtistUserSubscriptionConfirmation";`;
   await prisma.$executeRaw`DELETE FROM "Artist";`;

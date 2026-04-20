@@ -90,6 +90,21 @@ describe("manage/merch/{merchId}", () => {
       );
     });
 
+    it("should allow updating platformPercent", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const merch = await createMerch(artist.id, {});
+
+      const response = await requestApp
+        .put(`manage/merch/${merch.id}`)
+        .send({ platformPercent: 12 })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.platformPercent, 12);
+    });
+
     it("should reject linking a track group that does not belong to the user", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);

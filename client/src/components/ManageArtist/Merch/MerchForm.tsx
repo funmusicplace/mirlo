@@ -6,6 +6,7 @@ import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import useErrorHandler from "services/useErrorHandler";
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
+import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import FormComponent from "components/common/FormComponent";
 import { css } from "@emotion/css";
 import FormError from "components/common/FormError";
@@ -33,6 +34,7 @@ const MerchForm: React.FC<{
     minPrice: string;
     quantityRemaining: number;
     catalogNumber: string;
+    platformPercent: number;
   }>();
   const {
     handleSubmit,
@@ -153,6 +155,12 @@ const MerchForm: React.FC<{
           {errors.catalogNumber && (
             <FormError>{t("catalogNumberInvalid")}</FormError>
           )}
+        </FormComponent>
+        <FormComponent>
+          <PaymentSlider
+            label={t("platformPercent")}
+            url={`manage/merch/${merch.id}`}
+          />
         </FormComponent>
         <SelectTrackGroup merch={merch} reload={reload} />
         <DownloadableContent item={merch} reload={reload} itemType="merch" />

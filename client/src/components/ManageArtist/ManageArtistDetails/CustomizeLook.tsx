@@ -3,6 +3,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { bp } from "../../../constants";
 import FormComponent from "components/common/FormComponent";
 import { css } from "@emotion/css";
+import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import UploadArtistImage from "../UploadArtistImage";
 import { useTranslation } from "react-i18next";
@@ -353,6 +354,7 @@ export const CustomizeLook: React.FC = () => {
                   }}
                 />
                 <small>{t("defaultPlatformFeeDescription")}</small>
+                <ApplyPlatformFeeButton artistId={artist.id} />
               </FormComponent>
               <FormComponent
                 className={css`
@@ -414,6 +416,48 @@ export const CustomizeLook: React.FC = () => {
 
       {!artist.isLabelProfile && <DeleteArtist />}
     </div>
+  );
+};
+
+const ApplyPlatformFeeButton: React.FC<{ artistId: number }> = ({
+  artistId,
+}) => {
+  const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
+  const snackbar = useSnackbar();
+  const [isPending, setIsPending] = React.useState(false);
+
+  const onClick = React.useCallback(async () => {
+    if (!window.confirm(t("applyPlatformFeeConfirm") ?? "")) {
+      return;
+    }
+    try {
+      setIsPending(true);
+      await api.post<unknown, unknown>(
+        `manage/artists/${artistId}/applyPlatformFee`,
+        {}
+      );
+      snackbar(t("applyPlatformFeeSuccess"), { type: "success" });
+    } catch (e) {
+      console.error(e);
+      snackbar(t("applyPlatformFeeError"), { type: "warning" });
+    } finally {
+      setIsPending(false);
+    }
+  }, [artistId, snackbar, t]);
+
+  return (
+    <ArtistButton
+      type="button"
+      variant="dashed"
+      onClick={onClick}
+      disabled={isPending}
+      isLoading={isPending}
+      className={css`
+        margin-top: 0.5rem;
+      `}
+    >
+      {t("applyPlatformFeeToAll")}
+    </ArtistButton>
   );
 };
 
