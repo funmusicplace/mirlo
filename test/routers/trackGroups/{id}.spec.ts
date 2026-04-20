@@ -120,27 +120,27 @@ describe("trackGroups/{id}", () => {
           {
             title: "Track 1",
             isPreview: true,
+            order: 1,
             audio: { create: { uploadState: "SUCCESS" } },
           },
           {
             title: "Track 2",
             isPreview: false,
+            order: 2,
             audio: { create: { uploadState: "SUCCESS" } },
           },
         ],
       });
 
-      const tracks = await prisma.track.findMany({
-        where: { trackGroupId: trackGroup.id },
-        orderBy: { order: "asc" },
+      const previewTrack = await prisma.track.findFirstOrThrow({
+        where: { trackGroupId: trackGroup.id, title: "Track 1" },
       });
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
       });
 
-      // Only purchase the first track
-      await createUserTrackPurchase(purchaser.id, tracks[0].id);
+      await createUserTrackPurchase(purchaser.id, previewTrack.id);
 
       const response = await requestApp
         .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
@@ -149,7 +149,9 @@ describe("trackGroups/{id}", () => {
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.tracks.length, 2);
+      assert.equal(response.body.result.tracks[0].title, "Track 1");
       assert.equal(response.body.result.tracks[0].isPlayable, true);
+      assert.equal(response.body.result.tracks[1].title, "Track 2");
       assert.equal(response.body.result.tracks[1].isPlayable, false);
     });
   });
