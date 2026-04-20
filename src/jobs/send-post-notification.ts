@@ -6,6 +6,34 @@ import { processSinglePost } from "../utils/post";
 import { flatten, uniqBy } from "lodash";
 import { getClient } from "../activityPub/utils";
 
+const getSafeErrorContext = (error: unknown) => {
+  if (error instanceof Error) {
+    const errorWithExtras = error as Error & {
+      code?: string;
+      command?: { name?: string; args?: unknown[] };
+    };
+
+    return {
+      name: errorWithExtras.name,
+      message: errorWithExtras.message,
+      code: errorWithExtras.code,
+      stack: errorWithExtras.stack?.split("\n").slice(0, 8).join("\n"),
+      command: errorWithExtras.command
+        ? {
+            name: errorWithExtras.command.name,
+            argsCount: Array.isArray(errorWithExtras.command.args)
+              ? errorWithExtras.command.args.length
+              : undefined,
+          }
+        : undefined,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
+};
+
 /**
  * Job processor: Sends notification emails when a post is published
  * Handles the complete flow: creates notifications + queues emails
@@ -21,6 +49,12 @@ export default async function sendPostNotification(job: {
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
+        featuredImage: {
+          select: {
+            id: true,
+            extension: true,
+          },
+        },
         artist: {
           include: {
             subscriptionTiers: {
@@ -117,9 +151,18 @@ export default async function sendPostNotification(job: {
         `sendPostNotification: queueing ${notificationsToEmail.length} email(s) for post ${postId}`
       );
 
+      const htmlContent = await parseOutIframes(post.content || "");
+
       // Queue emails for all notifications
       for (const notification of notificationsToEmail) {
-        const htmlContent = await parseOutIframes(post.content || "");
+        const postForEmail = processSinglePost({
+          id: post.id,
+          title: post.title,
+          urlSlug: post.urlSlug,
+          featuredImage: post.featuredImage,
+          content: post.content,
+          isPublic: post.isPublic,
+        });
 
         await sendMailQueue.add("send-mail", {
           template: "announce-post-published",
@@ -127,9 +170,13 @@ export default async function sendPostNotification(job: {
             to: notification.user?.email,
           },
           locals: {
-            artist: post.artist,
+            artist: {
+              id: post.artist?.id,
+              name: post.artist?.name,
+              urlSlug: post.artist?.urlSlug,
+            },
             post: {
-              ...processSinglePost(post),
+              ...postForEmail,
               htmlContent,
             },
             email: encodeURIComponent(notification.user?.email || ""),
@@ -149,8 +196,10 @@ export default async function sendPostNotification(job: {
 
     logger.info(`sendPostNotification: completed for post ${postId}`);
   } catch (error) {
-    logger.error(`sendPostNotification: error processing post ${postId}`);
-    logger.error(error);
+    logger.error(`sendPostNotification: error processing post ${postId}`, {
+      postId,
+      ...getSafeErrorContext(error),
+    });
     // Re-throw to let BullMQ handle retry logic
     throw error;
   }
