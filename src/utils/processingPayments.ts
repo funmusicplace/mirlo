@@ -8,7 +8,7 @@ export const calculatePlatformPercent = async (
   if (currency.toLowerCase() === "brl" || currency.toLowerCase() === "mxn") {
     return 0;
   }
-  return (percent ?? settings.platformPercent ?? 7) / 100;
+  return percent ?? settings.platformPercent ?? 7;
 };
 
 export const castToFixed = (val: number) => {
@@ -25,6 +25,10 @@ export const calculateAppFee = async (
     platformPercent
   );
 
-  const appFee = castToFixed(price * calculatedPlatformPercent);
-  return appFee || 0;
+  if (calculatedPlatformPercent <= 0) {
+    return 0;
+  }
+
+  // Use integer cent math to avoid floating-point leakage into fee amounts.
+  return Math.round((price * calculatedPlatformPercent) / 100);
 };

@@ -748,6 +748,10 @@ export const createCheckoutSessionForSubscription = async ({
     tier.artistId,
     stripeAccount.default_currency
   );
+  const platformPercent = await calculatePlatformPercent(
+    currency,
+    tier.platformPercent
+  );
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -758,12 +762,12 @@ export const createCheckoutSessionForSubscription = async ({
           }
         : undefined,
       customer_email: loggedInUser?.email || email,
-      subscription_data: {
-        application_fee_percent: await calculatePlatformPercent(
-          currency,
-          tier.platformPercent
-        ),
-      },
+      subscription_data:
+        platformPercent > 0
+          ? {
+              application_fee_percent: platformPercent,
+            }
+          : undefined,
       line_items: [
         {
           price_data: {
