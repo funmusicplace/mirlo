@@ -118,6 +118,9 @@ const DownloadableContent: React.FC<{
         >
           {c.downloadableContent.originalFilename}
           <ArtistButtonAnchor
+            aria-label={t("downloadDownloadableContentItem", {
+              filename: c.downloadableContent.originalFilename,
+            })}
             startIcon={<FaDownload />}
             variant="dashed"
             href={c.downloadableContent.downloadUrl as string}
@@ -125,6 +128,9 @@ const DownloadableContent: React.FC<{
             target="_blank"
           />
           <ArtistButton
+            aria-label={t("removeDownloadableContentItem", {
+              filename: c.downloadableContent.originalFilename,
+            })}
             startIcon={<FaTimes />}
             variant="dashed"
             onClick={() => {

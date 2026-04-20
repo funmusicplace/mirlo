@@ -812,6 +812,8 @@
     "merchFulfillment": "Merch fulfillment",
     "viewFulfillment": "View fulfillment",
     "downloadableContent": "Does the user get to download anything after purchase?",
+    "downloadDownloadableContentItem": "Download {{ filename }}",
+    "removeDownloadableContentItem": "Remove {{ filename }}",
     "noDownloadableContent": "No downloadable content linked.",
     "relatedDownloadableContentInfo": "Purchasing this merch will also allow access to this content.",
     "trackGroupRelatedDownloadableContent": "Purchasing this release will also allow the download of this content.",
