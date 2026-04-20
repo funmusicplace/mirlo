@@ -5,6 +5,7 @@ import { parseOutIframes } from "./send-notification-email";
 import { processSinglePost } from "../utils/post";
 import { flatten, uniqBy } from "lodash";
 import { getClient } from "../activityPub/utils";
+import { getSafeErrorContext } from "../utils/logging";
 
 /**
  * Job processor: Sends notification emails when a post is published
@@ -21,6 +22,12 @@ export default async function sendPostNotification(job: {
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
+        featuredImage: {
+          select: {
+            id: true,
+            extension: true,
+          },
+        },
         artist: {
           include: {
             subscriptionTiers: {
@@ -117,26 +124,53 @@ export default async function sendPostNotification(job: {
         `sendPostNotification: queueing ${notificationsToEmail.length} email(s) for post ${postId}`
       );
 
+      const htmlContent = await parseOutIframes(post.content || "");
+
       // Queue emails for all notifications
       for (const notification of notificationsToEmail) {
-        const htmlContent = await parseOutIframes(post.content || "");
+        if (!notification.user?.email) {
+          logger.warn(
+            `sendPostNotification: skipping notification ${notification.id} for post ${postId} because recipient email is missing`
+          );
+          continue;
+        }
 
-        await sendMailQueue.add("send-mail", {
-          template: "announce-post-published",
-          message: {
-            to: notification.user?.email,
-          },
-          locals: {
-            artist: post.artist,
-            post: {
-              ...processSinglePost(post),
-              htmlContent,
-            },
-            email: encodeURIComponent(notification.user?.email || ""),
-            host: process.env.API_DOMAIN,
-            client: (await getClient()).applicationUrl,
-          },
+        const postForEmail = processSinglePost({
+          id: post.id,
+          title: post.title,
+          urlSlug: post.urlSlug,
+          featuredImage: post.featuredImage,
+          content: post.content,
+          isPublic: post.isPublic,
         });
+
+        await sendMailQueue.add(
+          "send-mail",
+          {
+            template: "announce-post-published",
+            message: {
+              to: notification.user.email,
+            },
+            locals: {
+              artist: {
+                id: post.artist?.id,
+                name: post.artist?.name,
+                urlSlug: post.artist?.urlSlug,
+              },
+              post: {
+                ...postForEmail,
+                htmlContent,
+              },
+              email: encodeURIComponent(notification.user.email),
+              host: process.env.API_DOMAIN,
+              client: (await getClient()).applicationUrl,
+            },
+          },
+          {
+            // Stable job IDs make email enqueue idempotent across retries.
+            jobId: `announce-post-published:${postId}:${notification.id}`,
+          }
+        );
       }
 
       // Mark post as having email announcement sent
@@ -149,8 +183,10 @@ export default async function sendPostNotification(job: {
 
     logger.info(`sendPostNotification: completed for post ${postId}`);
   } catch (error) {
-    logger.error(`sendPostNotification: error processing post ${postId}`);
-    logger.error(error);
+    logger.error(`sendPostNotification: error processing post ${postId}`, {
+      postId,
+      ...getSafeErrorContext(error),
+    });
     // Re-throw to let BullMQ handle retry logic
     throw error;
   }
