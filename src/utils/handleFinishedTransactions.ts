@@ -235,7 +235,9 @@ export const handleTrackGroupPurchase = async (
     });
 
     if (user && trackGroup && purchase) {
-      const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
+      const isBeforeReleaseDate = trackGroup.releaseDate
+        ? new Date(trackGroup.releaseDate) > new Date()
+        : false;
 
       await sendMail<AlbumPurchaseEmailType>({
         data: {

@@ -464,7 +464,7 @@ describe("artists/{id}/feed", () => {
       );
       assert.equal(
         createItem.object.published,
-        trackGroup.releaseDate.toISOString()
+        trackGroup.releaseDate!.toISOString()
       );
       const secondCreateItem = first.orderedItems[1];
       assert(

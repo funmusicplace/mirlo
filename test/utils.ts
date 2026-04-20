@@ -158,7 +158,8 @@ export const createTrackGroup = async (
       isGettable: data?.isGettable ?? true,
       stripeProductKey: data?.stripeProductKey ?? null,
       paymentToUserId: data?.paymentToUserId,
-      releaseDate: data?.releaseDate,
+      releaseDate:
+        data?.releaseDate === null ? null : (data?.releaseDate ?? new Date()),
       hideFromSearch: data?.hideFromSearch ?? false,
       cover:
         data?.cover !== undefined

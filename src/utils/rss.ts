@@ -40,7 +40,7 @@ export const turnItemsIntoRSS = async (
         description:
           p.about ?? `<h2>An release by artist ${p.artist?.name}.</h2>`,
         url: `${client?.applicationUrl}/${p.artist?.urlSlug}/release/${p.urlSlug}`,
-        date: p.releaseDate,
+        date: p.releaseDate ?? p.createdAt,
       });
     } else if (isPost(p)) {
       feed.item({

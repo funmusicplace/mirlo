@@ -152,8 +152,10 @@ export default function () {
       const albums = await getAlbumsVisibleToUser(artist);
 
       const zipped = [...posts.posts, ...albums].sort((a, b) => {
-        const publishedDateA = isTrackGroup(a) ? a.releaseDate : a.publishedAt;
-        const publishedDateB = isTrackGroup(b) ? b.releaseDate : b.publishedAt;
+        const publishedDateA =
+          (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
+        const publishedDateB =
+          (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
         if (publishedDateA > publishedDateB) {
           return -1;
         } else {
