@@ -19,6 +19,7 @@ export async function triggerPostNotifications() {
   const postsToNotify = await prisma.post.findMany({
     where: {
       isDraft: false,
+      deletedAt: null,
       publishedAt: {
         lte: now,
       },
@@ -27,6 +28,7 @@ export async function triggerPostNotifications() {
       shouldSendEmail: true,
       artist: {
         enabled: true,
+        deletedAt: null,
       },
     },
     select: {
