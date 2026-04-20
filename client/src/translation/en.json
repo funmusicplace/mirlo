@@ -430,6 +430,12 @@
     "labelNotFound": "Label not found"
   },
   "artist": {
+    "contact": "Contact",
+    "contactArtistTitle": "Contact {{ artistName }}",
+    "contactArtistDescription": "Send {{ artistName }} a message. They'll receive it as a notification and by email.",
+    "contactMessageLabel": "Your message",
+    "sendMessage": "Send message",
+    "contactMessageSent": "Message sent",
     "editTier": "Edit",
     "failedToAddLocation": "Failed to add location tag",
     "failedToRemoveLocation": "Failed to remove location tag",
@@ -1022,6 +1028,8 @@
     "downloadableContent": "Downloadable content"
   },
   "artistForm": {
+    "allowDirectMessages": "Allow direct messages from listeners",
+    "allowDirectMessagesDescription": "When enabled, logged-in listeners can send you a message through your profile. Messages arrive as a notification and by email.",
     "deleteArtist": "Permanently delete artist page",
     "shortDescription": "Something short about you",
     "announcement": "Write an announcement:",
@@ -1184,6 +1192,8 @@
     "newPost": "New Post",
     "newFollower": "New Follower",
     "newSubscriber": "New Subscriber",
+    "newMessage": "New Message",
+    "sentYouAMessage": "sent you a message",
     "purchaseTag": "Purchase",
     "labelTag": "Label",
     "startedFollowingYou": "started following you",

@@ -1,0 +1,9 @@
+extends ../layout.pug
+
+block content
+    p Hello from Mirlo!
+    p #{sender.name} (#{sender.email}) sent you a message regarding #{artist.name}:
+    blockquote(style="border-left: 3px solid #ccc; margin: 1rem 0; padding: 0.25rem 1rem;")
+      != message.replace(/\n/g, "<br>")
+    p You can reply directly to this email to respond to #{sender.name}.
+    p This message is also visible in your Mirlo notifications.

@@ -3,6 +3,7 @@ import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
 import FollowArtist from "./FollowArtist";
+import ContactArtist from "./ContactArtist";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
@@ -234,7 +235,12 @@ const ArtistHeaderSection: React.FC<{
                     )}
                   </div>
                   <ArtistActions>
-                    {!isManage && <FollowArtist artistId={artist.id} />}
+                    {!isManage && (
+                      <>
+                        <FollowArtist artistId={artist.id} />
+                        <ContactArtist artist={artist} />
+                      </>
+                    )}
                   </ArtistActions>
                 </ArtistTitleText>
               </SpaceBetweenDiv>

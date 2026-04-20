@@ -213,6 +213,7 @@ enum NotificationType {
   LABEL_ADDED_ARTIST
   FUNDRAISER_PLEDGE_CHARGED
   AP_FOLLOW
+  ARTIST_CONTACT_MESSAGE
 }
 
 enum NotificationDeliveryMethod {
@@ -313,6 +314,7 @@ model Artist {
   paymentToUser                      User?                                @relation(fields: [paymentToUserId], references: [id], name: "paymentToUser")
   isLabelProfile                     Boolean                              @default(false)
   artistLocationTags                 ArtistLocationTag[]
+  allowDirectMessages                Boolean                              @default(true)
 }
 
 model ArtistAvatar {

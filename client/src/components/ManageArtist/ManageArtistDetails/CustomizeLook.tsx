@@ -67,6 +67,7 @@ export type ArtistFormData = {
   background: File[];
   avatar: File[];
   activityPub: boolean;
+  allowDirectMessages: boolean;
   defaultPlatformFee: number;
   properties: {
     colors: {
@@ -93,6 +94,7 @@ const generateDefaults = (existing?: Artist) => {
     bio: existing?.bio ?? "",
     urlSlug: existing?.urlSlug ?? "",
     activityPub: existing?.activityPub ?? false,
+    allowDirectMessages: existing?.allowDirectMessages ?? true,
     defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
     shortDescription: existing?.shortDescription ?? "",
     maxFreePlays: existing?.maxFreePlays,
@@ -161,6 +163,7 @@ export const CustomizeLook: React.FC = () => {
       const sending = {
         urlSlug: data.urlSlug?.toLowerCase(),
         activityPub: data.activityPub,
+        allowDirectMessages: data.allowDirectMessages,
         properties: data.properties,
       };
 
@@ -201,6 +204,7 @@ export const CustomizeLook: React.FC = () => {
   );
 
   const activityPub = methods.watch("activityPub");
+  const allowDirectMessages = methods.watch("allowDirectMessages");
 
   if (!artist) {
     return null;
@@ -385,6 +389,19 @@ export const CustomizeLook: React.FC = () => {
                   }}
                 />
                 <small>{t("makeSearchable")}</small>
+              </FormComponent>
+              <FormComponent>
+                <Toggle
+                  label={t("allowDirectMessages")}
+                  toggled={allowDirectMessages}
+                  onClick={() => {
+                    methods.setValue(
+                      "allowDirectMessages",
+                      !allowDirectMessages
+                    );
+                  }}
+                />
+                <small>{t("allowDirectMessagesDescription")}</small>
               </FormComponent>
             </ArtistFormSection>
             <CustomNamesForTabs />
