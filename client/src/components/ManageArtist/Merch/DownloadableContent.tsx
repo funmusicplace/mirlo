@@ -108,37 +108,42 @@ const DownloadableContent: React.FC<{
           <LoadingSpinner size="small" fill={colors?.primary} />
         </div>
       )}
-      {item.downloadableContent?.map((c) => (
-        <Pill
-          key={c.downloadableContentId}
-          className={css`
-            margin: 0.5rem 0 1rem;
-            gap: 0.25rem;
-          `}
-        >
-          {c.downloadableContent.originalFilename}
-          <ArtistButtonAnchor
-            aria-label={t("downloadDownloadableContentItem", {
-              filename: c.downloadableContent.originalFilename,
-            })}
-            startIcon={<FaDownload />}
-            variant="dashed"
-            href={c.downloadableContent.downloadUrl as string}
-            rel="noopener noreferrer"
-            target="_blank"
-          />
-          <ArtistButton
-            aria-label={t("removeDownloadableContentItem", {
-              filename: c.downloadableContent.originalFilename,
-            })}
-            startIcon={<FaTimes />}
-            variant="dashed"
-            onClick={() => {
-              deleteContent(c.downloadableContentId);
-            }}
-          />
-        </Pill>
-      ))}
+      {!!item.downloadableContent && item.downloadableContent.length > 0 && (
+        <ul>
+          {item.downloadableContent.map((c) => (
+            <li key={c.downloadableContentId}>
+              <Pill
+                className={css`
+                  margin: 0.5rem 0 1rem;
+                  gap: 0.25rem;
+                `}
+              >
+                {c.downloadableContent.originalFilename}
+                <ArtistButtonAnchor
+                  aria-label={t("downloadDownloadableContentItem", {
+                    filename: c.downloadableContent.originalFilename,
+                  })}
+                  startIcon={<FaDownload />}
+                  variant="dashed"
+                  href={c.downloadableContent.downloadUrl as string}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                />
+                <ArtistButton
+                  aria-label={t("removeDownloadableContentItem", {
+                    filename: c.downloadableContent.originalFilename,
+                  })}
+                  startIcon={<FaTimes />}
+                  variant="dashed"
+                  onClick={() => {
+                    deleteContent(c.downloadableContentId);
+                  }}
+                />
+              </Pill>
+            </li>
+          ))}
+        </ul>
+      )}
       <UploadFiles
         accept="application/pdf,image/*"
         hint={
