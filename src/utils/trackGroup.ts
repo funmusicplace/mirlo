@@ -42,7 +42,8 @@ export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
     adminEnabled: true,
     artist: {
       enabled: true,
-      user: { canCreateArtists: true },
+      deletedAt: null,
+      user: { canCreateArtists: true, deletedAt: null },
     },
     hideFromSearch: false,
     deletedAt: null,
