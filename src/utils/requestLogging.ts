@@ -63,6 +63,11 @@ export const sanitizeHeadersForLogs = (
 };
 
 export const sanitizeBodyForLogs = (body: unknown): unknown => {
+  // Handle undefined, null, or non-serializable values
+  if (body === undefined || body === null) {
+    return body;
+  }
+
   // Deep clone to avoid modifying the original body
   const sanitized = JSON.parse(JSON.stringify(body));
 
