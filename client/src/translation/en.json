@@ -669,6 +669,7 @@
     "needsToBeUnique": "This URL is taken, try something else.",
     "downloadCodes": "Download codes",
     "typeForTags": "Start typing to add tags",
+    "removeTag": "Remove {{tagName}} tag",
     "notEnabled": "This artist page has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
     "paymentProcessorNotSetUp": "There is no payment processor set up yet for this artist page. Set up your Stripe account <manage>by clicking here</manage>.",
