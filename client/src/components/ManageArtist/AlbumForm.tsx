@@ -14,7 +14,8 @@ const AlbumForm: React.FC<{
   trackGroup: TrackGroup;
   artist: Artist;
   reload: () => void;
-}> = ({ trackGroup, artist, reload }) => {
+  isFlowV2?: boolean;
+}> = ({ trackGroup, artist, reload, isFlowV2 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
@@ -29,7 +30,7 @@ const AlbumForm: React.FC<{
     const trackGroupIsGettable = trackGroup?.isGettable ?? false;
     const defaultValues = {
       ...trackGroup,
-      releaseDate: trackGroup?.releaseDate.split("T")[0],
+      releaseDate: trackGroup?.releaseDate?.split("T")[0] ?? "",
       catalogNumber: trackGroup?.catalogNumber ?? "",
       publishedAt: trackGroup?.publishedAt?.split("T")[0],
       platformPercent: `${trackGroup?.platformPercent ?? 7}`,
@@ -101,7 +102,11 @@ const AlbumForm: React.FC<{
     <div>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(doSave)}>
-          <AlbumFormContent existingObject={trackGroup} reload={reload} />
+          <AlbumFormContent
+            existingObject={trackGroup}
+            reload={reload}
+            isFlowV2={isFlowV2}
+          />
         </form>
       </FormProvider>
     </div>

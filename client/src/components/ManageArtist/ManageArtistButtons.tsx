@@ -83,9 +83,7 @@ const ManageArtistButtons: React.FC = () => {
 
   const isAlbumPage = Boolean(trackGroupId);
 
-  const beforeReleaseDate =
-    managedTrackGroup?.releaseDate &&
-    new Date(managedTrackGroup?.releaseDate) > new Date();
+  const isPreorder = managedTrackGroup?.isPreorder ?? false;
 
   return (
     <>
@@ -210,7 +208,7 @@ const ManageArtistButtons: React.FC = () => {
                   size="compact"
                   rounded
                 >
-                  {t(beforeReleaseDate ? "viewPreorder" : "viewLive")}
+                  {t(isPreorder ? "viewPreorder" : "viewLive")}
                 </FixedButtonLink>
               )}
             </>

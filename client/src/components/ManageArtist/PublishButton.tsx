@@ -16,7 +16,8 @@ import { formatDate } from "components/TrackGroup/ReleaseDate";
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
   reload: () => Promise<unknown>;
-}> = ({ trackGroup, reload }) => {
+  isFlowV2?: boolean;
+}> = ({ trackGroup, reload, isFlowV2 }) => {
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "manageAlbum",
   });
@@ -111,17 +112,11 @@ const PublishButton: React.FC<{
   const isPublished =
     trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
 
-  const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
-
-  const publishButton = beforeReleaseDate ? "publishPreorder" : "publish";
-  const privateButton = beforeReleaseDate
-    ? "makePreorderPrivate"
-    : "makePrivate";
-
   return (
     <div
       className={css`
         display: flex;
+        flex-wrap: wrap;
         gap: 0.75rem;
       `}
     >
@@ -139,16 +134,36 @@ const PublishButton: React.FC<{
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing}
+        className={css`
+          background-color: var(--mi-green-500) !important;
+          border-color: var(--mi-green-700) !important;
+          color: var(--mi-green-100) !important;
+
+          svg {
+            fill: var(--mi-green-100) !important;
+          }
+
+          &:hover:not(:disabled) {
+            background-color: var(--mi-green-700) !important;
+            border-color: var(--mi-green-700) !important;
+          }
+        `}
       >
-        {t(isPublished ? privateButton : publishButton, {
-          date: trackGroup.publishedAt
-            ? formatDate({
-                date: trackGroup.publishedAt,
-                options: { year: "numeric", month: "short", day: "numeric" },
-                i18n,
-              })
-            : t("now"),
-        })}
+        {isFlowV2
+          ? t(isPublished ? "makePrivateSimple" : "publishSimple")
+          : t(isPublished ? "makePrivate" : "publish", {
+              date: trackGroup.publishedAt
+                ? formatDate({
+                    date: trackGroup.publishedAt,
+                    options: {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    },
+                    i18n,
+                  })
+                : t("now"),
+            })}
       </ArtistButton>
     </div>
   );

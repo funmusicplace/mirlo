@@ -38,7 +38,6 @@ const PurchaseAlbumModal: React.FC<{
     return null;
   }
 
-  const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const payOrNameYourPrice =
     trackGroup.minPrice === 0 ? "nameYourPriceLabel" : "buy";
 
@@ -47,10 +46,10 @@ const PurchaseAlbumModal: React.FC<{
       ? "saveAlbum"
       : trackGroup.fundraiser?.isAllOrNothing
         ? "backThisProject"
-        : isBeforeReleaseDate
+        : trackGroup.isPreorder
           ? "preOrder"
           : payOrNameYourPrice;
-  const purchaseTitle = isBeforeReleaseDate
+  const purchaseTitle = trackGroup.isPreorder
     ? "preOrderingTrackGroup"
     : "buyingTrackGroup";
 

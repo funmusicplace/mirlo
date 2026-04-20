@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import AlbumForm from "../AlbumForm";
 import BulkTrackUpload from "./BulkTrackUpload";
@@ -37,7 +37,7 @@ export interface TrackGroupFormData {
   suggestedPrice?: string;
   isGettable?: boolean;
   platformPercent?: string;
-  releaseDate: string;
+  releaseDate?: string;
   credits: string;
   about: string;
   coverFile: File[];
@@ -59,7 +59,8 @@ const ManageTrackGroup: React.FC<{}> = () => {
   });
   const snackbar = useSnackbar();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const isFlowV2 = location.pathname.includes("release-flow-2");
   const { artistId: artistParamId, trackGroupId: trackGroupParamId } =
     useParams();
 
@@ -157,22 +158,30 @@ const ManageTrackGroup: React.FC<{}> = () => {
               }
             `}
           >
-            <PublishButton trackGroup={trackGroup} reload={refetch} />
-            <ArtistButtonLink
-              to={getArtistManageUrl(artist.id) + "/releases/tools"}
-              startIcon={<MdOutlineDownloadForOffline />}
-            >
-              {t("downloadCodes")}
-            </ArtistButtonLink>
-            <ArtistButton
-              startIcon={<FaTrash />}
-              onClick={() => {
-                void handleDeleteTrackGroup();
-              }}
-              isLoading={isDeletingTrackGroup}
-            >
-              {manageArtistT("delete")}
-            </ArtistButton>
+            <PublishButton
+              trackGroup={trackGroup}
+              reload={refetch}
+              isFlowV2={isFlowV2}
+            />
+            {!isFlowV2 && (
+              <ArtistButtonLink
+                to={getArtistManageUrl(artist.id) + "/releases/tools"}
+                startIcon={<MdOutlineDownloadForOffline />}
+              >
+                {t("downloadCodes")}
+              </ArtistButtonLink>
+            )}
+            {!isFlowV2 && (
+              <ArtistButton
+                startIcon={<FaTrash />}
+                onClick={() => {
+                  void handleDeleteTrackGroup();
+                }}
+                isLoading={isDeletingTrackGroup}
+              >
+                {manageArtistT("delete")}
+              </ArtistButton>
+            )}
           </div>
         </SpaceBetweenDiv>
       </div>
@@ -181,10 +190,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
         trackGroup={trackGroup}
         artist={artist}
         reload={() => refetch()}
+        isFlowV2={isFlowV2}
       />
       <FormSection>
         <h2>{t("uploadTracks")}</h2>
-        <ManageTrackDefaults reload={refetch} trackGroup={trackGroup} />
+        <ManageTrackDefaults trackGroup={trackGroup} reload={refetch} />
         {trackGroup && trackGroup?.tracks?.length > 0 && (
           <ManageTrackTable
             tracks={trackGroup.tracks}
@@ -223,18 +233,52 @@ const ManageTrackGroup: React.FC<{}> = () => {
           flex-wrap: wrap;
         `}
       >
-        <PublishButton trackGroup={trackGroup} reload={refetch} />
-        <ArtistButton
-          startIcon={<FaTrash />}
-          onClick={() => {
-            void handleDeleteTrackGroup();
-          }}
-          isLoading={isDeletingTrackGroup}
-          variant="outlined"
-        >
-          {manageArtistT("delete")}
-        </ArtistButton>
+        <PublishButton
+          trackGroup={trackGroup}
+          reload={refetch}
+          isFlowV2={isFlowV2}
+        />
+        {!isFlowV2 && (
+          <ArtistButton
+            startIcon={<FaTrash />}
+            onClick={() => {
+              void handleDeleteTrackGroup();
+            }}
+            isLoading={isDeletingTrackGroup}
+            variant="outlined"
+          >
+            {manageArtistT("delete")}
+          </ArtistButton>
+        )}
       </div>
+      {isFlowV2 && (
+        <>
+          <FormSection />
+          <ArtistButton
+            startIcon={<FaTrash />}
+            onClick={() => {
+              void handleDeleteTrackGroup();
+            }}
+            isLoading={isDeletingTrackGroup}
+            className={css`
+              background-color: var(--mi-red-700) !important;
+              border-color: var(--mi-red-700) !important;
+              color: var(--mi-red-100) !important;
+
+              svg {
+                fill: var(--mi-red-100) !important;
+              }
+
+              &:hover:not(:disabled) {
+                background-color: var(--mi-red-800) !important;
+                border-color: var(--mi-red-800) !important;
+              }
+            `}
+          >
+            {manageArtistT("delete")}
+          </ArtistButton>
+        </>
+      )}
     </ManageSectionWrapper>
   );
 };

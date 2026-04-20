@@ -1,8 +1,10 @@
 import React from "react";
 import { css } from "@emotion/css";
+import { useTranslation } from "react-i18next";
 
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import { useAuthContext } from "state/AuthContext";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
@@ -18,6 +20,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   flex?: boolean;
 }> = ({ trackGroup, track, collapse, fixed, flex }) => {
   const { user } = useAuthContext();
+  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [isOwned, setIsOwned] = React.useState(false);
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: trackGroup.artist.urlSlug })
@@ -79,11 +82,13 @@ const PurchaseOrDownloadAlbum: React.FC<{
     return null;
   }
 
-  const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
-
   const showPurchase = !isOwned;
 
-  const showDownload = isOwned && (!isBeforeReleaseDate || (track?.isPreview ?? false));
+  const showPreOrdered =
+    isOwned && trackGroup.isPreorder && !(track?.isPreview ?? false);
+
+  const showDownload =
+    isOwned && (!trackGroup.isPreorder || (track?.isPreview ?? false));
 
   return (
     <>
@@ -106,9 +111,26 @@ const PurchaseOrDownloadAlbum: React.FC<{
             collapse={collapse}
           />
         )}
-        {/* {showPurchase && (
-          <AddToCollection trackGroup={trackGroup} fixed={fixed} />
-        )} */}
+        {showPreOrdered && (
+          <ArtistButton
+            variant="outlined"
+            disabled
+            aria-disabled="true"
+            className={css`
+              font-size: 1rem !important;
+              padding-left: 2rem !important;
+              padding-right: 2rem !important;
+              opacity: 0.6;
+              cursor: default;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                width: 100%;
+              }
+            `}
+          >
+            {t("preOrdered")}
+          </ArtistButton>
+        )}
         {showDownload && !fixed && (
           <DownloadAlbumButton trackGroup={trackGroup} onlyIcon track={track} />
         )}

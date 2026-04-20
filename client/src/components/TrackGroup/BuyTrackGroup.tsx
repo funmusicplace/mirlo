@@ -109,10 +109,9 @@ const BuyTrackGroup: React.FC<{
       isFinite(+chosenPrice) && Number(chosenPrice) < minPrice / 100;
   }
 
-  const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = trackGroup.fundraiser?.isAllOrNothing
     ? "addPaymentInformation"
-    : isBeforeReleaseDate
+    : trackGroup.isPreorder
       ? "preOrder"
       : "buy";
 
@@ -253,7 +252,7 @@ const BuyTrackGroup: React.FC<{
             <small>{t("downloadDisclaimer")}</small>
           </div>
         </form>
-        {!isBeforeReleaseDate && (
+        {!trackGroup.isPreorder && (
           <>
             {!!minPrice && lessThanMin && (
               <strong>
