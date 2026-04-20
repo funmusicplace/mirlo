@@ -141,6 +141,22 @@ export const fileExistCheckBackblaze = async (
       {}
     );
   } catch (e) {
+    const error = e as {
+      name?: string;
+      $metadata?: { httpStatusCode?: number };
+    };
+
+    if (
+      error.$metadata?.httpStatusCode === 404 ||
+      error.name === "NotFound" ||
+      error.name === "NoSuchKey"
+    ) {
+      return undefined;
+    }
+
+    logger.error(
+      `Error fetching static file from backblaze: ${bucket}/${filename}`
+    );
     return undefined;
   }
   return backblazeStat;
@@ -152,12 +168,6 @@ export const statFile = async (bucket: string, filename: string) => {
 
   if (backendStorage === "backblaze") {
     backblazeStat = await fileExistCheckBackblaze(bucket, filename);
-    if (!backblazeStat) {
-      // don't need to log this if our backend storage isn't backblaze
-      logger.error(
-        `Error fetching static file from backblaze: ${bucket}/${filename}`
-      );
-    }
   }
   // If the object doesn't exist on backblaze we check in minio
   if (backendStorage === "minio" && minioClient) {
