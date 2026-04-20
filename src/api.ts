@@ -14,7 +14,10 @@ import qs from "qs";
 import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
 import crypto from "crypto";
-import { sanitizeHeadersForLogs } from "./utils/requestLogging";
+import {
+  sanitizeHeadersForLogs,
+  sanitizeBodyForLogs,
+} from "./utils/requestLogging";
 const isDev = process.env.NODE_ENV === "development";
 
 const apiApp = express();
@@ -55,8 +58,9 @@ apiApp.use((req, res, next) => {
   const log = req.logger || logger;
   // Basic logging for API requests
   const sanitizedHeaders = sanitizeHeadersForLogs(req.headers);
+  const sanitizedBody = sanitizeBodyForLogs(req.body);
   log.info(
-    `API: ${req.method} ${req.path} - query: ${JSON.stringify(req.query)} - body: ${JSON.stringify(req.body)} - headers: ${JSON.stringify(sanitizedHeaders)}`
+    `API: ${req.method} ${req.path} - query: ${JSON.stringify(req.query)} - body: ${JSON.stringify(sanitizedBody)} - headers: ${JSON.stringify(sanitizedHeaders)}`
   );
   next();
 });

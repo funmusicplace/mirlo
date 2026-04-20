@@ -83,7 +83,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    if (!["Follow", "Undo"].includes(req.body.type)) {
+    if (!["Follow", "Undo", "Delete"].includes(req.body.type)) {
       throw new AppError({
         httpCode: 501,
         description: `${req.body.type} not implemented`,
@@ -129,6 +129,16 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
           },
         });
       }
+    }
+    if (req.body.type === "Delete") {
+      // Delete activities typically indicate the actor's account has been deleted
+      // Remove them from followers
+      await prisma.activityPubArtistFollowers.deleteMany({
+        where: {
+          artistId: artist.id,
+          actor: req.body.actor,
+        },
+      });
     }
     if (req.headers.accept) {
       res.set("content-type", "application/activity+json");
