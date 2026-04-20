@@ -5,6 +5,7 @@ import { describe, it } from "mocha";
 import { clearTables, createArtist, createPost, createUser } from "../../utils";
 
 import { faker } from "@faker-js/faker";
+import prisma from "@mirlo/prisma";
 import { requestApp } from "../utils";
 
 describe("posts", () => {
@@ -38,6 +39,40 @@ describe("posts", () => {
       });
       const artist = await createArtist(user.id);
       await createPost(artist.id);
+
+      const response = await requestApp
+        .get(`posts`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 0);
+    });
+
+    it("should GET exclude posts from disabled artists", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id, { enabled: false });
+      await createPost(artist.id, { isDraft: false });
+
+      const response = await requestApp
+        .get(`posts`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 0);
+    });
+
+    it("should GET exclude posts from soft-deleted artists", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      await prisma.artist.update({
+        where: { id: artist.id },
+        data: { deletedAt: new Date() },
+      });
+      await createPost(artist.id, { isDraft: false });
 
       const response = await requestApp
         .get(`posts`)

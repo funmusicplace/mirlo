@@ -16,51 +16,62 @@ export default function () {
     const user = req.user as User;
     const { take, skip } = req.query;
     try {
+      const artistVisibility: Prisma.PostWhereInput = {
+        OR: [
+          { artistId: null },
+          { artist: { enabled: true, deletedAt: null } },
+        ],
+      };
+
       let where: Prisma.PostWhereInput = {
         publishedAt: { lte: new Date() },
         isPublic: true,
         isDraft: false,
+        ...artistVisibility,
       };
       if (user) {
-        delete where.isPublic;
-        where.OR = [
-          {
-            isPublic: true,
-          },
-          {
-            minimumSubscriptionTier: {
-              userSubscriptions: {
-                some: {
-                  userId: user.id,
+        where = {
+          publishedAt: { lte: new Date() },
+          isDraft: false,
+          AND: [
+            artistVisibility,
+            {
+              OR: [
+                {
+                  isPublic: true,
                 },
-              },
-            },
-          },
-          {
-            postSubscriptionTiers: {
-              some: {
-                artistSubscriptionTier: {
-                  userSubscriptions: {
-                    some: {
-                      userId: user.id,
+                {
+                  minimumSubscriptionTier: {
+                    userSubscriptions: {
+                      some: {
+                        userId: user.id,
+                      },
                     },
                   },
                 },
-              },
+                {
+                  postSubscriptionTiers: {
+                    some: {
+                      artistSubscriptionTier: {
+                        userSubscriptions: {
+                          some: {
+                            userId: user.id,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
             },
-          },
-        ];
+          ],
+        };
       }
 
       const posts = await prisma.post.findMany({
         where,
         include: {
-          artist: {
-            where: {
-              enabled: true,
-              deletedAt: null,
-            },
-          },
+          artist: true,
           featuredImage: true,
           tracks: {
             orderBy: {
