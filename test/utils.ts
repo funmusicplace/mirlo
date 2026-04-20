@@ -160,6 +160,7 @@ export const createTrackGroup = async (
       paymentToUserId: data?.paymentToUserId,
       releaseDate:
         data?.releaseDate === null ? null : (data?.releaseDate ?? new Date()),
+      isPreorder: data?.isPreorder ?? false,
       hideFromSearch: data?.hideFromSearch ?? false,
       cover:
         data?.cover !== undefined
