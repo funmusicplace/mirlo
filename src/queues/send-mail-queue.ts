@@ -1,10 +1,29 @@
 import { logger } from "../logger";
 import { REDIS_CONFIG } from "../config/redis";
-import { Queue, QueueEvents } from "bullmq";
-const queueOptions = {
+import { Queue, QueueEvents, QueueOptions } from "bullmq";
+import { getSafeErrorContext } from "../utils/logging";
+
+const queueOptions: QueueOptions = {
   prefix: "mirlo",
   connection: REDIS_CONFIG,
+  defaultJobOptions: {
+    // Keep Redis bounded while retaining enough history for troubleshooting.
+    removeOnComplete: {
+      age: 2 * 24 * 60 * 60,
+      count: 3000,
+    },
+    removeOnFail: {
+      age: 14 * 24 * 60 * 60,
+      count: 5000,
+    },
+    attempts: 3,
+    backoff: {
+      type: "exponential",
+      delay: 10_000,
+    },
+  },
 };
+
 export const sendMailQueue = new Queue("send-mail", queueOptions);
 
 export const sendMailQueueEvents = new QueueEvents("send-mail", queueOptions);
@@ -40,5 +59,5 @@ sendMailQueueEvents.on("stalled", async (result: { jobId: string }) => {
 });
 
 sendMailQueueEvents.on("error", async (error) => {
-  logger.error(`jobId ${JSON.stringify(error)} had an error`);
+  logger.error("send-mail queue error", getSafeErrorContext(error));
 });

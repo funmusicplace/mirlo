@@ -1,10 +1,27 @@
-import { Queue, QueueEvents } from "bullmq";
+import { Queue, QueueEvents, QueueOptions } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
+import { getSafeErrorContext } from "../utils/logging";
 
-const queueOptions = {
+const queueOptions: QueueOptions = {
   prefix: "mirlo",
   connection: REDIS_CONFIG,
+  defaultJobOptions: {
+    // Keep Redis bounded while retaining enough history for troubleshooting.
+    removeOnComplete: {
+      age: 2 * 24 * 60 * 60,
+      count: 1000,
+    },
+    removeOnFail: {
+      age: 14 * 24 * 60 * 60,
+      count: 5000,
+    },
+    attempts: 3,
+    backoff: {
+      type: "exponential",
+      delay: 10_000,
+    },
+  },
 };
 
 export const sendPostNotificationQueue = new Queue(
@@ -40,5 +57,8 @@ sendPostNotificationQueueEvents.on("failed", async (result: any) => {
 });
 
 sendPostNotificationQueueEvents.on("error", async (error) => {
-  logger.error(`send-post-notification queue error:`, error);
+  logger.error(
+    "send-post-notification queue error",
+    getSafeErrorContext(error)
+  );
 });

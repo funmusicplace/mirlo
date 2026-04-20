@@ -5,34 +5,7 @@ import { parseOutIframes } from "./send-notification-email";
 import { processSinglePost } from "../utils/post";
 import { flatten, uniqBy } from "lodash";
 import { getClient } from "../activityPub/utils";
-
-const getSafeErrorContext = (error: unknown) => {
-  if (error instanceof Error) {
-    const errorWithExtras = error as Error & {
-      code?: string;
-      command?: { name?: string; args?: unknown[] };
-    };
-
-    return {
-      name: errorWithExtras.name,
-      message: errorWithExtras.message,
-      code: errorWithExtras.code,
-      stack: errorWithExtras.stack?.split("\n").slice(0, 8).join("\n"),
-      command: errorWithExtras.command
-        ? {
-            name: errorWithExtras.command.name,
-            argsCount: Array.isArray(errorWithExtras.command.args)
-              ? errorWithExtras.command.args.length
-              : undefined,
-          }
-        : undefined,
-    };
-  }
-
-  return {
-    message: String(error),
-  };
-};
+import { getSafeErrorContext } from "../utils/logging";
 
 /**
  * Job processor: Sends notification emails when a post is published
@@ -155,6 +128,13 @@ export default async function sendPostNotification(job: {
 
       // Queue emails for all notifications
       for (const notification of notificationsToEmail) {
+        if (!notification.user?.email) {
+          logger.warn(
+            `sendPostNotification: skipping notification ${notification.id} for post ${postId} because recipient email is missing`
+          );
+          continue;
+        }
+
         const postForEmail = processSinglePost({
           id: post.id,
           title: post.title,
@@ -164,26 +144,33 @@ export default async function sendPostNotification(job: {
           isPublic: post.isPublic,
         });
 
-        await sendMailQueue.add("send-mail", {
-          template: "announce-post-published",
-          message: {
-            to: notification.user?.email,
-          },
-          locals: {
-            artist: {
-              id: post.artist?.id,
-              name: post.artist?.name,
-              urlSlug: post.artist?.urlSlug,
+        await sendMailQueue.add(
+          "send-mail",
+          {
+            template: "announce-post-published",
+            message: {
+              to: notification.user.email,
             },
-            post: {
-              ...postForEmail,
-              htmlContent,
+            locals: {
+              artist: {
+                id: post.artist?.id,
+                name: post.artist?.name,
+                urlSlug: post.artist?.urlSlug,
+              },
+              post: {
+                ...postForEmail,
+                htmlContent,
+              },
+              email: encodeURIComponent(notification.user.email),
+              host: process.env.API_DOMAIN,
+              client: (await getClient()).applicationUrl,
             },
-            email: encodeURIComponent(notification.user?.email || ""),
-            host: process.env.API_DOMAIN,
-            client: (await getClient()).applicationUrl,
           },
-        });
+          {
+            // Stable job IDs make email enqueue idempotent across retries.
+            jobId: `announce-post-published:${postId}:${notification.id}`,
+          }
+        );
       }
 
       // Mark post as having email announcement sent
