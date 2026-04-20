@@ -30,24 +30,29 @@ export const Toggle: React.FC<{
     >
       <input
         type="checkbox"
-        defaultChecked={isToggled}
+        role="switch"
         checked={isToggled}
-        onClick={callback}
+        onChange={callback}
+        aria-checked={isToggled}
         aria-labelledby={labelId}
         id={id}
-        className={css`
-          opacity: 0;
-          width: 0;
-          height: 0;
+        className={
+          "sr-only " +
+          css`
+            &:focus-visible ~ .toggle {
+              outline: 2px solid var(--mi-primary-color);
+              outline-offset: 2px;
+            }
 
-          &:checked + .toggle {
-            background-color: #00c853;
-          }
+            &:checked ~ .toggle {
+              background-color: var(--mi-green-500);
+            }
 
-          &:checked + .toggle:before {
-            transform: translateX(14px);
-          }
-        `}
+            &:checked ~ .toggle:before {
+              transform: translateX(14px);
+            }
+          `
+        }
       />
       <span
         className={
@@ -60,7 +65,7 @@ export const Toggle: React.FC<{
 
             transition: 0.3s;
             cursor: pointer;
-            background: #2c3e50;
+            background: var(--mi-neutral-500);
             border-radius: 30px;
 
             &:before {
@@ -69,7 +74,7 @@ export const Toggle: React.FC<{
               height: 12px;
               width: 12px;
               left: 2px;
-              background-color: #fff;
+              background-color: var(--mi-normal-background-color);
               border-radius: 50%;
               transition: 0.3s;
             }
