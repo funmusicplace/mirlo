@@ -9,7 +9,7 @@ import { AppError } from "../../../../utils/error";
 
 type Params = { id: string };
 
-const CONTACT_RATE_LIMIT = 24;
+const CONTACT_RATE_LIMIT = 2;
 const CONTACT_RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const MAX_MESSAGE_LENGTH = 5000;
 
