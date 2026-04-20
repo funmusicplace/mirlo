@@ -214,6 +214,7 @@ const TrackRow: React.FC<{
               overflow: hidden;
               text-overflow: ellipsis;
               margin-right: 0.2rem;
+              flex-grow: 1;
 
               i {
                 opacity: 0.8;

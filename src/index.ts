@@ -151,6 +151,7 @@ const LOW_NOISE_PROBE_PATHS = new Set([
   "/.aws/credentials",
   "/wp-login.php",
   "/wp-admin",
+  "/.ssh/sftp-config.json",
 ]);
 
 // This has to be the last thing used so that other things don't get over-written

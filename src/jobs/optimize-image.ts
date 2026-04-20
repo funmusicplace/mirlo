@@ -106,29 +106,37 @@ const optimizeImage = async (job: Job) => {
         return [
           ...ar.map(async () => {
             logger.info(`Optimizing image to ${outputType}`);
-            const originalPipeline = sharp(buffer).rotate();
+            try {
+              const originalPipeline = sharp(buffer).rotate();
 
-            if (originalResizeOptions) {
-              originalPipeline.resize(originalResizeOptions);
-            }
-
-            const originalSize =
-              await originalPipeline[outputType](outputOptions).toBuffer();
-
-            await uploadWrapper(
-              finalMinioBucket,
-              `${destinationId}-original${ext}`,
-              originalSize,
-              {
-                contentType: `image/${outputType}`,
+              if (originalResizeOptions) {
+                originalPipeline.resize(originalResizeOptions);
               }
-            );
 
-            return {
-              width: "original",
-              height: "original",
-              format: outputType,
-            };
+              const originalSize =
+                await originalPipeline[outputType](outputOptions).toBuffer();
+
+              await uploadWrapper(
+                finalMinioBucket,
+                `${destinationId}-original${ext}`,
+                originalSize,
+                {
+                  contentType: `image/${outputType}`,
+                }
+              );
+
+              return {
+                width: "original",
+                height: "original",
+                format: outputType,
+              };
+            } catch (e) {
+              const errorMessage = e instanceof Error ? e.message : String(e);
+              logger.error(
+                `Error processing original image for ${outputType}: ${errorMessage}`
+              );
+              return null;
+            }
           }),
           ...variants.map(
             async (
@@ -201,7 +209,11 @@ const optimizeImage = async (job: Job) => {
                   format: outputType,
                 };
               } catch (e) {
-                console.error(e);
+                const errorMessage = e instanceof Error ? e.message : String(e);
+                logger.error(
+                  `Error processing variant ${suffix} for ${outputType}: ${errorMessage}`
+                );
+                return null;
               }
             }
           ),
@@ -209,9 +221,20 @@ const optimizeImage = async (job: Job) => {
       })
       .flat(1);
 
-    const results = await Promise.all(promises);
+    const results = await Promise.allSettled(promises);
+    const successfulResults = results
+      .map((result) => {
+        if (result.status === "fulfilled") {
+          return result.value;
+        } else {
+          logger.error(`Promise rejected: ${result.reason}`);
+          return null;
+        }
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null && r !== undefined);
+
     const urls = uniq(
-      results.map((r?: { width?: number | string }) =>
+      successfulResults.map((r) =>
         r?.width !== "original"
           ? `${destinationId}-x${r?.width}`
           : `${destinationId}-original`
@@ -237,13 +260,19 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "userAvatar") {
-      const faviconFinalName = `${destinationId}_user_avatar_favicon.ico`;
-      ico.sharpsToIco([sharp(buffer)], faviconFinalName, {
-        sizes: [48],
-        resizeOptions: {},
-      });
-      logger.info("Uploading user avatar favicon to bucket");
-      await uploadWrapper(finalMinioBucket, faviconFinalName, sharp(buffer));
+      try {
+        const faviconFinalName = `${destinationId}_user_avatar_favicon.ico`;
+        const sharpBuffer = await sharp(buffer).png().toBuffer();
+        const faviconBuffer = ico.encode([sharpBuffer]);
+        logger.info("Uploading user avatar favicon to bucket");
+        await uploadWrapper(finalMinioBucket, faviconFinalName, faviconBuffer, {
+          contentType: "image/x-icon",
+        });
+        logger.info("User avatar favicon uploaded successfully");
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        logger.error(`Error creating user avatar favicon: ${errorMessage}`);
+      }
 
       await prisma.userAvatar.update({
         where: { id: destinationId },
@@ -255,13 +284,19 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
-      const faviconFinalName = `${destinationId}_artist_avatar_favicon.ico`;
-      ico.sharpsToIco([sharp(buffer)], faviconFinalName, {
-        sizes: [48],
-        resizeOptions: {},
-      });
-      logger.info("Uploading artist avatar favicon to bucket");
-      await uploadWrapper(finalMinioBucket, faviconFinalName, sharp(buffer));
+      try {
+        const faviconFinalName = `${destinationId}_artist_avatar_favicon.ico`;
+        const sharpBuffer = await sharp(buffer).png().toBuffer();
+        const faviconBuffer = ico.encode([sharpBuffer]);
+        logger.info("Uploading artist avatar favicon to bucket");
+        await uploadWrapper(finalMinioBucket, faviconFinalName, faviconBuffer, {
+          contentType: "image/x-icon",
+        });
+        logger.info("Artist avatar favicon uploaded successfully");
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        logger.error(`Error creating artist avatar favicon: ${errorMessage}`);
+      }
 
       await prisma.artistAvatar.update({
         where: { id: destinationId },
@@ -278,6 +313,13 @@ const optimizeImage = async (job: Job) => {
     logger.info(`Removing from Bucket ${incomingMinioBucket}`);
 
     await removeObjectFromStorage(incomingMinioBucket, destinationId);
+
+    if (urls.length === 0) {
+      logger.warn(
+        `No successful image URLs generated for ${destinationId}. Skipping SightEngine check.`
+      );
+      return { error: "No images were successfully optimized" };
+    }
 
     if (SIGHTENGINE_USER && SIGHTENGINE_SECRET) {
       logger.info("Checking SightEngine");

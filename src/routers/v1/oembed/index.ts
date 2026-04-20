@@ -37,18 +37,17 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const {
-      url,
-      maxwidth = "400",
-      format = "json",
-    } = req.query as {
-      url: string;
-      maxwidth?: string;
-      format?: string;
+    const { url: urlParam, format = "json" } = req.query as {
+      url: string | string[];
+      format?: string | string[];
     };
 
+    // Handle url parameter that may come as array (when sent multiple times)
+    const url = Array.isArray(urlParam) ? urlParam[0] : urlParam;
+    const formatStr = Array.isArray(format) ? format[0] : format;
+
     try {
-      if (format !== "json") {
+      if (formatStr !== "json") {
         throw new AppError({
           httpCode: 400,
           description: "We only support json oEmbed requests for now",
@@ -278,6 +277,7 @@ export default function () {
         name: "url",
         required: true,
         type: "string",
+        collectionFormat: "multi",
         description: "The Mirlo URL to get embedding information for",
       },
       {
@@ -286,13 +286,8 @@ export default function () {
         type: "string",
         enum: ["json"],
         default: "json",
+        collectionFormat: "multi",
         description: "The required response format (json only)",
-      },
-      {
-        in: "query",
-        name: "maxwidth",
-        type: "string",
-        description: "The maximum width of the embed (optional)",
       },
     ],
     responses: {

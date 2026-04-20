@@ -61,7 +61,31 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    await verifySignature(req, signatureHeader);
+    // Check for valid activity structure first
+    if (!req.body.actor || !req.body.type) {
+      throw new AppError({
+        httpCode: 400,
+        description: "Not a valid Activity",
+      });
+    }
+
+    // Verify signature, but allow Delete activities if verification fails due to Gone (410)
+    try {
+      await verifySignature(req, signatureHeader);
+    } catch (e) {
+      // Allow Delete activities from gone accounts (410 status)
+      if (
+        req.body.type === "Delete" &&
+        e instanceof AppError &&
+        e.description?.includes("Gone")
+      ) {
+        log.info(
+          `Allowing Delete activity from gone account: ${req.body.actor}`
+        );
+      } else {
+        throw e;
+      }
+    }
 
     const parsedId = await findArtistIdForURLSlug(id);
 
@@ -76,14 +100,8 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
         description: "Artist not found, must use urlSlug",
       });
     }
-    if (!req.body.actor || !req.body.type) {
-      throw new AppError({
-        httpCode: 400,
-        description: "Not a valid Activity",
-      });
-    }
 
-    if (!["Follow", "Undo"].includes(req.body.type)) {
+    if (!["Follow", "Undo", "Delete"].includes(req.body.type)) {
       throw new AppError({
         httpCode: 501,
         description: `${req.body.type} not implemented`,
@@ -129,6 +147,16 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
           },
         });
       }
+    }
+    if (req.body.type === "Delete") {
+      // Delete activities typically indicate the actor's account has been deleted
+      // Remove them from followers
+      await prisma.activityPubArtistFollowers.deleteMany({
+        where: {
+          artistId: artist.id,
+          actor: req.body.actor,
+        },
+      });
     }
     if (req.headers.accept) {
       res.set("content-type", "application/activity+json");

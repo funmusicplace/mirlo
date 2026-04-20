@@ -29,7 +29,6 @@ import { queryArtist, queryTrackGroup, queryUserStripeStatus } from "queries";
 import Fundraiser from "./Fundraiser";
 import FlagContent from "./FlagContent";
 import ReleaseDownloadableContent from "./ReleaseDownloadableContent";
-import TrackArtistsCredits from "./TrackArtistsCredits";
 
 export const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
@@ -344,7 +343,6 @@ function TrackGroup() {
                       <small>{t("downloadCodecsInfo")}</small>
                     </p>
                   )}
-                  <TrackArtistsCredits trackGroup={trackGroup} />
                 </TrackListingWrapper>
               )}
               {showAboutInsteadOfTrackListing && (

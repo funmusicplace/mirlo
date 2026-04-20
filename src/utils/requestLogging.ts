@@ -61,3 +61,27 @@ export const sanitizeHeadersForLogs = (
 
   return sanitized;
 };
+
+export const sanitizeBodyForLogs = (body: unknown): unknown => {
+  // Handle undefined, null, or non-serializable values
+  if (body === undefined || body === null) {
+    return body;
+  }
+
+  // Deep clone to avoid modifying the original body
+  const sanitized = JSON.parse(JSON.stringify(body));
+
+  // Redact ActivityPub signatures
+  if (sanitized && typeof sanitized === "object") {
+    if (sanitized.signature && typeof sanitized.signature === "object") {
+      if (
+        sanitized.signature.signatureValue &&
+        typeof sanitized.signature.signatureValue === "string"
+      ) {
+        sanitized.signature.signatureValue = "[REDACTED]";
+      }
+    }
+  }
+
+  return sanitized;
+};
