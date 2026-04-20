@@ -108,9 +108,9 @@ const RecommendedTrackGroups: React.FC<{
 
       {(results?.length ?? 0) > 0 && (
         <div className="mb-8">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 mt-4">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 mt-4">
             {results?.map((rec: TrackGroup) => (
-              <div
+              <li
                 key={rec.id}
                 className="relative border border-gray-300 rounded p-2 flex flex-col gap-2"
               >
@@ -134,9 +134,9 @@ const RecommendedTrackGroups: React.FC<{
                 >
                   {t("remove")}
                 </ArtistButton>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
 
