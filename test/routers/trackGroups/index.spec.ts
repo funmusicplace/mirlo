@@ -74,6 +74,49 @@ describe("trackGroups", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should GET / excludes trackGroups from soft-deleted artists", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      await createTrackGroup(artist.id, { title: "Super Hyper Galaxy" });
+      await prisma.artist.delete({ where: { id: artist.id } });
+
+      const response = await requestApp
+        .get("trackGroups?title=super")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 0);
+      assert(response.statusCode === 200);
+    });
+
+    it("should GET / excludes trackGroups from disabled artists", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id, { enabled: false });
+      await createTrackGroup(artist.id, { title: "Super Hyper Galaxy" });
+
+      const response = await requestApp
+        .get("trackGroups?title=super")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 0);
+      assert(response.statusCode === 200);
+    });
+
+    it("should GET / excludes trackGroups whose artist user cannot create artists", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+        canCreateArtists: false,
+      });
+      const artist = await createArtist(user.id);
+      await createTrackGroup(artist.id, { title: "Super Hyper Galaxy" });
+
+      const response = await requestApp
+        .get("trackGroups?title=super")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 0);
+      assert(response.statusCode === 200);
+    });
+
     it("should GET / ordered by release date", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);

@@ -4,6 +4,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { userHasPermission } from "../../../auth/passport";
 import { addSizesToImage } from "../../../utils/artist";
 import { finalCoversBucket } from "../../../utils/minio";
+import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -19,14 +20,7 @@ export default function () {
         audio: {
           uploadState: "SUCCESS",
         },
-
-        trackGroup: {
-          deletedAt: null,
-          publishedAt: { lte: new Date() },
-          artist: {
-            deletedAt: null,
-          },
-        },
+        trackGroup: whereForPublishedTrackGroups(),
       };
 
       if (title && typeof title === "string") {
