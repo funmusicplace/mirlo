@@ -1,6 +1,6 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 
 import prisma from "@mirlo/prisma";
 
@@ -18,7 +18,8 @@ export default function () {
     let { favorite } = req.body as unknown as {
       favorite?: boolean; // In cents
     };
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       const track = await prisma.track.findFirst({

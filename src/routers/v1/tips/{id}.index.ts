@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../auth/passport";
-import { User } from "@mirlo/prisma/client";
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 
 import { AppError } from "../../../utils/error";
 
@@ -12,7 +12,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const paidTip = await prisma.userArtistTip.findFirst({

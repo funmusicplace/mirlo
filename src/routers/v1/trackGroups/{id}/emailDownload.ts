@@ -51,7 +51,7 @@ export default function () {
       }
 
       if (req.user) {
-        const { id: userId, email } = req.user as User;
+        const { id: userId, email } = req.user;
 
         const purchaseExists = await prisma.userTrackGroupPurchase.findFirst({
           where: {

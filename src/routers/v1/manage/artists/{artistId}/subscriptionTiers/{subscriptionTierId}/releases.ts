@@ -3,9 +3,9 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import { AppError } from "../../../../../../../utils/error";
 
 type Params = {
@@ -26,7 +26,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { subscriptionTierId } = req.params as unknown as Params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
@@ -95,7 +96,8 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { subscriptionTierId } = req.params as unknown as Params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
     const { trackGroupId } = req.body;
 
     try {
@@ -207,7 +209,8 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { subscriptionTierId } = req.params as unknown as Params;
     const { trackGroupId } = req.query as unknown as QueryParams;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(

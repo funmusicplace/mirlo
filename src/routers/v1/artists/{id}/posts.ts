@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
@@ -19,7 +18,7 @@ export default function () {
       skip: string;
       take: string;
     };
-    const user = req.user as User;
+    const user = req.user;
 
     try {
       const parsedId = await findArtistIdForURLSlug(id);

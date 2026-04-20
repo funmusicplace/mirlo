@@ -1,10 +1,9 @@
-import { User } from "@mirlo/prisma/client";
-
 import { NextFunction, Request, Response } from "express";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
 import { getSiteSettings } from "../../../../../../../utils/settings";
@@ -31,7 +30,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { subscriptionTierId } = req.params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       let artistUser: { id: number } | undefined | null = user;
@@ -92,7 +92,8 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { subscriptionTierId } = req.params;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
@@ -192,7 +193,8 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     try {
       const { subscriptionTierId } = req.params;
-      const user = req.user as User;
+      assertLoggedIn(req);
+      const user = req.user;
 
       const tier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),

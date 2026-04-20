@@ -4,9 +4,9 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { processArtistBackground } from "../../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import { deleteArtistBackground } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import { busboyOptions } from "../../../../../utils/images";
@@ -76,7 +76,8 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const artist = await prisma.artist.findFirst({
         where: {

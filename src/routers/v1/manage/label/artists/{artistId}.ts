@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { AppError } from "../../../../../utils/error";
 
 export default function () {
@@ -15,7 +15,8 @@ export default function () {
       labelUserId?: string;
       isLabelApproved?: boolean;
     };
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     try {
       if (Number(labelUserId) !== loggedInUser.id) {

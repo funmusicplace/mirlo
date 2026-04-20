@@ -1,6 +1,6 @@
-import { User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../../utils/error";
 import { addSizesToImage } from "../../../../../utils/artist";
@@ -25,7 +25,8 @@ export default function () {
     const { userId } = req.params as unknown as Params;
     const { skip: skipQuery, take, notificationType } = req.query;
 
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     if (Number(userId) === Number(loggedInUser.id)) {
       const types = notificationType

@@ -1,4 +1,3 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../../../../logger";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
@@ -40,7 +39,7 @@ export default function () {
       let track;
 
       if (req.user) {
-        const user = req.user as User;
+        const user = req.user;
 
         if (!user.isAdmin) {
           const purchase = await findTrackPurchaseAndVoidToken(

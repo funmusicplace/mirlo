@@ -1,9 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 
 import prisma from "@mirlo/prisma";
 
@@ -49,7 +49,8 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const where = {
         userId: Number(loggedInUser.id),
@@ -93,7 +94,8 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { name, bio, urlSlug } = req.body;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
     try {
       name = name?.trim();
       urlSlug = urlSlug?.trim();

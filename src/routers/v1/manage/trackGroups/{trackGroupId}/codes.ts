@@ -1,9 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
 import { randomBytes } from "crypto";
@@ -23,7 +23,8 @@ export default function () {
     const { trackGroupId } = req.params as unknown as Params;
     const codes = req.body as unknown as { group: string; quantity: number }[];
 
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),

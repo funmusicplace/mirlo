@@ -3,6 +3,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { Prisma, User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { deleteUser, updateCurrencies } from "../../../../utils/user";
@@ -77,7 +78,8 @@ export default function () {
       urlSlug,
       isLabelAccount,
     } = req.body;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     if (user.id !== Number(userId)) {
       res.status(401).json({ error: "Editing invalid user" });
@@ -223,7 +225,8 @@ export default function () {
   }
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
     try {
       deleteUser(user.id);
     } catch (e) {

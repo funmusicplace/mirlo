@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 
 import {
   merchBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { AppError } from "../../../../../utils/error";
 import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
@@ -84,7 +84,8 @@ export default function () {
         // check that the artist who owns this merch also
         // owns this trackgroup, or that the logged-in user
         // is the label owner of the trackgroup
-        const user = req.user as User;
+        assertLoggedIn(req);
+        const user = req.user;
         const trackGroup = await prisma.trackGroup.findFirst({
           where: {
             id: Number(newValues.includePurchaseTrackGroupId),

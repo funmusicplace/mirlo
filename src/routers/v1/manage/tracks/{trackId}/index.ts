@@ -3,11 +3,11 @@ import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
 
 import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
-import { User } from "@mirlo/prisma/client";
 
 interface TrackBody {
   title: string;
@@ -114,7 +114,8 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { trackId: trackIdString } = req.params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     const trackId = Number(trackIdString);
     const track = await doesTrackBelongToUser(trackId, loggedInUser);

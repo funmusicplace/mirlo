@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 
 import { processSingleArtist, singleInclude } from "../../../../utils/artist";
 
@@ -15,7 +15,8 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const artists = await prisma.artistLabel.findMany({

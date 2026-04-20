@@ -1,10 +1,10 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   artistBelongsToLoggedInUser,
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import {
   getUserCountry,
@@ -77,7 +77,8 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { title, description, artistId } = req.body;
-    const user = req.user as User;
+    assertLoggedIn(req);
+    const user = req.user;
 
     try {
       const currencyString = await getUserCurrencyString(user.id);

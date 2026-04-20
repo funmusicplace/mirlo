@@ -1,9 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { processTrackAudio } from "../../../../../queues/processTrackAudio";
 import busboy from "connect-busboy";
@@ -30,7 +30,8 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const track = await doesTrackBelongToUser(Number(trackId), loggedInUser);
 

@@ -1,4 +1,3 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import prisma from "@mirlo/prisma";
@@ -44,7 +43,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id, segment }: { id?: string; segment?: string } = req.params;
-    const user = req.user as User | undefined;
+    const user = req.user;
 
     try {
       const track = await prisma.track.findUnique({

@@ -49,9 +49,7 @@ export default function () {
         });
 
       if (!confirmation) {
-        res.redirect(
-          applicationUrl + `/?message=Something went wrong`
-        );
+        res.redirect(applicationUrl + `/?message=Something went wrong`);
       }
 
       if (confirmation) {

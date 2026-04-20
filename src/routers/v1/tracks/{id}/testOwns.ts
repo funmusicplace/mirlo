@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { User } from "@mirlo/prisma/client";
 
 type Query = {
   urlSlug?: string;
@@ -17,11 +16,11 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { id } = req.params;
     const { email } = req.query as unknown as Query;
-    const user = req.user as User;
+    const user = req.user;
     try {
       let userEmail = email;
       let exists = false;
-      if (!userEmail) {
+      if (!userEmail && user) {
         userEmail = user.email;
       }
       if (userEmail) {

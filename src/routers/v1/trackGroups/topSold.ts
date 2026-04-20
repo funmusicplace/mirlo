@@ -1,4 +1,4 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import processor, {
@@ -13,7 +13,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { take = 50, datePurchased } = req.query;
-    const loggedInUser = req.user as User | null;
+    const loggedInUser = req.user;
 
     try {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();

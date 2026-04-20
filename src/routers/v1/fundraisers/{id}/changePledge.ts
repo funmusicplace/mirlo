@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { AppError } from "../../../../utils/error";
 
 type Query = {
@@ -18,7 +18,8 @@ export default function () {
 
   async function DELETE(req: Request, res: Response) {
     const { id } = req.params;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const pledge = await prisma.fundraiserPledge.findFirst({
         where: {
@@ -46,7 +47,8 @@ export default function () {
   async function PUT(req: Request, res: Response) {
     const { id } = req.params;
     const { amount } = req.body;
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const pledge = await prisma.fundraiserPledge.findFirst({
         where: {

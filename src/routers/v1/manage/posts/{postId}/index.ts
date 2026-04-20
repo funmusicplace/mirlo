@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
@@ -26,7 +26,8 @@ export default function () {
         shouldSendEmail,
         urlSlug,
       } = req.body;
-      const user = req.user as User;
+      assertLoggedIn(req);
+      const user = req.user;
 
       if (minimumSubscriptionTierId !== undefined) {
         const validTier = await prisma.artistSubscriptionTier.findFirst({

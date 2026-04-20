@@ -1,4 +1,3 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
@@ -16,7 +15,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    const loggedInUser = req.user;
 
     try {
       const user = await prisma.user.findUnique({

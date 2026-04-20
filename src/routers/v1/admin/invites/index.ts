@@ -1,4 +1,4 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
@@ -6,6 +6,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { uniqBy } from "lodash";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { getClient } from "../../../../activityPub/utils";
@@ -21,7 +22,8 @@ export default function () {
       users: { email: string }[];
       inviteType: "ARTIST" | "LABEL" | "LISTENER";
     };
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       const existingInvites = (
         await prisma.invite.findMany({

@@ -1,4 +1,3 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
@@ -16,7 +15,7 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    const user = req.user as User;
+    const user = req.user;
     const { email } = req.body ?? {};
 
     try {

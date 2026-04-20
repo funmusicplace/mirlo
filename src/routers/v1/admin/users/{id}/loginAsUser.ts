@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../auth/passport";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { setTokens } from "../../../../auth/utils";
 import { logger } from "../../../../../logger";
 
@@ -16,6 +16,7 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
+      assertLoggedIn(req);
       const user = await prisma.user.findUnique({
         where: { id: Number(id) },
         select: { id: true, email: true },
@@ -24,9 +25,7 @@ export default function () {
         return res.status(404).json({ message: "User not found" });
       }
       setTokens(res, user);
-      logger.info(
-        `Admin ${(req.user as User).email} logged in as user ${user.email}`
-      );
+      logger.info(`Admin ${req.user.email} logged in as user ${user.email}`);
       res.json({ message: "success" });
     } catch (e) {
       next(e);

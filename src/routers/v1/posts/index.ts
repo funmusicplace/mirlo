@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { User, Prisma } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 
 import postProcessor from "../../../utils/post";
 
@@ -13,7 +13,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const user = req.user as User;
+    const user = req.user;
     const { take, skip } = req.query;
     try {
       const artistVisibility: Prisma.PostWhereInput = {

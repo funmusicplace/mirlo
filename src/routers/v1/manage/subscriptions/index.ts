@@ -1,6 +1,7 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 
 type Params = {
@@ -15,7 +16,8 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
     const { artistId } = req.query as unknown as { artistId: string };
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     try {
       if (Number(userId) === Number(loggedInUser.id)) {
         const where: Prisma.ArtistUserSubscriptionWhereInput = {

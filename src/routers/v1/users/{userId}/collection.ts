@@ -1,6 +1,7 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import trackGroupProcessor, {
   processSingleTrackGroup,
@@ -21,7 +22,8 @@ export default function () {
     const { userId } = req.params as unknown as Params;
     const { trackGroupId } = req.query as unknown as { trackGroupId: string };
 
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
     if (Number(userId) === Number(loggedInUser.id)) {
       const where: Prisma.UserTrackGroupPurchaseWhereInput = {
         userId: Number(userId),

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
 
 import { userAuthenticated } from "../../../../auth/passport";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import {
   doesMerchBelongToUser,
@@ -18,7 +18,8 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const loggedInUser = req.user as User;
+    assertLoggedIn(req);
+    const loggedInUser = req.user;
 
     const { filename, trackGroupId, merchId, mimeType } = req.body;
     try {
