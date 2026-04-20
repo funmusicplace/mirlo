@@ -151,7 +151,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
         />
       </div>
       {tags.length > 0 && (
-        <div
+        <ul
           className={css`
             list-style: none;
             display: flex;
@@ -161,14 +161,11 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
           `}
         >
           {tags.map((tag, index) => (
-            <ArtistTag
-              tag={tag}
-              index={index}
-              key={tag}
-              removeTag={removeTag}
-            />
+            <li key={tag}>
+              <ArtistTag tag={tag} index={index} removeTag={removeTag} />
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </FormComponent>
   );
