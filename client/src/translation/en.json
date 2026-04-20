@@ -1218,6 +1218,7 @@
     "atSubscriptionTier": "at {{subscriptionTier}}",
     "manageOnArtistPage": "Manage on artist page",
     "newRelease": "New Release",
+    "availableForPreorder": "Available for Pre-order",
     "newPost": "New Post",
     "newFollower": "New Follower",
     "newSubscriber": "New Subscriber",
