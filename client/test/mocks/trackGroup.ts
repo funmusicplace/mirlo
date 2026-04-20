@@ -45,6 +45,9 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
       "1500": "/images/features/artist-page-sample-1.png",
     },
   },
+  isPreorder: false,
+  scheduleEndOnReleaseDate: false,
+  makeTracksPreviewableOnRelease: false,
   tags: [],
   tracks: [],
 };

@@ -100,7 +100,7 @@ interface TrackGroup {
   adminEnabled: boolean;
   catalogNumber?: string;
   id: number;
-  releaseDate: string;
+  releaseDate?: string;
   publishedAt?: string;
   about?: string;
   currency: string;
@@ -147,6 +147,9 @@ interface TrackGroup {
   defaultTrackAllowIndividualSale: boolean;
   defaultTrackMinPrice?: number; // in cents
   defaultIsPreview: boolean;
+  isPreorder: boolean;
+  scheduleEndOnReleaseDate: boolean;
+  makeTracksPreviewableOnRelease: boolean;
 }
 
 interface Post {
@@ -188,6 +191,7 @@ interface Notification {
   notificationType:
     | "NEW_ARTIST_POST"
     | "NEW_ARTIST_ALBUM"
+    | "NEW_ARTIST_PREORDER"
     | "USER_BOUGHT_YOUR_ALBUM"
     | "USER_BOUGHT_YOUR_TRACK"
     | "USER_FOLLOWED_YOU"
