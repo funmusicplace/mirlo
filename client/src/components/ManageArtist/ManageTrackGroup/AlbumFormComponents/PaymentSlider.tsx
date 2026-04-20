@@ -138,6 +138,7 @@ const PaymentSlider: React.FC<{
         <div className="flex gap-2 items-center justify-between">
           <output
             aria-atomic="true"
+            aria-live="polite"
             className="flex flex-auto gap-2 items-center justify-between"
             htmlFor="input-platform-percent"
             id="output-platform-percent"
