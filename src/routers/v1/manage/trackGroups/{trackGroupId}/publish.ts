@@ -33,10 +33,13 @@ export default function () {
         }
       }
 
+      const now = new Date();
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },
         data: {
-          publishedAt: isCurrentlyPublished ? null : new Date(),
+          publishedAt: isCurrentlyPublished ? null : now,
+          ...(!isCurrentlyPublished &&
+            !trackGroup.releaseDate && { releaseDate: now }),
         },
       });
       if (updatedTrackgroup.publishedAt) {
@@ -53,7 +56,9 @@ export default function () {
             return {
               userId: follower.userId,
               trackGroupId: updatedTrackgroup.id,
-              notificationType: "NEW_ARTIST_ALBUM",
+              notificationType: updatedTrackgroup.isPreorder
+                ? "NEW_ARTIST_PREORDER"
+                : "NEW_ARTIST_ALBUM",
             };
           }),
         });

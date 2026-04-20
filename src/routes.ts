@@ -110,6 +110,7 @@ const routes = [
   "manage/trackGroups/{trackGroupId}/tracks",
   "manage/trackGroups/{trackGroupId}/trackOrder",
   "manage/trackGroups/{trackGroupId}/publish",
+  "manage/trackGroups/{trackGroupId}/endPreorder",
   "manage/trackGroups/{trackGroupId}/tags",
   "manage/trackGroups/{trackGroupId}/cover",
   "manage/trackGroups/{trackGroupId}/codes",

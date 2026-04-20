@@ -116,6 +116,9 @@ export default function () {
         "defaultIsPreview",
         "catalogNumber",
         "urlSlug",
+        "isPreorder",
+        "scheduleEndOnReleaseDate",
+        "makeTracksPreviewableOnRelease",
       ]);
 
       const existingTrackGroup = await prisma.trackGroup.findFirst({
