@@ -28,6 +28,7 @@ const ArtistTag: React.FC<{
   index: number;
   removeTag: (idx: number) => void;
 }> = ({ tag, index, removeTag }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const onClick = React.useCallback(() => {
     removeTag(index);
   }, [removeTag, index]);
@@ -36,6 +37,7 @@ const ArtistTag: React.FC<{
     <Pill>
       {tag}{" "}
       <ArtistButton
+        aria-label={t("removeTag", { tagName: tag })}
         startIcon={<FaTimes />}
         onClick={onClick}
         onlyIcon
