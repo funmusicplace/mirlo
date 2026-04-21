@@ -164,7 +164,7 @@ export default function () {
     const loggedInUser = req.user;
 
     try {
-      if (!labelUserId) {
+      if (!labelUserId || !Number.isFinite(Number(labelUserId))) {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
@@ -181,6 +181,20 @@ export default function () {
         });
       }
 
+      const labelUser = await prisma.user.findFirst({
+        where: {
+          id: labelUserId,
+          deletedAt: null,
+        },
+      });
+
+      if (!labelUser) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Label user not found",
+        });
+      }
+
       const data: Prisma.ArtistLabelCreateArgs["data"] = {
         labelUserId,
         artistId: Number(artistId),
@@ -188,6 +202,13 @@ export default function () {
 
       const isLabelAddingArtist = loggedInUser.id === labelUserId;
       const isArtistAddingLabel = loggedInUser.id === artist.userId;
+
+      if (!isLabelAddingArtist && !isArtistAddingLabel) {
+        throw new AppError({
+          httpCode: 401,
+          description: "You are not allowed to add this label",
+        });
+      }
 
       if (isLabelAddingArtist) {
         data.isLabelApproved = isLabelApproved;

@@ -40,10 +40,12 @@ const ArtistLabels: React.FC<{ refetch: () => void }> = ({ refetch }) => {
   );
 
   const searchLabels = React.useCallback(async (search: string) => {
-    const options = await api.getMany<User>(`labels?email=${search}`);
+    const options = await api.getMany<Artist>(
+      `labels?name=${search}&includeUnpublished=true`
+    );
     return options.results.map((r) => ({
-      id: r.id,
-      name: `${r.name} (${r.email})`,
+      id: r.userId,
+      name: r.name,
     }));
   }, []);
 

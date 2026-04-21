@@ -10,16 +10,12 @@ import {
   finalCoversBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
-  finalUserAvatarBucket,
 } from "./utils/minio";
 import { Client } from "@mirlo/prisma/client";
-import { isNumber, isString, isUndefined } from "lodash";
 import { getSiteSettings } from "./utils/settings";
-import uuid from "uuid";
 import {
   fetchArtistMetadata,
   fetchAlbumMetadata,
-  fetchTrackMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
 } from "./parseIndex/metadata";

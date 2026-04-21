@@ -371,7 +371,7 @@ model ArtistSubscriptionTier {
   allowVariable          Boolean?
   maxAmount              Int? // in cents
   defaultAmount          Int? // in cents
-  currency               String                    @default("USD")
+  currency               String                    @default("usd")
   interval               Interval                  @default(MONTH)
   userSubscriptions      ArtistUserSubscription[]
   stripeProductKey       String?
@@ -443,7 +443,7 @@ model ArtistTipTier {
   allowVariable     Boolean?
   maxAmount         Int? // in cents
   defaultAmount     Int? // in cents
-  currency          String          @default("USD")
+  currency          String          @default("usd")
   userSubscriptions UserArtistTip[]
   stripeProductKey  String?
   createdAt         DateTime        @default(now())
@@ -460,7 +460,7 @@ model ArtistUserSubscription {
   user                          User                           @relation(fields: [userId], references: [id])
   amount                        Int // In cents
   platformCut                   Int? // in cents
-  currency                      String                         @default("USD")
+  currency                      String                         @default("usd")
   stripeSubscriptionKey         String?
   createdAt                     DateTime                       @default(now())
   updatedAt                     DateTime                       @default(now()) @updatedAt
