@@ -304,29 +304,81 @@ export const turnSubscribersIntoFollowers = (
   };
 };
 
+const parsePublicKeyFromActorDoc = (
+  data: any,
+  expectedKeyId: string
+): string | null => {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  if (typeof data.publicKeyPem === "string") {
+    return data.publicKeyPem;
+  }
+
+  if (
+    data.publicKey &&
+    typeof data.publicKey === "object" &&
+    typeof data.publicKey.publicKeyPem === "string"
+  ) {
+    if (!data.publicKey.id || data.publicKey.id === expectedKeyId) {
+      return data.publicKey.publicKeyPem;
+    }
+  }
+
+  if (Array.isArray(data.publicKey)) {
+    const matchingPublicKey = data.publicKey.find(
+      (pk: any) =>
+        pk?.id === expectedKeyId && typeof pk?.publicKeyPem === "string"
+    );
+    if (matchingPublicKey?.publicKeyPem) {
+      return matchingPublicKey.publicKeyPem;
+    }
+
+    const firstValidPublicKey = data.publicKey.find(
+      (pk: any) => typeof pk?.publicKeyPem === "string"
+    );
+    if (firstValidPublicKey?.publicKeyPem) {
+      return firstValidPublicKey.publicKeyPem;
+    }
+  }
+
+  return null;
+};
+
+const fetchWithHeaders = async (url: string) => {
+  const response = await fetch(url, {
+    headers: {
+      Accept:
+        'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json',
+    },
+  });
+  return response;
+};
+
 export async function fetchRemotePublicKey(keyId: string): Promise<string> {
   try {
-    const response = await fetch(keyId, {
-      headers: {
-        Accept: "application/activity+json",
-      },
-    });
+    let response = await fetchWithHeaders(keyId);
+
+    // Some servers return 404 for keyId URLs with fragments (e.g. actor#main-key).
+    // Fallback to the actor document and extract the key from there.
+    if (!response.ok && response.status === 404 && keyId.includes("#")) {
+      const actorUrl = keyId.split("#")[0];
+      response = await fetchWithHeaders(actorUrl);
+    }
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch public key: ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch public key (${response.status}): ${response.statusText}`
+      );
     }
 
-    const data = (await response.json()) as {
-      publicKeyPem?: string;
-      publicKey?: { publicKeyPem?: string };
-    };
+    const data = await response.json();
 
-    if (data.publicKeyPem) {
-      return data.publicKeyPem;
-    }
+    const publicKeyPem = parsePublicKeyFromActorDoc(data, keyId);
 
-    if (data.publicKey?.publicKeyPem) {
-      return data.publicKey.publicKeyPem;
+    if (publicKeyPem) {
+      return publicKeyPem;
     }
 
     throw new Error("No publicKeyPem found in actor document");
