@@ -152,7 +152,10 @@ const PreOrderSection: React.FC<{
                     id="hint-schedule-preorder-release"
                     className="block mt-1"
                   >
-                    {t("releaseDatePreorderHint")}
+                    <Trans
+                      i18nKey="manageAlbum.schedulePreorderNotPublicationHint"
+                      components={{ strong: <strong /> }}
+                    />
                   </small>
                 </div>
               </div>
@@ -173,23 +176,28 @@ const PreOrderSection: React.FC<{
               )}
 
               {scheduleOnReleaseDate && hasReleaseDate && (
-                <div className="w-fit rounded border border-black/10 bg-(--mi-lighten-background-color) p-3 opacity-80">
-                  <label
-                    htmlFor="input-preorder-release-date"
-                    className="text-sm text-(--mi-neutral-500)"
-                  >
-                    {t("currentReleaseDate")}
-                  </label>
-                  <InputEl
-                    id="input-preorder-release-date"
-                    type="date"
-                    value={releaseDateValue}
-                    disabled
-                    aria-describedby="hint-preorder-release-date"
-                    className="mt-1 opacity-60"
-                  />
-                  <small id="hint-preorder-release-date" className="sr-only">
-                    {t("releaseDateScheduledHint")}
+                <div className="flex flex-col sm:flex-row items-start gap-3">
+                  <div className="w-fit rounded border border-black/10 bg-(--mi-lighten-background-color) p-3 opacity-80">
+                    <label
+                      htmlFor="input-preorder-release-date"
+                      className="text-sm text-(--mi-neutral-500)"
+                    >
+                      {t("currentReleaseDate")}
+                    </label>
+                    <InputEl
+                      id="input-preorder-release-date"
+                      type="date"
+                      value={releaseDateValue}
+                      disabled
+                      aria-describedby="hint-preorder-release-date"
+                      className="mt-1 opacity-60"
+                    />
+                    <small id="hint-preorder-release-date" className="sr-only">
+                      {t("releaseDateScheduledHint")}
+                    </small>
+                  </div>
+                  <small className="flex-1 mt-1">
+                    {t("releaseDatePreorderHint")}
                   </small>
                 </div>
               )}

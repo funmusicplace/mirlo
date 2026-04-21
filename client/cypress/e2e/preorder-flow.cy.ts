@@ -189,7 +189,9 @@ describe("pre-order flow", () => {
 
       // Modal should appear
       cy.get('[role="dialog"]').within(() => {
-        cy.contains("Set all tracks as free listen").should("exist");
+        cy.contains("Set all tracks as playable on release day").should(
+          "exist"
+        );
 
         // Check the make-tracks-previewable checkbox in the modal
         cy.get("#input-make-tracks-previewable").check({ force: true });
