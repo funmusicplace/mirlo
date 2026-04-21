@@ -1,12 +1,12 @@
-import styled from "@emotion/styled";
+import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { FormProvider, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import styled from "@emotion/styled";
 
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
-import api from "services/api";
+import { useBulkSetTracksIsPreviewMutation } from "queries/trackGroups";
 import { useSnackbar } from "state/SnackbarContext";
 import SavingInput from "./SavingInput";
 
@@ -30,18 +30,22 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<TrackGroup>({ defaultValues: trackGroup });
   const snackbar = useSnackbar();
+  const { mutate: bulkSetTracksIsPreview } =
+    useBulkSetTracksIsPreviewMutation();
 
-  const handleSetAllTracksPreview = async (isPreview: boolean) => {
-    try {
-      await api.put<{ isPreview: boolean }, { result: TrackGroup }>(
-        `manage/trackGroups/${trackGroup.id}/tracks`,
-        { isPreview }
-      );
-      snackbar(t("updatedAllTracks"), { type: "success" });
-      reload();
-    } catch (e) {
-      console.error("Error updating tracks:", e);
-    }
+  const handleSetAllTracksPreview = (isPreview: boolean) => {
+    bulkSetTracksIsPreview(
+      { trackGroupId: trackGroup.id, isPreview },
+      {
+        onSuccess: () => {
+          snackbar(t("updatedAllTracks"), { type: "success" });
+          reload();
+        },
+        onError: (e) => {
+          console.error("Error updating tracks:", e);
+        },
+      }
+    );
   };
 
   return (

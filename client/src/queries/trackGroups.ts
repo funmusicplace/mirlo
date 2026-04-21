@@ -161,6 +161,27 @@ export function useUpdateTrackGroupMutation() {
   });
 }
 
+async function bulkSetTracksIsPreview(opts: {
+  trackGroupId: number;
+  isPreview: boolean;
+}) {
+  return api.put(`v1/manage/trackGroups/${opts.trackGroupId}/tracks`, {
+    isPreview: opts.isPreview,
+  });
+}
+
+export function useBulkSetTracksIsPreviewMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: bulkSetTracksIsPreview,
+    async onSuccess() {
+      await client.invalidateQueries({
+        predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
+      });
+    },
+  });
+}
+
 async function updatePledge(opts: { fundraiserId: number; amount: number }) {
   await api.put(`v1/fundraisers/${opts.fundraiserId}/changePledge`, {
     amount: opts.amount,
