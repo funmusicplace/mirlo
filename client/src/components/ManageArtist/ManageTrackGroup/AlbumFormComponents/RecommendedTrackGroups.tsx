@@ -21,6 +21,7 @@ const RecommendedTrackGroups: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const [showSearch, setShowSearch] = React.useState(false);
+  const [didAddRecommendation, setDidAddRecommendation] = React.useState(false);
 
   const { data: { results } = {}, refetch } = useQuery(
     queryManagedRecommendedTrackGroups(trackGroupId)
@@ -102,6 +103,22 @@ const RecommendedTrackGroups: React.FC<{
     );
   };
 
+  const searchRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (didAddRecommendation) {
+      searchRef.current?.focus();
+    }
+  }, [didAddRecommendation, searchRef.current]);
+
+  React.useEffect(() => {
+    if (showSearch) {
+      setDidAddRecommendation(true);
+    } else {
+      setDidAddRecommendation(false);
+    }
+  }, [showSearch]);
+
   return (
     <>
       <h2>{t("recommendedAlbums")}</h2>
@@ -158,6 +175,7 @@ const RecommendedTrackGroups: React.FC<{
                 id="input-track-group"
                 onSelect={handleAddRecommendation}
                 placeholder={t("searchPlaceholder")}
+                ref={searchRef}
               />
             </FormComponent>
 
