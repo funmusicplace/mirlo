@@ -314,7 +314,7 @@ model Artist {
   paymentToUser                      User?                                @relation(fields: [paymentToUserId], references: [id], name: "paymentToUser")
   isLabelProfile                     Boolean                              @default(false)
   artistLocationTags                 ArtistLocationTag[]
-  allowDirectMessages                Boolean                              @default(true)
+  allowDirectMessages                Boolean                              @default(false)
 }
 
 model ArtistAvatar {
