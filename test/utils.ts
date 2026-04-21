@@ -88,6 +88,7 @@ export const createArtist = async (
       subscriptionTiers: data?.subscriptionTiers,
       activityPub: data?.activityPub ?? false,
       isLabelProfile: data?.isLabelProfile ?? false,
+      paymentToUserId: data?.paymentToUserId,
     },
     include: {
       subscriptionTiers: true,

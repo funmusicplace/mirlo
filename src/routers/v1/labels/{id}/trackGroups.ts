@@ -35,7 +35,6 @@ export default function () {
           ...where,
           OR: [
             { paymentToUserId: labelProfile?.userId },
-            { artist: { userId: labelProfile?.userId } },
             { artistId: artistId },
           ],
         },

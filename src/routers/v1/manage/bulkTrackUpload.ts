@@ -3,6 +3,7 @@ import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import { AppError, HttpCode } from "../../../utils/error";
+import { ArtistLabel } from "@mirlo/prisma/client";
 // @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
 
@@ -88,9 +89,13 @@ export default function () {
           let artist = await prisma.artist.findFirst({
             where: {
               name: artistName,
-              user: {
-                id: loggedInUserId,
-              },
+              OR: [
+                { userId: loggedInUserId },
+                { paymentToUserId: loggedInUserId },
+              ],
+            },
+            include: {
+              artistLabels: true,
             },
           });
 
@@ -100,6 +105,9 @@ export default function () {
                 name: artistName,
                 urlSlug: slug(artistName),
                 userId: loggedInUserId,
+              },
+              include: {
+                artistLabels: true,
               },
             });
             result.artistsCreated++;
@@ -136,16 +144,35 @@ export default function () {
                 });
               }
 
+              // Determine if label should receive payments for this release
+              let paymentToUserId: number | undefined = undefined;
+              if (
+                artist?.artistLabels?.some(
+                  (label: ArtistLabel) =>
+                    label.labelUserId === loggedInUserId &&
+                    label.canLabelAddReleases
+                )
+              ) {
+                paymentToUserId = loggedInUserId;
+              }
+
               // Create the track group
               const createdTrackGroup = await prisma.trackGroup.create({
                 data: {
                   title: trackGroup.title,
-                  artistId: artist.id,
+                  artist: { connect: { id: artist.id } },
                   urlSlug: finalSlug,
                   about: trackGroup.about,
-                  releaseDate: trackGroup.releaseDate,
-                  publishedAt: trackGroup.publishedAt,
+                  releaseDate: trackGroup.releaseDate
+                    ? new Date(trackGroup.releaseDate)
+                    : undefined,
+                  publishedAt: trackGroup.publishedAt
+                    ? new Date(trackGroup.publishedAt)
+                    : undefined,
                   catalogNumber: trackGroup.catalogNumber,
+                  ...(paymentToUserId && {
+                    paymentToUser: { connect: { id: paymentToUserId } },
+                  }),
                 },
               });
               result.trackGroupsCreated++;
