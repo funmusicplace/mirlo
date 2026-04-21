@@ -557,5 +557,145 @@ describe("manage/bulkTrackUpload", () => {
       );
       assert.equal(trackGroup.catalogNumber, "CAT-2024-001");
     });
+
+    it("should set paymentToUserId when label creates track groups via bulk upload", async () => {
+      const { user: labelUser, accessToken: labelAccessToken } =
+        await createUser({ email: "label@example.com" });
+      const { user: artistUser } = await createUser({
+        email: "artist@example.com",
+      });
+      const artistName = "Label Featured Artist";
+
+      const artist = await createArtist(artistUser.id, {
+        name: artistName,
+        paymentToUserId: labelUser.id,
+      });
+
+      // Set up label relationship with permission to add releases
+      await prisma.artistLabel.create({
+        data: {
+          labelUserId: labelUser.id,
+          artistId: artist.id,
+          canLabelAddReleases: true,
+          canLabelManageArtist: true,
+          isLabelApproved: true,
+          isArtistApproved: true,
+        },
+      });
+
+      const labels = await prisma.artist.findMany({
+        where: {
+          id: artist.id,
+        },
+        include: {
+          artistLabels: true,
+        },
+      });
+
+      const response = await requestApp
+        .post("manage/bulkTrackUpload")
+        .set("Cookie", [`jwt=${labelAccessToken}`])
+        .send({
+          artists: [
+            {
+              name: artistName,
+              trackGroups: [
+                {
+                  title: "Label Release Album",
+                  tracks: [
+                    {
+                      title: "Label Release Track",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.trackGroupsCreated, 1);
+
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          title: "Label Release Album",
+        },
+      });
+
+      assert(trackGroup);
+      assert.equal(
+        trackGroup.paymentToUserId,
+        labelUser.id,
+        "paymentToUserId should be set to label user ID"
+      );
+    });
+
+    it("should NOT set paymentToUserId when label lacks canLabelAddReleases permission", async () => {
+      const { user: labelUser, accessToken: labelAccessToken } =
+        await createUser({ email: "restrictedlabel@example.com" });
+      const { user: artistUser } = await createUser({
+        email: "artist2@example.com",
+      });
+
+      const artist = await createArtist(artistUser.id, {
+        name: "Restricted Artist",
+      });
+
+      // Set up label relationship WITHOUT canLabelAddReleases permission
+      await prisma.artistLabel.create({
+        data: {
+          labelUserId: labelUser.id,
+          artistId: artist.id,
+          canLabelAddReleases: false,
+          canLabelManageArtist: true,
+          isLabelApproved: true,
+          isArtistApproved: true,
+        },
+      });
+
+      const response = await requestApp
+        .post("manage/bulkTrackUpload")
+        .set("Cookie", [`jwt=${labelAccessToken}`])
+        .send({
+          artists: [
+            {
+              name: "Restricted Artist",
+              trackGroups: [
+                {
+                  title: "Restricted Release Album",
+                  tracks: [
+                    {
+                      title: "Restricted Release Track",
+                      order: 1,
+                      artists: [],
+                      metadata: {},
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          title: "Restricted Release Album",
+        },
+      });
+
+      assert(trackGroup);
+      assert.equal(
+        trackGroup.paymentToUserId,
+        null,
+        "paymentToUserId should NOT be set when label lacks permission"
+      );
+    });
   });
 });
