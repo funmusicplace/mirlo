@@ -81,14 +81,14 @@ const SavingInput: React.FC<{
         formKey === "publishedAt" ||
         formKey === "fundraisingEndDate"
       ) {
-        value = new Date(value).toISOString();
+        value = value ? new Date(value).toISOString() : null;
       } else if (
         formKey === "minPrice" ||
         formKey === "suggestedPrice" ||
         !!currency ||
         multiplyBy100
       ) {
-        value = value ? value * 100 : undefined;
+        value = value ? value * 100 : null;
       }
 
       if (valueTransform) {

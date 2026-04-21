@@ -39,9 +39,12 @@ html {
   --mi-neutral-500: #8b8083;
   --mi-red-100: #ffe5ea;
   --mi-red-700: #6e162d;
+  --mi-red-800: #43141e;
   --mi-blue-100: #e1f4fc;
   --mi-blue-700: #34515c;
   --mi-green-100: #dff2dc;
+  --mi-green-500: #44633f;
+  --mi-green-700: #21381d;
 
   --mi-warning-color: #f2897a;
   --mi-warning-background-color: var(--mi-warning-color);

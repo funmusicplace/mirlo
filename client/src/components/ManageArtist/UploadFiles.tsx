@@ -17,7 +17,7 @@ const UploadFiles = React.forwardRef<
   const inputId = `input-${nameForId}`;
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* The `label` element displays the drop/click area and the `input` element and its default UI are visually hidden. `input` is before `label` so that a focus ring can be applied to `label` while the `input` has focus. */}
       <input
         accept={accept}
