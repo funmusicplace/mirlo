@@ -27,6 +27,7 @@ const FundraisingGoal: React.FC<{
   const { artistId } = useParams();
   const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [didAddFundraiser, setDidAddFundraiser] = React.useState(false);
 
   const { data: trackGroup, refetch } = useQuery(
     queryManagedTrackGroup(trackGroupId)
@@ -70,7 +71,7 @@ const FundraisingGoal: React.FC<{
   const onAddFundraiser = async () => {
     try {
       setIsLoading(true);
-
+      setDidAddFundraiser(true);
       await api.post(`manage/trackGroups/${trackGroupId}/fundraiser`, {});
       refetch();
     } catch (e) {
@@ -83,6 +84,7 @@ const FundraisingGoal: React.FC<{
   const onRemoveFundraiser = async () => {
     try {
       setIsLoading(true);
+      setDidAddFundraiser(false);
       if (!fundraiser) {
         return;
       }
@@ -111,6 +113,15 @@ const FundraisingGoal: React.FC<{
       setIsLoading(false);
     }
   };
+
+  const goalRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    console.log(didAddFundraiser, goalRef);
+    if (didAddFundraiser) {
+      goalRef.current?.focus();
+    }
+  }, [didAddFundraiser, goalRef.current]);
 
   if (!fundraiser) {
     return (
@@ -182,6 +193,7 @@ const FundraisingGoal: React.FC<{
             ariaDescribedBy="description-goal-amount"
             formKey="goalAmount"
             id="input-goal-amount"
+            ref={goalRef}
             url={`manage/fundraisers/${fundraiser.id}`}
             extraData={{ artistId: Number(artistId) }}
             type="number"
