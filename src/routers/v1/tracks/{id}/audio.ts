@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { validate as uuidValidate } from "uuid";
 
 import prisma from "@mirlo/prisma";
 
@@ -15,8 +16,22 @@ export default function () {
     const { id }: { id?: string; segment?: string } = req.params;
 
     try {
+      if (!id) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Missing track identifier",
+        });
+      }
+
+      if (!uuidValidate(id)) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Invalid track identifier",
+        });
+      }
+
       const track = await prisma.trackAudio.findUnique({
-        where: { id: id },
+        where: { id },
         include: {
           track: true,
         },
