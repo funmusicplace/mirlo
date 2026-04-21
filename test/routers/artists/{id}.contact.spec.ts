@@ -107,7 +107,9 @@ describe("artists/{id}/contact", () => {
       const { user: sender, accessToken } = await createUser({
         email: "sender@sender.com",
       });
-      const artist = await createArtist(artistUser.id);
+      const artist = await createArtist(artistUser.id, {
+        allowDirectMessages: true,
+      });
 
       const response = await requestApp
         .post(`artists/${artist.id}/contact`)
@@ -136,7 +138,9 @@ describe("artists/{id}/contact", () => {
       const { user: sender, accessToken } = await createUser({
         email: "sender@sender.com",
       });
-      const artist = await createArtist(artistUser.id);
+      const artist = await createArtist(artistUser.id, {
+        allowDirectMessages: true,
+      });
 
       await prisma.notification.createMany({
         data: Array.from({ length: 24 }, () => ({

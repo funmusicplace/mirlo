@@ -89,6 +89,7 @@ export const createArtist = async (
       activityPub: data?.activityPub ?? false,
       isLabelProfile: data?.isLabelProfile ?? false,
       paymentToUserId: data?.paymentToUserId,
+      allowDirectMessages: data?.allowDirectMessages ?? false,
     },
     include: {
       subscriptionTiers: true,
