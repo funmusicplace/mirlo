@@ -33,6 +33,11 @@ const DestinationListItem: React.FC<{
     : defaultOption;
 
   const homeCountry = methods.watch(`destinations.${index}.homeCountry`);
+  const idPrefix = `input-destination-${index}`;
+  const homeCountryId = `${idPrefix}-home-country`;
+  const destinationCountryId = `${idPrefix}-destination-country`;
+  const costPerUnitId = `${idPrefix}-cost-per-unit`;
+  const costPerAdditionalUnitId = `${idPrefix}-cost-per-additional-unit`;
   return (
     <li>
       {isEditing && (
@@ -50,8 +55,9 @@ const DestinationListItem: React.FC<{
           `}
         >
           <FormComponent>
-            <label>{t("homeCountry")}</label>
+            <label htmlFor={homeCountryId}>{t("homeCountry")}</label>
             <SelectEl
+              id={homeCountryId}
               {...methods.register(`destinations.${index}.homeCountry`)}
             >
               {countryCodesCurrencies
@@ -64,8 +70,11 @@ const DestinationListItem: React.FC<{
             </SelectEl>
           </FormComponent>
           <FormComponent>
-            <label>{t("destinationCountry")}</label>
+            <label htmlFor={destinationCountryId}>
+              {t("destinationCountry")}
+            </label>
             <SelectEl
+              id={destinationCountryId}
               {...methods.register(`destinations.${index}.destinationCountry`)}
             >
               <option value="">{defaultOption}</option>
@@ -79,8 +88,9 @@ const DestinationListItem: React.FC<{
             </SelectEl>
           </FormComponent>
           <FormComponent>
-            <label>{t("costUnit")}</label>
+            <label htmlFor={costPerUnitId}>{t("costUnit")}</label>
             <InputEl
+              id={costPerUnitId}
               type="number"
               min={0}
               step={0.01}
@@ -88,8 +98,11 @@ const DestinationListItem: React.FC<{
             />
           </FormComponent>
           <FormComponent>
-            <label>{t("costExtraUnit")}</label>
+            <label htmlFor={costPerAdditionalUnitId}>
+              {t("costExtraUnit")}
+            </label>
             <InputEl
+              id={costPerAdditionalUnitId}
               type="number"
               min={0}
               step={0.01}
@@ -108,7 +121,7 @@ const DestinationListItem: React.FC<{
       {!isEditing && (
         <>
           <em>
-            {dest.homeCountry} -&gt; {destinationString}
+            {dest.homeCountry} &#x2192; {destinationString}
           </em>
           {dest.currency && (
             <>

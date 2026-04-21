@@ -102,26 +102,31 @@ const MerchForm: React.FC<{
         `}
       >
         <FormComponent>
-          <label>{t("merchTitle")}</label>
+          <label htmlFor="input-merch-title">{t("merchTitle")}</label>
           <SavingInput
             formKey="title"
+            id="input-merch-title"
             url={`manage/merch/${merch.id}`}
             extraData={{}}
           />
         </FormComponent>
         <FormComponent>
-          <label>{t("merchDescription")}</label>
+          <label htmlFor="input-merch-description">
+            {t("merchDescription")}
+          </label>
           <SavingInput
             formKey="description"
+            id="input-merch-description"
             rows={3}
             url={`manage/merch/${merch.id}`}
             extraData={{}}
           />
         </FormComponent>
         <FormComponent>
-          <label>{t("price")}</label>
+          <label htmlFor="input-price">{t("price")}</label>
           <SavingInput
             formKey="minPrice"
+            id="input-price"
             type="number"
             step="0.01"
             min={0}
@@ -132,21 +137,24 @@ const MerchForm: React.FC<{
         </FormComponent>
 
         <FormComponent>
-          <label>{t("quantity")}</label>
+          <label htmlFor="input-quantity">{t("quantity")}</label>
           <SavingInput
+            ariaDescribedBy="hint-quantity"
             formKey="quantityRemaining"
+            id="input-quantity"
             type="number"
             step="1"
             min={0}
             url={`manage/merch/${merch.id}`}
             extraData={{}}
           />
-          <small>{t("quantityRemainingDescription")}</small>
+          <small id="hint-quantity">{t("quantityRemainingDescription")}</small>
         </FormComponent>
         <FormComponent>
-          <label>{t("catalogNumber")}</label>
+          <label htmlFor="input-catalog-number">{t("catalogNumber")}</label>
           <SavingInput
             formKey="catalogNumber"
+            id="input-catalog-number"
             step="0.01"
             min={0}
             url={`manage/merch/${merch.id}`}

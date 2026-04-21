@@ -89,6 +89,7 @@ type Result = {
 const AutoComplete = React.forwardRef<
   HTMLInputElement,
   {
+    ariaDescribedBy?: string;
     colors?: { background: string; foreground: string };
     getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
     resultsPrefix?: string;
@@ -123,6 +124,7 @@ const AutoComplete = React.forwardRef<
 >(
   (
     {
+      ariaDescribedBy,
       getOptions,
       resultsPrefix,
       usesNavigation,
@@ -212,6 +214,7 @@ const AutoComplete = React.forwardRef<
         `}
       >
         <InputEl
+          aria-describedby={ariaDescribedBy}
           name="search"
           colors={colors}
           value={searchValue}

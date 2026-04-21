@@ -54,7 +54,7 @@ const SelectTrackGroup: React.FC<{
 
   return (
     <FormComponent>
-      <label>{t("relatedToTrackGroup")}</label>
+      <label htmlFor="input-track-group">{t("relatedToTrackGroup")}</label>
       {currentTrackGroup && (
         <Pill
           className={css`
@@ -78,6 +78,7 @@ const SelectTrackGroup: React.FC<{
         `}
       >
         <AutoCompleteTrackGroup
+          ariaDescribedBy="hint-track-group"
           id="input-track-group"
           onSelect={(val) => doSave(val)}
           filterByArtistId={merch.artistId}
@@ -87,6 +88,7 @@ const SelectTrackGroup: React.FC<{
         {isSaving && <LoadingSpinner size="small" />}
       </div>
       <small
+        id="hint-track-group"
         className={css`
           margin-top: 1rem;
         `}

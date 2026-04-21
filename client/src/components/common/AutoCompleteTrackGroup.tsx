@@ -7,12 +7,14 @@ import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormCompone
 const AutoCompleteTrackGroup: React.FC<{
   id: string;
   onSelect: (val: number) => void;
+  ariaDescribedBy?: string;
   filterByArtistId?: number;
   placeholder?: string;
   includeLabelReleases?: boolean;
 }> = ({
   id,
   onSelect,
+  ariaDescribedBy,
   filterByArtistId,
   placeholder,
   includeLabelReleases,
@@ -49,6 +51,7 @@ const AutoCompleteTrackGroup: React.FC<{
 
   return (
     <AutoComplete
+      ariaDescribedBy={ariaDescribedBy}
       getOptions={getTrackGroupOptions}
       id={id}
       placeholder={placeholder}
