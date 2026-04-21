@@ -371,12 +371,13 @@ const PriceAndSuch: React.FC<{
                       justify-content: center;
                       margin-bottom: 0.25rem;
                     `}
+                    id="unit-minimum-price"
                   >
                     {getCurrencySymbol(user?.currency)}
                   </div>
                 )}
                 <SavingInput
-                  ariaDescribedBy="description-minimum-price hint-minimum-price-access hint-minimum-price-currency"
+                  ariaDescribedBy="unit-minimum-price description-minimum-price hint-minimum-price-access hint-minimum-price-currency"
                   formKey="minPrice"
                   id="input-minimum-price"
                   type="number"
@@ -437,11 +438,13 @@ const PriceAndSuch: React.FC<{
                           justify-content: center;
                           margin-bottom: 0.25rem;
                         `}
+                        id="unit-suggested-price"
                       >
                         {getCurrencySymbol(user?.currency)}
                       </div>
                     )}
                     <SavingInput
+                      ariaDescribedBy="unit-suggested-price"
                       ariaLabelledBy="label-has-suggested-price"
                       formKey="suggestedPrice"
                       id="input-suggested-price"
