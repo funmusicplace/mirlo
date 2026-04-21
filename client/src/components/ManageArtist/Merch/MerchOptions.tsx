@@ -45,6 +45,13 @@ const OptionType: React.FC<{
     name: `optionTypes.${index}.options`,
   });
 
+  const idPrefix = `input-option-${index}`;
+  const valueIdPrefix = `${idPrefix}-value`;
+  const optionNameId = `${idPrefix}-name`;
+  const valueNameId = `${valueIdPrefix}-name`;
+  const valueAdditionalPriceId = `${valueIdPrefix}-additional-price`;
+  const valueQuantityId = `${valueIdPrefix}-quantity`;
+
   return (
     <li>
       {isEditing && (
@@ -61,8 +68,11 @@ const OptionType: React.FC<{
           `}
         >
           <FormComponent>
-            <label>{t("optionType")}</label>
-            <InputEl {...register(`optionTypes.${index}.optionName`)} />
+            <label htmlFor={optionNameId}>{t("optionType")}</label>
+            <InputEl
+              id={optionNameId}
+              {...register(`optionTypes.${index}.optionName`)}
+            />
           </FormComponent>
           <FormComponent
             className={css`
@@ -83,8 +93,9 @@ const OptionType: React.FC<{
                 key={o.id}
               >
                 <FormComponent>
-                  <label>{t("subtypeName")}</label>
+                  <label htmlFor={valueNameId}>{t("subtypeName")}</label>
                   <InputEl
+                    id={valueNameId}
                     {...register(
                       `optionTypes.${index}.options.${optionIndex}.name`
                     )}
@@ -93,8 +104,11 @@ const OptionType: React.FC<{
                   />
                 </FormComponent>
                 <FormComponent>
-                  <label>{t("additionalPrice")}</label>
+                  <label htmlFor={valueAdditionalPriceId}>
+                    {t("additionalPrice")}
+                  </label>
                   <InputEl
+                    id={valueAdditionalPriceId}
                     {...register(
                       `optionTypes.${index}.options.${optionIndex}.additionalPrice`
                     )}
@@ -105,8 +119,9 @@ const OptionType: React.FC<{
                   />
                 </FormComponent>
                 <FormComponent>
-                  <label>{t("quantity")}</label>
+                  <label htmlFor={valueQuantityId}>{t("quantity")}</label>
                   <InputEl
+                    id={valueQuantityId}
                     {...register(
                       `optionTypes.${index}.options.${optionIndex}.quantityRemaining`
                     )}
