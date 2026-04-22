@@ -3,6 +3,7 @@ import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
 import FollowArtist from "./FollowArtist";
+import ContactArtist from "./ContactArtist";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
@@ -113,23 +114,6 @@ export const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
     ${(props) => props.colors?.primary ?? "var(--mi-light-foreground-color)"};
 `;
 
-const ArtistActions = styled.div`
-  text-align: right;
-  word-break: normal !important;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  a {
-    margin-left: 0.75rem;
-  }
-  padding-left: 1rem;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    padding-left: 0.3rem;
-  }
-`;
-
 const ArtistHeaderSection: React.FC<{
   artist: Artist | undefined;
   isLoading: boolean;
@@ -233,9 +217,14 @@ const ArtistHeaderSection: React.FC<{
                       </div>
                     )}
                   </div>
-                  <ArtistActions>
-                    {!isManage && <FollowArtist artistId={artist.id} />}
-                  </ArtistActions>
+                  <div className="flex flex-row items-center gap-1 pl-4 max-md:pl-1 text-right break-normal!">
+                    {!isManage && (
+                      <>
+                        <FollowArtist artistId={artist.id} />
+                        <ContactArtist artist={artist} />
+                      </>
+                    )}
+                  </div>
                 </ArtistTitleText>
               </SpaceBetweenDiv>
             </ArtistTitleWrapper>

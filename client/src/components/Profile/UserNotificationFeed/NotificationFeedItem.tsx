@@ -7,6 +7,7 @@ import NewArtistAlbum from "./NewArtistAlbum";
 import UserFollowedYou from "./UserFollowedYou";
 import FundraiserPledge from "./FundraiserPledge";
 import LabelInvite from "./LabelInvite";
+import ArtistContactMessage from "./ArtistContactMessage";
 
 const categoryBorderColor = (type: Notification["notificationType"]) => {
   switch (type) {
@@ -75,6 +76,9 @@ const NotificationFeedItem: React.FC<{
       )}
       {notification.notificationType === "LABEL_ADDED_ARTIST" && (
         <LabelInvite notification={notification} />
+      )}
+      {notification.notificationType === "ARTIST_CONTACT_MESSAGE" && (
+        <ArtistContactMessage notification={notification} compact={compact} />
       )}
     </LI>
   );

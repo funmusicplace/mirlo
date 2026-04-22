@@ -43,6 +43,7 @@ export default function () {
       shortDescription,
       maxFreePlays,
       announcementText,
+      allowDirectMessages,
     } = req.body;
     assertLoggedIn(req);
     const user = req.user;
@@ -72,6 +73,7 @@ export default function () {
           shortDescription,
           maxFreePlays,
           announcementText,
+          allowDirectMessages,
           ...(urlSlug
             ? {
                 urlSlug: generateSlug(urlSlug),

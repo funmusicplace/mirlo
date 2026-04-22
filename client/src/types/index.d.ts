@@ -193,7 +193,8 @@ interface Notification {
     | "USER_FOLLOWED_YOU"
     | "USER_SUBSCRIBED_TO_YOU"
     | "LABEL_ADDED_ARTIST"
-    | "FUNDRAISER_PLEDGE_CHARGED";
+    | "FUNDRAISER_PLEDGE_CHARGED"
+    | "ARTIST_CONTACT_MESSAGE";
   post?: Post;
   relatedUser?: User & {
     userAvatar?: { sizes?: { [key: number]: string } };
@@ -250,6 +251,7 @@ interface Artist {
   bio: string;
   isLabelProfile: boolean;
   activityPub: boolean;
+  allowDirectMessages?: boolean;
   urlSlug?: string;
   userId: number;
   id: number;

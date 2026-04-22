@@ -89,6 +89,7 @@ export const createArtist = async (
       activityPub: data?.activityPub ?? false,
       isLabelProfile: data?.isLabelProfile ?? false,
       paymentToUserId: data?.paymentToUserId,
+      allowDirectMessages: data?.allowDirectMessages ?? false,
     },
     include: {
       subscriptionTiers: true,
@@ -138,6 +139,7 @@ export const createTrackGroup = async (
     tracks?: {
       title: string;
       isPreview?: boolean;
+      order?: number;
       audio?: { create: { uploadState?: "SUCCESS" } };
     }[];
   } & Partial<Prisma.TrackGroupCreateArgs["data"]>
