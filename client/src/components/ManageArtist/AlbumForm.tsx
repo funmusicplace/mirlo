@@ -54,7 +54,7 @@ const AlbumForm: React.FC<{
           : ""
       }`,
     };
-    methods.reset(defaultValues);
+    methods.reset(defaultValues, { keepDirtyValues: true });
   }, [trackGroup]);
 
   const artistId = artist?.id;
