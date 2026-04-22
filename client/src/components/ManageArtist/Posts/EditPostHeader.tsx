@@ -28,58 +28,61 @@ const EditPostHeader: React.FC<{
   }
 
   return (
-    <div
-      className={css`
-        background-color: ${artist?.properties?.colors?.background ??
-        "var(--mi-normal-background-color)"};
-        box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.25);
-        top: 0;
-        position: sticky;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.2rem 0;
-        margin-bottom: 1rem;
-        z-index: 2;
-
-        @media screen and (max-width: ${bp.medium}px) {
-          padding-top: 0.5rem;
-        }
-      `}
-    >
-      <BackToArtistLink subPage="posts" />
+    <>
       <div
         className={css`
+          background-color: ${artist?.properties?.colors?.background ??
+          "var(--mi-normal-background-color)"};
+          box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.25);
+          top: 0;
+          position: sticky;
           display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.2rem 0;
+          margin-bottom: 1rem;
+          z-index: 2;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            padding-top: 0.5rem;
+          }
         `}
       >
-        {artist && isPublished && (
-          <div
-            className={css`
-              display: flex;
-              align-items: center;
-              margin-right: 1rem;
-            `}
-          >
-            <ArtistButtonLink
-              variant="dashed"
-              to={getPostURLReference({ ...post, artist })}
+        <BackToArtistLink subPage="posts" />
+        <div
+          className={css`
+            display: flex;
+          `}
+        >
+          {artist && isPublished && (
+            <div
+              className={css`
+                display: flex;
+                align-items: center;
+                margin-right: 1rem;
+              `}
             >
-              {t("viewLive")}
-            </ArtistButtonLink>
-          </div>
-        )}
-        {artist && (
-          <SaveDraftButton
-            post={post}
-            artistId={artist.id}
-            reload={reload}
-            onClose={onClose}
-          />
-        )}
-        <PublishPostButton post={post} reload={() => refetch()} />
+              <ArtistButtonLink
+                variant="dashed"
+                to={getPostURLReference({ ...post, artist })}
+              >
+                {t("viewLive")}
+              </ArtistButtonLink>
+            </div>
+          )}
+          {artist && (
+            <SaveDraftButton
+              post={post}
+              artistId={artist.id}
+              reload={reload}
+              onClose={onClose}
+            />
+          )}
+          <PublishPostButton post={post} reload={() => refetch()} />
+        </div>
       </div>
-    </div>
+      <h1>{post.title || t("untitledPost")}</h1>
+    </>
   );
 };
 
