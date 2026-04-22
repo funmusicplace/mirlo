@@ -25,10 +25,22 @@ const PreOrderSection: React.FC<{
   const { mutateAsync: bulkSetTracksIsPreview } =
     useBulkSetTracksIsPreviewMutation();
 
-  const isPreorder = existingObject.isPreorder;
-  const scheduleOnReleaseDate = existingObject.scheduleEndOnReleaseDate;
-  const makePreviewableOnRelease =
-    existingObject.makeTracksPreviewableOnRelease;
+  const [isPreorder, setIsPreorder] = React.useState(existingObject.isPreorder);
+  const [scheduleOnReleaseDate, setScheduleOnReleaseDate] = React.useState(
+    existingObject.scheduleEndOnReleaseDate
+  );
+  const [makePreviewableOnRelease, setMakePreviewableOnRelease] =
+    React.useState(existingObject.makeTracksPreviewableOnRelease);
+
+  React.useEffect(() => {
+    setIsPreorder(existingObject.isPreorder);
+    setScheduleOnReleaseDate(existingObject.scheduleEndOnReleaseDate);
+    setMakePreviewableOnRelease(existingObject.makeTracksPreviewableOnRelease);
+  }, [
+    existingObject.isPreorder,
+    existingObject.scheduleEndOnReleaseDate,
+    existingObject.makeTracksPreviewableOnRelease,
+  ]);
   const isPublished =
     existingObject.publishedAt &&
     new Date(existingObject.publishedAt) <= new Date();
@@ -88,6 +100,11 @@ const PreOrderSection: React.FC<{
   };
 
   const handlePreorderToggle = async (enabled: boolean) => {
+    setIsPreorder(enabled);
+    if (!enabled) {
+      setScheduleOnReleaseDate(false);
+      setMakePreviewableOnRelease(false);
+    }
     try {
       await api.put(`manage/trackGroups/${trackGroupId}`, {
         isPreorder: enabled,
@@ -103,6 +120,7 @@ const PreOrderSection: React.FC<{
       });
       reload();
     } catch (e) {
+      setIsPreorder(!enabled);
       errorHandler(e);
     }
   };
@@ -129,6 +147,8 @@ const PreOrderSection: React.FC<{
       setShowPastDateModal(true);
       return;
     }
+    setScheduleOnReleaseDate(checked);
+    if (!checked) setMakePreviewableOnRelease(false);
     await updateField({
       scheduleEndOnReleaseDate: checked,
       ...(!checked && { makeTracksPreviewableOnRelease: false }),
@@ -136,6 +156,7 @@ const PreOrderSection: React.FC<{
   };
 
   const handlePreviewableToggle = async (checked: boolean) => {
+    setMakePreviewableOnRelease(checked);
     await updateField({ makeTracksPreviewableOnRelease: checked });
   };
 
