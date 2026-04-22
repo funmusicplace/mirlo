@@ -117,7 +117,6 @@ const FundraisingGoal: React.FC<{
   const goalRef = React.useRef<HTMLElement>(null);
 
   React.useEffect(() => {
-    console.log(didAddFundraiser, goalRef);
     if (didAddFundraiser) {
       goalRef.current?.focus();
     }
@@ -193,6 +192,7 @@ const FundraisingGoal: React.FC<{
             ariaDescribedBy="description-goal-amount"
             formKey="goalAmount"
             id="input-goal-amount"
+            ref={goalRef}
             url={`manage/fundraisers/${fundraiser.id}`}
             extraData={{ artistId: Number(artistId) }}
             type="number"
