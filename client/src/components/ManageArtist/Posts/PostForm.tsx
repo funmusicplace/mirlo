@@ -151,17 +151,21 @@ const PostForm: React.FC<{
 
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
-          <label>{t("title")}</label>
+          <label htmlFor="input-title">{t("title")}</label>
           <SavingInput
             formKey="title"
+            id="input-title"
             required
             url={`manage/posts/${post.id}`}
           />
         </FormComponent>
         <FormComponent>
-          <label>{t("publicationDate")} </label>
+          <label htmlFor="input-publication-date">
+            {t("publicationDate")}{" "}
+          </label>
           <SavingInput
             formKey="publishedAt"
+            id="input-publication-date"
             type="datetime-local"
             required
             url={`manage/posts/${post.id}`}
@@ -242,10 +246,11 @@ const PostForm: React.FC<{
                 display: block;
                 margin-bottom: 0.5rem;
               `}
+              htmlFor="select-minimum-tier"
             >
               {t("ifNotPublic")}
             </label>
-            <SelectEl {...register("minimumTier")}>
+            <SelectEl id="select-minimum-tier" {...register("minimumTier")}>
               <option value="">None</option>
               {tiers?.results.map((tier) => (
                 <option value={tier.id} key={tier.id}>
