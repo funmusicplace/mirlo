@@ -22,6 +22,11 @@ export const doesSubscriptionTierBelongToUser = async (
       images: {
         include: { image: true },
       },
+      releases: {
+        select: {
+          trackGroupId: true,
+        },
+      },
     },
   });
 

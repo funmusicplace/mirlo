@@ -86,7 +86,11 @@ const ArtistSupport: React.FC = () => {
     return null;
   }
 
-  if (!isPending && !userStripeStatus?.chargesEnabled) {
+  if (
+    !isPending &&
+    !userStripeStatus?.chargesEnabled &&
+    artist.userId !== user?.id
+  ) {
     return (
       <div
         className={css`

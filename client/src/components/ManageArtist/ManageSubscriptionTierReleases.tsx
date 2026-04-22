@@ -69,6 +69,8 @@ const ManageSubscriptionTierReleases: React.FC<{
     [tier.id, tier.releases, artistId, t, snackbar, errorHandler, reload]
   );
 
+  console.log("selectedReleaseIds", tier);
+
   return (
     <div className="pt-2">
       <FormComponent>
