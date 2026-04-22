@@ -8,6 +8,7 @@ import {
 import SubscriptionForm from "./SubscriptionForm";
 import { useTranslation } from "react-i18next";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
 
 const ManageSubscriptionTierPage: React.FC = () => {
   const { artistId, tierId } = useParams();
@@ -42,6 +43,7 @@ const ManageSubscriptionTierPage: React.FC = () => {
 
   return (
     <div className="p-4">
+      <BackToArtistLink subPage="tiers" />
       <h1 className="text-xl font-bold mb-4">
         {tier?.name || t("newSubscriptionTier")}
       </h1>

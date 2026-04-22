@@ -764,6 +764,7 @@
     "licenseAdded": "License added"
   },
   "manageMerch": {
+    "untitledMerch": "Untitled merch",
     "saveDestinations": "Save destinations",
     "updatedShippingDestinations": "Updated shipping destinations",
     "catalogNumber": "Catalog number",

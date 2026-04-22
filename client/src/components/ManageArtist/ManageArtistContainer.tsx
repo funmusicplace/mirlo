@@ -99,7 +99,9 @@ const ManageArtistContainer: React.FC<{}> = () => {
 
   const dontShowHeader =
     location.pathname.includes("/release/") ||
-    location.pathname.includes("/new-release") ||
+    (location.pathname.includes("/tiers/") &&
+      !location.pathname.includes("supporters")) ||
+    location.pathname.includes("/merch/") ||
     location.pathname.includes("/post/");
 
   const labelProfile = hasLabel?.labelUser.artists?.find(

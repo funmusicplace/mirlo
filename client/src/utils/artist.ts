@@ -34,6 +34,13 @@ export const getArtistManageUrl = (artistId: number) => {
   return `/manage/artists/${artistId}`;
 };
 
+export const getArtistTiersUrl = (artist: {
+  urlSlug?: string;
+  id?: number;
+}) => {
+  return `/${getArtistUrlReference(artist)}/support`;
+};
+
 export const getArtistManageTiersUrl = (artistId: number) => {
   return getArtistManageUrl(artistId) + "/tiers";
 };

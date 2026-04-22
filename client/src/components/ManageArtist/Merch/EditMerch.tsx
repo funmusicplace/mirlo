@@ -21,6 +21,7 @@ import DeleteMerchButton from "./DeleteMerchButton";
 import MerchFulfillmentLink from "./MerchFulfillmentLink";
 import { FaArrowLeft } from "react-icons/fa";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
 
 const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
@@ -98,20 +99,8 @@ const EditMerch: React.FC<{}> = () => {
         }
       `}
     >
-      {merch.isPublic && (
-        <SpaceBetweenDiv>
-          <ArtistButtonLink
-            startIcon={<FaArrowLeft />}
-            variant="link"
-            to={getArtistManageUrl(artist.id) + "/merch"}
-          >
-            {t("backToMerchList")}
-          </ArtistButtonLink>{" "}
-          <ArtistButtonLink to={getMerchUrl(artist, merch)}>
-            {t("viewMerchLive")}
-          </ArtistButtonLink>
-        </SpaceBetweenDiv>
-      )}
+      <BackToArtistLink subPage="merch" />
+      <h1>{merch.title || t("untitledMerch")}</h1>
       <IsPublicToggle merch={merch} />
       <div
         className={css`

@@ -5,7 +5,13 @@ import { useTranslation } from "react-i18next";
 import { FaEdit, FaEye, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryManagedTrackGroup, queryTrackGroup } from "queries";
+import {
+  queryArtist,
+  queryManagedArtistSubscriptionTier,
+  queryManagedMerch,
+  queryManagedTrackGroup,
+  queryTrackGroup,
+} from "queries";
 import { useAuthContext } from "state/AuthContext";
 import FixedButtonLink from "components/common/FixedButton";
 import { IoIosColorPalette } from "react-icons/io";
@@ -13,7 +19,12 @@ import { useGlobalStateContext } from "state/GlobalState";
 import Wishlist from "components/TrackGroup/Wishlist";
 import TipArtist from "components/common/TipArtist";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
-import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
+import {
+  getArtistTiersUrl,
+  getManageReleaseUrl,
+  getMerchUrl,
+  getReleaseUrl,
+} from "utils/artist";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import { RiAdminLine } from "react-icons/ri";
 
@@ -55,7 +66,7 @@ const ManageArtistButtons: React.FC = () => {
   const { pathname } = useLocation();
   const { state } = useGlobalStateContext();
   const isUp = state.playerQueueIds.length > 0;
-  const { artistId, trackGroupId } = useParams();
+  const { artistId, merchId, tierId, trackGroupId } = useParams();
   const isManagePage =
     pathname.includes("/manage/artists") && !pathname.includes("/customize");
   const seeViewLink = pathname.includes("/manage/artists");
@@ -70,6 +81,17 @@ const ManageArtistButtons: React.FC = () => {
   );
   const { data: managedTrackGroup } = useQuery(
     queryManagedTrackGroup(Number(trackGroupId) ?? 0)
+  );
+  const {
+    data: merch,
+    isPending: isLoadingMerch,
+    refetch,
+  } = useQuery(queryManagedMerch(merchId ?? ""));
+  const { data: tier, isLoading } = useQuery(
+    queryManagedArtistSubscriptionTier({
+      artistId: Number(artistId),
+      tierId: Number(tierId),
+    })
   );
   const { user } = useAuthContext();
 
@@ -175,7 +197,7 @@ const ManageArtistButtons: React.FC = () => {
                   {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
                 </FixedButtonLink>
               )}
-              {seeViewLink && !isAlbumPage && (
+              {seeViewLink && !isAlbumPage && !merch && !tier && (
                 <FixedButtonLink
                   to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
                   endIcon={<FaEye />}
@@ -209,6 +231,30 @@ const ManageArtistButtons: React.FC = () => {
                   rounded
                 >
                   {t(isPreorder ? "viewPreorder" : "viewLive")}
+                </FixedButtonLink>
+              )}
+              {merch && isManagePage && (
+                <FixedButtonLink
+                  to={getMerchUrl(artist, merch)}
+                  endIcon={<FaEye />}
+                  disabled={!artist}
+                  variant="dashed"
+                  size="compact"
+                  rounded
+                >
+                  {t("viewLive")}
+                </FixedButtonLink>
+              )}
+              {tier && isManagePage && (
+                <FixedButtonLink
+                  to={getArtistTiersUrl(artist)}
+                  endIcon={<FaEye />}
+                  disabled={!artist}
+                  variant="dashed"
+                  size="compact"
+                  rounded
+                >
+                  {t("viewLive")}
                 </FixedButtonLink>
               )}
             </>

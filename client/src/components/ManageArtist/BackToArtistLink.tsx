@@ -7,9 +7,9 @@ import { useTranslation } from "react-i18next";
 import { FaChevronLeft } from "react-icons/fa";
 import useArtistQuery from "utils/useArtistQuery";
 
-const BackToArtistLink: React.FC<{ subPage?: "posts" | "releases" }> = ({
-  subPage,
-}) => {
+const BackToArtistLink: React.FC<{
+  subPage?: "posts" | "releases" | "tiers" | "merch";
+}> = ({ subPage }) => {
   const { data: artist } = useArtistQuery();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
