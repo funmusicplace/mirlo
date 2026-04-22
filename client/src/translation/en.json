@@ -431,12 +431,15 @@
     "labelNotFound": "Label not found"
   },
   "artist": {
+    "artistNavigation": "Artist",
+    "labelNavigation": "Label",
     "contact": "Contact",
     "contactArtistTitle": "Contact {{ artistName }}",
     "contactArtistDescription": "Send {{ artistName }} a message. They'll receive it as a notification and by email.",
     "contactMessageLabel": "Your message",
     "sendMessage": "Send message",
     "contactMessageSent": "Message sent",
+    "editTitled": "Edit {{ title }}",
     "editTier": "Edit",
     "failedToAddLocation": "Failed to add location tag",
     "failedToRemoveLocation": "Failed to remove location tag",
@@ -645,6 +648,8 @@
     "payoutsInfo": "See our documentation for more information <link>on payouts and fees</link>."
   },
   "manageArtist": {
+    "manageArtistNavigation": "Manage artist",
+    "manageLabelNavigation": "Manage label",
     "albumTags": "Release tags",
     "label": "Label",
     "actions": "Actions",
@@ -731,7 +736,8 @@
     "searchAlbums": "Search releases",
     "noReleases": "No releases found",
     "selected": "Selected",
-    "saving": "Saving changes..."
+    "saving": "Saving changes...",
+    "viewLiveTitled": "View live {{ title }}"
   },
   "managePost": {
     "untitledPost": "Untitled post",
