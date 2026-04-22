@@ -49,8 +49,13 @@ const BuyTrackGroup: React.FC<{
     },
     reValidateMode: "onChange",
   });
+  const paymentUserId =
+    trackGroup.paymentToUser?.id ??
+    trackGroup.artist?.paymentToUserId ??
+    trackGroup.artist?.userId ??
+    0;
   const { data: stripeAccountStatus, isPending } = useQuery(
-    queryUserStripeStatus(trackGroup.artist?.userId ?? 0)
+    queryUserStripeStatus(paymentUserId)
   );
 
   const { watch, handleSubmit, formState } = methods;

@@ -42,8 +42,9 @@ const BuyMerchItem: React.FC<{
   const snackbar = useSnackbar();
   const [isLoadingStripe, setIsLoadingStripe] = React.useState(false);
 
+  const paymentUserId = artist.paymentToUserId ?? artist.userId;
   const { data: stripeAccountStatus } = useQuery(
-    queryUserStripeStatus(artist.userId)
+    queryUserStripeStatus(paymentUserId)
   );
 
   const minPrice = (merch?.minPrice ?? 0) / 100;
