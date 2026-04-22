@@ -4,7 +4,7 @@ import { parseBlob } from "music-metadata-browser";
 import styled from "@emotion/styled";
 import { InputEl } from "components/common/Input";
 
-export const produceNewStatus = produce(
+const produceNewStatusImpl = produce(
   (
     queue: { title: string; status: number }[],
     title: string,
@@ -17,13 +17,19 @@ export const produceNewStatus = produce(
     }
     if (queue?.[idx]) {
       queue[idx] = {
-        title: queue[idx].title,
+        ...queue[idx],
         status: status,
       };
     }
     return queue;
   }
 );
+
+export const produceNewStatus = <T extends { title: string; status: number }>(
+  queue: T[],
+  title: string,
+  status: number
+): T[] => produceNewStatusImpl(queue as { title: string; status: number }[], title, status) as T[];
 
 export const fileListIntoArray = (fileList: FileList) => {
   if (fileList?.length > 0) {

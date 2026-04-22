@@ -1512,5 +1512,11 @@
     "newVersionAvailable": "A new version of Mirlo is available.",
     "reload": "Reload",
     "dismiss": "Dismiss"
+  },
+  "uploadPanel": {
+    "uploadsInProgress_one": "{{count}} track uploading",
+    "uploadsInProgress_other": "{{count}} tracks uploading",
+    "uploadsComplete": "All tracks uploaded",
+    "keepBrowserOpen": "Keep this tab open until uploads finish. You can keep browsing."
   }
 }
