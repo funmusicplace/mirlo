@@ -193,7 +193,6 @@ const FundraisingGoal: React.FC<{
             ariaDescribedBy="description-goal-amount"
             formKey="goalAmount"
             id="input-goal-amount"
-            ref={goalRef}
             url={`manage/fundraisers/${fundraiser.id}`}
             extraData={{ artistId: Number(artistId) }}
             type="number"
