@@ -254,6 +254,7 @@ interface Artist {
   allowDirectMessages?: boolean;
   urlSlug?: string;
   userId: number;
+  paymentToUserId?: number;
   id: number;
   location?: string;
   enabled: boolean;
