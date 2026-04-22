@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-
+import { AppError, HttpCode } from "../../../../../utils/error";
 import stripe from "../../../../../utils/stripe";
 import logger from "../../../../../logger";
 const { API_DOMAIN } = process.env;
@@ -16,7 +16,7 @@ export default function () {
     GET: [userAuthenticated, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
@@ -55,8 +55,26 @@ export default function () {
           let stripeAccount;
           try {
             stripeAccount = await stripe.accounts.retrieve(accountId);
-          } catch (e) {
-            console.error(`Error retrieving account information about user`, e);
+          } catch (e: any) {
+            if (
+              e?.code === "account_invalid" ||
+              e?.type === "StripePermissionError"
+            ) {
+              return next(
+                new AppError({
+                  httpCode: HttpCode.FORBIDDEN,
+                  description:
+                    "Unable to access Stripe account. The API key may not have permission to access this account or the account may have been deleted.",
+                })
+              );
+            }
+            return next(
+              new AppError({
+                httpCode: HttpCode.INTERNAL_SERVER_ERROR,
+                description:
+                  "Failed to retrieve Stripe account information. Please try again later.",
+              })
+            );
           }
 
           const accountLink = await stripe.accountLinks.create({
