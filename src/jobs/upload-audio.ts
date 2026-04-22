@@ -37,6 +37,10 @@ export default async (job: Job) => {
     // It looks like ffmpeg has issues with streams
     await getFile(incomingAudioBucket, audioId, originalPath);
     logger.info(`upload-audio: got file and put it at ${originalPath}`);
+
+    // Capture the original file size
+    const fileStats = await fsPromises.stat(originalPath);
+    const originalFileSize = fileStats.size;
     let data: any;
 
     const profiler = logger.startTimer();
@@ -102,7 +106,7 @@ export default async (job: Job) => {
     logger.info(`audioId ${audioId}: Cleaned up incoming bucket`);
     await fsPromises.rm(destinationFolder, { recursive: true });
     logger.info(`Cleaned up ${destinationFolder}`);
-    const response = { ...(data ?? {}), duration };
+    const response = { ...(data ?? {}), duration, originalFileSize };
     logger.info(`Data: ${JSON.stringify(response)}`);
     return response;
   } catch (e) {

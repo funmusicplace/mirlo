@@ -57,6 +57,10 @@ audioQueueEvents.on(
               typeof result.returnvalue?.duration === "number"
                 ? result.returnvalue.duration
                 : null,
+            size:
+              typeof result.returnvalue?.originalFileSize === "number"
+                ? result.returnvalue.originalFileSize
+                : null,
           },
         });
 
