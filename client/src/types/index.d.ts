@@ -531,6 +531,7 @@ interface Merch {
   shippingDestinations: ShippingDestination[];
   optionTypes?: MerchOptionType[];
   downloadableContent?: MerchDownloadableContent[];
+  platformPercent?: number;
 }
 
 interface Fundraiser {

@@ -103,6 +103,7 @@ const routes = [
   "manage/artists/{artistId}/subscriptionTiers",
   "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}",
   "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}/releases",
+  "manage/artists/{artistId}/applyPlatformFee",
   "manage/downloadableContent",
   "manage/downloadableContent/{contentId}",
   "manage/trackGroups/{trackGroupId}",
