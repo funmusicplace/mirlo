@@ -111,7 +111,16 @@ const SavingInput = React.forwardRef<
           formKey === "publishedAt" ||
           formKey === "fundraisingEndDate"
         ) {
-          value = value ? new Date(value).toISOString() : null;
+          if (!value) {
+            value = null;
+          } else {
+            const parsed = new Date(value);
+            if (isNaN(parsed.getTime())) {
+              setIsSaving(false);
+              return;
+            }
+            value = parsed.toISOString();
+          }
         } else if (
           formKey === "minPrice" ||
           formKey === "suggestedPrice" ||
