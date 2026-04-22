@@ -218,8 +218,27 @@ export default function () {
         data.isArtistApproved = true;
       }
 
-      await prisma.artistLabel.create({
-        data,
+      // Check if the relationship already exists before upsert
+      const existingRelationship = await prisma.artistLabel.findUnique({
+        where: {
+          labelUserId_artistId: {
+            labelUserId,
+            artistId: Number(artistId),
+          },
+        },
+      });
+
+      const isNewRelationship = !existingRelationship;
+
+      await prisma.artistLabel.upsert({
+        where: {
+          labelUserId_artistId: {
+            labelUserId,
+            artistId: Number(artistId),
+          },
+        },
+        create: data,
+        update: data,
       });
 
       const labels = await prisma.artistLabel.findMany({
@@ -228,7 +247,8 @@ export default function () {
         },
       });
 
-      if (isLabelAddingArtist) {
+      // Only send notification on new relationship creation
+      if (isLabelAddingArtist && isNewRelationship) {
         await sendArtistNotificationOfLabel(artist, loggedInUser);
       }
       res.json({

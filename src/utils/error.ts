@@ -102,7 +102,7 @@ const errorHandler = (
   ) {
     const messageStrings = err.message.split("\n");
 
-    res.status(400).json({
+    return res.status(400).json({
       error: messageStrings[messageStrings.length - 1],
     });
   } else if (
@@ -142,13 +142,13 @@ const errorHandler = (
     if (err.code === "P2025") {
       message = `Not found: ${err.message}`;
     }
-    res.status(400).json({
+    return res.status(400).json({
       error: message,
     });
   } else if (res.statusCode === 429) {
-    res.json({ error: "Too many requests" });
+    return res.json({ error: "Too many requests" });
   } else {
-    res.status(err.status ?? 500).json({ error: err.errors });
+    return res.status(err.status ?? 500).json({ error: err.errors });
   }
 };
 

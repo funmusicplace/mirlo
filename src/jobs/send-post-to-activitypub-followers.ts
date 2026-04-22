@@ -2,10 +2,10 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import crypto from "crypto";
 import {
-  rootArtist,
   createPostActivity,
   signAndSendActivityPubMessage,
 } from "../activityPub/utils";
+import { fetchActivityPubDocument } from "../activityPub/httpClient";
 
 /**
  * Sends published posts to ActivityPub followers' inboxes
@@ -150,19 +150,7 @@ const sendPostToActivityPubFollowers = async () => {
         const domain = actorUrl.hostname;
 
         // Fetch the follower's actor document to get their inbox
-        const actorResponse = await fetch(follower.actor, {
-          headers: {
-            Accept: "application/activity+json",
-          },
-        });
-
-        if (!actorResponse.ok) {
-          throw new Error(
-            `Failed to fetch actor ${follower.actor}: ${actorResponse.status}`
-          );
-        }
-
-        const actorDoc: any = await actorResponse.json();
+        const actorDoc = await fetchActivityPubDocument(follower.actor);
         const inboxUrl = actorDoc.inbox;
 
         if (!inboxUrl) {

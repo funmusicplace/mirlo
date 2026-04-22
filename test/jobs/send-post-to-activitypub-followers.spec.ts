@@ -7,9 +7,11 @@ import { clearTables, createArtist, createPost, createUser } from "../utils";
 import sendPostToActivityPubFollowers from "../../src/jobs/send-post-to-activitypub-followers";
 import prisma from "@mirlo/prisma";
 import assert from "assert";
+import * as httpClientModule from "../../src/activityPub/httpClient";
 
 describe("send-post-to-activitypub-followers", () => {
-  let fetchStub: sinon.SinonStub;
+  let fetchActivityPubDocumentStub: sinon.SinonStub;
+  let sendSignedActivityPubMessageStub: sinon.SinonStub;
 
   beforeEach(async () => {
     try {
@@ -17,14 +19,19 @@ describe("send-post-to-activitypub-followers", () => {
     } catch (e) {
       console.error(e);
     }
-    // Stub fetch for this test
-    fetchStub = sinon.stub(global, "fetch" as any);
+    // Stub the httpClient functions
+    fetchActivityPubDocumentStub = sinon.stub(
+      httpClientModule,
+      "fetchActivityPubDocument"
+    );
+    sendSignedActivityPubMessageStub = sinon.stub(
+      httpClientModule,
+      "sendSignedActivityPubMessage"
+    );
   });
 
   afterEach(() => {
-    if (fetchStub) {
-      fetchStub.restore();
-    }
+    sinon.restore();
   });
 
   it("should send posts to ActivityPub followers", async () => {
@@ -87,38 +94,20 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    // Mock fetch responses
-    const follower1ActorResponse = {
-      ok: true,
-      json: async () => ({
-        inbox: "https://mastodon.example/users/follower1/inbox",
-      }),
-    };
-
-    const follower2ActorResponse = {
-      ok: true,
-      json: async () => ({
-        inbox: "https://pixelfed.example/users/follower2/inbox",
-      }),
-    };
-
-    const inboxResponse = {
-      ok: true,
-      text: async () => "",
-    };
-
-    fetchStub
+    // Mock httpClient functions
+    fetchActivityPubDocumentStub
       .withArgs("https://mastodon.example/users/follower1")
-      .resolves(follower1ActorResponse);
-    fetchStub
+      .resolves({
+        inbox: "https://mastodon.example/users/follower1/inbox",
+      });
+
+    fetchActivityPubDocumentStub
       .withArgs("https://pixelfed.example/users/follower2")
-      .resolves(follower2ActorResponse);
-    fetchStub
-      .withArgs("https://mastodon.example/users/follower1/inbox")
-      .resolves(inboxResponse);
-    fetchStub
-      .withArgs("https://pixelfed.example/users/follower2/inbox")
-      .resolves(inboxResponse);
+      .resolves({
+        inbox: "https://pixelfed.example/users/follower2/inbox",
+      });
+
+    sendSignedActivityPubMessageStub.resolves();
 
     // Run the job
     await sendPostToActivityPubFollowers();
@@ -134,30 +123,43 @@ describe("send-post-to-activitypub-followers", () => {
     assert.strictEqual(updatedNotif1?.isRead, true);
     assert.strictEqual(updatedNotif2?.isRead, true);
 
-    // Verify fetch was called for actor documents
+    // Verify httpClient functions were called for actor documents
     assert(
-      fetchStub.calledWith("https://mastodon.example/users/follower1"),
+      fetchActivityPubDocumentStub.calledWith(
+        "https://mastodon.example/users/follower1"
+      ),
       "Should fetch follower1 actor"
     );
     assert(
-      fetchStub.calledWith("https://pixelfed.example/users/follower2"),
+      fetchActivityPubDocumentStub.calledWith(
+        "https://pixelfed.example/users/follower2"
+      ),
       "Should fetch follower2 actor"
     );
 
-    // Verify inbox POST calls were made
-    assert(
-      fetchStub.calledWith(
-        "https://mastodon.example/users/follower1/inbox",
-        sinon.match.object
-      ),
-      "Should POST to follower1 inbox"
+    // Verify sendSignedActivityPubMessage was called for both followers
+    assert.strictEqual(
+      sendSignedActivityPubMessageStub.callCount,
+      2,
+      "Should send to 2 followers"
     );
+
     assert(
-      fetchStub.calledWith(
-        "https://pixelfed.example/users/follower2/inbox",
+      sendSignedActivityPubMessageStub.calledWith(
+        "https://mastodon.example/users/follower1/inbox",
+        sinon.match.object,
         sinon.match.object
       ),
-      "Should POST to follower2 inbox"
+      "Should send to follower1 inbox"
+    );
+
+    assert(
+      sendSignedActivityPubMessageStub.calledWith(
+        "https://pixelfed.example/users/follower2/inbox",
+        sinon.match.object,
+        sinon.match.object
+      ),
+      "Should send to follower2 inbox"
     );
   });
 
@@ -202,7 +204,7 @@ describe("send-post-to-activitypub-followers", () => {
     assert.strictEqual(updatedNotif?.isRead, true);
 
     // No fetch calls should be made
-    assert.strictEqual(fetchStub.callCount, 0);
+    assert.strictEqual(fetchActivityPubDocumentStub.callCount, 0);
   });
 
   it("should skip notifications with deliveryMethod EMAIL only", async () => {
@@ -247,7 +249,7 @@ describe("send-post-to-activitypub-followers", () => {
     await sendPostToActivityPubFollowers();
 
     // No fetch calls should be made since no ACTIVITYPUB notifications exist
-    assert.strictEqual(fetchStub.callCount, 0);
+    assert.strictEqual(fetchActivityPubDocumentStub.callCount, 0);
   });
 
   it("should pass activity pub disabled artists", async () => {
@@ -299,7 +301,7 @@ describe("send-post-to-activitypub-followers", () => {
     assert.strictEqual(updatedNotif?.isRead, true);
 
     // No fetch calls should be made
-    assert.strictEqual(fetchStub.callCount, 0);
+    assert.strictEqual(fetchActivityPubDocumentStub.callCount, 0);
   });
 
   it("should skip already read notifications", async () => {
@@ -336,7 +338,7 @@ describe("send-post-to-activitypub-followers", () => {
     await sendPostToActivityPubFollowers();
 
     // No fetch calls should be made
-    assert.strictEqual(fetchStub.callCount, 0);
+    assert.strictEqual(fetchActivityPubDocumentStub.callCount, 0);
   });
 
   it("should handle follower inbox fetch errors gracefully", async () => {
@@ -378,8 +380,8 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    // Mock fetch to fail when fetching actor
-    fetchStub
+    // Mock fetchActivityPubDocument to fail when fetching actor
+    fetchActivityPubDocumentStub
       .withArgs("https://error.example/users/follower")
       .rejects(new Error("Network error"));
 

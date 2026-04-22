@@ -166,7 +166,19 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       message: "success",
     });
   } catch (e) {
-    log.error(`inboxPOST error:`, e);
+    const errorDetails = {
+      error: e instanceof Error ? e.message : String(e),
+      actor: req.body?.actor,
+      type: req.body?.type,
+      ...(e instanceof AppError && { httpCode: e.httpCode }),
+    };
+
+    // Log more details for signature verification failures
+    if (e instanceof AppError && e.description?.includes("signature")) {
+      log.warn(`ActivityPub signature verification failed:`, errorDetails);
+    } else {
+      log.error(`inboxPOST error:`, errorDetails);
+    }
     next(e);
   }
 };

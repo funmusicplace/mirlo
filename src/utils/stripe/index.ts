@@ -805,8 +805,17 @@ export const handleAccountUpdate = async (account: Stripe.Account) => {
     if (user && stripeAccount.default_currency) {
       updateCurrencies(user.id, stripeAccount.default_currency);
     }
-  } catch (e) {
-    console.error(`Error retrieving account information about user`, e);
+  } catch (e: any) {
+    if (e?.code === "account_invalid" || e?.type === "StripePermissionError") {
+      logger.warn(
+        `Stripe permission error retrieving account '${account.id}': The API key may not have access to this account or the account may have been deleted.`
+      );
+    } else {
+      logger.error(
+        `Error retrieving Stripe account information for account '${account.id}'`,
+        e
+      );
+    }
   }
   logger.info(`account.update: received update for ${account.id}`);
 };

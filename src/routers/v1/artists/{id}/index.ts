@@ -23,7 +23,7 @@ export default function () {
     const { includeDefaultTier }: { includeDefaultTier?: boolean } = req.query;
     const loggedInUser = req.user;
     if (!id || id === "undefined") {
-      return res.status(400);
+      return res.status(400).json({ error: "Invalid artist ID" });
     }
     try {
       const parsedId = await findArtistIdForURLSlug(id);
@@ -40,8 +40,7 @@ export default function () {
         isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);
 
         if (!artist) {
-          res.status(404);
-          return next();
+          return res.status(404).json({ error: "Artist not found" });
         }
 
         if (artist.isLabelProfile) {
@@ -60,11 +59,9 @@ export default function () {
           if (req.headers.accept) {
             res.set("content-type", "application/activity+json");
           }
-          res.json(await turnArtistIntoActor(artist as any));
-
-          return next();
+          return res.json(await turnArtistIntoActor(artist as any));
         } else {
-          res.json({
+          return res.json({
             result: processSingleArtist(
               artist as any,
               loggedInUser?.id,
@@ -73,8 +70,7 @@ export default function () {
           });
         }
       } else {
-        res.status(404);
-        return next();
+        return res.status(404).json({ error: "Artist not found" });
       }
     } catch (e) {
       next(e);

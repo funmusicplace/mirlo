@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-
+import { AppError, HttpCode } from "../../../../../utils/error";
 import stripe from "../../../../../utils/stripe";
 
 type Params = {
@@ -34,8 +34,22 @@ export default function () {
           let account;
           try {
             account = await stripe.accounts.retrieve(accountId);
-          } catch (e) {
-            console.error(`Error retreiving Stripe information about user`, e);
+          } catch (e: any) {
+            if (
+              e?.code === "account_invalid" ||
+              e?.type === "StripePermissionError"
+            ) {
+              throw new AppError({
+                httpCode: HttpCode.FORBIDDEN,
+                description:
+                  "Unable to access Stripe account. The API key may not have permission to access this account or the account may have been deleted.",
+              });
+            }
+            throw new AppError({
+              httpCode: HttpCode.INTERNAL_SERVER_ERROR,
+              description:
+                "Failed to retrieve Stripe account information. Please try again later.",
+            });
           }
           res.status(200).json({
             result: {
