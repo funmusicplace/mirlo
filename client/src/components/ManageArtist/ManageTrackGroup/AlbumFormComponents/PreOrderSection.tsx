@@ -19,7 +19,7 @@ const PreOrderSection: React.FC<{
 }> = ({ existingObject, reload, hasReleaseDate }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { artistId, trackGroupId } = useParams();
-  const { watch } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const errorHandler = useErrorHandler();
   const releaseDateValue = watch("releaseDate");
   const { mutateAsync: bulkSetTracksIsPreview } =
@@ -33,27 +33,46 @@ const PreOrderSection: React.FC<{
     existingObject.publishedAt &&
     new Date(existingObject.publishedAt) <= new Date();
 
-  const prevHasReleaseDate = React.useRef(hasReleaseDate);
-  React.useEffect(() => {
-    const wasTrue = prevHasReleaseDate.current;
-    prevHasReleaseDate.current = hasReleaseDate;
-
-    if (wasTrue && !hasReleaseDate && scheduleOnReleaseDate) {
-      api
-        .put(`manage/trackGroups/${trackGroupId}`, {
-          scheduleEndOnReleaseDate: false,
-          makeTracksPreviewableOnRelease: false,
-          artistId: Number(artistId),
-        })
-        .then(() => reload())
-        .catch((e) => errorHandler(e));
-    }
-  }, [hasReleaseDate]);
-
   const [showEndModal, setShowEndModal] = React.useState(false);
   const [showNoDateModal, setShowNoDateModal] = React.useState(false);
+  const [showPastDateModal, setShowPastDateModal] = React.useState(false);
+  const [showRemoveScheduleModal, setShowRemoveScheduleModal] =
+    React.useState(false);
   const [makeTracksPreviewable, setMakeTracksPreviewable] =
     React.useState(false);
+
+  const isReleaseDateInPast =
+    !!releaseDateValue &&
+    new Date(releaseDateValue) < new Date(new Date().toDateString());
+  const isReleaseDateValid = hasReleaseDate && !isReleaseDateInPast;
+  const savedReleaseDate = existingObject.releaseDate?.split("T")[0] ?? "";
+
+  const prevWasValid = React.useRef(isReleaseDateValid);
+  React.useEffect(() => {
+    if (scheduleOnReleaseDate && prevWasValid.current && !isReleaseDateValid) {
+      setShowRemoveScheduleModal(true);
+    }
+    prevWasValid.current = isReleaseDateValid;
+  }, [isReleaseDateValid, scheduleOnReleaseDate]);
+
+  const handleConfirmRemoveSchedule = async () => {
+    setShowRemoveScheduleModal(false);
+    try {
+      await api.put(`manage/trackGroups/${trackGroupId}`, {
+        scheduleEndOnReleaseDate: false,
+        makeTracksPreviewableOnRelease: false,
+        artistId: Number(artistId),
+      });
+      reload();
+    } catch (e) {
+      errorHandler(e);
+    }
+  };
+
+  const handleCancelRemoveSchedule = () => {
+    setShowRemoveScheduleModal(false);
+    setValue("releaseDate", savedReleaseDate);
+  };
 
   const updateField = async (data: Record<string, unknown>) => {
     try {
@@ -104,6 +123,10 @@ const PreOrderSection: React.FC<{
   const handleScheduleToggle = async (checked: boolean) => {
     if (checked && !hasReleaseDate) {
       setShowNoDateModal(true);
+      return;
+    }
+    if (checked && isReleaseDateInPast) {
+      setShowPastDateModal(true);
       return;
     }
     await updateField({
@@ -259,6 +282,33 @@ const PreOrderSection: React.FC<{
           <Button onClick={() => setShowNoDateModal(false)}>
             {t("cancel")}
           </Button>
+        </div>
+      </Modal>
+      <Modal
+        open={showPastDateModal}
+        onClose={() => setShowPastDateModal(false)}
+        title={t("schedulePreorderReleaseDate")}
+      >
+        <div className="flex flex-col gap-4">
+          <p>{t("releaseDateInPast")}</p>
+          <Button onClick={() => setShowPastDateModal(false)}>
+            {t("cancel")}
+          </Button>
+        </div>
+      </Modal>
+      <Modal
+        open={showRemoveScheduleModal}
+        onClose={handleCancelRemoveSchedule}
+        title={t("schedulePreorderReleaseDate")}
+      >
+        <div className="flex flex-col gap-4">
+          <p>{t("removeScheduleOnDateChangeWarning")}</p>
+          <div className="flex gap-2">
+            <Button onClick={handleConfirmRemoveSchedule}>
+              {t("continue")}
+            </Button>
+            <Button onClick={handleCancelRemoveSchedule}>{t("cancel")}</Button>
+          </div>
         </div>
       </Modal>
     </FormSection>
