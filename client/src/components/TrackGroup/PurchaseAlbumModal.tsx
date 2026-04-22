@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryUserStripeStatus } from "queries";
 import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
 import { bp } from "../../constants";
+import { isTrackGroupPublished } from "utils/artist";
 
 const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
@@ -31,8 +32,7 @@ const PurchaseAlbumModal: React.FC<{
     return null;
   }
 
-  const isPublished =
-    trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
+  const isPublished = isTrackGroupPublished(trackGroup);
 
   if (!isPublished) {
     return null;

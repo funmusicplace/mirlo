@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { getReleaseUrl } from "utils/artist";
+import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
 import { FaEye, FaLock } from "react-icons/fa";
 import {
   ArtistButton,
@@ -108,8 +108,7 @@ const PublishButton: React.FC<{
     return null;
   }
 
-  const isPublished =
-    trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
+  const isPublished = isTrackGroupPublished(trackGroup);
 
   return (
     <div className="flex flex-wrap gap-3">

@@ -11,6 +11,7 @@ import Button from "components/common/Button";
 import api from "services/api";
 import { useBulkSetTracksIsPreviewMutation } from "queries/trackGroups";
 import useErrorHandler from "services/useErrorHandler";
+import { isTrackGroupPublished } from "utils/artist";
 
 const PreOrderSection: React.FC<{
   existingObject: TrackGroup;
@@ -41,9 +42,7 @@ const PreOrderSection: React.FC<{
     existingObject.scheduleEndOnReleaseDate,
     existingObject.makeTracksPreviewableOnRelease,
   ]);
-  const isPublished =
-    existingObject.publishedAt &&
-    new Date(existingObject.publishedAt) <= new Date();
+  const isPublished = isTrackGroupPublished(existingObject);
 
   const [showEndModal, setShowEndModal] = React.useState(false);
   const [showNoDateModal, setShowNoDateModal] = React.useState(false);

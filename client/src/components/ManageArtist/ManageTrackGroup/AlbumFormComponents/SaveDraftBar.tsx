@@ -7,7 +7,7 @@ import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
-import { getArtistManageUrl } from "utils/artist";
+import { getArtistManageUrl, isTrackGroupPublished } from "utils/artist";
 import { useSnackbar } from "state/SnackbarContext";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
@@ -23,9 +23,7 @@ const SaveDraftBar: React.FC<{
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
 
-  const isPublished =
-    existingObject.publishedAt &&
-    new Date(existingObject.publishedAt) <= new Date();
+  const isPublished = isTrackGroupPublished(existingObject);
 
   const handleSaveDraft = async () => {
     if (!trackGroupId || !artistId) return;

@@ -8,7 +8,11 @@ import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
+import {
+  getManageReleaseUrl,
+  getReleaseUrl,
+  isTrackGroupPublished,
+} from "utils/artist";
 import { useDeleteTrackGroupMutation } from "queries";
 import ArtistRouterLink, {
   ArtistButton,
@@ -76,7 +80,7 @@ const TrackGroupCard: React.FC<{
       >
         <ArtistRouterLink
           to={
-            album.publishedAt && new Date(album.publishedAt) <= new Date()
+            isTrackGroupPublished(album)
               ? getReleaseUrl(artist, album)
               : getManageReleaseUrl(artist, album)
           }

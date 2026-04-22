@@ -11,6 +11,7 @@ import { queryArtist } from "queries";
 import BackingThisProject from "./BackingThisProject";
 import PurchaseAlbumModal from "./PurchaseAlbumModal";
 import { bp } from "../../constants";
+import { isTrackGroupPublished } from "utils/artist";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
@@ -75,8 +76,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     );
   }
 
-  const isPublished =
-    trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
+  const isPublished = isTrackGroupPublished(trackGroup);
 
   if (!isPublished) {
     return null;

@@ -18,6 +18,7 @@ import FundraisingGoal from "./FundraisingGoal";
 import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 import PreOrderSection from "./PreOrderSection";
 import SaveDraftBar from "./SaveDraftBar";
+import { isTrackGroupPublished } from "utils/artist";
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
@@ -65,20 +66,19 @@ const AlbumFormContent: React.FC<{
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
             />
-            {existingObject.publishedAt &&
-              new Date(existingObject.publishedAt) < new Date() && (
-                <small>
-                  <span>
-                    {t("fullUrlIs", {
-                      currentUrlSlug: `${window.location.origin}/${existingObject.artist.urlSlug}/release/${urlSlug}`,
-                    })}
-                    .{" "}
-                  </span>
-                  <span className="bg-(--mi-normal-background-color) text-(--mi-warning-color)">
-                    {t("urlSlugWarning")}
-                  </span>
-                </small>
-              )}
+            {isTrackGroupPublished(existingObject) && (
+              <small>
+                <span>
+                  {t("fullUrlIs", {
+                    currentUrlSlug: `${window.location.origin}/${existingObject.artist.urlSlug}/release/${urlSlug}`,
+                  })}
+                  .{" "}
+                </span>
+                <span className="bg-(--mi-normal-background-color) text-(--mi-warning-color)">
+                  {t("urlSlugWarning")}
+                </span>
+              </small>
+            )}
           </FormComponent>
         </div>
         <div
