@@ -94,12 +94,24 @@ export const userAuthenticated = (
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    passport.authenticate("jwt", { session: false })(req, res, next);
-  } catch (e) {
-    logger.info(`failed user authentication check ${e}`);
-    res.status(401).json({ error: "Unauthorized" });
-  }
+  passport.authenticate(
+    "jwt",
+    { session: false },
+    (err?: unknown, user?: Express.User, info?: any) => {
+      if (err instanceof TokenExpiredError) {
+        return res.status(401).json({ error: info.message });
+      } else if (err) {
+        logger.info(`failed user authentication check ${err}`);
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      if (!user) {
+        logger.info(`user not authenticated`);
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      req.user = user;
+      return next();
+    }
+  )(req, res, next);
 };
 
 export const userHasPermission = (role: "admin" | "owner") => {
