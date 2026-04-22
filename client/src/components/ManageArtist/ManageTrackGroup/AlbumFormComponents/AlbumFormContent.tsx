@@ -13,11 +13,8 @@ import { css } from "@emotion/css";
 import { bp } from "../../../../constants";
 import ManageTags from "./ManageTags";
 
-import styled from "@emotion/styled";
-
 import PriceAndSuch from "./PriceAndSuch";
 import FundraisingGoal from "./FundraisingGoal";
-import Box from "components/common/Box";
 import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 
 const AlbumFormContent: React.FC<{
