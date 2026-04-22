@@ -13,14 +13,19 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 
 const SaveDraftBar: React.FC<{
+  existingObject: TrackGroup;
   reload: () => void;
-}> = ({ reload }) => {
+}> = ({ existingObject, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { getValues } = useFormContext();
   const { artistId, trackGroupId } = useParams();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
+
+  const isPublished =
+    existingObject.publishedAt &&
+    new Date(existingObject.publishedAt) <= new Date();
 
   const handleSaveDraft = async () => {
     if (!trackGroupId || !artistId) return;
@@ -46,7 +51,9 @@ const SaveDraftBar: React.FC<{
         artistId: Number(artistId),
       });
       reload();
-      snackbar(t("draftSaved"), { type: "success" });
+      snackbar(t(isPublished ? "releaseUpdated" : "draftSaved"), {
+        type: "success",
+      });
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -57,7 +64,7 @@ const SaveDraftBar: React.FC<{
   return (
     <div className="flex flex-wrap justify-between items-center mt-4 gap-2">
       <ArtistButton onClick={handleSaveDraft} isLoading={isSaving}>
-        {t("saveAlbumDraft")}
+        {t(isPublished ? "updateRelease" : "saveAlbumDraft")}
       </ArtistButton>
       <ArtistButtonLink
         to={getArtistManageUrl(Number(artistId)) + "/releases/tools"}

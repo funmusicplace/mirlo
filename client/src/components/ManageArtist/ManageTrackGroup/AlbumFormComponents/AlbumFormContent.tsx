@@ -35,7 +35,9 @@ const AlbumFormContent: React.FC<{
 
   return (
     <>
-      {isFlowV2 && <SaveDraftBar reload={reload} />}
+      {isFlowV2 && (
+        <SaveDraftBar existingObject={existingObject} reload={reload} />
+      )}
       {isFlowV2 && (
         <PreOrderSection
           existingObject={existingObject}
