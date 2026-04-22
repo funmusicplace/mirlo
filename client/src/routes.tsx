@@ -369,15 +369,6 @@ const routes: RouteObject[] = [
                     },
                   },
                   {
-                    path: "tiers/:tierId",
-                    async lazy() {
-                      const { default: Component } = await import(
-                        "components/ManageArtist/ManageSubscriptionTierPage"
-                      );
-                      return { Component };
-                    },
-                  },
-                  {
                     path: "posts",
                     async lazy() {
                       const { default: Component } = await import(
@@ -394,15 +385,6 @@ const routes: RouteObject[] = [
                         async lazy() {
                           const { default: Component } = await import(
                             "components/ManageArtist/Merch/ManageMerch"
-                          );
-                          return { Component };
-                        },
-                      },
-                      {
-                        path: ":merchId",
-                        async lazy() {
-                          const { default: Component } = await import(
-                            "components/ManageArtist/Merch/EditMerch"
                           );
                           return { Component };
                         },
@@ -435,6 +417,24 @@ const routes: RouteObject[] = [
                 async lazy() {
                   const { default: Component } = await import(
                     "components/ManageArtist/ManageTrackGroup/ManageTrackGroup"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: "merch/:merchId",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/ManageArtist/Merch/EditMerch"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: "tiers/:tierId",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/ManageArtist/ManageSubscriptionTierPage"
                   );
                   return { Component };
                 },
