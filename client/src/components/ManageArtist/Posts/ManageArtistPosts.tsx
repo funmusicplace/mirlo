@@ -99,117 +99,124 @@ const ManageArtistPosts: React.FC<{}> = () => {
           {t("addNewPost", { artist: artist.name })}
         </ArtistButton>
       </SpaceBetweenDiv>
-      {posts?.map((p) => (
-        <Box
-          key={p.id}
-          className={css`
-            margin-bottom: 1rem;
-            background-color: var(--mi-darken-background-color);
-          `}
-        >
-          <SpaceBetweenDiv
-            className={css`
-              display: flex;
-              flex-direction: column;
-            `}
-          >
-            <div
+      {!!posts && posts.length > 0 && (
+        <ol>
+          {posts.map((p) => (
+            <Box
+              as="li"
+              key={p.id}
               className={css`
-                margin-top: 0.5rem;
-                margin-bottom: 0.5rem;
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-                padding-bottom: 0.5rem;
-                border-bottom: var(--mi-border);
+                margin-bottom: 1rem;
+                background-color: var(--mi-darken-background-color);
               `}
             >
-              <ArtistRouterLink
-                to={
-                  p.isDraft
-                    ? getManagePostURLReference(p)
-                    : getPostURLReference({ ...p, artist })
-                }
+              <SpaceBetweenDiv
                 className={css`
-                  width: 80%;
                   display: flex;
-                  justify-content: flex-start;
-                  align-items: flex-start;
-                  h2 {
-                    margin-right: 1rem;
-                  }
+                  flex-direction: column;
                 `}
               >
-                {p.isDraft && (
-                  <Pill
+                <div
+                  className={css`
+                    margin-top: 0.5rem;
+                    margin-bottom: 0.5rem;
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    padding-bottom: 0.5rem;
+                    border-bottom: var(--mi-border);
+                  `}
+                >
+                  <ArtistRouterLink
+                    to={
+                      p.isDraft
+                        ? getManagePostURLReference(p)
+                        : getPostURLReference({ ...p, artist })
+                    }
                     className={css`
-                      margin-right: 0.5rem;
+                      width: 80%;
+                      display: flex;
+                      justify-content: flex-start;
+                      align-items: flex-start;
+                      h2 {
+                        margin-right: 1rem;
+                      }
                     `}
                   >
-                    Draft
-                  </Pill>
-                )}
+                    {p.isDraft && (
+                      <Pill
+                        className={css`
+                          margin-right: 0.5rem;
+                        `}
+                      >
+                        Draft
+                      </Pill>
+                    )}
 
-                <h2>
-                  {p.title === "" || !p.title ? (
-                    <span
+                    <h2>
+                      {p.title === "" || !p.title ? (
+                        <span
+                          className={css`
+                            font-style: italic;
+                          `}
+                        >
+                          {t("untitledPost")}
+                        </span>
+                      ) : (
+                        p.title
+                      )}
+                    </h2>
+                  </ArtistRouterLink>
+                  <div
+                    className={css`
+                      display: flex;
+                    `}
+                  >
+                    <ArtistButtonLink
+                      aria-label={t("editPost")}
+                      to={getManagePostURLReference(p)}
+                      onlyIcon
+                      variant="dashed"
+                      startIcon={<FaPen />}
+                    />
+                    <ArtistButton
+                      aria-label={t("deletePost")}
                       className={css`
-                        font-style: italic;
+                        margin-left: 0.5rem;
                       `}
-                    >
-                      No title
-                    </span>
-                  ) : (
-                    p.title
-                  )}
-                </h2>
-              </ArtistRouterLink>
-              <div
-                className={css`
-                  display: flex;
-                `}
-              >
-                <ArtistButtonLink
-                  to={getManagePostURLReference(p)}
-                  onlyIcon
-                  variant="dashed"
-                  startIcon={<FaPen />}
-                />
-                <ArtistButton
+                      startIcon={<FaTrash />}
+                      onClick={() => deletePost(p.id)}
+                    ></ArtistButton>
+                  </div>
+                </div>
+                <p
                   className={css`
-                    margin-left: 0.5rem;
+                    color: grey;
+                    margin-bottom: 1rem;
+                    text-align: left;
+                    width: 100%;
                   `}
-                  startIcon={<FaTrash />}
-                  onClick={() => deletePost(p.id)}
-                ></ArtistButton>
-              </div>
-            </div>
-            <p
-              className={css`
-                color: grey;
-                margin-bottom: 1rem;
-                text-align: left;
-                width: 100%;
-              `}
-            >
-              {new Date(p.publishedAt) > new Date() &&
-                t("willPublishAt", {
-                  date: formatDate({
-                    date: p.publishedAt,
-                    i18n,
-                    options: { dateStyle: "short" },
-                  }),
-                })}
-              {!p.isDraft &&
-                new Date(p.publishedAt) <= new Date() &&
-                t("publishedAt", {
-                  date: formatDate({ date: p.publishedAt, i18n }),
-                })}
-            </p>
-          </SpaceBetweenDiv>
-          <MarkdownWrapper>{parse(p.content ?? "")}</MarkdownWrapper>
-        </Box>
-      ))}
+                >
+                  {new Date(p.publishedAt) > new Date() &&
+                    t("willPublishAt", {
+                      date: formatDate({
+                        date: p.publishedAt,
+                        i18n,
+                        options: { dateStyle: "short" },
+                      }),
+                    })}
+                  {!p.isDraft &&
+                    new Date(p.publishedAt) <= new Date() &&
+                    t("publishedAt", {
+                      date: formatDate({ date: p.publishedAt, i18n }),
+                    })}
+                </p>
+              </SpaceBetweenDiv>
+              <MarkdownWrapper>{parse(p.content ?? "")}</MarkdownWrapper>
+            </Box>
+          ))}
+        </ol>
+      )}
     </ManageSectionWrapper>
   );
 };
