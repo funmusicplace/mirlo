@@ -218,7 +218,9 @@ const PostForm: React.FC<{
         >
           <Controller
             name="isPublic"
-            render={({ field: { value = true, onChange, onBlur, ref, name } }) => (
+            render={({
+              field: { value = true, onChange, onBlur, ref, name },
+            }) => (
               <input
                 id="subscribers-only"
                 type="checkbox"
