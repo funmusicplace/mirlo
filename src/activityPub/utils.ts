@@ -19,6 +19,10 @@ import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
 import { IncomingHttpHeaders } from "http";
 import { logger } from "../logger";
+import {
+  fetchActivityPubDocument,
+  sendSignedActivityPubMessage,
+} from "./httpClient";
 
 const { REACT_APP_CLIENT_DOMAIN } = process.env;
 
@@ -346,46 +350,53 @@ const parsePublicKeyFromActorDoc = (
   return null;
 };
 
-const fetchWithHeaders = async (url: string) => {
-  const response = await fetch(url, {
-    headers: {
-      Accept:
-        'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json',
-    },
-  });
-  return response;
-};
+// Simple in-memory cache for public keys to avoid repeated fetches
+const publicKeyCache = new Map<string, { key: string; timestamp: number }>();
+const CACHE_DURATION_MS = 1000 * 60 * 60; // 1 hour
 
 export async function fetchRemotePublicKey(keyId: string): Promise<string> {
   try {
-    let response = await fetchWithHeaders(keyId);
-
-    // Some servers return 404 for keyId URLs with fragments (e.g. actor#main-key).
-    // Fallback to the actor document and extract the key from there.
-    if (!response.ok && response.status === 404 && keyId.includes("#")) {
-      const actorUrl = keyId.split("#")[0];
-      response = await fetchWithHeaders(actorUrl);
+    // Check cache first
+    const cached = publicKeyCache.get(keyId);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION_MS) {
+      logger.debug(`Public key cache hit for ${keyId}`);
+      return cached.key;
     }
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch public key (${response.status}): ${response.statusText}`
-      );
-    }
+    let data: Record<string, any>;
 
-    const data = await response.json();
+    try {
+      // Try the keyId first (might have a fragment like #main-key)
+      data = await fetchActivityPubDocument(keyId);
+    } catch (error) {
+      // Some servers return 404 for keyId URLs with fragments (e.g. actor#main-key).
+      // Fallback to the actor document and extract the key from there.
+      if (keyId.includes("#")) {
+        const actorUrl = keyId.split("#")[0];
+        logger.info(
+          `Got error for ${keyId}, trying without fragment: ${actorUrl}`
+        );
+        data = await fetchActivityPubDocument(actorUrl);
+      } else {
+        throw error;
+      }
+    }
 
     const publicKeyPem = parsePublicKeyFromActorDoc(data, keyId);
 
     if (publicKeyPem) {
+      // Cache the successful fetch
+      publicKeyCache.set(keyId, { key: publicKeyPem, timestamp: Date.now() });
       return publicKeyPem;
     }
 
     throw new Error("No publicKeyPem found in actor document");
   } catch (e) {
+    const errorMsg = e instanceof Error ? e.message : "Unknown error";
+    logger.error(`Error fetching public key for ${keyId}: ${errorMsg}`);
     throw new AppError({
       httpCode: 401,
-      description: `Failed to verify signature: ${e instanceof Error ? e.message : "Unknown error"}`,
+      description: `Failed to verify signature: ${errorMsg}`,
     });
   }
 }
@@ -493,24 +504,9 @@ export const signAndSendActivityPubMessage = async (
 
   const header = `keyId="${rootArtist}${artistUrlSlug}#main-key",headers="(request-target) host date digest",signature="${signature_b64}"`;
 
-  const response = await fetch(inboxUrl, {
-    method: "POST",
-    headers: {
-      Host: destinationDomain,
-      Date: date.toUTCString(),
-      Digest: `SHA-256=${digestHash}`,
-      Signature: header,
-      "Content-Type": "application/activity+json",
-    },
-    body: JSON.stringify(message),
+  await sendSignedActivityPubMessage(inboxUrl, message, {
+    Date: date.toUTCString(),
+    Digest: `SHA-256=${digestHash}`,
+    Signature: header,
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to deliver to ${inboxUrl}: ${response.status} ${errorText}`
-    );
-  }
-
-  return response;
 };

@@ -102,45 +102,50 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
 
-    res.status(200).json({
-      result: {
-        ...foundUser,
-        userAvatar: foundUser?.userAvatar
-          ? addSizesToImage(finalUserAvatarBucket, foundUser.userAvatar)
-          : null,
-        userBanner: foundUser?.userBanner
-          ? addSizesToImage(finalUserBannerBucket, foundUser.userBanner)
-          : null,
-        trackFavorites: foundUser?.trackFavorites.map((tf) => ({
-          ...tf,
-          track: {
-            ...tf.track,
-            trackGroup: {
-              ...tf.track.trackGroup,
-              cover: addSizesToImage(
-                finalCoversBucket,
-                tf.track.trackGroup.cover
-              ),
-            },
-          },
-        })),
-        artistUserSubscriptions: foundUser?.artistUserSubscriptions.map(
-          (aus) => ({
-            ...aus,
-            artistSubscriptionTier: {
-              ...aus.artistSubscriptionTier,
-              artist: {
-                ...aus.artistSubscriptionTier.artist,
-                avatar: addSizesToImage(
-                  finalArtistAvatarBucket,
-                  aus.artistSubscriptionTier.artist.avatar
-                ),
+    // Build response object before sending status/headers
+    const responseData = {
+      result: foundUser
+        ? {
+            ...foundUser,
+            userAvatar: foundUser.userAvatar
+              ? addSizesToImage(finalUserAvatarBucket, foundUser.userAvatar)
+              : null,
+            userBanner: foundUser.userBanner
+              ? addSizesToImage(finalUserBannerBucket, foundUser.userBanner)
+              : null,
+            trackFavorites: foundUser.trackFavorites.map((tf) => ({
+              ...tf,
+              track: {
+                ...tf.track,
+                trackGroup: {
+                  ...tf.track.trackGroup,
+                  cover: addSizesToImage(
+                    finalCoversBucket,
+                    tf.track.trackGroup.cover
+                  ),
+                },
               },
-            },
-          })
-        ),
-      },
-    });
+            })),
+            artistUserSubscriptions: foundUser.artistUserSubscriptions.map(
+              (aus) => ({
+                ...aus,
+                artistSubscriptionTier: {
+                  ...aus.artistSubscriptionTier,
+                  artist: {
+                    ...aus.artistSubscriptionTier.artist,
+                    avatar: addSizesToImage(
+                      finalArtistAvatarBucket,
+                      aus.artistSubscriptionTier.artist.avatar
+                    ),
+                  },
+                },
+              })
+            ),
+          }
+        : null,
+    };
+
+    res.status(200).json(responseData);
   } catch (e) {
     next(e);
   }
