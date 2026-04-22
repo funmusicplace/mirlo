@@ -163,26 +163,28 @@ const SubscriptionForm: React.FC<{
         />
         <FormSection>
           <FormComponent>
-            {t("name")}
-            <InputEl {...register("name")} />
+            <label htmlFor="input-name">{t("name")}</label>
+            <InputEl id="input-name" {...register("name")} />
           </FormComponent>
           <FormComponent>
-            <label>{t("description")}</label>
-            <TextArea {...register("description")} />
+            <label htmlFor="input-description">{t("description")}</label>
+            <TextArea id="input-description" {...register("description")} />
           </FormComponent>
         </FormSection>
         <FormSection>
           <h2>{t("theMoneyBit")}</h2>
           <FormComponent>
-            {t("minimumAmount")}
+            <label htmlFor="input-minimum-amount">{t("minimumAmount")}</label>
             <div className="flex w-full items-center gap-2">
               <InputEl
+                aria-describedby="unit-minimum-amount"
+                id="input-minimum-amount"
                 step={0.01}
                 type="number"
                 {...register("minAmount", { min: 1 })}
                 min={0}
               />
-              <span className="whitespace-nowrap">
+              <span className="whitespace-nowrap" id="unit-minimum-amount">
                 {t("inCurrency", { currency: user?.currency ?? "usd" })}
               </span>
             </div>
@@ -213,8 +215,12 @@ const SubscriptionForm: React.FC<{
           )}
 
           <FormComponent>
-            <label>{t("interval")}</label>
-            <SelectEl defaultValue="paid" {...register("interval")}>
+            <label htmlFor="select-interval">{t("interval")}</label>
+            <SelectEl
+              defaultValue="paid"
+              id="select-interval"
+              {...register("interval")}
+            >
               <option value="MONTH">{t("monthly")}</option>
               <option value="YEAR">{t("yearly")}</option>
             </SelectEl>
