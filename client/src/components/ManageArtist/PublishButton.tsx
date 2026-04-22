@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { css } from "@emotion/css";
 import { getReleaseUrl } from "utils/artist";
 import { FaEye, FaLock } from "react-icons/fa";
 import {
@@ -113,13 +112,7 @@ const PublishButton: React.FC<{
     trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
 
   return (
-    <div
-      className={css`
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-      `}
-    >
+    <div className="flex flex-wrap gap-3">
       {!isPublished && artist && (
         <ArtistButtonLink
           to={getReleaseUrl(artist, trackGroup)}
@@ -134,20 +127,7 @@ const PublishButton: React.FC<{
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing}
-        className={css`
-          background-color: var(--mi-green-500) !important;
-          border-color: var(--mi-green-700) !important;
-          color: var(--mi-green-100) !important;
-
-          svg {
-            fill: var(--mi-green-100) !important;
-          }
-
-          &:hover:not(:disabled) {
-            background-color: var(--mi-green-700) !important;
-            border-color: var(--mi-green-700) !important;
-          }
-        `}
+        className="!bg-(--mi-green-500) !border-(--mi-green-700) !text-(--mi-green-100) [&_svg]:!fill-(--mi-green-100) enabled:hover:!bg-(--mi-green-700) enabled:hover:!border-(--mi-green-700)"
       >
         {isFlowV2
           ? t(isPublished ? "makePrivateSimple" : "publishSimple")
