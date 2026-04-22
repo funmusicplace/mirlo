@@ -27,7 +27,6 @@ const ManageSubscriptionTierBox: React.FC<{
   const snackbar = useSnackbar();
 
   const { artistId } = useParams();
-  const [manageTier, setManageTier] = React.useState<boolean>();
 
   const userId = user?.id;
 
@@ -122,15 +121,6 @@ const ManageSubscriptionTierBox: React.FC<{
         </SpaceBetweenDiv>
 
         <MarkdownContent content={tier.description} />
-
-        <Modal
-          open={!!manageTier}
-          title={t("editTier")}
-          onClose={() => setManageTier(undefined)}
-        >
-          {/* There is some overly complex state management going on here with the reloads being passed around */}
-          <SubscriptionForm existing={tier} reload={reload} artist={artist} />
-        </Modal>
       </div>
     </Box>
   );

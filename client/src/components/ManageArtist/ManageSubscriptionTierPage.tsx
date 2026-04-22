@@ -25,6 +25,8 @@ const ManageSubscriptionTierPage: React.FC = () => {
     })
   );
 
+  console.log("tier", tier);
+
   const handleReload = async () => {
     await queryClient.invalidateQueries({
       queryKey: queryManagedArtistSubscriptionTier({
