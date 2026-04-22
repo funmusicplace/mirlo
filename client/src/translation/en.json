@@ -732,6 +732,7 @@
     "saving": "Saving changes..."
   },
   "managePost": {
+    "untitledPost": "Untitled post",
     "managePost": "Manage post",
     "viewLive": "View live"
   },
