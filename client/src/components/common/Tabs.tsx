@@ -59,6 +59,14 @@ export const ArtistTabs = styled(Tabs)<{ color?: string }>`
       }
     }
   }
+
+  > .tab-primary {
+    margin-inline-end: 0;
+  }
+
+  > .tab-primary + .tab-secondary {
+    margin-inline-start: 0;
+  }
 `;
 
 export default Tabs;
