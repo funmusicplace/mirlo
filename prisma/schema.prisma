@@ -80,6 +80,9 @@ model User {
   stripeCustomerId                    String?
   canCreateArtists                    Boolean                         @default(true)
   accountingEmail                     String?
+  pendingEmail                        String?
+  pendingEmailToken                   String?                         @db.Uuid
+  pendingEmailExpiration              DateTime?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
