@@ -260,18 +260,6 @@ const PostForm: React.FC<{
                 </option>
               ))}
             </SelectEl>
-            {minimumTier && (
-              <small>
-                The mimimum tier will be{" "}
-                <em>
-                  {
-                    tiers?.results.find((tier) => `${tier.id}` === minimumTier)
-                      ?.name
-                  }
-                </em>
-                .
-              </small>
-            )}
           </FormComponent>
         )}
 
