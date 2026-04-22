@@ -296,11 +296,8 @@ describe("inboxPOST", () => {
     // Mock fetchRemotePublicKey to return our test public key
     sinon.stub(utilsModule, "fetchRemotePublicKey").resolves(testPublicKey);
 
-    // Mock fetch for sending Accept message
-    fetchStub.resolves({
-      ok: true,
-      text: async () => "",
-    });
+    // Mock signAndSendActivityPubMessage to avoid real HTTP calls
+    sinon.stub(utilsModule, "signAndSendActivityPubMessage").resolves();
 
     const req = {
       params: { id: artist.urlSlug },
@@ -344,7 +341,9 @@ describe("inboxPOST", () => {
     assert(follower);
     assert.equal(follower.actor, "https://test-actor.com/remote-actor");
 
-    // Verify Accept message was sent (fetch called)
-    assert(fetchStub.called);
+    // Verify Accept message was sent
+    assert(
+      (utilsModule.signAndSendActivityPubMessage as sinon.SinonStub).called
+    );
   });
 });
