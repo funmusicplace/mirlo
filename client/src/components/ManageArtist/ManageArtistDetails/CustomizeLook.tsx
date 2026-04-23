@@ -354,10 +354,10 @@ export const CustomizeLook: React.FC = () => {
                 </div>
               </div>
             </ArtistFormSection>
-            <ArtistFormSection>
+            <ArtistFormSection className="flex-col">
               <FormComponent
                 className={css`
-                  width: 300px;
+                  width: 500px;
                 `}
               >
                 <PaymentSlider
