@@ -32,14 +32,20 @@ block content
       if transaction.trackGroupPurchases
         each purchase in transaction.trackGroupPurchases
           if !purchase.proGratis
-            +purchaseRow(`${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`, purchase.trackGroup.catalogNumber, transaction,
+            +purchaseRow(`Digital: ${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`, 
+               purchase.trackGroup.catalogNumber, 
+               transaction,
               `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`)
       if transaction.trackPurchases
         each purchase in transaction.trackPurchases
-          +purchaseRow(purchase.track.title, purchase.track.isrc, transaction)
+          +purchaseRow(`Digital: ${purchase.track.artist.name} \ ${purchase.track.title}`, 
+            purchase.track.isrc, 
+            transaction)
       if transaction.merchPurchases
         each purchase in transaction.merchPurchases
-          +purchaseRow(`${purchase.merch.artist.name} \ ${purchase.merch.title}`, purchase.merch.sku, transaction)
+          +purchaseRow(`Merch: ${purchase.merch.artist.name} \ ${purchase.merch.title}`, 
+            purchase.merch.sku, 
+            transaction)
       if transaction.tips
         each tip in transaction.tips
           +purchaseRow('Tip', '', transaction)
