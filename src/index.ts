@@ -153,6 +153,9 @@ const LOW_NOISE_PROBE_PATHS = new Set([
   "/wp-admin",
   "/.ssh/sftp-config.json",
   "/.vscode/sftp.json",
+  "/.anthropic/config.json",
+  "/.openai/config.json",
+  "/.cursor/mcp.json",
 ]);
 
 // This has to be the last thing used so that other things don't get over-written
