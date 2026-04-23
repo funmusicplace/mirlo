@@ -38,7 +38,7 @@ block content
               `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`)
       if transaction.trackPurchases
         each purchase in transaction.trackPurchases
-          +purchaseRow(`Digital: ${purchase.track.artist.name} \ ${purchase.track.title}`, 
+          +purchaseRow(`Digital: ${purchase.track.trackGroup.artist.name} \ ${purchase.track.title}`, 
             purchase.track.isrc, 
             transaction)
       if transaction.merchPurchases

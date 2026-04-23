@@ -111,7 +111,6 @@ const errorHandler = (
     err.name === "NotFoundError" ||
     err.name === "PrismaClientKnownRequestError"
   ) {
-    log.error("err", err.cause, err.name, err.code, err.meta);
     let message = `Something went wrong with the data supplied. Admin should check the logs`;
 
     if (err.meta && err.code === "P2002") {
@@ -143,6 +142,15 @@ const errorHandler = (
     if (err.code === "P2025") {
       message = `Not found: ${err.message}`;
     }
+    log.error(
+      `PrismaClientKnownRequestError: ${message} - ${JSON.stringify({
+        cause: err.cause,
+        name: err.name,
+        code: err.code,
+        meta: err.meta,
+        stack: err.stack,
+      })}`
+    );
     return res.status(400).json({
       error: message,
     });
