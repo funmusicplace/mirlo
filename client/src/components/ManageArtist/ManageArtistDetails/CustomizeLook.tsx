@@ -246,9 +246,10 @@ export const CustomizeLook: React.FC = () => {
                 `}
               >
                 <FormComponent>
-                  <label>{t("displayName")} </label>
+                  <label htmlFor="input-name">{t("displayName")} </label>
                   <SavingInput
                     formKey="name"
+                    id="input-name"
                     url={`manage/artists/${artist.id}`}
                     extraData={{}}
                   />
@@ -266,18 +267,22 @@ export const CustomizeLook: React.FC = () => {
                   />
                 </FormComponent>
                 <FormComponent>
-                  <label>{t("shortDescription")}</label>
+                  <label htmlFor="input-description">
+                    {t("shortDescription")}
+                  </label>
                   <SavingInput
                     formKey="shortDescription"
+                    id="input-description"
                     maxLength={160}
                     url={`manage/artists/${artist.id}`}
                     extraData={{}}
                   />
                 </FormComponent>
                 <FormComponent>
-                  <label>{t("bio")}</label>
+                  <label htmlFor="textarea-bio">{t("bio")}</label>
                   <SavingInput
                     formKey="bio"
+                    id="textarea-bio"
                     rows={7}
                     url={`manage/artists/${artist.id}`}
                     extraData={{}}
@@ -333,12 +338,18 @@ export const CustomizeLook: React.FC = () => {
                     />
                   </FormComponent>
                   <FormComponent>
-                    <label>{t("tileImage")}</label>
+                    <label htmlFor="input-tile-background-image">
+                      {t("tileImage")}
+                    </label>
                     <InputEl
+                      aria-describedby="hint-tile-background-image"
+                      id="input-tile-background-image"
                       type="checkbox"
                       {...methods.register("properties.tileBackgroundImage")}
                     />
-                    <small>{t("tileImageDescription")}</small>
+                    <small id="input-tile-background-image">
+                      {t("tileImageDescription")}
+                    </small>
                   </FormComponent>
                 </div>
               </div>
@@ -352,12 +363,15 @@ export const CustomizeLook: React.FC = () => {
                 <PaymentSlider
                   label={t("defaultPlatformFee")}
                   url={`manage/artists/${artist.id}`}
+                  ariaDescribedBy="hint-default-platform-fee"
                   keyName="defaultPlatformFee"
                   extraData={{
                     artistId: 0,
                   }}
                 />
-                <small>{t("defaultPlatformFeeDescription")}</small>
+                <small id="hint-default-platform-fee">
+                  {t("defaultPlatformFeeDescription")}
+                </small>
                 <ApplyPlatformFeeButton artistId={artist.id} />
               </FormComponent>
               <FormComponent
@@ -384,16 +398,20 @@ export const CustomizeLook: React.FC = () => {
             >
               <FormComponent>
                 <Toggle
+                  ariaDescribedBy="hint-enable-activity-pub"
                   label={t("enableActivityPub")}
                   toggled={activityPub}
                   onClick={() => {
                     methods.setValue("activityPub", !activityPub);
                   }}
                 />
-                <small>{t("makeSearchable")}</small>
+                <small id="hint-enable-activity-pub">
+                  {t("makeSearchable")}
+                </small>
               </FormComponent>
               <FormComponent>
                 <Toggle
+                  ariaDescribedBy="hint-allow-direct-messages"
                   label={t("allowDirectMessages")}
                   toggled={allowDirectMessages}
                   onClick={() => {
@@ -403,7 +421,9 @@ export const CustomizeLook: React.FC = () => {
                     );
                   }}
                 />
-                <small>{t("allowDirectMessagesDescription")}</small>
+                <small id="hint-allow-direct-messages">
+                  {t("allowDirectMessagesDescription")}
+                </small>
               </FormComponent>
             </ArtistFormSection>
             <CustomNamesForTabs />

@@ -15,9 +15,16 @@ import api from "services/api";
 const PaymentSlider: React.FC<{
   label: string;
   url: string;
+  ariaDescribedBy?: string;
   keyName?: string;
   extraData?: { artistId: number };
-}> = ({ label, url, extraData, keyName = "platformPercent" }) => {
+}> = ({
+  label,
+  url,
+  ariaDescribedBy,
+  extraData,
+  keyName = "platformPercent",
+}) => {
   const { artistId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "paymentSlider" });
   const [isOpen, setIsInfoOpen] = React.useState(false);
@@ -120,7 +127,7 @@ const PaymentSlider: React.FC<{
             `}
           />
           <InputEl
-            aria-describedby="output-platform-percent"
+            aria-describedby={`output-platform-percent ${ariaDescribedBy}`}
             id="input-platform-percent"
             min={0}
             max={100}

@@ -18,6 +18,7 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   const { register, getFieldState } = useFormContext();
 
   const errorMessage = getFieldState(name).error?.message ?? "";
+  const id = `input-color-${name}`;
 
   return (
     <FormComponent
@@ -36,8 +37,9 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
         }
       `}
     >
-      {title}
+      <label htmlFor={id}>{title}</label>
       <input
+        id={id}
         type="color"
         {...register(name, {
           validate: {
