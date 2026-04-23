@@ -29,7 +29,12 @@ export const produceNewStatus = <T extends { title: string; status: number }>(
   queue: T[],
   title: string,
   status: number
-): T[] => produceNewStatusImpl(queue as { title: string; status: number }[], title, status) as T[];
+): T[] =>
+  produceNewStatusImpl(
+    queue as { title: string; status: number }[],
+    title,
+    status
+  ) as T[];
 
 export const fileListIntoArray = (fileList: FileList) => {
   if (fileList?.length > 0) {
@@ -78,7 +83,12 @@ type ParsedItem = {
 export const convertMetaData = (
   p: ParsedItem,
   i: number,
-  trackGroup: { tracks: Track[]; artist?: Artist; artistId?: number }
+  trackGroup: {
+    tracks: Track[];
+    artist?: Artist;
+    artistId?: number;
+    defaultIsPreview?: boolean;
+  }
 ) => {
   let title = p.metadata.common.title;
 
@@ -99,7 +109,7 @@ export const convertMetaData = (
     duration: p.metadata.format.duration,
     file: p.file,
     title: title,
-    status: "preview",
+    status: trackGroup.defaultIsPreview === false ? "must-own" : "preview",
     lyrics: p.metadata.common.lyrics,
     isrc: isrc,
     trackArtists:
