@@ -11,6 +11,7 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
+import { isTrackGroupPublished } from "utils/artist";
 
 import MarkdownContent from "components/common/MarkdownContent";
 import Wishlist from "./Wishlist";
@@ -197,8 +198,7 @@ function TrackGroup() {
     return <FullPageLoadingSpinner />;
   }
 
-  const isPublished =
-    trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date();
+  const isPublished = isTrackGroupPublished(trackGroup);
 
   const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;

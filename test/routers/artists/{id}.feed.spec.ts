@@ -462,6 +462,7 @@ describe("artists/{id}/feed", () => {
         createItem.object.content,
         `<h2>A release by ${artist.name}.</h2>`
       );
+      assert(trackGroup.releaseDate);
       assert.equal(
         createItem.object.published,
         trackGroup.releaseDate.toISOString()

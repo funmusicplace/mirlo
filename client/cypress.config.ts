@@ -33,6 +33,7 @@ export default defineConfig({
           published?: boolean;
           isGettable?: boolean;
           releaseDate?: string;
+          isPreorder?: boolean;
         }) => {
           return pkg.createTrackGroup(query.artistId, query);
         },

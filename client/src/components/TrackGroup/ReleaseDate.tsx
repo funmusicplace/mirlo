@@ -63,13 +63,17 @@ export const calculateDateWithTimezoneOffset = (dateString: string) => {
   return new Date(date.getTime() + userTimezoneOffset);
 };
 
-const ReleaseDate: React.FC<{ releaseDate: string }> = ({
+const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
   releaseDate: releaseDateString,
 }) => {
   const { colors } = useGetArtistColors();
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+
+  if (!releaseDateString) {
+    return null;
+  }
 
   const releaseDate = calculateDateWithTimezoneOffset(releaseDateString);
   const beforeReleaseDate = releaseDate > new Date();

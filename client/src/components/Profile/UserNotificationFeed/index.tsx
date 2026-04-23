@@ -12,6 +12,7 @@ import NotificationColumn from "./NotificationColumn";
 
 const FOLLOW_TYPES: Notification["notificationType"][] = [
   "NEW_ARTIST_ALBUM",
+  "NEW_ARTIST_PREORDER",
   "NEW_ARTIST_POST",
 ];
 
@@ -142,7 +143,7 @@ const UserNotificationFeed = () => {
             {
               value: "albums",
               label: t("categoryAlbums"),
-              types: ["NEW_ARTIST_ALBUM"],
+              types: ["NEW_ARTIST_ALBUM", "NEW_ARTIST_PREORDER"],
             },
             {
               value: "posts",

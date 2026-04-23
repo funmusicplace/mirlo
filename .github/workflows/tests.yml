@@ -127,6 +127,14 @@ jobs:
           config-file: client/cypress.config.ts
           command: yarn client:cy:run
 
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: client/cypress/screenshots
+          if-no-files-found: ignore
+
       - name: Stop containers
         if: always()
         run: docker compose down

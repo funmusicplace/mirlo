@@ -12,6 +12,7 @@ import ArtistContactMessage from "./ArtistContactMessage";
 const categoryBorderColor = (type: Notification["notificationType"]) => {
   switch (type) {
     case "NEW_ARTIST_ALBUM":
+    case "NEW_ARTIST_PREORDER":
       return "#BE3455"; // Red 500
     case "NEW_ARTIST_POST":
       return "#5C899C"; // Blue
@@ -71,7 +72,8 @@ const NotificationFeedItem: React.FC<{
       {notification.notificationType === "NEW_ARTIST_POST" && (
         <NewArtistPost notification={notification} />
       )}
-      {notification.notificationType === "NEW_ARTIST_ALBUM" && (
+      {(notification.notificationType === "NEW_ARTIST_ALBUM" ||
+        notification.notificationType === "NEW_ARTIST_PREORDER") && (
         <NewArtistAlbum notification={notification} />
       )}
       {notification.notificationType === "LABEL_ADDED_ARTIST" && (

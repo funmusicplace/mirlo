@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 
 import FormComponent from "components/common/FormComponent";
 
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import UploadArtistImage from "../../UploadArtistImage";
 import { useParams } from "react-router-dom";
@@ -16,19 +16,36 @@ import ManageTags from "./ManageTags";
 import PriceAndSuch from "./PriceAndSuch";
 import FundraisingGoal from "./FundraisingGoal";
 import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
+import PreOrderSection from "./PreOrderSection";
+import SaveDraftBar from "./SaveDraftBar";
+import { isTrackGroupPublished } from "utils/artist";
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
   reload: () => void;
-}> = ({ existingObject, reload }) => {
+  isFlowV2?: boolean;
+}> = ({ existingObject, reload, isFlowV2 }) => {
   const { watch } = useFormContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
   const { artistId, trackGroupId } = useParams();
   const urlSlug = watch("urlSlug");
+  const releaseDateValue = watch("releaseDate");
+
+  const hasReleaseDate = Boolean(releaseDateValue);
 
   return (
     <>
+      {isFlowV2 && (
+        <SaveDraftBar existingObject={existingObject} reload={reload} />
+      )}
+      {isFlowV2 && (
+        <PreOrderSection
+          existingObject={existingObject}
+          reload={reload}
+          hasReleaseDate={hasReleaseDate}
+        />
+      )}
       <FormSection>
         <h2>{t("keyDetails")}</h2>
         <div className="md:grid md:grid-cols-2 gap-4">
@@ -49,20 +66,19 @@ const AlbumFormContent: React.FC<{
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
             />
-            {existingObject.publishedAt &&
-              new Date(existingObject.publishedAt) < new Date() && (
-                <small>
-                  <span>
-                    {t("fullUrlIs", {
-                      currentUrlSlug: `${window.location.origin}/${existingObject.artist.urlSlug}/release/${urlSlug}`,
-                    })}
-                    .{" "}
-                  </span>
-                  <span className="bg-(--mi-normal-background-color) text-(--mi-warning-color)">
-                    {t("urlSlugWarning")}
-                  </span>
-                </small>
-              )}
+            {isTrackGroupPublished(existingObject) && (
+              <small>
+                <span>
+                  {t("fullUrlIs", {
+                    currentUrlSlug: `${window.location.origin}/${existingObject.artist.urlSlug}/release/${urlSlug}`,
+                  })}
+                  .{" "}
+                </span>
+                <span className="bg-(--mi-normal-background-color) text-(--mi-warning-color)">
+                  {t("urlSlugWarning")}
+                </span>
+              </small>
+            )}
           </FormComponent>
         </div>
         <div
@@ -77,20 +93,22 @@ const AlbumFormContent: React.FC<{
             }
           `}
         >
-          <FormComponent>
-            <label htmlFor="input-published-at">{t("publishedAt")}</label>
-            <SavingInput
-              ariaDescribedBy="hint-published-at"
-              formKey="publishedAt"
-              id="input-published-at"
-              type="date"
-              required
-              url={`manage/trackGroups/${trackGroupId}`}
-              extraData={{ artistId: Number(artistId) }}
-              reload={reload}
-            />
-            <small id="hint-published-at">{t("publishedAtHint")}</small>
-          </FormComponent>
+          {!isFlowV2 && (
+            <FormComponent>
+              <label htmlFor="input-published-at">{t("publishedAt")}</label>
+              <SavingInput
+                ariaDescribedBy="hint-published-at"
+                formKey="publishedAt"
+                id="input-published-at"
+                type="date"
+                required
+                url={`manage/trackGroups/${trackGroupId}`}
+                extraData={{ artistId: Number(artistId) }}
+                reload={reload}
+              />
+              <small id="hint-published-at">{t("publishedAtHint")}</small>
+            </FormComponent>
+          )}
           <FormComponent>
             <label htmlFor="input-release-date">{t("releaseDate")}</label>
             <SavingInput
@@ -98,13 +116,22 @@ const AlbumFormContent: React.FC<{
               formKey="releaseDate"
               id="input-release-date"
               type="date"
-              required
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
-            />{" "}
-            <small id="hint-release-date">{t("releasedAtHint")}</small>
+            />
+            <small id="hint-release-date">
+              {!isFlowV2 ? (
+                t("releasedAtHint")
+              ) : existingObject.scheduleEndOnReleaseDate ? (
+                <Trans
+                  i18nKey="manageAlbum.releaseDateScheduledHint"
+                  components={{ strong: <strong /> }}
+                />
+              ) : (
+                t("releaseDateInfoText")
+              )}
+            </small>
           </FormComponent>
-
           <ManageTags tags={existingObject.tags} />
         </div>
       </FormSection>

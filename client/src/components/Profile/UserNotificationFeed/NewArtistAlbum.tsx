@@ -18,6 +18,7 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
 
   const { trackGroup } = notification;
   const coverUrl = trackGroup.cover?.sizes?.[300] ?? "";
+  const isPreorder = notification.notificationType === "NEW_ARTIST_PREORDER";
 
   return (
     <div className="flex items-center gap-4 p-4 min-h-[200px] relative">
@@ -38,7 +39,7 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
 
       <div className="flex-1 min-w-0">
         <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-pink) mb-1">
-          {t("newRelease")}
+          {isPreorder ? t("availableForPreorder") : t("newRelease")}
         </div>
         <div className="text-sm font-semibold truncate text-(--mi-normal-foreground-color)">
           {trackGroup.title}

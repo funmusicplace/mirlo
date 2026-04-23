@@ -18,6 +18,14 @@ export const getTrackGroupUrlReference = (trackGroup: {
   return `${trackGroup.id}`;
 };
 
+export const isTrackGroupPublished = (trackGroup: {
+  publishedAt?: string | null;
+}) => {
+  return (
+    !!trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date()
+  );
+};
+
 export const getArtistUrl = (artist: { urlSlug?: string; id?: number }) => {
   return `/${getArtistUrlReference(artist)}`;
 };

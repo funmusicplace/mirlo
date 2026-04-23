@@ -431,6 +431,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: "release-flow-2/:trackGroupId",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/ManageArtist/ManageTrackGroup/ManageTrackGroup"
+                  );
+                  return { Component };
+                },
+              },
+              {
                 path: "post/:postId",
                 async lazy() {
                   const { default: Component } = await import(
