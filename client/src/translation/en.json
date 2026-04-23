@@ -1133,7 +1133,7 @@
     "foregroundColor": "Normal text color",
     "deleteImage": "Delete image",
     "warningFeature": "Warning: this is an experimental feature. You shouldn't rely on it.",
-    "enableActivityPub": "Enable ActivityPub",
+    "enableActivityPub": "Enable the social web.",
     "groupName": "What should we show as the group type? Label? Collective?",
     "label": "Label",
     "makeSearchable": "Do you want to make this artist searchable on the fediverse? This will enable ActivityPub for this artist."

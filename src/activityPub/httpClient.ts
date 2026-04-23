@@ -62,19 +62,23 @@ export async function fetchActivityPubDocument(
     logger.debug(`Successfully fetched ${url}`);
     return body;
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    const statusCode =
+      error && typeof error === "object" && "response" in error
+        ? (error as any).response?.statusCode
+        : null;
 
-    logger.warn(`Failed to fetch ${url}: ${errorMsg}`);
+    // Handle 410 Gone errors (account deleted) without warning log
+    if (statusCode === 410) {
+      throw new Error(`Remote actor Gone (410): ${url}`);
+    }
 
-    // Check for 404 errors
-    if (
-      error &&
-      typeof error === "object" &&
-      "response" in error &&
-      (error as any).response?.statusCode === 404
-    ) {
+    // Handle 404 errors (not found)
+    if (statusCode === 404) {
       throw new Error(`ActivityPub document not found (404): ${url}`);
     }
+
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    logger.warn(`Failed to fetch ${url}: ${errorMsg}`);
 
     throw error;
   }

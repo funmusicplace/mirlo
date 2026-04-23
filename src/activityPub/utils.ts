@@ -393,7 +393,12 @@ export async function fetchRemotePublicKey(keyId: string): Promise<string> {
     throw new Error("No publicKeyPem found in actor document");
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : "Unknown error";
-    logger.error(`Error fetching public key for ${keyId}: ${errorMsg}`);
+
+    // Don't log 410 Gone errors; they're expected and inboxPOST handles them
+    if (!errorMsg.includes("Gone")) {
+      logger.error(`Error fetching public key for ${keyId}: ${errorMsg}`);
+    }
+
     throw new AppError({
       httpCode: 401,
       description: `Failed to verify signature: ${errorMsg}`,
@@ -422,6 +427,7 @@ export const verifySignature = async (
   const signatureB64 = signatureMatch[1];
 
   // Get the public key from the remote actor
+  // Don't catch here; let errors bubble up to inboxPOST for handling
   const publicKey = await fetchRemotePublicKey(keyId);
 
   // Reconstruct the signed string
