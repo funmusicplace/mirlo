@@ -7,7 +7,9 @@ client/build
 package-lock.json
 yarn-error.log
 .DS_Store
-.vscode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .pnp.*
 .yarn/*
 __generated__/
