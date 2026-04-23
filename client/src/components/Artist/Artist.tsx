@@ -162,7 +162,7 @@ function Artist() {
               <li className="tab-secondary">
                 <ArtistButtonQuickLink
                   ariaLabel={t("editTitled", { title: rosterTitle })}
-                  to="profile/label"
+                  to="/profile/label"
                   icon={<FaEdit />}
                 />
               </li>
