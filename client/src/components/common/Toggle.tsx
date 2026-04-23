@@ -5,10 +5,19 @@ export const Toggle: React.FC<{
   label: string;
   toggled: boolean;
   onClick: (newVal: boolean) => void;
+  ariaDescribedBy?: string;
   labelClassName?: string;
   id?: string;
   labelId?: string;
-}> = ({ label, toggled, onClick, labelClassName, id, labelId }) => {
+}> = ({
+  label,
+  toggled,
+  onClick,
+  ariaDescribedBy,
+  labelClassName,
+  id,
+  labelId,
+}) => {
   const [isToggled, toggle] = useState(toggled);
 
   const callback = () => {
@@ -34,6 +43,7 @@ export const Toggle: React.FC<{
         checked={isToggled}
         onChange={callback}
         aria-checked={isToggled}
+        aria-describedby={ariaDescribedBy}
         aria-labelledby={labelId}
         id={id}
         className={

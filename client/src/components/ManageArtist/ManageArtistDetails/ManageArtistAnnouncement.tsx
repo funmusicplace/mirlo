@@ -218,16 +218,18 @@ const ManageArtistAnnouncement: React.FC<{
             `}
           >
             <div className="flex w-full align-center justify-between">
-              <label>{t("announcement")}</label>
+              <label htmlFor="textarea-announcement">{t("announcement")}</label>
             </div>
             <SavingInput
+              ariaDescribedBy="hint-announcement"
               formKey={"announcementText"}
+              id="textarea-announcement"
               url={`manage/artists/${artist.id}`}
               reload={refresh}
               rows={1}
               saveOnBlur
             />
-            <small>{t("announcementDescription")}</small>
+            <small id="hint-announcement">{t("announcementDescription")}</small>
           </FormComponent>
         )}
       </div>

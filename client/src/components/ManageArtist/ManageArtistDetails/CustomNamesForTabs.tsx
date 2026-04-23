@@ -42,8 +42,9 @@ export const CustomNamesForTabs: React.FC = () => {
           `}
         >
           <FormComponent>
-            <label>{t("releasesTab")}</label>
+            <label htmlFor="input-releases-tab">{t("releasesTab")}</label>
             <InputEl
+              id="input-releases-tab"
               type="text"
               colors={artist.properties?.colors}
               placeholder={t("releases") ?? ""}
@@ -51,8 +52,9 @@ export const CustomNamesForTabs: React.FC = () => {
             />
           </FormComponent>
           <FormComponent>
-            <label>{t("merchTab")}</label>
+            <label htmlFor="input-merch-tab">{t("merchTab")}</label>
             <InputEl
+              id="input-merch-tab"
               type="text"
               colors={artist.properties?.colors}
               placeholder={t("merch") ?? ""}
@@ -60,8 +62,9 @@ export const CustomNamesForTabs: React.FC = () => {
             />
           </FormComponent>
           <FormComponent>
-            <label>{t("postsTab")}</label>
+            <label htmlFor="input-posts-tab">{t("postsTab")}</label>
             <InputEl
+              id="input-posts-tab"
               type="text"
               colors={artist.properties?.colors}
               placeholder={t("posts") ?? ""}
@@ -69,8 +72,9 @@ export const CustomNamesForTabs: React.FC = () => {
             />
           </FormComponent>
           <FormComponent>
-            <label>{t("supportTab")}</label>
+            <label htmlFor="input-support-tab">{t("supportTab")}</label>
             <InputEl
+              id="input-support-tab"
               type="text"
               colors={artist.properties?.colors}
               placeholder={t("support") ?? ""}
@@ -79,8 +83,9 @@ export const CustomNamesForTabs: React.FC = () => {
           </FormComponent>
           {artist.isLabelProfile && (
             <FormComponent>
-              <label>{t("rosterTab")}</label>
+              <label htmlFor="input-roster-tab">{t("rosterTab")}</label>
               <InputEl
+                id="input-roster-tab"
                 type="text"
                 colors={artist.properties?.colors}
                 placeholder={t("roster") ?? ""}
@@ -90,8 +95,9 @@ export const CustomNamesForTabs: React.FC = () => {
           )}
           {artist.isLabelProfile && (
             <FormComponent>
-              <label>{t("groupName")}</label>
+              <label htmlFor="input-group-name">{t("groupName")}</label>
               <InputEl
+                id="input-group-name"
                 type="text"
                 colors={artist.properties?.colors}
                 placeholder={t("label") ?? ""}

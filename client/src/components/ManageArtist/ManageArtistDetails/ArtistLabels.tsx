@@ -65,7 +65,7 @@ const ArtistLabels: React.FC<{ refetch: () => void }> = ({ refetch }) => {
       `}
     >
       <FormComponent>
-        <label>{t("whatLabelsisThisArtistPartOf")}</label>
+        <label htmlFor="input-label">{t("whatLabelsisThisArtistPartOf")}</label>
         <AutoComplete
           getOptions={searchLabels}
           id="input-label"
