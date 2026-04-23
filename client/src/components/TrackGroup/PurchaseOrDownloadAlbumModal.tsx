@@ -1,17 +1,17 @@
-import React from "react";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-
-import DownloadAlbumButton from "components/common/DownloadAlbumButton";
-import { useAuthContext } from "state/AuthContext";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-
 import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import { queryArtist } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthContext } from "state/AuthContext";
+import { isTrackGroupPublished } from "utils/artist";
+
+import { bp } from "../../constants";
+
 import BackingThisProject from "./BackingThisProject";
 import PurchaseAlbumModal from "./PurchaseAlbumModal";
-import { bp } from "../../constants";
-import { isTrackGroupPublished } from "utils/artist";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
@@ -79,7 +79,12 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const isPublished = isTrackGroupPublished(trackGroup);
 
   if (!isPublished) {
-    return null;
+    if (
+      !(artist.userId === user?.id || artist.paymentToUserId === user?.id) ||
+      user?.isAdmin
+    ) {
+      return null;
+    }
   }
 
   const showPurchase = !isOwned;
