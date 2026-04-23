@@ -1,9 +1,8 @@
-import { css } from "@emotion/css";
-import Button from "../Button";
 import { widgetUrl } from "utils/tracks";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { ImEmbed } from "react-icons/im";
+import { DropdownMenuItemButton } from "../DropdownMenuItem";
 
 const EmbedLink: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
   track,
@@ -13,27 +12,16 @@ const EmbedLink: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
     keyPrefix: "trackGroupDetails",
   });
   return (
-    <Button
-      size="compact"
-      variant="transparent"
+    <DropdownMenuItemButton
       onClick={(e) => {
         e.stopPropagation();
         navigator.clipboard.writeText(widgetUrl(track.id, "track"));
         snackbar(t("copiedTrackUrl"), { type: "success" });
       }}
       startIcon={<ImEmbed />}
-      className={css`
-        .startIcon {
-          padding-left: 1rem;
-        }
-        :hover {
-          background: transparent !important;
-          opacity: 0.6;
-        }
-      `}
     >
       {t("embedCode")}
-    </Button>
+    </DropdownMenuItemButton>
   );
 };
 

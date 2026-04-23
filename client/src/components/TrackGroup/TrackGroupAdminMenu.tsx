@@ -15,7 +15,7 @@ const TrackGroupAdminMenu: React.FC<{
   }
   return (
     <li>
-      <DownloadAlbumButton trackGroup={trackGroup} />
+      <DownloadAlbumButton trackGroup={trackGroup} dropdownItem />
     </li>
   );
 };

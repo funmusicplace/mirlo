@@ -11,6 +11,7 @@ import {
   ArtistButton,
   ArtistButtonAnchor,
 } from "components/Artist/ArtistButtons";
+import { DropdownMenuItemButton } from "./DropdownMenuItem";
 import useErrorHandler from "services/useErrorHandler";
 
 const formats = ["flac", "wav", "128.opus", "320.mp3", "256.mp3", "128.mp3"];
@@ -31,7 +32,8 @@ const DownloadAlbumButton: React.FC<{
   email?: string;
   track?: Track;
   fixed?: boolean;
-}> = ({ trackGroup, onlyIcon, email, token, track, fixed }) => {
+  dropdownItem?: boolean;
+}> = ({ trackGroup, onlyIcon, email, token, track, fixed, dropdownItem }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
@@ -98,7 +100,7 @@ const DownloadAlbumButton: React.FC<{
   }
 
   return (
-    <div>
+    <>
       <Modal
         title={`${t("download")} ${formatsDisplay[chosenFormat]}`}
         open={isPopupOpen}
@@ -186,24 +188,38 @@ const DownloadAlbumButton: React.FC<{
           )}
         </div>
       </Modal>
-      <ArtistButton
-        onlyIcon={onlyIcon}
-        data-testid="download-button"
-        className={css`
-          margin-top: 0;
-          font-size: 1.2rem;
-          background: transparent;
-          color: var(--mi-primary-color);
-        `}
-        startIcon={<RiDownloadLine />}
-        onClick={() => {
-          setChosenFormat("");
-          setIsPopupOpen(true);
-        }}
-      >
-        {onlyIcon ? "" : t("download")}
-      </ArtistButton>
-    </div>
+      {dropdownItem ? (
+        <DropdownMenuItemButton
+          data-testid="download-button"
+          startIcon={<RiDownloadLine />}
+          onClick={(e) => {
+            e.stopPropagation();
+            setChosenFormat("");
+            setIsPopupOpen(true);
+          }}
+        >
+          {t("download")}
+        </DropdownMenuItemButton>
+      ) : (
+        <ArtistButton
+          onlyIcon={onlyIcon}
+          data-testid="download-button"
+          className={css`
+            margin-top: 0;
+            font-size: 1.2rem;
+            background: transparent;
+            color: var(--mi-primary-color);
+          `}
+          startIcon={<RiDownloadLine />}
+          onClick={() => {
+            setChosenFormat("");
+            setIsPopupOpen(true);
+          }}
+        >
+          {onlyIcon ? "" : t("download")}
+        </ArtistButton>
+      )}
+    </>
   );
 };
 

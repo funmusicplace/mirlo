@@ -17,6 +17,7 @@ import FavoriteTrack from "components/TrackGroup/Favorite";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -172,6 +173,16 @@ const TrackRow: React.FC<{
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
+  const ownsTrack = !!user?.userTrackPurchases?.find(
+    (p) => p.trackId === track.id
+  );
+  const ownsTrackGroup = !!user?.userTrackGroupPurchases?.find(
+    (p) => p.trackGroupId === trackGroup.id
+  );
+  const isOwned = ownsTrack || ownsTrackGroup;
+  const canDownloadTrack =
+    isOwned && (!trackGroup.isPreorder || track.isPreview);
+
   const onTrackPlay = React.useCallback(() => {
     if (canPlayTrack) {
       addTracksToQueue?.(track.id);
@@ -284,6 +295,15 @@ const TrackRow: React.FC<{
               {track.lyrics && (
                 <li>
                   <LyricsModal track={track} />
+                </li>
+              )}
+              {canDownloadTrack && (
+                <li>
+                  <DownloadAlbumButton
+                    track={track}
+                    trackGroup={trackGroup}
+                    dropdownItem
+                  />
                 </li>
               )}
               <li>
