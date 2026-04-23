@@ -80,8 +80,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   if (!isPublished) {
     if (
-      !(artist.userId === user?.id || artist.paymentToUserId === user?.id) ||
-      user?.isAdmin
+      !(
+        artist.userId === user?.id ||
+        artist.paymentToUserId === user?.id ||
+        user?.isAdmin
+      )
     ) {
       return null;
     }
