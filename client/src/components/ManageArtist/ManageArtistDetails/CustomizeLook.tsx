@@ -20,15 +20,12 @@ import DeleteArtist from "../DeleteArtist";
 import { Toggle } from "components/common/Toggle";
 import LabelConfirmation from "./LabelConfirmation";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
-import FeatureFlag from "components/common/FeatureFlag";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import { InputEl } from "components/common/Input";
 import CustomNamesForTabs from "./CustomNamesForTabs";
 import ThankYouMessageEditors from "./ThankYouMessageEditors";
 import { merge } from "lodash";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import TextArea from "components/common/TextArea";
-import ManageArtistAnnouncement from "./ManageArtistAnnouncement";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -158,7 +155,7 @@ export const CustomizeLook: React.FC = () => {
   }, [snackbar]);
 
   const onValidSubmit = React.useCallback(
-    (data: ArtistFormData) => {
+    async (data: ArtistFormData) => {
       if (!userId) return;
 
       const sending = {
@@ -169,12 +166,12 @@ export const CustomizeLook: React.FC = () => {
       };
 
       if (existingId) {
-        updateArtist(
+        await updateArtist(
           { userId, artistId: existingId, body: sending },
           { onSuccess, onError }
         );
       } else {
-        createArtist({ userId, body: sending }, { onSuccess, onError });
+        await createArtist({ userId, body: sending }, { onSuccess, onError });
       }
 
       const timeout = setTimeout(() => {
