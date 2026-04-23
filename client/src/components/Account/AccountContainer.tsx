@@ -69,9 +69,15 @@ const AccountContainer: React.FC = () => {
           if (user.email !== data.newEmail && data.password === "") {
             snackbar("Must set password", { type: "warning" });
           } else {
+            const isEmailChange = user.email !== data.newEmail;
             await mutateAsync({ ...data, userId });
             i18n.changeLanguage(data.language);
-            snackbar(t("profileUpdated"), { type: "success" });
+            snackbar(
+              isEmailChange
+                ? i18n.t("verificationEmailSent")
+                : t("profileUpdated"),
+              { type: "success" }
+            );
           }
         } catch (e) {
           errorHandler(e);
@@ -80,7 +86,7 @@ const AccountContainer: React.FC = () => {
         }
       }
     },
-    [snackbar, userId, user?.email, errorHandler, t]
+    [snackbar, userId, user?.email, errorHandler, i18n, mutateAsync, t]
   );
 
   const deleteAccount = React.useCallback(async () => {
@@ -115,7 +121,11 @@ const AccountContainer: React.FC = () => {
         >
           <FormComponent>
             <label>{t("email")}</label>
-            <InputEl {...register("newEmail")} />
+            <InputEl
+              id="account-email"
+              type="email"
+              {...register("newEmail")}
+            />
           </FormComponent>
           {newEmail !== user.email && (
             <FormComponent>

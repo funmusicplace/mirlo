@@ -221,7 +221,8 @@
     "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!",
     "resetPassword": "Want to reset your password?",
     "subscriptionCharges": "Subscription payments you've made",
-    "noCharges": "You haven't made any payments yet."
+    "noCharges": "You haven't made any payments yet.",
+    "verificationEmailSent": "We've sent you a verification email to confirm your new email address. Please check your inbox and click the link in the email to verify your new email."
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",

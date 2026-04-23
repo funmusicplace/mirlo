@@ -1,10 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useNavigate } from "react-router-dom";
+
 import api from "../services/api";
 import { useSnackbar } from "../state/SnackbarContext";
+
 import Box from "./common/Box";
 import Button from "./common/Button";
-import { useTranslation } from "react-i18next";
 
 function ConfirmEmailChange() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ function ConfirmEmailChange() {
     string | null
   >(null);
   const [isConfirmed, setIsConfirmed] = React.useState(false);
+  const hasAttemptedConfirmation = React.useRef(false);
 
   const onConfirmEmailChange = React.useCallback(async () => {
     if (!token || !userId) {
@@ -30,6 +33,7 @@ function ConfirmEmailChange() {
     }
 
     setIsConfirming(true);
+    setConfirmationError(null);
     try {
       await api.post(`users/${userId}/confirmEmailChange`, {
         token,
@@ -37,7 +41,7 @@ function ConfirmEmailChange() {
       snackbar(t("confirmed"), { type: "success" });
       setIsConfirmed(true);
       setTimeout(() => {
-        navigate("/profile");
+        navigate("/login");
       }, 3000);
     } catch (e: unknown) {
       const errorMessage = (e as Error).message || t("confirmationFailed");
@@ -49,6 +53,10 @@ function ConfirmEmailChange() {
   }, [token, userId, t, snackbar, navigate]);
 
   React.useEffect(() => {
+    if (hasAttemptedConfirmation.current) {
+      return;
+    }
+    hasAttemptedConfirmation.current = true;
     onConfirmEmailChange();
   }, [onConfirmEmailChange]);
 

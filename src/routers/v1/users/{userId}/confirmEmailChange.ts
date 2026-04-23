@@ -1,14 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import {
-  userAuthenticated,
-  userHasPermission,
-} from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, userHasPermission("owner"), POST],
+    POST,
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

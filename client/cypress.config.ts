@@ -66,6 +66,9 @@ export default defineConfig({
             query.data
           );
         },
+        getCurrentUser: async (email: string) => {
+          return pkg.getUserByEmail(email);
+        },
       });
     },
   },

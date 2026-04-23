@@ -350,6 +350,12 @@ export const createSiteSettings = async (data?: Record<string, any>) => {
   return settings;
 };
 
+export const getUserByEmail = async (email: string) => {
+  return prisma.user.findFirst({
+    where: { email },
+  });
+};
+
 export default {
   createArtist,
   createPost,
@@ -364,4 +370,5 @@ export default {
   createFundraiserPledge,
   clearTables,
   createClient,
+  getUserByEmail,
 };
