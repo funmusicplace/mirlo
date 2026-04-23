@@ -3,22 +3,22 @@ import logger from "../logger";
 import { autoPurchaseNewAlbumsQueue } from "../queues/auto-purchase-new-albums-queue";
 
 /**
- * Trigger function: Finds recent albums and enqueues auto-purchase jobs
- * Runs on a schedule to find albums released in the last hour
- * Enqueues individual jobs for each subscriber that should auto-purchase
+ * Trigger function: Finds recently published albums and enqueues auto-purchase jobs
+ * Runs on a schedule to find albums published to Mirlo in the last hour. Uses
+ * publishedAt (not releaseDate) so back-catalog uploads — where releaseDate is
+ * the album's historical release but publishedAt is when the artist uploaded —
+ * still trigger auto-purchase for followers.
  */
 export async function triggerAutoPurchaseNewAlbums() {
   const currentDate = new Date();
-  const oneHourAgo = new Date();
-  oneHourAgo.setHours(currentDate.getHours() - 1);
+  const oneHourAgo = new Date(currentDate.getTime() - 60 * 60 * 1000);
 
   const recentAlbums = await prisma.trackGroup.findMany({
     where: {
-      releaseDate: {
+      publishedAt: {
         gte: oneHourAgo,
         lte: currentDate,
       },
-      publishedAt: { lte: new Date() },
       deletedAt: null,
     },
   });
