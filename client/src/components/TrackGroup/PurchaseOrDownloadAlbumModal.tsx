@@ -81,9 +81,10 @@ const PurchaseOrDownloadAlbum: React.FC<{
   if (!isPublished) {
     if (
       !(
-        artist.userId === user?.id ||
-        artist.paymentToUserId === user?.id ||
-        user?.isAdmin
+        user &&
+        (artist.userId === user.id ||
+          artist.paymentToUserId === user.id ||
+          user.isAdmin)
       )
     ) {
       return null;

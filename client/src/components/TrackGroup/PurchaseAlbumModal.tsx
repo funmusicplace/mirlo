@@ -1,16 +1,15 @@
-import Modal from "components/common/Modal";
-import React from "react";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
-
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import { FixedButton } from "components/common/FixedButton";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryUserStripeStatus } from "queries";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
+import { FixedButton } from "components/common/FixedButton";
+import Modal from "components/common/Modal";
+import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
+import { queryArtist } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+
 import { bp } from "../../constants";
-import { isTrackGroupPublished } from "utils/artist";
 
 const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
@@ -29,12 +28,6 @@ const PurchaseAlbumModal: React.FC<{
   }
 
   if (!trackGroup.isGettable) {
-    return null;
-  }
-
-  const isPublished = isTrackGroupPublished(trackGroup);
-
-  if (!isPublished) {
     return null;
   }
 
