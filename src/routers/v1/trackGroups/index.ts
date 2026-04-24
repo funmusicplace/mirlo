@@ -1,14 +1,14 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
+import { set } from "lodash";
+
+import { userLoggedInWithoutRedirect } from "../../../auth/passport";
+import { turnItemsIntoRSS } from "../../../utils/rss";
 import processor, {
   processTrackGroupQueryOrder,
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
-import { turnItemsIntoRSS } from "../../../utils/rss";
-import { set } from "lodash";
-import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { locationQuery } from "../locationTags";
 
 export default function () {
   const operations = {
