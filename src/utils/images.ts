@@ -2,6 +2,14 @@ import { backendStorage } from "./minio";
 
 const { S3_REGION = "" } = process.env;
 
+// Module-level cache initialized from DB settings at startup (and refreshed on admin save).
+// Kept synchronous so generateFullStaticImageUrl can be used as a plain function reference.
+let _cdnUrl: string | undefined;
+
+export const setCdnUrl = (url: string | undefined) => {
+  _cdnUrl = url;
+};
+
 export const busboyOptions = {
   highWaterMark: 2 * 1024 * 1024,
   limits: {
@@ -17,10 +25,8 @@ export const generateFullStaticImageUrl = (
   if (backendStorage === "minio") {
     return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${imageName}.${extension ?? "webp"}`;
   } else {
-    // CDN_URL should be set to your Cloudflare subdomain (e.g. https://cdn.mirlo.space)
-    // which CNAMEs to f{B2_ACCOUNT_ID}.backblazeb2.com.
-    if (process.env.CDN_URL) {
-      return `${process.env.CDN_URL}/file/${bucket}/${imageName}.${extension ?? "webp"}`;
+    if (_cdnUrl) {
+      return `${_cdnUrl}/file/${bucket}/${imageName}.${extension ?? "webp"}`;
     }
     return `https://${bucket}.s3.${S3_REGION}.backblazeb2.com/${imageName}.${extension ?? "webp"}`;
   }

@@ -1,15 +1,18 @@
+import crypto from "crypto";
+
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import logger from "../logger";
+import { findArtistIdForURLSlug } from "../utils/artist";
+import { AppError } from "../utils/error";
+
 import {
   headersAreForActivityPub,
   rootArtist,
   verifySignature,
   signAndSendActivityPubMessage,
 } from "./utils";
-import prisma from "@mirlo/prisma";
-import crypto from "crypto";
-import { AppError } from "../utils/error";
-import { findArtistIdForURLSlug } from "../utils/artist";
-import logger from "../logger";
 
 async function sendAcceptMessage(
   thebody: { [key: string]: unknown },
@@ -107,6 +110,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
         description: `${req.body.type} not implemented`,
       });
     }
+
     const remoteActorId = new URL(req.body.actor);
     const remoteActorDomain = remoteActorId.hostname;
     if (req.body.type === "Follow") {

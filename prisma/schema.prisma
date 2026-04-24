@@ -27,6 +27,7 @@ model Settings {
   publicKey                    String? // Used for ActivityPub
   privateKey                   String? // Used for ActivityPub
   bucketNames                  Json? // Used for S3
+  cdnUrl                       String? // CDN URL for serving images (e.g. Cloudflare in front of Backblaze)
   terms                        String?
   contentPolicy                String?
   privacyPolicy                String?

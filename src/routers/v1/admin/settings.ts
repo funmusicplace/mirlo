@@ -1,7 +1,9 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated, userHasPermission } from "../../../auth/passport";
-import { getSiteSettings } from "../../../utils/settings";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { setCdnUrl } from "../../../utils/images";
+import { getSiteSettings } from "../../../utils/settings";
 
 export default function () {
   const operations = {
@@ -28,6 +30,7 @@ export default function () {
       defconLevel,
       isClosedToPublicArtistSignup,
       showQueueDashboard,
+      cdnUrl,
     } = req.body;
     try {
       let existingSettings = await prisma.settings.findFirst();
@@ -50,11 +53,13 @@ export default function () {
           contentPolicy,
           defconLevel: Number(defconLevel),
           showQueueDashboard,
+          cdnUrl,
         },
         where: {
           id: existingSettings.id,
         },
       });
+      setCdnUrl(cdnUrl ?? undefined);
       const refreshedSettings = await prisma.settings.findFirst();
       return res.status(200).json({ result: refreshedSettings });
     } catch (e) {

@@ -1,4 +1,8 @@
+import path from "node:path";
+
 import { ExpressAdapter } from "@bull-board/express";
+import prisma from "@mirlo/prisma";
+import cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
@@ -6,32 +10,23 @@ import qs from "qs";
 import swaggerUi from "swagger-ui-express";
 
 import apiApp from "./api";
+import "./auth/passport";
 import { corsCheck } from "./auth/cors";
 import logger from "./logger";
 import parseIndex from "./parseIndex";
 import { imageQueue } from "./queues/processImages";
+import { audioQueue } from "./queues/processTrackAudio";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import auth from "./routers/auth";
+import { serveStatic } from "./static";
+import errorHandler from "./utils/error";
+import { setCdnUrl } from "./utils/images";
+import { sanitizeHeadersForLogs } from "./utils/requestLogging";
+import { getSiteSettings } from "./utils/settings";
+import wellKnown from "./wellKnown";
 
 const { createBullBoard } = require("@bull-board/api");
 const { BullMQAdapter } = require("@bull-board/api/bullMQAdapter");
-
-import "./auth/passport";
-import { audioQueue } from "./queues/processTrackAudio";
-import { serveStatic } from "./static";
-
-import prisma from "@mirlo/prisma";
-
-import errorHandler from "./utils/error";
-
-import path from "node:path";
-
-import wellKnown from "./wellKnown";
-
-import cookieParser from "cookie-parser";
-
-import { getSiteSettings } from "./utils/settings";
-import { sanitizeHeadersForLogs } from "./utils/requestLogging";
 
 dotenv.config();
 
@@ -241,9 +236,11 @@ app.use("/", async (req, res, next) => {
 
 app.use(errorHandler);
 
-app.listen(process.env.PORT, () =>
+app.listen(process.env.PORT, async () => {
+  const settings = await getSiteSettings();
+  setCdnUrl(settings.cdnUrl ?? undefined);
   console.info(`
-🚀 Server ready at: ${process.env.API_DOMAIN}`)
-);
+🚀 Server ready at: ${process.env.API_DOMAIN}`);
+});
 
 export default app;

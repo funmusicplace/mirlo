@@ -3,6 +3,7 @@ import { Settings } from "@mirlo/prisma/client";
 
 interface SettingsType extends Partial<Settings> {
   platformPercent: number;
+  cdnUrl?: string;
 }
 
 const defaultSettings = {
@@ -31,5 +32,6 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
     ...defaultSettings,
     ...settings,
     ...result,
+    cdnUrl: result.cdnUrl ?? undefined,
   };
 };
