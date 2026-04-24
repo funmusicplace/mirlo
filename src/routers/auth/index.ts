@@ -1,26 +1,34 @@
-import express, { Response } from "express";
-import { userAuthenticated } from "../../auth/passport";
-import prisma from "@mirlo/prisma";
+import express from "express";
+import { rateLimit } from "express-rate-limit";
 
-import profile from "./profile";
-import signup from "./signup";
-import refresh from "./refresh";
-import login from "./login";
-import verifyEmail from "./verifyEmail";
-import resendVerificationEmail from "./resendVerificationEmail";
+import { userAuthenticated } from "../../auth/passport";
+
 import confirmEmailToken from "./confirmEmailToken";
+import login from "./login";
 import {
   passwordResetConfirmation,
   passwordResetInitiate,
   passwordResetSetPassword,
 } from "./passwordReset";
+import profile from "./profile";
+import refresh from "./refresh";
+import resendVerificationEmail from "./resendVerificationEmail";
+import signup from "./signup";
 import { clearJWT, setTokens } from "./utils";
+import verifyEmail from "./verifyEmail";
 
 const router = express.Router();
 
 router.post(`/signup`, signup);
 
-router.post(`/verify-email`, verifyEmail);
+const verifyEmailLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  skip: (req) => !!req.body?.code, // only limit email-sending, not code verification
+});
+
+router.post(`/verify-email`, verifyEmailLimiter, verifyEmail);
 
 router.post(`/confirm-email-token`, confirmEmailToken);
 
