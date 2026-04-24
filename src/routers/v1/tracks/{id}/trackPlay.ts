@@ -1,6 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { AppError, HttpCode } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -10,18 +12,26 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: trackId }: { id?: string } = req.params;
     const user = req.user;
+    const parsedTrackId = Number(trackId);
 
     try {
+      if (!Number.isInteger(parsedTrackId) || parsedTrackId <= 0) {
+        throw new AppError({
+          httpCode: HttpCode.BAD_REQUEST,
+          description: "Invalid track id",
+        });
+      }
+
       const track = await prisma.track.findUnique({
-        where: { id: Number(trackId) },
+        where: { id: parsedTrackId },
         select: { id: true },
       });
 
       if (!track) {
-        res.status(404).json({
-          error: "No track found",
+        throw new AppError({
+          httpCode: HttpCode.NOT_FOUND,
+          description: "No track found",
         });
-        return next();
       }
       await prisma.trackPlay.create({
         data: {

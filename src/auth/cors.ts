@@ -1,12 +1,12 @@
-import { flatten } from "lodash";
 import prisma from "@mirlo/prisma";
-
 import { Client } from "@mirlo/prisma/client";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
-import { AppError } from "../utils/error";
+import { flatten } from "lodash";
+
 import { headersAreForActivityPub } from "../activityPub/utils";
 import logger from "../logger";
+import { AppError } from "../utils/error";
 
 const isTest = process.env.NODE_ENV === "test" || process.env.CI;
 const MIRLO_API_KEY_HEADER = "mirlo-api-key";
@@ -79,7 +79,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
           },
         });
         log.info(
-          `Found ${clients.length} clients with that API key: ${clients.map((c) => c.allowedCorsOrigins.join(", ")).join(", ")}`
+          `Found ${clients.length} clients with that API key: ${clients.map((c) => `${c.applicationName}: ${c.allowedCorsOrigins.join(", ")}`).join(", ")}`
         );
       }
     }
