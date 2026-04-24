@@ -1,16 +1,14 @@
+import { useQueryClient } from "@tanstack/react-query";
+import Box from "components/common/Box";
 import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
+import { Input, InputEl } from "components/common/Input";
+import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-
-import { Input, InputEl } from "components/common/Input";
-import FormComponent from "components/common/FormComponent";
 import { useAuthContext } from "state/AuthContext";
-import Box from "components/common/Box";
-import { useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
-import { css } from "@emotion/css";
+import { useSnackbar } from "state/SnackbarContext";
 
 const EmailVerification: React.FC<{
   setVerifiedEmail: (verifiedEmail: string) => void;
@@ -82,30 +80,30 @@ const EmailVerification: React.FC<{
     <>
       {waitingForVerification ? (
         <Box variant="info">
-          {t("checkEmail")}
-          <FormComponent>
-            <label htmlFor="input-verification-code">
-              {t("verificationCode")}
-            </label>
-            <InputEl
-              id="input-verification-code"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
-          </FormComponent>{" "}
-          <Button type="button" isLoading={isLoading} onClick={verifyCode}>
-            {t("verifyEmailCode")}
-          </Button>
+          <p className="text-sm mb-3">{t("checkEmail")}</p>
+          <div className="flex flex-col gap-3">
+            <FormComponent>
+              <label htmlFor="input-verification-code">
+                {t("verificationCode")}
+              </label>
+              <InputEl
+                id="input-verification-code"
+                type="text"
+                inputMode="numeric"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+            </FormComponent>
+            <Button type="button" isLoading={isLoading} onClick={verifyCode}>
+              {t("verifyEmailCode")}
+            </Button>
+          </div>
         </Box>
       ) : (
-        <FormComponent
-          className={css`
-            width: 100%;
-          `}
-        >
-          <label htmlFor="input-email-verify">{t("email")}</label>
-          <div className="inline-button">
+        <div className="flex flex-col gap-3 w-full">
+          <FormComponent>
+            <label htmlFor="input-email-verify">{t("email")}</label>
             <Input
               autoComplete="on"
               id="input-email-verify"
@@ -113,16 +111,22 @@ const EmailVerification: React.FC<{
               type="email"
               value={email}
               required
+              aria-describedby="hint-email-verify"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setEmail(e.target.value);
               }}
             />
-            <Button type="button" onClick={verifyEmail}>
-              {t("verifyEmail")}
-            </Button>
-          </div>
-          <small>{t(smallText)}</small>
-        </FormComponent>
+          </FormComponent>
+          <Button type="button" isLoading={isLoading} onClick={verifyEmail}>
+            {t("verifyEmail")}
+          </Button>
+          <small
+            id="hint-email-verify"
+            className="text-(--mi-light-foreground-color)"
+          >
+            {t(smallText)}
+          </small>
+        </div>
       )}
     </>
   );
