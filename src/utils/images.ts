@@ -17,6 +17,11 @@ export const generateFullStaticImageUrl = (
   if (backendStorage === "minio") {
     return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${imageName}.${extension ?? "webp"}`;
   } else {
+    // CDN_URL should be set to your Cloudflare subdomain (e.g. https://cdn.mirlo.space)
+    // which CNAMEs to f{B2_ACCOUNT_ID}.backblazeb2.com.
+    if (process.env.CDN_URL) {
+      return `${process.env.CDN_URL}/file/${bucket}/${imageName}.${extension ?? "webp"}`;
+    }
     return `https://${bucket}.s3.${S3_REGION}.backblazeb2.com/${imageName}.${extension ?? "webp"}`;
   }
 };

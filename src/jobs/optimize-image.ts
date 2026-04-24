@@ -1,19 +1,20 @@
+import prisma from "@mirlo/prisma";
+import { Job } from "bullmq";
+import { uniq } from "lodash";
+import fetch from "node-fetch";
 import sharp from "sharp";
 import ico from "sharp-ico";
 
 import tempSharpConfig from "../config/sharp";
-import { Job } from "bullmq";
-import { uniq } from "lodash";
+import { generateFullStaticImageUrl } from "../utils/images";
 import {
   createBucketIfNotExists,
   getBufferFromStorage,
   removeObjectFromStorage,
   uploadWrapper,
 } from "../utils/minio";
-import prisma from "@mirlo/prisma";
+
 import { logger } from "./queue-worker";
-import { generateFullStaticImageUrl } from "../utils/images";
-import fetch from "node-fetch";
 import sendMail from "./send-mail";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
@@ -122,6 +123,7 @@ const optimizeImage = async (job: Job) => {
                 originalSize,
                 {
                   contentType: `image/${outputType}`,
+                  cacheControl: "public, max-age=31536000, immutable",
                 }
               );
 
@@ -197,6 +199,7 @@ const optimizeImage = async (job: Job) => {
                   newBuffer,
                   {
                     contentType: `image/${outputType}`,
+                    cacheControl: "public, max-age=31536000, immutable",
                   }
                 );
 
@@ -267,6 +270,7 @@ const optimizeImage = async (job: Job) => {
         logger.info("Uploading user avatar favicon to bucket");
         await uploadWrapper(finalMinioBucket, faviconFinalName, faviconBuffer, {
           contentType: "image/x-icon",
+          cacheControl: "public, max-age=604800, stale-while-revalidate=604800",
         });
         logger.info("User avatar favicon uploaded successfully");
       } catch (e) {
@@ -291,6 +295,7 @@ const optimizeImage = async (job: Job) => {
         logger.info("Uploading artist avatar favicon to bucket");
         await uploadWrapper(finalMinioBucket, faviconFinalName, faviconBuffer, {
           contentType: "image/x-icon",
+          cacheControl: "public, max-age=604800, stale-while-revalidate=604800",
         });
         logger.info("Artist avatar favicon uploaded successfully");
       } catch (e) {

@@ -1,13 +1,14 @@
 import { css } from "@emotion/css";
-import { Link } from "react-router-dom";
-import { Trans, useTranslation } from "react-i18next";
-import { ButtonLink } from "components/common/Button";
 import styled from "@emotion/styled";
-import { bp } from "../../constants";
-import { useAuthContext } from "state/AuthContext";
-import { FaArrowRight } from "react-icons/fa";
-import React from "react";
+import { ButtonLink } from "components/common/Button";
 import Parallax from "parallax-js";
+import React from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { FaArrowRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
+
+import { bp } from "../../constants";
 
 export const SplashWrapper = styled.div`
   display: var(--mi-instance-show-hero-on-home, flex);
@@ -130,7 +131,7 @@ const Splash = () => {
             top: 55% !important;
             left: 35% !important;
             z-index: -1;
-            background-image: url("/static/images/cloud-toneddowngrain-1.webp");
+            background-image: url("/static/images/cloud-toneddowngrain-1-optimized.webp");
 
             @media screen and (max-width: ${bp.medium}px) {
               margin-bottom: 0rem;
@@ -154,7 +155,7 @@ const Splash = () => {
       >
         <div
           className={css`
-            background-image: url("/static/images/frog-mirlo-toneddowngrain.webp");
+            background-image: url("/static/images/frog-mirlo-toneddowngrain-optimized.webp");
             background-size: contain;
             background-repeat: no-repeat;
             z-index: 1;
@@ -225,11 +226,10 @@ const Splash = () => {
                 t={t}
                 i18nKey="featuresLink"
                 components={{
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
                   features: (
                     <Link to="https://docs.mirlo.space/features/"></Link>
                   ),
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
+
                   about: <a href="https://docs.mirlo.space"></a>,
                 }}
               />
