@@ -1,13 +1,15 @@
-import React from "react";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { bp } from "../../constants";
-import ReactDOM from "react-dom";
-import Background from "./Background";
-import { FaTimes } from "react-icons/fa";
-import SpaceBetweenDiv from "./SpaceBetweenDiv";
-import Button from "./Button";
 import { FocusTrap } from "focus-trap-react";
+import React from "react";
+import ReactDOM from "react-dom";
+import { FaTimes } from "react-icons/fa";
+
+import { bp } from "../../constants";
+
+import Background from "./Background";
+import Button from "./Button";
+import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 const wrapper = css`
   position: fixed;
@@ -150,6 +152,7 @@ export const Modal: React.FC<{
   className?: string;
   contentClassName?: string;
   noPadding?: boolean;
+  focusTrapOptions?: React.ComponentProps<typeof FocusTrap>["focusTrapOptions"];
 }> = ({
   children,
   open,
@@ -161,6 +164,7 @@ export const Modal: React.FC<{
   className,
   contentClassName,
   noPadding,
+  focusTrapOptions,
 }) => {
   const [container] = React.useState(() => {
     // This will be executed only on the initial render
@@ -204,6 +208,7 @@ export const Modal: React.FC<{
     <FocusTrap
       focusTrapOptions={{
         initialFocus: ".".concat(close),
+        ...focusTrapOptions,
       }}
     >
       <div
