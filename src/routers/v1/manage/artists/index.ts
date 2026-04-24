@@ -1,14 +1,14 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-
-import prisma from "@mirlo/prisma";
-
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
+import { getSiteSettings } from "../../../../utils/settings";
 
 const forbiddenNames = [
   "mirlo",
@@ -94,6 +94,7 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { name, bio, urlSlug } = req.body;
+    const settings = await getSiteSettings();
     assertLoggedIn(req);
     const user = req.user;
     try {
@@ -122,6 +123,14 @@ export default function () {
           user: {
             connect: {
               id: Number(user.id),
+            },
+          },
+          properties: {
+            colors: settings.settings?.instanceCustomization?.colors ?? {
+              primary: "#be3455",
+              secondary: "#ffc0cb",
+              background: "#f5f0f0",
+              foreground: "#111",
             },
           },
           subscriptionTiers: {

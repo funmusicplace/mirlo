@@ -1,45 +1,41 @@
+import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { useQueryClient } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import { Toggle } from "components/common/Toggle";
+import { merge } from "lodash";
+import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
+import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { bp } from "../../../constants";
-import FormComponent from "components/common/FormComponent";
-import { css } from "@emotion/css";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+
+import ArtistSlugInput from "../../common/SlugInput";
+import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 import UploadArtistImage from "../UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ArtistFormColors from "./ArtistFormColors";
-import ArtistSlugInput from "../../common/SlugInput";
-import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
 import { useAuthContext } from "state/AuthContext";
-import styled from "@emotion/styled";
-import ChooseYourTheme from "../ChooseYourTheme";
-import { useQueryClient } from "@tanstack/react-query";
-import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
-import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
+
 import DeleteArtist from "../DeleteArtist";
-import { Toggle } from "components/common/Toggle";
-import LabelConfirmation from "./LabelConfirmation";
-import useManagedArtistQuery from "utils/useManagedArtistQuery";
-import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
-import { InputEl } from "components/common/Input";
+
 import CustomNamesForTabs from "./CustomNamesForTabs";
+import LabelConfirmation from "./LabelConfirmation";
+
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
+
+import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
+
 import ThankYouMessageEditors from "./ThankYouMessageEditors";
-import { merge } from "lodash";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export interface ShareableTrackgroup {
   creatorId: number;
   slug: string;
 }
-
-const someColorsSet = (artist: Artist) => {
-  return (
-    artist.properties?.colors?.primary ||
-    artist.properties?.colors?.secondary ||
-    artist.properties?.colors?.foreground ||
-    artist.properties?.colors?.background
-  );
-};
 
 export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
   display: flex;
@@ -306,11 +302,7 @@ export const CustomizeLook: React.FC = () => {
                   `}
                 >
                   <FormComponent>
-                    {!someColorsSet(artist) && (
-                      <ChooseYourTheme artistId={artist.id} />
-                    )}
-
-                    {someColorsSet(artist) && <ArtistFormColors />}
+                    <ArtistFormColors />
                   </FormComponent>
                 </div>
                 <div
