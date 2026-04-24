@@ -1,26 +1,31 @@
 import { css } from "@emotion/css";
-import { SplashTitle } from "./Splash";
-import { useTranslation } from "react-i18next";
-import { useSnackbar } from "state/SnackbarContext";
-import React from "react";
-import Button from "components/common/Button";
-import { bp } from "../../constants";
-import api from "services/api";
-import { useQuery } from "@tanstack/react-query";
-import { queryInstanceArtist } from "queries/settings";
-import EmailVerification from "components/common/EmailVerification";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { useQuery } from "@tanstack/react-query";
+import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import Modal from "components/common/Modal";
+import { queryInstanceArtist } from "queries/settings";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import api from "services/api";
+import { APIResponseError } from "services/APIInstance";
+import { useSnackbar } from "state/SnackbarContext";
 
-type TurnstileGlobal = {
-  reset: (container?: string | HTMLElement) => void;
-};
+import { bp } from "../../constants";
+
+import { SplashTitle } from "./Splash";
 
 const containerStyles = css`
   width: 100%;
-  background-color: var(--mi-lighten-background-color);
+  background-color: color-mix(
+    in srgb,
+    var(--mi-normal-foreground-color) 6%,
+    var(--mi-normal-background-color)
+  );
   display: flex;
   justify-content: center;
-  padding: 4rem 1rem;
+  padding: 7rem 1rem;
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: 3rem 1.5rem;
@@ -37,234 +42,225 @@ const innerStyles = css`
   @media screen and (max-width: ${bp.medium}px) {
     flex-direction: column;
     align-items: stretch;
-    text-align: left;
   }
-`;
-
-const copyStyles = css`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 420px;
-
-  p {
-    color: var(--mi-light-foreground-color);
-    line-height: 1.5;
-  }
-`;
-
-const formStyles = css`
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  flex: 1;
-  max-width: 500px;
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-
-    @media screen and (max-width: ${bp.medium}px) {
-      align-items: stretch;
-    }
-  }
-`;
-
-const helperTextStyles = css`
-  color: var(--mi-normal-foreground-color);
-  font-size: 0.85rem;
-`;
-
-const verificationStyles = css`
-  width: 100%;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    margin-top: 0.75rem;
-  }
-`;
-
-const turnstileStyles = css`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-`;
-
-const turnstileRowStyles = css`
-  display: flex;
-  gap: 1rem;
-  width: 100%;
-  align-items: center;
-  flex-wrap: wrap;
-`;
-
-const verifiedEmailStyles = css`
-  justify-content: space-between;
-  width: 100%;
-  display: flex;
-  gap: 0.5rem;
-  color: var(--mi-normal-foreground-color);
 `;
 
 const NewsletterSignup: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
   const snackbar = useSnackbar();
-  const [verifiedEmail, setVerifiedEmail] = React.useState<string | null>(null);
-  const [verifiedEmailDisplay, setVerifiedEmailDisplay] = React.useState<
-    string | null
-  >(null);
+  const [email, setEmail] = React.useState("");
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [step, setStep] = React.useState<1 | 2>(1);
+  const [code, setCode] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [turnstileToken, setTurnstileToken] = React.useState<string | null>(
-    null
-  );
-  const [verificationKey, setVerificationKey] = React.useState(0);
-  const { data: instanceArtist, isPending } = useQuery(queryInstanceArtist());
+  const [isVerifying, setIsVerifying] = React.useState(false);
+  const [isResending, setIsResending] = React.useState(false);
+  const [verifyError, setVerifyError] = React.useState<string | null>(null);
+  const codeInputRef = React.useRef<HTMLInputElement>(null);
   const turnstileSiteKey = import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY;
+  const { data: instanceArtist, isPending } = useQuery(queryInstanceArtist());
 
-  const handleVerifiedEmail = React.useCallback((value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      return;
-    }
-    setVerifiedEmail(trimmed.toLowerCase());
-    setVerifiedEmailDisplay(trimmed);
-  }, []);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email.trim() || !instanceArtist?.id || isSubmitting) return;
 
-  const handleResetVerification = React.useCallback(() => {
-    setVerifiedEmail(null);
-    setVerifiedEmailDisplay(null);
-    setVerificationKey((current) => current + 1);
-  }, []);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!verifiedEmail || isSubmitting) {
-      return;
-    }
-
-    if (!instanceArtist?.id) {
-      snackbar(t("newsletterError"), { type: "warning" });
-      return;
-    }
-
-    if (!verifiedEmail) {
-      snackbar(t("newsletterVerificationRequired"), { type: "warning" });
-      return;
-    }
-
-    if (turnstileSiteKey && !turnstileToken) {
-      snackbar(t("newsletterCaptchaRequired"), { type: "warning" });
+    if (turnstileSiteKey) {
+      setStep(1);
+      setModalOpen(true);
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const cfTurnstile = turnstileSiteKey
-        ? (turnstileToken ?? undefined)
-        : undefined;
-
-      await api.post(`artists/${instanceArtist.id}/follow`, {
-        email: verifiedEmail,
-        ...(cfTurnstile ? { cfTurnstile } : {}),
-      });
-      if (turnstileSiteKey && typeof window !== "undefined") {
-        try {
-          (
-            window as typeof window & {
-              turnstile?: TurnstileGlobal;
-            }
-          ).turnstile?.reset();
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      setTurnstileToken(null);
-      snackbar(t("newsletterSuccess"), { type: "success" });
-    } catch (error) {
-      const message =
-        error instanceof Error && error.message
-          ? error.message
-          : t("newsletterError");
-      snackbar(message, { type: "warning" });
+      await api.post("verify-email", { email });
+      setStep(2);
+      setModalOpen(true);
+    } catch {
+      snackbar(t("newsletterError"), { type: "warning" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const hasVerifiedEmail = Boolean(verifiedEmail);
+  const handleTurnstileSuccess = async (token: string) => {
+    try {
+      await api.post("verify-email", { email, cfTurnstile: token });
+      setStep(2);
+    } catch {
+      snackbar(t("newsletterError"), { type: "warning" });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setCode("");
+    setStep(1);
+    setVerifyError(null);
+  };
+
+  const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!code.trim() || isVerifying || !instanceArtist?.id) return;
+
+    try {
+      setIsVerifying(true);
+      setVerifyError(null);
+      const response = await api.post<
+        { email: string; code: string },
+        { userId: string }
+      >("verify-email", { code: code.trim(), email });
+
+      if (!response.userId) {
+        setVerifyError(t("newsletterInvalidCode"));
+        return;
+      }
+
+      await api.post(`artists/${instanceArtist.id}/follow`, { email });
+
+      snackbar(t("newsletterSuccess"), { type: "success" });
+      setModalOpen(false);
+      setEmail("");
+      setCode("");
+      setStep(1);
+    } catch (error) {
+      if (error instanceof APIResponseError && error.status === 400) {
+        setVerifyError(t("newsletterInvalidCode"));
+      } else {
+        setVerifyError(t("newsletterError"));
+      }
+      codeInputRef.current?.focus();
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (isResending) return;
+    try {
+      setIsResending(true);
+      await api.post("verify-email", { email });
+      snackbar(t("newsletterResendSuccess"), { type: "success" });
+    } catch {
+      snackbar(t("newsletterError"), { type: "warning" });
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   if (!instanceArtist && !isPending) {
     return null;
   }
 
+  const modalTitle =
+    step === 1 ? t("newsletterVerifyingTitle") : t("newsletterCheckInbox");
+
   return (
     <section className={containerStyles}>
       <div className={innerStyles}>
-        <div className={copyStyles}>
+        <div className="flex flex-col gap-3 max-w-[420px]">
           <SplashTitle as="h2">{t("mailingList")}</SplashTitle>
-          <p>{t("newsletterDescription")}</p>
+          <p className="text-(--mi-light-foreground-color) leading-[1.6]">
+            {t("newsletterDescription")}
+          </p>
         </div>
-        <div className={formStyles}>
-          <form onSubmit={handleSubmit}>
-            <div className={turnstileRowStyles}>
-              {turnstileSiteKey ? (
-                <div className={turnstileStyles}>
-                  <Turnstile
-                    siteKey={turnstileSiteKey}
-                    onSuccess={(token) => setTurnstileToken(token)}
-                    onExpire={() => setTurnstileToken(null)}
-                  />
-                </div>
-              ) : null}
-            </div>
-            {!hasVerifiedEmail ? (
-              <small className={helperTextStyles}>
-                {t("newsletterVerificationHint")}
-              </small>
-            ) : (
-              <div className={verifiedEmailStyles}>
-                <span>
-                  {t("newsletterVerifiedEmail", {
-                    email: verifiedEmailDisplay ?? verifiedEmail,
-                  })}
-                </span>
-                <Button
-                  type="button"
-                  variant="link"
-                  size="compact"
-                  onClick={handleResetVerification}
-                >
-                  {t("newsletterChangeEmail")}
-                </Button>
-              </div>
-            )}
+        <div className="bg-(--mi-normal-background-color) border border-(--mi-darken-x-background-color) rounded-[var(--mi-border-radius-x)] p-8 flex-1 max-w-[460px] max-md:max-w-full max-md:p-6">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <label
+              htmlFor="input-newsletter-email"
+              className="text-sm font-medium text-(--mi-normal-foreground-color)"
+            >
+              {t("newsletterEmailLabel")}
+            </label>
+            <InputEl
+              id="input-newsletter-email"
+              type="email"
+              required
+              value={email}
+              placeholder={t("newsletterPlaceholder")}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Button
+              type="submit"
+              isLoading={isSubmitting}
+              disabled={!email.trim() || !instanceArtist?.id || isSubmitting}
+              size="big"
+              className="w-full justify-center mt-1"
+            >
+              {t("newsletterButton")}
+            </Button>
           </form>
-          {!hasVerifiedEmail ? (
-            <div className={verificationStyles}>
-              <EmailVerification
-                key={verificationKey}
-                setVerifiedEmail={handleVerifiedEmail}
-                smallText="newsletterVerificationInfo"
-              />
-            </div>
-          ) : null}
-          <Button
-            type="submit"
-            isLoading={isSubmitting}
-            disabled={
-              !hasVerifiedEmail ||
-              isSubmitting ||
-              !instanceArtist?.id ||
-              (Boolean(turnstileSiteKey) && !turnstileToken)
-            }
-          >
-            {t("newsletterButton")}
-          </Button>
         </div>
       </div>
+      <Modal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        title={modalTitle}
+        size="small"
+        focusTrapOptions={{ delayInitialFocus: true }}
+      >
+        {step === 1 && turnstileSiteKey ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-(--mi-light-foreground-color)">
+              {t("newsletterVerifyingDescription")}
+            </p>
+            <Turnstile
+              siteKey={turnstileSiteKey}
+              onSuccess={handleTurnstileSuccess}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-(--mi-light-foreground-color)">
+              {t("newsletterCodeSentTo", { email })}
+            </p>
+            <form onSubmit={handleVerify} className="flex flex-col gap-3">
+              <FormComponent>
+                <label htmlFor="input-newsletter-code">
+                  {t("newsletterEnterCode")}
+                </label>
+                <InputEl
+                  id="input-newsletter-code"
+                  ref={codeInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  autoFocus
+                  required
+                  value={code}
+                  onChange={(e) => {
+                    setCode(e.target.value);
+                    setVerifyError(null);
+                  }}
+                />
+              </FormComponent>
+              <p
+                role="alert"
+                aria-atomic="true"
+                className="text-sm text-(--mi-red-700)"
+              >
+                {verifyError}
+              </p>
+              <Button
+                type="submit"
+                isLoading={isVerifying}
+                disabled={!code.trim() || isVerifying}
+                className="w-full justify-center"
+              >
+                {t("newsletterVerifyAndSubscribe")}
+              </Button>
+            </form>
+            <Button
+              type="button"
+              variant="link"
+              size="compact"
+              isLoading={isResending}
+              disabled={isResending}
+              onClick={handleResend}
+            >
+              {t("newsletterResend")}
+            </Button>
+          </div>
+        )}
+      </Modal>
     </section>
   );
 };

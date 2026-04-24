@@ -1531,11 +1531,20 @@
     "newsletterButton": "Sign up",
     "newsletterSuccess": "Thanks! You're now on the list.",
     "newsletterError": "We couldn't add you to the mailing list. Please try again.",
+    "newsletterInvalidCode": "That code doesn't look right. Make sure you entered the correct number, or click resend code.",
     "newsletterVerificationHint": "Verify your email below before signing up.",
     "newsletterVerificationRequired": "Please verify your email before signing up.",
     "newsletterCaptchaRequired": "Please complete the spam check before signing up.",
     "newsletterVerifiedEmail": "Ready to subscribe with {{email}}.",
-    "newsletterChangeEmail": "Use a different email"
+    "newsletterChangeEmail": "Use a different email",
+    "newsletterVerifyingTitle": "One moment...",
+    "newsletterVerifyingDescription": "We're making sure you're not a robot.",
+    "newsletterCheckInbox": "Check your inbox",
+    "newsletterCodeSentTo": "We sent a verification code to {{email}}.",
+    "newsletterEnterCode": "Verification code",
+    "newsletterVerifyAndSubscribe": "Verify & subscribe",
+    "newsletterResend": "Resend code",
+    "newsletterResendSuccess": "Code resent!"
   },
   "mobileApp.searchScreen": {
     "bestSelling": "Best Selling",
