@@ -1,27 +1,35 @@
-import express from "express";
-import swaggerUi from "swagger-ui-express";
-import * as dotenv from "dotenv";
 import { ExpressAdapter } from "@bull-board/express";
+import * as dotenv from "dotenv";
+import express from "express";
+import { rateLimit } from "express-rate-limit";
+import qs from "qs";
+import swaggerUi from "swagger-ui-express";
+
+import apiApp from "./api";
+import { corsCheck } from "./auth/cors";
+import logger from "./logger";
+import parseIndex from "./parseIndex";
+import { imageQueue } from "./queues/processImages";
+import { sendMailQueue } from "./queues/send-mail-queue";
+import auth from "./routers/auth";
+
 const { createBullBoard } = require("@bull-board/api");
 const { BullMQAdapter } = require("@bull-board/api/bullMQAdapter");
 
-import auth from "./routers/auth";
 import "./auth/passport";
-import { imageQueue } from "./queues/processImages";
 import { audioQueue } from "./queues/processTrackAudio";
 import { serveStatic } from "./static";
+
 import prisma from "@mirlo/prisma";
-import { rateLimit } from "express-rate-limit";
+
 import errorHandler from "./utils/error";
-import { sendMailQueue } from "./queues/send-mail-queue";
+
 import path from "node:path";
-import parseIndex from "./parseIndex";
+
 import wellKnown from "./wellKnown";
-import logger from "./logger";
-import apiApp from "./api";
-import { corsCheck } from "./auth/cors";
+
 import cookieParser from "cookie-parser";
-import qs from "qs";
+
 import { getSiteSettings } from "./utils/settings";
 import { sanitizeHeadersForLogs } from "./utils/requestLogging";
 
@@ -81,7 +89,7 @@ if (!isDev) {
   app.use("/auth", auth);
 }
 
-app.use(express.static("public"));
+app.use(express.static("public", { maxAge: "1y", immutable: true }));
 
 app.use("/images/:bucket/:filename", serveStatic);
 
@@ -181,9 +189,21 @@ app.use("/", async (req, res, next) => {
         req.path.startsWith("/static/")
       )
     ) {
+      // HTML pages must never be cached — they reference hashed asset filenames
+      res.setHeader("Cache-Control", "no-store");
       const html = await parseIndex(req.path);
       res.send(html);
     } else {
+      // Vite hashes /assets/ filenames on every build — safe to cache permanently
+      // Other dist files (images, etc.) get 1 week with stale-while-revalidate
+      if (req.path.startsWith("/assets/")) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      } else {
+        res.setHeader(
+          "Cache-Control",
+          "public, max-age=604800, stale-while-revalidate=604800"
+        );
+      }
       const fileLocation = path.join(
         __dirname,
         "..",
