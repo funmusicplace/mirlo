@@ -1,6 +1,6 @@
-import { Client, BucketItem } from "minio";
-import { Logger } from "winston";
-import * as Minio from "minio";
+import fs from "fs";
+import { Readable } from "stream";
+
 import {
   S3Client,
   CreateBucketCommand,
@@ -12,11 +12,13 @@ import {
   HeadObjectCommandOutput,
   ListObjectsCommand,
 } from "@aws-sdk/client-s3";
-import fs from "fs";
-import logger from "../logger";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Readable } from "stream";
+import { Client, BucketItem } from "minio";
+import * as Minio from "minio";
+import { Logger } from "winston";
+
+import logger from "../logger";
 
 const s3UniquePrefix = "";
 
@@ -217,7 +219,7 @@ export const uploadFilesToBackblaze = async (
   bucket: string,
   fileName: string,
   fileStream: Readable | Buffer,
-  options?: { contentType?: string }
+  options?: { contentType?: string; cacheControl?: string }
 ) => {
   if (!backblazeClient) {
     throw new Error("Backblaze client is not initialized");
@@ -229,6 +231,7 @@ export const uploadFilesToBackblaze = async (
         Key: fileName,
         Body: fileStream,
         ContentType: options?.contentType,
+        CacheControl: options?.cacheControl,
       })
     );
   } else {
@@ -239,6 +242,7 @@ export const uploadFilesToBackblaze = async (
         Key: fileName,
         Body: fileStream,
         ContentType: options?.contentType,
+        CacheControl: options?.cacheControl,
       },
     });
 
@@ -284,7 +288,7 @@ export const uploadWrapper = async (
   bucket: string,
   fileName: string,
   fileStream: Readable | Buffer,
-  options?: { contentType?: string }
+  options?: { contentType?: string; cacheControl?: string }
 ) => {
   logger.info(
     `${backendStorage}: uploading fileStream|buffer: ${bucket}/${fileName}`
