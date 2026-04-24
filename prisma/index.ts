@@ -42,6 +42,7 @@ declare global {
           secondary?: string;
           background?: string;
           foreground?: string;
+          body?: string;
         };
       };
     };

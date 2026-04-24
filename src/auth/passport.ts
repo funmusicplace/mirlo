@@ -1,15 +1,14 @@
-import { User } from "@mirlo/prisma/client";
-
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
 import passportJWT, { JwtFromRequestFunction } from "passport-jwt";
-import prisma from "@mirlo/prisma";
+
+import logger from "../logger";
 import {
   findArtistIdForURLSlug,
   whereForAllArtistsThisLabelCanEdit,
 } from "../utils/artist";
-import logger from "../logger";
 import { AppError } from "../utils/error";
 import {
   doesMerchBelongToUser,
@@ -44,7 +43,7 @@ passport.use(
 
       if (Date.now() > expiration) {
         logger.info("token expired");
-        done("Unauthorized", false);
+        return done("Unauthorized", false);
       }
       const foundUser = await prisma.user.findFirst({
         where: {
@@ -53,9 +52,9 @@ passport.use(
       });
 
       if (!foundUser) {
-        done(null, false);
+        return done(null, false);
       }
-      done(null, {
+      return done(null, {
         ...jwtPayload,
         isAdmin: foundUser?.isAdmin,
         isLabelAccount: foundUser?.isLabelAccount,
