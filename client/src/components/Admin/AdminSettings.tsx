@@ -12,6 +12,7 @@ import { useSnackbar } from "state/SnackbarContext";
 
 interface FormSettings {
   platformPercent: number;
+  cdnUrl?: string;
   terms: string;
   privacyPolicy: string;
   cookiePolicy: string;
@@ -27,6 +28,7 @@ interface FormSettings {
 }
 
 interface SettingsFromAPI {
+  cdnUrl?: string;
   settings: {
     platformPercent: number;
     instanceArtistId: number;
@@ -92,6 +94,7 @@ const AdminSettings = () => {
           response.result.isClosedToPublicArtistSignup,
         showQueueDashboard: response.result.showQueueDashboard,
         platformPercent: response.result.settings?.platformPercent,
+        cdnUrl: response.result.cdnUrl,
         instanceCustomization: {
           ...(response.result.settings?.instanceCustomization ?? {
             colors: {
@@ -145,6 +148,7 @@ const AdminSettings = () => {
             },
             cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
           },
+          cdnUrl: data.cdnUrl,
           terms: data.terms,
           showQueueDashboard: data.showQueueDashboard,
           isClosedToPublicArtistSignup: data.isClosedToPublicArtistSignup,
@@ -176,6 +180,17 @@ const AdminSettings = () => {
               <InputEl
                 {...register("platformPercent")}
                 type="number"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>CDN URL</td>
+            <td>
+              <InputEl
+                {...register("cdnUrl")}
                 className={css`
                   text-align: right;
                 `}
