@@ -4,9 +4,10 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+
 import * as api from "./fetch/fetchWrapper";
-import { QUERY_KEY_AUTH } from "./queryKeys";
 import { MirloFetchError } from "./fetch/MirloFetchError";
+import { QUERY_KEY_AUTH } from "./queryKeys";
 
 type LoginBody = {
   email: string;
@@ -109,6 +110,26 @@ const fetchProfile: QueryFunction<
     });
 };
 
+const getInjectedAuthUser = (): LoggedInUser | null | undefined => {
+  if (typeof document === "undefined") {
+    return undefined;
+  }
+
+  const script = document.getElementById("__MIRLO_AUTH__");
+  if (!script?.textContent) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(script.textContent) as {
+      user?: LoggedInUser | null;
+    };
+    return parsed.user ?? null;
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Query for the currently-authenticated user profile.
  *
@@ -118,5 +139,7 @@ export function queryAuthProfile() {
   return queryOptions({
     queryKey: ["fetchProfile", QUERY_KEY_AUTH],
     queryFn: fetchProfile,
+    initialData: getInjectedAuthUser,
+    refetchOnMount: "always",
   });
 }

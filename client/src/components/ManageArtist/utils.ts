@@ -1,8 +1,8 @@
-import { IAudioMetadata, ICommonTagsResult } from "music-metadata/lib/type";
 import produce from "immer";
-import { parseBlob } from "music-metadata-browser";
-import styled from "@emotion/styled";
-import { InputEl } from "components/common/Input";
+import type {
+  IAudioMetadata,
+  ICommonTagsResult,
+} from "music-metadata/lib/type";
 
 const produceNewStatusImpl = produce(
   (
@@ -125,6 +125,7 @@ export const convertMetaData = (
 };
 
 export const parse = async (files: File[]): Promise<ParsedItem[]> => {
+  const { parseBlob } = await import("music-metadata-browser");
   const parsed = await Promise.all(
     files.map(async (file) => {
       try {

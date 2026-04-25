@@ -1,11 +1,10 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { useSnackbar } from "state/SnackbarContext";
-import useErrorHandler from "services/useErrorHandler";
 import FormComponent from "components/common/FormComponent";
 import ReleaseListSelector from "components/common/ReleaseListSelector";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
-import LoadingSpinner from "components/common/LoadingSpinner";
+import useErrorHandler from "services/useErrorHandler";
+import { useSnackbar } from "state/SnackbarContext";
 
 const ManageSubscriptionTierReleases: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -68,8 +67,6 @@ const ManageSubscriptionTierReleases: React.FC<{
     },
     [tier.id, tier.releases, artistId, t, snackbar, errorHandler, reload]
   );
-
-  console.log("selectedReleaseIds", tier);
 
   return (
     <div className="pt-2">

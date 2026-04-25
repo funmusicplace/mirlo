@@ -103,8 +103,6 @@ describe("email change verification", () => {
               .replace(/=3D/g, "=")
               .replace(/&amp;/g, "&");
 
-            console.log("emailBody", normalizedEmailBody);
-
             // Extract token and userId from the confirmation URL
             const tokenMatch = normalizedEmailBody.match(
               /confirm-email-change\?token=([a-f0-9-]+)&userId=(\d+)/
