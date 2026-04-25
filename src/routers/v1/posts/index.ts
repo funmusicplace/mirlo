@@ -1,11 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import { Prisma } from "@mirlo/prisma/client";
-
-import postProcessor from "../../../utils/post";
-
 import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
+import { NextFunction, Request, Response } from "express";
+
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { checkIsUserSubscriber } from "../../../utils/artist";
+import postProcessor from "../../../utils/post";
 
 export default function () {
   const operations = {
