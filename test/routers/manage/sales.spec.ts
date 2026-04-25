@@ -3,6 +3,7 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it, beforeEach } from "mocha";
+
 import {
   clearTables,
   createUser,
@@ -12,7 +13,6 @@ import {
   createUserTrackPurchase,
   createTrack,
 } from "../../utils";
-
 import { requestApp } from "../utils";
 
 describe("manage/sales", () => {
@@ -64,7 +64,7 @@ describe("manage/sales", () => {
       // Create a purchase
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 2000,
-        currency: "USD",
+        currency: "usd",
       });
 
       const response = await requestApp
@@ -80,7 +80,7 @@ describe("manage/sales", () => {
 
       const sale = response.body.results[0];
       assert.equal(sale.amount, 2000);
-      assert.equal(sale.currency, "USD");
+      assert.equal(sale.currency, "usd");
       assert(sale.artist);
       assert.equal(sale.artist[0].id, artist.id);
     });
@@ -99,7 +99,7 @@ describe("manage/sales", () => {
 
       await createUserTrackPurchase(buyer.user.id, track.id, {
         amount: 500,
-        currency: "USD",
+        currency: "usd",
       });
 
       const response = await requestApp
@@ -160,7 +160,7 @@ describe("manage/sales", () => {
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 2000,
-        currency: "USD",
+        currency: "usd",
       });
 
       const response = await requestApp
@@ -191,7 +191,7 @@ describe("manage/sales", () => {
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 2000,
-        currency: "USD",
+        currency: "usd",
       });
 
       const response = await requestApp

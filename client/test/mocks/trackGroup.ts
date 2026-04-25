@@ -7,7 +7,7 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
   createdAt: "1999-09-09T09:09:09Z",
   updatedAt: "1999-09-09T09:09:09Z",
   minPrice: 0,
-  currency: "USD",
+  currency: "usd",
   isPriceFixed: false,
   urlSlug: "example-album",
   isGettable: true,

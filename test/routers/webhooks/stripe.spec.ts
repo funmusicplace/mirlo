@@ -1,9 +1,19 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 import { Request, Response } from "express";
 
 dotenv.config();
 import { describe, it } from "mocha";
+import sinon from "sinon";
+import Stripe from "stripe";
+
+import * as sendMailQueueModule from "../../../src/queues/send-mail-queue";
+import stripeConnectWebhook from "../../../src/routers/v1/webhooks/stripe/connect";
+import * as handleFinishedTransactions from "../../../src/utils/handleFinishedTransactions";
+import * as stripeUtils from "../../../src/utils/stripe";
+import { handleInvoicePaid } from "../../../src/utils/stripe";
+import * as subscriptionModule from "../../../src/utils/subscription";
 import {
   clearTables,
   createArtist,
@@ -11,16 +21,8 @@ import {
   createUser,
   createTier,
 } from "../../utils";
-import sinon from "sinon";
 
 import prisma from "@mirlo/prisma";
-import stripeConnectWebhook from "../../../src/routers/v1/webhooks/stripe/connect";
-import * as stripeUtils from "../../../src/utils/stripe";
-import * as handleFinishedTransactions from "../../../src/utils/handleFinishedTransactions";
-import * as sendMailQueueModule from "../../../src/queues/send-mail-queue";
-import * as subscriptionModule from "../../../src/utils/subscription";
-import Stripe from "stripe";
-import { handleInvoicePaid } from "../../../src/utils/stripe";
 
 describe("Stripe Webhooks - Failed Payments", () => {
   beforeEach(async () => {
@@ -49,7 +51,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           name: "Premium",
           minAmount: 1000,
-          currency: "USD",
+          currency: "usd",
           artistId: artist.id,
         },
       });
@@ -61,7 +63,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
           artistSubscriptionTierId: tier.id,
           stripeSubscriptionKey: "sub_1234567890",
           amount: 1000,
-          currency: "USD",
+          currency: "usd",
         },
       });
 
@@ -597,7 +599,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           name: "Basic",
           minAmount: 500,
-          currency: "USD",
+          currency: "usd",
           artistId: artist.id,
         },
       });

@@ -1,10 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { AppError } from "../../../../utils/error";
 import { registerPurchase } from "../../../../utils/trackGroup";
 import { findOrCreateUserBasedOnEmail } from "../../../../utils/user";
-import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -73,7 +73,7 @@ export default function () {
           userId: purchaser.id,
           trackGroupId: trackGroup.id,
           pricePaid: 0,
-          currencyPaid: "USD",
+          currencyPaid: "usd",
           paymentProcessorKey: null,
         });
         return res.status(200).json(purchase);

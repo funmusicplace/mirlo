@@ -1,8 +1,10 @@
-import prisma from "../prisma/prisma";
 import { Prisma } from "@mirlo/prisma/client";
-import { buildTokens, hashPassword } from "../src/routers/auth/utils";
-// @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
+
+import prisma from "../prisma/prisma";
+import { buildTokens, hashPassword } from "../src/routers/auth/utils";
+
+// @ts-ignore: Ignore import errors for github-slugger
 
 export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "SubscriptionTierRelease";`;
@@ -242,7 +244,7 @@ export const createUserTrackGroupPurchase = async (
     data: {
       userId,
       amount: data?.amount ?? 1000,
-      currency: data?.currency ?? "USD",
+      currency: data?.currency ?? "usd",
       createdAt: data?.createdAt,
       paymentStatus: "COMPLETED",
     },
@@ -268,7 +270,7 @@ export const createUserTrackPurchase = async (
     data: {
       userId,
       amount: data?.amount ?? 1000,
-      currency: data?.currency ?? "USD",
+      currency: data?.currency ?? "usd",
       createdAt: data?.createdAt,
     },
   });
