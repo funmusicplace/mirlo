@@ -1,23 +1,25 @@
-import { useRef } from "react";
-import { Link, useParams } from "react-router-dom";
-import usePublicArtist from "utils/usePublicObjectById";
-import PageBackground from "components/common/ArtistBackground";
-import { bp } from "../../constants";
-import HeaderSearch from "./HeaderSearch";
-import Logo from "components/common/Logo";
-import { ImMenu } from "react-icons/im";
 import styled from "@emotion/styled";
-import useShow from "utils/useShow";
-import { useAuthContext } from "state/AuthContext";
-import Button, { ButtonLink } from "components/common/Button";
-import { useTranslation } from "react-i18next";
-import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
-import { queryInstanceArtist } from "queries/settings";
 import { useQuery } from "@tanstack/react-query";
-import { createPortal } from "react-dom";
-import { getArtistUrl } from "utils/artist";
+import PageBackground from "components/common/ArtistBackground";
+import Button, { ButtonLink } from "components/common/Button";
+import Logo from "components/common/Logo";
 import UserBanner from "components/common/UserBanner";
 import Menu from "components/Header/Menu";
+import { queryInstanceArtist } from "queries/settings";
+import { useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { ImMenu } from "react-icons/im";
+import { Link, useParams } from "react-router-dom";
+import usePublicArtist from "utils/usePublicObjectById";
+import { bp } from "../../constants";
+
+import HeaderSearch from "./HeaderSearch";
+
+import useShow from "utils/useShow";
+import { useAuthContext } from "state/AuthContext";
+import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
+import { createPortal } from "react-dom";
+import { getArtistUrl } from "utils/artist";
 
 const HeaderWrapper = styled.div<{
   hasBackground?: boolean;
@@ -213,6 +215,7 @@ const Header = () => {
           {isLoggedIn && (
             <Button
               aria-controls={menuDialogId}
+              data-cy="user-nav"
               // @ts-ignore React doesn't support Invoker Commands API
               command="show-modal"
               commandfor={menuDialogId}
@@ -220,6 +223,7 @@ const Header = () => {
               onClick={() => openMenu()}
               startIcon={<ImMenu />}
               variant="transparent"
+              aria-label="Menu"
             >
               Menu
             </Button>

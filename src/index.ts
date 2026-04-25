@@ -12,6 +12,7 @@ import swaggerUi from "swagger-ui-express";
 import apiApp from "./api";
 import "./auth/passport";
 import { corsCheck } from "./auth/cors";
+import { userLoggedInWithoutRedirect } from "./auth/passport";
 import logger from "./logger";
 import parseIndex from "./parseIndex";
 import { imageQueue } from "./queues/processImages";
@@ -162,7 +163,7 @@ const LOW_NOISE_PROBE_PATHS = new Set([
 ]);
 
 // This has to be the last thing used so that other things don't get over-written
-app.use("/", async (req, res, next) => {
+app.use("/", userLoggedInWithoutRedirect, async (req, res, next) => {
   if (!res.headersSent) {
     if (req.path.startsWith("/v1")) {
       res.sendStatus(404);
@@ -186,7 +187,7 @@ app.use("/", async (req, res, next) => {
     ) {
       // HTML pages must never be cached — they reference hashed asset filenames
       res.setHeader("Cache-Control", "no-store");
-      const html = await parseIndex(req.path);
+      const html = await parseIndex(req.path, req);
       res.send(html);
     } else {
       // Vite hashes /assets/ filenames on every build — safe to cache permanently

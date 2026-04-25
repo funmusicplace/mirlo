@@ -66,6 +66,7 @@ const routes = [
   "users/{userId}",
   "users/{userId}/artists",
   "users/{userId}/confirmEmail",
+  "users/{userId}/confirmEmailChange",
   "users/{userId}/avatar",
   "users/{userId}/banner",
   "users/{userId}/notifications",

@@ -1,12 +1,13 @@
 import { css } from "@emotion/css";
-import { bp } from "../../constants";
-import Releases from "./HomeReleases";
 import styled from "@emotion/styled";
-import Splash from "./Splash";
-import Posts from "./Posts";
-import SupportMirlo from "./SupportMirlo";
+
+import { bp } from "../../constants";
+
 import Announcement from "./Announcement";
+import Releases from "./HomeReleases";
 import NewsletterSignup from "./NewsletterSignup";
+import Splash from "./Splash";
+import SupportMirlo from "./SupportMirlo";
 
 export const SectionHeader = styled.div<{ userId?: number }>`
   padding-bottom: 0;
@@ -54,7 +55,6 @@ function Home() {
       <Splash />
       <Releases />
       <SupportMirlo />
-      <Posts />
       <NewsletterSignup />
     </div>
   );

@@ -1,8 +1,19 @@
-import path from "node:path";
 import fs from "fs";
-import * as cheerio from "cheerio";
+import path from "node:path";
+
 import prisma from "@mirlo/prisma";
+import { Client } from "@mirlo/prisma/client";
+import * as cheerio from "cheerio";
+import { Request } from "express";
+
 import { getClient } from "./activityPub/utils";
+import {
+  fetchArtistMetadata,
+  fetchAlbumMetadata,
+  fetchPostMetadata,
+  fetchMerchMetadata,
+} from "./parseIndex/metadata";
+import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
   finalArtistAvatarBucket,
@@ -11,15 +22,11 @@ import {
   finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
-import { Client } from "@mirlo/prisma/client";
-import { getSiteSettings } from "./utils/settings";
 import {
-  fetchArtistMetadata,
-  fetchAlbumMetadata,
-  fetchPostMetadata,
-  fetchMerchMetadata,
-} from "./parseIndex/metadata";
-import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
+  USER_PROFILE_SELECT,
+  serializeUserProfile,
+} from "./utils/serialize/userProfile";
+import { getSiteSettings } from "./utils/settings";
 import { whereForPublishedTrackGroups } from "./utils/trackGroup";
 
 type RouteParams = Record<string, string | number | undefined>;
@@ -737,11 +744,24 @@ const dispatchRoute = async (
 
 export const analyzePathAndGenerateHTML = async (
   pathname: string,
-  $: cheerio.CheerioAPI
+  $: cheerio.CheerioAPI,
+  req?: Request
 ) => {
   const segments = pathname.split("/").filter(Boolean);
   try {
     const client = await getClient();
+    // Inject logged-in user state so the client doesn't need to wait for /auth/profile
+    if (req?.user) {
+      const user = await prisma.user.findFirst({
+        where: { email: (req.user as { email: string }).email },
+        select: USER_PROFILE_SELECT,
+      });
+      if (user) {
+        $("head").append(
+          `<script id="__MIRLO_AUTH__" type="application/json">${JSON.stringify({ user: serializeUserProfile(user), injectedAt: new Date().toISOString() })}</script>`
+        );
+      }
+    }
 
     // Try to fetch avatar if artist exists
     let avatarUrl: string | undefined;
@@ -797,7 +817,7 @@ export const analyzePathAndGenerateHTML = async (
  * @param pathname
  * @returns
  */
-const parseIndex = async (pathname: string) => {
+const parseIndex = async (pathname: string, req?: Request) => {
   const fileLocation = path.join(
     __dirname,
     "..",
@@ -813,7 +833,7 @@ const parseIndex = async (pathname: string) => {
     return "<html>No built client</html>";
   }
   const $ = cheerio.load(buffer);
-  await analyzePathAndGenerateHTML(pathname, $);
+  await analyzePathAndGenerateHTML(pathname, $, req);
   return $.html();
 };
 

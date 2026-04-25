@@ -12,6 +12,8 @@ import { AppError } from "../../../../utils/error";
 import sendMail from "../../../../jobs/send-mail";
 import { Job } from "bullmq";
 import generateSlug from "../../../../utils/generateSlug";
+import { randomUUID } from "crypto";
+import { getClient } from "../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -105,7 +107,7 @@ export default function () {
         properties,
       };
 
-      let changedEmail = false;
+      let pendingEmailSent = false;
 
       if (req.user && newEmail) {
         const emailChanged = newEmail !== user.email;
@@ -128,7 +130,16 @@ export default function () {
                 description: "Can't change user email, wrong password",
               });
             } else {
-              changedEmail = true;
+              // Generate verification token for new email
+              const emailChangeToken = randomUUID();
+              const emailChangeExpiration = new Date(
+                Date.now() + 24 * 60 * 60 * 1000 // 24 hour expiration
+              );
+
+              data.pendingEmail = newEmail;
+              data.pendingEmailToken = emailChangeToken;
+              data.pendingEmailExpiration = emailChangeExpiration;
+              pendingEmailSent = true;
             }
           } else {
             throw new AppError({
@@ -142,6 +153,7 @@ export default function () {
       const updatedUser = await prisma.user.update({
         select: {
           email: true,
+          pendingEmail: true,
           name: true,
           language: true,
           emailConfirmationToken: true,
@@ -152,10 +164,7 @@ export default function () {
         where: {
           id: Number(userId),
         },
-        data: {
-          ...data,
-          email: newEmail,
-        },
+        data,
       });
 
       if (data.isLabelAccount) {
@@ -191,29 +200,25 @@ export default function () {
         },
         select: {
           email: true,
+          pendingEmail: true,
           id: true,
         },
       });
-      if (changedEmail && refreshedUser) {
+
+      if (pendingEmailSent && refreshedUser?.pendingEmail) {
+        const client = await getClient();
         sendMail({
           data: {
-            template: "user-changed-email",
+            template: "confirm-email-change",
             message: {
-              to: refreshedUser.email,
+              to: refreshedUser.pendingEmail,
             },
             locals: {
-              newEmail: refreshedUser.email,
-            },
-          },
-        } as Job);
-        sendMail({
-          data: {
-            template: "user-changed-email",
-            message: {
-              to: user.email,
-            },
-            locals: {
-              newEmail: refreshedUser.email,
+              userId: user.id,
+              newEmail: refreshedUser.pendingEmail,
+              token: data.pendingEmailToken,
+              clientDomain: client.applicationUrl,
+              host: process.env.API_DOMAIN,
             },
           },
         } as Job);

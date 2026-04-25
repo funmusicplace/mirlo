@@ -52,6 +52,13 @@ export default defineConfig({
             "react-dom",
             "@tanstack/query-core",
           ],
+          editor: [
+            "remirror",
+            "@remirror/react",
+            "@remirror/core",
+            "@remirror/core-utils",
+          ],
+          charts: ["recharts"],
         },
       },
     },

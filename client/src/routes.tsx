@@ -150,6 +150,15 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "confirm-email-change",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/ConfirmEmailChange"
+          );
+          return { Component };
+        },
+      },
+      {
         path: "account",
         async lazy() {
           const { default: Component } = await import(

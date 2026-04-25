@@ -1,0 +1,12 @@
+extends ../layout.pug
+
+block content
+  p Hi there,
+  p Someone requested to change the email for your Mirlo account to:
+  p 
+    strong #{newEmail}
+  p 
+    a(href!=`${clientDomain}/confirm-email-change?token=${token}&userId=${userId}`) Click here to confirm this email change
+  p 
+    | If this was not you, you can safely ignore this email. Your email will not be changed.
+  p If this wasn't you, please contact hi@mirlo.space ASAP
