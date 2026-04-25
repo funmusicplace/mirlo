@@ -1,6 +1,5 @@
 import {
   ARTIST_EXAMPLE,
-  POST_EXAMPLE,
   TRACK_GROUP_EXAMPLE,
 } from "../../../client/test/mocks";
 
@@ -30,18 +29,6 @@ const popularRelease = {
     urlSlug: "popular-artist",
   },
 };
-
-const posts = [
-  {
-    ...POST_EXAMPLE,
-  },
-  {
-    ...POST_EXAMPLE,
-    id: 2,
-    title: "Latest tour update",
-    urlSlug: "latest-tour-update",
-  },
-];
 
 describe("home page", () => {
   beforeEach(() => {
@@ -97,20 +84,6 @@ describe("home page", () => {
       });
     }).as("tags");
 
-    cy.intercept("GET", "/v1/posts*", (req) => {
-      expect(req.query).to.include({
-        take: "6",
-      });
-
-      req.reply({
-        statusCode: 200,
-        body: {
-          results: posts,
-          total: posts.length,
-        },
-      });
-    }).as("posts");
-
     cy.intercept("GET", "/v1/settings/instanceArtist", {
       statusCode: 200,
       body: {
@@ -149,7 +122,6 @@ describe("home page", () => {
       "@trackGroups",
       "@topSoldTrackGroups",
       "@tags",
-      "@posts",
       "@instanceArtist",
     ]);
   });
@@ -267,11 +239,6 @@ describe("home page", () => {
       .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/tags");
-
-    cy.contains("Latest posts from the community")
-      .scrollIntoView()
-      .should("be.visible");
-    cy.contains(posts[0].title).scrollIntoView().should("be.visible");
 
     cy.contains("Support Mirlo").should("be.visible");
     cy.contains(
