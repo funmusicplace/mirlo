@@ -127,10 +127,10 @@ export default function () {
           },
           properties: {
             colors: settings.settings?.instanceCustomization?.colors ?? {
-              primary: "#be3455",
-              secondary: "#ffc0cb",
+              button: "#be3455",
+              buttonText: "#ffc0cb",
               background: "#f5f0f0",
-              foreground: "#111",
+              text: "#111",
             },
           },
           subscriptionTiers: {
