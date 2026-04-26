@@ -24,7 +24,7 @@ describe(".well-known/webfinger", () => {
     }
   });
 
-  it.only("should return webfinger data for an ActivityPub artist", async () => {
+  it("should return webfinger data for an ActivityPub artist", async () => {
     const { user } = await createUser({
       email: "test@test.com",
     });
