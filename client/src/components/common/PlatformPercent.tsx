@@ -1,7 +1,8 @@
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+
 import { moneyDisplay } from "./Money";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 const PlatformPercent: React.FC<{
   percent: number;
@@ -36,8 +37,8 @@ const PlatformPercent: React.FC<{
         id={`${tooltipId}-button`}
         className="w-6 h-6 border-1 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer p-0 transition-opacity hover:opacity-80"
         style={{
-          borderColor: colors?.primary ?? "var(--mi-primary-color)",
-          color: colors?.primary ?? "var(--mi-primary-color)",
+          borderColor: colors?.button ?? "var(--mi-primary-color)",
+          color: colors?.button ?? "var(--mi-primary-color)",
         }}
         onClick={() => setShowTooltip(!showTooltip)}
         type="button"
@@ -57,8 +58,8 @@ const PlatformPercent: React.FC<{
           style={{
             backgroundColor:
               colors?.background ?? "var(--mi-normal-background-color)",
-            borderColor: colors?.primary ?? "var(--mi-primary-color)",
-            color: colors?.foreground ?? "var(--mi-foreground-color)",
+            borderColor: colors?.button ?? "var(--mi-primary-color)",
+            color: colors?.text ?? "var(--mi-foreground-color)",
           }}
         >
           {t("platformPercent", {

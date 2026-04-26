@@ -34,10 +34,10 @@ interface SettingsFromAPI {
     instanceArtistId: number;
     instanceCustomization?: {
       colors?: {
-        primary?: string;
-        secondary?: string;
+        button?: string;
+        buttonText?: string;
         background?: string;
-        foreground?: string;
+        text?: string;
       };
       artistId?: string;
       title?: string;
@@ -98,10 +98,10 @@ const AdminSettings = () => {
         instanceCustomization: {
           ...(response.result.settings?.instanceCustomization ?? {
             colors: {
-              primary: "#be3455",
-              secondary: "#ffffff",
+              button: "#be3455",
+              buttonText: "#ffffff",
               background: "#ffffff",
-              foreground: "#000000",
+              text: "#000000",
             },
           }),
         },
@@ -251,7 +251,7 @@ const AdminSettings = () => {
               <FormComponent>
                 <label>Primary Color</label>
                 <InputEl
-                  {...register("instanceCustomization.colors.primary")}
+                  {...register("instanceCustomization.colors.button")}
                   type="color"
                   className={css`
                     text-align: right;
@@ -261,7 +261,7 @@ const AdminSettings = () => {
               <FormComponent>
                 <label>Secondary Color</label>
                 <InputEl
-                  {...register("instanceCustomization.colors.secondary")}
+                  {...register("instanceCustomization.colors.buttonText")}
                   type="color"
                   className={css`
                     text-align: right;
@@ -271,7 +271,7 @@ const AdminSettings = () => {
               <FormComponent>
                 <label>Foreground Color</label>
                 <InputEl
-                  {...register("instanceCustomization.colors.foreground")}
+                  {...register("instanceCustomization.colors.text")}
                   type="color"
                   className={css`
                     text-align: right;

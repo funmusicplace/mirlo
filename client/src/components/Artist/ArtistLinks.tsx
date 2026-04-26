@@ -1,22 +1,23 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { bp } from "../../constants";
-
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
-import { useParams } from "react-router-dom";
+import { ArtistTitle } from "components/common/ArtistHeaderSection";
 import {
   findOutsideSite,
   linkUrlDisplay,
   linkUrlHref,
 } from "components/common/LinkIconDisplay";
-import Avatar from "./Avatar";
-import { ArtistTitle } from "components/common/ArtistHeaderSection";
+import { queryArtist } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaChevronLeft, FaPen } from "react-icons/fa";
-import { ArtistButtonAnchor, ArtistButtonLink } from "./ArtistButtons";
-import { getArtistManageUrl, getArtistUrl } from "utils/artist";
+import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
+import { getArtistManageUrl, getArtistUrl } from "utils/artist";
+
+import { bp } from "../../constants";
+
+import { ArtistButtonAnchor, ArtistButtonLink } from "./ArtistButtons";
+import Avatar from "./Avatar";
 
 const ArtistLinks: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -127,7 +128,7 @@ const ArtistLinks: React.FC = () => {
 
             li {
               border: 1px solid
-                ${colors?.primary ?? "var(--mi-darken-background-color)"};
+                ${colors?.button ?? "var(--mi-darken-background-color)"};
               margin: 0.5rem 0;
 
               a {
@@ -172,7 +173,7 @@ const ArtistLinks: React.FC = () => {
                   className={css`
                     align-items: center;
                     margin-right: 0.75rem;
-                    ${colors?.foreground ?? "var(--mi-foreground-color)"};
+                    ${colors?.text ?? "var(--mi-foreground-color)"};
                   `}
                 >
                   <div

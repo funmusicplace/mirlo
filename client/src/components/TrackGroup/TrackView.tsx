@@ -1,24 +1,24 @@
 import { css } from "@emotion/css";
-
-import { useNavigate, useParams } from "react-router-dom";
-import ClickToPlayTracks from "../common/ClickToPlayTracks";
-import Box from "../common/Box";
-import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
-import { MetaCard } from "components/common/MetaCard";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { MetaCard } from "components/common/MetaCard";
+import SupportArtistPopUp from "components/common/SupportArtistPopUp";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import WidthContainer from "components/common/WidthContainer";
+import { queryArtist, queryTrackGroup } from "queries";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
+import { getReleaseUrl } from "utils/artist";
 
 import { bp } from "../../constants";
+import Box from "../common/Box";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
-import ReleaseDate from "./ReleaseDate";
-import WidthContainer from "components/common/WidthContainer";
 import TrackGroupTitle from "./ItemViewTitle";
-import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import { useAuthContext } from "state/AuthContext";
-import TrackGroupMerch from "./TrackGroupMerch";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryTrackGroup } from "queries";
+import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
+import ReleaseDate from "./ReleaseDate";
 import {
   Container,
   ImageAndDetailsWrapper,
@@ -27,8 +27,7 @@ import {
   TrackListingWrapper,
   UnderneathImage,
 } from "./TrackGroup";
-import { getReleaseUrl } from "utils/artist";
-import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
+import TrackGroupMerch from "./TrackGroupMerch";
 
 function TrackView() {
   const { t } = useTranslation("translation", {
@@ -83,7 +82,7 @@ function TrackView() {
             }
 
             a {
-              color: ${artist.properties?.colors?.primary};
+              color: ${artist.properties?.colors?.button};
             }
 
             @media screen and (max-width: ${bp.small}px) {

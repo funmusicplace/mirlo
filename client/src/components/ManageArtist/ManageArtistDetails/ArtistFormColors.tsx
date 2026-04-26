@@ -1,9 +1,10 @@
-import { useTranslation } from "react-i18next";
-import ColorInput from "./ColorInput";
 import { css } from "@emotion/css";
-import React from "react";
 import styled from "@emotion/styled";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import React from "react";
+import { useTranslation } from "react-i18next";
+
+import ColorInput from "./ColorInput";
 
 const ColorInputWrapper = styled.div`
   display: flex;
@@ -52,12 +53,9 @@ const ArtistFormColors: React.FC = () => {
       <label>{t("customColors")}</label>
 
       <ColorInputWrapper className={css``}>
+        <ColorInput name="properties.colors.button" title={t("primaryColor")} />
         <ColorInput
-          name="properties.colors.primary"
-          title={t("primaryColor")}
-        />
-        <ColorInput
-          name="properties.colors.secondary"
+          name="properties.colors.buttonText"
           title={t("secondaryColor")}
         />
         <ColorInput
@@ -65,7 +63,7 @@ const ArtistFormColors: React.FC = () => {
           title={t("backgroundColor")}
         />
         <ColorInput
-          name="properties.colors.foreground"
+          name="properties.colors.text"
           title={t("foregroundColor")}
         />
       </ColorInputWrapper>

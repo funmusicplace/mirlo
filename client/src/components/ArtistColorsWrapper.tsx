@@ -64,8 +64,7 @@ const ArtistColors: React.FC<{
         className={css`
           background-color: ${artistColors?.background ??
           "var(--mi-normal-background-color)"};
-          color: ${artistColors?.foreground ??
-          "var(--mi-normal-foreground-color)"};
+          color: ${artistColors?.text ?? "var(--mi-normal-foreground-color)"};
         `}
       >
         {children}

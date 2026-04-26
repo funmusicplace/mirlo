@@ -111,7 +111,7 @@ const PaymentSlider: React.FC<{
                 width: 25px;
                 height: 25px;
                 border-radius: 50%;
-                background: ${artist?.properties?.colors?.primary ??
+                background: ${artist?.properties?.colors?.button ??
                 "var(--mi-primary-color)"};
                 cursor: pointer;
               }
@@ -120,7 +120,7 @@ const PaymentSlider: React.FC<{
                 width: 25px;
                 height: 25px;
                 border-radius: 50%;
-                background: ${artist?.properties?.colors?.primary ??
+                background: ${artist?.properties?.colors?.button ??
                 "var(--mi-primary-color)"};
                 cursor: pointer;
               }

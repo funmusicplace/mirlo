@@ -1,23 +1,24 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useGlobalStateContext } from "state/GlobalState";
-
-import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
-import { bp } from "../../../constants";
-import TrackRowPlayControl from "./TrackRowPlayControl";
-import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
-import Tooltip from "../Tooltip";
-import TrackAuthors from "./TrackAuthors";
-import EmbedLink from "./EmbedLink";
-import TrackLink from "./TrackLink";
-import DropdownMenu from "../DropdownMenu";
-import LyricsModal from "./LyricsModal";
-import FavoriteTrack from "components/TrackGroup/Favorite";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import DownloadAlbumButton from "components/common/DownloadAlbumButton";
+import FavoriteTrack from "components/TrackGroup/Favorite";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
-import DownloadAlbumButton from "components/common/DownloadAlbumButton";
+import { useAuthContext } from "state/AuthContext";
+import { useGlobalStateContext } from "state/GlobalState";
+import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
+
+import { bp } from "../../../constants";
+import DropdownMenu from "../DropdownMenu";
+import Tooltip from "../Tooltip";
+
+import EmbedLink from "./EmbedLink";
+import LyricsModal from "./LyricsModal";
+import TrackAuthors from "./TrackAuthors";
+import TrackLink from "./TrackLink";
+import TrackRowPlayControl from "./TrackRowPlayControl";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -34,7 +35,7 @@ const TR = styled.tr<{
 }>`
   ${(props) =>
     !props.canPlayTrack
-      ? `color: ${props.colors?.primary ?? "var(--mi-normal-foreground-color)"}; opacity: .6;`
+      ? `color: ${props.colors?.button ?? "var(--mi-normal-foreground-color)"}; opacity: .6;`
       : ""}
 
   display: flex;
@@ -45,8 +46,7 @@ const TR = styled.tr<{
       props.colors?.background ??
       "var(--mi-normal-foreground-color)"} !important;
     background-color: ${(props) =>
-      props.colors?.foreground ??
-      "var(--mi-normal-background-color)"} !important;
+      props.colors?.text ?? "var(--mi-normal-background-color)"} !important;
 
     button.play-button,
     button.pause-button {
@@ -66,8 +66,7 @@ const TR = styled.tr<{
         props.colors?.background ??
         "var(--mi-normal-foreground-color)"} !important;
       color: ${(props) =>
-        props.colors?.foreground ??
-        "var(--mi-normal-background-color)"} !important;
+        props.colors?.text ?? "var(--mi-normal-background-color)"} !important;
     }
 
     .track-authors {
@@ -81,13 +80,13 @@ const TR = styled.tr<{
   button.play-button,
   button.pause-button {
     color: ${(props) =>
-      props.colors?.primary ?? "var(--mi-normal-foreground-color)"};
+      props.colors?.button ?? "var(--mi-normal-foreground-color)"};
     background: transparent;
     font-size: 0.8rem;
 
     svg {
       fill: ${(props) =>
-        props.colors?.primary ?? "var(--mi-normal-foreground-color)"};
+        props.colors?.button ?? "var(--mi-normal-foreground-color)"};
     }
   }
 

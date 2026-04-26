@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 export const TextArea = styled.textarea<{
-  colors?: { background: string; foreground: string };
+  colors?: { background: string; text: string };
 }>`
   padding: 0.5rem;
   font-size: 1rem;
@@ -9,12 +9,11 @@ export const TextArea = styled.textarea<{
   width: 100%;
   border-radius: var(--mi-border-radius);
   color: ${(props) =>
-    props.colors?.foreground ?? "var(--mi-normal-foreground-color)"};
+    props.colors?.text ?? "var(--mi-normal-foreground-color)"};
   background-color: ${(props) =>
     props.colors?.background ?? "var(--mi-lighten-x-background-color)"};
   border: 1px solid
-    ${(props) =>
-      props.colors?.foreground ?? "var(--mi-normal-foreground-color)"};
+    ${(props) => props.colors?.text ?? "var(--mi-normal-foreground-color)"};
 `;
 
 export default TextArea;

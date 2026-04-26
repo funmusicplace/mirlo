@@ -1,33 +1,30 @@
 import { css } from "@emotion/css";
-
-import { Link, useParams } from "react-router-dom";
-import Box from "../common/Box";
-import { useTranslation } from "react-i18next";
-import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import { MetaCard } from "components/common/MetaCard";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-
-import { bp } from "../../constants";
-
-import MarkdownContent from "components/common/MarkdownContent";
-import WidthContainer from "components/common/WidthContainer";
-import { ItemViewTitle } from "../TrackGroup/ItemViewTitle";
-import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryMerch, queryUserStripeStatus } from "queries";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import MarkdownContent from "components/common/MarkdownContent";
+import { MetaCard } from "components/common/MetaCard";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import SupportArtistPopUp from "components/common/SupportArtistPopUp";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import WidthContainer from "components/common/WidthContainer";
 import {
   ImageAndDetailsWrapper,
   ImageWrapper,
 } from "components/TrackGroup/TrackGroup";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
+import { queryArtist, queryMerch, queryUserStripeStatus } from "queries";
+import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
+
+import { bp } from "../../constants";
+import Box from "../common/Box";
+import { ItemViewTitle } from "../TrackGroup/ItemViewTitle";
 
 import MerchButtonPopUp from "./MerchButtonPopUp";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import MerchDownloadableContent from "./MerchDownloadableContent";
 
 function MerchView() {
@@ -85,7 +82,7 @@ function MerchView() {
           }
 
           a {
-            color: ${artist.properties?.colors?.primary};
+            color: ${artist.properties?.colors?.button};
           }
 
           @media screen and (max-width: ${bp.small}px) {

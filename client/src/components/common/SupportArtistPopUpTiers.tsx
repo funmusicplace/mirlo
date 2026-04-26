@@ -1,13 +1,12 @@
 import styled from "@emotion/styled";
-import { InputEl } from "./Input";
-import { useFormContext } from "react-hook-form";
-import { forwardRef } from "react";
-import { moneyDisplay } from "./Money";
-import { useTranslation } from "react-i18next";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
-import { css } from "@emotion/css";
-import Box, { ArtistBox } from "./Box";
+import { forwardRef } from "react";
 import React from "react";
+import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+
+import { InputEl } from "./Input";
+import { moneyDisplay } from "./Money";
 
 const Label = styled.label<{ colors?: ArtistColors }>`
   display: block;
@@ -38,7 +37,7 @@ const ListItem = styled.li<{ colors?: ArtistColors }>`
   border-radius: 8px;
   margin-bottom: 0.5rem;
   border: 1px solid
-    ${(props) => props.colors?.primary ?? "var(--mi-darken-x-background-color)"};
+    ${(props) => props.colors?.button ?? "var(--mi-darken-x-background-color)"};
 
   input[type="radio"] {
     display: none;
@@ -47,8 +46,7 @@ const ListItem = styled.li<{ colors?: ArtistColors }>`
   input[type="radio"]:checked + label {
     background-color: ${(props) =>
       props.colors?.background ?? "var(--mi-background-color)"};
-    color: ${(props) =>
-      props.colors?.foreground ?? "var(--mi-foreground-color)"};
+    color: ${(props) => props.colors?.text ?? "var(--mi-foreground-color)"};
     &:after {
       content: "✔";
     }

@@ -1,20 +1,20 @@
+import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { queryArtist } from "queries";
+import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
-import { useAuthContext } from "state/AuthContext";
-import Button from "./Button";
-import React from "react";
-import { useSnackbar } from "state/SnackbarContext";
-import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
-import api from "services/api";
 import { moneyDisplay } from "./Money";
-import { css } from "@emotion/css";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
 import TextArea from "./TextArea";
-import useErrorHandler from "services/useErrorHandler";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const defaultGifts = [
   { value: 5 },
@@ -110,10 +110,10 @@ const TipArtistForm: React.FC<{
                       padding: 0.75rem 1rem;
                       display: block;
                       border-radius: 0.5rem;
-                      color: ${artistDetails.properties?.colors?.primary ??
+                      color: ${artistDetails.properties?.colors?.button ??
                       "var(--mi-text-color)"};
                       border: 1px dashed
-                        ${artistDetails.properties?.colors?.primary ??
+                        ${artistDetails.properties?.colors?.button ??
                         "var(--mi-primary-color)"};
                       margin-right: 0.2rem;
                       background-color: ${artistDetails.properties?.colors
@@ -124,7 +124,7 @@ const TipArtistForm: React.FC<{
 
                     input:checked + label {
                       background-color: ${artistDetails.properties?.colors
-                        ?.secondary ?? "var(--mi-secondary-color)"};
+                        ?.buttonText ?? "var(--mi-secondary-color)"};
                     }
                   `}
                 >

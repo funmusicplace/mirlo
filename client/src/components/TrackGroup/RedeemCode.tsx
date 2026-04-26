@@ -1,38 +1,33 @@
 import { css } from "@emotion/css";
-
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
+import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { InputEl } from "components/common/Input";
+import { MetaCard } from "components/common/MetaCard";
+import SmallTileDetails from "components/common/SmallTileDetails";
+import { WidthWrapper } from "components/common/WidthContainer";
+import { queryTrackGroup } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Link,
   useNavigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import Box from "../common/Box";
-import usePublicObjectById from "utils/usePublicObjectById";
-import { useTranslation } from "react-i18next";
-import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import { MetaCard } from "components/common/MetaCard";
-import { useArtistContext } from "state/ArtistContext";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-
-import { WidthWrapper } from "components/common/WidthContainer";
-
-import SmallTileDetails from "components/common/SmallTileDetails";
-import { InputEl } from "components/common/Input";
-import Button from "components/common/Button";
-import React from "react";
-import FormComponent from "components/common/FormComponent";
 import api from "services/api";
-import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import useArtistQuery from "utils/useArtistQuery";
-import { queryTrackGroup } from "queries";
-import {
-  ArtistButton,
-  useGetArtistColors,
-} from "components/Artist/ArtistButtons";
-import { bp } from "../../constants";
 import { useSnackbar } from "state/SnackbarContext";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import useArtistQuery from "utils/useArtistQuery";
+
+import { bp } from "../../constants";
+import Box from "../common/Box";
 
 function RedeemCode() {
   const { t } = useTranslation("translation", {
@@ -144,7 +139,7 @@ function RedeemCode() {
                   {trackGroup.title}
                 </Link>
               }
-              textColor={colors?.foreground}
+              textColor={colors?.text}
               subtitle={
                 <Link to={getArtistUrl(trackGroup.artist)}>
                   {trackGroup.artist?.name ?? ""}

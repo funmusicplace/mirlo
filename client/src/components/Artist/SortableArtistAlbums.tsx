@@ -1,14 +1,3 @@
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-
-import { useParams } from "react-router-dom";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
-import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
-
-import api from "services/api";
-
 import {
   DndContext,
   KeyboardSensor,
@@ -16,17 +5,23 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-  DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import SortableTrackGroupItem from "./SortableTrackGroupItem";
-import { produce } from "immer";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
 import Background from "components/common/Background";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { produce } from "immer";
+import { queryArtist } from "queries";
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import api from "services/api";
+
+import SortableTrackGroupItem from "./SortableTrackGroupItem";
 
 export const determineNewTrackGroupOrder = produce(
   (
@@ -110,7 +105,7 @@ const SortableArtistAlbums: React.FC = () => {
         >
           <LoadingSpinner
             size="large"
-            fill={artist?.properties?.colors?.foreground}
+            fill={artist?.properties?.colors?.text}
           />
         </Background>
       )}

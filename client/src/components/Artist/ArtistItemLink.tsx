@@ -1,17 +1,17 @@
+import { css } from "@emotion/css";
+import {
+  isMerch,
+  isTrack,
+  isTrackgroup,
+} from "components/ManageArtist/UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
-import { css } from "@emotion/css";
 import {
   getArtistUrl,
   getMerchUrl,
   getReleaseUrl,
   getTrackUrl,
 } from "utils/artist";
-import {
-  isMerch,
-  isTrack,
-  isTrackgroup,
-} from "components/ManageArtist/UploadArtistImage";
 
 type Item =
   | (Merch & { artist?: Artist })
@@ -59,12 +59,12 @@ const ArtistItemLink: React.FC<{
         item.title?.length
           ? css`
               color: ${artistId
-                ? artist.properties?.colors?.foreground
+                ? artist.properties?.colors?.text
                 : "var(--mi-normal-foreground-color)"};
             `
           : css`
               color: ${artistId
-                ? artist.properties?.colors?.foreground
+                ? artist.properties?.colors?.text
                 : "var(--mi-light-foreground-color)"};
               font-style: italic;
             `

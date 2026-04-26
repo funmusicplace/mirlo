@@ -1,35 +1,34 @@
 import { css } from "@emotion/css";
-
-import { useParams } from "react-router-dom";
-import ClickToPlayTracks from "../common/ClickToPlayTracks";
-import Box, { ArtistBox } from "../common/Box";
-import { useTranslation } from "react-i18next";
+import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
-import { MetaCard } from "components/common/MetaCard";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-
-import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
-import { bp } from "../../constants";
+import MarkdownContent from "components/common/MarkdownContent";
+import { MetaCard } from "components/common/MetaCard";
+import SupportArtistPopUp from "components/common/SupportArtistPopUp";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import WidthContainer from "components/common/WidthContainer";
+import { queryArtist, queryTrackGroup } from "queries";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPublished } from "utils/artist";
 
-import MarkdownContent from "components/common/MarkdownContent";
-import Wishlist from "./Wishlist";
-import ReleaseDate from "./ReleaseDate";
-import WidthContainer from "components/common/WidthContainer";
-import TrackGroupTitle from "./ItemViewTitle";
-import styled from "@emotion/styled";
-import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import TrackGroupPills from "./TrackGroupPills";
-import TrackGroupEmbed from "./TrackGroupEmbed";
-import RecommendedAlbums from "./RecommendedAlbums";
-import { useAuthContext } from "state/AuthContext";
-import TrackGroupMerch from "./TrackGroupMerch";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryTrackGroup, queryUserStripeStatus } from "queries";
-import Fundraiser from "./Fundraiser";
+import { bp } from "../../constants";
+import Box, { ArtistBox } from "../common/Box";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
+
 import FlagContent from "./FlagContent";
+import Fundraiser from "./Fundraiser";
+import TrackGroupTitle from "./ItemViewTitle";
+import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
+import RecommendedAlbums from "./RecommendedAlbums";
+import ReleaseDate from "./ReleaseDate";
 import ReleaseDownloadableContent from "./ReleaseDownloadableContent";
+import TrackGroupEmbed from "./TrackGroupEmbed";
+import TrackGroupMerch from "./TrackGroupMerch";
+import TrackGroupPills from "./TrackGroupPills";
+import Wishlist from "./Wishlist";
 
 export const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
@@ -224,7 +223,7 @@ function TrackGroup() {
             }
 
             a {
-              color: ${artist.properties?.colors?.primary};
+              color: ${artist.properties?.colors?.button};
             }
 
             @media screen and (max-width: ${bp.small}px) {
