@@ -7,6 +7,7 @@ import logger from "../logger";
 import { findArtistIdForURLSlug } from "../utils/artist";
 import { AppError } from "../utils/error";
 
+import { fetchActivityPubDocument } from "./httpClient";
 import {
   headersAreForActivityPub,
   rootArtist,
@@ -15,28 +16,43 @@ import {
 } from "./utils";
 
 async function sendAcceptMessage(
-  thebody: { [key: string]: unknown },
-  artistUrlSlug: string,
-  targetDomain: string
+  body: { [key: string]: unknown },
+  artistUrlSlug: string
 ) {
   const guid = crypto.randomBytes(16).toString("hex");
   const now = new Date();
-  let message = {
+  const message = {
     "@context": "https://www.w3.org/ns/activitystreams",
     id: `${rootArtist}${artistUrlSlug}#activity-${guid}`,
     type: "Accept",
     actor: `${rootArtist}${artistUrlSlug}`,
-    object: thebody,
-    to: [thebody.actor],
+    object: body,
+    to: [body.actor],
     published: now.toISOString(),
   };
-  const inboxUrl = thebody.actor + "/inbox";
+
+  const actor = body.actor;
+  if (!actor || typeof actor !== "string") {
+    throw new Error("Cannot send Accept message without a valid actor URL");
+  }
+
+  const actorDoc = await fetchActivityPubDocument(actor);
+  const inboxUrl = actorDoc.inbox;
+
+  if (!inboxUrl || typeof inboxUrl !== "string") {
+    throw new Error(`No inbox found for actor ${actor}`);
+  }
+
+  const destinationDomain = new URL(inboxUrl).hostname;
+
   await signAndSendActivityPubMessage(
     message,
     artistUrlSlug,
-    inboxUrl as string,
-    targetDomain
+    inboxUrl,
+    destinationDomain
   );
+
+  return inboxUrl;
 }
 
 const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
@@ -111,10 +127,11 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    const remoteActorId = new URL(req.body.actor);
-    const remoteActorDomain = remoteActorId.hostname;
     if (req.body.type === "Follow") {
-      await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
+      const acceptInboxUrl = await sendAcceptMessage(req.body, artist.urlSlug);
+      log.info(
+        `ActivityPub Follow accepted for ${req.body.actor}; Accept delivered to ${acceptInboxUrl}`
+      );
       // update followers
       await prisma.activityPubArtistFollowers.upsert({
         where: {
@@ -142,7 +159,6 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
     if (req.body.type === "Undo") {
       // Undo activities have the original activity wrapped in the "object" field
       if (req.body.object?.type === "Follow") {
-        await sendAcceptMessage(req.body, artist.urlSlug, remoteActorDomain);
         // Remove from followers
         await prisma.activityPubArtistFollowers.deleteMany({
           where: {
@@ -150,6 +166,8 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
             actor: req.body.actor,
           },
         });
+
+        log.info(`ActivityPub Follow removed for ${req.body.actor} via Undo`);
       }
     }
     if (req.body.type === "Delete") {

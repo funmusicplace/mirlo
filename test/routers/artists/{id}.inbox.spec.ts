@@ -1,15 +1,19 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it, beforeEach, afterEach } from "mocha";
-import { clearTables, createArtist, createUser } from "../../utils";
-import prisma from "@mirlo/prisma";
-import crypto from "crypto";
-import sinon from "sinon";
 import { Request, Response } from "express";
+import { describe, it, beforeEach, afterEach } from "mocha";
+import sinon from "sinon";
 
+import * as httpClientModule from "../../../src/activityPub/httpClient";
 import inboxPOST from "../../../src/activityPub/inboxPOST";
 import * as utilsModule from "../../../src/activityPub/utils";
+import { clearTables, createArtist, createUser } from "../../utils";
+
+import prisma from "@mirlo/prisma";
+
+import crypto from "crypto";
 
 function generateHttpSignature(
   method: string,
@@ -267,7 +271,7 @@ describe("inboxPOST", () => {
     assert(error.description.includes("not implemented"));
   });
 
-  it("should accept a valid Follow activity with correct signature", async () => {
+  it("should accept a valid Follow activity and send Accept to actor inbox", async () => {
     const { user: artistUser } = await createUser({
       email: "test@test.com",
     });
@@ -296,8 +300,13 @@ describe("inboxPOST", () => {
     // Mock fetchRemotePublicKey to return our test public key
     sinon.stub(utilsModule, "fetchRemotePublicKey").resolves(testPublicKey);
 
-    // Mock signAndSendActivityPubMessage to avoid real HTTP calls
-    sinon.stub(utilsModule, "signAndSendActivityPubMessage").resolves();
+    // Mock actor document lookup and delivery to avoid network calls
+    sinon
+      .stub(httpClientModule, "fetchActivityPubDocument")
+      .resolves({ inbox: "https://remote.example/users/test/inbox" });
+    const sendStub = sinon
+      .stub(utilsModule, "signAndSendActivityPubMessage")
+      .resolves();
 
     const req = {
       params: { id: artist.urlSlug },
@@ -342,8 +351,81 @@ describe("inboxPOST", () => {
     assert.equal(follower.actor, "https://test-actor.com/remote-actor");
 
     // Verify Accept message was sent
-    assert(
-      (utilsModule.signAndSendActivityPubMessage as sinon.SinonStub).called
+    assert(sendStub.calledOnce);
+    assert.equal(
+      sendStub.firstCall.args[2],
+      "https://remote.example/users/test/inbox"
     );
+    assert.equal(sendStub.firstCall.args[3], "remote.example");
+  });
+
+  it("should remove follower on Undo Follow without sending Accept", async () => {
+    const { user: artistUser } = await createUser({
+      email: "test@test.com",
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      name: "Test artist",
+      userId: artistUser.id,
+      enabled: true,
+    });
+
+    await prisma.activityPubArtistFollowers.create({
+      data: {
+        artistId: artist.id,
+        actor: "https://test-actor.com/remote-actor",
+      },
+    });
+
+    const body = JSON.stringify({
+      actor: "https://test-actor.com/remote-actor",
+      type: "Undo",
+      object: {
+        type: "Follow",
+      },
+    });
+
+    const sendStub = sinon
+      .stub(utilsModule, "signAndSendActivityPubMessage")
+      .resolves();
+
+    const req = {
+      params: { id: artist.urlSlug },
+      method: "POST",
+      path: `/v1/artists/${artist.urlSlug}/inbox`,
+      headers: {
+        "content-type": "application/activity+json",
+        signature:
+          'keyId="test",headers="(request-target) host date digest",signature="test"',
+      },
+      body: {
+        actor: "https://test-actor.com/remote-actor",
+        type: "Undo",
+        object: {
+          type: "Follow",
+        },
+      },
+      rawBody: body,
+    } as any as Request;
+
+    const res = {
+      status: sinon.stub().returnsThis() as any,
+      json: sinon.stub().returnsThis() as any,
+      set: sinon.stub().returnsThis() as any,
+    } as any as Response;
+
+    await inboxPOST(req, res, nextStub);
+
+    assert((res.status as any).calledWith(200));
+    assert.equal(sendStub.callCount, 0);
+
+    const follower = await prisma.activityPubArtistFollowers.findFirst({
+      where: {
+        artistId: artist.id,
+        actor: "https://test-actor.com/remote-actor",
+      },
+    });
+
+    assert.equal(follower, null);
   });
 });
