@@ -504,12 +504,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     }));
 
     let description = `An album by ${tg.artist.name}\nReleased ${releaseDate}`;
-    if (tg.tracks.length > 0) {
-      description += `\n\nTracks:\n`;
-      tg.tracks.forEach((track, index) => {
-        description += `${index + 1}. ${track.title}\n`;
-      });
-    }
+
     if (tg.about) {
       description += `\n${tg.about}`;
     }

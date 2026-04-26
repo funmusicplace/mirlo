@@ -90,7 +90,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
 
     // Verify signature, but allow Delete activities if verification fails due to Gone (410)
     try {
-      await verifySignature(req, signatureHeader);
+      await verifySignature(req, signatureHeader, id);
     } catch (e) {
       // Allow Delete activities from gone accounts (410 status)
       if (

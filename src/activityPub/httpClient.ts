@@ -5,7 +5,7 @@
 
 import { logger } from "../logger";
 
-const ACTIVITYPUB_ACCEPT_HEADER =
+export const ACTIVITYPUB_ACCEPT_HEADER =
   'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json';
 
 // Lazy load got (ESM module in CommonJS)
@@ -45,7 +45,8 @@ async function getFederationClient() {
  * Includes timeout, retry, and proper error handling
  */
 export async function fetchActivityPubDocument(
-  url: string
+  url: string,
+  extraHeaders?: Record<string, string>
 ): Promise<Record<string, any>> {
   try {
     logger.debug(`Fetching ActivityPub document from ${url}`);
@@ -54,6 +55,7 @@ export async function fetchActivityPubDocument(
     const response = await client.get(url, {
       headers: {
         Accept: ACTIVITYPUB_ACCEPT_HEADER,
+        ...extraHeaders,
       },
       responseType: "json",
     });
