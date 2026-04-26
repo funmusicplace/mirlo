@@ -1,17 +1,19 @@
 import * as assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it, afterEach } from "mocha";
 import sinon from "sinon";
-import { clearTables, createArtist, createUser } from "../../../utils";
-import { requestApp } from "../../utils";
 
-import prisma from "@mirlo/prisma";
 import {
   sendMailQueue,
   sendMailQueueEvents,
 } from "../../../../src/queues/send-mail-queue";
 import labelsEndpoint from "../../../../src/routers/v1/manage/artists/{artistId}/labels/index";
+import { clearTables, createArtist, createUser } from "../../../utils";
+import { requestApp } from "../../utils";
+
+import prisma from "@mirlo/prisma";
 
 describe("manage/artists/{artistId}/labels", () => {
   beforeEach(async () => {
@@ -362,6 +364,8 @@ describe("manage/artists/{artistId}/labels", () => {
       assert.equal(emailData.message.to, artistUser.email);
       assert.equal(emailData.locals.artist.id, artist.id);
       assert.ok(emailData.locals.label, "Label profile should be included");
+      assert.equal(emailData.locals.user.id, artistUser.id);
+      assert.equal(emailData.locals.labelArtist.id, label.id);
     });
 
     it("should create notification alongside email queue", async () => {

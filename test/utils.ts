@@ -1,10 +1,9 @@
 import { Prisma } from "@mirlo/prisma/client";
+// @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
 
 import prisma from "../prisma/prisma";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
-
-// @ts-ignore: Ignore import errors for github-slugger
 
 export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "SubscriptionTierRelease";`;

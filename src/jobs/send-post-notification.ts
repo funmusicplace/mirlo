@@ -1,11 +1,13 @@
 import prisma from "@mirlo/prisma";
+import { flatten, uniqBy } from "lodash";
+
+import { getClient } from "../activityPub/utils";
 import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
-import { parseOutIframes } from "./send-notification-email";
-import { processSinglePost } from "../utils/post";
-import { flatten, uniqBy } from "lodash";
-import { getClient } from "../activityPub/utils";
 import { getSafeErrorContext } from "../utils/logging";
+import { processSinglePost } from "../utils/post";
+
+import { parseOutIframes } from "./parse-out-iframes";
 
 /**
  * Job processor: Sends notification emails when a post is published
