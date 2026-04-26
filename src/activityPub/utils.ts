@@ -1,5 +1,7 @@
+import crypto, { createVerify } from "crypto";
+import { IncomingHttpHeaders } from "http";
+
 import prisma from "@mirlo/prisma";
-import { Request } from "express";
 import {
   Artist,
   ArtistAvatar,
@@ -8,17 +10,18 @@ import {
   Post,
   TrackGroup,
 } from "@mirlo/prisma/client";
+import { Request } from "express";
+
+import { logger } from "../logger";
 import { AppError } from "../utils/error";
-import crypto, { createVerify } from "crypto";
+import { generateFullStaticImageUrl } from "../utils/images";
 import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
 } from "../utils/minio";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
-import { IncomingHttpHeaders } from "http";
-import { logger } from "../logger";
+import { isTrackGroup } from "../utils/typeguards";
+
 import {
   fetchActivityPubDocument,
   sendSignedActivityPubMessage,
@@ -189,6 +192,7 @@ export const createPostActivity = async (
     type: "Note",
     attributedTo: actorId,
     content: post.content,
+    mediaType: "text/html",
     name: post.title,
     url: noteUrl,
     to: ["https://www.w3.org/ns/activitystreams#Public"],
@@ -197,7 +201,10 @@ export const createPostActivity = async (
   };
 
   return {
-    "@context": "https://www.w3.org/ns/activitystreams",
+    "@context": [
+      "https://www.w3.org/ns/activitystreams",
+      "https://w3id.org/security/v1",
+    ],
     id: `${noteId}#activity${activityIdSuffix ? `-${activityIdSuffix}` : ""}`,
     type: "Create",
     actor: actorId,
