@@ -1,9 +1,14 @@
 import express from "express";
-import webfinger from "./activityPub/webfinger";
 
 const router = express.Router();
 
-router.get("/.well-known/webfinger", webfinger);
+// Fedify handles webfinger for AP-enabled artists; fall through to 404 for
+// non-AP artists or wrong-domain resources so the SPA catch-all doesn't grab them.
+router.get("/.well-known/webfinger", (req, res) => {
+  console.log("hi");
+  res.status(404).json({ error: "Not found" });
+});
+
 router.get("/.well-known/assetlinks", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(JSON.stringify([]));

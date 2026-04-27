@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 
-import { getClient } from "../activityPub/utils";
 import logger from "../logger";
+import { getClient } from "../utils/getClient";
 
 export const parseOutIframes = async (content: string) => {
   // Replace <iframe src="https://mirlo.space/widget/trackGroup/:id"> or <iframe src="https://mirlo.space/widget/track/:id">

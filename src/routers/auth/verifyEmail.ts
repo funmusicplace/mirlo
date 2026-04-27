@@ -1,12 +1,14 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { setTokens } from "./utils";
-import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
+import { NextFunction, Request, Response } from "express";
+
+import { sendMail } from "../../jobs/send-mail";
 import logger from "../../logger";
 import { AppError } from "../../utils/error";
-import { getClient } from "../../activityPub/utils";
+import { getClient } from "../../utils/getClient";
 import { findOrCreateUserBasedOnEmail } from "../../utils/user";
+
+import { setTokens } from "./utils";
 
 const generate = (n: number, chunks = 0, separator = " "): string => {
   var add = 1,

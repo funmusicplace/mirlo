@@ -1,13 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
 import {
   confirmArtistIdExists,
   subscribeUserToArtist,
 } from "../../../../utils/artist";
+import { getClient } from "../../../../utils/getClient";
 import { getSiteSettings } from "../../../../utils/settings";
-import { getClient } from "../../../../activityPub/utils";
 
 type Params = {
   id: string;

@@ -1,8 +1,9 @@
 import prisma from "@mirlo/prisma";
-import logger from "../logger";
 import { Artist } from "@mirlo/prisma/client";
+
+import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
-import { getClient } from "../activityPub/utils";
+import { getClient } from "../utils/getClient";
 
 export type SubscriptionRenewalReminderEmailType = {
   interval: "MONTH" | "YEAR";

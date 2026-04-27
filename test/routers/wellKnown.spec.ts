@@ -52,14 +52,16 @@ describe(".well-known/webfinger", () => {
       `acct:${artist.urlSlug}@${webfingerDomain}`
     );
     assert.equal(response.body.aliases?.length, 1);
-    assert(response.body.aliases[0].endsWith(`/${artist.urlSlug}`));
+    assert(
+      response.body.aliases[0].endsWith(`/v1/ap/artists/${artist.urlSlug}`)
+    );
 
     const selfLink = response.body.links?.find(
       (link: { rel?: string }) => link.rel === "self"
     );
     assert(selfLink);
     assert.equal(selfLink.type, "application/activity+json");
-    assert(selfLink.href.endsWith(`/v1/artists/${artist.urlSlug}`));
+    assert(selfLink.href.endsWith(`/v1/ap/artists/${artist.urlSlug}`));
   });
 
   it("should return 404 when artist is not ActivityPub enabled", async () => {

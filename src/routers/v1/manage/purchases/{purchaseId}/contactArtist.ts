@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
-import sendMail from "../../../../../jobs/send-mail";
 import { Job } from "bullmq";
-import { getClient } from "../../../../../activityPub/utils";
+import { Request, Response } from "express";
+
+import { userAuthenticated } from "../../../../../auth/passport";
+import sendMail from "../../../../../jobs/send-mail";
+import { getClient } from "../../../../../utils/getClient";
 
 export default function () {
   const operations = {

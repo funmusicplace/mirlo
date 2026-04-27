@@ -1,11 +1,12 @@
 import prisma from "@mirlo/prisma";
+import { Job } from "bullmq";
+import { groupBy, keyBy } from "lodash";
 
 import logger from "../logger";
-import { getClient } from "../activityPub/utils";
 import { findSales } from "../routers/v1/artists/{id}/supporters";
-import { groupBy, keyBy } from "lodash";
+import { getClient } from "../utils/getClient";
+
 import sendMail from "./send-mail";
-import { Job } from "bullmq";
 
 export type MonthlyIncomeReportEmailType = {
   user: { name: string; email: string };

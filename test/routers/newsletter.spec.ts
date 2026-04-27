@@ -1,11 +1,13 @@
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
 import { clearTables, createArtist, createUser } from "../utils";
+
 import { requestApp } from "./utils";
 
 async function createInstanceArtist() {
@@ -162,7 +164,7 @@ describe("artists/{id}/follow newsletter", () => {
       },
     });
 
-    process.env.REACT_APP_CLIENT_DOMAIN = "https://example.com";
+    process.env.API_DOMAIN = "https://example.com";
 
     const response = await requestApp
       .get(`artists/${artist.id}/confirmFollow`)

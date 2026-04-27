@@ -1,17 +1,19 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import Parser from "rss-parser";
+
 import {
   clearTables,
   createArtist,
   createTrackGroup,
   createUser,
 } from "../../utils";
-
 import { requestApp } from "../utils";
+
 import { faker } from "@faker-js/faker";
 
 describe("artists/{id}/feed", () => {
@@ -394,100 +396,5 @@ describe("artists/{id}/feed", () => {
     assert(obj.items[0].content?.includes(""));
     assert.equal(obj.items[0].title, `${trackGroup.title} by ${artist.name}`);
     assert.equal(obj.items[1].title, `${postTitle} by ${artist.name}`);
-  });
-
-  describe("ActivityPub", () => {
-    it("should GET / both an album and a post and display it in outbox", async () => {
-      const user = await prisma.user.create({
-        data: {
-          email: "test@test.com",
-        },
-      });
-      const artist = await prisma.artist.create({
-        data: {
-          name: "Test artist",
-          urlSlug: "test-artist",
-          userId: user.id,
-          enabled: true,
-        },
-      });
-
-      const postTitle = "Test post title";
-
-      const post = await prisma.post.create({
-        data: {
-          title: postTitle,
-          artistId: artist.id,
-          isPublic: true,
-          content: "# HI",
-          isDraft: false,
-          publishedAt: faker.date.past().toISOString(),
-        },
-      });
-
-      const trackGroup = await createTrackGroup(artist.id);
-
-      const response = await requestApp
-        .get(`artists/${artist.urlSlug}/feed`)
-        .set("Accept", "application/activity+json");
-
-      assert(response.statusCode === 200);
-      const first = response.body.first;
-      assert.equal(response.body.type, "OrderedCollection");
-      assert.equal(response.body.totalItems, 2);
-      assert(response.body.id.includes(`v1/artists/${artist.urlSlug}/feed`));
-      assert.equal(first.type, "OrderedCollectionPage");
-      assert(first.partOf.includes(`v1/artists/${artist.urlSlug}/feed`));
-      assert(first.id.includes(`v1/artists/${artist.urlSlug}/feed?page=1`));
-      assert.equal(first.orderedItems.length, 2);
-      assert.equal(
-        response.body["@context"][0],
-        "https://www.w3.org/ns/activitystreams"
-      );
-      const createItem = first.orderedItems[0];
-      assert(
-        createItem.id.endsWith(
-          `v1/artists/${artist.urlSlug}/trackGroups/${trackGroup.urlSlug}#activity`
-        )
-      );
-      assert.equal(createItem.type, "Create");
-      assert(
-        createItem.object.url.endsWith(
-          `${artist.urlSlug}/releases/${trackGroup.urlSlug}`
-        )
-      );
-      assert(createItem.object.attributedTo.endsWith(`/${artist.urlSlug}`));
-      assert.equal(createItem.object.type, "Note");
-      assert.equal(
-        createItem.object.content,
-        `<h2>A release by ${artist.name}.</h2>`
-      );
-      assert(trackGroup.releaseDate);
-      assert.equal(
-        createItem.object.published,
-        trackGroup.releaseDate.toISOString()
-      );
-      const secondCreateItem = first.orderedItems[1];
-      assert(
-        secondCreateItem.id.endsWith(
-          `v1/artists/${artist.urlSlug}/posts/${post.id}#activity`
-        )
-      );
-      assert.equal(secondCreateItem.type, "Create");
-      assert(
-        secondCreateItem.object.url.endsWith(
-          `${artist.urlSlug}/posts/${post.id}`
-        )
-      );
-      assert(
-        secondCreateItem.object.attributedTo.endsWith(`/${artist.urlSlug}`)
-      );
-      assert.equal(secondCreateItem.object.type, "Note");
-      assert.equal(secondCreateItem.object.content, post.content);
-      assert.equal(
-        secondCreateItem.object.published,
-        post.publishedAt.toISOString()
-      );
-    });
   });
 });

@@ -6,7 +6,6 @@ import { Client } from "@mirlo/prisma/client";
 import * as cheerio from "cheerio";
 import { Request } from "express";
 
-import { getClient } from "./activityPub/utils";
 import {
   fetchArtistMetadata,
   fetchAlbumMetadata,
@@ -14,6 +13,7 @@ import {
   fetchMerchMetadata,
 } from "./parseIndex/metadata";
 import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
+import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
   finalArtistAvatarBucket,

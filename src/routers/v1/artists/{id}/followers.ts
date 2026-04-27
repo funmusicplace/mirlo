@@ -1,13 +1,7 @@
-import { Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
-
 import prisma from "@mirlo/prisma";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { Request, Response } from "express";
+
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import {
-  headersAreForActivityPub,
-  turnSubscribersIntoFollowers,
-} from "../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -44,16 +38,9 @@ export default function () {
           },
         },
       });
-      if (headersAreForActivityPub(req.headers, "GET")) {
-        if (req.headers.accept) {
-          res.set("content-type", "application/activity+json");
-        }
-        res.json(turnSubscribersIntoFollowers(artist, followers));
-      } else {
-        res.json({
-          result: followers.length,
-        });
-      }
+      res.json({
+        result: followers.length,
+      });
     } catch (e) {
       console.error(`/v1/artists/{id}/followers ${e}`);
       res.status(400);
@@ -61,10 +48,10 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns followers, primarily used for activityPub",
+    summary: "Returns followers",
     responses: {
       200: {
-        description: "A list of published posts",
+        description: "A list of followers",
         schema: {
           type: "array",
           items: {

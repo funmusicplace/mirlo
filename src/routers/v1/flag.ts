@@ -1,10 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import { AppError } from "../../utils/error";
-import sendMail from "../../jobs/send-mail";
-import { Job } from "bullmq";
 import prisma from "@mirlo/prisma";
+import { Job } from "bullmq";
+import { NextFunction, Request, Response } from "express";
+
+import sendMail from "../../jobs/send-mail";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
-import { getClient } from "../../activityPub/utils";
+import { AppError } from "../../utils/error";
+import { getClient } from "../../utils/getClient";
 
 export default function () {
   const operations = {

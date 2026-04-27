@@ -1,6 +1,6 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import {
   checkIsUserSubscriber,
@@ -8,11 +8,6 @@ import {
   processSingleArtist,
   singleInclude,
 } from "../../../../utils/artist";
-import {
-  headersAreForActivityPub,
-  turnArtistIntoActor,
-} from "../../../../activityPub/utils";
-
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -55,20 +50,13 @@ export default function () {
           });
         }
 
-        if (headersAreForActivityPub(req.headers, "GET")) {
-          if (req.headers.accept) {
-            res.set("content-type", "application/activity+json");
-          }
-          return res.json(await turnArtistIntoActor(artist as any));
-        } else {
-          return res.json({
-            result: processSingleArtist(
-              artist as any,
-              loggedInUser?.id,
-              isUserSubscriber
-            ),
-          });
-        }
+        return res.json({
+          result: processSingleArtist(
+            artist as any,
+            loggedInUser?.id,
+            isUserSubscriber
+          ),
+        });
       } else {
         return res.status(404).json({ error: "Artist not found" });
       }

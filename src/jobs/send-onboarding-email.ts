@@ -1,9 +1,8 @@
 import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
-
 import { sendMailQueue } from "../queues/send-mail-queue";
-import { getClient } from "../activityPub/utils";
+import { getClient } from "../utils/getClient";
 
 const sendOnboardingEmail = async () => {
   const date = new Date();

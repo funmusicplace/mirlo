@@ -58,7 +58,7 @@ type SignupBody = {
 async function signup(body: Omit<SignupBody, "client">) {
   const signupBody: SignupBody = {
     ...body,
-    client: String(process.env.REACT_APP_CLIENT_DOMAIN),
+    client: String(process.env.API_DOMAIN),
   };
 
   await api.post("auth/signup", signupBody, {

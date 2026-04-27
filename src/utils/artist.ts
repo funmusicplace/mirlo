@@ -1,3 +1,4 @@
+import prisma from "@mirlo/prisma";
 import {
   User,
   ArtistSubscriptionTier,
@@ -13,15 +14,20 @@ import {
   MerchImage,
   Image,
 } from "@mirlo/prisma/client";
-import prisma from "@mirlo/prisma";
-import stripe from "./stripe";
 import {
-  deleteTrackGroup,
-  processSingleTrackGroup,
-  trackGroupPublishedObject,
-} from "./trackGroup";
-import postProcessor from "./post";
+  DefaultArgs,
+  PrismaClientKnownRequestError,
+} from "@prisma/client/runtime/library";
+import { Job } from "bullmq";
+import { NextFunction, Request, Response } from "express";
+
+import sendMail from "../jobs/send-mail";
+import logger from "../logger";
+
+import { AppError } from "./error";
+import { getClient } from "./getClient";
 import { convertURLArrayToSizes } from "./images";
+import { deleteMerch, processSingleMerch } from "./merch";
 import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
@@ -30,19 +36,14 @@ import {
   finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
-import {
-  DefaultArgs,
-  PrismaClientKnownRequestError,
-} from "@prisma/client/runtime/library";
-import sendMail from "../jobs/send-mail";
-import { NextFunction, Request, Response } from "express";
-import { AppError } from "./error";
-import logger from "../logger";
-import { Job } from "bullmq";
-import { deleteMerch, processSingleMerch } from "./merch";
+import postProcessor from "./post";
 import { getSiteSettings } from "./settings";
-import subscriptionTiers from "../routers/v1/manage/artists/{artistId}/subscriptionTiers";
-import { getClient } from "../activityPub/utils";
+import stripe from "./stripe";
+import {
+  deleteTrackGroup,
+  processSingleTrackGroup,
+  trackGroupPublishedObject,
+} from "./trackGroup";
 
 type Params = {
   id: string;

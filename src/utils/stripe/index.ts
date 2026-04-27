@@ -1,4 +1,3 @@
-import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 import {
   Prisma,
@@ -7,12 +6,13 @@ import {
   Fundraiser,
   TrackGroup,
 } from "@mirlo/prisma/client";
-import { logger } from "../../logger";
 import { Request, Response } from "express";
-import { findOrCreateUserBasedOnEmail, updateCurrencies } from "../user";
-import { generateFullStaticImageUrl } from "../images";
-import { finalCoversBucket, finalMerchImageBucket } from "../minio";
+import Stripe from "stripe";
+
+import { logger } from "../../logger";
+import { subscribeUserToArtist } from "../artist";
 import { AppError } from "../error";
+import { getClient } from "../getClient";
 import {
   handleArtistGift,
   handleArtistMerchPurchase,
@@ -24,11 +24,12 @@ import {
   handleTrackGroupPurchase,
   handleTrackPurchase,
 } from "../handleFinishedTransactions";
-import { manageSubscriptionReceipt } from "../subscription";
-import { subscribeUserToArtist } from "../artist";
-import { createOrUpdatePledge } from "../trackGroup";
-import { getClient } from "../../activityPub/utils";
+import { generateFullStaticImageUrl } from "../images";
+import { finalCoversBucket, finalMerchImageBucket } from "../minio";
 import { calculateAppFee } from "../processingPayments";
+import { manageSubscriptionReceipt } from "../subscription";
+import { createOrUpdatePledge } from "../trackGroup";
+import { findOrCreateUserBasedOnEmail, updateCurrencies } from "../user";
 
 const { STRIPE_KEY } = process.env;
 

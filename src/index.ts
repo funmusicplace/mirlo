@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import { ExpressAdapter } from "@bull-board/express";
+import { integrateFederation } from "@fedify/express";
 import prisma from "@mirlo/prisma";
 import cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
@@ -9,6 +10,7 @@ import { rateLimit } from "express-rate-limit";
 import qs from "qs";
 import swaggerUi from "swagger-ui-express";
 
+import { federation } from "./activityPub/federation";
 import apiApp from "./api";
 import "./auth/passport";
 import { corsCheck } from "./auth/cors";
@@ -45,6 +47,20 @@ app.get("/x-forwarded-for", (request, response) =>
 
 app.use(corsCheck);
 app.use(cookieParser());
+// @fedify/express's fromERequest builds the request URL using req.host, which
+// in Express returns the raw Host header including the port (e.g. "api:3000").
+// Fedify's WebFinger domain check compares against that, so a resource like
+// acct:user@api never matches api:3000.  req.hostname strips the port; patch
+// req.host to use it so Fedify sees the hostname without port.
+app.use((req, _res, next) => {
+  const hostname = (req as any).hostname as string;
+  Object.defineProperty(req, "host", {
+    get: () => hostname,
+    configurable: true,
+  });
+  next();
+});
+app.use(integrateFederation(federation, () => undefined));
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
@@ -236,6 +252,12 @@ app.use("/", userLoggedInWithoutRedirect, async (req, res, next) => {
 });
 
 app.use(errorHandler);
+
+// Prevent unhandled async rejections (e.g. from Fedify's background queue)
+// from crashing the process, especially during tests.
+process.on("unhandledRejection", (reason) => {
+  logger.error(`Unhandled promise rejection: ${reason}`);
+});
 
 app.listen(process.env.PORT, async () => {
   const settings = await getSiteSettings();

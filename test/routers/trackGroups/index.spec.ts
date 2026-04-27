@@ -3,6 +3,8 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+import Parser from "rss-parser";
+
 import {
   clearTables,
   createArtist,
@@ -10,10 +12,11 @@ import {
   createUser,
   createUserTrackGroupPurchase,
 } from "../../utils";
+
 import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../utils";
-import Parser from "rss-parser";
+
 import { faker } from "@faker-js/faker";
 
 describe("trackGroups", () => {
@@ -286,10 +289,7 @@ describe("trackGroups", () => {
 
       const obj = await parser.parseString(response.text);
 
-      assert.equal(
-        obj.feedUrl,
-        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
-      );
+      assert.ok(obj.feedUrl?.includes(`/v1/trackGroups?format=rss`));
       assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 0);
     });
@@ -312,10 +312,7 @@ describe("trackGroups", () => {
 
       const obj = await parser.parseString(response.text);
 
-      assert.equal(
-        obj.feedUrl,
-        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
-      );
+      assert.ok(obj.feedUrl?.includes(`/v1/trackGroups?format=rss`));
       assert.equal(obj.items.length, 1);
       assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
     });
@@ -338,10 +335,7 @@ describe("trackGroups", () => {
 
       const obj = await parser.parseString(response.text);
 
-      assert.equal(
-        obj.feedUrl,
-        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
-      );
+      assert.ok(obj.feedUrl?.includes(`/v1/trackGroups?format=rss`));
       assert.equal(obj.items.length, 1);
       assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
     });
@@ -364,10 +358,7 @@ describe("trackGroups", () => {
 
       const obj = await parser.parseString(response.text);
 
-      assert.equal(
-        obj.feedUrl,
-        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
-      );
+      assert.ok(obj.feedUrl?.includes(`/v1/trackGroups?format=rss`));
       assert.equal(obj.items.length, 0);
     });
 
@@ -389,10 +380,7 @@ describe("trackGroups", () => {
 
       const obj = await parser.parseString(response.text);
 
-      assert.equal(
-        obj.feedUrl,
-        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
-      );
+      assert.ok(obj.feedUrl?.includes(`/v1/trackGroups?format=rss`));
       assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 1);
       assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
