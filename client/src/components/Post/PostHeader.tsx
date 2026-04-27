@@ -1,19 +1,19 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import Avatar from "components/Artist/Avatar";
 import { ButtonLink } from "components/common/Button";
+import ClickToPlayTracks from "components/common/ClickToPlayTracks";
+import FollowArtist from "components/common/FollowArtist";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import TipArtist from "components/common/TipArtist";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { bp } from "../../constants";
-import FollowArtist from "components/common/FollowArtist";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import Avatar from "components/Artist/Avatar";
-
 import { useAuthContext } from "state/AuthContext";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
-import TipArtist from "components/common/TipArtist";
-import styled from "@emotion/styled";
-import ClickToPlayTracks from "components/common/ClickToPlayTracks";
+
+import { bp } from "../../constants";
 
 const AvatarWrapper = styled.div`
   margin-right: 0.25rem;
@@ -118,7 +118,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             position: relative;
             color: ${featuredImage
               ? "var(--mi-white)"
-              : post?.artist?.properties?.colors?.primary} !important;
+              : post?.artist?.properties?.colors?.button} !important;
 
             h1 {
               margin-bottom: 0.5rem;

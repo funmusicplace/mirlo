@@ -1,14 +1,16 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import Background from "components/common/Background";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
-import { bp } from "../../constants";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import Background from "components/common/Background";
-import Button from "./Button";
-import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
+
+import { bp } from "../../constants";
+
+import Button from "./Button";
 
 const SearchResultsDiv = styled.div`
   position: absolute;
@@ -90,7 +92,7 @@ const AutoComplete = React.forwardRef<
   HTMLInputElement,
   {
     ariaDescribedBy?: string;
-    colors?: { background: string; foreground: string };
+    colors?: { background: string; text: string };
     getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
     resultsPrefix?: string;
     onSelect?: (

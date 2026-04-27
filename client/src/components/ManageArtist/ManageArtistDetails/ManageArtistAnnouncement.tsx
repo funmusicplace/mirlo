@@ -1,17 +1,18 @@
-import FormComponent from "components/common/FormComponent";
-import { useTranslation } from "react-i18next";
-import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
-import React from "react";
-import Button from "components/common/Button";
-import { FormProvider, useForm } from "react-hook-form";
 import { css } from "@emotion/css";
+import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
 import MarkdownContent from "components/common/MarkdownContent";
-import { bp } from "../../../constants";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import useArtistQuery from "utils/useArtistQuery";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
+import { bp } from "../../../constants";
+import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
+
 export const AnnouncementWrapper: React.FC<{
-  artistColors?: { primary: string; secondary: string; background: string };
+  artistColors?: { button: string; buttonText: string; background: string };
   children: React.ReactNode;
 }> = ({ artistColors, children }) => {
   return (
@@ -24,8 +25,8 @@ export const AnnouncementWrapper: React.FC<{
         position: relative;
         margin-bottom: 0.25rem;
 
-        color: ${artistColors?.primary || "var(--mi-foreground-color)"};
-        background-color: ${artistColors?.secondary ||
+        color: ${artistColors?.button || "var(--mi-foreground-color)"};
+        background-color: ${artistColors?.buttonText ||
         "var(--mi-secondary-color)"};
       `}
     >
@@ -94,7 +95,7 @@ const ManageArtistAnnouncement: React.FC<{
                 right: 1rem;
                 background-color: ${artist.properties?.colors?.background ||
                 "var(--mi-background-color)"} !important;
-                color: ${artist.properties?.colors?.primary ||
+                color: ${artist.properties?.colors?.button ||
                 "var(--mi-foreground-color)"} !important;
               `}
             >
@@ -113,7 +114,7 @@ const ManageArtistAnnouncement: React.FC<{
           padding: var(--mi-side-paddings-xsmall);
           padding-top: 0.5rem;
           padding-bottom: 0.5rem;
-          background-color: ${artist.properties?.colors?.secondary ||
+          background-color: ${artist.properties?.colors?.buttonText ||
           "var(--mi-secondary-color)"} !important;
           filter: brightness(95%) grayscale(10%);
 
@@ -129,7 +130,7 @@ const ManageArtistAnnouncement: React.FC<{
           className={css`
             background-color: ${artist.properties?.colors?.background ||
             "var(--mi-background-color)"} !important;
-            color: ${artist.properties?.colors?.primary ||
+            color: ${artist.properties?.colors?.button ||
             "var(--mi-foreground-color)"} !important;
             width: 100%;
             padding: var(--mi-side-paddings-xsmall);
@@ -149,9 +150,9 @@ const ManageArtistAnnouncement: React.FC<{
           position: relative;
 
           textarea {
-            color: ${artist.properties?.colors?.primary ||
+            color: ${artist.properties?.colors?.button ||
             "var(--mi-primary-color)"};
-            background-color: ${artist.properties?.colors?.secondary ||
+            background-color: ${artist.properties?.colors?.buttonText ||
             "var(--mi-foreground-color)"};
           }
 
@@ -162,7 +163,7 @@ const ManageArtistAnnouncement: React.FC<{
           button {
             background-color: ${artist.properties?.colors?.background ||
             "var(--mi-background-color)"};
-            color: ${artist.properties?.colors?.primary ||
+            color: ${artist.properties?.colors?.button ||
             "var(--mi-foreground-color)"};
           }
 
@@ -183,7 +184,7 @@ const ManageArtistAnnouncement: React.FC<{
               right: 1rem;
               background-color: ${artist.properties?.colors?.background ||
               "var(--mi-background-color)"} !important;
-              color: ${artist.properties?.colors?.primary ||
+              color: ${artist.properties?.colors?.button ||
               "var(--mi-foreground-color)"} !important;
             `}
           >
@@ -207,7 +208,7 @@ const ManageArtistAnnouncement: React.FC<{
 
               color: ${artist.properties?.colors?.background ||
               "var(--mi-background-color)"};
-              background-color: ${artist.properties?.colors?.primary ||
+              background-color: ${artist.properties?.colors?.button ||
               "var(--mi-foreground-color)"};
 
               a {

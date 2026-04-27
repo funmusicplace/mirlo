@@ -1,25 +1,27 @@
 import { css } from "@emotion/css";
-import { bp } from "../../constants";
-import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
-import FollowArtist from "./FollowArtist";
-import ContactArtist from "./ContactArtist";
-import SpaceBetweenDiv from "./SpaceBetweenDiv";
-import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
-import Avatar from "components/Artist/Avatar";
-import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
+import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
+import ArtistTourDates from "components/Artist/ArtistTourDates";
+import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { MetaCard } from "components/common/MetaCard";
+import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
+import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
+import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
+import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
-import { useSnackbar } from "state/SnackbarContext";
-import { useAuthContext } from "state/AuthContext";
-import { FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
-import ArtistTourDates from "components/Artist/ArtistTourDates";
-import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
-import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
+import { FaRss } from "react-icons/fa";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+
+import { bp } from "../../constants";
+
+import ContactArtist from "./ContactArtist";
+import FollowArtist from "./FollowArtist";
+import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 const smallButtonClass = css`
   svg {
@@ -111,7 +113,7 @@ export const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
   align-items: flex-end;
   justify-content: space-around;
   border-bottom: solid 1px
-    ${(props) => props.colors?.primary ?? "var(--mi-light-foreground-color)"};
+    ${(props) => props.colors?.button ?? "var(--mi-light-foreground-color)"};
 `;
 
 const ArtistHeaderSection: React.FC<{
@@ -268,7 +270,7 @@ const ArtistHeaderSection: React.FC<{
         >
           <div
             className={css`
-              color: ${artist.properties?.colors?.primary ||
+              color: ${artist.properties?.colors?.button ||
               "var(--mi-foreground-color)"};
             `}
           >

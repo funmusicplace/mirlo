@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+
 import { useGetArtistColors } from "./ArtistButtons";
 
 const IncludedReleases: React.FC<{
@@ -30,7 +31,7 @@ const IncludedReleases: React.FC<{
                 {!release.trackGroup.cover && (
                   <div
                     className="w-12 h-12 flex-shrink-0"
-                    style={{ backgroundColor: colors?.secondary }}
+                    style={{ backgroundColor: colors?.buttonText }}
                   />
                 )}
                 <span className="flex-1 truncate text-sm">

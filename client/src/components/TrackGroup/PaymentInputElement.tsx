@@ -1,15 +1,12 @@
-import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
-import React from "react";
-import { useTranslation } from "react-i18next";
-
-import { InputEl } from "components/common/Input";
-import { useFormContext } from "react-hook-form";
-import PlatformPercent from "components/common/PlatformPercent";
-import Box from "components/common/Box";
-
-import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
-import { useAuthContext } from "state/AuthContext";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
+import { InputEl } from "components/common/Input";
+import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
+import PlatformPercent from "components/common/PlatformPercent";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useAuthContext } from "state/AuthContext";
 
 interface FormData {
   chosenPrice: string;
@@ -121,7 +118,7 @@ const PaymentInputElement: React.FC<{
         numericChosenPrice > 0 &&
         normalizedDiscountPercent > 0 && (
           <div
-            className={`w-full align-center mt-2 rounded border p-3 text-sm border-[${colors.colors?.primary ?? "--mi-primary-color"}]`}
+            className={`w-full align-center mt-2 rounded border p-3 text-sm border-[${colors.colors?.button ?? "--mi-primary-color"}]`}
           >
             {t("discountSummary", {
               discountPercent: normalizedDiscountPercent,

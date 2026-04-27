@@ -1,14 +1,14 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButtonQuickLink } from "components/Artist/Artist";
 import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
-import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist } from "queries";
-import { getArtistUrl } from "utils/artist";
-import { ArtistButtonQuickLink } from "components/Artist/Artist";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
+import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
+import { getArtistUrl } from "utils/artist";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -58,7 +58,7 @@ const ManageArtist: React.FC<{}> = () => {
               : t("manageArtistNavigation")
           }
         >
-          <ArtistTabs color={artist.properties?.colors?.primary}>
+          <ArtistTabs color={artist.properties?.colors?.button}>
             <li className="tab-primary">
               <NavLink to="releases">{releasesTitle}</NavLink>
             </li>

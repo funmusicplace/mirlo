@@ -1,8 +1,16 @@
-import { bp } from "../../constants";
-import Box from "../common/Box";
-import { useTranslation } from "react-i18next";
-import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import { ArtistTabs } from "components/common/Tabs";
+import {
+  queryArtist,
+  queryPublicLabelTrackGroups,
+  queryUserStripeStatus,
+} from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaChevronRight, FaEdit } from "react-icons/fa";
 import {
   NavLink,
   Outlet,
@@ -10,22 +18,16 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { ArtistTabs } from "components/common/Tabs";
-import React from "react";
 import api from "services/api";
-import { FaChevronRight, FaEdit } from "react-icons/fa";
-import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import {
-  queryArtist,
-  queryPublicLabelTrackGroups,
-  queryUserStripeStatus,
-} from "queries";
 import { getArtistManageUrl } from "utils/artist";
-import { ArtistButtonLink } from "./ArtistButtons";
-import useManagedArtistQuery from "utils/useManagedArtistQuery";
 import useArtistQuery from "utils/useArtistQuery";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
+
+import { bp } from "../../constants";
+import Box from "../common/Box";
+
+import { ArtistButtonLink } from "./ArtistButtons";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
@@ -153,7 +155,7 @@ function Artist() {
           artist.isLabelProfile ? t("labelNavigation") : t("artistNavigation")
         }
       >
-        <ArtistTabs color={artist.properties?.colors?.primary}>
+        <ArtistTabs color={artist.properties?.colors?.button}>
           {artist.isLabelProfile && (
             <>
               <li className="tab-primary">

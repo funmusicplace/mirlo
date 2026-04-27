@@ -38,20 +38,20 @@ declare global {
         purchaseEmail?: string;
         showHeroOnHome?: boolean;
         colors?: {
-          primary?: string;
-          secondary?: string;
+          button?: string;
+          buttonText?: string;
           background?: string;
-          foreground?: string;
+          text?: string;
           body?: string;
         };
       };
     };
     type Properties = {
       colors?: {
-        primary?: string;
-        secondary?: string;
+        button?: string;
+        buttonText?: string;
         background?: string;
-        foreground?: string;
+        text?: string;
       };
       emails?: {
         support?: string;

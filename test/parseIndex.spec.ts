@@ -1,7 +1,8 @@
 import assert from "node:assert";
+
+import * as cheerio from "cheerio";
 import * as dotenv from "dotenv";
 import { describe, it, beforeEach } from "mocha";
-import * as cheerio from "cheerio";
 
 dotenv.config();
 
@@ -10,6 +11,7 @@ import {
   getTrackGroupWidget,
   getTrackWidget,
 } from "../src/parseIndex";
+
 import {
   clearTables,
   createArtist,
@@ -475,10 +477,10 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should inject instance colors from site settings as CSS variables", async () => {
       await createSiteSettings({
         instanceColors: {
-          primary: "#ff0000",
-          secondary: "#00ff00",
+          button: "#ff0000",
+          buttonText: "#00ff00",
           background: "#0000ff",
-          foreground: "#ffff00",
+          text: "#ffff00",
         },
       });
 
@@ -508,7 +510,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should apply partial instance colors from settings", async () => {
       await createSiteSettings({
         instanceColors: {
-          primary: "#123456",
+          button: "#123456",
         },
       });
 

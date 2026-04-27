@@ -1,21 +1,19 @@
-import React from "react";
-
-import { useTranslation } from "react-i18next";
-import { useSnackbar } from "state/SnackbarContext";
-import useErrorHandler from "services/useErrorHandler";
-
-import api from "services/api";
 import { css } from "@emotion/css";
-import { FaDownload, FaTimes } from "react-icons/fa";
-import FormComponent from "components/common/FormComponent";
-import Pill from "components/common/Pill";
 import {
   ArtistButton,
   ArtistButtonAnchor,
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import Pill from "components/common/Pill";
 import UploadFiles from "components/ManageArtist/UploadFiles";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaDownload, FaTimes } from "react-icons/fa";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
+import { useSnackbar } from "state/SnackbarContext";
 
 const DownloadableContent: React.FC<{
   item: Merch | TrackGroup;
@@ -105,7 +103,7 @@ const DownloadableContent: React.FC<{
     <FormComponent>
       {isSaving && (
         <div>
-          <LoadingSpinner size="small" fill={colors?.primary} />
+          <LoadingSpinner size="small" fill={colors?.button} />
         </div>
       )}
       {!!item.downloadableContent && item.downloadableContent.length > 0 && (

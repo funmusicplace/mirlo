@@ -177,10 +177,10 @@ interface PostImage {
 }
 
 type ArtistColors = {
-  primary: string;
-  secondary: string;
+  button: string;
+  buttonText: string;
   background: string;
-  foreground: string;
+  text: string;
 };
 
 interface Notification {

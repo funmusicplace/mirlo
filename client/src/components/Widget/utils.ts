@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+
 import { bp } from "../../constants";
 
 export function inIframe() {
@@ -32,12 +33,11 @@ export const WidgetWrapper = styled.div<{
 
   a {
     color: ${(props) =>
-      props.artistColors?.primary ?? "var(--mi-primary-color)"};
+      props.artistColors?.button ?? "var(--mi-primary-color)"};
     }
 
   color: ${(props) =>
-    props.artistColors?.foreground ??
-    "var(--mi-normal-foreground-color)"} !important;
+    props.artistColors?.text ?? "var(--mi-normal-foreground-color)"} !important;
     background-color: ${(props) =>
       props.artistColors?.background ??
       "var(--mi-normal-background-color)"} !important;
@@ -45,13 +45,13 @@ export const WidgetWrapper = styled.div<{
       button.play-button,
       button.pause-button {
       color: ${(props) =>
-        props.artistColors?.foreground ?? "var(--mi-normal-foreground-color)"};
+        props.artistColors?.text ?? "var(--mi-normal-foreground-color)"};
         
         background: transparent;
         
         svg {
         fill: ${(props) =>
-          props.artistColors?.foreground ??
+          props.artistColors?.text ??
           "var(--mi-normal-foreground-color)"} !important; 
         }   
     } 
@@ -63,7 +63,7 @@ export const WidgetWrapper = styled.div<{
     props.artistColors?.background ??
     "var(--mi-normal-foreground-color)"} !important;
     background-color: ${(props) =>
-      props.artistColors?.foreground ??
+      props.artistColors?.text ??
       "var(--mi-normal-background-color)"} !important;
       
       button.play-button,

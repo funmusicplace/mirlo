@@ -1,9 +1,10 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { bp } from "../../constants";
-import { useTranslation } from "react-i18next";
-import { i18n } from "i18next";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import { i18n } from "i18next";
+import React from "react";
+import { useTranslation } from "react-i18next";
+
+import { bp } from "../../constants";
 
 export const formatDate = ({
   date,
@@ -89,9 +90,7 @@ const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
   return (
     <div
       className={css`
-        color: ${colors
-          ? colors.foreground
-          : "var(--mi-light-foreground-color)"};
+        color: ${colors ? colors.text : "var(--mi-light-foreground-color)"};
         font-size: 1rem;
         width: 100%;
         font-size: var(--mi-font-size-small);

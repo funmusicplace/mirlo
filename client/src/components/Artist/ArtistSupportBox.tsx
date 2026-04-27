@@ -1,25 +1,27 @@
 import { css } from "@emotion/css";
-import React from "react";
-import api from "services/api";
-import Money from "../common/Money";
-import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import Box from "components/common/Box";
 import MarkdownContent from "components/common/MarkdownContent";
 import PlatformPercent from "components/common/PlatformPercent";
-import LoadingBlocks from "./LoadingBlocks";
-import ArtistVariableSupport from "./ArtistVariableSupport";
-import { useAuthContext } from "state/AuthContext";
 import { queryArtist } from "queries";
-import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "react-router-dom";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { getArtistManageTiersUrl } from "utils/artist";
+
+import Money from "../common/Money";
+
 import {
   ArtistButton,
   ArtistButtonLink,
   useGetArtistColors,
 } from "./ArtistButtons";
-import useErrorHandler from "services/useErrorHandler";
+import ArtistVariableSupport from "./ArtistVariableSupport";
 import IncludedReleases from "./IncludedReleases";
-import { getArtistManageTiersUrl } from "utils/artist";
-import Box from "components/common/Box";
+import LoadingBlocks from "./LoadingBlocks";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
@@ -32,7 +34,7 @@ const ArtistSupportBox: React.FC<{
   );
 
   const { colors } = useGetArtistColors();
-  const secondaryColor = colors?.secondary ?? "var(--mi-secondary-color)";
+  const secondaryColor = colors?.buttonText ?? "var(--mi-secondary-color)";
 
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
@@ -97,7 +99,7 @@ const ArtistSupportBox: React.FC<{
       !sub.artistSubscriptionTier.isDefaultTier
   );
 
-  const primary = colors?.primary ?? "var(--mi-primary-color)";
+  const primary = colors?.button ?? "var(--mi-primary-color)";
   const tierBorderColor = `color-mix(in srgb, ${primary} ${isSubscribedToTier ? "100%" : "20%"}, transparent)`;
   const tierInnerBorderColor = `color-mix(in srgb, ${primary} 20%, transparent)`;
 

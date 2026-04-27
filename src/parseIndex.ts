@@ -800,10 +800,10 @@ export const analyzePathAndGenerateHTML = async (
   $("title").after(`
     <style>
     html {
-      --mi-instance-primary-color: ${settings.settings?.instanceCustomization?.colors?.primary ?? "#be3455"};
-      --mi-instance-secondary-color: ${settings.settings?.instanceCustomization?.colors?.secondary ?? "#ffffff"};
+      --mi-instance-primary-color: ${settings.settings?.instanceCustomization?.colors?.button ?? "#be3455"};
+      --mi-instance-secondary-color: ${settings.settings?.instanceCustomization?.colors?.buttonText ?? "#ffffff"};
       --mi-instance-background-color: ${settings.settings?.instanceCustomization?.colors?.background ?? "#ffffff"};
-      --mi-instance-foreground-color: ${settings.settings?.instanceCustomization?.colors?.foreground ?? "#000000"};
+      --mi-instance-foreground-color: ${settings.settings?.instanceCustomization?.colors?.text ?? "#000000"};
       --mi-instance-show-hero-on-home: ${settings.settings?.instanceCustomization?.showHeroOnHome ? "flex" : "none"};
     }
     </style>

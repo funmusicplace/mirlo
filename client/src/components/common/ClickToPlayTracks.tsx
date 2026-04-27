@@ -1,12 +1,11 @@
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
 import React from "react";
+import { useParams } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 
 import PlayControlButton from "./PlayControlButton";
-import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-import { queryArtist } from "queries";
 
 const Wrapper = styled.div<{ colors?: ArtistColors }>`
   position: relative;
@@ -18,27 +17,27 @@ const Wrapper = styled.div<{ colors?: ArtistColors }>`
 
   button {
     background-color: ${(props) =>
-      props.colors?.primary ?? "var(--mi-primary-color)"} !important;
+      props.colors?.button ?? "var(--mi-primary-color)"} !important;
     color: ${(props) =>
-      props.colors?.secondary ?? "var(--mi-secondary-color)"} !important;
+      props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
     border: 0px !important;
     width: 3rem;
     height: 3rem;
 
     svg {
       fill: ${(props) =>
-        props.colors?.secondary ?? "var(--mi-secondary-color)"} !important;
+        props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
     }
 
     &:hover:not(:disabled) {
       color: ${(props) =>
-        props.colors?.primary ?? "var(--mi-primary-color)"} !important;
+        props.colors?.button ?? "var(--mi-primary-color)"} !important;
       background-color: ${(props) =>
-        props.colors?.secondary ?? "var(--mi-secondary-color)"} !important;
+        props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
 
       svg {
         fill: ${(props) =>
-          props.colors?.primary ?? "var(--mi-primary-color)"} !important;
+          props.colors?.button ?? "var(--mi-primary-color)"} !important;
       }
     }
   }

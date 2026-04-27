@@ -1,19 +1,17 @@
+import { css } from "@emotion/css";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import { InputEl } from "components/common/Input";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import { getCurrencySymbol } from "components/common/Money";
+import TextArea from "components/common/TextArea";
+import TextEditor from "components/common/TextEditor";
+import { set } from "lodash";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { useDebouncedCallback } from "use-debounce";
-import { InputEl } from "components/common/Input";
-import TextArea from "components/common/TextArea";
-
-import api from "services/api";
-
-import LoadingSpinner from "components/common/LoadingSpinner";
-import { css } from "@emotion/css";
-import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
-import { multiply, set } from "lodash";
-import { getCurrencySymbol } from "components/common/Money";
-import TextEditor from "components/common/TextEditor";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
+import { useDebouncedCallback } from "use-debounce";
 
 const SavingInput = React.forwardRef<
   { focus: () => void },
@@ -266,8 +264,8 @@ const SavingInput = React.forwardRef<
             filter: invert(100%);
           `}
         >
-          {isSaving && <LoadingSpinner fill={colors?.primary} size="small" />}
-          {saveSuccess && <FaCheck fill={colors?.primary} />}
+          {isSaving && <LoadingSpinner fill={colors?.button} size="small" />}
+          {saveSuccess && <FaCheck fill={colors?.button} />}
         </div>
       </div>
     );

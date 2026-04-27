@@ -1,8 +1,9 @@
 import prisma from "@mirlo/prisma";
 import { Artist, Notification } from "@mirlo/prisma/client";
+
+import { getClient } from "../activityPub/utils";
 import logger from "../logger";
 import { sendMailQueue, sendMailQueueEvents } from "../queues/send-mail-queue";
-import { getClient } from "../activityPub/utils";
 
 export const parseOutIframes = async (content: string) => {
   // Replace <iframe src="https://mirlo.space/widget/trackGroup/:id"> or <iframe src="https://mirlo.space/widget/track/:id">
@@ -61,18 +62,18 @@ export const parseOutIframes = async (content: string) => {
       (_match, _before, type, id, _after) => {
         if (type === "trackGroup" && trackGroupMap[id]) {
           const tg = trackGroupMap[id];
-          const primary = tg.artist.properties?.colors?.primary || "#be3455";
+          const button = tg.artist.properties?.colors?.button || "#be3455";
           const background =
             tg.artist.properties?.colors?.background || "#f5f0f0";
-          const secondary = tg.artist.properties?.colors?.secondary || "#111";
-          const foreground = tg.artist.properties?.colors?.foreground || "#111";
+          const buttonText = tg.artist.properties?.colors?.buttonText || "#111";
+          const text = tg.artist.properties?.colors?.text || "#111";
           return `<div data-type="trackGroup" data-id="${id}" style="display:flex;flex-direction:row;gap:8px;background-color:${background};border-radius:8px;padding:16px;">
                     <div>
                       <a href="${applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}" style="
                       display:inline-block;
                       text-decoration:none;
-                      background:${primary};
-                      color:${foreground};
+                      background:${button};
+                      color:${text};
                       width: 32px;
                       height: 32px;
                       text-align: center;
@@ -88,7 +89,7 @@ export const parseOutIframes = async (content: string) => {
                     </div>
                     <div>
                       <strong>${tg.title}</strong><br/>
-                      <a href="${applicationUrl}/${tg.artist.urlSlug}" style="color:${primary};text-decoration:none;">
+                      <a href="${applicationUrl}/${tg.artist.urlSlug}" style="color:${button};text-decoration:none;">
                         ${tg.artist?.name || "Unknown"}
                       </a><br/>
                       <ol>
@@ -98,20 +99,19 @@ export const parseOutIframes = async (content: string) => {
                   </div>`;
         } else if (type === "track" && trackMap[id]) {
           const t = trackMap[id];
-          const primary =
-            t.trackGroup.artist.properties?.colors?.primary || "#be3455";
+          const button =
+            t.trackGroup.artist.properties?.colors?.button || "#be3455";
           const background =
             t.trackGroup.artist.properties?.colors?.background || "#f5f0f0";
-          const secondary =
-            t.trackGroup.artist.properties?.colors?.secondary || "#111";
-          const foreground =
-            t.trackGroup.artist.properties?.colors?.foreground || "#111";
+          const buttonText =
+            t.trackGroup.artist.properties?.colors?.buttonText || "#111";
+          const text = t.trackGroup.artist.properties?.colors?.text || "#111";
           return `<div data-type="track" data-id="${id}" style="display:flex;flex-direction:column;gap:8px;background-color:${background};border-radius:8px;padding:16px;">
                   <div>
                     <a href="${applicationUrl}/${t.trackGroup.artist.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}" style="display:inline-block;
                       text-decoration:none;
-                      background:${primary};
-                      color:${foreground};
+                      background:${button};
+                      color:${text};
                       width: 32px;
                       height: 32px;
                       text-align: center;
@@ -127,7 +127,7 @@ export const parseOutIframes = async (content: string) => {
                   </div>
                   <div>
                     <strong>${t.title}</strong><br/>
-                    <a href="${applicationUrl}/${t.trackGroup.artist.urlSlug}" style="color:${foreground}; text-decoration:none;">
+                    <a href="${applicationUrl}/${t.trackGroup.artist.urlSlug}" style="color:${text}; text-decoration:none;">
                       ${t.trackGroup.artist?.name || "Unknown"}
                     </a>
                   </div>

@@ -1,32 +1,34 @@
-import React from "react";
-import { useFieldArray, useForm, FormProvider } from "react-hook-form";
-import { InputEl } from "components/common/Input";
-import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
 import { css } from "@emotion/css";
-import { Trans, useTranslation } from "react-i18next";
-import { fmtMSS } from "utils/tracks";
-import SelectTrackPreview from "../../SelectTrackPreview";
-import TrackUploadingState from "../../TrackUploadingState";
-import TrackArtistFormFields from "../TrackArtistFormFields";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-import useJobStatusCheck from "utils/useJobStatusCheck";
-import LoadingSpinner from "components/common/LoadingSpinner";
-import { useAuthContext } from "state/AuthContext";
-import ManageTrackLicense from "../ManageTrackLicense";
-import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
-import TextArea from "components/common/TextArea";
-import { Link } from "react-router-dom";
-import ShowRawID3Data from "./ShowRawID3Data";
 import styled from "@emotion/styled";
-import FormCheckbox from "components/common/FormCheckbox";
-import InfoModal from "components/common/InfoModal";
 import {
   ArtistButton,
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
+import FormCheckbox from "components/common/FormCheckbox";
+import InfoModal from "components/common/InfoModal";
+import { InputEl } from "components/common/Input";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import TextArea from "components/common/TextArea";
 import { TrackData } from "components/ManageArtist/utils";
 import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
+import React from "react";
+import { useFieldArray, useForm, FormProvider } from "react-hook-form";
+import { Trans, useTranslation } from "react-i18next";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+import { fmtMSS } from "utils/tracks";
+import useJobStatusCheck from "utils/useJobStatusCheck";
+
+import SelectTrackPreview from "../../SelectTrackPreview";
+import TrackUploadingState from "../../TrackUploadingState";
+import ManageTrackLicense from "../ManageTrackLicense";
+import TrackArtistFormFields from "../TrackArtistFormFields";
+
+import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
+import ShowRawID3Data from "./ShowRawID3Data";
 
 export interface FormData {
   title: string;
@@ -42,9 +44,9 @@ export interface FormData {
   trackArtists: TrackData["trackArtists"];
 }
 
-const IndentedTR = styled("tr")<{ colors?: { foreground: string } }>`
-  border-left: 1rem solid ${(props) => props.colors?.foreground ?? "white"};
-  border-bottom: 1px solid ${(props) => props.colors?.foreground ?? "white"};
+const IndentedTR = styled("tr")<{ colors?: { text: string } }>`
+  border-left: 1rem solid ${(props) => props.colors?.text ?? "white"};
+  border-bottom: 1px solid ${(props) => props.colors?.text ?? "white"};
   td {
     padding: 1rem 0;
   }
@@ -233,9 +235,9 @@ const EditTrackRow: React.FC<{
             type="button"
             className={css`
               ${methods.formState.isDirty
-                ? `background-color: ${colors?.primary} !important; 
+                ? `background-color: ${colors?.button} !important; 
                    color: ${colors?.background} !important;
-                   border-color: ${colors?.primary} !important;
+                   border-color: ${colors?.button} !important;
 
                    animation: shake 0.5s;
                    
@@ -443,9 +445,9 @@ const EditTrackRow: React.FC<{
             type="button"
             className={css`
               ${methods.formState.isDirty
-                ? `background-color: ${colors?.primary} !important; 
+                ? `background-color: ${colors?.button} !important; 
                    color: ${colors?.background} !important;
-                   border-color: ${colors?.primary} !important;`
+                   border-color: ${colors?.button} !important;`
                 : ""}
             `}
           >

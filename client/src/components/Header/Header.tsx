@@ -7,19 +7,19 @@ import UserBanner from "components/common/UserBanner";
 import Menu from "components/Header/Menu";
 import { queryInstanceArtist } from "queries/settings";
 import { useRef } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
 import { Link, useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
+import { getArtistUrl } from "utils/artist";
 import usePublicArtist from "utils/usePublicObjectById";
+import useShow from "utils/useShow";
+
 import { bp } from "../../constants";
 
 import HeaderSearch from "./HeaderSearch";
-
-import useShow from "utils/useShow";
-import { useAuthContext } from "state/AuthContext";
-import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
-import { createPortal } from "react-dom";
-import { getArtistUrl } from "utils/artist";
 
 const HeaderWrapper = styled.div<{
   hasBackground?: boolean;
@@ -28,9 +28,9 @@ const HeaderWrapper = styled.div<{
   show?: string;
   trackGroupId?: boolean;
   colors?: {
-    primary?: string;
-    secondary?: string;
-    foreground?: string;
+    button?: string;
+    buttonText?: string;
+    text?: string;
     background?: string;
   };
 }>`

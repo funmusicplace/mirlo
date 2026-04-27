@@ -1,10 +1,11 @@
-import styled from "@emotion/styled";
-import { bp } from "../../constants";
-import React from "react";
 import { css } from "@emotion/css";
-import { useParams } from "react-router-dom";
-import { queryArtist } from "queries";
+import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
+import React from "react";
+import { useParams } from "react-router-dom";
+
+import { bp } from "../../constants";
 
 export const ArtistBox: React.FC<{
   variant?: "success" | "info" | "warning";
@@ -23,17 +24,17 @@ export const ArtistBox: React.FC<{
     switch (props.variant) {
       case "success":
         return `
-        background: ${colors?.foreground} !important;
+        background: ${colors?.text} !important;
         color: ${colors?.background} !important;
         `;
       case "info":
         return `
-        background: ${colors?.secondary} !important;
+        background: ${colors?.buttonText} !important;
         color: ${colors?.background} !important;
         `;
       case "warning":
         return `
-        background: ${colors?.primary} !important;
+        background: ${colors?.button} !important;
         color: ${colors?.background} !important;
 
         a {

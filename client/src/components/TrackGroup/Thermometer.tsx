@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { queryTrackGroupSupporters } from "queries";
-
 import { useTranslation } from "react-i18next";
 
 function Thermometer({
@@ -47,7 +46,7 @@ function Thermometer({
         className={
           "h-full relative inline-flex pr-2 items-center justify-end " +
           css`
-            background-color: ${artist?.properties?.colors?.primary ??
+            background-color: ${artist?.properties?.colors?.button ??
             "var(--mi-primary-color)"};
             transition: all 0.5s;
             width: ${displayPercent}%;

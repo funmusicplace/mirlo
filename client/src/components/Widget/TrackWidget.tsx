@@ -1,24 +1,25 @@
 import { css } from "@emotion/css";
-import { AudioWrapper } from "components/Player/AudioWrapper";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 // import { AudioWrapper } from "components/AudioWrapper";
 // import ClickToPlay from "components/common/ClickToPlay";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
 import SmallTileDetails from "components/common/SmallTileDetails";
+import { AudioWrapper } from "components/Player/AudioWrapper";
+import { TrackArtistLinks } from "components/Player/PlayingTrackDetails";
 import React from "react";
 import { useTranslation } from "react-i18next";
-
 import { Link, useParams } from "react-router-dom";
 import api from "services/api";
-import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
-import { FlexWrapper, WidgetWrapper, inIframe, inMirlo } from "./utils";
-import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
-import DisplayAudioWrapper from "./DisplayAudio";
-import { bp } from "../../constants";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
 import { getReleaseUrl } from "utils/artist";
-import { TrackArtistLinks } from "components/Player/PlayingTrackDetails";
+import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
+
+import { bp } from "../../constants";
+
+import DisplayAudioWrapper from "./DisplayAudio";
+import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
+import { FlexWrapper, WidgetWrapper, inIframe, inMirlo } from "./utils";
 
 const TrackWidget = () => {
   const params = useParams();
@@ -178,7 +179,7 @@ const TrackWidget = () => {
                     </>
                   }
                   textColor={
-                    track.trackGroup.artist?.properties?.colors?.primary
+                    track.trackGroup.artist?.properties?.colors?.button
                   }
                 />
               </FlexWrapper>

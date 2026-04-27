@@ -1,14 +1,15 @@
-import React from "react";
-import styled from "@emotion/styled";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { sample } from "lodash";
+import React from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
 import { useLinkContainer } from "utils/useLinkContainer";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { Trans, useTranslation } from "react-i18next";
-import { sample } from "lodash";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+
 import { bp } from "../../constants";
 
 const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
@@ -178,8 +179,8 @@ const PostCard: React.FC<{
             />
           ) : (
             <HalfTone
-              color1={post.artist?.properties?.colors?.primary}
-              color2={post.artist?.properties?.colors?.secondary}
+              color1={post.artist?.properties?.colors?.button}
+              color2={post.artist?.properties?.colors?.buttonText}
             />
           )}
         </div>

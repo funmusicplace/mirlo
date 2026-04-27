@@ -10,26 +10,22 @@ import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { bp } from "../../../constants";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-
-import ArtistSlugInput from "../../common/SlugInput";
-import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
-import UploadArtistImage from "../UploadArtistImage";
 import { useTranslation } from "react-i18next";
-import ArtistFormColors from "./ArtistFormColors";
+import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-
-import DeleteArtist from "../DeleteArtist";
-
-import CustomNamesForTabs from "./CustomNamesForTabs";
-import LabelConfirmation from "./LabelConfirmation";
-
+import { useSnackbar } from "state/SnackbarContext";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
+import { bp } from "../../../constants";
+import ArtistSlugInput from "../../common/SlugInput";
+import DeleteArtist from "../DeleteArtist";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
+import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
+import UploadArtistImage from "../UploadArtistImage";
 
+import ArtistFormColors from "./ArtistFormColors";
+import CustomNamesForTabs from "./CustomNamesForTabs";
+import LabelConfirmation from "./LabelConfirmation";
 import ThankYouMessageEditors from "./ThankYouMessageEditors";
 
 export interface ShareableTrackgroup {
@@ -65,10 +61,10 @@ export type ArtistFormData = {
   defaultPlatformFee: number;
   properties: {
     colors: {
-      primary: string;
-      secondary: string;
+      button: string;
+      buttonText: string;
       background: string;
-      foreground: string;
+      text: string;
     };
     tileBackgroundImage?: boolean;
     titles?: {
@@ -95,10 +91,10 @@ const generateDefaults = (existing?: Artist) => {
     properties: merge(
       {
         colors: {
-          primary: "",
-          secondary: "",
+          button: "",
+          buttonText: "",
           background: "",
-          foreground: "",
+          text: "",
         },
         titles: {
           releases: "Releases",

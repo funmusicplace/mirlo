@@ -30,7 +30,7 @@ const ArtistRouterLink: React.FC<LinkProps> = (props) => {
           ${props.className} ${
             colors &&
             css`
-              color: ${colors?.primary} !important;
+              color: ${colors?.button} !important;
             `
           }`}
     />
@@ -43,11 +43,11 @@ export const ArtistButton: React.FC<
   const { colors } = useGetArtistColors();
 
   let variantStyles = () => {
-    let primaryColor = colors?.primary ?? `var(--mi-primary-color)`;
-    let secondaryColor = colors?.secondary ?? `var(--mi-secondary-color)`;
+    let primaryColor = colors?.button ?? `var(--mi-primary-color)`;
+    let secondaryColor = colors?.buttonText ?? `var(--mi-secondary-color)`;
 
     if (props.color === "foreground") {
-      primaryColor = colors?.foreground ?? `var(--mi-foreground-color)`;
+      primaryColor = colors?.text ?? `var(--mi-foreground-color)`;
     }
     switch (props.variant) {
       case "link":
