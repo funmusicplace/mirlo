@@ -1,13 +1,14 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+import Stripe from "stripe";
 
+import { handleSubscription } from "../../src/utils/handleFinishedTransactions";
 import { clearTables, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
+
 import assert from "assert";
-import { handleSubscription } from "../../src/utils/handleFinishedTransactions";
-import Stripe from "stripe";
 
 describe("handleSubscription", () => {
   beforeEach(async () => {
@@ -46,7 +47,7 @@ describe("handleSubscription", () => {
 
     const mockSession = {
       amount_total: 1000,
-      currency: "USD",
+      currency: "usd",
       subscription: "sub_test123",
     } as Stripe.Checkout.Session;
 
@@ -64,7 +65,7 @@ describe("handleSubscription", () => {
     assert.equal(subscription.userId, purchaser.id);
     assert.equal(subscription.artistSubscriptionTierId, tier.id);
     assert.equal(subscription.amount, 1000);
-    assert.equal(subscription.currency, "USD");
+    assert.equal(subscription.currency, "usd");
     assert.equal(subscription.stripeSubscriptionKey, "sub_test123");
   });
 
@@ -96,7 +97,7 @@ describe("handleSubscription", () => {
 
     const mockSession = {
       amount_total: 1000,
-      currency: "USD",
+      currency: "usd",
       subscription: "sub_test123",
     } as Stripe.Checkout.Session;
 
@@ -153,7 +154,7 @@ describe("handleSubscription", () => {
         userId: purchaser.id,
         artistSubscriptionTierId: tier.id,
         amount: 500,
-        currency: "USD",
+        currency: "usd",
         stripeSubscriptionKey: "sub_old",
         deletedAt: new Date(),
       },
@@ -161,7 +162,7 @@ describe("handleSubscription", () => {
 
     const mockSession = {
       amount_total: 1000,
-      currency: "USD",
+      currency: "usd",
       subscription: "sub_new",
     } as Stripe.Checkout.Session;
 

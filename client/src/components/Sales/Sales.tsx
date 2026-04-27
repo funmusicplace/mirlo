@@ -1,20 +1,21 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Button, { ButtonLink } from "components/common/Button";
+import DropdownMenu from "components/common/DropdownMenu";
+import { moneyDisplay } from "components/common/Money";
+import { SelectEl } from "components/common/Select";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
+import WidthContainer from "components/common/WidthContainer";
+import { queryManagedArtists, queryUserSales } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import SalesRow from "./SalesRow";
-import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtists, queryUserSales } from "queries";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import WidthContainer from "components/common/WidthContainer";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { SelectEl } from "components/common/Select";
-import Button, { ButtonLink } from "components/common/Button";
+
 import usePagination from "utils/usePagination";
-import { moneyDisplay } from "components/common/Money";
 import { FaDownload } from "react-icons/fa";
 import api from "services/api";
-import DropdownMenu from "components/common/DropdownMenu";
+import SalesRow from "./SalesRow";
 
 const pageSize = 50;
 
@@ -148,9 +149,9 @@ export const Sales: React.FC = () => {
             <strong>{t("totalSalesIncome")}: </strong>
             {moneyDisplay({
               amount: (totalAmount ?? 0) / 100,
-              currency: "USD",
+              currency: results[0]?.currency ?? "usd",
             })}
-          </p>{" "}
+          </p>
           <p>
             <strong>{t("totalSales")}: </strong>
             {total}

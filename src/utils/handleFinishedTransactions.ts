@@ -1,4 +1,3 @@
-import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 import {
   Artist,
@@ -8,19 +7,21 @@ import {
   FundraiserPledge,
   Fundraiser,
 } from "@mirlo/prisma/client";
-
-import { logger } from "../logger";
-import sendMail from "../jobs/send-mail";
-import { getClient } from "../activityPub/utils";
-import { registerPurchase, registerTrackPurchase } from "./trackGroup";
-import { registerSubscription } from "./subscriptionTier";
-import { Job } from "bullmq";
-import stripe, { OPTION_JOINER } from "./stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Job } from "bullmq";
+import Stripe from "stripe";
+
+import { getClient } from "../activityPub/utils";
+import sendMail from "../jobs/send-mail";
+import { logger } from "../logger";
+import { sendMailQueue } from "../queues/send-mail-queue";
+
+import { subscribeUserToArtist } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { calculateAppFee } from "./processingPayments";
-import { sendMailQueue } from "../queues/send-mail-queue";
-import { subscribeUserToArtist } from "./artist";
+import stripe, { OPTION_JOINER } from "./stripe";
+import { registerSubscription } from "./subscriptionTier";
+import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 
 const getPaymentIntent = async (
   paymentIntentId: string,
@@ -182,7 +183,7 @@ export const handleTrackGroupPurchase = async (
       await getApplicationFee(session);
     const amount = session?.amount_total ?? 0;
     const pricePaid = amount;
-    const currencyPaid = session?.currency ?? "USD";
+    const currencyPaid = session?.currency ?? "usd";
     const paymentProcessorKey = session?.id ?? null;
 
     const transaction = await prisma.userTransaction.create({
@@ -205,7 +206,7 @@ export const handleTrackGroupPurchase = async (
       trackGroupId: Number(trackGroupId),
       pricePaid: session?.amount_total ?? 0,
       message: session?.metadata?.message ?? null,
-      currencyPaid: session?.currency ?? "USD",
+      currencyPaid: session?.currency ?? "usd",
       paymentProcessorKey: session?.id ?? null,
       platformCut: applicationFee ?? null,
       transactionId: transaction.id,
@@ -301,7 +302,7 @@ export const handleTrackGroupPurchase = async (
                 acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
               0
             ),
-            currency: transactions[0]?.currency ?? "USD",
+            currency: transactions[0]?.currency ?? "usd",
             message: session?.metadata?.message,
             email: user.email,
             client: applicationUrl,
@@ -361,7 +362,7 @@ export const handleCataloguePurchase = async (
       (applicationFee ?? 0) / artistTrackGroups.length;
 
     const pricePaid = session?.amount_total ?? 0;
-    const currencyPaid = session?.currency ?? "USD";
+    const currencyPaid = session?.currency ?? "usd";
     const paymentProcessorKey = session?.id ?? null;
 
     // We only create one transaction for the whole purchase
@@ -451,7 +452,7 @@ export const handleTrackPurchase = async (
       trackId: Number(trackId),
       pricePaid: session?.amount_total ?? 0,
       message: session?.metadata?.message ?? null,
-      currencyPaid: session?.currency ?? "USD",
+      currencyPaid: session?.currency ?? "usd",
       paymentProcessorKey: session?.id ?? null,
       platformCut: applicationFee ?? null,
       discountPercent: session?.metadata?.discountPercent
@@ -684,7 +685,7 @@ const sendSaleEmails = async (
               acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
             0
           ),
-          currency: transactions[0]?.currency ?? "USD",
+          currency: transactions[0]?.currency ?? "usd",
           message: message ?? null,
           email: purchaser.email,
           client: applicationUrl,
@@ -1039,7 +1040,7 @@ export const handleSubscription = async (
       userId: Number(userId),
       tierId: Number(tierId),
       amount: session.amount_total ?? 0,
-      currency: session.currency ?? "USD",
+      currency: session.currency ?? "usd",
       paymentProcessorKey: session.subscription as string,
       platformCut: applicationFee ?? null,
       shippingAddress: session.shipping_details ?? null,

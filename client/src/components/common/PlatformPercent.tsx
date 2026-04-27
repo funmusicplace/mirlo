@@ -13,7 +13,7 @@ const PlatformPercent: React.FC<{
 }> = ({
   percent,
   chosenPrice,
-  currency = "USD",
+  currency = "usd",
   artistName,
   alignRight = false,
 }) => {

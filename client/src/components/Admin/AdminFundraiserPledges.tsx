@@ -1,15 +1,17 @@
-import React from "react";
 import { css } from "@emotion/css";
-import Table from "components/common/Table";
 import Money from "components/common/Money";
+import Pill from "components/common/Pill";
+import Table from "components/common/Table";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+import usePagination from "utils/usePagination";
+
 import {
   useFundraiserPledgesQuery,
   type FundraiserPledgesFilters,
 } from "../../queries/admin";
-import { useSearchParams } from "react-router-dom";
-import usePagination from "utils/usePagination";
+
 import useAdminFilters from "./useAdminFilters";
-import Pill from "components/common/Pill";
 
 const pageSize = 50;
 
@@ -77,7 +79,10 @@ export default function AdminFundraiserPledges() {
                 </td>
                 <td>{pledge.fundraiser?.name || "—"}</td>
                 <td>
-                  <Money amount={pledge.amount / 100} currency="USD" />
+                  <Money
+                    amount={pledge.amount / 100}
+                    currency={pledge.currency ?? "usd"}
+                  />
                 </td>
                 <td>
                   {pledge.paidAt ? (

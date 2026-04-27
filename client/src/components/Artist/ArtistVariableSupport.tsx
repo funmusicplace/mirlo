@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
+import { getCurrencySymbol } from "components/common/Money";
 import { isEmpty } from "lodash";
 import { queryArtist } from "queries";
 import React from "react";
@@ -9,9 +10,9 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useAuthContext } from "state/AuthContext";
 import useErrorHandler from "services/useErrorHandler";
-import { getCurrencySymbol } from "components/common/Money";
+import { useAuthContext } from "state/AuthContext";
+
 import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
 import IncludedReleases from "./IncludedReleases";
 
@@ -31,8 +32,12 @@ const ArtistVariableSupport: React.FC<{
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
   const { artistId } = useParams();
-  const { refetch: refresh } = useQuery(queryArtist({ artistSlug: artistId }));
+  const { data: artist, refetch: refresh } = useQuery(
+    queryArtist({ artistSlug: artistId })
+  );
   const errorHandler = useErrorHandler();
+  const supportButtonText =
+    artist?.properties?.titles?.supportButton?.trim() || t("support");
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     try {
@@ -69,7 +74,7 @@ const ArtistVariableSupport: React.FC<{
           width: 100%;
         `}
       >
-        {t("support")}
+        {supportButtonText}
       </ArtistButton>
       <Modal
         size="small"

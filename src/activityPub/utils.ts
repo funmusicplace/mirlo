@@ -1,5 +1,7 @@
+import crypto from "crypto";
+import { IncomingHttpHeaders } from "http";
+
 import prisma from "@mirlo/prisma";
-import { Request } from "express";
 import {
   Artist,
   ArtistAvatar,
@@ -8,19 +10,22 @@ import {
   Post,
   TrackGroup,
 } from "@mirlo/prisma/client";
+import { Request } from "express";
+import httpSignature from "http-signature";
+
+import { logger } from "../logger";
 import { AppError } from "../utils/error";
-import crypto, { createVerify } from "crypto";
+import { generateFullStaticImageUrl } from "../utils/images";
 import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
 } from "../utils/minio";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
-import { IncomingHttpHeaders } from "http";
-import { logger } from "../logger";
+import { isTrackGroup } from "../utils/typeguards";
+
 import {
   fetchActivityPubDocument,
+  ACTIVITYPUB_ACCEPT_HEADER,
   sendSignedActivityPubMessage,
 } from "./httpClient";
 
@@ -189,6 +194,7 @@ export const createPostActivity = async (
     type: "Note",
     attributedTo: actorId,
     content: post.content,
+    mediaType: "text/html",
     name: post.title,
     url: noteUrl,
     to: ["https://www.w3.org/ns/activitystreams#Public"],
@@ -197,7 +203,10 @@ export const createPostActivity = async (
   };
 
   return {
-    "@context": "https://www.w3.org/ns/activitystreams",
+    "@context": [
+      "https://www.w3.org/ns/activitystreams",
+      "https://w3id.org/security/v1",
+    ],
     id: `${noteId}#activity${activityIdSuffix ? `-${activityIdSuffix}` : ""}`,
     type: "Create",
     actor: actorId,
@@ -354,7 +363,94 @@ const parsePublicKeyFromActorDoc = (
 const publicKeyCache = new Map<string, { key: string; timestamp: number }>();
 const CACHE_DURATION_MS = 1000 * 60 * 60; // 1 hour
 
-export async function fetchRemotePublicKey(keyId: string): Promise<string> {
+const getErrorStatusCode = (error: unknown): number | null => {
+  if (error && typeof error === "object" && "response" in error) {
+    return (error as any).response?.statusCode ?? null;
+  }
+  return null;
+};
+
+const buildHttpSignatureHeader = async (
+  method: "get" | "post",
+  path: string,
+  keyId: string,
+  privateKey: string,
+  headers: Array<[string, string]>
+) => {
+  const signer = httpSignature.createSigner({
+    keyId,
+    key: privateKey,
+  });
+
+  signer.writeTarget(method, path);
+  for (const [headerName, headerValue] of headers) {
+    signer.writeHeader(headerName, headerValue);
+  }
+
+  const authorization = await new Promise<string>((resolve, reject) => {
+    signer.sign((error, value) => {
+      if (error || !value) {
+        reject(error ?? new Error("Failed to sign ActivityPub request"));
+        return;
+      }
+      resolve(value);
+    });
+  });
+
+  return authorization.replace(/^Signature\s+/i, "");
+};
+
+const fetchActivityPubDocumentWithSignedRetry = async (
+  url: string,
+  localActorUrlSlug?: string
+) => {
+  try {
+    return await fetchActivityPubDocument(url);
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error);
+    if (statusCode !== 401 || !localActorUrlSlug) {
+      throw error;
+    }
+
+    logger.info(
+      `Got 401 fetching ${url}, retrying with signed GET using local actor ${localActorUrlSlug}`
+    );
+
+    const { privateKey } = await generateKeysForSiteIfNeeded();
+    if (!privateKey) {
+      throw new Error("No private key available for signed ActivityPub fetch");
+    }
+
+    const targetUrl = new URL(url);
+    const targetHost = targetUrl.hostname;
+    const targetPath = `${targetUrl.pathname}${targetUrl.search}`;
+    const date = new Date().toUTCString();
+
+    const signatureHeader = await buildHttpSignatureHeader(
+      "get",
+      targetPath,
+      `${rootArtist}${localActorUrlSlug}#main-key`,
+      privateKey,
+      [
+        ["host", targetHost],
+        ["date", date],
+        ["accept", ACTIVITYPUB_ACCEPT_HEADER],
+      ]
+    );
+
+    return await fetchActivityPubDocument(url, {
+      Host: targetHost,
+      Date: date,
+      Accept: ACTIVITYPUB_ACCEPT_HEADER,
+      Signature: signatureHeader,
+    });
+  }
+};
+
+export async function fetchRemotePublicKey(
+  keyId: string,
+  localActorUrlSlug?: string
+): Promise<string> {
   try {
     // Check cache first
     const cached = publicKeyCache.get(keyId);
@@ -367,7 +463,10 @@ export async function fetchRemotePublicKey(keyId: string): Promise<string> {
 
     try {
       // Try the keyId first (might have a fragment like #main-key)
-      data = await fetchActivityPubDocument(keyId);
+      data = await fetchActivityPubDocumentWithSignedRetry(
+        keyId,
+        localActorUrlSlug
+      );
     } catch (error) {
       // Some servers return 404 for keyId URLs with fragments (e.g. actor#main-key).
       // Fallback to the actor document and extract the key from there.
@@ -376,7 +475,10 @@ export async function fetchRemotePublicKey(keyId: string): Promise<string> {
         logger.info(
           `Got error for ${keyId}, trying without fragment: ${actorUrl}`
         );
-        data = await fetchActivityPubDocument(actorUrl);
+        data = await fetchActivityPubDocumentWithSignedRetry(
+          actorUrl,
+          localActorUrlSlug
+        );
       } else {
         throw error;
       }
@@ -408,62 +510,47 @@ export async function fetchRemotePublicKey(keyId: string): Promise<string> {
 
 export const verifySignature = async (
   req: Request,
-  signatureHeader: string
+  signatureHeader: string,
+  localActorUrlSlug?: string
 ): Promise<boolean> => {
-  // Parse signature header: keyId="...",headers="...",signature="..."
-  const keyIdMatch = signatureHeader.match(/keyId="([^"]+)"/);
-  const headersMatch = signatureHeader.match(/headers="([^"]+)"/);
-  const signatureMatch = signatureHeader.match(/signature="([^"]+)"/);
-
-  if (!keyIdMatch || !headersMatch || !signatureMatch) {
+  if (!signatureHeader) {
     throw new AppError({
       httpCode: 401,
       description: "Invalid signature header format",
     });
   }
 
-  const keyId = keyIdMatch[1];
-  const signedHeaders = headersMatch[1].split(" ");
-  const signatureB64 = signatureMatch[1];
+  let parsedSignature;
+  try {
+    const requestForParsing = {
+      ...req,
+      headers: {
+        ...req.headers,
+        authorization: `Signature ${signatureHeader}`,
+      },
+    };
+
+    parsedSignature = httpSignature.parseRequest(requestForParsing as any);
+  } catch (e) {
+    throw new AppError({
+      httpCode: 401,
+      description: "Invalid signature header format",
+    });
+  }
+
+  const keyId = parsedSignature?.params?.keyId;
+  if (!keyId) {
+    throw new AppError({
+      httpCode: 401,
+      description: "Invalid signature header format",
+    });
+  }
 
   // Get the public key from the remote actor
   // Don't catch here; let errors bubble up to inboxPOST for handling
-  const publicKey = await fetchRemotePublicKey(keyId);
+  const publicKey = await fetchRemotePublicKey(keyId, localActorUrlSlug);
 
-  // Reconstruct the signed string
-  let signedString = "";
-  const signedParts = [];
-
-  for (let i = 0; i < signedHeaders.length; i++) {
-    const headerName = signedHeaders[i];
-    let headerLine = "";
-
-    if (headerName === "(request-target)") {
-      // Use originalUrl to get the full path including any base URL (e.g., /v1)
-      const path = req.originalUrl || req.url || req.path;
-      const method = req.method.toLowerCase();
-      headerLine = `(request-target): ${method} ${path}`;
-    } else {
-      const headerValue = req.headers[headerName.toLowerCase()];
-      if (!headerValue) {
-        throw new AppError({
-          httpCode: 401,
-          description: `Missing required header for signature: ${headerName}`,
-        });
-      }
-      headerLine = `${headerName}: ${headerValue}`;
-    }
-
-    signedParts.push(headerLine);
-  }
-
-  signedString = signedParts.join("\n");
-
-  // Verify the signature
-  const verifier = createVerify("sha256");
-  verifier.update(signedString);
-  const signatureBuffer = Buffer.from(signatureB64, "base64");
-  const isValid = verifier.verify(publicKey, signatureBuffer);
+  const isValid = httpSignature.verifySignature(parsedSignature, publicKey);
 
   if (!isValid) {
     throw new AppError({
@@ -498,17 +585,18 @@ export const signAndSendActivityPubMessage = async (
     .update(JSON.stringify(message))
     .digest("base64");
 
-  const signer = crypto.createSign("sha256");
   const date = new Date();
-  const stringToSign = `(request-target): post ${inboxPath}\nhost: ${destinationDomain}\ndate: ${date.toUTCString()}\ndigest: SHA-256=${digestHash}`;
-
-  signer.update(stringToSign);
-  signer.end();
-
-  const signature = signer.sign(privateKey);
-  const signature_b64 = signature.toString("base64");
-
-  const header = `keyId="${rootArtist}${artistUrlSlug}#main-key",headers="(request-target) host date digest",signature="${signature_b64}"`;
+  const header = await buildHttpSignatureHeader(
+    "post",
+    inboxPath,
+    `${rootArtist}${artistUrlSlug}#main-key`,
+    privateKey,
+    [
+      ["host", destinationDomain],
+      ["date", date.toUTCString()],
+      ["digest", `SHA-256=${digestHash}`],
+    ]
+  );
 
   await sendSignedActivityPubMessage(inboxUrl, message, {
     Date: date.toUTCString(),

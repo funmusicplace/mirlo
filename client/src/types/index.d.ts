@@ -287,6 +287,7 @@ interface Artist {
       merch?: string;
       posts?: string;
       support?: string;
+      supportButton?: string;
       roster?: string;
       groupName?: string;
     };

@@ -1,13 +1,11 @@
+import { css } from "@emotion/css";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-
-import FormComponent from "components/common/FormComponent";
-import { css } from "@emotion/css";
-
 import { useTranslation } from "react-i18next";
-
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
-import { InputEl } from "components/common/Input";
+
 import { ArtistFormData, ArtistFormSection } from "./CustomizeLook";
 
 export interface ShareableTrackgroup {
@@ -79,6 +77,18 @@ export const CustomNamesForTabs: React.FC = () => {
               colors={artist.properties?.colors}
               placeholder={t("support") ?? ""}
               {...methods.register("properties.titles.support")}
+            />
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="input-support-button-text">
+              {t("supportButtonText")}
+            </label>
+            <InputEl
+              id="input-support-button-text"
+              type="text"
+              colors={artist.properties?.colors}
+              placeholder={t("support") ?? ""}
+              {...methods.register("properties.titles.supportButton")}
             />
           </FormComponent>
           {artist.isLabelProfile && (

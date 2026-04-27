@@ -1,16 +1,18 @@
 import assert from "node:assert";
+
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it, beforeEach } from "mocha";
 import request from "supertest";
-import prisma from "@mirlo/prisma";
+
 import { clearTables, createUser } from "../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/`;
 const requestApp = request(baseURL);
 
 const webfingerDomain = new URL(
-  process.env.REACT_APP_CLIENT_DOMAIN || "http://localhost:3000"
+  process.env.API_DOMAIN || "http://localhost:3000"
 ).hostname;
 
 describe(".well-known/webfinger", () => {
@@ -79,6 +81,42 @@ describe(".well-known/webfinger", () => {
       .get(".well-known/webfinger")
       .query({
         resource: `acct:${artist.urlSlug}@${webfingerDomain}`,
+      })
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 404);
+  });
+
+  it("should return 400 for malformed acct resources", async () => {
+    const response = await requestApp
+      .get(".well-known/webfinger")
+      .query({
+        resource: "team@test.com",
+      })
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 400);
+  });
+
+  it("should return 404 for acct resources targeting another domain", async () => {
+    const { user } = await createUser({
+      email: "test@test.com",
+    });
+
+    await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: user.id,
+        enabled: true,
+        activityPub: true,
+      },
+    });
+
+    const response = await requestApp
+      .get(".well-known/webfinger")
+      .query({
+        resource: "acct:test-artist@example.com",
       })
       .set("Accept", "application/json");
 

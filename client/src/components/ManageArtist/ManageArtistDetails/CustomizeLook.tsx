@@ -72,6 +72,7 @@ export type ArtistFormData = {
       merch: string;
       posts: string;
       support: string;
+      supportButton: string;
       roster: string;
       groupName: string;
     };
@@ -101,6 +102,7 @@ const generateDefaults = (existing?: Artist) => {
           merch: "Merch",
           posts: "Posts",
           support: "Support",
+          supportButton: "Support",
           roster: "Roster",
         },
       },
