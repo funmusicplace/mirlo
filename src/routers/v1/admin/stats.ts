@@ -1,5 +1,6 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 
 export default function () {
@@ -101,12 +102,54 @@ export default function () {
         ORDER BY currencies.currency ASC, weeks.week_start ASC
       `;
 
+      const avgMonthlyPlays = await prisma.$queryRaw<
+        Array<{ avgMonthlyPlays: number }>
+      >`
+        SELECT ROUND(AVG(monthly_count))::int AS "avgMonthlyPlays"
+        FROM (
+          SELECT DATE_TRUNC('month', "createdAt") AS month, COUNT(*)::int AS monthly_count
+          FROM "TrackPlay"
+          WHERE "createdAt" >= NOW() - INTERVAL '12 months'
+          GROUP BY month
+        ) t
+      `;
+
+      const avgMonthlyActiveUsers = await prisma.$queryRaw<
+        Array<{ avgMonthlyActiveUsers: number }>
+      >`
+        SELECT ROUND(AVG(monthly_active))::int AS "avgMonthlyActiveUsers"
+        FROM (
+          SELECT DATE_TRUNC('month', "createdAt") AS month, COUNT(DISTINCT "userId")::int AS monthly_active
+          FROM "TrackPlay"
+          WHERE "createdAt" >= NOW() - INTERVAL '12 months'
+            AND "userId" IS NOT NULL
+          GROUP BY month
+        ) t
+      `;
+
+      const avgMonthlyAlbumDownloads = await prisma.$queryRaw<
+        Array<{ avgMonthlyAlbumDownloads: number }>
+      >`
+        SELECT ROUND(AVG(monthly_count))::int AS "avgMonthlyAlbumDownloads"
+        FROM (
+          SELECT DATE_TRUNC('month', "createdAt") AS month, COUNT(*)::int AS monthly_count
+          FROM "TrackGroupDownload"
+          WHERE "createdAt" >= NOW() - INTERVAL '12 months'
+          GROUP BY month
+        ) t
+      `;
+
       res.json({
         result: {
           userSignupsByWeek,
           artistSignupsByWeek,
           transactionsByWeek,
           transactionAmountByWeek,
+          avgMonthlyPlays: avgMonthlyPlays[0]?.avgMonthlyPlays ?? 0,
+          avgMonthlyActiveUsers:
+            avgMonthlyActiveUsers[0]?.avgMonthlyActiveUsers ?? 0,
+          avgMonthlyAlbumDownloads:
+            avgMonthlyAlbumDownloads[0]?.avgMonthlyAlbumDownloads ?? 0,
         },
       });
     } catch (e) {
