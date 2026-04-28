@@ -22,6 +22,8 @@ html {
   --mi-tint-color: var(--mi-darken-background-color);
   --mi-tint-x-color: var(--mi-darken-x-background-color);
   --mi-tint-xx-color: var(--mi-darken-xx-background-color);
+  --mi-button-tint-color: var(--mi-tint-color);
+  --mi-button-tint-x-color: var(--mi-tint-x-color);
   --mi-contrast-color: var(--mi-button-color);
 
   --mi-text-color: var(--mi-instance-text-color, var(--mi-black));

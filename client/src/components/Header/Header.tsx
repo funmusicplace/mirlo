@@ -15,7 +15,6 @@ import { ImMenu } from "react-icons/im";
 import { Link, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
-import { isLight } from "utils/colors";
 import usePublicArtist from "utils/usePublicObjectById";
 import useShow from "utils/useShow";
 
@@ -159,11 +158,8 @@ const Header = () => {
   const show = useShow();
   const transparent = !!artistBackground && !!artistId;
 
-  const button = artist?.properties?.colors?.button;
-  const stripTint = button
-    ? isLight(button)
-      ? "rgba(0, 0, 0, 0.1)"
-      : "rgba(255, 255, 255, 0.12)"
+  const stripTint = artistId
+    ? "var(--mi-button-tint-color)"
     : "transparent";
 
   const { data: instanceArtist } = useQuery(queryInstanceArtist());

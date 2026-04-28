@@ -96,13 +96,13 @@ const PostContainer = styled.li<{
     inset: 0;
     border-radius: 5px;
     z-index: 1;
-    background: rgba(0, 0, 0, 0);
+    background: var(--mi-button-tint-color);
     transition: 0.2s background;
     pointer-events: none;
   }
 
   &:hover::after {
-    background: var(--mi-tint-color);
+    background: var(--mi-button-tint-x-color);
   }
 
   &:hover {

@@ -83,6 +83,21 @@ const tintStyleFor = (
   } as React.CSSProperties;
 };
 
+const buttonTintStyleFor = (
+  button: string | undefined
+): React.CSSProperties => {
+  if (!button) return {};
+  const light = isLight(button);
+  return {
+    "--mi-button-tint-color": light
+      ? "rgba(0, 0, 0, 0.1)"
+      : "rgba(255, 255, 255, 0.12)",
+    "--mi-button-tint-x-color": light
+      ? "rgba(0, 0, 0, 0.2)"
+      : "rgba(255, 255, 255, 0.24)",
+  } as React.CSSProperties;
+};
+
 const ArtistColorsInner: React.FC<{
   artistId: string;
   children: React.ReactElement;
@@ -126,6 +141,7 @@ const ArtistColorsInner: React.FC<{
   const varStyle: React.CSSProperties = {
     ...(buildVarMap(colors) as React.CSSProperties),
     ...tintStyleFor(colors.background),
+    ...buttonTintStyleFor(colors.button),
   };
   const rootBg = isDefined(colors.background)
     ? colors.background

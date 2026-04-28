@@ -108,7 +108,7 @@ const ArtistSupportBox: React.FC<{
     <div
       className={
         (isSubscribedToTier ? " border-4" : " border-1") +
-        " relative border-inset pb-5 mb-1 gap-5 bg-(--mi-tint-color) flex flex-col text-sm border-(--tier-border-color)"
+        " relative border-inset pb-5 mb-1 gap-5 bg-(--mi-button-tint-color) flex flex-col text-sm border-(--tier-border-color)"
       }
       style={
         {
