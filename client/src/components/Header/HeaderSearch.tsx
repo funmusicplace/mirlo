@@ -137,12 +137,12 @@ const HeaderSearch: React.FC = () => {
         margin-left: 0.5rem;
 
         input[type="search"] {
-          background: var(--mi-tint-xx-color) !important;
-          color: var(--mi-contrast-color) !important;
-          border-color: var(--mi-contrast-color) !important;
+          background: var(--mi-lighten-x-background-color) !important;
+          color: var(--mi-black) !important;
+          border-color: var(--mi-black) !important;
         }
         input[type="search"]::placeholder {
-          color: var(--mi-contrast-color) !important;
+          color: var(--mi-black) !important;
           opacity: 0.6;
         }
       `}
