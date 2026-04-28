@@ -1,11 +1,12 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { Outlet, useParams } from "react-router-dom";
-import ArtistHeaderSection from "../common/ArtistHeaderSection";
-import { useTranslation } from "react-i18next";
-import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
 import { useQuery } from "@tanstack/react-query";
+import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
 import { queryArtist } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Outlet, useParams } from "react-router-dom";
+
+import ArtistHeaderSection from "../common/ArtistHeaderSection";
 
 const ArtistContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -24,10 +25,7 @@ const ArtistContainer: React.FC = () => {
     <>
       {!isPostOrRelease && (
         <>
-          <ArtistPageWrapper
-            hasBackground={!!artistBackground}
-            artistBackground={artist?.properties?.colors?.background}
-          >
+          <ArtistPageWrapper hasBackground={!!artistBackground}>
             <ArtistHeaderSection
               artist={artist}
               isLoading={isArtistLoading}

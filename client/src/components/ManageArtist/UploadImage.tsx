@@ -46,7 +46,7 @@ export const Spinner: React.FC<{ rounded?: boolean }> = ({ rounded }) => {
         position: absolute;
         width: 100%;
         height: 100%;
-        background-color: var(--mi-lighten-x-background-color);
+        background-color: var(--mi-tint-x-color);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -91,7 +91,7 @@ export const UploadPrompt: React.FC<{
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid var(--mi-darken-x-background-color);
+        border: 1px solid var(--mi-tint-x-color);
         ${rounded ? "border-radius: 100%;" : ""}
         transition: .25s background-color;
         cursor: pointer;
@@ -102,7 +102,7 @@ export const UploadPrompt: React.FC<{
         }
 
         &:hover {
-          background-color: var(--mi-darken-background-color);
+          background-color: var(--mi-tint-color);
         }
         @media (max-width: ${bp.medium}px) {
           padding: 0.2rem;

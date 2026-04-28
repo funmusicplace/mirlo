@@ -111,7 +111,7 @@ const TrackGroupCard: React.FC<{
           margin-left: 0.5rem;
           padding: 1rem;
           flex-grow: 1;
-          background-color: var(--mi-darken-background-color);
+          background-color: var(--mi-tint-color);
           font-size: var(--mi-font-size-xsmall);
 
           @media screen and (max-width: ${bp.medium}px) {

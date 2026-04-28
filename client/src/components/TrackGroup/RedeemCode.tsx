@@ -1,9 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArtistButton,
-  useGetArtistColors,
-} from "components/Artist/ArtistButtons";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
@@ -33,7 +30,6 @@ function RedeemCode() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
-  const { colors } = useGetArtistColors();
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const navigate = useNavigate();
@@ -139,7 +135,7 @@ function RedeemCode() {
                   {trackGroup.title}
                 </Link>
               }
-              textColor={colors?.text}
+              textColor="var(--mi-text-color)"
               subtitle={
                 <Link to={getArtistUrl(trackGroup.artist)}>
                   {trackGroup.artist?.name ?? ""}
@@ -161,7 +157,6 @@ function RedeemCode() {
             >
               <label>{t("enterDownloadCode")}</label>
               <InputEl
-                colors={colors}
                 className={css`
                   margin-bottom: 1rem;
                 `}
@@ -172,7 +167,6 @@ function RedeemCode() {
                 <FormComponent>
                   <label>{t("yourEmail")}</label>
                   <InputEl
-                    colors={colors}
                     className={css`
                       margin-bottom: 1rem;
                     `}

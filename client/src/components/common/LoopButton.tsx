@@ -1,9 +1,9 @@
-import React from "react";
 import { css } from "@emotion/css";
-
+import styled from "@emotion/styled";
+import React from "react";
 import { RxLoop } from "react-icons/rx";
 import { GlobalState, useGlobalStateContext } from "state/GlobalState";
-import styled from "@emotion/styled";
+
 import Button from "./Button";
 
 const LoopingIndicator = styled.span`
@@ -59,7 +59,7 @@ export const LoopButton: React.FC = () => {
           color: ${looping ? "white !important" : "inherit"};
         }
         ${looping
-          ? `color: var(--mi-button-color) !important; 
+          ? `color: var(--mi-button-color) !important;
              `
           : ""}
       `}

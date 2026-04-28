@@ -64,14 +64,11 @@ const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
 
 const PostContainer = styled.li<{
   isOnArtistPage?: boolean;
-  artistBackground?: string;
 }>`
   display: flex;
   border-radius: 5px;
   border: var(--mi-border);
-  background-color: ${(props) =>
-    (props.isOnArtistPage && props.artistBackground) ??
-    "var(--mi-background-color)"};
+  background-color: var(--mi-background-color);
   position: relative;
   width: 100%;
   cursor: pointer;
@@ -105,7 +102,7 @@ const PostContainer = styled.li<{
   }
 
   &:hover::after {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--mi-tint-color);
   }
 
   &:hover {
@@ -131,14 +128,9 @@ const PostCard: React.FC<{
   const isOnArtistPage = !!artistId;
 
   const LinkToUse = isOnArtistPage ? ArtistButtonLink : Link;
-  const artistBackground = post.artist?.properties?.colors?.background;
 
   return (
-    <PostContainer
-      isOnArtistPage={isOnArtistPage}
-      artistBackground={isOnArtistPage ? artistBackground : undefined}
-      {...postContainerProps}
-    >
+    <PostContainer isOnArtistPage={isOnArtistPage} {...postContainerProps}>
       <Box
         noPadding
         className={css`
@@ -151,8 +143,7 @@ const PostCard: React.FC<{
           position: relative;
 
           @media (prefers-color-scheme: dark) {
-            background-color: ${(isOnArtistPage && artistBackground) ??
-            "var(--mi-background-color)"};
+            background-color: var(--mi-background-color);
           }
 
           @media screen and (max-width: ${bp.medium}px) {
@@ -179,8 +170,8 @@ const PostCard: React.FC<{
             />
           ) : (
             <HalfTone
-              color1={post.artist?.properties?.colors?.button}
-              color2={post.artist?.properties?.colors?.buttonText}
+              color1="var(--mi-button-color)"
+              color2="var(--mi-background-color)"
             />
           )}
         </div>
@@ -194,8 +185,7 @@ const PostCard: React.FC<{
             overflow: hidden;
             transition: 0.2s ease-in-out;
             ${!post.featuredImage ? "height: 100%;" : ""}
-            background-color: ${(isOnArtistPage && artistBackground) ??
-            "var(--mi-background-color)"};
+            background-color: var(--mi-background-color);
           `}
         >
           {post.artist && (

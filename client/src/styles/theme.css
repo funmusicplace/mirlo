@@ -19,6 +19,11 @@ html {
   --mi-darken-x-background-color: rgba(50, 0, 0, 0.2);
   --mi-darken-xx-background-color: rgba(50, 0, 0, 0.2);
 
+  --mi-tint-color: var(--mi-darken-background-color);
+  --mi-tint-x-color: var(--mi-darken-x-background-color);
+  --mi-tint-xx-color: var(--mi-darken-xx-background-color);
+  --mi-contrast-color: var(--mi-button-color);
+
   --mi-text-color: var(--mi-instance-text-color, var(--mi-black));
   --mi-light-foreground-color: #454545; /* FIXME: remove */
   --mi-lighter-foreground-color: #515151; /* FIXME: remove */
@@ -66,4 +71,5 @@ html,
 [data-mi-theme="dark"],
 #artist-colors-root {
   --mi-secondary-text-color: var(--mi-text-color);
+  --mi-border: solid 1px var(--mi-tint-x-color);
 }

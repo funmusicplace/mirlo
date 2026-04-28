@@ -6,7 +6,7 @@ export const DisplayAudioWrapper: React.FC<{ children: React.ReactNode }> = ({
   return (
     <div
       className={css`
-        border-bottom: solid 0.25rem var(--mi-lighten-background-color);
+        border-bottom: solid 0.25rem var(--mi-tint-color);
       `}
     >
       <div

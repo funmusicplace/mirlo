@@ -1,6 +1,10 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistBox } from "components/common/Box";
+import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import React from "react";
-import { bp } from "../../constants";
+import { Trans, useTranslation } from "react-i18next";
 import {
   Link,
   Navigate,
@@ -8,15 +12,12 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
-import ArtistHeaderSection from "../common/ArtistHeaderSection";
-import { Trans, useTranslation } from "react-i18next";
-import styled from "@emotion/styled";
-import { ArtistBox } from "components/common/Box";
-import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtist, queryUserStripeStatus } from "queries";
-import { useAuthContext } from "state/AuthContext";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
+
+import { bp } from "../../constants";
+import ArtistHeaderSection from "../common/ArtistHeaderSection";
 
 const Container = styled.div<{ hasBackground: boolean }>`
   width: 100%;
@@ -42,8 +43,7 @@ const Container = styled.div<{ hasBackground: boolean }>`
 export const ArtistPageWrapper: React.FC<{
   children: React.ReactNode;
   hasBackground?: boolean;
-  artistBackground?: string;
-}> = ({ children, hasBackground, artistBackground }) => {
+}> = ({ children, hasBackground }) => {
   return (
     <Container hasBackground={!!hasBackground}>
       <div
@@ -51,7 +51,7 @@ export const ArtistPageWrapper: React.FC<{
           ${hasBackground
             ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));"
             : ""}
-          background-color: ${artistBackground ?? "transparent"};
+          background-color: var(--mi-background-color);
           padding: 0 2rem 2rem;
           height: 100%;
 
@@ -109,10 +109,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
   );
 
   return (
-    <ArtistPageWrapper
-      hasBackground={!!artistBackground}
-      artistBackground={artist?.properties?.colors?.background}
-    >
+    <ArtistPageWrapper hasBackground={!!artistBackground}>
       <div
         className={css`
           padding-top: 1rem;
@@ -138,7 +135,6 @@ const ManageArtistContainer: React.FC<{}> = () => {
                   t={t}
                   i18nKey={"paymentProcessorNotSetUp"}
                   components={{
-                    // eslint-disable-next-line jsx-a11y/anchor-has-content
                     manage: (
                       <a href={api.paymentProcessor.stripeConnect(user.id)}></a>
                     ),

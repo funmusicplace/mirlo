@@ -135,6 +135,16 @@ const HeaderSearch: React.FC = () => {
       role="search"
       className={css`
         margin-left: 0.5rem;
+
+        input[type="search"] {
+          background: var(--mi-tint-xx-color) !important;
+          color: var(--mi-contrast-color) !important;
+          border-color: var(--mi-contrast-color) !important;
+        }
+        input[type="search"]::placeholder {
+          color: var(--mi-contrast-color) !important;
+          opacity: 0.6;
+        }
       `}
     >
       <AutoComplete

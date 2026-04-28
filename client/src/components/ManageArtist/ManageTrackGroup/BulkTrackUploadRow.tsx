@@ -47,7 +47,7 @@ export const BulkTrackUploadRow: React.FC<{
       className={css`
         position: relative;
         margin-bottom: 0.2rem;
-        background: var(--mi-darken-background-color);
+        background: var(--mi-tint-color);
       `}
     >
       <PercentUpload percentUpload={track.status} />

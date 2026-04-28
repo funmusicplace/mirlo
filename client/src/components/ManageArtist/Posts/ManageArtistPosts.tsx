@@ -107,7 +107,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
               key={p.id}
               className={css`
                 margin-bottom: 1rem;
-                background-color: var(--mi-darken-background-color);
+                background-color: var(--mi-tint-color);
               `}
             >
               <SpaceBetweenDiv

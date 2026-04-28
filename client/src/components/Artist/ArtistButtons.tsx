@@ -22,17 +22,13 @@ export const useGetArtistColors = () => {
 };
 
 const ArtistRouterLink: React.FC<LinkProps> = (props) => {
-  const { colors } = useGetArtistColors();
   return (
     <Link
       {...props}
       className={`
-          ${props.className} ${
-            colors &&
-            css`
-              color: ${colors?.button} !important;
-            `
-          }`}
+          ${props.className} ${css`
+            color: var(--mi-button-color) !important;
+          `}`}
     />
   );
 };
@@ -40,71 +36,69 @@ const ArtistRouterLink: React.FC<LinkProps> = (props) => {
 export const ArtistButton: React.FC<
   ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
 > = ({ onClick, ...props }) => {
-  const { colors } = useGetArtistColors();
-
   let variantStyles = () => {
-    let primaryColor = colors?.button ?? `var(--mi-button-color)`;
-    let secondaryColor = colors?.buttonText ?? `var(--mi-button-text-color)`;
+    const accentColor =
+      props.color === "foreground"
+        ? "var(--mi-text-color)"
+        : "var(--mi-button-color)";
+    const contrastColor = "var(--mi-button-text-color)";
 
-    if (props.color === "foreground") {
-      primaryColor = colors?.text ?? `var(--mi-foreground-color)`;
-    }
     switch (props.variant) {
       case "link":
         return `
         display: inline-flex !important;
-        color: ${primaryColor} !important;
+        color: ${accentColor} !important;
 
         svg {
-          fill: ${primaryColor} !important;
+          fill: ${accentColor} !important;
         }
 
       `;
       case "outlined":
       case "dashed":
         return `
-        color: ${primaryColor} !important;
-        border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${primaryColor} !important;
+        color: ${accentColor} !important;
+        border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${accentColor} !important;
 
         svg {
-          fill: ${primaryColor} !important;
+          fill: ${accentColor} !important;
         }
 
         &:hover:not(:disabled) {
-          color: ${primaryColor} !important;
-          background-color: ${secondaryColor} !important;
+          color: ${accentColor} !important;
+          background-color: ${contrastColor} !important;
 
           svg {
-            fill: ${primaryColor} !important;
+            fill: ${accentColor} !important;
           }
         }
       `;
       case "transparent":
-        return `color: ${primaryColor} !important;
+        return `color: ${accentColor} !important;
 
         svg {
-          fill: ${primaryColor} !important;
+          fill: ${accentColor} !important;
         }
 
         &:hover:not(:disabled) {
-          color: ${secondaryColor} !important;
+          color: ${contrastColor} !important;
           background-color: transparent !important;
 
           svg {
-            fill: ${secondaryColor} !important;
+            fill: ${contrastColor} !important;
           }
         }`;
       default:
         return `
-        background-color: ${primaryColor} !important;
-        color: ${secondaryColor} !important;
-        border: 1px solid ${primaryColor} !important;
+        background-color: ${accentColor} !important;
+        color: ${contrastColor} !important;
+        border: 1px solid ${accentColor} !important;
 
         svg {
-          fill: ${secondaryColor} !important;
-           
+          fill: ${contrastColor} !important;
+
           @media (prefers-color-scheme: dark) {
-            fill: ${secondaryColor} !important;
+            fill: ${contrastColor} !important;
           }
         }
       `;

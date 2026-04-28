@@ -7,13 +7,12 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+
 import { hasId } from "../ManageTrackGroup/AlbumFormComponents/ManageTags";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 const ArtistLabels: React.FC<{ refetch: () => void }> = ({ refetch }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const { artistId } = useParams();
-  const { colors } = useGetArtistColors();
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
 
   const removeLabel = React.useCallback(
@@ -70,7 +69,6 @@ const ArtistLabels: React.FC<{ refetch: () => void }> = ({ refetch }) => {
           getOptions={searchLabels}
           id="input-label"
           onSelect={setLabel}
-          colors={colors}
         />
       </FormComponent>
     </form>

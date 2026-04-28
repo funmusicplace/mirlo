@@ -13,7 +13,7 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 
-import { ArtistButton, useGetArtistColors } from "./ArtistButtons";
+import { ArtistButton } from "./ArtistButtons";
 import IncludedReleases from "./IncludedReleases";
 
 const ArtistVariableSupport: React.FC<{
@@ -26,7 +26,6 @@ const ArtistVariableSupport: React.FC<{
       amount: tier.minAmount ? tier.minAmount / 100 : 0,
     },
   });
-  const { colors } = useGetArtistColors();
   const { refreshLoggedInUser } = useAuthContext();
   const [open, setOpen] = React.useState(false);
   const [isCheckingForSubscription, setIsCheckingForSubscription] =

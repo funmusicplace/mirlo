@@ -30,7 +30,7 @@ const getGridStyles = (coverCount: number) => {
 const CompositeContainer = styled.div<{ coverCount: number }>`
   display: grid;
   gap: 2px;
-  background-color: var(--mi-darken-background-color);
+  background-color: var(--mi-tint-color);
   aspect-ratio: 1 / 1;
   overflow: hidden;
   width: 100%;

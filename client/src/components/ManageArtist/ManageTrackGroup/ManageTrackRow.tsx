@@ -54,10 +54,10 @@ const TrackRow = styled("tr")`
   }
 
   &:hover {
-    background-color: var(--mi-darken-background-color);
+    background-color: var(--mi-tint-color);
 
     @media (prefers-color-scheme: dark) {
-      background-color: var(--mi-lighten-background-color);
+      background-color: var(--mi-tint-color);
     }
   }
 `;

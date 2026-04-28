@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import FavoriteTrack from "components/TrackGroup/Favorite";
 import React from "react";
@@ -31,62 +30,25 @@ const LicenseSpan = styled.a`
 
 const TR = styled.tr<{
   canPlayTrack: boolean;
-  colors?: ArtistColors;
 }>`
   ${(props) =>
-    !props.canPlayTrack
-      ? `color: ${props.colors?.button ?? "var(--mi-text-color)"}; opacity: .6;`
-      : ""}
+    !props.canPlayTrack ? `color: var(--mi-contrast-color); opacity: .6;` : ""}
 
   display: flex;
   align-items: start;
 
   &:hover {
-    color: ${(props) =>
-      props.colors?.background ??
-      "var(--mi-text-color)"} !important;
-    background-color: ${(props) =>
-      props.colors?.text ?? "var(--mi-background-color)"} !important;
-
-    button.play-button,
-    button.pause-button {
-      color: ${(props) =>
-        props.colors?.background ?? "var(--mi-text-color)"};
-      background: transparent;
-
-      svg {
-        fill: ${(props) =>
-          props.colors?.background ??
-          "var(--mi-text-color)"} !important;
-      }
-    }
-
-    .mi-dropdown-button {
-      background-color: ${(props) =>
-        props.colors?.background ??
-        "var(--mi-text-color)"} !important;
-      color: ${(props) =>
-        props.colors?.text ?? "var(--mi-background-color)"} !important;
-    }
-
-    .track-authors {
-      color: ${(props) =>
-        props.colors?.background ??
-        "var(--mi-text-color)"} !important;
-      opacity: 0.8 !important;
-    }
+    background-color: var(--mi-tint-x-color);
   }
 
   button.play-button,
   button.pause-button {
-    color: ${(props) =>
-      props.colors?.button ?? "var(--mi-text-color)"};
+    color: var(--mi-contrast-color);
     background: transparent;
     font-size: 0.8rem;
 
     svg {
-      fill: ${(props) =>
-        props.colors?.button ?? "var(--mi-text-color)"};
+      fill: var(--mi-contrast-color);
     }
   }
 
@@ -168,7 +130,6 @@ const TrackRow: React.FC<{
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const { user } = useAuthContext();
-  const { colors } = useGetArtistColors();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
@@ -190,12 +151,7 @@ const TrackRow: React.FC<{
   }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
 
   return (
-    <TR
-      key={track.id}
-      id={`${track.id}`}
-      canPlayTrack={canPlayTrack}
-      colors={colors}
-    >
+    <TR key={track.id} id={`${track.id}`} canPlayTrack={canPlayTrack}>
       <FirstTD onClick={onTrackPlay}>
         <TrackRowPlayControl
           trackId={track.id}

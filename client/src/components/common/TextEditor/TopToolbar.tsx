@@ -1,5 +1,4 @@
-import React from "react";
-
+import { css } from "@emotion/css";
 import {
   BasicFormattingButtonGroup,
   CommandButtonGroup,
@@ -10,11 +9,11 @@ import {
   ToggleOrderedListButton,
   Toolbar,
 } from "@remirror/react";
+import React from "react";
 
-import InsertVideoButton from "./InsertVideoButton";
-import { css } from "@emotion/css";
-import InsertMirloWidgetButton from "./InsertMirloWidgetButton";
 import InsertImageButton from "./InsertImageButton";
+import InsertMirloWidgetButton from "./InsertMirloWidgetButton";
+import InsertVideoButton from "./InsertVideoButton";
 
 const TopToolbar: React.FC<{
   postId?: number;

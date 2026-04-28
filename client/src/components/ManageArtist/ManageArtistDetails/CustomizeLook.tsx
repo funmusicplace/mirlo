@@ -37,8 +37,7 @@ export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
   display: flex;
   padding: 2rem !important;
   margin-bottom: 1rem;
-  ${(props) =>
-    !props.isOdd ? "background: var(--mi-lighten-background-color);" : ""}
+  ${(props) => (!props.isOdd ? "background: var(--mi-tint-color);" : "")}
   gap: 1rem;
 
   @media (max-width: ${bp.medium}px) {

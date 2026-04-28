@@ -234,7 +234,7 @@ const BuyMerchItem: React.FC<{
                 flex-direction: row;
               }
 
-              border-bottom: 1px solid var(--mi-darken-x-background-color);
+              border-bottom: 1px solid var(--mi-tint-x-color);
               > div {
                 width: 49%;
                 margin-right: 1rem;
@@ -297,7 +297,7 @@ const BuyMerchItem: React.FC<{
         <BuyMerchItemDestinations merch={merch} />
         <div
           className={css`
-            border-bottom: 1px solid var(--mi-darken-x-background-color);
+            border-bottom: 1px solid var(--mi-tint-x-color);
             padding-bottom: 1rem;
             margin-bottom: 2rem;
           `}

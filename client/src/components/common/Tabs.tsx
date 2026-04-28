@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+
 import { bp } from "../../constants";
 
 const Tabs = styled.ul`
@@ -35,7 +36,7 @@ const Tabs = styled.ul`
   }
 `;
 
-export const ArtistTabs = styled(Tabs)<{ color?: string }>`
+export const ArtistTabs = styled(Tabs)`
   margin: 0rem 0.5rem 1rem 0;
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -47,15 +48,13 @@ export const ArtistTabs = styled(Tabs)<{ color?: string }>`
   > li {
     > a:not(.edit),
     button {
-      color: ${(props) => props.color ?? `var(--mi-button-color)`} !important;
+      color: var(--mi-button-color) !important;
 
       &.active {
-        border-bottom: 4px solid
-          ${(props) => props.color ?? `var(--mi-button-color)`} !important;
+        border-bottom: 4px solid var(--mi-button-color) !important;
       }
       &:hover {
-        border-bottom: 4px solid
-          ${(props) => props.color ?? `var(--mi-button-color)`} !important;
+        border-bottom: 4px solid var(--mi-button-color) !important;
       }
     }
   }

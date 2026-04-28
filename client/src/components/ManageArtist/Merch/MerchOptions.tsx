@@ -1,9 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { queryManagedMerch } from "queries";
-import { FaPen, FaPlus, FaTrash } from "react-icons/fa";
-import { useParams } from "react-router-dom";
-import DashedList from "./DashedList";
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import { queryManagedMerch } from "queries";
 import React from "react";
 import {
   FormProvider,
@@ -11,15 +11,13 @@ import {
   useForm,
   useFormContext,
 } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
-import { InputEl } from "components/common/Input";
+import { FaPen, FaPlus, FaTrash } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 import api from "services/api";
-import {
-  ArtistButton,
-  useGetArtistColors,
-} from "components/Artist/ArtistButtons";
 import { useSnackbar } from "state/SnackbarContext";
+
+import DashedList from "./DashedList";
 
 type OptionTypesForm = {
   optionTypes: Partial<MerchOptionType>[];
@@ -31,7 +29,6 @@ const OptionType: React.FC<{
   isEditing: boolean;
   deleteOptionType: () => void;
 }> = ({ optionType, isEditing, index, deleteOptionType }) => {
-  const { colors } = useGetArtistColors();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
 
   const { control, register } = useFormContext();
@@ -100,7 +97,6 @@ const OptionType: React.FC<{
                       `optionTypes.${index}.options.${optionIndex}.name`
                     )}
                     required
-                    colors={colors}
                   />
                 </FormComponent>
                 <FormComponent>
@@ -115,7 +111,6 @@ const OptionType: React.FC<{
                     step={0.01}
                     min={0}
                     type="number"
-                    colors={colors}
                   />
                 </FormComponent>
                 <FormComponent>
@@ -128,7 +123,6 @@ const OptionType: React.FC<{
                     step={1}
                     min={0}
                     type="number"
-                    colors={colors}
                   />
                 </FormComponent>
                 <ArtistButton

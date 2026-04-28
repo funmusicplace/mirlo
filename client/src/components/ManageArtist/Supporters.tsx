@@ -175,7 +175,7 @@ const Supporters = () => {
               padding: 2rem;
               text-align: center;
               width: 100%;
-              background: var(--mi-lighten-x-background-color);
+              background: var(--mi-tint-x-color);
             `}
           >
             {t("noSupportersYet")}

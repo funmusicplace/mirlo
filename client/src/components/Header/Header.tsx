@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import PageBackground from "components/common/ArtistBackground";
@@ -14,6 +15,7 @@ import { ImMenu } from "react-icons/im";
 import { Link, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
+import { isLight } from "utils/colors";
 import usePublicArtist from "utils/usePublicObjectById";
 import useShow from "utils/useShow";
 
@@ -27,12 +29,7 @@ const HeaderWrapper = styled.div<{
   artistId?: boolean;
   show?: string;
   trackGroupId?: boolean;
-  colors?: {
-    button?: string;
-    buttonText?: string;
-    text?: string;
-    background?: string;
-  };
+  stripTint?: string;
 }>`
   position: sticky;
   width: 100%;
@@ -51,22 +48,12 @@ const HeaderWrapper = styled.div<{
       : ""}
 
   ${(props) =>
-    props.transparent
-      ? `background: transparent; 
+    props.transparent && !props.trackGroupId
+      ? `background: transparent;
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-      : `background: var(--mi-background-color); 
+      : `background-color: var(--mi-background-color);
+         background-image: linear-gradient(${props.stripTint}, ${props.stripTint});
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);`}
-
-  ${(props) =>
-    props.trackGroupId
-      ? `background-color: var(--mi-background-color) !important; 
-         box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1) !important;`
-      : ""}
-
-  ${(props) =>
-    props.trackGroupId
-      ? "background-color: var(--mi-background-color);"
-      : ""}
 
   @media screen and (max-width: ${bp.medium}px) {
     position: sticky;
@@ -144,6 +131,20 @@ const Content = styled.div<{ artistId?: string }>`
   }
 `;
 
+const menuButtonOverride = css`
+  color: var(--mi-contrast-color) !important;
+  svg {
+    fill: var(--mi-contrast-color) !important;
+  }
+  &:hover:not(:disabled) {
+    background-color: var(--mi-tint-color) !important;
+    color: var(--mi-contrast-color) !important;
+    svg {
+      fill: var(--mi-contrast-color) !important;
+    }
+  }
+`;
+
 const Header = () => {
   const { t } = useTranslation();
 
@@ -154,10 +155,16 @@ const Header = () => {
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
   const artistBackground = artist?.background?.sizes;
-  const colors = artist?.properties?.colors;
 
   const show = useShow();
   const transparent = !!artistBackground && !!artistId;
+
+  const button = artist?.properties?.colors?.button;
+  const stripTint = button
+    ? isLight(button)
+      ? "rgba(0, 0, 0, 0.1)"
+      : "rgba(255, 255, 255, 0.12)"
+    : "transparent";
 
   const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
@@ -184,7 +191,7 @@ const Header = () => {
       show={show}
       trackGroupId={!!trackGroupId}
       artistId={!!artistId}
-      colors={colors}
+      stripTint={stripTint}
     >
       <div className="md:hidden!">
         <PageBackground />
@@ -215,6 +222,7 @@ const Header = () => {
           {isLoggedIn && (
             <Button
               aria-controls={menuDialogId}
+              aria-label="Menu"
               data-cy="user-nav"
               // @ts-ignore React doesn't support Invoker Commands API
               command="show-modal"
@@ -223,7 +231,7 @@ const Header = () => {
               onClick={() => openMenu()}
               startIcon={<ImMenu />}
               variant="transparent"
-              aria-label="Menu"
+              className={menuButtonOverride}
             >
               Menu
             </Button>

@@ -92,7 +92,6 @@ const AutoComplete = React.forwardRef<
   HTMLInputElement,
   {
     ariaDescribedBy?: string;
-    colors?: { background: string; text: string };
     getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
     resultsPrefix?: string;
     onSelect?: (
@@ -136,7 +135,6 @@ const AutoComplete = React.forwardRef<
       placeholder,
       allowNew,
       showBackground,
-      colors,
       id,
     },
     ref
@@ -218,7 +216,6 @@ const AutoComplete = React.forwardRef<
         <InputEl
           aria-describedby={ariaDescribedBy}
           name="search"
-          colors={colors}
           value={searchValue}
           placeholder={placeholder ?? ""}
           data-lpignore="true"

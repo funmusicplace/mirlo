@@ -1,29 +1,27 @@
+import { css } from "@emotion/css";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Box from "components/common/Box";
+import FollowArtist from "components/common/FollowArtist";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import { queryUserStripeStatus } from "queries";
+import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React from "react";
-import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import useArtistQuery from "utils/useArtistQuery";
+
+import { bp } from "../../constants";
+
 import ArtistManageSubscription from "./ArtistManageSubscription";
 import ArtistSupportBox from "./ArtistSupportBox";
 import ScrollButton from "./ScrollButton";
-import { css } from "@emotion/css";
-import { bp } from "../../constants";
-import { useGetArtistColors } from "./ArtistButtons";
-import FollowArtist from "components/common/FollowArtist";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { useAuthContext } from "state/AuthContext";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
-import useErrorHandler from "services/useErrorHandler";
-import useArtistQuery from "utils/useArtistQuery";
-import { queryUserStripeStatus } from "queries";
 
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
   const { data: artist } = useArtistQuery();
-  const { colors } = useGetArtistColors();
-  const pageBackground =
-    colors?.background ?? "var(--mi-background-color)";
+  const pageBackground = "var(--mi-background-color)";
   const { data: userStripeStatus, isPending } = useQuery(
     queryUserStripeStatus(artist?.userId || 0)
   );

@@ -44,7 +44,7 @@ const DeleteMerch: React.FC<{}> = () => {
         margin-top: 2rem;
         padding-top: 2rem;
         width: 100%;
-        border-top: 1px solid var(--mi-darken-x-background-color);
+        border-top: 1px solid var(--mi-tint-x-color);
       `}
     >
       <ArtistButton

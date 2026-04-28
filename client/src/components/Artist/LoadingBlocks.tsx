@@ -10,9 +10,9 @@ const Shine = styled("div")`
 
   background: linear-gradient(
     110deg,
-    var(--mi-darken-background-color) 8%,
-    var(--mi-darken-x-background-color) 18%,
-    var(--mi-darken-background-color) 33%
+    var(--mi-tint-color) 8%,
+    var(--mi-tint-x-color) 18%,
+    var(--mi-tint-color) 33%
   );
   border-radius: 5px;
   background-size: 200% 100%;

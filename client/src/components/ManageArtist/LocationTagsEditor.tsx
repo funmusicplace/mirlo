@@ -109,7 +109,7 @@ const LocationTagsEditor: React.FC<LocationTagsEditorProps> = ({
                   align-items: center;
                   gap: 0.5rem;
                   padding: 0.5rem 1rem;
-                  background: var(--mi-lighten-background-color);
+                  background: var(--mi-tint-color);
                   border-radius: 4px;
                   font-size: 0.9rem;
                 `}

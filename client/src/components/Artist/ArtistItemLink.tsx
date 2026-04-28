@@ -58,14 +58,10 @@ const ArtistItemLink: React.FC<{
       className={
         item.title?.length
           ? css`
-              color: ${artistId
-                ? artist.properties?.colors?.text
-                : "var(--mi-text-color)"};
+              color: var(--mi-text-color);
             `
           : css`
-              color: ${artistId
-                ? artist.properties?.colors?.text
-                : "var(--mi-light-foreground-color)"};
+              color: var(--mi-text-color);
               font-style: italic;
             `
       }

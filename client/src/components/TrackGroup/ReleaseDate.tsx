@@ -1,11 +1,9 @@
 import { css } from "@emotion/css";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { i18n } from "i18next";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { bp } from "../../constants";
-
 export const formatDate = ({
   date,
   options: defaultOptions,
@@ -67,7 +65,6 @@ export const calculateDateWithTimezoneOffset = (dateString: string) => {
 const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
   releaseDate: releaseDateString,
 }) => {
-  const { colors } = useGetArtistColors();
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -90,7 +87,7 @@ const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
   return (
     <div
       className={css`
-        color: ${colors ? colors.text : "var(--mi-light-foreground-color)"};
+        color: var(--mi-secondary-text-color);
         font-size: 1rem;
         width: 100%;
         font-size: var(--mi-font-size-small);
