@@ -177,10 +177,13 @@ interface PostImage {
 }
 
 type ArtistColors = {
-  button: string;
-  buttonText: string;
-  background: string;
-  text: string;
+  button?: string;
+  buttonText?: string;
+  background?: string;
+  text?: string;
+  // Cascade is handled at the CSS level via a theme.css alias:
+  //   --mi-secondary-text-color: var(--mi-text-color)
+  secondaryText?: string;
 };
 
 interface Notification {
