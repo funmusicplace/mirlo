@@ -39,7 +39,7 @@ const NewArtistPost: React.FC<{ notification: Notification }> = ({
             {t("newPost")}
           </div>
         )}
-        <div className="text-sm font-semibold mb-1 text-(--mi-normal-foreground-color)">
+        <div className="text-sm font-semibold mb-1 text-(--mi-text-color)">
           {notification.post.title}
         </div>
         {notification.post.content && (
@@ -62,7 +62,7 @@ const NewArtistPost: React.FC<{ notification: Notification }> = ({
           <div className="text-xs text-(--mi-light-foreground-color)">
             {formatRelativeTime({ date: notification.createdAt, i18n })}
           </div>
-          <span className="text-xs font-semibold text-(--mi-normal-foreground-color) opacity-70">
+          <span className="text-xs font-semibold text-(--mi-text-color) opacity-70">
             {t("readPost")} →
           </span>
         </div>

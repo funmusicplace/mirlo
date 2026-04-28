@@ -15,12 +15,12 @@ import Button from "./Button";
 const SearchResultsDiv = styled.div`
   position: absolute;
   padding: 0.5rem;
-  background: var(--mi-normal-background-color);
+  background: var(--mi-background-color);
   border: 1px solid var(--mi-darken-xx-background-color);
   width: 100%;
   z-index: 1000;
   word-break: break-word;
-  color: var(--mi-normal-foreground-color);
+  color: var(--mi-text-color);
   border-radius: 5px;
   max-height: 400px;
   overflow-y: scroll;
@@ -30,9 +30,9 @@ const SearchResultsDiv = styled.div`
   }
 
   @media (prefers-color-scheme: dark) {
-    color: var(--mi-normal-foreground-color);
+    color: var(--mi-text-color);
     &::placeholder {
-      color: var(--mi-normal-foreground-color) !important;
+      color: var(--mi-text-color) !important;
       opacity: 0.3;
     }
   }
@@ -47,7 +47,7 @@ const SearchResult = styled.li`
   a,
   button {
     padding: 0.5rem 0.75rem !important;
-    color: var(--mi-normal-foreground-color) !important;
+    color: var(--mi-text-color) !important;
     display: block;
     background: transparent;
     border: none;
@@ -58,24 +58,24 @@ const SearchResult = styled.li`
   }
 
   &.selected {
-    background: var(--mi-normal-foreground-color);
-    color: var(--mi-normal-background-color) !important;
+    background: var(--mi-text-color);
+    color: var(--mi-background-color) !important;
 
     button,
     a {
-      color: var(--mi-normal-background-color) !important;
+      color: var(--mi-background-color) !important;
     }
   }
 
   button:hover,
   a:hover {
-    color: var(--mi-normal-background-color) !important;
-    background-color: var(--mi-normal-foreground-color) !important;
+    color: var(--mi-background-color) !important;
+    background-color: var(--mi-text-color) !important;
   }
   @media (prefers-color-scheme: dark) {
     button:hover,
     a:hover {
-      background-color: var(--mi-normal-foreground-color) !important;
+      background-color: var(--mi-text-color) !important;
     }
   }
 `;
@@ -232,18 +232,18 @@ const AutoComplete = React.forwardRef<
             opacity: 0.95;
             position: relative;
             margin-bottom: 0 !important;
-            border: 1px solid var(--mi-normal-foreground-color);
+            border: 1px solid var(--mi-text-color);
             overflow: hidden;
             text-overflow: ellipsis;
             &::placeholder {
-              color: var(--mi-normal-foreground-color) !important;
+              color: var(--mi-text-color) !important;
               opacity: 0.5;
             }
             @media (prefers-color-scheme: dark) {
-              color: var(--mi-normal-foreground-color) !important;
-              background: var(--mi-normal-background-color) !important;
+              color: var(--mi-text-color) !important;
+              background: var(--mi-background-color) !important;
               &::placeholder {
-                color: var(--mi-normal-foreground-color) !important;
+                color: var(--mi-text-color) !important;
               }
             }
           `}

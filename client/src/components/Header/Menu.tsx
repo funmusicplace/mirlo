@@ -113,7 +113,7 @@ const Menu = forwardRef<
                 </li>
               )}
               <li>
-                <ul className="border-y border-y-(--mi-normal-foreground-color)! m-0 p-0! max-h-[190px] overflow-auto">
+                <ul className="border-y border-y-(--mi-text-color)! m-0 p-0! max-h-[190px] overflow-auto">
                   {isLoading && (
                     <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
                   )}

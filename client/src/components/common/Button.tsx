@@ -27,7 +27,7 @@ const CustomButton = styled.button<Sizable>(
     const bodyStyles = window.getComputedStyle(document.body);
     let cssColorVariable = `--mi-${buttonRole ?? "primary"}-color`;
     var primaryColor = bodyStyles.getPropertyValue(cssColorVariable);
-    let secondaryColor = bodyStyles.getPropertyValue(`--mi-secondary-color`);
+    let secondaryColor = bodyStyles.getPropertyValue(`--mi-button-text-color`);
     const isOnlyIcon = props.onlyIcon
       ? `
       padding: .5rem;

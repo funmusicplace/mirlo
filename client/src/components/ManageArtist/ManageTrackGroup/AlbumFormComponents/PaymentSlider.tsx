@@ -112,7 +112,7 @@ const PaymentSlider: React.FC<{
                 height: 25px;
                 border-radius: 50%;
                 background: ${artist?.properties?.colors?.button ??
-                "var(--mi-primary-color)"};
+                "var(--mi-button-color)"};
                 cursor: pointer;
               }
 
@@ -121,7 +121,7 @@ const PaymentSlider: React.FC<{
                 height: 25px;
                 border-radius: 50%;
                 background: ${artist?.properties?.colors?.button ??
-                "var(--mi-primary-color)"};
+                "var(--mi-button-color)"};
                 cursor: pointer;
               }
             `}
@@ -186,7 +186,7 @@ const PaymentSlider: React.FC<{
           >
             <div
               className={css`
-                background-color: var(--mi-primary-color);
+                background-color: var(--mi-button-color);
                 color: var(--mi-white);
                 padding: 1rem;
                 border-radius: 0.5rem;
@@ -263,7 +263,7 @@ const PaymentSlider: React.FC<{
                       margin-right: ${Number.parseInt(
                         row.percent.slice(0, -1)
                       ) * -0.5}rem;
-                      background-color: var(--mi-primary-color);
+                      background-color: var(--mi-button-color);
                     `}
                   ></span>
                   {row.percent}

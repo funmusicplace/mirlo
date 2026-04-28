@@ -20,7 +20,7 @@ const SupportMirlo = () => {
     <div
       className={css`
         width: 100%;
-        background-color: var(--mi-primary-color) !important;
+        background-color: var(--mi-button-color) !important;
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -28,7 +28,7 @@ const SupportMirlo = () => {
         }
 
         @media (min-width: 768px) and (prefers-color-scheme: dark) {
-          background-color: var(--mi-secondary-color);
+          background-color: var(--mi-button-text-color);
         }
       `}
     >

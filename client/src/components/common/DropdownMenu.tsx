@@ -68,10 +68,10 @@ const DropdownMenu: React.FC<{
                 min-width: 215px;
                 max-width: 215px;
                 text-overflow: ellipsis;
-                background: var(--mi-normal-background-color) !important;
+                background: var(--mi-background-color) !important;
 
                 button {
-                  color: var(--mi-normal-foreground-color) !important;
+                  color: var(--mi-text-color) !important;
                 }
 
                 li {
@@ -85,9 +85,9 @@ const DropdownMenu: React.FC<{
                   text-align: right;
                   display: block;
                   white-space: normal;
-                  color: var(--mi-normal-foreground-color) !important;
+                  color: var(--mi-text-color) !important;
                   background-color: var(
-                    --mi-normal-background-color
+                    --mi-background-color
                   ) !important;
                   word-break: break-word;
                   font-weight: normal;
@@ -105,8 +105,8 @@ const DropdownMenu: React.FC<{
                 li > button {
                   &:hover {
                     border-radius: 0;
-                    background: var(--mi-normal-foreground-color) !important;
-                    color: var(--mi-normal-background-color) !important;
+                    background: var(--mi-text-color) !important;
+                    color: var(--mi-background-color) !important;
                     border: none;
                   }
                 }

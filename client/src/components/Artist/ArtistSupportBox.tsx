@@ -34,7 +34,7 @@ const ArtistSupportBox: React.FC<{
   );
 
   const { colors } = useGetArtistColors();
-  const secondaryColor = colors?.buttonText ?? "var(--mi-secondary-color)";
+  const secondaryColor = colors?.buttonText ?? "var(--mi-button-text-color)";
 
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
@@ -99,7 +99,7 @@ const ArtistSupportBox: React.FC<{
       !sub.artistSubscriptionTier.isDefaultTier
   );
 
-  const primary = colors?.button ?? "var(--mi-primary-color)";
+  const primary = colors?.button ?? "var(--mi-button-color)";
   const tierBorderColor = `color-mix(in srgb, ${primary} ${isSubscribedToTier ? "100%" : "20%"}, transparent)`;
   const tierInnerBorderColor = `color-mix(in srgb, ${primary} 20%, transparent)`;
 
@@ -184,8 +184,8 @@ const ArtistSupportBox: React.FC<{
           "px-5 " +
           css`
             button:hover {
-              background-color: var(--mi-normal-foreground-color) !important;
-              color: var(--mi-normal-background-color);
+              background-color: var(--mi-text-color) !important;
+              color: var(--mi-background-color);
             }
           `
         }

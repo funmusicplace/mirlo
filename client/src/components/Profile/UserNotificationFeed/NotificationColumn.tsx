@@ -67,7 +67,7 @@ const NotificationColumn: React.FC<{
           {title}
         </p>
       ) : (
-        <h2 className="text-lg font-bold text-(--mi-normal-foreground-color) mb-3">
+        <h2 className="text-lg font-bold text-(--mi-text-color) mb-3">
           {title}
         </h2>
       )}

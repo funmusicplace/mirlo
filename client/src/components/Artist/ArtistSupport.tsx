@@ -23,7 +23,7 @@ const ArtistSupport: React.FC = () => {
   const { data: artist } = useArtistQuery();
   const { colors } = useGetArtistColors();
   const pageBackground =
-    colors?.background ?? "var(--mi-normal-background-color)";
+    colors?.background ?? "var(--mi-background-color)";
   const { data: userStripeStatus, isPending } = useQuery(
     queryUserStripeStatus(artist?.userId || 0)
   );

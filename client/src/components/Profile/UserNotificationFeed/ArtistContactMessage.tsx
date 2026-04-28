@@ -45,8 +45,8 @@ const ArtistContactMessage: React.FC<{
         <div
           className={
             compact
-              ? "text-xs text-(--mi-normal-foreground-color) leading-snug"
-              : "text-sm text-(--mi-normal-foreground-color)"
+              ? "text-xs text-(--mi-text-color) leading-snug"
+              : "text-sm text-(--mi-text-color)"
           }
         >
           <strong>{senderName}</strong> {t("sentYouAMessage")}
@@ -60,7 +60,7 @@ const ArtistContactMessage: React.FC<{
           )}
         </div>
         {notification.content && !compact && (
-          <p className="text-sm text-(--mi-normal-foreground-color) whitespace-pre-wrap mt-1">
+          <p className="text-sm text-(--mi-text-color) whitespace-pre-wrap mt-1">
             {notification.content}
           </p>
         )}

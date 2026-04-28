@@ -114,7 +114,7 @@ const TipArtistForm: React.FC<{
                       "var(--mi-text-color)"};
                       border: 1px dashed
                         ${artistDetails.properties?.colors?.button ??
-                        "var(--mi-primary-color)"};
+                        "var(--mi-button-color)"};
                       margin-right: 0.2rem;
                       background-color: ${artistDetails.properties?.colors
                         ?.background ?? "var(--mi-background-color)"};
@@ -124,7 +124,7 @@ const TipArtistForm: React.FC<{
 
                     input:checked + label {
                       background-color: ${artistDetails.properties?.colors
-                        ?.buttonText ?? "var(--mi-secondary-color)"};
+                        ?.buttonText ?? "var(--mi-button-text-color)"};
                     }
                   `}
                 >

@@ -23,11 +23,11 @@ const FilterGroup: React.FC<{
           />
           <span
             className={[
-              "inline-block rounded-full border transition-colors select-none peer-focus-visible:ring-2 peer-focus-visible:ring-(--mi-primary-color) peer-focus-visible:ring-offset-1",
+              "inline-block rounded-full border transition-colors select-none peer-focus-visible:ring-2 peer-focus-visible:ring-(--mi-button-color) peer-focus-visible:ring-offset-1",
               compact ? "text-xs px-2 py-0.5" : "text-xs px-2.5 py-1",
               value === opt.value
-                ? "border-(--mi-primary-color) text-(--mi-primary-color) font-semibold"
-                : "border-(--mi-darken-x-background-color) text-(--mi-light-foreground-color) hover:text-(--mi-normal-foreground-color) hover:border-(--mi-normal-foreground-color)",
+                ? "border-(--mi-button-color) text-(--mi-button-color) font-semibold"
+                : "border-(--mi-darken-x-background-color) text-(--mi-light-foreground-color) hover:text-(--mi-text-color) hover:border-(--mi-text-color)",
             ].join(" ")}
           >
             {opt.label}

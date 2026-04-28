@@ -55,8 +55,8 @@ const FundraiserPledge: React.FC<{
         <div
           className={
             compact
-              ? "text-xs text-(--mi-normal-foreground-color) leading-snug"
-              : "text-sm text-(--mi-normal-foreground-color)"
+              ? "text-xs text-(--mi-text-color) leading-snug"
+              : "text-sm text-(--mi-text-color)"
           }
         >
           {notification.content}

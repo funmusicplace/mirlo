@@ -17,10 +17,10 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
     switch (props.variant) {
       case "success":
         return `
-        color: var(--mi-normal-foreground-color); 
+        color: var(--mi-text-color); 
         font-weight: bold;`;
       default:
-        return `color: var(--mi-normal-foreground-color)`;
+        return `color: var(--mi-text-color)`;
     }
   }};
   z-index: 1000;

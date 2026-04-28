@@ -17,7 +17,7 @@ const UploadProgressPanel: React.FC = () => {
     <div
       role="status"
       aria-live="polite"
-      className="fixed right-4 bottom-[90px] z-[999] w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--mi-border-radius)] border border-[var(--mi-darken-background-color)] bg-[var(--mi-normal-background-color)] text-[var(--mi-normal-foreground-color)] shadow-[0_4px_16px_rgba(0,0,0,0.25)] max-sm:right-2 max-sm:bottom-[110px] max-sm:left-2 max-sm:w-auto"
+      className="fixed right-4 bottom-[90px] z-[999] w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--mi-border-radius)] border border-[var(--mi-darken-background-color)] bg-[var(--mi-background-color)] text-[var(--mi-text-color)] shadow-[0_4px_16px_rgba(0,0,0,0.25)] max-sm:right-2 max-sm:bottom-[110px] max-sm:left-2 max-sm:w-auto"
     >
       <button
         type="button"

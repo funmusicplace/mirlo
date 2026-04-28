@@ -53,10 +53,10 @@ const ArtistFormColors: React.FC = () => {
       <label>{t("customColors")}</label>
 
       <ColorInputWrapper className={css``}>
-        <ColorInput name="properties.colors.button" title={t("primaryColor")} />
+        <ColorInput name="properties.colors.button" title={t("buttonColor")} />
         <ColorInput
           name="properties.colors.buttonText"
-          title={t("secondaryColor")}
+          title={t("buttonTextColor")}
         />
         <ColorInput
           name="properties.colors.background"
@@ -64,7 +64,7 @@ const ArtistFormColors: React.FC = () => {
         />
         <ColorInput
           name="properties.colors.text"
-          title={t("foregroundColor")}
+          title={t("textColor")}
         />
       </ColorInputWrapper>
       <div>

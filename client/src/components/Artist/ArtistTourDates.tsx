@@ -126,7 +126,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
 
                       em {
                         font-style: italic;
-                        color: var(--mi-normal-foreground-color);
+                        color: var(--mi-text-color);
                       }
                     }
                     > a {
@@ -209,7 +209,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
                   flex-direction: column;
                   margin-bottom: 1rem;
                   padding-bottom: 1rem;
-                  border-bottom: 1px solid var(--mi-normal-foreground-color);
+                  border-bottom: 1px solid var(--mi-text-color);
                 `}
               >
                 <div

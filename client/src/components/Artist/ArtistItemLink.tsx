@@ -60,7 +60,7 @@ const ArtistItemLink: React.FC<{
           ? css`
               color: ${artistId
                 ? artist.properties?.colors?.text
-                : "var(--mi-normal-foreground-color)"};
+                : "var(--mi-text-color)"};
             `
           : css`
               color: ${artistId

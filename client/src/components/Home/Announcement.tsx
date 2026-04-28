@@ -14,8 +14,8 @@ const Announcement: React.FC = () => {
   return (
     <div
       className={css`
-        background: var(--mi-primary-color);
-        color: var(--mi-secondary-color);
+        background: var(--mi-button-color);
+        color: var(--mi-button-text-color);
         padding: 1rem;
         border-radius: 5px;
         width: 100%;
@@ -27,7 +27,7 @@ const Announcement: React.FC = () => {
         font-size: 1.2rem;
 
         a {
-          color: var(--mi-secondary-color);
+          color: var(--mi-button-text-color);
           text-decoration: underline;
         }
       `}

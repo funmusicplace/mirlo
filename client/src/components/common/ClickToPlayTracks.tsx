@@ -17,27 +17,27 @@ const Wrapper = styled.div<{ colors?: ArtistColors }>`
 
   button {
     background-color: ${(props) =>
-      props.colors?.button ?? "var(--mi-primary-color)"} !important;
+      props.colors?.button ?? "var(--mi-button-color)"} !important;
     color: ${(props) =>
-      props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
+      props.colors?.buttonText ?? "var(--mi-button-text-color)"} !important;
     border: 0px !important;
     width: 3rem;
     height: 3rem;
 
     svg {
       fill: ${(props) =>
-        props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
+        props.colors?.buttonText ?? "var(--mi-button-text-color)"} !important;
     }
 
     &:hover:not(:disabled) {
       color: ${(props) =>
-        props.colors?.button ?? "var(--mi-primary-color)"} !important;
+        props.colors?.button ?? "var(--mi-button-color)"} !important;
       background-color: ${(props) =>
-        props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
+        props.colors?.buttonText ?? "var(--mi-button-text-color)"} !important;
 
       svg {
         fill: ${(props) =>
-          props.colors?.button ?? "var(--mi-primary-color)"} !important;
+          props.colors?.button ?? "var(--mi-button-color)"} !important;
       }
     }
   }

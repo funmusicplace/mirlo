@@ -20,7 +20,7 @@ export const InputEl = styled.input<{
   font-size: 1rem;
   width: 100%;
   color: ${(props) =>
-    props.colors?.text ?? "var(--mi-normal-foreground-color)"};
+    props.colors?.text ?? "var(--mi-text-color)"};
   background-color: ${(props) =>
     props.colors?.background ?? "var(--mi-lighten-x-background-color)"};
   transition: 0.4s border-radius;

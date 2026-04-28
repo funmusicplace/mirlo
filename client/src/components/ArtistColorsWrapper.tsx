@@ -28,11 +28,11 @@ const updateTheme = (artistColors?: any, theme?: "dark" | "light") => {
   document.documentElement.setAttribute("data-mi-theme", theme ?? "light");
 
   document.documentElement.style.setProperty(
-    "--mi-normal-background-color",
+    "--mi-background-color",
     colors[theme ?? "light"]["background"]
   );
   document.documentElement.style.setProperty(
-    "--mi-normal-foreground-color",
+    "--mi-text-color",
     colors[theme ?? "light"]["foreground"]
   );
 };
@@ -63,8 +63,8 @@ const ArtistColors: React.FC<{
         id="artist-colors-wrapper"
         className={css`
           background-color: ${artistColors?.background ??
-          "var(--mi-normal-background-color)"};
-          color: ${artistColors?.text ?? "var(--mi-normal-foreground-color)"};
+          "var(--mi-background-color)"};
+          color: ${artistColors?.text ?? "var(--mi-text-color)"};
         `}
       >
         {children}

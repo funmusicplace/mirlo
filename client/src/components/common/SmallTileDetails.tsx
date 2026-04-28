@@ -27,7 +27,7 @@ export const SmallTileDetails: React.FC<{
   subtitle,
   moreActions,
   footer,
-  textColor = "var(--mi-normal-foreground-color)",
+  textColor = "var(--mi-text-color)",
 }) => {
   return (
     <>

@@ -41,7 +41,7 @@ const ArtistLinks: React.FC = () => {
     <div
       className={css`
         background-color: ${colors?.background ??
-        "var(--mi-normal-background-color)"};
+        "var(--mi-background-color)"};
         opacity: 0.98;
 
         @media screen and (max-width: ${bp.medium}px) {

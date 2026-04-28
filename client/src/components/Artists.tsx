@@ -67,7 +67,7 @@ const Artists = () => {
     <div
       className={css`
         a {
-          color: var(--mi-normal-foreground-color);
+          color: var(--mi-text-color);
         }
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;

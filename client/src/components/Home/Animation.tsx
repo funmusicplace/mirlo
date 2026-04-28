@@ -2,8 +2,8 @@ import { css } from "@emotion/css";
 import { random, sample } from "lodash";
 
 const colors = [
-  "var(--mi-primary-color)",
-  // "var(--mi-normal-background-color)",
+  "var(--mi-button-color)",
+  // "var(--mi-background-color)",
   "#12AAE0",
   "#E0D412",
 ];

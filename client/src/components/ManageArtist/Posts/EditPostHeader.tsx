@@ -32,7 +32,7 @@ const EditPostHeader: React.FC<{
       <div
         className={css`
           background-color: ${artist?.properties?.colors?.background ??
-          "var(--mi-normal-background-color)"};
+          "var(--mi-background-color)"};
           box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.25);
           top: 0;
           position: sticky;

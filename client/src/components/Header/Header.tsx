@@ -54,18 +54,18 @@ const HeaderWrapper = styled.div<{
     props.transparent
       ? `background: transparent; 
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-      : `background: var(--mi-normal-background-color); 
+      : `background: var(--mi-background-color); 
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);`}
 
   ${(props) =>
     props.trackGroupId
-      ? `background-color: var(--mi-normal-background-color) !important; 
+      ? `background-color: var(--mi-background-color) !important; 
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1) !important;`
       : ""}
 
   ${(props) =>
     props.trackGroupId
-      ? "background-color: var(--mi-normal-background-color);"
+      ? "background-color: var(--mi-background-color);"
       : ""}
 
   @media screen and (max-width: ${bp.medium}px) {

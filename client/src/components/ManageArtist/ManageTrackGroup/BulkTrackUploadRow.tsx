@@ -17,14 +17,14 @@ export const PercentUpload = styled("div")<{ percentUpload: number }>`
     animation: 3s shine linear infinite;
     background: linear-gradient(
       110deg,
-      var(--mi-primary-color) 33%,
+      var(--mi-button-color) 33%,
       #ec7c98 33%,
       #ec7c98 38%,
-      var(--mi-primary-color) 39%,
-      var(--mi-primary-color) 66%,
+      var(--mi-button-color) 39%,
+      var(--mi-button-color) 66%,
       #ec7c98 66%,
       #ec7c98 76%,
-      var(--mi-primary-color) 76%
+      var(--mi-button-color) 76%
     );
     background-size: 200% 100%;
 

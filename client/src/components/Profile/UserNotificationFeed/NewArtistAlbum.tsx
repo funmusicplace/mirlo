@@ -41,7 +41,7 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
         <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-pink) mb-1">
           {isPreorder ? t("availableForPreorder") : t("newRelease")}
         </div>
-        <div className="text-sm font-semibold truncate text-(--mi-normal-foreground-color)">
+        <div className="text-sm font-semibold truncate text-(--mi-text-color)">
           {trackGroup.title}
         </div>
         <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
@@ -64,7 +64,7 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
       {trackGroup.artist && (
         <Link
           to={getReleaseUrl(trackGroup.artist, trackGroup)}
-          className="absolute bottom-3 right-4 text-xs font-semibold text-(--mi-normal-foreground-color) no-underline opacity-70 hover:opacity-100"
+          className="absolute bottom-3 right-4 text-xs font-semibold text-(--mi-text-color) no-underline opacity-70 hover:opacity-100"
         >
           {t("goToRelease")} →
         </Link>

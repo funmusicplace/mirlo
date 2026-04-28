@@ -118,7 +118,7 @@ const PaymentInputElement: React.FC<{
         numericChosenPrice > 0 &&
         normalizedDiscountPercent > 0 && (
           <div
-            className={`w-full align-center mt-2 rounded border p-3 text-sm border-[${colors.colors?.button ?? "--mi-primary-color"}]`}
+            className={`w-full align-center mt-2 rounded border p-3 text-sm border-[${colors.colors?.button ?? "--mi-button-color"}]`}
           >
             {t("discountSummary", {
               discountPercent: normalizedDiscountPercent,

@@ -60,8 +60,8 @@ html:has([open]:modal) {
 }
 
 body {
-  background-color: var(--mi-normal-background-color);
-  color: var(--mi-normal-foreground-color);
+  background-color: var(--mi-background-color);
+  color: var(--mi-text-color);
   font-family: var(--mi-font-family-stack);
 }
 body,
@@ -166,14 +166,14 @@ a {
   transition:
     0.1s color,
     0.1s background-color;
-  color: var(--mi-primary-color);
+  color: var(--mi-button-color);
   text-decoration: underline;
   word-break: break-word;
 }
 
 @media (prefers-color-scheme: dark) {
   a {
-    color: var(--mi-primary-color);
+    color: var(--mi-button-color);
   }
 }
 

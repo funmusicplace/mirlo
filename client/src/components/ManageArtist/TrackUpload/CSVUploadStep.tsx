@@ -291,7 +291,7 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
             <div
               key={index}
               className={`grid grid-cols-[1fr_2fr] items-center gap-4 rounded p-4 ${
-                mapping[index] ? "bg-[var(--mi-primary-color)]" : "bg-white"
+                mapping[index] ? "bg-[var(--mi-button-color)]" : "bg-white"
               }`}
             >
               <label className="font-medium">

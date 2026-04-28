@@ -74,7 +74,7 @@ const AlbumFormContent: React.FC<{
                   })}
                   .{" "}
                 </span>
-                <span className="bg-(--mi-normal-background-color) text-(--mi-warning-color)">
+                <span className="bg-(--mi-background-color) text-(--mi-warning-color)">
                   {t("urlSlugWarning")}
                 </span>
               </small>

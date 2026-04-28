@@ -27,7 +27,7 @@ export const AnnouncementWrapper: React.FC<{
 
         color: ${artistColors?.button || "var(--mi-foreground-color)"};
         background-color: ${artistColors?.buttonText ||
-        "var(--mi-secondary-color)"};
+        "var(--mi-button-text-color)"};
       `}
     >
       <div
@@ -115,7 +115,7 @@ const ManageArtistAnnouncement: React.FC<{
           padding-top: 0.5rem;
           padding-bottom: 0.5rem;
           background-color: ${artist.properties?.colors?.buttonText ||
-          "var(--mi-secondary-color)"} !important;
+          "var(--mi-button-text-color)"} !important;
           filter: brightness(95%) grayscale(10%);
 
           @media screen and (max-width: ${bp.medium}px) {
@@ -151,7 +151,7 @@ const ManageArtistAnnouncement: React.FC<{
 
           textarea {
             color: ${artist.properties?.colors?.button ||
-            "var(--mi-primary-color)"};
+            "var(--mi-button-color)"};
             background-color: ${artist.properties?.colors?.buttonText ||
             "var(--mi-foreground-color)"};
           }

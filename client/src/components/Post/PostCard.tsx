@@ -44,12 +44,12 @@ const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
           background-image:
             radial-gradient(
               circle at center,
-              ${color2 || "var(--mi-primary-color)"} var(--stop1),
+              ${color2 || "var(--mi-button-color)"} var(--stop1),
               transparent var(--stop2)
             ),
             radial-gradient(
               circle at center,
-              ${color2 || "var(--mi-primary-color)"} var(--stop1),
+              ${color2 || "var(--mi-button-color)"} var(--stop1),
               transparent var(--stop2)
             );
           background-size: var(--bgSize) var(--bgSize);
@@ -71,7 +71,7 @@ const PostContainer = styled.li<{
   border: var(--mi-border);
   background-color: ${(props) =>
     (props.isOnArtistPage && props.artistBackground) ??
-    "var(--mi-normal-background-color)"};
+    "var(--mi-background-color)"};
   position: relative;
   width: 100%;
   cursor: pointer;
@@ -115,7 +115,7 @@ const PostContainer = styled.li<{
   }
 
   &:focus-within {
-    outline: 1px solid var(--mi-normal-foreground-color);
+    outline: 1px solid var(--mi-text-color);
   }
 `;
 
@@ -152,7 +152,7 @@ const PostCard: React.FC<{
 
           @media (prefers-color-scheme: dark) {
             background-color: ${(isOnArtistPage && artistBackground) ??
-            "var(--mi-normal-background-color)"};
+            "var(--mi-background-color)"};
           }
 
           @media screen and (max-width: ${bp.medium}px) {
@@ -195,7 +195,7 @@ const PostCard: React.FC<{
             transition: 0.2s ease-in-out;
             ${!post.featuredImage ? "height: 100%;" : ""}
             background-color: ${(isOnArtistPage && artistBackground) ??
-            "var(--mi-normal-background-color)"};
+            "var(--mi-background-color)"};
           `}
         >
           {post.artist && (
@@ -263,7 +263,7 @@ const PostCard: React.FC<{
                   css`
                     font-weight: normal;
                     text-align: center;
-                    color: var(--mi-normal-foreground-color);
+                    color: var(--mi-text-color);
                   `
                 }
               >

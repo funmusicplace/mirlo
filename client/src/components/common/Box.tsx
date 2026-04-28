@@ -81,18 +81,18 @@ const Box = styled.div<{
         return `
             background: var(--mi-success-background-color);
             border: var(--mi-success-background-color) 1px solid;
-            color: var(--mi-normal-foreground-color); 
+            color: var(--mi-text-color); 
         `;
       case "info":
         return `
           background-color: var(--mi-info-background-color);
-          color: var(--mi-normal-foreground-color);
+          color: var(--mi-text-color);
         `;
       case "warning":
         return `
             background: var(--mi-warning-background-color);
             border: var(--mi-warning-background-color) 1px solid;
-            color: var(--mi-normal-foreground-color);
+            color: var(--mi-text-color);
 
             a { 
               color: var(--mi-white);

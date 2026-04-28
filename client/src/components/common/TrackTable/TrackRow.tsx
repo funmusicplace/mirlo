@@ -35,7 +35,7 @@ const TR = styled.tr<{
 }>`
   ${(props) =>
     !props.canPlayTrack
-      ? `color: ${props.colors?.button ?? "var(--mi-normal-foreground-color)"}; opacity: .6;`
+      ? `color: ${props.colors?.button ?? "var(--mi-text-color)"}; opacity: .6;`
       : ""}
 
   display: flex;
@@ -44,35 +44,35 @@ const TR = styled.tr<{
   &:hover {
     color: ${(props) =>
       props.colors?.background ??
-      "var(--mi-normal-foreground-color)"} !important;
+      "var(--mi-text-color)"} !important;
     background-color: ${(props) =>
-      props.colors?.text ?? "var(--mi-normal-background-color)"} !important;
+      props.colors?.text ?? "var(--mi-background-color)"} !important;
 
     button.play-button,
     button.pause-button {
       color: ${(props) =>
-        props.colors?.background ?? "var(--mi-normal-foreground-color)"};
+        props.colors?.background ?? "var(--mi-text-color)"};
       background: transparent;
 
       svg {
         fill: ${(props) =>
           props.colors?.background ??
-          "var(--mi-normal-foreground-color)"} !important;
+          "var(--mi-text-color)"} !important;
       }
     }
 
     .mi-dropdown-button {
       background-color: ${(props) =>
         props.colors?.background ??
-        "var(--mi-normal-foreground-color)"} !important;
+        "var(--mi-text-color)"} !important;
       color: ${(props) =>
-        props.colors?.text ?? "var(--mi-normal-background-color)"} !important;
+        props.colors?.text ?? "var(--mi-background-color)"} !important;
     }
 
     .track-authors {
       color: ${(props) =>
         props.colors?.background ??
-        "var(--mi-normal-foreground-color)"} !important;
+        "var(--mi-text-color)"} !important;
       opacity: 0.8 !important;
     }
   }
@@ -80,13 +80,13 @@ const TR = styled.tr<{
   button.play-button,
   button.pause-button {
     color: ${(props) =>
-      props.colors?.button ?? "var(--mi-normal-foreground-color)"};
+      props.colors?.button ?? "var(--mi-text-color)"};
     background: transparent;
     font-size: 0.8rem;
 
     svg {
       fill: ${(props) =>
-        props.colors?.button ?? "var(--mi-normal-foreground-color)"};
+        props.colors?.button ?? "var(--mi-text-color)"};
     }
   }
 

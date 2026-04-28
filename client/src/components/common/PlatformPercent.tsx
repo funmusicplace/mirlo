@@ -37,8 +37,8 @@ const PlatformPercent: React.FC<{
         id={`${tooltipId}-button`}
         className="w-6 h-6 border-1 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer p-0 transition-opacity hover:opacity-80"
         style={{
-          borderColor: colors?.button ?? "var(--mi-primary-color)",
-          color: colors?.button ?? "var(--mi-primary-color)",
+          borderColor: colors?.button ?? "var(--mi-button-color)",
+          color: colors?.button ?? "var(--mi-button-color)",
         }}
         onClick={() => setShowTooltip(!showTooltip)}
         type="button"
@@ -57,8 +57,8 @@ const PlatformPercent: React.FC<{
           role="tooltip"
           style={{
             backgroundColor:
-              colors?.background ?? "var(--mi-normal-background-color)",
-            borderColor: colors?.button ?? "var(--mi-primary-color)",
+              colors?.background ?? "var(--mi-background-color)",
+            borderColor: colors?.button ?? "var(--mi-button-color)",
             color: colors?.text ?? "var(--mi-foreground-color)",
           }}
         >

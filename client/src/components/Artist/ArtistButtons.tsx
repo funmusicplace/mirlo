@@ -43,8 +43,8 @@ export const ArtistButton: React.FC<
   const { colors } = useGetArtistColors();
 
   let variantStyles = () => {
-    let primaryColor = colors?.button ?? `var(--mi-primary-color)`;
-    let secondaryColor = colors?.buttonText ?? `var(--mi-secondary-color)`;
+    let primaryColor = colors?.button ?? `var(--mi-button-color)`;
+    let secondaryColor = colors?.buttonText ?? `var(--mi-button-text-color)`;
 
     if (props.color === "foreground") {
       primaryColor = colors?.text ?? `var(--mi-foreground-color)`;

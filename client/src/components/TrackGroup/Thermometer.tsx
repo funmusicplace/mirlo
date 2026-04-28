@@ -47,7 +47,7 @@ function Thermometer({
           "h-full relative inline-flex pr-2 items-center justify-end " +
           css`
             background-color: ${artist?.properties?.colors?.button ??
-            "var(--mi-primary-color)"};
+            "var(--mi-button-color)"};
             transition: all 0.5s;
             width: ${displayPercent}%;
           `
