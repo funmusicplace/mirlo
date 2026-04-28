@@ -1,23 +1,23 @@
-import { NextFunction, Request, Response } from "express";
-import { logger } from "../../../../logger";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import contentDisposition from "content-disposition";
+import { NextFunction, Request, Response } from "express";
+import filenamify from "filenamify";
 
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { logger } from "../../../../logger";
+import { startGeneratingZip } from "../../../../queues/album-queue";
+import { AppError } from "../../../../utils/error";
+import {
+  getReadStream,
+  statFile,
+  trackGroupFormatBucket,
+} from "../../../../utils/minio";
 import {
   FormatOptions,
   basicTrackGroupInclude,
   findPurchaseAndVoidToken,
   findPurchaseBasedOnTokenAndUpdate,
 } from "../../../../utils/trackGroup";
-import {
-  getReadStream,
-  statFile,
-  trackGroupFormatBucket,
-} from "../../../../utils/minio";
-import { startGeneratingZip } from "../../../../queues/album-queue";
-import filenamify from "filenamify";
-import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -133,6 +133,12 @@ export default function () {
         const stream = await getReadStream(trackGroupFormatBucket, zipName);
 
         if (stream) {
+          await prisma.trackGroupDownload.create({
+            data: {
+              trackGroupId: trackGroup.id,
+              userId: req.user?.id ?? null,
+            },
+          });
           stream.pipe(res);
         } else {
           throw new AppError({

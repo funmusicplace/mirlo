@@ -1,3 +1,4 @@
+import { moneyDisplay } from "components/common/Money";
 import React from "react";
 import {
   LineChart,
@@ -9,7 +10,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "services/api";
-import { moneyDisplay } from "components/common/Money";
 
 interface StatsData {
   userSignupsByWeek: Array<{ week: string; count: number }>;
@@ -20,6 +20,9 @@ interface StatsData {
     currency: string;
     totalAmountCents: number;
   }>;
+  avgMonthlyPlays: number;
+  avgMonthlyActiveUsers: number;
+  avgMonthlyAlbumDownloads: number;
 }
 
 const transactionVolumeColors = [
@@ -37,6 +40,17 @@ const ChartContainer: React.FC<{
   <div className="mb-8 p-4 border border-gray-200 rounded-md bg-white">
     <h4 className="mb-4 font-semibold">{title}</h4>
     {children}
+  </div>
+);
+
+const KpiCard: React.FC<{ title: string; value: number | string }> = ({
+  title,
+  value,
+}) => (
+  <div className="p-4 border border-gray-200 rounded-md bg-white flex flex-col gap-1">
+    <span className="text-sm text-gray-500">{title}</span>
+    <span className="text-3xl font-bold">{value.toLocaleString()}</span>
+    <span className="text-xs text-gray-400">avg / month (last 12 months)</span>
   </div>
 );
 
@@ -110,6 +124,18 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="flex-grow p-4">
       <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
+
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <KpiCard title="Monthly Plays" value={stats.avgMonthlyPlays} />
+        <KpiCard
+          title="Monthly Active Users"
+          value={stats.avgMonthlyActiveUsers}
+        />
+        <KpiCard
+          title="Monthly Album Downloads"
+          value={stats.avgMonthlyAlbumDownloads}
+        />
+      </div>
 
       <div className="flex flex-col flex-wrap gap-4 w-full justify-stretch">
         <ChartContainer title="Artist Signups Per Week">

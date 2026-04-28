@@ -105,6 +105,7 @@ model User {
   invitesSent                         Invite[]                        @relation("invitedBy")
   invitesUsed                         Invite[]                        @relation("usedBy")
   transactions                        UserTransaction[]
+  trackGroupDownloads                 TrackGroupDownload[]
 }
 
 model Invite {
@@ -752,7 +753,18 @@ model TrackGroup {
   recommendedByTrackGroups        RecommendedTrackGroup[]         @relation("recommendedByTrackGroups")
   subscriptionTierReleases        SubscriptionTierRelease[]
 
+  downloads                       TrackGroupDownload[]
+
   @@unique([artistId, urlSlug])
+}
+
+model TrackGroupDownload {
+  id           String     @id @default(uuid()) @db.Uuid
+  trackGroupId Int
+  trackGroup   TrackGroup @relation(fields: [trackGroupId], references: [id])
+  userId       Int?
+  user         User?      @relation(fields: [userId], references: [id])
+  createdAt    DateTime   @default(now())
 }
 
 model Fundraiser {
