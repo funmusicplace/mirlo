@@ -1,15 +1,10 @@
 import { css } from "@emotion/css";
 import FormComponent from "components/common/FormComponent";
-import { useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { useParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 
-const isValidColor = (val: string) => {
-  const matcher = val.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
-  return matcher;
-};
+const isValidColor = (val: string) =>
+  /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(val);
 
 export const ColorInput: React.FC<{ name: string; title: string }> = ({
   name,
@@ -43,7 +38,8 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
         type="color"
         {...register(name, {
           validate: {
-            validColor: (val) => !!isValidColor(val) || "Not a valid color!",
+            validColor: (val) =>
+              !val || isValidColor(val) || "Not a valid color!",
           },
         })}
         className={css`
@@ -52,14 +48,12 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
           width: 80%;
           cursor: pointer;
 
-          /* For WebKit browsers (Chrome, Safari) */
           &::-webkit-color-swatch-wrapper {
             padding: 0;
           }
           &::-webkit-color-swatch {
             border: none;
           }
-          /* For Firefox */
           &::-moz-color-swatch {
             border: none;
           }

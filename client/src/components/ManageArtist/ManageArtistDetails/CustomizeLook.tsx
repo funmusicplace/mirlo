@@ -60,12 +60,7 @@ export type ArtistFormData = {
   allowDirectMessages: boolean;
   defaultPlatformFee: number;
   properties: {
-    colors: {
-      button: string;
-      buttonText: string;
-      background: string;
-      text: string;
-    };
+    colors: ArtistColors;
     tileBackgroundImage?: boolean;
     titles?: {
       releases: string;
@@ -91,12 +86,6 @@ const generateDefaults = (existing?: Artist) => {
     maxFreePlays: existing?.maxFreePlays,
     properties: merge(
       {
-        colors: {
-          button: "",
-          buttonText: "",
-          background: "",
-          text: "",
-        },
         titles: {
           releases: "Releases",
           merch: "Merch",
@@ -156,7 +145,7 @@ export const CustomizeLook: React.FC = () => {
         urlSlug: data.urlSlug?.toLowerCase(),
         activityPub: data.activityPub,
         allowDirectMessages: data.allowDirectMessages,
-        properties: data.properties,
+        properties: { ...artist?.properties, ...data.properties },
       };
 
       if (existingId) {
