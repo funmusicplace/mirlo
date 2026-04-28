@@ -30,10 +30,10 @@ const IncludedReleases: React.FC<{
                     style={{ backgroundColor: "var(--mi-button-color)" }}
                   />
                 )}
-                <span className="flex-1 truncate text-sm">
+                <span className="truncate text-sm">
                   {release.trackGroup.artist.name}
                 </span>
-                <span className="flex-1 truncate text-sm">
+                <span className="truncate text-sm">
                   {release.trackGroup.title}
                 </span>
               </div>
