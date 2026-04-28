@@ -284,6 +284,7 @@ interface Artist {
   }[];
   properties?: {
     colors?: ArtistColors;
+    transparentContainer?: boolean;
     tileBackgroundImage?: boolean;
     titles?: {
       releases?: string;

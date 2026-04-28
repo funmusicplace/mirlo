@@ -1131,6 +1131,8 @@
     "backgroundColor": "Background color",
     "textColor": "Text color",
     "secondaryTextColor": "Secondary text color",
+    "transparentContainer": "Make container transparent",
+    "transparentContainerDescription": "Hides the page background color so a background image shows through behind your content.",
     "buttonColor": "Button / link color",
     "buttonTextColor": "Button text color",
     "saveColors": "Save colors",

@@ -1,7 +1,11 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import { useArtistColorsPreview } from "components/ArtistColorsProvider";
+import {
+  useArtistColorsPreview,
+  useTransparentContainerPreview,
+} from "components/ArtistColorsProvider";
+import { InputEl } from "components/common/Input";
 import { useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -26,26 +30,41 @@ const ArtistFormColors: React.FC = () => {
   const { user } = useAuthContext();
   const { data: artist } = useManagedArtistQuery();
   const setPreview = useArtistColorsPreview();
+  const setTransparentPreview = useTransparentContainerPreview();
   const { mutateAsync: updateArtist, isPending } = useUpdateArtistMutation();
 
-  const { control, getValues, setValue, formState } = useFormContext<{
-    properties: { colors?: ArtistColors };
+  const { control, getValues, setValue, formState, register } = useFormContext<{
+    properties: { colors?: ArtistColors; transparentContainer?: boolean };
   }>();
 
   const watchedColors = useWatch({ control, name: "properties.colors" });
+  const watchedTransparent = useWatch({
+    control,
+    name: "properties.transparentContainer",
+  });
   React.useEffect(() => {
     setPreview(watchedColors ?? null);
   }, [watchedColors, setPreview]);
   React.useEffect(() => {
-    return () => setPreview(null);
-  }, [setPreview]);
+    setTransparentPreview(watchedTransparent ?? null);
+  }, [watchedTransparent, setTransparentPreview]);
+  React.useEffect(() => {
+    return () => {
+      setPreview(null);
+      setTransparentPreview(null);
+    };
+  }, [setPreview, setTransparentPreview]);
 
-  const colorsDirty = Boolean(formState.dirtyFields.properties?.colors);
+  const colorsDirty =
+    Boolean(formState.dirtyFields.properties?.colors) ||
+    Boolean(formState.dirtyFields.properties?.transparentContainer);
 
   const onSaveColors = async () => {
     if (!user || !artist) return;
     try {
       const colors = getValues("properties.colors") ?? {};
+      const transparentContainer =
+        getValues("properties.transparentContainer") ?? false;
       await updateArtist({
         userId: user.id,
         artistId: artist.id,
@@ -53,10 +72,15 @@ const ArtistFormColors: React.FC = () => {
           properties: {
             ...artist.properties,
             colors,
+            transparentContainer,
           },
         },
       });
       setValue("properties.colors", colors, {
+        shouldDirty: false,
+        shouldTouch: false,
+      });
+      setValue("properties.transparentContainer", transparentContainer, {
         shouldDirty: false,
         shouldTouch: false,
       });
@@ -71,6 +95,14 @@ const ArtistFormColors: React.FC = () => {
       shouldDirty: false,
       shouldTouch: false,
     });
+    setValue(
+      "properties.transparentContainer",
+      artist?.properties?.transparentContainer ?? false,
+      {
+        shouldDirty: false,
+        shouldTouch: false,
+      }
+    );
   };
 
   if (!artist) return null;
@@ -84,6 +116,33 @@ const ArtistFormColors: React.FC = () => {
           name="properties.colors.background"
           title={t("backgroundColor")}
         />
+        <div>
+          <label
+            htmlFor="input-transparent-container"
+            className={css`
+              display: inline-flex;
+              align-items: center;
+              gap: 0.5rem;
+            `}
+          >
+            <InputEl
+              id="input-transparent-container"
+              type="checkbox"
+              aria-describedby="hint-transparent-container"
+              {...register("properties.transparentContainer")}
+            />
+            <span>{t("transparentContainer")}</span>
+          </label>
+          <small
+            id="hint-transparent-container"
+            className={css`
+              display: block;
+              margin-top: 0.25rem;
+            `}
+          >
+            {t("transparentContainerDescription")}
+          </small>
+        </div>
         <ColorInput name="properties.colors.text" title={t("textColor")} />
         <ColorInput
           name="properties.colors.secondaryText"

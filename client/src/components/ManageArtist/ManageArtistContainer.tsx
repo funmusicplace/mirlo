@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
+import { useTransparentContainer } from "components/ArtistColorsProvider";
 import { ArtistBox } from "components/common/Box";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import React from "react";
@@ -44,14 +45,17 @@ export const ArtistPageWrapper: React.FC<{
   children: React.ReactNode;
   hasBackground?: boolean;
 }> = ({ children, hasBackground }) => {
+  const transparent = useTransparentContainer();
   return (
     <Container hasBackground={!!hasBackground}>
       <div
         className={css`
-          ${hasBackground
+          ${hasBackground && !transparent
             ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));"
             : ""}
-          background-color: var(--mi-background-color);
+          background-color: ${transparent
+            ? "transparent"
+            : "var(--mi-background-color)"};
           padding: 0 2rem 2rem;
           height: 100%;
 

@@ -60,6 +60,7 @@ export type ArtistFormData = {
   defaultPlatformFee: number;
   properties: {
     colors: ArtistColors;
+    transparentContainer?: boolean;
     tileBackgroundImage?: boolean;
     titles?: {
       releases: string;
