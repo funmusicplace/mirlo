@@ -20,8 +20,17 @@ export default function ErrorPage() {
     if (process.env.NODE_ENV !== "development" && error instanceof Error) {
       console.error("Error:", error.message);
       if (error.message.includes("dynamically imported module")) {
-        snackbar("Hey, there's a new version of Mirlo! Reloading...");
-        window.location.reload();
+        const alreadyReloaded = sessionStorage.getItem("chunkReload") === "1";
+        if (!alreadyReloaded) {
+          sessionStorage.setItem("chunkReload", "1");
+          snackbar("Hey, there's a new version of Mirlo! Reloading...");
+          navigator.serviceWorker?.getRegistration().then((reg) => {
+            reg?.waiting?.postMessage({ type: "SKIP_WAITING" });
+          });
+          window.location.reload();
+        } else {
+          sessionStorage.removeItem("chunkReload");
+        }
       }
     }
   }, [error]);
