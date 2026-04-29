@@ -1,10 +1,11 @@
 import prisma from "@mirlo/prisma";
-import sendMail from "./send-mail";
+import { Job } from "bullmq";
+import { groupBy } from "lodash";
 
 import logger from "../logger";
-import { getClient } from "../activityPub/utils";
-import { groupBy } from "lodash";
-import { Job } from "bullmq";
+import { getClient } from "../utils/getClient";
+
+import sendMail from "./send-mail";
 
 export type AnnounceMonthlyReceiptsEmailType = {
   userSubscriptions: {

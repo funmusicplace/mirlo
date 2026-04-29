@@ -1,11 +1,12 @@
-import { User } from "@mirlo/prisma/client";
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import sendMail from "../../../../jobs/send-mail";
+import { User } from "@mirlo/prisma/client";
 import { Job } from "bullmq";
-import { getClient } from "../../../../activityPub/utils";
+import { NextFunction, Request, Response } from "express";
+
+import { userAuthenticated } from "../../../../auth/passport";
+import sendMail from "../../../../jobs/send-mail";
 import { AppError } from "../../../../utils/error";
+import { getClient } from "../../../../utils/getClient";
 
 type Params = { id: string };
 

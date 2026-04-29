@@ -1,10 +1,9 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
 import stripe from "../../../utils/stripe";
 
-const DEFAULT_CLIENT_BASE_URL =
-  process.env.REACT_APP_CLIENT_DOMAIN ?? "https://mirlo.space";
+const DEFAULT_CLIENT_BASE_URL = process.env.API_DOMAIN ?? "https://mirlo.space";
 
 const ensureTrailingSlash = (value: string) =>
   value.endsWith("/") ? value : `${value}/`;

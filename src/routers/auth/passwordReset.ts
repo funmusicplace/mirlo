@@ -1,12 +1,14 @@
-import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
-import { hashPassword, setTokens } from "./utils";
-import { sendMail } from "../../jobs/send-mail";
-import { Job } from "bullmq";
-import logger from "../../logger";
-import { getClient } from "../../activityPub/utils";
-
 import { randomUUID } from "crypto";
+
+import prisma from "@mirlo/prisma";
+import { Job } from "bullmq";
+import { NextFunction, Request, Response } from "express";
+
+import { sendMail } from "../../jobs/send-mail";
+import logger from "../../logger";
+import { getClient } from "../../utils/getClient";
+
+import { hashPassword, setTokens } from "./utils";
 
 /**
  * This endpoint is pretty much only ever accessed from an external link,

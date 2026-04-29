@@ -67,7 +67,6 @@ NODE_ENV=production
 PORT=3000
 API_DOMAIN=https://yourdomain.com
 STATIC_MEDIA_HOST=https://yourdomain.com
-REACT_APP_API_DOMAIN=https://yourdomain.com
 
 # Security
 JWT_SECRET=your-secure-jwt-secret-here

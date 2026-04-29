@@ -33,9 +33,6 @@ spec:
         - key: STATIC_MEDIA_HOST
           value: https://${APP_DOMAIN}
           scope: RUN_TIME
-        - key: REACT_APP_API_DOMAIN
-          value: https://${APP_DOMAIN}
-          scope: RUN_TIME
         - key: DATABASE_URL
           value: ${db.connection_string}
           scope: RUN_TIME

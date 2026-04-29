@@ -1,10 +1,9 @@
 import { TrackGroup, Post, Artist } from "@mirlo/prisma/client";
-
 import RSS from "rss";
 
+import { getClient } from "./getClient";
 import { markdownAsHtml } from "./post";
 import { isArtist, isPost, isTrackGroup } from "./typeguards";
-import { getClient } from "../activityPub/utils";
 
 export const turnItemsIntoRSS = async (
   feedDetails: {

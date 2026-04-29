@@ -1,15 +1,15 @@
-import { Prisma } from "@mirlo/prisma/client";
-
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
+import { NextFunction, Request, Response } from "express";
+import { uniqBy } from "lodash";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { uniqBy } from "lodash";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
-import { getClient } from "../../../../activityPub/utils";
+import { getClient } from "../../../../utils/getClient";
 
 export default function () {
   const operations = {

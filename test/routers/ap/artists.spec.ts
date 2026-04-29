@@ -8,7 +8,7 @@ import { describe, it } from "mocha";
 import { clearTables } from "../../utils";
 import { requestApp } from "../utils";
 
-describe("artists", () => {
+describe("ap/artists", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -26,7 +26,7 @@ describe("artists", () => {
       }
     });
 
-    it("should GET /{id} with artist slug", async () => {
+    it("should GET /{id} with as ActivityPub Actor", async () => {
       const artistSlug = "test-artist";
       const user = await prisma.user.create({
         data: {
@@ -39,35 +39,30 @@ describe("artists", () => {
           urlSlug: artistSlug,
           userId: user.id,
           enabled: true,
+          activityPub: true,
+          bio: "a test bio",
         },
       });
       const response = await requestApp
-        .get(`artists/${artistSlug}`)
-        .set("Accept", "application/json");
+        .get(`ap/artists/${artistSlug}`)
+        .set("Accept", "application/activity+json");
 
-      assert.equal(response.body.result.id, artist.id);
-    });
+      assert.equal(
+        response.headers["content-type"],
+        "application/activity+json"
+      );
 
-    it("should GET /{id} with wrong artist slug", async () => {
-      const artistSlug = "test-artist";
-      const user = await prisma.user.create({
-        data: {
-          email: "test@test.com",
-        },
-      });
-      await prisma.artist.create({
-        data: {
-          name: "Test artist",
-          urlSlug: "other-artist-slug",
-          userId: user.id,
-          enabled: true,
-        },
-      });
-      const response = await requestApp
-        .get(`artists/${artistSlug}`)
-        .set("Accept", "application/json");
+      assert.equal(response.status, 200);
+      assert.equal(response.body.type, "Person");
+      assert.equal(response.body.discoverable, true);
+      assert.equal(response.body.preferredUsername, artistSlug);
+      assert.equal(response.body.name, artist.name);
+      assert.equal(response.body.summary, artist.bio);
 
-      assert.equal(response.status, 404);
-    });
+      assert(
+        response.body.followers.includes("/v1/ap/artists/test-artist/followers")
+      );
+      assert(response.body.publicKey.publicKeyPem);
+    }).timeout(5000);
   });
 });

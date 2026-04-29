@@ -1,10 +1,6 @@
 import { Request, Response } from "express";
 
-import { getClient } from "../../../../../activityPub/utils";
-
-type Params = {
-  userId: string;
-};
+import { getClient } from "../../../../../utils/getClient";
 
 export default function () {
   const operations = {

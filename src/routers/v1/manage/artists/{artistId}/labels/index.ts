@@ -2,7 +2,6 @@ import prisma from "@mirlo/prisma";
 import { User, Prisma, Artist } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import { getClient } from "../../../../../../activityPub/utils";
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
@@ -12,6 +11,7 @@ import {
 import { sendMailQueue } from "../../../../../../queues/send-mail-queue";
 import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
+import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
 
 const sendArtistNotificationOfLabel = async (

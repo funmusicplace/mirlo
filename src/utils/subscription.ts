@@ -1,11 +1,10 @@
 import prisma from "@mirlo/prisma";
-import { logger } from "../logger";
-import sendMail from "../jobs/send-mail";
-
-import { Job } from "bullmq";
 import { Artist } from "@mirlo/prisma/client";
+
+import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
-import { getClient } from "../activityPub/utils";
+
+import { getClient } from "./getClient";
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "MONTH" | "YEAR";

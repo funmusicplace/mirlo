@@ -1,7 +1,11 @@
 import assert from "node:assert";
+
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
+import { getClient } from "../../../src/utils/getClient";
 import {
   clearTables,
   createArtist,
@@ -12,8 +16,6 @@ import {
   createUser,
 } from "../../utils";
 import { requestApp } from "../utils";
-import prisma from "@mirlo/prisma";
-import { getClient } from "../../../src/activityPub/utils";
 
 let applicationUrl: string;
 describe("oembed", () => {

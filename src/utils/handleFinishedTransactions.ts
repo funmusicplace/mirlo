@@ -11,13 +11,13 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Job } from "bullmq";
 import Stripe from "stripe";
 
-import { getClient } from "../activityPub/utils";
 import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 
 import { subscribeUserToArtist } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
+import { getClient } from "./getClient";
 import { calculateAppFee } from "./processingPayments";
 import stripe, { OPTION_JOINER } from "./stripe";
 import { registerSubscription } from "./subscriptionTier";

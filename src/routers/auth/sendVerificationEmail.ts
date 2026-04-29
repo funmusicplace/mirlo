@@ -1,6 +1,7 @@
 import { Job } from "bullmq";
+
 import { sendMail } from "../../jobs/send-mail";
-import { getClient } from "../../activityPub/utils";
+import { getClient } from "../../utils/getClient";
 
 export type VerificationAccountType = "artist" | "listener" | "label";
 

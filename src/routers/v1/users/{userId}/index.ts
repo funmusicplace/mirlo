@@ -1,19 +1,21 @@
+import { randomUUID } from "crypto";
+
+import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
+import bcrypt from "bcryptjs";
+import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { Prisma, User } from "@mirlo/prisma/client";
-import prisma from "@mirlo/prisma";
-import { deleteUser, updateCurrencies } from "../../../../utils/user";
-import bcrypt from "bcryptjs";
-import { AppError } from "../../../../utils/error";
 import sendMail from "../../../../jobs/send-mail";
-import { Job } from "bullmq";
+import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
-import { randomUUID } from "crypto";
-import { getClient } from "../../../../activityPub/utils";
+import { getClient } from "../../../../utils/getClient";
+import { deleteUser, updateCurrencies } from "../../../../utils/user";
 
 export default function () {
   const operations = {

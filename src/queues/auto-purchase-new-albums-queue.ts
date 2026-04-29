@@ -1,10 +1,12 @@
+import prisma from "@mirlo/prisma";
 import { Queue, QueueEvents } from "bullmq";
+
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
-import prisma from "@mirlo/prisma";
-import { sendMailQueue } from "./send-mail-queue";
+import { getClient } from "../utils/getClient";
 import { registerPurchase } from "../utils/trackGroup";
-import { getClient } from "../activityPub/utils";
+
+import { sendMailQueue } from "./send-mail-queue";
 
 export type AutomaticallyReceivedAlbumEmailType = {
   trackGroup: {

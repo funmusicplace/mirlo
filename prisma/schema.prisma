@@ -176,6 +176,7 @@ model ActivityPubArtistFollowers {
   artistId  Int
   artist    Artist   @relation(fields: [artistId], references: [id])
   actor     String
+  inboxUrl  String?
   createdAt DateTime @default(now())
 
   @@unique([actor, artistId])
@@ -306,6 +307,8 @@ model Artist {
   maxFreePlays                       Int?
   merchStoreURL                      String?
   activityPub                        Boolean                              @default(false)
+  apPublicKey                        String?
+  apPrivateKey                       String?
   announcementText                   String?
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
   userArtistNotificationSettings     UserArtistNotificationSetting[]

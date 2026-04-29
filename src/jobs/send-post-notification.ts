@@ -1,9 +1,9 @@
 import prisma from "@mirlo/prisma";
 import { flatten, uniqBy } from "lodash";
 
-import { getClient } from "../activityPub/utils";
 import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
 import { processSinglePost } from "../utils/post";
 

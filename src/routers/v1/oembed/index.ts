@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from "express";
-import { AppError } from "../../../utils/error";
+
 import logger from "../../../logger";
-import { getClient } from "../../../activityPub/utils";
-import { matchRoute } from "../../../parseIndex/routeMatcher";
 import {
   fetchArtistMetadata,
   fetchAlbumMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
 } from "../../../parseIndex/metadata";
+import { matchRoute } from "../../../parseIndex/routeMatcher";
+import { AppError } from "../../../utils/error";
+import { getClient } from "../../../utils/getClient";
 import { generateFullStaticImageUrl } from "../../../utils/images";
 import {
   finalCoversBucket,

@@ -1,23 +1,19 @@
-import { Request, Response } from "express";
+import prisma from "@mirlo/prisma";
 import {
   User,
   Prisma,
   Artist,
   ArtistSubscriptionTier,
 } from "@mirlo/prisma/client";
+import { Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
-import { isTrackGroup } from "../../../../utils/typeguards";
-import {
-  headersAreForActivityPub,
-  turnFeedIntoOutbox,
-} from "../../../../activityPub/utils";
 import { generateFullStaticImageUrl } from "../../../../utils/images";
 import { finalPostImageBucket } from "../../../../utils/minio";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
+import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
+import { isTrackGroup } from "../../../../utils/typeguards";
 
 export const getPostsVisibleToUser = async (
   user: User | undefined,
@@ -117,6 +113,29 @@ export const getAlbumsVisibleToUser = async (artist: Artist) => {
   return albums;
 };
 
+export const buildFeedForArtist = async (
+  user: User | undefined,
+  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] }
+) => {
+  const posts = await getPostsVisibleToUser(user, artist);
+
+  const albums = await getAlbumsVisibleToUser(artist);
+
+  const zipped = [...posts.posts, ...albums].sort((a, b) => {
+    const publishedDateA =
+      (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
+    const publishedDateB =
+      (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
+    if (publishedDateA > publishedDateB) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+
+  return zipped;
+};
+
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -147,30 +166,9 @@ export default function () {
         });
       }
 
-      const posts = await getPostsVisibleToUser(user, artist);
+      const zipped = await buildFeedForArtist(user, artist);
 
-      const albums = await getAlbumsVisibleToUser(artist);
-
-      const zipped = [...posts.posts, ...albums].sort((a, b) => {
-        const publishedDateA =
-          (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
-        const publishedDateB =
-          (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
-        if (publishedDateA > publishedDateB) {
-          return -1;
-        } else {
-          return 1;
-        }
-      });
-
-      if (headersAreForActivityPub(req.headers, "GET")) {
-        if (req.headers.accept) {
-          res.set("content-type", "application/activity+json");
-        }
-        const feed = await turnFeedIntoOutbox(artist, zipped);
-
-        res.send(feed);
-      } else if (format === "rss") {
+      if (format === "rss") {
         const feed = await turnItemsIntoRSS(
           {
             name: artist.name,

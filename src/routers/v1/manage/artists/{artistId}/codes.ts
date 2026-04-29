@@ -1,13 +1,13 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
+
 import {
   userAuthenticated,
   artistBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
-
-import prisma from "@mirlo/prisma";
 import { downloadCSVFile } from "../../../../../utils/download";
-import { getClient } from "../../../../../activityPub/utils";
+import { getClient } from "../../../../../utils/getClient";
 
 type Params = {
   artistId: string;
