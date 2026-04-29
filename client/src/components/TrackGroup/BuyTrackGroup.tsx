@@ -1,25 +1,28 @@
+import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Button from "components/common/Button";
+import EmailVerification from "components/common/EmailVerification";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
 import Money, { moneyDisplay } from "components/common/Money";
+import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
+import TextArea from "components/common/TextArea";
+import { queryUserStripeStatus } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
-import { InputEl } from "components/common/Input";
-import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
-import { css } from "@emotion/css";
-import { testOwnership } from "./utils";
-import { useAuthContext } from "state/AuthContext";
-import TextArea from "components/common/TextArea";
-import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
-import EmailVerification from "components/common/EmailVerification";
-import Button from "components/common/Button";
-import { FaArrowRight } from "react-icons/fa";
-import { useQuery } from "@tanstack/react-query";
-import { queryUserStripeStatus } from "queries";
-import PaymentInputElement from "./PaymentInputElement";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
+
 import AddToCollection from "./AddToCollection";
+import PaymentInputElement from "./PaymentInputElement";
+import { testOwnership } from "./utils";
+
+import { useAuthContext } from "state/AuthContext";
+import { FaArrowRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 interface FormData {
   chosenPrice: string;
@@ -33,6 +36,7 @@ const BuyTrackGroup: React.FC<{
   track?: Track;
   noPadding?: boolean;
 }> = ({ trackGroup, track, noPadding }) => {
+  const navigate = useNavigate();
   const snackbar = useSnackbar();
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
@@ -63,6 +67,9 @@ const BuyTrackGroup: React.FC<{
   const chosenPrice = watch("chosenPrice");
   const consentToStoreData = watch("consentToStoreData");
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
+  const [onComplete, setOnComplete] = React.useState<(() => void) | undefined>(
+    undefined
+  );
 
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
@@ -89,6 +96,18 @@ const BuyTrackGroup: React.FC<{
           });
 
           if (response.clientSecret) {
+            const artistSlug =
+              trackGroup.artist?.urlSlug ?? trackGroup.artist?.id;
+            const params = new URLSearchParams();
+            params.set("purchaseType", track ? "track" : "trackGroup");
+            params.set("trackGroupId", trackGroup.id.toString());
+            if (track) params.set("trackId", track.id.toString());
+            setOnComplete(
+              () => () =>
+                navigate(
+                  `/${artistSlug}/checkout-complete?${params.toString()}`
+                )
+            );
             setClientSecret(response.clientSecret);
           } else {
             window.location.assign(response.redirectUrl);
@@ -100,7 +119,7 @@ const BuyTrackGroup: React.FC<{
         setStripeLoading(false);
       }
     },
-    [snackbar, t, trackGroup.id, track, verifiedEmail]
+    [snackbar, t, trackGroup, track, verifiedEmail, navigate]
   );
 
   let lessThanMin = false;
@@ -155,6 +174,7 @@ const BuyTrackGroup: React.FC<{
         clientSecret={clientSecret}
         isSetupIntent={trackGroup.fundraiser?.isAllOrNothing}
         stripeAccountId={stripeAccountStatus?.stripeAccountId}
+        onComplete={onComplete}
       />
     );
   }
