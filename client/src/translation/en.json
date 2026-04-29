@@ -718,6 +718,7 @@
     "tools": "Tools",
     "publish": "Publish now",
     "private": "Private",
+    "onlyVisibleToYou": "Only visible to you",
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",
     "backgroundColor": "Background color",
