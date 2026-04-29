@@ -77,6 +77,19 @@ describe("trackGroups", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should GET / not return private trackGroups", async () => {
+      const { user } = await createUser({ email: "private@test.com" });
+      const artist = await createArtist(user.id);
+      await createTrackGroup(artist.id, { isPublic: false });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 0);
+      assert(response.statusCode === 200);
+    });
+
     it("should GET / excludes trackGroups from soft-deleted artists", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
