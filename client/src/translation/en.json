@@ -163,7 +163,9 @@
     "somethingWrong": "Something went wrong",
     "preview": "Preview",
     "deleteTrackGroupConfirm": "Are you sure you want to delete this release?",
-    "managingPaymentsTooltip": "Do you receive payments for this release?"
+    "managingPaymentsTooltip": "Do you receive payments for this release?",
+    "private": "Private",
+    "visibility": "Visibility"
   },
   "profile": {
     "yourAvatar": "Your avatar",
