@@ -750,6 +750,7 @@ model TrackGroup {
   scheduleEndOnReleaseDate        Boolean                         @default(false)
   makeTracksPreviewableOnRelease  Boolean                         @default(false)
   hideFromSearch                  Boolean                         @default(false)
+  isPublic                        Boolean                         @default(true)
   fundraiser                      Fundraiser?                     @relation(fields: [fundraiserId], references: [id])
   fundraiserId                    Int?
   recommendedTrackGroups          RecommendedTrackGroup[]         @relation("trackGroupRecommendations")

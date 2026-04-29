@@ -1,3 +1,6 @@
+import { randomUUID } from "crypto";
+
+import prisma from "@mirlo/prisma";
 import {
   TrackGroup,
   TrackAudio,
@@ -11,10 +14,19 @@ import {
   Artist,
   ArtistAvatar,
   UploadState,
-  UserTrackPurchase,
 } from "@mirlo/prisma/client";
-import prisma from "@mirlo/prisma";
+import { DefaultArgs } from "@prisma/client/runtime/library";
+import archiver from "archiver";
+import { Response } from "express";
+
+import { logger } from "../logger";
+
+import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
+import { sendBasecampAMessage } from "./basecamp";
+import { deleteDownloadableContent } from "./content";
+import { AppError } from "./error";
 import { generateFullStaticImageUrl } from "./images";
+import { processSingleMerch } from "./merch";
 import {
   finalCoversBucket,
   finalAudioBucket,
@@ -22,24 +34,17 @@ import {
   getReadStream,
   finalArtistAvatarBucket,
 } from "./minio";
-import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
-import { logger } from "../logger";
-import archiver from "archiver";
-import { deleteTrack } from "./tracks";
-import { randomUUID } from "crypto";
-import { Response } from "express";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
-import { AppError } from "./error";
-import { processSingleMerch } from "./merch";
-import { sendBasecampAMessage } from "./basecamp";
-import { deleteDownloadableContent } from "./content";
+import { deleteTrack } from "./tracks";
 
-export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
+export const whereForPublishedTrackGroups = (opts?: {
+  includePrivate?: boolean;
+}): Prisma.TrackGroupWhereInput => {
   return {
     publishedAt: { lte: new Date() },
     isDrafts: false,
     adminEnabled: true,
+    ...(opts?.includePrivate ? {} : { isPublic: true }),
     artist: {
       enabled: true,
       deletedAt: null,

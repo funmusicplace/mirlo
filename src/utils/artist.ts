@@ -446,14 +446,16 @@ export const deleteStripeSubscriptions = async (
 
 export const singleInclude = (queryOptions?: {
   includeDefaultTier?: boolean;
+  includePrivate?: boolean;
 }): Prisma.ArtistInclude<DefaultArgs> & {
   merch: { include: { images: boolean } };
 } => {
-  const { includeDefaultTier } = queryOptions ?? {};
+  const { includeDefaultTier, includePrivate } = queryOptions ?? {};
   return {
     trackGroups: {
       where: {
         ...trackGroupPublishedObject(),
+        ...(includePrivate ? {} : { isPublic: true }),
       },
       orderBy: [
         {
