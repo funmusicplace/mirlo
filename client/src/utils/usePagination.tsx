@@ -52,7 +52,7 @@ const usePagination = ({
           {showPrev ? (
             <Link
               to={`?${previousPage.toString()}`}
-              className="inline-flex items-center gap-1.5 text-(--mi-light-foreground-color) hover:text-(--mi-normal-foreground-color) no-underline transition-colors"
+              className="inline-flex items-center gap-1.5 text-(--mi-light-foreground-color) hover:text-(--mi-text-color) no-underline transition-colors"
             >
               <FaChevronLeft /> Previous
             </Link>
@@ -62,7 +62,7 @@ const usePagination = ({
           {showNext && (
             <Link
               to={`?${nextPage.toString()}`}
-              className="inline-flex items-center gap-1.5 text-(--mi-light-foreground-color) hover:text-(--mi-normal-foreground-color) no-underline transition-colors"
+              className="inline-flex items-center gap-1.5 text-(--mi-light-foreground-color) hover:text-(--mi-text-color) no-underline transition-colors"
             >
               Next <FaChevronRight />
             </Link>

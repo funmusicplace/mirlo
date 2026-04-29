@@ -1,9 +1,9 @@
-import React from "react";
 import { css } from "@emotion/css";
-
+import styled from "@emotion/styled";
+import React from "react";
 import { RxLoop } from "react-icons/rx";
 import { GlobalState, useGlobalStateContext } from "state/GlobalState";
-import styled from "@emotion/styled";
+
 import Button from "./Button";
 
 const LoopingIndicator = styled.span`
@@ -12,9 +12,9 @@ const LoopingIndicator = styled.span`
   line-height: 0.5rem;
   font-weight: bold;
   padding: 0.15rem 0.25rem;
-  background-color: var(--mi-secondary-color);
+  background-color: var(--mi-button-text-color);
   border-radius: 100%;
-  color: var(--mi-primary-color);
+  color: var(--mi-button-color);
   top: 0.2rem;
   right: 0.2rem;
   display: flex;
@@ -59,7 +59,7 @@ export const LoopButton: React.FC = () => {
           color: ${looping ? "white !important" : "inherit"};
         }
         ${looping
-          ? `color: var(--mi-primary-color) !important; 
+          ? `color: var(--mi-button-color) !important;
              `
           : ""}
       `}

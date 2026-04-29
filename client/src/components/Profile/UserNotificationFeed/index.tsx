@@ -129,7 +129,7 @@ const UserNotificationFeed = () => {
     >
       <a
         href="#activity-column"
-        className="sr-only focus:not-sr-only focus:block focus:mb-2 focus:px-3 focus:py-1.5 focus:text-sm focus:bg-(--mi-darken-background-color) focus:text-(--mi-normal-foreground-color) focus:rounded focus:outline-2 focus:outline-(--mi-primary-color)"
+        className="sr-only focus:not-sr-only focus:block focus:mb-2 focus:px-3 focus:py-1.5 focus:text-sm focus:bg-(--mi-darken-background-color) focus:text-(--mi-text-color) focus:rounded focus:outline-2 focus:outline-(--mi-button-color)"
       >
         {t("skipToActivity")}
       </a>

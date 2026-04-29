@@ -82,7 +82,7 @@ function TrackView() {
             }
 
             a {
-              color: ${artist.properties?.colors?.button};
+              color: var(--mi-button-color);
             }
 
             @media screen and (max-width: ${bp.small}px) {

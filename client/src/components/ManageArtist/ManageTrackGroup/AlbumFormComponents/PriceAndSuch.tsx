@@ -1,31 +1,28 @@
-import React from "react";
-import { useFormContext } from "react-hook-form";
-
-import FormComponent from "components/common/FormComponent";
-
-import { Trans, useTranslation } from "react-i18next";
-
-import FormError from "components/common/FormError";
-import { useParams } from "react-router-dom";
-
-import SavingInput from "./SavingInput";
 import { css } from "@emotion/css";
-import { bp } from "../../../../constants";
-import PaymentSlider from "./PaymentSlider";
-import { getCurrencySymbol } from "components/common/Money";
-import { useAuthContext } from "state/AuthContext";
-import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
-import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
-import api from "services/api";
-import useErrorHandler from "services/useErrorHandler";
-import { InputEl } from "components/common/Input";
 import ArtistRouterLink, {
   ArtistButton,
-  useGetArtistColors,
 } from "components/Artist/ArtistButtons";
-import { TrackGroupFormData } from "../ManageTrackGroup";
-import useManagedArtistQuery from "utils/useManagedArtistQuery";
+import FormComponent from "components/common/FormComponent";
+import FormError from "components/common/FormError";
+import { InputEl } from "components/common/Input";
+import { getCurrencySymbol } from "components/common/Money";
+import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+import { Trans, useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
 import { getArtistManageTiersUrl } from "utils/artist";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
+
+import { bp } from "../../../../constants";
+import { TrackGroupFormData } from "../ManageTrackGroup";
+import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
+
+import PaymentSlider from "./PaymentSlider";
+import SavingInput from "./SavingInput";
 
 type PricingMode = "free-or-donate" | "paid" | "no-payments";
 
@@ -37,7 +34,6 @@ const PriceAndSuch: React.FC<{
   const { artistId, trackGroupId } = useParams();
   const { data: artist } = useManagedArtistQuery();
   const errorHandler = useErrorHandler();
-  const { colors } = useGetArtistColors();
   const {
     formState: { errors },
     watch,
@@ -301,7 +297,7 @@ const PriceAndSuch: React.FC<{
             })}
           </div>
         </FormComponent>
-        <div className="w-full flex flex-col gap-2 border-1 border-(--mi-darken-x-background-color) px-4 py-3">
+        <div className="w-full flex flex-col gap-2 border-1 border-(--mi-tint-x-color) px-4 py-3">
           <p>
             <Trans
               i18nKey="manageOnSubscription"
@@ -399,7 +395,6 @@ const PriceAndSuch: React.FC<{
                 <InputEl
                   aria-describedby="hint-has-suggested-price hint-has-suggested-price-clarifier"
                   id="input-has-suggested-price"
-                  colors={colors}
                   type="checkbox"
                   checked={hasSuggestedPrice}
                   onChange={(event) => {

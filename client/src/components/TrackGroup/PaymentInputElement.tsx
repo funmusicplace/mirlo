@@ -1,4 +1,3 @@
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
@@ -7,7 +6,6 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
-
 interface FormData {
   chosenPrice: string;
   userEmail: string;
@@ -31,7 +29,6 @@ const PaymentInputElement: React.FC<{
   artistId,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const colors = useGetArtistColors();
   const { register, setValue, watch } = useFormContext<FormData>();
 
   const chosenPrice = watch("chosenPrice");
@@ -117,9 +114,7 @@ const PaymentInputElement: React.FC<{
       {isFinite(numericChosenPrice) &&
         numericChosenPrice > 0 &&
         normalizedDiscountPercent > 0 && (
-          <div
-            className={`w-full align-center mt-2 rounded border p-3 text-sm border-[${colors.colors?.button ?? "--mi-primary-color"}]`}
-          >
+          <div className="w-full align-center mt-2 rounded border p-3 text-sm border-(--mi-button-color)">
             {t("discountSummary", {
               discountPercent: normalizedDiscountPercent,
               discountAmount: moneyDisplay({

@@ -44,7 +44,7 @@ export const DeleteArtist: React.FC = () => {
     <ArtistSection
       className={css`
         margin-top: 4rem !important;
-        border-top: 1px solid var(--mi-darken-x-background-color);
+        border-top: 1px solid var(--mi-tint-x-color);
         padding-top: 1rem !important;
       `}
     >

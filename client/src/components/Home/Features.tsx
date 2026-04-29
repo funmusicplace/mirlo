@@ -227,7 +227,7 @@ const Features = () => {
         variant="full"
         className={css`
           padding: 2rem;
-          background: var(--mi-primary-color);
+          background: var(--mi-button-color);
           color: var(--mi-white);
 
           @media screen and (max-width: ${bp.small}px) {

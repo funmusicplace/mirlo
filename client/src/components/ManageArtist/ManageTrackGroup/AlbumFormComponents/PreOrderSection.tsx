@@ -220,7 +220,7 @@ const PreOrderSection: React.FC<{
 
               {scheduleOnReleaseDate && hasReleaseDate && (
                 <div className="flex flex-col sm:flex-row items-start gap-3">
-                  <div className="w-fit rounded border border-black/10 bg-(--mi-lighten-background-color) p-3 opacity-80">
+                  <div className="w-fit rounded border border-black/10 bg-(--mi-tint-color) p-3 opacity-80">
                     <label
                       htmlFor="input-preorder-release-date"
                       className="text-sm text-(--mi-neutral-500)"

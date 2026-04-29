@@ -1,16 +1,18 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { ButtonLink } from "components/common/Button";
+import { queryInstanceArtist } from "queries/settings";
+import { useTranslation } from "react-i18next";
+import { getArtistUrl } from "utils/artist";
+
+import { bp } from "../../constants";
+
 import {
   SplashButtonWrapper,
   SplashTitle,
   SplashWrapper,
   TextWrapper,
 } from "./Splash";
-import { ButtonLink } from "components/common/Button";
-import { useTranslation } from "react-i18next";
-import { bp } from "../../constants";
-import { getArtistUrl } from "utils/artist";
-import { queryInstanceArtist } from "queries/settings";
-import { useQuery } from "@tanstack/react-query";
 
 const SupportMirlo = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
@@ -20,7 +22,7 @@ const SupportMirlo = () => {
     <div
       className={css`
         width: 100%;
-        background-color: var(--mi-primary-color) !important;
+        background-color: var(--mi-button-color) !important;
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -28,7 +30,7 @@ const SupportMirlo = () => {
         }
 
         @media (min-width: 768px) and (prefers-color-scheme: dark) {
-          background-color: var(--mi-secondary-color);
+          background-color: var(--mi-button-text-color);
         }
       `}
     >

@@ -1,4 +1,3 @@
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +18,6 @@ const PlatformPercent: React.FC<{
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipId = `platform-percent-tooltip-${Math.random().toString(36).substr(2, 9)}`;
-  const { colors } = useGetArtistColors();
   const chosenNumber =
     chosenPrice && isFinite(+chosenPrice) ? Number(chosenPrice) : null;
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -37,8 +35,8 @@ const PlatformPercent: React.FC<{
         id={`${tooltipId}-button`}
         className="w-6 h-6 border-1 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer p-0 transition-opacity hover:opacity-80"
         style={{
-          borderColor: colors?.button ?? "var(--mi-primary-color)",
-          color: colors?.button ?? "var(--mi-primary-color)",
+          borderColor: "var(--mi-button-color)",
+          color: "var(--mi-button-color)",
         }}
         onClick={() => setShowTooltip(!showTooltip)}
         type="button"
@@ -56,10 +54,9 @@ const PlatformPercent: React.FC<{
           }`}
           role="tooltip"
           style={{
-            backgroundColor:
-              colors?.background ?? "var(--mi-normal-background-color)",
-            borderColor: colors?.button ?? "var(--mi-primary-color)",
-            color: colors?.text ?? "var(--mi-foreground-color)",
+            backgroundColor: "var(--mi-background-color)",
+            borderColor: "var(--mi-button-color)",
+            color: "var(--mi-text-color)",
           }}
         >
           {t("platformPercent", {

@@ -58,7 +58,7 @@ const ManageArtist: React.FC<{}> = () => {
               : t("manageArtistNavigation")
           }
         >
-          <ArtistTabs color={artist.properties?.colors?.button}>
+          <ArtistTabs>
             <li className="tab-primary">
               <NavLink to="releases">{releasesTitle}</NavLink>
             </li>

@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 
 export default styled.ul`
-  border: 1px dashed var(--mi-darken-x-background-color);
+  border: 1px dashed var(--mi-tint-x-color);
   list-style: none;
   width: 100%;
-  background-color: var(--mi-lighten-background-color);
+  background-color: var(--mi-tint-color);
 
   li {
     padding: 1rem;
@@ -14,6 +14,6 @@ export default styled.ul`
   }
 
   li:not(:first-child) {
-    border-top: 1px dashed var(--mi-darken-x-background-color);
+    border-top: 1px dashed var(--mi-tint-x-color);
   }
 `;

@@ -155,7 +155,7 @@ function Artist() {
           artist.isLabelProfile ? t("labelNavigation") : t("artistNavigation")
         }
       >
-        <ArtistTabs color={artist.properties?.colors?.button}>
+        <ArtistTabs>
           {artist.isLabelProfile && (
             <>
               <li className="tab-primary">

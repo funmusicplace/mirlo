@@ -49,7 +49,7 @@ const ManageSubscriptionTierBox: React.FC<{
     <Box
       key={tier.id}
       className={css`
-        background: var(--mi-darken-background-color);
+        background: var(--mi-tint-color);
       `}
       noPadding
     >

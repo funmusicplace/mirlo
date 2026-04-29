@@ -44,7 +44,6 @@ export const CustomNamesForTabs: React.FC = () => {
             <InputEl
               id="input-releases-tab"
               type="text"
-              colors={artist.properties?.colors}
               placeholder={t("releases") ?? ""}
               {...methods.register("properties.titles.releases")}
             />
@@ -54,7 +53,6 @@ export const CustomNamesForTabs: React.FC = () => {
             <InputEl
               id="input-merch-tab"
               type="text"
-              colors={artist.properties?.colors}
               placeholder={t("merch") ?? ""}
               {...methods.register("properties.titles.merch")}
             />
@@ -64,7 +62,6 @@ export const CustomNamesForTabs: React.FC = () => {
             <InputEl
               id="input-posts-tab"
               type="text"
-              colors={artist.properties?.colors}
               placeholder={t("posts") ?? ""}
               {...methods.register("properties.titles.posts")}
             />
@@ -74,7 +71,6 @@ export const CustomNamesForTabs: React.FC = () => {
             <InputEl
               id="input-support-tab"
               type="text"
-              colors={artist.properties?.colors}
               placeholder={t("support") ?? ""}
               {...methods.register("properties.titles.support")}
             />
@@ -86,7 +82,6 @@ export const CustomNamesForTabs: React.FC = () => {
             <InputEl
               id="input-support-button-text"
               type="text"
-              colors={artist.properties?.colors}
               placeholder={t("support") ?? ""}
               {...methods.register("properties.titles.supportButton")}
             />
@@ -97,7 +92,6 @@ export const CustomNamesForTabs: React.FC = () => {
               <InputEl
                 id="input-roster-tab"
                 type="text"
-                colors={artist.properties?.colors}
                 placeholder={t("roster") ?? ""}
                 {...methods.register("properties.titles.roster")}
               />
@@ -109,7 +103,6 @@ export const CustomNamesForTabs: React.FC = () => {
               <InputEl
                 id="input-group-name"
                 type="text"
-                colors={artist.properties?.colors}
                 placeholder={t("label") ?? ""}
                 {...methods.register("properties.titles.groupName")}
               />

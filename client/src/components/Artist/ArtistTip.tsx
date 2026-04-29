@@ -73,7 +73,7 @@ const ArtistTip: React.FC = () => {
               hr {
                 flex-grow: 1;
                 margin: 1rem;
-                border-color: var(--mi-darken-x-background-color);
+                border-color: var(--mi-tint-x-color);
               }
             `}
           >

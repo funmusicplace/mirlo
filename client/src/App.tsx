@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import ArtistColorsWrapper from "components/ArtistColorsWrapper";
+import ArtistColorsProvider from "components/ArtistColorsProvider";
 import PageBackground from "components/common/ArtistBackground";
 import FailedSubscriptionBanner from "components/common/FailedSubscriptionBanner";
 import { MetaCard } from "components/common/MetaCard";
@@ -9,19 +9,17 @@ import UploadProgressPanel from "components/common/UploadProgressPanel";
 import UserBanner from "components/common/UserBanner";
 import CookieDisclaimer from "components/CookieDisclaimer";
 import { Footer } from "components/Footer";
+import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 import Player from "components/Player";
 import ScrollToTop from "components/ScrollToTop";
-import { lazy, Suspense, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
 import useWidgetListener from "utils/useWidgetListener";
+
 import Header from "./components/Header/Header";
 import { bp } from "./constants";
-
-const ManageArtistButtons = lazy(
-  () => import("components/ManageArtist/ManageArtistButtons")
-);
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -31,7 +29,7 @@ function App() {
   const [search, setSearch] = useSearchParams();
   const { user } = useAuthContext();
 
-  // In the case of a widget we don't show all the wrapper stuff
+  // In the case of a widget we don't show all the provider stuff
   if (location.pathname.includes("widget")) {
     return <Outlet />;
   }
@@ -64,7 +62,7 @@ function App() {
         description="A music distribution and patronage site"
         image="/android-chrome-512x512.png"
       />
-      <ArtistColorsWrapper>
+      <ArtistColorsProvider>
         <>
           {/* <Snackbar /> */}
           {isDisplayed && <Snackbar />}
@@ -92,9 +90,7 @@ function App() {
               min-height: calc(100vh - 65px);
             `}
           >
-            <Suspense fallback={null}>
-              <ManageArtistButtons />
-            </Suspense>
+            <ManageArtistButtons />
             <div className="w-full flex flex-col min-h-screen">
               <div
                 className={css`
@@ -114,7 +110,7 @@ function App() {
             </div>
           </div>
         </>
-      </ArtistColorsWrapper>
+      </ArtistColorsProvider>
       <Player />
       <UploadProgressPanel />
     </>

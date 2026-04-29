@@ -1,13 +1,14 @@
-import React from "react";
-
 import styled from "@emotion/styled";
-import LoadingSpinner from "./LoadingSpinner";
-import { bp } from "../../constants";
+import React from "react";
 import {
   RelativeRoutingType,
   useHref,
   useLinkClickHandler,
 } from "react-router-dom";
+
+import { bp } from "../../constants";
+
+import LoadingSpinner from "./LoadingSpinner";
 
 export interface Sizable {
   size?: "big" | "compact";
@@ -25,9 +26,18 @@ const CustomButton = styled.button<Sizable>(
   {},
   ({ buttonRole, size, ...props }) => {
     const bodyStyles = window.getComputedStyle(document.body);
-    let cssColorVariable = `--mi-${buttonRole ?? "primary"}-color`;
-    var primaryColor = bodyStyles.getPropertyValue(cssColorVariable);
-    let secondaryColor = bodyStyles.getPropertyValue(`--mi-secondary-color`);
+    // buttonRole "primary" maps to the artist accent (--mi-button-color in the
+    // new scheme; --mi-button-color in legacy), other roles keep their
+    // explicit Mirlo system var. Contrast color for filled buttons follows
+    // the same convention as ArtistButton: --mi-button-text-color.
+    const cssColorVariable =
+      buttonRole && buttonRole !== "primary"
+        ? `--mi-${buttonRole}-color`
+        : `--mi-button-color`;
+    const primaryColor = bodyStyles.getPropertyValue(cssColorVariable);
+    const secondaryColor = bodyStyles.getPropertyValue(
+      `--mi-button-text-color`
+    );
     const isOnlyIcon = props.onlyIcon
       ? `
       padding: .5rem;

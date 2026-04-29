@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { forwardRef } from "react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -8,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
 
-const Label = styled.label<{ colors?: ArtistColors }>`
+const Label = styled.label`
   display: block;
   display: flex;
   justify-content: space-between;
@@ -33,20 +32,18 @@ const List = styled.ul`
   list-style: none;
 `;
 
-const ListItem = styled.li<{ colors?: ArtistColors }>`
+const ListItem = styled.li`
   border-radius: 8px;
   margin-bottom: 0.5rem;
-  border: 1px solid
-    ${(props) => props.colors?.button ?? "var(--mi-darken-x-background-color)"};
+  border: 1px solid var(--mi-button-color);
 
   input[type="radio"] {
     display: none;
   }
 
   input[type="radio"]:checked + label {
-    background-color: ${(props) =>
-      props.colors?.background ?? "var(--mi-background-color)"};
-    color: ${(props) => props.colors?.text ?? "var(--mi-foreground-color)"};
+    background-color: var(--mi-background-color);
+    color: var(--mi-text-color);
     &:after {
       content: "✔";
     }
@@ -64,8 +61,6 @@ const SupportArtistPopUpTiers = forwardRef<
   const currentValue: undefined | ArtistSubscriptionTier =
     methods.watch("tier");
 
-  const { colors } = useGetArtistColors();
-
   React.useEffect(() => {
     if (options.length === 1) {
       methods.setValue("tier", options[0]);
@@ -76,7 +71,7 @@ const SupportArtistPopUpTiers = forwardRef<
     <List>
       {options.map((tier) => {
         return (
-          <ListItem key={tier.id} colors={colors}>
+          <ListItem key={tier.id}>
             <InputEl
               type="radio"
               id={`${tier.id}`}
@@ -92,7 +87,6 @@ const SupportArtistPopUpTiers = forwardRef<
               onClick={() => {
                 methods.setValue("tier", tier);
               }}
-              colors={colors}
             >
               <div>
                 <strong>

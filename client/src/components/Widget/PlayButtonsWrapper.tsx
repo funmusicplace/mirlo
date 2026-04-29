@@ -39,23 +39,23 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
     <div
       className={css`
         button {
-          background-color: var(--mi-normal-foreground-color);
-          color: var(--mi-normal-background-color);
-          border: solid 1.5px var(--mi-normal-foreground-color);
+          background-color: var(--mi-text-color);
+          color: var(--mi-background-color);
+          border: solid 1.5px var(--mi-text-color);
           width: 3rem;
           height: 3rem;
           svg {
             font-size: 1.5rem;
-            fill: var(--mi-normal-background-color);
+            fill: var(--mi-background-color);
           }
         }
 
         button:hover {
-          color: var(--mi-normal-foreground-color) !important;
-          background-color: var(--mi-normal-background-color) !important;
+          color: var(--mi-text-color) !important;
+          background-color: var(--mi-background-color) !important;
 
           svg {
-            fill: var(--mi-normal-foreground-color) !important;
+            fill: var(--mi-text-color) !important;
           }
         }
       `}

@@ -24,10 +24,10 @@ const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
             background: repeating-linear-gradient(45deg, 
               var(--mi-lighten-background-color), 
               var(--mi-lighten-background-color) 10px, 
-              var(--mi-normal-background-color) 10px, 
-              var(--mi-normal-background-color) 20px);
+              var(--mi-background-color) 10px, 
+              var(--mi-background-color) 20px);
             border: var(--mi-warning-background-color) 1px solid;
-            color: var(--mi-normal-foreground-color);
+            color: var(--mi-text-color);
             font-weight: bold;
           `;
       default:

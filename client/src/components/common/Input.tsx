@@ -10,19 +10,14 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
 }
 
-export const InputEl = styled.input<{
-  colors?: { background: string; text: string };
-}>`
-  border: 1px solid
-    ${(props) => props.colors?.text ?? "var(--mi-lighter-foreground-color)"};
+export const InputEl = styled.input`
+  border: 1px solid var(--mi-text-color);
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   width: 100%;
-  color: ${(props) =>
-    props.colors?.text ?? "var(--mi-normal-foreground-color)"};
-  background-color: ${(props) =>
-    props.colors?.background ?? "var(--mi-lighten-x-background-color)"};
+  color: var(--mi-text-color);
+  background-color: var(--mi-background-color);
   transition: 0.4s border-radius;
 
   &[disabled] {

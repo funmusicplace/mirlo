@@ -110,21 +110,17 @@ const TipArtistForm: React.FC<{
                       padding: 0.75rem 1rem;
                       display: block;
                       border-radius: 0.5rem;
-                      color: ${artistDetails.properties?.colors?.button ??
-                      "var(--mi-text-color)"};
-                      border: 1px dashed
-                        ${artistDetails.properties?.colors?.button ??
-                        "var(--mi-primary-color)"};
+                      color: var(--mi-button-color);
+                      border: 1px dashed var(--mi-button-color);
                       margin-right: 0.2rem;
-                      background-color: ${artistDetails.properties?.colors
-                        ?.background ?? "var(--mi-background-color)"};
+                      background-color: var(--mi-background-color);
                       text-align: center;
                       cursor: pointer;
                     }
 
                     input:checked + label {
-                      background-color: ${artistDetails.properties?.colors
-                        ?.buttonText ?? "var(--mi-secondary-color)"};
+                      background-color: var(--mi-button-color);
+                      color: var(--mi-button-text-color);
                     }
                   `}
                 >

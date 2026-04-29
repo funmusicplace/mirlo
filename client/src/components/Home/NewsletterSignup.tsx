@@ -20,8 +20,8 @@ const containerStyles = css`
   width: 100%;
   background-color: color-mix(
     in srgb,
-    var(--mi-normal-foreground-color) 6%,
-    var(--mi-normal-background-color)
+    var(--mi-text-color) 6%,
+    var(--mi-background-color)
   );
   display: flex;
   justify-content: center;
@@ -163,11 +163,11 @@ const NewsletterSignup: React.FC = () => {
             {t("newsletterDescription")}
           </p>
         </div>
-        <div className="bg-(--mi-normal-background-color) border border-(--mi-darken-x-background-color) rounded-[var(--mi-border-radius-x)] p-8 flex-1 max-w-[460px] max-md:max-w-full max-md:p-6">
+        <div className="bg-(--mi-background-color) border border-(--mi-darken-x-background-color) rounded-[var(--mi-border-radius-x)] p-8 flex-1 max-w-[460px] max-md:max-w-full max-md:p-6">
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <label
               htmlFor="input-newsletter-email"
-              className="text-sm font-medium text-(--mi-normal-foreground-color)"
+              className="text-sm font-medium text-(--mi-text-color)"
             >
               {t("newsletterEmailLabel")}
             </label>

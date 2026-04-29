@@ -1,14 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { useGetArtistColors } from "./ArtistButtons";
-
 const IncludedReleases: React.FC<{
   tier: ArtistSubscriptionTier;
 }> = ({ tier }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-
-  const { colors } = useGetArtistColors();
 
   return (
     <>
@@ -31,13 +27,13 @@ const IncludedReleases: React.FC<{
                 {!release.trackGroup.cover && (
                   <div
                     className="w-12 h-12 flex-shrink-0"
-                    style={{ backgroundColor: colors?.buttonText }}
+                    style={{ backgroundColor: "var(--mi-button-color)" }}
                   />
                 )}
-                <span className="flex-1 truncate text-sm">
+                <span className="truncate text-sm">
                   {release.trackGroup.artist.name}
                 </span>
-                <span className="flex-1 truncate text-sm">
+                <span className="truncate text-sm">
                   {release.trackGroup.title}
                 </span>
               </div>

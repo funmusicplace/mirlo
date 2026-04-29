@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import {
   ArtistButton,
   ArtistButtonAnchor,
-  useGetArtistColors,
 } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import LoadingSpinner from "components/common/LoadingSpinner";
@@ -23,7 +22,6 @@ const DownloadableContent: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
-  const { colors } = useGetArtistColors();
   const [isSaving, setIsSaving] = React.useState(false);
 
   const handleFileChange = (files: FileList | null) => {
@@ -103,7 +101,7 @@ const DownloadableContent: React.FC<{
     <FormComponent>
       {isSaving && (
         <div>
-          <LoadingSpinner size="small" fill={colors?.button} />
+          <LoadingSpinner size="small" fill="var(--mi-button-color)" />
         </div>
       )}
       {!!item.downloadableContent && item.downloadableContent.length > 0 && (

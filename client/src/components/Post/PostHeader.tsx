@@ -118,7 +118,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             position: relative;
             color: ${featuredImage
               ? "var(--mi-white)"
-              : post?.artist?.properties?.colors?.button} !important;
+              : "var(--mi-button-color)"} !important;
 
             h1 {
               margin-bottom: 0.5rem;

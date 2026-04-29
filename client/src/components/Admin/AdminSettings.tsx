@@ -249,7 +249,7 @@ const AdminSettings = () => {
             <td>Colors</td>
             <td>
               <FormComponent>
-                <label>Primary Color</label>
+                <label>Button Color</label>
                 <InputEl
                   {...register("instanceCustomization.colors.button")}
                   type="color"
@@ -259,7 +259,7 @@ const AdminSettings = () => {
                 />
               </FormComponent>
               <FormComponent>
-                <label>Secondary Color</label>
+                <label>Button Text Color</label>
                 <InputEl
                   {...register("instanceCustomization.colors.buttonText")}
                   type="color"
@@ -269,7 +269,7 @@ const AdminSettings = () => {
                 />
               </FormComponent>
               <FormComponent>
-                <label>Foreground Color</label>
+                <label>Text Color</label>
                 <InputEl
                   {...register("instanceCustomization.colors.text")}
                   type="color"

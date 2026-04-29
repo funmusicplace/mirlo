@@ -14,11 +14,7 @@ import { getArtistManageTiersUrl } from "utils/artist";
 
 import Money from "../common/Money";
 
-import {
-  ArtistButton,
-  ArtistButtonLink,
-  useGetArtistColors,
-} from "./ArtistButtons";
+import { ArtistButton, ArtistButtonLink } from "./ArtistButtons";
 import ArtistVariableSupport from "./ArtistVariableSupport";
 import IncludedReleases from "./IncludedReleases";
 import LoadingBlocks from "./LoadingBlocks";
@@ -33,8 +29,7 @@ const ArtistSupportBox: React.FC<{
     queryArtist({ artistSlug: artistId })
   );
 
-  const { colors } = useGetArtistColors();
-  const secondaryColor = colors?.buttonText ?? "var(--mi-secondary-color)";
+  const secondaryColor = "var(--mi-button-text-color)";
 
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
@@ -99,9 +94,9 @@ const ArtistSupportBox: React.FC<{
       !sub.artistSubscriptionTier.isDefaultTier
   );
 
-  const primary = colors?.button ?? "var(--mi-primary-color)";
-  const tierBorderColor = `color-mix(in srgb, ${primary} ${isSubscribedToTier ? "100%" : "20%"}, transparent)`;
-  const tierInnerBorderColor = `color-mix(in srgb, ${primary} 20%, transparent)`;
+  const link = "var(--mi-button-color)";
+  const tierBorderColor = `color-mix(in srgb, ${link} ${isSubscribedToTier ? "100%" : "20%"}, transparent)`;
+  const tierInnerBorderColor = `color-mix(in srgb, ${link} 20%, transparent)`;
 
   const hasRewards =
     subscriptionTier.autoPurchaseAlbums ||
@@ -113,7 +108,7 @@ const ArtistSupportBox: React.FC<{
     <div
       className={
         (isSubscribedToTier ? " border-4" : " border-1") +
-        " relative border-inset pb-5 mb-1 gap-5 bg-(--mi-darken-background-color) flex flex-col text-sm border-(--tier-border-color)"
+        " relative border-inset pb-5 mb-1 gap-5 bg-(--mi-button-tint-color) flex flex-col text-sm border-(--tier-border-color)"
       }
       style={
         {
@@ -184,8 +179,8 @@ const ArtistSupportBox: React.FC<{
           "px-5 " +
           css`
             button:hover {
-              background-color: var(--mi-normal-foreground-color) !important;
-              color: var(--mi-normal-background-color);
+              background-color: var(--mi-text-color) !important;
+              color: var(--mi-background-color);
             }
           `
         }

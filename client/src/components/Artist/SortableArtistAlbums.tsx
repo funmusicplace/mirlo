@@ -103,10 +103,7 @@ const SortableArtistAlbums: React.FC = () => {
             justify-content: center;
           `}
         >
-          <LoadingSpinner
-            size="large"
-            fill={artist?.properties?.colors?.text}
-          />
+          <LoadingSpinner size="large" fill="var(--mi-text-color)" />
         </Background>
       )}
 

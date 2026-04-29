@@ -12,9 +12,8 @@ import { bp } from "../../../constants";
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 
 export const AnnouncementWrapper: React.FC<{
-  artistColors?: { button: string; buttonText: string; background: string };
   children: React.ReactNode;
-}> = ({ artistColors, children }) => {
+}> = ({ children }) => {
   return (
     <div
       className={css`
@@ -25,9 +24,8 @@ export const AnnouncementWrapper: React.FC<{
         position: relative;
         margin-bottom: 0.25rem;
 
-        color: ${artistColors?.button || "var(--mi-foreground-color)"};
-        background-color: ${artistColors?.buttonText ||
-        "var(--mi-secondary-color)"};
+        color: var(--mi-button-color);
+        background-color: var(--mi-button-text-color);
       `}
     >
       <div
@@ -40,7 +38,7 @@ export const AnnouncementWrapper: React.FC<{
           }
 
           a {
-            color: ${artistColors?.background || "var(--mi-background-color)"};
+            color: var(--mi-background-color);
             text-decoration: underline;
           }
         `}
@@ -74,7 +72,7 @@ const ManageArtistAnnouncement: React.FC<{
 
   if (!isOpen && artist.announcementText) {
     return (
-      <AnnouncementWrapper artistColors={artist.properties?.colors}>
+      <AnnouncementWrapper>
         <MarkdownContent content={artist.announcementText} />
         {showButtons && !isOpen && (
           <div
@@ -93,10 +91,8 @@ const ManageArtistAnnouncement: React.FC<{
                 position: absolute;
                 top: 0.75rem;
                 right: 1rem;
-                background-color: ${artist.properties?.colors?.background ||
-                "var(--mi-background-color)"} !important;
-                color: ${artist.properties?.colors?.button ||
-                "var(--mi-foreground-color)"} !important;
+                background-color: var(--mi-background-color) !important;
+                color: var(--mi-button-color) !important;
               `}
             >
               {t("editAnnouncement")}
@@ -114,8 +110,7 @@ const ManageArtistAnnouncement: React.FC<{
           padding: var(--mi-side-paddings-xsmall);
           padding-top: 0.5rem;
           padding-bottom: 0.5rem;
-          background-color: ${artist.properties?.colors?.buttonText ||
-          "var(--mi-secondary-color)"} !important;
+          background-color: var(--mi-button-text-color) !important;
           filter: brightness(95%) grayscale(10%);
 
           @media screen and (max-width: ${bp.medium}px) {
@@ -128,10 +123,8 @@ const ManageArtistAnnouncement: React.FC<{
           size="compact"
           onClick={() => setIsOpen(true)}
           className={css`
-            background-color: ${artist.properties?.colors?.background ||
-            "var(--mi-background-color)"} !important;
-            color: ${artist.properties?.colors?.button ||
-            "var(--mi-foreground-color)"} !important;
+            background-color: var(--mi-background-color) !important;
+            color: var(--mi-button-color) !important;
             width: 100%;
             padding: var(--mi-side-paddings-xsmall);
           `}
@@ -150,10 +143,8 @@ const ManageArtistAnnouncement: React.FC<{
           position: relative;
 
           textarea {
-            color: ${artist.properties?.colors?.button ||
-            "var(--mi-primary-color)"};
-            background-color: ${artist.properties?.colors?.buttonText ||
-            "var(--mi-foreground-color)"};
+            color: var(--mi-button-color);
+            background-color: var(--mi-button-text-color);
           }
 
           small {
@@ -161,10 +152,8 @@ const ManageArtistAnnouncement: React.FC<{
           }
 
           button {
-            background-color: ${artist.properties?.colors?.background ||
-            "var(--mi-background-color)"};
-            color: ${artist.properties?.colors?.button ||
-            "var(--mi-foreground-color)"};
+            background-color: var(--mi-background-color);
+            color: var(--mi-button-color);
           }
 
           @media screen and (max-width: ${bp.medium}px) {
@@ -182,10 +171,8 @@ const ManageArtistAnnouncement: React.FC<{
               position: absolute;
               top: 0.75rem;
               right: 1rem;
-              background-color: ${artist.properties?.colors?.background ||
-              "var(--mi-background-color)"} !important;
-              color: ${artist.properties?.colors?.button ||
-              "var(--mi-foreground-color)"} !important;
+              background-color: var(--mi-background-color) !important;
+              color: var(--mi-button-color) !important;
             `}
           >
             {t("close")}
@@ -206,14 +193,11 @@ const ManageArtistAnnouncement: React.FC<{
               font-size: 1rem;
               line-height: 1.5rem;
 
-              color: ${artist.properties?.colors?.background ||
-              "var(--mi-background-color)"};
-              background-color: ${artist.properties?.colors?.button ||
-              "var(--mi-foreground-color)"};
+              color: var(--mi-background-color);
+              background-color: var(--mi-button-color);
 
               a {
-                color: ${artist.properties?.colors?.background ||
-                "var(--mi-background-color)"};
+                color: var(--mi-background-color);
                 text-decoration: underline;
               }
             `}

@@ -80,7 +80,7 @@ const BuyMerchItem: React.FC<{ merch: Merch }> = ({ merch }) => {
       className={css`
         padding-bottom: 2rem;
         margin-bottom: 2rem !important;
-        border-bottom: 1px solid var(--mi-darken-x-background-color);
+        border-bottom: 1px solid var(--mi-tint-x-color);
       `}
     >
       <label htmlFor="shippingDestinationId">

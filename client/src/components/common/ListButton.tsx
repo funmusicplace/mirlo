@@ -14,7 +14,7 @@ export const ListButton = styled.button<Sizable>`
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: var(--mi-normal-foreground-color);
+  color: var(--mi-text-color);
   transition: 0.5s background-color;
 
   &:hover {

@@ -1,24 +1,22 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import ArtistRouterLink from "components/Artist/ArtistButtons";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Confetti from "components/common/Confetti";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { moneyDisplay } from "components/common/Money";
+import ShareToSocials from "components/common/ShareToSocials";
+import { AnnouncementWrapper } from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import {
   queryPublicRecommendedTrackGroups,
   queryTrackGroupSupporters,
 } from "queries";
-
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-
-import BackOrIsBacking from "./BackOrIsBacking";
-import { AnnouncementWrapper } from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import { useSearchParams } from "react-router-dom";
-import Confetti from "components/common/Confetti";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import ArtistRouterLink from "components/Artist/ArtistButtons";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { getReleaseUrl } from "utils/artist";
 
-import ShareToSocials from "components/common/ShareToSocials";
-import { useState } from "react";
+import BackOrIsBacking from "./BackOrIsBacking";
 import Thermometer from "./Thermometer";
 
 function CampaignSummary({
@@ -160,7 +158,7 @@ function CampaignSummary({
 
       {percent >= 100 && trackGroup.fundraiser?.isAllOrNothing && (
         <div className="mt-3">
-          <AnnouncementWrapper artistColors={artist?.properties?.colors}>
+          <AnnouncementWrapper>
             {t("allOrNothingFullyFunded")}
           </AnnouncementWrapper>
         </div>

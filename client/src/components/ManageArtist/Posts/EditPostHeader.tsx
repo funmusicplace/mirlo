@@ -1,12 +1,14 @@
 import { css } from "@emotion/css";
-import BackToArtistLink from "../BackToArtistLink";
 import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtist, queryManagedPost } from "queries";
-import { useParams } from "react-router-dom";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
-import { getPostURLReference } from "utils/artist";
+import { queryManagedArtist, queryManagedPost } from "queries";
 import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { getPostURLReference } from "utils/artist";
+
 import { bp } from "../../../constants";
+import BackToArtistLink from "../BackToArtistLink";
+
 import PublishPostButton from "./PublishPostButton";
 import SaveDraftButton from "./SaveDraftButton";
 
@@ -31,8 +33,7 @@ const EditPostHeader: React.FC<{
     <>
       <div
         className={css`
-          background-color: ${artist?.properties?.colors?.background ??
-          "var(--mi-normal-background-color)"};
+          background-color: var(--mi-background-color);
           box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.25);
           top: 0;
           position: sticky;

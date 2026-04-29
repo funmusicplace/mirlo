@@ -33,15 +33,13 @@ const ArtistLinks: React.FC = () => {
   }
 
   const artistAvatar = artist?.avatar;
-  const colors = artist?.properties?.colors;
 
   const isOwningArtist = artist?.userId === user?.id;
 
   return (
     <div
       className={css`
-        background-color: ${colors?.background ??
-        "var(--mi-normal-background-color)"};
+        background-color: var(--mi-background-color);
         opacity: 0.98;
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -127,8 +125,7 @@ const ArtistLinks: React.FC = () => {
             list-style: none;
 
             li {
-              border: 1px solid
-                ${colors?.button ?? "var(--mi-darken-background-color)"};
+              border: 1px solid var(--mi-button-color);
               margin: 0.5rem 0;
 
               a {
@@ -139,8 +136,7 @@ const ArtistLinks: React.FC = () => {
               }
 
               a:hover {
-                background-color: ${colors?.background ??
-                "var(--mi-darken-background-color)"};
+                background-color: var(--mi-background-color);
               }
             }
           `}
@@ -159,7 +155,7 @@ const ArtistLinks: React.FC = () => {
                   }
                   a:hover {
                     background-color: var(
-                      --mi-darken-background-color
+                      --mi-tint-color
                     ) !important;
                   }
                 `}
@@ -173,7 +169,7 @@ const ArtistLinks: React.FC = () => {
                   className={css`
                     align-items: center;
                     margin-right: 0.75rem;
-                    ${colors?.text ?? "var(--mi-foreground-color)"};
+                    color: var(--mi-text-color);
                   `}
                 >
                   <div

@@ -186,7 +186,7 @@ const DelayAutoFocusInput = ({
     <InputEl
       ref={inputRef}
       {...omitted}
-      style={{ backgroundColor: "var(--mi-normal-background-color)" }}
+      style={{ backgroundColor: "var(--mi-background-color)" }}
     />
   );
 };

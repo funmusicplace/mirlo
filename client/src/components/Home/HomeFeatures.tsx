@@ -16,7 +16,7 @@ const SupportMirlo = () => {
     <div
       className={css`
         width: 100%;
-        background-color: var(--mi-primary-color);
+        background-color: var(--mi-button-color);
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {

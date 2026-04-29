@@ -35,7 +35,7 @@ const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
   ${(props) =>
     props.title
       ? ""
-      : "background-color: var(--mi-normal-background-color) !important; border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) !important; padding-bottom: 1.5rem !important;"}
+      : "background-color: var(--mi-background-color) !important; border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) !important; padding-bottom: 1.5rem !important;"}
   ::-webkit-scrollbar {
     width: 3px;
   }
@@ -76,7 +76,7 @@ const Content = styled.div<ContentProps>`
   flex-direction: column;
   ${(props) =>
     props.contentTitle
-      ? "background-color: var(--mi-normal-background-color);"
+      ? "background-color: var(--mi-background-color);"
       : ""}
 
   ${(props) =>

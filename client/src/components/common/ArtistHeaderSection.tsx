@@ -107,13 +107,12 @@ export const ArtistTitleText = styled.div`
   }
 `;
 
-export const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
+export const HeaderWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-around;
-  border-bottom: solid 1px
-    ${(props) => props.colors?.button ?? "var(--mi-light-foreground-color)"};
+  border-bottom: solid 1px var(--mi-button-color);
 `;
 
 const ArtistHeaderSection: React.FC<{
@@ -162,7 +161,7 @@ const ArtistHeaderSection: React.FC<{
         description={artist.bio}
         image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />
-      <HeaderWrapper colors={artist.properties?.colors}>
+      <HeaderWrapper>
         <Header>
           <AvatarWrapper artistAvatar={!!artistAvatar}>
             {artistAvatar && (
@@ -270,8 +269,7 @@ const ArtistHeaderSection: React.FC<{
         >
           <div
             className={css`
-              color: ${artist.properties?.colors?.button ||
-              "var(--mi-foreground-color)"};
+              color: var(--mi-button-color);
             `}
           >
             {artist.isLabelProfile &&

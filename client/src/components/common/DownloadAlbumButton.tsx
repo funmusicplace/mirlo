@@ -208,7 +208,7 @@ const DownloadAlbumButton: React.FC<{
             margin-top: 0;
             font-size: 1.2rem;
             background: transparent;
-            color: var(--mi-primary-color);
+            color: var(--mi-button-color);
           `}
           startIcon={<RiDownloadLine />}
           onClick={() => {

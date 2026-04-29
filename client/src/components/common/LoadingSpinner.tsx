@@ -11,7 +11,7 @@ export const LoadingSpinner: React.FC<{
     <AiOutlineLoading
       className={
         css`
-          fill: ${fill ?? "var(--mi-normal-foreground-color)"};
+          fill: ${fill ?? "var(--mi-text-color)"};
           animation-name: spinning;
           animation-duration: 0.5s;
           animation-iteration-count: infinite;

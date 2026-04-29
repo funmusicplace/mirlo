@@ -38,7 +38,7 @@ export const SongTimeDisplay: React.FC<{
           overflow: none;
           transition: 0.2s width;
           width: ${percent * 100}%;
-          background: var(--mi-primary-color);
+          background: var(--mi-button-color);
           pointer-events: none;
         `}
       ></div>

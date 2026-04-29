@@ -1,8 +1,5 @@
 import { css } from "@emotion/css";
-import {
-  ArtistButton,
-  useGetArtistColors,
-} from "components/Artist/ArtistButtons";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import { InputEl } from "components/common/Input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -26,7 +23,6 @@ const SlugInput = React.forwardRef<
     { ariaDescribedBy, currentArtistId, id, isDisabled, type, currentName },
     ref
   ) => {
-    const { colors } = useGetArtistColors();
     const { i18n, t } = useTranslation("translation", {
       keyPrefix: "manageArtist",
     });
@@ -95,7 +91,6 @@ const SlugInput = React.forwardRef<
       <>
         <InputEl
           aria-describedby={`hint-slug error-slug${ariaDescribedBy ? " " + ariaDescribedBy : ""}`}
-          colors={colors}
           className={css`
             margin-bottom: 0.5rem;
           `}

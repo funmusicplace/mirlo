@@ -50,7 +50,7 @@ export const Toggle: React.FC<{
           "sr-only " +
           css`
             &:focus-visible ~ .toggle {
-              outline: 2px solid var(--mi-primary-color);
+              outline: 2px solid var(--mi-button-color);
               outline-offset: 2px;
             }
 
@@ -84,7 +84,7 @@ export const Toggle: React.FC<{
               height: 12px;
               width: 12px;
               left: 2px;
-              background-color: var(--mi-normal-background-color);
+              background-color: var(--mi-background-color);
               border-radius: 50%;
               transition: 0.3s;
             }

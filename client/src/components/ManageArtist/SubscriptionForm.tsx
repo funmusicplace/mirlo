@@ -24,7 +24,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 export const FormSection = styled.div`
   margin: 2rem 0;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--mi-darken-x-background-color);
+  border-bottom: 1px solid var(--mi-tint-x-color);
 
   h2 {
     font-size: 1.3rem;

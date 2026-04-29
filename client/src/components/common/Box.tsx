@@ -1,9 +1,6 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
 import React from "react";
-import { useParams } from "react-router-dom";
 
 import { bp } from "../../constants";
 
@@ -13,32 +10,25 @@ export const ArtistBox: React.FC<{
   small?: boolean;
   children: React.ReactNode;
 }> = (props) => {
-  const { artistId } = useParams();
-
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
-  );
-
-  const colors = artist?.properties?.colors;
   const styles = () => {
     switch (props.variant) {
       case "success":
         return `
-        background: ${colors?.text} !important;
-        color: ${colors?.background} !important;
+        background: var(--mi-text-color) !important;
+        color: var(--mi-button-text-color) !important;
         `;
       case "info":
         return `
-        background: ${colors?.buttonText} !important;
-        color: ${colors?.background} !important;
+        background: var(--mi-button-color) !important;
+        color: var(--mi-button-text-color) !important;
         `;
       case "warning":
         return `
-        background: ${colors?.button} !important;
-        color: ${colors?.background} !important;
+        background: var(--mi-button-color) !important;
+        color: var(--mi-button-text-color) !important;
 
         a {
-          color: ${colors?.background} !important;
+          color: var(--mi-button-text-color) !important;
           filter: hue-rotate(90deg);
         }
         `;
@@ -81,20 +71,20 @@ const Box = styled.div<{
         return `
             background: var(--mi-success-background-color);
             border: var(--mi-success-background-color) 1px solid;
-            color: var(--mi-normal-foreground-color); 
+            color: var(--mi-text-color);
         `;
       case "info":
         return `
           background-color: var(--mi-info-background-color);
-          color: var(--mi-normal-foreground-color);
+          color: var(--mi-text-color);
         `;
       case "warning":
         return `
             background: var(--mi-warning-background-color);
             border: var(--mi-warning-background-color) 1px solid;
-            color: var(--mi-normal-foreground-color);
+            color: var(--mi-text-color);
 
-            a { 
+            a {
               color: var(--mi-white);
             }
           `;

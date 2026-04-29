@@ -189,7 +189,7 @@ const Splash = () => {
                   red: (
                     <span
                       className={css`
-                        color: var(--mi-primary-color);
+                        color: var(--mi-button-color);
                       `}
                     ></span>
                   ),

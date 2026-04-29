@@ -178,9 +178,7 @@ const TrackWidget = () => {
                       />
                     </>
                   }
-                  textColor={
-                    track.trackGroup.artist?.properties?.colors?.button
-                  }
+                  textColor="var(--mi-text-color)"
                 />
               </FlexWrapper>
               {isTrackOwnedOrPreview(track, user) && (

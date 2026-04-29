@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { getCurrencySymbol } from "components/common/Money";
@@ -71,7 +70,6 @@ const SavingInput = React.forwardRef<
     },
     ref
   ) => {
-    const { colors } = useGetArtistColors();
     const { register, getValues } = useFormContext();
     const errorHandler = useErrorHandler();
 
@@ -200,7 +198,6 @@ const SavingInput = React.forwardRef<
               <InputEl
                 aria-describedby={ariaDescribedBy}
                 aria-labelledby={ariaLabelledBy}
-                colors={colors}
                 {...register(formKey)}
                 onInput={saveOnInputDebounced}
                 // onChange={type === "checkbox" ? saveOnInput : undefined}
@@ -226,7 +223,6 @@ const SavingInput = React.forwardRef<
                 aria-labelledby={ariaLabelledBy}
                 id={id}
                 rows={rows}
-                colors={colors}
                 {...(saveOnBlur && { onBlur: saveOnInput })}
                 onInput={saveOnInputDebounced}
                 ref={elementRef as React.LegacyRef<HTMLTextAreaElement>}
@@ -264,8 +260,10 @@ const SavingInput = React.forwardRef<
             filter: invert(100%);
           `}
         >
-          {isSaving && <LoadingSpinner fill={colors?.button} size="small" />}
-          {saveSuccess && <FaCheck fill={colors?.button} />}
+          {isSaving && (
+            <LoadingSpinner fill="var(--mi-button-color)" size="small" />
+          )}
+          {saveSuccess && <FaCheck fill="var(--mi-button-color)" />}
         </div>
       </div>
     );

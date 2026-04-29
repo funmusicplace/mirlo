@@ -7,7 +7,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 
 import PlayControlButton from "./PlayControlButton";
 
-const Wrapper = styled.div<{ colors?: ArtistColors }>`
+const Wrapper = styled.div`
   position: relative;
   max-width: 100%;
 
@@ -16,28 +16,22 @@ const Wrapper = styled.div<{ colors?: ArtistColors }>`
   }
 
   button {
-    background-color: ${(props) =>
-      props.colors?.button ?? "var(--mi-primary-color)"} !important;
-    color: ${(props) =>
-      props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
+    background-color: var(--mi-button-color) !important;
+    color: var(--mi-button-text-color) !important;
     border: 0px !important;
     width: 3rem;
     height: 3rem;
 
     svg {
-      fill: ${(props) =>
-        props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
+      fill: var(--mi-button-text-color) !important;
     }
 
     &:hover:not(:disabled) {
-      color: ${(props) =>
-        props.colors?.button ?? "var(--mi-primary-color)"} !important;
-      background-color: ${(props) =>
-        props.colors?.buttonText ?? "var(--mi-secondary-color)"} !important;
+      color: var(--mi-button-color) !important;
+      background-color: var(--mi-button-text-color) !important;
 
       svg {
-        fill: ${(props) =>
-          props.colors?.button ?? "var(--mi-primary-color)"} !important;
+        fill: var(--mi-button-color) !important;
       }
     }
   }
@@ -74,7 +68,7 @@ const ClickToPlayTracks: React.FC<{
   }
 
   return (
-    <Wrapper className={className} colors={artist.properties?.colors}>
+    <Wrapper className={className}>
       <PlayControlButton
         onPlay={onClickPlay}
         isPlaying={currentlyPlaying}

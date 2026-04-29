@@ -33,26 +33,26 @@ export const WidgetWrapper = styled.div<{
 
   a {
     color: ${(props) =>
-      props.artistColors?.button ?? "var(--mi-primary-color)"};
+      props.artistColors?.button ?? "var(--mi-button-color)"};
     }
 
   color: ${(props) =>
-    props.artistColors?.text ?? "var(--mi-normal-foreground-color)"} !important;
+    props.artistColors?.text ?? "var(--mi-text-color)"} !important;
     background-color: ${(props) =>
       props.artistColors?.background ??
-      "var(--mi-normal-background-color)"} !important;
+      "var(--mi-background-color)"} !important;
       
       button.play-button,
       button.pause-button {
       color: ${(props) =>
-        props.artistColors?.text ?? "var(--mi-normal-foreground-color)"};
+        props.artistColors?.text ?? "var(--mi-text-color)"};
         
         background: transparent;
         
         svg {
         fill: ${(props) =>
           props.artistColors?.text ??
-          "var(--mi-normal-foreground-color)"} !important; 
+          "var(--mi-text-color)"} !important; 
         }   
     } 
 
@@ -61,22 +61,22 @@ export const WidgetWrapper = styled.div<{
   &:hover {
   color: ${(props) =>
     props.artistColors?.background ??
-    "var(--mi-normal-foreground-color)"} !important;
+    "var(--mi-text-color)"} !important;
     background-color: ${(props) =>
       props.artistColors?.text ??
-      "var(--mi-normal-background-color)"} !important;
+      "var(--mi-background-color)"} !important;
       
       button.play-button,
       button.pause-button {
       color: ${(props) =>
-        props.artistColors?.background ?? "var(--mi-normal-foreground-color)"};
+        props.artistColors?.background ?? "var(--mi-text-color)"};
         
         background: transparent;
         
         svg {
         fill: ${(props) =>
           props.artistColors?.background ??
-          "var(--mi-normal-foreground-color)"} !important; 
+          "var(--mi-text-color)"} !important; 
         }   
     } 
   }

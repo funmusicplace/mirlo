@@ -488,10 +488,10 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/", $);
 
       const styleTag = $("style").first().html();
-      assert(styleTag?.includes("--mi-instance-primary-color"));
-      assert(styleTag?.includes("--mi-instance-secondary-color"));
+      assert(styleTag?.includes("--mi-instance-button-color"));
+      assert(styleTag?.includes("--mi-instance-button-text-color"));
       assert(styleTag?.includes("--mi-instance-background-color"));
-      assert(styleTag?.includes("--mi-instance-foreground-color"));
+      assert(styleTag?.includes("--mi-instance-text-color"));
     });
 
     it("should use default colors when site settings are not configured", async () => {
@@ -518,9 +518,9 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/", $);
 
       const styleTag = $("style").first().html();
-      assert(styleTag?.includes("--mi-instance-primary-color"));
+      assert(styleTag?.includes("--mi-instance-button-color"));
       // Other colors should use defaults or what's in settings
-      assert(styleTag?.includes("--mi-instance-secondary-color"));
+      assert(styleTag?.includes("--mi-instance-button-text-color"));
     });
   });
 });

@@ -54,7 +54,7 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
   );
 
   return (
-    <div className="flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-darken-background-color)">
+    <div className="flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-tint-color)">
       <div className="hidden md:grid md:grid-cols-10 md:items-center md:gap-3 md:px-3 md:py-1">
         <div className="col-span-2">{t("title")}</div>
         <div className="text-right">{t("publishedAt")}</div>
