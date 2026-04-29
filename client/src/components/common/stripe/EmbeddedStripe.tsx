@@ -1,6 +1,6 @@
 import {
-  EmbeddedCheckoutProvider,
   EmbeddedCheckout,
+  EmbeddedCheckoutProvider,
   Elements,
 } from "@stripe/react-stripe-js";
 import { loadStripe, Stripe } from "@stripe/stripe-js";

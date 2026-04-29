@@ -10,19 +10,17 @@ import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import TextArea from "components/common/TextArea";
 import { queryUserStripeStatus } from "queries";
 import React from "react";
-import { useTranslation } from "react-i18next";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-
 import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaArrowRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
 
 import AddToCollection from "./AddToCollection";
 import PaymentInputElement from "./PaymentInputElement";
 import { testOwnership } from "./utils";
-
-import { useAuthContext } from "state/AuthContext";
-import { FaArrowRight } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 
 interface FormData {
   chosenPrice: string;

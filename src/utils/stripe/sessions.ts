@@ -1,21 +1,20 @@
-import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
-import { logger } from "../../logger";
+import Stripe from "stripe";
 
+import { logger } from "../../logger";
+import { getPlatformFeeForArtist } from "../artist";
+import countryCodesCurrencies from "../country-codes-currencies";
+import { AppError } from "../error";
 import { generateFullStaticImageUrl } from "../images";
 import { finalArtistAvatarBucket } from "../minio";
-import { AppError } from "../error";
-
-import countryCodesCurrencies from "../country-codes-currencies";
-import { getPlatformFeeForArtist } from "../artist";
-
 import {
   calculateAppFee,
   calculatePlatformPercent,
   castToFixed,
 } from "../processingPayments";
 import { calculateDiscountedPrice } from "../purchasing";
+
 import stripe, {
   createMerchStripeProduct,
   createSubscriptionStripeProduct,
@@ -152,6 +151,7 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
         ),
       },
       ui_mode: "embedded",
+      redirect_on_completion: "if_required",
       line_items: lineItems,
       metadata: {
         clientId: client?.id ?? null,
@@ -362,6 +362,7 @@ export const createStripeCheckoutSessionForPurchase = async ({
         ),
       },
       ui_mode: "embedded",
+      redirect_on_completion: "if_required",
       line_items: lineItems,
       metadata: {
         clientId: client?.id ?? null,
@@ -585,6 +586,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
       },
       mode: "payment",
       ui_mode: "embedded",
+      redirect_on_completion: "if_required",
       return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
     },
     { stripeAccount: stripeAccountId }
