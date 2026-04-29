@@ -1,9 +1,11 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { userAuthenticated } from "../../../../../auth/passport";
+import { NextFunction, Request, Response } from "express";
+
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { userAuthenticated } from "../../../../../auth/passport";
 import { AppError, HttpCode } from "../../../../../utils/error";
+import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { notifyFollowersOfNewAlbum } from "../../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -42,26 +44,8 @@ export default function () {
             !trackGroup.releaseDate && { releaseDate: now }),
         },
       });
-      if (updatedTrackgroup.publishedAt) {
-        const artistFollowers = await prisma.artistUserSubscription.findMany({
-          where: {
-            artistSubscriptionTier: {
-              artistId: updatedTrackgroup.artistId,
-            },
-          },
-        });
-
-        await prisma.notification.createMany({
-          data: artistFollowers.map((follower) => {
-            return {
-              userId: follower.userId,
-              trackGroupId: updatedTrackgroup.id,
-              notificationType: updatedTrackgroup.isPreorder
-                ? "NEW_ARTIST_PREORDER"
-                : "NEW_ARTIST_ALBUM",
-            };
-          }),
-        });
+      if (updatedTrackgroup.publishedAt && updatedTrackgroup.isPublic) {
+        await notifyFollowersOfNewAlbum(updatedTrackgroup);
       }
       res.json(updatedTrackgroup);
     } catch (e) {

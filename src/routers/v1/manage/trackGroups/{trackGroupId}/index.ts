@@ -12,7 +12,10 @@ import generateSlug from "../../../../../utils/generateSlug";
 import processor, {
   trackGroupSingleInclude,
 } from "../../../../../utils/trackGroup";
-import { deleteTrackGroup } from "../../../../../utils/trackGroup";
+import {
+  deleteTrackGroup,
+  notifyFollowersOfNewAlbum,
+} from "../../../../../utils/trackGroup";
 
 type Params = {
   trackGroupId: string;
@@ -168,6 +171,16 @@ export default function () {
       let trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },
       });
+
+      const isPublishedNow =
+        trackGroup?.publishedAt && trackGroup.publishedAt <= new Date();
+      const flippedToPublic =
+        existingTrackGroup.isPublic === false &&
+        trackGroup?.isPublic === true &&
+        isPublishedNow;
+      if (flippedToPublic && trackGroup) {
+        await notifyFollowersOfNewAlbum(trackGroup);
+      }
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
         let slug = generateSlug(newValues.title);
