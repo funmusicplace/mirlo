@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "@mirlo/prisma";
-import { Prisma } from "@mirlo/prisma/client";
+
 import {
   clearTables,
   createArtist,
@@ -75,6 +75,132 @@ describe("manage/trackGroups/{trackGroupId}", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 400);
+    });
+
+    it("should notify followers when flipping a published trackGroup from private to public", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist-flip@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date(),
+        isPublic: false,
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: { artistId: artist.id, name: "Tier" },
+      });
+      const { user: follower } = await createUser({
+        email: "follower-flip@example.com",
+      });
+      await prisma.artistUserSubscription.create({
+        data: {
+          userId: follower.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 10,
+          stripeSubscriptionKey: "sub-flip",
+        },
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, isPublic: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+
+      const notifications = await prisma.notification.findMany({
+        where: { trackGroupId: trackGroup.id, userId: follower.id },
+      });
+      assert.equal(notifications.length, 1);
+      assert.equal(notifications[0].notificationType, "NEW_ARTIST_ALBUM");
+    });
+
+    it("should not notify followers when flipping isPublic on a draft trackGroup", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist-draft-flip@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: null,
+        isPublic: false,
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: { artistId: artist.id, name: "Tier" },
+      });
+      const { user: follower } = await createUser({
+        email: "follower-draft-flip@example.com",
+      });
+      await prisma.artistUserSubscription.create({
+        data: {
+          userId: follower.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 10,
+          stripeSubscriptionKey: "sub-draft-flip",
+        },
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, isPublic: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+
+      const notifications = await prisma.notification.findMany({
+        where: { trackGroupId: trackGroup.id },
+      });
+      assert.equal(notifications.length, 0);
+    });
+
+    it("should not notify followers twice when flipping isPublic back and forth", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist-toggle@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date(),
+        isPublic: false,
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: { artistId: artist.id, name: "Tier" },
+      });
+      const { user: follower } = await createUser({
+        email: "follower-toggle@example.com",
+      });
+      await prisma.artistUserSubscription.create({
+        data: {
+          userId: follower.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 10,
+          stripeSubscriptionKey: "sub-toggle",
+        },
+      });
+
+      await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, isPublic: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, isPublic: false })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, isPublic: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      const notifications = await prisma.notification.findMany({
+        where: { trackGroupId: trackGroup.id, userId: follower.id },
+      });
+      assert.equal(notifications.length, 1);
     });
 
     it("should find a new slug for a trackGroup", async () => {

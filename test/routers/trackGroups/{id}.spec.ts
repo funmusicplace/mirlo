@@ -1,7 +1,9 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createArtist,
@@ -10,6 +12,7 @@ import {
   createUserTrackGroupPurchase,
   createUserTrackPurchase,
 } from "../../utils";
+
 import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../utils";
@@ -29,6 +32,24 @@ describe("trackGroups/{id}", () => {
         .get("trackGroups/1")
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET / 200 for an private but published trackGroup (URL access)", async () => {
+      const { user } = await createUser({
+        email: "artist-private-url@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        isPublic: false,
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.id, trackGroup.id);
+      assert.equal(response.body.result.isPublic, false);
     });
 
     it("should GET / 200 with isPlayable false when user hasn't purchased", async () => {
