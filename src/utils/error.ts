@@ -3,6 +3,7 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
 import { NextFunction, Request, Response } from "express";
+
 import logger from "../logger";
 
 const getSafeRequestContext = (req: Request) => {
@@ -76,6 +77,7 @@ const errorHandler = (
 
   if (err instanceof AppError) {
     if (err.httpCode >= 500) {
+      console.error(err);
       log.error(
         "Found instance of unhandled AppError",
         req.path,

@@ -1,27 +1,28 @@
-import { useTranslation } from "react-i18next";
-
+import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import Box from "components/common/Box";
+import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import { moneyDisplay } from "components/common/Money";
+import { SelectEl } from "components/common/Select";
+import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
+import TextArea from "components/common/TextArea";
+import PaymentInputElement from "components/TrackGroup/PaymentInputElement";
+import { flatten } from "lodash";
 import { queryUserStripeStatus } from "queries";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaChevronRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+
 import { bp } from "../../constants";
 
-import Button from "components/common/Button";
-import { InputEl } from "components/common/Input";
-import { FormProvider, useForm } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
-import React from "react";
-import { css } from "@emotion/css";
-import api from "services/api";
-import { SelectEl } from "components/common/Select";
-import { moneyDisplay } from "components/common/Money";
-import IncludesDigitalDownload from "./IncludesDigitalDownload";
-import { FaChevronRight } from "react-icons/fa";
-import { flatten } from "lodash";
-import Box from "components/common/Box";
-import TextArea from "components/common/TextArea";
-import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import BuyMerchItemDestinations from "./BuyMerchItemDestinations";
-import PaymentInputElement from "components/TrackGroup/PaymentInputElement";
-import { useSnackbar } from "state/SnackbarContext";
+import IncludesDigitalDownload from "./IncludesDigitalDownload";
 
 export type BuyMerchFormData = {
   quantity: number;
@@ -63,7 +64,11 @@ const BuyMerchItem: React.FC<{
   const quantity = methods.watch("quantity");
   const shippingDestination = methods.watch("shippingDestinationId");
   const merchOptionIds = methods.watch("merchOptionIds");
+  const navigate = useNavigate();
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
+  const [onComplete, setOnComplete] = React.useState<(() => void) | undefined>(
+    undefined
+  );
 
   const onSubmit = React.useCallback(
     async (data: BuyMerchFormData) => {
@@ -112,6 +117,16 @@ const BuyMerchItem: React.FC<{
             message: data.message,
           });
           if (response.clientSecret) {
+            const artistSlug = artist.urlSlug ?? artist.id;
+            const params = new URLSearchParams();
+            params.set("purchaseType", "merch");
+            params.set("merchId", merch.id);
+            setOnComplete(
+              () => () =>
+                navigate(
+                  `/${artistSlug}/checkout-complete?${params.toString()}`
+                )
+            );
             setClientSecret(response.clientSecret);
           } else {
             window.location.assign(response.redirectUrl);
@@ -165,6 +180,7 @@ const BuyMerchItem: React.FC<{
       <EmbeddedStripeForm
         clientSecret={clientSecret}
         stripeAccountId={stripeAccountStatus.stripeAccountId}
+        onComplete={onComplete}
       />
     );
   }

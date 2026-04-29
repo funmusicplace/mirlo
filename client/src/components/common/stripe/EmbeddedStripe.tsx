@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-
-import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
-  EmbeddedCheckoutProvider,
   EmbeddedCheckout,
+  EmbeddedCheckoutProvider,
   Elements,
 } from "@stripe/react-stripe-js";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
+import React from "react";
 
 import SetupIntentForm from "./SetupIntentForm";
 
@@ -15,7 +14,8 @@ const EmbeddedStripeForm: React.FC<{
   clientSecret: string;
   stripe: Stripe;
   isSetupIntent?: boolean;
-}> = ({ clientSecret, stripe, isSetupIntent }) => {
+  onComplete?: () => void;
+}> = ({ clientSecret, stripe, isSetupIntent, onComplete }) => {
   if (stripe) {
     if (isSetupIntent) {
       return (
@@ -30,7 +30,10 @@ const EmbeddedStripeForm: React.FC<{
       );
     }
     return (
-      <EmbeddedCheckoutProvider stripe={stripe} options={{ clientSecret }}>
+      <EmbeddedCheckoutProvider
+        stripe={stripe}
+        options={{ clientSecret, onComplete }}
+      >
         <EmbeddedCheckout />
       </EmbeddedCheckoutProvider>
     );
@@ -41,7 +44,8 @@ const LoadStripeWrapper: React.FC<{
   clientSecret: string;
   isSetupIntent?: boolean;
   stripeAccountId: string;
-}> = ({ clientSecret, isSetupIntent, stripeAccountId }) => {
+  onComplete?: () => void;
+}> = ({ clientSecret, isSetupIntent, stripeAccountId, onComplete }) => {
   const [stripe, setStripe] = React.useState<Stripe | null>();
 
   const callback = React.useCallback(
@@ -66,6 +70,7 @@ const LoadStripeWrapper: React.FC<{
       clientSecret={clientSecret}
       stripe={stripe}
       isSetupIntent={isSetupIntent}
+      onComplete={onComplete}
     />
   );
 };
