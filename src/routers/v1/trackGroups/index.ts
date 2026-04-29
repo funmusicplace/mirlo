@@ -136,6 +136,7 @@ export default function () {
                 AND "publishedAt" <= NOW()
                 AND "adminEnabled" = true
                 AND "hideFromSearch" = false
+                AND "isPublic" = true
                 and exists (
                 	select id from "Track" t	
                 	where t."trackGroupId" = "TrackGroup".id
