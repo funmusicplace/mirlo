@@ -32,9 +32,11 @@ const checkForPrivateEndpoint = (path: string, query?: { format?: string }) => {
   );
 };
 
-const isValidActivityPubEndpoints = (path: string) => {
-  return /^\/v1\/ap\/artists\/[\w-]+(?:\/(?:outbox|followers|inbox))?$/.test(
-    path
+export const isValidActivityPubEndpoint = (path: string) => {
+  return (
+    /^\/v1\/ap\/artists\/[\w-]+(?:\/(?:outbox|followers|following|inbox))?$/.test(
+      path
+    ) || /^\/.well-known\/(webfinger|nodeinfo)/.test(path)
   );
 };
 
@@ -60,7 +62,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         req.headers,
         req.method as "POST" | "GET" | "PUT" | "DELETE"
       );
-      const validActivityPubEndpoints = isValidActivityPubEndpoints(req.path);
+      const validActivityPubEndpoints = isValidActivityPubEndpoint(req.path);
       // We only care about the API key for API requests
       if (isSameSite || !isAPIEndpointPrivate) {
         clients = await prisma.client.findMany();
