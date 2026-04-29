@@ -35,6 +35,38 @@ import {
   finalArtistAvatarBucket,
 } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
+export const notifyFollowersOfNewAlbum = async (trackGroup: {
+  id: number;
+  artistId: number;
+  isPreorder: boolean;
+  notifiedFollowersAt: Date | null;
+}) => {
+  if (trackGroup.notifiedFollowersAt) return;
+
+  await prisma.trackGroup.update({
+    where: { id: trackGroup.id },
+    data: { notifiedFollowersAt: new Date() },
+  });
+
+  const artistFollowers = await prisma.artistUserSubscription.findMany({
+    where: {
+      artistSubscriptionTier: { artistId: trackGroup.artistId },
+    },
+  });
+
+  if (artistFollowers.length === 0) return;
+
+  await prisma.notification.createMany({
+    data: artistFollowers.map((follower) => ({
+      userId: follower.userId,
+      trackGroupId: trackGroup.id,
+      notificationType: trackGroup.isPreorder
+        ? "NEW_ARTIST_PREORDER"
+        : "NEW_ARTIST_ALBUM",
+    })),
+  });
+};
+
 import { deleteTrack } from "./tracks";
 
 export const whereForPublishedTrackGroups = (opts?: {
@@ -812,6 +844,7 @@ export const processSingleTrackGroup = (
   options?: { loggedInUserId?: number }
 ) => ({
   ...tg,
+  hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
   tracks: tg.tracks?.map((track) => ({
     ...track,
     isPlayable:
