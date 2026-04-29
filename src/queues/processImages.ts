@@ -1,9 +1,12 @@
+import prisma from "@mirlo/prisma";
 import { Queue, QueueEvents } from "bullmq";
 import sharp from "sharp";
 
-import sharpConfig from "../config/sharp";
-
 import { REDIS_CONFIG } from "../config/redis";
+import sharpConfig from "../config/sharp";
+import { logger } from "../jobs/queue-worker";
+import { AppError, HttpCode } from "../utils/error";
+import { APIContext } from "../utils/file";
 import {
   createBucketIfNotExists,
   finalArtistAvatarBucket,
@@ -18,10 +21,6 @@ import {
   incomingUserBannerBucket,
   uploadWrapper,
 } from "../utils/minio";
-import prisma from "@mirlo/prisma";
-import { APIContext } from "../utils/file";
-import { logger } from "../jobs/queue-worker";
-import { AppError, HttpCode } from "../utils/error";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -117,9 +116,8 @@ export const uploadAndSendToImageQueue = async (
 ) => {
   logger.info(`Uploading ${sharpConfigKey} to object storage`);
 
-  await createBucketIfNotExists(incomingBucket, logger);
-  logger.info("Made bucket");
-
+  // Pipe the request body immediately so the proxy doesn't drop the connection
+  // while we do async work. Bucket creation moves inside the file event handler.
   ctx.req.pipe(ctx.req.busboy);
 
   const fromBody: {
@@ -140,84 +138,101 @@ export const uploadAndSendToImageQueue = async (
         fromBody["imageId"] = val;
       }
     });
+    ctx.req.busboy.on("error", reject);
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
-      if (sharpConfigKey === "inFormData" && !fromBody.dimensions) {
-        reject("Must provide dimensions field in form data");
-        return;
-      }
-      const config: "square" | "background" | "banner" | "avatar" | "artwork" =
-        sharpConfigKey === "inFormData"
-          ? (fromBody.dimensions ?? "square")
-          : sharpConfigKey;
-
-      const webpConfig = sharpConfig.config[config].webp;
-      const largestVariant = getLargestVariant(webpConfig?.variants ?? []);
-
-      const image = await createDatabaseEntry(fileInfo, {
-        ...(fromBody as {
-          dimensions: "square";
-          relation?: "subscriptionTierImage";
-        }),
-      });
-
-      if (!image) {
-        reject("Could not create database entry");
-        return;
-      }
-
       try {
-        const filenameArray = fileInfo.filename.split(".");
-        const transform = sharp().rotate();
+        await createBucketIfNotExists(incomingBucket, logger);
+        logger.info("Made bucket");
 
-        if (largestVariant.width || largestVariant.height) {
-          transform.resize({
-            width: largestVariant.width,
-            height: largestVariant.height,
-            fit: "inside",
-            withoutEnlargement: true,
-          });
+        if (sharpConfigKey === "inFormData" && !fromBody.dimensions) {
+          reject("Must provide dimensions field in form data");
+          return;
+        }
+        const config:
+          | "square"
+          | "background"
+          | "banner"
+          | "avatar"
+          | "artwork" =
+          sharpConfigKey === "inFormData"
+            ? (fromBody.dimensions ?? "square")
+            : sharpConfigKey;
+
+        const webpConfig = sharpConfig.config[config].webp;
+        const largestVariant = getLargestVariant(webpConfig?.variants ?? []);
+
+        const image = await createDatabaseEntry(fileInfo, {
+          ...(fromBody as {
+            dimensions: "square";
+            relation?: "subscriptionTierImage";
+          }),
+        });
+
+        if (!image) {
+          reject("Could not create database entry");
+          return;
         }
 
-        const optimizedStream = fileStream.pipe(transform);
-        const fileName = storeWithExtension
-          ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
-          : image.id;
-        await uploadWrapper(incomingBucket, `${fileName}`, optimizedStream, {
-          contentType: fileInfo.mimeType || "application/octet-stream",
-        });
+        try {
+          const filenameArray = fileInfo.filename.split(".");
+          const transform = sharp().rotate();
+
+          if (largestVariant.width || largestVariant.height) {
+            transform.resize({
+              width: largestVariant.width,
+              height: largestVariant.height,
+              fit: "inside",
+              withoutEnlargement: true,
+            });
+          }
+
+          const optimizedStream = fileStream.pipe(transform);
+          const fileName = storeWithExtension
+            ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
+            : image.id;
+          await uploadWrapper(incomingBucket, `${fileName}`, optimizedStream, {
+            contentType: fileInfo.mimeType || "application/octet-stream",
+          });
+        } catch (e) {
+          const message = e instanceof Error ? e.message : String(e);
+
+          logger.error("There was an error uploading to storage", {
+            mimeType: fileInfo.mimeType,
+            filename: fileInfo.filename,
+            message,
+          });
+
+          if (isUnsupportedImageCodecError(e)) {
+            reject(
+              new AppError({
+                httpCode: HttpCode.NOT_ACCEPTABLE,
+                description:
+                  "Unsupported image format. Please upload a JPEG, PNG, GIF, or WebP image.",
+              })
+            );
+            return;
+          }
+
+          reject(e);
+          return;
+        }
+
+        if (finalBucket) {
+          logger.info("Adding image to queue");
+
+          const job = await imageQueue.add("optimize-image", {
+            destinationId: image.id,
+            model,
+            incomingMinioBucket: incomingBucket,
+            finalMinioBucket: finalBucket,
+            config: sharpConfig.config[config],
+          });
+          resolve({ jobId: job.id, imageId: image.id });
+        } else {
+          resolve({ imageId: image.id });
+        }
       } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-
-        logger.error("There was an error uploading to storage", {
-          mimeType: fileInfo.mimeType,
-          filename: fileInfo.filename,
-          message,
-        });
-
-        if (isUnsupportedImageCodecError(e)) {
-          throw new AppError({
-            httpCode: HttpCode.NOT_ACCEPTABLE,
-            description:
-              "Unsupported image format. Please upload a JPEG, PNG, GIF, or WebP image.",
-          });
-        }
-
-        throw e;
-      }
-
-      if (finalBucket) {
-        logger.info("Adding image to queue");
-
-        const job = await imageQueue.add("optimize-image", {
-          destinationId: image.id,
-          model,
-          incomingMinioBucket: incomingBucket,
-          finalMinioBucket: finalBucket,
-          config: sharpConfig.config[config],
-        });
-        resolve({ jobId: job.id, imageId: image.id });
-      } else {
-        resolve({ imageId: image.id });
+        reject(e);
       }
     });
   }).catch((e) => {
