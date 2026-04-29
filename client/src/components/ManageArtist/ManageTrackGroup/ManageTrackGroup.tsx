@@ -1,13 +1,3 @@
-import React from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import AlbumForm from "../AlbumForm";
-import BulkTrackUpload from "./BulkTrackUpload";
-import ManageTrackTable from "./ManageTrackTable";
-import PublishButton from "../PublishButton";
-import { bp } from "../../../constants";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
@@ -24,12 +14,24 @@ import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
-import { MdOutlineDownloadForOffline } from "react-icons/md";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
-import { getArtistManageUrl } from "utils/artist";
-import DownloadableContent from "../Merch/DownloadableContent";
-import RecommendedTrackGroups from "./AlbumFormComponents/RecommendedTrackGroups";
+import { MdOutlineDownloadForOffline } from "react-icons/md";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
+import { getArtistManageUrl } from "utils/artist";
+
+import { bp } from "../../../constants";
+import AlbumForm from "../AlbumForm";
+import ManageSectionWrapper from "../ManageSectionWrapper";
+import DownloadableContent from "../Merch/DownloadableContent";
+import PublishButton from "../PublishButton";
+
+import RecommendedTrackGroups from "./AlbumFormComponents/RecommendedTrackGroups";
+import BulkTrackUpload from "./BulkTrackUpload";
+import ManageTrackTable from "./ManageTrackTable";
 
 export interface TrackGroupFormData {
   title: string;
@@ -158,11 +160,13 @@ const ManageTrackGroup: React.FC<{}> = () => {
               }
             `}
           >
-            <PublishButton
-              trackGroup={trackGroup}
-              reload={refetch}
-              isFlowV2={isFlowV2}
-            />
+            {!isFlowV2 && (
+              <PublishButton
+                trackGroup={trackGroup}
+                reload={refetch}
+                isFlowV2={isFlowV2}
+              />
+            )}
             {!isFlowV2 && (
               <ArtistButtonLink
                 to={getArtistManageUrl(artist.id) + "/releases/tools"}
@@ -233,11 +237,21 @@ const ManageTrackGroup: React.FC<{}> = () => {
           flex-wrap: wrap;
         `}
       >
-        <PublishButton
-          trackGroup={trackGroup}
-          reload={refetch}
-          isFlowV2={isFlowV2}
-        />
+        {isFlowV2 ? (
+          <ArtistButtonLink
+            to={getArtistManageUrl(artist.id) + "/releases/tools"}
+            startIcon={<MdOutlineDownloadForOffline />}
+            variant="outlined"
+          >
+            {t("downloadCodes")}
+          </ArtistButtonLink>
+        ) : (
+          <PublishButton
+            trackGroup={trackGroup}
+            reload={refetch}
+            isFlowV2={isFlowV2}
+          />
+        )}
         {!isFlowV2 && (
           <ArtistButton
             startIcon={<FaTrash />}

@@ -1,19 +1,19 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEY_TRACK_GROUPS } from "queries/queryKeys";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-
 import { useTranslation } from "react-i18next";
-import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
-import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
+import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import useErrorHandler from "services/useErrorHandler";
-import { QUERY_KEY_TRACK_GROUPS } from "queries/queryKeys";
-import { useQueryClient } from "@tanstack/react-query";
+
+import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
+import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
 
 const AlbumForm: React.FC<{
   trackGroup: TrackGroup;
   artist: Artist;
-  reload: () => void;
+  reload: () => Promise<unknown>;
   isFlowV2?: boolean;
 }> = ({ trackGroup, artist, reload, isFlowV2 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });

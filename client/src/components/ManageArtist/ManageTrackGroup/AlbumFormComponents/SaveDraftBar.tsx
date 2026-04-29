@@ -1,20 +1,16 @@
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { MdOutlineDownloadForOffline } from "react-icons/md";
-import {
-  ArtistButton,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
-import { getArtistManageUrl, isTrackGroupPublished } from "utils/artist";
-import { useSnackbar } from "state/SnackbarContext";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
+import { useSnackbar } from "state/SnackbarContext";
+import { isTrackGroupPublished } from "utils/artist";
 
 const SaveDraftBar: React.FC<{
   existingObject: TrackGroup;
-  reload: () => void;
+  reload: () => Promise<unknown>;
 }> = ({ existingObject, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { getValues } = useFormContext();
@@ -24,6 +20,10 @@ const SaveDraftBar: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
 
   const isPublished = isTrackGroupPublished(existingObject);
+
+  if (isPublished) {
+    return null;
+  }
 
   const handleSaveDraft = async () => {
     if (!trackGroupId || !artistId) return;
@@ -46,12 +46,11 @@ const SaveDraftBar: React.FC<{
           : null,
         catalogNumber: values.catalogNumber,
         urlSlug: values.urlSlug,
+        isPublic: values.isPublic,
         artistId: Number(artistId),
       });
-      reload();
-      snackbar(t(isPublished ? "releaseUpdated" : "draftSaved"), {
-        type: "success",
-      });
+      await reload();
+      snackbar(t("draftSaved"), { type: "success" });
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -60,18 +59,13 @@ const SaveDraftBar: React.FC<{
   };
 
   return (
-    <div className="flex flex-wrap justify-between items-center mt-4 gap-2">
-      <ArtistButton onClick={handleSaveDraft} isLoading={isSaving}>
-        {t(isPublished ? "updateRelease" : "saveAlbumDraft")}
-      </ArtistButton>
-      <ArtistButtonLink
-        to={getArtistManageUrl(Number(artistId)) + "/releases/tools"}
-        startIcon={<MdOutlineDownloadForOffline />}
-        variant="outlined"
-      >
-        {t("downloadCodes")}
-      </ArtistButtonLink>
-    </div>
+    <ArtistButton
+      onClick={handleSaveDraft}
+      isLoading={isSaving}
+      variant="outlined"
+    >
+      {t("saveAlbumDraft")}
+    </ArtistButton>
   );
 };
 

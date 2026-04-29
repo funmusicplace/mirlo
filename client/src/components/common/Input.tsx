@@ -30,8 +30,12 @@ export const InputEl = styled.input`
     border-radius: var(--mi-border-radius-focus);
   }
 
-  &[type="checkbox"] {
+  &[type="checkbox"],
+  &[type="radio"] {
     width: auto;
+    padding: 0;
+    background-color: transparent;
+    border: 0;
   }
   @media (prefers-color-scheme: dark) {
     background-color: var(--mi-darken-background-color);
