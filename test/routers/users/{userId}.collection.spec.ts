@@ -3,15 +3,14 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import prisma from "@mirlo/prisma";
-
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createArtist,
   createTrackGroup,
   createUser,
 } from "../../utils";
-
 import { requestApp } from "../utils";
 
 describe("users/{userId}/collection", () => {
@@ -139,6 +138,46 @@ describe("users/{userId}/collection", () => {
 
       assert.equal(responseHidden.statusCode, 200);
       assert.equal(responseHidden.body.results.length, 0);
+    });
+
+    it("should keep private (isPublic: false) albums in collection after purchase", async () => {
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@testcom",
+      });
+
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date(),
+        isPublic: false,
+      });
+
+      const transaction = await prisma.userTransaction.create({
+        data: {
+          userId: purchaser.id,
+          amount: 10,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+        },
+      });
+
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          trackGroupId: trackGroup.id,
+          userId: purchaser.id,
+          userTransactionId: transaction.id,
+        },
+      });
+
+      const response = await requestApp
+        .get(`users/${purchaser.id}/collection`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].trackGroupId, trackGroup.id);
     });
 
     it("should remove albums with deleted artist from collection", async () => {

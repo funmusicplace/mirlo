@@ -1,23 +1,21 @@
 import { css } from "@emotion/css";
-import Box from "components/common/Box";
-import Button, { ButtonLink } from "components/common/Button";
+import ArtistRouterLink, {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { useDeleteTrackGroupMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaCheck, FaEye, FaTimes, FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaEye, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
-import { bp } from "../../constants";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import {
   getManageReleaseUrl,
   getReleaseUrl,
   isTrackGroupPublished,
 } from "utils/artist";
-import { useDeleteTrackGroupMutation } from "queries";
-import ArtistRouterLink, {
-  ArtistButton,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
+
+import { bp } from "../../constants";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
@@ -191,6 +189,11 @@ const TrackGroupCard: React.FC<{
             <strong>{trackGroupCardTranslation("releaseDate")} </strong>
             {album.releaseDate?.split("T")[0]}
           </div>
+          {isPublished && !album.isPublic && (
+            <div>
+              <strong>{t("private")}</strong>
+            </div>
+          )}
           {album.catalogNumber && <div>{album.catalogNumber}</div>}
         </div>
         <div

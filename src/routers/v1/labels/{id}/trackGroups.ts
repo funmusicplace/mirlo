@@ -1,13 +1,15 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import {
+  findArtistIdForURLSlug,
+  whereForAllArtistsThisLabelCanEdit,
+} from "../../../../utils/artist";
 import {
   processSingleTrackGroup,
   whereForPublishedTrackGroups,
 } from "../../../../utils/trackGroup";
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { User } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {
@@ -24,7 +26,19 @@ export default function () {
       const labelProfile = await prisma.artist.findFirst({
         where: { id: artistId, isLabelProfile: true },
       });
-      const where = whereForPublishedTrackGroups();
+
+      const canManage =
+        !!loggedInUser &&
+        (await prisma.artist.findFirst({
+          where: {
+            id: artistId,
+            enabled: true,
+            ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
+          },
+          select: { id: true },
+        })) !== null;
+
+      const where = whereForPublishedTrackGroups({ includePrivate: canManage });
 
       if (excludeArtistId) {
         where.artistId = { not: Number(excludeArtistId) };

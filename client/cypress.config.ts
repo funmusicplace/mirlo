@@ -1,6 +1,7 @@
-import { defineConfig } from "cypress";
-import pkg, { clearTables, createTrack } from "../test/utils";
 import { Prisma } from "@mirlo/prisma/client";
+import { defineConfig } from "cypress";
+
+import pkg, { clearTables, createTrack } from "../test/utils";
 
 export default defineConfig({
   e2e: {
@@ -31,9 +32,11 @@ export default defineConfig({
           minPrice?: number;
           suggestedPrice?: number;
           published?: boolean;
+          publishedAt?: string | null;
           isGettable?: boolean;
           releaseDate?: string;
           isPreorder?: boolean;
+          isPublic?: boolean;
         }) => {
           return pkg.createTrackGroup(query.artistId, query);
         },

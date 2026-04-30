@@ -163,6 +163,7 @@ export const createTrackGroup = async (
         data?.releaseDate === null ? null : (data?.releaseDate ?? new Date()),
       isPreorder: data?.isPreorder ?? false,
       hideFromSearch: data?.hideFromSearch ?? false,
+      ...(data?.isPublic !== undefined && { isPublic: data.isPublic }),
       cover:
         data?.cover !== undefined
           ? data.cover

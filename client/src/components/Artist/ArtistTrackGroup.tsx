@@ -1,12 +1,16 @@
-import React, { forwardRef } from "react";
-import ClickToPlay from "../common/ClickToPlay";
-import { bp } from "../../constants";
-import styled from "@emotion/styled";
-import ArtistLink from "./ArtistLink";
-import ArtistItemLink from "./ArtistItemLink";
-import { ArtistButton } from "./ArtistButtons";
-import { FaCrosshairs, FaICursor } from "react-icons/fa";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaLock } from "react-icons/fa";
+import { useAuthContext } from "state/AuthContext";
+import { isTrackGroupPublished } from "utils/artist";
+
+import { bp } from "../../constants";
+import ClickToPlay from "../common/ClickToPlay";
+
+import ArtistItemLink from "./ArtistItemLink";
+import ArtistLink from "./ArtistLink";
 
 export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
@@ -88,6 +92,15 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
   ...props
 }) => {
   const length = size === "small" ? 300 : 600;
+  const { user } = useAuthContext();
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const isPublished = isTrackGroupPublished(trackGroup);
+  const isPrivateView = !trackGroup.isPublic && isPublished;
+
+  if (isPrivateView && !user) {
+    return null;
+  }
+
   return (
     <TrackGroupWrapper as={as} ref={myRef} {...props}>
       <div
@@ -95,27 +108,36 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
           position: relative;
         `}
       >
-        <ClickToPlay
-          image={{
-            width: length,
-            height: length,
-            url: trackGroup.cover?.sizes?.[size === "small" ? 300 : 600] ?? "",
-          }}
-          trackIds={trackGroup.tracks
-            .filter((t) => t.isPlayable)
-            .map((t) => t.id)}
-          title={trackGroup.title ?? ""}
-          trackGroup={trackGroup}
-          showWishlist={!showTrackFavorite}
-          showTrackFavorite={showTrackFavorite}
-        >
-          <TrackGroupLinks>
-            <TrackGroupInfo>
-              <ArtistItemLink item={trackGroup} />
-              {showArtist && <ArtistLink artist={trackGroup.artist} />}
-            </TrackGroupInfo>
-          </TrackGroupLinks>
-        </ClickToPlay>
+        <div className={isPrivateView ? "grayscale opacity-70" : undefined}>
+          <ClickToPlay
+            image={{
+              width: length,
+              height: length,
+              url:
+                trackGroup.cover?.sizes?.[size === "small" ? 300 : 600] ?? "",
+            }}
+            trackIds={trackGroup.tracks
+              .filter((t) => t.isPlayable)
+              .map((t) => t.id)}
+            title={trackGroup.title ?? ""}
+            trackGroup={trackGroup}
+            showWishlist={!showTrackFavorite}
+            showTrackFavorite={showTrackFavorite}
+          >
+            <TrackGroupLinks>
+              <TrackGroupInfo>
+                <ArtistItemLink item={trackGroup} />
+                {showArtist && <ArtistLink artist={trackGroup.artist} />}
+                {isPrivateView && (
+                  <span className="text-xs text-(--mi-normal-foreground-color) flex items-center gap-1 mt-1">
+                    <FaLock aria-hidden="true" />
+                    {t("onlyVisibleToYou")}
+                  </span>
+                )}
+              </TrackGroupInfo>
+            </TrackGroupLinks>
+          </ClickToPlay>
+        </div>
       </div>
     </TrackGroupWrapper>
   );

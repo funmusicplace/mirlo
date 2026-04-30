@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
 import { processSingleArtist, singleInclude } from "../../../../utils/artist";
 
 type Params = {
@@ -25,7 +25,7 @@ export default function () {
         },
         include: {
           artist: {
-            include: singleInclude(),
+            include: singleInclude({ includePrivate: true }),
           },
         } as any,
       });
