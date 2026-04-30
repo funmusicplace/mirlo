@@ -142,7 +142,7 @@ const EditMerch: React.FC<{}> = () => {
           <MerchForm merch={merch} artist={artist} reload={refetch} />
         </div>
 
-        <MerchDestinations />
+        <MerchDestinations artist={artist} />
         <MerchOptions />
         <IsPublicToggle merch={merch} />
         <MerchFulfillmentLink />
