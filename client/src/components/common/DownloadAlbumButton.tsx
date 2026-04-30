@@ -37,6 +37,7 @@ const DownloadAlbumButton: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
+  const [isCheckingGeneration, setIsCheckingGeneration] = React.useState(false);
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const [isDownloading, setIsDownloading] = React.useState(false);
   const errorHandler = useErrorHandler();
@@ -60,6 +61,7 @@ const DownloadAlbumButton: React.FC<{
 
   const generateAlbum = React.useCallback(
     async (format: string) => {
+      setIsCheckingGeneration(true);
       try {
         const queryParams = new URLSearchParams();
         queryParams.append("format", format);
@@ -73,6 +75,8 @@ const DownloadAlbumButton: React.FC<{
         }
       } catch (e) {
         errorHandler(e);
+      } finally {
+        setIsCheckingGeneration(false);
       }
     },
     [chosenFormat, trackGroup.id, t, prefix, errorHandler]
@@ -145,7 +149,7 @@ const DownloadAlbumButton: React.FC<{
             </>
           ) : (
             <>
-              {isGeneratingAlbum > 0 ? (
+              {isCheckingGeneration || isGeneratingAlbum > 0 ? (
                 <p
                   className={css`
                     svg {
