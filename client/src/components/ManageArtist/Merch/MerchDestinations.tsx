@@ -31,7 +31,20 @@ const currencyToCountryMap = countryCodesCurrencies.reduce(
   {} as { [key: string]: any }
 );
 
-const MerchDestinations: React.FC<{}> = () => {
+const countryNameToCodeMap = countryCodesCurrencies.reduce(
+  (aggr, country) => {
+    aggr[country.countryName.toLowerCase()] = country.countryCode;
+    return aggr;
+  },
+  {} as { [key: string]: string }
+);
+
+export const countryNameToCode = (name?: string | null) => {
+  if (!name) return undefined;
+  return countryNameToCodeMap[name.trim().toLowerCase()];
+};
+
+const MerchDestinations: React.FC<{ artist?: Artist }> = ({ artist }) => {
   const { merchId: merchParamId } = useParams();
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
@@ -42,13 +55,26 @@ const MerchDestinations: React.FC<{}> = () => {
     queryManagedMerch(merchParamId ?? "")
   );
 
+  const artistCountryCode = React.useMemo(() => {
+    for (const tag of artist?.artistLocationTags ?? []) {
+      const code = countryNameToCode(tag.locationTag?.country);
+      if (code) return code;
+    }
+    return undefined;
+  }, [artist]);
+
+  const defaultHomeCountry =
+    artistCountryCode ??
+    (user?.currency
+      ? currencyToCountryMap[user.currency]?.countryCode
+      : undefined);
+
   const methods = useForm<DestinationForm>({
     defaultValues: {
       destinations: merch?.shippingDestinations.map((dest) => ({
         ...dest,
-        homeCountry: (user?.currency && !dest.homeCountry
-          ? currencyToCountryMap[user?.currency].countryCode
-          : dest.homeCountry
+        homeCountry: (
+          dest.homeCountry || defaultHomeCountry || ""
         ).toUpperCase(),
         costUnit: dest.costUnit / 100,
         costExtraUnit: dest.costExtraUnit / 100,
@@ -132,7 +158,10 @@ const MerchDestinations: React.FC<{}> = () => {
             <>
               <ArtistButton
                 onClick={() => {
-                  append({ destinationCountry: null });
+                  append({
+                    destinationCountry: null,
+                    homeCountry: defaultHomeCountry,
+                  });
                 }}
                 type="button"
                 size="compact"
