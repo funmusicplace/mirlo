@@ -100,5 +100,58 @@ describe("artists", () => {
       const titles = trackGroup.tracks.map((t: { title: string }) => t.title);
       assert.deepEqual(titles, ["first", "second", "third"]);
     });
+
+    it("should return user._count.artistLabels = 0 for a label with empty roster", async () => {
+      const { user: labelUser } = await createUser({
+        email: "label@test.com",
+        isLabelAccount: true,
+      });
+      const label = await createArtist(labelUser.id, {
+        name: "Empty Label",
+        urlSlug: "empty-label",
+        isLabelProfile: true,
+      });
+
+      const response = await requestApp
+        .get(`artists/${label.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.user?._count?.artistLabels, 0);
+    });
+
+    it("should return user._count.artistLabels matching the roster size", async () => {
+      const { user: labelUser } = await createUser({
+        email: "label2@test.com",
+        isLabelAccount: true,
+      });
+      const label = await createArtist(labelUser.id, {
+        name: "Stocked Label",
+        urlSlug: "stocked-label",
+        isLabelProfile: true,
+      });
+      const { user: artistUser } = await createUser({
+        email: "rosterartist@test.com",
+      });
+      const rosterArtist = await createArtist(artistUser.id, {
+        name: "Roster Artist",
+        urlSlug: "roster-artist",
+      });
+      await prisma.artistLabel.create({
+        data: {
+          artistId: rosterArtist.id,
+          labelUserId: labelUser.id,
+          isLabelApproved: true,
+          isArtistApproved: true,
+        },
+      });
+
+      const response = await requestApp
+        .get(`artists/${label.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.user?._count?.artistLabels, 1);
+    });
   });
 });

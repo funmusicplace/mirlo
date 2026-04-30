@@ -591,6 +591,9 @@ export const singleInclude = (queryOptions?: {
     user: {
       select: {
         currency: true,
+        _count: {
+          select: { artistLabels: true },
+        },
       },
     },
   } as any;
