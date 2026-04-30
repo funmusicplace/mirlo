@@ -32,6 +32,7 @@ export default function () {
 
       const labelArtists = await prisma.artist.findMany({
         where: {
+          deletedAt: null,
           artistLabels: {
             some: {
               labelUserId: labelProfile?.userId,

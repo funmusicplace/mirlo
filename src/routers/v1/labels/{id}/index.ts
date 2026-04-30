@@ -45,6 +45,7 @@ export default function () {
             where: {
               isArtistApproved: true,
               isLabelApproved: true,
+              artist: { deletedAt: null },
             },
             include: {
               artist: {
