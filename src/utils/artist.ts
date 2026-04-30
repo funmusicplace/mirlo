@@ -480,6 +480,7 @@ export const singleInclude = (queryOptions?: {
       include: {
         tracks: {
           where: { deletedAt: null },
+          orderBy: { order: "asc" },
         },
         cover: {
           where: {
