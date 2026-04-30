@@ -35,11 +35,17 @@ describe("artist customize look", () => {
     cy.login({ email: userEmail, password: userPassword });
 
     cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", `/v1/manage/artists/${artistId}*`).as(
+      "getManagedArtist"
+    );
     cy.intercept("PUT", `/v1/manage/artists/${artistId}`).as("updateArtist");
     cy.intercept("GET", `/v1/artists/${urlSlug}*`).as("getArtist");
 
     cy.visit(`/manage/artists/${artistId}/customize`);
     cy.wait("@authProfile");
+    // Wait for the managed-artist fetch so the form's defaults useEffect
+    // resets BEFORE we interact; otherwise a late reset wipes our checkbox.
+    cy.wait("@getManagedArtist");
   });
 
   it("toggles transparent container and persists it to artist properties", () => {
