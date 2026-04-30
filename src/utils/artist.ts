@@ -148,6 +148,22 @@ export const whereForAllArtistsThisLabelCanEdit = (
   ],
 });
 
+export const whereForAllArtistsThisLabelCanAddReleasesFor = (
+  userId: number
+): Prisma.ArtistWhereInput => ({
+  OR: [
+    { userId },
+    {
+      artistLabels: {
+        some: {
+          labelUserId: userId,
+          canLabelAddReleases: true,
+        },
+      },
+    },
+  ],
+});
+
 export const findArtistIdForURLSlug = async (id: string) => {
   if (Number.isNaN(Number(id))) {
     const artist = await prisma.artist.findFirst({
