@@ -1,29 +1,28 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-
-import { NewAlbumButton } from "./NewAlbumButton";
 import { useQuery } from "@tanstack/react-query";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Tooltip from "components/common/Tooltip";
 import {
   queryArtist,
   queryManagedArtistTrackGroups,
   queryPublicLabelTrackGroups,
   useDeleteTrackGroupMutation,
 } from "queries";
-import {
-  ArtistButton,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
-import SetEntireCataloguePrice from "./SetEntireCataloguePrice";
-import { MdOutlineDownloadForOffline } from "react-icons/md";
-import Table from "components/common/Table";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaEye, FaTrash } from "react-icons/fa";
-import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
-import { useSnackbar } from "state/SnackbarContext";
+import { MdOutlineDownloadForOffline } from "react-icons/md";
+import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import Tooltip from "components/common/Tooltip";
+import { useSnackbar } from "state/SnackbarContext";
+import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
+
+import { NewAlbumButton } from "./NewAlbumButton";
+import SetEntireCataloguePrice from "./SetEntireCataloguePrice";
 
 const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
   releases,
@@ -55,18 +54,19 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
 
   return (
     <div className="flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-tint-color)">
-      <div className="hidden md:grid md:grid-cols-10 md:items-center md:gap-3 md:px-3 md:py-1">
-        <div className="col-span-2">{t("title")}</div>
+      <div className="hidden md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3 md:px-3 md:py-1">
+        <div>{t("title")}</div>
         <div className="text-right">{t("publishedAt")}</div>
         <div className="text-right">{t("releaseDate")}</div>
         <div className="text-right">{t("tracks")}</div>
         <div className="text-right">{t("catalogNumber")}</div>
+        <div className="text-right">{t("visibility")}</div>
         <div className="text-right">
           <Tooltip hoverText={t("managingPaymentsTooltip")}>
             {t("managingPayments")}
           </Tooltip>
         </div>
-        <div aria-label="actions" className="col-span-3" />
+        <div aria-label="actions" />
       </div>
 
       {releases.map((release) => {
@@ -76,9 +76,9 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
         return (
           <div
             key={release.id}
-            className="flex flex-col gap-3 rounded-md md:px-3 md:py-1 md:grid md:grid-cols-10 md:items-center md:gap-3"
+            className="flex flex-col gap-3 rounded-md md:px-3 md:py-1 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3"
           >
-            <div className="flex items-center gap-3 col-span-2">
+            <div className="flex items-center gap-3 min-w-0">
               {release.cover && (
                 <img
                   src={release.cover.sizes?.[120] ?? release.cover.url?.[0]}
@@ -87,7 +87,9 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
                 />
               )}
               <div className="min-w-0 flex-1">
-                <div className="font-medium">{release.title}</div>
+                <div className="font-medium truncate" title={release.title}>
+                  {release.title}
+                </div>
               </div>
             </div>
 
@@ -119,8 +121,19 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
               <div id="catalogNumber" className="md:hidden">
                 {t("catalogNumber")}
               </div>
-              <div className="text-right" aria-labelledby="catalogNumber">
+              <div
+                className="text-right truncate"
+                aria-labelledby="catalogNumber"
+                title={release.catalogNumber}
+              >
                 {release.catalogNumber}
+              </div>
+
+              <div id="visibility" className="md:hidden">
+                {t("visibility")}
+              </div>
+              <div className="text-right" aria-labelledby="visibility">
+                {isPublished && !release.isPublic ? t("private") : ""}
               </div>
 
               <div id="managingPayments" className="md:hidden">
@@ -134,7 +147,7 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-end gap-2 md:col-span-3">
+            <div className="flex flex-wrap justify-end gap-2">
               <ArtistButtonLink
                 to={getManageReleaseUrl(release.artist, release)}
                 size="compact"
@@ -270,6 +283,3 @@ const ManageArtistAlbums: React.FC<{}> = () => {
 };
 
 export default ManageArtistAlbums;
-function deleteTrackGroup(arg0: { userId: any; trackGroupId: number }) {
-  throw new Error("Function not implemented.");
-}

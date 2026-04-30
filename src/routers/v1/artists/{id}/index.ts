@@ -7,7 +7,9 @@ import {
   findArtistIdForURLSlug,
   processSingleArtist,
   singleInclude,
+  whereForAllArtistsThisLabelCanEdit,
 } from "../../../../utils/artist";
+
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -24,12 +26,26 @@ export default function () {
       const parsedId = await findArtistIdForURLSlug(id);
       let isUserSubscriber = false;
       if (parsedId) {
+        const canManage =
+          !!loggedInUser &&
+          (await prisma.artist.findFirst({
+            where: {
+              id: parsedId,
+              enabled: true,
+              ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
+            },
+            select: { id: true },
+          })) !== null;
+
         const artist = await prisma.artist.findFirst({
           where: {
             id: parsedId,
             enabled: true,
           },
-          include: singleInclude({ includeDefaultTier }) as any,
+          include: singleInclude({
+            includeDefaultTier,
+            includePrivate: canManage,
+          }) as any,
         });
 
         isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);

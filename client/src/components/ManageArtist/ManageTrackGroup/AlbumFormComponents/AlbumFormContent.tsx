@@ -1,28 +1,29 @@
+import { css } from "@emotion/css";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
+import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
+import PublishButton from "components/ManageArtist/PublishButton";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-
-import FormComponent from "components/common/FormComponent";
-
 import { Trans, useTranslation } from "react-i18next";
-
-import UploadArtistImage from "../../UploadArtistImage";
+import { FaEye } from "react-icons/fa";
 import { useParams } from "react-router-dom";
+import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
 
-import SavingInput from "./SavingInput";
-import { css } from "@emotion/css";
 import { bp } from "../../../../constants";
-import ManageTags from "./ManageTags";
+import UploadArtistImage from "../../UploadArtistImage";
 
 import PriceAndSuch from "./PriceAndSuch";
 import FundraisingGoal from "./FundraisingGoal";
-import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
+import ManageTags from "./ManageTags";
 import PreOrderSection from "./PreOrderSection";
 import SaveDraftBar from "./SaveDraftBar";
-import { isTrackGroupPublished } from "utils/artist";
+import SavingInput from "./SavingInput";
+import VisibilityRadio from "./VisibilityRadio";
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
-  reload: () => void;
+  reload: () => Promise<unknown>;
   isFlowV2?: boolean;
 }> = ({ existingObject, reload, isFlowV2 }) => {
   const { watch } = useFormContext();
@@ -37,8 +38,30 @@ const AlbumFormContent: React.FC<{
   return (
     <>
       {isFlowV2 && (
-        <SaveDraftBar existingObject={existingObject} reload={reload} />
+        <div className="flex flex-wrap items-center gap-2 mt-4">
+          <SaveDraftBar existingObject={existingObject} reload={reload} />
+          {!isTrackGroupPublished(existingObject) &&
+            (existingObject.tracks?.length > 0 ||
+              !!existingObject.fundraiser) &&
+            existingObject.artist && (
+              <ArtistButtonLink
+                to={getReleaseUrl(existingObject.artist, existingObject)}
+                startIcon={<FaEye />}
+                variant="dashed"
+              >
+                {t("previewRelease")}
+              </ArtistButtonLink>
+            )}
+          <div className="ml-auto">
+            <PublishButton
+              trackGroup={existingObject}
+              reload={reload}
+              isFlowV2={isFlowV2}
+            />
+          </div>
+        </div>
       )}
+      {isFlowV2 && <VisibilityRadio existingObject={existingObject} />}
       {isFlowV2 && (
         <PreOrderSection
           existingObject={existingObject}

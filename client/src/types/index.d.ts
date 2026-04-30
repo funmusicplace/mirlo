@@ -150,6 +150,8 @@ interface TrackGroup {
   isPreorder: boolean;
   scheduleEndOnReleaseDate: boolean;
   makeTracksPreviewableOnRelease: boolean;
+  isPublic: boolean;
+  hasNotifiedFollowers?: boolean;
 }
 
 interface Post {

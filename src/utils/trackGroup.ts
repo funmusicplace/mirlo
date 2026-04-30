@@ -1,3 +1,6 @@
+import { randomUUID } from "crypto";
+
+import prisma from "@mirlo/prisma";
 import {
   TrackGroup,
   TrackAudio,
@@ -11,10 +14,19 @@ import {
   Artist,
   ArtistAvatar,
   UploadState,
-  UserTrackPurchase,
 } from "@mirlo/prisma/client";
-import prisma from "@mirlo/prisma";
+import { DefaultArgs } from "@prisma/client/runtime/library";
+import archiver from "archiver";
+import { Response } from "express";
+
+import { logger } from "../logger";
+
+import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
+import { sendBasecampAMessage } from "./basecamp";
+import { deleteDownloadableContent } from "./content";
+import { AppError } from "./error";
 import { generateFullStaticImageUrl } from "./images";
+import { processSingleMerch } from "./merch";
 import {
   finalCoversBucket,
   finalAudioBucket,
@@ -22,24 +34,49 @@ import {
   getReadStream,
   finalArtistAvatarBucket,
 } from "./minio";
-import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
-import { logger } from "../logger";
-import archiver from "archiver";
-import { deleteTrack } from "./tracks";
-import { randomUUID } from "crypto";
-import { Response } from "express";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
-import { AppError } from "./error";
-import { processSingleMerch } from "./merch";
-import { sendBasecampAMessage } from "./basecamp";
-import { deleteDownloadableContent } from "./content";
+export const notifyFollowersOfNewAlbum = async (trackGroup: {
+  id: number;
+  artistId: number;
+  isPreorder: boolean;
+  notifiedFollowersAt: Date | null;
+}) => {
+  if (trackGroup.notifiedFollowersAt) return;
 
-export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
+  await prisma.trackGroup.update({
+    where: { id: trackGroup.id },
+    data: { notifiedFollowersAt: new Date() },
+  });
+
+  const artistFollowers = await prisma.artistUserSubscription.findMany({
+    where: {
+      artistSubscriptionTier: { artistId: trackGroup.artistId },
+    },
+  });
+
+  if (artistFollowers.length === 0) return;
+
+  await prisma.notification.createMany({
+    data: artistFollowers.map((follower) => ({
+      userId: follower.userId,
+      trackGroupId: trackGroup.id,
+      notificationType: trackGroup.isPreorder
+        ? "NEW_ARTIST_PREORDER"
+        : "NEW_ARTIST_ALBUM",
+    })),
+  });
+};
+
+import { deleteTrack } from "./tracks";
+
+export const whereForPublishedTrackGroups = (opts?: {
+  includePrivate?: boolean;
+}): Prisma.TrackGroupWhereInput => {
   return {
     publishedAt: { lte: new Date() },
     isDrafts: false,
     adminEnabled: true,
+    ...(opts?.includePrivate ? {} : { isPublic: true }),
     artist: {
       enabled: true,
       deletedAt: null,
@@ -807,6 +844,7 @@ export const processSingleTrackGroup = (
   options?: { loggedInUserId?: number }
 ) => ({
   ...tg,
+  hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
   tracks: tg.tracks?.map((track) => ({
     ...track,
     isPlayable:

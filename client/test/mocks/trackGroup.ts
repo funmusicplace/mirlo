@@ -48,6 +48,7 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
   isPreorder: false,
   scheduleEndOnReleaseDate: false,
   makeTracksPreviewableOnRelease: false,
+  isPublic: true,
   tags: [],
   tracks: [],
 };

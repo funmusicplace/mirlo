@@ -1,13 +1,14 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
+import { set } from "lodash";
+
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-import trackGroupProcessor, {
+import { userAuthenticated } from "../../../../auth/passport";
+import {
   processSingleTrackGroup,
   whereForPublishedTrackGroups,
 } from "../../../../utils/trackGroup";
-import { set } from "lodash";
 
 type Params = {
   userId: string;
@@ -32,7 +33,7 @@ export default function () {
         where.trackGroupId = Number(trackGroupId);
       }
 
-      where.trackGroup = whereForPublishedTrackGroups();
+      where.trackGroup = whereForPublishedTrackGroups({ includePrivate: true });
 
       const tgPurchases = await prisma.userTrackGroupPurchase.findMany({
         where,
@@ -59,7 +60,11 @@ export default function () {
         whereTrack.track = { trackGroupId: Number(trackGroupId) };
       }
 
-      set(whereTrack, "track.trackGroup", whereForPublishedTrackGroups());
+      set(
+        whereTrack,
+        "track.trackGroup",
+        whereForPublishedTrackGroups({ includePrivate: true })
+      );
 
       const trackPurchases = await prisma.userTrackPurchase.findMany({
         where: whereTrack,

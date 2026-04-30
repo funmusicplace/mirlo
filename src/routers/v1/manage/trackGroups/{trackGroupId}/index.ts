@@ -1,18 +1,21 @@
-import { Artist } from "@mirlo/prisma/client";
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import { AppError } from "../../../../../utils/error";
+import generateSlug from "../../../../../utils/generateSlug";
 import processor, {
   trackGroupSingleInclude,
 } from "../../../../../utils/trackGroup";
-import prisma from "@mirlo/prisma";
-import { deleteTrackGroup } from "../../../../../utils/trackGroup";
-import { AppError } from "../../../../../utils/error";
-import generateSlug from "../../../../../utils/generateSlug";
+import {
+  deleteTrackGroup,
+  notifyFollowersOfNewAlbum,
+} from "../../../../../utils/trackGroup";
 
 type Params = {
   trackGroupId: string;
@@ -95,6 +98,13 @@ export default function () {
     const data = req.body;
 
     try {
+      if (data.isPublic !== undefined && typeof data.isPublic !== "boolean") {
+        throw new AppError({
+          httpCode: 400,
+          description: "isPublic must be a boolean",
+        });
+      }
+
       const newValues = pick(data, [
         "title",
         "releaseDate",
@@ -119,6 +129,7 @@ export default function () {
         "isPreorder",
         "scheduleEndOnReleaseDate",
         "makeTracksPreviewableOnRelease",
+        "isPublic",
       ]);
 
       const existingTrackGroup = await prisma.trackGroup.findFirst({
@@ -160,6 +171,16 @@ export default function () {
       let trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },
       });
+
+      const isPublishedNow =
+        trackGroup?.publishedAt && trackGroup.publishedAt <= new Date();
+      const flippedToPublic =
+        existingTrackGroup.isPublic === false &&
+        trackGroup?.isPublic === true &&
+        isPublishedNow;
+      if (flippedToPublic && trackGroup) {
+        await notifyFollowersOfNewAlbum(trackGroup);
+      }
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
         let slug = generateSlug(newValues.title);

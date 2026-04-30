@@ -1,18 +1,18 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+import { merge } from "lodash";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-
 import {
   deleteArtist,
   findArtistIdForURLSlug,
   processSingleArtist,
   singleInclude,
 } from "../../../../../utils/artist";
-import { merge } from "lodash";
 import generateSlug from "../../../../../utils/generateSlug";
 
 type Params = {
@@ -158,7 +158,7 @@ export default function () {
           id: Number(castArtistId),
         },
         include: {
-          ...singleInclude(),
+          ...singleInclude({ includePrivate: true }),
           merch: {
             where: {
               deletedAt: null,
