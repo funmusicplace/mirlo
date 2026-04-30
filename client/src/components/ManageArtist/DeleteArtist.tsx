@@ -26,11 +26,12 @@ export const DeleteArtist: React.FC = () => {
 
   const onDelete = React.useCallback(() => {
     if (!!artist && window.confirm(t("areYouSureDelete") ?? "")) {
+      navigate("/manage");
       deleteArtist(
         { artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
         {
           onSuccess() {
-            navigate("/manage");
+            snackbar(t("artistDeleted"), { type: "success" });
           },
           onError() {
             snackbar(t("problemDeletingArtist"), { type: "warning" });

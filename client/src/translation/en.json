@@ -738,7 +738,8 @@
     "noReleases": "No releases found",
     "selected": "Selected",
     "saving": "Saving changes...",
-    "viewLiveTitled": "View live {{ title }}"
+    "viewLiveTitled": "View live {{ title }}",
+    "doesNotExist": "This artist page does not exist."
   },
   "managePost": {
     "untitledPost": "Untitled post",
@@ -1073,6 +1074,7 @@
     "allowDirectMessages": "Allow direct messages from listeners",
     "allowDirectMessagesDescription": "When enabled, logged-in listeners can send you a message through your profile. Messages arrive as a notification and by email.",
     "deleteArtist": "Permanently delete artist page",
+    "artistDeleted": "Artist page deleted",
     "shortDescription": "Something short about you",
     "announcement": "Write an announcement:",
     "editAnnouncement": "Edit announcement",
