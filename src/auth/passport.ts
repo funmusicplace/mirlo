@@ -7,6 +7,7 @@ import passportJWT, { JwtFromRequestFunction } from "passport-jwt";
 import logger from "../logger";
 import {
   findArtistIdForURLSlug,
+  whereForAllArtistsThisLabelCanAddReleasesFor,
   whereForAllArtistsThisLabelCanEdit,
 } from "../utils/artist";
 import { AppError } from "../utils/error";
@@ -427,9 +428,9 @@ export const trackBelongsToLoggedInUser = async (
       const track = await prisma.track.findFirst({
         where: {
           trackGroup: {
-            artist: {
-              userId: loggedInUser.id,
-            },
+            artist: whereForAllArtistsThisLabelCanAddReleasesFor(
+              loggedInUser.id
+            ),
           },
           id: Number(trackId),
         },
