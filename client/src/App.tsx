@@ -17,14 +17,12 @@ import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
 import { useGlobalPlayerSyncIntegration } from "utils/playerSync";
-import useWidgetListener from "utils/useWidgetListener";
 
 import Header from "./components/Header/Header";
 import { bp } from "./constants";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
-  useWidgetListener();
   useGlobalPlayerSyncIntegration();
   const location = useLocation();
   const snackbar = useSnackbar();

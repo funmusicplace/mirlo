@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+
 import { bp } from "../../constants";
 
 const MarkdownWrapper = styled.div`
@@ -40,9 +41,10 @@ const MarkdownWrapper = styled.div`
     max-width: 100%;
   }
 
-  iframe[src*="widget/trackGroup"] {
+  iframe[src*="widget/trackGroup"],
+  iframe[src*="widget/label"] {
     width: 700px;
-    height: 371px;
+    height: 230px;
     max-width: 100%;
   }
 

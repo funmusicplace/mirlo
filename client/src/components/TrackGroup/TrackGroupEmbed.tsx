@@ -1,19 +1,18 @@
-import Button from "components/common/Button";
-import React from "react";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import Button from "components/common/Button";
 import Modal from "components/common/Modal";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { BsShare } from "react-icons/bs";
+import { FaCopy } from "react-icons/fa";
+import { useSnackbar } from "state/SnackbarContext";
 import {
   getArtistUrl,
   getLabelWidget,
   getReleaseUrl,
   getTrackGroupWidget,
 } from "utils/artist";
-import { FaCopy } from "react-icons/fa";
-import { BsShare } from "react-icons/bs";
-import { useSnackbar } from "state/SnackbarContext";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 import useArtistQuery from "utils/useArtistQuery";
 
 const Embed: React.FC<{
@@ -35,7 +34,7 @@ const Embed: React.FC<{
 
   const widgetText = `<iframe
     src="${src}"
-    style="width:100%; height: 371px; border:0; border-radius: 4px; overflow:hidden;"
+    style="width:100%; height: 230px; border:0; border-radius: 4px; overflow:hidden;"
     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   ></iframe>`;
 

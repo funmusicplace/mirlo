@@ -1,31 +1,24 @@
-import { css } from "@emotion/css";
-import { AudioWrapper } from "components/Player/AudioWrapper";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import { AudioWrapper } from "components/Player/AudioWrapper";
+import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import api from "services/api";
-import { isTrackOwnedOrPreview } from "utils/tracks";
-import {
-  FlexWrapper,
-  TgWidgetWrapper,
-  TrackListWrapper,
-  WidgetTitleWrapper,
-  WidgetWrapper,
-  inIframe,
-  inMirlo,
-} from "./utils";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
-import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
-import DisplayAudioWrapper from "./DisplayAudio";
-import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
+import { useAuthContext } from "state/AuthContext";
 import {
   getArtistUrl,
   getArtistUrlReference,
   getReleaseUrl,
 } from "utils/artist";
-import { bp } from "../../constants";
-import { useAuthContext } from "state/AuthContext";
+import { isTrackOwnedOrPreview } from "utils/tracks";
+import { isEmbeddedInMirlo } from "utils/widgetContext";
+
+import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
+import { TgWidgetWrapper, TrackListWrapper, WidgetWrapper } from "./utils";
+import WidgetActionButtons from "./WidgetActionButtons";
 
 const TrackGroupWidget = () => {
   const { t } = useTranslation("translation", {
@@ -40,7 +33,7 @@ const TrackGroupWidget = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [artist, setArtist] = React.useState<Artist>();
 
-  const embeddedInMirlo = inIframe() && inMirlo();
+  const embeddedInMirlo = isEmbeddedInMirlo();
 
   React.useEffect(() => {
     const callback = async () => {
@@ -65,14 +58,9 @@ const TrackGroupWidget = () => {
   if ((!trackGroup || !trackGroup.id) && !isLoading) {
     return (
       <div
-        className={css`
-          border: var(--mi-border);
-          ${embeddedInMirlo && "min-height: 359px;"}
-          display: flex;
-          width: 100%;
-          justify-content: center;
-          padding: 1rem;
-        `}
+        className={`[border:var(--mi-border)] flex w-full justify-center p-4 ${
+          embeddedInMirlo ? "min-h-[200px]" : ""
+        }`}
       >
         {t("trackDoesntExist")}
       </div>
@@ -90,31 +78,11 @@ const TrackGroupWidget = () => {
   return (
     <WidgetWrapper
       artistColors={artist?.properties?.colors}
-      className={css`
-        height: 100vh;
-        overflow: scroll;
-        a {
-          text-decoration: none;
-        }
-        a:hover {
-          text-decoration: underline;
-        }
-      `}
+      className="h-screen border-0! [&_a]:no-underline!"
     >
       <TgWidgetWrapper>
-        <FlexWrapper
-          className={css`
-            position: relative;
-            width: 100%;
-          `}
-        >
-          <div
-            className={css`
-              position: absolute;
-              right: 2.5%;
-              bottom: 2.5%;
-            `}
-          >
+        <div className="[grid-area:cover] relative">
+          <div className="absolute right-[2.5%] bottom-[2.5%]">
             <PlayButtonsWrapper ids={playableTracks.map((t) => t.id)} />
           </div>
           <ImageWithPlaceholder
@@ -124,90 +92,97 @@ const TrackGroupWidget = () => {
             square
             objectFit="contain"
           />
-        </FlexWrapper>
+        </div>
 
-        <WidgetTitleWrapper className={css``}>
-          <div
-            className={css`
-              padding: 1rem;
-            `}
-          >
-            <FlexWrapper
-              className={css`
-                a {
-                  font-size: 1.5rem;
-                }
-                @media screen and (max-width: ${bp.small}px) {
-                  padding-bottom: 0.25rem;
-                }
-              `}
-            >
-              {embeddedInMirlo && trackGroup.artist && (
-                <Link
-                  target={`"_blank"`}
-                  to={getReleaseUrl(trackGroup.artist, trackGroup)}
-                >
-                  {trackGroup.title}
-                </Link>
-              )}
-              {!embeddedInMirlo && trackGroup.artist && (
-                <a
-                  target={`"_blank"`}
-                  href={`${import.meta.env.VITE_CLIENT_DOMAIN}${getReleaseUrl(
-                    trackGroup.artist,
-                    trackGroup
-                  )}`}
-                >
-                  {trackGroup.title}
-                </a>
-              )}
-            </FlexWrapper>{" "}
-            <FlexWrapper
-              className={css`
-                align-items: flex-end;
-                a {
-                  padding-left: 0.25rem;
-                }
-              `}
-            >
-              {t("by")}{" "}
-              {embeddedInMirlo && trackGroup.artist && (
-                <Link target={`"_blank"`} to={getArtistUrl(trackGroup.artist)}>
-                  {trackGroup.artist.name}
-                </Link>
-              )}
-              {!embeddedInMirlo && trackGroup.artist && (
-                <a
-                  target={`"_blank"`}
-                  href={`${
-                    import.meta.env.VITE_CLIENT_DOMAIN
-                  }/${getArtistUrlReference(trackGroup.artist)}`}
-                >
-                  {trackGroup.artist.name}
-                </a>
-              )}
-            </FlexWrapper>
+        <div className="[grid-area:title] min-w-0 overflow-hidden border-l border-current/15 flex flex-col">
+          <div className="flex-1 min-h-0 flex p-4 gap-3 max-sm:items-center relative">
+            <div className="flex-1 min-w-0 flex flex-col sm:pr-[8rem]">
+              <div className="text-xl font-bold truncate break-normal max-sm:text-base">
+                {embeddedInMirlo && trackGroup.artist && (
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    to={getReleaseUrl(trackGroup.artist, trackGroup)}
+                  >
+                    {trackGroup.title}
+                  </Link>
+                )}
+                {!embeddedInMirlo && trackGroup.artist && (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`${import.meta.env.VITE_CLIENT_DOMAIN}${getReleaseUrl(
+                      trackGroup.artist,
+                      trackGroup
+                    )}`}
+                  >
+                    {trackGroup.title}
+                  </a>
+                )}
+              </div>
+              <div className="text-sm opacity-85 truncate break-normal max-sm:text-xs [&_a:hover]:underline!">
+                {t("by")}{" "}
+                {embeddedInMirlo && trackGroup.artist && (
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    to={getArtistUrl(trackGroup.artist)}
+                  >
+                    {trackGroup.artist.name}
+                  </Link>
+                )}
+                {!embeddedInMirlo && trackGroup.artist && (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`${
+                      import.meta.env.VITE_CLIENT_DOMAIN
+                    }/${getArtistUrlReference(trackGroup.artist)}`}
+                  >
+                    {trackGroup.artist.name}
+                  </a>
+                )}
+                {" · "}
+                {t("trackCount", { count: trackGroup.tracks.length })}
+              </div>
+            </div>
+            {trackGroup.artist && (
+              <div className="shrink-0 absolute top-4 right-4">
+                <WidgetActionButtons artist={artist} trackGroup={trackGroup} />
+              </div>
+            )}
           </div>
-          <TrackListWrapper>
+          {currentTrack && !embeddedInMirlo && (
+            <AudioWrapper
+              currentTrack={currentTrack}
+              position="static"
+              setCurrentSeconds={setCurrentSeconds}
+              currentSeconds={currentSeconds}
+              compact
+            />
+          )}
+        </div>
+
+        <div className="[grid-area:tracks] flex flex-col min-h-0 overflow-hidden border-l border-t border-current/15 max-sm:border-l-0 relative">
+          <TrackListWrapper id="trackgroup-tracks-scroll">
             <PublicTrackGroupListing
               size="small"
               showDropdown={false}
               tracks={trackGroup.tracks}
               trackGroup={trackGroup}
+              inWidget
             />
           </TrackListWrapper>
-        </WidgetTitleWrapper>
-      </TgWidgetWrapper>
-      {currentTrack && !embeddedInMirlo && (
-        <DisplayAudioWrapper>
-          <AudioWrapper
-            currentTrack={currentTrack}
-            position="relative"
-            setCurrentSeconds={setCurrentSeconds}
-            currentSeconds={currentSeconds}
+          <ScrollFadeOverlay
+            scrollElementId="trackgroup-tracks-scroll"
+            position="bottom"
+            fadeColor={
+              artist?.properties?.colors?.background ??
+              "var(--mi-background-color)"
+            }
           />
-        </DisplayAudioWrapper>
-      )}
+        </div>
+      </TgWidgetWrapper>
     </WidgetWrapper>
   );
 };

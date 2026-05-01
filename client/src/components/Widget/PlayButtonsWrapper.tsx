@@ -1,66 +1,86 @@
 import { css } from "@emotion/css";
+import Button from "components/common/Button";
 import React from "react";
 import { TfiControlPause } from "react-icons/tfi";
 import { VscPlay } from "react-icons/vsc";
 import { useGlobalStateContext } from "state/GlobalState";
-import { inIframe, inMirlo } from "./utils";
-import Button from "components/common/Button";
+import { usePlayerSyncRequest } from "utils/playerSync";
+import { isEmbeddedInMirlo } from "utils/widgetContext";
+
+import { bp } from "../../constants";
 
 export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
   const {
-    state: { playing },
+    state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
-  const embeddedInMirlo = inIframe() && inMirlo();
+  const embeddedInMirlo = isEmbeddedInMirlo();
+  const sendPlayerRequest = usePlayerSyncRequest();
+  const currentPlayingTrackId =
+    currentlyPlayingIndex !== undefined
+      ? playerQueueIds[currentlyPlayingIndex]
+      : undefined;
+  const isOurTrackPlaying =
+    currentPlayingTrackId !== undefined && ids.includes(currentPlayingTrackId);
 
   const onPause = React.useCallback(
     (e: any) => {
       if (ids.length > 0 && embeddedInMirlo) {
-        window.parent.postMessage("mirlo:pause:track:" + ids[0]);
+        sendPlayerRequest({ type: "pause", trackId: ids[0] });
       } else {
         dispatch({ type: "setPlaying", playing: false });
       }
     },
-    [dispatch, embeddedInMirlo, ids]
+    [dispatch, embeddedInMirlo, ids, sendPlayerRequest]
   );
 
   const playMusic = React.useCallback(() => {
     if (ids.length > 0) {
       if (embeddedInMirlo) {
-        window.parent.postMessage("mirlo:play:track:" + ids[0]);
+        sendPlayerRequest({ type: "play", trackId: ids[0] });
       } else {
         dispatch({ type: "setPlayerQueueIds", playerQueueIds: ids });
         dispatch({ type: "setPlaying", playing: true });
       }
     }
-  }, [ids, embeddedInMirlo, dispatch]);
+  }, [ids, embeddedInMirlo, dispatch, sendPlayerRequest]);
 
   return (
     <div
       className={css`
         button {
-          background-color: var(--mi-text-color);
-          color: var(--mi-background-color);
-          border: solid 1.5px var(--mi-text-color);
+          background-color: var(--mi-button-color);
+          color: var(--mi-button-text-color);
+          border: solid 1.5px var(--mi-button-color);
           width: 3rem;
           height: 3rem;
           svg {
             font-size: 1.5rem;
-            fill: var(--mi-background-color);
+            fill: var(--mi-button-text-color);
           }
         }
 
         button:hover {
-          color: var(--mi-text-color) !important;
-          background-color: var(--mi-background-color) !important;
+          color: var(--mi-button-color) !important;
+          background-color: var(--mi-button-text-color) !important;
 
           svg {
-            fill: var(--mi-text-color) !important;
+            fill: var(--mi-button-color) !important;
+          }
+        }
+
+        @media screen and (max-width: ${bp.small}px) {
+          button {
+            width: 2.25rem;
+            height: 2.25rem;
+            svg {
+              font-size: 1.1rem;
+            }
           }
         }
       `}
     >
-      {!playing && (
+      {(!playing || !isOurTrackPlaying) && (
         <Button
           onClick={playMusic}
           startIcon={<VscPlay />}
@@ -71,15 +91,8 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
           `}
         />
       )}
-      {(playing || embeddedInMirlo) && (
-        <Button
-          onClick={onPause}
-          startIcon={<TfiControlPause />}
-          className={css`
-          ${embeddedInMirlo && "display: none !important;"}
-        }
-      `}
-        />
+      {playing && isOurTrackPlaying && (
+        <Button onClick={onPause} startIcon={<TfiControlPause />} />
       )}
     </div>
   );

@@ -1,9 +1,10 @@
 import { css } from "@emotion/css";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import { Link } from "react-router-dom";
-import { bp } from "../../constants";
-import { getReleaseUrl, getTrackUrl } from "utils/artist";
 import React from "react";
+import { Link } from "react-router-dom";
+import { getReleaseUrl, getTrackUrl } from "utils/artist";
+
+import { bp } from "../../constants";
 
 export const TrackArtistLinks: React.FC<{
   track: Track;
@@ -26,7 +27,8 @@ export const TrackArtistLinks: React.FC<{
         <>
           {fullLink ? (
             <a
-              target={`"_blank"`}
+              target="_blank"
+              rel="noopener noreferrer"
               href={`${import.meta.env.VITE_CLIENT_DOMAIN}/${artist.artistId}`}
             >
               {artist.artistName}
@@ -36,6 +38,7 @@ export const TrackArtistLinks: React.FC<{
               to={`/${artist.artistId}`}
               id="player-artist-name"
               target={target}
+              rel={target === "_blank" ? "noopener noreferrer" : undefined}
             >
               {artist.artistName}
             </Link>
