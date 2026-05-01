@@ -36,7 +36,7 @@ import {
   finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
-import postProcessor from "./post";
+import { serializePost } from "./serialize/post";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
 import {
@@ -642,7 +642,7 @@ export const processSingleArtist = (
   return {
     ...artist,
     posts: artist?.posts?.map((p: Post) =>
-      postProcessor.single(p, isUserSubscriber || artist.userId === userId)
+      serializePost(p, isUserSubscriber || artist.userId === userId)
     ),
     merch: artist?.merch?.map(processSingleMerch),
     background: addSizesToImage(

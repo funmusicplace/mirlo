@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { checkIsUserSubscriber } from "../../../utils/artist";
-import postProcessor from "../../../utils/post";
+import { serializePost } from "../../../utils/serialize/post";
 
 export default function () {
   const operations = {
@@ -87,7 +87,7 @@ export default function () {
 
       const processedPosts = await Promise.all(
         posts.map(async (p) =>
-          postProcessor.single(
+          serializePost(
             p,
             (p.artistId
               ? await checkIsUserSubscriber(user, p.artistId)

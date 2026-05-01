@@ -5,7 +5,7 @@ import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
-import { processSinglePost } from "../utils/post";
+import { serializePost } from "../utils/serialize/post";
 
 import { parseOutIframes } from "./parse-out-iframes";
 
@@ -137,7 +137,7 @@ export default async function sendPostNotification(job: {
           continue;
         }
 
-        const postForEmail = processSinglePost({
+        const postForEmail = serializePost({
           id: post.id,
           title: post.title,
           urlSlug: post.urlSlug,

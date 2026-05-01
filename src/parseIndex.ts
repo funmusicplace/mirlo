@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "node:path";
 
 import prisma from "@mirlo/prisma";
-import { Client } from "@mirlo/prisma/client";
+import { Client, User } from "@mirlo/prisma/client";
 import * as cheerio from "cheerio";
 import { Request } from "express";
 
@@ -22,6 +22,11 @@ import {
   finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
+import { checkIsUserSubscriber } from "./utils/artist";
+import {
+  postIncludeForUser,
+  serializePost,
+} from "./utils/serialize/post";
 import {
   USER_PROFILE_SELECT,
   serializeUserProfile,
@@ -373,6 +378,54 @@ const handlePost: RouteHandler<PostParams> = async ({
       imageUrl: avatarUrl,
     });
   }
+};
+
+/**
+ * Fetch the public post matching the route and inject it as JSON in <head>
+ * (`<script id="__MIRLO_POST__">`) so the client-side `queryPost` can use it
+ * as `initialData` and skip the loading flash on direct page load.
+ */
+const injectPostHydration = async (
+  $: cheerio.CheerioAPI,
+  routeParams: Record<string, any>,
+  req?: Request
+) => {
+  const user = req?.user as User | undefined;
+  const userId = user?.id;
+
+  const where =
+    typeof routeParams.postId === "number"
+      ? { id: routeParams.postId, artist: { urlSlug: routeParams.artistSlug } }
+      : {
+          urlSlug: {
+            equals: String(routeParams.postSlug),
+            mode: "insensitive" as const,
+          },
+          artist: { urlSlug: routeParams.artistSlug },
+        };
+
+  const post = await prisma.post.findFirst({
+    where: {
+      ...where,
+      publishedAt: { lte: new Date() },
+      isDraft: false,
+    },
+    include: postIncludeForUser(userId),
+  });
+  if (!post) return;
+
+  const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
+  const serialized = serializePost(
+    post,
+    isUserSubscriber || post.artist?.userId === userId
+  );
+
+  $("head").append(
+    `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify({
+      post: serialized,
+      injectedAt: new Date().toISOString(),
+    })}</script>`
+  );
 };
 
 type MerchParams = { artistSlug: string; merchId?: string };
@@ -781,6 +834,15 @@ export const analyzePathAndGenerateHTML = async (
     const routeParams = matchRoutePattern(segments);
     if (routeParams) {
       await dispatchRoute(routeParams, { $, client, avatarUrl });
+
+      // For a specific post, hydrate the page with the serialized post so the
+      // public Post component renders immediately without a load flash.
+      if (
+        routeParams.type === "post" &&
+        (routeParams.postId || routeParams.postSlug)
+      ) {
+        await injectPostHydration($, routeParams, req);
+      }
     } else {
       // No matching route - use default
       await handleDefault({ $, client, params: {} });
