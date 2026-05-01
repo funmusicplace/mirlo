@@ -36,15 +36,16 @@ model Settings {
 }
 
 model Client {
-  id                 Int       @id @default(autoincrement())
+  id                 Int         @id @default(autoincrement())
   applicationName    String
   applicationUrl     String
   allowedCorsOrigins String[]
   secret             String?
   key                String?
-  updatedAt          DateTime  @default(now()) @updatedAt
-  createdAt          DateTime  @default(now())
+  updatedAt          DateTime    @default(now()) @updatedAt
+  createdAt          DateTime    @default(now())
   deletedAt          DateTime?
+  trackPlays         TrackPlay[]
 }
 
 model User {
@@ -913,6 +914,8 @@ model TrackPlay {
   track     Track    @relation(fields: [trackId], references: [id])
   userId    Int?
   user      User?    @relation(fields: [userId], references: [id])
+  clientId  Int?
+  client    Client?  @relation(fields: [clientId], references: [id])
   ip        String?
   createdAt DateTime @default(now())
   owned     Boolean  @default(false)
