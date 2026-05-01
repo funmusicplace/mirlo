@@ -58,6 +58,7 @@ export type ArtistFormData = {
   background: File[];
   avatar: File[];
   activityPub: boolean;
+  federatedStreaming: boolean;
   allowDirectMessages: boolean;
   defaultPlatformFee: number;
   properties: {
@@ -83,6 +84,7 @@ const generateDefaults = (existing?: Artist) => {
     bio: existing?.bio ?? "",
     urlSlug: existing?.urlSlug ?? "",
     activityPub: existing?.activityPub ?? false,
+    federatedStreaming: existing?.federatedStreaming ?? false,
     allowDirectMessages: existing?.allowDirectMessages ?? true,
     defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
     shortDescription: existing?.shortDescription ?? "",
@@ -147,6 +149,7 @@ export const CustomizeLook: React.FC = () => {
       const sending = {
         urlSlug: data.urlSlug?.toLowerCase(),
         activityPub: data.activityPub,
+        federatedStreaming: data.federatedStreaming,
         allowDirectMessages: data.allowDirectMessages,
         properties: { ...artist?.properties, ...data.properties },
       };
@@ -188,6 +191,7 @@ export const CustomizeLook: React.FC = () => {
   );
 
   const activityPub = methods.watch("activityPub");
+  const federatedStreaming = methods.watch("federatedStreaming");
   const allowDirectMessages = methods.watch("allowDirectMessages");
 
   if (!artist) {
@@ -374,6 +378,19 @@ export const CustomizeLook: React.FC = () => {
                   toggled={activityPub}
                   onClick={() => {
                     methods.setValue("activityPub", !activityPub);
+                  }}
+                />
+                <small id="hint-enable-activity-pub">
+                  {t("makeSearchable")}
+                </small>
+              </FormComponent>
+              <FormComponent>
+                <Toggle
+                  ariaDescribedBy="hint-enable-federated-streaming"
+                  label={t("enableFederatedStreaming")}
+                  toggled={federatedStreaming}
+                  onClick={() => {
+                    methods.setValue("federatedStreaming", !federatedStreaming);
                   }}
                 />
                 <small id="hint-enable-activity-pub">

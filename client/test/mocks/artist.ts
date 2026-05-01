@@ -10,5 +10,6 @@ export const ARTIST_EXAMPLE: Artist = {
   subscriptionTiers: [],
   merch: [],
   activityPub: false,
+  federatedStreaming: false,
   isLabelProfile: false,
 };

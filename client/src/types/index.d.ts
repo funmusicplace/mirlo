@@ -268,6 +268,7 @@ interface Artist {
   bio: string;
   isLabelProfile: boolean;
   activityPub: boolean;
+  federatedStreaming: boolean;
   allowDirectMessages?: boolean;
   urlSlug?: string;
   userId: number;

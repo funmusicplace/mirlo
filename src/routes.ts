@@ -169,6 +169,7 @@ const routes = [
   "admin/stats",
   "oembed",
   "flag",
+  "federatedStreaming"
 ];
 
 export default routes;

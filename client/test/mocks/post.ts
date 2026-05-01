@@ -21,6 +21,7 @@ export const POST_EXAMPLE: Post = {
     subscriptionTiers: [],
     merch: [],
     activityPub: false,
+    federatedStreaming: false,
     isLabelProfile: false,
   },
 };
