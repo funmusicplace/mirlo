@@ -12,6 +12,9 @@ export default defineConfig({
     "Documentation for the open source music sales and patronage platform.",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    search: {
+      provider: "local",
+    },
     nav: [
       { text: "Home", link: "/" },
       { text: "FAQ", link: "/faq" },
