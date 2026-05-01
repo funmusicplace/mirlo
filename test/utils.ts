@@ -6,45 +6,52 @@ import prisma from "../prisma/prisma";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
 
 export const clearTables = async () => {
-  await prisma.$executeRaw`DELETE FROM "SubscriptionTierRelease";`;
-  await prisma.$executeRaw`DELETE FROM "FundraiserPledge";`;
-  await prisma.$executeRaw`DELETE FROM "RecommendedTrackGroup";`;
-  await prisma.$executeRaw`DELETE FROM "Fundraiser";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistLabel";`;
-  await prisma.$executeRaw`DELETE FROM "ActivityPubArtistFollowers";`;
-  await prisma.$executeRaw`DELETE FROM "Notification";`;
-  await prisma.$executeRaw`DELETE FROM "PostImage";`;
-  await prisma.$executeRaw`DELETE FROM "MerchPurchase";`;
-  await prisma.$executeRaw`DELETE FROM "Merch";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistUserSubscriptionCharge";`;
-  await prisma.$executeRaw`DELETE FROM "UserArtistNotificationSetting";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistUserSubscription";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistSubscriptionTier";`;
-  await prisma.$executeRaw`DELETE FROM "Post";`;
-  await prisma.$executeRaw`DELETE FROM "TrackGroupTag";`;
-  await prisma.$executeRaw`DELETE FROM "Tag";`;
-  await prisma.$executeRaw`DELETE FROM "TrackArtist";`;
-  await prisma.$executeRaw`DELETE FROM "TrackAudio";`;
-  await prisma.$executeRaw`DELETE FROM "UserTransaction";`;
-  await prisma.$executeRaw`DELETE FROM "UserTrackPurchase";`;
-  await prisma.$executeRaw`DELETE FROM "TrackPlay";`;
-  await prisma.$executeRaw`DELETE FROM "Track";`;
-  await prisma.$executeRaw`DELETE FROM "UserTrackGroupWishlist";`;
-  await prisma.$executeRaw`DELETE FROM "UserTrackGroupPurchase";`;
-  await prisma.$executeRaw`DELETE FROM "TrackGroupCover";`;
-  await prisma.$executeRaw`DELETE FROM "TrackGroupDownloadableContent";`;
-  await prisma.$executeRaw`DELETE FROM "TrackGroupDownloadCodes";`;
-  await prisma.$executeRaw`DELETE FROM "TrackGroup";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistBackground";`;
-  await prisma.$executeRaw`DELETE FROM "UserArtistTip";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistTipTier";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistAvatar";`;
-  await prisma.$executeRaw`DELETE FROM "ArtistUserSubscriptionConfirmation";`;
-  await prisma.$executeRaw`DELETE FROM "Artist";`;
-  await prisma.$executeRaw`DELETE FROM "Invite";`;
-  await prisma.$executeRaw`DELETE FROM "User";`;
-  await prisma.$executeRaw`DELETE FROM "Client";`;
-  await prisma.$executeRaw`DELETE FROM "Settings";`;
+  // Single TRUNCATE replaces ~40 sequential DELETE statements that were
+  // running per test and occasionally exceeding mocha's 2s hook timeout
+  // under CI load. CASCADE handles FK ordering so we don't have to.
+  await prisma.$executeRawUnsafe(`
+    TRUNCATE TABLE
+      "ActivityPubArtistFollowers",
+      "Artist",
+      "ArtistAvatar",
+      "ArtistBackground",
+      "ArtistLabel",
+      "ArtistSubscriptionTier",
+      "ArtistTipTier",
+      "ArtistUserSubscription",
+      "ArtistUserSubscriptionCharge",
+      "ArtistUserSubscriptionConfirmation",
+      "Client",
+      "Fundraiser",
+      "FundraiserPledge",
+      "Invite",
+      "Merch",
+      "MerchPurchase",
+      "Notification",
+      "Post",
+      "PostImage",
+      "RecommendedTrackGroup",
+      "Settings",
+      "SubscriptionTierRelease",
+      "Tag",
+      "Track",
+      "TrackArtist",
+      "TrackAudio",
+      "TrackGroup",
+      "TrackGroupCover",
+      "TrackGroupDownloadCodes",
+      "TrackGroupDownloadableContent",
+      "TrackGroupTag",
+      "TrackPlay",
+      "User",
+      "UserArtistNotificationSetting",
+      "UserArtistTip",
+      "UserTrackGroupPurchase",
+      "UserTrackGroupWishlist",
+      "UserTrackPurchase",
+      "UserTransaction"
+    RESTART IDENTITY CASCADE;
+  `);
 };
 
 export const createClient = async (clientKey: string) => {
