@@ -50,7 +50,7 @@ export const clearTables = async () => {
       "UserTrackGroupWishlist",
       "UserTrackPurchase",
       "UserTransaction"
-    RESTART IDENTITY CASCADE;
+    CASCADE;
   `);
 };
 
