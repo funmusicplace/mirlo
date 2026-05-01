@@ -1,4 +1,6 @@
+import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
 import React from "react";
+import { useScrollOverflow } from "utils/useScrollOverflow";
 
 interface ScrollButtonProps {
   direction: "left" | "right";
@@ -15,37 +17,19 @@ const ScrollButton: React.FC<ScrollButtonProps> = ({
   scrollAmount = 320,
   pageBackground,
 }) => {
-  const isLeft = direction === "left";
-  const arrow = isLeft ? "←" : "→";
-  const [isVisible, setIsVisible] = React.useState(!isLeft);
-
-  React.useEffect(() => {
-    const el = document.getElementById(scrollElementId);
-    if (!el) return;
-
-    const checkVisibility = () => {
-      if (isLeft) {
-        setIsVisible(el.scrollLeft > 0);
-      } else {
-        setIsVisible(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-      }
-    };
-
-    checkVisibility();
-    el.addEventListener("scroll", checkVisibility);
-    return () => el.removeEventListener("scroll", checkVisibility);
-  }, [scrollElementId, isLeft]);
+  const arrow = direction === "left" ? "←" : "→";
+  const isVisible = useScrollOverflow(scrollElementId, direction);
 
   return (
     <div
-      className={`hidden md:flex items-start pt-6 absolute ${isLeft ? "left-0" : "right-0"} top-0 h-full z-20`}
+      className={`hidden md:flex items-start pt-6 absolute ${direction === "left" ? "left-0" : "right-0"} top-0 h-full z-20`}
     >
       {pageBackground && (
-        <div
-          className={`absolute top-0 ${isLeft ? "left-0" : "right-0"} w-20 h-full pointer-events-none transition-opacity duration-500 ${isVisible ? "opacity-100" : "opacity-0"}`}
-          style={{
-            background: `linear-gradient(to ${isLeft ? "left" : "right"}, transparent, ${pageBackground})`,
-          }}
+        <ScrollFadeOverlay
+          scrollElementId={scrollElementId}
+          position={direction}
+          fadeColor={pageBackground}
+          size="5rem"
         />
       )}
       <button
@@ -56,7 +40,7 @@ const ScrollButton: React.FC<ScrollButtonProps> = ({
           const el = document.getElementById(scrollElementId);
           if (!el) return;
           el.scrollBy({
-            left: isLeft ? -scrollAmount : scrollAmount,
+            left: direction === "left" ? -scrollAmount : scrollAmount,
             behavior: "smooth",
           });
         }}
