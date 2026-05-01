@@ -1,24 +1,24 @@
-import React from "react";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { isEmpty } from "lodash";
+import React from "react";
+import { useAuthContext } from "state/AuthContext";
+import { useGlobalStateContext } from "state/GlobalState";
+import { useBroadcastPlayerSync } from "utils/playerSync";
+import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
 
 import { bp } from "../../constants";
-import { AudioWrapper } from "./AudioWrapper";
-import Spinner from "../common/Spinner";
-import { useGlobalStateContext } from "state/GlobalState";
-import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
 import LoopButton from "../common/LoopButton";
-import ShuffleButton from "../common/ShuffleButton";
 import NextButton from "../common/NextButton";
 import PreviousButton from "../common/PreviousButton";
-import { isEmpty } from "lodash";
 import { PlayControlButton } from "../common/PlayControlButton";
+import ShuffleButton from "../common/ShuffleButton";
+import Spinner from "../common/Spinner";
+
+import { AudioWrapper } from "./AudioWrapper";
 import PlayingTrackDetails from "./PlayingTrackDetails";
 import useCurrentTrackHook from "./useCurrentTrackHook";
-import styled from "@emotion/styled";
 import { VolumeControl } from "./VolumeControl";
-import { useAuthContext } from "state/AuthContext";
-import Wishlist from "components/TrackGroup/Wishlist";
-import TipArtist from "components/common/TipArtist";
 
 const ControlWrapper = styled.span`
   display: flex;
@@ -36,11 +36,22 @@ const ControlWrapper = styled.span`
 
 const Player = () => {
   const { user } = useAuthContext();
-  const { dispatch } = useGlobalStateContext();
+  const { state, dispatch } = useGlobalStateContext();
 
   const [volume, setVolume] = React.useState(1);
   const { currentTrack, isLoading } = useCurrentTrackHook();
   const [currentSeconds, setCurrentSeconds] = React.useState(0);
+
+  useBroadcastPlayerSync(
+    React.useMemo(
+      () => ({
+        playing: !!state.playing,
+        currentTrackId: currentTrack?.id ?? null,
+        currentSeconds: Math.floor(currentSeconds),
+      }),
+      [state.playing, currentTrack?.id, currentSeconds]
+    )
+  );
 
   React.useEffect(() => {
     if ("mediaSession" in navigator) {
