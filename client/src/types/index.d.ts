@@ -301,7 +301,7 @@ interface Artist {
     };
   };
   announcementText?: string;
-  user?: Partial<User> & { _count?: { artistLabels?: number } };
+  user?: Partial<User> & { artistLabels?: { artistId: number }[] };
   background?: {
     url: string;
     sizes?: { [key: number]: string; original: string };

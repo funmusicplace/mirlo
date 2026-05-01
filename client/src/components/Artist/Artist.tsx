@@ -157,7 +157,7 @@ function Artist() {
       >
         <ArtistTabs>
           {artist.isLabelProfile &&
-            (artist.user?._count?.artistLabels ?? 0) > 0 && (
+            (artist.user?.artistLabels?.length ?? 0) > 0 && (
               <>
                 <li className="tab-primary">
                   <NavLink to="roster">{rosterTitle}</NavLink>
