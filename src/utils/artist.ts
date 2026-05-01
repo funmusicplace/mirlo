@@ -593,6 +593,15 @@ export const singleInclude = (queryOptions?: {
     user: {
       select: {
         currency: true,
+        artistLabels: {
+          where: {
+            isLabelApproved: true,
+            isArtistApproved: true,
+            artist: { deletedAt: null },
+          },
+          take: 1,
+          select: { artistId: true },
+        },
       },
     },
   } as any;

@@ -100,5 +100,130 @@ describe("artists", () => {
       const titles = trackGroup.tracks.map((t: { title: string }) => t.title);
       assert.deepEqual(titles, ["first", "second", "third"]);
     });
+
+    it("should return an empty user.artistLabels for a label with empty roster", async () => {
+      const { user: labelUser } = await createUser({
+        email: "label@test.com",
+        isLabelAccount: true,
+      });
+      const label = await createArtist(labelUser.id, {
+        name: "Empty Label",
+        urlSlug: "empty-label",
+        isLabelProfile: true,
+      });
+
+      const response = await requestApp
+        .get(`artists/${label.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.user?.artistLabels?.length ?? 0, 0);
+    });
+
+    it("should return at least one user.artistLabels entry when the roster has approved artists", async () => {
+      const { user: labelUser } = await createUser({
+        email: "label2@test.com",
+        isLabelAccount: true,
+      });
+      const label = await createArtist(labelUser.id, {
+        name: "Stocked Label",
+        urlSlug: "stocked-label",
+        isLabelProfile: true,
+      });
+      const { user: artistUser } = await createUser({
+        email: "rosterartist@test.com",
+      });
+      const rosterArtist = await createArtist(artistUser.id, {
+        name: "Roster Artist",
+        urlSlug: "roster-artist",
+      });
+      await prisma.artistLabel.create({
+        data: {
+          artistId: rosterArtist.id,
+          labelUserId: labelUser.id,
+          isLabelApproved: true,
+          isArtistApproved: true,
+        },
+      });
+
+      const response = await requestApp
+        .get(`artists/${label.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.user?.artistLabels?.length, 1);
+    });
+
+    it("should not include soft-deleted roster artists in user.artistLabels", async () => {
+      const { user: labelUser } = await createUser({
+        email: "label3@test.com",
+        isLabelAccount: true,
+      });
+      const label = await createArtist(labelUser.id, {
+        name: "Label With Deleted Member",
+        urlSlug: "label-with-deleted",
+        isLabelProfile: true,
+      });
+      const { user: deletedArtistUser } = await createUser({
+        email: "deletedrosterartist@test.com",
+      });
+      const deletedArtist = await createArtist(deletedArtistUser.id, {
+        name: "Deleted Roster Artist",
+        urlSlug: "deleted-roster-artist",
+      });
+      await prisma.artistLabel.create({
+        data: {
+          artistId: deletedArtist.id,
+          labelUserId: labelUser.id,
+          isLabelApproved: true,
+          isArtistApproved: true,
+        },
+      });
+      await prisma.artist.update({
+        where: { id: deletedArtist.id },
+        data: { deletedAt: new Date() },
+      });
+
+      const response = await requestApp
+        .get(`artists/${label.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.user?.artistLabels?.length ?? 0, 0);
+    });
+
+    it("should not include unapproved roster relationships in user.artistLabels", async () => {
+      const { user: labelUser } = await createUser({
+        email: "label4@test.com",
+        isLabelAccount: true,
+      });
+      const label = await createArtist(labelUser.id, {
+        name: "Pending Label",
+        urlSlug: "pending-label",
+        isLabelProfile: true,
+      });
+      const { user: artistUser } = await createUser({
+        email: "pendingrosterartist@test.com",
+      });
+      const pendingArtist = await createArtist(artistUser.id, {
+        name: "Pending Roster Artist",
+        urlSlug: "pending-roster-artist",
+      });
+      await prisma.artistLabel.create({
+        data: {
+          artistId: pendingArtist.id,
+          labelUserId: labelUser.id,
+          isLabelApproved: true,
+          isArtistApproved: false,
+        },
+      });
+
+      const response = await requestApp
+        .get(`artists/${label.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.user?.artistLabels?.length ?? 0, 0);
+    });
   });
 });

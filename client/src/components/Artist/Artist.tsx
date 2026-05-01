@@ -156,20 +156,21 @@ function Artist() {
         }
       >
         <ArtistTabs>
-          {artist.isLabelProfile && (
-            <>
-              <li className="tab-primary">
-                <NavLink to="roster">{rosterTitle}</NavLink>
-              </li>
-              <li className="tab-secondary">
-                <ArtistButtonQuickLink
-                  ariaLabel={t("editTitled", { title: rosterTitle })}
-                  to="/profile/label"
-                  icon={<FaEdit />}
-                />
-              </li>
-            </>
-          )}
+          {artist.isLabelProfile &&
+            (artist.user?.artistLabels?.length ?? 0) > 0 && (
+              <>
+                <li className="tab-primary">
+                  <NavLink to="roster">{rosterTitle}</NavLink>
+                </li>
+                <li className="tab-secondary">
+                  <ArtistButtonQuickLink
+                    ariaLabel={t("editTitled", { title: rosterTitle })}
+                    to="/profile/label"
+                    icon={<FaEdit />}
+                  />
+                </li>
+              </>
+            )}
           {((artist?.trackGroups.length ?? 0) > 0 ||
             (releases?.results.length ?? 0) > 0) && (
             <>

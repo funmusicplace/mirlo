@@ -303,7 +303,7 @@ interface Artist {
     };
   };
   announcementText?: string;
-  user?: Partial<User>;
+  user?: Partial<User> & { artistLabels?: { artistId: number }[] };
   background?: {
     url: string;
     sizes?: { [key: number]: string; original: string };
