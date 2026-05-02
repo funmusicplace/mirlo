@@ -11,7 +11,7 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import { formatAcceptList } from "utils/uploadFormats";
 
 const ACCEPTED_AUDIO =
-  "audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a";
+  "audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a";
 export interface FormData {
   trackFile: FileList;
 }
