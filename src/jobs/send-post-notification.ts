@@ -126,7 +126,12 @@ export default async function sendPostNotification(job: {
         `sendPostNotification: queueing ${notificationsToEmail.length} email(s) for post ${postId}`
       );
 
-      const htmlContent = await parseOutIframes(post.content || "");
+      // Pass the post URL as a fallback so embedded tracks/trackGroups link
+      // to the post when their parent album is unreachable (draft, private,
+      // unreleased, deleted). Otherwise the email link 404s. See #1703.
+      const { applicationUrl } = await getClient();
+      const postUrl = `${applicationUrl}/${post.artist?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
+      const htmlContent = await parseOutIframes(post.content || "", postUrl);
 
       // Queue emails for all notifications
       for (const notification of notificationsToEmail) {

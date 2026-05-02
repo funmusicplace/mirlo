@@ -3,7 +3,31 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
 
-export const parseOutIframes = async (content: string) => {
+/**
+ * A trackGroup is unreachable to the public (and therefore to a post-email
+ * recipient) if it's a draft, deleted, private, or not yet published. Used
+ * by `parseOutIframes` to decide between linking to the trackGroup/track and
+ * falling back to the post page that embeds it.
+ */
+const isTrackGroupUnreachable = (tg: {
+  isDrafts: boolean;
+  deletedAt: Date | null;
+  publishedAt: Date | null;
+  isPublic?: boolean;
+}) => {
+  return (
+    tg.isDrafts ||
+    tg.deletedAt !== null ||
+    tg.publishedAt === null ||
+    tg.publishedAt.getTime() > Date.now() ||
+    tg.isPublic === false
+  );
+};
+
+export const parseOutIframes = async (
+  content: string,
+  fallbackUrl?: string
+) => {
   // Replace <iframe src="https://mirlo.space/widget/trackGroup/:id"> or <iframe src="https://mirlo.space/widget/track/:id">
   // with a div containing info about the trackGroup or track, fetching live data from the database
 
@@ -65,9 +89,16 @@ export const parseOutIframes = async (content: string) => {
             tg.artist.properties?.colors?.background || "#f5f0f0";
           const buttonText = tg.artist.properties?.colors?.buttonText || "#111";
           const text = tg.artist.properties?.colors?.text || "#111";
+          // If the trackGroup is unreachable (draft/private/deleted/unreleased),
+          // fall back to the post URL so the recipient lands somewhere that
+          // actually plays the track. See #1703.
+          const trackGroupUrl =
+            fallbackUrl && isTrackGroupUnreachable(tg)
+              ? fallbackUrl
+              : `${applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}`;
           return `<div data-type="trackGroup" data-id="${id}" style="display:flex;flex-direction:row;gap:8px;background-color:${background};border-radius:8px;padding:16px;">
                     <div>
-                      <a href="${applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}" style="
+                      <a href="${trackGroupUrl}" style="
                       display:inline-block;
                       text-decoration:none;
                       background:${button};
@@ -104,9 +135,16 @@ export const parseOutIframes = async (content: string) => {
           const buttonText =
             t.trackGroup.artist.properties?.colors?.buttonText || "#111";
           const text = t.trackGroup.artist.properties?.colors?.text || "#111";
+          // Same fallback as the trackGroup branch: when a track's parent
+          // album is unreachable to the public, link to the post that embeds
+          // the track instead of an unreachable URL.
+          const trackUrl =
+            fallbackUrl && isTrackGroupUnreachable(t.trackGroup)
+              ? fallbackUrl
+              : `${applicationUrl}/${t.trackGroup.artist.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}`;
           return `<div data-type="track" data-id="${id}" style="display:flex;flex-direction:column;gap:8px;background-color:${background};border-radius:8px;padding:16px;">
                   <div>
-                    <a href="${applicationUrl}/${t.trackGroup.artist.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}" style="display:inline-block;
+                    <a href="${trackUrl}" style="display:inline-block;
                       text-decoration:none;
                       background:${button};
                       color:${text};
