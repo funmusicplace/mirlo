@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { formatAcceptList } from "../../utils/uploadFormats";
 
 const UploadFiles = React.forwardRef<
   HTMLInputElement,
@@ -15,6 +16,7 @@ const UploadFiles = React.forwardRef<
 >(({ accept, hint, label, name, nameForId, onBlur, onChange }, ref) => {
   const { t } = useTranslation("translation");
   const inputId = `input-${nameForId}`;
+  const acceptedFormats = formatAcceptList(accept);
 
   return (
     <div className="relative w-full">
@@ -40,7 +42,15 @@ const UploadFiles = React.forwardRef<
           </span>
         </span>
         {!!hint && (
-          <span className="block mbe-4 font-normal text-sm">{hint}</span>
+          <span className="block mbe-2 font-normal text-sm">{hint}</span>
+        )}
+        {!!acceptedFormats && (
+          <span className="block mbe-4 font-normal text-sm opacity-70">
+            {t("acceptedFormats", {
+              keyPrefix: "manageAlbum",
+              formats: acceptedFormats,
+            })}
+          </span>
         )}
         <span className="cursor-pointer block border-2 border-dashed border-neutral-500 rounded-lg p-8 w-full text-center">
           {t("dropFilesHere", { keyPrefix: "manageAlbum" })}
