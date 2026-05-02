@@ -2,18 +2,22 @@ extends ../layout.pug
 
 block content
 
-    if post.featuredImage
-      div.mw600 
-        a(href!=`${client}/post/${post.id}`) 
-          img(src=post.featuredImage.src, alt="Featured Image", style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:16px;")
-    p  
-    p #{artist.name} just published a new post on Mirlo: 
-    h2 #{post.title}
-    p 
-      a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`) Read it on Mirlo.
-    div.mw600 
+    div.mw600.email-header
+      if post.featuredImage
+        a(href!=`${client}/post/${post.id}`)
+          img(src=post.featuredImage.src, alt="Featured Image", style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:8px;")
+
+      p.email-byline #{artist.name} just published a new post on Mirlo
+      h1.email-title #{post.title}
+      p.read-on-mirlo
+        a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`) Read it on Mirlo.
+
+    div.mw600
       | !{post.htmlContent}
-    hr
-    p.mw600 Don't want to receive emails from #{artist.name} anymore?       
+
+    p.mw600.email-unsubscribe
+      | Don't want to receive emails from #{artist.name} anymore?
+      |
+      |
       a(href!=`${client}/${artist.urlSlug || artist.id}/unsubscribe?email=${email}`) Unsubscribe.
 
