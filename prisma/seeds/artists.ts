@@ -32,6 +32,14 @@ export const artists: Prisma.ArtistCreateInput[] = [
     },
   },
   {
+    name: "Label user",
+    urlSlug: "label-user",
+    isLabelProfile: true,
+    user: {
+      connect: { email: "label@admin.example" },
+    },
+  },
+  {
     name: "A Flock of Gulls",
     bio: "Lots of weird noises. We'll steal your food",
     urlSlug: "a-flock-of-gulls",
