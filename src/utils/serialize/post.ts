@@ -1,4 +1,4 @@
-import { Artist, ArtistAvatar, Post, Prisma } from "@mirlo/prisma/client";
+import { Artist, ArtistAvatar, Post } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
 import { generateFullStaticImageUrl } from "../images";
@@ -11,10 +11,14 @@ import { finalArtistAvatarBucket, finalPostImageBucket } from "../minio";
  * `userId` is the optional logged-in user id. When supplied, purchase-status
  * relations are scoped to that user so `serializePost` can compute
  * `isPlayable` without leaking other users' purchases.
+ *
+ * Return type is intentionally inferred (not annotated as `Prisma.PostInclude`).
+ * The wide annotation forced TS to compare two heavily-generic instantiations
+ * of `PostInclude` at every call site and triggered TS2321 "excessive stack
+ * depth"; the inferred narrow literal still validates against `findFirst`'s
+ * `include` parameter without the recursion.
  */
-export const postIncludeForUser = (
-  userId?: number
-): Prisma.PostInclude => ({
+export const postIncludeForUser = (userId?: number) => ({
   tracks: {
     include: {
       track: {
@@ -35,7 +39,7 @@ export const postIncludeForUser = (
         },
       },
     },
-    orderBy: { order: "asc" },
+    orderBy: { order: "asc" as const },
   },
   featuredImage: true,
   artist: {

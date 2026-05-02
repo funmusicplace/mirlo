@@ -41,6 +41,7 @@ type RouteContext<T extends RouteParams = RouteParams> = {
   client: Client;
   avatarUrl?: string;
   params: T;
+  req?: Request;
 };
 
 type RouteHandler<T extends RouteParams = RouteParams> = (
@@ -311,6 +312,7 @@ const handlePost: RouteHandler<PostParams> = async ({
   $,
   client,
   avatarUrl,
+  req,
   params: { artistSlug, postId, postSlug },
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
@@ -368,6 +370,36 @@ const handlePost: RouteHandler<PostParams> = async ({
       releaseDate: postCreatedDate,
       schemas: [schema],
     });
+
+    // Hydrate the public Post page so the client renders without a load
+    // flash on direct page load (mirrors the `__MIRLO_AUTH__` user-hydration
+    // pattern). Refetched as a single full post with user-scoped purchase
+    // info so `serializePost` produces the same shape as `/v1/posts/{id}`.
+    const user = req?.user as User | undefined;
+    const userId = user?.id;
+    const fullPost = await prisma.post.findFirst({
+      where: {
+        id: post.id,
+        publishedAt: { lte: new Date() },
+        isDraft: false,
+      },
+      include: postIncludeForUser(userId),
+    });
+    if (fullPost) {
+      const isUserSubscriber = await checkIsUserSubscriber(
+        user,
+        fullPost.artistId
+      );
+      $("head").append(
+        `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify({
+          post: serializePost(
+            fullPost,
+            isUserSubscriber || fullPost.artist?.userId === userId
+          ),
+          injectedAt: new Date().toISOString(),
+        })}</script>`
+      );
+    }
   } else {
     // Index of all posts
     buildOpenGraphTags($, {
@@ -378,54 +410,6 @@ const handlePost: RouteHandler<PostParams> = async ({
       imageUrl: avatarUrl,
     });
   }
-};
-
-/**
- * Fetch the public post matching the route and inject it as JSON in <head>
- * (`<script id="__MIRLO_POST__">`) so the client-side `queryPost` can use it
- * as `initialData` and skip the loading flash on direct page load.
- */
-const injectPostHydration = async (
-  $: cheerio.CheerioAPI,
-  routeParams: Record<string, any>,
-  req?: Request
-) => {
-  const user = req?.user as User | undefined;
-  const userId = user?.id;
-
-  const where =
-    typeof routeParams.postId === "number"
-      ? { id: routeParams.postId, artist: { urlSlug: routeParams.artistSlug } }
-      : {
-          urlSlug: {
-            equals: String(routeParams.postSlug),
-            mode: "insensitive" as const,
-          },
-          artist: { urlSlug: routeParams.artistSlug },
-        };
-
-  const post = await prisma.post.findFirst({
-    where: {
-      ...where,
-      publishedAt: { lte: new Date() },
-      isDraft: false,
-    },
-    include: postIncludeForUser(userId),
-  });
-  if (!post) return;
-
-  const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
-  const serialized = serializePost(
-    post,
-    isUserSubscriber || post.artist?.userId === userId
-  );
-
-  $("head").append(
-    `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify({
-      post: serialized,
-      injectedAt: new Date().toISOString(),
-    })}</script>`
-  );
 };
 
 type MerchParams = { artistSlug: string; merchId?: string };
@@ -833,16 +817,7 @@ export const analyzePathAndGenerateHTML = async (
     // Match against route patterns using shared matcher
     const routeParams = matchRoutePattern(segments);
     if (routeParams) {
-      await dispatchRoute(routeParams, { $, client, avatarUrl });
-
-      // For a specific post, hydrate the page with the serialized post so the
-      // public Post component renders immediately without a load flash.
-      if (
-        routeParams.type === "post" &&
-        (routeParams.postId || routeParams.postSlug)
-      ) {
-        await injectPostHydration($, routeParams, req);
-      }
+      await dispatchRoute(routeParams, { $, client, avatarUrl, req });
     } else {
       // No matching route - use default
       await handleDefault({ $, client, params: {} });
