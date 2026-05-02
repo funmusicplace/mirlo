@@ -8,6 +8,7 @@ import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 
 import { bp } from "../../constants";
 
@@ -18,10 +19,27 @@ const PurchaseAlbumModal: React.FC<{
   collapse?: boolean;
 }> = ({ trackGroup, track, fixed, collapse }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: trackGroup.artist.urlSlug })
   );
+  const wantsToBuy = searchParams.get("buy") === "true";
+
+  React.useEffect(() => {
+    if (wantsToBuy && artist) {
+      setIsPurchasingAlbum(true);
+    }
+  }, [wantsToBuy, artist]);
+
+  const closeModal = () => {
+    setIsPurchasingAlbum(false);
+    if (searchParams.get("buy")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("buy");
+      setSearchParams(next, { replace: true });
+    }
+  };
 
   if (!trackGroup || !artist) {
     return null;
@@ -97,7 +115,7 @@ const PurchaseAlbumModal: React.FC<{
       <Modal
         size="small"
         open={isPurchasingAlbum}
-        onClose={() => setIsPurchasingAlbum(false)}
+        onClose={closeModal}
         title={
           t(purchaseTitle, { title: track?.title ?? trackGroup.title }) ?? ""
         }

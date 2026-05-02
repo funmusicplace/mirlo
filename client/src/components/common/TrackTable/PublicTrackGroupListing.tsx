@@ -1,22 +1,22 @@
 import { cloneDeep } from "lodash";
 import React from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
+import { isTrackOwnedOrPreview } from "utils/tracks";
 
 import { CenteredSpinner } from "../Spinner";
 import Table from "../Table";
+
 import TrackRow from "./TrackRow";
-import { css } from "@emotion/css";
-import { bp } from "../../../constants";
-import { isTrackOwnedOrPreview } from "utils/tracks";
-import { useAuthContext } from "state/AuthContext";
-import { useTranslation } from "react-i18next";
 
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup?: TrackGroup;
   size?: "small";
   showDropdown?: boolean;
-}> = ({ tracks, trackGroup, size, showDropdown = true }) => {
+  inWidget?: boolean;
+}> = ({ tracks, trackGroup, size, showDropdown = true, inWidget }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -57,13 +57,7 @@ export const PublicTrackGroupListing: React.FC<{
   }
 
   return (
-    <Table
-      className={css`
-        @media screen and (max-width: ${bp.small}px) {
-          margin: 0;
-        }
-      `}
-    >
+    <Table className={`max-sm:m-0 ${inWidget ? "table-fixed" : ""}`}>
       <tbody>
         {displayTracks?.map((track) => (
           <TrackRow
@@ -73,6 +67,7 @@ export const PublicTrackGroupListing: React.FC<{
             addTracksToQueue={addTracksToQueue}
             trackGroup={track.trackGroup ?? trackGroup}
             size={size}
+            inWidget={inWidget}
           />
         ))}
       </tbody>

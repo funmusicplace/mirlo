@@ -2,38 +2,25 @@ import styled from "@emotion/styled";
 
 import { bp } from "../../constants";
 
-export function inIframe() {
-  try {
-    return window.self !== window.top;
-  } catch (e) {
-    return true;
-  }
-}
-
-export function inMirlo() {
-  try {
-    return window.top?.location.origin === import.meta.env.VITE_CLIENT_DOMAIN;
-  } catch (e) {
-    return false;
-  }
-}
-
 export const WidgetWrapper = styled.div<{
-  embeddedInMirlo?: boolean;
   artistColors?: ArtistColors;
 }>`
   border: var(--mi-border);
-
-  ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
   display: flex;
   align-items: space-between;
   border-radius: 0.3rem;
   overflow: hidden;
   box-sizing: border-box;
 
+  ${(props) =>
+    props.artistColors?.button &&
+    `--mi-button-color: ${props.artistColors.button};`}
+  ${(props) =>
+    props.artistColors?.buttonText &&
+    `--mi-button-text-color: ${props.artistColors.buttonText};`}
+
   a {
-    color: ${(props) =>
-      props.artistColors?.button ?? "var(--mi-button-color)"};
+    color: ${(props) => props.artistColors?.button ?? "var(--mi-button-color)"};
     }
 
   color: ${(props) =>
@@ -44,15 +31,13 @@ export const WidgetWrapper = styled.div<{
       
       button.play-button,
       button.pause-button {
-      color: ${(props) =>
-        props.artistColors?.text ?? "var(--mi-text-color)"};
+      color: ${(props) => props.artistColors?.text ?? "var(--mi-text-color)"};
         
         background: transparent;
         
         svg {
         fill: ${(props) =>
-          props.artistColors?.text ??
-          "var(--mi-text-color)"} !important; 
+          props.artistColors?.text ?? "var(--mi-text-color)"} !important; 
         }   
     } 
 
@@ -60,11 +45,9 @@ export const WidgetWrapper = styled.div<{
   
   &:hover {
   color: ${(props) =>
-    props.artistColors?.background ??
-    "var(--mi-text-color)"} !important;
+    props.artistColors?.background ?? "var(--mi-text-color)"} !important;
     background-color: ${(props) =>
-      props.artistColors?.text ??
-      "var(--mi-background-color)"} !important;
+      props.artistColors?.text ?? "var(--mi-background-color)"} !important;
       
       button.play-button,
       button.pause-button {
@@ -75,33 +58,36 @@ export const WidgetWrapper = styled.div<{
         
         svg {
         fill: ${(props) =>
-          props.artistColors?.background ??
-          "var(--mi-text-color)"} !important; 
+          props.artistColors?.background ?? "var(--mi-text-color)"} !important; 
         }   
     } 
   }
 
 `;
 
-export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
+export const TgWidgetWrapper = styled.div`
   display: grid;
   width: 100%;
-  grid-template-columns: 1fr 1fr;
+  height: 100%;
+  grid-template-columns: 230px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "cover title"
+    "cover tracks";
 
   @media screen and (max-width: ${bp.small}px) {
-    grid-template-columns: 1fr;
-    grid-template-rows: 50% 50%;
-
-    .image-container {
-      width: 100%;
-    }
+    grid-template-columns: 130px 1fr;
+    grid-template-rows: 130px 1fr;
+    grid-template-areas:
+      "cover title"
+      "tracks tracks";
   }
 `;
 
 export const TrackListWrapper = styled.div<{}>`
-  border-top: var(--mi-border);
+  flex: 1;
+  min-height: 0;
   overflow: auto;
-  max-height: 280px;
   ::-webkit-scrollbar {
     -webkit-appearance: none;
   }
@@ -123,21 +109,4 @@ export const TrackListWrapper = styled.div<{}>`
   @media screen and (max-width: ${bp.small}px) {
     overflow: auto;
   }
-`;
-export const WidgetTitleWrapper = styled.div<{}>`
-  border-left: var(--mi-border);
-
-  @media screen and (max-width: ${bp.small}px) {
-    a {
-      font-size: var(--mi-font-size-small) !important;
-      white-space: nowrap;
-      max-width: 100%;
-      display: block;
-      text-overflow: ellipsis;
-    }
-  }
-`;
-
-export const FlexWrapper = styled.div`
-  display: flex;
 `;

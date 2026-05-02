@@ -16,7 +16,7 @@ export interface Sizable {
   rounded?: boolean;
   collapsible?: boolean;
   buttonRole?: "primary" | "warning" | "black";
-  variant?: "link" | "outlined" | "dashed" | "transparent" | "default";
+  variant?: "link" | "outlined" | "dashed" | "transparent" | "default" | "pill";
   uppercase?: boolean;
   onlyIcon?: boolean;
   smallIcon?: boolean;
@@ -151,6 +151,31 @@ const CustomButton = styled.button<Sizable>(
           &[disabled] {
             color: #ddd;
             border-color: #ddd;
+          }
+        `;
+        case "pill":
+          return `
+          color: currentColor;
+          background-color: transparent;
+          border: 1px solid;
+          border-color: color-mix(in srgb, currentColor 40%, transparent);
+          font-weight: 500;
+          font-size: 0.7rem;
+          line-height: 1;
+          padding: 0.25rem 0.625rem !important;
+          border-radius: 9999px !important;
+
+          svg {
+            fill: currentColor;
+          }
+
+          &:hover:not(:disabled) {
+            border-color: currentColor;
+            background-color: transparent;
+          }
+
+          &[disabled] {
+            opacity: 0.6;
           }
         `;
         case "transparent":

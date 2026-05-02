@@ -1,12 +1,13 @@
 // import { css } from "@emotion/css";
 
+import Hls, { HlsConfig } from "hls.js";
 import React from "react";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
+
 import SongTimeDisplay from "../common/SongTimeDisplay";
-import { useAuthContext } from "state/AuthContext";
+
 import BuyTrackModal from "./BuyTrackModal";
-import Hls, { HlsConfig } from "hls.js";
 
 // Load react-hls-player asynchronously (the hls bundle is quite big)
 const ReactHlsPlayer = React.lazy(() => import("@mirlo/react-hls-player"));
@@ -42,12 +43,14 @@ export const AudioWrapper: React.FC<{
   volume?: number;
   setCurrentSeconds: (time: number) => void;
   currentSeconds: number;
+  compact?: boolean;
 }> = ({
   currentTrack,
   position,
   volume = 1,
   setCurrentSeconds,
   currentSeconds,
+  compact,
 }) => {
   const [showBuyModal, setShowBuyModal] = React.useState(false);
   const [hasShownBuyModalBeenShown, setHasShownBuyModalBeenShown] =
@@ -226,39 +229,42 @@ export const AudioWrapper: React.FC<{
         trackId={currentTrack.id}
         trackGroupId={currentTrack.trackGroupId}
       />
-      <ReactHlsPlayer
-        src={streamUrl}
-        autoPlay={false}
-        style={{ display: "none" }}
-        // controls={true}
-        // @ts-ignore
-        hlsConfig={hlsConfig}
-        onError={(event: any, data: any) => {
-          if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
-            if (data.networkDetails?.responseText) {
-              if (
-                data.networkDetails.responseText.includes(
-                  "Track play limit exceeded"
-                ) &&
-                !hasShownBuyModalBeenShown
-              ) {
-                setHasOverplayedSong(true);
+      <React.Suspense fallback={null}>
+        <ReactHlsPlayer
+          src={streamUrl}
+          autoPlay={false}
+          style={{ display: "none" }}
+          // controls={true}
+          // @ts-ignore
+          hlsConfig={hlsConfig}
+          onError={(event: any, data: any) => {
+            if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+              if (data.networkDetails?.responseText) {
+                if (
+                  data.networkDetails.responseText.includes(
+                    "Track play limit exceeded"
+                  ) &&
+                  !hasShownBuyModalBeenShown
+                ) {
+                  setHasOverplayedSong(true);
+                }
               }
             }
-          }
-        }}
-        width="100%"
-        height="2rem"
-        onPlay={onPlay}
-        onEnded={onEnded}
-        playerRef={playerRef}
-        onTimeUpdate={onListen}
-        playsInline
-      />
+          }}
+          width="100%"
+          height="2rem"
+          onPlay={onPlay}
+          onEnded={onEnded}
+          playerRef={playerRef}
+          onTimeUpdate={onListen}
+          playsInline
+        />
+      </React.Suspense>
       <SongTimeDisplay
         playerRef={playerRef}
         currentSeconds={currentSeconds}
         position={position}
+        compact={compact}
       />
     </>
   );

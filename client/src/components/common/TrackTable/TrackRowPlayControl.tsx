@@ -1,9 +1,12 @@
-import { VscPlay } from "react-icons/vsc";
-import { TfiControlPause } from "react-icons/tfi";
-import { useGlobalStateContext } from "state/GlobalState";
-import React from "react";
-import Button from "../Button";
 import { css } from "@emotion/css";
+import React from "react";
+import { TfiControlPause } from "react-icons/tfi";
+import { VscPlay } from "react-icons/vsc";
+import { useGlobalStateContext } from "state/GlobalState";
+import { usePlayerSyncRequest } from "utils/playerSync";
+import { isEmbeddedInMirlo } from "utils/widgetContext";
+
+import Button from "../Button";
 
 const TrackRowPlayControl: React.FC<{
   trackNumber: number;
@@ -22,6 +25,8 @@ const TrackRowPlayControl: React.FC<{
     state: { playerQueueIds, playing, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
+  const embeddedInMirlo = isEmbeddedInMirlo();
+  const sendPlayerRequest = usePlayerSyncRequest();
   const currentPlayingTrackId =
     currentlyPlayingIndex !== undefined
       ? playerQueueIds[currentlyPlayingIndex]
@@ -30,18 +35,26 @@ const TrackRowPlayControl: React.FC<{
   const onTrackPlay = React.useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e.stopPropagation();
-      onTrackPlayCallback?.(trackId);
-      dispatch({ type: "setPlaying", playing: true });
+      if (embeddedInMirlo) {
+        sendPlayerRequest({ type: "play", trackId });
+      } else {
+        onTrackPlayCallback?.(trackId);
+        dispatch({ type: "setPlaying", playing: true });
+      }
     },
-    [dispatch, onTrackPlayCallback, trackId]
+    [dispatch, onTrackPlayCallback, trackId, embeddedInMirlo, sendPlayerRequest]
   );
 
   const onTrackPause = React.useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e.stopPropagation();
-      dispatch({ type: "setPlaying", playing: false });
+      if (embeddedInMirlo) {
+        sendPlayerRequest({ type: "pause", trackId });
+      } else {
+        dispatch({ type: "setPlaying", playing: false });
+      }
     },
-    [dispatch]
+    [dispatch, trackId, embeddedInMirlo, sendPlayerRequest]
   );
 
   return (

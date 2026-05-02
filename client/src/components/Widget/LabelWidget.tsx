@@ -1,27 +1,19 @@
-import { css } from "@emotion/css";
-import { AudioWrapper } from "components/Player/AudioWrapper";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import { AudioWrapper } from "components/Player/AudioWrapper";
+import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import api from "services/api";
-import { isTrackOwnedOrPreview } from "utils/tracks";
-import {
-  FlexWrapper,
-  TgWidgetWrapper,
-  TrackListWrapper,
-  WidgetTitleWrapper,
-  WidgetWrapper,
-  inIframe,
-  inMirlo,
-} from "./utils";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
-import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
-import DisplayAudioWrapper from "./DisplayAudio";
-import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
-import { getArtistUrl } from "utils/artist";
-import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
+import { getArtistUrl } from "utils/artist";
+import { isTrackOwnedOrPreview } from "utils/tracks";
+import { isEmbeddedInMirlo } from "utils/widgetContext";
+
+import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
+import { TgWidgetWrapper, TrackListWrapper, WidgetWrapper } from "./utils";
 
 const LabelWidget = () => {
   const { t } = useTranslation("translation", {
@@ -36,7 +28,7 @@ const LabelWidget = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [tracks, setTracks] = React.useState<Track[]>();
 
-  const embeddedInMirlo = inIframe() && inMirlo();
+  const embeddedInMirlo = isEmbeddedInMirlo();
 
   React.useEffect(() => {
     const callback = async () => {
@@ -61,14 +53,9 @@ const LabelWidget = () => {
   if ((!label || !label.id) && !isLoading) {
     return (
       <div
-        className={css`
-          border: var(--mi-border);
-          ${embeddedInMirlo && "min-height: 359px;"}
-          display: flex;
-          width: 100%;
-          justify-content: center;
-          padding: 1rem;
-        `}
+        className={`[border:var(--mi-border)] flex w-full justify-center p-4 ${
+          embeddedInMirlo ? "min-h-[200px]" : ""
+        }`}
       >
         {t("trackDoesntExist")}
       </div>
@@ -86,31 +73,11 @@ const LabelWidget = () => {
   return (
     <WidgetWrapper
       artistColors={label?.profile?.properties?.colors}
-      className={css`
-        height: 100vh;
-        overflow: scroll;
-        a {
-          text-decoration: none;
-        }
-        a:hover {
-          text-decoration: underline;
-        }
-      `}
+      className="h-screen border-0! [&_a]:no-underline!"
     >
-      <TgWidgetWrapper className={css``}>
-        <FlexWrapper
-          className={css`
-            position: relative;
-            width: 100%;
-          `}
-        >
-          <div
-            className={css`
-              position: absolute;
-              right: 2.5%;
-              bottom: 2.5%;
-            `}
-          >
+      <TgWidgetWrapper>
+        <div className="[grid-area:cover] relative">
+          <div className="absolute right-[2.5%] bottom-[2.5%]">
             <PlayButtonsWrapper ids={playableTracks.map((t) => t.id)} />
           </div>
           <ImageWithPlaceholder
@@ -120,32 +87,24 @@ const LabelWidget = () => {
             square
             objectFit="contain"
           />
-        </FlexWrapper>
+        </div>
 
-        <WidgetTitleWrapper className={css``}>
-          <div
-            className={css`
-              padding: 1rem;
-            `}
-          >
-            <FlexWrapper
-              className={css`
-                a {
-                  font-size: 1.5rem;
-                }
-                @media screen and (max-width: ${bp.small}px) {
-                  padding-bottom: 0.25rem;
-                }
-              `}
-            >
+        <div className="[grid-area:title] min-w-0 overflow-hidden border-l border-current/15 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col p-4 max-sm:justify-center">
+            <div className="text-xl font-bold truncate break-normal max-sm:text-base">
               {embeddedInMirlo && label.profile && (
-                <Link target={`"_blank"`} to={getArtistUrl(label.profile)}>
+                <Link
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  to={getArtistUrl(label.profile)}
+                >
                   {label.profile.name}
                 </Link>
               )}
               {!embeddedInMirlo && label.profile && (
                 <a
-                  target={`"_blank"`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   href={`${import.meta.env.VITE_CLIENT_DOMAIN}${getArtistUrl(
                     label.profile
                   )}`}
@@ -153,25 +112,33 @@ const LabelWidget = () => {
                   {label.profile.name}
                 </a>
               )}
-            </FlexWrapper>{" "}
+            </div>
           </div>
-          <TrackListWrapper>
-            <PublicTrackGroupListing tracks={tracks} />
-          </TrackListWrapper>
-        </WidgetTitleWrapper>
-      </TgWidgetWrapper>
-      {currentTrack && !embeddedInMirlo && (
-        <div>
-          <DisplayAudioWrapper>
+          {currentTrack && !embeddedInMirlo && (
             <AudioWrapper
               currentTrack={currentTrack}
-              position="relative"
+              position="static"
               setCurrentSeconds={setCurrentSeconds}
               currentSeconds={currentSeconds}
+              compact
             />
-          </DisplayAudioWrapper>
+          )}
         </div>
-      )}
+
+        <div className="[grid-area:tracks] flex flex-col min-h-0 overflow-hidden border-l border-t border-current/15 max-sm:border-l-0 relative">
+          <TrackListWrapper id="label-tracks-scroll">
+            <PublicTrackGroupListing tracks={tracks} inWidget />
+          </TrackListWrapper>
+          <ScrollFadeOverlay
+            scrollElementId="label-tracks-scroll"
+            position="bottom"
+            fadeColor={
+              label?.profile?.properties?.colors?.background ??
+              "var(--mi-background-color)"
+            }
+          />
+        </div>
+      </TgWidgetWrapper>
     </WidgetWrapper>
   );
 };
