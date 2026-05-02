@@ -13,7 +13,8 @@ import {
   getArtistUrlReference,
   getReleaseUrl,
 } from "utils/artist";
-import { isTrackOwnedOrPreview } from "utils/tracks";
+import { usePlayerSyncState } from "utils/playerSync";
+import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
 
 import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
@@ -34,6 +35,10 @@ const TrackGroupWidget = () => {
   const [artist, setArtist] = React.useState<Artist>();
 
   const embeddedInMirlo = isEmbeddedInMirlo();
+  const playerSyncState = usePlayerSyncState();
+  const elapsedSeconds = embeddedInMirlo
+    ? (playerSyncState?.currentSeconds ?? 0)
+    : currentSeconds;
 
   React.useEffect(() => {
     const callback = async () => {
@@ -145,9 +150,15 @@ const TrackGroupWidget = () => {
                 {" · "}
                 {t("trackCount", { count: trackGroup.tracks.length })}
               </div>
+              {currentTrack && (
+                <div className="text-sm opacity-85 truncate break-normal max-sm:text-xs">
+                  <em>{t("playing")}</em> {currentTrack.title} ·{" "}
+                  <span className="tabular-nums">{fmtMSS(elapsedSeconds)}</span>
+                </div>
+              )}
             </div>
             {trackGroup.artist && (
-              <div className="shrink-0 absolute top-4 right-4">
+              <div className="shrink-0 absolute top-4 right-4 max-sm:top-2 max-sm:right-2">
                 <WidgetActionButtons artist={artist} trackGroup={trackGroup} />
               </div>
             )}
