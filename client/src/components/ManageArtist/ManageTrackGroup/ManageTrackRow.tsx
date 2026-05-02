@@ -1,58 +1,31 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+} from "components/Artist/ArtistButtons";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import Tooltip from "components/common/Tooltip";
+import TrackAuthors from "components/common/TrackTable/TrackAuthors";
+import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   FaDownload,
   FaExclamationTriangle,
   FaPen,
   FaTrash,
 } from "react-icons/fa";
-import useDraggableTrack from "utils/useDraggableTrack";
-
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
-import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
-import TrackAuthors from "components/common/TrackTable/TrackAuthors";
-import { useTranslation } from "react-i18next";
+import useDraggableTrack from "utils/useDraggableTrack";
+
 import EditTrackRow from "./AlbumFormComponents/EditTrackRow";
-import styled from "@emotion/styled";
-import LoadingSpinner from "components/common/LoadingSpinner";
-import { useAuthContext } from "state/AuthContext";
-import {
-  ArtistButton,
-  ArtistButtonAnchor,
-} from "components/Artist/ArtistButtons";
-import Tooltip from "components/common/Tooltip";
 import ReplaceTrackAudioInput from "./AlbumFormComponents/ReplaceTrackAudioInput";
 
 const TrackRow = styled("tr")`
-  > td {
-    position: relative;
-  }
-  > td > .play-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    svg {
-      margin-left: 15%;
-    }
-  }
-  > td > .track-number {
-    opacity: 1;
-    padding: 0.4rem;
-    font-size: 0.9rem;
-  }
-  &:hover > td > .play-button,
-  .play-button:focus-visible {
-    opacity: 1;
-  }
-
-  &:hover > td > .track-number {
-    opacity: 0;
-  }
-
   &:hover {
     background-color: var(--mi-tint-color);
 
@@ -154,13 +127,13 @@ const ManageTrackRow: React.FC<{
       onDragStart={onDragStart}
       onDrop={handleDrop}
       onDragEnd={onDragEnd}
-      className={css`
+      className={`group ${css`
         ${isError ? `background-color: red;` : ""}
         &:hover {
           cursor: grab;
         }
         ${!track.audio ? "background-color: red;" : ""}
-      `}
+      `}`}
     >
       <td
         className={css`
