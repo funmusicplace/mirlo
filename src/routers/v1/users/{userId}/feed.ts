@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import postProcessor from "../../../../utils/post";
+import { serializePost } from "../../../../utils/serialize/post";
 
 type Params = {
   userId: string;
@@ -44,7 +44,7 @@ export default function () {
 
       res.json({
         results: await Promise.all(
-          posts.map(async (p) => postProcessor.single(p, true))
+          posts.map(async (p) => serializePost(p, true))
         ),
       });
     } else {

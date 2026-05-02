@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "node:path";
 
 import prisma from "@mirlo/prisma";
-import { Client } from "@mirlo/prisma/client";
+import { Client, User } from "@mirlo/prisma/client";
 import * as cheerio from "cheerio";
 import { Request } from "express";
 
@@ -22,6 +22,11 @@ import {
   finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
+import { checkIsUserSubscriber } from "./utils/artist";
+import {
+  postIncludeForUser,
+  serializePost,
+} from "./utils/serialize/post";
 import {
   USER_PROFILE_SELECT,
   serializeUserProfile,
@@ -36,6 +41,7 @@ type RouteContext<T extends RouteParams = RouteParams> = {
   client: Client;
   avatarUrl?: string;
   params: T;
+  req?: Request;
 };
 
 type RouteHandler<T extends RouteParams = RouteParams> = (
@@ -306,6 +312,7 @@ const handlePost: RouteHandler<PostParams> = async ({
   $,
   client,
   avatarUrl,
+  req,
   params: { artistSlug, postId, postSlug },
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
@@ -363,6 +370,36 @@ const handlePost: RouteHandler<PostParams> = async ({
       releaseDate: postCreatedDate,
       schemas: [schema],
     });
+
+    // Hydrate the public Post page so the client renders without a load
+    // flash on direct page load (mirrors the `__MIRLO_AUTH__` user-hydration
+    // pattern). Refetched as a single full post with user-scoped purchase
+    // info so `serializePost` produces the same shape as `/v1/posts/{id}`.
+    const user = req?.user as User | undefined;
+    const userId = user?.id;
+    const fullPost = await prisma.post.findFirst({
+      where: {
+        id: post.id,
+        publishedAt: { lte: new Date() },
+        isDraft: false,
+      },
+      include: postIncludeForUser(userId),
+    });
+    if (fullPost) {
+      const isUserSubscriber = await checkIsUserSubscriber(
+        user,
+        fullPost.artistId
+      );
+      $("head").append(
+        `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify({
+          post: serializePost(
+            fullPost,
+            isUserSubscriber || fullPost.artist?.userId === userId
+          ),
+          injectedAt: new Date().toISOString(),
+        })}</script>`
+      );
+    }
   } else {
     // Index of all posts
     buildOpenGraphTags($, {
@@ -780,7 +817,7 @@ export const analyzePathAndGenerateHTML = async (
     // Match against route patterns using shared matcher
     const routeParams = matchRoutePattern(segments);
     if (routeParams) {
-      await dispatchRoute(routeParams, { $, client, avatarUrl });
+      await dispatchRoute(routeParams, { $, client, avatarUrl, req });
     } else {
       // No matching route - use default
       await handleDefault({ $, client, params: {} });

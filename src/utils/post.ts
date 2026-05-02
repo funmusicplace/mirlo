@@ -1,62 +1,9 @@
-import { Artist, ArtistAvatar, Post } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import showdown from "showdown";
-import { addSizesToImage } from "./artist";
-import { finalArtistAvatarBucket, finalPostImageBucket } from "./minio";
 import { AppError } from "./error";
-import { generateFullStaticImageUrl } from "./images";
 
-export const processSinglePost = (
-  post: Partial<Post> & {
-    artist?: (Partial<Artist> & { avatar?: ArtistAvatar | null }) | null;
-  } & { featuredImage?: { extension: string; id: string } | null } & {
-    tracks?: {
-      trackId: number;
-      track?: {
-        isPreview: boolean;
-        trackGroup?: {
-          userTrackGroupPurchases?: { userId: number }[];
-        };
-        userTrackPurchases?: { userId: number }[];
-      };
-    }[];
-  },
-  isUserSubscriber?: boolean
-) => ({
-  ...post,
-  tracks: post.tracks?.map((pt) => ({
-    isPlayable:
-      pt.track?.isPreview ||
-      pt.track?.trackGroup?.userTrackGroupPurchases?.some(
-        (purchase) => purchase.userId === pt.trackId
-      ) ||
-      pt.track?.userTrackPurchases?.some(
-        (purchase) => purchase.userId === pt.trackId
-      ) ||
-      isUserSubscriber,
-    ...pt,
-  })),
-  artist: {
-    ...post.artist,
-    avatar: post.artist
-      ? addSizesToImage(finalArtistAvatarBucket, post.artist?.avatar)
-      : null,
-  },
-  featuredImage: post.featuredImage && {
-    ...post.featuredImage,
-    src: generateFullStaticImageUrl(
-      post.featuredImage.id,
-      finalPostImageBucket,
-      post.featuredImage.extension
-    ),
-  },
-  isContentHidden: !(isUserSubscriber || post.isPublic),
-});
-
-export default {
-  single: processSinglePost,
-};
+export { serializePost, postIncludeForUser } from "./serialize/post";
 
 const converter = new showdown.Converter({ headerLevelStart: 2 });
 

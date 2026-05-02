@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { processSinglePost } from "../../../utils/post";
+import { serializePost } from "../../../utils/serialize/post";
 import { checkIsUserSubscriber } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
 
@@ -103,7 +103,7 @@ export default function () {
       }
       const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
       res.json({
-        result: processSinglePost(
+        result: serializePost(
           post,
           isUserSubscriber || post.artist?.userId === user?.id
         ),

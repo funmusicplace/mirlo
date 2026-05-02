@@ -15,6 +15,40 @@ const fetchPost: QueryFunction<
     .then((r) => r.result);
 };
 
+const getInjectedPost = (
+  postId: string,
+  artistSlug: string
+): Post | undefined => {
+  if (typeof document === "undefined") {
+    return undefined;
+  }
+
+  const script = document.getElementById("__MIRLO_POST__");
+  if (!script?.textContent) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(script.textContent) as { post?: Post };
+    const injected = parsed.post;
+    if (!injected) return undefined;
+    // Only use the injected payload if it actually matches the route the
+    // component is asking about — otherwise fall through to the network fetch.
+    const matchesId = String(injected.id) === postId;
+    const matchesSlug =
+      injected.urlSlug?.toLowerCase() === postId.toLowerCase();
+    const matchesArtist =
+      !artistSlug ||
+      injected.artist?.urlSlug?.toLowerCase() === artistSlug.toLowerCase();
+    if ((matchesId || matchesSlug) && matchesArtist) {
+      return injected;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export function queryPost(opts: { postId: string; artistId: string }) {
   return queryOptions({
     queryKey: [
@@ -26,6 +60,8 @@ export function queryPost(opts: { postId: string; artistId: string }) {
     ],
     queryFn: fetchPost,
     enabled: !!opts.postId,
+    initialData: () => getInjectedPost(opts.postId, opts.artistId),
+    refetchOnMount: "always",
   });
 }
 
