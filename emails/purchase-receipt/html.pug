@@ -4,46 +4,44 @@ mixin purchaseRow(title, transaction)
   tr
     td #{transaction.userFriendlyId || '---'}
     td #{title}
-    td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
-    td #{transaction.platformFee / 100 ? `(Platform fee: ${transaction.platformFee / 100})` : ''}
-    td #{transaction.stripeCut / 100 ? `(Payment processor fee: ${transaction.stripeCut / 100})` : ''}
+    td.num #{(transaction.amount / 100).toFixed(2)}
+    td.num #{transaction.platformFee / 100 ? (transaction.platformFee / 100).toFixed(2) : ''}
+    td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
 
 block content
   p Thank you for your purchase!
   - const supportMessage = artist?.properties?.emails?.purchase
   if supportMessage
     div.border.pa3!= supportMessage
-  table 
+  - var receiptCurrency = transactions && transactions[0] && transactions[0].currency ? transactions[0].currency.toUpperCase() : ''
+  table.receipt
     thead
       tr
         th Transaction ID
         th Item
-        th Amount
-        th Platform Fee
-        th Payment Processor Fee
+        th.num Amount#{receiptCurrency ? ` (${receiptCurrency})` : ''}
+        th.num Platform fee
+        th.num Payment processor fee
     tbody
       each transaction in transactions
         each purchase in transaction.trackGroupPurchases
           +purchaseRow(purchase.trackGroup.title, transaction)
-          tr 
-            td(colspan="4")
+          tr
+            td(colspan="5")
               a(href!=`${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`) View release
 
         each purchase in transaction.trackPurchases
           +purchaseRow(purchase.track.title, transaction)
-          tr 
-            td(colspan="4")
+          tr
+            td(colspan="5")
               a(href!=`${client}/${purchase.track.trackGroup.artist.urlSlug}/release/${purchase.track.trackGroup.urlSlug}`) View release
-              
+
         each purchase in transaction.merchPurchases
           +purchaseRow(`${purchase.merch.title} ${purchase.options.map((o) => o.name).join(', ')}: ${purchase.quantity}`, transaction)
         each tip in transaction.tips
           +purchaseRow('Tip', transaction)
-  
-  p Your support keeps our community strong. 
-  hr 
-  p New to mirlo? 
-    | If you want to have access to all your purchases for this e-mail address, 
-    | simply 
-    a(href!=`${client}/password-reset?email=${email}`) set a password for it
-    | .
+
+  p Your support keeps our community strong.
+  hr
+  p
+    | New to mirlo? If you want to have access to all your purchases for this e-mail address, simply #[a(href!=`${client}/password-reset?email=${email}`) set a password for it].

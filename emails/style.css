@@ -74,3 +74,36 @@ p {
   margin-right: auto;
   margin-left: auto;
 }
+
+/* Receipt-style tables (#1980) */
+table.receipt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+table.receipt th,
+table.receipt td {
+  padding: 0.4rem 0.5rem;
+  vertical-align: top;
+}
+
+table.receipt thead th {
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+table.receipt th.num,
+table.receipt td.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+table.receipt tr.totals td {
+  border-top: 1px solid rgba(0, 0, 0, 0.4);
+  font-weight: bold;
+  padding-top: 0.6rem;
+}
