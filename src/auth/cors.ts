@@ -2,7 +2,6 @@ import prisma from "@mirlo/prisma";
 import { Client } from "@mirlo/prisma/client";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
-import { flatten } from "lodash";
 
 import { headersAreForActivityPub } from "../activityPub/utils";
 import logger from "../logger";
@@ -45,43 +44,56 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
   // @ts-ignore - req.logger added by middleware
   const log = req.logger || logger;
   try {
-    const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
     const isSameSite =
       req.headers["sec-fetch-site"] === "same-site" ||
       req.headers["sec-fetch-site"] === "same-origin";
-
     const isHealthCheck = req.path === "/health" && req.headers["health-check"];
     const isRSSFormat = req.query?.format === "rss";
 
+    // Health checks, the test environment, and any RSS feed bypass both
+    // client lookup and API-key validation entirely. CORS still applies (we
+    // fall through to the cors() call below with an empty client list, so
+    // only API_DOMAIN / dev localhost are in the origin allowlist)
+    const skipsClientLookup = isHealthCheck || isTest || isRSSFormat;
+
     let clients: Client[] = [];
-    if (isHealthCheck || isTest || isRSSFormat) {
-      // do nothing
-    } else {
+    if (!skipsClientLookup) {
       const isAPIEndpointPrivate = checkForPrivateEndpoint(req.path, req.query);
-      const isActivityPubRequest = headersAreForActivityPub(
-        req.headers,
-        req.method as "POST" | "GET" | "PUT" | "DELETE"
-      );
-      const validActivityPubEndpoints = isValidActivityPubEndpoint(req.path);
-      // We only care about the API key for API requests
-      if (isSameSite || !isAPIEndpointPrivate) {
+      const isActivityPubRequest =
+        headersAreForActivityPub(
+          req.headers,
+          req.method as "POST" | "GET" | "PUT" | "DELETE"
+        ) && isValidActivityPubEndpoint(req.path);
+
+      // The API key is only required for cross-site requests to private
+      // endpoints. Same-site (the SPA), public endpoints, and signature-based
+      // ActivityPub requests all skip the key check; in those cases we still
+      // need every registered client's allowed origins merged into the CORS
+      // allowlist, so we load them all
+      const skipsApiKey =
+        isSameSite || !isAPIEndpointPrivate || isActivityPubRequest;
+
+      if (skipsApiKey) {
         clients = await prisma.client.findMany();
-      } else if (isActivityPubRequest && validActivityPubEndpoints) {
-        clients = await prisma.client.findMany();
-      } else if (!apiHeader || typeof apiHeader !== "string") {
-        throw new AppError({
-          httpCode: 401,
-          description: "Missing API Code",
-        });
-      } else if (typeof apiHeader === "string" && !isSameSite) {
+      } else {
+        const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
+        if (typeof apiHeader !== "string" || !apiHeader) {
+          throw new AppError({
+            httpCode: 401,
+            description: "Missing API Code",
+          });
+        }
         log.info(`Looking for client with API key: ${apiHeader}`);
         clients = await prisma.client.findMany({
-          where: {
-            key: apiHeader,
-          },
+          where: { key: apiHeader },
         });
         log.info(
-          `Found ${clients.length} clients with that API key: ${clients.map((c) => `${c.applicationName}: ${c.allowedCorsOrigins.join(", ")}`).join(", ")}`
+          `Found ${clients.length} clients with that API key: ${clients
+            .map(
+              (c) =>
+                `${c.applicationName}: ${c.allowedCorsOrigins.join(", ")}`
+            )
+            .join(", ")}`
         );
         if (clients.length === 1) {
           req.client = clients[0];
@@ -89,17 +101,16 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       }
     }
 
-    const origin = [
-      ...flatten(
-        clients.map((c) =>
-          c.allowedCorsOrigins.map((origin) => {
-            if (origin.startsWith("regex:")) {
-              return new RegExp(origin.replace("regex:", ""));
-            }
-            return origin;
-          })
-        )
-      ),
+    const allowedClientOrigins = clients.flatMap((c) =>
+      c.allowedCorsOrigins.map((origin) =>
+        origin.startsWith("regex:")
+          ? new RegExp(origin.replace("regex:", ""))
+          : origin
+      )
+    );
+
+    const origin: (string | RegExp)[] = [
+      ...allowedClientOrigins,
       process.env.API_DOMAIN ?? "http://localhost:3000",
     ];
 
