@@ -82,7 +82,10 @@ const SavingInput = React.forwardRef<
     );
 
     // React Hook Form uses a ref to handle changes/errors
-    const { ref: registerRef, ...rest } = register(formKey);
+    const { ref: registerRef, ...rest } = register(
+      formKey,
+      min !== undefined ? { min } : undefined
+    );
 
     // One imperative handle for the forwarded ref, for parent usage
     React.useImperativeHandle(ref, () => {
@@ -198,7 +201,6 @@ const SavingInput = React.forwardRef<
               <InputEl
                 aria-describedby={ariaDescribedBy}
                 aria-labelledby={ariaLabelledBy}
-                {...register(formKey)}
                 onInput={saveOnInputDebounced}
                 // onChange={type === "checkbox" ? saveOnInput : undefined}
                 type={type}

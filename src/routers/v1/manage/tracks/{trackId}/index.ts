@@ -6,6 +6,7 @@ import {
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
+import { AppError } from "../../../../../utils/error";
 
 import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
 
@@ -52,6 +53,16 @@ export default function () {
     } = req.body as TrackBody;
 
     try {
+      if (minPrice !== undefined && minPrice !== null) {
+        const numericMinPrice = Number(minPrice);
+        if (!Number.isFinite(numericMinPrice) || numericMinPrice < 0) {
+          throw new AppError({
+            httpCode: 400,
+            description: "minPrice must be zero or greater",
+          });
+        }
+      }
+
       await updateTrackArtists(Number(trackId), trackArtists);
 
       const newTrack = await prisma.track.update({
