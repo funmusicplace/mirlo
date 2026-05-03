@@ -30,8 +30,26 @@ img {
   height: auto;
 }
 
+.email-body {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+.email-background {
+  width: 100%;
+  padding: 2rem 1rem;
+  background-color: #fdf4f4;
+}
+
+.email-card {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 6px;
+}
+
 .email-header {
-  padding-bottom: 1rem;
+  padding-bottom: 1.5rem;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }

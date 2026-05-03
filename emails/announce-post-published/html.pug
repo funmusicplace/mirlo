@@ -2,7 +2,7 @@ extends ../layout.pug
 
 block content
 
-    div.mw600.email-header
+    div.email-header
       if post.featuredImage
         a(href!=`${client}/post/${post.id}`)
           img(src=post.featuredImage.src, alt="Featured Image", style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:8px;")
@@ -12,12 +12,11 @@ block content
       p.read-on-mirlo
         a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`) Read it on Mirlo.
 
-    div.mw600
+    div
       | !{post.htmlContent}
 
-    p.mw600.email-unsubscribe
+    p.email-unsubscribe
       | Don't want to receive emails from #{artist.name} anymore?
       |
       |
       a(href!=`${client}/${artist.urlSlug || artist.id}/unsubscribe?email=${email}`) Unsubscribe.
-
