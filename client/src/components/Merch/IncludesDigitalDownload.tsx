@@ -54,7 +54,12 @@ const IncludesDigitalDownload: React.FC<{ merch: Merch; artist: Artist }> = ({
                 " " +
                 openOutsideLinkAfter
               }
-              to={getReleaseUrl(merch.artist, merch.includePurchaseTrackGroup)}
+              to={getReleaseUrl(
+                // Use the trackGroup's own artist (a label's merch may
+                // include purchase of a roster artist's release). See #2008.
+                merch.includePurchaseTrackGroup.artist ?? merch.artist,
+                merch.includePurchaseTrackGroup
+              )}
               target="_blank"
             ></Link>
           ),
