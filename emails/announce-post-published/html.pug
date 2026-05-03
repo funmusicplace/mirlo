@@ -4,7 +4,7 @@ block content
 
     div.email-header
       if post.featuredImage
-        a(href!=`${client}/post/${post.id}`)
+        a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`)
           img(src=post.featuredImage.src, alt="Featured Image", style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:8px;")
 
       p.email-byline #{artist.name} just published a new post on Mirlo
