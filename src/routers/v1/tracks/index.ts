@@ -4,6 +4,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { userHasPermission } from "../../../auth/passport";
 import { addSizesToImage } from "../../../utils/artist";
 import { finalCoversBucket } from "../../../utils/minio";
+import { turnItemsIntoRSS } from "../../../utils/rss";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -12,7 +13,9 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take = 10, title } = req.query;
+    const { format } = req.query;
+    const { skip: skipQuery, take = format === "rss" ? 50 : 10, title } =
+      req.query;
 
     try {
       let where: Prisma.TrackWhereInput = {
@@ -37,10 +40,28 @@ export default function () {
           },
           audio: true,
         },
+        // Newest tracks first when serving RSS so subscribers see latest at the
+        // top; preserve the existing default ordering for the JSON response.
+        orderBy: format === "rss" ? { createdAt: "desc" } : undefined,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         where,
       });
+
+      if (format === "rss") {
+        const feed = await turnItemsIntoRSS(
+          {
+            name: "All Mirlo Tracks",
+            apiEndpoint: "tracks",
+            description: "Mirlo's most recent tracks",
+            clientUrl: "releases",
+          },
+          tracks
+        );
+        res.set("Content-Type", "application/rss+xml");
+        return res.send(feed.xml());
+      }
+
       res.json({
         results: tracks.map((tr) => ({
           ...tr,

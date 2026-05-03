@@ -1,9 +1,17 @@
-import { TrackGroup, Post, Artist } from "@mirlo/prisma/client";
+import { Track, TrackGroup, Post, Artist } from "@mirlo/prisma/client";
 import RSS from "rss";
 
 import { getClient } from "./getClient";
 import { markdownAsHtml } from "./post";
-import { isArtist, isPost, isTrackGroup } from "./typeguards";
+import { isArtist, isPost, isTrack, isTrackGroup } from "./typeguards";
+
+type FeedTrackGroup = TrackGroup & {
+  artist: { name: string; urlSlug: string; id: number } | null;
+};
+
+type FeedTrack = Track & {
+  trackGroup: FeedTrackGroup | null;
+};
 
 export const turnItemsIntoRSS = async (
   feedDetails: {
@@ -13,9 +21,8 @@ export const turnItemsIntoRSS = async (
     clientUrl: string;
   },
   zipped: (
-    | (TrackGroup & {
-        artist: { name: string; urlSlug: string; id: number } | null;
-      })
+    | FeedTrackGroup
+    | FeedTrack
     | (Post & { artist: { name: string; urlSlug: string; id: number } | null })
     | Artist
   )[]
@@ -31,7 +38,25 @@ export const turnItemsIntoRSS = async (
   });
 
   for (const p of zipped) {
-    if (isTrackGroup(p)) {
+    if (isTrack(p)) {
+      const tg = p.trackGroup;
+      const artistName = tg?.artist?.name ?? "an artist";
+      feed.item({
+        title: p.title
+          ? `${p.title} by ${artistName}`
+          : `A track by ${artistName}`,
+        description:
+          p.description ??
+          (tg?.title
+            ? `A track from "${tg.title}" by ${artistName}.`
+            : `A track by ${artistName}.`),
+        url:
+          tg && tg.artist
+            ? `${client?.applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}/tracks/${p.id}`
+            : `${client?.applicationUrl}/`,
+        date: p.createdAt,
+      });
+    } else if (isTrackGroup(p)) {
       feed.item({
         title: p.title
           ? `${p.title} by ${p.artist?.name}`
