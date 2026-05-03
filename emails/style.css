@@ -1,19 +1,76 @@
 .sans-serif {
   font-family:
-    -apple-system, BlinkMacSystemFont, "avenir next", avenir, "helvetica neue",
-    helvetica, ubuntu, roboto, noto, "segoe ui", arial, sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
 }
 
 body {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.5;
   padding: 0.5rem;
   max-width: 540px;
   margin: 0 auto;
+  font-weight: 400;
 }
 
 p {
   margin-bottom: 0.75rem;
+}
+
+h2 {
+  font-weight: 500;
+}
+
+h2 strong {
+  font-weight: 600;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.email-body {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+.email-background {
+  width: 100%;
+  padding: 2rem 1rem;
+  background-color: #fdf4f4;
+}
+
+.email-card {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 6px;
+}
+
+.email-header {
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.email-byline {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 0 0 0.5rem;
+}
+
+.email-title {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+.read-on-mirlo {
+  font-size: 0.875rem;
+  margin: 0;
 }
 
 .b {
@@ -30,6 +87,23 @@ p {
 
 .mw600 {
   max-width: 600px;
+  margin: 0 auto;
+  font-size: 18px;
+}
+
+.email-unsubscribe {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.email-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .w-100 {
