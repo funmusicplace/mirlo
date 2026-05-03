@@ -3,63 +3,62 @@ extends ../layout.pug
 mixin purchaseRow(title, sku, transaction, url)
   tr
     td #{transaction.userFriendlyId || '---'}
-    td 
-      if url 
+    td
+      if url
         a(href!=url) #{title}
-      else 
-        #{title}
+      else
+        | #{title}
     td #{sku}
-    td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
-    td #{transaction.platformFee / 100 ? (transaction.platformFee / 100).toFixed(2) : ''}
-    td #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
-    td #{transaction.currency} #{(((transaction.amount || 0) - (transaction.platformFee || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
+    td.num #{(transaction.amount / 100).toFixed(2)}
+    td.num #{transaction.platformFee / 100 ? (transaction.platformFee / 100).toFixed(2) : ''}
+    td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
+    td.num #{(((transaction.amount || 0) - (transaction.platformFee || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
 
 block content
   p New purchases on your Mirlo store!
   p Purchased by: #{email}
-    
-  table 
+
+  table.receipt
     thead
       tr
         th Transaction ID
         th Item
         th SKU/ISRC
-        th Gross Amount
-        th Platform Fee
-        th Payment Processor Fee
-        th Net Amount
-    each transaction in transactions
-      if transaction.trackGroupPurchases
-        each purchase in transaction.trackGroupPurchases
-          if !purchase.proGratis
-            +purchaseRow(`Digital: ${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`, 
-               purchase.trackGroup.catalogNumber, 
-               transaction,
-              `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`)
-      if transaction.trackPurchases
-        each purchase in transaction.trackPurchases
-          +purchaseRow(`Digital: ${purchase.track.trackGroup.artist.name} \ ${purchase.track.title}`, 
-            purchase.track.isrc, 
-            transaction)
-      if transaction.merchPurchases
-        each purchase in transaction.merchPurchases
-          +purchaseRow(`Merch: ${purchase.merch.artist.name} \ ${purchase.merch.title}`, 
-            purchase.merch.sku, 
-            transaction)
-      if transaction.tips
-        each tip in transaction.tips
-          +purchaseRow('Tip', '', transaction)
-    tr 
-      td Total
-      td Gross
-      td #{currency} #{(totalGross / 100).toFixed(2)}
-      td(colspan="2") Net
-      td #{currency} #{(totalNet / 100).toFixed(2)}
+        th.num Gross (#{currency.toUpperCase()})
+        th.num Platform fee
+        th.num Payment processor fee
+        th.num Net (#{currency.toUpperCase()})
+    tbody
+      each transaction in transactions
+        if transaction.trackGroupPurchases
+          each purchase in transaction.trackGroupPurchases
+            if !purchase.proGratis
+              +purchaseRow(`Digital: ${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`,
+                 purchase.trackGroup.catalogNumber,
+                 transaction,
+                `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`)
+        if transaction.trackPurchases
+          each purchase in transaction.trackPurchases
+            +purchaseRow(`Digital: ${purchase.track.trackGroup.artist.name} \ ${purchase.track.title}`,
+              purchase.track.isrc,
+              transaction)
+        if transaction.merchPurchases
+          each purchase in transaction.merchPurchases
+            +purchaseRow(`Merch: ${purchase.merch.artist.name} \ ${purchase.merch.title}`,
+              purchase.merch.sku,
+              transaction)
+        if transaction.tips
+          each tip in transaction.tips
+            +purchaseRow('Tip', '', transaction)
+      tr.totals
+        td(colspan="3") Total
+        td.num #{(totalGross / 100).toFixed(2)}
+        td.num
+        td.num
+        td.num #{(totalNet / 100).toFixed(2)}
 
 
-  p You can view your sales in your
-    a(href!=`${client}/sales`) artist dashboard
-    | .
-  p Learn more about
-    a(href="https://docs.mirlo.space/payouts") how payouts work on Mirlo
-    | .
+  p
+    | You can view your sales in your #[a(href!=`${client}/sales`) artist dashboard].
+  p
+    | Learn more about #[a(href="https://docs.mirlo.space/payouts") how payouts work on Mirlo].
