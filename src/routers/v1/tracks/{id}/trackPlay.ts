@@ -37,6 +37,7 @@ export default function () {
         data: {
           trackId: track.id,
           ...(user ? { userId: user.id } : { ip: req.ip }),
+          ...(req.client ? { clientId: req.client.id } : {}),
         },
       });
       res.sendStatus(200);
