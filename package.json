@@ -5,6 +5,7 @@
   "module": "commonjs",
   "scripts": {
     "api:test": "tsc --noEmit && mocha test --exit --extension ts",
+    "api:test:docker": "docker compose -f docker-compose.api.yml -f docker-compose.test.yml --profile test run --rm test",
     "api:watch": "NODE_ENV=development PORT=3000 nodemon src/index.ts",
     "api:start": "ts-node src/index.ts",
     "prepare": "husky",
