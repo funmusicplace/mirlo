@@ -104,46 +104,28 @@ const About: React.FC = () => {
           }}
         />
       </div>
+      
       <div>
-        <H2HashLink id="story">Our story</H2HashLink>
+        <H2HashLink id="story">{t("storyTitle")}</H2HashLink>
 
-        <p>
-          The idea of Mirlo grew out of conversations that began in late 2022 as
-          a handful of musicians, technologists, and mutual aid organizers began
-          to find each other and reflect on their experiences working with two
-          ongoing music cooperative initiatives at the time,{" "}
-          <a href="https://ampled.com/">Ampled</a> and{" "}
-          <a href="https://resonate.coop/">Resonate</a>. Through those
-          conversations, we began to develop a shared analysis of today’s
-          precarious music industry and invited others to join us in the
-          conversations we published online at{" "}
-          <a href="https://funmusic.place">Fun Music Place</a>. We also started
-          to{" "}
-          <a href="https://funmusic.place/blog/the-spotify-ai-blues/">
-            dream together
-          </a>{" "}
-          about what alternatives that foregrounded mutual aid and the value of
-          musical creativity might actually look like. Two of the group members,
-          LLK and Si, wrote code for an initial software product.
-        </p>
-        <p>
-          As these conversations unfolded, Bandcamp was sold again, firing half
-          of their employees in the process. We realized the heightened need for
-          viable alternatives to the corporate giants. Ultimately, three of us
-          who were based in the United States{" "}
-          <a href="https://mirlo.space/team/posts/10/"> formed an LLC</a> and
-          became the <a href="#team">official co-founders and worker-owners</a>{" "}
-          , with other contributors continuing to offer support internationally.
-          We joined the{" "}
-          <a href="https://www.usworker.coop/en/">
-            US Federation of Worker Cooperatives
-          </a>{" "}
-          as a startup member and are currently finalizing our operating
-          agreement to incorporate consent-based cooperative governance into our
-          foundational protocols, inspired by the principles of{" "}
-          <a href="https://www.sociocracyforall.org/sociocracy/">Sociocracy</a>.
-        </p>
+        <Trans
+          t={t}
+          i18nKey="storyText"
+          components={{
+            p: <p />,
+            ampled: <a href="https://ampled.com/" />,
+            resonate: <a href="https://resonate.coop/" />,
+            funmusic: <a href="https://funmusic.place" />,
+            dream: <a href="https://funmusic.place/blog/the-spotify-ai-blues/" />,
+            llc: <a href="https://mirlo.space/team/posts/10/" />,
+            team: <a href="#team" />,
+            coop: <a href="https://www.usworker.coop/en/" />,
+            sociocracy: <a href="https://www.sociocracyforall.org/sociocracy/" />
+          }}
+        />
+            
       </div>
+      
       <div>
         <H2HashLink id="team">Our team</H2HashLink>
         <p>
