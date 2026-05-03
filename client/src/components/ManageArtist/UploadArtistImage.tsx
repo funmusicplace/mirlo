@@ -15,6 +15,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { formatAcceptList } from "utils/uploadFormats";
 import { useAuthContext } from "state/AuthContext";
 
 type ImageType =
@@ -284,6 +285,22 @@ const UploadArtistImage: React.FC<{
           `}
         >
           {t("dimensionsTip", { maxDimensions, maxSize })}
+        </small>
+        <small
+          className={css`
+            width: 100%;
+            flex: 100%;
+            margin-top: 0.25rem !important;
+            opacity: 0.7;
+            @media (max-width: ${bp.medium}px) {
+              font-size: var(--mi-font-size-xsmall);
+            }
+          `}
+        >
+          {t("acceptedFormats", {
+            keyPrefix: "manageAlbum",
+            formats: formatAcceptList("image/*"),
+          })}
         </small>
       </div>
       {existingImage && (

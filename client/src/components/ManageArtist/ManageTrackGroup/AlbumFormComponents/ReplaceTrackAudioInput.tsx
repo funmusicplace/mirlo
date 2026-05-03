@@ -8,6 +8,10 @@ import useJobStatusCheck from "utils/useJobStatusCheck";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import { formatAcceptList } from "utils/uploadFormats";
+
+const ACCEPTED_AUDIO =
+  "audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a";
 export interface FormData {
   trackFile: FileList;
 }
@@ -49,8 +53,12 @@ const ReplaceTrackAudioInput: React.FC<{
     }
   }, [setUploadJobs, snackbar, t, trackId]);
 
+  const tooltipText = `${t("replaceTrackAudio")} — ${t("acceptedFormats", {
+    formats: formatAcceptList(ACCEPTED_AUDIO),
+  })}`;
+
   return (
-    <Tooltip hoverText={t("replaceTrackAudio")}>
+    <Tooltip hoverText={tooltipText}>
       <label
         htmlFor={`track.${trackId}`}
         className={css`
@@ -80,7 +88,7 @@ const ReplaceTrackAudioInput: React.FC<{
           {...register("trackFile", {
             onChange: onSave,
           })}
-          accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+          accept={ACCEPTED_AUDIO}
         />
       </label>
     </Tooltip>

@@ -1050,6 +1050,7 @@
     "trackGroupCreated": "Release created",
     "updatedTrack": "Updated track info",
     "dropFilesHere": "Drop files here, or click to select files.",
+    "acceptedFormats": "Accepted formats: {{ formats }}",
     "or": "or",
     "optionalType": "The type is optional",
     "replaceTrackAudio": "Replace audio",
