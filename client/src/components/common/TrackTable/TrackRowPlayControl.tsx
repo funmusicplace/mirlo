@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import React from "react";
 import { TfiControlPause } from "react-icons/tfi";
 import { VscPlay } from "react-icons/vsc";
@@ -6,7 +5,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { usePlayerSyncRequest } from "utils/playerSync";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
 
-import Button from "../Button";
+const baseButtonClass =
+  "flex items-center justify-center bg-transparent hover:bg-transparent text-current cursor-pointer transition-opacity";
 
 const TrackRowPlayControl: React.FC<{
   trackNumber: number;
@@ -14,12 +14,14 @@ const TrackRowPlayControl: React.FC<{
   onTrackPlayCallback?: (trackId: number) => void;
   canPlayTrack: boolean;
   isDisabled?: boolean;
+  inWidget?: boolean;
 }> = ({
   trackId,
   trackNumber,
   onTrackPlayCallback,
   canPlayTrack,
   isDisabled,
+  inWidget,
 }) => {
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex },
@@ -31,6 +33,7 @@ const TrackRowPlayControl: React.FC<{
     currentlyPlayingIndex !== undefined
       ? playerQueueIds[currentlyPlayingIndex]
       : undefined;
+  const isThisTrackPlaying = playing && currentPlayingTrackId === trackId;
 
   const onTrackPlay = React.useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -57,43 +60,52 @@ const TrackRowPlayControl: React.FC<{
     [dispatch, trackId, embeddedInMirlo, sendPlayerRequest]
   );
 
+  const stackClass = inWidget
+    ? "relative w-6 h-6 max-sm:w-5 max-sm:h-5"
+    : "relative w-8 h-8 max-sm:w-7 max-sm:h-7";
+
+  const numberClass = inWidget
+    ? "absolute inset-0 flex items-center justify-start text-[0.7rem] max-sm:text-[0.6rem]"
+    : "absolute inset-0 flex items-center justify-center";
+
+  const iconClass = inWidget ? "text-[0.7rem] max-sm:text-[0.6rem]" : "text-sm";
+
+  if (isThisTrackPlaying) {
+    return (
+      <button
+        type="button"
+        aria-label="Pause track"
+        onClick={onTrackPause}
+        className={`${baseButtonClass} ${stackClass} ${
+          inWidget ? "justify-start" : ""
+        }`}
+      >
+        <TfiControlPause className={iconClass} aria-hidden />
+      </button>
+    );
+  }
+
   return (
-    <>
-      {(!playing || currentPlayingTrackId !== trackId) && (
-        <>
-          <span
-            className={
-              "track-number " +
-              css`
-                text-align: center;
-                margin: 0 0 0 0;
-              `
-            }
-          >
-            {trackNumber}
-          </span>
-          {canPlayTrack && !isDisabled && (
-            <Button
-              aria-label="Play track"
-              size="compact"
-              startIcon={<VscPlay />}
-              className="play-button"
-              onClick={onTrackPlay}
-            ></Button>
-          )}
-        </>
+    <div className={stackClass}>
+      <span
+        className={`${numberClass} transition-opacity group-hover:opacity-0 group-focus-within:opacity-0`}
+        aria-hidden
+      >
+        {trackNumber}
+      </span>
+      {canPlayTrack && !isDisabled && (
+        <button
+          type="button"
+          aria-label="Play track"
+          onClick={onTrackPlay}
+          className={`${baseButtonClass} absolute inset-0 ${
+            inWidget ? "justify-start" : ""
+          } opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100`}
+        >
+          <VscPlay className={iconClass} aria-hidden />
+        </button>
       )}
-      {playing && currentPlayingTrackId === trackId && (
-        <Button
-          aria-label="Pause track"
-          size="compact"
-          startIcon={<TfiControlPause />}
-          className="pause-button"
-          onClick={onTrackPause}
-          style={{ width: "2rem", textAlign: "center" }}
-        />
-      )}
-    </>
+    </div>
   );
 };
 

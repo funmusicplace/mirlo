@@ -1,16 +1,16 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { bp } from "../../constants";
-
-import Background from "components/common/Background";
-import { FaEllipsisV } from "react-icons/fa";
-import Button from "./Button";
-
 import {
   ArtistButton,
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
+import Background from "components/common/Background";
+import React from "react";
 import { createPortal } from "react-dom";
+import { FaEllipsisV } from "react-icons/fa";
+
+import { bp } from "../../constants";
+
+import Button from "./Button";
 
 const DropdownMenu: React.FC<{
   children: React.ReactElement | React.ReactElement[];
@@ -86,9 +86,7 @@ const DropdownMenu: React.FC<{
                   display: block;
                   white-space: normal;
                   color: var(--mi-text-color) !important;
-                  background-color: var(
-                    --mi-background-color
-                  ) !important;
+                  background-color: var(--mi-background-color) !important;
                   word-break: break-word;
                   font-weight: normal;
                   border-radius: 0;
@@ -143,9 +141,10 @@ const DropdownMenu: React.FC<{
         `}
         onClick={(e) => {
           e.stopPropagation();
+          const rect = e.currentTarget.getBoundingClientRect();
           setButtonPosition({
-            x: e.clientX,
-            y: e.clientY,
+            x: rect.right,
+            y: rect.top,
           });
           setIsMenuOpen(true);
         }}

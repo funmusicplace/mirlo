@@ -10,7 +10,6 @@ import { usePlayerSyncRequest } from "utils/playerSync";
 import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
 
-import { bp } from "../../../constants";
 import DropdownMenu from "../DropdownMenu";
 import Tooltip from "../Tooltip";
 
@@ -22,7 +21,6 @@ import TrackRowPlayControl from "./TrackRowPlayControl";
 
 const TR = styled.tr<{
   canPlayTrack: boolean;
-  inWidget?: boolean;
 }>`
   ${(props) =>
     !props.canPlayTrack ? `color: var(--mi-contrast-color); opacity: .6;` : ""}
@@ -30,103 +28,6 @@ const TR = styled.tr<{
   &:hover {
     background-color: var(--mi-tint-x-color);
   }
-
-  button.play-button,
-  button.pause-button {
-    color: var(--mi-contrast-color);
-    background: transparent;
-    font-size: 0.8rem;
-
-    svg {
-      fill: var(--mi-contrast-color);
-    }
-  }
-
-  > td {
-    line-height: 2rem !important;
-  }
-
-  > td > .play-button {
-    display: none;
-  }
-  > td > .track-number {
-    display: block;
-    width: 2rem;
-    line-height: 2rem !important;
-  }
-  &:hover > td > .play-button,
-  &:hover > td > .pause-button {
-    display: flex;
-  }
-  ${(props) =>
-    props.canPlayTrack
-      ? `&:hover > td > .track-number {
-          display: none;
-        }`
-      : ""}
-
-  @media screen and (max-width: ${bp.small}px) {
-    td {
-      padding: 0.15rem 0.3rem;
-    }
-    button.play-button,
-    button.pause-button {
-      width: 1.75rem;
-      height: 1.75rem;
-      padding: 0;
-      svg {
-        width: 0.9rem;
-        height: 0.9rem;
-      }
-    }
-  }
-
-  ${(props) =>
-    props.inWidget &&
-    `
-    font-size: 0.75rem;
-    &:not(:first-of-type) > td {
-      border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
-    }
-    > td {
-      line-height: 1.5rem !important;
-      padding: 0 !important;
-    }
-    > td:first-of-type {
-      padding-left: 1rem !important;
-    }
-    > td:last-of-type {
-      padding-right: 1rem !important;
-    }
-    > td > .track-number {
-      width: auto;
-      line-height: 1.5rem !important;
-      text-align: left !important;
-    }
-    button.play-button,
-    button.pause-button {
-      width: 1.5rem !important;
-      height: 1.5rem !important;
-      padding: 0 !important;
-      font-size: 0.7rem !important;
-      justify-content: flex-start !important;
-      .startIcon {
-        justify-content: flex-start !important;
-      }
-    }
-    @media screen and (max-width: ${bp.small}px) {
-      button.play-button,
-      button.pause-button {
-        width: 1.25rem !important;
-        height: 1.25rem !important;
-        font-size: 0.6rem !important;
-        svg {
-          width: 0.7rem !important;
-          height: 0.7rem !important;
-        }
-      }
-    }
-  `}
 `;
 
 const licenseSpanClass =
@@ -137,16 +38,22 @@ const PlayCell: React.FC<{
   canPlayTrack: boolean;
   addTracksToQueue: (id: number) => void;
   onTrackPlay: () => void;
-}> = ({ track, canPlayTrack, addTracksToQueue, onTrackPlay }) => (
+  inWidget?: boolean;
+}> = ({ track, canPlayTrack, addTracksToQueue, onTrackPlay, inWidget }) => (
   <td
     onClick={onTrackPlay}
-    className="h-[30px] w-8 [&_button]:bg-transparent [&_button:hover]:!bg-transparent"
+    className={
+      inWidget
+        ? "pl-4! pr-2! w-10 align-middle"
+        : "h-[30px] w-8 align-middle max-sm:px-1 max-sm:py-0.5"
+    }
   >
     <TrackRowPlayControl
       trackId={track.id}
       canPlayTrack={canPlayTrack}
       trackNumber={track.order}
       onTrackPlayCallback={addTracksToQueue}
+      inWidget={inWidget}
     />
   </td>
 );
@@ -161,7 +68,14 @@ const TitleCell: React.FC<{
     keyPrefix: "trackGroupDetails",
   });
   return (
-    <td onClick={onTrackPlay} className="w-full p-0 m-0">
+    <td
+      onClick={onTrackPlay}
+      className={
+        inWidget
+          ? "w-full p-0! pr-4! m-0 leading-6"
+          : "w-full p-0 m-0 leading-8 max-sm:px-1 max-sm:py-0.5"
+      }
+    >
       <div
         className={`flex justify-between items-center ${
           inWidget ? "min-w-0 overflow-hidden" : ""
@@ -169,7 +83,7 @@ const TitleCell: React.FC<{
       >
         <div
           className={`overflow-hidden text-ellipsis mr-1 grow [&_i]:opacity-80 max-md:text-sm ${
-            inWidget ? "whitespace-nowrap break-normal min-w-0 !text-xs" : ""
+            inWidget ? "whitespace-nowrap break-normal min-w-0 text-xs" : ""
           }`}
         >
           {track.title ?? <i>{t("untitled")}</i>}
@@ -181,7 +95,7 @@ const TitleCell: React.FC<{
 
         <div
           className={`text-sm max-md:text-xs max-md:font-bold max-md:ml-1 ${
-            inWidget ? "!text-xs max-sm:!text-[0.6rem]" : ""
+            inWidget ? "text-xs max-sm:text-[0.6rem]" : ""
           }`}
         >
           {track.audio?.duration && fmtMSS(track.audio.duration)}
@@ -285,18 +199,31 @@ const TrackRow: React.FC<{
   showDropdown,
   inWidget,
 }) => {
-  const { dispatch } = useGlobalStateContext();
+  const {
+    state: { playerQueueIds, playing, currentlyPlayingIndex },
+    dispatch,
+  } = useGlobalStateContext();
   const { user } = useAuthContext();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
   const embeddedInMirlo = isEmbeddedInMirlo();
   const sendPlayerRequest = usePlayerSyncRequest();
   const showDropdownCell = size !== "small" && showDropdown;
+  const currentPlayingTrackId =
+    currentlyPlayingIndex !== undefined
+      ? playerQueueIds[currentlyPlayingIndex]
+      : undefined;
+  const isThisTrackPlaying = playing && currentPlayingTrackId === track.id;
 
   const onTrackPlay = React.useCallback(() => {
     if (!canPlayTrack) return;
     if (embeddedInMirlo) {
-      sendPlayerRequest({ type: "play", trackId: track.id });
+      sendPlayerRequest({
+        type: isThisTrackPlaying ? "pause" : "play",
+        trackId: track.id,
+      });
+    } else if (isThisTrackPlaying) {
+      dispatch({ type: "setPlaying", playing: false });
     } else {
       addTracksToQueue?.(track.id);
       dispatch({ type: "setPlaying", playing: true });
@@ -308,6 +235,7 @@ const TrackRow: React.FC<{
     track.id,
     embeddedInMirlo,
     sendPlayerRequest,
+    isThisTrackPlaying,
   ]);
 
   return (
@@ -315,13 +243,18 @@ const TrackRow: React.FC<{
       key={track.id}
       id={`${track.id}`}
       canPlayTrack={canPlayTrack}
-      inWidget={inWidget}
+      className={`group ${canPlayTrack ? "cursor-pointer" : ""} ${
+        inWidget
+          ? "[&:not(:first-of-type)>td]:border-t [&:not(:first-of-type)>td]:border-current/15 text-xs"
+          : ""
+      }`}
     >
       <PlayCell
         track={track}
         canPlayTrack={canPlayTrack}
         addTracksToQueue={addTracksToQueue}
         onTrackPlay={onTrackPlay}
+        inWidget={inWidget}
       />
       <TitleCell
         track={track}
