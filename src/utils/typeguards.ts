@@ -63,6 +63,14 @@ export function isTrackGroup(entity: unknown): entity is TrackGroup {
   return (entity as TrackGroup).credits !== undefined;
 }
 
+export function isTrack(entity: unknown): entity is Track {
+  if (!entity) {
+    return false;
+  }
+  // Track has trackGroupId; TrackGroup doesn't.
+  return (entity as Track).trackGroupId !== undefined;
+}
+
 export function isPost(entity: unknown): entity is Post {
   if (!entity) {
     return false;
