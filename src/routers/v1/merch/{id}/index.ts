@@ -52,6 +52,12 @@ export default function () {
           },
           includePurchaseTrackGroup: {
             include: {
+              // Without the trackGroup's own artist the client falls back to
+              // `merch.artist` when building the album link — which 404s when a
+              // label attaches a roster artist's release to label-owned merch
+              // (the URL ends up `/{labelSlug}/release/{trackGroupSlug}` and the
+              // trackGroup actually lives under `{rosterArtistSlug}`). See #2008.
+              artist: true,
               tracks: {
                 where: {
                   deletedAt: null,

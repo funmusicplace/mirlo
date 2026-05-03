@@ -178,7 +178,11 @@ function MerchView() {
               {merch.includePurchaseTrackGroup && (
                 <Link
                   to={getReleaseUrl(
-                    merch.artist,
+                    // The trackGroup may belong to a roster artist while the
+                    // merch belongs to the label that sells it; build the URL
+                    // with the trackGroup's own artist when available so the
+                    // link doesn't 404. See #2008.
+                    merch.includePurchaseTrackGroup.artist ?? merch.artist,
                     merch.includePurchaseTrackGroup
                   )}
                   className={css`
