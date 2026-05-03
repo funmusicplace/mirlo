@@ -523,6 +523,9 @@ model Merch {
   catalogNumber               String?
   includePurchaseTrackGroup   TrackGroup?                @relation(fields: [includePurchaseTrackGroupId], references: [id])
   isPublic                    Boolean
+  // When set, the public buy button on the merch view redirects to this URL
+  // instead of going through Mirlo's checkout. See #1424.
+  externalUrl                 String?
   itemTypeId                  Int?
   itemType                    MerchItemType?             @relation(fields: [itemTypeId], references: [id])
   createdAt                   DateTime                   @default(now())

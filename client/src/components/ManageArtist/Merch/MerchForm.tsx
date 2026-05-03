@@ -35,6 +35,7 @@ const MerchForm: React.FC<{
     quantityRemaining: number;
     catalogNumber: string;
     platformPercent: number;
+    externalUrl?: string | null;
   }>();
   const {
     handleSubmit,
@@ -163,6 +164,19 @@ const MerchForm: React.FC<{
           {errors.catalogNumber && (
             <FormError>{t("catalogNumberInvalid")}</FormError>
           )}
+        </FormComponent>
+        <FormComponent>
+          <label htmlFor="input-external-url">{t("externalUrlLabel")}</label>
+          <SavingInput
+            formKey="externalUrl"
+            id="input-external-url"
+            type="url"
+            placeholder="https://"
+            ariaDescribedBy="hint-external-url"
+            url={`manage/merch/${merch.id}`}
+            extraData={{}}
+          />
+          <small id="hint-external-url">{t("externalUrlDescription")}</small>
         </FormComponent>
         <FormComponent>
           <PaymentSlider

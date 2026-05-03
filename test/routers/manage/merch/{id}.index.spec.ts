@@ -125,5 +125,33 @@ describe("manage/merch/{merchId}", () => {
 
       assert.equal(response.status, 400);
     });
+
+    it("persists externalUrl on the merch item (#1424)", async () => {
+      const { user, accessToken } = await createUser({
+        email: "external-merch@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const merch = await createMerch(artist.id, {});
+
+      const externalUrl = "https://artistshop.example.com/vinyl";
+      const response = await requestApp
+        .put(`manage/merch/${merch.id}`)
+        .send({ externalUrl })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.externalUrl, externalUrl);
+
+      // Clearing it back to null should also work.
+      const cleared = await requestApp
+        .put(`manage/merch/${merch.id}`)
+        .send({ externalUrl: null })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(cleared.status, 200);
+      assert.equal(cleared.body.result.externalUrl, null);
+    });
   });
 });
