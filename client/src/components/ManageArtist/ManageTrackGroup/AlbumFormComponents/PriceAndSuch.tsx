@@ -105,9 +105,9 @@ const PriceAndSuch: React.FC<{
         : null;
 
       if (mode === "no-payments") {
+        // Only disable purchase; preserve prices so a round-trip back to a
+        // payment-enabled mode restores the user's previously set values.
         isGettable = false;
-        nextMinPrice = 0;
-        nextSuggestedPrice = null;
       }
 
       if (mode === "free-or-donate") {
