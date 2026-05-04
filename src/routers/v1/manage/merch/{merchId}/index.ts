@@ -74,6 +74,7 @@ export default function () {
         "urlSlug",
         "catalogNumber",
         "platformPercent",
+        "externalUrl",
       ]);
       const merch = await prisma.merch.findFirst({
         where: {

@@ -544,6 +544,7 @@ interface Merch {
   optionTypes?: MerchOptionType[];
   downloadableContent?: MerchDownloadableContent[];
   platformPercent?: number;
+  externalUrl?: string | null;
 }
 
 interface Fundraiser {
