@@ -81,7 +81,9 @@ const PaymentInputElement: React.FC<{
         })}{" "}
       </label>
       <InputEl
-        {...register("chosenPrice")}
+        {...register("chosenPrice", {
+          min: minPrice ? minPrice / 100 : 0,
+        })}
         type="number"
         min={minPrice ? minPrice / 100 : 0}
         step="0.01"

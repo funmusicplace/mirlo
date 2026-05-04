@@ -30,4 +30,23 @@ describe("PUT /manage/tracks/{id}", () => {
     assert.equal(response.body.result.description, "Updated description");
     assert.equal(response.statusCode, 200);
   });
+
+  it("should reject a negative minPrice", async () => {
+    const { user, accessToken } = await createUser({
+      email: "artist@artist.com",
+    });
+    const artist = await createArtist(user.id);
+    const trackGroup = await createTrackGroup(artist.id);
+    const track = await createTrack(trackGroup.id, {
+      title: "test track",
+    });
+
+    const response = await requestApp
+      .put(`manage/tracks/${track.id}`)
+      .send({ title: "test track", minPrice: -1 })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 400);
+  });
 });

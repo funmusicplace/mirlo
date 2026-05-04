@@ -125,6 +125,8 @@ const BuyTrackGroup: React.FC<{
     lessThanMin =
       isFinite(+chosenPrice) && Number(chosenPrice) < minPrice / 100;
   }
+  const isNegativePrice =
+    isFinite(+chosenPrice) && Number(chosenPrice) < 0;
 
   const purchaseText = trackGroup.fundraiser?.isAllOrNothing
     ? "addPaymentInformation"
@@ -134,6 +136,7 @@ const BuyTrackGroup: React.FC<{
 
   const isDisabled =
     lessThanMin ||
+    isNegativePrice ||
     !isValid ||
     (trackGroup.fundraiser?.isAllOrNothing && !consentToStoreData);
 

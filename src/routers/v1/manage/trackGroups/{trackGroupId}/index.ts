@@ -105,6 +105,22 @@ export default function () {
         });
       }
 
+      for (const key of [
+        "minPrice",
+        "suggestedPrice",
+        "defaultTrackMinPrice",
+      ] as const) {
+        const raw = data[key];
+        if (raw === undefined || raw === null) continue;
+        const value = Number(raw);
+        if (!Number.isFinite(value) || value < 0) {
+          throw new AppError({
+            httpCode: 400,
+            description: `${key} must be zero or greater`,
+          });
+        }
+      }
+
       const newValues = pick(data, [
         "title",
         "releaseDate",

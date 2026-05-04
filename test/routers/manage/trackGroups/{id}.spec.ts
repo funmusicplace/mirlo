@@ -60,6 +60,38 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(response.body.result.defaultIsPreview, true);
     });
 
+    it("should reject a negative minPrice", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ minPrice: -100 })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+    });
+
+    it("should reject a negative suggestedPrice", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ suggestedPrice: -50 })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+    });
+
     it("should reject a duplicate urlSlug for the same artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);

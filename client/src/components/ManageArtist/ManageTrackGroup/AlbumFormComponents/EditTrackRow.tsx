@@ -311,7 +311,13 @@ const EditTrackRow: React.FC<{
             <label htmlFor="minPrice">{t("minPrice")}</label>
           </td>
           <td colSpan={99}>
-            <InputEl id="minPrice" {...register("minPrice")} />
+            <InputEl
+              id="minPrice"
+              type="number"
+              min={0}
+              step="0.01"
+              {...register("minPrice", { min: 0 })}
+            />
           </td>
         </IndentedTR>
       )}

@@ -73,10 +73,14 @@ const SetPriceOfAllTracks: React.FC<BulkUpdateTracksProps> = ({
           type="number"
           value={minPrice}
           step="0.01"
+          min={0}
           className={css`
             width: 100px;
           `}
-          onChange={(e) => setMinPrice(Number(e.target.value))}
+          onChange={(e) => {
+            const next = Number(e.target.value);
+            setMinPrice(Number.isFinite(next) && next >= 0 ? next : 0);
+          }}
         />
       </FormComponent>
       <ArtistButton onClick={() => handleBulkUpdate(true)}>
