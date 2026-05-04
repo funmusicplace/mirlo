@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
@@ -9,8 +10,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+
 import ArtistLabels from "./ArtistLabels";
-import { css } from "@emotion/css";
 
 const LabelConfirmation: React.FC = () => {
   const { artistId } = useParams();
@@ -126,7 +127,7 @@ const LabelConfirmation: React.FC = () => {
                 </thead>
                 <tbody>
                   {fields?.map((relationship, idx) => (
-                    <tr key={relationship.labelUser.id}>
+                    <tr key={relationship.id}>
                       <td>
                         {relationship.labelUser.userAvatar && (
                           <img
