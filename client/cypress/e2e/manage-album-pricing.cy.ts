@@ -62,10 +62,13 @@ describe("manage album pricing", () => {
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
+        // Toggling to "No payments" only flips isGettable; minPrice and
+        // suggestedPrice are preserved so a round-trip back to a paid mode
+        // restores the user's previously set values (#1557).
         expect(body).to.include({
           artistId,
           isGettable: false,
-          minPrice: 0,
+          minPrice: 300,
           suggestedPrice: null,
         });
       });
