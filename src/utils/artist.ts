@@ -338,6 +338,12 @@ export const deleteArtist = async (userId: number, artistId: number) => {
   });
 
   await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id)));
+
+  await prisma.artistLabel.deleteMany({
+    where: {
+      artistId: Number(artistId),
+    },
+  });
 };
 
 export const deleteArtistAvatar = async (artistId: number) => {
