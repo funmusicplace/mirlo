@@ -10,6 +10,7 @@ import {
   isEmailLink,
   linkUrlHref,
   outsideLinks,
+  websiteSite,
 } from "components/common/LinkIconDisplay";
 import { useSnackbar } from "state/SnackbarContext";
 import Modal from "components/common/Modal";
@@ -70,7 +71,10 @@ function transformToLinks(data: FormData): Pick<Artist, "linksJson" | "links"> {
       const matchingSite = trimmedLinkType
         ? outsideLinks.find((site) => site.name === trimmedLinkType)
         : undefined;
-      const allowsCustomIcon = !matchingSite || matchingSite.matches === "";
+      // Custom icon is only allowed when the chosen linkType isn't a pinned
+      // platform — i.e. for "Website"-style or unknown link types. A user
+      // can't override e.g. a Twitter link's icon.
+      const allowsCustomIcon = !matchingSite || matchingSite.isFallback;
 
       const sanitizedIconUrl = link.iconUrl?.trim();
 
@@ -91,8 +95,7 @@ function transformToLinks(data: FormData): Pick<Artist, "linksJson" | "links"> {
   };
 }
 
-const websiteSite = outsideLinks.find((site) => site.matches === "");
-const DEFAULT_WEBSITE_NAME = websiteSite?.name ?? "Website";
+const DEFAULT_WEBSITE_NAME = websiteSite.name;
 
 const normalizeUrlInput = (value: string): string => {
   const trimmed = value.trim();
@@ -107,7 +110,7 @@ const allowsCustomIconForLinkType = (linkType?: string) => {
     return true;
   }
   const matchingSite = outsideLinks.find((site) => site.name === linkType);
-  return !matchingSite || matchingSite.matches === "";
+  return !matchingSite;
 };
 
 const resolveFaviconUrl = async (url: string): Promise<string | undefined> => {
