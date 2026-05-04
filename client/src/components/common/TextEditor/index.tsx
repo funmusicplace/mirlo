@@ -1,4 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { CommandFunctionProps, DelayedPromiseCreator } from "@remirror/core";
+import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   PlaceholderExtension,
   TableExtension,
@@ -9,24 +12,20 @@ import {
   LinkExtension,
   ImageAttributes,
 } from "remirror/extensions";
-import { CommandFunctionProps, DelayedPromiseCreator } from "@remirror/core";
-import { useTranslation } from "react-i18next";
-
-import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
 import "remirror/styles/all.css";
 import { css } from "@emotion/css";
-
 import { TableComponents } from "@remirror/react";
 import { prosemirrorNodeToHtml } from "@remirror/core-utils";
+import api from "services/api";
 
-import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
-import SlashCommands from "./SlashCommands";
-import { SlashCommandHighlightExtension } from "./SlashTrackHighlightExtension";
-import SLASH_COMMANDS from "./slashCommandConfigs";
+import { IframeEnterExtension } from "./IframeEnterExtension";
 import MentionCommands from "./MentionCommands";
 import { MentionHighlightExtension } from "./MentionHighlightExtension";
-import api from "services/api";
+import SLASH_COMMANDS from "./slashCommandConfigs";
+import SlashCommands from "./SlashCommands";
+import { SlashCommandHighlightExtension } from "./SlashTrackHighlightExtension";
+import TopToolbar from "./TopToolbar";
 import { usePastedImageUpload } from "./usePastedImageUpload";
 
 const SLASH_TRIGGERS = SLASH_COMMANDS.map((c) => c.trigger);
@@ -54,6 +53,7 @@ const extensions =
       },
     }),
     new IframeExtension({ enableResizing: false }),
+    new IframeEnterExtension({}),
     new LinkExtension({ autoLink: true, selectTextOnClick: true }),
     new SlashCommandHighlightExtension({ triggers: SLASH_TRIGGERS }),
     new MentionHighlightExtension({}),

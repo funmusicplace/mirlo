@@ -1,33 +1,25 @@
-import React, { useEffect, useState, useCallback } from "react";
-import type { Node as ProsemirrorNode } from "prosemirror-model";
 import {
   useChainedCommands,
   useEditorState,
   useRemirrorContext,
 } from "@remirror/react";
-import LoadingSpinner from "../LoadingSpinner";
-import Button from "../Button";
-import { useDebouncedCallback } from "use-debounce";
-import Background from "../Background";
+import type { Node as ProsemirrorNode } from "prosemirror-model";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
+import { useDebouncedCallback } from "use-debounce";
+import { getArtistUrl } from "utils/artist";
+
+import CommandDropdown, { useCommandKeyboardNav } from "./CommandDropdown";
 
 export type MentionResult = {
   id: string;
   label: string;
-  // The AP actor ID (URL) for the mention href
+  displayName: string;
+  url: string;
   actorId: string;
-  // Display handle like @username or @username@server
   handle: string;
 };
-
-const searchResultsDivClass =
-  "absolute p-2 bg-[var(--mi-normal-background-color)] border border-[var(--mi-darken-xx-background-color)] z-[1001] break-words text-[var(--mi-normal-foreground-color)] rounded-[5px] max-h-[300px] overflow-y-scroll min-w-[300px] max-sm:left-0 max-sm:w-[90%]";
-
-const searchResultListClass = "list-none mt-2";
-
-const searchResultButtonClass =
-  "px-3 py-2 text-[var(--mi-normal-foreground-color)] block bg-transparent border-none w-full text-left overflow-hidden text-ellipsis text-[0.9rem] cursor-pointer hover:text-[var(--mi-normal-background-color)] hover:bg-[var(--mi-normal-foreground-color)]";
 
 // Matches a fully-qualified AP handle: @user@server
 const REMOTE_HANDLE_PATTERN = /^@?([\w.-]+)@([\w.-]+\.[a-zA-Z]{2,})$/;
@@ -54,6 +46,8 @@ async function searchMentions(query: string): Promise<MentionResult[]> {
           {
             id: actor.id,
             label: actor.name ? `${actor.name} (${handle})` : handle,
+            displayName: actor.name || handle,
+            url: actor.url,
             actorId: actor.id,
             handle,
           },
@@ -79,6 +73,8 @@ async function searchMentions(query: string): Promise<MentionResult[]> {
     return {
       id: String(artist.id),
       label: artist.name,
+      displayName: artist.name,
+      url: getArtistUrl(artist),
       actorId,
       handle: `@${artist.urlSlug}`,
     };
@@ -92,6 +88,10 @@ const MentionCommands: React.FC = () => {
   const [results, setResults] = useState<MentionResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const chain = useChainedCommands();
   const state = useEditorState();
@@ -117,26 +117,28 @@ const MentionCommands: React.FC = () => {
 
   const searchCallback = useDebouncedCallback(runSearch, 300);
 
+  const dismiss = useCallback(() => {
+    setIsActive(false);
+    setResults([]);
+    setSearchText("");
+    setDropdownPos(null);
+  }, []);
+
   const insertMention = useCallback(
     (item: MentionResult) => {
       try {
         const anchorPos = view.state.selection.$anchor.pos;
         const scanFrom = Math.max(0, anchorPos - 100);
 
-        // Walk text nodes before the cursor and find the one containing our
-        // @token. Using nodesBetween gives us accurate doc positions per node,
-        // avoiding the node-boundary offset drift that textBetween causes.
         let from = -1;
         view.state.doc.nodesBetween(
           scanFrom,
           anchorPos,
           (node: ProsemirrorNode, pos: number) => {
             if (!node.isText || !node.text) return;
-            // Only consider the portion of this node that's before the cursor
             const nodeEnd = pos + node.text.length;
             const sliceEnd = Math.min(nodeEnd, anchorPos);
             const text = node.text.slice(0, sliceEnd - pos);
-            // Find the full @token ending at the cursor within this slice
             const match = text.match(/@[\w.-]+(?:@[\w.-]*)?$/);
             if (match && match.index !== undefined) {
               from = pos + match.index;
@@ -147,26 +149,24 @@ const MentionCommands: React.FC = () => {
         if (from === -1) return;
 
         const to = anchorPos;
-        // Insert as a link: <a href="{actorId}" data-mention-actor="{actorId}">{handle}</a>
         chain
           .selectText({ from, to })
           .delete()
-          .insertText(item.handle)
-          .selectText({ from, to: from + item.handle.length })
+          .insertText(item.displayName)
+          .selectText({ from, to: from + item.displayName.length })
           .updateLink({
-            href: item.actorId,
+            href: item.url,
             "data-mention-actor": item.actorId,
           } as any)
+          .selectText(from + item.displayName.length)
           .run();
 
-        setIsActive(false);
-        setResults([]);
-        setSearchText("");
+        dismiss();
       } catch (e) {
         console.error("MentionCommands: insert error", e);
       }
     },
-    [chain, view]
+    [chain, view, dismiss]
   );
 
   // Detect @mention trigger from editor state
@@ -182,82 +182,47 @@ const MentionCommands: React.FC = () => {
       $cursor.pos
     );
 
-    // Match @query at end of text (no space yet)
     const match = textBefore.match(/@([\w.-]*)(?:@[\w.-]*)?$/);
     if (match) {
-      const query = match[0]; // includes leading @
+      const query = match[0];
       setIsActive(true);
       setSearchText(query);
       searchCallback(query);
-    } else {
-      setIsActive(false);
-      setResults([]);
-      setSearchText("");
-    }
-  }, [state, searchCallback]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isActive) return;
-      if (e.key === "Escape") {
-        setIsActive(false);
-        e.preventDefault();
-      } else if (e.key === "Enter" && results.length > 0) {
-        insertMention(results[selectedIndex]);
-        e.preventDefault();
-      } else if (e.key === "ArrowDown") {
-        setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1));
-        e.preventDefault();
-      } else if (e.key === "ArrowUp") {
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-        e.preventDefault();
+      try {
+        const coords = view.coordsAtPos($cursor.pos);
+        setDropdownPos({ top: coords.bottom, left: coords.left });
+      } catch {
+        // coordsAtPos can throw if pos is out of bounds
       }
-    };
-
-    if (isActive) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
+    } else {
+      dismiss();
     }
-  }, [isActive, results, selectedIndex, insertMention]);
+  }, [state, searchCallback, view, dismiss]);
+
+  useCommandKeyboardNav({
+    isActive,
+    results,
+    selectedIndex,
+    setSelectedIndex,
+    onSelect: insertMention,
+    onDismiss: dismiss,
+  });
 
   if (!isActive || (!isSearching && results.length === 0 && !searchText)) {
     return null;
   }
 
   return (
-    <>
-      <Background
-        onClick={() => {
-          setIsActive(false);
-          setResults([]);
-        }}
-        transparent
-      />
-      <div className={searchResultsDivClass}>
-        {isSearching && <LoadingSpinner size="small" />}
-        {!isSearching && results.length > 0 && (
-          <ol className={searchResultListClass}>
-            {results.map((result, index) => (
-              <li key={result.id}>
-                <Button
-                  type="button"
-                  onClick={() => insertMention(result)}
-                  className={`${searchResultButtonClass} ${selectedIndex === index ? "!bg-[var(--mi-normal-foreground-color)] !text-[var(--mi-normal-background-color)]" : ""}`}
-                >
-                  {result.label}
-                </Button>
-              </li>
-            ))}
-          </ol>
-        )}
-        {!isSearching && results.length === 0 && searchText && (
-          <div className="px-3 py-2 text-[var(--mi-normal-foreground-color)] opacity-70">
-            {t("noMentionsFound")}
-          </div>
-        )}
-      </div>
-    </>
+    <CommandDropdown
+      isSearching={isSearching}
+      results={results}
+      selectedIndex={selectedIndex}
+      searchText={searchText}
+      dropdownPos={dropdownPos}
+      noResultsLabel={t("noMentionsFound")}
+      onSelect={insertMention}
+      onDismiss={dismiss}
+    />
   );
 };
 

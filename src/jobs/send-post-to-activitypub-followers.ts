@@ -94,7 +94,7 @@ const sendPostToActivityPubFollowers = async () => {
     `sendPostToActivityPubFollowers: grouped into ${postMap.size} unique posts`
   );
 
-  for (const { post, notificationIds } of postMap.values()) {
+  for (const { post, notificationIds } of Array.from(postMap.values())) {
     if (!post?.artist) {
       logger.warn(
         `sendPostToActivityPubFollowers: post ${post?.id} has no artist`
@@ -139,7 +139,6 @@ const sendPostToActivityPubFollowers = async () => {
       new Request(`https://${root}`),
       undefined
     );
-
     const mentions = parseMentionsFromContent(post.content ?? "");
 
     const createActivity = new Create({

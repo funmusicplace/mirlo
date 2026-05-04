@@ -1,9 +1,9 @@
 import { PlainExtension, DefaultExtensionOptions } from "@remirror/core";
-import { Decoration, DecorationSet } from "prosemirror-view";
 import { Plugin } from "prosemirror-state";
+import { Decoration, DecorationSet } from "prosemirror-view";
 
 // Matches @username or @username@server.tld
-const MENTION_PATTERN = /@[\w.-]+(?:@[\w.-]+\.[a-zA-Z]{2,})?/g;
+const MENTION_PATTERN = /@[\w.-]+(?:@[\w.-]+(?:\.[a-zA-Z]{2,})?)?/g;
 
 type MentionHighlightOptions = Record<string, never>;
 

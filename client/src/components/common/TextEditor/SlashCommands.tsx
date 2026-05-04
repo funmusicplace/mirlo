@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useCallback } from "react";
 import {
   useChainedCommands,
   useEditorState,
   useRemirrorContext,
 } from "@remirror/react";
-import LoadingSpinner from "../LoadingSpinner";
-import Button from "../Button";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import Background from "../Background";
+
+import CommandDropdown, { useCommandKeyboardNav } from "./CommandDropdown";
+
 export type SlashCommandResult = {
   id: number | string;
   label: string;
@@ -24,14 +24,6 @@ export type SlashCommandConfig = {
   noResultsLabel?: string;
 };
 
-const searchResultsDivClass =
-  "absolute p-2 bg-[var(--mi-normal-background-color)] border border-[var(--mi-darken-xx-background-color)] z-[1001] break-words text-[var(--mi-normal-foreground-color)] rounded-[5px] max-h-[300px] overflow-y-scroll min-w-[300px] max-sm:left-0 max-sm:w-[90%]";
-
-const searchResultListClass = "list-none mt-2";
-
-const searchResultButtonClass =
-  "px-3 py-2 text-[var(--mi-normal-foreground-color)] block bg-transparent border-none w-full text-left overflow-hidden text-ellipsis text-[0.9rem] cursor-pointer hover:text-[var(--mi-normal-background-color)] hover:bg-[var(--mi-normal-foreground-color)]";
-
 const SlashCommands: React.FC<{
   commands: SlashCommandConfig[];
 }> = ({ commands: commandConfigs }) => {
@@ -43,6 +35,10 @@ const SlashCommands: React.FC<{
   const [results, setResults] = useState<SlashCommandResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const chain = useChainedCommands();
   const state = useEditorState();
@@ -71,6 +67,14 @@ const SlashCommands: React.FC<{
 
   const searchCallback = useDebouncedCallback(runSearch, 300);
 
+  const dismiss = useCallback(() => {
+    setIsActive(false);
+    setResults([]);
+    setSearchText("");
+    setDropdownPos(null);
+    setActiveConfig(null);
+  }, []);
+
   const insertResult = useCallback(
     (item: SlashCommandResult) => {
       if (!activeConfig) return;
@@ -95,15 +99,12 @@ const SlashCommands: React.FC<{
         const c = chain.selectText({ from, to }).delete();
         activeConfig.onSelect(item, c, from);
 
-        setIsActive(false);
-        setResults([]);
-        setSearchText("");
-        setActiveConfig(null);
+        dismiss();
       } catch (e) {
         console.error("Error inserting slash command result:", e);
       }
     },
-    [chain, view, activeConfig, searchText]
+    [chain, view, activeConfig, searchText, dismiss]
   );
 
   // Detect active slash command from editor state
@@ -123,82 +124,47 @@ const SlashCommands: React.FC<{
       const pattern = new RegExp(`\\/${config.trigger}\\s+([^\\n]*)$`);
       const match = textBefore.match(pattern);
       if (match) {
-        const newSearchText = match[1];
         setIsActive(true);
         setActiveConfig(config);
-        setSearchText(newSearchText);
-        searchCallback(config, newSearchText);
+        setSearchText(match[1]);
+        searchCallback(config, match[1]);
+        try {
+          const coords = view.coordsAtPos($cursor.pos);
+          setDropdownPos({ top: coords.bottom, left: coords.left });
+        } catch {
+          // coordsAtPos can throw if pos is out of bounds
+        }
         return;
       }
     }
 
-    setIsActive(false);
-    setResults([]);
-    setActiveConfig(null);
-  }, [state, searchCallback, commandConfigs]);
+    dismiss();
+  }, [state, searchCallback, commandConfigs, view, dismiss]);
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isActive) return;
-      if (e.key === "Escape") {
-        setIsActive(false);
-        e.preventDefault();
-      } else if (e.key === "Enter" && results.length > 0) {
-        insertResult(results[selectedIndex]);
-        e.preventDefault();
-      } else if (e.key === "ArrowDown") {
-        setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1));
-        e.preventDefault();
-      } else if (e.key === "ArrowUp") {
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-        e.preventDefault();
-      }
-    };
-
-    if (isActive) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [isActive, results, selectedIndex, insertResult]);
+  useCommandKeyboardNav({
+    isActive,
+    results,
+    selectedIndex,
+    setSelectedIndex,
+    onSelect: insertResult,
+    onDismiss: dismiss,
+  });
 
   if (!isActive || (!isSearching && results.length === 0 && !searchText)) {
     return null;
   }
 
   return (
-    <>
-      <Background
-        onClick={() => {
-          setIsActive(false);
-          setResults([]);
-        }}
-        transparent
-      />
-      <div className={searchResultsDivClass}>
-        {isSearching && <LoadingSpinner size="small" />}
-        {!isSearching && results.length > 0 && (
-          <ol className={searchResultListClass}>
-            {results.map((result, index) => (
-              <li key={result.id}>
-                <Button
-                  type="button"
-                  onClick={() => insertResult(result)}
-                  className={`${searchResultButtonClass} ${selectedIndex === index ? "!bg-[var(--mi-normal-foreground-color)] !text-[var(--mi-normal-background-color)]" : ""}`}
-                >
-                  {result.label}
-                </Button>
-              </li>
-            ))}
-          </ol>
-        )}
-        {!isSearching && results.length === 0 && searchText && (
-          <div className="px-3 py-2 text-[var(--mi-normal-foreground-color)] opacity-70">
-            {activeConfig?.noResultsLabel ?? "No results found"}
-          </div>
-        )}
-      </div>
-    </>
+    <CommandDropdown
+      isSearching={isSearching}
+      results={results}
+      selectedIndex={selectedIndex}
+      searchText={searchText}
+      dropdownPos={dropdownPos}
+      noResultsLabel={activeConfig?.noResultsLabel ?? "No results found"}
+      onSelect={insertResult}
+      onDismiss={dismiss}
+    />
   );
 };
 
