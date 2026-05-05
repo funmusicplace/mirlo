@@ -1407,7 +1407,7 @@
     "edit": "Edit",
     "fromAlbum": "from <albumLink>{{album}}</albumLink>",
     "byArtist": "by <artistLink>{{artist}}</artistLink>",
-    "copiedTrackUrl": "Copied track URL",
+    "copiedTrackUrl": "Copied iframe to embed widget",
     "releaseDate": "Release date:",
     "pastRelease": "Released on {{date}}",
     "futureRelease": "Will be released on {{date}}",
