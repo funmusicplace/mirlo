@@ -73,8 +73,8 @@ describe("oembed", () => {
 
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.type, "rich");
-        assert.equal(response.body.width, 400);
-        assert.equal(response.body.height, 140);
+        assert.equal(response.body.width, 560);
+        assert.equal(response.body.height, 315);
         assert.equal(
           response.body.title,
           `${trackGroup.title} by ${artist.name}`
@@ -130,8 +130,8 @@ describe("oembed", () => {
 
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.type, "rich");
-        assert.equal(response.body.width, 400);
-        assert.equal(response.body.height, 140);
+        assert.equal(response.body.width, 560);
+        assert.equal(response.body.height, 315);
         assert.equal(response.body.title, `${track.title} by ${artist.name}`);
         assert.equal(response.body.author_name, artist.name);
         assert.equal(
