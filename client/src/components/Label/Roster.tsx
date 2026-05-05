@@ -8,7 +8,7 @@ import TrackgroupGrid from "components/common/TrackgroupGrid";
 import ArtistSquare from "components/Artist/ArtistSquare";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 
-function Label() {
+function Roster() {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
 
   const { artistId } = useParams();
@@ -36,4 +36,4 @@ function Label() {
   );
 }
 
-export default Label;
+export default Roster;
