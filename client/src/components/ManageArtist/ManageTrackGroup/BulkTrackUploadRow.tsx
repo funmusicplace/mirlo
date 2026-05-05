@@ -1,8 +1,7 @@
+import { css } from "@emotion/css";
+import styled from "@emotion/styled";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { css } from "@emotion/css";
-
-import styled from "@emotion/styled";
 
 export const PercentUpload = styled("div")<{ percentUpload: number }>`
   position: absolute;
@@ -38,7 +37,7 @@ export const PercentUpload = styled("div")<{ percentUpload: number }>`
 `;
 
 export const BulkTrackUploadRow: React.FC<{
-  track: { title: string; status: number };
+  track: { title: string; status: number; image?: string };
 }> = ({ track }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
@@ -48,14 +47,33 @@ export const BulkTrackUploadRow: React.FC<{
         position: relative;
         margin-bottom: 0.2rem;
         background: var(--mi-tint-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
       `}
     >
       <PercentUpload percentUpload={track.status} />
+      {track.image && (
+        <img
+          src={track.image}
+          alt={track.title}
+          className={css`
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+          `}
+        />
+      )}
       <div
         className={css`
           padding: 0.5rem 1rem;
           position: relative;
           z-index: 1;
+          flex: 1;
         `}
       >
         {t("uploading", { title: track.title })}

@@ -30,6 +30,7 @@ import ManageTrackDefaults from "./AlbumFormComponents/ManageTrackDefaults";
 import RecommendedTrackGroups from "./AlbumFormComponents/RecommendedTrackGroups";
 import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
+import { ZipDropZone } from "./ZipDropZone";
 
 export interface TrackGroupFormData {
   title: string;
@@ -103,6 +104,13 @@ const ManageTrackGroup: React.FC<{}> = () => {
     }
   }, [artist, deleteTrackGroup, manageArtistT, navigate, snackbar, trackGroup]);
 
+  const handleZipImportConfirm = React.useCallback(
+    (_result: PreScanResult, _coverIndex: number) => {
+      // This will be implemented in the next phase
+    },
+    []
+  );
+
   if (!artist && isLoading) {
     return <LoadingBlocks />;
   } else if (!artist) {
@@ -128,11 +136,19 @@ const ManageTrackGroup: React.FC<{}> = () => {
         <h1 className="mt-4">{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
       </div>
       <AlbumPaymentReceiver />
+      <FormSection>
+        <h2>{t("importAlbumContent")}</h2>
+        <ZipDropZone
+          existingTracksCount={trackGroup?.tracks?.length ?? 0}
+          onConfirm={handleZipImportConfirm}
+        />
+      </FormSection>
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}
         reload={() => refetch()}
       />
+
       <FormSection>
         <h2>{t("uploadTracks")}</h2>
         <ManageTrackDefaults trackGroup={trackGroup} reload={refetch} />
@@ -165,7 +181,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
       <FormSection>
         <RecommendedTrackGroups trackGroupId={trackGroup.id} />
       </FormSection>
-
       <ArtistButtonLink
         to={getArtistManageUrl(artist.id) + "/releases/tools"}
         startIcon={<MdOutlineDownloadForOffline />}
