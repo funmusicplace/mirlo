@@ -121,6 +121,7 @@ export const createPost = async (
       shouldSendEmail: data?.shouldSendEmail,
       isDraft: data?.isDraft ?? true,
       publishedAt: data?.publishedAt ?? new Date(),
+      hasActivityPubBeenSent: data?.hasActivityPubBeenSent ?? false,
     },
   });
   return post;
