@@ -1,25 +1,26 @@
-import React from "react";
-
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
-import { useSnackbar } from "state/SnackbarContext";
-import { pick } from "lodash";
-import api from "../../../services/api";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import { SelectEl } from "components/common/Select";
-import useErrorHandler from "services/useErrorHandler";
-import TextEditor from "components/common/TextEditor";
-import Box from "components/common/Box";
-import { useAuthContext } from "state/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { getArtistManageUrl } from "utils/artist";
 import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtistSubscriptionTiers } from "queries";
-import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
-import useGetUserObjectById from "utils/useGetUserObjectById";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import Box from "components/common/Box";
+import FormComponent from "components/common/FormComponent";
+import { SelectEl } from "components/common/Select";
+import TextEditor from "components/common/TextEditor";
+import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
+import { pick } from "lodash";
+import { queryManagedArtistSubscriptionTiers } from "queries";
+import React from "react";
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+import { getArtistManageUrl } from "utils/artist";
+import useGetUserObjectById from "utils/useGetUserObjectById";
+
+import api from "../../../services/api";
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
+
 import EditPostHeader from "./EditPostHeader";
 
 export type PostFormData = {
@@ -173,7 +174,7 @@ const PostForm: React.FC<{
           {/* <InputEl type="datetime-local" {...register("publishedAt")} /> */}
           {new Date(publicationDate) > new Date() && (
             <Box variant="info" compact small>
-              <>{t("inTheFuture")}</>
+              {t("inTheFuture")}
             </Box>
           )}
         </FormComponent>
