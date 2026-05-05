@@ -71,8 +71,8 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
 
         @media screen and (max-width: ${bp.small}px) {
           button {
-            width: 2.25rem;
-            height: 2.25rem;
+            width: 2.5rem;
+            height: 2.5rem;
             svg {
               font-size: 1.1rem;
             }
