@@ -27,6 +27,7 @@ import {
   TrackListingWrapper,
   UnderneathImage,
 } from "./TrackGroup";
+import TrackGroupEmbed from "./TrackGroupEmbed";
 import TrackGroupMerch from "./TrackGroupMerch";
 
 function TrackView() {
@@ -129,12 +130,15 @@ function TrackView() {
                 </ImageWrapper>
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
-                  {filteredTrack.allowIndividualSale && (
-                    <PurchaseOrDownloadAlbum
-                      trackGroup={trackGroup}
-                      track={filteredTrack}
-                    />
-                  )}
+                  <div>
+                    <TrackGroupEmbed trackGroup={trackGroup} />
+                    {filteredTrack.allowIndividualSale && (
+                      <PurchaseOrDownloadAlbum
+                        trackGroup={trackGroup}
+                        track={filteredTrack}
+                      />
+                    )}
+                  </div>
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />

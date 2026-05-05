@@ -1,7 +1,9 @@
-import { widgetUrl } from "utils/tracks";
-import { useSnackbar } from "state/SnackbarContext";
+import { widgetIframeHtml } from "components/TrackGroup/TrackGroupEmbed";
 import { useTranslation } from "react-i18next";
 import { ImEmbed } from "react-icons/im";
+import { useSnackbar } from "state/SnackbarContext";
+import { widgetUrl } from "utils/tracks";
+
 import { DropdownMenuItemButton } from "../DropdownMenuItem";
 
 const EmbedLink: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
@@ -15,7 +17,9 @@ const EmbedLink: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
     <DropdownMenuItemButton
       onClick={(e) => {
         e.stopPropagation();
-        navigator.clipboard.writeText(widgetUrl(track.id, "track"));
+        navigator.clipboard.writeText(
+          widgetIframeHtml(widgetUrl(track.id, "track"))
+        );
         snackbar(t("copiedTrackUrl"), { type: "success" });
       }}
       startIcon={<ImEmbed />}

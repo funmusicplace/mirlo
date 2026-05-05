@@ -285,21 +285,18 @@ function TrackGroup() {
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
                   <div
-                    className={css`
-                      display: flex;
-                      justify-content: flex-end;
-                      align-items: center;
-                      gap: 0.5rem;
-                      width: 100%;
+                    className={
+                      "flex justify-end items-center gap-1 w-full " +
+                      css`
+                        a {
+                          font-size: var(--mi-font-size-normal);
+                        }
 
-                      a {
-                        font-size: var(--mi-font-size-normal);
-                      }
-
-                      @media screen and (max-width: ${bp.small}px) {
-                        gap: 0.75rem;
-                      }
-                    `}
+                        @media screen and (max-width: ${bp.small}px) {
+                          gap: 0.75rem;
+                        }
+                      `
+                    }
                   >
                     <TrackGroupEmbed trackGroup={trackGroup} />
                     <Wishlist trackGroup={trackGroup} inArtistPage />

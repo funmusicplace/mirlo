@@ -12,8 +12,16 @@ import {
   getLabelWidget,
   getReleaseUrl,
   getTrackGroupWidget,
+  getTrackUrl,
+  getTrackWidget,
 } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
+
+export const widgetIframeHtml = (src: string, height: number = 230) => `<iframe
+    src="${src}"
+    style="width:100%; height: ${height}px; border:0; border-radius: 4px; overflow:hidden;"
+    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+  ></iframe>`;
 
 const Embed: React.FC<{
   title?: string;
@@ -21,22 +29,18 @@ const Embed: React.FC<{
   src?: string;
   buttonClassName?: string;
   translationString?: string;
+  height?: number;
 }> = ({
   title,
   url,
   src,
   buttonClassName,
   translationString = "copyAlbum",
+  height,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupEmbed" });
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const snackbar = useSnackbar();
-
-  const widgetText = `<iframe
-    src="${src}"
-    style="width:100%; height: 230px; border:0; border-radius: 4px; overflow:hidden;"
-    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-  ></iframe>`;
 
   return (
     <div>
@@ -85,11 +89,13 @@ const Embed: React.FC<{
           <p>{t("copyIframe")}</p>
           <code
             onClick={() => {
-              navigator.clipboard.writeText(widgetText);
+              navigator.clipboard.writeText(
+                widgetIframeHtml(src ?? "", height)
+              );
               snackbar(t("copiedToClipboard"), { type: "success" });
             }}
           >
-            {widgetText}
+            {widgetIframeHtml(src ?? "", height)}
             <FaCopy />
           </code>
         </div>
@@ -115,6 +121,28 @@ const Embed: React.FC<{
   );
 };
 
+export const TrackEmbed: React.FC<{
+  track: Track;
+  trackGroup: TrackGroup;
+}> = ({ track, trackGroup }) => {
+  const { data: artist } = useArtistQuery();
+
+  if (!track || !artist) {
+    return null;
+  }
+
+  const trackWidget = getTrackWidget(track.id);
+
+  return (
+    <Embed
+      title={track.title}
+      url={getTrackUrl(artist, trackGroup, track)}
+      src={trackWidget}
+      height={130}
+    />
+  );
+};
+
 const TrackGroupEmbed: React.FC<{
   trackGroup: TrackGroup;
 }> = ({ trackGroup }) => {
@@ -131,6 +159,7 @@ const TrackGroupEmbed: React.FC<{
       title={trackGroup.title}
       url={getReleaseUrl(trackGroup.artist, trackGroup)}
       src={trackGroupWidget}
+      height={230}
     />
   );
 };
@@ -152,6 +181,7 @@ export const LabelEmbed: React.FC<{
       url={getArtistUrl(label)}
       src={labelWidget}
       buttonClassName={buttonClassName}
+      height={230}
     />
   );
 };
