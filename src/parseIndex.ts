@@ -13,6 +13,7 @@ import {
   fetchMerchMetadata,
 } from "./parseIndex/metadata";
 import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
+import { checkIsUserSubscriber } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
@@ -22,11 +23,7 @@ import {
   finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
-import { checkIsUserSubscriber } from "./utils/artist";
-import {
-  postIncludeForUser,
-  serializePost,
-} from "./utils/serialize/post";
+import { postIncludeForUser, serializePost } from "./utils/serialize/post";
 import {
   USER_PROFILE_SELECT,
   serializeUserProfile,
@@ -48,6 +45,12 @@ type RouteHandler<T extends RouteParams = RouteParams> = (
   context: RouteContext<T>
 ) => Promise<void>;
 
+type PlayerEmbed = {
+  url: string;
+  width: number;
+  height: number;
+};
+
 type PageMetadata = {
   title: string;
   description: string;
@@ -55,7 +58,8 @@ type PageMetadata = {
   imageUrl?: string;
   isAlbum?: boolean;
   isSong?: boolean;
-  isPlayer?: string;
+  ogVideo?: PlayerEmbed;
+  twitterPlayer?: PlayerEmbed;
   rss?: string;
   color?: string;
   artistName?: string;
@@ -197,12 +201,22 @@ const buildArticleSchema = (metadata: PageMetadata): string => {
   }`;
 };
 
-export const getTrackGroupWidget = (client: Client, trackGroupId: number) => {
-  return `${client.applicationUrl}/widget/trackGroup/${trackGroupId}`;
+export const getTrackGroupWidget = (
+  client: Client,
+  trackGroupId: number,
+  variant?: string
+) => {
+  const base = `${client.applicationUrl}/widget/trackGroup/${trackGroupId}`;
+  return variant ? `${base}?variant=${variant}` : base;
 };
 
-export const getTrackWidget = (client: Client, trackId: number) => {
-  return `${client.applicationUrl}/widget/track/${trackId}`;
+export const getTrackWidget = (
+  client: Client,
+  trackId: number,
+  variant?: string
+) => {
+  const base = `${client.applicationUrl}/widget/track/${trackId}`;
+  return variant ? `${base}?variant=${variant}` : base;
 };
 
 const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
@@ -213,7 +227,9 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     imageUrl,
     rss,
     isAlbum,
-    isPlayer,
+    ogVideo,
+    twitterPlayer,
+    artistName,
     color = "#be3455",
     schemas = [],
   } = metadata;
@@ -230,7 +246,7 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta name="description" content="${metaDescription}">
-    <meta property="og:site_name" content="${title}">
+    <meta property="og:site_name" content="${artistName || "Mirlo"}">
     <meta property="og:url" content="${url}">
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
@@ -244,21 +260,26 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     ${rss ? `<link rel="alternate" type="application/rss+xml" href="${rss}" />` : ""}
     <link rel="alternate" type="application/json+oembed" href="${process.env.API_DOMAIN}/v1/oembed?url=${encodeURIComponent(url)}" title="oEmbed" />
     ${
-      isPlayer
+      ogVideo
         ? `
         <meta name="medium" content="video" />
-        <meta name="video_height" content="140" />
-        <meta name="video_width" content="400" />
+        <meta name="video_height" content="${ogVideo.height}" />
+        <meta name="video_width" content="${ogVideo.width}" />
         <meta name="generator" content="Mirlo" />
-        <meta name="video_type" content="application/x-shockwave-flash" /><!-- Does this work -->
-        <meta property="og:video:height" content="140" />
-        <meta property="og:video:width" content="400" />
-        <meta property="og:video" content="${isPlayer}" /> 
-        <meta property="og:video:type" content="text/html" /> 
-        <meta property="og:video:secure_url" content="${isPlayer}" />
-        <meta property="twitter:player" content="${isPlayer}" /> 
-        <meta property="twitter:player:height" content="140" />
-        <meta property="twitter:player:width" content="400" />
+        <meta property="og:video:height" content="${ogVideo.height}" />
+        <meta property="og:video:width" content="${ogVideo.width}" />
+        <meta property="og:video" content="${ogVideo.url}" />
+        <meta property="og:video:type" content="text/html" />
+        <meta property="og:video:secure_url" content="${ogVideo.url}" />
+    `
+        : ""
+    }
+    ${
+      twitterPlayer
+        ? `
+        <meta property="twitter:player" content="${twitterPlayer.url}" />
+        <meta property="twitter:player:height" content="${twitterPlayer.height}" />
+        <meta property="twitter:player:width" content="${twitterPlayer.width}" />
     `
         : ""
     }
@@ -363,8 +384,19 @@ const handlePost: RouteHandler<PostParams> = async ({
             post.featuredImage.extension
           )
         : avatarUrl,
-      isPlayer: hasTracks
-        ? getTrackWidget(client, post.tracks[0].trackId)
+      ogVideo: hasTracks
+        ? {
+            url: getTrackWidget(client, post.tracks[0].trackId),
+            width: 400,
+            height: 140,
+          }
+        : undefined,
+      twitterPlayer: hasTracks
+        ? {
+            url: getTrackWidget(client, post.tracks[0].trackId),
+            width: 400,
+            height: 140,
+          }
         : undefined,
       artistName: artistName,
       releaseDate: postCreatedDate,
@@ -523,7 +555,16 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         ? generateFullStaticImageUrl(coverString, finalCoversBucket)
         : undefined,
       isSong: true,
-      isPlayer: getTrackWidget(client, track.id),
+      ogVideo: {
+        url: getTrackWidget(client, track.id),
+        width: 400,
+        height: 140,
+      },
+      twitterPlayer: {
+        url: getTrackWidget(client, track.id, "card"),
+        width: 560,
+        height: 315,
+      },
       artistName: tg.artist.name,
       releaseDate: releaseDate,
       schemas: [schema],
@@ -568,7 +609,16 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         ? generateFullStaticImageUrl(coverString, finalCoversBucket)
         : undefined,
       isAlbum: true,
-      isPlayer: getTrackGroupWidget(client, tg.id),
+      ogVideo: {
+        url: getTrackGroupWidget(client, tg.id),
+        width: 400,
+        height: 140,
+      },
+      twitterPlayer: {
+        url: getTrackGroupWidget(client, tg.id, "card"),
+        width: 560,
+        height: 315,
+      },
       artistName: tg.artist.name,
       releaseDate: releaseDate,
       schemas: [schema],

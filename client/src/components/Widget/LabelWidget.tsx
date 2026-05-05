@@ -73,7 +73,8 @@ const LabelWidget = () => {
   return (
     <WidgetWrapper
       artistColors={label?.profile?.properties?.colors}
-      className="h-screen border-0! [&_a]:no-underline!"
+      embeddedInMirlo={embeddedInMirlo}
+      className="h-screen [&_a]:no-underline!"
     >
       <TgWidgetWrapper>
         <div className="[grid-area:cover] relative">
@@ -89,7 +90,7 @@ const LabelWidget = () => {
           />
         </div>
 
-        <div className="[grid-area:title] min-w-0 overflow-hidden border-l border-current/15 flex flex-col">
+        <div className="[grid-area:title] min-w-0 overflow-hidden border-l border-current/20 flex flex-col">
           <div className="flex-1 min-h-0 flex flex-col p-4 max-sm:justify-center">
             <div className="text-xl font-bold truncate break-normal max-sm:text-base">
               {embeddedInMirlo && label.profile && (
@@ -125,7 +126,7 @@ const LabelWidget = () => {
           )}
         </div>
 
-        <div className="[grid-area:tracks] flex flex-col min-h-0 overflow-hidden border-l border-t border-current/15 max-sm:border-l-0 relative">
+        <div className="[grid-area:tracks] flex flex-col min-h-0 overflow-hidden border-l border-t border-current/20 max-sm:border-l-0 relative">
           <TrackListWrapper id="label-tracks-scroll">
             <PublicTrackGroupListing tracks={tracks} inWidget />
           </TrackListWrapper>

@@ -93,9 +93,9 @@ export default function () {
               album.releaseDate?.toISOString().split("T")[0] || "";
             oembedData = {
               type: "rich",
-              html: `<iframe src="${client.applicationUrl}/widget/trackGroup/${album.id}" width="400" height="140" frameborder="0" allow="autoplay"></iframe>`,
-              width: 400,
-              height: 140,
+              html: `<iframe src="${client.applicationUrl}/widget/trackGroup/${album.id}?variant=card" width="560" height="315" frameborder="0" allow="autoplay"></iframe>`,
+              width: 560,
+              height: 315,
               title: `${album.title} by ${album.artist.name}`,
               author_name: album.artist.name,
               author_url: `${client.applicationUrl}/${album.artist.urlSlug}`,
@@ -121,9 +121,9 @@ export default function () {
               const coverUrl = album.cover?.url.find((u) => u.includes("x600"));
               oembedData = {
                 type: "rich",
-                html: `<iframe src="${client.applicationUrl}/widget/track/${track.id}" width="400" height="140" frameborder="0" allow="autoplay"></iframe>`,
-                width: 400,
-                height: 140,
+                html: `<iframe src="${client.applicationUrl}/widget/track/${track.id}?variant=card" width="560" height="315" frameborder="0" allow="autoplay"></iframe>`,
+                width: 560,
+                height: 315,
                 title: `${track.title} by ${album.artist.name}`,
                 author_name: album.artist.name,
                 author_url: `${client.applicationUrl}/${album.artist.urlSlug}`,

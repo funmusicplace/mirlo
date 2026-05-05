@@ -20,10 +20,6 @@ const WidgetActionButtons: React.FC<{
   const buyUrl = `${buyPath}?buy=true`;
 
   const hasTiers = (artist?.subscriptionTiers?.length ?? 0) > 0;
-  const supportUrl = hasTiers
-    ? `${getArtistUrl(trackGroup.artist)}/support`
-    : getArtistUrl(trackGroup.artist);
-  const supportLabel = hasTiers ? t("support") : t("follow");
 
   return (
     <div className="flex gap-2 ml-auto">
@@ -35,14 +31,16 @@ const WidgetActionButtons: React.FC<{
       >
         {t("buy")}
       </ButtonAnchor>
-      <ButtonAnchor
-        href={supportUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        variant="pill"
-      >
-        {supportLabel}
-      </ButtonAnchor>
+      {hasTiers && (
+        <ButtonAnchor
+          href={`${getArtistUrl(trackGroup.artist)}/support`}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="pill"
+        >
+          {t("support")}
+        </ButtonAnchor>
+      )}
     </div>
   );
 };
