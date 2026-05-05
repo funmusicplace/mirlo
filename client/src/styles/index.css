@@ -53,6 +53,10 @@ html {
   scrollbar-gutter: stable;
 }
 
+html[data-widget] {
+  scrollbar-gutter: auto;
+}
+
 html:has([open]:modal) {
   overflow: hidden;
 }

@@ -29,8 +29,18 @@ function App() {
   const [search, setSearch] = useSearchParams();
   const { user } = useAuthContext();
 
-  // In the case of a widget we don't show all the provider stuff
-  if (location.pathname.includes("widget")) {
+  const isWidget = location.pathname.includes("widget");
+
+  useEffect(() => {
+    if (isWidget) {
+      document.documentElement.dataset.widget = "true";
+      return () => {
+        delete document.documentElement.dataset.widget;
+      };
+    }
+  }, [isWidget]);
+
+  if (isWidget) {
     return <Outlet />;
   }
 
