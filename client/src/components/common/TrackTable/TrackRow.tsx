@@ -44,7 +44,7 @@ const PlayCell: React.FC<{
     onClick={onTrackPlay}
     className={
       inWidget
-        ? "pl-4! pr-2! w-10 align-middle"
+        ? "pl-4! pr-2! py-0.5! w-10 align-middle"
         : "h-[30px] w-8 align-middle max-sm:px-1 max-sm:py-0.5"
     }
   >
@@ -72,7 +72,7 @@ const TitleCell: React.FC<{
       onClick={onTrackPlay}
       className={
         inWidget
-          ? "w-full p-0! pr-4! m-0 leading-6"
+          ? "w-full p-0! pr-4! py-0.5! m-0 leading-5"
           : "w-full p-0 m-0 leading-8 max-sm:px-1 max-sm:py-0.5"
       }
     >
@@ -82,8 +82,10 @@ const TitleCell: React.FC<{
         }`}
       >
         <div
-          className={`overflow-hidden text-ellipsis mr-1 grow [&_i]:opacity-80 max-md:text-sm ${
-            inWidget ? "whitespace-nowrap break-normal min-w-0 text-xs" : ""
+          className={`overflow-hidden text-ellipsis mr-1 grow [&_i]:opacity-80 ${
+            inWidget
+              ? "whitespace-nowrap break-normal min-w-0 text-xs"
+              : "max-md:text-sm"
           }`}
         >
           {track.title ?? <i>{t("untitled")}</i>}
@@ -94,8 +96,8 @@ const TitleCell: React.FC<{
         </div>
 
         <div
-          className={`text-sm max-md:text-xs max-md:font-bold max-md:ml-1 ${
-            inWidget ? "text-xs max-sm:text-[0.6rem]" : ""
+          className={`max-md:ml-1 ${
+            inWidget ? "text-xs" : "text-sm max-md:text-xs max-md:font-bold"
           }`}
         >
           {track.audio?.duration && fmtMSS(track.audio.duration)}
