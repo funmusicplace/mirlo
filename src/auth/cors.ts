@@ -90,8 +90,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         log.info(
           `Found ${clients.length} clients with that API key: ${clients
             .map(
-              (c) =>
-                `${c.applicationName}: ${c.allowedCorsOrigins.join(", ")}`
+              (c) => `${c.applicationName}: ${c.allowedCorsOrigins.join(", ")}`
             )
             .join(", ")}`
         );

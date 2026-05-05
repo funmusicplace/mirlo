@@ -68,6 +68,10 @@ const TrackWidget = () => {
     return <LoadingBlocks />;
   }
 
+  const trackCoverUrl =
+    track?.trackGroup.cover?.sizes?.[300] ??
+    track?.trackGroup.artist?.avatar?.sizes?.[300];
+
   return (
     <>
       {(!track || !track.id) && !isLoading && (

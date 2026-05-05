@@ -1,11 +1,13 @@
-import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Button from "../../common/Button";
-import { ColumnMapping, ParsedRow } from "./CSVUploadStep";
-import ArtistGroup from "./ArtistGroup";
 import Box from "components/common/Box";
-import api from "services/api";
 import { queryUserArtists } from "queries";
+import React, { useMemo, useState } from "react";
+import api from "services/api";
+
+import Button from "../../common/Button";
+
+import ArtistGroup from "./ArtistGroup";
+import { ColumnMapping, ParsedRow } from "./CSVUploadStep";
 
 export interface PreviewTrackGroup {
   title: string;
@@ -264,7 +266,7 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
       // Stay on preview to allow uploading more artists
       setUploadedArtists((prev) => new Set(prev).add(artistName));
     } catch (err) {
-      console.log("err", err);
+      console.error("err", err);
       setError(
         err instanceof Error
           ? JSON.stringify(err.message)

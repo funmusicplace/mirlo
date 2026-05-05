@@ -222,12 +222,14 @@ enum NotificationType {
   FUNDRAISER_PLEDGE_CHARGED
   AP_FOLLOW
   ARTIST_CONTACT_MESSAGE
+  MENTION_IN_POST
 }
 
 enum NotificationDeliveryMethod {
   EMAIL
   ACTIVITYPUB
   BOTH
+  IN_APP
 }
 
 model Post {
@@ -762,7 +764,7 @@ model TrackGroup {
   recommendedByTrackGroups        RecommendedTrackGroup[]         @relation("recommendedByTrackGroups")
   subscriptionTierReleases        SubscriptionTierRelease[]
 
-  downloads                       TrackGroupDownload[]
+  downloads TrackGroupDownload[]
 
   @@unique([artistId, urlSlug])
 }
