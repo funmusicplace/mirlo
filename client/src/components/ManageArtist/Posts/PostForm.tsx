@@ -7,15 +7,11 @@ import FormComponent from "components/common/FormComponent";
 import { SelectEl } from "components/common/Select";
 import TextEditor from "components/common/TextEditor";
 import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
-import { pick } from "lodash";
 import { queryManagedArtistSubscriptionTiers } from "queries";
 import React from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import useErrorHandler from "services/useErrorHandler";
-import { useAuthContext } from "state/AuthContext";
-import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
 import { useFormPersist } from "utils/useFormPersist";
 import useGetUserObjectById from "utils/useGetUserObjectById";
@@ -40,11 +36,8 @@ const PostForm: React.FC<{
   artist: Artist;
   onClose?: () => void;
 }> = ({ reload, artist, post, onClose }) => {
-  const { user } = useAuthContext();
-  const snackbar = useSnackbar();
   const navigate = useNavigate();
-  const errorHandler = useErrorHandler();
-  const [isSaving, setIsSaving] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
 
   const { data: tiers } = useQuery(
@@ -54,30 +47,24 @@ const PostForm: React.FC<{
     })
   );
 
-  const publishedAt = post ? new Date(post.publishedAt) : new Date();
-  publishedAt.setMinutes(
-    publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
-  );
-
   const { objects: images, reload: reloadImages } =
     useGetUserObjectById<PostImage>(`manage/posts/${post?.id}/images`, {
       multiple: true,
     });
 
-  const buildDefaultValues = React.useCallback(
-    (): Partial<PostFormData> =>
-      post
-        ? {
-            ...post,
-            publishedAt: publishedAt.toISOString().slice(0, 16),
-          }
-        : {
-            publishedAt: publishedAt.toISOString().slice(0, 16),
-            shouldSendEmail: true,
-            isPublic: true,
-          },
-    [post, publishedAt]
-  );
+  const buildDefaultValues = React.useCallback((): Partial<PostFormData> => {
+    const dateBase = post ? new Date(post.publishedAt) : new Date();
+    dateBase.setMinutes(dateBase.getMinutes() - dateBase.getTimezoneOffset());
+    const publishedAtIso = dateBase.toISOString().slice(0, 16);
+
+    return post
+      ? { ...post, publishedAt: publishedAtIso }
+      : {
+          publishedAt: publishedAtIso,
+          shouldSendEmail: true,
+          isPublic: true,
+        };
+  }, [post]);
 
   const methods = useForm<PostFormData>({
     defaultValues: buildDefaultValues(),
@@ -100,75 +87,28 @@ const PostForm: React.FC<{
     }
   }, [tiers]);
 
-  const { register, handleSubmit, watch } = methods;
+  const { register, watch } = methods;
 
   const isPublic = watch("isPublic");
-  const minimumTier = watch("minimumTier");
 
   const existingId = post.id;
-  const userId = user?.id;
 
   const publicationDate = watch("publishedAt");
-
-  const doSave = React.useCallback(
-    async (data: PostFormData) => {
-      if (userId) {
-        try {
-          setIsSaving(true);
-          let postId;
-          const picked = {
-            ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
-            publishedAt: new Date(data.publishedAt + ":00").toISOString(),
-            artistId: artist.id,
-            minimumSubscriptionTierId:
-              isFinite(+data.minimumTier) && +data.minimumTier !== 0
-                ? Number(data.minimumTier)
-                : undefined,
-          };
-          const response = await api.put<
-            Partial<Post>,
-            { result: { id: number } }
-          >(`manage/posts/${existingId}`, picked);
-          postId = response.result.id;
-
-          clearDraft();
-          snackbar(t("postUpdated"), { type: "success" });
-          reload(postId);
-          reloadImages();
-          onClose?.();
-        } catch (e) {
-          errorHandler(e);
-        } finally {
-          setIsSaving(false);
-          await reload();
-        }
-      }
-    },
-    [
-      reload,
-      existingId,
-      snackbar,
-      artist.id,
-      errorHandler,
-      onClose,
-      userId,
-      t,
-      clearDraft,
-      reloadImages,
-    ]
-  );
 
   const doDelete = React.useCallback(async () => {
     try {
       const confirmed = window.confirm(t("confirmDelete") ?? "");
       if (confirmed) {
+        setIsDeleting(true);
         await api.delete(`manage/posts/${existingId}`);
         navigate(getArtistManageUrl(artist.id));
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsDeleting(false);
     }
-  }, [artist.id, existingId, navigate, t, userId]);
+  }, [artist.id, existingId, navigate, t]);
 
   return (
     <FormProvider {...methods}>
@@ -178,7 +118,7 @@ const PostForm: React.FC<{
         onSaveSuccess={clearDraft}
       />
 
-      <form onSubmit={handleSubmit(doSave)}>
+      <form onSubmit={(e) => e.preventDefault()}>
         {hasRestoredDraft && (
           <DraftRestoredBanner
             onDiscard={() => discardDraft(buildDefaultValues() as PostFormData)}
@@ -205,7 +145,6 @@ const PostForm: React.FC<{
             required
             url={`manage/posts/${post.id}`}
           />
-          {/* <InputEl type="datetime-local" {...register("publishedAt")} /> */}
           {new Date(publicationDate) > new Date() && (
             <Box variant="info" compact small>
               {t("inTheFuture")}
@@ -333,7 +272,7 @@ const PostForm: React.FC<{
             align-items: center;
           `}
         >
-          <ArtistButton type="button" isLoading={isSaving} onClick={doDelete}>
+          <ArtistButton type="button" isLoading={isDeleting} onClick={doDelete}>
             {t("delete")}
           </ArtistButton>
         </div>
