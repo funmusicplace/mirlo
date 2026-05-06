@@ -297,6 +297,7 @@ interface Artist {
       roster?: string;
       groupName?: string;
     };
+    tabOrder?: Array<"roster" | "releases" | "posts" | "support" | "merch">;
     emails?: {
       support?: string | null;
       purchase?: string | null;

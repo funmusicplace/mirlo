@@ -1,5 +1,3 @@
-import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { ArtistTabs } from "components/common/Tabs";
@@ -21,24 +19,28 @@ import {
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistManageUrl } from "utils/artist";
+import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
 import useArtistQuery from "utils/useArtistQuery";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
-import { bp } from "../../constants";
 import Box from "../common/Box";
 
 import { ArtistButtonLink } from "./ArtistButtons";
 
-export const ArtistSection = styled.div`
-  margin-bottom: 2rem;
-  margin-top: 0.5rem;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    padding: var(--mi-side-paddings-xsmall);
-    margin-top: 0.5rem;
-    margin-bottom: 1.5rem;
-  }
-`;
+export const ArtistSection: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  children,
+  ...props
+}) => (
+  <div
+    className={`mb-8 mt-2 max-md:px-[var(--mi-side-paddings-xsmall)] max-md:mb-6 ${
+      className ?? ""
+    }`}
+    {...props}
+  >
+    {children}
+  </div>
+);
 
 export const ArtistButtonQuickLink: React.FC<{
   ariaLabel: string;
@@ -61,13 +63,7 @@ export const ArtistButtonQuickLink: React.FC<{
       startIcon={icon}
       to={to}
       variant="dashed"
-      className={
-        "edit " +
-        css`
-          margin-left: 0.25rem;
-          margin-top: -0.5rem;
-        `
-      }
+      className="edit ml-1 -mt-2"
     />
   );
 };
@@ -107,30 +103,52 @@ function Artist() {
     ];
     const end = pathname.split("/")[2];
 
-    if (!subPages.includes(end)) {
-      if (artist?.isLabelProfile) {
-        navigate(`/${urlSlug}/roster`, { replace: true });
-      } else if (artist?.trackGroups.length) {
-        // has track groups
-        navigate(`/${urlSlug}/releases`, { replace: true });
-      } else if (artist?.posts.length) {
-        // has track groups
-        navigate(`/${urlSlug}/posts`, { replace: true });
-      } else if (canReceivePayments) {
-        // has track groups
-        navigate(`/${urlSlug}/support`, { replace: true });
-      } else if (artist?.linksJson?.length) {
-        // has links
+    if (!subPages.includes(end) && artist && urlSlug) {
+      const tabVisible: Record<TabId, boolean> = {
+        roster:
+          artist.isLabelProfile && (artist.user?.artistLabels?.length ?? 0) > 0,
+        releases:
+          (artist.trackGroups.length ?? 0) > 0 ||
+          (releases?.results.length ?? 0) > 0,
+        posts: (artist.posts.length ?? 0) > 0,
+        support:
+          !!canReceivePayments &&
+          (artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
+            .length ?? 0) > 0,
+        merch: (artist.merch.length ?? 0) > 0,
+      };
+
+      const defaultOrder: TabId[] = [
+        "roster",
+        "releases",
+        "posts",
+        "support",
+        "merch",
+      ];
+
+      const ordered = sortTabsByOrder(
+        defaultOrder.map((id) => ({
+          id,
+          visible: tabVisible[id],
+          label: "",
+          to: id,
+        })),
+        artist.properties?.tabOrder as TabId[] | undefined
+      );
+
+      const firstVisible = ordered.find((tab) => tab.visible);
+      if (firstVisible) {
+        navigate(`/${urlSlug}/${firstVisible.to}`, { replace: true });
+      } else if (artist.linksJson?.length) {
         navigate(`/${urlSlug}/links`, { replace: true });
       }
     }
   }, [
     pathname,
     navigate,
-    user?.id,
     urlSlug,
-    artist?.trackGroups.length,
-    artist?.posts.length,
+    artist,
+    releases?.results.length,
     canReceivePayments,
   ]);
 
@@ -148,6 +166,62 @@ function Artist() {
     artist.properties?.titles?.support || t("support", { artist: artist.name });
   const rosterTitle = artist.properties?.titles?.roster || t("roster");
 
+  const allTabs: TabConfig[] = [
+    {
+      id: "roster",
+      label: rosterTitle,
+      visible:
+        artist.isLabelProfile && (artist.user?.artistLabels?.length ?? 0) > 0,
+      to: "roster",
+      editTo: "/profile/label",
+      editAriaLabel: t("editTitled", { title: rosterTitle }),
+    },
+    {
+      id: "releases",
+      label: releasesTitle,
+      visible:
+        (artist?.trackGroups.length ?? 0) > 0 ||
+        (releases?.results.length ?? 0) > 0,
+      to: "releases",
+      navLinkId: "artist-navlink-releases",
+      editTo: getArtistManageUrl(artist.id) + "/releases",
+      editAriaLabel: t("editTitled", { title: releasesTitle }),
+    },
+    {
+      id: "posts",
+      label: postsTitle,
+      visible: (artist?.posts.length ?? 0) > 0,
+      to: "posts",
+      navLinkId: "artist-navlink-updates",
+      editTo: getArtistManageUrl(artist.id) + "/posts",
+      editAriaLabel: t("editTitled", { title: postsTitle }),
+    },
+    {
+      id: "support",
+      label: supportTitle,
+      visible:
+        !!canReceivePayments &&
+        (artist?.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
+          .length ?? 0) > 0,
+      to: "support",
+      editTo: getArtistManageUrl(artist.id) + "/tiers",
+      editAriaLabel: t("editTitled", { title: supportTitle }),
+    },
+    {
+      id: "merch",
+      label: merchTitle,
+      visible: (artist.merch.length ?? 0) > 0,
+      to: "merch",
+      editTo: getArtistManageUrl(artist.id) + "/merch",
+      editAriaLabel: t("editTitled", { title: merchTitle }),
+    },
+  ];
+
+  const tabs = sortTabsByOrder(
+    allTabs,
+    artist.properties?.tabOrder as TabId[] | undefined
+  );
+
   return (
     <>
       <nav
@@ -156,99 +230,31 @@ function Artist() {
         }
       >
         <ArtistTabs>
-          {artist.isLabelProfile &&
-            (artist.user?.artistLabels?.length ?? 0) > 0 && (
-              <>
+          {tabs
+            .filter((tab) => tab.visible)
+            .map((tab) => (
+              <React.Fragment key={tab.id}>
                 <li className="tab-primary">
-                  <NavLink to="roster">{rosterTitle}</NavLink>
+                  <NavLink to={tab.to} id={tab.navLinkId}>
+                    {tab.label}
+                  </NavLink>
                 </li>
-                <li className="tab-secondary">
-                  <ArtistButtonQuickLink
-                    ariaLabel={t("editTitled", { title: rosterTitle })}
-                    to="/profile/label"
-                    icon={<FaEdit />}
-                  />
-                </li>
-              </>
-            )}
-          {((artist?.trackGroups.length ?? 0) > 0 ||
-            (releases?.results.length ?? 0) > 0) && (
-            <>
-              <li className="tab-primary">
-                <NavLink to="releases" id="artist-navlink-releases">
-                  {releasesTitle}
-                </NavLink>
-              </li>
-              <li className="tab-secondary">
-                <ArtistButtonQuickLink
-                  ariaLabel={t("editTitled", { title: releasesTitle })}
-                  to={getArtistManageUrl(artist.id) + "/releases"}
-                  icon={<FaEdit />}
-                />
-              </li>
-            </>
-          )}
-          {(artist?.posts.length ?? 0) > 0 && (
-            <>
-              <li className="tab-primary">
-                <NavLink to="posts" id="artist-navlink-updates">
-                  {postsTitle}
-                </NavLink>
-              </li>
-              <li className="tab-secondary">
-                <ArtistButtonQuickLink
-                  ariaLabel={t("editTitled", { title: postsTitle })}
-                  to={getArtistManageUrl(artist.id) + "/posts"}
-                  icon={<FaEdit />}
-                />
-              </li>
-            </>
-          )}
-          {canReceivePayments && (
-            <>
-              {(artist?.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
-                .length ?? 0) > 0 && (
-                <>
-                  <li className="tab-primary">
-                    <NavLink to="support">{supportTitle}</NavLink>
-                  </li>
+                {tab.editTo && (
                   <li className="tab-secondary">
                     <ArtistButtonQuickLink
-                      ariaLabel={t("editTitled", { title: supportTitle })}
-                      to={getArtistManageUrl(artist.id) + "/tiers"}
+                      ariaLabel={tab.editAriaLabel ?? ""}
+                      to={tab.editTo}
                       icon={<FaEdit />}
                     />
                   </li>
-                </>
-              )}
-            </>
-          )}
-          {(artist.merch.length ?? 0) > 0 && (
-            <>
-              <li className="tab-primary">
-                <NavLink to="merch">{merchTitle}</NavLink>
-              </li>
-              <li className="tab-secondary">
-                <ArtistButtonQuickLink
-                  ariaLabel={t("editTitled", { title: merchTitle })}
-                  to={getArtistManageUrl(artist.id) + "/merch"}
-                  icon={<FaEdit />}
-                />
-              </li>
-            </>
-          )}
+                )}
+              </React.Fragment>
+            ))}
           {user && isArtistUser && !canReceivePayments && (
             <li>
               <a
                 href={api.paymentProcessor.stripeConnect(user.id)}
-                className={css`
-                  display: flex !important;
-                  align-items: center;
-
-                  svg {
-                    margin-left: 0.25rem;
-                  }
-                `}
+                className="!flex items-center [&_svg]:ml-1"
               >
                 {t("configurePayment")} <FaChevronRight />
               </a>

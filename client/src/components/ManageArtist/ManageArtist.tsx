@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
 import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
 import { getArtistUrl } from "utils/artist";
+import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -35,6 +36,54 @@ const ManageArtist: React.FC<{}> = () => {
   const supportTitle = artist.properties?.titles?.support || t("support");
   const rosterTitle = artist.properties?.titles?.roster || t("roster");
 
+  const allTabs: TabConfig[] = [
+    {
+      id: "roster",
+      label: rosterTitle,
+      visible: !!artist.isLabelProfile,
+      to: "/profile/label",
+      editTo: getArtistUrl(artist) + "/roster",
+      editAriaLabel: t("viewLiveTitled", { title: rosterTitle }),
+    },
+    {
+      id: "releases",
+      label: releasesTitle,
+      visible: true,
+      to: "releases",
+      editTo: getArtistUrl(artist) + "/releases",
+      editAriaLabel: t("viewLiveTitled", { title: releasesTitle }),
+    },
+    {
+      id: "posts",
+      label: postsTitle,
+      visible: true,
+      to: "posts",
+      editTo: getArtistUrl(artist) + "/posts",
+      editAriaLabel: t("viewLiveTitled", { title: postsTitle }),
+    },
+    {
+      id: "support",
+      label: supportTitle,
+      visible: true,
+      to: "tiers",
+      editTo: getArtistUrl(artist) + "/support",
+      editAriaLabel: t("viewLiveTitled", { title: supportTitle }),
+    },
+    {
+      id: "merch",
+      label: merchTitle,
+      visible: true,
+      to: "merch",
+      editTo: getArtistUrl(artist) + "/merch",
+      editAriaLabel: t("viewLiveTitled", { title: merchTitle }),
+    },
+  ];
+
+  const tabs = sortTabsByOrder(
+    allTabs,
+    artist.properties?.tabOrder as TabId[] | undefined
+  );
+
   return (
     <>
       {artist && !artist.enabled && (
@@ -59,68 +108,24 @@ const ManageArtist: React.FC<{}> = () => {
           }
         >
           <ArtistTabs>
-            <li className="tab-primary">
-              <NavLink to="releases">{releasesTitle}</NavLink>
-            </li>
-            <li className="tab-secondary">
-              <ArtistButtonQuickLink
-                ariaLabel={t("viewLiveTitled", { title: releasesTitle })}
-                to={getArtistUrl(artist) + "/releases"}
-                icon={<FaEye />}
-              />
-            </li>
-            <li className="tab-primary">
-              <NavLink to="posts">{postsTitle}</NavLink>{" "}
-            </li>
-            <li className="tab-secondary">
-              <ArtistButtonQuickLink
-                ariaLabel={t("viewLiveTitled", { title: postsTitle })}
-                to={getArtistUrl(artist) + "/posts"}
-                icon={<FaEye />}
-              />
-            </li>
-            {artist && (
-              <>
-                <li className="tab-primary">
-                  <NavLink to="tiers">{supportTitle}</NavLink>
-                </li>
-                <li className="tab-secondary">
-                  <ArtistButtonQuickLink
-                    ariaLabel={t("viewLiveTitled", { title: supportTitle })}
-                    to={getArtistUrl(artist) + "/support"}
-                    icon={<FaEye />}
-                  />
-                </li>
-              </>
-            )}
-            {artist && (
-              <>
-                <li className="tab-primary">
-                  <NavLink to="merch">{merchTitle}</NavLink>
-                </li>
-                <li className="tab-secondary">
-                  <ArtistButtonQuickLink
-                    ariaLabel={t("viewLiveTitled", { title: merchTitle })}
-                    to={getArtistUrl(artist) + "/merch"}
-                    icon={<FaEye />}
-                  />
-                </li>
-              </>
-            )}
-            {artist && artist.isLabelProfile && (
-              <>
-                <li className="tab-primary">
-                  <NavLink to="/profile/label">{rosterTitle}</NavLink>
-                </li>
-                <li className="tab-secondary">
-                  <ArtistButtonQuickLink
-                    ariaLabel={t("viewLiveTitled", { title: rosterTitle })}
-                    to={getArtistUrl(artist) + "/roster"}
-                    icon={<FaEye />}
-                  />
-                </li>
-              </>
-            )}
+            {tabs
+              .filter((tab) => tab.visible)
+              .map((tab) => (
+                <React.Fragment key={tab.id}>
+                  <li className="tab-primary">
+                    <NavLink to={tab.to}>{tab.label}</NavLink>
+                  </li>
+                  {tab.editTo && (
+                    <li className="tab-secondary">
+                      <ArtistButtonQuickLink
+                        ariaLabel={tab.editAriaLabel ?? ""}
+                        to={tab.editTo}
+                        icon={<FaEye />}
+                      />
+                    </li>
+                  )}
+                </React.Fragment>
+              ))}
           </ArtistTabs>
         </nav>
       )}

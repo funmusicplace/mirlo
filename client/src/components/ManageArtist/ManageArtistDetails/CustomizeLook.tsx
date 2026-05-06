@@ -71,6 +71,7 @@ export type ArtistFormData = {
       roster: string;
       groupName: string;
     };
+    tabOrder?: Array<"roster" | "releases" | "posts" | "support" | "merch">;
   };
 };
 
