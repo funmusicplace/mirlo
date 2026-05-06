@@ -310,7 +310,7 @@ interface Artist {
     };
   };
   announcementText?: string;
-  user?: Partial<User> & { artistLabels?: { artistId: number }[] };
+  user?: Partial<User> & { artistLabels?: ArtistLabel[] };
   background?: {
     url: string;
     sizes?: { [key: number]: string; original: string };
