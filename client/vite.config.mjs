@@ -25,7 +25,7 @@ export default defineConfig({
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: false,
+        skipWaiting: true,
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
         navigateFallbackDenylist: [/^\/api/, /^\/widget/],
       },
