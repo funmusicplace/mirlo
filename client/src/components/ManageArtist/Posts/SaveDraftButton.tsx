@@ -1,18 +1,17 @@
-import React from "react";
-
-import { useFormContext } from "react-hook-form";
-import { useSnackbar } from "state/SnackbarContext";
-import { pick } from "lodash";
-import api from "../../../services/api";
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { pick } from "lodash";
+import { queryManagedArtistSubscriptionTiers } from "queries";
+import React from "react";
+import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import useErrorHandler from "services/useErrorHandler";
-
 import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtistSubscriptionTiers } from "queries";
+import { useSnackbar } from "state/SnackbarContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+
+import api from "../../../services/api";
 
 export type PostFormData = {
   title: string;
@@ -28,7 +27,8 @@ const SaveDraftButton: React.FC<{
   reload: (postId?: number) => Promise<unknown>;
   artistId: number;
   onClose?: () => void;
-}> = ({ reload, artistId, post, onClose }) => {
+  onSaveSuccess?: () => void;
+}> = ({ reload, artistId, post, onClose, onSaveSuccess }) => {
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
@@ -98,6 +98,7 @@ const SaveDraftButton: React.FC<{
           >(`manage/posts/${existingId}`, picked);
           postId = response.result.id;
 
+          onSaveSuccess?.();
           snackbar(t("postUpdated"), { type: "success" });
           reload(postId);
           reloadImages();
@@ -110,7 +111,18 @@ const SaveDraftButton: React.FC<{
         }
       }
     },
-    [reload, existingId, snackbar, artistId, errorHandler, onClose, userId, t]
+    [
+      reload,
+      existingId,
+      snackbar,
+      artistId,
+      errorHandler,
+      onClose,
+      userId,
+      t,
+      onSaveSuccess,
+      reloadImages,
+    ]
   );
 
   return (

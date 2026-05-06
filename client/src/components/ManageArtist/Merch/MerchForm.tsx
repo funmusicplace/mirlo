@@ -67,7 +67,10 @@ const MerchForm: React.FC<{
   const userId = user?.id;
 
   React.useEffect(() => {
-    methods.reset(buildDefaultValues(merch));
+    methods.reset(buildDefaultValues(merch), {
+      keepDirtyValues: true,
+      keepDirty: true,
+    });
   }, [merch]);
 
   const draftKey = merch?.id ? `merchDraft-${merch.id}` : null;

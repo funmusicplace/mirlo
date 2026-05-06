@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
+import DraftRestoredBanner from "components/common/DraftRestoredBanner";
 import FormComponent from "components/common/FormComponent";
 import { SelectEl } from "components/common/Select";
 import TextEditor from "components/common/TextEditor";
@@ -16,6 +17,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
+import { useFormPersist } from "utils/useFormPersist";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 
 import api from "../../../services/api";
@@ -62,18 +64,28 @@ const PostForm: React.FC<{
       multiple: true,
     });
 
+  const buildDefaultValues = React.useCallback(
+    (): Partial<PostFormData> =>
+      post
+        ? {
+            ...post,
+            publishedAt: publishedAt.toISOString().slice(0, 16),
+          }
+        : {
+            publishedAt: publishedAt.toISOString().slice(0, 16),
+            shouldSendEmail: true,
+            isPublic: true,
+          },
+    [post, publishedAt]
+  );
+
   const methods = useForm<PostFormData>({
-    defaultValues: post
-      ? {
-          ...post,
-          publishedAt: publishedAt.toISOString().slice(0, 16),
-        }
-      : {
-          publishedAt: publishedAt.toISOString().slice(0, 16),
-          shouldSendEmail: true,
-          isPublic: true,
-        },
+    defaultValues: buildDefaultValues(),
   });
+
+  const draftKey = post?.id ? `postDraft-${post.id}` : null;
+  const { hasRestoredDraft, clearDraft, discardDraft, dismissBanner } =
+    useFormPersist(draftKey, methods);
 
   React.useEffect(() => {
     if ((tiers?.results.length ?? 0) > 0) {
@@ -119,6 +131,7 @@ const PostForm: React.FC<{
           >(`manage/posts/${existingId}`, picked);
           postId = response.result.id;
 
+          clearDraft();
           snackbar(t("postUpdated"), { type: "success" });
           reload(postId);
           reloadImages();
@@ -131,7 +144,18 @@ const PostForm: React.FC<{
         }
       }
     },
-    [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t]
+    [
+      reload,
+      existingId,
+      snackbar,
+      artist.id,
+      errorHandler,
+      onClose,
+      userId,
+      t,
+      clearDraft,
+      reloadImages,
+    ]
   );
 
   const doDelete = React.useCallback(async () => {
@@ -148,9 +172,19 @@ const PostForm: React.FC<{
 
   return (
     <FormProvider {...methods}>
-      <EditPostHeader reload={reload} onClose={onClose} />
+      <EditPostHeader
+        reload={reload}
+        onClose={onClose}
+        onSaveSuccess={clearDraft}
+      />
 
       <form onSubmit={handleSubmit(doSave)}>
+        {hasRestoredDraft && (
+          <DraftRestoredBanner
+            onDiscard={() => discardDraft(buildDefaultValues() as PostFormData)}
+            onKeep={dismissBanner}
+          />
+        )}
         <FormComponent>
           <label htmlFor="input-title">{t("title")}</label>
           <SavingInput
@@ -184,6 +218,7 @@ const PostForm: React.FC<{
             render={({ field: { onChange, value } }) => {
               return (
                 <TextEditor
+                  key={hasRestoredDraft ? "restored" : "initial"}
                   onChange={(val: any) => {
                     onChange(val);
                   }}

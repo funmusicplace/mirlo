@@ -7,12 +7,14 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 import useGetUserObjectById from "utils/useGetUserObjectById";
+
 import { PostFormData } from "./PostForm";
 
 const PublishPostButton: React.FC<{
   post: Post;
   reload: (postId?: number) => void;
-}> = ({ post, reload }) => {
+  onSaveSuccess?: () => void;
+}> = ({ post, reload, onSaveSuccess }) => {
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
   const snackbar = useSnackbar();
   const [isPublishing, setIsPublishing] = React.useState(false);
@@ -63,6 +65,7 @@ const PublishPostButton: React.FC<{
           picked
         );
         await api.put(`manage/posts/${existingId}/publish`, {});
+        onSaveSuccess?.();
         reload(existingId);
         reloadImages();
         snackbar(t("publishedPost"), { type: "success" });
@@ -72,7 +75,20 @@ const PublishPostButton: React.FC<{
         setIsPublishing(false);
       }
     },
-    [existingId, title, content, isDraft]
+    [
+      existingId,
+      title,
+      content,
+      isDraft,
+      onSaveSuccess,
+      ask,
+      post.artistId,
+      post.isDraft,
+      reload,
+      reloadImages,
+      snackbar,
+      t,
+    ]
   );
 
   const minimumTier = watch("minimumTier");

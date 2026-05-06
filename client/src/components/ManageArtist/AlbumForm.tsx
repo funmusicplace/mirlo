@@ -39,7 +39,10 @@ const AlbumForm: React.FC<{
   const methods = useForm<TrackGroupFormData>();
 
   React.useEffect(() => {
-    methods.reset(buildDefaultValues(trackGroup), { keepDirtyValues: true });
+    methods.reset(buildDefaultValues(trackGroup), {
+      keepDirtyValues: true,
+      keepDirty: true,
+    });
   }, [trackGroup]);
 
   const draftKey = trackGroup?.id ? `albumDraft-${trackGroup.id}` : null;

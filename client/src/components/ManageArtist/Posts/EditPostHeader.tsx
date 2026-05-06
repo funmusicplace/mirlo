@@ -15,7 +15,8 @@ import SaveDraftButton from "./SaveDraftButton";
 const EditPostHeader: React.FC<{
   reload: (postId?: number) => Promise<unknown>;
   onClose?: () => void;
-}> = ({ reload, onClose }) => {
+  onSaveSuccess?: () => void;
+}> = ({ reload, onClose, onSaveSuccess }) => {
   const { postId, artistId } = useParams();
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
@@ -77,9 +78,14 @@ const EditPostHeader: React.FC<{
               artistId={artist.id}
               reload={reload}
               onClose={onClose}
+              onSaveSuccess={onSaveSuccess}
             />
           )}
-          <PublishPostButton post={post} reload={() => refetch()} />
+          <PublishPostButton
+            post={post}
+            reload={() => refetch()}
+            onSaveSuccess={onSaveSuccess}
+          />
         </div>
       </div>
       <h1>{post.title || t("untitledPost")}</h1>
