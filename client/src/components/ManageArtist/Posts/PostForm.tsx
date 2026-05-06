@@ -129,7 +129,6 @@ const PostForm: React.FC<{
           <label htmlFor="input-title">{t("title")}</label>
           <InputEl
             id="input-title"
-            required
             {...register("title", { required: true })}
           />
         </FormComponent>
@@ -140,7 +139,6 @@ const PostForm: React.FC<{
           <InputEl
             id="input-publication-date"
             type="datetime-local"
-            required
             {...register("publishedAt", { required: true })}
           />
           {new Date(publicationDate) > new Date() && (
