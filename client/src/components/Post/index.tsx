@@ -16,7 +16,7 @@ import { useTracksQuery } from "utils/useTracksQuery";
 
 import PostHeader from "./PostHeader";
 
-const PageMarkdownWrapper = styled.div`
+export const PageMarkdownWrapper = styled.div`
   width: 100%;
   font-size: 1.125rem;
   line-height: 1.75;

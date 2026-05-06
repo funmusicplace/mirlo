@@ -426,6 +426,8 @@ const handlePost: RouteHandler<PostParams> = async ({
         `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify({
           post: serializePost(
             fullPost,
+            undefined,
+            undefined,
             isUserSubscriber || fullPost.artist?.userId === userId
           ),
           injectedAt: new Date().toISOString(),
