@@ -10,6 +10,7 @@ import { useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
 import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
+import useShow from "utils/useShow";
 
 import { bp } from "../../../../constants";
 import UploadArtistImage from "../../UploadArtistImage";
@@ -30,6 +31,7 @@ const AlbumFormContent: React.FC<{
 }> = ({ existingObject, reload, onSaveSuccess }) => {
   const { register, watch } = useFormContext<TrackGroupFormData>();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const headerShow = useShow();
 
   const urlSlug = watch("urlSlug");
   const releaseDateValue = watch("releaseDate");
@@ -38,7 +40,11 @@ const AlbumFormContent: React.FC<{
 
   return (
     <>
-      <div className="flex flex-wrap items-start gap-2 mt-4">
+      <div
+        className={`sticky z-10 flex flex-wrap items-start gap-2 bg-(--mi-background-color) py-4 mb-4 border-b border-(--mi-tint-x-color) transition-[top] duration-300 ${
+          headerShow === "down" ? "top-0" : "top-(--header-cover-sticky-height)"
+        }`}
+      >
         <SaveDraftBar
           existingObject={existingObject}
           reload={reload}
