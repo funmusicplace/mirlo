@@ -45,7 +45,7 @@ const PlayCell: React.FC<{
     className={
       inWidget
         ? "pl-4! pr-2! py-0.5! w-10 align-middle"
-        : "h-[30px] w-8 align-middle max-sm:px-1 max-sm:py-0.5"
+        : "h-[40px] w-8 align-middle max-sm:px-1 max-sm:py-0.5"
     }
   >
     <TrackRowPlayControl

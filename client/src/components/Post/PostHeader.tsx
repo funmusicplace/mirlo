@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import Avatar from "components/Artist/Avatar";
-import { ButtonLink } from "components/common/Button";
 import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -9,9 +8,7 @@ import TipArtist from "components/common/TipArtist";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../../constants";
 
@@ -48,12 +45,11 @@ const AvatarLink: React.FC<{
   </Link>
 );
 
-const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
+const PostHeader: React.FC<{ post: Post; hasTracks: boolean }> = ({
+  post,
+  hasTracks,
+}) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
-
-  const { user } = useAuthContext();
-
-  const ownedByUser = post.artist?.userId === user?.id;
 
   const featuredImage = post.featuredImage?.src;
 
@@ -107,30 +103,23 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
         `}
       >
         <div
-          className={css`
-            padding: 1rem;
-            margin: 0 auto 0;
-            display: flex;
-            max-width: var(--mi-container-medium);
+          className={
+            (hasTracks ? "max-w-6xl" : "max-w-3xl") +
+            " max-w-3xl p-1 flex pt-8 w-full justify-center " +
+            css`
+              margin: 0 auto 0;
+              position: relative;
+              color: ${featuredImage
+                ? "var(--mi-white)"
+                : "var(--mi-button-color)"} !important;
 
-            justify-content: center;
-            width: 100%;
-            position: relative;
-            color: ${featuredImage
-              ? "var(--mi-white)"
-              : "var(--mi-button-color)"} !important;
-
-            h1 {
-              margin-bottom: 0.5rem;
-              font-size: 3rem;
-            }
-
-            @media (min-width: ${bp.medium}px) {
-              font-size: 1.2rem;
-              font-weight: 100;
-              line-height: 1.5rem;
-            }
-          `}
+              @media (min-width: ${bp.medium}px) {
+                font-size: 1.2rem;
+                font-weight: 100;
+                line-height: 1.5rem;
+              }
+            `
+          }
         >
           {post.artistId && (
             <div
@@ -146,24 +135,13 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                 `}
               >
                 <TipArtist artistId={post.artistId} />
-                {(ownedByUser || user?.isAdmin) && (
-                  <ButtonLink
-                    to={`/manage/artists/${post.artistId}/post/${post.id}`}
-                    startIcon={<FaPen />}
-                    className={css`
-                      margin-top: 1rem;
-                    `}
-                  >
-                    {t("edit")}
-                  </ButtonLink>
-                )}
               </div>
             </div>
           )}
           <div
             className={css`
               flex: 100%;
-              max-width: var(--mi-container-medium);
+              width: 100%;
             `}
           >
             <div
@@ -174,11 +152,14 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
               `}
             >
               <h1
-                className={css`
-                  @media (max-width: ${bp.medium}px) {
-                    font-size: 2rem;
-                  }
-                `}
+                className={
+                  "mb-1 text-5xl! " +
+                  css`
+                    @media (max-width: ${bp.medium}px) {
+                      font-size: 2rem;
+                    }
+                  `
+                }
               >
                 {post.title}
               </h1>
