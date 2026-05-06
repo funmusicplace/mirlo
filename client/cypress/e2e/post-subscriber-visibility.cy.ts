@@ -145,12 +145,8 @@ describe("blog post subscriber visibility", () => {
         }
       });
 
-      // Type the title and blur to trigger auto-save
-      cy.get("#input-title").type("Exclusive Subscriber Post").blur();
-      cy.wait("@updatePost");
+      cy.get("#input-title").type("Exclusive Subscriber Post");
 
-      // Type into the Remirror contenteditable editor (not a textarea).
-      // Content is only persisted when Publish is clicked, so we type first.
       cy.get(".ProseMirror")
         .click()
         .type("This is exclusive content only for paying subscribers.");

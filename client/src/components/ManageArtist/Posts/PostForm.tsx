@@ -4,6 +4,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
 import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
 import TextEditor from "components/common/TextEditor";
 import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
@@ -17,7 +18,6 @@ import { useFormPersist } from "utils/useFormPersist";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 
 import api from "../../../services/api";
-import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 
 import EditPostHeader from "./EditPostHeader";
 
@@ -127,23 +127,21 @@ const PostForm: React.FC<{
         )}
         <FormComponent>
           <label htmlFor="input-title">{t("title")}</label>
-          <SavingInput
-            formKey="title"
+          <InputEl
             id="input-title"
             required
-            url={`manage/posts/${post.id}`}
+            {...register("title", { required: true })}
           />
         </FormComponent>
         <FormComponent>
           <label htmlFor="input-publication-date">
             {t("publicationDate")}{" "}
           </label>
-          <SavingInput
-            formKey="publishedAt"
+          <InputEl
             id="input-publication-date"
             type="datetime-local"
             required
-            url={`manage/posts/${post.id}`}
+            {...register("publishedAt", { required: true })}
           />
           {new Date(publicationDate) > new Date() && (
             <Box variant="info" compact small>
