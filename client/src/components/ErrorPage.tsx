@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
-import { useSnackbar } from "state/SnackbarContext";
 
 import NotFoundPage from "./404";
 import { ButtonLink } from "./common/Button";
@@ -9,7 +8,6 @@ import { ButtonLink } from "./common/Button";
 export default function ErrorPage() {
   const error = useRouteError();
   console.error(error);
-  const snackbar = useSnackbar();
 
   const isNotFoundError =
     (isRouteErrorResponse(error) && error.status === 404) ||
@@ -20,16 +18,16 @@ export default function ErrorPage() {
     if (process.env.NODE_ENV !== "development" && error instanceof Error) {
       console.error("Error:", error.message);
       if (error.message.includes("dynamically imported module")) {
-        const alreadyReloaded = sessionStorage.getItem("chunkReload") === "1";
-        if (!alreadyReloaded) {
-          sessionStorage.setItem("chunkReload", "1");
-          snackbar("Hey, there's a new version of Mirlo! Reloading...");
-          navigator.serviceWorker?.getRegistration().then((reg) => {
-            reg?.waiting?.postMessage({ type: "SKIP_WAITING" });
-          });
+        // Use a time-based cooldown (30s) rather than a binary flag so that
+        // repeated errors after a failed reload can still trigger another attempt,
+        // while still preventing infinite reload loops.
+        const lastReloadTime = sessionStorage.getItem("chunkReloadTime");
+        const now = Date.now();
+        const canReload =
+          !lastReloadTime || now - Number(lastReloadTime) > 30_000;
+        if (canReload) {
+          sessionStorage.setItem("chunkReloadTime", String(now));
           window.location.reload();
-        } else {
-          sessionStorage.removeItem("chunkReload");
         }
       }
     }
