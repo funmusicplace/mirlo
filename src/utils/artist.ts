@@ -451,6 +451,9 @@ export const deleteStripeSubscriptions = async (
   });
 };
 
+/**
+ * Common includes when returning a single artist
+ */
 export const singleInclude = (queryOptions?: {
   includeDefaultTier?: boolean;
   includePrivate?: boolean;
@@ -590,8 +593,9 @@ export const singleInclude = (queryOptions?: {
             isArtistApproved: true,
             artist: { deletedAt: null },
           },
-          take: 1,
-          select: { artistId: true },
+          include: {
+            artist: true,
+          },
         },
       },
     },

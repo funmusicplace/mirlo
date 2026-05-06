@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
-import { queryLabelBySlug } from "queries";
+import { queryArtist } from "queries";
 
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import ArtistSquare from "components/Artist/ArtistSquare";
@@ -11,25 +11,27 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 function Roster() {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
 
-  const { artistId } = useParams();
+  const { artistId: slug } = useParams();
 
-  if (!artistId) {
+  if (!slug) {
     return <div>{t("labelNotFound")}</div>;
   }
 
-  const { data: label, isPending } = useQuery(queryLabelBySlug(artistId));
+  const { data: artistAsLabel, isPending } = useQuery(
+    queryArtist({ artistSlug: slug })
+  );
 
   if (isPending) {
     return <LoadingBlocks squares margin="1rem" />;
   }
 
-  if (!label) {
+  if (!artistAsLabel) {
     return <div>{t("labelNotFound")}</div>;
   }
 
   return (
     <TrackgroupGrid gridNumber="4" as="ul" role="list">
-      {label?.artistLabels?.map((al) => (
+      {artistAsLabel.user?.artistLabels?.map((al) => (
         <ArtistSquare key={al.artist.id} artist={al.artist} />
       ))}
     </TrackgroupGrid>

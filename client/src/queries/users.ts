@@ -273,7 +273,8 @@ export function useDeleteArtistMutation() {
         predicate: (query) =>
           queryKeyMatches(query, { artistId }) ||
           queryKeyMatches(query, { artistSlug }) ||
-          queryKeyIncludes(query, QUERY_KEY_ARTISTS),
+          queryKeyIncludes(query, QUERY_KEY_ARTISTS) ||
+          query.queryKey.includes("fetchArtist"),
       });
     },
   });
