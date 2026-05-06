@@ -642,7 +642,12 @@ export const processSingleArtist = (
   return {
     ...artist,
     posts: artist?.posts?.map((p: Post) =>
-      serializePost(p, isUserSubscriber || artist.userId === userId)
+      serializePost(
+        p,
+        undefined,
+        undefined,
+        isUserSubscriber || artist.userId === userId
+      )
     ),
     merch: artist?.merch?.map(processSingleMerch),
     background: addSizesToImage(

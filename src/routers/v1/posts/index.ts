@@ -89,6 +89,8 @@ export default function () {
         posts.map(async (p) =>
           serializePost(
             p,
+            undefined,
+            undefined,
             (p.artistId
               ? await checkIsUserSubscriber(user, p.artistId)
               : false) || p.artist?.userId === user?.id

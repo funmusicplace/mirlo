@@ -34,10 +34,6 @@ export const getPostsVisibleToUser = async (
     // we don't have to post process this?
   }
 
-  const itemCount = await prisma.post.count({
-    where,
-  });
-
   let posts = await prisma.post.findMany({
     where,
     include: {
