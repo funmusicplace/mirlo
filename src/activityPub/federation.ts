@@ -173,6 +173,7 @@ federation
       });
       if (!artist) return null;
       const zipped = await buildFeedForArtist(undefined, artist);
+      const client = await getClient();
       const creates = zipped.map((item) => {
         if (isPost(item)) {
           return new Create({
@@ -182,9 +183,18 @@ federation
             }),
             actor: ctx.getActorUri(identifier),
             published: getTemporal(item.publishedAt),
-            object: ctx.getObjectUri(Article, {
-              identifier,
-              postId: String(item.id),
+            object: new Article({
+              id: ctx.getObjectUri(Article, {
+                identifier,
+                postId: String(item.id),
+              }),
+              name: item.title,
+              content: item.content ?? undefined,
+              published: getTemporal(item.publishedAt),
+              url: new URL(
+                `/${identifier}/posts/${item.id}`,
+                client.applicationUrl
+              ),
             }),
           });
         } else {
@@ -195,9 +205,14 @@ federation
             }),
             actor: ctx.getActorUri(identifier),
             published: getTemporal(item.releaseDate),
-            object: ctx.getObjectUri(Audio, {
-              identifier,
-              releaseId: String(item.id),
+            object: new Audio({
+              id: ctx.getObjectUri(Audio, {
+                identifier,
+                releaseId: String(item.id),
+              }),
+              name: item.title ?? undefined,
+              content: item.about ?? undefined,
+              published: getTemporal(item.releaseDate),
             }),
           });
         }
