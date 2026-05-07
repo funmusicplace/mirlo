@@ -47,6 +47,11 @@ export const getPostsVisibleToUser = async (
     },
   });
 
+  console.log(
+    `[Feed] Fetched ${posts.length} posts for artist ${artist.id} with where:`,
+    JSON.stringify(where, null, 2)
+  );
+
   if (user) {
     const userSubscription = await prisma.artistUserSubscription.findFirst({
       where: {
@@ -82,6 +87,10 @@ export const getPostsVisibleToUser = async (
   // This isn't very efficient for large number of posts
   const takePosts = posts.slice(skip, take + skip);
 
+  console.log(
+    `[Feed] Returning ${takePosts.length} posts (took ${take}, skipped ${skip}) from ${posts.length} total after filtering`
+  );
+
   return {
     posts: takePosts.map((post) => ({
       ...post,
@@ -111,9 +120,11 @@ export const getAlbumsVisibleToUser = async (artist: Artist) => {
 
 export const buildFeedForArtist = async (
   user: User | undefined,
-  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] }
+  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] },
+  take: number = 10000,
+  skip: number = 0
 ) => {
-  const posts = await getPostsVisibleToUser(user, artist);
+  const posts = await getPostsVisibleToUser(user, artist, take, skip);
 
   const albums = await getAlbumsVisibleToUser(artist);
 
