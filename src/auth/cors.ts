@@ -3,7 +3,6 @@ import { Client } from "@mirlo/prisma/client";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
 
-import { headersAreForActivityPub } from "../activityPub/utils";
 import logger from "../logger";
 import { AppError } from "../utils/error";
 
@@ -59,19 +58,16 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     let clients: Client[] = [];
     if (!skipsClientLookup) {
       const isAPIEndpointPrivate = checkForPrivateEndpoint(req.path, req.query);
-      const isActivityPubRequest =
-        headersAreForActivityPub(
-          req.headers,
-          req.method as "POST" | "GET" | "PUT" | "DELETE"
-        ) && isValidActivityPubEndpoint(req.path);
 
       // The API key is only required for cross-site requests to private
-      // endpoints. Same-site (the SPA), public endpoints, and signature-based
-      // ActivityPub requests all skip the key check; in those cases we still
-      // need every registered client's allowed origins merged into the CORS
-      // allowlist, so we load them all
+      // endpoints. Same-site (the SPA), public endpoints, and ActivityPub
+      // endpoints all skip the key check; in those cases we still need every
+      // registered client's allowed origins merged into the CORS allowlist,
+      // so we load them all
       const skipsApiKey =
-        isSameSite || !isAPIEndpointPrivate || isActivityPubRequest;
+        isSameSite ||
+        !isAPIEndpointPrivate ||
+        isValidActivityPubEndpoint(req.path);
 
       if (skipsApiKey) {
         clients = await prisma.client.findMany();
