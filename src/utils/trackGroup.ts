@@ -68,6 +68,42 @@ export const notifyFollowersOfNewAlbum = async (trackGroup: {
   });
 };
 
+export const finalizeTrackGroupPublication = async (
+  trackGroup: {
+    id: number;
+    publishedAt: Date | null;
+    releaseDate: Date | null;
+  },
+  publishedAt: Date
+) => {
+  const data: Prisma.TrackGroupUpdateInput = {};
+  if (
+    !trackGroup.publishedAt ||
+    trackGroup.publishedAt.getTime() !== publishedAt.getTime()
+  ) {
+    data.publishedAt = publishedAt;
+  }
+  if (!trackGroup.releaseDate) {
+    data.releaseDate = publishedAt;
+  }
+
+  const updated =
+    Object.keys(data).length > 0
+      ? await prisma.trackGroup.update({
+          where: { id: trackGroup.id },
+          data,
+        })
+      : await prisma.trackGroup.findUniqueOrThrow({
+          where: { id: trackGroup.id },
+        });
+
+  if (updated.isPublic) {
+    await notifyFollowersOfNewAlbum(updated);
+  }
+
+  return updated;
+};
+
 import { deleteTrack } from "./tracks";
 
 export const whereForPublishedTrackGroups = (opts?: {
