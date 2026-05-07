@@ -13,12 +13,13 @@ import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
 import { bp } from "../../../../constants";
 import UploadArtistImage from "../../UploadArtistImage";
 
-import PriceAndSuch from "./PriceAndSuch";
 import FundraisingGoal from "./FundraisingGoal";
 import ManageTags from "./ManageTags";
 import PreOrderSection from "./PreOrderSection";
+import PriceAndSuch from "./PriceAndSuch";
 import SaveDraftBar from "./SaveDraftBar";
 import SavingInput from "./SavingInput";
+import SchedulePublication from "./SchedulePublication";
 import VisibilityRadio from "./VisibilityRadio";
 
 const AlbumFormContent: React.FC<{
@@ -38,7 +39,7 @@ const AlbumFormContent: React.FC<{
   return (
     <>
       {isFlowV2 && (
-        <div className="flex flex-wrap items-center gap-2 mt-4">
+        <div className="flex flex-wrap items-start gap-2 mt-4">
           <SaveDraftBar existingObject={existingObject} reload={reload} />
           {!isTrackGroupPublished(existingObject) &&
             (existingObject.tracks?.length > 0 ||
@@ -52,11 +53,15 @@ const AlbumFormContent: React.FC<{
                 {t("previewRelease")}
               </ArtistButtonLink>
             )}
-          <div className="ml-auto">
+          <div className="ml-auto flex flex-col items-end gap-1">
             <PublishButton
               trackGroup={existingObject}
               reload={reload}
               isFlowV2={isFlowV2}
+            />
+            <SchedulePublication
+              existingObject={existingObject}
+              reload={reload}
             />
           </div>
         </div>
