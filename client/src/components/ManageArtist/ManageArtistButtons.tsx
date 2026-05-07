@@ -1,32 +1,34 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { FaEdit, FaEye, FaPen } from "react-icons/fa";
-import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
+import FixedButtonLink from "components/common/FixedButton";
+import TipArtist from "components/common/TipArtist";
+import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
+import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
+import Wishlist from "components/TrackGroup/Wishlist";
 import {
   queryArtist,
   queryManagedArtistSubscriptionTier,
   queryManagedMerch,
   queryManagedTrackGroup,
+  queryPost,
   queryTrackGroup,
 } from "queries";
-import { useAuthContext } from "state/AuthContext";
-import FixedButtonLink from "components/common/FixedButton";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaEdit, FaEye, FaPen } from "react-icons/fa";
 import { IoIosColorPalette } from "react-icons/io";
+import { RiAdminLine } from "react-icons/ri";
+import { useLocation, useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
-import Wishlist from "components/TrackGroup/Wishlist";
-import TipArtist from "components/common/TipArtist";
-import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import {
   getArtistTiersUrl,
   getManageReleaseUrl,
   getMerchUrl,
   getReleaseUrl,
 } from "utils/artist";
-import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
-import { RiAdminLine } from "react-icons/ri";
+
+import { bp } from "../../constants";
 
 const PlayingTrack: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -66,7 +68,7 @@ const ManageArtistButtons: React.FC = () => {
   const { pathname } = useLocation();
   const { state } = useGlobalStateContext();
   const isUp = state.playerQueueIds.length > 0;
-  const { artistId, merchId, tierId, trackGroupId } = useParams();
+  const { artistId, merchId, tierId, trackGroupId, postId } = useParams();
   const isManagePage =
     pathname.includes("/manage/artists") && !pathname.includes("/customize");
   const seeViewLink = pathname.includes("/manage/artists");
@@ -82,16 +84,15 @@ const ManageArtistButtons: React.FC = () => {
   const { data: managedTrackGroup } = useQuery(
     queryManagedTrackGroup(Number(trackGroupId) ?? 0)
   );
-  const {
-    data: merch,
-    isPending: isLoadingMerch,
-    refetch,
-  } = useQuery(queryManagedMerch(merchId ?? ""));
-  const { data: tier, isLoading } = useQuery(
+  const { data: merch } = useQuery(queryManagedMerch(merchId ?? ""));
+  const { data: tier } = useQuery(
     queryManagedArtistSubscriptionTier({
       artistId: Number(artistId),
       tierId: Number(tierId),
     })
+  );
+  const { data: post } = useQuery(
+    queryPost({ postId: postId ?? "", artistId: artistId ?? "" })
   );
   const { user } = useAuthContext();
 
@@ -197,7 +198,7 @@ const ManageArtistButtons: React.FC = () => {
                   {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
                 </FixedButtonLink>
               )}
-              {seeViewLink && !isAlbumPage && !merch && !tier && (
+              {seeViewLink && !isAlbumPage && !merch && !tier && !post && (
                 <FixedButtonLink
                   to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
                   endIcon={<FaEye />}
@@ -219,6 +220,18 @@ const ManageArtistButtons: React.FC = () => {
                   rounded
                 >
                   {t("editRelease")}
+                </FixedButtonLink>
+              )}
+              {post && !isManagePage && (
+                <FixedButtonLink
+                  to={`/manage/artists/${post.artistId}/post/${post.id}`}
+                  endIcon={<FaEdit />}
+                  disabled={!artist}
+                  variant="dashed"
+                  size="compact"
+                  rounded
+                >
+                  {t("editPost")}
                 </FixedButtonLink>
               )}
               {managedTrackGroup && (

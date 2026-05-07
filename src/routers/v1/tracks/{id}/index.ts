@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import processor from "../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
+import processor from "../../../../utils/trackGroup";
+import { isTrackPlayableNested } from "../../../../utils/trackPlayability";
 
 export default function () {
   const operations = {
@@ -58,10 +60,12 @@ export default function () {
       res.json({
         result: {
           ...track,
-          isPlayable:
-            track.isPreview ||
-            track.userTrackPurchases.length > 0 ||
-            track.trackGroup.userTrackGroupPurchases.length > 0,
+          isPlayable: isTrackPlayableNested({
+            isPreview: track.isPreview,
+            trackGroupPurchases: track.trackGroup.userTrackGroupPurchases,
+            trackPurchases: track.userTrackPurchases,
+            userId: loggedInUser?.id,
+          }),
           trackGroup: track
             ? processor.single(track.trackGroup, {
                 loggedInUserId: loggedInUser?.id,

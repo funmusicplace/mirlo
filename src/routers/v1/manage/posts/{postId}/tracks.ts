@@ -1,7 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
 import { userAuthenticated } from "../../../../../auth/passport";
 import { doesPostBelongToUser } from "../../../../../utils/post";
-import prisma from "@mirlo/prisma";
 
 type Params = {
   postId: string;

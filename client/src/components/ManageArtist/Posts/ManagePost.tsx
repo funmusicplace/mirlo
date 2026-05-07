@@ -1,14 +1,13 @@
+import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { queryManagedArtist, queryManagedPost } from "queries";
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 
 import ManageSectionWrapper from "../ManageSectionWrapper";
-import { css } from "@emotion/css";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import PostForm from "./PostForm";
 
-import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtist, queryManagedPost } from "queries";
+import PostForm from "./PostForm";
 
 const ManagePost: React.FC<{}> = () => {
   const { postId, artistId } = useParams();

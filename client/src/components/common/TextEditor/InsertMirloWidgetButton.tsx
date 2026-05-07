@@ -1,22 +1,23 @@
-import React from "react";
-import Button from "../Button";
-import Modal from "../Modal";
-import { FaMusic } from "react-icons/fa";
-import { useCommands } from "@remirror/react";
-import AutoComplete from "../AutoComplete";
-import api from "services/api";
-import { widgetUrl } from "utils/tracks";
 import { css } from "@emotion/css";
-import { bp } from "../../../constants";
-import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
-import { useTranslation } from "react-i18next";
-import BulkTrackUpload from "components/ManageArtist/ManageTrackGroup/BulkTrackUpload";
-import { InputEl } from "../Input";
-import FormComponent from "../FormComponent";
-import Box from "../Box";
-import { useForm } from "react-hook-form";
+import { useCommands } from "@remirror/react";
 import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
+import BulkTrackUpload from "components/ManageArtist/ManageTrackGroup/BulkTrackUpload";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaMusic } from "react-icons/fa";
+import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
+import { widgetUrl } from "utils/tracks";
+
+import { bp } from "../../../constants";
+import AutoComplete from "../AutoComplete";
+import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
+import Box from "../Box";
+import Button from "../Button";
+import FormComponent from "../FormComponent";
+import { InputEl } from "../Input";
+import Modal from "../Modal";
 
 const InsertMirloWidgetButton: React.FC<{
   postId?: number;
@@ -48,11 +49,6 @@ const InsertMirloWidgetButton: React.FC<{
       height: variant === "track" ? 137 : 371,
       width: 700,
     });
-    if (variant === "track" && postId) {
-      await api.put(`manage/posts/${postId}/tracks`, {
-        trackId: trackId,
-      });
-    }
     setIsOpen(false);
   };
 

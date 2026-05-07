@@ -1,10 +1,11 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 
-import prisma from "@mirlo/prisma";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
+import { serializePost } from "../../../../utils/serialize/post";
 
 export default function () {
   const operations = {
@@ -123,10 +124,13 @@ export default function () {
       orderBy: {
         publishedAt: "desc",
       },
+      include: {
+        featuredImage: true,
+      },
     });
 
     res.json({
-      results: posts,
+      results: posts.map((post) => serializePost(post)),
     });
   }
 

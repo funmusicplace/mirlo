@@ -1,9 +1,10 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { serializePost } from "../../../utils/serialize/post";
 import { checkIsUserSubscriber } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
+import { serializePost } from "../../../utils/serialize/post";
 
 export default function () {
   const operations = {
@@ -55,6 +56,7 @@ export default function () {
               track: {
                 select: {
                   isPreview: true,
+                  trackGroupId: true,
                   trackGroup: {
                     select: {
                       userTrackGroupPurchases: {
@@ -102,9 +104,31 @@ export default function () {
         });
       }
       const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
+      const userTrackGroupPurchases = user
+        ? await prisma.userTrackGroupPurchase.findMany({
+            where: {
+              userId: user.id,
+              trackGroupId: {
+                in: post.tracks
+                  ?.filter((t) => t.track?.trackGroupId)
+                  .map((t) => t.track?.trackGroupId) as number[],
+              },
+            },
+          })
+        : undefined;
+      const userTrackPurchases = user
+        ? await prisma.userTrackPurchase.findMany({
+            where: {
+              userId: user.id,
+              trackId: { in: post.tracks?.map((t) => t.trackId) as number[] },
+            },
+          })
+        : undefined;
       res.json({
         result: serializePost(
           post,
+          userTrackGroupPurchases,
+          userTrackPurchases,
           isUserSubscriber || post.artist?.userId === user?.id
         ),
       });

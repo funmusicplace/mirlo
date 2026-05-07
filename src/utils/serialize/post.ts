@@ -3,6 +3,7 @@ import { Artist, ArtistAvatar, Post } from "@mirlo/prisma/client";
 import { addSizesToImage } from "../artist";
 import { generateFullStaticImageUrl } from "../images";
 import { finalArtistAvatarBucket, finalPostImageBucket } from "../minio";
+import { isTrackPlayable } from "../trackPlayability";
 
 /**
  * Prisma include for fetching a public post with everything needed to
@@ -57,28 +58,32 @@ export const serializePost = (
       trackId: number;
       track?: {
         isPreview: boolean;
-        trackGroup?: {
-          userTrackGroupPurchases?: { userId: number }[];
-        };
-        userTrackPurchases?: { userId: number }[];
+        trackGroupId?: number;
       };
     }[];
   },
+  userTrackGroupPurchases?: Array<{ userId: number; trackGroupId: number }>,
+  userTrackPurchases?: Array<{ userId: number; trackId: number }>,
   isUserSubscriber?: boolean
 ) => ({
   ...post,
-  tracks: post.tracks?.map((pt) => ({
-    isPlayable:
-      pt.track?.isPreview ||
-      pt.track?.trackGroup?.userTrackGroupPurchases?.some(
-        (purchase) => purchase.userId === pt.trackId
-      ) ||
-      pt.track?.userTrackPurchases?.some(
-        (purchase) => purchase.userId === pt.trackId
-      ) ||
-      isUserSubscriber,
-    ...pt,
-  })),
+  tracks: post.tracks?.map((pt) => {
+    // Use provided purchase arrays if available, otherwise extract from nested structure
+    const tgPurchases = userTrackGroupPurchases ?? [];
+    const trackPurchases = userTrackPurchases ?? [];
+
+    return {
+      isPlayable: isTrackPlayable({
+        isPreview: pt.track?.isPreview,
+        trackGroupId: pt.track?.trackGroupId,
+        trackId: pt.trackId,
+        trackGroupPurchases: tgPurchases,
+        trackPurchases: trackPurchases,
+        isUserSubscriber,
+      }),
+      ...pt,
+    };
+  }),
   artist: {
     ...post.artist,
     avatar: post.artist

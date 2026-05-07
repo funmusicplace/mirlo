@@ -1,10 +1,11 @@
 import assert from "node:assert";
-import prisma from "@mirlo/prisma";
 
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+
 import {
   clearTables,
   createArtist,

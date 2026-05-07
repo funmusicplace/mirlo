@@ -35,6 +35,7 @@ import {
   finalArtistAvatarBucket,
 } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
+import { isTrackPlayableNested } from "./trackPlayability";
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
   id: number;
   artistId: number;
@@ -847,14 +848,12 @@ export const processSingleTrackGroup = (
   hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
   tracks: tg.tracks?.map((track) => ({
     ...track,
-    isPlayable:
-      track.isPreview ||
-      tg.trackGroupPurchases?.some(
-        (purchase) => purchase.userId === options?.loggedInUserId
-      ) ||
-      track.userTrackPurchases?.some(
-        (purchase) => purchase.userId === options?.loggedInUserId
-      ),
+    isPlayable: isTrackPlayableNested({
+      isPreview: track.isPreview,
+      trackGroupPurchases: tg.trackGroupPurchases,
+      trackPurchases: track.userTrackPurchases,
+      userId: options?.loggedInUserId,
+    }),
   })),
   artist: tg.artist
     ? {

@@ -1,78 +1,66 @@
-import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Box from "components/common/Box";
+import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { MetaCard } from "components/common/MetaCard";
+import SupportArtistPopUp from "components/common/SupportArtistPopUp";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 import parse from "html-react-parser";
-import React from "react";
+import { queryPost } from "queries";
+import React, { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
-import { bp } from "../../constants";
-import Box from "components/common/Box";
-
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import styled from "@emotion/styled";
-import MarkdownWrapper from "components/common/MarkdownWrapper";
-
-import { useQuery } from "@tanstack/react-query";
-import { queryPost } from "queries";
-import PostHeader from "./PostHeader";
 import useArtistQuery from "utils/useArtistQuery";
+import { useTracksQuery } from "utils/useTracksQuery";
+
+import PostHeader from "./PostHeader";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
-  margin-top: 2rem;
-  max-width: var(--mi-container-medium);
-  margin: auto;
-  padding: var(--mi-side-paddings-xsmall);
-  font-size: 18px;
-  line-height: 1.7rem;
+  font-size: 1.125rem;
+  line-height: 1.75;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 
   blockquote {
-    direction: ltr;
     font-style: italic;
+    border-left: 4px solid #d1d5db;
     padding-left: 1rem;
-    border-left: solid 3px grey;
-    unicode-bidi: isolate;
-    margin-bottom: 1.5rem;
-  }
-
-  h1 {
-    font-weight: normal !important;
+    margin: 1rem 0;
   }
 
   h2 {
-    font-weight: normal !important;
-    font-size: 1.7rem !important;
-    margin-top: 1rem;
-    margin-bottom: 1rem !important;
-  }
-
-  h3 {
+    font-size: 1.7rem;
     margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0;
+    margin-bottom: 0.5rem;
   }
 
   p {
-    line-height: 1.7rem !important;
-  }
-
-  iframe {
-    margin: 0 !important;
-  }
-
-  ul {
-    margin-left: 1rem;
+    line-height: 1.75;
     margin-bottom: 1rem;
-    line-height: 1.7rem;
+  }
+
+  ul,
+  ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   li {
     margin-bottom: 0.5rem;
+    line-height: 1.75;
   }
 
-  @media (max-width: ${bp.medium}px) {
+  iframe {
+    margin: 1rem 0;
+    line-height: 1.75;
+  }
+
+  @media (max-width: 768px) {
     p {
-      line-height: 1.6rem !important;
+      line-height: 1.5;
     }
   }
 `;
@@ -86,15 +74,17 @@ const Post: React.FC = () => {
     queryPost({ postId: postId ?? "", artistId: artistId ?? "" })
   );
 
+  // Fetch full track details if post has associated tracks
+  const trackIds = useMemo(() => {
+    return post?.tracks?.map((t) => t.trackId) ?? [];
+  }, [post?.tracks]);
+
+  const { data: tracksData } = useTracksQuery(trackIds);
+
   if (!post) {
     if (!isLoading) {
       return (
-        <Box
-          className={css`
-            width: 100;
-            text-align: center;
-          `}
-        >
+        <Box className="w-full text-center">
           {t("noPostFound")}
           {artistId && (
             <Trans
@@ -114,36 +104,44 @@ const Post: React.FC = () => {
   }
 
   return (
-    <div
-      className={css`
-        width: 100%;
-        position: relative;
-      `}
-    >
+    <div className="w-full relative">
       <MetaCard
         title={`${post.title} ${t("byArtist", { artist: post.artist?.name })}`}
         description={post.content.slice(0, 500)}
         image={post.featuredImage?.src}
       />
-      <PostHeader post={post} />
-      <PageMarkdownWrapper
-        className={css`
-          padding: 1rem !important;
-        `}
-      >
-        {post.isContentHidden && (
+      <PostHeader post={post} hasTracks={trackIds.length > 0} />
+
+      <div className="max-w-6xl mx-auto px-4 pt-8">
+        <div
+          className={`grid gap-8 ${trackIds.length > 0 ? "grid-cols-1 lg:grid-cols-[1fr_400px]" : "grid-cols-1"}`}
+        >
           <div
-            className={css`
-              padding: 2rem 0;
-            `}
+            className={`${trackIds.length > 0 ? "lg:col-span-2" : "max-w-3xl mx-auto w-full"}`}
+          ></div>
+          <div
+            className={trackIds.length > 0 ? "" : "max-w-3xl mx-auto w-full"}
           >
-            {t("notAvailable")}
+            <PageMarkdownWrapper>
+              {post.isContentHidden && (
+                <div className="py-8">{t("notAvailable")}</div>
+              )}
+              {!post.isContentHidden && (
+                <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
+              )}
+            </PageMarkdownWrapper>
           </div>
-        )}
-        {!post.isContentHidden && (
-          <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
-        )}
-      </PageMarkdownWrapper>
+          {tracksData && tracksData.length > 0 && (
+            <div className="lg:col-start-2">
+              <PublicTrackGroupListing
+                tracks={tracksData}
+                trackGroup={tracksData[0]?.trackGroup}
+                size="small"
+              />
+            </div>
+          )}
+        </div>
+      </div>
       {post.artist && (
         <SupportArtistPopUp
           artist={post.artist}

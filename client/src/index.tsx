@@ -5,15 +5,15 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./styles/index.css";
 import "./i18n";
 
-import { GlobalStateProvider } from "./state/GlobalState";
-
+import routes from "routes";
+import { AuthContextProvider } from "state/AuthContext";
 import { SnackBarContextProvider } from "state/SnackbarContext";
 import { UploadContextProvider } from "state/UploadContext";
-
-import routes from "routes";
-import { QueryClientWrapper } from "queries/QueryClientWrapper";
-import { AuthContextProvider } from "state/AuthContext";
 import { ConfirmContextProvider } from "utils/useConfirm";
+
+import { GlobalStateProvider } from "./state/GlobalState";
+
+import { QueryClientWrapper } from "queries/QueryClientWrapper";
 import { ConfirmDialog } from "components/common/ConfirmDialog";
 
 const router = createBrowserRouter(routes);
