@@ -5,7 +5,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import { notifyFollowersOfNewAlbum } from "../../../../../utils/trackGroup";
+import { finalizeTrackGroupPublication } from "../../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -36,16 +36,17 @@ export default function () {
       }
 
       const now = new Date();
-      const updatedTrackgroup = await prisma.trackGroup.update({
-        where: { id: Number(trackGroupId) || undefined },
-        data: {
-          publishedAt: isCurrentlyPublished ? null : now,
-          ...(!isCurrentlyPublished &&
-            !trackGroup.releaseDate && { releaseDate: now }),
-        },
-      });
-      if (updatedTrackgroup.publishedAt && updatedTrackgroup.isPublic) {
-        await notifyFollowersOfNewAlbum(updatedTrackgroup);
+      let updatedTrackgroup;
+      if (isCurrentlyPublished) {
+        updatedTrackgroup = await prisma.trackGroup.update({
+          where: { id: Number(trackGroupId) || undefined },
+          data: { publishedAt: null },
+        });
+      } else {
+        updatedTrackgroup = await finalizeTrackGroupPublication(
+          trackGroup,
+          now
+        );
       }
       res.json(updatedTrackgroup);
     } catch (e) {

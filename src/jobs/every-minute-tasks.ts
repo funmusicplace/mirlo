@@ -1,20 +1,15 @@
+import { endScheduledPreorders } from "./end-scheduled-preorders";
 import sendPostToActivityPubFollowers from "./send-post-to-activitypub-followers";
 import { triggerAutoPurchaseNewAlbums } from "./trigger-auto-purchase-new-albums";
 import { triggerPostNotifications } from "./trigger-post-notifications";
-import { endScheduledPreorders } from "./end-scheduled-preorders";
+import { triggerTrackGroupPublishNotifications } from "./trigger-trackgroup-publish-notifications";
 
 const everyMinuteTasks = async () => {
-  // 1. Discover posts ready to notify (both manually published and scheduled)
   await triggerPostNotifications();
-
-  // 2. Send to external platforms (ActivityPub)
   await sendPostToActivityPubFollowers();
-
-  // 3. Handle business logic (auto-purchases, etc.)
   await triggerAutoPurchaseNewAlbums();
-
-  // 4. End pre-orders whose release date has passed
   await endScheduledPreorders();
+  await triggerTrackGroupPublishNotifications();
 };
 
 everyMinuteTasks()
