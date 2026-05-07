@@ -32,7 +32,7 @@ const checkForPrivateEndpoint = (path: string, query?: { format?: string }) => {
 
 export const isValidActivityPubEndpoint = (path: string) => {
   return (
-    /^\/v1\/ap\/artists\/[\w-]+(?:\/(?:outbox|followers|following|inbox))?$/.test(
+    /^\/v1\/ap\/artists\/[\w-]+(?:\/(?:outbox|followers|following|inbox|activities|posts|releases)(?:\/[\w-]+)?)?$/.test(
       path
     ) || /^\/.well-known\/(webfinger|nodeinfo)/.test(path)
   );

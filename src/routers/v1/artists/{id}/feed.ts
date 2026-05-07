@@ -26,6 +26,7 @@ export const getPostsVisibleToUser = async (
     artistId: Number(artist.id),
     isPublic: true,
     isDraft: false,
+    deletedAt: null,
   };
 
   if (user) {
