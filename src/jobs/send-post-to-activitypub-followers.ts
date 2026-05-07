@@ -27,106 +27,72 @@ export function parseMentionsFromContent(content: string): ApMention[] {
   return mentions;
 }
 
-/**
- * Sends published posts to ActivityPub followers' inboxes
+/** * Sends published posts to ActivityPub followers' inboxes
  * This job should run periodically to deliver new posts to federated servers
  */
 const sendPostToActivityPubFollowers = async () => {
   const date = new Date();
 
-  const notifications = await prisma.notification.findMany({
+  const posts = await prisma.post.findMany({
     where: {
-      isRead: false,
-      createdAt: { lte: date },
-      notificationType: "NEW_ARTIST_POST",
-      deliveryMethod: { in: ["ACTIVITYPUB", "BOTH"] },
-      post: {
-        deletedAt: null,
-        isDraft: false,
-        isPublic: true,
-        publishedAt: { lte: date },
-      },
+      deletedAt: null,
+      isDraft: false,
+      isPublic: true,
+      publishedAt: { lte: date },
+      hasActivityPubBeenSent: false,
+      artist: { activityPub: true },
     },
     select: {
       id: true,
-      post: {
+      title: true,
+      content: true,
+      urlSlug: true,
+      publishedAt: true,
+      artist: {
         select: {
           id: true,
-          title: true,
-          content: true,
           urlSlug: true,
-          publishedAt: true,
-          artistId: true,
-          artist: {
-            select: {
-              id: true,
-              urlSlug: true,
-              name: true,
-              activityPub: true,
-              activityPubArtistFollowers: { select: { actor: true } },
-            },
-          },
+          name: true,
+          activityPub: true,
+          activityPubArtistFollowers: { select: { actor: true } },
         },
       },
     },
   });
 
   logger.info(
-    `sendPostToActivityPubFollowers: found ${notifications.length} notifications to process`
+    `sendPostToActivityPubFollowers: found ${posts.length} posts to process`
   );
 
-  const postMap = new Map<
-    number,
-    { post: (typeof notifications)[0]["post"]; notificationIds: string[] }
-  >();
-
-  for (const notif of notifications) {
-    if (!notif.post) continue;
-    const postId = notif.post.id;
-    if (!postMap.has(postId)) {
-      postMap.set(postId, { post: notif.post, notificationIds: [notif.id] });
-    } else {
-      postMap.get(postId)!.notificationIds.push(notif.id);
-    }
-  }
-
-  logger.info(
-    `sendPostToActivityPubFollowers: grouped into ${postMap.size} unique posts`
-  );
-
-  for (const { post, notificationIds } of Array.from(postMap.values())) {
-    if (!post?.artist) {
+  for (const post of posts) {
+    if (!post.artist) {
       logger.warn(
-        `sendPostToActivityPubFollowers: post ${post?.id} has no artist`
+        `sendPostToActivityPubFollowers: post ${post.id} has no artist, skipping`
       );
-      await prisma.notification.updateMany({
-        where: { id: { in: notificationIds } },
-        data: { isRead: true },
+      await prisma.post.update({
+        where: { id: post.id },
+        data: { hasActivityPubBeenSent: true },
       });
       continue;
     }
 
-    if (!post.artist.activityPub) {
+    const mentions = parseMentionsFromContent(post.content ?? "");
+    const hasFollowers = post.artist.activityPubArtistFollowers.length > 0;
+
+    if (!hasFollowers && mentions.length === 0) {
       logger.info(
-        `sendPostToActivityPubFollowers: artist ${post.artist.urlSlug} does not have ActivityPub enabled`
+        `sendPostToActivityPubFollowers: artist ${post.artist.urlSlug} has no followers and no mentions, skipping`
       );
-      await prisma.notification.updateMany({
-        where: { id: { in: notificationIds } },
-        data: { isRead: true },
+      await prisma.post.update({
+        where: { id: post.id },
+        data: { hasActivityPubBeenSent: true },
       });
       continue;
     }
 
-    if (post.artist.activityPubArtistFollowers.length === 0) {
-      logger.info(
-        `sendPostToActivityPubFollowers: artist ${post.artist.urlSlug} has no followers`
-      );
-      await prisma.notification.updateMany({
-        where: { id: { in: notificationIds } },
-        data: { isRead: true },
-      });
-      continue;
-    }
+    logger.info(
+      `sendPostToActivityPubFollowers: processing post ${post.id} (${mentions.length} mention(s), hasFollowers=${hasFollowers})`
+    );
 
     const identifier = post.artist.urlSlug;
     const actorUri = new URL(`https://${root}/v1/ap/artists/${identifier}`);
@@ -139,7 +105,6 @@ const sendPostToActivityPubFollowers = async () => {
       new Request(`https://${root}`),
       undefined
     );
-    const mentions = parseMentionsFromContent(post.content ?? "");
 
     const createActivity = new Create({
       id: new URL(`${noteId.href}#activity-${guid}`),
@@ -161,19 +126,20 @@ const sendPostToActivityPubFollowers = async () => {
       }),
     });
 
-    try {
-      await ctx.sendActivity({ identifier }, "followers", createActivity, {
-        immediate: true,
-      });
-
-      logger.info(
-        `sendPostToActivityPubFollowers: sent post ${post.id} to followers of ${identifier}`
-      );
-    } catch (error) {
-      logger.error(
-        `sendPostToActivityPubFollowers: failed to send post ${post.id} to followers:`,
-        error
-      );
+    if (hasFollowers) {
+      try {
+        await ctx.sendActivity({ identifier }, "followers", createActivity, {
+          immediate: true,
+        });
+        logger.info(
+          `sendPostToActivityPubFollowers: sent post ${post.id} to followers of ${identifier}`
+        );
+      } catch (error) {
+        logger.error(
+          `sendPostToActivityPubFollowers: failed to send post ${post.id} to followers:`,
+          error
+        );
+      }
     }
 
     // Deliver to mentioned actors not already covered by the followers fanout
@@ -224,11 +190,22 @@ const sendPostToActivityPubFollowers = async () => {
       }
     }
 
-    // Mark all notifications for this post as read even if some deliveries failed
-    await prisma.notification.updateMany({
-      where: { id: { in: notificationIds } },
-      data: { isRead: true },
-    });
+    // Mark post as sent and clean up any related subscriber notifications,
+    // even if some deliveries failed.
+    await prisma.$transaction([
+      prisma.post.update({
+        where: { id: post.id },
+        data: { hasActivityPubBeenSent: true },
+      }),
+      prisma.notification.updateMany({
+        where: {
+          postId: post.id,
+          notificationType: "NEW_ARTIST_POST",
+          deliveryMethod: { in: ["ACTIVITYPUB", "BOTH"] },
+        },
+        data: { isRead: true },
+      }),
+    ]);
   }
 };
 
