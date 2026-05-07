@@ -1,17 +1,19 @@
-import FormComponent from "components/common/FormComponent";
-import React from "react";
-import SavingInput from "./SavingInput";
-import { useTranslation } from "react-i18next";
-import { useFormContext } from "react-hook-form";
-import { useParams, Link } from "react-router-dom";
 import { css } from "@emotion/css";
-import { useAuthContext } from "state/AuthContext";
-import Button, { ButtonLink } from "components/common/Button";
-import { queryManagedTrackGroup, queryTrackGroupSupporters } from "queries";
 import { useQuery } from "@tanstack/react-query";
+import Button, { ButtonLink } from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import { getCurrencySymbol } from "components/common/Money";
+import { queryManagedTrackGroup, queryTrackGroupSupporters } from "queries";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaTrash } from "react-icons/fa";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { FaEye, FaTrash } from "react-icons/fa";
+
+import { TrackGroupFormData } from "../ManageTrackGroup";
 
 const FundraisingGoal: React.FC<{
   trackGroupId: number;
@@ -23,8 +25,7 @@ const FundraisingGoal: React.FC<{
 }> = ({ trackGroupId, fundraiser }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const { watch } = useFormContext();
-  const { artistId } = useParams();
+  const { register, watch } = useFormContext<TrackGroupFormData>();
   const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(false);
   const [didAddFundraiser, setDidAddFundraiser] = React.useState(false);
@@ -33,7 +34,7 @@ const FundraisingGoal: React.FC<{
     queryManagedTrackGroup(trackGroupId)
   );
 
-  const goal = watch("fundraisingGoal");
+  const goal = watch("goalAmount");
   const isAllOrNothing = watch("isAllOrNothing");
 
   const {
@@ -114,7 +115,14 @@ const FundraisingGoal: React.FC<{
     }
   };
 
-  const goalRef = React.useRef<HTMLElement>(null);
+  const goalRef = React.useRef<HTMLInputElement | null>(null);
+  const { ref: goalRegisterRef, ...goalRegisterRest } = register("goalAmount", {
+    min: 0,
+  });
+  const setGoalRef = (el: HTMLInputElement | null) => {
+    goalRegisterRef(el);
+    goalRef.current = el;
+  };
 
   React.useEffect(() => {
     if (didAddFundraiser) {
@@ -188,19 +196,20 @@ const FundraisingGoal: React.FC<{
         </FormComponent> */}
         <FormComponent>
           <label htmlFor="input-goal-amount">{t("goal")}</label>
-          <SavingInput
-            ariaDescribedBy="description-goal-amount"
-            formKey="goalAmount"
-            id="input-goal-amount"
-            ref={goalRef}
-            url={`manage/fundraisers/${fundraiser.id}`}
-            extraData={{ artistId: Number(artistId) }}
-            type="number"
-            multiplyBy100
-            currency={user?.currency}
-            step="0.01"
-            min={0}
-          />
+          <div className="flex items-center gap-2">
+            {user?.currency && (
+              <span className="ml-1">{getCurrencySymbol(user.currency)}</span>
+            )}
+            <InputEl
+              aria-describedby="description-goal-amount"
+              id="input-goal-amount"
+              type="number"
+              step="0.01"
+              min={0}
+              {...goalRegisterRest}
+              ref={setGoalRef}
+            />
+          </div>
           <span className="text-sm" id="description-goal-amount">
             {t("fundraisingGoalDescription")}
           </span>
@@ -208,14 +217,11 @@ const FundraisingGoal: React.FC<{
       </div>
       <FormComponent direction="row">
         <div>
-          <SavingInput
-            ariaDescribedBy="description-all-or-nothing"
-            formKey="isAllOrNothing"
+          <InputEl
+            aria-describedby="description-all-or-nothing"
             id="isAllOrNothing"
-            timer={0}
-            url={`manage/fundraisers/${fundraiser.id}`}
-            extraData={{ artistId: Number(artistId) }}
             type="checkbox"
+            {...register("isAllOrNothing")}
           />
         </div>
         <div className="flex flex-col pl-2">

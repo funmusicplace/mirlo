@@ -8,10 +8,14 @@ import { useSnackbar } from "state/SnackbarContext";
 import { isTrackGroupPublished } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
+import { useSaveTrackGroupForm } from "./ManageTrackGroup/AlbumFormComponents/saveTrackGroupForm";
+import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
+
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
   reload: () => Promise<unknown>;
-}> = ({ trackGroup, reload }) => {
+  onSaveSuccess?: () => void;
+}> = ({ trackGroup, reload, onSaveSuccess }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageAlbum",
   });
@@ -22,9 +26,12 @@ const PublishButton: React.FC<{
 
   const { artistId, trackGroupId } = useParams();
   const { data: artist } = useArtistQuery();
-  const formContext = useFormContext();
+  const formContext = useFormContext<TrackGroupFormData>();
+  const isDirty = formContext?.formState.isDirty ?? false;
 
   const artistUserId = artist?.userId;
+
+  const save = useSaveTrackGroupForm(trackGroup, Number(artistId), reload);
 
   const publishTrackGroup = React.useCallback(async () => {
     setIsPublishing(true);
@@ -70,15 +77,9 @@ const PublishButton: React.FC<{
 
     try {
       if (artistUserId && trackGroupId) {
-        if (formContext && artistId) {
-          const values = formContext.getValues();
-          const desiredIsPublic = values.isPublic ?? trackGroup.isPublic;
-          if (desiredIsPublic !== trackGroup.isPublic) {
-            await api.put(`manage/trackGroups/${trackGroupId}`, {
-              isPublic: desiredIsPublic,
-              artistId: Number(artistId),
-            });
-          }
+        if (isDirty) {
+          await save();
+          onSaveSuccess?.();
         }
         await api.put(`manage/trackGroups/${trackGroupId}/publish`, {});
         snackbar(
@@ -100,41 +101,21 @@ const PublishButton: React.FC<{
   }, [
     trackGroup.tracks,
     trackGroup.publishedAt,
-    trackGroup.isPublic,
     t,
     artistUserId,
-    artistId,
     trackGroupId,
-    formContext,
+    isDirty,
+    save,
+    onSaveSuccess,
     snackbar,
     reload,
   ]);
 
   const updateRelease = React.useCallback(async () => {
-    if (!trackGroupId || !artistId || !formContext) return;
     setIsUpdating(true);
     try {
-      const values = formContext.getValues();
-      await api.put(`manage/trackGroups/${trackGroupId}`, {
-        title: values.title,
-        about: values.about,
-        credits: values.credits,
-        releaseDate: values.releaseDate
-          ? new Date(values.releaseDate).toISOString()
-          : null,
-        publishedAt: values.publishedAt
-          ? new Date(values.publishedAt).toISOString()
-          : null,
-        minPrice: values.minPrice ? Number(values.minPrice) * 100 : null,
-        suggestedPrice: values.suggestedPrice
-          ? Number(values.suggestedPrice) * 100
-          : null,
-        catalogNumber: values.catalogNumber,
-        urlSlug: values.urlSlug,
-        isPublic: values.isPublic,
-        artistId: Number(artistId),
-      });
-      await reload();
+      await save();
+      onSaveSuccess?.();
       snackbar(t("releaseUpdated"), { type: "success" });
     } catch (e) {
       snackbar((e as { message: string }).message ?? t("somethingWentWrong"), {
@@ -143,7 +124,7 @@ const PublishButton: React.FC<{
     } finally {
       setIsUpdating(false);
     }
-  }, [trackGroupId, artistId, formContext, reload, snackbar, t]);
+  }, [save, onSaveSuccess, snackbar, t]);
 
   if (!trackGroup || !artist) {
     return null;
@@ -157,7 +138,7 @@ const PublishButton: React.FC<{
         <ArtistButton
           isLoading={isUpdating}
           onClick={updateRelease}
-          disabled={isUpdating}
+          disabled={isUpdating || !isDirty}
           className="!bg-(--mi-green-500) !border-(--mi-green-700) !text-(--mi-green-100) [&_svg]:!fill-(--mi-green-100) enabled:hover:!bg-(--mi-green-700) enabled:hover:!border-(--mi-green-700) disabled:grayscale disabled:!opacity-50"
         >
           {t("updateRelease")}

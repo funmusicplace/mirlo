@@ -1,35 +1,36 @@
 import { css } from "@emotion/css";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import TextArea from "components/common/TextArea";
 import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 import PublishButton from "components/ManageArtist/PublishButton";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
-import { useParams } from "react-router-dom";
 import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
 
 import { bp } from "../../../../constants";
 import UploadArtistImage from "../../UploadArtistImage";
+import { TrackGroupFormData } from "../ManageTrackGroup";
 
 import FundraisingGoal from "./FundraisingGoal";
 import ManageTags from "./ManageTags";
 import PreOrderSection from "./PreOrderSection";
 import PriceAndSuch from "./PriceAndSuch";
 import SaveDraftBar from "./SaveDraftBar";
-import SavingInput from "./SavingInput";
 import SchedulePublication from "./SchedulePublication";
 import VisibilityRadio from "./VisibilityRadio";
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
   reload: () => Promise<unknown>;
-}> = ({ existingObject, reload }) => {
-  const { watch } = useFormContext();
+  onSaveSuccess?: () => void;
+}> = ({ existingObject, reload, onSaveSuccess }) => {
+  const { register, watch } = useFormContext<TrackGroupFormData>();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
-  const { artistId, trackGroupId } = useParams();
   const urlSlug = watch("urlSlug");
   const releaseDateValue = watch("releaseDate");
 
@@ -38,7 +39,11 @@ const AlbumFormContent: React.FC<{
   return (
     <>
       <div className="flex flex-wrap items-start gap-2 mt-4">
-        <SaveDraftBar existingObject={existingObject} reload={reload} />
+        <SaveDraftBar
+          existingObject={existingObject}
+          reload={reload}
+          onSaveSuccess={onSaveSuccess}
+        />
         {!isTrackGroupPublished(existingObject) &&
           (existingObject.tracks?.length > 0 || !!existingObject.fundraiser) &&
           existingObject.artist && (
@@ -51,7 +56,11 @@ const AlbumFormContent: React.FC<{
             </ArtistButtonLink>
           )}
         <div className="ml-auto flex flex-col items-end gap-1">
-          <PublishButton trackGroup={existingObject} reload={reload} />
+          <PublishButton
+            trackGroup={existingObject}
+            reload={reload}
+            onSaveSuccess={onSaveSuccess}
+          />
           <SchedulePublication
             existingObject={existingObject}
             reload={reload}
@@ -69,21 +78,11 @@ const AlbumFormContent: React.FC<{
         <div className="md:grid md:grid-cols-2 gap-4">
           <FormComponent>
             <label htmlFor="input-title">{t("title")}</label>
-            <SavingInput
-              formKey="title"
-              id="input-title"
-              url={`manage/trackGroups/${trackGroupId}`}
-              extraData={{ artistId: Number(artistId) }}
-            />
+            <InputEl id="input-title" {...register("title")} />
           </FormComponent>
           <FormComponent>
             <label htmlFor="input-slug">{t("urlSlug")}</label>
-            <SavingInput
-              formKey="urlSlug"
-              id="input-slug"
-              url={`manage/trackGroups/${trackGroupId}`}
-              extraData={{ artistId: Number(artistId) }}
-            />
+            <InputEl id="input-slug" {...register("urlSlug")} />
             {isTrackGroupPublished(existingObject) && (
               <small>
                 <span>
@@ -113,13 +112,11 @@ const AlbumFormContent: React.FC<{
         >
           <FormComponent>
             <label htmlFor="input-release-date">{t("releaseDate")}</label>
-            <SavingInput
-              ariaDescribedBy="hint-release-date"
-              formKey="releaseDate"
+            <InputEl
+              aria-describedby="hint-release-date"
               id="input-release-date"
               type="date"
-              url={`manage/trackGroups/${trackGroupId}`}
-              extraData={{ artistId: Number(artistId) }}
+              {...register("releaseDate")}
             />
             <small id="hint-release-date">
               {existingObject.scheduleEndOnReleaseDate ? (
@@ -161,23 +158,11 @@ const AlbumFormContent: React.FC<{
         <h2>{t("aboutTheAlbum")}</h2>
         <FormComponent>
           <label htmlFor="input-about">{t("about")} </label>
-          <SavingInput
-            formKey="about"
-            id="input-about"
-            rows={5}
-            url={`manage/trackGroups/${trackGroupId}`}
-            extraData={{ artistId: Number(artistId) }}
-          />
+          <TextArea id="input-about" rows={5} {...register("about")} />
         </FormComponent>
         <FormComponent>
           <label htmlFor="input-credits">{t("credits")} </label>
-          <SavingInput
-            formKey="credits"
-            id="input-credits"
-            rows={5}
-            url={`manage/trackGroups/${trackGroupId}`}
-            extraData={{ artistId: Number(artistId) }}
-          />
+          <TextArea id="input-credits" rows={5} {...register("credits")} />
         </FormComponent>
         <div
           className={css`
@@ -192,12 +177,7 @@ const AlbumFormContent: React.FC<{
         >
           <FormComponent>
             <label htmlFor="input-catalog-number">{t("catalogNumber")}</label>
-            <SavingInput
-              formKey="catalogNumber"
-              id="input-catalog-number"
-              url={`manage/trackGroups/${trackGroupId}`}
-              extraData={{ artistId: Number(artistId) }}
-            />
+            <InputEl id="input-catalog-number" {...register("catalogNumber")} />
           </FormComponent>
         </div>
       </FormSection>

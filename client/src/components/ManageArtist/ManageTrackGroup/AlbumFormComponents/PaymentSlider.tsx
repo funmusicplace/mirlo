@@ -1,37 +1,30 @@
 import { css } from "@emotion/css";
-import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import Pill from "components/common/Pill";
-import { queryArtist } from "queries";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { IoHelp } from "react-icons/io5";
-import { useParams } from "react-router-dom";
 import api from "services/api";
 
 const PaymentSlider: React.FC<{
   label: string;
-  url: string;
   ariaDescribedBy?: string;
   keyName?: string;
+  url?: string;
   extraData?: { artistId: number };
 }> = ({
   label,
-  url,
   ariaDescribedBy,
-  extraData,
   keyName = "platformPercent",
+  url,
+  extraData,
 }) => {
-  const { artistId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "paymentSlider" });
   const [isOpen, setIsInfoOpen] = React.useState(false);
 
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
-  );
   const methods = useFormContext();
   const { field } = useController({
     control: methods.control,
@@ -41,7 +34,8 @@ const PaymentSlider: React.FC<{
     ? Number(field.value)
     : 0;
 
-  const onBlur = React.useCallback(async () => {
+  const onInstantSave = React.useCallback(async () => {
+    if (!url) return;
     try {
       await api.put<unknown, unknown>(url, {
         ...extraData,
@@ -89,9 +83,9 @@ const PaymentSlider: React.FC<{
             onChange={(event) => field.onChange(Number(event.target.value))}
             onBlur={() => {
               field.onBlur();
-              onBlur();
+              onInstantSave();
             }}
-            onMouseUp={onBlur}
+            onMouseUp={onInstantSave}
             className={css`
               -webkit-appearance: none;
               width: 100%;
@@ -135,7 +129,7 @@ const PaymentSlider: React.FC<{
             onChange={(event) => field.onChange(Number(event.target.value))}
             onBlur={() => {
               field.onBlur();
-              onBlur();
+              onInstantSave();
             }}
             className="w-[100px]!"
           />
