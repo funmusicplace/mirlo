@@ -158,22 +158,22 @@ federation
     return [{ publicKey, privateKey }];
   });
 
-federation.setOutboxDispatcher(
-  "/v1/ap/artists/{identifier}/outbox",
-  async (ctx, identifier) => {
-    const parsedId = await findArtistIdForURLSlug(identifier);
-    if (!parsedId) return null;
+federation
+  .setOutboxDispatcher(
+    "/v1/ap/artists/{identifier}/outbox",
+    async (ctx, identifier) => {
+      const parsedId = await findArtistIdForURLSlug(identifier);
+      if (!parsedId) return null;
 
-    const artist = await prisma.artist.findFirst({
-      where: { id: parsedId, activityPub: true },
-      include: {
-        subscriptionTiers: true,
-      },
-    });
-    if (!artist) return null;
-    const zipped = await buildFeedForArtist(undefined, artist);
-    return {
-      items: zipped.map((item) => {
+      const artist = await prisma.artist.findFirst({
+        where: { id: parsedId, activityPub: true },
+        include: {
+          subscriptionTiers: true,
+        },
+      });
+      if (!artist) return null;
+      const zipped = await buildFeedForArtist(undefined, artist);
+      const creates = zipped.map((item) => {
         if (isPost(item)) {
           return new Create({
             id: ctx.getObjectUri(Create, {
@@ -201,10 +201,25 @@ federation.setOutboxDispatcher(
             }),
           });
         }
-      }),
-    };
-  }
-);
+      });
+      return {
+        items: creates,
+      };
+    }
+  )
+  .setCounter(async (_ctx, identifier) => {
+    const parsedId = await findArtistIdForURLSlug(identifier);
+    if (!parsedId) return 0n;
+    const artist = await prisma.artist.findFirst({
+      where: { id: parsedId, activityPub: true },
+      include: {
+        subscriptionTiers: true,
+      },
+    });
+    if (!artist) return 0n;
+    const feed = await buildFeedForArtist(undefined, artist);
+    return BigInt(feed.length);
+  });
 
 const findAPReleaseById = async (id: number) => {
   return await prisma.trackGroup.findFirst({
@@ -230,6 +245,7 @@ const findAPPostById = async (id: number) => {
       id,
       deletedAt: null,
       isDraft: false,
+      isPublic: true,
       artist: {
         enabled: true,
         activityPub: true,
