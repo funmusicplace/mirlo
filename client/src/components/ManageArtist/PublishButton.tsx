@@ -3,7 +3,6 @@ import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { FaLock } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
@@ -158,7 +157,6 @@ const PublishButton: React.FC<{
     return (
       <div className="flex flex-wrap gap-3">
         <ArtistButton
-          startIcon={<FaLock />}
           isLoading={isUpdating}
           onClick={updateRelease}
           disabled={isUpdating}
@@ -176,7 +174,6 @@ const PublishButton: React.FC<{
   return (
     <div className="flex flex-wrap gap-3">
       <ArtistButton
-        startIcon={<FaLock />}
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing || nothingToPublish}
