@@ -1,11 +1,5 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEY_TRACK_GROUPS } from "queries/queryKeys";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import useErrorHandler from "services/useErrorHandler";
-import { useAuthContext } from "state/AuthContext";
-import { useSnackbar } from "state/SnackbarContext";
 
 import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
 import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
@@ -14,17 +8,8 @@ const AlbumForm: React.FC<{
   trackGroup: TrackGroup;
   artist: Artist;
   reload: () => Promise<unknown>;
-  isFlowV2?: boolean;
-}> = ({ trackGroup, artist, reload, isFlowV2 }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const snackbar = useSnackbar();
-  const errorHandler = useErrorHandler();
-
+}> = ({ trackGroup, reload }) => {
   const methods = useForm<TrackGroupFormData>();
-  const { handleSubmit } = methods;
-  const { user } = useAuthContext();
-  const userId = user?.id;
-  const client = useQueryClient();
 
   React.useEffect(() => {
     const trackGroupIsGettable = trackGroup?.isGettable ?? false;
@@ -57,57 +42,10 @@ const AlbumForm: React.FC<{
     methods.reset(defaultValues, { keepDirtyValues: true });
   }, [trackGroup]);
 
-  const artistId = artist?.id;
-  const trackGroupId = trackGroup?.id;
-
-  const doSave = React.useCallback(async () => {
-    if (userId) {
-      try {
-        snackbar(t("trackGroupUpdated"), {
-          type: "success",
-        });
-      } catch (e) {
-        errorHandler(e);
-      } finally {
-        await reload();
-      }
-    }
-
-    const timeout = setTimeout(() => {
-      client.invalidateQueries({
-        predicate: (query) => {
-          const shouldInvalidate = query.queryKey.find((obj) => {
-            if (typeof obj === "string") {
-              return obj
-                .toLowerCase()
-                .includes(QUERY_KEY_TRACK_GROUPS.toLowerCase());
-            }
-            return false;
-          });
-
-          return !!shouldInvalidate;
-        },
-      });
-
-      snackbar(t("merchUpdated"), {
-        type: "success",
-      });
-    }, 2000);
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [t, userId, trackGroupId, snackbar, artistId, errorHandler, reload]);
-
   return (
     <div>
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(doSave)}>
-          <AlbumFormContent
-            existingObject={trackGroup}
-            reload={reload}
-            isFlowV2={isFlowV2}
-          />
-        </form>
+        <AlbumFormContent existingObject={trackGroup} reload={reload} />
       </FormProvider>
     </div>
   );

@@ -62,7 +62,7 @@ describe("schedule publication flow", () => {
     });
 
     it("disables the Schedule confirm button when no date is selected", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.contains("Schedule publication date").click();
@@ -70,7 +70,7 @@ describe("schedule publication flow", () => {
     });
 
     it("schedules a publication date and shows the confirmation label", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.contains("Schedule publication date").click();
@@ -117,7 +117,7 @@ describe("schedule publication flow", () => {
     });
 
     it("cancels a scheduled publication and restores the link", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.contains("Will be published automatically on").should("exist");

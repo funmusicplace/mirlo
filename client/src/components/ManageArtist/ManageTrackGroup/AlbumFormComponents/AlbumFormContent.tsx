@@ -25,8 +25,7 @@ import VisibilityRadio from "./VisibilityRadio";
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
   reload: () => Promise<unknown>;
-  isFlowV2?: boolean;
-}> = ({ existingObject, reload, isFlowV2 }) => {
+}> = ({ existingObject, reload }) => {
   const { watch } = useFormContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
@@ -38,42 +37,33 @@ const AlbumFormContent: React.FC<{
 
   return (
     <>
-      {isFlowV2 && (
-        <div className="flex flex-wrap items-start gap-2 mt-4">
-          <SaveDraftBar existingObject={existingObject} reload={reload} />
-          {!isTrackGroupPublished(existingObject) &&
-            (existingObject.tracks?.length > 0 ||
-              !!existingObject.fundraiser) &&
-            existingObject.artist && (
-              <ArtistButtonLink
-                to={getReleaseUrl(existingObject.artist, existingObject)}
-                startIcon={<FaEye />}
-                variant="dashed"
-              >
-                {t("previewRelease")}
-              </ArtistButtonLink>
-            )}
-          <div className="ml-auto flex flex-col items-end gap-1">
-            <PublishButton
-              trackGroup={existingObject}
-              reload={reload}
-              isFlowV2={isFlowV2}
-            />
-            <SchedulePublication
-              existingObject={existingObject}
-              reload={reload}
-            />
-          </div>
+      <div className="flex flex-wrap items-start gap-2 mt-4">
+        <SaveDraftBar existingObject={existingObject} reload={reload} />
+        {!isTrackGroupPublished(existingObject) &&
+          (existingObject.tracks?.length > 0 || !!existingObject.fundraiser) &&
+          existingObject.artist && (
+            <ArtistButtonLink
+              to={getReleaseUrl(existingObject.artist, existingObject)}
+              startIcon={<FaEye />}
+              variant="dashed"
+            >
+              {t("previewRelease")}
+            </ArtistButtonLink>
+          )}
+        <div className="ml-auto flex flex-col items-end gap-1">
+          <PublishButton trackGroup={existingObject} reload={reload} />
+          <SchedulePublication
+            existingObject={existingObject}
+            reload={reload}
+          />
         </div>
-      )}
-      {isFlowV2 && <VisibilityRadio existingObject={existingObject} />}
-      {isFlowV2 && (
-        <PreOrderSection
-          existingObject={existingObject}
-          reload={reload}
-          hasReleaseDate={hasReleaseDate}
-        />
-      )}
+      </div>
+      <VisibilityRadio existingObject={existingObject} />
+      <PreOrderSection
+        existingObject={existingObject}
+        reload={reload}
+        hasReleaseDate={hasReleaseDate}
+      />
       <FormSection>
         <h2>{t("keyDetails")}</h2>
         <div className="md:grid md:grid-cols-2 gap-4">
@@ -121,22 +111,6 @@ const AlbumFormContent: React.FC<{
             }
           `}
         >
-          {!isFlowV2 && (
-            <FormComponent>
-              <label htmlFor="input-published-at">{t("publishedAt")}</label>
-              <SavingInput
-                ariaDescribedBy="hint-published-at"
-                formKey="publishedAt"
-                id="input-published-at"
-                type="date"
-                required
-                url={`manage/trackGroups/${trackGroupId}`}
-                extraData={{ artistId: Number(artistId) }}
-                reload={reload}
-              />
-              <small id="hint-published-at">{t("publishedAtHint")}</small>
-            </FormComponent>
-          )}
           <FormComponent>
             <label htmlFor="input-release-date">{t("releaseDate")}</label>
             <SavingInput
@@ -148,9 +122,7 @@ const AlbumFormContent: React.FC<{
               extraData={{ artistId: Number(artistId) }}
             />
             <small id="hint-release-date">
-              {!isFlowV2 ? (
-                t("releasedAtHint")
-              ) : existingObject.scheduleEndOnReleaseDate ? (
+              {existingObject.scheduleEndOnReleaseDate ? (
                 <Trans
                   i18nKey="manageAlbum.releaseDateScheduledHint"
                   components={{ strong: <strong /> }}

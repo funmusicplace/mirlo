@@ -73,7 +73,7 @@ describe("pre-order flow", () => {
     });
 
     it("enables pre-order and sets all tracks to must-own", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.contains("Pre-order").should("exist");
@@ -96,7 +96,7 @@ describe("pre-order flow", () => {
     });
 
     it("disables pre-order and resets tracks to free-listen", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       // Toggle pre-order OFF
@@ -149,7 +149,7 @@ describe("pre-order flow", () => {
     });
 
     it("can schedule pre-order to end on release date", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.get("#input-schedule-preorder-release").check({ force: true });
@@ -162,7 +162,7 @@ describe("pre-order flow", () => {
     });
 
     it("can toggle set-tracks-free-listen-on-release when schedule is enabled", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.get("#input-make-tracks-previewable-on-release").check({
@@ -182,7 +182,7 @@ describe("pre-order flow", () => {
         `/v1/manage/trackGroups/${trackGroupId}/endPreorder`
       ).as("endPreorder");
 
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.contains("Release pre-order now").click();
