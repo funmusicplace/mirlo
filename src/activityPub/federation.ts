@@ -181,15 +181,10 @@ federation.setOutboxDispatcher(
               activityId: `post-${item.id}`,
             }),
             actor: ctx.getActorUri(identifier),
-            object: new Article({
-              id: ctx.getObjectUri(Article, {
-                identifier,
-                postId: String(item.id),
-              }),
-              name: item.title,
-              content: item.content ?? undefined,
-              published: getTemporal(item.publishedAt),
-              url: new URL(`${identifier}/posts/${item.id}`, ctx.url),
+            published: getTemporal(item.publishedAt),
+            object: ctx.getObjectUri(Article, {
+              identifier,
+              postId: String(item.id),
             }),
           });
         } else {
@@ -199,14 +194,10 @@ federation.setOutboxDispatcher(
               activityId: `release-${item.id}`,
             }),
             actor: ctx.getActorUri(identifier),
-            object: new Audio({
-              id: ctx.getObjectUri(Audio, {
-                identifier,
-                releaseId: String(item.id),
-              }),
-              name: item.title ?? undefined,
-              content: item.about ?? undefined,
-              published: getTemporal(item.releaseDate),
+            published: getTemporal(item.releaseDate),
+            object: ctx.getObjectUri(Audio, {
+              identifier,
+              releaseId: String(item.id),
             }),
           });
         }
@@ -260,12 +251,13 @@ federation.setObjectDispatcher(
     const post = await findAPPostById(Number(postId));
     if (!post || post.artistId !== parsedId) return null;
 
+    const client = await getClient();
     return new Article({
       id: ctx.getObjectUri(Article, { identifier, postId }),
       name: post.title,
       content: post.content ?? undefined,
       published: getTemporal(post.publishedAt),
-      url: new URL(`${identifier}/posts/${post.id}`, ctx.url),
+      url: new URL(`/${identifier}/posts/${post.id}`, client.applicationUrl),
     });
   }
 );
