@@ -1,26 +1,26 @@
 #!/usr/bin/env node
 
+import { Job, Worker } from "bullmq";
 import * as dotenv from "dotenv";
+import winston from "winston";
+import yargs from "yargs";
+
 dotenv.config();
 
-import yargs from "yargs";
-import { Job, Worker } from "bullmq";
-import winston from "winston";
-import uploadAudioJob from "./upload-audio";
-import verifyAudioJob from "./verify-audio";
-import generateAlbumJob from "./generate-album";
-import optimizeImage from "./optimize-image";
-import cleanUpOldFilesJob from "./clean-up-old-files";
-import sendPostNotification from "./send-post-notification";
+import { REDIS_CONFIG } from "../config/redis";
 import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
 
+import cleanUpOldFilesJob from "./clean-up-old-files";
+import generateAlbumJob from "./generate-album";
+import optimizeImage from "./optimize-image";
 import sendMail from "./send-mail";
+import sendPostNotification from "./send-post-notification";
+import uploadAudioJob from "./upload-audio";
+import verifyAudioJob from "./verify-audio";
 
 import "../queues/send-mail-queue";
 import "../queues/send-post-notification-queue";
 import "../queues/auto-purchase-new-albums-queue";
-
-import { REDIS_CONFIG } from "../config/redis";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -43,6 +43,8 @@ const workerOptions = {
   connection: REDIS_CONFIG,
 };
 
+const workers: Worker[] = [];
+
 /**
  * Factory function to create a worker with standard event logging
  */
@@ -54,6 +56,7 @@ function createWorkerWithLogging(
   includeActiveEvent = false
 ): Worker {
   const worker = new Worker(queueName, processor, options);
+  workers.push(worker);
   logger.info(startupMessage);
 
   if (includeActiveEvent) {
@@ -86,7 +89,39 @@ function createWorkerWithLogging(
   return worker;
 }
 
-yargs // eslint-disable-line
+// Handle graceful shutdown
+async function gracefulShutdown(signal: string) {
+  logger.info(`Received ${signal}, shutting down gracefully...`);
+
+  try {
+    // Close all workers - this will wait for in-flight jobs to complete
+    // with a default timeout of 30 seconds per job
+    await Promise.all(
+      workers.map((worker) =>
+        worker.close().catch((err) => {
+          logger.error(`Error closing worker:`, err);
+        })
+      )
+    );
+    logger.info("All workers closed successfully");
+    process.exit(0);
+  } catch (error) {
+    logger.error("Error during graceful shutdown:", error);
+    process.exit(1);
+  }
+}
+
+// Register signal handlers
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (error) => {
+  logger.error("Uncaught exception:", error);
+  gracefulShutdown("uncaughtException");
+});
+
+yargs
   .command("run", "starts file processing queue", (argv: any) => {
     logger.info("STARTING WORKER QUEUE");
     audioQueue();
@@ -161,8 +196,8 @@ export async function generateAlbumQueueWorker() {
     generateAlbumJob,
     {
       ...workerOptions,
-      lockDuration: 10 * 60 * 1000, // 10 minutes
-      lockRenewTime: 5 * 60 * 1000, // Renew every 5 minutes
+      lockDuration: 60 * 60 * 1000, // 1 hour
+      lockRenewTime: 30 * 60 * 1000, // Renew every 30 minutes
     },
     "Generate Album worker started",
     true // includeActiveEvent
