@@ -106,7 +106,7 @@ federation
         summary: artist.bio ?? undefined,
         discoverable: true,
         inbox: ctx.getInboxUri(identifier),
-        outbox: new URL(`https://${root}/v1/artists/${identifier}/feed`), // feed stays at API path
+        outbox: ctx.getOutboxUri(identifier),
         followers: ctx.getFollowersUri(identifier),
         url: new URL(`${client.applicationUrl}/${identifier}`),
         publicKey: publicKeyObj,
@@ -174,35 +174,168 @@ federation.setOutboxDispatcher(
     const zipped = await buildFeedForArtist(undefined, artist);
     return {
       items: zipped.map((item) => {
-        return new Create({
-          id: new URL(
-            `/v1/ap/artists/${identifier}/outbox/${item.id}`,
-            ctx.url
-          ),
-          actor: ctx.getActorUri(identifier),
-          object: isPost(item)
-            ? new Article({
-                id: new URL(
-                  `/v1/ap/artists/${identifier}/feed/${item.id}`,
-                  ctx.url
-                ),
-                name: item.title,
-                content: item.content,
-                published: getTemporal(item.publishedAt),
-                url: new URL(`${identifier}/posts/${item.id}`, ctx.url),
-              })
-            : new Audio({
-                id: new URL(
-                  `/v1/ap/artists/${identifier}/feed/${item.id}`,
-                  ctx.url
-                ),
-                name: item.title,
-                content: item.about ?? undefined,
-                published: getTemporal(item.publishedAt),
+        if (isPost(item)) {
+          return new Create({
+            id: ctx.getObjectUri(Create, {
+              identifier,
+              activityId: `post-${item.id}`,
+            }),
+            actor: ctx.getActorUri(identifier),
+            object: new Article({
+              id: ctx.getObjectUri(Article, {
+                identifier,
+                postId: String(item.id),
               }),
-        });
+              name: item.title,
+              content: item.content ?? undefined,
+              published: getTemporal(item.publishedAt),
+              url: new URL(`${identifier}/posts/${item.id}`, ctx.url),
+            }),
+          });
+        } else {
+          return new Create({
+            id: ctx.getObjectUri(Create, {
+              identifier,
+              activityId: `release-${item.id}`,
+            }),
+            actor: ctx.getActorUri(identifier),
+            object: new Audio({
+              id: ctx.getObjectUri(Audio, {
+                identifier,
+                releaseId: String(item.id),
+              }),
+              name: item.title ?? undefined,
+              content: item.about ?? undefined,
+              published: getTemporal(item.releaseDate),
+            }),
+          });
+        }
       }),
     };
+  }
+);
+
+const findAPReleaseById = async (id: number) => {
+  return await prisma.trackGroup.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      isDrafts: false,
+      adminEnabled: true,
+      artist: {
+        enabled: true,
+        activityPub: true,
+      },
+    },
+    include: {
+      artist: true,
+    },
+  });
+};
+
+const findAPPostById = async (id: number) => {
+  return await prisma.post.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      isDraft: false,
+      artist: {
+        enabled: true,
+        activityPub: true,
+      },
+    },
+    include: {
+      artist: true,
+    },
+  });
+};
+
+federation.setObjectDispatcher(
+  Article,
+  "/v1/ap/artists/{identifier}/posts/{postId}",
+  async (ctx, { identifier, postId }) => {
+    const parsedId = await findArtistIdForURLSlug(identifier);
+    if (!parsedId) return null;
+
+    const post = await findAPPostById(Number(postId));
+    if (!post || post.artistId !== parsedId) return null;
+
+    return new Article({
+      id: ctx.getObjectUri(Article, { identifier, postId }),
+      name: post.title,
+      content: post.content ?? undefined,
+      published: getTemporal(post.publishedAt),
+      url: new URL(`${identifier}/posts/${post.id}`, ctx.url),
+    });
+  }
+);
+
+federation.setObjectDispatcher(
+  Audio,
+  "/v1/ap/artists/{identifier}/releases/{releaseId}",
+  async (ctx, { identifier, releaseId }) => {
+    const parsedId = await findArtistIdForURLSlug(identifier);
+    if (!parsedId) return null;
+
+    const trackGroup = await findAPReleaseById(Number(releaseId));
+    if (!trackGroup || trackGroup.artistId !== parsedId) return null;
+
+    return new Audio({
+      id: ctx.getObjectUri(Audio, { identifier, releaseId }),
+      name: trackGroup.title ?? undefined,
+      content: trackGroup.about ?? undefined,
+      published: getTemporal(trackGroup.releaseDate),
+    });
+  }
+);
+
+federation.setObjectDispatcher(
+  Create,
+  "/v1/ap/artists/{identifier}/activities/{activityId}",
+  async (ctx, { identifier, activityId }) => {
+    const parsedId = await findArtistIdForURLSlug(identifier);
+    if (!parsedId) return null;
+
+    const artist = await prisma.artist.findFirst({
+      where: { id: parsedId, activityPub: true },
+    });
+    if (!artist) return null;
+
+    const dashIndex = activityId.indexOf("-");
+    if (dashIndex === -1) return null;
+    const type = activityId.slice(0, dashIndex);
+    const rawId = Number(activityId.slice(dashIndex + 1));
+    if (isNaN(rawId)) return null;
+
+    if (type === "post") {
+      const post = await findAPPostById(Number(rawId));
+      if (!post || post.artistId !== parsedId) return null;
+
+      return new Create({
+        id: ctx.getObjectUri(Create, { identifier, activityId }),
+        actor: ctx.getActorUri(identifier),
+        object: ctx.getObjectUri(Article, {
+          identifier,
+          postId: String(rawId),
+        }),
+        published: getTemporal(post.publishedAt),
+      });
+    } else if (type === "release") {
+      const trackGroup = await findAPReleaseById(Number(rawId));
+      if (!trackGroup || trackGroup.artistId !== parsedId) return null;
+
+      return new Create({
+        id: ctx.getObjectUri(Create, { identifier, activityId }),
+        actor: ctx.getActorUri(identifier),
+        object: ctx.getObjectUri(Audio, {
+          identifier,
+          releaseId: String(rawId),
+        }),
+        published: getTemporal(trackGroup.releaseDate),
+      });
+    }
+
+    return null;
   }
 );
 
