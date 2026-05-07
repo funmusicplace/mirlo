@@ -59,7 +59,7 @@ describe("visibility flow", () => {
     });
 
     it("shows 'Publish as' legend with Public and Private radios on draft", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.contains("Publish as").should("exist");
@@ -68,7 +68,7 @@ describe("visibility flow", () => {
     });
 
     it("flipping radio Private does not auto-save", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.get("#input-visibility-private").check({ force: true });
@@ -78,7 +78,7 @@ describe("visibility flow", () => {
     });
 
     it("publishing as private commits isPublic=false then publishes", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.get("#input-visibility-private").check({ force: true });
@@ -121,7 +121,7 @@ describe("visibility flow", () => {
     });
 
     it("shows 'Visibility' legend (published variant) with Private checked", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.contains("Visibility").should("exist");
@@ -130,7 +130,7 @@ describe("visibility flow", () => {
     });
 
     it("flipping radio Public then Update release commits isPublic=true", () => {
-      cy.visit(`/manage/artists/${artistId}/release-flow-2/${trackGroupId}`);
+      cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
       cy.get("#input-visibility-public").check({ force: true });

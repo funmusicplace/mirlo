@@ -1,5 +1,4 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -12,9 +11,8 @@ import useArtistQuery from "utils/useArtistQuery";
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
   reload: () => Promise<unknown>;
-  isFlowV2?: boolean;
-}> = ({ trackGroup, reload, isFlowV2 }) => {
-  const { t, i18n } = useTranslation("translation", {
+}> = ({ trackGroup, reload }) => {
+  const { t } = useTranslation("translation", {
     keyPrefix: "manageAlbum",
   });
   const snackbar = useSnackbar();
@@ -153,7 +151,7 @@ const PublishButton: React.FC<{
 
   const isPublished = isTrackGroupPublished(trackGroup);
 
-  if (isFlowV2 && isPublished) {
+  if (isPublished) {
     return (
       <div className="flex flex-wrap gap-3">
         <ArtistButton
@@ -180,21 +178,7 @@ const PublishButton: React.FC<{
         title={nothingToPublish ? t("publishDisabledNoTracks") : undefined}
         className="!bg-(--mi-green-500) !border-(--mi-green-700) !text-(--mi-green-100) [&_svg]:!fill-(--mi-green-100) enabled:hover:!bg-(--mi-green-700) enabled:hover:!border-(--mi-green-700) disabled:grayscale disabled:!opacity-50"
       >
-        {isFlowV2
-          ? t("publishSimple")
-          : t(isPublished ? "makePrivate" : "publish", {
-              date: trackGroup.publishedAt
-                ? formatDate({
-                    date: trackGroup.publishedAt,
-                    options: {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    },
-                    i18n,
-                  })
-                : t("now"),
-            })}
+        {t("publishSimple")}
       </ArtistButton>
     </div>
   );
