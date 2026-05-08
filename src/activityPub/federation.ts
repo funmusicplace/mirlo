@@ -19,6 +19,7 @@ import {
   Follow,
   Image,
   Person,
+  PUBLIC_COLLECTION,
   Undo,
   Audio,
 } from "@fedify/fedify/vocab";
@@ -174,6 +175,7 @@ federation
       if (!artist) return null;
       const zipped = await buildFeedForArtist(undefined, artist);
       const client = await getClient();
+      const followersUri = ctx.getFollowersUri(identifier);
       const creates = zipped.map((item) => {
         if (isPost(item)) {
           return new Create({
@@ -182,6 +184,8 @@ federation
               activityId: `post-${item.id}`,
             }),
             actor: ctx.getActorUri(identifier),
+            to: PUBLIC_COLLECTION,
+            cc: followersUri,
             published: getTemporal(item.publishedAt),
             object: new Article({
               id: ctx.getObjectUri(Article, {
@@ -191,6 +195,8 @@ federation
               name: item.title,
               content: item.content ?? undefined,
               published: getTemporal(item.publishedAt),
+              to: PUBLIC_COLLECTION,
+              cc: followersUri,
               url: new URL(
                 `/${identifier}/posts/${item.id}`,
                 client.applicationUrl
@@ -204,6 +210,8 @@ federation
               activityId: `release-${item.id}`,
             }),
             actor: ctx.getActorUri(identifier),
+            to: PUBLIC_COLLECTION,
+            cc: followersUri,
             published: getTemporal(item.releaseDate),
             object: new Audio({
               id: ctx.getObjectUri(Audio, {
@@ -213,6 +221,8 @@ federation
               name: item.title ?? undefined,
               content: item.about ?? undefined,
               published: getTemporal(item.releaseDate),
+              to: PUBLIC_COLLECTION,
+              cc: followersUri,
             }),
           });
         }
