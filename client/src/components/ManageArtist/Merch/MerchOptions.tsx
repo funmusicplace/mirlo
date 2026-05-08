@@ -210,6 +210,9 @@ const MerchOptions: React.FC<{}> = () => {
         ...ot,
         options: ot.options?.map((o) => ({
           ...o,
+          quantityRemaining: o.quantityRemaining
+            ? Number(o.quantityRemaining)
+            : 0,
           additionalPrice: o.additionalPrice * 100,
         })),
       }));
