@@ -1,9 +1,13 @@
+import { isEqual } from "lodash";
 import React from "react";
 import { FieldValues, Path, PathValue, UseFormReturn } from "react-hook-form";
 import { useDebouncedCallback } from "use-debounce";
 
+import { safeLocalStorage } from "./safeLocalStorage";
+
 interface UseFormPersistResult {
   hasRestoredDraft: boolean;
+  restoredFields: string[];
   clearDraft: () => void;
   discardDraft: (serverValues: FieldValues) => void;
   dismissBanner: () => void;
@@ -13,77 +17,80 @@ export function useFormPersist<T extends FieldValues>(
   key: string | null,
   methods: UseFormReturn<T>
 ): UseFormPersistResult {
-  const [hasRestoredDraft, setHasRestoredDraft] = React.useState(false);
+  const [restoredFields, setRestoredFields] = React.useState<string[]>([]);
   const hasRestoredOnce = React.useRef(false);
 
   React.useEffect(() => {
     if (!key || hasRestoredOnce.current) return;
+    const raw = safeLocalStorage.read(key);
+    if (!raw) return;
     try {
-      const raw = window.localStorage.getItem(key);
-      if (!raw) return;
       const parsed = JSON.parse(raw);
-      let anyDifferent = false;
+      const changed: string[] = [];
       Object.entries(parsed).forEach(([fieldName, value]) => {
         const currentValue = methods.getValues(fieldName as Path<T>);
-        if (!Object.is(currentValue, value)) {
-          anyDifferent = true;
+        if (!isEqual(currentValue, value)) {
+          changed.push(fieldName);
+          methods.setValue(
+            fieldName as Path<T>,
+            value as PathValue<T, Path<T>>,
+            { shouldDirty: true }
+          );
         }
-        methods.setValue(fieldName as Path<T>, value as PathValue<T, Path<T>>, {
-          shouldDirty: true,
-        });
       });
       hasRestoredOnce.current = true;
-      if (anyDifferent) {
-        setHasRestoredDraft(true);
+      if (changed.length > 0) {
+        setRestoredFields(changed);
       } else {
-        window.localStorage.removeItem(key);
+        safeLocalStorage.remove(key);
       }
     } catch {}
   }, [key, methods]);
 
   const persistDraft = useDebouncedCallback((values: T) => {
     if (!key) return;
-    try {
-      window.localStorage.setItem(key, JSON.stringify(values));
-    } catch {}
+    safeLocalStorage.write(key, JSON.stringify(values));
   }, 500);
 
   React.useEffect(() => {
     if (!key) return;
     const subscription = methods.watch((values) => {
+      if (!methods.formState.isDirty) return;
       persistDraft(values as T);
     });
     return () => {
       subscription.unsubscribe();
-      persistDraft.cancel();
+      persistDraft.flush();
     };
   }, [key, methods, persistDraft]);
 
   const clearDraft = React.useCallback(() => {
     if (!key) return;
     persistDraft.cancel();
-    try {
-      window.localStorage.removeItem(key);
-    } catch {}
-    setHasRestoredDraft(false);
+    safeLocalStorage.remove(key);
+    setRestoredFields([]);
   }, [key, persistDraft]);
 
   const discardDraft = React.useCallback(
     (serverValues: FieldValues) => {
       if (!key) return;
       persistDraft.cancel();
-      try {
-        window.localStorage.removeItem(key);
-      } catch {}
+      safeLocalStorage.remove(key);
       methods.reset(serverValues as T);
-      setHasRestoredDraft(false);
+      setRestoredFields([]);
     },
     [key, methods, persistDraft]
   );
 
   const dismissBanner = React.useCallback(() => {
-    setHasRestoredDraft(false);
+    setRestoredFields([]);
   }, []);
 
-  return { hasRestoredDraft, clearDraft, discardDraft, dismissBanner };
+  return {
+    hasRestoredDraft: restoredFields.length > 0,
+    restoredFields,
+    clearDraft,
+    discardDraft,
+    dismissBanner,
+  };
 }

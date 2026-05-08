@@ -14,6 +14,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { getArtistManageUrl } from "utils/artist";
+import { useBodyDraft } from "utils/useBodyDraft";
 import { useFormPersist } from "utils/useFormPersist";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 
@@ -24,7 +25,6 @@ import EditPostHeader from "./EditPostHeader";
 export type PostFormData = {
   title: string;
   publishedAt: string;
-  content: string;
   isPublic: boolean;
   minimumTier: string;
   shouldSendEmail: boolean;
@@ -57,22 +57,66 @@ const PostForm: React.FC<{
     dateBase.setMinutes(dateBase.getMinutes() - dateBase.getTimezoneOffset());
     const publishedAtIso = dateBase.toISOString().slice(0, 16);
 
-    return post
-      ? { ...post, publishedAt: publishedAtIso }
-      : {
-          publishedAt: publishedAtIso,
-          shouldSendEmail: true,
-          isPublic: true,
-        };
+    if (!post) {
+      return {
+        publishedAt: publishedAtIso,
+        shouldSendEmail: true,
+        isPublic: true,
+      };
+    }
+
+    const postWithEmail = post as Post & { shouldSendEmail?: boolean };
+    return {
+      title: postWithEmail.title,
+      publishedAt: publishedAtIso,
+      isPublic: postWithEmail.isPublic,
+      shouldSendEmail: postWithEmail.shouldSendEmail,
+    };
   }, [post]);
 
   const methods = useForm<PostFormData>({
     defaultValues: buildDefaultValues(),
   });
 
-  const draftKey = post?.id ? `postDraft-${post.id}` : null;
-  const { hasRestoredDraft, clearDraft, discardDraft, dismissBanner } =
-    useFormPersist(draftKey, methods);
+  const formDraftKey = post?.id ? `postDraft-${post.id}` : null;
+  const {
+    hasRestoredDraft: hasRestoredFormDraft,
+    clearDraft: clearFormDraft,
+    discardDraft: discardFormDraft,
+    dismissBanner: dismissFormBanner,
+  } = useFormPersist(formDraftKey, methods);
+
+  const bodyDraftKey = post?.id ? `postBodyDraft-${post.id}` : null;
+  const serverContent = post?.content ?? "";
+  const {
+    content: bodyContent,
+    hasRestoredDraft: hasRestoredBodyDraft,
+    setContent: setBodyContent,
+    clearDraft: clearBodyDraft,
+    discardDraft: discardBodyDraft,
+    dismissBanner: dismissBodyBanner,
+  } = useBodyDraft(bodyDraftKey, serverContent);
+
+  const bodyContentRef = React.useRef(bodyContent);
+  bodyContentRef.current = bodyContent;
+  const getBodyContent = React.useCallback(() => bodyContentRef.current, []);
+
+  const [discardCount, setDiscardCount] = React.useState(0);
+  const onDiscardClick = React.useCallback(() => {
+    discardFormDraft(buildDefaultValues() as PostFormData);
+    discardBodyDraft();
+    setDiscardCount((c) => c + 1);
+  }, [discardFormDraft, discardBodyDraft, buildDefaultValues]);
+
+  const onKeepClick = React.useCallback(() => {
+    dismissFormBanner();
+    dismissBodyBanner();
+  }, [dismissFormBanner, dismissBodyBanner]);
+
+  const onSaveSuccess = React.useCallback(() => {
+    clearFormDraft();
+    clearBodyDraft();
+  }, [clearFormDraft, clearBodyDraft]);
 
   React.useEffect(() => {
     if ((tiers?.results.length ?? 0) > 0) {
@@ -110,19 +154,22 @@ const PostForm: React.FC<{
     }
   }, [artist.id, existingId, navigate, t]);
 
+  const showBanner = hasRestoredFormDraft || hasRestoredBodyDraft;
+
   return (
     <FormProvider {...methods}>
       <EditPostHeader
         reload={reload}
         onClose={onClose}
-        onSaveSuccess={clearDraft}
+        onSaveSuccess={onSaveSuccess}
+        getBodyContent={getBodyContent}
       />
 
       <form onSubmit={(e) => e.preventDefault()}>
-        {hasRestoredDraft && (
+        {showBanner && (
           <DraftRestoredBanner
-            onDiscard={() => discardDraft(buildDefaultValues() as PostFormData)}
-            onKeep={dismissBanner}
+            onDiscard={onDiscardClick}
+            onKeep={onKeepClick}
           />
         )}
         <FormComponent>
@@ -148,22 +195,13 @@ const PostForm: React.FC<{
           )}
         </FormComponent>
         <FormComponent>
-          <Controller
-            name="content"
-            render={({ field: { onChange, value } }) => {
-              return (
-                <TextEditor
-                  key={hasRestoredDraft ? "restored" : "initial"}
-                  onChange={(val: any) => {
-                    onChange(val);
-                  }}
-                  value={value}
-                  postId={post.id}
-                  artistId={artist.id}
-                  reloadImages={reloadImages}
-                />
-              );
-            }}
+          <TextEditor
+            key={`${post.id}-${discardCount}`}
+            onChange={setBodyContent}
+            value={bodyContent}
+            postId={post.id}
+            artistId={artist.id}
+            reloadImages={reloadImages}
           />
           <ImagesInPostManager
             postId={post.id}

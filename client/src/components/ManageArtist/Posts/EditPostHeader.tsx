@@ -16,7 +16,8 @@ const EditPostHeader: React.FC<{
   reload: (postId?: number) => Promise<unknown>;
   onClose?: () => void;
   onSaveSuccess?: () => void;
-}> = ({ reload, onClose, onSaveSuccess }) => {
+  getBodyContent: () => string;
+}> = ({ reload, onClose, onSaveSuccess, getBodyContent }) => {
   const { postId, artistId } = useParams();
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
@@ -79,12 +80,14 @@ const EditPostHeader: React.FC<{
               reload={reload}
               onClose={onClose}
               onSaveSuccess={onSaveSuccess}
+              getBodyContent={getBodyContent}
             />
           )}
           <PublishPostButton
             post={post}
             reload={() => refetch()}
             onSaveSuccess={onSaveSuccess}
+            getBodyContent={getBodyContent}
           />
         </div>
       </div>

@@ -19,7 +19,8 @@ const SaveDraftButton: React.FC<{
   artistId: number;
   onClose?: () => void;
   onSaveSuccess?: () => void;
-}> = ({ reload, artistId, post, onClose, onSaveSuccess }) => {
+  getBodyContent: () => string;
+}> = ({ reload, artistId, post, onClose, onSaveSuccess, getBodyContent }) => {
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
@@ -50,7 +51,8 @@ const SaveDraftButton: React.FC<{
           setIsSaving(true);
           let postId;
           const picked = {
-            ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
+            ...pick(data, ["title", "isPublic", "shouldSendEmail"]),
+            content: getBodyContent(),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
             artistId: artistId,
             minimumSubscriptionTierId:
@@ -88,6 +90,7 @@ const SaveDraftButton: React.FC<{
       t,
       onSaveSuccess,
       reloadImages,
+      getBodyContent,
     ]
   );
 
