@@ -15,6 +15,12 @@ export const root = new URL(API_DOMAIN || "http://localhost:3000").hostname;
 
 export const rootArtist = `https://${root}/v1/artists/`;
 
+export const stripHtml = (html: string) =>
+  html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 export const getTemporal = (date?: Date | null) => {
   if (!date) return undefined;
   return Temporal.Instant.fromEpochMilliseconds(date.getTime()) as any;
@@ -60,20 +66,25 @@ export function buildPostCreateActivity(
 ): Create {
   const actorUri = ctx.getActorUri(identifier);
   const followersUri = ctx.getFollowersUri(identifier);
+  const mentionUris = mentions.map((m) => new URL(m.href));
+  const ccList = [followersUri, ...mentionUris];
   return new Create({
     id: ctx.getObjectUri(Create, { identifier, activityId: `post-${post.id}` }),
     actor: actorUri,
     to: PUBLIC_COLLECTION,
-    cc: followersUri,
+    ccs: ccList,
     published: getTemporal(post.publishedAt),
     object: new Article({
       id: ctx.getObjectUri(Article, { identifier, postId: String(post.id) }),
       attribution: actorUri,
       name: post.title,
+      summary: post.content
+        ? stripHtml(post.content).slice(0, 200) + "..."
+        : undefined,
       content: post.content ?? undefined,
       published: getTemporal(post.publishedAt),
       to: PUBLIC_COLLECTION,
-      cc: followersUri,
+      ccs: ccList,
       url: getPostUrl(applicationUrl, identifier, post),
       tags: mentions.map(
         (m) => new Mention({ href: new URL(m.href), name: m.name })
