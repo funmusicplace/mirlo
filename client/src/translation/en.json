@@ -1626,7 +1626,10 @@
     "dismiss": "Dismiss",
     "draftRestored": "Some unsaved changes have been restored.",
     "keepDraft": "Keep",
-    "discardDraft": "Discard"
+    "discardDraft": "Discard",
+    "fieldsRestored_one": "{{count}} field restored: {{fields}}",
+    "fieldsRestored_other": "{{count}} fields restored: {{fields}}",
+    "restoredFromDraft": "Restored from draft"
   },
   "uploadPanel": {
     "uploadsInProgress_one": "{{count}} track uploading",

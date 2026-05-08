@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { RestoredLabel } from "components/common/RestoredFields";
 import TextArea from "components/common/TextArea";
 import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 import PublishButton from "components/ManageArtist/PublishButton";
@@ -40,8 +41,11 @@ const AlbumFormContent: React.FC<{
 
   return (
     <>
+      {/* TODO: replace the z-1001 with a shared z-index design.
+          1001 is just one above AutoComplete (z-1000) so the tags dropdown
+          doesn't render over the sticky save bar when it opens. */}
       <div
-        className={`sticky z-10 flex flex-wrap items-start gap-2 bg-(--mi-background-color) py-4 mb-4 border-b border-(--mi-tint-x-color) transition-[top] duration-300 ${
+        className={`sticky z-[1001] flex flex-wrap items-start gap-2 bg-(--mi-background-color) py-4 mb-4 border-b border-(--mi-tint-x-color) transition-[top] duration-300 ${
           headerShow === "down" ? "top-0" : "top-(--header-cover-sticky-height)"
         }`}
       >
@@ -83,11 +87,15 @@ const AlbumFormContent: React.FC<{
         <h2>{t("keyDetails")}</h2>
         <div className="md:grid md:grid-cols-2 gap-4">
           <FormComponent>
-            <label htmlFor="input-title">{t("title")}</label>
+            <RestoredLabel htmlFor="input-title" field="title">
+              {t("title")}
+            </RestoredLabel>
             <InputEl id="input-title" {...register("title")} />
           </FormComponent>
           <FormComponent>
-            <label htmlFor="input-slug">{t("urlSlug")}</label>
+            <RestoredLabel htmlFor="input-slug" field="urlSlug">
+              {t("urlSlug")}
+            </RestoredLabel>
             <InputEl id="input-slug" {...register("urlSlug")} />
             {isTrackGroupPublished(existingObject) && (
               <small>
@@ -117,7 +125,9 @@ const AlbumFormContent: React.FC<{
           `}
         >
           <FormComponent>
-            <label htmlFor="input-release-date">{t("releaseDate")}</label>
+            <RestoredLabel htmlFor="input-release-date" field="releaseDate">
+              {t("releaseDate")}
+            </RestoredLabel>
             <InputEl
               aria-describedby="hint-release-date"
               id="input-release-date"
@@ -163,11 +173,15 @@ const AlbumFormContent: React.FC<{
       <FormSection>
         <h2>{t("aboutTheAlbum")}</h2>
         <FormComponent>
-          <label htmlFor="input-about">{t("about")} </label>
+          <RestoredLabel htmlFor="input-about" field="about">
+            {t("about")}
+          </RestoredLabel>
           <TextArea id="input-about" rows={5} {...register("about")} />
         </FormComponent>
         <FormComponent>
-          <label htmlFor="input-credits">{t("credits")} </label>
+          <RestoredLabel htmlFor="input-credits" field="credits">
+            {t("credits")}
+          </RestoredLabel>
           <TextArea id="input-credits" rows={5} {...register("credits")} />
         </FormComponent>
         <div
@@ -182,7 +196,9 @@ const AlbumFormContent: React.FC<{
           `}
         >
           <FormComponent>
-            <label htmlFor="input-catalog-number">{t("catalogNumber")}</label>
+            <RestoredLabel htmlFor="input-catalog-number" field="catalogNumber">
+              {t("catalogNumber")}
+            </RestoredLabel>
             <InputEl id="input-catalog-number" {...register("catalogNumber")} />
           </FormComponent>
         </div>

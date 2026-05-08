@@ -1,6 +1,8 @@
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
+import { RestoredFieldsProvider } from "components/common/RestoredFields";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useFormPersist } from "utils/useFormPersist";
 
 import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
@@ -36,6 +38,7 @@ const AlbumForm: React.FC<{
   artist: Artist;
   reload: () => Promise<unknown>;
 }> = ({ trackGroup, reload }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<TrackGroupFormData>();
 
   React.useEffect(() => {
@@ -46,23 +49,48 @@ const AlbumForm: React.FC<{
   }, [trackGroup]);
 
   const draftKey = trackGroup?.id ? `albumDraft-${trackGroup.id}` : null;
-  const { hasRestoredDraft, clearDraft, discardDraft, dismissBanner } =
-    useFormPersist(draftKey, methods);
+  const {
+    hasRestoredDraft,
+    restoredFields,
+    clearDraft,
+    discardDraft,
+    dismissBanner,
+  } = useFormPersist(draftKey, methods);
+
+  const fieldLabelMap = React.useMemo<Record<string, string>>(
+    () => ({
+      title: t("title"),
+      urlSlug: t("urlSlug"),
+      releaseDate: t("releaseDate"),
+      catalogNumber: t("catalogNumber"),
+      about: t("about"),
+      credits: t("credits"),
+      minPrice: t("minimumPrice"),
+      suggestedPrice: t("suggestedPrice"),
+    }),
+    [t]
+  );
+  const restoredLabels = restoredFields
+    .map((f) => fieldLabelMap[f])
+    .filter(Boolean);
 
   return (
     <div>
       <FormProvider {...methods}>
-        {hasRestoredDraft && (
-          <DraftRestoredBanner
-            onDiscard={() => discardDraft(buildDefaultValues(trackGroup))}
-            onKeep={dismissBanner}
+        <RestoredFieldsProvider fields={restoredFields}>
+          {hasRestoredDraft && (
+            <DraftRestoredBanner
+              onDiscard={() => discardDraft(buildDefaultValues(trackGroup))}
+              onKeep={dismissBanner}
+              fieldLabels={restoredLabels}
+            />
+          )}
+          <AlbumFormContent
+            existingObject={trackGroup}
+            reload={reload}
+            onSaveSuccess={clearDraft}
           />
-        )}
-        <AlbumFormContent
-          existingObject={trackGroup}
-          reload={reload}
-          onSaveSuccess={clearDraft}
-        />
+        </RestoredFieldsProvider>
       </FormProvider>
     </div>
   );
