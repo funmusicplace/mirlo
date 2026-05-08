@@ -58,8 +58,10 @@ export default function () {
             include: {
               track: {
                 select: {
+                  title: true,
                   isPreview: true,
                   trackGroupId: true,
+                  audio: { select: { duration: true } },
                   trackGroup: {
                     select: {
                       userTrackGroupPurchases: {

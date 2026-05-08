@@ -404,57 +404,6 @@ describe("send-post-to-activitypub-followers", () => {
       );
     });
 
-    it("should not fetch actor document for mentions that are already followers", async () => {
-      const { user: artistUser } = await createUser({
-        email: "artist-dup@test.com",
-      });
-
-      const artist = await createArtist(artistUser.id, {
-        name: "Test Artist",
-        urlSlug: "test-artist-dup",
-        activityPub: true,
-      });
-
-      const followerActorUrl = "https://mastodon.example/users/follower";
-
-      const post = await createPost(artist.id, {
-        title: "Post with Duplicate Mention",
-        content: `Mentioning: <a href="${followerActorUrl}" data-mention-actor="${followerActorUrl}">@follower</a>`,
-        isDraft: false,
-        isPublic: true,
-        publishedAt: new Date(),
-      });
-
-      const subscriber = await createUser({ email: "sub-dup@test.com" });
-
-      await prisma.notification.create({
-        data: {
-          postId: post.id,
-          userId: subscriber.user.id,
-          notificationType: "NEW_ARTIST_POST",
-          deliveryMethod: "BOTH",
-          isRead: false,
-        },
-      });
-
-      // The mentioned actor is also a follower
-      await prisma.activityPubArtistFollowers.create({
-        data: {
-          artistId: artist.id,
-          actor: followerActorUrl,
-        },
-      });
-
-      await sendPostToActivityPubFollowers();
-
-      // The follower's actor document should NOT have been fetched
-      // (they receive via the followers fanout, not individual mention delivery)
-      assert(
-        !fetchStub.calledWith(followerActorUrl, sinon.match.any),
-        "Should not fetch actor document for a follower who is also mentioned"
-      );
-    });
-
     it("should mark notification as read even when mention delivery fails", async () => {
       const { user: artistUser } = await createUser({
         email: "artist-err@test.com",

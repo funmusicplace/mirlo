@@ -219,6 +219,9 @@ export const getTrackWidget = (
   return variant ? `${base}?variant=${variant}` : base;
 };
 
+export const getPostWidget = (client: Client, postId: number) =>
+  `${client.applicationUrl}/widget/post/${postId}`;
+
 const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
   const {
     title,
@@ -230,7 +233,6 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     ogVideo,
     twitterPlayer,
     artistName,
-    color = "#be3455",
     schemas = [],
   } = metadata;
 
@@ -250,7 +252,7 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     <meta property="og:url" content="${url}">
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:card" content="${isAlbum ? "player" : "summary"}" />
+    <meta name="twitter:card" content="${isAlbum || twitterPlayer ? "player" : "summary"}" />
 
     <meta property="og:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
     <meta name="twitter:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
@@ -386,16 +388,16 @@ const handlePost: RouteHandler<PostParams> = async ({
         : avatarUrl,
       ogVideo: hasTracks
         ? {
-            url: getTrackWidget(client, post.tracks[0].trackId),
-            width: 400,
-            height: 140,
+            url: getPostWidget(client, post.id),
+            width: 560,
+            height: 315,
           }
         : undefined,
       twitterPlayer: hasTracks
         ? {
-            url: getTrackWidget(client, post.tracks[0].trackId),
-            width: 400,
-            height: 140,
+            url: getPostWidget(client, post.id),
+            width: 560,
+            height: 315,
           }
         : undefined,
       artistName: artistName,
