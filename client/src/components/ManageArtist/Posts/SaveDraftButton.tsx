@@ -1,8 +1,6 @@
 import { css } from "@emotion/css";
-import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { pick } from "lodash";
-import { queryManagedArtistSubscriptionTiers } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -13,14 +11,7 @@ import useGetUserObjectById from "utils/useGetUserObjectById";
 
 import api from "../../../services/api";
 
-export type PostFormData = {
-  title: string;
-  publishedAt: string;
-  content: string;
-  isPublic: boolean;
-  minimumTier: string;
-  shouldSendEmail: boolean;
-};
+import { PostFormData } from "./PostForm";
 
 const SaveDraftButton: React.FC<{
   post: Post;
@@ -35,18 +26,6 @@ const SaveDraftButton: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
 
-  const { data: tiers } = useQuery(
-    queryManagedArtistSubscriptionTiers({
-      artistId,
-      includeDefault: true,
-    })
-  );
-
-  const publishedAt = post ? new Date(post.publishedAt) : new Date();
-  publishedAt.setMinutes(
-    publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
-  );
-
   const { reload: reloadImages } = useGetUserObjectById<PostImage>(
     `manage/posts/${post?.id}/images`,
     {
@@ -55,19 +34,6 @@ const SaveDraftButton: React.FC<{
   );
 
   const methods = useFormContext<PostFormData>();
-
-  React.useEffect(() => {
-    if ((tiers?.results.length ?? 0) > 0) {
-      if (
-        post.minimumSubscriptionTierId &&
-        tiers?.results.find(
-          (tier) => tier.id === post.minimumSubscriptionTierId
-        )
-      ) {
-        methods.setValue("minimumTier", `${post.minimumSubscriptionTierId}`);
-      }
-    }
-  }, [tiers]);
 
   const { handleSubmit, watch } = methods;
 
