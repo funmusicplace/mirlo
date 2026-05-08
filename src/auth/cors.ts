@@ -54,6 +54,9 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     // fall through to the cors() call below with an empty client list, so
     // only API_DOMAIN / dev localhost are in the origin allowlist)
     const skipsClientLookup = isHealthCheck || isTest || isRSSFormat;
+    logger.info(
+      `CORS check for ${req.method} ${req.path} - sameSite: ${isSameSite}, skipsClientLookup: ${skipsClientLookup}`
+    );
 
     let clients: Client[] = [];
     if (!skipsClientLookup) {
@@ -69,7 +72,12 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         !isAPIEndpointPrivate ||
         isValidActivityPubEndpoint(req.path);
 
+      logger.info(
+        `CORS check for ${req.method} ${req.path} - sameSite: ${isSameSite}, privateEndpoint: ${isAPIEndpointPrivate}, skipsApiKey: ${skipsApiKey}`
+      );
+
       if (skipsApiKey) {
+        logger.info(`Skipping API key check for ${req.method} ${req.path}`);
         clients = await prisma.client.findMany();
       } else {
         const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
@@ -95,6 +103,9 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         }
       }
     }
+    logger.info(
+      `CORS allowed clients for this request: ${clients.map((c) => c.applicationName).join(", ")}`
+    );
 
     const allowedClientOrigins = clients.flatMap((c) =>
       c.allowedCorsOrigins.map((origin) =>
@@ -102,6 +113,9 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
           ? new RegExp(origin.replace("regex:", ""))
           : origin
       )
+    );
+    logger.info(
+      `Allowed origins for this request: ${allowedClientOrigins.join(", ")}`
     );
 
     const origin: (string | RegExp)[] = [
@@ -112,6 +126,9 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     if (process.env.NODE_ENV === "development") {
       origin.push("http://localhost:8080"); // Just... for ease of coding
     }
+    logger.info(
+      `Final CORS origin allowlist for this request: ${origin.join(", ")}`
+    );
 
     return cors({
       origin,

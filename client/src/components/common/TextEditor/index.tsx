@@ -54,7 +54,11 @@ const extensions =
     }),
     new IframeExtension({ enableResizing: false }),
     new IframeEnterExtension({}),
-    new LinkExtension({ autoLink: true, selectTextOnClick: true }),
+    new LinkExtension({
+      autoLink: true,
+      selectTextOnClick: true,
+      extraAttributes: { "data-mention-actor": { default: null } },
+    }),
     new SlashCommandHighlightExtension({ triggers: SLASH_TRIGGERS }),
     new MentionHighlightExtension({}),
     ...wysiwygPreset(),

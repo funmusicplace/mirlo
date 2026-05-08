@@ -198,7 +198,7 @@ federation
               to: PUBLIC_COLLECTION,
               cc: followersUri,
               url: new URL(
-                `/${identifier}/posts/${item.id}`,
+                `/${identifier}/posts/${item.urlSlug ?? item.id}`,
                 client.applicationUrl
               ),
             }),
@@ -216,7 +216,7 @@ federation
             object: new Audio({
               id: ctx.getObjectUri(Audio, {
                 identifier,
-                releaseId: String(item.id),
+                releaseId: String(item.urlSlug ?? item.id),
               }),
               name: item.title ?? undefined,
               content: item.about ?? undefined,
