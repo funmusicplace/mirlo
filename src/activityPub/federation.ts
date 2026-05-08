@@ -23,10 +23,15 @@ import {
   Undo,
   Audio,
 } from "@fedify/fedify/vocab";
-import { Temporal } from "@js-temporal/polyfill";
 import prisma from "@mirlo/prisma";
 
-import { getPostUrl, root } from "../activityPub/utils";
+import {
+  buildPostCreateActivity,
+  getPostUrl,
+  getTemporal,
+  parseMentionsFromContent,
+  root,
+} from "../activityPub/utils";
 import logger from "../logger";
 import { buildFeedForArtist } from "../routers/v1/artists/{id}/feed";
 import { findArtistIdForURLSlug } from "../utils/artist";
@@ -37,11 +42,6 @@ import {
   finalArtistBackgroundBucket,
 } from "../utils/minio";
 import { isPost } from "../utils/typeguards";
-
-export const getTemporal = (date?: Date | null) => {
-  if (!date) return undefined;
-  return Temporal.Instant.fromEpochMilliseconds(date.getTime()) as any;
-};
 
 export async function ensureArtistHasApKeys(urlSlug: string) {
   const artist = await prisma.artist.findFirst({ where: { urlSlug } });
@@ -178,28 +178,13 @@ federation
       const followersUri = ctx.getFollowersUri(identifier);
       const creates = zipped.map((item) => {
         if (isPost(item)) {
-          return new Create({
-            id: ctx.getObjectUri(Create, {
-              identifier,
-              activityId: `post-${item.id}`,
-            }),
-            actor: ctx.getActorUri(identifier),
-            to: PUBLIC_COLLECTION,
-            cc: followersUri,
-            published: getTemporal(item.publishedAt),
-            object: new Article({
-              id: ctx.getObjectUri(Article, {
-                identifier,
-                postId: String(item.id),
-              }),
-              name: item.title,
-              content: item.content ?? undefined,
-              published: getTemporal(item.publishedAt),
-              to: PUBLIC_COLLECTION,
-              cc: followersUri,
-              url: getPostUrl(client.applicationUrl, identifier, item),
-            }),
-          });
+          return buildPostCreateActivity(
+            ctx,
+            identifier,
+            item,
+            client.applicationUrl,
+            parseMentionsFromContent(item.content ?? "")
+          );
         } else {
           return new Create({
             id: ctx.getObjectUri(Create, {

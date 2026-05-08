@@ -1,30 +1,13 @@
-import { Article, Create, PUBLIC_COLLECTION } from "@fedify/fedify/vocab";
 import prisma from "@mirlo/prisma";
 
-import { federation, getTemporal } from "../activityPub/federation";
-import { getPostUrl, root } from "../activityPub/utils";
+import { federation } from "../activityPub/federation";
+import {
+  buildPostCreateActivity,
+  parseMentionsFromContent,
+  root,
+} from "../activityPub/utils";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
-
-interface ApMention {
-  href: string;
-  name: string;
-}
-
-export function parseMentionsFromContent(content: string): ApMention[] {
-  const mentions: ApMention[] = [];
-  const anchorPattern =
-    /<a\s[^>]*data-mention-actor="([^"]+)"[^>]*>(.*?)<\/a>/gi;
-  let match: RegExpExecArray | null;
-  while ((match = anchorPattern.exec(content)) !== null) {
-    const actorId = match[1];
-    const name = match[2].replace(/<[^>]+>/g, "").trim();
-    if (actorId && name) {
-      mentions.push({ href: actorId, name });
-    }
-  }
-  return mentions;
-}
 
 /** * Sends published posts to ActivityPub followers' inboxes
  * This job should run periodically to deliver new posts to federated servers
@@ -94,41 +77,20 @@ const sendPostToActivityPubFollowers = async () => {
     );
 
     const identifier = post.artist.urlSlug;
-    const actorUri = new URL(`https://${root}/v1/ap/artists/${identifier}`);
 
     const ctx = await federation.createContext(
       new Request(`https://${root}`),
       undefined
     );
     const client = await getClient();
-    const followersUri = ctx.getFollowersUri(identifier);
 
-    const articleId = ctx.getObjectUri(Article, {
+    const createActivity = buildPostCreateActivity(
+      ctx,
       identifier,
-      postId: String(post.id),
-    });
-    const createId = ctx.getObjectUri(Create, {
-      identifier,
-      activityId: `post-${post.id}`,
-    });
-
-    const createActivity = new Create({
-      id: createId,
-      actors: [actorUri],
-      to: PUBLIC_COLLECTION,
-      cc: followersUri,
-      published: getTemporal(post.publishedAt) as any,
-      object: new Article({
-        id: articleId,
-        attribution: actorUri,
-        content: post.content ?? undefined,
-        name: post.title,
-        url: getPostUrl(client.applicationUrl, identifier, post),
-        to: PUBLIC_COLLECTION,
-        cc: followersUri,
-        published: getTemporal(post.publishedAt) as any,
-      }),
-    });
+      post,
+      client.applicationUrl,
+      mentions
+    );
 
     if (hasFollowers) {
       try {

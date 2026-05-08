@@ -10,6 +10,8 @@ import api from "services/api";
 import { useDebouncedCallback } from "use-debounce";
 import { getArtistUrl } from "utils/artist";
 
+import { API_ROOT } from "../../../constants";
+
 import CommandDropdown, { useCommandKeyboardNav } from "./CommandDropdown";
 
 export type MentionResult = {
@@ -69,14 +71,15 @@ async function searchMentions(query: string): Promise<MentionResult[]> {
   });
 
   return response.results.map((artist) => {
-    const actorId = `${window.location.origin}/v1/artists/${artist.urlSlug}`;
+    const actorId = `${API_ROOT}/v1/ap/artists/${artist.urlSlug}`;
+    const apDomain = new URL(API_ROOT).hostname;
     return {
       id: String(artist.id),
       label: artist.name,
       displayName: artist.name,
       url: getArtistUrl(artist),
       actorId,
-      handle: `@${artist.urlSlug}`,
+      handle: `@${artist.urlSlug}@${apDomain}`,
     };
   });
 }
@@ -157,6 +160,7 @@ const MentionCommands: React.FC = () => {
           .updateLink({
             href: item.url,
             "data-mention-actor": item.actorId,
+            "data-mention-handle": item.handle,
           } as any)
           .selectText(from + item.displayName.length)
           .run();
@@ -181,6 +185,8 @@ const MentionCommands: React.FC = () => {
       Math.max(0, $cursor.pos - 100),
       $cursor.pos
     );
+
+    console.log("[MentionCommands] textBefore:", JSON.stringify(textBefore));
 
     const match = textBefore.match(/@([\w.-]*)(?:@[\w.-]*)?$/);
     if (match) {

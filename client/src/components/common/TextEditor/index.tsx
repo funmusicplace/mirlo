@@ -57,7 +57,10 @@ const extensions =
     new LinkExtension({
       autoLink: true,
       selectTextOnClick: true,
-      extraAttributes: { "data-mention-actor": { default: null } },
+      extraAttributes: {
+        "data-mention-actor": { default: null },
+        "data-mention-handle": { default: null },
+      },
     }),
     new SlashCommandHighlightExtension({ triggers: SLASH_TRIGGERS }),
     new MentionHighlightExtension({}),

@@ -35,32 +35,35 @@ export default function () {
     assertLoggedIn(req);
     const user = req.user;
     try {
-      const artist = await prisma.artist.findFirst({
-        where: {
-          id: artistId,
-          userId: user.id,
-        },
-        select: {
-          id: true,
-          user: {
-            select: {
-              currency: true,
-            },
-          },
-        },
-      });
+      const [artist, mostRecentPost] = await Promise.all([
+        prisma.artist.findFirst({
+          where: { id: artistId, userId: user.id },
+          select: { id: true, user: { select: { currency: true } } },
+        }),
+        prisma.post.findFirst({
+          where: { artistId, deletedAt: null },
+          orderBy: { createdAt: "desc" },
+          select: { minimumSubscriptionTierId: true, shouldSendEmail: true },
+        }),
+      ]);
       if (!artist) {
         throw new AppError({
           description: "Artist must belong to logged in user",
           httpCode: 400,
         });
       }
+
+      const resolvedTierId =
+        minimumSubscriptionTierId ?? mostRecentPost?.minimumSubscriptionTierId;
+      const resolvedShouldSendEmail =
+        shouldSendEmail ?? mostRecentPost?.shouldSendEmail ?? true;
+
       let validTier;
-      if (minimumSubscriptionTierId) {
+      if (resolvedTierId) {
         validTier = await prisma.artistSubscriptionTier.findFirst({
           where: {
             artistId,
-            id: minimumSubscriptionTierId,
+            id: resolvedTierId,
           },
         });
       } else {
@@ -91,7 +94,7 @@ export default function () {
             content,
             isPublic,
             publishedAt,
-            shouldSendEmail,
+            shouldSendEmail: resolvedShouldSendEmail,
             artist: { connect: { id: artistId } },
             minimumSubscriptionTier: {
               connect: { id: validTier?.id },
