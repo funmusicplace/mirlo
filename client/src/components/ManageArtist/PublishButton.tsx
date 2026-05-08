@@ -136,6 +136,7 @@ const PublishButton: React.FC<{
     return (
       <div className="flex flex-wrap gap-3">
         <ArtistButton
+          type="button"
           isLoading={isUpdating}
           onClick={updateRelease}
           disabled={isUpdating || !isDirty}
@@ -153,6 +154,7 @@ const PublishButton: React.FC<{
   return (
     <div className="flex flex-wrap gap-3">
       <ArtistButton
+        type="button"
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing || nothingToPublish}

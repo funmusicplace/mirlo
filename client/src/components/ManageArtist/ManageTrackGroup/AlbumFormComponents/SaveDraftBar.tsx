@@ -36,7 +36,6 @@ const SaveDraftBar: React.FC<{
       onSaveSuccess?.();
       snackbar(t("draftSaved"), { type: "success" });
     } catch {
-      // error handled by hook
     } finally {
       setIsSaving(false);
     }
@@ -44,6 +43,7 @@ const SaveDraftBar: React.FC<{
 
   return (
     <ArtistButton
+      type="button"
       onClick={handleSaveDraft}
       isLoading={isSaving}
       disabled={isSaving || !isDirty}

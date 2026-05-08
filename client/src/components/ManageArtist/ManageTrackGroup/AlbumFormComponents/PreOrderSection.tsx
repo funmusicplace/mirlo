@@ -1,15 +1,15 @@
-import React from "react";
-import { Trans, useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-import { useFormContext } from "react-hook-form";
-import { Toggle } from "components/common/Toggle";
-import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
+import Button from "components/common/Button";
 import { CheckBoxLabel } from "components/common/FormCheckbox";
 import { InputEl } from "components/common/Input";
 import { Modal } from "components/common/Modal";
-import Button from "components/common/Button";
-import api from "services/api";
+import { Toggle } from "components/common/Toggle";
+import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 import { useBulkSetTracksIsPreviewMutation } from "queries/trackGroups";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+import { Trans, useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { isTrackGroupPublished } from "utils/artist";
 
@@ -247,6 +247,7 @@ const PreOrderSection: React.FC<{
             </div>
 
             <Button
+              type="button"
               className="self-start"
               onClick={() => setShowEndModal(true)}
             >
@@ -275,10 +276,10 @@ const PreOrderSection: React.FC<{
               {t("makeTracksPreviewableOnRelease")}
             </CheckBoxLabel>
             <div className="flex gap-2">
-              <Button onClick={handleEndPreorder}>
+              <Button type="button" onClick={handleEndPreorder}>
                 {t("confirmEndPreorder")}
               </Button>
-              <Button onClick={() => setShowEndModal(false)}>
+              <Button type="button" onClick={() => setShowEndModal(false)}>
                 {t("cancel")}
               </Button>
             </div>
@@ -286,7 +287,7 @@ const PreOrderSection: React.FC<{
         ) : (
           <div className="flex flex-col gap-4">
             <p>{t("endPreorderNotPublished")}</p>
-            <Button onClick={() => setShowEndModal(false)}>
+            <Button type="button" onClick={() => setShowEndModal(false)}>
               {t("cancel")}
             </Button>
           </div>
@@ -299,7 +300,7 @@ const PreOrderSection: React.FC<{
       >
         <div className="flex flex-col gap-4">
           <p>{t("noReleaseDateSet")}</p>
-          <Button onClick={() => setShowNoDateModal(false)}>
+          <Button type="button" onClick={() => setShowNoDateModal(false)}>
             {t("cancel")}
           </Button>
         </div>
@@ -311,7 +312,7 @@ const PreOrderSection: React.FC<{
       >
         <div className="flex flex-col gap-4">
           <p>{t("releaseDateInPast")}</p>
-          <Button onClick={() => setShowPastDateModal(false)}>
+          <Button type="button" onClick={() => setShowPastDateModal(false)}>
             {t("cancel")}
           </Button>
         </div>
@@ -324,10 +325,12 @@ const PreOrderSection: React.FC<{
         <div className="flex flex-col gap-4">
           <p>{t("removeScheduleOnDateChangeWarning")}</p>
           <div className="flex gap-2">
-            <Button onClick={handleConfirmRemoveSchedule}>
+            <Button type="button" onClick={handleConfirmRemoveSchedule}>
               {t("continue")}
             </Button>
-            <Button onClick={handleCancelRemoveSchedule}>{t("cancel")}</Button>
+            <Button type="button" onClick={handleCancelRemoveSchedule}>
+              {t("cancel")}
+            </Button>
           </div>
         </div>
       </Modal>
