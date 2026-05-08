@@ -1,10 +1,86 @@
 import { IncomingHttpHeaders } from "http";
 
+import type { Context } from "@fedify/fedify";
+import {
+  Article,
+  Create,
+  Mention,
+  PUBLIC_COLLECTION,
+} from "@fedify/fedify/vocab";
+import { Temporal } from "@js-temporal/polyfill";
+
 const { API_DOMAIN } = process.env;
 
 export const root = new URL(API_DOMAIN || "http://localhost:3000").hostname;
 
 export const rootArtist = `https://${root}/v1/artists/`;
+
+export const getTemporal = (date?: Date | null) => {
+  if (!date) return undefined;
+  return Temporal.Instant.fromEpochMilliseconds(date.getTime()) as any;
+};
+
+export interface ApMention {
+  href: string;
+  name: string;
+}
+
+export function parseMentionsFromContent(content: string): ApMention[] {
+  const mentions: ApMention[] = [];
+  const anchorPattern = /<a\s([^>]*)>(.*?)<\/a>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = anchorPattern.exec(content)) !== null) {
+    const attrs = match[1];
+    const inner = match[2];
+    const actorMatch = /data-mention-actor="([^"]+)"/.exec(attrs);
+    if (!actorMatch) continue;
+    const actorId = actorMatch[1];
+    const handleMatch = /data-mention-handle="([^"]+)"/.exec(attrs);
+    const displayName = inner.replace(/<[^>]+>/g, "").trim();
+    mentions.push({
+      href: actorId,
+      name: handleMatch ? handleMatch[1] : displayName,
+    });
+  }
+  return mentions;
+}
+
+export function buildPostCreateActivity(
+  ctx: Context<void>,
+  identifier: string,
+  post: {
+    id: number;
+    title: string | null;
+    content?: string | null;
+    urlSlug?: string | null;
+    publishedAt?: Date | null;
+  },
+  applicationUrl: string,
+  mentions: ApMention[] = []
+): Create {
+  const actorUri = ctx.getActorUri(identifier);
+  const followersUri = ctx.getFollowersUri(identifier);
+  return new Create({
+    id: ctx.getObjectUri(Create, { identifier, activityId: `post-${post.id}` }),
+    actor: actorUri,
+    to: PUBLIC_COLLECTION,
+    cc: followersUri,
+    published: getTemporal(post.publishedAt),
+    object: new Article({
+      id: ctx.getObjectUri(Article, { identifier, postId: String(post.id) }),
+      attribution: actorUri,
+      name: post.title,
+      content: post.content ?? undefined,
+      published: getTemporal(post.publishedAt),
+      to: PUBLIC_COLLECTION,
+      cc: followersUri,
+      url: getPostUrl(applicationUrl, identifier, post),
+      tags: mentions.map(
+        (m) => new Mention({ href: new URL(m.href), name: m.name })
+      ),
+    }),
+  });
+}
 
 export function getPostUrl(
   applicationUrl: string,

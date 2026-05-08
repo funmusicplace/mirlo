@@ -7,9 +7,8 @@ import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
-import sendPostToActivityPubFollowers, {
-  parseMentionsFromContent,
-} from "../../src/jobs/send-post-to-activitypub-followers";
+import { parseMentionsFromContent } from "../../src/activityPub/utils";
+import sendPostToActivityPubFollowers from "../../src/jobs/send-post-to-activitypub-followers";
 import { clearTables, createArtist, createPost, createUser } from "../utils";
 
 describe("send-post-to-activitypub-followers", () => {
