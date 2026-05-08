@@ -6,6 +6,17 @@ export const root = new URL(API_DOMAIN || "http://localhost:3000").hostname;
 
 export const rootArtist = `https://${root}/v1/artists/`;
 
+export function getPostUrl(
+  applicationUrl: string,
+  identifier: string,
+  post: { urlSlug?: string | null; id: number }
+): URL {
+  return new URL(
+    `/${identifier}/posts/${post.urlSlug ?? post.id}`,
+    applicationUrl
+  );
+}
+
 export const headersAreForActivityPub = (
   headers: IncomingHttpHeaders,
   method: "POST" | "GET" | "PUT" | "DELETE"

@@ -1,11 +1,10 @@
-import crypto from "crypto";
-
-import { Create, Note } from "@fedify/fedify/vocab";
+import { Article, Create, PUBLIC_COLLECTION } from "@fedify/fedify/vocab";
 import prisma from "@mirlo/prisma";
 
 import { federation, getTemporal } from "../activityPub/federation";
-import { root } from "../activityPub/utils";
+import { getPostUrl, root } from "../activityPub/utils";
 import logger from "../logger";
+import { getClient } from "../utils/getClient";
 
 interface ApMention {
   href: string;
@@ -96,32 +95,37 @@ const sendPostToActivityPubFollowers = async () => {
 
     const identifier = post.artist.urlSlug;
     const actorUri = new URL(`https://${root}/v1/ap/artists/${identifier}`);
-    const noteId = new URL(
-      `https://${root}/v1/ap/artists/${identifier}/posts/${post.urlSlug || post.id}`
-    );
-    const guid = crypto.randomBytes(16).toString("hex");
 
     const ctx = await federation.createContext(
       new Request(`https://${root}`),
       undefined
     );
+    const client = await getClient();
+    const followersUri = ctx.getFollowersUri(identifier);
+
+    const articleId = ctx.getObjectUri(Article, {
+      identifier,
+      postId: String(post.id),
+    });
+    const createId = ctx.getObjectUri(Create, {
+      identifier,
+      activityId: `post-${post.id}`,
+    });
 
     const createActivity = new Create({
-      id: new URL(`${noteId.href}#activity-${guid}`),
+      id: createId,
       actors: [actorUri],
-      to: new URL("https://www.w3.org/ns/activitystreams#Public"),
-      cc: new URL(`${actorUri.href}/followers`),
+      to: PUBLIC_COLLECTION,
+      cc: followersUri,
       published: getTemporal(post.publishedAt) as any,
-      object: new Note({
-        id: noteId,
+      object: new Article({
+        id: articleId,
         attribution: actorUri,
         content: post.content ?? undefined,
         name: post.title,
-        url: new URL(
-          `${ctx.origin}/${identifier}/posts/${post.urlSlug || post.id}`
-        ),
-        to: new URL("https://www.w3.org/ns/activitystreams#Public"),
-        cc: new URL(`${actorUri.href}/followers`),
+        url: getPostUrl(client.applicationUrl, identifier, post),
+        to: PUBLIC_COLLECTION,
+        cc: followersUri,
         published: getTemporal(post.publishedAt) as any,
       }),
     });

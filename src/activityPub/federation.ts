@@ -26,7 +26,7 @@ import {
 import { Temporal } from "@js-temporal/polyfill";
 import prisma from "@mirlo/prisma";
 
-import { root } from "../activityPub/utils";
+import { getPostUrl, root } from "../activityPub/utils";
 import logger from "../logger";
 import { buildFeedForArtist } from "../routers/v1/artists/{id}/feed";
 import { findArtistIdForURLSlug } from "../utils/artist";
@@ -197,10 +197,7 @@ federation
               published: getTemporal(item.publishedAt),
               to: PUBLIC_COLLECTION,
               cc: followersUri,
-              url: new URL(
-                `/${identifier}/posts/${item.urlSlug ?? item.id}`,
-                client.applicationUrl
-              ),
+              url: getPostUrl(client.applicationUrl, identifier, item),
             }),
           });
         } else {
@@ -298,7 +295,7 @@ federation.setObjectDispatcher(
       name: post.title,
       content: post.content ?? undefined,
       published: getTemporal(post.publishedAt),
-      url: new URL(`/${identifier}/posts/${post.id}`, client.applicationUrl),
+      url: getPostUrl(client.applicationUrl, identifier, post),
     });
   }
 );
