@@ -67,17 +67,31 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       // endpoints all skip the key check; in those cases we still need every
       // registered client's allowed origins merged into the CORS allowlist,
       // so we load them all
+
+      const isCORSPreflight =
+        req.method === "OPTIONS" &&
+        req.headers["access-control-request-method"] &&
+        req.headers["access-control-request-headers"];
       const skipsApiKey =
         isSameSite ||
         !isAPIEndpointPrivate ||
+        isCORSPreflight ||
         isValidActivityPubEndpoint(req.path);
 
       logger.info(
-        `CORS check for ${req.method} ${req.path} - sameSite: ${isSameSite}, privateEndpoint: ${isAPIEndpointPrivate}, skipsApiKey: ${skipsApiKey}`
+        `CORS check for ${req.method} ${req.path} - sameSite: ${isSameSite}, privateEndpoint: ${isAPIEndpointPrivate}, skipsApiKey: ${skipsApiKey}, isCorsPreflight: ${isCORSPreflight}`
+      );
+
+      logger.info(
+        "headers",
+        req.headers["access-control-request-method"],
+        req.headers["access-control-request-headers"]
       );
 
       if (skipsApiKey) {
-        logger.info(`Skipping API key check for ${req.method} ${req.path}`);
+        logger.info(
+          `${req.method} ${req.path} Skipping API key check for ${req.method} ${req.path}`
+        );
         clients = await prisma.client.findMany();
       } else {
         const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
@@ -104,7 +118,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       }
     }
     logger.info(
-      `CORS allowed clients for this request: ${clients.map((c) => c.applicationName).join(", ")}`
+      `${req.method} ${req.path} CORS allowed clients for this request: ${clients.map((c) => c.applicationName).join(", ")}`
     );
 
     const allowedClientOrigins = clients.flatMap((c) =>
@@ -115,7 +129,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       )
     );
     logger.info(
-      `Allowed origins for this request: ${allowedClientOrigins.join(", ")}`
+      `${req.method} ${req.path} Allowed origins for this request: ${allowedClientOrigins.join(", ")}`
     );
 
     const origin: (string | RegExp)[] = [
@@ -127,7 +141,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       origin.push("http://localhost:8080"); // Just... for ease of coding
     }
     logger.info(
-      `Final CORS origin allowlist for this request: ${origin.join(", ")}`
+      `${req.method} ${req.path} Final CORS origin allowlist for this request: ${origin.join(", ")}`
     );
 
     return cors({
