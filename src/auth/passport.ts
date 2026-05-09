@@ -182,23 +182,22 @@ export const canUserCreateArtists = async (
   }
 };
 
-export const artistBelongsToLoggedInUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
+export const artistEditableByUser = async (
+  artistId: string | number,
+  user: Express.User
 ) => {
-  const { artistId } = req.params as unknown as {
-    artistId: string;
-  };
   try {
     const castArtistId = await findArtistIdForURLSlug(artistId);
-    const loggedInUser = req.user;
+    const loggedInUser = user;
 
     if (!loggedInUser) {
-      res.status(401).json({ error: "Unauthorized" });
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
     } else {
       if (loggedInUser.isAdmin) {
-        return next();
+        return true;
       }
 
       const artist = await prisma.artist.findFirst({
@@ -209,17 +208,41 @@ export const artistBelongsToLoggedInUser = async (
       });
 
       if (!artist) {
-        res.status(404).json({
-          error: "Artist not found or does not belong to user",
+        throw new AppError({
+          description:
+            "Artist not found or user does not have permission to edit",
+          httpCode: 404,
         });
-        return;
       }
     }
-    return next();
+    return true;
   } catch (e) {
-    next(e);
+    throw e;
   }
-  return;
+};
+
+export const artistBelongsToLoggedInUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { artistId } = req.params as unknown as {
+    artistId: string;
+  };
+
+  const artistEditableByUserResult = await artistEditableByUser(
+    artistId,
+    req.user as Express.User
+  );
+
+  if (artistEditableByUserResult) {
+    return next();
+  } else {
+    throw new AppError({
+      description: "Artist not found or user does not have permission to edit",
+      httpCode: 404,
+    });
+  }
 };
 
 export const fundraiserBelongsToLoggedInUser = async (
