@@ -124,7 +124,17 @@ const Post: React.FC = () => {
           >
             <PageMarkdownWrapper>
               {post.isContentHidden && (
-                <div className="py-8">{t("notAvailable")}</div>
+                <div className="py-8">
+                  <Trans
+                    t={t}
+                    i18nKey="notAvailable"
+                    components={{
+                      support: (
+                        <Link to={`/${post.artist?.urlSlug}/support`}></Link>
+                      ),
+                    }}
+                  />
+                </div>
               )}
               {!post.isContentHidden && (
                 <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>

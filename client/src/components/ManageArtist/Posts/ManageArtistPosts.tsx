@@ -39,7 +39,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const artistId = artist?.id;
 
   const fetchPosts = React.useCallback(async () => {
-    if (userId) {
+    if (userId && artistId) {
       const fetchedPosts = await api.getMany<Post>(
         `manage/posts?artistId=${artistId}`
       );
