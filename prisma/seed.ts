@@ -1,11 +1,13 @@
-import { PrismaClient } from "./__generated__";
-import { users } from "./seeds/users";
 import { hashPassword } from "../src/routers/auth/utils";
-import { clients } from "./seeds/clients";
+
+import { PrismaClient } from "./__generated__";
 import { artists } from "./seeds/artists";
-import { trackGroups } from "./seeds/trackGroups";
+import { clients } from "./seeds/clients";
 import { fundraisers } from "./seeds/fundraisers";
+import { seedPosts } from "./seeds/posts";
 import { seedLocationTags } from "./seeds/seedLocationTags";
+import { trackGroups } from "./seeds/trackGroups";
+import { users } from "./seeds/users";
 
 const prisma = new PrismaClient();
 
@@ -116,6 +118,7 @@ async function main() {
   }
 
   await seedLocationTags();
+  await seedPosts();
 
   console.log(`Seeding finished.`);
 }

@@ -187,6 +187,12 @@ export const artistEditableByUser = async (
   user: Express.User
 ) => {
   try {
+    if (!artistId) {
+      throw new AppError({
+        description: "Artist ID is required",
+        httpCode: 400,
+      });
+    }
     const castArtistId = await findArtistIdForURLSlug(artistId);
     const loggedInUser = user;
 

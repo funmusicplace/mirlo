@@ -1,17 +1,17 @@
 import assert from "node:assert";
-import { Prisma } from "@mirlo/prisma/client";
 
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+
+import prisma from "../../../../prisma/prisma";
 import {
   clearTables,
   createArtist,
   createTrackGroup,
   createUser,
 } from "../../../utils";
-import prisma from "../../../../prisma/prisma";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
@@ -208,7 +208,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       assert.equal(response.status, 404);
       assert.equal(
         response.body.error,
-        "Artist not found or does not belong to user"
+        "Artist not found or user does not have permission to edit"
       );
     });
 

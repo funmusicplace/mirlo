@@ -116,6 +116,7 @@ export default function () {
         isArtistOwner,
         subscription,
       });
+
       const userTrackGroupPurchases = user
         ? await prisma.userTrackGroupPurchase.findMany({
             where: {

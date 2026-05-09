@@ -79,16 +79,24 @@ export const buildFeedForArtist = async (
   take: number = 10000,
   skip: number = 0
 ) => {
-  const { posts } = await getPostsVisibleToUser(user, artist, take, skip);
+  const { posts, total } = await getPostsVisibleToUser(
+    user,
+    artist,
+    take,
+    skip
+  );
   const albums = await getAlbumsVisibleToUser(artist);
 
-  return [...posts, ...albums].sort((a, b) => {
-    const dateA =
-      (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
-    const dateB =
-      (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
-    return dateA > dateB ? -1 : 1;
-  });
+  return {
+    results: [...posts, ...albums].sort((a, b) => {
+      const dateA =
+        (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
+      const dateB =
+        (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
+      return dateA > dateB ? -1 : 1;
+    }),
+    total: total + albums.length,
+  };
 };
 
 export default function () {
@@ -116,7 +124,7 @@ export default function () {
       }
 
       if (format === "rss") {
-        const zipped = await buildFeedForArtist(user, artist);
+        const { results: zipped } = await buildFeedForArtist(user, artist);
         const feed = await turnItemsIntoRSS(
           {
             name: artist.name,
@@ -131,20 +139,13 @@ export default function () {
       } else {
         const takeNum = take ? Number(take) : 20;
         const skipNum = skip ? Number(skip) : 0;
-        const { posts, total } = await getPostsVisibleToUser(
+
+        const { results: zipped, total } = await buildFeedForArtist(
           user,
           artist,
           takeNum,
           skipNum
         );
-        const albums = await getAlbumsVisibleToUser(artist);
-        const zipped = [...posts, ...albums].sort((a, b) => {
-          const dateA =
-            (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
-          const dateB =
-            (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
-          return dateA > dateB ? -1 : 1;
-        });
         res.json({ results: zipped, total });
       }
     } catch (e) {

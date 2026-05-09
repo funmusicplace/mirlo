@@ -116,6 +116,7 @@ export default function () {
     }
   }
 
+  /** FIXME this should not be nested here, it should really live under /manage/artists/{id}/posts */
   async function GET(req: Request, res: Response) {
     const { artistId } = req.query;
     assertLoggedIn(req);
