@@ -66,7 +66,7 @@
     "lodash": "^4.17.21",
     "minio": "^8.0.7",
     "music-metadata": "7.13.3",
-    "node-fetch": "2",
+    "node-fetch": "3",
     "nodemailer": "^8.0.5",
     "nodemailer-mailgun-transport": "^2.1.5",
     "nodemailer-sendgrid": "^1.0.3",
