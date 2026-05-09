@@ -67,7 +67,7 @@
     "minio": "^8.0.5",
     "music-metadata": "7.13.3",
     "node-fetch": "2",
-    "nodemailer": "^6.9.1",
+    "nodemailer": "^8.0.5",
     "nodemailer-mailgun-transport": "^2.1.5",
     "nodemailer-sendgrid": "^1.0.3",
     "passport": "^0.7.0",
