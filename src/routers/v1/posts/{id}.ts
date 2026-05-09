@@ -2,8 +2,11 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { checkIsUserSubscriber } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
+import {
+  canUserSeePostContent,
+  getUserSubscriptionForArtist,
+} from "../../../utils/postAccess";
 import { serializePost } from "../../../utils/serialize/post";
 
 export default function () {
@@ -85,6 +88,8 @@ export default function () {
             },
           },
           featuredImage: true,
+          minimumSubscriptionTier: true,
+          postSubscriptionTiers: true,
           artist: {
             include: {
               avatar: {
@@ -103,7 +108,14 @@ export default function () {
           description: "Post not found",
         });
       }
-      const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
+      const isArtistOwner = !!(user && post.artist?.userId === user.id);
+      const subscription = post.artistId
+        ? await getUserSubscriptionForArtist(user, post.artistId)
+        : null;
+      const canSeeContent = canUserSeePostContent(post, {
+        isArtistOwner,
+        subscription,
+      });
       const userTrackGroupPurchases = user
         ? await prisma.userTrackGroupPurchase.findMany({
             where: {
@@ -129,7 +141,7 @@ export default function () {
           post,
           userTrackGroupPurchases,
           userTrackPurchases,
-          isUserSubscriber || post.artist?.userId === user?.id
+          canSeeContent
         ),
       });
     } catch (e) {

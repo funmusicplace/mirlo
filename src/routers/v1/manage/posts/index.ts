@@ -3,7 +3,10 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../auth/passport";
+import {
+  artistEditableByUser,
+  userAuthenticated,
+} from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { serializePost } from "../../../../utils/serialize/post";
 
@@ -112,10 +115,17 @@ export default function () {
       next(e);
     }
   }
-  // FIXME: document POST
 
   async function GET(req: Request, res: Response) {
     const { artistId } = req.query;
+    assertLoggedIn(req);
+    if (!(await artistEditableByUser(artistId as string, req.user))) {
+      throw new AppError({
+        description:
+          "Artist not found or user does not have permission to edit",
+        httpCode: 404,
+      });
+    }
 
     let where: Prisma.PostWhereInput = {};
     if (artistId) {

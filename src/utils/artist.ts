@@ -164,8 +164,8 @@ export const whereForAllArtistsThisLabelCanAddReleasesFor = (
   ],
 });
 
-export const findArtistIdForURLSlug = async (id: string) => {
-  if (Number.isNaN(Number(id))) {
+export const findArtistIdForURLSlug = async (id: string | number) => {
+  if (typeof id !== "number" && Number.isNaN(Number(id))) {
     const artist = await prisma.artist.findFirst({
       where: {
         urlSlug: { equals: id, mode: "insensitive" },
