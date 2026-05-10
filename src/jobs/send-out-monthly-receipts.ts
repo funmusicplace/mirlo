@@ -31,6 +31,7 @@ const sendOutMonthlyReceipts = async () => {
         deletedAt: null,
         artistSubscriptionTier: {
           isDefaultTier: false,
+          interval: "MONTH",
         },
       },
       include: {
