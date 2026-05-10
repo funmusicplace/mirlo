@@ -62,8 +62,10 @@ export const serializePost = (
     tracks?: {
       trackId: number;
       track?: {
+        title?: string | null;
         isPreview: boolean;
         trackGroupId?: number;
+        audio?: { duration: number | null } | null;
       };
     }[];
   },
@@ -86,6 +88,8 @@ export const serializePost = (
         trackPurchases: trackPurchases,
         isUserSubscriber,
       }),
+      title: pt.track?.title ?? undefined,
+      audioDuration: pt.track?.audio?.duration ?? undefined,
       ...pt,
     };
   }),

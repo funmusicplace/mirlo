@@ -38,23 +38,22 @@ export default function () {
     assertLoggedIn(req);
     const user = req.user;
     try {
-      const [artist, mostRecentPost] = await Promise.all([
-        prisma.artist.findFirst({
-          where: { id: artistId, userId: user.id },
-          select: { id: true, user: { select: { currency: true } } },
-        }),
-        prisma.post.findFirst({
-          where: { artistId, deletedAt: null },
-          orderBy: { createdAt: "desc" },
-          select: { minimumSubscriptionTierId: true, shouldSendEmail: true },
-        }),
-      ]);
+      const artist = await prisma.artist.findFirst({
+        where: { id: artistId, userId: user.id },
+        select: { id: true, user: { select: { currency: true } } },
+      });
       if (!artist) {
         throw new AppError({
           description: "Artist must belong to logged in user",
           httpCode: 400,
         });
       }
+
+      const mostRecentPost = await prisma.post.findFirst({
+        where: { artistId, deletedAt: null },
+        orderBy: { createdAt: "desc" },
+        select: { minimumSubscriptionTierId: true, shouldSendEmail: true },
+      });
 
       const resolvedTierId =
         minimumSubscriptionTierId ?? mostRecentPost?.minimumSubscriptionTierId;

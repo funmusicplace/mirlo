@@ -168,7 +168,13 @@ interface Post {
   featuredImageId?: string;
   featuredImage?: { src: string };
   isDraft: boolean;
-  tracks?: { postId: number; trackId: number; isPlayable?: boolean }[];
+  tracks?: {
+    postId: number;
+    trackId: number;
+    isPlayable?: boolean;
+    title?: string;
+    audioDuration?: number;
+  }[];
 }
 
 interface PostImage {

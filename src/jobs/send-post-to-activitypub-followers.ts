@@ -36,7 +36,9 @@ const sendPostToActivityPubFollowers = async () => {
           urlSlug: true,
           name: true,
           activityPub: true,
-          activityPubArtistFollowers: { select: { actor: true } },
+          activityPubArtistFollowers: {
+            select: { actor: true, inboxUrl: true },
+          },
         },
       },
     },
@@ -108,12 +110,16 @@ const sendPostToActivityPubFollowers = async () => {
       }
     }
 
-    // Deliver to mentioned actors not already covered by the followers fanout
-    const followerActorIds = new Set(
-      post.artist.activityPubArtistFollowers.map((f) => f.actor)
+    // Deliver to mentioned actors not already covered by the followers fanout.
+    // Only skip a mentioned actor if they are a follower WITH a known inbox —
+    // if inboxUrl is null the fanout skipped them, so we must deliver here.
+    const followerActorIdsWithInbox = new Set(
+      post.artist.activityPubArtistFollowers
+        .filter((f) => f.inboxUrl !== null)
+        .map((f) => f.actor)
     );
     const mentionsToDeliver = mentions.filter(
-      (m) => !followerActorIds.has(m.href)
+      (m) => !followerActorIdsWithInbox.has(m.href)
     );
 
     if (mentionsToDeliver.length > 0) {
