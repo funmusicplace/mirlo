@@ -1,21 +1,21 @@
-import { FormProvider, Controller, useForm } from "react-hook-form";
-import FormComponent from "./FormComponent";
-import { InputEl } from "./Input";
-import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
-import { useAuthContext } from "state/AuthContext";
-import React from "react";
-import { useSnackbar } from "state/SnackbarContext";
-import { useTranslation } from "react-i18next";
-
-import api from "services/api";
-import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { isEmpty } from "lodash";
+import React from "react";
+import { FormProvider, Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
 import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
-import { Turnstile } from "@marsidev/react-turnstile";
+
+import FormComponent from "./FormComponent";
+import { InputEl } from "./Input";
+import { moneyDisplay } from "./Money";
+import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 
 const SupportArtistTiersForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -45,6 +45,7 @@ const SupportArtistTiersForm: React.FC<{
       isDefaultTier: boolean;
       currency: string;
       minAmount: number;
+      interval: "MONTH" | "YEAR";
     };
     monthlyContribution: boolean;
     email: string;
@@ -152,12 +153,17 @@ const SupportArtistTiersForm: React.FC<{
         {value &&
           !value.isDefaultTier &&
           !isSubscribedToCurrentTier &&
-          t("continueWithPrice", {
-            amount: moneyDisplay({
-              amount: value?.minAmount / 100,
-              currency: value?.currency,
-            }),
-          })}
+          t(
+            value.interval === "MONTH"
+              ? "continueWithPriceMonthly"
+              : "continueWithPriceYearly",
+            {
+              amount: moneyDisplay({
+                amount: value?.minAmount / 100,
+                currency: value?.currency,
+              }),
+            }
+          )}
       </ArtistButton>
 
       {value && !value.isDefaultTier && (
