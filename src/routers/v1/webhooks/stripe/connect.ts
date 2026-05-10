@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+
+import logger from "../../../../logger";
 import {
   handleAccountUpdate,
   handleCheckoutSession,
@@ -9,7 +11,6 @@ import {
   handleSetupIntentSucceeded,
   verifyStripeSignature,
 } from "../../../../utils/stripe";
-import logger from "../../../../logger";
 
 const { STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET } = process.env;
 

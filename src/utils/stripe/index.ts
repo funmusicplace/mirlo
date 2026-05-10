@@ -803,7 +803,7 @@ export const handleAccountUpdate = async (account: Stripe.Account) => {
         stripeAccountId: account.id,
       },
     });
-    if (user && stripeAccount.default_currency) {
+    if (user && stripeAccount.default_currency && !user.currency) {
       updateCurrencies(user.id, stripeAccount.default_currency);
     }
   } catch (e: any) {

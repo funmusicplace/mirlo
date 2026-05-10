@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
 import DashedList from "components/ManageArtist/Merch/DashedList";
+import { useTranslation } from "react-i18next";
+
 import TrackGroupMerchItem from "./TrackGroupMerchItem";
 
 const TrackGroupMerch: React.FC<{ merch: Merch[] }> = ({ merch }) => {
