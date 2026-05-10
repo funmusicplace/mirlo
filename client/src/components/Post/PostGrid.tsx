@@ -1,5 +1,7 @@
 import styled from "@emotion/styled";
+
 import { bp } from "../../constants";
+
 import PostCard from "./PostCard";
 
 const PostGridWrapper = styled.ul<{}>`
@@ -26,7 +28,9 @@ interface PostGridProps {
 export default function PostGrid(props: PostGridProps) {
   return (
     <PostGridWrapper role="list" aria-labelledby={props.ariaLabelledBy}>
-      {props.posts?.map((post) => <PostCard key={post.id} post={post} />)}
+      {props.posts?.map((post) => (
+        <PostCard key={post.id} post={post} />
+      ))}
     </PostGridWrapper>
   );
 }

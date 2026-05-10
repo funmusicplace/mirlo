@@ -41,7 +41,7 @@ import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
 } from "../utils/minio";
-import { isPost } from "../utils/typeguards";
+import { isPost, isTrackGroup } from "../utils/typeguards";
 
 export async function ensureArtistHasApKeys(urlSlug: string) {
   const artist = await prisma.artist.findFirst({ where: { urlSlug } });
@@ -173,7 +173,7 @@ federation
         },
       });
       if (!artist) return null;
-      const zipped = await buildFeedForArtist(undefined, artist);
+      const { results: zipped } = await buildFeedForArtist(undefined, artist);
       const client = await getClient();
       const followersUri = ctx.getFollowersUri(identifier);
       const creates = zipped.map((item) => {
@@ -185,7 +185,7 @@ federation
             client.applicationUrl,
             parseMentionsFromContent(item.content ?? "")
           );
-        } else {
+        } else if (isTrackGroup(item)) {
           return new Create({
             id: ctx.getObjectUri(Create, {
               identifier,
@@ -207,6 +207,8 @@ federation
               cc: followersUri,
             }),
           });
+        } else {
+          throw new Error(`Unknown item type in feed: ${item}`);
         }
       });
       return {
@@ -224,8 +226,8 @@ federation
       },
     });
     if (!artist) return 0n;
-    const feed = await buildFeedForArtist(undefined, artist);
-    return BigInt(feed.length);
+    const { total } = await buildFeedForArtist(undefined, artist);
+    return BigInt(total);
   });
 
 const findAPReleaseById = async (id: number) => {

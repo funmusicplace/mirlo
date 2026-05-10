@@ -1,13 +1,13 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { bp } from "../../constants";
-
+import { useQuery } from "@tanstack/react-query";
 import PostGrid from "components/Post/PostGrid";
 import { queryArtist, queryArtistPosts } from "queries";
-import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import usePagination from "utils/usePagination";
+
+import { bp } from "../../constants";
 
 const pageSize = 6;
 
@@ -47,7 +47,9 @@ const ArtistPosts: React.FC = () => {
             padding-bottom: 0.7rem;
           `}
         >
-          {artist.posts?.length === 0 && <>{t("noUpdates", {artistName: artist.name})}</>}
+          {artist.posts?.length === 0 && (
+            <>{t("noUpdates", { artistName: artist.name })}</>
+          )}
         </div>
         <PostGrid
           posts={posts.results}

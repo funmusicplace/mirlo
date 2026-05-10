@@ -5,6 +5,11 @@ import { generateFullStaticImageUrl } from "../images";
 import { finalArtistAvatarBucket, finalPostImageBucket } from "../minio";
 import { isTrackPlayable } from "../trackPlayability";
 
+const extractFirstParagraph = (html: string): string | null => {
+  const match = html.match(/<p[^>]*>[\s\S]*?<\/p>/);
+  return match ? match[0] : null;
+};
+
 /**
  * Prisma include for fetching a public post with everything needed to
  * render the public Post page (cover, artist+avatar, tracks with playability).
@@ -51,7 +56,7 @@ export const postIncludeForUser = (userId?: number) => ({
 });
 
 export const serializePost = (
-  post: Partial<Post> & {
+  post: Partial<Post> & { id: number; isPublic: boolean } & {
     artist?: (Partial<Artist> & { avatar?: ArtistAvatar | null }) | null;
   } & { featuredImage?: { extension: string; id: string } | null } & {
     tracks?: {
@@ -99,4 +104,7 @@ export const serializePost = (
     ),
   },
   isContentHidden: !(isUserSubscriber || post.isPublic),
+  content: !(isUserSubscriber || post.isPublic)
+    ? extractFirstParagraph(post.content ?? "")
+    : post.content,
 });

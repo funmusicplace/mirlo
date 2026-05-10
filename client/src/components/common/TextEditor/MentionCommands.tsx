@@ -186,8 +186,6 @@ const MentionCommands: React.FC = () => {
       $cursor.pos
     );
 
-    console.log("[MentionCommands] textBefore:", JSON.stringify(textBefore));
-
     const match = textBefore.match(/@([\w.-]*)(?:@[\w.-]*)?$/);
     if (match) {
       const query = match[0];

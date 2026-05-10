@@ -1,9 +1,10 @@
 import assert from "node:assert";
 
+import { faker } from "@faker-js/faker";
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import prisma from "@mirlo/prisma";
 import Parser from "rss-parser";
 
 import {
@@ -13,8 +14,6 @@ import {
   createUser,
 } from "../../utils";
 import { requestApp } from "../utils";
-
-import { faker } from "@faker-js/faker";
 
 describe("artists/{id}/feed", () => {
   beforeEach(async () => {
@@ -136,7 +135,7 @@ describe("artists/{id}/feed", () => {
     assert.equal(obj.items[0].title, `${postTitle} by ${artist.name}`);
   });
 
-  it("should not GET / a hidden post", async () => {
+  it("should GET / a hidden post but it should have no content", async () => {
     const user = await prisma.user.create({
       data: {
         email: "test@test.com",
@@ -151,6 +150,8 @@ describe("artists/{id}/feed", () => {
         title: postTitle,
         artistId: artist.id,
         isPublic: false,
+        content: "<p>hi</p><p>this is a guest post</p>",
+        publishedAt: faker.date.past().toISOString(),
         isDraft: false,
       },
     });
@@ -159,8 +160,11 @@ describe("artists/{id}/feed", () => {
       .get(`artists/${artist.id}/feed`)
       .set("Accept", "application/json");
 
-    assert(response.statusCode === 200);
-    assert(response.body.results.length === 0);
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.results.length, 1);
+    assert.equal(response.body.results[0].title, `${postTitle}`);
+    assert.equal(response.body.results[0].content, "<p>hi</p>");
+    assert.equal(response.body.results[0].isContentHidden, true);
     assert(response.body.results);
   });
 

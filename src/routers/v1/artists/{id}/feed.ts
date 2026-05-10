@@ -9,9 +9,12 @@ import { Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { generateFullStaticImageUrl } from "../../../../utils/images";
-import { finalPostImageBucket } from "../../../../utils/minio";
+import {
+  canUserSeePostContent,
+  getUserSubscriptionForArtist,
+} from "../../../../utils/postAccess";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
+import { serializePost } from "../../../../utils/serialize/post";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 
@@ -21,91 +24,42 @@ export const getPostsVisibleToUser = async (
   take: number = 20,
   skip: number = 0
 ) => {
-  let where: Prisma.PostWhereInput = {
+  const where: Prisma.PostWhereInput = {
     publishedAt: { lte: new Date() },
     artistId: Number(artist.id),
-    isPublic: true,
     isDraft: false,
     deletedAt: null,
   };
 
-  if (user) {
-    delete where.isPublic;
-    // FIXME: is there a way to craft the where statement so that
-    // we don't have to post process this?
-  }
+  const [posts, total] = await prisma.$transaction([
+    prisma.post.findMany({
+      where,
+      include: {
+        artist: { include: { avatar: { where: { deletedAt: null } } } },
+        minimumSubscriptionTier: true,
+        postSubscriptionTiers: true,
+        featuredImage: true,
+      },
+      orderBy: { publishedAt: "desc" },
+      take,
+      skip,
+    }),
+    prisma.post.count({ where }),
+  ]);
 
-  let posts = await prisma.post.findMany({
-    where,
-    include: {
-      artist: true,
-      minimumSubscriptionTier: true,
-      postSubscriptionTiers: true,
-      featuredImage: true,
-    },
-    orderBy: {
-      publishedAt: "desc",
-    },
-  });
+  const isArtistOwner = !!(user && user.id === artist.userId);
+  const subscription = await getUserSubscriptionForArtist(user, artist.id);
 
-  console.log(
-    `[Feed] Fetched ${posts.length} posts for artist ${artist.id} with where:`,
-    JSON.stringify(where, null, 2)
+  const processedPosts = posts.map((post) =>
+    serializePost(
+      post,
+      undefined,
+      undefined,
+      canUserSeePostContent(post, { isArtistOwner, subscription })
+    )
   );
 
-  if (user) {
-    const userSubscription = await prisma.artistUserSubscription.findFirst({
-      where: {
-        userId: user.id,
-        artistSubscriptionTierId: {
-          in: artist.subscriptionTiers.map((s) => s.id),
-        },
-      },
-      orderBy: {
-        amount: "asc",
-      },
-    });
-    if (userSubscription) {
-      // Filter posts
-      // If the post minimum tier matches the user's subscription :ok:
-      // If any of the post's tiers match the user's subscription :ok:
-      posts = posts.filter(
-        (p) =>
-          (p.minimumSubscriptionTier?.minAmount ?? 0) <=
-            userSubscription.amount ||
-          p.postSubscriptionTiers.find(
-            (t) =>
-              userSubscription.artistSubscriptionTierId ===
-              t.artistSubscriptionTierId
-          ) ||
-          p.isPublic
-      );
-    } else {
-      posts = posts.filter((p) => p.isPublic);
-    }
-  }
-
-  // This isn't very efficient for large number of posts
-  const takePosts = posts.slice(skip, take + skip);
-
-  console.log(
-    `[Feed] Returning ${takePosts.length} posts (took ${take}, skipped ${skip}) from ${posts.length} total after filtering`
-  );
-
-  return {
-    posts: takePosts.map((post) => ({
-      ...post,
-      featuredImage: post.featuredImage && {
-        ...post.featuredImage,
-        src: generateFullStaticImageUrl(
-          post.featuredImage.id,
-          finalPostImageBucket,
-          post.featuredImage.extension
-        ),
-      },
-    })),
-    total: posts.length,
-  };
+  return { posts: processedPosts, total };
 };
 
 export const getAlbumsVisibleToUser = async (artist: Artist) => {
@@ -125,23 +79,24 @@ export const buildFeedForArtist = async (
   take: number = 10000,
   skip: number = 0
 ) => {
-  const posts = await getPostsVisibleToUser(user, artist, take, skip);
-
+  const { posts, total } = await getPostsVisibleToUser(
+    user,
+    artist,
+    take,
+    skip
+  );
   const albums = await getAlbumsVisibleToUser(artist);
 
-  const zipped = [...posts.posts, ...albums].sort((a, b) => {
-    const publishedDateA =
-      (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
-    const publishedDateB =
-      (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
-    if (publishedDateA > publishedDateB) {
-      return -1;
-    } else {
-      return 1;
-    }
-  });
-
-  return zipped;
+  return {
+    results: [...posts, ...albums].sort((a, b) => {
+      const dateA =
+        (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
+      const dateB =
+        (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
+      return dateA > dateB ? -1 : 1;
+    }),
+    total: total + albums.length,
+  };
 };
 
 export default function () {
@@ -151,7 +106,7 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
-    const { format } = req.query;
+    const { format, take, skip } = req.query;
     const user = req.user;
 
     try {
@@ -159,24 +114,17 @@ export default function () {
       let artist;
       if (parsedId) {
         artist = await prisma.artist.findFirst({
-          where: {
-            id: Number(parsedId),
-          },
-          include: {
-            subscriptionTiers: true,
-          },
+          where: { id: Number(parsedId) },
+          include: { subscriptionTiers: true },
         });
       }
 
       if (!artist) {
-        return res.status(404).json({
-          error: "Artist not found",
-        });
+        return res.status(404).json({ error: "Artist not found" });
       }
 
-      const zipped = await buildFeedForArtist(user, artist);
-
       if (format === "rss") {
+        const { results: zipped } = await buildFeedForArtist(user, artist);
         const feed = await turnItemsIntoRSS(
           {
             name: artist.name,
@@ -184,14 +132,21 @@ export default function () {
             apiEndpoint: `artists/${artist.urlSlug}/feed`,
             clientUrl: artist.urlSlug,
           },
-          zipped
+          zipped as Parameters<typeof turnItemsIntoRSS>[1]
         );
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());
       } else {
-        res.json({
-          results: zipped,
-        });
+        const takeNum = take ? Number(take) : 20;
+        const skipNum = skip ? Number(skip) : 0;
+
+        const { results: zipped, total } = await buildFeedForArtist(
+          user,
+          artist,
+          takeNum,
+          skipNum
+        );
+        res.json({ results: zipped, total });
       }
     } catch (e) {
       console.error(`/v1/artists/{id}/feed ${e}`);

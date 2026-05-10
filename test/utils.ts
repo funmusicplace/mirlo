@@ -366,6 +366,21 @@ export const getUserByEmail = async (email: string) => {
   });
 };
 
+export const createSubscription = async (
+  userId: number,
+  tierId: number,
+  amount: number = 500
+) => {
+  return prisma.artistUserSubscription.create({
+    data: {
+      userId,
+      artistSubscriptionTierId: tierId,
+      amount,
+      currency: "usd",
+    },
+  });
+};
+
 export default {
   createArtist,
   createPost,
@@ -381,4 +396,5 @@ export default {
   clearTables,
   createClient,
   getUserByEmail,
+  createSubscription,
 };

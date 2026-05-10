@@ -1,7 +1,11 @@
 import { Prisma } from "@mirlo/prisma/client";
 import { defineConfig } from "cypress";
 
-import pkg, { clearTables, createTrack } from "../test/utils";
+import pkg, {
+  clearTables,
+  createTrack,
+  createSubscription,
+} from "../test/utils";
 
 export default defineConfig({
   e2e: {
@@ -71,6 +75,45 @@ export default defineConfig({
         },
         getCurrentUser: async (email: string) => {
           return pkg.getUserByEmail(email);
+        },
+        createPost: async (query: {
+          artistId: number;
+          title?: string;
+          urlSlug?: string;
+          content?: string;
+          isPublic?: boolean;
+          isDraft?: boolean;
+          publishedAt?: string;
+          minimumSubscriptionTierId?: number;
+        }) => {
+          return pkg.createPost(query.artistId, {
+            title: query.title,
+            urlSlug: query.urlSlug,
+            content: query.content,
+            isPublic: query.isPublic,
+            isDraft: query.isDraft,
+            publishedAt: query.publishedAt
+              ? new Date(query.publishedAt)
+              : undefined,
+            minimumSubscriptionTierId: query.minimumSubscriptionTierId,
+          });
+        },
+        createTier: async (query: {
+          artistId: number;
+          name?: string;
+          minAmount?: number;
+        }) => {
+          return pkg.createTier(query.artistId, {
+            name: query.name,
+            minAmount: query.minAmount,
+          });
+        },
+        createSubscription: async (query: {
+          userId: number;
+          tierId: number;
+          amount?: number;
+        }) => {
+          return createSubscription(query.userId, query.tierId, query.amount);
         },
       });
     },

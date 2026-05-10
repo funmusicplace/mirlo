@@ -630,7 +630,7 @@
     "noPostFound": "No post found",
     "returnToArtist": ", return to <link>{{artistName}}</link>",
     "edit": "Edit",
-    "notAvailable": "This post was made private.",
+    "notAvailable": "This post is for subscribers only. <support>Support this artist</support> to get access.",
     "publishedAt": "Published {{ date }}",
     "likedThisPost": "Liked this post?",
     "willPublishAt": "Will publish at {{ date }}"

@@ -1,10 +1,11 @@
 import assert from "node:assert";
+
+import { faker } from "@faker-js/faker";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import { clearTables, createArtist, createPost, createUser } from "../../utils";
 
-import { faker } from "@faker-js/faker";
+import { clearTables, createArtist, createPost, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("posts/{id}", () => {
@@ -82,13 +83,14 @@ describe("posts/{id}", () => {
         isDraft: false,
         isPublic: false,
         content: testContent,
+        publishedAt: faker.date.past(),
       });
 
       const response = await requestApp
         .get(`posts/${post.id}`)
         .set("Accept", "application/json");
 
-      assert.equal(response.body.result.content, testContent);
+      assert.equal(response.body.result.content, null);
       assert.equal(response.body.result.isContentHidden, true);
     });
   });

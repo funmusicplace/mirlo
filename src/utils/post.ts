@@ -1,9 +1,8 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 import showdown from "showdown";
-import { AppError } from "./error";
 
-export { serializePost, postIncludeForUser } from "./serialize/post";
+import { AppError } from "./error";
 
 const converter = new showdown.Converter({ headerLevelStart: 2 });
 

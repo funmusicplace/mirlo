@@ -48,23 +48,11 @@ export default function () {
           }) as any,
         });
 
-        isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);
-
         if (!artist) {
           return res.status(404).json({ error: "Artist not found" });
         }
 
-        if (artist.isLabelProfile) {
-          const user = await prisma.user.findUnique({
-            where: {
-              id: artist.userId,
-              isLabelAccount: true,
-            },
-            select: {
-              artistLabels: true,
-            },
-          });
-        }
+        isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);
 
         return res.json({
           result: processSingleArtist(

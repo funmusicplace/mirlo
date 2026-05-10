@@ -1,10 +1,10 @@
 import assert from "node:assert";
-import { Prisma } from "@mirlo/prisma/client";
 
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+
 import { clearTables, createArtist, createUser } from "../../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
@@ -21,17 +21,18 @@ describe("manage/posts", () => {
 
   describe("GET", () => {
     it("should GET /", async () => {
-      const { accessToken } = await createUser({
+      const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
 
+      const artist = await createArtist(user.id);
+
       const response = await requestApp
-        .get(`manage/posts`)
+        .get(`manage/posts?artistId=${artist.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
-
+      assert.equal(response.statusCode, 200);
       assert.deepEqual(response.body.results, []);
-      assert(response.statusCode === 200);
     });
   });
 
