@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
+import LazyIframe from "components/common/LazyIframe";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { MetaCard } from "components/common/MetaCard";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
@@ -144,7 +145,8 @@ const Post: React.FC = () => {
                         node instanceof Element &&
                         node.tagName === "iframe"
                       ) {
-                        node.attribs.loading = "lazy";
+                        const { loading: _loading, ...attribs } = node.attribs;
+                        return <LazyIframe {...attribs} />;
                       }
                     },
                   })}
