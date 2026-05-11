@@ -1,18 +1,16 @@
-import React from "react";
-import Button from "./Button";
-import api from "services/api";
-import { FaCheck, FaMinus, FaPlus } from "react-icons/fa";
-import { useTranslation } from "react-i18next";
-import Modal from "./Modal";
-
-import { useAuthContext } from "state/AuthContext";
-import SupportArtistTiersForm from "./SupportArtistTiersForm";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
 import { css } from "@emotion/css";
-import Box from "./Box";
+import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { queryArtist } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaCheck, FaMinus, FaPlus } from "react-icons/fa";
+import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+
+import Box from "./Box";
+import Modal from "./Modal";
+import SupportArtistTiersForm from "./SupportArtistTiersForm";
 
 const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -151,8 +149,9 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
             )}
           </p>
         )}
-
-        <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
+        {hasNoneDefaultSubscriptionTiers && (
+          <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
+        )}
       </Modal>
 
       <ArtistButton
