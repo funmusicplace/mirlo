@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormCheckbox from "components/common/FormCheckbox";
+import FormError from "components/common/FormError";
 import InfoModal from "components/common/InfoModal";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
@@ -77,6 +78,10 @@ const EditTrackRow: React.FC<{
   const trackId = track.id;
   const { control, register, reset, watch } = methods;
   const allowIndividualSale = watch("allowIndividualSale");
+  const isrcValue = watch("isrc");
+  const isrcWarning =
+    !!isrcValue &&
+    !/^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$/.test(isrcValue.replace(/-/g, ""));
   const {
     fields: trackArtists,
     append,
@@ -361,6 +366,7 @@ const EditTrackRow: React.FC<{
             {...register(`isrc`)}
             disabled={isSaving || isDisabled}
           />
+          {isrcWarning && <FormError>{t("isrcInvalid")}</FormError>}
         </td>
       </IndentedTR>
       <IndentedTR>
