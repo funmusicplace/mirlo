@@ -665,6 +665,7 @@
     "adminEditUser": "Admin: edit user",
     "adminEditArtist": "Admin: edit artist",
     "adminEditRelease": "Admin: edit release",
+    "unpublishedLabelReleases": "Unpublished releases from artists on this roster",
     "labelReleases": "Releases from artists on this roster",
     "labelReleasesDescription": "These are releases from artists on your roster. If you are administering payments for these artists, you'll receive payments for these releases.",
     "linkedToLabel": "This artist is linked to a label/collective <label>{{label}}</label> who have payment processing set up. You can talk to them about collecting payments.",

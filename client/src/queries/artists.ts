@@ -74,15 +74,26 @@ export function queryUserArtists(opts: { userId?: number }) {
 
 const fetchManagedArtistTrackGroups: QueryFunction<
   { results: TrackGroup[] },
-  ["fetchUserTrackGroups", { artistId?: number }, ...any]
-> = ({ queryKey: [_, { artistId }], signal }) => {
-  return api.get(`v1/manage/artists/${artistId}/trackGroups`, { signal });
+  [
+    "fetchUserTrackGroups",
+    { artistId?: number; includeLabelReleases?: boolean },
+    ...any,
+  ]
+> = ({ queryKey: [_, { artistId, includeLabelReleases }], signal }) => {
+  const params = includeLabelReleases ? "?includeLabelReleases=true" : "";
+  return api.get(`v1/manage/artists/${artistId}/trackGroups${params}`, {
+    signal,
+  });
 };
 
-export function queryManagedArtistTrackGroups(opts: { artistId?: number }) {
+export function queryManagedArtistTrackGroups(opts: {
+  artistId?: number;
+  includeLabelReleases?: boolean;
+}) {
   return queryOptions({
     queryKey: ["fetchUserTrackGroups", opts, QUERY_KEY_TRACK_GROUPS],
     queryFn: fetchManagedArtistTrackGroups,
+    enabled: !!opts.artistId,
   });
 }
 

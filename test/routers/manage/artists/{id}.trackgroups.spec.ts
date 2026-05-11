@@ -111,6 +111,169 @@ describe("manage/artists/{artistId}/trackGroups", () => {
     });
   });
 
+  describe("GET with includeLabelReleases", () => {
+    it("should return releases from artists the label manages via ArtistLabel", async () => {
+      const { user: labelUser, accessToken: labelAccessToken } =
+        await createUser({ email: "label@test.com" });
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+
+      const label = await createArtist(labelUser.id, {
+        name: "Test Label",
+        urlSlug: "test-label",
+        isLabelProfile: true,
+      });
+      const managedArtist = await createArtist(artistUser.id, {
+        name: "Managed Artist",
+        urlSlug: "managed-artist",
+      });
+
+      await prisma.artistLabel.create({
+        data: {
+          labelUserId: labelUser.id,
+          artistId: managedArtist.id,
+          canLabelAddReleases: true,
+          canLabelManageArtist: true,
+        },
+      });
+
+      const labelRelease = await createTrackGroup(managedArtist.id, {
+        title: "Managed Artist Release",
+        urlSlug: "managed-artist-release",
+      });
+
+      const response = await requestApp
+        .get(`manage/artists/${label.id}/trackGroups?includeLabelReleases=true`)
+        .set("Cookie", [`jwt=${labelAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].id, labelRelease.id);
+    });
+
+    it("should not return releases from unrelated artists", async () => {
+      const { user: labelUser, accessToken: labelAccessToken } =
+        await createUser({ email: "label2@test.com" });
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+      });
+
+      const label = await createArtist(labelUser.id, {
+        name: "Test Label 2",
+        urlSlug: "test-label-2",
+        isLabelProfile: true,
+      });
+      const unrelatedArtist = await createArtist(otherUser.id, {
+        name: "Unrelated Artist",
+        urlSlug: "unrelated-artist",
+      });
+
+      await createTrackGroup(unrelatedArtist.id, {
+        title: "Unrelated Release",
+        urlSlug: "unrelated-release",
+      });
+
+      const response = await requestApp
+        .get(`manage/artists/${label.id}/trackGroups?includeLabelReleases=true`)
+        .set("Cookie", [`jwt=${labelAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 0);
+    });
+
+    it("should include both the label's own releases and managed artist releases", async () => {
+      const { user: labelUser, accessToken: labelAccessToken } =
+        await createUser({ email: "label3@test.com" });
+      const { user: artistUser } = await createUser({
+        email: "artist3@test.com",
+      });
+
+      const label = await createArtist(labelUser.id, {
+        name: "Test Label 3",
+        urlSlug: "test-label-3",
+        isLabelProfile: true,
+      });
+      const managedArtist = await createArtist(artistUser.id, {
+        name: "Managed Artist 3",
+        urlSlug: "managed-artist-3",
+      });
+
+      await prisma.artistLabel.create({
+        data: {
+          labelUserId: labelUser.id,
+          artistId: managedArtist.id,
+          canLabelAddReleases: true,
+          canLabelManageArtist: true,
+        },
+      });
+
+      const ownRelease = await createTrackGroup(label.id, {
+        title: "Label Own Release",
+        urlSlug: "label-own-release",
+      });
+      const managedRelease = await createTrackGroup(managedArtist.id, {
+        title: "Managed Release",
+        urlSlug: "managed-release",
+      });
+
+      const response = await requestApp
+        .get(`manage/artists/${label.id}/trackGroups?includeLabelReleases=true`)
+        .set("Cookie", [`jwt=${labelAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 2);
+      const ids = response.body.results.map((r: { id: number }) => r.id);
+      assert(ids.includes(ownRelease.id));
+      assert(ids.includes(managedRelease.id));
+    });
+
+    it("should include unpublished releases from managed artists", async () => {
+      const { user: labelUser, accessToken: labelAccessToken } =
+        await createUser({ email: "label4@test.com" });
+      const { user: artistUser } = await createUser({
+        email: "artist4@test.com",
+      });
+
+      const label = await createArtist(labelUser.id, {
+        name: "Test Label 4",
+        urlSlug: "test-label-4",
+        isLabelProfile: true,
+      });
+      const managedArtist = await createArtist(artistUser.id, {
+        name: "Managed Artist 4",
+        urlSlug: "managed-artist-4",
+      });
+
+      await prisma.artistLabel.create({
+        data: {
+          labelUserId: labelUser.id,
+          artistId: managedArtist.id,
+          canLabelAddReleases: true,
+          canLabelManageArtist: true,
+        },
+      });
+
+      const unpublishedRelease = await createTrackGroup(managedArtist.id, {
+        title: "Unpublished Managed Release",
+        urlSlug: "unpublished-managed-release",
+        publishedAt: null,
+      });
+
+      const response = await requestApp
+        .get(`manage/artists/${label.id}/trackGroups?includeLabelReleases=true`)
+        .set("Cookie", [`jwt=${labelAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].id, unpublishedRelease.id);
+    });
+  });
+
   describe("POST", () => {
     it("should POST an album successfully", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });

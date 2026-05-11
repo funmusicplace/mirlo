@@ -1,13 +1,17 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import {
+  getPlatformFeeForArtist,
+  whereForAllArtistsThisLabelCanAddReleasesFor,
+} from "../../../../../utils/artist";
 import processor from "../../../../../utils/trackGroup";
-import prisma from "@mirlo/prisma";
-import { getPlatformFeeForArtist } from "../../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -23,6 +27,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params;
     const { includeLabelReleases } = req.query;
+    assertLoggedIn(req);
     const loggedInUser = req.user;
 
     try {
@@ -31,8 +36,12 @@ export default function () {
           ...(includeLabelReleases === "true"
             ? {
                 OR: [
-                  { paymentToUserId: loggedInUser?.id },
-                  { artist: { userId: loggedInUser?.id } },
+                  {
+                    artist: whereForAllArtistsThisLabelCanAddReleasesFor(
+                      loggedInUser.id
+                    ),
+                  },
+                  { paymentToUserId: loggedInUser.id },
                 ],
               }
             : { artistId: Number(artistId) }),
