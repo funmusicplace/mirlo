@@ -3,7 +3,6 @@ import {
   useEditorState,
   useRemirrorContext,
 } from "@remirror/react";
-import type { Node as ProsemirrorNode } from "prosemirror-model";
 import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -62,11 +61,12 @@ async function searchMentions(query: string): Promise<MentionResult[]> {
   }
 
   // Local Mirlo artist search
-  const cleanQuery = query.startsWith("@") ? query.slice(1) : query;
+  const cleanQuery = (query.startsWith("@") ? query.slice(1) : query).trim();
   if (!cleanQuery) return [];
 
   const response = await api.getMany<Artist>("artists", {
     name: cleanQuery,
+    includeUnpublished: "true",
     take: "10",
   });
 
@@ -84,7 +84,9 @@ async function searchMentions(query: string): Promise<MentionResult[]> {
   });
 }
 
-const MentionCommands: React.FC = () => {
+const MentionCommands: React.FC<{
+  anchorRef: { current: number | null };
+}> = ({ anchorRef }) => {
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
   const [isActive, setIsActive] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -125,33 +127,16 @@ const MentionCommands: React.FC = () => {
     setResults([]);
     setSearchText("");
     setDropdownPos(null);
-  }, []);
+    anchorRef.current = null;
+  }, [anchorRef]);
 
   const insertMention = useCallback(
     (item: MentionResult) => {
       try {
-        const anchorPos = view.state.selection.$anchor.pos;
-        const scanFrom = Math.max(0, anchorPos - 100);
+        const from = anchorRef.current;
+        if (from === null) return;
+        const to = view.state.selection.$anchor.pos;
 
-        let from = -1;
-        view.state.doc.nodesBetween(
-          scanFrom,
-          anchorPos,
-          (node: ProsemirrorNode, pos: number) => {
-            if (!node.isText || !node.text) return;
-            const nodeEnd = pos + node.text.length;
-            const sliceEnd = Math.min(nodeEnd, anchorPos);
-            const text = node.text.slice(0, sliceEnd - pos);
-            const match = text.match(/@[\w.-]+(?:@[\w.-]*)?$/);
-            if (match && match.index !== undefined) {
-              from = pos + match.index;
-            }
-          }
-        );
-
-        if (from === -1) return;
-
-        const to = anchorPos;
         chain
           .selectText({ from, to })
           .delete()
@@ -170,10 +155,13 @@ const MentionCommands: React.FC = () => {
         console.error("MentionCommands: insert error", e);
       }
     },
-    [chain, view, dismiss]
+    [chain, view, dismiss, anchorRef]
   );
 
-  // Detect @mention trigger from editor state
+  // Detect @mention trigger from editor state.
+  // isActive is intentionally excluded from deps: we use anchorRef (ref)
+  // as the source of truth so that dismiss() doesn't cause the effect to
+  // immediately re-run and re-activate at the same '@'.
   useEffect(() => {
     const $cursor = state.selection.$anchor;
     if (!$cursor) {
@@ -181,27 +169,48 @@ const MentionCommands: React.FC = () => {
       return;
     }
 
-    const textBefore = state.doc.textBetween(
-      Math.max(0, $cursor.pos - 100),
-      $cursor.pos
-    );
+    const cursorPos = $cursor.pos;
+    const anchor = anchorRef.current;
 
-    const match = textBefore.match(/@([\w.-]*)(?:@[\w.-]*)?$/);
+    if (anchor !== null) {
+      if (cursorPos <= anchor) {
+        dismiss();
+        return;
+      }
+      const query = state.doc.textBetween(anchor, cursorPos);
+      if (!query.startsWith("@")) {
+        dismiss();
+        return;
+      }
+      setSearchText(query);
+      searchCallback(query);
+      try {
+        const coords = view.coordsAtPos(cursorPos);
+        setDropdownPos({ top: coords.bottom, left: coords.left });
+      } catch {}
+      return;
+    }
+
+    // Not active — check for '@' trigger
+    const textBefore = state.doc.textBetween(
+      Math.max(0, cursorPos - 100),
+      cursorPos
+    );
+    const match = textBefore.match(/@[\w.-]*$/);
     if (match) {
       const query = match[0];
+      anchorRef.current = cursorPos - query.length;
       setIsActive(true);
       setSearchText(query);
       searchCallback(query);
       try {
-        const coords = view.coordsAtPos($cursor.pos);
+        const coords = view.coordsAtPos(cursorPos);
         setDropdownPos({ top: coords.bottom, left: coords.left });
-      } catch {
-        // coordsAtPos can throw if pos is out of bounds
-      }
+      } catch {}
     } else {
       dismiss();
     }
-  }, [state, searchCallback, view, dismiss]);
+  }, [state, searchCallback, view, dismiss, anchorRef]);
 
   useCommandKeyboardNav({
     isActive,

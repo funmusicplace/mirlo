@@ -1,6 +1,13 @@
+import { css } from "@emotion/css";
 import { CommandFunctionProps, DelayedPromiseCreator } from "@remirror/core";
-import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
-import React, { useEffect, useState } from "react";
+import { prosemirrorNodeToHtml } from "@remirror/core-utils";
+import {
+  TableComponents,
+  EditorComponent,
+  Remirror,
+  useRemirror,
+} from "@remirror/react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   PlaceholderExtension,
@@ -13,9 +20,7 @@ import {
   ImageAttributes,
 } from "remirror/extensions";
 import "remirror/styles/all.css";
-import { css } from "@emotion/css";
-import { TableComponents } from "@remirror/react";
-import { prosemirrorNodeToHtml } from "@remirror/core-utils";
+
 import api from "services/api";
 
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
@@ -28,10 +33,15 @@ import { SlashCommandHighlightExtension } from "./SlashTrackHighlightExtension";
 import TopToolbar from "./TopToolbar";
 import { usePastedImageUpload } from "./usePastedImageUpload";
 
-const SLASH_TRIGGERS = SLASH_COMMANDS.map((c) => c.trigger);
-
 const extensions =
-  (placeholder: string, postId?: number, reload?: () => void) => () => [
+  (
+    placeholder: string,
+    mentionHighlightExt: MentionHighlightExtension,
+    slashHighlightExt: SlashCommandHighlightExtension,
+    postId?: number,
+    reload?: () => void
+  ) =>
+  () => [
     new PlaceholderExtension({ placeholder }),
     new TableExtension({}),
     new DropCursorExtension({}),
@@ -62,8 +72,8 @@ const extensions =
         "data-mention-handle": { default: null },
       },
     }),
-    new SlashCommandHighlightExtension({ triggers: SLASH_TRIGGERS }),
-    new MentionHighlightExtension({}),
+    mentionHighlightExt,
+    slashHighlightExt,
     ...wysiwygPreset(),
   ];
 
@@ -87,8 +97,26 @@ const TextEditor: React.FC<{
   basicStyles = false,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
+  const mentionHighlightExtRef = useRef<MentionHighlightExtension | null>(null);
+  if (!mentionHighlightExtRef.current) {
+    mentionHighlightExtRef.current = new MentionHighlightExtension({});
+  }
+  const slashHighlightExtRef = useRef<SlashCommandHighlightExtension | null>(
+    null
+  );
+  if (!slashHighlightExtRef.current) {
+    slashHighlightExtRef.current = new SlashCommandHighlightExtension({
+      triggers: SLASH_COMMANDS.map((c) => c.trigger),
+    });
+  }
   const { manager, state, setState } = useRemirror({
-    extensions: extensions(t("typeSomething").toString(), postId, reloadImages),
+    extensions: extensions(
+      t("typeSomething").toString(),
+      mentionHighlightExtRef.current,
+      slashHighlightExtRef.current,
+      postId,
+      reloadImages
+    ),
     content: value,
     stringHandler: "html",
     selection: "end",
@@ -194,6 +222,14 @@ const TextEditor: React.FC<{
         color: var(--mi-normal-foreground-color);
       }
 
+      .mention-link {
+        background: color-mix(in srgb, var(--mi-button-color) 15%, transparent);
+        border-radius: 3px;
+        font-weight: bold;
+        padding: 3px 5px;
+        color: var(--mi-button-color);
+      }
+
       iframe {
         width: 100%;
       }
@@ -248,8 +284,13 @@ const TextEditor: React.FC<{
         <EditorComponent />
         <TableComponents />
         <FloatingLinkToolbar />
-        <SlashCommands commands={SLASH_COMMANDS} />
-        <MentionCommands />
+        <SlashCommands
+          commands={SLASH_COMMANDS}
+          anchorRef={slashHighlightExtRef.current!.anchorRef}
+        />
+        <MentionCommands
+          anchorRef={mentionHighlightExtRef.current!.anchorRef}
+        />
       </Remirror>
     </div>
   );

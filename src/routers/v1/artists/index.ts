@@ -1,9 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
+
 import { processSingleArtist } from "../../../utils/artist";
-import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 import { turnItemsIntoRSS } from "../../../utils/rss";
+import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -147,6 +148,7 @@ export default function () {
           },
         },
       });
+
       if (format === "rss") {
         const feed = await turnItemsIntoRSS(
           {

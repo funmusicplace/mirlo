@@ -26,7 +26,8 @@ export type SlashCommandConfig = {
 
 const SlashCommands: React.FC<{
   commands: SlashCommandConfig[];
-}> = ({ commands: commandConfigs }) => {
+  anchorRef: { current: number | null };
+}> = ({ commands: commandConfigs, anchorRef }) => {
   const [isActive, setIsActive] = useState(false);
   const [activeConfig, setActiveConfig] = useState<SlashCommandConfig | null>(
     null
@@ -73,7 +74,8 @@ const SlashCommands: React.FC<{
     setSearchText("");
     setDropdownPos(null);
     setActiveConfig(null);
-  }, []);
+    anchorRef.current = null;
+  }, [anchorRef]);
 
   const insertResult = useCallback(
     (item: SlashCommandResult) => {
@@ -124,6 +126,7 @@ const SlashCommands: React.FC<{
       const pattern = new RegExp(`\\/${config.trigger}\\s+([^\\n]*)$`);
       const match = textBefore.match(pattern);
       if (match) {
+        anchorRef.current = $cursor.pos - match[0].length;
         setIsActive(true);
         setActiveConfig(config);
         setSearchText(match[1]);

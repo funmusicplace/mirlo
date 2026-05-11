@@ -27,6 +27,7 @@ export default function () {
       license,
       title,
       locationSlug,
+      artistName,
       isReleased,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
@@ -72,6 +73,13 @@ export default function () {
             },
           },
         };
+      }
+
+      if (artistName && typeof artistName === "string") {
+        if (!where.artist) {
+          where.artist = {};
+        }
+        where.artist.name = { contains: artistName, mode: "insensitive" };
       }
 
       if (license && license !== "" && license !== "all") {
