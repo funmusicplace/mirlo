@@ -2,6 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
+// When a deploy lands and the SW has cleaned old chunk URLs, lazy-loaded
+// modules 404. Reloading fetches fresh HTML + the new SW's precached chunks.
+window.addEventListener("vite:preloadError", () => {
+  window.location.reload();
+});
+
 import "./styles/index.css";
 import "./i18n";
 
