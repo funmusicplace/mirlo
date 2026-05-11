@@ -1,16 +1,23 @@
 import { css } from "@emotion/css";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
-
 import { Trans, useTranslation } from "react-i18next";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
-const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
-  artist,
-  fromAlbum,
-}) => {
+const ArtistByLine: React.FC<{
+  artist: Artist;
+  trackGroup?: TrackGroup;
+  showFromAlbum?: boolean;
+}> = ({ artist, trackGroup, showFromAlbum }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+
+  const labelArtist =
+    trackGroup?.paymentToUserId && trackGroup.paymentToUserId !== artist.userId
+      ? artist.artistLabels?.find(
+          (al) => al.labelUserId === trackGroup.paymentToUserId
+        )?.labelUser.artists?.[0]
+      : undefined;
 
   return (
     <div
@@ -19,19 +26,19 @@ const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
         font-style: normal;
       `}
     >
-      {fromAlbum && (
+      {showFromAlbum && trackGroup && (
         <>
           <Trans
             t={t}
             i18nKey="fromAlbum"
             values={{
-              album: fromAlbum.title,
+              album: trackGroup.title,
             }}
             components={{
               albumLink: (
                 <ArtistButtonLink
                   variant="link"
-                  to={getReleaseUrl(artist, fromAlbum)}
+                  to={getReleaseUrl(artist, trackGroup)}
                 ></ArtistButtonLink>
               ),
             }}
@@ -53,6 +60,26 @@ const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
           ),
         }}
       />
+      {labelArtist && (
+        <>
+          {" "}
+          <Trans
+            t={t}
+            i18nKey="onLabel"
+            values={{
+              label: labelArtist.name,
+            }}
+            components={{
+              labelLink: (
+                <ArtistButtonLink
+                  variant="link"
+                  to={getArtistUrl(labelArtist)}
+                ></ArtistButtonLink>
+              ),
+            }}
+          />
+        </>
+      )}
     </div>
   );
 };

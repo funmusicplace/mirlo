@@ -1,19 +1,19 @@
 import { css } from "@emotion/css";
-import { useParams } from "react-router-dom";
-import ClickToPlayTracks from "../common/ClickToPlayTracks";
-import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import DropdownMenu from "components/common/DropdownMenu";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import { queryArtist } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../../constants";
-import DropdownMenu from "components/common/DropdownMenu";
-import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
-import React from "react";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { useAuthContext } from "state/AuthContext";
 import ArtistByLine from "./ArtistByLine";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
+import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 export const ItemViewTitle: React.FC<{
   title: string;
@@ -102,7 +102,8 @@ const TrackGroupTitle: React.FC<{
       >
         <ArtistByLine
           artist={artist}
-          fromAlbum={title !== trackGroup.title ? trackGroup : undefined}
+          trackGroup={trackGroup}
+          showFromAlbum={title !== trackGroup.title}
         />
         <div
           className={css`
