@@ -50,7 +50,7 @@ export async function triggerPostNotifications() {
       "send-post-notification",
       { postId: post.id },
       {
-        jobId: `post-notification:${post.id}`,
+        jobId: `post-notification-${post.id}`,
         removeOnComplete: true,
       }
     );
