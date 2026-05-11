@@ -1,13 +1,14 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import Box from "../common/Box";
-import Money, { moneyDisplay } from "../common/Money";
-import Pill from "../common/Pill";
-import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
+import React from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
+
+import Box from "../common/Box";
+import { moneyDisplay } from "../common/Money";
+import Pill from "../common/Pill";
 
 const UL = styled.ul`
   margin-top: 1rem;
@@ -81,11 +82,21 @@ const UserSupports: React.FC<{
                   >
                     <span>{s.artistSubscriptionTier.artist.name}</span>
                     <span>
-                      {moneyDisplay({
-                        amount: s.amount / 100,
-                        currency: s.artistSubscriptionTier.currency,
-                      })}
-                      /mo
+                      <Trans
+                        t={t}
+                        i18nKey="supportAmountInterval"
+                        values={{
+                          amount: moneyDisplay({
+                            amount: s.amount / 100,
+                            currency: s.artistSubscriptionTier.currency,
+                          }),
+                          interval:
+                            s.artistSubscriptionTier.interval === "MONTH"
+                              ? t("monthlyShort")
+                              : t("yearlyShort"),
+                        }}
+                        defaults="{{amount}}/{{interval}}"
+                      />
                     </span>
                   </div>
                 </Link>

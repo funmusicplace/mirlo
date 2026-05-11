@@ -171,6 +171,8 @@
     "yourAvatar": "Your avatar",
     "yourBanner": "Your banner",
     "account": "Account",
+    "monthlyShort": "mo",
+    "yearlyShort": "yr",
     "accountingEmail": "Accounting email",
     "purchaseDetails": "Purchase details",
     "manageLabel": "Manage label",
