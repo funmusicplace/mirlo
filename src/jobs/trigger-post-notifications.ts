@@ -1,4 +1,5 @@
 import prisma from "@mirlo/prisma";
+
 import logger from "../logger";
 import { sendPostNotificationQueue } from "../queues/send-post-notification-queue";
 
@@ -48,7 +49,10 @@ export async function triggerPostNotifications() {
     await sendPostNotificationQueue.add(
       "send-post-notification",
       { postId: post.id },
-      { removeOnComplete: true }
+      {
+        jobId: `post-notification:${post.id}`,
+        removeOnComplete: true,
+      }
     );
   }
 }

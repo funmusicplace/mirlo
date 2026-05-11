@@ -65,7 +65,7 @@ export const parseOutIframes = async (
         : Promise.resolve([]),
       trackIds.length
         ? prisma.track.findMany({
-            where: { id: { in: trackIds } },
+            where: { id: { in: trackIds }, deletedAt: null },
             include: { trackGroup: { include: { artist: true } } },
           })
         : Promise.resolve([]),
