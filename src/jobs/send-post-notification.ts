@@ -90,16 +90,26 @@ export default async function sendPostNotification(job: {
       return;
     }
 
-    // Only process published, non-draft posts that should send email
     const hasContent = post.content && post.content.trim().length > 0;
-    if (
-      post.isDraft ||
-      !post.shouldSendEmail ||
-      !hasContent ||
-      post.hasAnnounceEmailBeenSent
-    ) {
+    if (post.isDraft || !post.shouldSendEmail || !hasContent) {
       logger.info(
-        `sendPostNotification: skipping post ${postId} (draft=${post.isDraft}, shouldSendEmail=${post.shouldSendEmail}, hasContent=${hasContent}, alreadySent=${post.hasAnnounceEmailBeenSent})`
+        `sendPostNotification: skipping post ${postId} (draft=${post.isDraft}, shouldSendEmail=${post.shouldSendEmail}, hasContent=${hasContent})`
+      );
+      return;
+    }
+
+    // Atomically claim the post for sending. updateMany with the condition
+    // acts as a mutex — only one job execution (across retries or concurrent
+    // cron-queued duplicates) will get count=1 here. Any subsequent attempt
+    // sees count=0 and exits early, preventing duplicate emails.
+    const claim = await prisma.post.updateMany({
+      where: { id: postId, hasAnnounceEmailBeenSent: false },
+      data: { hasAnnounceEmailBeenSent: true },
+    });
+
+    if (claim.count === 0) {
+      logger.info(
+        `sendPostNotification: post ${postId} already claimed by another job, skipping`
       );
       return;
     }
@@ -120,122 +130,107 @@ export default async function sendPostNotification(job: {
       `sendPostNotification: found ${uniqueSubscribers.length} subscribers for post ${postId}`
     );
 
-    // Create notifications and queue emails in a transaction
-    // This ensures atomicity - if it fails halfway, the transaction rolls back
-    await prisma.$transaction(async (tx) => {
-      // Create notifications (skipDuplicates prevents duplicate emails)
-      const createdNotifications = await tx.notification.createMany({
-        data: uniqueSubscribers.map((subscriber) => ({
+    // Create notifications in the DB
+    const createdNotifications = await prisma.notification.createMany({
+      data: uniqueSubscribers.map((subscriber) => ({
+        postId,
+        userId: subscriber.id,
+        notificationType: "NEW_ARTIST_POST" as const,
+        deliveryMethod: post.artist?.activityPub
+          ? ("BOTH" as const)
+          : ("EMAIL" as const),
+      })),
+      skipDuplicates: true,
+    });
+
+    logger.info(
+      `sendPostNotification: created ${createdNotifications.count} new notifications for post ${postId}`
+    );
+
+    const notificationsToEmail = await prisma.notification.findMany({
+      where: {
+        postId,
+        deliveryMethod: { in: ["EMAIL", "BOTH"] },
+      },
+      include: {
+        user: { select: { email: true } },
+      },
+    });
+
+    logger.info(
+      `sendPostNotification: queueing ${notificationsToEmail.length} email(s) for post ${postId}`
+    );
+
+    // Pass the post URL as a fallback so embedded tracks/trackGroups link
+    // to the post when their parent album is unreachable (draft, private,
+    // unreleased, deleted). Otherwise the email link 404s. See #1703.
+    const { applicationUrl } = await getClient();
+    const postUrl = `${applicationUrl}/${post.artist?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
+    const htmlContent = await parseOutIframes(post.content || "", postUrl);
+
+    for (const notification of notificationsToEmail) {
+      if (!notification.user?.email) {
+        logger.warn(
+          `sendPostNotification: skipping notification ${notification.id} for post ${postId} because recipient email is missing`
+        );
+        continue;
+      }
+
+      const postForEmail = serializePost({
+        id: post.id,
+        title: post.title,
+        urlSlug: post.urlSlug,
+        featuredImage: post.featuredImage,
+        content: post.content,
+        isPublic: post.isPublic,
+      });
+
+      await sendMailQueue.add(
+        "send-mail",
+        {
+          template: "announce-post-published",
+          message: {
+            to: notification.user.email,
+          },
+          locals: {
+            artist: {
+              id: post.artist?.id,
+              name: post.artist?.name,
+              urlSlug: post.artist?.urlSlug,
+            },
+            post: {
+              ...postForEmail,
+              htmlContent,
+            },
+            email: encodeURIComponent(notification.user.email),
+            host: process.env.API_DOMAIN,
+            client: (await getClient()).applicationUrl,
+          },
+        },
+        {
+          jobId: `announce-post-published:${postId}:${notification.id}`,
+        }
+      );
+    }
+
+    // Create in-app notifications for mentioned local artists
+    const mentionedArtistUserIds = await findMentionedLocalArtistUserIds(
+      post.content || ""
+    );
+    if (mentionedArtistUserIds.length > 0) {
+      await prisma.notification.createMany({
+        data: mentionedArtistUserIds.map((userId) => ({
           postId,
-          userId: subscriber.id,
-          notificationType: "NEW_ARTIST_POST" as const,
-          deliveryMethod: post.artist?.activityPub
-            ? ("BOTH" as const)
-            : ("EMAIL" as const),
+          userId,
+          notificationType: "MENTION_IN_POST" as const,
+          deliveryMethod: "IN_APP" as const,
         })),
         skipDuplicates: true,
       });
-
       logger.info(
-        `sendPostNotification: created ${createdNotifications.count} new notifications for post ${postId}`
+        `sendPostNotification: created ${mentionedArtistUserIds.length} mention notification(s) for post ${postId}`
       );
-
-      // Find ALL notifications for this post (both newly created and existing)
-      // to queue emails for them
-      const notificationsToEmail = await tx.notification.findMany({
-        where: {
-          postId,
-          deliveryMethod: { in: ["EMAIL", "BOTH"] },
-        },
-        include: {
-          user: { select: { email: true } },
-        },
-      });
-
-      logger.info(
-        `sendPostNotification: queueing ${notificationsToEmail.length} email(s) for post ${postId}`
-      );
-
-      // Pass the post URL as a fallback so embedded tracks/trackGroups link
-      // to the post when their parent album is unreachable (draft, private,
-      // unreleased, deleted). Otherwise the email link 404s. See #1703.
-      const { applicationUrl } = await getClient();
-      const postUrl = `${applicationUrl}/${post.artist?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
-      const htmlContent = await parseOutIframes(post.content || "", postUrl);
-
-      // Queue emails for all notifications
-      for (const notification of notificationsToEmail) {
-        if (!notification.user?.email) {
-          logger.warn(
-            `sendPostNotification: skipping notification ${notification.id} for post ${postId} because recipient email is missing`
-          );
-          continue;
-        }
-
-        const postForEmail = serializePost({
-          id: post.id,
-          title: post.title,
-          urlSlug: post.urlSlug,
-          featuredImage: post.featuredImage,
-          content: post.content,
-          isPublic: post.isPublic,
-        });
-
-        await sendMailQueue.add(
-          "send-mail",
-          {
-            template: "announce-post-published",
-            message: {
-              to: notification.user.email,
-            },
-            locals: {
-              artist: {
-                id: post.artist?.id,
-                name: post.artist?.name,
-                urlSlug: post.artist?.urlSlug,
-              },
-              post: {
-                ...postForEmail,
-                htmlContent,
-              },
-              email: encodeURIComponent(notification.user.email),
-              host: process.env.API_DOMAIN,
-              client: (await getClient()).applicationUrl,
-            },
-          },
-          {
-            // Stable job IDs make email enqueue idempotent across retries.
-            jobId: `announce-post-published:${postId}:${notification.id}`,
-          }
-        );
-      }
-
-      // Create in-app notifications for mentioned local artists
-      const mentionedArtistUserIds = await findMentionedLocalArtistUserIds(
-        post.content || ""
-      );
-      if (mentionedArtistUserIds.length > 0) {
-        await tx.notification.createMany({
-          data: mentionedArtistUserIds.map((userId) => ({
-            postId,
-            userId,
-            notificationType: "MENTION_IN_POST" as const,
-            deliveryMethod: "IN_APP" as const,
-          })),
-          skipDuplicates: true,
-        });
-        logger.info(
-          `sendPostNotification: created ${mentionedArtistUserIds.length} mention notification(s) for post ${postId}`
-        );
-      }
-
-      // Mark post as having email announcement sent
-      // This prevents re-processing on job retry
-      await tx.post.update({
-        where: { id: postId },
-        data: { hasAnnounceEmailBeenSent: true },
-      });
-    });
+    }
 
     logger.info(`sendPostNotification: completed for post ${postId}`);
   } catch (error) {

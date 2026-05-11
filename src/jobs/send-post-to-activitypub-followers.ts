@@ -113,13 +113,18 @@ const sendPostToActivityPubFollowers = async () => {
     // Deliver to mentioned actors not already covered by the followers fanout.
     // Only skip a mentioned actor if they are a follower WITH a known inbox —
     // if inboxUrl is null the fanout skipped them, so we must deliver here.
+    // Local actors (same instance) are skipped: they receive in-app notifications
+    // via sendPostNotification and don't need AP HTTP delivery.
+    const localActorPrefix = `https://${root}/`;
     const followerActorIdsWithInbox = new Set(
       post.artist.activityPubArtistFollowers
         .filter((f) => f.inboxUrl !== null)
         .map((f) => f.actor)
     );
     const mentionsToDeliver = mentions.filter(
-      (m) => !followerActorIdsWithInbox.has(m.href)
+      (m) =>
+        !m.href.startsWith(localActorPrefix) &&
+        !followerActorIdsWithInbox.has(m.href)
     );
 
     if (mentionsToDeliver.length > 0) {
