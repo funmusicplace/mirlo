@@ -1,5 +1,3 @@
-// import { css } from "@emotion/css";
-
 import Hls, { HlsConfig } from "hls.js";
 import React from "react";
 import api from "services/api";
@@ -8,6 +6,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import SongTimeDisplay from "../common/SongTimeDisplay";
 
 import BuyTrackModal from "./BuyTrackModal";
+import PlayLimitNotice, { PlayLimit } from "./PlayLimitNotice";
 
 // Load react-hls-player asynchronously (the hls bundle is quite big)
 const ReactHlsPlayer = React.lazy(() => import("@mirlo/react-hls-player"));
@@ -44,6 +43,7 @@ export const AudioWrapper: React.FC<{
   setCurrentSeconds: (time: number) => void;
   currentSeconds: number;
   compact?: boolean;
+  showPlayLimit?: boolean;
 }> = ({
   currentTrack,
   position,
@@ -51,11 +51,13 @@ export const AudioWrapper: React.FC<{
   setCurrentSeconds,
   currentSeconds,
   compact,
+  showPlayLimit,
 }) => {
   const [showBuyModal, setShowBuyModal] = React.useState(false);
   const [hasShownBuyModalBeenShown, setHasShownBuyModalBeenShown] =
     React.useState(false);
   const [hasOverplayedSong, setHasOverplayedSong] = React.useState(false);
+  const [playLimit, setPlayLimit] = React.useState<PlayLimit | null>(null);
   const {
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
@@ -77,6 +79,7 @@ export const AudioWrapper: React.FC<{
       setMostlyListened(false);
       setHasOverplayedSong(false);
       setHasShownBuyModalBeenShown(false);
+      setPlayLimit(null);
     }
   }, [currentTrack.id]);
 
@@ -86,7 +89,10 @@ export const AudioWrapper: React.FC<{
       if (!mostlyListened && currentTrack && e.target.currentTime > 45) {
         setMostlyListened(true);
         try {
-          await api.get(`tracks/${currentTrack.id}/trackPlay`);
+          const resp = await api.get<{ playLimit: PlayLimit | null }>(
+            `tracks/${currentTrack.id}/trackPlay`
+          );
+          setPlayLimit(resp.result?.playLimit ?? null);
         } catch (e) {
           console.error(e);
         }
@@ -223,6 +229,7 @@ export const AudioWrapper: React.FC<{
 
   return (
     <>
+      {showPlayLimit && playLimit && <PlayLimitNotice playLimit={playLimit} />}
       <BuyTrackModal
         showBuyModal={showBuyModal}
         setShowBuyModal={setShowBuyModal}

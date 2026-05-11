@@ -1,11 +1,11 @@
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import Button from "components/common/Button";
+import { FixedButton } from "components/common/FixedButton";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import { useTranslation } from "react-i18next";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import { FixedButton } from "components/common/FixedButton";
 
 const Wishlist: React.FC<{
   trackGroup: { id: number };
@@ -40,6 +40,7 @@ const Wishlist: React.FC<{
         className="wishlist"
         title={buttonLabel}
         rounded
+        variant="pill"
         size="compact"
         endIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
       />

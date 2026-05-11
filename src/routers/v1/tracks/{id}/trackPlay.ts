@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError, HttpCode } from "../../../../utils/error";
+import { getPlayLimitContext } from "../../../../utils/ownership";
 
 export default function () {
   const operations = {
@@ -40,7 +41,12 @@ export default function () {
           ...(req.client ? { clientId: req.client.id } : {}),
         },
       });
-      res.sendStatus(200);
+
+      // After recording the play, surface remaining-free-plays so the client
+      // can show a soft notice before the listener actually hits the limit.
+      // `null` means no limit applies (#1760).
+      const playLimit = await getPlayLimitContext(track.id, user, req.ip);
+      res.status(200).json({ result: { playLimit } });
       return;
     } catch (e) {
       next(e);

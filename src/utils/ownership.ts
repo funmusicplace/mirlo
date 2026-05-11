@@ -176,6 +176,72 @@ export const doesTrackBelongToUser = async (trackId: number, user: User) => {
   }
 };
 
+/**
+ * How many free plays remain for `user` (or `ip`, when anonymous) on a given
+ * track. Returns `null` for cases where the limit doesn't apply: the track
+ * isn't a preview, the artist hasn't set `maxFreePlays`, the user owns the
+ * track/album, or the user is the artist. Otherwise returns
+ * `{ remaining, max, exceeded }` so the client can surface a soft warning
+ * before the listener actually hits the limit (#1760).
+ */
+export const getPlayLimitContext = async (
+  trackId: number,
+  user?: { id: number },
+  ip?: string
+): Promise<{
+  remaining: number;
+  max: number;
+  exceeded: boolean;
+} | null> => {
+  const track = await prisma.track.findUnique({
+    where: { id: trackId },
+    select: {
+      id: true,
+      isPreview: true,
+      trackGroupId: true,
+      trackGroup: {
+        select: {
+          artist: { select: { maxFreePlays: true, userId: true } },
+        },
+      },
+    },
+  });
+  if (!track || !track.isPreview) return null;
+
+  const max = track.trackGroup?.artist?.maxFreePlays ?? 0;
+  if (!max) return null;
+
+  if (user) {
+    if (track.trackGroup?.artist?.userId === user.id) return null;
+    const owns = await prisma.userTrackGroupPurchase.findFirst({
+      where: { trackGroupId: track.trackGroupId, userId: user.id },
+      select: { userId: true },
+    });
+    if (owns) return null;
+    const ownsTrack = await prisma.userTrackPurchase.findFirst({
+      where: { trackId: track.id, userId: user.id },
+      select: { userId: true },
+    });
+    if (ownsTrack) return null;
+  }
+
+  let count = 0;
+  if (user) {
+    count = await prisma.trackPlay.count({
+      where: { userId: user.id, trackId: track.id },
+    });
+  } else if (ip) {
+    count = await prisma.trackPlay.count({
+      where: { ip, trackId: track.id },
+    });
+  } else {
+    return null;
+  }
+
+  const remaining = Math.max(0, max - count);
+  return { remaining, max, exceeded: count >= max };
+};
+
 export const canUserListenToTrack = async (
   trackId?: number,
   user?: User,

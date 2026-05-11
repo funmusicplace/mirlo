@@ -10,8 +10,8 @@ import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
 import { bp } from "../../constants";
 import LoopButton from "../common/LoopButton";
 import NextButton from "../common/NextButton";
-import PreviousButton from "../common/PreviousButton";
 import { PlayControlButton } from "../common/PlayControlButton";
+import PreviousButton from "../common/PreviousButton";
 import ShuffleButton from "../common/ShuffleButton";
 import Spinner from "../common/Spinner";
 
@@ -108,6 +108,7 @@ const Player = () => {
             volume={volume}
             setCurrentSeconds={setCurrentSeconds}
             currentSeconds={currentSeconds}
+            showPlayLimit
           />
         )}
       </div>
