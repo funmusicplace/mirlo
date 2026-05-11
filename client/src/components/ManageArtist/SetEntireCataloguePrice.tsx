@@ -3,6 +3,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
+import { getCurrencySymbol } from "components/common/Money";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -98,12 +99,17 @@ const SetEntireCataloguePrice: React.FC = () => {
             `}
           >
             <FormComponent>
-              <InputEl
-                type="number"
-                value={price}
-                onChange={handlePriceChange}
-                placeholder={t("enterPrice") ?? undefined}
-              />
+              <div className="flex items-center gap-1">
+                {artist?.user?.currency && (
+                  <span>{getCurrencySymbol(artist.user.currency)}</span>
+                )}
+                <InputEl
+                  type="number"
+                  value={price}
+                  onChange={handlePriceChange}
+                  placeholder={t("enterPrice") ?? undefined}
+                />
+              </div>
             </FormComponent>
             <ArtistButton type="button" onClick={handleOk}>
               {t("save")}
