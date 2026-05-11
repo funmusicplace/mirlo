@@ -55,7 +55,7 @@ const Card = () => {
   }
 
   const bgColor =
-    artist?.properties?.colors?.background ?? "var(--mi-background-color)";
+    artist?.properties?.colors?.background || "var(--mi-background-color)";
 
   const cover =
     track.trackGroup.cover?.sizes?.[600] ??
