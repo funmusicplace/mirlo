@@ -1,11 +1,11 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-
 import { deleteArtist } from "../../../../../utils/artist";
 
 type Params = {
@@ -23,7 +23,7 @@ export default function () {
     try {
       let draftAlbum = await prisma.trackGroup.findFirst({
         where: {
-          isDrafts: true,
+          isHiddenTrackGroupForSongDrafts: true,
           artistId: Number(artistId),
         },
         include: {
@@ -38,7 +38,7 @@ export default function () {
       if (!draftAlbum) {
         draftAlbum = await prisma.trackGroup.create({
           data: {
-            isDrafts: true,
+            isHiddenTrackGroupForSongDrafts: true,
             urlSlug: "hidden-draft-album",
             artistId: Number(artistId),
           },

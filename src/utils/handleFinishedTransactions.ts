@@ -343,7 +343,7 @@ export const handleCataloguePurchase = async (
         releaseDate: {
           lte: new Date(),
         },
-        isDrafts: false,
+        isHiddenTrackGroupForSongDrafts: false,
         publishedAt: { lte: new Date() },
         isGettable: true,
         adminEnabled: true,

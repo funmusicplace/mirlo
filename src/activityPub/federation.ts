@@ -235,7 +235,7 @@ const findAPReleaseById = async (id: number) => {
     where: {
       id,
       deletedAt: null,
-      isDrafts: false,
+      isHiddenTrackGroupForSongDrafts: false,
       adminEnabled: true,
       artist: {
         enabled: true,

@@ -111,7 +111,7 @@ export const whereForPublishedTrackGroups = (opts?: {
 }): Prisma.TrackGroupWhereInput => {
   return {
     publishedAt: { lte: new Date() },
-    isDrafts: false,
+    isHiddenTrackGroupForSongDrafts: false,
     adminEnabled: true,
     ...(opts?.includePrivate ? {} : { isPublic: true }),
     artist: {
@@ -807,7 +807,7 @@ export const findTrackPurchaseBasedOnTokenAndUpdate = async (
 export const trackGroupPublishedObject = () => ({
   publishedAt: { lte: new Date() },
   deletedAt: null,
-  isDrafts: false,
+  isHiddenTrackGroupForSongDrafts: false,
 });
 
 export const findPurchaseBasedOnTokenAndUpdate = async (
