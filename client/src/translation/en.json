@@ -1425,6 +1425,7 @@
     "edit": "Edit",
     "fromAlbum": "from <albumLink>{{album}}</albumLink>",
     "byArtist": "by <artistLink>{{artist}}</artistLink>",
+    "onLabel": "on <labelLink>{{label}}</labelLink>",
     "copiedTrackUrl": "Copied iframe to embed widget",
     "releaseDate": "Release date:",
     "pastRelease": "Released on {{date}}",

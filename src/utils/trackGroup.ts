@@ -36,6 +36,7 @@ import {
 } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { isTrackPlayableNested } from "./trackPlayability";
+
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
   id: number;
   artistId: number;
@@ -292,7 +293,22 @@ export const trackGroupSingleInclude = (options: {
         downloadableContent: true,
       },
     },
-    artist: true,
+    artist: {
+      include: {
+        artistLabels: {
+          include: {
+            labelUser: {
+              include: {
+                artists: {
+                  where: { isLabelProfile: true },
+                  select: { name: true, urlSlug: true, id: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     merch: {
       where: { isPublic: true },
       include: {
