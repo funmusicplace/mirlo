@@ -715,7 +715,7 @@ model TrackGroup {
   artist                          Artist                          @relation(fields: [artistId], references: [id])
   artistId                        Int
   title                           String?
-  isDrafts                        Boolean                         @default(false)
+  isHiddenTrackGroupForSongDrafts Boolean                         @default(false)
   tracks                          Track[]
   cover                           TrackGroupCover?
   publishedAt                     DateTime?

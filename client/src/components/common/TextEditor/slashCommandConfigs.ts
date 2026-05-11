@@ -1,6 +1,7 @@
 import api from "services/api";
-import { widgetUrl } from "utils/tracks";
 import { getArtistUrl } from "utils/artist";
+import { widgetUrl } from "utils/tracks";
+
 import { SlashCommandConfig } from "./SlashCommands";
 
 const SLASH_COMMANDS: SlashCommandConfig[] = [
@@ -31,11 +32,30 @@ const SLASH_COMMANDS: SlashCommandConfig[] = [
     trigger: "release",
     noResultsLabel: "No releases found",
     search: async (query) => {
-      const response = await api.getMany<TrackGroup>("trackGroups", {
-        title: query,
-        take: "10",
-      });
-      return response.results.map((r) => ({
+      const [byTitle, byArtist] = await Promise.all([
+        api.getMany<TrackGroup>("trackGroups", {
+          title: query,
+          take: "10",
+        }),
+        api.getMany<TrackGroup>("trackGroups", {
+          artistName: query, // Assuming API supports this param
+          take: "10",
+        }),
+      ]);
+
+      // Deduplicate by ID and combine results
+      console.log("byTitle", byTitle);
+      console.log("byArtist", byArtist);
+      const seen = new Set<number>();
+      const results = [...byTitle.results, ...byArtist.results]
+        .filter((r) => {
+          if (seen.has(r.id)) return false;
+          seen.add(r.id);
+          return true;
+        })
+        .slice(0, 10); // Cap at 10 results
+
+      return results.map((r) => ({
         id: r.id,
         label: `${r.artist?.name} - ${r.title}`,
       }));

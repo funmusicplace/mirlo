@@ -3,8 +3,8 @@ import assert from "assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-
 import prisma from "@mirlo/prisma";
+
 import { parseOutIframes } from "../../src/jobs/parse-out-iframes";
 import {
   clearTables,
@@ -61,7 +61,7 @@ describe("parse-out-iframes", () => {
       });
       await prisma.trackGroup.update({
         where: { id: trackGroup.id },
-        data: { isDrafts: true },
+        data: { isHiddenTrackGroupForSongDrafts: true },
       });
 
       const fallbackUrl = "https://example.test/an-artist/posts/post-slug";
@@ -116,7 +116,7 @@ describe("parse-out-iframes", () => {
       });
       await prisma.trackGroup.update({
         where: { id: trackGroup.id },
-        data: { isDrafts: true },
+        data: { isHiddenTrackGroupForSongDrafts: true },
       });
       const track = await prisma.track.findFirstOrThrow({
         where: { trackGroupId: trackGroup.id },

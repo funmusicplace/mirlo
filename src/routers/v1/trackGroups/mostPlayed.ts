@@ -1,10 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
+
 import processor, {
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
-import { tr } from "@faker-js/faker";
 
 export default function () {
   const operations = {
@@ -26,7 +26,7 @@ export default function () {
       INNER JOIN "TrackPlay" AS tp ON tr.id = tp."trackId"
       INNER JOIN "TrackGroupCover" AS tgc ON tg.id = tgc."trackGroupId"
       WHERE tg."publishedAt" <= NOW() 
-      AND tg."isDrafts" = false 
+      AND tg."isHiddenTrackGroupForSongDrafts" = false 
       AND tg."deletedAt" IS NULL 
       AND tgc.url IS NOT NULL 
       AND array_length(tgc.url, 1) > 0

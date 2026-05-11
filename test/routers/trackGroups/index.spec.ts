@@ -313,7 +313,7 @@ describe("trackGroups", () => {
       const releaseDate = faker.date.past();
       const tg = await createTrackGroup(artist.id, {
         publishedAt: new Date(),
-        isDrafts: false,
+        isHiddenTrackGroupForSongDrafts: false,
         releaseDate,
       });
       const response = await requestApp
@@ -336,7 +336,7 @@ describe("trackGroups", () => {
       const releaseDate = faker.date.past();
       const tg = await createTrackGroup(artist.id, {
         publishedAt: new Date(),
-        isDrafts: false,
+        isHiddenTrackGroupForSongDrafts: false,
         releaseDate,
       });
       const response = await requestApp
@@ -359,7 +359,7 @@ describe("trackGroups", () => {
       const releaseDate = faker.date.future();
       const tg = await createTrackGroup(artist.id, {
         publishedAt: new Date(),
-        isDrafts: false,
+        isHiddenTrackGroupForSongDrafts: false,
         releaseDate,
       });
       const response = await requestApp
@@ -381,7 +381,7 @@ describe("trackGroups", () => {
       const releaseDate = faker.date.future();
       const tg = await createTrackGroup(artist.id, {
         publishedAt: new Date(),
-        isDrafts: false,
+        isHiddenTrackGroupForSongDrafts: false,
         releaseDate,
       });
       const response = await requestApp

@@ -10,7 +10,7 @@ export async function triggerTrackGroupPublishNotifications() {
     where: {
       publishedAt: { lte: now, not: null },
       isPublic: true,
-      isDrafts: false,
+      isHiddenTrackGroupForSongDrafts: false,
       notifiedFollowersAt: null,
       deletedAt: null,
       adminEnabled: true,

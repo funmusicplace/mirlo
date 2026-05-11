@@ -51,12 +51,11 @@ vi.mock("prosemirror-state", () => ({
 
 // Import AFTER mocks are set up
 import { MentionHighlightExtension } from "./MentionHighlightExtension";
-import { Decoration, DecorationSet } from "prosemirror-view";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeTextNode(text: string) {
-  return { isText: true as const, text };
+  return { isText: true as const, text, marks: [] as unknown[] };
 }
 
 function makeState(nodes: Array<{ isText: boolean; text?: string }>) {

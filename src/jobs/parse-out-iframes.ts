@@ -10,13 +10,13 @@ import { getClient } from "../utils/getClient";
  * falling back to the post page that embeds it.
  */
 const isTrackGroupUnreachable = (tg: {
-  isDrafts: boolean;
+  isHiddenTrackGroupForSongDrafts: boolean;
   deletedAt: Date | null;
   publishedAt: Date | null;
   isPublic?: boolean;
 }) => {
   return (
-    tg.isDrafts ||
+    tg.isHiddenTrackGroupForSongDrafts ||
     tg.deletedAt !== null ||
     tg.publishedAt === null ||
     tg.publishedAt.getTime() > Date.now() ||
