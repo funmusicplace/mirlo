@@ -1,13 +1,14 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 // import remarkEmbedder from "@remark-embedder/core";
-import remarkEmbedder from "utils/remarkEmbedder";
-import MarkdownWrapper from "./MarkdownWrapper";
-import LoadingSpinner from "./LoadingSpinner";
-import { isWidgetUrl } from "utils/tracks";
 import api from "services/api";
+import remarkEmbedder from "utils/remarkEmbedder";
+import { isWidgetUrl } from "utils/tracks";
+
+import LoadingSpinner from "./LoadingSpinner";
+import MarkdownWrapper from "./MarkdownWrapper";
 
 const BlackbirdTransformer = {
   name: "BlackbirdTransformer",
@@ -20,7 +21,7 @@ const BlackbirdTransformer = {
   getHTML(url: string) {
     const iframeUrl = url.replace("/s/", "/embed/");
 
-    return `<iframe src="${iframeUrl}" style="width:100%; height: 137px; border:0; border-radius: 4px; overflow:hidden;" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe>`;
+    return `<iframe src="${iframeUrl}" loading="lazy" style="width:100%; height: 137px; border:0; border-radius: 4px; overflow:hidden;" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe>`;
   },
 };
 

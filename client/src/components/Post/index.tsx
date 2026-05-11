@@ -6,7 +6,7 @@ import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { MetaCard } from "components/common/MetaCard";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
-import parse from "html-react-parser";
+import parse, { Element } from "html-react-parser";
 import { queryPost } from "queries";
 import React, { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -137,7 +137,18 @@ const Post: React.FC = () => {
                 </div>
               )}
               {!post.isContentHidden && (
-                <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
+                <MarkdownWrapper>
+                  {parse(post.content, {
+                    replace(node) {
+                      if (
+                        node instanceof Element &&
+                        node.tagName === "iframe"
+                      ) {
+                        node.attribs.loading = "lazy";
+                      }
+                    },
+                  })}
+                </MarkdownWrapper>
               )}
             </PageMarkdownWrapper>
           </div>
