@@ -1,24 +1,12 @@
-import { css } from "@emotion/css";
 import Hls, { HlsConfig } from "hls.js";
 import React from "react";
-import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 
 import SongTimeDisplay from "../common/SongTimeDisplay";
 
 import BuyTrackModal from "./BuyTrackModal";
-
-type PlayLimit = {
-  remaining: number;
-  max: number;
-  exceeded: boolean;
-};
-
-// Show the soft "free plays left" notice once the listener is within this
-// many plays of the cap — gives them a heads-up without nagging on the very
-// first listen (per #1760's discussion).
-const PLAYS_REMAINING_NOTICE_THRESHOLD = 2;
+import PlayLimitNotice, { PlayLimit } from "./PlayLimitNotice";
 
 // Load react-hls-player asynchronously (the hls bundle is quite big)
 const ReactHlsPlayer = React.lazy(() => import("@mirlo/react-hls-player"));
@@ -55,6 +43,7 @@ export const AudioWrapper: React.FC<{
   setCurrentSeconds: (time: number) => void;
   currentSeconds: number;
   compact?: boolean;
+  showPlayLimit?: boolean;
 }> = ({
   currentTrack,
   position,
@@ -62,8 +51,8 @@ export const AudioWrapper: React.FC<{
   setCurrentSeconds,
   currentSeconds,
   compact,
+  showPlayLimit,
 }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "player" });
   const [showBuyModal, setShowBuyModal] = React.useState(false);
   const [hasShownBuyModalBeenShown, setHasShownBuyModalBeenShown] =
     React.useState(false);
@@ -240,6 +229,7 @@ export const AudioWrapper: React.FC<{
 
   return (
     <>
+      {showPlayLimit && playLimit && <PlayLimitNotice playLimit={playLimit} />}
       <BuyTrackModal
         showBuyModal={showBuyModal}
         setShowBuyModal={setShowBuyModal}
@@ -283,24 +273,6 @@ export const AudioWrapper: React.FC<{
         position={position}
         compact={compact}
       />
-      {playLimit &&
-        playLimit.remaining > 0 &&
-        playLimit.remaining <= PLAYS_REMAINING_NOTICE_THRESHOLD && (
-          <small
-            data-cy="plays-remaining-notice"
-            className={css`
-              display: block;
-              text-align: center;
-              padding: 0.25rem 0.5rem;
-              color: var(--mi-warning-text-color, inherit);
-              opacity: 0.85;
-            `}
-          >
-            {t("playsRemaining", {
-              count: playLimit.remaining,
-            })}
-          </small>
-        )}
     </>
   );
 };

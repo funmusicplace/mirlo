@@ -1,10 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import FixedButtonLink from "components/common/FixedButton";
-import TipArtist from "components/common/TipArtist";
-import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
-import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
-import Wishlist from "components/TrackGroup/Wishlist";
 import {
   queryArtist,
   queryManagedArtistSubscriptionTier,
@@ -29,39 +25,6 @@ import {
 } from "utils/artist";
 
 import { bp } from "../../constants";
-
-const PlayingTrack: React.FC = () => {
-  const { state } = useGlobalStateContext();
-  const { currentTrack, isLoading } = useCurrentTrackHook();
-
-  if (!state.playing) {
-    return null;
-  }
-
-  if (!currentTrack || isLoading) {
-    return null;
-  }
-
-  return (
-    <div
-      className={css`
-        margin-top: 0.5rem;
-        display: flex;
-        gap: 0.5rem;
-      `}
-    >
-      <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} fixed />
-      {/* {state.playing && ( */}
-      {currentTrack.trackGroup.artistId && (
-        <TipArtist artistId={currentTrack.trackGroup.artistId} fixed />
-      )}
-
-      {currentTrack.trackGroup && (
-        <PurchaseOrDownloadAlbum trackGroup={currentTrack.trackGroup} fixed />
-      )}
-    </div>
-  );
-};
 
 const ManageArtistButtons: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -274,23 +237,6 @@ const ManageArtistButtons: React.FC = () => {
           )}
         </div>
       )}
-      <div
-        className={css`
-          z-index: 999999;
-          bottom: 80px;
-          right: 1rem;
-          position: fixed;
-          display: flex;
-          flex-direction: column;
-          a,
-          button {
-            margin-bottom: 0.5rem;
-          }
-          transition: all 0.3s ease;
-        `}
-      >
-        <PlayingTrack />
-      </div>
     </>
   );
 };
