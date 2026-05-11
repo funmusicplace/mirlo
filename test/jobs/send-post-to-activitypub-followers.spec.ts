@@ -388,6 +388,13 @@ describe("send-post-to-activitypub-followers", () => {
         ok: true,
         json: async () => ({ inbox: mentionedInboxUrl }),
       });
+      // Allow the inbox POST to complete so fedify's sendActivity resolves
+      fetchStub.withArgs(mentionedInboxUrl, sinon.match.any).resolves({
+        ok: true,
+        status: 202,
+        text: async () => "",
+        headers: new Headers(),
+      });
 
       await sendPostToActivityPubFollowers();
 
