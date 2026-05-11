@@ -9,7 +9,6 @@ import Tooltip from "components/common/Tooltip";
 import {
   queryArtist,
   queryManagedArtistTrackGroups,
-  queryPublicLabelTrackGroups,
   useDeleteTrackGroupMutation,
 } from "queries";
 import React from "react";
@@ -204,20 +203,26 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     queryManagedArtistTrackGroups({ artistId: Number(artistId) })
   );
 
-  const { data: publishedLabelReleases } = useQuery(
-    queryPublicLabelTrackGroups(artistId, { excludeArtistId: Number(artistId) })
+  const { data: labelTrackGroups } = useQuery(
+    queryManagedArtistTrackGroups({
+      artistId: artist?.isLabelProfile ? Number(artistId) : undefined,
+      includeLabelReleases: true,
+    })
   );
 
-  const publishedReleases =
-    trackGroups?.results.filter(
-      (album) => album.publishedAt && new Date(album.publishedAt) < new Date()
-    ) ?? [];
+  const isPublished = (album: TrackGroup) =>
+    !!album.publishedAt && new Date(album.publishedAt) < new Date();
 
+  const publishedReleases = trackGroups?.results.filter(isPublished) ?? [];
   const unpublishedReleases =
-    trackGroups?.results.filter(
-      (album) =>
-        !(album.publishedAt && new Date(album.publishedAt) < new Date())
+    trackGroups?.results.filter((a) => !isPublished(a)) ?? [];
+
+  const labelReleases =
+    labelTrackGroups?.results.filter(
+      (a) => a.artist?.id !== Number(artistId)
     ) ?? [];
+  const publishedLabelReleases = labelReleases.filter(isPublished);
+  const unpublishedLabelReleases = labelReleases.filter((a) => !isPublished(a));
 
   return (
     <div className="flex flex-col gap-8">
@@ -266,17 +271,20 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           </div>
         )}
 
-        {artist?.isLabelProfile &&
-          publishedLabelReleases?.results &&
-          (publishedLabelReleases.results.length ?? 0) > 0 && (
-            <div className="flex gap-2 flex-col">
-              <h3>{t("labelReleases")}</h3>
-              <p>{t("labelReleasesDescription")}</p>
-              <ManageArtistAlbumsTable
-                releases={publishedLabelReleases.results}
-              />
-            </div>
-          )}
+        {artist?.isLabelProfile && unpublishedLabelReleases.length > 0 && (
+          <div className="flex gap-2 flex-col">
+            <h3>{t("unpublishedLabelReleases")}</h3>
+            <p>{t("labelReleasesDescription")}</p>
+            <ManageArtistAlbumsTable releases={unpublishedLabelReleases} />
+          </div>
+        )}
+        {artist?.isLabelProfile && publishedLabelReleases.length > 0 && (
+          <div className="flex gap-2 flex-col">
+            <h3>{t("labelReleases")}</h3>
+            <p>{t("labelReleasesDescription")}</p>
+            <ManageArtistAlbumsTable releases={publishedLabelReleases} />
+          </div>
+        )}
       </div>
     </div>
   );

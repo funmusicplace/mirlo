@@ -1,18 +1,15 @@
-import React from "react";
-
-import { useTranslation } from "react-i18next";
-import { useSnackbar } from "state/SnackbarContext";
-import useErrorHandler from "services/useErrorHandler";
-import FormComponent from "components/common/FormComponent";
-
-import AutoCompleteTrackGroup from "components/common/AutoCompleteTrackGroup";
-import api from "services/api";
-import Pill from "components/common/Pill";
 import { css } from "@emotion/css";
-import { FaTimes } from "react-icons/fa";
-import { hasId } from "../ManageTrackGroup/AlbumFormComponents/ManageTags";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import AutoCompleteTrackGroup from "components/common/AutoCompleteTrackGroup";
+import FormComponent from "components/common/FormComponent";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import Pill from "components/common/Pill";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaTimes } from "react-icons/fa";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
+import { useSnackbar } from "state/SnackbarContext";
 
 const SelectTrackGroup: React.FC<{
   merch: Merch;

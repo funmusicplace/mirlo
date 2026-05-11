@@ -182,7 +182,6 @@ const TipArtistForm: React.FC<{
                     {...methods.register("message")}
                     rows={2}
                   />
-                  <small>{t("messageToArtist")}</small>
                 </FormComponent>
                 <ArtistButton
                   onClick={() => subscribeToTier()}

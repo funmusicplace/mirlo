@@ -125,8 +125,7 @@ const BuyTrackGroup: React.FC<{
     lessThanMin =
       isFinite(+chosenPrice) && Number(chosenPrice) < minPrice / 100;
   }
-  const isNegativePrice =
-    isFinite(+chosenPrice) && Number(chosenPrice) < 0;
+  const isNegativePrice = isFinite(+chosenPrice) && Number(chosenPrice) < 0;
 
   const purchaseText = trackGroup.fundraiser?.isAllOrNothing
     ? "addPaymentInformation"
@@ -213,7 +212,6 @@ const BuyTrackGroup: React.FC<{
           <FormComponent>
             <label htmlFor="message">{t("leaveAComment")}</label>
             <TextArea id="message" {...methods.register("message")} rows={2} />
-            <small>{t("messageToArtist")}</small>
           </FormComponent>
 
           {!user && (
