@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
-
 import { Trans, useTranslation } from "react-i18next";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
