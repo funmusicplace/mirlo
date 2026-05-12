@@ -1,9 +1,8 @@
-import { Job } from "bullmq";
-
-import ffmpeg from "fluent-ffmpeg";
 import { createReadStream, promises as fsPromises } from "fs";
 
-import { logger } from "./queue-worker";
+import { Job } from "bullmq";
+import ffmpeg from "fluent-ffmpeg";
+
 import {
   createBucketIfNotExists,
   finalAudioBucket,
@@ -12,6 +11,8 @@ import {
   removeObjectFromStorage,
   uploadWrapper,
 } from "../utils/minio";
+
+import { logger } from "./queue-worker";
 
 export default async (job: Job) => {
   const { audioId, fileExtension } = job.data;
@@ -52,6 +53,7 @@ export default async (job: Job) => {
       let duration = 0;
       ffmpeg(hlsStream)
         .noVideo()
+        .outputOptions("-map_metadata", "-1")
         .outputOptions("-movflags", "+faststart")
         .addOption("-start_number", "0") // start the first .ts segment at index 0
         .addOption("-hls_time", "10") // 10 second segment duration
