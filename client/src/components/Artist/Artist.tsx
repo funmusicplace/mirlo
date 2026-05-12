@@ -225,6 +225,7 @@ function Artist() {
   return (
     <>
       <nav
+        className="md:mt-2"
         aria-label={
           artist.isLabelProfile ? t("labelNavigation") : t("artistNavigation")
         }

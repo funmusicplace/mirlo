@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import {
   ArtistButton,
   ArtistButtonAnchor,
-  ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import Button from "components/common/Button";
 import FormCheckbox from "components/common/FormCheckbox";
@@ -222,7 +221,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
   return (
     <>
-      <div className="flex align-center mb-2 max-md:mb-0 max-w-full pr-2 pl-2">
+      <div className="flex align-center max-w-full">
         <div
           className={css`
             max-width: 100%;
@@ -289,11 +288,6 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                 </ArtistButtonAnchor>
               );
             })}
-          {!isManage && allLinks.length > links.length && (
-            <ArtistButtonLink to="links" size="compact" variant="dashed">
-              {t("moreLinks")}
-            </ArtistButtonLink>
-          )}
         </div>
 
         {isManage && (

@@ -100,6 +100,15 @@ export const HeaderWrapper = styled.div`
   align-items: flex-end;
   justify-content: space-around;
   border-bottom: solid 1px var(--mi-button-color);
+
+  @media screen and (max-width: ${bp.medium}px) {
+    gap: 0.5rem;
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--mi-button-color) 50%,
+      transparent
+    );
+  }
 `;
 
 const ArtistHeaderSection: React.FC<{
@@ -234,10 +243,10 @@ const ArtistHeaderSection: React.FC<{
                 display: none;
                 @media screen and (max-width: ${bp.medium}px) {
                   display: flex;
-                  font-size: 0.9rem;
+                  font-size: var(--mi-font-size-xsmall);
                   line-height: 1.1rem;
-                  margin-top: 0.75rem;
-                  margin-bottom: 0.75rem;
+                  margin-top: 1rem;
+                  margin-bottom: 0.5rem;
                 }
               `}
             >
@@ -253,7 +262,7 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div className="w-full flex flex-row items-center justify-end py-2 max-md:border-t max-md:border-(--mi-button-tint-color)">
+        <div className="w-full flex flex-row items-center justify-end py-2 max-md:border-t max-md:border-(--mi-button-color)/50">
           <ArtistHeaderActionsStrip
             artist={artist}
             isManage={!!isManage}
@@ -266,25 +275,7 @@ const ArtistHeaderSection: React.FC<{
       {(isManage ||
         (artist.linksJson?.length ?? 0) > 0 ||
         (artist.links?.length ?? 0) > 0) && (
-        <div
-          className={css`
-            display: flex;
-            justify-content: flex-end;
-            padding-top: 0.5rem;
-            align-items: flex-start;
-
-            ${artist.announcementText
-              ? `flex-direction: column;
-              justify-content: flex-end;
-              align-items: flex-end;
-              padding-top: 0;
-
-              > div {
-                margin-bottom: 0.5rem;}
-              `
-              : ""}
-          `}
-        >
+        <div className="max-md:hidden flex justify-end items-center px-2 py-2">
           <ArtistFormLinks
             isManage={!!isManage}
             artist={artist}

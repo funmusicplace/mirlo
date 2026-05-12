@@ -1,3 +1,4 @@
+import { transformFromLinks } from "components/ManageArtist/ArtistFormLinks";
 import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import { UpdateArtistBody } from "queries";
 import { useTranslation } from "react-i18next";
@@ -17,8 +18,9 @@ const ArtistHeaderActionsStrip: React.FC<{
   onSubmit: (data: UpdateArtistBody) => Promise<void>;
 }> = ({ artist, isManage, onSubmit }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
-  const hasLinks =
-    (artist.linksJson?.length ?? 0) > 0 || (artist.links?.length ?? 0) > 0;
+  const allLinks = transformFromLinks(artist).linkArray;
+  const hasAnyLink = allLinks.length > 0;
+  const hasHiddenLink = allLinks.some((l) => !l.inHeader);
 
   return (
     <div className="flex flex-row items-end gap-2 max-md:p-(--mi-side-paddings-xsmall)">
@@ -32,8 +34,12 @@ const ArtistHeaderActionsStrip: React.FC<{
         artist={artist}
         onSubmit={onSubmit}
       />
-      {hasLinks && (
-        <ArtistButtonLink to="links" size="compact" className={tabButtonClass}>
+      {hasAnyLink && (
+        <ArtistButtonLink
+          to="links"
+          size="compact"
+          className={`${tabButtonClass} ${hasHiddenLink ? "" : "md:hidden"}`}
+        >
           {t("links")}
         </ArtistButtonLink>
       )}

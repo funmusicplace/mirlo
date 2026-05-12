@@ -1,22 +1,22 @@
-import { useTranslation } from "react-i18next";
-import { useForm } from "react-hook-form";
 import { css } from "@emotion/css";
-import { FaSave, FaTimes } from "react-icons/fa";
-import React from "react";
-import { useSnackbar } from "state/SnackbarContext";
-import { FaPen } from "react-icons/fa";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
-import { useQueryClient } from "@tanstack/react-query";
+import AutoComplete from "components/common/AutoComplete";
+import Pill from "components/common/Pill";
 import {
   queryLocationTags,
   useAddLocationTag,
   useRemoveLocationTag,
 } from "queries/locationTags";
-import AutoComplete from "components/common/AutoComplete";
-import Pill from "components/common/Pill";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaPen } from "react-icons/fa";
+import { FaSave, FaTimes } from "react-icons/fa";
+import { useSnackbar } from "state/SnackbarContext";
 
 interface FormData {
   location: string;
@@ -113,7 +113,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
 
   if (!isEditing) {
     return (
-      <div className="flex items-center mt-1 md:mt-1 gap-2">
+      <div className="flex items-center gap-2">
         {artist?.location && (
           <div
             className={css`
