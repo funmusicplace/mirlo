@@ -41,8 +41,8 @@ export const ArtistTabs = styled(Tabs)`
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);
-    margin-bottom: 0.5rem;
-    margin-top: 0.5rem;
+    margin-bottom: 0;
+    margin-top: 0;
   }
 
   > li {

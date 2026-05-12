@@ -16,12 +16,12 @@ import {
   websiteSite,
 } from "components/common/LinkIconDisplay";
 import Modal from "components/common/Modal";
+import { SelectEl } from "components/common/Select";
 import React from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaPen, FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
-import { SelectEl } from "components/common/Select";
 
 import { bp } from "../../constants";
 
@@ -222,7 +222,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
   return (
     <>
-      <div className="flex align-center mb-2 max-w-full pr-2 pl-2">
+      <div className="flex align-center mb-2 max-md:mb-0 max-w-full pr-2 pl-2">
         <div
           className={css`
             max-width: 100%;
@@ -264,7 +264,6 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
             @media screen and (max-width: ${bp.medium}px) {
               padding: var(--mi-side-paddings-xsmall);
-              padding-bottom: 0.5rem;
             }
           `}
         >
