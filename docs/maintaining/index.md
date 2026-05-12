@@ -19,3 +19,8 @@ These pages are to document how to handle Mirlo Maintenance
 
 - [File storage](./design/file-storage.md)
 - [Transactions](./design/transactions.md)
+
+## Communication
+
+- [Verbal communication guidelines](./verbal-communication-guidelines.md)
+- [Translation](./translation.md)

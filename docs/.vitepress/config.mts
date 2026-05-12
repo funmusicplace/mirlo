@@ -70,6 +70,10 @@ export default defineConfig({
         link: "/maintaining",
         items: [
           {
+            text: "Translation",
+            link: "/maintaining/translation",
+          },
+          {
             text: "System Architecture",
             link: "/maintaining/system-architecture",
           },
