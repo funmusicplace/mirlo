@@ -1,5 +1,3 @@
-import { isNumber } from "lodash";
-
 export type RouteParams = Record<string, string | number | undefined>;
 
 /**
@@ -118,6 +116,26 @@ const routePatterns: Array<RoutePattern<any>> = [
     pattern: (segments) =>
       segments.length === 1
         ? { type: "artist", artistSlug: segments[0] }
+        : null,
+  },
+  // /widget/track/:id
+  {
+    pattern: (segments) =>
+      segments.length === 3 &&
+      segments[0] === "widget" &&
+      segments[1] === "track" &&
+      isFinite(Number(segments[2]))
+        ? { type: "widget-track", trackId: Number(segments[2]) }
+        : null,
+  },
+  // /widget/trackgroup/:id
+  {
+    pattern: (segments) =>
+      segments.length === 3 &&
+      segments[0] === "widget" &&
+      segments[1] === "trackgroup" &&
+      isFinite(Number(segments[2]))
+        ? { type: "widget-trackgroup", trackGroupId: Number(segments[2]) }
         : null,
   },
 ];

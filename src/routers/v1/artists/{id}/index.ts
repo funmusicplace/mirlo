@@ -5,10 +5,10 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import {
   checkIsUserSubscriber,
   findArtistIdForURLSlug,
-  processSingleArtist,
   singleInclude,
   whereForAllArtistsThisLabelCanEdit,
 } from "../../../../utils/artist";
+import { processSingleArtist } from "../../../../utils/serialize/artist";
 
 export default function () {
   const operations = {

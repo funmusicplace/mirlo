@@ -10,10 +10,10 @@ import {
 import {
   deleteArtist,
   findArtistIdForURLSlug,
-  processSingleArtist,
   singleInclude,
 } from "../../../../../utils/artist";
 import generateSlug from "../../../../../utils/generateSlug";
+import { processSingleArtist } from "../../../../../utils/serialize/artist";
 
 type Params = {
   artistId: string;

@@ -5,10 +5,8 @@ import { set } from "lodash";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import {
-  processSingleTrackGroup,
-  whereForPublishedTrackGroups,
-} from "../../../../utils/trackGroup";
+import { processSingleTrackGroup } from "../../../../utils/serialize/trackGroup";
+import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 type Params = {
   userId: string;
