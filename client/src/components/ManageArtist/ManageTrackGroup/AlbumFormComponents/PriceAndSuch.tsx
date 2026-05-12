@@ -271,11 +271,7 @@ const PriceAndSuch: React.FC<{
             }
           `}
         >
-          <FormComponent
-            className={css`
-              flex-grow: 1;
-            `}
-          >
+          <FormComponent className="grow">
             <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
             <small id="description-minimum-price">
               {t("minimumPriceDescription")}
@@ -377,11 +373,7 @@ const PriceAndSuch: React.FC<{
             </div>
           </FormComponent>
 
-          <FormComponent
-            className={css`
-              flex-grow: 1;
-            `}
-          >
+          <FormComponent className="grow">
             <PaymentSlider label={t("platformPercent")} />
             {errors.platformPercent && (
               <FormError>{t("platformPercent")}</FormError>
