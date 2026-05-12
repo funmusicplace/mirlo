@@ -15,6 +15,8 @@ interface UseBodyDraftResult {
 const readInitial = (key: string | null): string | null =>
   key ? safeLocalStorage.read(key) : null;
 
+// Separate from useFormPersist because TextEditor only reads its value at mount,
+// so the draft restore has to live outside react-hook-form state.
 export function useBodyDraft(
   key: string | null,
   serverContent: string

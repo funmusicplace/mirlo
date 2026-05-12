@@ -78,45 +78,34 @@ const PostForm: React.FC<{
     defaultValues: buildDefaultValues(),
   });
 
+  // Body content uses its own hook + localStorage key because TextEditor only
+  // reads its value at mount, so any Controller-based draft restore via setValue
+  // is invisible. We aggregate both restores in the banner below.
   const formDraftKey = post?.id ? `postDraft-${post.id}` : null;
-  const {
-    hasRestoredDraft: hasRestoredFormDraft,
-    clearDraft: clearFormDraft,
-    discardDraft: discardFormDraft,
-    dismissBanner: dismissFormBanner,
-  } = useFormPersist(formDraftKey, methods);
-
   const bodyDraftKey = post?.id ? `postBodyDraft-${post.id}` : null;
-  const serverContent = post?.content ?? "";
-  const {
-    content: bodyContent,
-    hasRestoredDraft: hasRestoredBodyDraft,
-    setContent: setBodyContent,
-    clearDraft: clearBodyDraft,
-    discardDraft: discardBodyDraft,
-    dismissBanner: dismissBodyBanner,
-  } = useBodyDraft(bodyDraftKey, serverContent);
+  const formDraft = useFormPersist(formDraftKey, methods);
+  const bodyDraft = useBodyDraft(bodyDraftKey, post?.content ?? "");
 
-  const bodyContentRef = React.useRef(bodyContent);
-  bodyContentRef.current = bodyContent;
+  const bodyContentRef = React.useRef(bodyDraft.content);
+  bodyContentRef.current = bodyDraft.content;
   const getBodyContent = React.useCallback(() => bodyContentRef.current, []);
 
   const [discardCount, setDiscardCount] = React.useState(0);
   const onDiscardClick = React.useCallback(() => {
-    discardFormDraft(buildDefaultValues() as PostFormData);
-    discardBodyDraft();
+    formDraft.discardDraft(buildDefaultValues() as PostFormData);
+    bodyDraft.discardDraft();
     setDiscardCount((c) => c + 1);
-  }, [discardFormDraft, discardBodyDraft, buildDefaultValues]);
+  }, [formDraft, bodyDraft, buildDefaultValues]);
 
   const onKeepClick = React.useCallback(() => {
-    dismissFormBanner();
-    dismissBodyBanner();
-  }, [dismissFormBanner, dismissBodyBanner]);
+    formDraft.dismissBanner();
+    bodyDraft.dismissBanner();
+  }, [formDraft, bodyDraft]);
 
   const onSaveSuccess = React.useCallback(() => {
-    clearFormDraft();
-    clearBodyDraft();
-  }, [clearFormDraft, clearBodyDraft]);
+    formDraft.clearDraft();
+    bodyDraft.clearDraft();
+  }, [formDraft, bodyDraft]);
 
   React.useEffect(() => {
     if ((tiers?.results.length ?? 0) > 0) {
@@ -154,7 +143,7 @@ const PostForm: React.FC<{
     }
   }, [artist.id, existingId, navigate, t]);
 
-  const showBanner = hasRestoredFormDraft || hasRestoredBodyDraft;
+  const showBanner = formDraft.hasRestoredDraft || bodyDraft.hasRestoredDraft;
 
   return (
     <FormProvider {...methods}>
@@ -197,8 +186,8 @@ const PostForm: React.FC<{
         <FormComponent>
           <TextEditor
             key={`${post.id}-${discardCount}`}
-            onChange={setBodyContent}
-            value={bodyContent}
+            onChange={bodyDraft.setContent}
+            value={bodyDraft.content}
             postId={post.id}
             artistId={artist.id}
             reloadImages={reloadImages}
