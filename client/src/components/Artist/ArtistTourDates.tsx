@@ -1,24 +1,20 @@
 import { css } from "@emotion/css";
-import MarkdownContent from "components/common/MarkdownContent";
-import { useTranslation } from "react-i18next";
-import React from "react";
-import { useSnackbar } from "state/SnackbarContext";
-import { useFieldArray, useForm } from "react-hook-form";
-import { FaPen, FaPlus, FaSave, FaTimes } from "react-icons/fa";
-import TextArea from "components/common/TextArea";
-import {
-  ArtistButton,
-  ArtistButtonAnchor,
-  ArtistButtonLink,
-} from "./ArtistButtons";
-import Modal from "components/common/Modal";
-import { InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
-import Artist from "./Artist";
+import { InputEl } from "components/common/Input";
+import Modal from "components/common/Modal";
 import {
   calculateDateWithTimezoneOffset,
   formatDate,
 } from "components/TrackGroup/ReleaseDate";
+import React from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaPen, FaPlus, FaSave, FaTimes } from "react-icons/fa";
+import { useSnackbar } from "state/SnackbarContext";
+
+import Artist from "./Artist";
+import { ArtistButton, ArtistButtonAnchor } from "./ArtistButtons";
+import { tabButtonClass } from "./ArtistHeaderActionsStrip";
 
 interface FormData {
   tourDates: { location: string; date: string; ticketsUrl: string }[];
@@ -77,14 +73,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
       <ArtistButton
         onClick={() => setIsOpen(true)}
         size="compact"
-        className={css`
-          margin-top: -1rem;
-          margin-bottom: -1px;
-          border-radius: 0rem !important;
-          border-top-left-radius: 0.5rem !important;
-          border-top-right-radius: 0.5rem !important;
-          margin-right: 0.5rem;
-        `}
+        className={tabButtonClass}
       >
         {t("dates")}
       </ArtistButton>

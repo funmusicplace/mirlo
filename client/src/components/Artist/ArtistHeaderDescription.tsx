@@ -8,9 +8,8 @@ import { useTranslation } from "react-i18next";
 import { FaPen, FaSave, FaTimes } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
-import { bp } from "../../constants";
-
 import { ArtistButton } from "./ArtistButtons";
+import { tabButtonClass } from "./ArtistHeaderActionsStrip";
 
 interface FormData {
   bio: string;
@@ -58,20 +57,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
       <ArtistButton
         onClick={() => setIsOpen(true)}
         size="compact"
-        className={css`
-          margin-top: -1rem;
-          margin-bottom: -1px;
-          border-radius: 0rem !important;
-          border-top-left-radius: 0.5rem !important;
-          border-top-right-radius: 0.5rem !important;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            margin-top: 0;
-            margin-bottom: 0.25rem;
-            height: 1.5rem !important;
-            border-radius: 9999px !important;
-          }
-        `}
+        className={tabButtonClass}
       >
         {t("about")}
       </ArtistButton>

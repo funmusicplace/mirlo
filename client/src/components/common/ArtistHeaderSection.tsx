@@ -1,19 +1,15 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
-import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
-import ArtistTourDates from "components/Artist/ArtistTourDates";
+import ArtistHeaderActionsStrip from "components/Artist/ArtistHeaderActionsStrip";
 import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { MetaCard } from "components/common/MetaCard";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
-import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaRss } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -22,17 +18,6 @@ import { bp } from "../../constants";
 import ContactArtist from "./ContactArtist";
 import FollowArtist from "./FollowArtist";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
-
-const smallButtonClass = css`
-  svg {
-    font-size: 0.8rem;
-  }
-  paddding: 0.25rem;
-  margin-left: 0.5rem;
-  margin-bottom: 0.25rem;
-  height: 1.5rem !important;
-  width: 1.5rem !important;
-`;
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -268,30 +253,12 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div className="w-full flex flex-row items-center justify-end">
-          <div className="flex flex-row items-end max-md:p-(--mi-side-paddings-xsmall)">
-            <ArtistTourDates
-              isManage={!!isManage}
-              artist={artist}
-              onSubmit={handleSubmit}
-            />
-            <ArtistHeaderDescription
-              isManage={!!isManage}
-              artist={artist}
-              onSubmit={handleSubmit}
-            />
-            <ArtistButtonAnchor
-              target="_blank"
-              href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
-              rel="noreferrer"
-              onlyIcon
-              className={smallButtonClass}
-              startIcon={<FaRss />}
-            />
-            {artist.isLabelProfile && (
-              <LabelEmbed label={artist} buttonClassName={smallButtonClass} />
-            )}
-          </div>
+        <div className="w-full flex flex-row items-center justify-end py-2 max-md:border-t max-md:border-(--mi-button-tint-color)">
+          <ArtistHeaderActionsStrip
+            artist={artist}
+            isManage={!!isManage}
+            onSubmit={handleSubmit}
+          />
         </div>
       </HeaderWrapper>
 
