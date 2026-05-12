@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import {
   FaBandcamp,
   FaFacebook,
@@ -19,8 +20,8 @@ import {
   FaDeezer,
 } from "react-icons/fa6";
 import { FiMail } from "react-icons/fi";
+
 import Logo from "./Logo";
-import { css } from "@emotion/css";
 
 const customIconClass = css`
   min-width: 1rem;
@@ -111,7 +112,7 @@ const matchesPeerTube = (parsed: URL): boolean => {
 
 export type OutsideLink = {
   name: string;
-  icon: JSX.Element;
+  icon?: JSX.Element;
   matches: (parsed: URL) => boolean;
   showFull?: boolean;
   isFallback?: boolean;
@@ -120,6 +121,13 @@ export type OutsideLink = {
 export const websiteSite: OutsideLink = {
   name: "Website",
   icon: <FaGlobe />,
+  matches: () => false,
+  showFull: true,
+  isFallback: true,
+};
+
+const unknownSite: OutsideLink = {
+  name: "Website",
   matches: () => false,
   showFull: true,
   isFallback: true,
@@ -272,8 +280,8 @@ export const findOutsideSite = (link: Link): OutsideLink => {
     return emailSite;
   }
   const parsed = parseLinkUrl(link.url);
-  if (!parsed) return websiteSite;
-  return outsideLinks.find((site) => site.matches(parsed)) ?? websiteSite;
+  if (!parsed) return unknownSite;
+  return outsideLinks.find((site) => site.matches(parsed)) ?? unknownSite;
 };
 
 const parseUnknownSiteNameFromUrl = (urlString: string) => {
