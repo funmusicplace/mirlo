@@ -51,7 +51,6 @@ const AlbumFormContent: React.FC<{
       >
         <SaveDraftBar
           existingObject={existingObject}
-          reload={reload}
           onSaveSuccess={onSaveSuccess}
         />
         {!isTrackGroupPublished(existingObject) &&

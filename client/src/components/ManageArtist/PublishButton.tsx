@@ -1,14 +1,15 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useSaveAlbumFormMutation } from "queries/trackGroups";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import { isTrackGroupPublished } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
-import { useSaveTrackGroupForm } from "./ManageTrackGroup/AlbumFormComponents/saveTrackGroupForm";
 import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
 
 const PublishButton: React.FC<{
@@ -20,18 +21,34 @@ const PublishButton: React.FC<{
     keyPrefix: "manageAlbum",
   });
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
 
   const [isPublishing, setIsPublishing] = React.useState(false);
-  const [isUpdating, setIsUpdating] = React.useState(false);
 
   const { artistId, trackGroupId } = useParams();
   const { data: artist } = useArtistQuery();
-  const formContext = useFormContext<TrackGroupFormData>();
-  const isDirty = formContext?.formState.isDirty ?? false;
+  const methods = useFormContext<TrackGroupFormData>();
+  const isDirty = methods?.formState.isDirty ?? false;
 
   const artistUserId = artist?.userId;
+  const saveMutation = useSaveAlbumFormMutation();
 
-  const save = useSaveTrackGroupForm(trackGroup, Number(artistId), reload);
+  const saveCurrentForm = React.useCallback(async () => {
+    const values = methods.getValues();
+    await saveMutation.mutateAsync({
+      formData: values,
+      trackGroupId: trackGroup.id,
+      artistId: Number(artistId),
+      fundraiserId: trackGroup.fundraiser?.id,
+    });
+    methods.reset(values);
+  }, [
+    methods,
+    saveMutation,
+    trackGroup.id,
+    trackGroup.fundraiser?.id,
+    artistId,
+  ]);
 
   const publishTrackGroup = React.useCallback(async () => {
     setIsPublishing(true);
@@ -78,7 +95,7 @@ const PublishButton: React.FC<{
     try {
       if (artistUserId && trackGroupId) {
         if (isDirty) {
-          await save();
+          await saveCurrentForm();
           onSaveSuccess?.();
         }
         await api.put(`manage/trackGroups/${trackGroupId}/publish`, {});
@@ -105,26 +122,21 @@ const PublishButton: React.FC<{
     artistUserId,
     trackGroupId,
     isDirty,
-    save,
+    saveCurrentForm,
     onSaveSuccess,
     snackbar,
     reload,
   ]);
 
   const updateRelease = React.useCallback(async () => {
-    setIsUpdating(true);
     try {
-      await save();
+      await saveCurrentForm();
       onSaveSuccess?.();
       snackbar(t("releaseUpdated"), { type: "success" });
     } catch (e) {
-      snackbar((e as { message: string }).message ?? t("somethingWentWrong"), {
-        type: "warning",
-      });
-    } finally {
-      setIsUpdating(false);
+      errorHandler(e);
     }
-  }, [save, onSaveSuccess, snackbar, t]);
+  }, [saveCurrentForm, onSaveSuccess, snackbar, errorHandler, t]);
 
   if (!trackGroup || !artist) {
     return null;
@@ -137,9 +149,9 @@ const PublishButton: React.FC<{
       <div className="flex flex-wrap gap-3">
         <ArtistButton
           type="button"
-          isLoading={isUpdating}
+          isLoading={saveMutation.isPending}
           onClick={updateRelease}
-          disabled={isUpdating || !isDirty}
+          disabled={saveMutation.isPending || !isDirty}
           className="!bg-(--mi-green-500) !border-(--mi-green-700) !text-(--mi-green-100) [&_svg]:!fill-(--mi-green-100) enabled:hover:!bg-(--mi-green-700) enabled:hover:!border-(--mi-green-700) disabled:grayscale disabled:!opacity-50"
         >
           {t("updateRelease")}

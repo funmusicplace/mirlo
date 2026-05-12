@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+
 import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_TRACK_GROUPS,
@@ -153,6 +154,74 @@ export function useUpdateTrackGroupMutation() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: updateTrackGroup,
+    async onSuccess() {
+      await client.invalidateQueries({
+        predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
+      });
+    },
+  });
+}
+
+const toIsoOrNull = (value?: string | null) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (isNaN(parsed.getTime())) return null;
+  return parsed.toISOString();
+};
+
+const toCentsOrNull = (value: unknown) => {
+  if (value === "" || value === null || value === undefined) return null;
+  const num = Number(value);
+  if (isNaN(num)) return null;
+  return Math.round(num * 100);
+};
+
+async function saveAlbumForm(opts: {
+  formData: import("../components/ManageArtist/ManageTrackGroup/ManageTrackGroup").TrackGroupFormData;
+  trackGroupId: number;
+  artistId: number;
+  fundraiserId?: number;
+}) {
+  const { formData, trackGroupId, artistId, fundraiserId } = opts;
+  const trackGroupPayload = {
+    title: formData.title,
+    about: formData.about,
+    credits: formData.credits,
+    releaseDate: toIsoOrNull(formData.releaseDate),
+    publishedAt: toIsoOrNull(formData.publishedAt),
+    minPrice: toCentsOrNull(formData.minPrice),
+    suggestedPrice: toCentsOrNull(formData.suggestedPrice),
+    catalogNumber: formData.catalogNumber,
+    urlSlug: formData.urlSlug,
+    isPublic: formData.isPublic,
+    isGettable: formData.isGettable,
+    platformPercent:
+      formData.platformPercent !== undefined && formData.platformPercent !== ""
+        ? Number(formData.platformPercent)
+        : undefined,
+    artistId,
+  };
+
+  const requests: Promise<unknown>[] = [
+    api.put(`v1/manage/trackGroups/${trackGroupId}`, trackGroupPayload),
+  ];
+
+  if (fundraiserId) {
+    requests.push(
+      api.put(`v1/manage/fundraisers/${fundraiserId}`, {
+        goalAmount: toCentsOrNull(formData.goalAmount) ?? 0,
+        isAllOrNothing: !!formData.isAllOrNothing,
+      })
+    );
+  }
+
+  await Promise.all(requests);
+}
+
+export function useSaveAlbumFormMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: saveAlbumForm,
     async onSuccess() {
       await client.invalidateQueries({
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
