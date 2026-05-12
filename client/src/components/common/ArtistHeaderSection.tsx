@@ -102,8 +102,10 @@ export const ArtistTitleText = styled.div`
   justify-content: space-between;
   word-break: break-word;
   width: 100%;
+  gap: 1.5rem;
   @media screen and (max-width: ${bp.medium}px) {
     min-height: auto;
+    gap: 1rem;
   }
 `;
 
@@ -189,17 +191,28 @@ const ArtistHeaderSection: React.FC<{
                       flex-direction: column;
                       justify-content: center;
                       word-break: break-word;
-                      width: 100%;
+                      flex: 1 1 auto;
+                      min-width: 0;
                     `}
                   >
                     <ArtistTitle artistAvatar={!!artistAvatar}>
                       {artist.name}
                     </ArtistTitle>
-                    <ArtistFormLocation
-                      isManage={!!isManage}
-                      artist={artist}
-                      onSubmit={handleSubmit}
-                    />{" "}
+                    <div className="flex items-center gap-2">
+                      {artist.isLabelProfile && (
+                        <>
+                          <span className="max-md:hidden text-(--mi-button-color)">
+                            {artist.properties?.titles?.groupName ?? t("label")}
+                          </span>
+                          <span className="max-md:hidden opacity-50">-</span>
+                        </>
+                      )}
+                      <ArtistFormLocation
+                        isManage={!!isManage}
+                        artist={artist}
+                        onSubmit={handleSubmit}
+                      />
+                    </div>{" "}
                     {artist.shortDescription && (
                       <div
                         className={css`
@@ -218,7 +231,7 @@ const ArtistHeaderSection: React.FC<{
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-row items-center gap-1 pl-4 max-md:pl-1 text-right break-normal!">
+                  <div className="flex flex-row items-center gap-1 shrink-0 text-right break-normal!">
                     {!isManage && (
                       <>
                         <FollowArtist artistId={artist.id} />
@@ -229,20 +242,17 @@ const ArtistHeaderSection: React.FC<{
                 </ArtistTitleText>
               </SpaceBetweenDiv>
             </ArtistTitleWrapper>
-          </AvatarWrapper>{" "}
-          {artist.shortDescription && (
+          </AvatarWrapper>
+          {!artist.bio && artist.shortDescription && (
             <div
               className={css`
-                font-size: 1rem;
-                line-height: 1.2rem;
-                margin-top: 0.25rem;
-                font-size: var(--mi-font-size-xsmall) !important;
                 display: none;
                 @media screen and (max-width: ${bp.medium}px) {
                   display: flex;
                   font-size: 0.9rem;
                   line-height: 1.1rem;
-                  margin-bottom: 0.25rem;
+                  margin-top: 0.75rem;
+                  margin-bottom: 0.75rem;
                 }
               `}
             >
@@ -258,34 +268,8 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div
-          className={css`
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-          `}
-        >
-          <div
-            className={css`
-              color: var(--mi-button-color);
-            `}
-          >
-            {artist.isLabelProfile &&
-              (artist.properties?.titles?.groupName ?? t("label"))}
-          </div>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: row;
-              align-items: flex-end;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                padding: var(--mi-side-paddings-xsmall);
-              }
-            `}
-          >
+        <div className="w-full flex flex-row items-center justify-end">
+          <div className="flex flex-row items-end max-md:p-(--mi-side-paddings-xsmall)">
             <ArtistTourDates
               isManage={!!isManage}
               artist={artist}
@@ -312,31 +296,35 @@ const ArtistHeaderSection: React.FC<{
       </HeaderWrapper>
 
       <ManageArtistAnnouncement showButtons={isManage} />
-      <div
-        className={css`
-          display: flex;
-          justify-content: flex-end;
-          padding-top: 0.5rem;
-          align-items: flex-start;
-
-          ${artist.announcementText
-            ? `flex-direction: column;
+      {(isManage ||
+        (artist.linksJson?.length ?? 0) > 0 ||
+        (artist.links?.length ?? 0) > 0) && (
+        <div
+          className={css`
+            display: flex;
             justify-content: flex-end;
-            align-items: flex-end;
-            padding-top: 0;
+            padding-top: 0.5rem;
+            align-items: flex-start;
 
-            > div {
-              margin-bottom: 0.5rem;}
-            `
-            : ""}
-        `}
-      >
-        <ArtistFormLinks
-          isManage={!!isManage}
-          artist={artist}
-          onSubmit={handleSubmit}
-        />
-      </div>
+            ${artist.announcementText
+              ? `flex-direction: column;
+              justify-content: flex-end;
+              align-items: flex-end;
+              padding-top: 0;
+
+              > div {
+                margin-bottom: 0.5rem;}
+              `
+              : ""}
+          `}
+        >
+          <ArtistFormLinks
+            isManage={!!isManage}
+            artist={artist}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      )}
     </div>
   );
 };
