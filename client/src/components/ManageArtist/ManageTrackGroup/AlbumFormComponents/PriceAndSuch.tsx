@@ -8,11 +8,9 @@ import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
 import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useController, useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import api from "services/api";
-import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistManageTiersUrl } from "utils/artist";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
@@ -22,7 +20,6 @@ import { TrackGroupFormData } from "../ManageTrackGroup";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
 
 import PaymentSlider from "./PaymentSlider";
-import SavingInput from "./SavingInput";
 
 type PricingMode = "free-or-donate" | "paid" | "no-payments";
 
@@ -31,18 +28,22 @@ const PriceAndSuch: React.FC<{
   reload: () => void;
 }> = ({ existingObject, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const { artistId, trackGroupId } = useParams();
+  const { trackGroupId } = useParams();
   const { data: artist } = useManagedArtistQuery();
-  const errorHandler = useErrorHandler();
   const {
+    control,
     formState: { errors },
+    register,
     watch,
     setValue,
     getValues,
   } = useFormContext<TrackGroupFormData>();
+  const { field: isGettableField } = useController({
+    control,
+    name: "isGettable",
+    defaultValue: false,
+  });
   const { user } = useAuthContext();
-  const [isUpdatingPricingMode, setIsUpdatingPricingMode] =
-    React.useState(false);
   const pricingModeInputRefs: {
     [K in PricingMode]: React.RefObject<HTMLInputElement>;
   } = {
@@ -51,7 +52,7 @@ const PriceAndSuch: React.FC<{
     "no-payments": React.useRef<HTMLInputElement>(null),
   };
 
-  const isAlbumGettable = watch("isGettable", false);
+  const isAlbumGettable = isGettableField.value ?? false;
   const minPrice = Number(watch("minPrice") || 0);
   const suggestedPrice = watch("suggestedPrice");
   const hasSuggestedPrice =
@@ -65,36 +66,8 @@ const PriceAndSuch: React.FC<{
       ? "paid"
       : "free-or-donate";
 
-  const savePricingState = React.useCallback(
-    async ({
-      isGettable,
-      nextMinPrice,
-      nextSuggestedPrice,
-    }: {
-      isGettable: boolean;
-      nextMinPrice: number;
-      nextSuggestedPrice?: number | null;
-    }) => {
-      if (!trackGroupId) {
-        return;
-      }
-
-      await api.put(`manage/trackGroups/${trackGroupId}`, {
-        artistId: Number(artistId),
-        isGettable: isGettable,
-        minPrice: Math.round(nextMinPrice * 100),
-        suggestedPrice:
-          nextSuggestedPrice === null || nextSuggestedPrice === undefined
-            ? null
-            : Math.round(nextSuggestedPrice * 100),
-      });
-    },
-    [artistId, trackGroupId]
-  );
-
-  /* We toggle some defaults on selecting of a new pricing mode */
   const onSelectPricingMode = React.useCallback(
-    async (mode: PricingMode) => {
+    (mode: PricingMode) => {
       const currentMinPrice = Number(getValues("minPrice") || 0);
       const currentSuggestedPrice = Number(getValues("suggestedPrice") || 0);
 
@@ -105,8 +78,6 @@ const PriceAndSuch: React.FC<{
         : null;
 
       if (mode === "no-payments") {
-        // Only disable purchase; preserve prices so a round-trip back to a
-        // payment-enabled mode restores the user's previously set values.
         isGettable = false;
       }
 
@@ -122,52 +93,28 @@ const PriceAndSuch: React.FC<{
         }
       }
 
-      setIsUpdatingPricingMode(true);
-      try {
-        setValue("isGettable", isGettable);
-        setValue("minPrice", `${nextMinPrice}`);
-        setValue(
-          "suggestedPrice",
-          nextSuggestedPrice === null || nextSuggestedPrice === undefined
-            ? ""
-            : `${nextSuggestedPrice}`
-        );
-
-        await savePricingState({
-          isGettable,
-          nextMinPrice,
-          nextSuggestedPrice,
-        });
-      } catch (e) {
-        errorHandler(e);
-      } finally {
-        setIsUpdatingPricingMode(false);
-      }
+      setValue("isGettable", isGettable, { shouldDirty: true });
+      setValue("minPrice", `${nextMinPrice}`, { shouldDirty: true });
+      setValue(
+        "suggestedPrice",
+        nextSuggestedPrice === null || nextSuggestedPrice === undefined
+          ? ""
+          : `${nextSuggestedPrice}`,
+        { shouldDirty: true }
+      );
+      pricingModeInputRefs[mode].current?.focus();
     },
-    [errorHandler, getValues, hasSuggestedPrice, savePricingState, setValue]
+    [
+      getValues,
+      hasSuggestedPrice,
+      isGettableField,
+      pricingModeInputRefs,
+      setValue,
+    ]
   );
 
-  const [didUpdatePricingMode, setDidUpdatePricingMode] = React.useState(false);
-
-  // Restore focus to selected input after disabling and re-enabling
-  React.useEffect(() => {
-    if (isUpdatingPricingMode) {
-      setDidUpdatePricingMode(true);
-    } else if (!isUpdatingPricingMode && didUpdatePricingMode) {
-      pricingModeInputRefs[selectedPricingMode].current?.focus();
-      setDidUpdatePricingMode(false);
-    }
-  }, [
-    isUpdatingPricingMode,
-    didUpdatePricingMode,
-    pricingModeInputRefs["free-or-donate"].current,
-    pricingModeInputRefs["paid"].current,
-    pricingModeInputRefs["no-payments"].current,
-    selectedPricingMode,
-  ]);
-
   const onToggleSuggestedPrice = React.useCallback(
-    async (checked: boolean) => {
+    (checked: boolean) => {
       if (!isAlbumGettable || selectedPricingMode === "no-payments") {
         return;
       }
@@ -181,30 +128,13 @@ const PriceAndSuch: React.FC<{
           )
         : null;
 
-      try {
-        setValue(
-          "suggestedPrice",
-          nextSuggestedPrice === null ? "" : `${nextSuggestedPrice}`
-        );
-
-        await savePricingState({
-          isGettable: isAlbumGettable,
-          nextMinPrice: currentMinPrice,
-          nextSuggestedPrice,
-        });
-      } catch (e) {
-        errorHandler(e);
-      } finally {
-      }
+      setValue(
+        "suggestedPrice",
+        nextSuggestedPrice === null ? "" : `${nextSuggestedPrice}`,
+        { shouldDirty: true }
+      );
     },
-    [
-      errorHandler,
-      getValues,
-      isAlbumGettable,
-      savePricingState,
-      selectedPricingMode,
-      setValue,
-    ]
+    [getValues, isAlbumGettable, selectedPricingMode, setValue]
   );
 
   const artistHasTiersThatGrantThisAlbum =
@@ -271,7 +201,6 @@ const PriceAndSuch: React.FC<{
                   <input
                     checked={isSelected}
                     className="sr-only"
-                    disabled={isUpdatingPricingMode}
                     id={id}
                     name="pricing"
                     onChange={() =>
@@ -332,24 +261,83 @@ const PriceAndSuch: React.FC<{
             </p>
           )}
         </div>
-        {isAlbumGettable && (
-          <div
-            className={css`
-              width: 100%;
-              @media screen and (min-width: ${bp.medium}px) {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-              }
-            `}
-          >
-            <FormComponent
+        <div
+          hidden={!isAlbumGettable}
+          className={css`
+            width: 100%;
+            @media screen and (min-width: ${bp.medium}px) {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+            }
+          `}
+        >
+          <FormComponent className="grow">
+            <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
+            <small id="description-minimum-price">
+              {t("minimumPriceDescription")}
+            </small>
+            <div
               className={css`
-                flex-grow: 1;
+                display: flex;
+                align-items: center;
               `}
             >
-              <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
-              <small id="description-minimum-price">
-                {t("minimumPriceDescription")}
+              {user?.currency && (
+                <div
+                  className={css`
+                    width: 2rem;
+                    height: 89%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 0.25rem;
+                  `}
+                  id="unit-minimum-price"
+                >
+                  {getCurrencySymbol(user?.currency)}
+                </div>
+              )}
+              <InputEl
+                aria-describedby="unit-minimum-price description-minimum-price hint-minimum-price-access hint-minimum-price-currency"
+                id="input-minimum-price"
+                type="number"
+                step="0.01"
+                min={0}
+                {...register("minPrice", { min: 0 })}
+              />
+            </div>
+            <small id="hint-minimum-price-access">{t("pricingHelp")}</small>
+            {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
+            <small id="hint-minimum-price-currency">
+              {t("currencyIsSetOnManageArtist")}
+            </small>
+          </FormComponent>
+
+          <FormComponent className="grow">
+            <div className="flex items-center gap-1">
+              <InputEl
+                aria-describedby="hint-has-suggested-price hint-has-suggested-price-clarifier"
+                id="input-has-suggested-price"
+                type="checkbox"
+                checked={hasSuggestedPrice}
+                onChange={(event) => {
+                  onToggleSuggestedPrice(event.target.checked);
+                }}
+              />
+              <label
+                htmlFor="input-has-suggested-price"
+                id="label-has-suggested-price"
+              >
+                {t("suggestAlternateDefaultPrice")}
+              </label>
+            </div>
+
+            <div hidden={!hasSuggestedPrice}>
+              <small id="hint-has-suggested-price">
+                {t("suggestedPriceDescription")}
+              </small>
+              <small id="hint-has-suggested-price-clarifier">
+                {t("suggestedPriceDescriptionClarifier")}
               </small>
               <div
                 className={css`
@@ -367,109 +355,31 @@ const PriceAndSuch: React.FC<{
                       justify-content: center;
                       margin-bottom: 0.25rem;
                     `}
-                    id="unit-minimum-price"
+                    id="unit-suggested-price"
                   >
                     {getCurrencySymbol(user?.currency)}
                   </div>
                 )}
-                <SavingInput
-                  ariaDescribedBy="unit-minimum-price description-minimum-price hint-minimum-price-access hint-minimum-price-currency"
-                  formKey="minPrice"
-                  id="input-minimum-price"
+                <InputEl
+                  aria-describedby="unit-suggested-price"
+                  aria-labelledby="label-has-suggested-price"
+                  id="input-suggested-price"
                   type="number"
                   step="0.01"
                   min={0}
-                  url={`manage/trackGroups/${trackGroupId}`}
-                  extraData={{ artistId: Number(artistId) }}
+                  {...register("suggestedPrice", { min: 0 })}
                 />
               </div>
-              <small id="hint-minimum-price-access">{t("pricingHelp")}</small>
-              {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
-              <small id="hint-minimum-price-currency">
-                {t("currencyIsSetOnManageArtist")}
-              </small>
-            </FormComponent>
+            </div>
+          </FormComponent>
 
-            <FormComponent className="grow">
-              <div className="flex items-center gap-1">
-                <InputEl
-                  aria-describedby="hint-has-suggested-price hint-has-suggested-price-clarifier"
-                  id="input-has-suggested-price"
-                  type="checkbox"
-                  checked={hasSuggestedPrice}
-                  onChange={(event) => {
-                    onToggleSuggestedPrice(event.target.checked);
-                  }}
-                />
-                <label
-                  htmlFor="input-has-suggested-price"
-                  id="label-has-suggested-price"
-                >
-                  {t("suggestAlternateDefaultPrice")}
-                </label>
-              </div>
-
-              {hasSuggestedPrice && (
-                <>
-                  <small id="hint-has-suggested-price">
-                    {t("suggestedPriceDescription")}
-                  </small>
-                  <small id="hint-has-suggested-price-clarifier">
-                    {t("suggestedPriceDescriptionClarifier")}
-                  </small>
-                  <div
-                    className={css`
-                      display: flex;
-                      align-items: center;
-                    `}
-                  >
-                    {user?.currency && (
-                      <div
-                        className={css`
-                          width: 2rem;
-                          height: 89%;
-                          display: flex;
-                          align-items: center;
-                          justify-content: center;
-                          margin-bottom: 0.25rem;
-                        `}
-                        id="unit-suggested-price"
-                      >
-                        {getCurrencySymbol(user?.currency)}
-                      </div>
-                    )}
-                    <SavingInput
-                      ariaDescribedBy="unit-suggested-price"
-                      ariaLabelledBy="label-has-suggested-price"
-                      formKey="suggestedPrice"
-                      id="input-suggested-price"
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      url={`manage/trackGroups/${trackGroupId}`}
-                      extraData={{ artistId: Number(artistId) }}
-                    />
-                  </div>
-                </>
-              )}
-            </FormComponent>
-
-            <FormComponent
-              className={css`
-                flex-grow: 1;
-              `}
-            >
-              <PaymentSlider
-                label={t("platformPercent")}
-                url={`manage/trackGroups/${trackGroupId}`}
-                extraData={{ artistId: Number(artistId) }}
-              />
-              {errors.platformPercent && (
-                <FormError>{t("platformPercent")}</FormError>
-              )}
-            </FormComponent>
-          </div>
-        )}
+          <FormComponent className="grow">
+            <PaymentSlider label={t("platformPercent")} />
+            {errors.platformPercent && (
+              <FormError>{t("platformPercent")}</FormError>
+            )}
+          </FormComponent>
+        </div>
         {existingObject &&
           existingObject?.tracks?.length > 0 &&
           selectedPricingMode !== "no-payments" && (

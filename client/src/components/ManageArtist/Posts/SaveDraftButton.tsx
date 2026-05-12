@@ -1,51 +1,31 @@
-import React from "react";
-
-import { useFormContext } from "react-hook-form";
-import { useSnackbar } from "state/SnackbarContext";
-import { pick } from "lodash";
-import api from "../../../services/api";
 import { css } from "@emotion/css";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { pick } from "lodash";
+import React from "react";
+import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import useErrorHandler from "services/useErrorHandler";
-
 import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtistSubscriptionTiers } from "queries";
+import { useSnackbar } from "state/SnackbarContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 
-export type PostFormData = {
-  title: string;
-  publishedAt: string;
-  content: string;
-  isPublic: boolean;
-  minimumTier: string;
-  shouldSendEmail: boolean;
-};
+import api from "../../../services/api";
+
+import { PostFormData } from "./PostForm";
 
 const SaveDraftButton: React.FC<{
   post: Post;
   reload: (postId?: number) => Promise<unknown>;
   artistId: number;
   onClose?: () => void;
-}> = ({ reload, artistId, post, onClose }) => {
+  onSaveSuccess?: () => void;
+  getBodyContent: () => string;
+}> = ({ reload, artistId, post, onClose, onSaveSuccess, getBodyContent }) => {
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
-
-  const { data: tiers } = useQuery(
-    queryManagedArtistSubscriptionTiers({
-      artistId,
-      includeDefault: true,
-    })
-  );
-
-  const publishedAt = post ? new Date(post.publishedAt) : new Date();
-  publishedAt.setMinutes(
-    publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
-  );
 
   const { reload: reloadImages } = useGetUserObjectById<PostImage>(
     `manage/posts/${post?.id}/images`,
@@ -55,19 +35,6 @@ const SaveDraftButton: React.FC<{
   );
 
   const methods = useFormContext<PostFormData>();
-
-  React.useEffect(() => {
-    if ((tiers?.results.length ?? 0) > 0) {
-      if (
-        post.minimumSubscriptionTierId &&
-        tiers?.results.find(
-          (tier) => tier.id === post.minimumSubscriptionTierId
-        )
-      ) {
-        methods.setValue("minimumTier", `${post.minimumSubscriptionTierId}`);
-      }
-    }
-  }, [tiers]);
 
   const { handleSubmit, watch } = methods;
 
@@ -84,7 +51,8 @@ const SaveDraftButton: React.FC<{
           setIsSaving(true);
           let postId;
           const picked = {
-            ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
+            ...pick(data, ["title", "isPublic", "shouldSendEmail"]),
+            content: getBodyContent(),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
             artistId: artistId,
             minimumSubscriptionTierId:
@@ -98,6 +66,7 @@ const SaveDraftButton: React.FC<{
           >(`manage/posts/${existingId}`, picked);
           postId = response.result.id;
 
+          onSaveSuccess?.();
           snackbar(t("postUpdated"), { type: "success" });
           reload(postId);
           reloadImages();
@@ -110,7 +79,19 @@ const SaveDraftButton: React.FC<{
         }
       }
     },
-    [reload, existingId, snackbar, artistId, errorHandler, onClose, userId, t]
+    [
+      reload,
+      existingId,
+      snackbar,
+      artistId,
+      errorHandler,
+      onClose,
+      userId,
+      t,
+      onSaveSuccess,
+      reloadImages,
+      getBodyContent,
+    ]
   );
 
   return (

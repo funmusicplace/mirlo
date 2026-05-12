@@ -7,12 +7,15 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 import useGetUserObjectById from "utils/useGetUserObjectById";
+
 import { PostFormData } from "./PostForm";
 
 const PublishPostButton: React.FC<{
   post: Post;
   reload: (postId?: number) => void;
-}> = ({ post, reload }) => {
+  onSaveSuccess?: () => void;
+  getBodyContent: () => string;
+}> = ({ post, reload, onSaveSuccess, getBodyContent }) => {
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
   const snackbar = useSnackbar();
   const [isPublishing, setIsPublishing] = React.useState(false);
@@ -25,7 +28,6 @@ const PublishPostButton: React.FC<{
       multiple: true,
     }
   );
-  const content = watch("content");
   const isDraft = post.isDraft;
   const title = watch("title");
 
@@ -36,7 +38,9 @@ const PublishPostButton: React.FC<{
       try {
         setIsPublishing(true);
 
-        if (post.isDraft && (content === "" || content === "<p></p>")) {
+        const bodyContent = getBodyContent();
+
+        if (post.isDraft && (bodyContent === "" || bodyContent === "<p></p>")) {
           const ok = await ask(t("contentIsEmpty"));
           if (!ok) {
             return;
@@ -50,7 +54,8 @@ const PublishPostButton: React.FC<{
           }
         }
         const picked = {
-          ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
+          ...pick(data, ["title", "isPublic", "shouldSendEmail"]),
+          content: bodyContent,
           publishedAt: new Date(data.publishedAt + ":00").toISOString(),
           artistId: post.artistId,
           minimumSubscriptionTierId:
@@ -63,6 +68,7 @@ const PublishPostButton: React.FC<{
           picked
         );
         await api.put(`manage/posts/${existingId}/publish`, {});
+        onSaveSuccess?.();
         reload(existingId);
         reloadImages();
         snackbar(t("publishedPost"), { type: "success" });
@@ -72,7 +78,20 @@ const PublishPostButton: React.FC<{
         setIsPublishing(false);
       }
     },
-    [existingId, title, content, isDraft]
+    [
+      existingId,
+      title,
+      isDraft,
+      onSaveSuccess,
+      ask,
+      post.artistId,
+      post.isDraft,
+      reload,
+      reloadImages,
+      snackbar,
+      t,
+      getBodyContent,
+    ]
   );
 
   const minimumTier = watch("minimumTier");

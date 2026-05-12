@@ -33,15 +33,20 @@ import ManageTrackTable from "./ManageTrackTable";
 
 export interface TrackGroupFormData {
   title: string;
+  urlSlug?: string;
   minPrice: string;
   suggestedPrice?: string;
   isGettable?: boolean;
+  isPublic?: boolean;
   platformPercent?: string;
   releaseDate?: string;
+  publishedAt?: string;
   credits: string;
   about: string;
   coverFile: File[];
   catalogNumber?: string;
+  goalAmount?: string;
+  isAllOrNothing?: boolean;
 }
 
 export const FormSection = styled.div`

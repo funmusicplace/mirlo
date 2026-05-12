@@ -1623,7 +1623,13 @@
     "updateBillingInfo": "Update your billing info",
     "newVersionAvailable": "A new version of Mirlo is available.",
     "reload": "Reload",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "draftRestored": "Some unsaved changes have been restored.",
+    "keepDraft": "Keep",
+    "discardDraft": "Discard",
+    "fieldsRestored_one": "{{count}} field restored: {{fields}}",
+    "fieldsRestored_other": "{{count}} fields restored: {{fields}}",
+    "restoredFromDraft": "Restored from draft"
   },
   "uploadPanel": {
     "uploadsInProgress_one": "{{count}} track uploading",

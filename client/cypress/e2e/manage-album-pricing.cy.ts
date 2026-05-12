@@ -38,6 +38,7 @@ describe("manage album pricing", () => {
           title: "Pricing Album",
           urlSlug: "pricing-album",
           minPrice: 300,
+          publishedAt: null,
         });
       })
       .then((trackGroup) => {
@@ -47,24 +48,26 @@ describe("manage album pricing", () => {
   });
 
   beforeEach(() => {
+    cy.clearLocalStorage();
+    cy.login({ email: userEmail, password: userPassword });
     cy.intercept("GET", "/auth/profile").as("authProfile");
     cy.intercept("PUT", `/v1/manage/trackGroups/${trackGroupId}`).as(
       "updateTrackGroup"
     );
-
     cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
     cy.wait("@authProfile");
     cy.contains("h2", "Price & such").should("exist");
   });
 
-  it("updates pricing mode and suggested price payloads", () => {
+  it("pricing mode toggles only commit on Save draft click", () => {
     cy.contains("button", "No payments").click();
+    cy.wait(500);
+    cy.get("@updateTrackGroup.all").should("have.length", 0);
+
+    cy.contains("button", "Save draft").click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
-        // Toggling to "No payments" only flips isGettable; minPrice and
-        // suggestedPrice are preserved so a round-trip back to a paid mode
-        // restores the user's previously set values (#1557).
         expect(body).to.include({
           artistId,
           isGettable: false,
@@ -72,8 +75,11 @@ describe("manage album pricing", () => {
           suggestedPrice: null,
         });
       });
+    // let save()'s reset + reload settle after the intercepted PUT response
+    cy.wait(200);
 
     cy.contains("button", "$0 or donate").click();
+    cy.contains("button", "Save draft").click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
@@ -83,8 +89,10 @@ describe("manage album pricing", () => {
           minPrice: 0,
         });
       });
+    cy.wait(200);
 
-    cy.get("#input-has-suggested-price").check({ force: true });
+    cy.get("label[for='input-has-suggested-price']").click();
+    cy.contains("button", "Save draft").click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
@@ -95,8 +103,10 @@ describe("manage album pricing", () => {
           suggestedPrice: 100,
         });
       });
+    cy.wait(200);
 
     cy.contains("button", "Paid").click();
+    cy.contains("button", "Save draft").click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
@@ -107,8 +117,10 @@ describe("manage album pricing", () => {
           suggestedPrice: 100,
         });
       });
+    cy.wait(200);
 
-    cy.get("#input-has-suggested-price").uncheck({ force: true });
+    cy.get("label[for='input-has-suggested-price']").click();
+    cy.contains("button", "Save draft").click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
