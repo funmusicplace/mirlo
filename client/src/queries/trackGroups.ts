@@ -222,8 +222,11 @@ export function useSaveAlbumFormMutation() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: saveAlbumForm,
-    async onSuccess() {
-      await client.invalidateQueries({
+    // Not awaited on purpose, SaveDraftBar resets the form right after mutateAsync resolves.
+    // Awaiting would delay that reset past slow refetches, letting it race with
+    // and remove the user's next click.
+    onSuccess() {
+      void client.invalidateQueries({
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
       });
     },
