@@ -1,13 +1,16 @@
 import { css } from "@emotion/css";
 import MarkdownContent from "components/common/MarkdownContent";
-import { useTranslation } from "react-i18next";
-import React from "react";
-import { useSnackbar } from "state/SnackbarContext";
-import { useForm } from "react-hook-form";
-import { FaPen, FaSave, FaTimes } from "react-icons/fa";
-import TextArea from "components/common/TextArea";
-import { ArtistButton } from "./ArtistButtons";
 import Modal from "components/common/Modal";
+import TextArea from "components/common/TextArea";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaPen, FaSave, FaTimes } from "react-icons/fa";
+import { useSnackbar } from "state/SnackbarContext";
+
+import { bp } from "../../constants";
+
+import { ArtistButton } from "./ArtistButtons";
 
 interface FormData {
   bio: string;
@@ -61,6 +64,13 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           border-radius: 0rem !important;
           border-top-left-radius: 0.5rem !important;
           border-top-right-radius: 0.5rem !important;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            margin-top: 0;
+            margin-bottom: 0.25rem;
+            height: 1.5rem !important;
+            border-radius: 9999px !important;
+          }
         `}
       >
         {t("about")}
