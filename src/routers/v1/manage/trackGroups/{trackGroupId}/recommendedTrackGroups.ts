@@ -1,13 +1,14 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   userAuthenticated,
   trackGroupBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import prisma from "@mirlo/prisma";
-import { processSingleTrackGroup } from "../../../../../utils/trackGroup";
 import { AppError } from "../../../../../utils/error";
+import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { processSingleTrackGroup } from "../../../../../utils/serialize/trackGroup";
 
 type Params = {
   trackGroupId: number;

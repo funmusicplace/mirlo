@@ -23,7 +23,10 @@ import {
   finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
+import { processSingleArtist } from "./utils/serialize/artist";
 import { postIncludeForUser, serializePost } from "./utils/serialize/post";
+import { processSingleTrack } from "./utils/serialize/track";
+import { processSingleTrackGroup } from "./utils/serialize/trackGroup";
 import {
   USER_PROFILE_SELECT,
   serializeUserProfile,
@@ -738,6 +741,101 @@ const resolveArtistImageUrl = (artist: {
   return undefined;
 };
 
+type TrackWidgetParams = { trackId: number };
+const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
+  $,
+  params: { trackId },
+}) => {
+  const track = await prisma.track.findFirst({
+    where: { id: trackId },
+    include: {
+      trackGroup: {
+        include: {
+          artist: { include: { avatar: { where: { deletedAt: null } } } },
+          cover: { where: { deletedAt: null } },
+        },
+      },
+      trackArtists: true,
+      audio: true,
+    },
+  });
+  if (!track) return;
+
+  $("head").append(
+    `<script id="__MIRLO_TRACK__" type="application/json">${JSON.stringify({
+      track: processSingleTrack(track),
+      injectedAt: new Date().toISOString(),
+    })}</script>`
+  );
+
+  const artist = await prisma.artist.findFirst({
+    where: { id: track.trackGroup.artistId },
+    include: {
+      avatar: { where: { deletedAt: null } },
+      background: { where: { deletedAt: null } },
+    },
+  });
+  if (artist) {
+    $("head").append(
+      `<script id="__MIRLO_ARTIST__" type="application/json">${JSON.stringify({
+        artist: processSingleArtist(artist),
+        injectedAt: new Date().toISOString(),
+      })}</script>`
+    );
+  }
+};
+
+type TrackGroupWidgetParams = { trackGroupId: number };
+const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
+  $,
+  params: { trackGroupId },
+}) => {
+  const trackGroup = await prisma.trackGroup.findFirst({
+    where: { id: trackGroupId },
+    include: {
+      tracks: {
+        where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
+        include: { audio: true, trackArtists: true, license: true },
+        orderBy: { order: "asc" },
+      },
+      artist: {
+        include: {
+          avatar: { where: { deletedAt: null } },
+        },
+      },
+      cover: { where: { deletedAt: null } },
+      tags: { include: { tag: true } },
+      fundraiser: true,
+    },
+  });
+  if (!trackGroup) return;
+
+  $("head").append(
+    `<script id="__MIRLO_TRACKGROUP__" type="application/json">${JSON.stringify(
+      {
+        trackGroup: processSingleTrackGroup(trackGroup, {}),
+        injectedAt: new Date().toISOString(),
+      }
+    )}</script>`
+  );
+
+  const artist = await prisma.artist.findFirst({
+    where: { id: trackGroup.artistId },
+    include: {
+      avatar: { where: { deletedAt: null } },
+      background: { where: { deletedAt: null } },
+    },
+  });
+  if (artist) {
+    $("head").append(
+      `<script id="__MIRLO_ARTIST__" type="application/json">${JSON.stringify({
+        artist: processSingleArtist(artist),
+        injectedAt: new Date().toISOString(),
+      })}</script>`
+    );
+  }
+};
+
 const dispatchRoute = async (
   routeParams: Record<string, any>,
   context: Omit<RouteContext, "params">
@@ -820,6 +918,18 @@ const dispatchRoute = async (
       await handleArtistProfile({
         ...context,
         params: { artistSlug: routeParams.artistSlug },
+      });
+      break;
+    case "widget-track":
+      await handleTrackWidget({
+        ...context,
+        params: { trackId: routeParams.trackId as number },
+      });
+      break;
+    case "widget-trackgroup":
+      await handleTrackGroupWidget({
+        ...context,
+        params: { trackGroupId: routeParams.trackGroupId as number },
       });
       break;
     default:

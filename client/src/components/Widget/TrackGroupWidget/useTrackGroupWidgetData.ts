@@ -3,6 +3,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
+import { getInjectedArtist, getInjectedTrackGroup } from "utils/injectedData";
 import { usePlayerSyncState } from "utils/playerSync";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
@@ -27,6 +28,18 @@ export const useTrackGroupWidgetData = () => {
     const callback = async () => {
       setIsLoading(true);
       try {
+        const injectedTrackGroup = getInjectedTrackGroup(params.id!);
+        if (injectedTrackGroup) {
+          setTrackGroup(injectedTrackGroup);
+          const artistId = injectedTrackGroup.artistId;
+          const injectedArtist = artistId
+            ? getInjectedArtist(artistId)
+            : undefined;
+          if (injectedArtist) {
+            setArtist(injectedArtist);
+            return;
+          }
+        }
         const results = await api.get<TrackGroup>(`trackGroups/${params.id}`);
         setTrackGroup(results.result);
         const response = await api.get<Artist>(

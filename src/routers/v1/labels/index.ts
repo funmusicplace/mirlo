@@ -1,9 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
-import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
+
 import { turnItemsIntoRSS } from "../../../utils/rss";
-import { processSingleArtist } from "../../../utils/artist";
+import { processSingleArtist } from "../../../utils/serialize/artist";
+import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {

@@ -3,7 +3,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { processSingleArtist, singleInclude } from "../../../../utils/artist";
+import { singleInclude } from "../../../../utils/artist";
+import { processSingleArtist } from "../../../../utils/serialize/artist";
 
 type Params = {
   artistId: string;

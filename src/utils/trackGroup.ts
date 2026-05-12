@@ -2,17 +2,10 @@ import { randomUUID } from "crypto";
 
 import prisma from "@mirlo/prisma";
 import {
-  TrackGroup,
   TrackAudio,
   Track,
-  TrackGroupCover,
   Prisma,
-  TrackGroupTag,
   User,
-  Merch,
-  MerchImage,
-  Artist,
-  ArtistAvatar,
   UploadState,
 } from "@mirlo/prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
@@ -21,21 +14,19 @@ import { Response } from "express";
 
 import { logger } from "../logger";
 
-import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
+import { findArtistIdForURLSlug } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
 import { generateFullStaticImageUrl } from "./images";
-import { processSingleMerch } from "./merch";
 import {
   finalCoversBucket,
   finalAudioBucket,
   removeObjectsFromBucket,
   getReadStream,
-  finalArtistAvatarBucket,
 } from "./minio";
+export { processSingleTrackGroup } from "./serialize/trackGroup";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
-import { isTrackPlayableNested } from "./trackPlayability";
 
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
   id: number;
@@ -881,54 +872,6 @@ export const setDownloadTokenToNull = async ({
   });
 };
 
-export const processSingleTrackGroup = (
-  tg: TrackGroup & {
-    cover?: TrackGroupCover | null;
-    artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
-    merch?: (Merch & { images: MerchImage[] })[];
-    tracks?: (Track & { userTrackPurchases?: { userId: number }[] })[];
-    tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
-    downloadableContent?: {
-      downloadableContent: Record<string, unknown>;
-      downloadableContentId: string;
-    }[];
-    trackGroupPurchases?: { userId: number }[];
-  },
-  options?: { loggedInUserId?: number }
-) => ({
-  ...tg,
-  hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
-  tracks: tg.tracks?.map((track) => ({
-    ...track,
-    isPlayable: isTrackPlayableNested({
-      isPreview: track.isPreview,
-      trackGroupPurchases: tg.trackGroupPurchases,
-      trackPurchases: track.userTrackPurchases,
-      userId: options?.loggedInUserId,
-    }),
-  })),
-  artist: tg.artist
-    ? {
-        ...tg.artist,
-        avatar: tg.artist.avatar
-          ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
-          : undefined,
-      }
-    : undefined,
-  merch: tg.merch?.map(processSingleMerch),
-  tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
-  cover: addSizesToImage(finalCoversBucket, tg.cover),
-  downloadableContent: tg.downloadableContent?.map((dc) => ({
-    ...dc,
-    downloadableContent: {
-      ...dc.downloadableContent,
-      downloadUrl:
-        process.env.API_DOMAIN +
-        `/v1/downloadableContent/${dc.downloadableContentId}`,
-    },
-  })),
-});
-
 export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
   let orderByObj: Partial<{
     releaseDate: "desc";
@@ -949,6 +892,8 @@ export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
   }
   return orderByObj;
 };
+
+import { processSingleTrackGroup } from "./serialize/trackGroup";
 
 export default {
   cover: generateFullStaticImageUrl,

@@ -3,16 +3,7 @@ import {
   User,
   ArtistSubscriptionTier,
   Artist,
-  Post,
-  ArtistBackground,
-  ArtistAvatar,
-  TrackGroup,
-  TrackGroupCover,
-  Track,
   Prisma,
-  Merch,
-  MerchImage,
-  Image,
 } from "@mirlo/prisma/client";
 import {
   DefaultArgs,
@@ -27,23 +18,17 @@ import logger from "../logger";
 import { AppError } from "./error";
 import { getClient } from "./getClient";
 import { convertURLArrayToSizes } from "./images";
-import { deleteMerch, processSingleMerch } from "./merch";
+import { deleteMerch } from "./merch";
 import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
-  finalCoversBucket,
-  finalImageBucket,
   finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
-import { serializePost } from "./serialize/post";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
-import {
-  deleteTrackGroup,
-  processSingleTrackGroup,
-  trackGroupPublishedObject,
-} from "./trackGroup";
+import { deleteTrackGroup, trackGroupPublishedObject } from "./trackGroup";
+export { processSingleArtist } from "./serialize/artist";
 
 type Params = {
   id: string;
@@ -607,21 +592,6 @@ export const singleInclude = (queryOptions?: {
   } as any;
 };
 
-interface LocalArtist extends Artist {
-  posts?: Post[];
-  background?: ArtistBackground | null;
-  avatar?: ArtistAvatar | null;
-  trackGroups?: (TrackGroup & {
-    cover?: TrackGroupCover | null;
-    tracks?: Track[];
-  })[];
-  merch?: (Merch & { images?: MerchImage[] })[];
-  subscriptionTiers?: (ArtistSubscriptionTier & {
-    images?: { image: Image }[];
-    releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
-  })[];
-}
-
 export const addSizesToImage = (
   bucket: string,
   image?: { url: string[] } | null
@@ -632,47 +602,4 @@ export const addSizesToImage = (
         sizes: image && convertURLArrayToSizes(image?.url, bucket),
       }
     : null;
-};
-
-export const processSingleArtist = (
-  artist: LocalArtist,
-  userId?: number,
-  isUserSubscriber?: boolean
-) => {
-  return {
-    ...artist,
-    posts: artist?.posts?.map((p: Post) =>
-      serializePost(
-        p,
-        undefined,
-        undefined,
-        isUserSubscriber || artist.userId === userId
-      )
-    ),
-    merch: artist?.merch?.map(processSingleMerch),
-    background: addSizesToImage(
-      finalArtistBackgroundBucket,
-      artist?.background
-    ),
-    avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
-    trackGroups: artist?.trackGroups?.map((tg) =>
-      processSingleTrackGroup(tg, {
-        loggedInUserId: userId,
-      })
-    ),
-    subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
-      ...tier,
-      images: tier.images?.map((img) => ({
-        ...img,
-        image: addSizesToImage(finalImageBucket, img.image),
-      })),
-      releases: tier.releases?.map((rel) => ({
-        ...rel,
-        trackGroup: {
-          ...rel.trackGroup,
-          cover: addSizesToImage(finalCoversBucket, rel.trackGroup.cover),
-        },
-      })),
-    })),
-  };
 };

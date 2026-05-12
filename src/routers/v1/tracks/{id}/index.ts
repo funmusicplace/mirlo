@@ -3,8 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
-import processor from "../../../../utils/trackGroup";
-import { isTrackPlayableNested } from "../../../../utils/trackPlayability";
+import { processSingleTrack } from "../../../../utils/serialize/track";
 
 export default function () {
   const operations = {
@@ -58,20 +57,7 @@ export default function () {
       }
 
       res.json({
-        result: {
-          ...track,
-          isPlayable: isTrackPlayableNested({
-            isPreview: track.isPreview,
-            trackGroupPurchases: track.trackGroup.userTrackGroupPurchases,
-            trackPurchases: track.userTrackPurchases,
-            userId: loggedInUser?.id,
-          }),
-          trackGroup: track
-            ? processor.single(track.trackGroup, {
-                loggedInUserId: loggedInUser?.id,
-              })
-            : {},
-        },
+        result: processSingleTrack(track, { loggedInUserId: loggedInUser?.id }),
       });
     } catch (e) {
       next(e);

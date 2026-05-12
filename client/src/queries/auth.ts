@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { getInjectedAuthUser } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";
 import { MirloFetchError } from "./fetch/MirloFetchError";
@@ -108,26 +109,6 @@ const fetchProfile: QueryFunction<
       if (e instanceof MirloFetchError && e.status === 401) return null;
       else throw e;
     });
-};
-
-const getInjectedAuthUser = (): LoggedInUser | null | undefined => {
-  if (typeof document === "undefined") {
-    return undefined;
-  }
-
-  const script = document.getElementById("__MIRLO_AUTH__");
-  if (!script?.textContent) {
-    return undefined;
-  }
-
-  try {
-    const parsed = JSON.parse(script.textContent) as {
-      user?: LoggedInUser | null;
-    };
-    return parsed.user ?? null;
-  } catch {
-    return undefined;
-  }
 };
 
 /**

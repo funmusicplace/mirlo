@@ -6,10 +6,8 @@ import {
   findArtistIdForURLSlug,
   whereForAllArtistsThisLabelCanEdit,
 } from "../../../../utils/artist";
-import {
-  processSingleTrackGroup,
-  whereForPublishedTrackGroups,
-} from "../../../../utils/trackGroup";
+import { processSingleTrackGroup } from "../../../../utils/serialize/trackGroup";
+import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {

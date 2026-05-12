@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { processSingleTrackGroup } from "../../../../utils/trackGroup";
+import { NextFunction, Request, Response } from "express";
+
+import { processSingleTrackGroup } from "../../../../utils/serialize/trackGroup";
 
 type Params = {
   id: number;
