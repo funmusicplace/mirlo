@@ -1,6 +1,9 @@
 import styled from "@emotion/styled";
 
-const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
+const Pill = styled.span<{
+  isHoverable?: boolean;
+  variant?: "warning" | "tint";
+}>`
   display: inline-flex;
   background-color: var(--mi-lighten-x-background-color);
   border-radius: var(--mi-border-radius-x);
@@ -19,6 +22,10 @@ const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
   }
   ${(props) => {
     switch (props.variant) {
+      case "tint":
+        return `
+            background-color: var(--mi-button-tint-color);
+          `;
       case "warning":
         return `
             background: repeating-linear-gradient(45deg, 
@@ -38,7 +45,13 @@ const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
   }}
   ${(props) =>
     props.isHoverable
-      ? `
+      ? props.variant === "tint"
+        ? `
+  &:hover {
+    background-color: var(--mi-button-tint-x-color);
+  }
+  `
+        : `
   &:hover {
     background-color: var(--mi-darken-background-color);
   }
