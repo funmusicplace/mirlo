@@ -423,21 +423,27 @@ const handlePost: RouteHandler<PostParams> = async ({
       include: postIncludeForUser(userId),
     });
     if (fullPost) {
-      const isUserSubscriber = await checkIsUserSubscriber(
-        user,
-        fullPost.artistId
-      );
-      $("head").append(
-        `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify({
-          post: serializePost(
-            fullPost,
-            undefined,
-            undefined,
-            isUserSubscriber || fullPost.artist?.userId === userId
-          ),
-          injectedAt: new Date().toISOString(),
-        })}</script>`
-      );
+      try {
+        const isUserSubscriber = await checkIsUserSubscriber(
+          user,
+          fullPost.artistId
+        );
+        $("head").append(
+          `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify(
+            {
+              post: serializePost(
+                fullPost,
+                undefined,
+                undefined,
+                isUserSubscriber || fullPost.artist?.userId === userId
+              ),
+              injectedAt: new Date().toISOString(),
+            }
+          )}</script>`
+        );
+      } catch (err) {
+        console.error("Error appending __MIRLO_POST__:", err);
+      }
     }
   } else {
     // Index of all posts
@@ -761,12 +767,16 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   });
   if (!track) return;
 
-  $("head").append(
-    `<script id="__MIRLO_TRACK__" type="application/json">${JSON.stringify({
-      track: processSingleTrack(track),
-      injectedAt: new Date().toISOString(),
-    })}</script>`
-  );
+  try {
+    $("head").append(
+      `<script id="__MIRLO_TRACK__" type="application/json">${JSON.stringify({
+        track: processSingleTrack(track),
+        injectedAt: new Date().toISOString(),
+      })}</script>`
+    );
+  } catch (err) {
+    console.error("Error appending __MIRLO_TRACK__:", err);
+  }
 
   const artist = await prisma.artist.findFirst({
     where: { id: track.trackGroup.artistId },
@@ -810,14 +820,18 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   });
   if (!trackGroup) return;
 
-  $("head").append(
-    `<script id="__MIRLO_TRACKGROUP__" type="application/json">${JSON.stringify(
-      {
-        trackGroup: processSingleTrackGroup(trackGroup, {}),
-        injectedAt: new Date().toISOString(),
-      }
-    )}</script>`
-  );
+  try {
+    $("head").append(
+      `<script id="__MIRLO_TRACKGROUP__" type="application/json">${JSON.stringify(
+        {
+          trackGroup: processSingleTrackGroup(trackGroup, {}),
+          injectedAt: new Date().toISOString(),
+        }
+      )}</script>`
+    );
+  } catch (err) {
+    console.error("Error appending __MIRLO_TRACKGROUP__:", err);
+  }
 
   const artist = await prisma.artist.findFirst({
     where: { id: trackGroup.artistId },
@@ -927,6 +941,7 @@ const dispatchRoute = async (
       });
       break;
     case "widget-trackgroup":
+      console.log("its a tg widget");
       await handleTrackGroupWidget({
         ...context,
         params: { trackGroupId: routeParams.trackGroupId as number },
@@ -954,7 +969,12 @@ export const analyzePathAndGenerateHTML = async (
       });
       if (user) {
         $("head").append(
-          `<script id="__MIRLO_AUTH__" type="application/json">${JSON.stringify({ user: serializeUserProfile(user), injectedAt: new Date().toISOString() })}</script>`
+          `<script id="__MIRLO_AUTH__" type="application/json">${JSON.stringify(
+            {
+              user: serializeUserProfile(user),
+              injectedAt: new Date().toISOString(),
+            }
+          )}</script>`
         );
       }
     }

@@ -40,6 +40,7 @@ export const useTrackGroupWidgetData = () => {
             return;
           }
         }
+
         const results = await api.get<TrackGroup>(`trackGroups/${params.id}`);
         setTrackGroup(results.result);
         const response = await api.get<Artist>(
