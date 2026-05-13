@@ -6,8 +6,6 @@ import { useTranslation } from "react-i18next";
 import { BsShare } from "react-icons/bs";
 import { getArtistUrl } from "utils/artist";
 
-const SHOW_EMBED_SECTION = false;
-
 const ArtistShare: React.FC<{
   artist: Artist;
   buttonClassName?: string;
@@ -19,13 +17,33 @@ const ArtistShare: React.FC<{
 
   const artistUrl = `${import.meta.env.VITE_CLIENT_DOMAIN}${getArtistUrl(artist)}`;
 
+  const handleShareClick = async () => {
+    const shareData = { title: artist.name, url: artistUrl };
+    const isTouchPrimary =
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches;
+    const canNativeShare =
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      (typeof navigator.canShare !== "function" ||
+        navigator.canShare(shareData));
+
+    if (isTouchPrimary && canNativeShare) {
+      try {
+        await navigator.share(shareData);
+      } catch {}
+      return;
+    }
+    setIsOpen(true);
+  };
+
   return (
     <>
       <ArtistButton
         onlyIcon
         aria-label={t("share") ?? ""}
         title={t("share") ?? ""}
-        onClick={() => setIsOpen(true)}
+        onClick={handleShareClick}
         startIcon={<BsShare />}
         className={buttonClassName}
       />
@@ -35,10 +53,11 @@ const ArtistShare: React.FC<{
         open={isOpen}
         onClose={() => setIsOpen(false)}
       >
-        <ShareToSocials url={artistUrl} title={artist.name} />
-        {SHOW_EMBED_SECTION && (
-          <div>{/* embed iframe section, hidden for now */}</div>
-        )}
+        <ShareToSocials
+          url={artistUrl}
+          title={artist.name}
+          socials={["mastodon", "bluesky", "email"]}
+        />
       </Modal>
     </>
   );

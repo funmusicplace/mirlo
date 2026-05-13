@@ -1230,7 +1230,8 @@
     "copied": "Copied!",
     "copyLink": "Copy link",
     "share": "Share",
-    "shareArtist": "Share {{artistName}}"
+    "shareArtist": "Share {{artistName}}'s page",
+    "urlToShare": "URL to share"
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",
