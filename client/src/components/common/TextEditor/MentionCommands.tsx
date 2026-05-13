@@ -196,7 +196,7 @@ const MentionCommands: React.FC<{
       Math.max(0, cursorPos - 100),
       cursorPos
     );
-    const match = textBefore.match(/@[\w.-]*$/);
+    const match = textBefore.match(/(?<!\w)@[\w.-]*$/);
     if (match) {
       const query = match[0];
       anchorRef.current = cursorPos - query.length;

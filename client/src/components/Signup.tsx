@@ -1,21 +1,23 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import { querySetting } from "queries/settings";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
-import api, { APIResponseError } from "services/api";
-import Button from "./common/Button";
-import { InputEl } from "./common/Input";
-import { useSnackbar } from "state/SnackbarContext";
-import Box from "./common/Box";
 import { Link, useSearchParams } from "react-router-dom";
-import FormComponent from "./common/FormComponent";
-import Checkbox from "./common/FormCheckbox";
-import styled from "@emotion/styled";
-import WidthContainer from "./common/WidthContainer";
+import api, { APIResponseError } from "services/api";
 import useErrorHandler from "services/useErrorHandler";
-import { useQuery } from "@tanstack/react-query";
-import { querySetting } from "queries/settings";
-import Lottie from "lottie-react";
+import { useSnackbar } from "state/SnackbarContext";
+
+import Box from "./common/Box";
+import Button from "./common/Button";
+import Checkbox from "./common/FormCheckbox";
+import FormComponent from "./common/FormComponent";
+import { InputEl } from "./common/Input";
+import WidthContainer from "./common/WidthContainer";
+
+const Lottie = React.lazy(() => import("lottie-react"));
 
 import checkmark from "../animations/lotties/checkmark.json";
 
@@ -273,13 +275,15 @@ function Signup() {
           gap: 1rem;
         `}
       >
-        <Lottie
-          animationData={checkmark}
-          loop={false}
-          width={100}
-          style={{ width: 100, height: 100 }}
-          height={100}
-        />
+        <React.Suspense fallback={null}>
+          <Lottie
+            animationData={checkmark}
+            loop={false}
+            width={100}
+            style={{ width: 100, height: 100 }}
+            height={100}
+          />
+        </React.Suspense>
         <p>{t("hasRegistered")}</p>
       </Box>
     );

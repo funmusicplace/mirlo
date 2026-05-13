@@ -208,7 +208,7 @@ export default async function sendPostNotification(job: {
           },
         },
         {
-          jobId: `announce-post-published:${postId}:${notification.id}`,
+          jobId: `announce-post-published-${postId}-${notification.userId}`,
         }
       );
     }

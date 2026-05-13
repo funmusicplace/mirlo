@@ -5,10 +5,15 @@
 
 import prisma from "@mirlo/prisma";
 
-export async function fetchArtistMetadata(artistSlug: string) {
+import { singleInclude } from "../utils/artist";
+
+export async function fetchArtistMetadata(artistSlug: string): Promise<any> {
   return await prisma.artist.findFirst({
     where: { urlSlug: artistSlug },
-    include: { avatar: true },
+    // singleInclude is deeply nested enough to hit TypeScript's recursive type
+    // depth limit ("Excessive stack depth comparing types"). The `as any` cast
+    // is the standard workaround — it doesn't affect runtime behaviour.
+    include: singleInclude({ includeDefaultTier: true }) as any,
   });
 }
 

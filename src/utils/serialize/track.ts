@@ -14,7 +14,7 @@ import { processSingleTrackGroup } from "./trackGroup";
 
 export const processSingleTrack = (
   track: Track & {
-    trackGroup: TrackGroup & {
+    trackGroup?: TrackGroup & {
       artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
       cover?: TrackGroupCover | null;
       userTrackGroupPurchases?: { userId: number }[];
@@ -28,11 +28,13 @@ export const processSingleTrack = (
   ...track,
   isPlayable: isTrackPlayableNested({
     isPreview: track.isPreview,
-    trackGroupPurchases: track.trackGroup.userTrackGroupPurchases,
+    trackGroupPurchases: track.trackGroup?.userTrackGroupPurchases,
     trackPurchases: track.userTrackPurchases,
     userId: options?.loggedInUserId,
   }),
-  trackGroup: processSingleTrackGroup(track.trackGroup, {
-    loggedInUserId: options?.loggedInUserId,
-  }),
+  trackGroup: track.trackGroup
+    ? processSingleTrackGroup(track.trackGroup, {
+        loggedInUserId: options?.loggedInUserId,
+      })
+    : undefined,
 });

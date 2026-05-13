@@ -1,11 +1,11 @@
 /// <reference types="vitest" />
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import viteTsconfigPaths from "vite-tsconfig-paths";
-import legacy from "@vitejs/plugin-legacy";
 import { optimizeLodashImports } from "@optimize-lodash/rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
+import legacy from "@vitejs/plugin-legacy";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import viteTsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   base: "/",
@@ -49,14 +49,21 @@ export default defineConfig({
             "react",
             "react-router-dom",
             "react-dom",
+            "@tanstack/react-query",
             "@tanstack/query-core",
+            "@emotion/react",
+            "@emotion/css",
+            "@emotion/styled",
           ],
+          i18n: ["i18next", "react-i18next", "@transifex/i18next"],
           editor: [
             "remirror",
             "@remirror/react",
             "@remirror/core",
             "@remirror/core-utils",
           ],
+          markdown: ["react-markdown", "remark-breaks", "remark-gfm"],
+          player: ["hls.js", "@mirlo/react-hls-player"],
           charts: ["recharts"],
         },
       },

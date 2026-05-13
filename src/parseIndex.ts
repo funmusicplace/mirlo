@@ -7,12 +7,31 @@ import * as cheerio from "cheerio";
 import { Request } from "express";
 
 import {
+  registerArtistHydration,
+  registerPostHydration,
+  registerTrackGroupHydration,
+  registerTrackHydration,
+  appendHydrationScript,
+  HydrationData,
+} from "./parseIndex/hydrations";
+import {
   fetchArtistMetadata,
   fetchAlbumMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
 } from "./parseIndex/metadata";
 import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
+import {
+  buildMusicGroupSchema,
+  buildArticleSchema,
+  buildMusicRecordingSchema,
+  buildMusicAlbumSchema,
+} from "./parseIndex/schemas";
+import {
+  getPostWidget,
+  getTrackGroupWidget,
+  getTrackWidget,
+} from "./parseIndex/widgetUrls";
 import { checkIsUserSubscriber } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
@@ -24,9 +43,7 @@ import {
   finalPostImageBucket,
 } from "./utils/minio";
 import { processSingleArtist } from "./utils/serialize/artist";
-import { postIncludeForUser, serializePost } from "./utils/serialize/post";
-import { processSingleTrack } from "./utils/serialize/track";
-import { processSingleTrackGroup } from "./utils/serialize/trackGroup";
+import { postIncludeForUser } from "./utils/serialize/post";
 import {
   USER_PROFILE_SELECT,
   serializeUserProfile,
@@ -42,6 +59,7 @@ type RouteContext<T extends RouteParams = RouteParams> = {
   avatarUrl?: string;
   params: T;
   req?: Request;
+  hydrations: HydrationData[];
 };
 
 type RouteHandler<T extends RouteParams = RouteParams> = (
@@ -54,7 +72,7 @@ type PlayerEmbed = {
   height: number;
 };
 
-type PageMetadata = {
+export type PageMetadata = {
   title: string;
   description: string;
   url: string;
@@ -83,147 +101,6 @@ const determineType = (metadata: PageMetadata) => {
   }
   return "article";
 };
-
-// Helper function to safely escape strings for JSON
-const escapeJsonString = (str: string): string => {
-  return str
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, "\\n")
-    .replace(/\r/g, "\\r")
-    .replace(/\t/g, "\\t");
-};
-
-// Build MusicAlbum schema for albums
-const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
-  const {
-    title,
-    description,
-    url,
-    imageUrl,
-    artistName,
-    artistUrl,
-    releaseDate,
-    trackCount = 0,
-    tracks = [],
-  } = metadata;
-
-  const trackListItems = tracks
-    .map(
-      (track, index) => `{
-      "@type": "MusicRecording",
-      "position": ${index + 1},
-      "name": "${escapeJsonString(track.title)}",
-      "url": "${track.url}"
-      ${track.duration ? `,"duration": "PT${track.duration}S"` : ""}
-    }`
-    )
-    .join(",");
-
-  return `{
-    "@context": "https://schema.org",
-    "@type": "MusicAlbum",
-    "name": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${url}",
-    "image": "${imageUrl || ""}",
-    "byArtist": {
-      "@type": "MusicGroup",
-      "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
-    },
-    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}",
-    "numberOfTracks": ${trackCount},
-    "track": [${trackListItems}]
-  }`;
-};
-
-// Build MusicRecording schema for individual tracks
-const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
-  const {
-    title,
-    description,
-    url,
-    imageUrl,
-    artistName,
-    artistUrl,
-    releaseDate,
-    duration,
-  } = metadata;
-
-  const durationString = duration ? `"duration": "PT${duration}S",` : "";
-
-  return `{
-    "@context": "https://schema.org",
-    "@type": "MusicRecording",
-    "name": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${url}",
-    "image": "${imageUrl || ""}",
-    ${durationString}
-    "byArtist": {
-      "@type": "MusicGroup",
-      "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
-    },
-    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
-  }`;
-};
-
-// Build MusicGroup schema for artist profiles
-const buildMusicGroupSchema = (metadata: PageMetadata): string => {
-  const { title, description, url, imageUrl, artistUrl } = metadata;
-
-  return `{
-    "@context": "https://schema.org",
-    "@type": "MusicGroup",
-    "name": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${artistUrl || url}",
-    "image": "${imageUrl || ""}"
-  }`;
-};
-
-// Build BlogPosting schema for posts and general articles
-const buildArticleSchema = (metadata: PageMetadata): string => {
-  const { title, description, url, imageUrl, artistName, releaseDate } =
-    metadata;
-
-  return `{
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${url}",
-    "image": "${imageUrl || ""}",
-    "author": {
-      "@type": "Person",
-      "name": "${escapeJsonString(artistName || "Mirlo Artist")}"
-    },
-    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
-  }`;
-};
-
-export const getTrackGroupWidget = (
-  client: Client,
-  trackGroupId: number,
-  variant?: string
-) => {
-  const base = `${client.applicationUrl}/widget/trackGroup/${trackGroupId}`;
-  return variant ? `${base}?variant=${variant}` : base;
-};
-
-export const getTrackWidget = (
-  client: Client,
-  trackId: number,
-  variant?: string
-) => {
-  const base = `${client.applicationUrl}/widget/track/${trackId}`;
-  return variant ? `${base}?variant=${variant}` : base;
-};
-
-export const getPostWidget = (client: Client, postId: number) =>
-  `${client.applicationUrl}/widget/post/${postId}`;
 
 const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
   const {
@@ -310,6 +187,7 @@ const handleArtistProfile: RouteHandler<ArtistParams> = async ({
   client,
   avatarUrl,
   params: { artistSlug },
+  hydrations,
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
   if (!artist) return;
@@ -322,6 +200,8 @@ const handleArtistProfile: RouteHandler<ArtistParams> = async ({
     imageUrl: avatarUrl,
     artistUrl: artistUrl,
   });
+
+  registerArtistHydration(hydrations, artist);
 
   buildOpenGraphTags($, {
     title: artist.name ?? "A Mirlo Artist",
@@ -339,10 +219,13 @@ const handlePost: RouteHandler<PostParams> = async ({
   client,
   avatarUrl,
   req,
+  hydrations,
   params: { artistSlug, postId, postSlug },
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
   if (!artist) return;
+
+  registerArtistHydration(hydrations, artist);
 
   const artistName = artist.name ?? "A Mirlo Artist";
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
@@ -428,19 +311,7 @@ const handlePost: RouteHandler<PostParams> = async ({
           user,
           fullPost.artistId
         );
-        $("head").append(
-          `<script id="__MIRLO_POST__" type="application/json">${JSON.stringify(
-            {
-              post: serializePost(
-                fullPost,
-                undefined,
-                undefined,
-                isUserSubscriber || fullPost.artist?.userId === userId
-              ),
-              injectedAt: new Date().toISOString(),
-            }
-          )}</script>`
-        );
+        registerPostHydration(hydrations, fullPost);
       } catch (err) {
         console.error("Error appending __MIRLO_POST__:", err);
       }
@@ -463,9 +334,12 @@ const handleMerch: RouteHandler<MerchParams> = async ({
   client,
   avatarUrl,
   params: { artistSlug, merchId },
+  hydrations,
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
   if (!artist) return;
+
+  registerArtistHydration(hydrations, artist);
 
   const artistName = artist.name ?? "A Mirlo Artist";
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
@@ -527,8 +401,8 @@ type AlbumParams = {
 const handleAlbum: RouteHandler<AlbumParams> = async ({
   $,
   client,
-  avatarUrl,
   params: { artistSlug, albumSlug, trackId },
+  hydrations,
 }) => {
   if (!albumSlug) {
     // /artist/releases index - handled by artist profile
@@ -538,10 +412,18 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
   const tg = await fetchAlbumMetadata(artistSlug, albumSlug);
   if (!tg) return;
 
+  const artist = await fetchArtistMetadata(artistSlug);
+  if (!artist) return;
+
+  registerArtistHydration(hydrations, artist);
+  registerTrackGroupHydration(hydrations, tg);
+
   // Check if it's a specific track
   if (trackId) {
     const track = tg.tracks.find((t) => t.id === trackId);
     if (!track) return;
+
+    registerTrackHydration(hydrations, track);
 
     const coverString = tg.cover?.url.find((u) => u.includes("x600"));
     const trackUrl = `${client.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`;
@@ -645,9 +527,12 @@ const handleSupport: RouteHandler<SupportParams> = async ({
   client,
   avatarUrl,
   params: { artistSlug },
+  hydrations,
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
   if (!artist) return;
+
+  registerArtistHydration(hydrations, artist);
 
   const artistName = artist.name ?? "A Mirlo Artist";
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
@@ -667,9 +552,12 @@ const handleArtistReleases: RouteHandler<ArtistReleasesParams> = async ({
   client,
   avatarUrl,
   params: { artistSlug },
+  hydrations,
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
   if (!artist) return;
+
+  registerArtistHydration(hydrations, artist);
 
   const artistName = artist.name ?? "A Mirlo Artist";
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
@@ -751,6 +639,7 @@ type TrackWidgetParams = { trackId: number };
 const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   $,
   params: { trackId },
+  hydrations,
 }) => {
   const track = await prisma.track.findFirst({
     where: { id: trackId },
@@ -767,17 +656,6 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   });
   if (!track) return;
 
-  try {
-    $("head").append(
-      `<script id="__MIRLO_TRACK__" type="application/json">${JSON.stringify({
-        track: processSingleTrack(track),
-        injectedAt: new Date().toISOString(),
-      })}</script>`
-    );
-  } catch (err) {
-    console.error("Error appending __MIRLO_TRACK__:", err);
-  }
-
   const artist = await prisma.artist.findFirst({
     where: { id: track.trackGroup.artistId },
     include: {
@@ -785,13 +663,11 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
       background: { where: { deletedAt: null } },
     },
   });
+
+  registerTrackHydration(hydrations, track);
+
   if (artist) {
-    $("head").append(
-      `<script id="__MIRLO_ARTIST__" type="application/json">${JSON.stringify({
-        artist: processSingleArtist(artist),
-        injectedAt: new Date().toISOString(),
-      })}</script>`
-    );
+    registerArtistHydration(hydrations, artist);
   }
 };
 
@@ -799,6 +675,7 @@ type TrackGroupWidgetParams = { trackGroupId: number };
 const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   $,
   params: { trackGroupId },
+  hydrations,
 }) => {
   const trackGroup = await prisma.trackGroup.findFirst({
     where: { id: trackGroupId },
@@ -820,19 +697,6 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   });
   if (!trackGroup) return;
 
-  try {
-    $("head").append(
-      `<script id="__MIRLO_TRACKGROUP__" type="application/json">${JSON.stringify(
-        {
-          trackGroup: processSingleTrackGroup(trackGroup, {}),
-          injectedAt: new Date().toISOString(),
-        }
-      )}</script>`
-    );
-  } catch (err) {
-    console.error("Error appending __MIRLO_TRACKGROUP__:", err);
-  }
-
   const artist = await prisma.artist.findFirst({
     where: { id: trackGroup.artistId },
     include: {
@@ -840,35 +704,36 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
       background: { where: { deletedAt: null } },
     },
   });
+  registerTrackGroupHydration(hydrations, trackGroup);
+
   if (artist) {
-    $("head").append(
-      `<script id="__MIRLO_ARTIST__" type="application/json">${JSON.stringify({
-        artist: processSingleArtist(artist),
-        injectedAt: new Date().toISOString(),
-      })}</script>`
-    );
+    appendHydrationScript($, "__MIRLO_ARTIST__", artist.id, {
+      artist: processSingleArtist(artist),
+    });
   }
 };
 
 const dispatchRoute = async (
   routeParams: Record<string, any>,
-  context: Omit<RouteContext, "params">
+  context: Omit<RouteContext, "params" | "hydrations">
 ): Promise<void> => {
+  const hydrations: HydrationData[] = [];
+  const contextWithHydrations = { ...context, hydrations };
   const routeType = routeParams.type as string;
 
   switch (routeType) {
     case "releases":
-      await handleReleasesPage(context as RouteContext);
+      await handleReleasesPage(contextWithHydrations as RouteContext);
       break;
     case "auth":
       await handleAuthPage({
-        ...context,
+        ...contextWithHydrations,
         params: { pageType: routeParams.pageType as AuthPageType },
       });
       break;
     case "track":
       await handleAlbum({
-        ...context,
+        ...contextWithHydrations,
         params: {
           artistSlug: routeParams.artistSlug,
           albumSlug: routeParams.albumSlug,
@@ -878,7 +743,7 @@ const dispatchRoute = async (
       break;
     case "album":
       await handleAlbum({
-        ...context,
+        ...contextWithHydrations,
         params: {
           artistSlug: routeParams.artistSlug,
           albumSlug: routeParams.albumSlug,
@@ -887,7 +752,7 @@ const dispatchRoute = async (
       break;
     case "post":
       await handlePost({
-        ...context,
+        ...contextWithHydrations,
         params: {
           artistSlug: routeParams.artistSlug,
           postId: routeParams.postId,
@@ -897,13 +762,13 @@ const dispatchRoute = async (
       break;
     case "posts-index":
       await handlePost({
-        ...context,
+        ...contextWithHydrations,
         params: { artistSlug: routeParams.artistSlug },
       });
       break;
     case "merch":
       await handleMerch({
-        ...context,
+        ...contextWithHydrations,
         params: {
           artistSlug: routeParams.artistSlug,
           merchId: routeParams.merchId,
@@ -912,37 +777,37 @@ const dispatchRoute = async (
       break;
     case "merch-index":
       await handleMerch({
-        ...context,
+        ...contextWithHydrations,
         params: { artistSlug: routeParams.artistSlug },
       });
       break;
     case "support":
       await handleSupport({
-        ...context,
+        ...contextWithHydrations,
         params: { artistSlug: routeParams.artistSlug },
       });
       break;
     case "artist-releases":
       await handleArtistReleases({
-        ...context,
+        ...contextWithHydrations,
         params: { artistSlug: routeParams.artistSlug },
       });
       break;
     case "artist":
       await handleArtistProfile({
-        ...context,
+        ...contextWithHydrations,
         params: { artistSlug: routeParams.artistSlug },
       });
       break;
     case "widget-track":
       await handleTrackWidget({
-        ...context,
+        ...contextWithHydrations,
         params: { trackId: routeParams.trackId as number },
       });
       break;
     case "widget-trackgroup":
       await handleTrackGroupWidget({
-        ...context,
+        ...contextWithHydrations,
         params: { trackGroupId: routeParams.trackGroupId as number },
       });
       break;
@@ -950,6 +815,17 @@ const dispatchRoute = async (
       // Unknown route type
       break;
   }
+
+  // Apply all registered hydrations
+  hydrations.forEach((hydration) => {
+    appendHydrationScript(
+      contextWithHydrations.$,
+      hydration.scriptId,
+      hydration.objectId,
+      hydration.data,
+      hydration.artistId
+    );
+  });
 };
 
 export const analyzePathAndGenerateHTML = async (
@@ -967,14 +843,9 @@ export const analyzePathAndGenerateHTML = async (
         select: USER_PROFILE_SELECT,
       });
       if (user) {
-        $("head").append(
-          `<script id="__MIRLO_AUTH__" type="application/json">${JSON.stringify(
-            {
-              user: serializeUserProfile(user),
-              injectedAt: new Date().toISOString(),
-            }
-          )}</script>`
-        );
+        appendHydrationScript($, "__MIRLO_AUTH__", user.id, {
+          user: serializeUserProfile(user),
+        });
       }
     }
 
@@ -1003,7 +874,7 @@ export const analyzePathAndGenerateHTML = async (
       await dispatchRoute(routeParams, { $, client, avatarUrl, req });
     } else {
       // No matching route - use default
-      await handleDefault({ $, client, params: {} });
+      await handleDefault({ $, client, hydrations: [], params: {} });
     }
   } catch (error) {
     console.error("Error in analyzePathAndGenerateHTML:", error);

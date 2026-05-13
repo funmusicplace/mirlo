@@ -171,7 +171,7 @@ describe("send-post-notification", () => {
     const [, , jobOptions] = mailQueueStub.firstCall.args;
     assert.ok(
       typeof jobOptions?.jobId === "string" &&
-        jobOptions.jobId.startsWith(`announce-post-published:${post.id}:`),
+        jobOptions.jobId.startsWith(`announce-post-published-${post.id}-`),
       `jobId should be stable and scoped to postId, got: ${jobOptions?.jobId}`
     );
   });

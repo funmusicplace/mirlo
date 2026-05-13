@@ -28,11 +28,12 @@ describe("auth profile injection", () => {
       const script = doc.getElementById("__MIRLO_AUTH__");
       expect(script).to.exist;
       expect(script!.getAttribute("type")).to.eq("application/json");
+      expect(script!.getAttribute("data-object-id")).to.exist;
+      expect(script!.getAttribute("data-injected-at")).to.exist;
 
       const data = JSON.parse(script!.textContent!);
       expect(data).to.have.property("user");
       expect(data.user).to.have.property("email", email);
-      expect(data).to.have.property("injectedAt");
     });
   });
 

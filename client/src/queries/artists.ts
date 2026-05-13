@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { getInjectedArtist } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";
 import {
@@ -39,6 +40,8 @@ export function queryArtist(opts: {
       },
     ],
     queryFn: fetchArtist,
+    initialData: () =>
+      opts.artistSlug ? getInjectedArtist(opts.artistSlug) : undefined,
     enabled: !!opts.artistSlug,
   });
 }
