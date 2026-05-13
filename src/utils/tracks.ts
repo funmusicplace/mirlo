@@ -1,11 +1,13 @@
-import prisma from "@mirlo/prisma";
-import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
-import ffmpeg from "fluent-ffmpeg";
-import logger from "../logger";
 import { existsSync } from "fs";
 import { Readable } from "stream";
+
+import prisma from "@mirlo/prisma";
 import { Artist, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
+import ffmpeg from "fluent-ffmpeg";
+
 import { Format } from "../jobs/generate-album";
+import logger from "../logger";
+import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
 
 export const deleteTrack = async (trackId: number) => {
   await prisma.track.delete({
@@ -203,10 +205,7 @@ export const convertAudioToFormat = (
 
   const processor = createFfmpegCommand(stream)
     .toFormat(format)
-    // FIXME why don't these work?
-    // .outputOptions("-map_metadata:s:a", "0:s:a")
-    // .outputOption("-map_metadata:s:a 0:s:a")
-    // .outputOptions("-map_metadata 0:s")
+    .outputOptions("-map_metadata", "-1")
     .outputOptions("-charset", "UTF-8")
     .outputOptions("-id3v2_version", "3")
     .on("stderr", function (stderrLine) {
