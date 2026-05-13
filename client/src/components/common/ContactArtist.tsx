@@ -1,23 +1,26 @@
+import { css } from "@emotion/css";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaEnvelope } from "react-icons/fa";
-import { css } from "@emotion/css";
 import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import useErrorHandler from "services/useErrorHandler";
+
 import Button from "./Button";
 import FormComponent from "./FormComponent";
-import TextArea from "./TextArea";
 import Modal from "./Modal";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import TextArea from "./TextArea";
 
 type FormData = { message: string };
 
 const ContactArtist: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "allowDirectMessages">;
-}> = ({ artist }) => {
+  className?: string;
+  onlyIcon?: boolean;
+}> = ({ artist, className, onlyIcon }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
@@ -27,7 +30,11 @@ const ContactArtist: React.FC<{
 
   const methods = useForm<FormData>({ defaultValues: { message: "" } });
 
-  if (!user || artist.allowDirectMessages === false || artist.userId === user.id) {
+  if (
+    !user ||
+    artist.allowDirectMessages === false ||
+    artist.userId === user.id
+  ) {
     return null;
   }
 
@@ -48,14 +55,12 @@ const ContactArtist: React.FC<{
   return (
     <>
       <ArtistButton
-        size="compact"
-        variant="outlined"
         type="button"
         onClick={() => setIsOpen(true)}
         startIcon={<FaEnvelope />}
-        className={css`
-          font-size: 0.75em !important;
-        `}
+        onlyIcon={onlyIcon}
+        aria-label={onlyIcon ? t("contact") : undefined}
+        className={className}
       >
         {t("contact")}
       </ArtistButton>

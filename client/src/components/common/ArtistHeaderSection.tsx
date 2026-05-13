@@ -15,7 +15,6 @@ import { useSnackbar } from "state/SnackbarContext";
 
 import { bp } from "../../constants";
 
-import ContactArtist from "./ContactArtist";
 import FollowArtist from "./FollowArtist";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
@@ -226,12 +225,7 @@ const ArtistHeaderSection: React.FC<{
                     )}
                   </div>
                   <div className="flex flex-row items-center gap-1 shrink-0 text-right break-normal!">
-                    {!isManage && (
-                      <>
-                        <FollowArtist artistId={artist.id} />
-                        <ContactArtist artist={artist} />
-                      </>
-                    )}
+                    {!isManage && <FollowArtist artistId={artist.id} />}
                   </div>
                 </ArtistTitleText>
               </SpaceBetweenDiv>

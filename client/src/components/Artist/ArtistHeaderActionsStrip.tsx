@@ -1,3 +1,4 @@
+import ContactArtist from "components/common/ContactArtist";
 import { transformFromLinks } from "components/ManageArtist/ArtistFormLinks";
 import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import { UpdateArtistBody } from "queries";
@@ -42,6 +43,9 @@ const ArtistHeaderActionsStrip: React.FC<{
         >
           {t("links")}
         </ArtistButtonLink>
+      )}
+      {!isManage && (
+        <ContactArtist artist={artist} onlyIcon className={smallButtonClass} />
       )}
       <ArtistButtonAnchor
         target="_blank"
