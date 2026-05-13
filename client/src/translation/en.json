@@ -1228,7 +1228,9 @@
   "share": {
     "linkCopiedToClipboard": "Link copied to clipboard!",
     "copied": "Copied!",
-    "copyLink": "Copy link"
+    "copyLink": "Copy link",
+    "share": "Share",
+    "shareArtist": "Share {{artistName}}"
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",

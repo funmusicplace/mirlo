@@ -1,12 +1,12 @@
 import ContactArtist from "components/common/ContactArtist";
 import { transformFromLinks } from "components/ManageArtist/ArtistFormLinks";
-import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import { UpdateArtistBody } from "queries";
 import { useTranslation } from "react-i18next";
 import { FaRss } from "react-icons/fa";
 
 import { ArtistButtonAnchor, ArtistButtonLink } from "./ArtistButtons";
 import ArtistHeaderDescription from "./ArtistHeaderDescription";
+import ArtistShare from "./ArtistShare";
 import ArtistTourDates from "./ArtistTourDates";
 
 const smallButtonClass = "h-6! w-6! [&_svg]:text-[0.8rem]";
@@ -55,9 +55,7 @@ const ArtistHeaderActionsStrip: React.FC<{
         className={smallButtonClass}
         startIcon={<FaRss />}
       />
-      {artist.isLabelProfile && (
-        <LabelEmbed label={artist} buttonClassName={smallButtonClass} />
-      )}
+      <ArtistShare artist={artist} buttonClassName={smallButtonClass} />
     </div>
   );
 };
