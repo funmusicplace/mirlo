@@ -221,7 +221,9 @@ const ManageArtistPosts: React.FC<{}> = () => {
                     })}
                 </p>
               </SpaceBetweenDiv>
-              <MarkdownWrapper>{parse(p.content ?? "")}</MarkdownWrapper>
+              <MarkdownWrapper className="line-clamp-2">
+                {parse(p.content ?? "")}
+              </MarkdownWrapper>
             </Box>
           ))}
         </ol>
