@@ -38,7 +38,7 @@ const ArtistHeaderActionsStrip: React.FC<{
         <ArtistButtonLink
           to="links"
           size="compact"
-          className={`${tabButtonClass} ${hasHiddenLink ? "" : "md:hidden"}`}
+          className={`${tabButtonClass} ${hasHiddenLink ? "" : "md:hidden!"}`}
         >
           {t("links")}
         </ArtistButtonLink>
