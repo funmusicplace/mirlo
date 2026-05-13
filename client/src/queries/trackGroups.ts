@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { getInjectedTrackGroup } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";
 import {
@@ -118,6 +119,7 @@ export function queryTrackGroup(opts: {
       },
     ],
     queryFn: fetchTrackGroup,
+    initialData: () => getInjectedTrackGroup(opts.albumSlug || ""),
     enabled: !!opts.albumSlug,
   });
 }

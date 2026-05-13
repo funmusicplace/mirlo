@@ -5,10 +5,12 @@
 
 import prisma from "@mirlo/prisma";
 
+import { singleInclude } from "../utils/artist";
+
 export async function fetchArtistMetadata(artistSlug: string) {
   return await prisma.artist.findFirst({
     where: { urlSlug: artistSlug },
-    include: { avatar: true },
+    include: singleInclude({ includeDefaultTier: true }) as any,
   });
 }
 

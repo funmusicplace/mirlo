@@ -175,15 +175,22 @@ function TrackGroup() {
   });
 
   const { artistId, trackGroupId } = useParams();
-  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+  const { data: artist, isPending: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
   const { user } = useAuthContext();
 
-  const { data: trackGroup, isLoading: isLoadingTrackGroup } = useQuery(
+  const { data: trackGroup, isPending: isLoadingTrackGroup } = useQuery(
     queryTrackGroup({ albumSlug: trackGroupId ?? "", artistId: artistId ?? "" })
   );
+
+  console.log("loading state", {
+    isLoadingArtist,
+    isLoadingTrackGroup,
+    artist,
+    trackGroup,
+  });
 
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
