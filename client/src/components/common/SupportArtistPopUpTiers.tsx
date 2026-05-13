@@ -3,17 +3,16 @@ import { forwardRef } from "react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { FaCheck } from "react-icons/fa";
 
 import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
 
 const Label = styled.label`
-  display: block;
   display: flex;
   justify-content: space-between;
   padding: 1rem;
-  border: 1px solid var(--mi-darken-x-background-color);
-  margin-bottom: 0.1rem;
+  border-radius: 8px;
 
   transition: 0.5s background-color;
   cursor: pointer;
@@ -36,16 +35,17 @@ const ListItem = styled.li`
   border-radius: 8px;
   margin-bottom: 0.5rem;
   border: 1px solid var(--mi-button-color);
+  transition:
+    0.5s background-color,
+    0.5s border-color;
 
-  input[type="radio"] {
-    display: none;
-  }
+  &:has(input[type="radio"]:checked) {
+    background-color: var(--mi-button-color);
+    border-color: var(--mi-button-color);
 
-  input[type="radio"]:checked + label {
-    background-color: var(--mi-background-color);
-    color: var(--mi-text-color);
-    &:after {
-      content: "✔";
+    label {
+      color: var(--mi-button-text-color);
+      font-weight: 600;
     }
   }
 `;
@@ -74,7 +74,8 @@ const SupportArtistPopUpTiers = forwardRef<
           <ListItem key={tier.id}>
             <InputEl
               type="radio"
-              id={`${tier.id}`}
+              id={`input-tier-${tier.id}`}
+              className="sr-only"
               checked={currentValue?.id === tier.id}
               ref={ref}
               onChange={() => {
@@ -83,7 +84,7 @@ const SupportArtistPopUpTiers = forwardRef<
               {...props}
             />
             <Label
-              htmlFor={"checkbox-" + tier.id}
+              htmlFor={`input-tier-${tier.id}`}
               onClick={() => {
                 methods.setValue("tier", tier);
               }}
@@ -110,6 +111,9 @@ const SupportArtistPopUpTiers = forwardRef<
                 </strong>
                 <p>{tier.description}</p>
               </div>
+              {currentValue?.id === tier.id && (
+                <FaCheck aria-hidden className="self-center shrink-0 ml-2" />
+              )}
             </Label>
           </ListItem>
         );
