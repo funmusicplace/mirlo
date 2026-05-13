@@ -523,4 +523,186 @@ describe("analyzePathAndGenerateHTML", () => {
       assert(styleTag?.includes("--mi-instance-button-text-color"));
     });
   });
+
+  describe("hydration script injection", () => {
+    it("should inject __MIRLO_ARTIST__ script on artist profile page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist", $);
+
+      const script = $("#__MIRLO_ARTIST__");
+      assert(script.length === 1, "expected __MIRLO_ARTIST__ script to exist");
+      assert.equal(script.attr("type"), "application/json");
+      assert.equal(script.attr("data-object-id"), "test-artist");
+      assert(
+        script.attr("data-injected-at"),
+        "expected data-injected-at attribute"
+      );
+
+      const data = JSON.parse(script.html()!);
+      assert(data.artist, "expected artist key in payload");
+      assert.equal(data.artist.urlSlug, "test-artist");
+      assert.equal(data.artist.name, "My Artist");
+    });
+
+    it("should inject __MIRLO_TRACKGROUP__ script on album page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      await createTrackGroup(artist.id, {
+        title: "My Album",
+        urlSlug: "test-album",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/release/test-album", $);
+
+      const script = $("#__MIRLO_TRACKGROUP__");
+      assert(
+        script.length === 1,
+        "expected __MIRLO_TRACKGROUP__ script to exist"
+      );
+      assert.equal(script.attr("type"), "application/json");
+      assert.equal(script.attr("data-object-id"), "test-album");
+      assert(
+        script.attr("data-injected-at"),
+        "expected data-injected-at attribute"
+      );
+
+      const data = JSON.parse(script.html()!);
+      assert(data.trackGroup, "expected trackGroup key in payload");
+      assert.equal(data.trackGroup.urlSlug, "test-album");
+      assert.equal(data.trackGroup.title, "My Album");
+    });
+
+    it("should inject __MIRLO_ARTIST__ alongside __MIRLO_TRACKGROUP__ on album page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      await createTrackGroup(artist.id, {
+        title: "My Album",
+        urlSlug: "test-album",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/release/test-album", $);
+
+      assert(
+        $("#__MIRLO_ARTIST__").length === 1,
+        "expected __MIRLO_ARTIST__ script to exist"
+      );
+      assert(
+        $("#__MIRLO_TRACKGROUP__").length === 1,
+        "expected __MIRLO_TRACKGROUP__ script to exist"
+      );
+    });
+
+    it("should inject __MIRLO_TRACK__ script on track page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      const trackGroup = await createTrackGroup(artist.id, {
+        title: "My Album",
+        urlSlug: "test-album",
+      });
+      const track = await createTrack(trackGroup.id, { title: "Cool Song" });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML(
+        `/test-artist/release/test-album/tracks/${track.id}`,
+        $
+      );
+
+      const script = $("#__MIRLO_TRACK__");
+      assert(script.length === 1, "expected __MIRLO_TRACK__ script to exist");
+      assert.equal(script.attr("type"), "application/json");
+      assert.equal(script.attr("data-object-id"), String(track.id));
+      assert(
+        script.attr("data-injected-at"),
+        "expected data-injected-at attribute"
+      );
+
+      const data = JSON.parse(script.html()!);
+      assert(data.track, "expected track key in payload");
+      assert.equal(data.track.title, "Cool Song");
+    });
+
+    it("should inject __MIRLO_POST__ script on published post page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      const post = await createPost(artist.id, {
+        title: "My Post",
+        urlSlug: "my-post",
+        isDraft: false,
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/posts/my-post", $);
+
+      const script = $("#__MIRLO_POST__");
+      assert(script.length === 1, "expected __MIRLO_POST__ script to exist");
+      assert.equal(script.attr("type"), "application/json");
+      assert.equal(script.attr("data-object-id"), "my-post");
+      assert(
+        script.attr("data-injected-at"),
+        "expected data-injected-at attribute"
+      );
+
+      const data = JSON.parse(script.html()!);
+      assert(data.post, "expected post key in payload");
+      assert.equal(data.post.title, "My Post");
+    });
+
+    it("should not inject __MIRLO_POST__ on artist posts index page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/posts", $);
+
+      assert(
+        $("#__MIRLO_POST__").length === 0,
+        "expected no __MIRLO_POST__ script on posts index"
+      );
+    });
+
+    it("should not inject any hydration scripts on the home page", async () => {
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/", $);
+
+      assert(
+        $("#__MIRLO_ARTIST__").length === 0,
+        "unexpected __MIRLO_ARTIST__ on home"
+      );
+      assert(
+        $("#__MIRLO_TRACKGROUP__").length === 0,
+        "unexpected __MIRLO_TRACKGROUP__ on home"
+      );
+      assert(
+        $("#__MIRLO_TRACK__").length === 0,
+        "unexpected __MIRLO_TRACK__ on home"
+      );
+      assert(
+        $("#__MIRLO_POST__").length === 0,
+        "unexpected __MIRLO_POST__ on home"
+      );
+    });
+  });
 });

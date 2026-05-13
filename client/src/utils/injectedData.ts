@@ -76,18 +76,15 @@ export const getInjectedTrackGroup = (
     "__MIRLO_TRACKGROUP__",
     trackGroupId
   );
-  console.log("getInjectedTrackGroup", { trackGroupId, parsed });
   return parsed?.trackGroup;
 };
 
 export const getInjectedArtist = (
   artistId: string | number
 ): Artist | undefined => {
-  console.log("getting artist", artistId);
   const parsed = readInjectedScript<{ artist?: Artist }>(
     "__MIRLO_ARTIST__",
     artistId
   );
-  console.log("parsed", parsed);
   return parsed?.artist;
 };

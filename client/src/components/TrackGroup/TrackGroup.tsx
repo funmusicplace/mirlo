@@ -185,13 +185,6 @@ function TrackGroup() {
     queryTrackGroup({ albumSlug: trackGroupId ?? "", artistId: artistId ?? "" })
   );
 
-  console.log("loading state", {
-    isLoadingArtist,
-    isLoadingTrackGroup,
-    artist,
-    trackGroup,
-  });
-
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
