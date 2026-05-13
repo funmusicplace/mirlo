@@ -1,38 +1,22 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
-import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
-import ArtistTourDates from "components/Artist/ArtistTourDates";
+import ArtistHeaderActionsStrip from "components/Artist/ArtistHeaderActionsStrip";
 import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { MetaCard } from "components/common/MetaCard";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
-import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaRss } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
 import { bp } from "../../constants";
 
-import ContactArtist from "./ContactArtist";
 import FollowArtist from "./FollowArtist";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
-
-const smallButtonClass = css`
-  svg {
-    font-size: 0.8rem;
-  }
-  paddding: 0.25rem;
-  margin-left: 0.5rem;
-  margin-bottom: 0.25rem;
-  height: 1.5rem !important;
-  width: 1.5rem !important;
-`;
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -102,8 +86,10 @@ export const ArtistTitleText = styled.div`
   justify-content: space-between;
   word-break: break-word;
   width: 100%;
+  gap: 1.5rem;
   @media screen and (max-width: ${bp.medium}px) {
     min-height: auto;
+    gap: 1rem;
   }
 `;
 
@@ -113,6 +99,15 @@ export const HeaderWrapper = styled.div`
   align-items: flex-end;
   justify-content: space-around;
   border-bottom: solid 1px var(--mi-button-color);
+
+  @media screen and (max-width: ${bp.medium}px) {
+    gap: 0.5rem;
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--mi-button-color) 50%,
+      transparent
+    );
+  }
 `;
 
 const ArtistHeaderSection: React.FC<{
@@ -189,17 +184,28 @@ const ArtistHeaderSection: React.FC<{
                       flex-direction: column;
                       justify-content: center;
                       word-break: break-word;
-                      width: 100%;
+                      flex: 1 1 auto;
+                      min-width: 0;
                     `}
                   >
                     <ArtistTitle artistAvatar={!!artistAvatar}>
                       {artist.name}
                     </ArtistTitle>
-                    <ArtistFormLocation
-                      isManage={!!isManage}
-                      artist={artist}
-                      onSubmit={handleSubmit}
-                    />{" "}
+                    <div className="flex items-center gap-2">
+                      {artist.isLabelProfile && (
+                        <>
+                          <span className="max-md:hidden text-(--mi-button-color)">
+                            {artist.properties?.titles?.groupName ?? t("label")}
+                          </span>
+                          <span className="max-md:hidden opacity-50">-</span>
+                        </>
+                      )}
+                      <ArtistFormLocation
+                        isManage={!!isManage}
+                        artist={artist}
+                        onSubmit={handleSubmit}
+                      />
+                    </div>{" "}
                     {artist.shortDescription && (
                       <div
                         className={css`
@@ -218,31 +224,23 @@ const ArtistHeaderSection: React.FC<{
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-row items-center gap-1 pl-4 max-md:pl-1 text-right break-normal!">
-                    {!isManage && (
-                      <>
-                        <FollowArtist artistId={artist.id} />
-                        <ContactArtist artist={artist} />
-                      </>
-                    )}
+                  <div className="flex flex-row items-center gap-1 shrink-0 text-right break-normal!">
+                    {!isManage && <FollowArtist artistId={artist.id} />}
                   </div>
                 </ArtistTitleText>
               </SpaceBetweenDiv>
             </ArtistTitleWrapper>
-          </AvatarWrapper>{" "}
-          {artist.shortDescription && (
+          </AvatarWrapper>
+          {!artist.bio && artist.shortDescription && (
             <div
               className={css`
-                font-size: 1rem;
-                line-height: 1.2rem;
-                margin-top: 0.25rem;
-                font-size: var(--mi-font-size-xsmall) !important;
                 display: none;
                 @media screen and (max-width: ${bp.medium}px) {
                   display: flex;
-                  font-size: 0.9rem;
+                  font-size: var(--mi-font-size-xsmall);
                   line-height: 1.1rem;
-                  margin-bottom: 0.25rem;
+                  margin-top: 1rem;
+                  margin-bottom: 0.5rem;
                 }
               `}
             >
@@ -258,85 +256,27 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div
-          className={css`
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-          `}
-        >
-          <div
-            className={css`
-              color: var(--mi-button-color);
-            `}
-          >
-            {artist.isLabelProfile &&
-              (artist.properties?.titles?.groupName ?? t("label"))}
-          </div>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: row;
-              align-items: flex-end;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                padding: var(--mi-side-paddings-xsmall);
-              }
-            `}
-          >
-            <ArtistTourDates
-              isManage={!!isManage}
-              artist={artist}
-              onSubmit={handleSubmit}
-            />
-            <ArtistHeaderDescription
-              isManage={!!isManage}
-              artist={artist}
-              onSubmit={handleSubmit}
-            />
-            <ArtistButtonAnchor
-              target="_blank"
-              href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
-              rel="noreferrer"
-              onlyIcon
-              className={smallButtonClass}
-              startIcon={<FaRss />}
-            />
-            {artist.isLabelProfile && (
-              <LabelEmbed label={artist} buttonClassName={smallButtonClass} />
-            )}
-          </div>
+        <div className="w-full flex flex-row items-center justify-end py-2 max-md:border-t max-md:border-(--mi-button-color)/50">
+          <ArtistHeaderActionsStrip
+            artist={artist}
+            isManage={!!isManage}
+            onSubmit={handleSubmit}
+          />
         </div>
       </HeaderWrapper>
 
       <ManageArtistAnnouncement showButtons={isManage} />
-      <div
-        className={css`
-          display: flex;
-          justify-content: flex-end;
-          padding-top: 0.5rem;
-          align-items: flex-start;
-
-          ${artist.announcementText
-            ? `flex-direction: column;
-            justify-content: flex-end;
-            align-items: flex-end;
-            padding-top: 0;
-
-            > div {
-              margin-bottom: 0.5rem;}
-            `
-            : ""}
-        `}
-      >
-        <ArtistFormLinks
-          isManage={!!isManage}
-          artist={artist}
-          onSubmit={handleSubmit}
-        />
-      </div>
+      {(isManage ||
+        (artist.linksJson?.length ?? 0) > 0 ||
+        (artist.links?.length ?? 0) > 0) && (
+        <div className="max-md:hidden flex justify-end items-center pt-2">
+          <ArtistFormLinks
+            isManage={!!isManage}
+            artist={artist}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      )}
     </div>
   );
 };

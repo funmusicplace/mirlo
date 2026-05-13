@@ -1,18 +1,22 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { moneyDisplay } from "components/common/Money";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
+import { queryArtist, queryPublicLabelTrackGroups } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import ArtistTrackGroup from "./ArtistTrackGroup";
-import { bp } from "../../constants";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useParams } from "react-router-dom";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryPublicLabelTrackGroups } from "queries";
-import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
+
+import { bp } from "../../constants";
+
 import { ArtistButton } from "./ArtistButtons";
-import { moneyDisplay } from "components/common/Money";
+
 import api from "services/api";
+
+import ArtistTrackGroup from "./ArtistTrackGroup";
 import SortableArtistAlbums from "./SortableArtistAlbums";
 
 const ArtistAlbums: React.FC = () => {
@@ -67,10 +71,12 @@ const ArtistAlbums: React.FC = () => {
         }
       `}
     >
-      <SpaceBetweenDiv>
-        <div />
-        {artist.userId === user?.id && <NewAlbumButton artist={artist} />}
-      </SpaceBetweenDiv>
+      {artist.userId === user?.id && (
+        <SpaceBetweenDiv>
+          <div />
+          <NewAlbumButton artist={artist} />
+        </SpaceBetweenDiv>
+      )}
       {!artist.isLabelProfile && <SortableArtistAlbums />}
       {artist.isLabelProfile && (
         <>

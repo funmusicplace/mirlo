@@ -1,10 +1,12 @@
-import { useTranslation } from "react-i18next";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { InputEl } from "components/common/Input";
-import Button from "components/common/Button";
 import { css } from "@emotion/css";
-import { FaPen, FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
-import React from "react";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+} from "components/Artist/ArtistButtons";
+import Button from "components/common/Button";
+import FormCheckbox from "components/common/FormCheckbox";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
 import {
   findOutsideSite,
   isEmailLink,
@@ -12,18 +14,15 @@ import {
   outsideLinks,
   websiteSite,
 } from "components/common/LinkIconDisplay";
-import { useSnackbar } from "state/SnackbarContext";
 import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
-import FormCheckbox from "components/common/FormCheckbox";
-import FormComponent from "components/common/FormComponent";
+import React from "react";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaPen, FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
+import { useSnackbar } from "state/SnackbarContext";
+
 import { bp } from "../../constants";
-import {
-  ArtistButton,
-  ArtistButtonAnchor,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
-import ManageArtistAnnouncement from "./ManageArtistDetails/ManageArtistAnnouncement";
 
 interface FormData {
   linkArray: Link[];
@@ -164,6 +163,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
   const allLinks = transformFromLinks(artist).linkArray;
   const links = isManage ? allLinks : allLinks.filter((l) => l.inHeader);
+  const hasOverflowLink = !isManage && allLinks.length > links.length;
 
   const handleSave = React.useCallback(
     async (data: FormData) => {
@@ -215,9 +215,13 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
     [getValues, setValue]
   );
 
+  if (!isManage && links.length === 0 && !hasOverflowLink) {
+    return null;
+  }
+
   return (
     <>
-      <div className="flex align-center mb-2 max-w-full pr-2 pl-2">
+      <div className="flex align-center max-w-full">
         <div
           className={css`
             max-width: 100%;
@@ -259,7 +263,6 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
             @media screen and (max-width: ${bp.medium}px) {
               padding: var(--mi-side-paddings-xsmall);
-              padding-bottom: 0.5rem;
             }
           `}
         >
@@ -285,11 +288,6 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                 </ArtistButtonAnchor>
               );
             })}
-          {!isManage && allLinks.length > links.length && (
-            <ArtistButtonLink to="links" size="compact" variant="dashed">
-              {t("moreLinks")}
-            </ArtistButtonLink>
-          )}
         </div>
 
         {isManage && (

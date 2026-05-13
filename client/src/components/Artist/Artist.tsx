@@ -33,7 +33,7 @@ export const ArtistSection: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => (
   <div
-    className={`mb-8 mt-2 max-md:px-[var(--mi-side-paddings-xsmall)] max-md:mb-6 ${
+    className={`mb-8 mt-2 max-md:[padding:var(--mi-side-paddings-xsmall)] max-md:mb-6 ${
       className ?? ""
     }`}
     {...props}
@@ -225,6 +225,7 @@ function Artist() {
   return (
     <>
       <nav
+        className="max-md:-mt-2"
         aria-label={
           artist.isLabelProfile ? t("labelNavigation") : t("artistNavigation")
         }

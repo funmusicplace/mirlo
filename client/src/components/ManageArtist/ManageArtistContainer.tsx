@@ -61,6 +61,9 @@ export const ArtistPageWrapper: React.FC<{
 
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0rem !important;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
           }
         `}
       >

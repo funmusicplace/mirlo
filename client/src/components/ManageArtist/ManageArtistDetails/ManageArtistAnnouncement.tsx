@@ -22,7 +22,6 @@ export const AnnouncementWrapper: React.FC<{
         font-size: 1rem;
         line-height: 1.5rem;
         position: relative;
-        margin-bottom: 0.25rem;
 
         color: var(--mi-button-color);
         background-color: var(--mi-button-text-color);
@@ -32,7 +31,6 @@ export const AnnouncementWrapper: React.FC<{
         className={css`
           opacity: 0.9;
           padding: 1rem;
-          margin-bottom: 0.5rem;
           > div {
             margin-top: 0 !important;
           }

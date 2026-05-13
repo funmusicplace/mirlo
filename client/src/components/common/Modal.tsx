@@ -9,6 +9,7 @@ import { bp } from "../../constants";
 
 import Background from "./Background";
 import Button from "./Button";
+import ScrollFadeOverlay from "./ScrollFadeOverlay";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 const wrapper = css`
@@ -19,25 +20,32 @@ const wrapper = css`
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  overflow: hidden;
 `;
 
-const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
+const ChildrenWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--mi-background-color);
+  border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) 0 0;
+  padding-top: var(--mi-border-radius-x);
+`;
+
+const ScrollArea = styled.div<{
+  noPadding?: boolean;
+}>`
   overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 
-  ${(props) => (props.noPadding ? "padding: 0;" : "padding: 20px;")}
-  ${(props) => (props.noPadding ? "" : "margin-bottom: 1rem;")}
-  margin-left: 0rem;
+  ${(props) => (props.noPadding ? "padding: 0;" : "padding: 0 20px 20px 20px;")}
 
-  ${(props) =>
-    props.title
-      ? ""
-      : "background-color: var(--mi-background-color) !important; border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) !important; padding-bottom: 1.5rem !important;"}
   ::-webkit-scrollbar {
-    width: 3px;
+    width: 8px;
   }
   ::-webkit-scrollbar-track {
     background-color: inset 0 0 0px rgba(0, 0, 0);
@@ -48,12 +56,8 @@ const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
     background-color: grey;
   }
 
-  h1 {
-    display: inline-block;
-  }
-  I @media (max-width: ${bp.small}px) {
-    margin-bottom: 0;
-    padding: 1rem;
+  @media (max-width: ${bp.small}px) {
+    ${(props) => (props.noPadding ? "" : "padding: 0 1rem 1rem 1rem;")}
   }
 `;
 
@@ -71,12 +75,11 @@ const Content = styled.div<ContentProps>`
   margin: 0 auto;
   max-height: calc(100vh - 150px);
   padding-top: 0;
-  border: 1px solid var(--mi-darken-background-color);
   display: flex;
   flex-direction: column;
   ${(props) =>
     props.contentTitle
-      ? "background-color: var(--mi-background-color);"
+      ? "background-color: var(--mi-background-color); border: 1px solid var(--mi-darken-background-color);"
       : ""}
 
   ${(props) =>
@@ -111,13 +114,11 @@ const Content = styled.div<ContentProps>`
       props.size === "small"
         ? "width: 90%;"
         : "bottom: 0; border-radius: var(--mi-border-radius-focus) var(--mi-border-radius-focus) 0  0; width: 100%;"}
-    padding-top: 0;
   }
 `;
 
 const close = css`
   color: #aaa;
-  float: right;
   border: none;
   background: none;
   cursor: pointer;
@@ -131,14 +132,17 @@ const close = css`
   }
 `;
 
+function slugifyTitle(title?: string | null) {
+  return title ? title.toLowerCase().trim().replaceAll(" ", "-") : undefined;
+}
+
 function dialogIDFromTitle(title?: string | null) {
-  return !title ? undefined : title.toLowerCase().trim().replace(" ", "-");
+  return slugifyTitle(title);
 }
 
 function dialogLabelFromTitle(title?: string | null) {
-  return !title
-    ? undefined
-    : title.toLowerCase().trim().replace(" ", "-").concat("-label");
+  const slug = slugifyTitle(title);
+  return slug ? `${slug}-label` : undefined;
 }
 
 export const Modal: React.FC<{
@@ -200,6 +204,8 @@ export const Modal: React.FC<{
     }
   }, [open]);
 
+  const childrenWrapperId = React.useId();
+
   if (!open) {
     return null;
   }
@@ -228,16 +234,17 @@ export const Modal: React.FC<{
               className={css`
                 position: sticky;
                 top: 0;
-                padding-top: 1rem;
                 margin-bottom: 0 !important;
                 align-items: center;
 
                 padding: 1rem;
+                padding-bottom: 0.5rem !important;
                 border-radius: var(--mi-border-radius-x)
                   var(--mi-border-radius-x) 0 0;
-                padding-bottom: 0.5rem !important;
                 background-color: inherit;
-                border-bottom: solid 1px rgba(125, 125, 125, 0.3);
+                ${title
+                  ? "border-bottom: solid 1px rgba(125, 125, 125, 0.3);"
+                  : ""}
                 z-index: 12;
 
                 ${title
@@ -264,9 +271,15 @@ export const Modal: React.FC<{
                 aria-label="close"
               ></Button>
             </SpaceBetweenDiv>
-            <ChildrenWrapper className={contentClassName} noPadding={noPadding}>
-              {children}
+            <ChildrenWrapper className={contentClassName}>
+              <ScrollArea id={childrenWrapperId} noPadding={noPadding}>
+                {children}
+              </ScrollArea>
             </ChildrenWrapper>
+            <ScrollFadeOverlay
+              scrollElementId={childrenWrapperId}
+              position="bottom"
+            />
           </Content>
         </div>
       </div>

@@ -110,7 +110,6 @@ const Embed: React.FC<{
             css`
               margin-top: 0rem;
               font-size: 1.2rem;
-              margin-left: 0.2rem;
             ` +
             " " +
             (buttonClassName ?? "")

@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import PostGrid from "components/Post/PostGrid";
 import { queryArtist, queryArtistPosts } from "queries";
 import React from "react";
-import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import usePagination from "utils/usePagination";
 
@@ -12,7 +11,6 @@ import { bp } from "../../constants";
 const pageSize = 6;
 
 const ArtistPosts: React.FC = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { artistId } = useParams();
   const { page, PaginationComponent } = usePagination({ pageSize });
 
@@ -42,15 +40,6 @@ const ArtistPosts: React.FC = () => {
           }
         `}
       >
-        <div
-          className={css`
-            padding-bottom: 0.7rem;
-          `}
-        >
-          {artist.posts?.length === 0 && (
-            <>{t("noUpdates", { artistName: artist.name })}</>
-          )}
-        </div>
         <PostGrid
           posts={posts.results}
           ariaLabelledBy="artist-navlink-updates"
