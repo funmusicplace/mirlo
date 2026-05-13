@@ -41,12 +41,14 @@ export const useTrackGroupWidgetData = () => {
           }
         }
 
-        const results = await api.get<TrackGroup>(`trackGroups/${params.id}`);
-        setTrackGroup(results.result);
-        const response = await api.get<Artist>(
-          `artists/${results.result.artistId}`
-        );
-        setArtist(response.result);
+        if (!injectedTrackGroup) {
+          const results = await api.get<TrackGroup>(`trackGroups/${params.id}`);
+          setTrackGroup(results.result);
+          const response = await api.get<Artist>(
+            `artists/${results.result.artistId}`
+          );
+          setArtist(response.result);
+        }
       } catch (e) {
         console.error("e", e);
       } finally {

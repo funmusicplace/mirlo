@@ -941,7 +941,6 @@ const dispatchRoute = async (
       });
       break;
     case "widget-trackgroup":
-      console.log("its a tg widget");
       await handleTrackGroupWidget({
         ...context,
         params: { trackGroupId: routeParams.trackGroupId as number },
