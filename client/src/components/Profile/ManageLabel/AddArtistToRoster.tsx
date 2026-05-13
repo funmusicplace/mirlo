@@ -45,8 +45,8 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
   }, []);
 
   return (
-    <form className="flex w-full flex-row items-start justify-between gap-4">
-      <FormComponent className="w-1/2">
+    <form className="md:flex w-full flex-row items-start justify-between gap-6">
+      <FormComponent className="md:w-1/2">
         <h3 id="label-existing-artist">{t("addExistingArtistToRoster")}</h3>
         <p className="mbs-1" id="description-existing-artist">
           {t("addExistingArtistExplanation")}
@@ -60,7 +60,7 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
           onSelect={setLabel}
         />
       </FormComponent>
-      <FormComponent className="w-1/2">
+      <FormComponent className="md:w-1/2">
         <h3>{t("addNewArtistToRoster")}</h3>
         <p className="mbs-1">{t("addNewArtistExplanation")}</p>
         <ArtistButtonLink
