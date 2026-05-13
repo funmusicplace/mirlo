@@ -1,159 +1,16 @@
-import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Modal from "components/common/Modal";
+import { uploadDownloadableContentFile } from "components/ManageArtist/Merch/DownloadableContent";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-
-const Section = styled.div`
-  margin-bottom: 1.5rem;
-`;
-
-const SectionTitle = styled.h3`
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: var(--mi-text-color);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const MetaGrid = styled.dl`
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.25rem 0.75rem;
-  margin: 0;
-  font-size: 0.9rem;
-
-  dt {
-    color: var(--mi-lighter-foreground-color);
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  dd {
-    margin: 0;
-    color: var(--mi-text-color);
-  }
-`;
-
-const AudioFilesList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const AudioFileItem = styled.div`
-  padding: 0.75rem;
-  background-color: var(--mi-tint-color);
-  border-radius: var(--mi-border-radius);
-  font-size: 0.9rem;
-`;
-
-const TrackNumber = styled.span`
-  font-weight: 600;
-  color: var(--mi-button-color);
-  margin-right: 0.5rem;
-`;
-
-const FileName = styled.span`
-  color: var(--mi-text-color);
-`;
-
-const ArtistName = styled.span`
-  font-size: 0.85rem;
-  color: var(--mi-lighter-foreground-color);
-  display: block;
-  margin-top: 0.25rem;
-`;
-
-const ImageGallery = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
-`;
-
-const ImageOption = styled.label<{ selected?: boolean }>`
-  position: relative;
-  cursor: pointer;
-  border-radius: var(--mi-border-radius);
-  overflow: hidden;
-  border: 3px solid
-    ${(props) => (props.selected ? "var(--mi-button-color)" : "transparent")};
-  transition: all 0.2s ease;
-
-  &:hover {
-    border-color: var(--mi-button-color);
-  }
-
-  input[type="radio"] {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    z-index: 2;
-  }
-
-  img {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-    display: block;
-  }
-`;
-
-const AlertBox = styled.div<{ type: "warning" | "error" }>`
-  padding: 1rem;
-  border-radius: var(--mi-border-radius);
-  margin-bottom: 1rem;
-  display: flex;
-  gap: 0.75rem;
-  background-color: ${(props) =>
-    props.type === "warning"
-      ? "rgba(255, 193, 7, 0.1)"
-      : "rgba(244, 67, 54, 0.1)"};
-  border-left: 4px solid
-    ${(props) => (props.type === "warning" ? "#FFC107" : "#F44336")};
-`;
-
-const AlertIcon = styled.div`
-  font-size: 1.25rem;
-  flex-shrink: 0;
-  margin-top: 0.25rem;
-`;
-
-const AlertText = styled.div`
-  font-size: 0.9rem;
-  line-height: 1.4;
-`;
-
-const InvalidFilesList = styled.ul`
-  margin: 0.5rem 0 0 1.5rem;
-  padding: 0;
-  font-size: 0.85rem;
-
-  li {
-    color: var(--mi-lighter-foreground-color);
-    margin-bottom: 0.25rem;
-  }
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-`;
-
-const SuccessIcon = styled.span`
-  color: var(--mi-success-background-color);
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-`;
+import api from "services/api";
+import { useUpload } from "state/UploadContext";
 
 interface ZipImportPreviewProps {
+  trackGroupId: number;
+  artistId: number;
+  reload: () => void;
   isOpen: boolean;
   preScanResult: PreScanResult | null;
   existingTracksCount: number;
@@ -161,11 +18,13 @@ interface ZipImportPreviewProps {
   onSelectedCoverChange: (index: number) => void;
   invalidFilesAction: "skip" | "cancel" | null;
   onInvalidFilesActionChange: (action: "skip" | "cancel") => void;
-  onConfirm: () => void;
   onClose: () => void;
 }
 
 export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
+  trackGroupId,
+  artistId,
+  reload,
   isOpen,
   preScanResult,
   existingTracksCount,
@@ -173,10 +32,10 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
   onSelectedCoverChange,
   invalidFilesAction,
   onInvalidFilesActionChange,
-  onConfirm,
   onClose,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "zipImport" });
+  const { enqueue } = useUpload();
 
   const hasInvalidFiles = (preScanResult?.invalidFiles.length ?? 0) > 0;
 
@@ -203,6 +62,49 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
     albumMeta.label ||
     (albumMeta.genres?.length ?? 0) > 0;
 
+  const handleZipImportConfirm = React.useCallback(
+    async (result: PreScanResult | null, coverIndex: number) => {
+      if (!result) {
+        return;
+      }
+      console.log("Importing with result:", result, "cover is ", coverIndex);
+
+      // Upload cover image using the same pattern as UploadArtistImage
+      const coverFile = result.imageFiles[coverIndex]?.file;
+      if (coverFile) {
+        try {
+          await api.uploadFile(`manage/trackGroups/${trackGroupId}/cover`, [
+            coverFile,
+          ]);
+        } catch (e) {
+          console.error("Error uploading cover image", e);
+        }
+      }
+
+      // Enqueue audio files using UploadContext — same pattern as BulkTrackUpload
+      if (result.audioFiles.length > 0) {
+        enqueue({
+          trackgroup: { id: trackGroupId, artistId, tracks: [] },
+          files: result.audioFiles.map((af) => af.file),
+          reload,
+        });
+      }
+
+      // Upload downloadable content using the shared utility
+      for (const dc of result.downloadableContentFiles) {
+        try {
+          await uploadDownloadableContentFile(dc.file, { trackGroupId });
+        } catch (e) {
+          console.error("Error uploading downloadable content", e);
+        }
+      }
+
+      onClose();
+      reload();
+    },
+    [trackGroupId, artistId, enqueue, reload, onClose]
+  );
+
   return (
     <Modal
       open={isOpen && preScanResult !== null}
@@ -212,42 +114,35 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       focusTrapOptions={{ delayInitialFocus: true }}
     >
       {existingTracksCount > 0 && (
-        <AlertBox type="warning">
-          <AlertIcon>⚠️</AlertIcon>
-          <AlertText>
+        <div className="p-4 rounded-[var(--mi-border-radius)] mb-4 flex gap-3 bg-[rgba(255,193,7,0.1)] border-l-4 border-[#FFC107]">
+          <div className="text-xl flex-shrink-0 mt-1">⚠️</div>
+          <div className="text-sm leading-snug">
             {t("existingTracksWarning", { count: existingTracksCount })}
-          </AlertText>
-        </AlertBox>
+          </div>
+        </div>
       )}
 
       {preScanResult && hasInvalidFiles && (
-        <AlertBox type="error">
-          <AlertIcon>
+        <div className="p-4 rounded-[var(--mi-border-radius)] mb-4 flex gap-3 bg-[rgba(244,67,54,0.1)] border-l-4 border-[#F44336]">
+          <div className="text-xl flex-shrink-0 mt-1">
             <FaExclamationTriangle />
-          </AlertIcon>
-          <AlertText>
+          </div>
+          <div className="text-sm leading-snug">
             {t("invalidFilesFound", {
               count: preScanResult.invalidFiles.length,
             })}
-            <InvalidFilesList>
+            <ul className="mt-2 ml-6 p-0 text-xs">
               {preScanResult.invalidFiles.map((f) => (
-                <li key={f.name}>
+                <li
+                  key={f.name}
+                  className="text-[var(--mi-lighter-foreground-color)] mb-1"
+                >
                   {f.name} — {f.reason}
                 </li>
               ))}
-            </InvalidFilesList>
-            <div
-              className={css`
-                margin-top: 0.75rem;
-              `}
-            >
-              <label
-                className={css`
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                `}
-              >
+            </ul>
+            <div className="mt-3">
+              <label className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="invalidAction"
@@ -257,14 +152,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
                 />
                 {t("skipInvalidFiles")}
               </label>
-              <label
-                className={css`
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                  margin-top: 0.5rem;
-                `}
-              >
+              <label className="flex items-center gap-2 mt-2">
                 <input
                   type="radio"
                   name="invalidAction"
@@ -275,82 +163,119 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
                 {t("cancelImport")}
               </label>
             </div>
-          </AlertText>
-        </AlertBox>
+          </div>
+        </div>
       )}
 
       {hasAlbumMeta && (
-        <Section>
-          <SectionTitle>{t("albumDetails")}</SectionTitle>
-          <MetaGrid>
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3 text-[var(--mi-text-color)] flex items-center gap-2">
+            {t("albumDetails")}
+          </h3>
+          <dl className="grid grid-cols-[auto_1fr] gap-y-1 gap-x-3 m-0 text-sm">
             {albumMeta.title && (
               <>
-                <dt>{t("albumTitle")}</dt>
-                <dd>{albumMeta.title}</dd>
+                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
+                  {t("albumTitle")}
+                </dt>
+                <dd className="m-0 text-[var(--mi-text-color)]">
+                  {albumMeta.title}
+                </dd>
               </>
             )}
             {albumMeta.albumArtist && (
               <>
-                <dt>{t("albumArtist")}</dt>
-                <dd>{albumMeta.albumArtist}</dd>
+                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
+                  {t("albumArtist")}
+                </dt>
+                <dd className="m-0 text-[var(--mi-text-color)]">
+                  {albumMeta.albumArtist}
+                </dd>
               </>
             )}
             {(albumMeta.date || albumMeta.year) && (
               <>
-                <dt>{t("releaseDate")}</dt>
-                <dd>{albumMeta.date ?? String(albumMeta.year)}</dd>
+                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
+                  {t("releaseDate")}
+                </dt>
+                <dd className="m-0 text-[var(--mi-text-color)]">
+                  {albumMeta.date ?? String(albumMeta.year)}
+                </dd>
               </>
             )}
             {albumMeta.label && (
               <>
-                <dt>{t("label")}</dt>
-                <dd>{albumMeta.label}</dd>
+                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
+                  {t("label")}
+                </dt>
+                <dd className="m-0 text-[var(--mi-text-color)]">
+                  {albumMeta.label}
+                </dd>
               </>
             )}
             {albumMeta.genres && albumMeta.genres.length > 0 && (
               <>
-                <dt>{t("genre")}</dt>
-                <dd>{albumMeta.genres.join(", ")}</dd>
+                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
+                  {t("genre")}
+                </dt>
+                <dd className="m-0 text-[var(--mi-text-color)]">
+                  {albumMeta.genres.join(", ")}
+                </dd>
               </>
             )}
-          </MetaGrid>
-        </Section>
+          </dl>
+        </div>
       )}
 
       {preScanResult && preScanResult.audioFiles.length > 0 && (
-        <Section>
-          <SectionTitle>
-            <SuccessIcon>
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3 text-[var(--mi-text-color)] flex items-center gap-2">
+            <span className="text-[var(--mi-success-background-color)] flex items-center gap-1">
               <FaCheckCircle /> {preScanResult.audioFiles.length}
-            </SuccessIcon>
+            </span>
             {t("tracksFound")}
-          </SectionTitle>
-          <AudioFilesList>
+          </h3>
+          <div className="flex flex-col gap-2">
             {sortedAudioFiles.map((af, idx) => (
-              <AudioFileItem key={`${af.file.name}-${idx}`}>
+              <div
+                key={`${af.file.name}-${idx}`}
+                className="p-3 bg-[var(--mi-tint-color)] rounded-[var(--mi-border-radius)] text-sm"
+              >
                 <div>
                   {af.trackNumber && (
-                    <TrackNumber>{af.trackNumber}.</TrackNumber>
+                    <span className="font-semibold text-[var(--mi-button-color)] mr-2">
+                      {af.trackNumber}.
+                    </span>
                   )}
-                  <FileName>{af.title}</FileName>
+                  <span className="text-[var(--mi-text-color)]">
+                    {af.title}
+                  </span>
                 </div>
                 {af.artists.length > 0 && (
-                  <ArtistName>{af.artists.join(", ")}</ArtistName>
+                  <span className="text-xs text-[var(--mi-lighter-foreground-color)] block mt-1">
+                    {t("artists")}: {af.artists.join(", ")}
+                  </span>
                 )}
-              </AudioFileItem>
+              </div>
             ))}
-          </AudioFilesList>
-        </Section>
+          </div>
+        </div>
       )}
 
       {preScanResult && preScanResult.imageFiles.length > 0 && (
-        <Section>
-          <SectionTitle>{t("selectCoverImage")}</SectionTitle>
-          <ImageGallery>
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3 text-[var(--mi-text-color)] flex items-center gap-2">
+            {t("selectCoverImage")}
+          </h3>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-4 mb-4">
             {preScanResult.imageFiles.map((img, idx) => (
-              <ImageOption
+              <label
                 key={`${img.name}-${idx}`}
-                selected={idx === selectedCoverIndex}
+                className={`relative cursor-pointer rounded-[var(--mi-border-radius)] overflow-hidden border-[3px] transition-all duration-200 hover:border-[var(--mi-button-color)] ${
+                  idx === selectedCoverIndex
+                    ? "border-[var(--mi-button-color)]"
+                    : "border-transparent"
+                }`}
               >
                 <input
                   type="radio"
@@ -358,31 +283,64 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
                   value={idx}
                   checked={idx === selectedCoverIndex}
                   onChange={() => onSelectedCoverChange(idx)}
+                  className="absolute top-2 right-2 z-[2]"
                 />
-                {img.dataUrl && <img src={img.dataUrl} alt={img.name} />}
-              </ImageOption>
+                {img.dataUrl && (
+                  <img
+                    src={img.dataUrl}
+                    alt={img.name}
+                    className="w-full h-[100px] object-cover block"
+                  />
+                )}
+              </label>
             ))}
-          </ImageGallery>
-        </Section>
+          </div>
+        </div>
+      )}
+
+      {preScanResult && preScanResult.downloadableContentFiles.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3 text-[var(--mi-text-color)] flex items-center gap-2">
+            <span className="text-[var(--mi-success-background-color)] flex items-center gap-1">
+              <FaCheckCircle /> {preScanResult.downloadableContentFiles.length}
+            </span>
+            {t("downloadableContentFound")}
+          </h3>
+          <div className="flex flex-col gap-2">
+            {preScanResult.downloadableContentFiles.map((dc, idx) => (
+              <div
+                key={`${dc.name}-${idx}`}
+                className="p-3 bg-[var(--mi-tint-color)] rounded-[var(--mi-border-radius)] text-sm"
+              >
+                <span className="text-[var(--mi-text-color)]">{dc.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {preScanResult && preScanResult.audioFiles.length === 0 && (
-        <AlertBox type="error">
-          <AlertIcon>
+        <div className="p-4 rounded-[var(--mi-border-radius)] mb-4 flex gap-3 bg-[rgba(244,67,54,0.1)] border-l-4 border-[#F44336]">
+          <div className="text-xl flex-shrink-0 mt-1">
             <FaExclamationTriangle />
-          </AlertIcon>
-          <AlertText>{t("noAudioFilesFound")}</AlertText>
-        </AlertBox>
+          </div>
+          <div className="text-sm leading-snug">{t("noAudioFilesFound")}</div>
+        </div>
       )}
 
-      <ButtonGroup>
+      <div className="flex justify-end gap-3">
         <ArtistButton onClick={onClose} variant="outlined">
           {t("cancel")}
         </ArtistButton>
-        <ArtistButton onClick={onConfirm} disabled={!canConfirm}>
+        <ArtistButton
+          onClick={() =>
+            handleZipImportConfirm(preScanResult, selectedCoverIndex)
+          }
+          disabled={!canConfirm}
+        >
           {t("confirmImport")}
         </ArtistButton>
-      </ButtonGroup>
+      </div>
     </Modal>
   );
 };

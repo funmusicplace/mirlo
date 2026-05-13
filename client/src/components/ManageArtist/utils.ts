@@ -5,6 +5,7 @@ import type {
 } from "music-metadata/lib/type";
 
 import { ACCEPTED_AUDIO } from "./ManageTrackGroup/AlbumFormComponents/ReplaceTrackAudioInput";
+import { DOWNLOADABLE_CONTENT_MIME_TYPES } from "./Merch/DownloadableContent";
 
 const produceNewStatusImpl = produce(
   (
@@ -201,12 +202,12 @@ export const prescanAudioFiles = async (
 ): Promise<PreScanResult> => {
   const audioFiles: ExtractedAudioFile[] = [];
   const imageFiles: ExtractedImageFile[] = [];
+  const downloadableContentFiles: ExtractedDownloadableContentFile[] = [];
   const invalidFiles: { name: string; reason: string }[] = [];
 
   // Separate audio and image files
   for (const file of files) {
     const mimeType = file.type || getMimeTypeFromExtension(file.name);
-
     if (AUDIO_MIME_TYPES.includes(mimeType)) {
       audioFiles.push({
         file,
@@ -216,6 +217,8 @@ export const prescanAudioFiles = async (
       });
     } else if (IMAGE_MIME_TYPES.includes(mimeType)) {
       imageFiles.push({ file, name: file.name });
+    } else if (DOWNLOADABLE_CONTENT_MIME_TYPES.includes(mimeType)) {
+      downloadableContentFiles.push({ file, name: file.name });
     } else {
       // Only flag as invalid if it's not a known system file
       if (!isSystemFile(file.name)) {
@@ -261,6 +264,7 @@ export const prescanAudioFiles = async (
   return {
     audioFiles: enhancedAudioFiles,
     imageFiles,
+    downloadableContentFiles,
     invalidFiles,
     albumMeta: {
       title: parsed[0]?.metadata.common.album,
@@ -289,6 +293,7 @@ const getMimeTypeFromExtension = (filename: string): string => {
     webp: "image/webp",
     gif: "image/gif",
     tiff: "image/tiff",
+    pdf: "application/pdf",
   };
   return extMap[ext] || "";
 };

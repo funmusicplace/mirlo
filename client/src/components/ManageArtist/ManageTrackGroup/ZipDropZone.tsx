@@ -57,12 +57,16 @@ const Subtitle = styled.div`
 
 interface ZipDropZoneProps {
   existingTracksCount: number;
-  onConfirm: (result: PreScanResult, selectedCoverIndex: number) => void;
+  trackGroupId: number;
+  artistId: number;
+  reload: () => void;
 }
 
 export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
   existingTracksCount,
-  onConfirm,
+  trackGroupId,
+  artistId,
+  reload,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "zipImport" });
 
@@ -106,12 +110,14 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
       }
 
       const extracted = await extractZipFiles(file);
+      console.log("extracted", extracted);
       if (extracted.errorMessage) {
         setError(extracted.errorMessage);
         return;
       }
 
       const result = await prescanAudioFiles(extracted.files);
+      console.log("result", result);
       setPreScanResult(result);
       setSelectedCoverIndex(0);
       setInvalidFilesAction(null);
@@ -152,6 +158,8 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
 
   return (
     <>
+      <h2>{t("importFromZip")}</h2>
+      <p>{t("importAlbumContent")}</p>
       <DropZoneContainer
         isDragging={isDragging}
         onDragOver={handleDragOver}
@@ -175,7 +183,6 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
         </TextWrapper>
         {isScanning && <Subtitle>{t("scanning")}</Subtitle>}
       </DropZoneContainer>
-
       {error && (
         <div
           className={css`
@@ -191,8 +198,10 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
           {error}
         </div>
       )}
-
       <ZipImportPreview
+        trackGroupId={trackGroupId}
+        artistId={artistId}
+        reload={reload}
         isOpen={showPreview && preScanResult !== null}
         preScanResult={preScanResult}
         existingTracksCount={existingTracksCount}
@@ -200,12 +209,6 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
         onSelectedCoverChange={setSelectedCoverIndex}
         invalidFilesAction={invalidFilesAction}
         onInvalidFilesActionChange={setInvalidFilesAction}
-        onConfirm={() => {
-          if (preScanResult) {
-            onConfirm(preScanResult, selectedCoverIndex);
-            handleClose();
-          }
-        }}
         onClose={handleClose}
       />
     </>

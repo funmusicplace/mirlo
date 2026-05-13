@@ -6,6 +6,7 @@ import {
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import FeatureFlag from "components/common/FeatureFlag";
 import {
   queryArtist,
   queryManagedTrackGroup,
@@ -104,13 +105,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
     }
   }, [artist, deleteTrackGroup, manageArtistT, navigate, snackbar, trackGroup]);
 
-  const handleZipImportConfirm = React.useCallback(
-    (_result: PreScanResult, _coverIndex: number) => {
-      // This will be implemented in the next phase
-    },
-    []
-  );
-
   if (!artist && isLoading) {
     return <LoadingBlocks />;
   } else if (!artist) {
@@ -136,13 +130,18 @@ const ManageTrackGroup: React.FC<{}> = () => {
         <h1 className="mt-4">{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
       </div>
       <AlbumPaymentReceiver />
-      <FormSection>
-        <h2>{t("importAlbumContent")}</h2>
-        <ZipDropZone
-          existingTracksCount={trackGroup?.tracks?.length ?? 0}
-          onConfirm={handleZipImportConfirm}
-        />
-      </FormSection>
+      <FeatureFlag flag="zipUpload">
+        {trackGroup && (
+          <FormSection>
+            <ZipDropZone
+              existingTracksCount={trackGroup?.tracks?.length ?? 0}
+              trackGroupId={trackGroup.id}
+              artistId={artist.id}
+              reload={refetch}
+            />
+          </FormSection>
+        )}
+      </FeatureFlag>
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}

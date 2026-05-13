@@ -655,9 +655,15 @@ interface ExtractedImageFile {
   dataUrl?: string; // base64 data URL for preview
 }
 
+interface ExtractedDownloadableContentFile {
+  file: File;
+  name: string;
+}
+
 interface PreScanResult {
   audioFiles: ExtractedAudioFile[];
   imageFiles: ExtractedImageFile[];
+  downloadableContentFiles: ExtractedDownloadableContentFile[];
   invalidFiles: { name: string; reason: string }[];
   albumMeta: AlbumMeta;
 }

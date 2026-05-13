@@ -2,24 +2,22 @@ import React from "react";
 import { useAuthContext } from "state/AuthContext";
 
 interface FeatureFlagProps {
-  featureFlag: "activityPub" | "fundraiser";
+  flag: "zipUpload";
   children: React.ReactNode;
 }
 
 export const checkIfFeatureEnabled = (
   user: LoggedInUser | null,
-  featureFlag: FeatureFlagProps["featureFlag"]
+  flag: FeatureFlagProps["flag"]
 ): boolean => {
   return (
-    (user?.isAdmin ||
-      !!user?.featureFlags?.find((flag) => flag === featureFlag)) ??
-    false
+    (user?.isAdmin || !!user?.featureFlags?.find((f) => f === flag)) ?? false
   );
 };
 
-const FeatureFlag: React.FC<FeatureFlagProps> = ({ featureFlag, children }) => {
+const FeatureFlag: React.FC<FeatureFlagProps> = ({ flag, children }) => {
   const { user } = useAuthContext();
-  const isFeatureEnabled = checkIfFeatureEnabled(user ?? null, featureFlag);
+  const isFeatureEnabled = checkIfFeatureEnabled(user ?? null, flag);
   return <>{isFeatureEnabled ? children : null}</>;
 };
 

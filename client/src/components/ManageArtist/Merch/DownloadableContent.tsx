@@ -14,6 +14,36 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
+export const DOWNLOADABLE_CONTENT_MIME_TYPES = ["application/pdf", "image/*"];
+
+export const uploadDownloadableContentFile = async (
+  file: File,
+  params: { trackGroupId: number } | { merchId: string }
+): Promise<void> => {
+  const response = await api.post<
+    unknown,
+    { result: DownloadableContent; uploadUrl: string }
+  >("manage/downloadableContent", {
+    filename: file.name,
+    mimeType: file.type,
+    ...params,
+  });
+
+  if (response?.uploadUrl) {
+    try {
+      await fetch(response.uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+    } catch (e) {
+      await api.delete(`manage/downloadableContent/${response.result.id}`);
+      console.error("Error uploading to remote server", e);
+      throw e;
+    }
+  }
+};
+
 const DownloadableContent: React.FC<{
   item: Merch | TrackGroup;
   reload: () => void;
@@ -41,40 +71,14 @@ const DownloadableContent: React.FC<{
     const nextFile = files.pop();
     try {
       if (nextFile) {
-        const response = await api.post<
-          unknown,
-          {
-            result: DownloadableContent;
-            uploadUrl: string;
-          }
-        >("manage/downloadableContent", {
-          filename: nextFile.file.name,
-          mimeType: nextFile.file.type,
-          ...(itemType === "release"
-            ? { trackGroupId: item.id }
-            : { merchId: item.id }),
-        });
-
-        if (response && response.uploadUrl) {
-          try {
-            const result = await fetch(response.uploadUrl, {
-              method: "PUT",
-              body: nextFile.file,
-              headers: {
-                "Content-Type": nextFile.file.type,
-              },
-            });
-            if (result.ok) {
-              snackbar(t("fileUploaded"), { type: "success" });
-              reload();
-            }
-          } catch (e) {
-            await api.delete(
-              `manage/downloadableContent/${response.result.id}`
-            );
-            console.error("Error uploading to remote server", e);
-          }
-        }
+        await uploadDownloadableContentFile(
+          nextFile.file,
+          itemType === "release"
+            ? { trackGroupId: item.id as number }
+            : { merchId: item.id as string }
+        );
+        snackbar(t("fileUploaded"), { type: "success" });
+        reload();
       }
     } catch (e) {
       console.error(e);
@@ -141,7 +145,7 @@ const DownloadableContent: React.FC<{
         </ul>
       )}
       <UploadFiles
-        accept="application/pdf,image/*"
+        accept={DOWNLOADABLE_CONTENT_MIME_TYPES.join(",")}
         hint={
           itemType !== "release"
             ? t("relatedDownloadableContentInfo")
