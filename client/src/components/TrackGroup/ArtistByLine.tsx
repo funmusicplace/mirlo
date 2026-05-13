@@ -12,12 +12,11 @@ const ArtistByLine: React.FC<{
     keyPrefix: "trackGroupDetails",
   });
 
-  const labelArtist =
-    trackGroup?.paymentToUserId && trackGroup.paymentToUserId !== artist.userId
-      ? artist.artistLabels?.find(
-          (al) => al.labelUserId === trackGroup.paymentToUserId
-        )?.labelUser.artists?.[0]
-      : undefined;
+  const labelArtist = trackGroup?.paymentToUserId
+    ? artist.artistLabels?.find(
+        (al) => al.labelUserId === trackGroup.paymentToUserId
+      )?.labelUser.artists?.[0]
+    : undefined;
 
   return (
     <div
