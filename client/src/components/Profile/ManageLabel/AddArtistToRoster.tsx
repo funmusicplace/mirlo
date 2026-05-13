@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
-import FormComponent from "components/common/FormComponent";
 import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -45,8 +44,8 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
   }, []);
 
   return (
-    <form className="md:flex w-full flex-row items-start justify-between gap-6">
-      <FormComponent className="md:w-1/2">
+    <div className="md:flex w-full flex-row items-start justify-between gap-6">
+      <form className="md:w-1/2">
         <h3 id="label-existing-artist">{t("addExistingArtistToRoster")}</h3>
         <p className="mbs-1" id="description-existing-artist">
           {t("addExistingArtistExplanation")}
@@ -59,8 +58,8 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
           id="input-existing-artist"
           onSelect={setLabel}
         />
-      </FormComponent>
-      <FormComponent className="md:w-1/2">
+      </form>
+      <div className="md:w-1/2">
         <h3>{t("addNewArtistToRoster")}</h3>
         <p className="mbs-1">{t("addNewArtistExplanation")}</p>
         <ArtistButtonLink
@@ -71,8 +70,8 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
         >
           {t("createNewArtist")}
         </ArtistButtonLink>
-      </FormComponent>
-    </form>
+      </div>
+    </div>
   );
 };
 
