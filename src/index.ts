@@ -249,6 +249,9 @@ app.use("/", userLoggedInWithoutRedirect, async (req, res, next) => {
             logger.info(`probe path not found: ${req.path}`);
           }
           if (!res.headersSent) {
+            // Override the Cache-Control set above — a missing file must never be
+            // cached, otherwise Cloudflare will serve the 404 for a year.
+            res.setHeader("Cache-Control", "no-store");
             res.sendStatus(404);
           }
           return;
