@@ -161,6 +161,7 @@ describe("blog post subscriber visibility", () => {
     });
 
     it("shows the gate to a non-subscriber", () => {
+      cy.visit("/");
       cy.login({ email: nonSubscriberEmail, password: nonSubscriberPassword });
       cy.visit(`/${artistSlug}/posts/${subscriberPostId}/`);
       cy.contains("This post is for subscribers only.").should("exist");
