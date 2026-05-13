@@ -1,37 +1,26 @@
 import React from "react";
 import api from "services/api";
-import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
 
 const useCurrentTrackHook = () => {
   const {
     state: { playerQueueIds, currentlyPlayingIndex },
   } = useGlobalStateContext();
-  const { user } = useAuthContext();
 
   const [currentTrack, setCurrentTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(false);
-  const userId = user?.id;
 
-  const fetchTrackCallback = React.useCallback(
-    async (id: number) => {
-      setIsLoading(true);
-      try {
-        const { result } = await api.get<Track>(`tracks/${id}`);
-
-        if (userId) {
-          setCurrentTrack(result);
-        } else {
-          setCurrentTrack(result);
-        }
-      } catch {
-        setCurrentTrack(undefined);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [userId]
-  );
+  const fetchTrackCallback = React.useCallback(async (id: number) => {
+    setIsLoading(true);
+    try {
+      const { result } = await api.get<Track>(`tracks/${id}`);
+      setCurrentTrack(result);
+    } catch {
+      setCurrentTrack(undefined);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const currentTrackId = currentTrack?.id;
   const playerQueueIdAtIndex =

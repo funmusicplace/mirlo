@@ -34,13 +34,16 @@ export const useTrackWidgetData = () => {
             return;
           }
         }
-        const results = await api.get<Track>(`tracks/${params.id}`);
-        const fetchedTrack = results.result;
-        setTrack(fetchedTrack);
-        const response = await api.get<Artist>(
-          `artists/${fetchedTrack.trackGroup.artistId}`
-        );
-        setArtist(response.result);
+        if (!injectedTrack) {
+          const results = await api.get<Track>(`tracks/${params.id}`);
+          const fetchedTrack = results.result;
+          setTrack(fetchedTrack);
+
+          const response = await api.get<Artist>(
+            `artists/${fetchedTrack.trackGroup.artistId}`
+          );
+          setArtist(response.result);
+        }
       } catch (e) {
         console.error("e", e);
       } finally {

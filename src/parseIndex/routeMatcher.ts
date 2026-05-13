@@ -133,7 +133,7 @@ const routePatterns: Array<RoutePattern<any>> = [
     pattern: (segments) =>
       segments.length === 3 &&
       segments[0] === "widget" &&
-      segments[1] === "trackgroup" &&
+      segments[1] === "trackGroup" &&
       isFinite(Number(segments[2]))
         ? { type: "widget-trackgroup", trackGroupId: Number(segments[2]) }
         : null,

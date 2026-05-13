@@ -1,6 +1,6 @@
-import React, { createContext } from "react";
 import produce from "immer";
 import { clone, pullAt, shuffle } from "lodash";
+import React, { createContext } from "react";
 
 export interface GlobalState {
   playerQueueIds: number[];
