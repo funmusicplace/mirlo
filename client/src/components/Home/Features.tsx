@@ -1,13 +1,14 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { MetaCard } from "components/common/MetaCard";
-import { WidthWrapper } from "components/common/WidthContainer";
-import { FaArrowDown, FaInfo } from "react-icons/fa";
-import { bp } from "../../constants";
 import { ButtonLink } from "components/common/Button";
-import { Link } from "react-router-dom";
-import { Trans, useTranslation } from "react-i18next";
+import { MetaCard } from "components/common/MetaCard";
 import Tooltip from "components/common/Tooltip";
+import { WidthWrapper } from "components/common/WidthContainer";
+import { Trans, useTranslation } from "react-i18next";
+import { FaArrowDown, FaInfo } from "react-icons/fa";
+import { Link } from "react-router-dom";
+
+import { bp } from "../../constants";
 
 const Container = styled(WidthWrapper)`
   h2 {
@@ -391,10 +392,10 @@ const Features = () => {
                 Want to share your music with press or close family and friends?
               </strong>
               <p>
-                Use download codes to share your music for free with press or
-                your proud family members and friends. You can generate an
-                unlimited set of codes for download of your music. Distribute it
-                with your merch or send it to your press contacts.
+                Use promo codes to share your music for free with press or your
+                proud family members and friends. You can generate an unlimited
+                set of promo codes for your music. Distribute it with your merch
+                or send it to your press contacts.
               </p>
             </div>
           </Feature>
@@ -490,7 +491,6 @@ const Features = () => {
               t={t}
               i18nKey="supportUs"
               components={{
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
                 support: <Link to="/team/support"></Link>,
               }}
             />{" "}

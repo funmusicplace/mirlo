@@ -176,13 +176,13 @@ See who's buying from your label:
 
 Generate promotional codes for press, friends, and family:
 
-1. Go to **"Download Codes"**.
-2. Create codes with:
+1. Go to **"Promo codes"**.
+2. Create promo codes with:
    - Number of uses
    - Applied to specific releases
-3. Share the codes.
+3. Share the promo codes.
 
-Customers can use the codes to get a free copy of the album.
+Customers can use the promo codes to get a free copy of the album.
 
 ### Catalogue Numbers
 
