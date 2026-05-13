@@ -269,7 +269,7 @@ const ArtistHeaderSection: React.FC<{
       {(isManage ||
         (artist.linksJson?.length ?? 0) > 0 ||
         (artist.links?.length ?? 0) > 0) && (
-        <div className="max-md:hidden flex justify-end items-center px-2 py-2">
+        <div className="max-md:hidden flex justify-end items-center pt-2">
           <ArtistFormLinks
             isManage={!!isManage}
             artist={artist}
