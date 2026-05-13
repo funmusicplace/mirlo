@@ -158,9 +158,7 @@ const Header = () => {
   const show = useShow();
   const transparent = !!artistBackground && !!artistId;
 
-  const stripTint = artistId
-    ? "var(--mi-button-tint-color)"
-    : "transparent";
+  const stripTint = artistId ? "var(--mi-button-tint-color)" : "transparent";
 
   const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
@@ -213,6 +211,8 @@ const Header = () => {
               aria-label={t("logIn", { keyPrefix: "logIn" })}
               startIcon={<FaUserAlt />}
               to="/login"
+              variant="transparent"
+              className={menuButtonOverride}
             />
           )}
           {isLoggedIn && (
