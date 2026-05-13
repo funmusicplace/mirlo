@@ -37,10 +37,12 @@ const Tabs = styled.ul`
 `;
 
 export const ArtistTabs = styled(Tabs)`
-  margin: 0rem 0.5rem 1rem 0;
+  padding: 0.5rem 0 0 0;
+  padding-inline-start: 0;
+  margin: 0 0 1rem 0;
 
   @media screen and (max-width: ${bp.medium}px) {
-    padding: var(--mi-side-paddings-xsmall);
+    padding: 0.5rem 0.5rem 0 0.5rem;
     margin-bottom: 0;
     margin-top: 0;
   }
