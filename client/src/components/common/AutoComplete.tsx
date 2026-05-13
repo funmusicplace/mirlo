@@ -92,6 +92,8 @@ const AutoComplete = React.forwardRef<
   HTMLInputElement,
   {
     ariaDescribedBy?: string;
+    ariaLabelledBy?: string;
+    className?: string;
     getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
     resultsPrefix?: string;
     onSelect?: (
@@ -126,6 +128,8 @@ const AutoComplete = React.forwardRef<
   (
     {
       ariaDescribedBy,
+      ariaLabelledBy,
+      className,
       getOptions,
       resultsPrefix,
       usesNavigation,
@@ -207,17 +211,13 @@ const AutoComplete = React.forwardRef<
     }, [usesNavigation, location]);
 
     return (
-      <div
-        className={css`
-          position: relative;
-          margin-right: 1rem;
-        `}
-      >
+      <div className={`relative me-4 ${className ?? ""}`}>
         <InputEl
           aria-describedby={ariaDescribedBy}
+          aria-labelledby={ariaLabelledBy}
           name="search"
           value={searchValue}
-          placeholder={placeholder ?? ""}
+          placeholder={placeholder ?? t("search")}
           data-lpignore="true"
           id={id}
           type="search"
@@ -234,7 +234,7 @@ const AutoComplete = React.forwardRef<
             text-overflow: ellipsis;
             &::placeholder {
               color: var(--mi-text-color) !important;
-              opacity: 0.5;
+              opacity: 0.75;
             }
             @media (prefers-color-scheme: dark) {
               color: var(--mi-text-color) !important;
