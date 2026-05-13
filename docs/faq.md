@@ -93,7 +93,7 @@ For a full list of features, see our [features](./features/index.md) section. Be
     <!-- <td>❌</td> Subvert -->
   </tr>
   <tr className="comparison">
-    <th>Download codes and press kits</th>
+    <th>Promo codes and press kits</th>
     <td>✅</td> <!-- Mirlo -->
     <td>✅</td> <!-- Bandcamp -->
     <td>❌</td> <!-- Patreon -->

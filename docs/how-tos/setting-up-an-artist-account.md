@@ -86,7 +86,7 @@ Once your basics are in place, consider exploring these features:
 - **Subscriptions** - Set up supporter tiers for recurring monthly support
 - **Merchandise** - Sell physical or digital merch alongside your music
 - **Blog/Posts** - Share updates with your community via RSS-compatible posts
-- **Download Codes** - Generate codes to share music with press and friends
+- **Promo codes** - Generate promo codes to share music with press and friends
 - **Email List** - Collect emails from supporters to stay in touch
 
 ## Need Help?

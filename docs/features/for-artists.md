@@ -68,13 +68,13 @@ We can support artists from 46 countries around the world. If
 you're one of these countries you can sell to people anywhere in
 the world.
 
-## Download codes
+## Promo codes
 
 Want to share your music with press or close family and friends?
 
-Use download codes to share your music for free with press or
+Use promo codes to share your music for free with press or
 your proud family members and friends. You can generate an
-unlimited set of codes for download of your music. Distribute it
+unlimited set of promo codes for your music. Distribute it
 with your merch or send it to your press contacts.
 
 ## Flexible pricing.
