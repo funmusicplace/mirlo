@@ -216,7 +216,7 @@ export default function () {
         if (artistSlug) {
           const artist = await fetchArtistMetadata(artistSlug);
           if (artist) {
-            const avatarUrl = artist.avatar?.url.find((u) =>
+            const avatarUrl = artist.avatar?.url.find((u: string) =>
               u.includes("x600")
             );
             oembedData = {

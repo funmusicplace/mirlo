@@ -150,6 +150,32 @@ describe("MentionHighlightExtension", () => {
     expect(decorations).toHaveLength(0);
   });
 
+  it("does not decorate @ immediately following a letter (e.g. email address)", () => {
+    const decorations = getDecorations(ext, [
+      makeTextNode("contact user@example.com for info"),
+    ]);
+    expect(decorations).toHaveLength(0);
+  });
+
+  it("does not decorate @ immediately following a digit or underscore", () => {
+    const decorations = getDecorations(ext, [makeTextNode("1@test.com")]);
+    expect(decorations).toHaveLength(0);
+  });
+
+  it("still decorates @mention at the start of text", () => {
+    const decorations = getDecorations(ext, [makeTextNode("@alice hello")]);
+    expect(decorations).toHaveLength(1);
+    expect(decorations[0].attrs.class).toBe("mention-highlight");
+  });
+
+  it("decorates @mention after a space but not an inline email in the same text", () => {
+    const decorations = getDecorations(ext, [
+      makeTextNode("email user@example.com or mention @bob here"),
+    ]);
+    expect(decorations).toHaveLength(1);
+    expect(decorations[0].attrs.class).toBe("mention-highlight");
+  });
+
   it("skips non-text nodes", () => {
     const nonTextNode = { isText: false, text: undefined };
     const decorations = getDecorations(ext, [

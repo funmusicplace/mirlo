@@ -4,8 +4,10 @@ import { Decoration, DecorationSet } from "prosemirror-view";
 
 import { addAnchoredDecorations } from "./AnchoredHighlight";
 
-// Fallback pattern for the initial @ keystroke before React sets the anchor
-const MENTION_PATTERN = /@[\w.-]+(?:@[\w.-]+(?:\.[a-zA-Z]{2,})?)?/g;
+// Fallback pattern for the initial @ keystroke before React sets the anchor.
+// (?<!\w) ensures @ immediately following a letter/digit/underscore (e.g. in
+// an email address like user@example.com) does NOT trigger a mention highlight.
+const MENTION_PATTERN = /(?<!\w)@[\w.-]+(?:@[\w.-]+(?:\.[a-zA-Z]{2,})?)?/g;
 
 export class MentionHighlightExtension extends PlainExtension<
   Record<string, never>

@@ -6,11 +6,11 @@ import { describe, it, beforeEach } from "mocha";
 
 dotenv.config();
 
+import { analyzePathAndGenerateHTML } from "../src/parseIndex";
 import {
-  analyzePathAndGenerateHTML,
   getTrackGroupWidget,
   getTrackWidget,
-} from "../src/parseIndex";
+} from "../src/parseIndex/widgetUrls";
 
 import {
   clearTables,
