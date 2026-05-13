@@ -47,21 +47,26 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
   return (
     <form className="flex w-full flex-row items-start justify-between gap-4">
       <FormComponent className="w-1/2">
-        <label>{t("addExistingArtistToRoster")}</label>
-        <small>{t("addExistingArtistExplanation")}</small>
+        <h3 id="label-existing-artist">{t("addExistingArtistToRoster")}</h3>
+        <p className="mbs-1" id="description-existing-artist">
+          {t("addExistingArtistExplanation")}
+        </p>
         <AutoComplete
+          ariaDescribedBy="description-existing-artist"
+          ariaLabelledBy="label-existing-artist"
+          className="mbs-4"
           getOptions={searchArtists}
           id="input-existing-artist"
           onSelect={setLabel}
         />
       </FormComponent>
       <FormComponent className="w-1/2">
-        <label>{t("addNewArtistToRoster")}</label>
-        <small>{t("addNewArtistExplanation")}</small>
+        <h3>{t("addNewArtistToRoster")}</h3>
+        <p className="mbs-1">{t("addNewArtistExplanation")}</p>
         <ArtistButtonLink
+          className="mbs-4"
           variant="outlined"
           to="/manage/welcome"
-          size="compact"
           endIcon={<FaChevronRight />}
         >
           {t("createNewArtist")}
