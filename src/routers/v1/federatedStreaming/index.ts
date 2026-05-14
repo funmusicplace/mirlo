@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import { convertSingleArtistIntoCanimus } from "../../../utils/artist";
 import { turnItemsIntoRSS } from "../../../utils/rss";
+import { serializeSingleArtistIntoCanimus } from "../../../utils/serialize/artist";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -67,6 +67,7 @@ export default function () {
             where: whereForPublishedTrackGroups(),
             include: {
               cover: true,
+              tracks: true,
             },
             orderBy: { orderIndex: "asc" },
           },
@@ -122,7 +123,7 @@ export default function () {
       } else {
         res.json({
           results: artists.map((artist) =>
-            convertSingleArtistIntoCanimus(artist)
+            serializeSingleArtistIntoCanimus(artist)
           ),
           total: count,
         });
