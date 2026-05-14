@@ -34,6 +34,7 @@ const routes = [
   "tracks/{id}/trackPlay",
   "tracks/{id}/favorite",
   "tracks/{id}/stream/{segment}",
+  "tracks/{id}/stream/authzd/{segment}",
   "artists",
   "artists/testExistence",
   "artists/{id}",

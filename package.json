@@ -4,10 +4,11 @@
   "license": "AGPL-3.0",
   "module": "commonjs",
   "scripts": {
+    "api:debug": "dotenv ts-node src/index.ts  --inspect",
+    "api:start": "ts-node src/index.ts",
     "api:test": "tsc --noEmit && mocha test --exit --extension ts",
     "api:test:docker": "docker compose -f docker-compose.api.yml -f docker-compose.test.yml --profile test run --rm test",
-    "api:watch": "NODE_ENV=development PORT=3000 nodemon src/index.ts",
-    "api:start": "ts-node src/index.ts",
+    "api:watch": "NODE_ENV=development PORT=${PORT:-3000} nodemon src/index.ts",
     "prepare": "husky",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -121,6 +122,7 @@
     "@types/yargs": "^17.0.22",
     "@yarnpkg/pnpify": "^4.0.1",
     "concurrently": "^7.6.0",
+    "dotenv-cli": "^11.0.0",
     "lint-staged": "^15",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
@@ -148,5 +150,5 @@
     "prisma",
     "client"
   ],
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.14.1+sha512.64df448055b2d37ba269d7db535a469b8da93f8ef1140c25fd7a83c00a8fbaacb214ca0e02553b92a2c54cef78bb67d0b4817fab02001df0e24fac0faccc3b42"
 }

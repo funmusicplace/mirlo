@@ -15,12 +15,12 @@ Prerequisites:
 
 - [Docker](https://www.docker.com/get-started/)
 - [Node.js 22](https://nodejs.org/en)
-- [Yarn 4](https://yarnpkg.com)
 
 Once node is installed, you can use [Corepack](https://nodejs.org/api/corepack.html) to automatically install the correct version of yarn (as defined in `package.json`):
 
 ```sh
 corepack enable
+corepack up
 ```
 
 If you'd like to use Nix, we have a basic `shell.nix` that includes Node.js, Yarn, and other tools to develop the client. Activate the shell using `nix-shell` at the top-level of the repository.

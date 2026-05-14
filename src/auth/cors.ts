@@ -75,7 +75,20 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         isCORSPreflight ||
         isValidActivityPubEndpoint(req.path);
 
+      log.info(
+        `CORS check for ${req.method} ${req.path} - sameSite: ${isSameSite}, privateEndpoint: ${isAPIEndpointPrivate}, skipsApiKey: ${skipsApiKey}, isCorsPreflight: ${isCORSPreflight}`
+      );
+
+      log.info(
+        "headers",
+        req.headers["access-control-request-method"],
+        req.headers["access-control-request-headers"]
+      );
+
       if (skipsApiKey) {
+        log.info(
+          `${req.method} ${req.path} Skipping API key check for ${req.method} ${req.path}`
+        );
         clients = await prisma.client.findMany();
       } else {
         const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
