@@ -2,12 +2,9 @@ import ArtistRouterLink, {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
-import Box from "components/common/Box";
-import MarkdownWrapper from "components/common/MarkdownWrapper";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import SectionActionStrip from "components/common/SectionActionStrip";
 import Table from "components/common/Table";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import parse from "html-react-parser";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPen, FaTrash } from "react-icons/fa";
@@ -17,9 +14,11 @@ import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { getManagePostURLReference, getPostURLReference } from "utils/artist";
+import { getManagePostURLReference } from "utils/artist";
 
 import { ManageSectionWrapper } from "../ManageSectionWrapper";
+
+import ManageArtistPostRow from "./ManageArtistPostRow";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const { user } = useAuthContext();
@@ -91,17 +90,17 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   return (
     <ManageSectionWrapper>
-      <SpaceBetweenDiv>
-        <div />
+      <SectionActionStrip>
         <ArtistButton
           onClick={createPost}
           startIcon={<FaPlus />}
           size="compact"
           variant="dashed"
+          collapsible
         >
           {t("addNewPost", { artist: artist.name })}
         </ArtistButton>
-      </SpaceBetweenDiv>
+      </SectionActionStrip>
 
       {draftPosts.length > 0 && (
         <div className="mb-8">
@@ -109,19 +108,19 @@ const ManageArtistPosts: React.FC<{}> = () => {
           <Table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="px-3 py-2 text-left text-sm font-bold border-b border-[var(--mi-border)] text-[var(--mi-light-foreground-color)]">
+                <th className="px-3 py-2 text-left text-sm font-bold border-b border-(--mi-tint-color) text-[var(--mi-light-foreground-color)]">
                   {t("postTitle")}
                 </th>
-                <th className="px-3 py-2 text-left text-sm font-bold border-b border-[var(--mi-border)] text-[var(--mi-light-foreground-color)]">
+                <th className="px-3 py-2 text-left text-sm font-bold border-b border-(--mi-tint-color) text-[var(--mi-light-foreground-color)]">
                   {t("publicationDate")}
                 </th>
-                <th className="px-3 py-2 text-left text-sm font-bold border-b border-[var(--mi-border)] text-[var(--mi-light-foreground-color)]">
+                <th className="px-3 py-2 text-left text-sm font-bold border-b border-(--mi-tint-color) text-[var(--mi-light-foreground-color)]">
                   {t("featuredImage")}
                 </th>
-                <th className="border-b border-[var(--mi-border)]" />
+                <th className="border-b border-(--mi-tint-color)" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--mi-border)]">
+            <tbody className="divide-y divide-(--mi-tint-color)">
               {draftPosts.map((p) => (
                 <tr key={p.id}>
                   <td className="px-3 py-2 align-middle">
@@ -173,60 +172,19 @@ const ManageArtistPosts: React.FC<{}> = () => {
       )}
 
       {publishedPosts.length > 0 && (
-        <ol>
-          {publishedPosts.map((p) => (
-            <Box as="li" key={p.id} className="mb-4 bg-[var(--mi-tint-color)]">
-              <SpaceBetweenDiv className="flex flex-col">
-                <div className="mt-2 mb-2 w-full flex justify-between pb-2 border-b border-[var(--mi-border)]">
-                  <ArtistRouterLink
-                    to={getPostURLReference({ ...p, artist })}
-                    className="w-4/5 flex justify-start items-start [&_h2]:mr-4"
-                  >
-                    <h2>
-                      {p.title === "" || !p.title ? (
-                        <span className="italic">{t("untitledPost")}</span>
-                      ) : (
-                        p.title
-                      )}
-                    </h2>
-                  </ArtistRouterLink>
-                  <div className="flex">
-                    <ArtistButtonLink
-                      aria-label={t("editPost")}
-                      to={getManagePostURLReference(p)}
-                      onlyIcon
-                      variant="dashed"
-                      startIcon={<FaPen />}
-                    />
-                    <ArtistButton
-                      aria-label={t("deletePost")}
-                      className="ml-2"
-                      startIcon={<FaTrash />}
-                      onClick={() => deletePost(p.id)}
-                    />
-                  </div>
-                </div>
-                <p className="text-gray-500 mb-4 text-left w-full">
-                  {new Date(p.publishedAt) > new Date() &&
-                    t("willPublishAt", {
-                      date: formatDate({
-                        date: p.publishedAt,
-                        i18n,
-                        options: { dateStyle: "short" },
-                      }),
-                    })}
-                  {new Date(p.publishedAt) <= new Date() &&
-                    t("publishedAt", {
-                      date: formatDate({ date: p.publishedAt, i18n }),
-                    })}
-                </p>
-              </SpaceBetweenDiv>
-              <MarkdownWrapper className="line-clamp-2">
-                {parse(p.content ?? "")}
-              </MarkdownWrapper>
-            </Box>
-          ))}
-        </ol>
+        <div>
+          <h2 className="mb-3">{t("publishedPosts")}</h2>
+          <ol>
+            {publishedPosts.map((p) => (
+              <ManageArtistPostRow
+                key={p.id}
+                post={p}
+                artist={artist}
+                onDelete={deletePost}
+              />
+            ))}
+          </ol>
+        </div>
       )}
     </ManageSectionWrapper>
   );
