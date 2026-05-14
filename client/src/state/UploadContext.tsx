@@ -1,6 +1,3 @@
-import React from "react";
-import { pick } from "lodash";
-import api from "services/api";
 import {
   TrackData,
   convertMetaData,
@@ -8,8 +5,11 @@ import {
   parse,
   produceNewStatus,
 } from "components/ManageArtist/utils";
-import { useSnackbar } from "state/SnackbarContext";
+import { pick } from "lodash";
+import React from "react";
 import { useTranslation } from "react-i18next";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
 
 const timeInBetweenUploads = 5000;
 
@@ -17,6 +17,7 @@ export type UploadQueueItem = {
   title: string;
   status: number;
   trackGroupId: number;
+  image?: string; // base64 data URL or URL string
 };
 
 type Trackgroup = { artistId?: number; id: number; tracks: Track[] };
@@ -25,6 +26,7 @@ type EnqueueArgs = {
   trackgroup: Trackgroup;
   files: FileList | File[];
   reload?: (newTrack?: Track) => unknown;
+  coverImage?: string; // base64 data URL for album cover from zip import
 };
 
 type UploadContextValue = {
@@ -115,10 +117,7 @@ export const UploadContextProvider: React.FC<{
         newTrack = response.result;
         setQueue((q) => produceNewStatus(q, firstTrack.t.title, 25));
 
-        if (
-          response.uploadUrl &&
-          !response.uploadUrl.includes("minio:9000")
-        ) {
+        if (response.uploadUrl && !response.uploadUrl.includes("minio:9000")) {
           const result = await fetch(response.uploadUrl, {
             method: "PUT",
             body: firstTrack.t.file,
@@ -188,7 +187,7 @@ export const UploadContextProvider: React.FC<{
   }, [snackbar, t]);
 
   const enqueue = React.useCallback(
-    ({ trackgroup, files, reload }: EnqueueArgs) => {
+    ({ trackgroup, files, reload, coverImage }: EnqueueArgs) => {
       const fileArray =
         files instanceof FileList ? fileListIntoArray(files) : files;
       if (!fileArray.length) return;
@@ -209,11 +208,32 @@ export const UploadContextProvider: React.FC<{
 
         setQueue((q) => [
           ...q,
-          ...newTracks.map((nt) => ({
-            title: nt.t.title,
-            status: 5,
-            trackGroupId: trackgroup.id,
-          })),
+          ...newTracks.map((nt) => {
+            // Extract image from coverImage parameter (zip import) or embedded metadata
+            let image: string | undefined = coverImage;
+
+            if (!image && nt.t.metadata?.common?.picture?.[0]) {
+              try {
+                const picture = nt.t.metadata.common.picture[0];
+                const bytes = new Uint8Array(picture.data);
+                const binaryString = bytes.reduce(
+                  (data, byte) => data + String.fromCharCode(byte),
+                  ""
+                );
+                const base64 = btoa(binaryString);
+                image = `data:${picture.format};base64,${base64}`;
+              } catch (error) {
+                console.error("Error converting image to base64", error);
+              }
+            }
+
+            return {
+              title: nt.t.title,
+              status: 5,
+              trackGroupId: trackgroup.id,
+              image,
+            };
+          }),
         ]);
 
         pendingBatchesRef.current.push({

@@ -1,22 +1,21 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { InputEl } from "components/common/Input";
+import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-
-import api from "services/api";
-import useJobStatusCheck from "utils/useJobStatusCheck";
-import { useSnackbar } from "state/SnackbarContext";
-import { InputEl } from "components/common/Input";
 import { AiFillDelete } from "react-icons/ai";
+import { useParams } from "react-router-dom";
+import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+import { formatAcceptList } from "utils/uploadFormats";
+import useJobStatusCheck from "utils/useJobStatusCheck";
+
+import { bp } from "../../constants";
 
 import { Img, ReplaceSpan, Spinner, UploadPrompt } from "./UploadImage";
-import Button from "components/common/Button";
-import { bp } from "../../constants";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import { formatAcceptList } from "utils/uploadFormats";
-import { useAuthContext } from "state/AuthContext";
 
 type ImageType =
   | "background"
@@ -124,9 +123,12 @@ const UploadArtistImage: React.FC<{
   const { refetch: refresh } = useQuery(
     queryArtist({ artistSlug: artistParamId ?? "" })
   );
-  const [existingImage, setExistingImage] = React.useState(
-    getExistingImage(existing, imageType)
-  );
+  const [existingImage, setExistingImage] = React.useState<
+    string | undefined
+  >();
+  React.useEffect(() => {
+    setExistingImage(getExistingImage(existing, imageType));
+  }, [existing, imageType]);
   const [isSaving, setIsSaving] = React.useState(false);
 
   const resetWrapper = React.useCallback(async () => {

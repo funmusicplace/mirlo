@@ -273,7 +273,7 @@ export const getPresignedUploadUrl = async (
     });
     return url;
   } else if (backendStorage === "minio" && minioClient) {
-    const url = await minioClient.presignedGetObject(
+    const url = await minioClient.presignedPutObject(
       bucket,
       fileName,
       expiresInSeconds

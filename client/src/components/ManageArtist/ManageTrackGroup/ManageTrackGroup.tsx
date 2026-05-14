@@ -6,6 +6,7 @@ import {
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import FeatureFlag from "components/common/FeatureFlag";
 import {
   queryArtist,
   queryManagedTrackGroup,
@@ -30,20 +31,21 @@ import ManageTrackDefaults from "./AlbumFormComponents/ManageTrackDefaults";
 import RecommendedTrackGroups from "./AlbumFormComponents/RecommendedTrackGroups";
 import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
+import { ZipDropZone } from "./ZipDropZone";
 
 export interface TrackGroupFormData {
   title: string;
   urlSlug?: string;
-  minPrice: string;
+  minPrice?: string;
   suggestedPrice?: string;
   isGettable?: boolean;
   isPublic?: boolean;
   platformPercent?: string;
   releaseDate?: string;
   publishedAt?: string;
-  credits: string;
-  about: string;
-  coverFile: File[];
+  credits?: string;
+  about?: string;
+  coverFile?: File[];
   catalogNumber?: string;
   goalAmount?: string;
   isAllOrNothing?: boolean;
@@ -76,6 +78,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
     isPending: isLoadingTrackGroup,
     refetch,
   } = useQuery(queryManagedTrackGroup(Number(trackGroupParamId)));
+
   const { mutateAsync: deleteTrackGroup, isPending: isDeletingTrackGroup } =
     useDeleteTrackGroupMutation();
 
@@ -128,11 +131,24 @@ const ManageTrackGroup: React.FC<{}> = () => {
         <h1 className="mt-4">{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
       </div>
       <AlbumPaymentReceiver />
+      <FeatureFlag flag="zipUpload">
+        {trackGroup && (
+          <FormSection>
+            <ZipDropZone
+              existingTracksCount={trackGroup?.tracks?.length ?? 0}
+              trackGroupId={trackGroup.id}
+              artistId={artist.id}
+              reload={refetch}
+            />
+          </FormSection>
+        )}
+      </FeatureFlag>
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}
         reload={() => refetch()}
       />
+
       <FormSection>
         <h2>{t("uploadTracks")}</h2>
         <ManageTrackDefaults trackGroup={trackGroup} reload={refetch} />
@@ -165,7 +181,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
       <FormSection>
         <RecommendedTrackGroups trackGroupId={trackGroup.id} />
       </FormSection>
-
       <ArtistButtonLink
         to={getArtistManageUrl(artist.id) + "/releases/tools"}
         startIcon={<MdOutlineDownloadForOffline />}

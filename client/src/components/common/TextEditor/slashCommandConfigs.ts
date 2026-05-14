@@ -44,8 +44,6 @@ const SLASH_COMMANDS: SlashCommandConfig[] = [
       ]);
 
       // Deduplicate by ID and combine results
-      console.log("byTitle", byTitle);
-      console.log("byArtist", byArtist);
       const seen = new Set<number>();
       const results = [...byTitle.results, ...byArtist.results]
         .filter((r) => {

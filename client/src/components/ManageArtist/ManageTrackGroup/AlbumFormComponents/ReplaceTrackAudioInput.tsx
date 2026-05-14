@@ -1,16 +1,16 @@
-import Tooltip from "components/common/Tooltip";
 import { css } from "@emotion/css";
-import { FaUpload } from "react-icons/fa";
-import { useTranslation } from "react-i18next";
-import { useForm, useFormContext } from "react-hook-form";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import Tooltip from "components/common/Tooltip";
 import React from "react";
-import useJobStatusCheck from "utils/useJobStatusCheck";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaUpload } from "react-icons/fa";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import { formatAcceptList } from "utils/uploadFormats";
+import useJobStatusCheck from "utils/useJobStatusCheck";
 
-const ACCEPTED_AUDIO =
+export const ACCEPTED_AUDIO =
   "audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a";
 export interface FormData {
   trackFile: FileList;

@@ -53,12 +53,13 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
 
   return (
     <div className="flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-tint-color)">
-      <div className="hidden md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3 md:px-3 md:py-1">
+      <div className="hidden md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3 md:px-3 md:py-1">
         <div>{t("title")}</div>
         <div className="text-right">{t("publishedAt")}</div>
         <div className="text-right">{t("releaseDate")}</div>
         <div className="text-right">{t("tracks")}</div>
         <div className="text-right">{t("catalogNumber")}</div>
+        <div className="text-right">{t("price")}</div>
         <div className="text-right">{t("visibility")}</div>
         <div className="text-right">
           <Tooltip hoverText={t("managingPaymentsTooltip")}>
@@ -75,7 +76,7 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
         return (
           <div
             key={release.id}
-            className="flex flex-col gap-3 rounded-md md:px-3 md:py-1 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3"
+            className="flex flex-col gap-3 rounded-md md:px-3 md:py-1 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3"
           >
             <div className="flex items-center gap-3 min-w-0">
               {release.cover && (
@@ -126,6 +127,14 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
                 title={release.catalogNumber}
               >
                 {release.catalogNumber}
+              </div>
+              <div id="price" className="md:hidden">
+                {t("price")}
+              </div>
+              <div className="text-right" aria-labelledby="price">
+                {release.minPrice
+                  ? `${release.minPrice} ${release.currency}`
+                  : "×"}
               </div>
 
               <div id="visibility" className="md:hidden">

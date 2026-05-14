@@ -629,3 +629,42 @@ interface TrackGroupDownloadableContent {
   downloadableContentId: string;
   downloadableContent: DownloadableContent;
 }
+
+// Zip Import Types
+interface AlbumMeta {
+  title?: string;
+  year?: number;
+  date?: string;
+  label?: string;
+  genres?: string[];
+  albumArtist?: string;
+  releaseDate?: string;
+}
+
+interface ExtractedAudioFile {
+  file: File;
+  title: string;
+  artists: string[];
+  trackNumber: number | null;
+  isrc?: string;
+  duration?: number;
+}
+
+interface ExtractedImageFile {
+  file: File;
+  name: string;
+  dataUrl?: string; // base64 data URL for preview
+}
+
+interface ExtractedDownloadableContentFile {
+  file: File;
+  name: string;
+}
+
+interface PreScanResult {
+  audioFiles: ExtractedAudioFile[];
+  imageFiles: ExtractedImageFile[];
+  downloadableContentFiles: ExtractedDownloadableContentFile[];
+  invalidFiles: { name: string; reason: string }[];
+  albumMeta: AlbumMeta;
+}

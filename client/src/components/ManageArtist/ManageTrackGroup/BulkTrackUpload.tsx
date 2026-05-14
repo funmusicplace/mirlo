@@ -1,13 +1,16 @@
-import React from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
-import { useTranslation } from "react-i18next";
-import { css } from "@emotion/css";
-import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 import { Buffer } from "buffer";
 import process from "process";
-import { useUpload } from "state/UploadContext";
+
+import { css } from "@emotion/css";
+import FormComponent from "components/common/FormComponent";
 import UploadFiles from "components/ManageArtist/UploadFiles";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useUpload } from "state/UploadContext";
+
+import { ACCEPTED_AUDIO } from "./AlbumFormComponents/ReplaceTrackAudioInput";
+import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
@@ -67,7 +70,7 @@ export const BulkTrackUpload: React.FC<{
         )}
         <FormComponent>
           <UploadFiles
-            accept="audio/flac,audio/wav,audio/x-wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+            accept={ACCEPTED_AUDIO}
             label={t("uploadTracksDescription")}
             nameForId="track-files"
             {...register("trackFiles")}

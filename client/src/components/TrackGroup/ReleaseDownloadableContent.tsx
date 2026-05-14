@@ -1,14 +1,11 @@
 import { css } from "@emotion/css";
-
+import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 import { useTranslation } from "react-i18next";
-
-import { bp } from "../../constants";
-
 import { FaDownload } from "react-icons/fa";
+import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 
-import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
-import api from "services/api";
+import { bp } from "../../constants";
 
 const ReleaseDownloadableContent: React.FC<{
   trackGroup: TrackGroup;
