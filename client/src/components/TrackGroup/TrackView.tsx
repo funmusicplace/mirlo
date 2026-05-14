@@ -78,8 +78,8 @@ function TrackView() {
             align-items: center;
 
             td {
-              padding: 0rem 0.4rem 0rem 0rem !important;
-              margin: 0.1rem 0rem !important;
+              padding: 0rem 0.4rem 0rem 0rem;
+              margin: 0.1rem 0rem;
             }
 
             a {
@@ -88,7 +88,7 @@ function TrackView() {
 
             @media screen and (max-width: ${bp.small}px) {
               td {
-                padding: 0.2rem 0.1rem 0.2rem 0rem !important;
+                padding: 0.2rem 0.1rem 0.2rem 0rem;
               }
             }
           `}
