@@ -638,3 +638,113 @@ export const addSizesToImage = (
       }
     : null;
 };
+
+export const convertSingleArtistIntoCanimus = (artist: LocalArtist) => {
+  const artistUrl = `https://mirlo.space/${artist.urlSlug}`;
+  return {
+    type: "artist",
+    name: artist.name,
+    url: artistUrl,
+    images: {
+      main: {
+        src: `https://cdn.mirlo.space/file/artist-avatars/${artist.avatar?.url[0]}.webp`,
+        alt: null,
+      },
+    },
+    summary: artist.shortDescription,
+    description: artist.bio,
+    links: Object.assign(
+      {},
+      ...artist.linksJson.map((link) => ({
+        name: link.linkLabel,
+        href: link.url,
+        type: link.linkType,
+      }))
+    ),
+    children: artist.trackGroups?.map((trackGroup) =>
+      convertSingleTrackGroupIntoCanimus(trackGroup, artistUrl)
+    ),
+  };
+};
+
+export const convertSingleTrackGroupIntoCanimus = (
+  trackGroup: LocalArtist.trackGroup,
+  artistUrl: string
+) => {
+  const releaseUrl = `${artistUrl}/release/${trackGroup.urlSlug}`;
+  return {
+    type: "album",
+    name: trackGroup.title,
+    url: releaseUrl,
+    release_date: trackGroup.releaseDate,
+    license: trackGroup.credits,
+    artist: trackGroup.artistId,
+    images: {
+      cover: {
+        src: `https://cdn.mirlo.space/file/trackgroup-covers/${trackGroup.cover.url[0]}.webp`,
+      },
+    },
+    description: trackGroup.about,
+    children: trackGroup.tracks?.map((track: Track) =>
+      convertSingleTrackIntoCanimus(track, releaseUrl)
+    ),
+  };
+};
+
+export const convertSingleTrackIntoCanimus = (
+  track: Track,
+  releaseUrl: string
+) => {
+  const trackUrl = `${releaseUrl}/tracks/${track.id}`;
+
+  return {
+    type: "track",
+    name: track.title,
+    url: trackUrl,
+    duration: track.metadata?.format.duration,
+    media: [
+      {
+        src: `https://mirlo.space/v1/tracks/${track.id}/stream/playlist.m3u8`,
+        type: "audio/x-mpegurl",
+      },
+    ],
+  };
+};
+
+export const processSingleArtist = (
+  artist: LocalArtist,
+  userId?: number,
+  isUserSubscriber?: boolean
+) => {
+  return {
+    ...artist,
+    posts: artist?.posts?.map((p: Post) =>
+      postProcessor.single(p, isUserSubscriber || artist.userId === userId)
+    ),
+    merch: artist?.merch?.map(processSingleMerch),
+    background: addSizesToImage(
+      finalArtistBackgroundBucket,
+      artist?.background
+    ),
+    avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
+    trackGroups: artist?.trackGroups?.map((tg) =>
+      processSingleTrackGroup(tg, {
+        loggedInUserId: userId,
+      })
+    ),
+    subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
+      ...tier,
+      images: tier.images?.map((img) => ({
+        ...img,
+        image: addSizesToImage(finalImageBucket, img.image),
+      })),
+      releases: tier.releases?.map((rel) => ({
+        ...rel,
+        trackGroup: {
+          ...rel.trackGroup,
+          cover: addSizesToImage(finalCoversBucket, rel.trackGroup.cover),
+        },
+      })),
+    })),
+  };
+};

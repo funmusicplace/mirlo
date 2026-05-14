@@ -1,9 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
-import { processSingleArtist } from "../../../utils/artist";
-import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
+
+import { convertSingleArtistIntoCanimus } from "../../../utils/artist";
 import { turnItemsIntoRSS } from "../../../utils/rss";
+import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -120,7 +121,9 @@ export default function () {
         res.send(feed.xml());
       } else {
         res.json({
-          results: artists.map((artist) => processSingleArtist(artist)),
+          results: artists.map((artist) =>
+            convertSingleArtistIntoCanimus(artist)
+          ),
           total: count,
         });
       }
