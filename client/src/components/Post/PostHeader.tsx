@@ -45,10 +45,7 @@ const AvatarLink: React.FC<{
   </Link>
 );
 
-const PostHeader: React.FC<{ post: Post; hasTracks: boolean }> = ({
-  post,
-  hasTracks,
-}) => {
+const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
 
   const featuredImage = post.featuredImage?.src;
@@ -104,8 +101,7 @@ const PostHeader: React.FC<{ post: Post; hasTracks: boolean }> = ({
       >
         <div
           className={
-            (hasTracks ? "max-w-6xl" : "max-w-3xl") +
-            " max-w-3xl p-1 flex pt-8 w-full justify-center " +
+            "max-w-3xl p-1 flex pt-8 w-full justify-center " +
             css`
               margin: 0 auto 0;
               position: relative;

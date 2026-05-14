@@ -6,14 +6,12 @@ import LazyIframe from "components/common/LazyIframe";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { MetaCard } from "components/common/MetaCard";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 import parse, { Element } from "html-react-parser";
 import { queryPost } from "queries";
-import React, { useMemo } from "react";
+import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import useArtistQuery from "utils/useArtistQuery";
-import { useTracksQuery } from "utils/useTracksQuery";
 
 import PostHeader from "./PostHeader";
 
@@ -75,13 +73,6 @@ const Post: React.FC = () => {
     queryPost({ postId: postId ?? "", artistId: artistId ?? "" })
   );
 
-  // Fetch full track details if post has associated tracks
-  const trackIds = useMemo(() => {
-    return post?.tracks?.map((t) => t.trackId) ?? [];
-  }, [post?.tracks]);
-
-  const { data: tracksData } = useTracksQuery(trackIds);
-
   if (!post) {
     if (!isLoading) {
       return (
@@ -111,59 +102,36 @@ const Post: React.FC = () => {
         description={post.content.slice(0, 500)}
         image={post.featuredImage?.src}
       />
-      <PostHeader post={post} hasTracks={trackIds.length > 0} />
+      <PostHeader post={post} />
 
-      <div className="max-w-6xl mx-auto px-4 pt-8">
-        <div
-          className={`grid gap-8 ${trackIds.length > 0 ? "grid-cols-1 lg:grid-cols-[1fr_400px]" : "grid-cols-1"}`}
-        >
-          <div
-            className={`${trackIds.length > 0 ? "lg:col-span-2" : "max-w-3xl mx-auto w-full"}`}
-          ></div>
-          <div
-            className={trackIds.length > 0 ? "" : "max-w-3xl mx-auto w-full"}
-          >
-            <PageMarkdownWrapper>
-              {post.isContentHidden && (
-                <div className="py-8">
-                  <Trans
-                    t={t}
-                    i18nKey="notAvailable"
-                    components={{
-                      support: (
-                        <Link to={`/${post.artist?.urlSlug}/support`}></Link>
-                      ),
-                    }}
-                  />
-                </div>
-              )}
-              {!post.isContentHidden && (
-                <MarkdownWrapper>
-                  {parse(post.content, {
-                    replace(node) {
-                      if (
-                        node instanceof Element &&
-                        node.tagName === "iframe"
-                      ) {
-                        const { loading: _loading, ...attribs } = node.attribs;
-                        return <LazyIframe {...attribs} />;
-                      }
-                    },
-                  })}
-                </MarkdownWrapper>
-              )}
-            </PageMarkdownWrapper>
-          </div>
-          {tracksData && tracksData.length > 0 && (
-            <div className="lg:col-start-2">
-              <PublicTrackGroupListing
-                tracks={tracksData}
-                trackGroup={tracksData[0]?.trackGroup}
-                size="small"
+      <div className="max-w-3xl mx-auto px-4 pt-8">
+        <PageMarkdownWrapper>
+          {post.isContentHidden && (
+            <div className="py-8">
+              <Trans
+                t={t}
+                i18nKey="notAvailable"
+                components={{
+                  support: (
+                    <Link to={`/${post.artist?.urlSlug}/support`}></Link>
+                  ),
+                }}
               />
             </div>
           )}
-        </div>
+          {!post.isContentHidden && (
+            <MarkdownWrapper>
+              {parse(post.content, {
+                replace(node) {
+                  if (node instanceof Element && node.tagName === "iframe") {
+                    const { loading: _loading, ...attribs } = node.attribs;
+                    return <LazyIframe {...attribs} />;
+                  }
+                },
+              })}
+            </MarkdownWrapper>
+          )}
+        </PageMarkdownWrapper>
       </div>
       {post.artist && (
         <SupportArtistPopUp
