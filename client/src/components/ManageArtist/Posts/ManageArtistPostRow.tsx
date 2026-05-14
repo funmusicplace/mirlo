@@ -33,7 +33,7 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
     <Box
       as="li"
       className="mb-4 bg-[var(--mi-tint-color)]"
-      style={{ padding: "0.5rem" }}
+      style={{ padding: "1rem 1rem 1rem 0.5rem" }}
     >
       <div className="flex flex-col">
         <div className="w-full flex items-center justify-between gap-2">
@@ -89,7 +89,7 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
           id={detailsId}
           className={
             isExpanded
-              ? "mt-2 pt-2 border-t border-(--mi-tint-color)"
+              ? "mt-2 pt-2 pl-8 pr-4 pb-4 border-t border-(--mi-tint-color)"
               : "hidden"
           }
         >
