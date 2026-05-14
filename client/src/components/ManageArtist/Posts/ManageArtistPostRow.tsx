@@ -29,15 +29,24 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
   const [isExpanded, setIsExpanded] = React.useState(false);
   const detailsId = `post-details-${post.id}`;
 
+  const isFuture = new Date(post.publishedAt) > new Date();
+  const dateLabel = isFuture
+    ? t("willPublishAt", {
+        date: formatDate({
+          date: post.publishedAt,
+          i18n,
+          options: { dateStyle: "short" },
+        }),
+      })
+    : t("publishedAt", {
+        date: formatDate({ date: post.publishedAt, i18n }),
+      });
+
   return (
-    <Box
-      as="li"
-      className="mb-4 bg-[var(--mi-tint-color)]"
-      style={{ padding: "1rem 1rem 1rem 0.5rem" }}
-    >
+    <Box as="li" className="mb-4 p-4 bg-(--mi-button-tint-color)">
       <div className="flex flex-col">
-        <div className="w-full flex items-center justify-between gap-2">
-          <div className="flex-1 min-w-0 flex items-center gap-2">
+        <div className="w-full flex items-center justify-between gap-4">
+          <div className="flex-1 min-w-0 flex items-center gap-4">
             <Button
               type="button"
               variant="transparent"
@@ -50,16 +59,10 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
                 isExpanded ? t("collapseDetails") : t("expandDetails")
               }
               onClick={() => setIsExpanded((v) => !v)}
-              style={{
-                padding: "0.25rem",
-                height: "auto",
-                width: "auto",
-                lineHeight: 1,
-              }}
             />
             <ArtistRouterLink
               to={getPostURLReference({ ...post, artist })}
-              className="min-w-0 flex-1 flex justify-start items-start [&_h2]:mr-4"
+              className="min-w-0 flex-1 flex flex-col justify-start items-start"
             >
               <h2 className="truncate mb-0!">
                 {post.title === "" || !post.title ? (
@@ -68,6 +71,9 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
                   post.title
                 )}
               </h2>
+              <p className="text-xs text-(--mi-secondary-text-color) mt-0.5 truncate">
+                {dateLabel}
+              </p>
             </ArtistRouterLink>
           </div>
           <div className="flex items-center gap-2">
@@ -89,24 +95,10 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
           id={detailsId}
           className={
             isExpanded
-              ? "mt-2 pt-2 pl-8 pr-4 pb-4 border-t border-(--mi-tint-color)"
+              ? "mt-4 pt-4 border-t border-(--mi-tint-color)"
               : "hidden"
           }
         >
-          <p className="text-gray-500 mb-4 text-left w-full">
-            {new Date(post.publishedAt) > new Date() &&
-              t("willPublishAt", {
-                date: formatDate({
-                  date: post.publishedAt,
-                  i18n,
-                  options: { dateStyle: "short" },
-                }),
-              })}
-            {new Date(post.publishedAt) <= new Date() &&
-              t("publishedAt", {
-                date: formatDate({ date: post.publishedAt, i18n }),
-              })}
-          </p>
           <MarkdownWrapper className="line-clamp-5">
             {parse(post.content ?? "")}
           </MarkdownWrapper>

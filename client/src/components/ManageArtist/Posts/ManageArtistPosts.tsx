@@ -105,69 +105,71 @@ const ManageArtistPosts: React.FC<{}> = () => {
       {draftPosts.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-3">{t("drafts")}</h2>
-          <Table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="px-3 py-2 text-left text-sm font-bold border-b border-(--mi-tint-color) text-[var(--mi-light-foreground-color)]">
-                  {t("postTitle")}
-                </th>
-                <th className="px-3 py-2 text-left text-sm font-bold border-b border-(--mi-tint-color) text-[var(--mi-light-foreground-color)]">
-                  {t("publicationDate")}
-                </th>
-                <th className="px-3 py-2 text-left text-sm font-bold border-b border-(--mi-tint-color) text-[var(--mi-light-foreground-color)]">
-                  {t("featuredImage")}
-                </th>
-                <th className="border-b border-(--mi-tint-color)" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-(--mi-tint-color)">
-              {draftPosts.map((p) => (
-                <tr key={p.id}>
-                  <td className="px-3 py-2 align-middle">
-                    <ArtistRouterLink to={getManagePostURLReference(p)}>
-                      {p.title === "" || !p.title ? (
-                        <span className="italic">{t("untitledPost")}</span>
-                      ) : (
-                        p.title
-                      )}
-                    </ArtistRouterLink>
-                  </td>
-                  <td className="px-3 py-2 align-middle">
-                    {formatDate({
-                      date: p.publishedAt,
-                      i18n,
-                      options: { dateStyle: "short" },
-                    })}
-                  </td>
-                  <td className="px-3 py-2 align-middle">
-                    {p.featuredImage && (
-                      <img
-                        src={p.featuredImage.src}
-                        alt=""
-                        className="w-12 h-12 object-cover rounded-sm"
-                      />
-                    )}
-                  </td>
-                  <td className="px-3 py-2 align-middle">
-                    <div className="flex justify-end gap-2">
-                      <ArtistButtonLink
-                        aria-label={t("editPost")}
-                        to={getManagePostURLReference(p)}
-                        onlyIcon
-                        variant="dashed"
-                        startIcon={<FaPen />}
-                      />
-                      <ArtistButton
-                        aria-label={t("deletePost")}
-                        startIcon={<FaTrash />}
-                        onClick={() => deletePost(p.id)}
-                      />
-                    </div>
-                  </td>
+          <div className="border border-(--mi-tint-color)">
+            <Table className="w-full border-collapse text-xs">
+              <thead>
+                <tr>
+                  <th className="px-3 py-2 text-left font-normal bg-(--mi-button-tint-color) text-(--mi-text-color)">
+                    {t("postTitle")}
+                  </th>
+                  <th className="px-3 py-2 text-center font-normal bg-(--mi-button-tint-color) text-(--mi-text-color) border-l border-(--mi-tint-color)">
+                    {t("publicationDate")}
+                  </th>
+                  <th className="px-3 py-2 text-center font-normal bg-(--mi-button-tint-color) text-(--mi-text-color) border-l border-(--mi-tint-color)">
+                    {t("featuredImage")}
+                  </th>
+                  <th className="bg-(--mi-button-tint-color) border-l border-(--mi-tint-color)" />
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody className="divide-y divide-(--mi-tint-color)">
+                {draftPosts.map((p) => (
+                  <tr key={p.id}>
+                    <td className="px-3 py-2 align-middle">
+                      <ArtistRouterLink to={getManagePostURLReference(p)}>
+                        {p.title === "" || !p.title ? (
+                          <span className="italic">{t("untitledPost")}</span>
+                        ) : (
+                          p.title
+                        )}
+                      </ArtistRouterLink>
+                    </td>
+                    <td className="px-3 py-2 text-center align-middle">
+                      {formatDate({
+                        date: p.publishedAt,
+                        i18n,
+                        options: { dateStyle: "short" },
+                      })}
+                    </td>
+                    <td className="px-3 py-2 text-center align-middle">
+                      {p.featuredImage && (
+                        <img
+                          src={p.featuredImage.src}
+                          alt=""
+                          className="w-12 h-12 object-cover rounded-sm mx-auto"
+                        />
+                      )}
+                    </td>
+                    <td className="px-3 py-2 align-middle">
+                      <div className="flex justify-end gap-2">
+                        <ArtistButtonLink
+                          aria-label={t("editPost")}
+                          to={getManagePostURLReference(p)}
+                          onlyIcon
+                          variant="dashed"
+                          startIcon={<FaPen />}
+                        />
+                        <ArtistButton
+                          aria-label={t("deletePost")}
+                          startIcon={<FaTrash />}
+                          onClick={() => deletePost(p.id)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
         </div>
       )}
 
