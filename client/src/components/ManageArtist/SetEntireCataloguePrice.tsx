@@ -6,6 +6,7 @@ import Modal from "components/common/Modal";
 import { getCurrencySymbol } from "components/common/Money";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FaTag } from "react-icons/fa";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
@@ -55,10 +56,9 @@ const SetEntireCataloguePrice: React.FC = () => {
       <ArtistButton
         onClick={showModal}
         size="compact"
-        variant="outlined"
-        className={css`
-          height: 100%;
-        `}
+        variant="dashed"
+        collapsible
+        startIcon={<FaTag />}
       >
         {t("setEntireCataloguePrice")}
       </ArtistButton>

@@ -1,21 +1,19 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { moneyDisplay } from "components/common/Money";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import SectionActionStrip from "components/common/SectionActionStrip";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import { queryArtist, queryPublicLabelTrackGroups } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../../constants";
 
 import { ArtistButton } from "./ArtistButtons";
-
-import api from "services/api";
-
 import ArtistTrackGroup from "./ArtistTrackGroup";
 import SortableArtistAlbums from "./SortableArtistAlbums";
 
@@ -72,10 +70,9 @@ const ArtistAlbums: React.FC = () => {
       `}
     >
       {artist.userId === user?.id && (
-        <SpaceBetweenDiv>
-          <div />
+        <SectionActionStrip tight>
           <NewAlbumButton artist={artist} />
-        </SpaceBetweenDiv>
+        </SectionActionStrip>
       )}
       {!artist.isLabelProfile && <SortableArtistAlbums />}
       {artist.isLabelProfile && (
