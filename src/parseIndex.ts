@@ -102,6 +102,9 @@ const determineType = (metadata: PageMetadata) => {
   return "article";
 };
 
+const mirloDefaultDescription = "Buy and sell music directly from musicians.";
+const mirloDefaultImagePath = "default-meta-image.webp";
+
 const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
   const {
     title,
@@ -134,8 +137,8 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:card" content="${isAlbum || twitterPlayer ? "player" : "summary"}" />
 
-    <meta property="og:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
-    <meta name="twitter:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
+    <meta property="og:image" content="${imageUrl ? imageUrl : "/" + mirloDefaultImagePath}" />
+    <meta name="twitter:image" content="${imageUrl ? imageUrl : "/" + mirloDefaultImagePath}" />
     <meta name="theme-color" content="${metadata.color}" />
     <meta name="msapplication-TileColor" content="${metadata.color}" />
 
@@ -168,8 +171,6 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     ${schemas.map((schema) => `<script type="application/ld+json">${schema}</script>`).join("\n    ")}
   `);
 };
-
-const mirloDefaultDescription = "Buy and sell music directly from musicians.";
 
 const handleReleasesPage: RouteHandler<{}> = async ({ $, client }) => {
   buildOpenGraphTags($, {
@@ -583,6 +584,7 @@ const handleAuthPage: RouteHandler<AuthParams> = async ({
     title,
     description: mirloDefaultDescription,
     url: `${client.applicationUrl}/${pageType}`,
+    imageUrl: `${client.applicationUrl}/${mirloDefaultImagePath}`,
   });
 };
 
@@ -591,6 +593,7 @@ const handleDefault: RouteHandler<{}> = async ({ $, client }) => {
     title: "Mirlo",
     description: mirloDefaultDescription,
     url: client.applicationUrl,
+    imageUrl: `${client.applicationUrl}/${mirloDefaultImagePath}`,
   });
 };
 
