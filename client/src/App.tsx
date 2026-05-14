@@ -70,7 +70,7 @@ function App() {
       <MetaCard
         title="Mirlo"
         description="A music distribution and patronage site"
-        image="/android-chrome-512x512.png"
+        image="/default-meta-image.webp"
       />
       <ArtistColorsProvider>
         <>
