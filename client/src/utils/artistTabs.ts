@@ -6,8 +6,6 @@ export interface TabConfig {
   visible: boolean;
   to: string;
   navLinkId?: string;
-  editTo?: string;
-  editAriaLabel?: string;
 }
 
 export function sortTabsByOrder(
