@@ -1,6 +1,7 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Modal from "components/common/Modal";
 import { uploadDownloadableContentFile } from "components/ManageArtist/Merch/DownloadableContent";
+import { useSaveAlbumFormMutation } from "queries";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
@@ -36,6 +37,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "zipImport" });
   const { enqueue } = useUpload();
+  const saveMutation = useSaveAlbumFormMutation();
 
   const hasInvalidFiles = (preScanResult?.invalidFiles.length ?? 0) > 0;
 
@@ -60,13 +62,26 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
     albumMeta.year ||
     albumMeta.date ||
     albumMeta.label ||
+    albumMeta.releaseDate ||
     (albumMeta.genres?.length ?? 0) > 0;
+
+  console.log("hasreleasedate", albumMeta.releaseDate, albumMeta.date); // DEBUG
 
   const handleZipImportConfirm = React.useCallback(
     async (result: PreScanResult | null, coverIndex: number) => {
       if (!result) {
         return;
       }
+      // Update the track group with album meta data.
+      await saveMutation.mutateAsync({
+        trackGroupId,
+        formData: {
+          title: albumMeta.title ?? "",
+          releaseDate: albumMeta.releaseDate ?? undefined,
+        },
+        artistId,
+      });
+
       console.log("Importing with result:", result, "cover is ", coverIndex);
 
       // Upload cover image using the same pattern as UploadArtistImage
@@ -199,27 +214,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
                   {t("releaseDate")}
                 </dt>
                 <dd className="m-0 text-[var(--mi-text-color)]">
-                  {albumMeta.date ?? String(albumMeta.year)}
-                </dd>
-              </>
-            )}
-            {albumMeta.label && (
-              <>
-                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
-                  {t("label")}
-                </dt>
-                <dd className="m-0 text-[var(--mi-text-color)]">
-                  {albumMeta.label}
-                </dd>
-              </>
-            )}
-            {albumMeta.genres && albumMeta.genres.length > 0 && (
-              <>
-                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
-                  {t("genre")}
-                </dt>
-                <dd className="m-0 text-[var(--mi-text-color)]">
-                  {albumMeta.genres.join(", ")}
+                  {albumMeta.releaseDate ?? String(albumMeta.releaseDate)}
                 </dd>
               </>
             )}

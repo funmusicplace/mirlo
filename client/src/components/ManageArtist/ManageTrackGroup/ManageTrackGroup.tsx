@@ -36,16 +36,16 @@ import { ZipDropZone } from "./ZipDropZone";
 export interface TrackGroupFormData {
   title: string;
   urlSlug?: string;
-  minPrice: string;
+  minPrice?: string;
   suggestedPrice?: string;
   isGettable?: boolean;
   isPublic?: boolean;
   platformPercent?: string;
   releaseDate?: string;
   publishedAt?: string;
-  credits: string;
-  about: string;
-  coverFile: File[];
+  credits?: string;
+  about?: string;
+  coverFile?: File[];
   catalogNumber?: string;
   goalAmount?: string;
   isAllOrNothing?: boolean;
@@ -78,6 +78,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
     isPending: isLoadingTrackGroup,
     refetch,
   } = useQuery(queryManagedTrackGroup(Number(trackGroupParamId)));
+
   const { mutateAsync: deleteTrackGroup, isPending: isDeletingTrackGroup } =
     useDeleteTrackGroupMutation();
 

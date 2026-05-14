@@ -232,7 +232,6 @@ export const prescanAudioFiles = async (
 
   // Parse ID3 metadata for audio files
   const parsed = await parse(audioFiles.map((af) => af.file));
-
   const enhancedAudioFiles = audioFiles.map((af, idx) => {
     const metadata = parsed[idx];
     const title = metadata.metadata.common.title || af.file.name;
@@ -241,6 +240,11 @@ export const prescanAudioFiles = async (
       : null;
     const artists = metadata.metadata.common.artists || [];
 
+    console.log("metadata", metadata.metadata.common, {
+      title,
+      trackNumber,
+      artists,
+    }); // DEBUG
     return {
       ...af,
       title,
@@ -248,6 +252,11 @@ export const prescanAudioFiles = async (
       artists: artists as string[],
       duration: metadata.metadata.format.duration,
       isrc: metadata.metadata.common.isrc?.[0],
+      lyrics: metadata.metadata.common.lyrics,
+      genre: metadata.metadata.common.genre,
+      album: metadata.metadata.common.album,
+      releaseDate: metadata.metadata.common.date,
+      license: metadata.metadata.common.license,
     };
   });
 
@@ -273,6 +282,7 @@ export const prescanAudioFiles = async (
       label: parsed[0]?.metadata.common.label?.[0],
       genres: parsed[0]?.metadata.common.genre,
       albumArtist: parsed[0]?.metadata.common.albumartist,
+      releaseDate: parsed[0]?.metadata.common.date,
     },
   };
 };
