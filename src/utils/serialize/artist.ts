@@ -37,6 +37,19 @@ interface LocalArtist extends Artist {
     images?: { image: Image }[];
     releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
   })[];
+  user?: {
+    artistLabels?: {
+      artist: Artist & {
+        avatar?: ArtistAvatar | null;
+        background?: ArtistBackground | null;
+        trackGroups?: (TrackGroup & {
+          cover?: TrackGroupCover | null;
+          tracks?: Track[];
+        })[];
+      };
+    }[];
+    [key: string]: unknown;
+  } | null;
 }
 
 export const processSingleArtist = (
@@ -77,5 +90,27 @@ export const processSingleArtist = (
         },
       })),
     })),
+    user: artist.user
+      ? {
+          ...artist.user,
+          artistLabels: artist.user.artistLabels?.map((al) => ({
+            ...al,
+            artist: {
+              ...al.artist,
+              avatar: addSizesToImage(
+                finalArtistAvatarBucket,
+                al.artist?.avatar
+              ),
+              background: addSizesToImage(
+                finalArtistBackgroundBucket,
+                al.artist?.background
+              ),
+              trackGroups: al.artist?.trackGroups?.map((tg) =>
+                processSingleTrackGroup(tg, { loggedInUserId: userId })
+              ),
+            },
+          })),
+        }
+      : artist.user,
   };
 };

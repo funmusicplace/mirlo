@@ -27,7 +27,11 @@ import {
 } from "./minio";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
-import { deleteTrackGroup, trackGroupPublishedObject } from "./trackGroup";
+import {
+  deleteTrackGroup,
+  trackGroupPublishedObject,
+  whereForPublishedTrackGroups,
+} from "./trackGroup";
 export { processSingleArtist } from "./serialize/artist";
 
 type Params = {
@@ -594,7 +598,25 @@ export const singleInclude = (queryOptions?: {
             artist: { deletedAt: null },
           },
           include: {
-            artist: true,
+            artist: {
+              include: {
+                avatar: {
+                  where: { deletedAt: null },
+                },
+                background: {
+                  where: { deletedAt: null },
+                },
+                trackGroups: {
+                  where: whereForPublishedTrackGroups(),
+                  include: {
+                    cover: true,
+                    tracks: true,
+                  },
+                  orderBy: { releaseDate: "desc" },
+                  take: 4,
+                },
+              },
+            },
           },
         },
       },
