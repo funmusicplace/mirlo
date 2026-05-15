@@ -15,6 +15,7 @@ const TrackRowPlayControl: React.FC<{
   canPlayTrack: boolean;
   isDisabled?: boolean;
   inWidget?: boolean;
+  compact?: boolean;
 }> = ({
   trackId,
   trackNumber,
@@ -22,6 +23,7 @@ const TrackRowPlayControl: React.FC<{
   canPlayTrack,
   isDisabled,
   inWidget,
+  compact,
 }) => {
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex },
@@ -62,13 +64,21 @@ const TrackRowPlayControl: React.FC<{
 
   const stackClass = inWidget
     ? "relative w-6 h-6 max-sm:w-5 max-sm:h-5"
-    : "relative w-8 h-8 max-sm:w-7 max-sm:h-7";
+    : compact
+      ? "relative w-6 h-6 max-sm:w-5 max-sm:h-5"
+      : "relative w-8 h-8 max-sm:w-7 max-sm:h-7";
 
   const numberClass = inWidget
     ? "absolute inset-0 flex items-center justify-start text-[0.7rem] max-sm:text-[0.6rem]"
-    : "absolute inset-0 flex items-center justify-center";
+    : compact
+      ? "absolute inset-0 flex items-center justify-center text-sm"
+      : "absolute inset-0 flex items-center justify-center";
 
-  const iconClass = inWidget ? "text-[0.7rem] max-sm:text-[0.6rem]" : "text-sm";
+  const iconClass = inWidget
+    ? "text-[0.7rem] max-sm:text-[0.6rem]"
+    : compact
+      ? "text-sm"
+      : "text-sm";
 
   if (isThisTrackPlaying) {
     return (

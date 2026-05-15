@@ -39,13 +39,21 @@ const PlayCell: React.FC<{
   addTracksToQueue: (id: number) => void;
   onTrackPlay: () => void;
   inWidget?: boolean;
-}> = ({ track, canPlayTrack, addTracksToQueue, onTrackPlay, inWidget }) => (
+  compact?: boolean;
+}> = ({
+  track,
+  canPlayTrack,
+  addTracksToQueue,
+  onTrackPlay,
+  inWidget,
+  compact,
+}) => (
   <td
     onClick={onTrackPlay}
     className={
       inWidget
         ? "pl-4! pr-2! py-0.5! w-10 align-middle"
-        : "h-[40px] w-8 align-middle max-sm:px-1 max-sm:py-0.5"
+        : `${compact ? "h-7 w-7" : "h-[40px] w-8"} align-middle max-sm:px-1 max-sm:py-0.5`
     }
   >
     <TrackRowPlayControl
@@ -54,6 +62,7 @@ const PlayCell: React.FC<{
       trackNumber={track.order}
       onTrackPlayCallback={addTracksToQueue}
       inWidget={inWidget}
+      compact={compact}
     />
   </td>
 );
@@ -63,7 +72,8 @@ const TitleCell: React.FC<{
   trackGroup: TrackGroup;
   inWidget?: boolean;
   onTrackPlay: () => void;
-}> = ({ track, trackGroup, inWidget, onTrackPlay }) => {
+  compact?: boolean;
+}> = ({ track, trackGroup, inWidget, onTrackPlay, compact }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -73,7 +83,7 @@ const TitleCell: React.FC<{
       className={
         inWidget
           ? "w-full p-0! pr-4! py-0.5! m-0 leading-5"
-          : "w-full p-0 m-0 leading-8 max-sm:px-1 max-sm:py-0.5"
+          : `w-full p-0 m-0 ${compact ? "leading-6 text-sm" : "leading-8"} max-sm:px-1 max-sm:py-0.5`
       }
     >
       <div
@@ -85,7 +95,9 @@ const TitleCell: React.FC<{
           className={`overflow-hidden text-ellipsis mr-1 grow [&_i]:opacity-80 ${
             inWidget
               ? "whitespace-nowrap break-normal min-w-0 text-xs"
-              : "max-md:text-sm"
+              : compact
+                ? "text-sm py-1.5"
+                : "max-md:text-sm"
           }`}
         >
           {track.title ?? <i>{t("untitled")}</i>}
@@ -97,7 +109,11 @@ const TitleCell: React.FC<{
 
         <div
           className={`max-md:ml-1 ${
-            inWidget ? "text-xs" : "text-sm max-md:text-xs max-md:font-bold"
+            inWidget
+              ? "text-xs"
+              : compact
+                ? "text-sm"
+                : "text-sm max-md:text-xs max-md:font-bold"
           }`}
         >
           {track.audio?.duration && fmtMSS(track.audio.duration)}
@@ -191,7 +207,7 @@ const TrackRow: React.FC<{
   track: Track;
   trackGroup: TrackGroup;
   addTracksToQueue: (id: number) => void;
-  size?: "small";
+  size?: "small" | "compact";
   inWidget?: boolean;
 }> = ({
   track,
@@ -210,7 +226,9 @@ const TrackRow: React.FC<{
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
   const embeddedInMirlo = isEmbeddedInMirlo();
   const sendPlayerRequest = usePlayerSyncRequest();
-  const showDropdownCell = size !== "small" && showDropdown;
+  const showDropdownCell =
+    size !== "small" && size !== "compact" && showDropdown;
+  const isCompact = size === "compact";
   const currentPlayingTrackId =
     currentlyPlayingIndex !== undefined
       ? playerQueueIds[currentlyPlayingIndex]
@@ -257,12 +275,14 @@ const TrackRow: React.FC<{
         addTracksToQueue={addTracksToQueue}
         onTrackPlay={onTrackPlay}
         inWidget={inWidget}
+        compact={isCompact}
       />
       <TitleCell
         track={track}
         trackGroup={trackGroup}
         inWidget={inWidget}
         onTrackPlay={onTrackPlay}
+        compact={isCompact}
       />
 
       {showDropdownCell && (
