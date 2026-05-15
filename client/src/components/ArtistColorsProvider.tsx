@@ -172,9 +172,7 @@ const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
       ? colors.background
       : "var(--mi-background-color)";
   const rootFg =
-    hasArtist && isDefined(colors.text)
-      ? colors.text
-      : "var(--mi-text-color)";
+    hasArtist && isDefined(colors.text) ? colors.text : "var(--mi-text-color)";
 
   return (
     <ArtistColorsContext.Provider value={hasArtist ? contextValue : null}>

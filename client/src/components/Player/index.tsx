@@ -47,7 +47,6 @@ const Player = () => {
   const { currentTrack, isLoading } = useCurrentTrackHook();
   const [currentSeconds, setCurrentSeconds] = React.useState(0);
   const [playLimit, setPlayLimit] = React.useState<PlayLimit | null>(null);
-  // Cypress reads data-mount-id (stable per instance) to catch Player remounts on navigation.
   const mountId = React.useId();
   const isArtistPageLight = useIsArtistPageLight();
   const tone =
@@ -120,162 +119,159 @@ const Player = () => {
           @media (max-width: ${bp.small}px) {
             flex-direction: column;
           }
-      `}
-      id="player"
-      data-mount-id={mountId}
-    >
-      <div
-        className={css`
-          width: 100%;
-          margin: auto;
-          background-color: var(--mi-fixed-bg-color);
-          color: var(--mi-fixed-fg-color);
         `}
+        id="player"
+        data-mount-id={mountId}
       >
-        {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
-          <AudioWrapper
-            currentTrack={currentTrack}
-            position="absolute"
-            volume={volume}
-            setCurrentSeconds={setCurrentSeconds}
-            currentSeconds={currentSeconds}
-            onPlayLimitChange={setPlayLimit}
-          />
-        )}
         <div
           className={css`
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-            paddin-right: 0.5rem;
-            font-size: var(--mi-font-size-small);
-            justify-content: space-between;
-
-            @media (max-width: ${bp.small}px) {
-              font-size: var(--mi-font-size-xsmall);
-              flex-grow: initial;
-              justify-content: space-between;
-            }
-
-            a {
-              color: var(--player-link);
-            }
+            width: 100%;
+            margin: auto;
+            background-color: var(--mi-fixed-bg-color);
+            color: var(--mi-fixed-fg-color);
           `}
         >
-          <PlayingTrackDetails
-            currentTrack={currentTrack}
-            byLineEnd={
-              <>
-                <ElapsedTime
-                  current={currentSeconds}
-                  total={currentTrack.audio?.duration}
-                />
-                {playLimit && (
-                  <PlayLimitText playLimit={playLimit} hideLastPlay short />
-                )}
-              </>
-            }
-          />
-
+          {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
+            <AudioWrapper
+              currentTrack={currentTrack}
+              position="absolute"
+              volume={volume}
+              setCurrentSeconds={setCurrentSeconds}
+              currentSeconds={currentSeconds}
+              onPlayLimitChange={setPlayLimit}
+            />
+          )}
           <div
             className={css`
-              display: inline-flex;
+              margin: 0 auto;
+              display: flex;
               align-items: center;
-              button {
-                margin-right: 0.25rem;
-              }
+              flex-grow: 1;
+              paddin-right: 0.5rem;
+              font-size: var(--mi-font-size-small);
+              justify-content: space-between;
 
               @media (max-width: ${bp.small}px) {
-                .tip-artist,
-                .wishlist {
-                  display: none;
-                }
+                font-size: var(--mi-font-size-xsmall);
+                flex-grow: initial;
+                justify-content: space-between;
+              }
+
+              a {
+                color: var(--player-link);
               }
             `}
           >
-            {/* The invisible spacers above and below ElapsedTime keep the
-                column symmetric so the timer stays vertically centered in the
-                parent flex row whether or not the play-limit badge is showing. */}
-            <div className="max-sm:hidden! flex flex-col items-end shrink-0 mr-4">
-              <small
-                aria-hidden
-                className="text-[0.65rem] leading-none invisible"
-              >
-                .
-              </small>
-              <span className="whitespace-nowrap inline-block min-w-12 text-right">
-                <ElapsedTime
-                  current={currentSeconds}
-                  total={currentTrack.audio?.duration}
-                />
-              </span>
-              {playLimit ? (
-                <PlayLimitText playLimit={playLimit} />
-              ) : (
+            <PlayingTrackDetails
+              currentTrack={currentTrack}
+              byLineEnd={
+                <>
+                  <ElapsedTime
+                    current={currentSeconds}
+                    total={currentTrack.audio?.duration}
+                  />
+                  {playLimit && (
+                    <PlayLimitText playLimit={playLimit} hideLastPlay short />
+                  )}
+                </>
+              }
+            />
+
+            <div
+              className={css`
+                display: inline-flex;
+                align-items: center;
+                button {
+                  margin-right: 0.25rem;
+                }
+
+                @media (max-width: ${bp.small}px) {
+                  .tip-artist,
+                  .wishlist {
+                    display: none;
+                  }
+                }
+              `}
+            >
+              <div className="max-sm:hidden! flex flex-col items-end shrink-0 mr-4">
                 <small
                   aria-hidden
                   className="text-[0.65rem] leading-none invisible"
                 >
                   .
                 </small>
-              )}
+                <span className="whitespace-nowrap inline-block min-w-12 text-right">
+                  <ElapsedTime
+                    current={currentSeconds}
+                    total={currentTrack.audio?.duration}
+                  />
+                </span>
+                {playLimit ? (
+                  <PlayLimitText playLimit={playLimit} />
+                ) : (
+                  <small
+                    aria-hidden
+                    className="text-[0.65rem] leading-none invisible"
+                  >
+                    .
+                  </small>
+                )}
+              </div>
+
+              <ControlWrapper>
+                <span
+                  className={css`
+                    display: flex;
+                    align-items: center;
+
+                    @media (max-width: ${bp.small}px) {
+                      display: none;
+                    }
+
+                    button {
+                      color: var(--mi-fixed-fg-color);
+                      border: var(--player-control-border);
+                    }
+                  `}
+                >
+                  <LoopButton />
+
+                  <ShuffleButton />
+                </span>
+                <div
+                  className={css`
+                    button svg {
+                      fill: var(--player-icon);
+                    }
+                  `}
+                >
+                  <PreviousButton />
+                </div>
+                <PlayControlButton playerButton />
+                <div
+                  className={css`
+                    button svg {
+                      fill: var(--player-icon);
+                    }
+                  `}
+                >
+                  <NextButton />
+                </div>
+                <div
+                  className={css`
+                    button svg {
+                      fill: var(--player-icon);
+                    }
+                  `}
+                >
+                  <VolumeControl setVolume={setVolume} volume={volume} />
+                </div>
+              </ControlWrapper>
             </div>
-
-            <ControlWrapper>
-              <span
-                className={css`
-                  display: flex;
-                  align-items: center;
-
-                  @media (max-width: ${bp.small}px) {
-                    display: none;
-                  }
-
-                  button {
-                    color: var(--mi-fixed-fg-color);
-                    border: var(--player-control-border);
-                  }
-                `}
-              >
-                <LoopButton />
-
-                <ShuffleButton />
-              </span>
-              <div
-                className={css`
-                  button svg {
-                    fill: var(--player-icon);
-                  }
-                `}
-              >
-                <PreviousButton />
-              </div>
-              <PlayControlButton playerButton />
-              <div
-                className={css`
-                  button svg {
-                    fill: var(--player-icon);
-                  }
-                `}
-              >
-                <NextButton />
-              </div>
-              <div
-                className={css`
-                  button svg {
-                    fill: var(--player-icon);
-                  }
-                `}
-              >
-                <VolumeControl setVolume={setVolume} volume={volume} />
-              </div>
-            </ControlWrapper>
           </div>
+          {!currentTrack && isLoading && <Spinner size="small" />}
         </div>
-        {!currentTrack && isLoading && <Spinner size="small" />}
       </div>
-    </div>
     </div>,
     document.body
   );

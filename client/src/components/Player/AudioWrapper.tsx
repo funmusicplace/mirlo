@@ -57,12 +57,6 @@ export const AudioWrapper: React.FC<{
   const [hasShownBuyModalBeenShown, setHasShownBuyModalBeenShown] =
     React.useState(false);
   const [hasOverplayedSong, setHasOverplayedSong] = React.useState(false);
-  const setPlayLimit = React.useCallback(
-    (limit: PlayLimit | null) => {
-      onPlayLimitChange?.(limit);
-    },
-    [onPlayLimitChange]
-  );
   const {
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
@@ -71,8 +65,12 @@ export const AudioWrapper: React.FC<{
   const playerRef = React.useRef<HTMLVideoElement>(null);
   const playingRef = React.useRef(playing);
   const showBuyModalRef = React.useRef(showBuyModal);
-  playingRef.current = playing;
-  showBuyModalRef.current = showBuyModal;
+  React.useEffect(() => {
+    playingRef.current = playing;
+  }, [playing]);
+  React.useEffect(() => {
+    showBuyModalRef.current = showBuyModal;
+  }, [showBuyModal]);
 
   const onHLSInstance = React.useCallback(
     (hls: Hls) => {
@@ -101,8 +99,7 @@ export const AudioWrapper: React.FC<{
       setMostlyListened(false);
       setHasOverplayedSong(false);
       setHasShownBuyModalBeenShown(false);
-      setPlayLimit(null);
-      document.documentElement.style.setProperty("--mi-track-progress", "0%");
+      onPlayLimitChange?.(null);
     }
   }, [currentTrack.id]);
 
@@ -115,21 +112,13 @@ export const AudioWrapper: React.FC<{
           const resp = await api.get<{ playLimit: PlayLimit | null }>(
             `tracks/${currentTrack.id}/trackPlay`
           );
-          setPlayLimit(resp.result?.playLimit ?? null);
+          onPlayLimitChange?.(resp.result?.playLimit ?? null);
         } catch (e) {
           console.error(e);
         }
       }
       setHasShownBuyModalBeenShown(false);
       setCurrentSeconds(e.target.currentTime);
-      const duration = e.target.duration;
-      if (duration > 0) {
-        const percent = (e.target.currentTime / duration) * 100;
-        document.documentElement.style.setProperty(
-          "--mi-track-progress",
-          `${percent}%`
-        );
-      }
     },
     [currentTrack, mostlyListened]
   );
@@ -253,12 +242,6 @@ export const AudioWrapper: React.FC<{
       playerRef.current.volume = volume;
     }
   }, [volume]);
-
-  React.useEffect(() => {
-    return () => {
-      document.documentElement.style.removeProperty("--mi-track-progress");
-    };
-  }, []);
 
   if (!streamUrl) {
     return null;
