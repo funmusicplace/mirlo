@@ -13,13 +13,14 @@ import {
 } from "../utils/minio";
 
 import { logger } from "./queue-worker";
+const TEMP_LOCATION = process.env.TEMP_LOCATION;
 
 export default async (job: Job) => {
   const { audioId, fileExtension } = job.data;
   let progress = 10;
 
   try {
-    const destinationFolder = `/data/media/processing/${audioId}`;
+    const destinationFolder = `${TEMP_LOCATION}processing/${audioId}`;
 
     logger.info(
       `upload-audio: checking if folder exists, if not creating it ${destinationFolder}`

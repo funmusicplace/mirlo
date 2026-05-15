@@ -1,10 +1,12 @@
-import { Job } from "bullmq";
-
 import { promises as fsPromises } from "fs";
 
-import { logger } from "./queue-worker";
-import { finalAudioBucket, getFile } from "../utils/minio";
+import { Job } from "bullmq";
 import fetch from "node-fetch";
+
+import { finalAudioBucket, getFile } from "../utils/minio";
+
+import { logger } from "./queue-worker";
+const TEMP_LOCATION = process.env.TEMP_LOCATION;
 
 export default async (job: Job) => {
   const { audioId, fileExtension } = job.data;
@@ -17,7 +19,7 @@ export default async (job: Job) => {
     }
 
     let progress = 10;
-    const tempFolder = `/data/media/verifying/${audioId}`;
+    const tempFolder = `${TEMP_LOCATION}verifying/${audioId}`;
 
     try {
       await fsPromises.stat(tempFolder);

@@ -1,8 +1,19 @@
-import { Job } from "bullmq";
-
 import { createReadStream, promises as fsPromises } from "fs";
+import { PassThrough } from "stream";
 
-import { logger } from "./queue-worker";
+import prisma from "@mirlo/prisma";
+import {
+  Artist,
+  Track,
+  TrackArtist,
+  TrackAudio,
+  TrackGroup,
+  TrackGroupCover,
+} from "@mirlo/prisma/client";
+import archiver from "archiver";
+import { Job } from "bullmq";
+import filenamify from "filenamify";
+
 import {
   createBucketIfNotExists,
   downloadableContentBucket,
@@ -15,24 +26,16 @@ import {
   uploadWrapper,
 } from "../utils/minio";
 import { convertAudioToFormat } from "../utils/tracks";
-import archiver from "archiver";
-import { PassThrough } from "stream";
-import {
-  Artist,
-  Track,
-  TrackArtist,
-  TrackAudio,
-  TrackGroup,
-  TrackGroupCover,
-} from "@mirlo/prisma/client";
-import filenamify from "filenamify";
-import prisma from "@mirlo/prisma";
+
+import { logger } from "./queue-worker";
 
 export type Format = {
   format: "mp3" | "wav" | "flac" | "opus" | "libmp3lame";
   audioCodec?: "flac" | "libmp3lame" | "opus" | "wav";
   audioBitrate?: "320" | "256" | "128";
 };
+
+const TEMP_LOCATION = process.env.TEMP_LOCATION;
 
 const parseFormat = (format: string): Format => {
   const split = format.split(".");
@@ -406,10 +409,10 @@ export default async (job: Job) => {
     format: string;
     destinationBucket: DestinationBucket;
   };
-  let tempFolder = `/data/media/trackGroup/${trackGroup.id}/${formatString}`;
+  let tempFolder = `${TEMP_LOCATION}trackGroup/${trackGroup.id}/${formatString}`;
 
   if (destinationBucket === "track-format") {
-    tempFolder = `/data/media/track/${tracks[0].id}/${formatString}`;
+    tempFolder = `${TEMP_LOCATION}track/${tracks[0].id}/${formatString}`;
   }
 
   try {
