@@ -137,12 +137,12 @@ export const ManageTrackTable: React.FC<{
 
   const addTracksToQueue = React.useCallback(
     (id: number) => {
-      const idx = tracks.findIndex((track) => track.id === id);
+      const ids = tracks.map((track) => track.id);
+      const startingIndex = ids.indexOf(id);
       dispatch({
         type: "startPlayingIds",
-        playerQueueIds: tracks
-          .slice(idx, tracks.length)
-          .map((track) => track.id),
+        playerQueueIds: ids,
+        startingIndex: startingIndex >= 0 ? startingIndex : 0,
       });
     },
     [dispatch, tracks]

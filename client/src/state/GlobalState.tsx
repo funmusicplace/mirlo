@@ -79,6 +79,7 @@ type SetShuffle = {
 type StartPlayingIds = {
   type: "startPlayingIds";
   playerQueueIds: number[];
+  startingIndex?: number;
 };
 
 type IncrementCurrentlyPlayingIndex = {
@@ -129,11 +130,14 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
     case "startPlayingIds":
       draft.playing = true;
       draft.playerQueueIds = clone(action.playerQueueIds);
+      const startingIndex = action.startingIndex ?? 0;
       if (draft.shuffle) {
-        const firstId = pullAt(draft.playerQueueIds, 0);
+        const firstId = pullAt(draft.playerQueueIds, startingIndex);
         draft.playerQueueIds = [...firstId, ...shuffle(draft.playerQueueIds)];
+        draft.currentlyPlayingIndex = 0;
+      } else {
+        draft.currentlyPlayingIndex = startingIndex;
       }
-      draft.currentlyPlayingIndex = 0;
       break;
     case "setLooping":
       draft.looping = action.looping;
@@ -156,7 +160,10 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
       draft.currentlyPlayingIndex = newIndex;
       break;
     case "decrementCurrentlyPlayingIndex":
-      draft.currentlyPlayingIndex = (draft.currentlyPlayingIndex ?? 0) - 1;
+      draft.currentlyPlayingIndex = Math.max(
+        0,
+        (draft.currentlyPlayingIndex ?? 0) - 1
+      );
       break;
     case "addTrackIdsToBackOfQueue":
       const newTracks = draft.shuffle

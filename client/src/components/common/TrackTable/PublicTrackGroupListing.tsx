@@ -38,15 +38,14 @@ export const PublicTrackGroupListing: React.FC<{
 
   const addTracksToQueue = React.useCallback(
     (id: number) => {
-      const idx = tracks.findIndex((track) => track.id === id);
+      const playableIds = tracks
+        .filter((track) => isTrackOwnedOrPreview(track, user, trackGroup))
+        .map((track) => track.id);
+      const startingIndex = playableIds.indexOf(id);
       dispatch({
         type: "startPlayingIds",
-        playerQueueIds: tracks
-          .slice(idx, tracks.length)
-          .filter((track) => {
-            return isTrackOwnedOrPreview(track, user, trackGroup);
-          })
-          .map((track) => track.id),
+        playerQueueIds: playableIds,
+        startingIndex: startingIndex >= 0 ? startingIndex : 0,
       });
     },
     [dispatch, trackGroup, tracks, user]
