@@ -2,21 +2,26 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { isEmpty } from "lodash";
 import React from "react";
+import { createPortal } from "react-dom";
 import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useBroadcastPlayerSync } from "utils/playerSync";
-import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
+import { isTrackOwnedOrPreview } from "utils/tracks";
 
 import { bp } from "../../constants";
+import { useIsArtistPageLight } from "../ArtistColorsProvider";
 import LoopButton from "../common/LoopButton";
 import NextButton from "../common/NextButton";
 import { PlayControlButton } from "../common/PlayControlButton";
 import PreviousButton from "../common/PreviousButton";
 import ShuffleButton from "../common/ShuffleButton";
 import Spinner from "../common/Spinner";
+import { ElapsedTime } from "../Widget/utils";
 
 import { AudioWrapper } from "./AudioWrapper";
+import PlayerActions from "./PlayerActions";
 import PlayingTrackDetails from "./PlayingTrackDetails";
+import { PlayLimit, PlayLimitText } from "./PlayLimitNotice";
 import useCurrentTrackHook from "./useCurrentTrackHook";
 import { VolumeControl } from "./VolumeControl";
 
@@ -41,6 +46,16 @@ const Player = () => {
   const [volume, setVolume] = React.useState(1);
   const { currentTrack, isLoading } = useCurrentTrackHook();
   const [currentSeconds, setCurrentSeconds] = React.useState(0);
+  const [playLimit, setPlayLimit] = React.useState<PlayLimit | null>(null);
+  // Cypress reads data-mount-id (stable per instance) to catch Player remounts on navigation.
+  const mountId = React.useId();
+  const isArtistPageLight = useIsArtistPageLight();
+  const tone =
+    isArtistPageLight === true
+      ? "light"
+      : isArtistPageLight === false
+        ? "dark"
+        : undefined;
 
   useBroadcastPlayerSync(
     React.useMemo(
@@ -68,37 +83,53 @@ const Player = () => {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
+      data-tone={tone}
       className={css`
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        position: fixed;
-        width: 100%;
-        z-index: 10;
-        bottom: 0;
-        filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.3));
+        --mi-fixed-bg-color: var(--mi-off-white);
+        --mi-fixed-fg-color: var(--mi-black);
 
-        background-color: var(--mi-darken-x-background-color);
-
-        @media (max-width: ${bp.small}px) {
-          flex-direction: column;
+        &[data-tone="dark"] {
+          --mi-fixed-bg-color: var(--mi-black);
+          --mi-fixed-fg-color: var(--mi-off-white);
         }
       `}
-      id="player"
     >
+      <PlayerActions />
       <div
         className={css`
           display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          flex-grow: 1;
+          flex-direction: column;
+          justify-content: space-between;
+          position: fixed;
+          width: 100%;
+          z-index: 10;
+          bottom: 0;
+          filter: drop-shadow(
+            0 0 0.1rem
+              color-mix(in srgb, var(--mi-fixed-fg-color) 30%, transparent)
+          );
+
+          background-color: var(--mi-darken-x-background-color);
+
+          --player-link: var(--mi-fixed-fg-color);
+          --player-icon: currentColor;
+          --player-control-border: none;
 
           @media (max-width: ${bp.small}px) {
-            width: 100%;
-            flex-grow: initial;
+            flex-direction: column;
           }
+      `}
+      id="player"
+      data-mount-id={mountId}
+    >
+      <div
+        className={css`
+          width: 100%;
+          margin: auto;
+          background-color: var(--mi-fixed-bg-color);
+          color: var(--mi-fixed-fg-color);
         `}
       >
         {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
@@ -108,24 +139,9 @@ const Player = () => {
             volume={volume}
             setCurrentSeconds={setCurrentSeconds}
             currentSeconds={currentSeconds}
-            showPlayLimit
+            onPlayLimitChange={setPlayLimit}
           />
         )}
-      </div>
-
-      <div
-        className={css`
-          width: 100%;
-          margin: auto;
-          background-color: var(--mi-off-white);
-          color: var(--mi-black);
-
-          @media (prefers-color-scheme: dark) {
-            background-color: var(--mi-black);
-            color: var(--mi-off-white);
-          }
-        `}
-      >
         <div
           className={css`
             margin: 0 auto;
@@ -142,14 +158,25 @@ const Player = () => {
               justify-content: space-between;
             }
 
-            @media (prefers-color-scheme: dark) {
-              a {
-                color: lightgrey;
-              }
+            a {
+              color: var(--player-link);
             }
           `}
         >
-          <PlayingTrackDetails currentTrack={currentTrack} />
+          <PlayingTrackDetails
+            currentTrack={currentTrack}
+            byLineEnd={
+              <>
+                <ElapsedTime
+                  current={currentSeconds}
+                  total={currentTrack.audio?.duration}
+                />
+                {playLimit && (
+                  <PlayLimitText playLimit={playLimit} hideLastPlay short />
+                )}
+              </>
+            }
+          />
 
           <div
             className={css`
@@ -167,16 +194,33 @@ const Player = () => {
               }
             `}
           >
-            <span
-              className={css`
-                display: inline-block;
-                min-width: 3rem;
-                text-align: right;
-                margin-right: 1rem;
-              `}
-            >
-              {fmtMSS(currentSeconds)}
-            </span>
+            {/* The invisible spacers above and below ElapsedTime keep the
+                column symmetric so the timer stays vertically centered in the
+                parent flex row whether or not the play-limit badge is showing. */}
+            <div className="max-sm:hidden! flex flex-col items-end shrink-0 mr-4">
+              <small
+                aria-hidden
+                className="text-[0.65rem] leading-none invisible"
+              >
+                .
+              </small>
+              <span className="whitespace-nowrap inline-block min-w-12 text-right">
+                <ElapsedTime
+                  current={currentSeconds}
+                  total={currentTrack.audio?.duration}
+                />
+              </span>
+              {playLimit ? (
+                <PlayLimitText playLimit={playLimit} />
+              ) : (
+                <small
+                  aria-hidden
+                  className="text-[0.65rem] leading-none invisible"
+                >
+                  .
+                </small>
+              )}
+            </div>
 
             <ControlWrapper>
               <span
@@ -188,11 +232,9 @@ const Player = () => {
                     display: none;
                   }
 
-                  @media (prefers-color-scheme: dark) {
-                    button {
-                      color: lightgrey;
-                      border: solid 1px grey;
-                    }
+                  button {
+                    color: var(--mi-fixed-fg-color);
+                    border: var(--player-control-border);
                   }
                 `}
               >
@@ -202,12 +244,8 @@ const Player = () => {
               </span>
               <div
                 className={css`
-                  @media (prefers-color-scheme: dark) {
-                    button {
-                      svg {
-                        fill: lightgrey;
-                      }
-                    }
+                  button svg {
+                    fill: var(--player-icon);
                   }
                 `}
               >
@@ -216,12 +254,8 @@ const Player = () => {
               <PlayControlButton playerButton />
               <div
                 className={css`
-                  @media (prefers-color-scheme: dark) {
-                    button {
-                      svg {
-                        fill: lightgrey;
-                      }
-                    }
+                  button svg {
+                    fill: var(--player-icon);
                   }
                 `}
               >
@@ -229,12 +263,8 @@ const Player = () => {
               </div>
               <div
                 className={css`
-                  @media (prefers-color-scheme: dark) {
-                    button {
-                      svg {
-                        fill: lightgrey;
-                      }
-                    }
+                  button svg {
+                    fill: var(--player-icon);
                   }
                 `}
               >
@@ -246,6 +276,8 @@ const Player = () => {
         {!currentTrack && isLoading && <Spinner size="small" />}
       </div>
     </div>
+    </div>,
+    document.body
   );
 };
 

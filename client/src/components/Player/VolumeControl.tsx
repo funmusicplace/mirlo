@@ -1,8 +1,9 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
-import { FaVolumeDown, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
-import { bp } from "../../constants";
+import { FaVolumeMute } from "react-icons/fa";
 import { FaVolumeHigh } from "react-icons/fa6";
+
+import { bp } from "../../constants";
 
 export const VolumeControl: React.FC<{
   setVolume: React.Dispatch<React.SetStateAction<number>>;
@@ -62,15 +63,11 @@ export const VolumeControl: React.FC<{
             overflow: none;
             transition: 0.1s width;
             width: ${volume * 100}%;
-            background: var(--mi-white);
+            background: var(--mi-fixed-fg-color);
             pointer-events: none;
             border-radius: 0.5rem;
             position: absolute;
             top: 0.4rem;
-
-            @media (prefers-color-scheme: light) {
-              background: var(--mi-black);
-            }
           `}
         />
         <div
@@ -78,16 +75,15 @@ export const VolumeControl: React.FC<{
             height: 0.25rem;
             overflow: none;
             width: 100%;
-            background: var(--mi-white);
+            background: color-mix(
+              in srgb,
+              var(--mi-fixed-fg-color) 25%,
+              transparent
+            );
             pointer-events: none;
             position: absolute;
             top: 0.4rem;
             border-radius: 0.5rem;
-            background: var(--mi-lighten-x-background-color);
-
-            @media (prefers-color-scheme: light) {
-              background: var(--mi-darken-x-background-color);
-            }
           `}
         />
       </div>

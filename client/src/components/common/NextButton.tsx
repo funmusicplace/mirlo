@@ -16,7 +16,7 @@ export const NextButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
 
   return (
     <Button
-      startIcon={<MdSkipNext />}
+      startIcon={<MdSkipNext size={compact ? undefined : 22} />}
       variant="transparent"
       onlyIcon={compact}
       className={compact ? "!h-6 !w-6 !p-1" : undefined}

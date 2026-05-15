@@ -40,7 +40,6 @@ const Wishlist: React.FC<{
         className="wishlist"
         title={buttonLabel}
         rounded
-        variant="pill"
         size="compact"
         endIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
       />

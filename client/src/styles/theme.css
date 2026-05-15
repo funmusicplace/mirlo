@@ -27,6 +27,9 @@ html {
   --mi-button-tint-x-color: var(--mi-tint-x-color);
   --mi-contrast-color: var(--mi-button-color);
 
+  --mi-fixed-bg-color: var(--mi-background-color);
+  --mi-fixed-fg-color: var(--mi-text-color);
+
   --mi-text-color: var(--mi-instance-text-color, var(--mi-black));
   --mi-light-foreground-color: #454545; /* FIXME: remove */
   --mi-lighter-foreground-color: #515151; /* FIXME: remove */
