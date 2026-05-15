@@ -1,10 +1,11 @@
-import { FaLink } from "react-icons/fa";
-import { getReleaseUrl } from "utils/artist";
 import { useTranslation } from "react-i18next";
+import { FaArrowRight } from "react-icons/fa";
 import { useParams } from "react-router-dom";
+import { getReleaseUrl } from "utils/artist";
+
 import { DropdownMenuItemLink } from "../DropdownMenuItem";
 
-const TrackLink: React.FC<{
+const GoToTrack: React.FC<{
   track: Track;
   artist: Artist;
   trackGroup: TrackGroup;
@@ -20,11 +21,11 @@ const TrackLink: React.FC<{
   return (
     <DropdownMenuItemLink
       to={`${getReleaseUrl(artist, trackGroup)}/tracks/${track.id}`}
-      startIcon={<FaLink />}
+      startIcon={<FaArrowRight />}
     >
-      {t("viewTrack")}
+      {t("goToTrack")}
     </DropdownMenuItemLink>
   );
 };
 
-export default TrackLink;
+export default GoToTrack;

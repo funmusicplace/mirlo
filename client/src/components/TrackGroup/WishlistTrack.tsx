@@ -3,12 +3,12 @@ import LogInForm from "components/common/LogInForm";
 import Modal from "components/common/Modal";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ImStarEmpty, ImStarFull } from "react-icons/im";
+import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 
-const FavoriteTrack: React.FC<{
+const WishlistTrack: React.FC<{
   track: { id: number };
   collapse?: boolean;
 }> = ({ track, collapse }) => {
@@ -19,7 +19,7 @@ const FavoriteTrack: React.FC<{
   });
   const { t: tLogIn } = useTranslation("translation", { keyPrefix: "logIn" });
 
-  const [isInFavorites, setIsInFavorites] = React.useState(
+  const [isInWishlist, setIsInWishlist] = React.useState(
     !!user?.trackFavorites?.find((w) => w.trackId === track.id)
   );
   const [isLogInModalOpen, setIsLogInModalOpen] = React.useState(false);
@@ -31,12 +31,12 @@ const FavoriteTrack: React.FC<{
     }
 
     if (!user) {
-      setIsInFavorites(false);
+      setIsInWishlist(false);
       return;
     }
 
-    setIsInFavorites(
-      !!user.trackFavorites?.find((favorite) => favorite.trackId === track.id)
+    setIsInWishlist(
+      !!user.trackFavorites?.find((entry) => entry.trackId === track.id)
     );
   }, [track.id, user]);
 
@@ -58,14 +58,14 @@ const FavoriteTrack: React.FC<{
       return;
     }
 
-    const nextFavoriteState = !isInFavorites;
+    const nextState = !isInWishlist;
 
     try {
       setIsSubmitting(true);
       await api.post(`tracks/${track.id}/favorite`, {
-        favorite: nextFavoriteState,
+        favorite: nextState,
       });
-      setIsInFavorites(nextFavoriteState);
+      setIsInWishlist(nextState);
       refreshLoggedInUser();
     } catch (error) {
       errorHandler(error);
@@ -74,7 +74,7 @@ const FavoriteTrack: React.FC<{
     }
   }, [
     errorHandler,
-    isInFavorites,
+    isInWishlist,
     isSubmitting,
     openLoginModal,
     refreshLoggedInUser,
@@ -83,7 +83,7 @@ const FavoriteTrack: React.FC<{
   ]);
 
   const buttonLabel = `${
-    isInFavorites ? tWishlist("removeFromFavorites") : tWishlist("addToFavorites")
+    isInWishlist ? tWishlist("removeFromWishlist") : tWishlist("addToWishlist")
   }`;
 
   return (
@@ -93,9 +93,9 @@ const FavoriteTrack: React.FC<{
         variant="transparent"
         onClick={onClick}
         aria-label={buttonLabel}
-        className="favorite"
+        className="wishlist"
         title={buttonLabel}
-        startIcon={isInFavorites ? <ImStarFull /> : <ImStarEmpty />}
+        startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
         disabled={user === undefined || isSubmitting}
       >
         {!collapse && buttonLabel}
@@ -115,4 +115,4 @@ const FavoriteTrack: React.FC<{
   );
 };
 
-export default FavoriteTrack;
+export default WishlistTrack;

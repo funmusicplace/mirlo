@@ -242,9 +242,7 @@
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",
-    "removeFromWishlist": "Remove from wishlist",
-    "addToFavorites": "Add to favorites",
-    "removeFromFavorites": "Remove from favorites"
+    "removeFromWishlist": "Remove from wishlist"
   },
   "trackGroupCard": {
     "publishedAt": "Publish date:",
@@ -1433,7 +1431,9 @@
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
     "coverForTitle": "Cover for '{{ title }}'",
-    "viewTrack": "View track",
+    "goToTrack": "Go to track",
+    "copyTrackLink": "Copy track link",
+    "copiedTrackLink": "Copied track link",
     "lyrics": "Lyrics",
     "buy": "Buy",
     "buyFor": "Buy for {{amount}}",
