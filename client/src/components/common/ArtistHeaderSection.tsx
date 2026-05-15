@@ -197,7 +197,9 @@ const ArtistHeaderSection: React.FC<{
                           <span className="max-md:hidden text-(--mi-button-color)">
                             {artist.properties?.titles?.groupName ?? t("label")}
                           </span>
-                          <span className="max-md:hidden opacity-50">-</span>
+                          {artist.properties?.titles?.groupName && (
+                            <span className="max-md:hidden opacity-50">-</span>
+                          )}
                         </>
                       )}
                       <ArtistFormLocation
@@ -256,7 +258,7 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div className="w-full flex flex-row items-center justify-end py-2 max-md:border-t max-md:border-(--mi-button-color)/50">
+        <div className="w-full flex flex-row items-center justify-end py-2 max-md:py-1 max-md:border-t max-md:border-(--mi-button-color)/50">
           <ArtistHeaderActionsStrip
             artist={artist}
             isManage={!!isManage}

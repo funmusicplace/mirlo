@@ -132,10 +132,18 @@ const FundraisingGoal: React.FC<{
 
   if (!fundraiser) {
     return (
-      <div>
+      <div className="flex flex-col items-start">
         <h2>{t("addFundraiser")}</h2>
-        <p>{t("addFundraiserDescription")}</p>
-        <Button type="button" onClick={onAddFundraiser} isLoading={isLoading}>
+        <small id="description-add-fundraiser">
+          {t("addFundraiserDescription")}
+        </small>
+        <Button
+          type="button"
+          onClick={onAddFundraiser}
+          isLoading={isLoading}
+          aria-describedby="description-add-fundraiser"
+          className="mt-4"
+        >
           {t("addFundraiserToThisRelease")}
         </Button>
       </div>

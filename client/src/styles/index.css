@@ -23,6 +23,8 @@ html {
   --mi-border-radius-x: 15px;
   --mi-border-radius-focus: 8px;
 
+  --mi-touch-target-min: 30px;
+
   --header-cover-sticky-height: 55px;
 
   --mi-font-family-stack:

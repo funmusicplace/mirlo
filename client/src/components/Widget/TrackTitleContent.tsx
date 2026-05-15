@@ -76,10 +76,10 @@ export const TrackTitleContent: React.FC<{
   return (
     <>
       <div
-        className={`font-bold leading-tight truncate break-normal ${
+        className={`leading-tight truncate break-normal ${
           compactTitle
-            ? "text-base max-sm:text-sm max-xs:text-xs"
-            : "text-lg max-sm:text-base max-xs:text-sm"
+            ? "text-base max-sm:text-sm max-xs:text-xs font-semibold"
+            : "text-lg max-sm:text-base max-xs:text-sm font-bold"
         }`}
       >
         {titleNode}

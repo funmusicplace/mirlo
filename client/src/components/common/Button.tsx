@@ -45,25 +45,10 @@ const CustomButton = styled.button<Sizable>(
       width: 2rem;
 
       @media screen and (max-width: ${bp.medium}px) {
-      
-      ${props.smallIcon ? "height: 1.2rem !important; width: 1.2rem !important; svg { width: 0.6rem; }; padding: .6rem !important;" : ""}
-      
-      }      
-
-      @media screen and (max-width: ${bp.small}px) {
-      
-
-        ${
-          size === "compact"
-            ? `
-            height: 1.7rem; 
-            padding: .9rem .5rem;
-            svg {
-              font-size: 1.2rem !important;
-            }
-            `
-            : ""
-        };
+        width: var(--mi-touch-target-min);
+        height: var(--mi-touch-target-min);
+        padding: 0;
+        ${props.smallIcon ? "svg { width: 0.6rem; };" : ""}
       }
     `
       : "";
@@ -93,9 +78,10 @@ const CustomButton = styled.button<Sizable>(
       ? `
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 100%;
-          height: auto;
+          width: var(--mi-touch-target-min);
+          height: var(--mi-touch-target-min);
           min-width: auto;
-          padding: .7rem !important;
+          padding: 0 !important;
 
           > p,
           .children {
@@ -253,7 +239,9 @@ const CustomButton = styled.button<Sizable>(
     display: flex;
     border-radius: ${props.onlyIcon ? "100%" : "var(--mi-border-radius)"};
     justify-content: center;
-  
+    min-width: var(--mi-touch-target-min);
+    min-height: var(--mi-touch-target-min);
+
     &[disabled] {
       opacity: 0.6;
     }
@@ -261,7 +249,7 @@ const CustomButton = styled.button<Sizable>(
     .startIcon,
     .endIcon {
       display: flex;
-      align-content: center;
+      align-items: center;
       justify-content: center;
       margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
       margin-right: ${props.onlyIcon ? "0px" : "0.5rem"};
