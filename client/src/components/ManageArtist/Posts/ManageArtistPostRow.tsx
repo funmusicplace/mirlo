@@ -43,7 +43,7 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
       });
 
   return (
-    <Box as="li" className="mb-4 p-4 bg-(--mi-button-tint-color)">
+    <Box as="li" className="mb-4 max-md:pb-4! bg-(--mi-button-tint-color)">
       <div className="flex flex-col">
         <div className="w-full flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0 flex items-center gap-4">
@@ -64,14 +64,14 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
               to={getPostURLReference({ ...post, artist })}
               className="min-w-0 flex-1 flex flex-col justify-start items-start"
             >
-              <h2 className="truncate mb-0!">
+              <h2 className="w-full truncate mb-0!">
                 {post.title === "" || !post.title ? (
                   <span className="italic">{t("untitledPost")}</span>
                 ) : (
                   post.title
                 )}
               </h2>
-              <p className="text-xs text-(--mi-secondary-text-color) mt-0.5 truncate">
+              <p className="w-full text-xs text-(--mi-secondary-text-color) mt-0.5 truncate">
                 {dateLabel}
               </p>
             </ArtistRouterLink>
