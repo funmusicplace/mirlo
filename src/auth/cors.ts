@@ -43,6 +43,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
   // @ts-ignore - req.logger added by middleware
   const log = req.logger || logger;
   try {
+    const isNotCors = req.headers["sec-fetch-mode"] === "no-cors";
     const isSameSite =
       req.headers["sec-fetch-site"] === "same-site" ||
       req.headers["sec-fetch-site"] === "same-origin";
@@ -69,15 +70,27 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         req.method === "OPTIONS" &&
         req.headers["access-control-request-method"] &&
         req.headers["access-control-request-headers"];
-      const skipsApiKey =
+      let skipsApiKey =
+        isNotCors ||
         isSameSite ||
         !isAPIEndpointPrivate ||
         isCORSPreflight ||
         isValidActivityPubEndpoint(req.path);
+      const origin = req.get("origin");
 
       log.info(
-        `CORS check for ${req.method} ${req.path} - sameSite: ${isSameSite}, privateEndpoint: ${isAPIEndpointPrivate}, skipsApiKey: ${skipsApiKey}, isCorsPreflight: ${isCORSPreflight}`
+        `CORS check for ${origin} ${req.method} ${req.path} - sameSite: ${isSameSite}, privateEndpoint: ${isAPIEndpointPrivate}, skipsApiKey: ${skipsApiKey}, isCorsPreflight: ${isCORSPreflight}`
       );
+
+      if (origin) {
+        const clientsThatMaySkipToken = await prisma.client.findMany({
+          where: { allowedCorsOrigins: { has: origin }, skipStreamToken: true },
+        });
+        skipsApiKey ||= clientsThatMaySkipToken.length > 0;
+        log.info(
+          `Found clients that don't require token: ${clientsThatMaySkipToken.length}`
+        );
+      }
 
       log.info(
         "headers",

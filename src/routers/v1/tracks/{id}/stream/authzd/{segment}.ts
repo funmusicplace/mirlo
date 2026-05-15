@@ -116,9 +116,12 @@ export default function () {
 
           // @ts-ignore playtoken type may not be a string?
           const decoded = jwt.verify(playToken, jwt_secret);
-          log.debug("Parsed playtoken:", decoded);
-          log.debug("Request userid:", reqUserId);
           const { song, userid } = decoded;
+
+          log.debug("Matching token to request", {
+            token: { song, userid },
+            request: { song: id, user: reqUserId },
+          });
 
           if (song !== id || reqUserId !== userid) {
             log.debug("Credentials error");

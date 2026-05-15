@@ -2,17 +2,16 @@
   "compilerOptions": {
     "module": "node16",
     "sourceMap": true,
+    "rootDir": ".",
     "outDir": "dist",
     "strict": true,
     "lib": ["esnext"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "moduleResolution": "node16",
-    "isolatedModules": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "isolatedModules": true
   },
+  "include": ["src"],
   "exclude": ["client"],
   "ts-node": {
     "transpileOnly": true

@@ -27,6 +27,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - REDIS_HOST=${REDIS_HOST:-redis}
+      - DATABASE_URL=postgresql://nomads:nomads@pgsql:5432/nomads?schema=public
     depends_on:
       - redis
       - pgsql
