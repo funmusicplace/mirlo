@@ -1,17 +1,28 @@
-import { ARTIST_EXAMPLE, TRACK_GROUP_EXAMPLE } from "../../../client/test/mocks";
+import {
+  ARTIST_EXAMPLE,
+  TRACK_GROUP_EXAMPLE,
+} from "../../../client/test/mocks";
 
 const trackId = 1;
 const artistSlug = "example-artist";
+
+const artist = {
+  ...ARTIST_EXAMPLE,
+  urlSlug: artistSlug,
+  user: { artistLabels: [] },
+};
+
+const featuredRelease = {
+  ...TRACK_GROUP_EXAMPLE,
+  artist: { ...TRACK_GROUP_EXAMPLE.artist, urlSlug: artistSlug },
+};
 
 const track = {
   id: trackId,
   title: "Example Track",
   order: 1,
   trackGroupId: TRACK_GROUP_EXAMPLE.id,
-  trackGroup: {
-    ...TRACK_GROUP_EXAMPLE,
-    artist: { ...TRACK_GROUP_EXAMPLE.artist },
-  },
+  trackGroup: featuredRelease,
   isPreview: true,
   audio: {
     id: "audio-1",
@@ -24,16 +35,6 @@ const track = {
 
 describe("player continuity across navigation", () => {
   beforeEach(() => {
-    cy.window().then((win) => {
-      win.localStorage.setItem(
-        "nomadState",
-        JSON.stringify({
-          playerQueueIds: [trackId],
-          currentlyPlayingIndex: 0,
-        })
-      );
-    });
-
     cy.intercept("GET", "/auth/profile", {
       statusCode: 200,
       body: { result: null },
@@ -46,13 +47,7 @@ describe("player continuity across navigation", () => {
 
     cy.intercept("GET", `/v1/artists/${artistSlug}*`, {
       statusCode: 200,
-      body: {
-        result: {
-          ...ARTIST_EXAMPLE,
-          urlSlug: artistSlug,
-          user: { artistLabels: [] },
-        },
-      },
+      body: { result: artist },
     });
 
     cy.intercept("GET", "/v1/settings/instanceArtist", {
@@ -62,6 +57,11 @@ describe("player continuity across navigation", () => {
 
     cy.intercept("GET", "/v1/trackGroups*", {
       statusCode: 200,
+      body: { results: [featuredRelease], total: 1 },
+    });
+
+    cy.intercept("GET", "/v1/trackGroups/topSold*", {
+      statusCode: 200,
       body: { results: [], total: 0 },
     });
 
@@ -69,22 +69,42 @@ describe("player continuity across navigation", () => {
       statusCode: 200,
       body: { results: [], total: 0 },
     });
+
+    cy.intercept("GET", "/v1/posts*", {
+      statusCode: 200,
+      body: { results: [], total: 0 },
+    });
   });
 
-  it("keeps the Player mounted across route changes", () => {
-    cy.visit("/");
+  it("keeps the Player mounted across client-side navigation", () => {
+    cy.visit("/", {
+      onBeforeLoad(win) {
+        win.localStorage.setItem(
+          "nomadState",
+          JSON.stringify({
+            playerQueueIds: [trackId],
+            currentlyPlayingIndex: 0,
+          })
+        );
+      },
+    });
+
     cy.get("#player", { timeout: 10000 })
       .invoke("attr", "data-mount-id")
       .as("originalMountId")
       .should("be.a", "string")
       .and("not.be.empty");
 
-    cy.visit(`/${artistSlug}`);
+    cy.get(`a[href="/${artistSlug}"]`).first().click();
+    cy.url().should("include", `/${artistSlug}`);
+
     cy.get("@originalMountId").then((id) => {
       cy.get("#player").should("have.attr", "data-mount-id", id);
     });
 
-    cy.visit("/");
+    cy.get('a[aria-label="Mirlo"]').first().click();
+    cy.url().should("not.include", `/${artistSlug}`);
+
     cy.get("@originalMountId").then((id) => {
       cy.get("#player").should("have.attr", "data-mount-id", id);
     });

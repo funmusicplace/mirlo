@@ -15,3 +15,10 @@
 
 // Import commands.js using ES2015 syntax:
 import "./commands";
+
+beforeEach(() => {
+  cy.intercept("POST", "/auth/refresh", {
+    statusCode: 200,
+    body: {},
+  });
+});
