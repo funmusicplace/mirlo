@@ -115,7 +115,7 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
 
   return (
     <div
-      className={`flex flex-col gap-3 max-md:rounded-md max-md:bg-(--mi-button-tint-color) max-md:p-3 ${albumRowSubgrid}`}
+      className={`flex flex-col gap-3 max-md:rounded-md max-md:bg-(--mi-button-tint-color) max-md:border max-md:border-(--mi-tint-x-color) max-md:p-3 ${albumRowSubgrid}`}
     >
       <div className="flex items-center gap-3 min-w-0">
         {release.cover ? (

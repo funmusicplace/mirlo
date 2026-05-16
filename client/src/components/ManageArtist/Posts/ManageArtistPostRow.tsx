@@ -42,7 +42,10 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
       });
 
   return (
-    <Box as="li" className="mb-4 max-md:pb-4! bg-(--mi-button-tint-color)">
+    <Box
+      as="li"
+      className="mb-4 max-md:pb-4! bg-(--mi-button-tint-color) border border-(--mi-tint-x-color)"
+    >
       <div className="flex flex-col">
         <div className="w-full flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0 flex items-center gap-4">
