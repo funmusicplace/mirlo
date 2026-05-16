@@ -8,7 +8,7 @@ import {
 } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaChevronRight, FaEdit } from "react-icons/fa";
+import { FaChevronRight } from "react-icons/fa";
 import {
   NavLink,
   Outlet,
@@ -18,14 +18,9 @@ import {
 } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistManageUrl } from "utils/artist";
 import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
-import useArtistQuery from "utils/useArtistQuery";
-import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 import Box from "../common/Box";
-
-import { ArtistButtonLink } from "./ArtistButtons";
 
 export const ArtistSection: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className,
@@ -41,32 +36,6 @@ export const ArtistSection: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
     {children}
   </div>
 );
-
-export const ArtistButtonQuickLink: React.FC<{
-  ariaLabel: string;
-  to: string;
-  icon: React.ReactElement;
-}> = ({ ariaLabel, to, icon }) => {
-  const { user } = useAuthContext();
-  const { data: viewingArtist } = useArtistQuery();
-  const { data: managedArtist } = useManagedArtistQuery();
-
-  const artist = viewingArtist ?? managedArtist;
-  const isArtistUser = artist?.userId === user?.id;
-
-  const canEdit = isArtistUser || user?.isAdmin;
-  if (!canEdit) return null;
-
-  return (
-    <ArtistButtonLink
-      aria-label={ariaLabel}
-      startIcon={icon}
-      to={to}
-      variant="dashed"
-      className="edit ml-1 -mt-2"
-    />
-  );
-};
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -173,8 +142,6 @@ function Artist() {
       visible:
         artist.isLabelProfile && (artist.user?.artistLabels?.length ?? 0) > 0,
       to: "roster",
-      editTo: "/profile/label",
-      editAriaLabel: t("editTitled", { title: rosterTitle }),
     },
     {
       id: "releases",
@@ -184,8 +151,6 @@ function Artist() {
         (releases?.results.length ?? 0) > 0,
       to: "releases",
       navLinkId: "artist-navlink-releases",
-      editTo: getArtistManageUrl(artist.id) + "/releases",
-      editAriaLabel: t("editTitled", { title: releasesTitle }),
     },
     {
       id: "posts",
@@ -193,8 +158,6 @@ function Artist() {
       visible: (artist?.posts.length ?? 0) > 0,
       to: "posts",
       navLinkId: "artist-navlink-updates",
-      editTo: getArtistManageUrl(artist.id) + "/posts",
-      editAriaLabel: t("editTitled", { title: postsTitle }),
     },
     {
       id: "support",
@@ -204,16 +167,12 @@ function Artist() {
         (artist?.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
           .length ?? 0) > 0,
       to: "support",
-      editTo: getArtistManageUrl(artist.id) + "/tiers",
-      editAriaLabel: t("editTitled", { title: supportTitle }),
     },
     {
       id: "merch",
       label: merchTitle,
       visible: (artist.merch.length ?? 0) > 0,
       to: "merch",
-      editTo: getArtistManageUrl(artist.id) + "/merch",
-      editAriaLabel: t("editTitled", { title: merchTitle }),
     },
   ];
 
@@ -234,22 +193,11 @@ function Artist() {
           {tabs
             .filter((tab) => tab.visible)
             .map((tab) => (
-              <React.Fragment key={tab.id}>
-                <li className="tab-primary">
-                  <NavLink to={tab.to} id={tab.navLinkId}>
-                    {tab.label}
-                  </NavLink>
-                </li>
-                {tab.editTo && (
-                  <li className="tab-secondary">
-                    <ArtistButtonQuickLink
-                      ariaLabel={tab.editAriaLabel ?? ""}
-                      to={tab.editTo}
-                      icon={<FaEdit />}
-                    />
-                  </li>
-                )}
-              </React.Fragment>
+              <li key={tab.id}>
+                <NavLink to={tab.to} id={tab.navLinkId}>
+                  {tab.label}
+                </NavLink>
+              </li>
             ))}
           {user && isArtistUser && !canReceivePayments && (
             <li>

@@ -1,14 +1,11 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import { ArtistButtonQuickLink } from "components/Artist/Artist";
 import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
 import { queryManagedArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaEye } from "react-icons/fa";
 import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
-import { getArtistUrl } from "utils/artist";
 import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
 
 const ManageArtist: React.FC<{}> = () => {
@@ -42,40 +39,30 @@ const ManageArtist: React.FC<{}> = () => {
       label: rosterTitle,
       visible: !!artist.isLabelProfile,
       to: "/profile/label",
-      editTo: getArtistUrl(artist) + "/roster",
-      editAriaLabel: t("viewLiveTitled", { title: rosterTitle }),
     },
     {
       id: "releases",
       label: releasesTitle,
       visible: true,
       to: "releases",
-      editTo: getArtistUrl(artist) + "/releases",
-      editAriaLabel: t("viewLiveTitled", { title: releasesTitle }),
     },
     {
       id: "posts",
       label: postsTitle,
       visible: true,
       to: "posts",
-      editTo: getArtistUrl(artist) + "/posts",
-      editAriaLabel: t("viewLiveTitled", { title: postsTitle }),
     },
     {
       id: "support",
       label: supportTitle,
       visible: true,
       to: "tiers",
-      editTo: getArtistUrl(artist) + "/support",
-      editAriaLabel: t("viewLiveTitled", { title: supportTitle }),
     },
     {
       id: "merch",
       label: merchTitle,
       visible: true,
       to: "merch",
-      editTo: getArtistUrl(artist) + "/merch",
-      editAriaLabel: t("viewLiveTitled", { title: merchTitle }),
     },
   ];
 
@@ -111,20 +98,9 @@ const ManageArtist: React.FC<{}> = () => {
             {tabs
               .filter((tab) => tab.visible)
               .map((tab) => (
-                <React.Fragment key={tab.id}>
-                  <li className="tab-primary">
-                    <NavLink to={tab.to}>{tab.label}</NavLink>
-                  </li>
-                  {tab.editTo && (
-                    <li className="tab-secondary">
-                      <ArtistButtonQuickLink
-                        ariaLabel={tab.editAriaLabel ?? ""}
-                        to={tab.editTo}
-                        icon={<FaEye />}
-                      />
-                    </li>
-                  )}
-                </React.Fragment>
+                <li key={tab.id}>
+                  <NavLink to={tab.to}>{tab.label}</NavLink>
+                </li>
               ))}
           </ArtistTabs>
         </nav>

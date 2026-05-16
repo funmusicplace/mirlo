@@ -448,7 +448,6 @@
     "contactMessageLabel": "Your message",
     "sendMessage": "Send message",
     "contactMessageSent": "Message sent",
-    "editTitled": "Edit {{ title }}",
     "editTier": "Edit",
     "failedToAddLocation": "Failed to add location tag",
     "failedToRemoveLocation": "Failed to remove location tag",
@@ -756,7 +755,6 @@
     "noReleases": "No releases found",
     "selected": "Selected",
     "saving": "Saving changes...",
-    "viewLiveTitled": "View live {{ title }}",
     "doesNotExist": "This artist page does not exist."
   },
   "managePost": {

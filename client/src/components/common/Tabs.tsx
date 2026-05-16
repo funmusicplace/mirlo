@@ -11,7 +11,7 @@ const Tabs = styled.ul`
     margin-right: 1rem;
     margin-top: 0.5rem;
 
-    > a:not(.edit),
+    > a,
     button {
       border-radius: none;
       text-decoration: none;
@@ -48,7 +48,7 @@ export const ArtistTabs = styled(Tabs)`
   }
 
   > li {
-    > a:not(.edit),
+    > a,
     button {
       color: var(--mi-button-color) !important;
 
@@ -59,14 +59,6 @@ export const ArtistTabs = styled(Tabs)`
         border-bottom: 4px solid var(--mi-button-color) !important;
       }
     }
-  }
-
-  > .tab-primary {
-    margin-inline-end: 0;
-  }
-
-  > .tab-primary + .tab-secondary {
-    margin-inline-start: 0;
   }
 `;
 
