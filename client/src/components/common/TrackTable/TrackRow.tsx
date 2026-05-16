@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
-import FavoriteTrack from "components/TrackGroup/Favorite";
+import WishlistTrack from "components/TrackGroup/WishlistTrack";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
@@ -13,17 +13,21 @@ import { isEmbeddedInMirlo } from "utils/widgetContext";
 import DropdownMenu from "../DropdownMenu";
 import Tooltip from "../Tooltip";
 
+import CopyTrackLink from "./CopyTrackLink";
 import EmbedLink from "./EmbedLink";
+import GoToTrack from "./GoToTrack";
 import LyricsModal from "./LyricsModal";
 import TrackAuthors from "./TrackAuthors";
-import TrackLink from "./TrackLink";
 import TrackRowPlayControl from "./TrackRowPlayControl";
 
 const TR = styled.tr<{
   canPlayTrack: boolean;
+  isPlaying: boolean;
 }>`
   ${(props) =>
     !props.canPlayTrack ? `color: var(--mi-contrast-color); opacity: .6;` : ""}
+
+  ${(props) => (props.isPlaying ? `font-weight: 600;` : "")}
 
   &:hover {
     background-color: var(--mi-tint-x-color);
@@ -52,8 +56,8 @@ const PlayCell: React.FC<{
     onClick={onTrackPlay}
     className={
       inWidget
-        ? "pl-4! pr-2! py-0.5! w-10 align-middle"
-        : `${compact ? "h-7 w-7" : "h-[40px] w-8"} align-middle max-sm:px-1 max-sm:py-0.5`
+        ? "pl-4! pr-2! py-0.5! w-10"
+        : `${compact ? "h-7 w-7 align-middle" : "w-8 py-1 align-top"} max-sm:px-1 max-sm:py-0.5`
     }
   >
     <TrackRowPlayControl
@@ -82,13 +86,13 @@ const TitleCell: React.FC<{
       onClick={onTrackPlay}
       className={
         inWidget
-          ? "w-full p-0! pr-4! py-0.5! m-0 leading-5"
-          : `w-full p-0 m-0 ${compact ? "leading-6 text-sm" : "leading-8"} max-sm:px-1 max-sm:py-0.5`
+          ? "w-full p-0! pr-4! py-0.5! m-0 leading-6"
+          : `w-full m-0 ${compact ? "p-0 leading-6 text-sm" : "px-0 py-1 leading-8 align-top"} max-sm:px-1 max-sm:py-0.5`
       }
     >
       <div
-        className={`flex justify-between items-center ${
-          inWidget ? "min-w-0 overflow-hidden" : ""
+        className={`flex justify-between ${
+          inWidget ? "items-center min-w-0 overflow-hidden" : "items-start"
         }`}
       >
         <div
@@ -110,10 +114,10 @@ const TitleCell: React.FC<{
         <div
           className={`max-md:ml-1 ${
             inWidget
-              ? "text-xs"
+              ? "text-xs leading-6"
               : compact
                 ? "text-sm"
-                : "text-sm max-md:text-xs max-md:font-bold"
+                : "text-sm leading-8 max-md:text-xs max-md:font-bold"
           }`}
         >
           {track.audio?.duration && fmtMSS(track.audio.duration)}
@@ -161,43 +165,52 @@ const DropdownCell: React.FC<{
   const showLicense = track.license && track.license.short !== "copyright";
 
   return (
-    <td className="text-right">
-      <DropdownMenu smallIcon compact label="Track options">
-        <ul>
-          <li>
-            <EmbedLink track={track} />
-          </li>
-          <li>
-            <TrackLink
-              track={track}
-              trackGroup={trackGroup}
-              artist={trackGroup.artist}
-            />
-          </li>
-          <li>
-            <FavoriteTrack track={track} />
-          </li>
-          {track.lyrics && (
+    <td className="text-right py-1 align-top">
+      <div className="flex items-center justify-end h-8">
+        <DropdownMenu smallIcon compact label="Track options">
+          <ul>
             <li>
-              <LyricsModal track={track} />
-            </li>
-          )}
-          {canDownloadTrack && (
-            <li>
-              <DownloadAlbumButton
+              <GoToTrack
                 track={track}
                 trackGroup={trackGroup}
-                dropdownItem
+                artist={trackGroup.artist}
               />
             </li>
-          )}
-          {showLicense && track.license && (
             <li>
-              <LicenseLabel license={track.license} />
+              <CopyTrackLink
+                track={track}
+                trackGroup={trackGroup}
+                artist={trackGroup.artist}
+              />
             </li>
-          )}
-        </ul>
-      </DropdownMenu>
+            <li>
+              <EmbedLink track={track} />
+            </li>
+            <li>
+              <WishlistTrack track={track} />
+            </li>
+            {track.lyrics && (
+              <li>
+                <LyricsModal track={track} />
+              </li>
+            )}
+            {canDownloadTrack && (
+              <li>
+                <DownloadAlbumButton
+                  track={track}
+                  trackGroup={trackGroup}
+                  dropdownItem
+                />
+              </li>
+            )}
+            {showLicense && track.license && (
+              <li>
+                <LicenseLabel license={track.license} />
+              </li>
+            )}
+          </ul>
+        </DropdownMenu>
+      </div>
     </td>
   );
 };
@@ -263,6 +276,7 @@ const TrackRow: React.FC<{
       key={track.id}
       id={`${track.id}`}
       canPlayTrack={canPlayTrack}
+      isPlaying={!!isThisTrackPlaying}
       className={`group ${canPlayTrack ? "cursor-pointer" : ""} ${
         inWidget
           ? "[&:not(:first-of-type)>td]:border-t [&:not(:first-of-type)>td]:border-current/15 text-xs"

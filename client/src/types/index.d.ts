@@ -29,6 +29,7 @@ interface LoggedInUser {
     userId: number;
     trackId: number;
     track: Track;
+    createdAt: string;
   }[];
   wishlist?: {
     userId: number;

@@ -1,22 +1,23 @@
-import styled from "@emotion/styled";
-import React from "react";
-import { bp } from "../../constants";
-import { useGlobalStateContext } from "state/GlobalState";
-import api from "services/api";
-import ImageWithPlaceholder from "./ImageWithPlaceholder";
-import { PlayingMusicBars } from "./PlayingMusicBars";
-import PlayButton from "./PlayButton";
-import { useTranslation } from "react-i18next";
-import Wishlist from "components/TrackGroup/Wishlist";
-import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
-import PauseButton from "./PauseButton";
-import { useAuthContext } from "state/AuthContext";
-import { Link } from "react-router-dom";
-import { determineItemLink } from "components/Artist/ArtistItemLink";
-import FavoriteTrack from "components/TrackGroup/Favorite";
-import useErrorHandler from "services/useErrorHandler";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { determineItemLink } from "components/Artist/ArtistItemLink";
+import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import Thermometer from "components/TrackGroup/Thermometer";
+import Wishlist from "components/TrackGroup/Wishlist";
+import WishlistTrack from "components/TrackGroup/WishlistTrack";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { useGlobalStateContext } from "state/GlobalState";
+
+import { bp } from "../../constants";
+
+import ImageWithPlaceholder from "./ImageWithPlaceholder";
+import PauseButton from "./PauseButton";
+import PlayButton from "./PlayButton";
+import { PlayingMusicBars } from "./PlayingMusicBars";
 
 const TrackgroupButtons = styled.div<{ compact?: boolean }>`
   width: 100%;
@@ -214,7 +215,7 @@ const ClickToPlay: React.FC<
   React.PropsWithChildren<{
     trackGroup: TrackGroup;
     showWishlist?: boolean;
-    showTrackFavorite?: boolean;
+    showTrackWishlist?: boolean;
     trackIds?: number[];
     track?: Track;
     title: string;
@@ -225,7 +226,7 @@ const ClickToPlay: React.FC<
 > = ({
   trackGroup,
   showWishlist,
-  showTrackFavorite,
+  showTrackWishlist,
   trackIds,
   track,
   title,
@@ -294,9 +295,9 @@ const ClickToPlay: React.FC<
                 <Wishlist trackGroup={trackGroup} />
               </div>
             )}
-            {showTrackFavorite && trackGroup.tracks && (
+            {showTrackWishlist && trackGroup.tracks && (
               <div>
-                <FavoriteTrack track={trackGroup.tracks[0]} collapse />
+                <WishlistTrack track={trackGroup.tracks[0]} collapse />
               </div>
             )}
 

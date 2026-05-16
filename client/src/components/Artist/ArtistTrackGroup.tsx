@@ -75,18 +75,20 @@ export const TrackGroupInfo = styled.div`
 type ArtistTrackGroupProps = {
   showArtist?: boolean;
   trackGroup: TrackGroup & { artist?: Artist };
+  track?: Track;
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
   size?: "small" | "large";
-  showTrackFavorite?: boolean;
+  showTrackWishlist?: boolean;
   myRef?: React.Ref<HTMLDivElement>;
   style?: React.CSSProperties;
 };
 
 const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
   trackGroup,
+  track,
   as,
   showArtist,
-  showTrackFavorite,
+  showTrackWishlist,
   size = "large",
   myRef,
   ...props
@@ -120,14 +122,17 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
               .filter((t) => t.isPlayable)
               .map((t) => t.id)}
-            title={trackGroup.title ?? ""}
+            title={track?.title ?? trackGroup.title ?? ""}
             trackGroup={trackGroup}
-            showWishlist={!showTrackFavorite}
-            showTrackFavorite={showTrackFavorite}
+            track={track}
+            showWishlist={!showTrackWishlist}
+            showTrackWishlist={showTrackWishlist}
           >
             <TrackGroupLinks>
               <TrackGroupInfo>
-                <ArtistItemLink item={trackGroup} />
+                <ArtistItemLink
+                  item={track ? { ...track, trackGroup } : trackGroup}
+                />
                 {showArtist && <ArtistLink artist={trackGroup.artist} />}
                 {isPrivateView && (
                   <span className="text-xs text-(--mi-normal-foreground-color) flex items-center gap-1 mt-1">
