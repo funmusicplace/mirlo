@@ -1,14 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import CanCreateArtists from "components/CanCreateArtists";
+import Button from "components/common/Button";
+import MenuLink from "components/Header/MenuLink";
+import { queryManagedArtists, useLogoutMutation } from "queries";
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-
-import Button from "components/common/Button";
-import CanCreateArtists from "components/CanCreateArtists";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import MenuLink from "components/Header/MenuLink";
-import { queryManagedArtists, useLogoutMutation } from "queries";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
 
@@ -76,12 +75,12 @@ const Menu = forwardRef<
         <Button
           aria-label="Close menu"
           autoFocus
-          className="border-none bg-transparent pointer leading-[1.5rem] h-[2rem]! text-[1rem]! self-end hover:no-underline focus:no-underline"
+          className="self-end border-none bg-transparent hover:no-underline focus:no-underline"
           // @ts-ignore React doesn't support Invoker Commands API
           command="close"
           commandfor={dialogId}
           onClick={() => onClose()}
-          size="compact"
+          onlyIcon
           startIcon={<FaTimes />}
         />
         <nav className="flex-auto">

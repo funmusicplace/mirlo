@@ -81,6 +81,8 @@ const CustomButton = styled.button<Sizable>(
           width: var(--mi-touch-target-min);
           height: var(--mi-touch-target-min);
           min-width: auto;
+          min-height: auto;
+          aspect-ratio: 1;
           padding: 0 !important;
 
           > p,
