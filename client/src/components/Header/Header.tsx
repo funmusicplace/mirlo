@@ -228,9 +228,7 @@ const Header = () => {
               startIcon={<ImMenu />}
               variant="transparent"
               className={menuButtonOverride}
-            >
-              Menu
-            </Button>
+            />
           )}
           {isLoggedIn &&
             createPortal(
