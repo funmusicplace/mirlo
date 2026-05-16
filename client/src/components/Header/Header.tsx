@@ -11,7 +11,6 @@ import { useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
-import { ImMenu } from "react-icons/im";
 import { Link, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
@@ -225,7 +224,19 @@ const Header = () => {
               commandfor={menuDialogId}
               id={menuButtonId}
               onClick={() => openMenu()}
-              startIcon={<ImMenu />}
+              startIcon={
+                <svg
+                  width="16"
+                  height="14"
+                  viewBox="0 0 16 14"
+                  fill="currentColor"
+                  aria-hidden
+                >
+                  <rect y="0" width="16" height="3" rx="1.5" />
+                  <rect y="5" width="16" height="3" rx="1.5" />
+                  <rect y="10" width="16" height="3" rx="1.5" />
+                </svg>
+              }
               variant="transparent"
               className={menuButtonOverride}
             />
