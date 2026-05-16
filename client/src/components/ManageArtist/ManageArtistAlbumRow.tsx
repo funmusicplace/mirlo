@@ -3,7 +3,6 @@ import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
-import Button from "components/common/Button";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp, FaEye, FaTrash } from "react-icons/fa";
@@ -150,7 +149,7 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
           )}
         </div>
         <div className="md:hidden">
-          <Button
+          <ArtistButton
             type="button"
             variant="transparent"
             size="compact"

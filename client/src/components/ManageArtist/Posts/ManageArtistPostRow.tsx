@@ -3,7 +3,6 @@ import ArtistRouterLink, {
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
-import Button from "components/common/Button";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import parse from "html-react-parser";
@@ -47,7 +46,7 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
       <div className="flex flex-col">
         <div className="w-full flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0 flex items-center gap-4">
-            <Button
+            <ArtistButton
               type="button"
               variant="transparent"
               size="compact"

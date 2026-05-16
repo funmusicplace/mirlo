@@ -1,18 +1,19 @@
 import { css } from "@emotion/css";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
-import Button, { ButtonLink } from "components/common/Button";
-import Modal from "components/common/Modal";
+import MarkdownContent from "components/common/MarkdownContent";
 import { Money } from "components/common/Money";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaPen, FaTrash } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-import SubscriptionForm from "./SubscriptionForm";
-import MarkdownContent from "components/common/MarkdownContent";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useAuthContext } from "state/AuthContext";
-import { useTranslation } from "react-i18next";
+import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageTiersUrl } from "utils/artist";
 
 const ManageSubscriptionTierBox: React.FC<{
@@ -103,13 +104,13 @@ const ManageSubscriptionTierBox: React.FC<{
                 display: flex;
               `}
             >
-              <ButtonLink
+              <ArtistButtonLink
                 variant="dashed"
                 startIcon={<FaPen />}
                 to={getArtistManageTiersUrl(artist.id) + `/${tier.id}`}
               />
 
-              <Button
+              <ArtistButton
                 className={css`
                   margin-left: 0.5rem;
                 `}
