@@ -5,7 +5,7 @@ import { queryArtist, queryManagedArtist } from "queries";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { isLight } from "../utils/colors";
+import { getBrightness, isLight } from "../utils/colors";
 
 const RootDiv = styled.div`
   min-height: 100vh;
@@ -39,6 +39,15 @@ export const useTransparentContainer = (): boolean => {
   return Boolean(ctx?.transparentContainer);
 };
 
+export const useIsArtistPageLight = (): boolean | null => {
+  const ctx = React.useContext(ArtistColorsContext);
+  const bg = ctx?.colors.background;
+  if (!bg) return null;
+  const brightness = getBrightness(bg);
+  if (brightness === undefined) return true;
+  return brightness > 100;
+};
+
 const isDefined = (value?: string) => Boolean(value && value !== "");
 
 export const resolveColors = (raw?: ArtistColors): ArtistColors => {
@@ -64,9 +73,7 @@ const buildVarMap = (colors: ArtistColors): Record<string, string> => {
   return map;
 };
 
-const tintStyleFor = (
-  surface: string | undefined
-): React.CSSProperties => {
+const tintStyleFor = (surface: string | undefined): React.CSSProperties => {
   if (!surface) return {};
   const light = isLight(surface);
   return {
@@ -98,10 +105,26 @@ const buttonTintStyleFor = (
   } as React.CSSProperties;
 };
 
-const ArtistColorsInner: React.FC<{
-  artistId: string;
-  children: React.ReactElement;
-}> = ({ artistId, children }) => {
+const fixedStyleFor = (surface: string | undefined): React.CSSProperties => {
+  if (!surface) return {};
+  const brightness = getBrightness(surface);
+  const pageLight = brightness === undefined ? true : brightness > 100;
+  return {
+    "--mi-fixed-bg-color": pageLight
+      ? "var(--mi-off-white)"
+      : "var(--mi-black)",
+    "--mi-fixed-fg-color": pageLight
+      ? "var(--mi-black)"
+      : "var(--mi-off-white)",
+  } as React.CSSProperties;
+};
+
+const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
+  children,
+}) => {
+  const params = useParams();
+  const artistId = params?.artistId ?? "";
+
   const { data: managedArtist } = useQuery(
     queryManagedArtist(Number(artistId))
   );
@@ -117,7 +140,7 @@ const ArtistColorsInner: React.FC<{
 
   const savedTransparent = Boolean(
     managedArtist?.properties?.transparentContainer ??
-      artist?.properties?.transparentContainer
+    artist?.properties?.transparentContainer
   );
   const transparentContainer =
     transparentPreview === null ? savedTransparent : transparentPreview;
@@ -134,45 +157,40 @@ const ArtistColorsInner: React.FC<{
     [colors, transparentContainer]
   );
 
-  if (!artist && !managedArtist) {
-    return <RootDiv>{children}</RootDiv>;
-  }
+  const hasArtist = artistId !== "" && (artist || managedArtist);
 
-  const varStyle: React.CSSProperties = {
-    ...(buildVarMap(colors) as React.CSSProperties),
-    ...tintStyleFor(colors.background),
-    ...buttonTintStyleFor(colors.button),
-  };
-  const rootBg = isDefined(colors.background)
-    ? colors.background
-    : "var(--mi-background-color)";
-  const rootFg = isDefined(colors.text) ? colors.text : "var(--mi-text-color)";
+  const varStyle: React.CSSProperties = hasArtist
+    ? {
+        ...(buildVarMap(colors) as React.CSSProperties),
+        ...tintStyleFor(colors.background),
+        ...buttonTintStyleFor(colors.button),
+        ...fixedStyleFor(colors.background),
+      }
+    : {};
+  const rootBg =
+    hasArtist && isDefined(colors.background)
+      ? colors.background
+      : "var(--mi-background-color)";
+  const rootFg =
+    hasArtist && isDefined(colors.text) ? colors.text : "var(--mi-text-color)";
 
   return (
-    <ArtistColorsContext.Provider value={contextValue}>
+    <ArtistColorsContext.Provider value={hasArtist ? contextValue : null}>
       <RootDiv
         id="artist-colors-root"
         style={varStyle}
-        className={cx(transparentContainer && "transparent-container", css`
-          background-color: ${rootBg};
-          color: ${rootFg};
-        `)}
+        className={cx(
+          hasArtist && transparentContainer && "transparent-container",
+          css`
+            background-color: ${rootBg};
+            color: ${rootFg};
+          `
+        )}
       >
         {children}
       </RootDiv>
     </ArtistColorsContext.Provider>
   );
-};
-
-const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
-  children,
-}) => {
-  const params = useParams();
-  const artistId = params?.artistId ?? "";
-  if (artistId === "") {
-    return <RootDiv>{children}</RootDiv>;
-  }
-  return <ArtistColorsInner artistId={artistId}>{children}</ArtistColorsInner>;
 };
 
 export default ArtistColorsProvider;

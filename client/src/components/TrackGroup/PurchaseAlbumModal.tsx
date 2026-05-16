@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
+import { FixedButton } from "components/common/FixedButton";
 import Modal from "components/common/Modal";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import { queryArtist } from "queries";
@@ -64,14 +65,13 @@ const PurchaseAlbumModal: React.FC<{
     : "buyingTrackGroup";
 
   const button = fixed ? (
-    <ArtistButton
+    <FixedButton
       onClick={() => setIsPurchasingAlbum(true)}
       rounded
-      variant="pill"
       size="compact"
     >
       {t(preOrderOrBuyText)}
-    </ArtistButton>
+    </FixedButton>
   ) : (
     <ArtistButton
       type="button"

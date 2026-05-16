@@ -632,7 +632,9 @@
     "thisIsYourLastPlay": "This is your last free play — purchase this release to continue listening.",
     "trackLimitExplanation": "You have reached the play limit for this track. Purchase it to continue listening.",
     "playsRemaining_one": "{{count}} free play left — buy this release to keep listening.",
-    "playsRemaining_other": "{{count}} free plays left — buy this release to keep listening."
+    "playsRemaining_other": "{{count}} free plays left — buy this release to keep listening.",
+    "playsRemainingShort_one": "{{count}} free play left",
+    "playsRemainingShort_other": "{{count}} free plays left"
   },
   "post": {
     "postByArtist": "by <link></link>",

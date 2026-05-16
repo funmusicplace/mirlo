@@ -1,8 +1,9 @@
 import { css } from "@emotion/css";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { TrackTitleContent } from "components/Widget/TrackTitleContent";
 import React from "react";
 import { Link } from "react-router-dom";
-import { getReleaseUrl, getTrackUrl } from "utils/artist";
+import { getTrackUrl } from "utils/artist";
 
 import { bp } from "../../constants";
 
@@ -52,9 +53,10 @@ export const TrackArtistLinks: React.FC<{
   ));
 };
 
-const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
-  currentTrack,
-}) => {
+const PlayingTrackDetails: React.FC<{
+  currentTrack: Track;
+  byLineEnd?: React.ReactNode;
+}> = ({ currentTrack, byLineEnd }) => {
   return (
     <div
       className={css`
@@ -97,67 +99,27 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
           flex: 80%;
           display: flex;
           flex-direction: column;
+          min-width: 0;
           @media (max-width: ${bp.small}px) {
             max-width: 70%;
             flex: 70%;
           }
         `}
       >
-        <div
-          className={css`
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            font-size: var(--mi-font-size-normal);
-          `}
-          id="player-track-title"
-          title={currentTrack?.title}
-        >
-          <Link
-            to={getTrackUrl(
-              currentTrack.trackGroup.artist,
-              currentTrack.trackGroup,
-              currentTrack
-            )}
-          >
-            {currentTrack?.title}
-          </Link>
-        </div>
-        {currentTrack?.trackGroup && (
-          <>
-            <div
-              className={css`
-                opacity: 0.6;
-                color: grey;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              `}
-              title={currentTrack.trackGroup.title}
-            >
-              {currentTrack.trackGroup.artist && (
-                <Link
-                  to={getReleaseUrl(
-                    currentTrack.trackGroup.artist,
-                    currentTrack.trackGroup
-                  )}
-                  id="player-trackGroup-title"
-                >
-                  {currentTrack.trackGroup.title}
-                </Link>
-              )}
-            </div>
-            <div
-              className={css`
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-              `}
-            >
-              <TrackArtistLinks track={currentTrack} />
-            </div>
-          </>
-        )}
+        <TrackTitleContent
+          track={currentTrack}
+          embeddedInMirlo={false}
+          combineFromAndBy
+          useTrackArtistLinks
+          titleLinkTo={getTrackUrl(
+            currentTrack.trackGroup.artist,
+            currentTrack.trackGroup,
+            currentTrack
+          )}
+          byLineEnd={byLineEnd}
+          foldByLineAtSm
+          compactTitle
+        />
       </div>
     </div>
   );

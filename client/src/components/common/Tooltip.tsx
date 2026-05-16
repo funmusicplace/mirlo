@@ -58,15 +58,16 @@ const TooltipText = styled.span<{
     } else {
       return `
         top: 100%;
-        left: 0%;
+        left: 50%;
+        transform: translateX(-50%);
         margin-top: ${props.compact ? "0.25rem" : "0.75rem"};
 
         &:after {
           content: " ";
           position: absolute;
           bottom: 100%;
-          left: ${props.compact ? "10%" : "50%"};
-          margin-left: ${props.compact ? "0px" : "-5px"};
+          left: 50%;
+          margin-left: -5px;
           border-width: 5px;
           border-style: solid;
           border-color: transparent transparent black transparent;

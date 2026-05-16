@@ -6,7 +6,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import SongTimeDisplay from "../common/SongTimeDisplay";
 
 import BuyTrackModal from "./BuyTrackModal";
-import PlayLimitNotice, { PlayLimit } from "./PlayLimitNotice";
+import { PlayLimit } from "./PlayLimitNotice";
 
 // Load react-hls-player asynchronously (the hls bundle is quite big)
 const ReactHlsPlayer = React.lazy(() => import("@mirlo/react-hls-player"));
@@ -43,7 +43,7 @@ export const AudioWrapper: React.FC<{
   setCurrentSeconds: (time: number) => void;
   currentSeconds: number;
   compact?: boolean;
-  showPlayLimit?: boolean;
+  onPlayLimitChange?: (limit: PlayLimit | null) => void;
 }> = ({
   currentTrack,
   position,
@@ -51,19 +51,39 @@ export const AudioWrapper: React.FC<{
   setCurrentSeconds,
   currentSeconds,
   compact,
-  showPlayLimit,
+  onPlayLimitChange,
 }) => {
   const [showBuyModal, setShowBuyModal] = React.useState(false);
   const [hasShownBuyModalBeenShown, setHasShownBuyModalBeenShown] =
     React.useState(false);
   const [hasOverplayedSong, setHasOverplayedSong] = React.useState(false);
-  const [playLimit, setPlayLimit] = React.useState<PlayLimit | null>(null);
   const {
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
   } = useGlobalStateContext();
   const [mostlyListened, setMostlyListened] = React.useState(false);
   const playerRef = React.useRef<HTMLVideoElement>(null);
+  const playingRef = React.useRef(playing);
+  const showBuyModalRef = React.useRef(showBuyModal);
+  React.useEffect(() => {
+    playingRef.current = playing;
+  }, [playing]);
+  React.useEffect(() => {
+    showBuyModalRef.current = showBuyModal;
+  }, [showBuyModal]);
+
+  const onHLSInstance = React.useCallback(
+    (hls: Hls) => {
+      hls.once(Hls.Events.MANIFEST_PARSED, () => {
+        if (playingRef.current && !showBuyModalRef.current) {
+          playerRef.current?.play().catch(() => {
+            dispatch({ type: "setPlaying", playing: false });
+          });
+        }
+      });
+    },
+    [dispatch]
+  );
 
   const onEnded = React.useCallback(async () => {
     if (looping === "loopTrack") {
@@ -79,7 +99,7 @@ export const AudioWrapper: React.FC<{
       setMostlyListened(false);
       setHasOverplayedSong(false);
       setHasShownBuyModalBeenShown(false);
-      setPlayLimit(null);
+      onPlayLimitChange?.(null);
     }
   }, [currentTrack.id]);
 
@@ -92,7 +112,7 @@ export const AudioWrapper: React.FC<{
           const resp = await api.get<{ playLimit: PlayLimit | null }>(
             `tracks/${currentTrack.id}/trackPlay`
           );
-          setPlayLimit(resp.result?.playLimit ?? null);
+          onPlayLimitChange?.(resp.result?.playLimit ?? null);
         } catch (e) {
           console.error(e);
         }
@@ -229,7 +249,6 @@ export const AudioWrapper: React.FC<{
 
   return (
     <>
-      {showPlayLimit && playLimit && <PlayLimitNotice playLimit={playLimit} />}
       <BuyTrackModal
         showBuyModal={showBuyModal}
         setShowBuyModal={setShowBuyModal}
@@ -244,6 +263,7 @@ export const AudioWrapper: React.FC<{
           // controls={true}
           // @ts-ignore
           hlsConfig={hlsConfig}
+          getHLSInstance={onHLSInstance}
           onError={(event: any, data: any) => {
             if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
               if (data.networkDetails?.responseText) {

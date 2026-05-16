@@ -3,24 +3,26 @@ import Button, { ButtonLink } from "./Button";
 import { bp } from "../../constants";
 
 export const FixedButton = styled(Button)`
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  color: black !important;
+  box-shadow: 1px 1px 0.15rem rgba(0, 0, 0, 0.15);
+  background-color: var(--mi-fixed-bg-color) !important;
+  color: var(--mi-fixed-fg-color) !important;
+  border: 1px solid
+    color-mix(in srgb, var(--mi-fixed-fg-color) 40%, transparent) !important;
   height: auto;
   width: auto;
 
   justify-content: space-between;
 
   svg {
-    fill: black;
+    fill: var(--mi-fixed-fg-color);
   }
 
   :hover {
-    background-color: rgba(0, 0, 0, 0.7) !important;
-    color: white !important;
+    background-color: var(--mi-fixed-fg-color) !important;
+    color: var(--mi-fixed-bg-color) !important;
 
     svg {
-      fill: white !important;
+      fill: var(--mi-fixed-bg-color) !important;
     }
   }
 
@@ -34,17 +36,19 @@ export const FixedButton = styled(Button)`
 `;
 
 const FixedButtonLink = styled(ButtonLink)`
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  color: black !important;
+  box-shadow: 1px 1px 0.15rem rgba(0, 0, 0, 0.15);
+  background-color: var(--mi-fixed-bg-color) !important;
+  color: var(--mi-fixed-fg-color) !important;
+  border: 1px solid
+    color-mix(in srgb, var(--mi-fixed-fg-color) 40%, transparent) !important;
   height: auto;
   width: auto;
 
   justify-content: space-between;
 
   :hover {
-    background-color: rgba(0, 0, 0, 0.7) !important;
-    color: white !important;
+    background-color: var(--mi-fixed-fg-color) !important;
+    color: var(--mi-fixed-bg-color) !important;
   }
 
   @media screen and (min-width: ${bp.medium}px) {

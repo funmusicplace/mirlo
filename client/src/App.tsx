@@ -119,9 +119,9 @@ function App() {
               <Footer />
             </div>
           </div>
+          <Player />
         </>
       </ArtistColorsProvider>
-      <Player />
       <UploadProgressPanel />
     </>
   );
