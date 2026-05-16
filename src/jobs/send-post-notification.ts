@@ -91,9 +91,12 @@ export default async function sendPostNotification(job: {
     }
 
     const hasContent = post.content && post.content.trim().length > 0;
-    if (post.isDraft || !post.shouldSendEmail || !hasContent) {
+    // Drafts and empty posts shouldn't appear anywhere — exit before claiming.
+    // shouldSendEmail is checked later, so the post still gets in-app
+    // notifications even when the author opted out of emails (#2071).
+    if (post.isDraft || !hasContent) {
       logger.info(
-        `sendPostNotification: skipping post ${postId} (draft=${post.isDraft}, shouldSendEmail=${post.shouldSendEmail}, hasContent=${hasContent})`
+        `sendPostNotification: skipping post ${postId} (draft=${post.isDraft}, hasContent=${hasContent})`
       );
       return;
     }
@@ -130,90 +133,104 @@ export default async function sendPostNotification(job: {
       `sendPostNotification: found ${uniqueSubscribers.length} subscribers for post ${postId}`
     );
 
+    // Pick the deliveryMethod that reflects which deliveries we will actually
+    // perform for this post. shouldSendEmail=false still creates an in-app
+    // notification so subscribers see the post in their "Artists you follow"
+    // feed, just without the email side-effect (#2071).
+    const wantsEmail = post.shouldSendEmail;
+    const wantsActivityPub = !!post.artist?.activityPub;
+    const deliveryMethod = wantsEmail
+      ? wantsActivityPub
+        ? ("BOTH" as const)
+        : ("EMAIL" as const)
+      : wantsActivityPub
+        ? ("ACTIVITYPUB" as const)
+        : ("IN_APP" as const);
+
     // Create notifications in the DB
     const createdNotifications = await prisma.notification.createMany({
       data: uniqueSubscribers.map((subscriber) => ({
         postId,
         userId: subscriber.id,
         notificationType: "NEW_ARTIST_POST" as const,
-        deliveryMethod: post.artist?.activityPub ? "BOTH" : "EMAIL",
+        deliveryMethod,
       })),
       skipDuplicates: true,
     });
 
     logger.info(
-      `sendPostNotification: created ${createdNotifications.count} new notifications for post ${postId}`
+      `sendPostNotification: created ${createdNotifications.count} new notifications for post ${postId} (deliveryMethod=${deliveryMethod})`
     );
 
-    const notificationsToEmail = await prisma.notification.findMany({
-      where: {
-        postId,
-        notificationType: "NEW_ARTIST_POST",
-        deliveryMethod: { in: ["EMAIL", "BOTH"] },
-      },
-      include: {
-        user: { select: { email: true } },
-      },
-    });
+    if (wantsEmail) {
+      const notificationsToEmail = await prisma.notification.findMany({
+        where: {
+          postId,
+          deliveryMethod: { in: ["EMAIL", "BOTH"] },
+        },
+        include: {
+          user: { select: { email: true } },
+        },
+      });
 
-    logger.info(
-      `sendPostNotification: queueing ${notificationsToEmail.length} email(s) for post ${postId}`
-    );
+      logger.info(
+        `sendPostNotification: queueing ${notificationsToEmail.length} email(s) for post ${postId}`
+      );
 
-    // Pass the post URL as a fallback so embedded tracks/trackGroups link
-    // to the post when their parent album is unreachable (draft, private,
-    // unreleased, deleted). Otherwise the email link 404s. See #1703.
-    const { applicationUrl } = await getClient();
-    const postUrl = `${applicationUrl}/${post.artist?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
-    const htmlContent = await parseOutIframes(post.content || "", postUrl);
+      // Pass the post URL as a fallback so embedded tracks/trackGroups link
+      // to the post when their parent album is unreachable (draft, private,
+      // unreleased, deleted). Otherwise the email link 404s. See #1703.
+      const { applicationUrl } = await getClient();
+      const postUrl = `${applicationUrl}/${post.artist?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
+      const htmlContent = await parseOutIframes(post.content || "", postUrl);
 
-    for (const notification of notificationsToEmail) {
-      if (!notification.user?.email) {
-        logger.warn(
-          `sendPostNotification: skipping notification ${notification.id} for post ${postId} because recipient email is missing`
-        );
-        continue;
-      }
+      for (const notification of notificationsToEmail) {
+        if (!notification.user?.email) {
+          logger.warn(
+            `sendPostNotification: skipping notification ${notification.id} for post ${postId} because recipient email is missing`
+          );
+          continue;
+        }
 
-      const postForEmail = serializePost(
-        {
+        const postForEmail = serializePost({
           id: post.id,
           title: post.title,
           urlSlug: post.urlSlug,
           featuredImage: post.featuredImage,
           content: post.content,
           isPublic: post.isPublic,
-        },
-        undefined,
-        undefined,
-        true
-      );
+        });
 
-      await sendMailQueue.add(
-        "send-mail",
-        {
-          template: "announce-post-published",
-          message: {
-            to: notification.user.email,
-          },
-          locals: {
-            artist: {
-              id: post.artist?.id,
-              name: post.artist?.name,
-              urlSlug: post.artist?.urlSlug,
+        await sendMailQueue.add(
+          "send-mail",
+          {
+            template: "announce-post-published",
+            message: {
+              to: notification.user.email,
             },
-            post: {
-              ...postForEmail,
-              htmlContent,
+            locals: {
+              artist: {
+                id: post.artist?.id,
+                name: post.artist?.name,
+                urlSlug: post.artist?.urlSlug,
+              },
+              post: {
+                ...postForEmail,
+                htmlContent,
+              },
+              email: encodeURIComponent(notification.user.email),
+              host: process.env.API_DOMAIN,
+              client: (await getClient()).applicationUrl,
             },
-            email: encodeURIComponent(notification.user.email),
-            host: process.env.API_DOMAIN,
-            client: (await getClient()).applicationUrl,
           },
-        },
-        {
-          jobId: `announce-post-published-${postId}-${notification.userId}`,
-        }
+          {
+            jobId: `announce-post-published-${postId}-${notification.userId}`,
+          }
+        );
+      }
+    } else {
+      logger.info(
+        `sendPostNotification: shouldSendEmail=false for post ${postId}, skipping email queue`
       );
     }
 

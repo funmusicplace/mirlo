@@ -189,7 +189,7 @@ describe("send-post-notification", () => {
     assert.strictEqual(updated?.hasAnnounceEmailBeenSent, false);
   });
 
-  it("skips posts with shouldSendEmail: false", async () => {
+  it("skips email queueing for posts with shouldSendEmail: false", async () => {
     const { artist } = await createArtistWithSubscriber("sub@test.com");
     const post = await createPublishedPost(artist.id, {
       shouldSendEmail: false,
@@ -198,6 +198,42 @@ describe("send-post-notification", () => {
     await sendPostNotification({ data: { postId: post.id } });
 
     assert.strictEqual(mailQueueStub.callCount, 0);
+  });
+
+  // shouldSendEmail controls email delivery only; subscribers must still see
+  // the post in their "Artists you follow" feed via an in-app notification.
+  // See #2071.
+  it("still creates in-app notifications when shouldSendEmail: false", async () => {
+    const { artist, subscriber } = await createArtistWithSubscriber(
+      "sub@test.com"
+    );
+    const post = await createPublishedPost(artist.id, {
+      shouldSendEmail: false,
+    });
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    const notification = await prisma.notification.findFirst({
+      where: {
+        postId: post.id,
+        userId: subscriber.id,
+        notificationType: "NEW_ARTIST_POST",
+      },
+    });
+    assert.ok(notification, "in-app notification should be created");
+    assert.strictEqual(notification?.deliveryMethod, "IN_APP");
+  });
+
+  it("marks shouldSendEmail: false posts as processed so the cron doesn't re-queue them", async () => {
+    const { artist } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(artist.id, {
+      shouldSendEmail: false,
+    });
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    const updated = await prisma.post.findUnique({ where: { id: post.id } });
+    assert.strictEqual(updated?.hasAnnounceEmailBeenSent, true);
   });
 
   it("skips posts with empty content", async () => {
