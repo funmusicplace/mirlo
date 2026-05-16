@@ -22,8 +22,17 @@ export default function () {
     try {
       const artistId = await findArtistIdForURLSlug(id);
       const labelProfile = await prisma.artist.findFirst({
-        where: { id: artistId, isLabelProfile: true },
+        where: {
+          id: artistId,
+          isLabelProfile: true,
+          deletedAt: null,
+          user: { isLabelAccount: true, deletedAt: null },
+        },
       });
+
+      if (!labelProfile) {
+        return res.status(404).json({ error: "Label not found" });
+      }
 
       const canManage =
         !!loggedInUser &&

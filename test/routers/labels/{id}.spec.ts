@@ -19,6 +19,24 @@ describe("GET /v1/labels/{id}", () => {
     }
   });
 
+  it("returns 404 when the label's owner has isLabelAccount = false (#1804)", async () => {
+    const { user: labelUser } = await createUser({
+      email: "off-label@example.com",
+      isLabelAccount: false,
+    });
+    const label = await createArtist(labelUser.id, {
+      name: "Disabled Label",
+      isLabelProfile: true,
+      urlSlug: "disabled-label",
+    });
+
+    const response = await requestApp
+      .get(`labels/${label.urlSlug}`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 404);
+  });
+
   it("should not include deleted roster artists in artistLabels", async () => {
     const { user: labelUser } = await createUser({
       email: "label-roster@example.com",
