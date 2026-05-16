@@ -1,21 +1,22 @@
 import { css } from "@emotion/css";
-import React from "react";
-import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
-import { useParams, useNavigate } from "react-router-dom";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ManageSectionWrapper } from "./ManageSectionWrapper";
-import { useTranslation } from "react-i18next";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import Button, { ButtonLink } from "components/common/Button";
-import { FaPlus, FaWrench } from "react-icons/fa";
+import SectionActionStrip from "components/common/SectionActionStrip";
 import {
   queryManagedArtist,
   queryManagedArtistSubscriptionTiers,
   useCreateSubscriptionTierMutation,
 } from "queries";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { FaPlus, FaWrench } from "react-icons/fa";
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+
+import { ManageSectionWrapper } from "./ManageSectionWrapper";
+import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const { t } = useTranslation("translation", {
@@ -72,37 +73,28 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
 
   return (
     <ManageSectionWrapper>
-      <SpaceBetweenDiv>
-        <div />
-        <div
-          className={css`
-            display: flex;
-          `}
+      <SectionActionStrip>
+        <ButtonLink
+          to="supporters"
+          variant="dashed"
+          size="compact"
+          collapsible
+          startIcon={<FaWrench />}
         >
-          <ButtonLink
-            to="supporters"
-            className={css`
-              margin-right: 0.25rem;
-            `}
-            variant="dashed"
-            size="compact"
-            collapsible
-            startIcon={<FaWrench />}
-          >
-            {t("supporters")}
-          </ButtonLink>
-          <Button
-            onClick={handleAddNewTier}
-            startIcon={<FaPlus />}
-            size="compact"
-            variant="dashed"
-            isLoading={isPending}
-            disabled={isPending}
-          >
-            {t("addNewTier")}
-          </Button>
-        </div>
-      </SpaceBetweenDiv>
+          {t("supporters")}
+        </ButtonLink>
+        <Button
+          onClick={handleAddNewTier}
+          startIcon={<FaPlus />}
+          size="compact"
+          variant="dashed"
+          collapsible
+          isLoading={isPending}
+          disabled={isPending}
+        >
+          {t("addNewTier")}
+        </Button>
+      </SectionActionStrip>
       <div className="grid md:grid-cols-3 gap-2">
         {tiers?.results
           .sort((a, b) => (a.minAmount ?? 0) - (b.minAmount ?? 0))

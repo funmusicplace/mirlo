@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+
 import { bp } from "../../constants";
 
 export const ManageSectionWrapper = styled.div`
@@ -15,7 +16,8 @@ export const ManageSectionWrapper = styled.div`
 
   h3 {
     margin-top: 0.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
+    padding-bottom: 0;
   }
 `;
 

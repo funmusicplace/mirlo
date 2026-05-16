@@ -13,7 +13,7 @@ import TrackRow from "./TrackRow";
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup?: TrackGroup;
-  size?: "small";
+  size?: "small" | "compact";
   showDropdown?: boolean;
   inWidget?: boolean;
 }> = ({ tracks, trackGroup, size, showDropdown = true, inWidget }) => {

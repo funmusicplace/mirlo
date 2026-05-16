@@ -1,10 +1,7 @@
-import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArtistButton,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import SectionActionStrip from "components/common/SectionActionStrip";
 import Tooltip from "components/common/Tooltip";
 import {
   queryArtist,
@@ -13,20 +10,24 @@ import {
 } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaEye, FaTrash } from "react-icons/fa";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { useParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
 
+import ManageArtistAlbumRow, {
+  albumCellDivider,
+  albumRowSubgrid,
+  albumTableGrid,
+  albumTableGridWithArtist,
+} from "./ManageArtistAlbumRow";
+import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import { NewAlbumButton } from "./NewAlbumButton";
 import SetEntireCataloguePrice from "./SetEntireCataloguePrice";
 
-const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
-  releases,
-}) => {
-  const { user } = useAuthContext();
+const ManageArtistAlbumsTable: React.FC<{
+  releases: TrackGroup[];
+  showArtist?: boolean;
+}> = ({ releases, showArtist }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "artistAlbumsTable",
   });
@@ -52,150 +53,73 @@ const ManageArtistAlbumsTable: React.FC<{ releases: TrackGroup[] }> = ({
   );
 
   return (
-    <div className="flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-tint-color)">
-      <div className="hidden md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3 md:px-3 md:py-1">
-        <div>{t("title")}</div>
-        <div className="text-right">{t("publishedAt")}</div>
-        <div className="text-right">{t("releaseDate")}</div>
-        <div className="text-right">{t("tracks")}</div>
-        <div className="text-right">{t("catalogNumber")}</div>
-        <div className="text-right">{t("price")}</div>
-        <div className="text-right">{t("visibility")}</div>
-        <div className="text-right">
+    <div
+      className={`flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-tint-color) md:border md:border-(--mi-tint-color) ${
+        showArtist ? albumTableGridWithArtist : albumTableGrid
+      }`}
+    >
+      <div className={`hidden md:block ${albumRowSubgrid}`}>
+        <div className="truncate">{t("title")}</div>
+        {showArtist && (
+          <div className={`text-center truncate ${albumCellDivider}`}>
+            {t("artist")}
+          </div>
+        )}
+        <div className={`text-center truncate ${albumCellDivider}`}>
+          {t("publishedAt")}
+        </div>
+        <div className={`text-center truncate ${albumCellDivider}`}>
+          {t("releaseDate")}
+        </div>
+        <div className={`text-center truncate ${albumCellDivider}`}>
+          {t("tracks")}
+        </div>
+        <div className={`text-center truncate ${albumCellDivider}`}>
+          {t("catalogNumber")}
+        </div>
+        <div className={`text-center truncate ${albumCellDivider}`}>
+          {t("price")}
+        </div>
+        <div className={`text-center truncate ${albumCellDivider}`}>
+          {t("visibility")}
+        </div>
+        <div className={`text-center truncate ${albumCellDivider}`}>
           <Tooltip hoverText={t("managingPaymentsTooltip")}>
             {t("managingPayments")}
           </Tooltip>
         </div>
-        <div aria-label="actions" />
+        <div aria-label="actions" className={albumCellDivider} />
       </div>
 
-      {releases.map((release) => {
-        const isPublished =
-          release.publishedAt && new Date(release.publishedAt) < new Date();
+      {releases.map((release) => (
+        <ManageArtistAlbumRow
+          key={release.id}
+          release={release}
+          isDeletePending={isDeletePending}
+          onDelete={handleDelete}
+          showArtist={showArtist}
+        />
+      ))}
+    </div>
+  );
+};
 
-        return (
-          <div
-            key={release.id}
-            className="flex flex-col gap-3 rounded-md md:px-3 md:py-1 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_40px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,4fr)] md:items-center md:gap-3"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              {release.cover && (
-                <img
-                  src={release.cover.sizes?.[120] ?? release.cover.url?.[0]}
-                  alt={release.title}
-                  className="h-10 w-10 flex-shrink-0 object-cover"
-                />
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="font-medium truncate" title={release.title}>
-                  {release.title}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 md:contents">
-              <div id="publishedAt" className="md:hidden">
-                {t("publishedAt")}
-              </div>
-              <div className="text-right" aria-labelledby="publishedAt">
-                {release.publishedAt ? release.publishedAt.split("T")[0] : "×"}
-              </div>
-
-              <div id="releaseDate" className="md:hidden">
-                {t("releaseDate")}
-              </div>
-              <div
-                className="text-right lg:text-right"
-                aria-labelledby="releaseDate"
-              >
-                {release.releaseDate ? release.releaseDate.split("T")[0] : "×"}
-              </div>
-
-              <div id="tracks" className="md:hidden">
-                {t("tracks")}
-              </div>
-              <div className="text-right" aria-labelledby="tracks">
-                {release.tracks.length}
-              </div>
-
-              <div id="catalogNumber" className="md:hidden">
-                {t("catalogNumber")}
-              </div>
-              <div
-                className="text-right truncate"
-                aria-labelledby="catalogNumber"
-                title={release.catalogNumber}
-              >
-                {release.catalogNumber}
-              </div>
-              <div id="price" className="md:hidden">
-                {t("price")}
-              </div>
-              <div className="text-right" aria-labelledby="price">
-                {release.minPrice
-                  ? `${release.minPrice} ${release.currency}`
-                  : "×"}
-              </div>
-
-              <div id="visibility" className="md:hidden">
-                {t("visibility")}
-              </div>
-              <div className="text-right" aria-labelledby="visibility">
-                {isPublished && !release.isPublic ? t("private") : ""}
-              </div>
-
-              <div id="managingPayments" className="md:hidden">
-                {t("managingPayments")}
-              </div>
-              <div className="text-right" aria-labelledby="managingPayments">
-                {release.paymentToUserId === user?.id ||
-                release.artist?.userId === user?.id
-                  ? "Yes"
-                  : "No"}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap justify-end gap-2">
-              <ArtistButtonLink
-                to={getManageReleaseUrl(release.artist, release)}
-                size="compact"
-                variant="outlined"
-              >
-                {t("manageAlbum")}
-              </ArtistButtonLink>
-              {release.artist && isPublished && (
-                <ArtistButtonLink
-                  to={getReleaseUrl(release.artist, release)}
-                  size="compact"
-                  variant="outlined"
-                  startIcon={<FaEye />}
-                >
-                  {t("viewLive")}
-                </ArtistButtonLink>
-              )}
-              {release.artist && !isPublished && (
-                <ArtistButtonLink
-                  to={getReleaseUrl(release.artist, release)}
-                  size="compact"
-                  variant="dashed"
-                  startIcon={<FaEye />}
-                >
-                  {t("preview")}
-                </ArtistButtonLink>
-              )}
-              <ArtistButton
-                size="compact"
-                variant="outlined"
-                startIcon={<FaTrash />}
-                onClick={() => handleDelete(release.id)}
-                isLoading={isDeletePending}
-              >
-                {t("delete")}
-              </ArtistButton>
-            </div>
-          </div>
-        );
-      })}
+const ReleasesSection: React.FC<{
+  title: string;
+  description?: string;
+  releases: TrackGroup[];
+  showArtist?: boolean;
+}> = ({ title, description, releases, showArtist }) => {
+  if (releases.length === 0) return null;
+  return (
+    <div className="flex gap-2 flex-col">
+      <h3>{title}</h3>
+      {description && (
+        <p className="text-sm text-(--mi-secondary-text-color) mb-1">
+          {description}
+        </p>
+      )}
+      <ManageArtistAlbumsTable releases={releases} showArtist={showArtist} />
     </div>
   );
 };
@@ -234,68 +158,52 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   const unpublishedLabelReleases = labelReleases.filter((a) => !isPublished(a));
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between w-full gap-2">
-        {trackGroups?.results.length === 0 && !isLoadingTrackGroups && (
-          <div>{t("noAlbumsYet")}</div>
-        )}
-        {trackGroups?.results.length !== 0 && <div />}
-        <div
-          className={css`
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.2rem;
-          `}
+    <ManageSectionWrapper>
+      <SectionActionStrip>
+        <SetEntireCataloguePrice />
+        <ArtistButtonLink
+          to={`/manage/artists/${artistId}/releases/tools`}
+          size="compact"
+          startIcon={<MdOutlineDownloadForOffline />}
+          variant="dashed"
+          collapsible
         >
-          <SetEntireCataloguePrice />
-          <ArtistButtonLink
-            to={`/manage/artists/${artistId}/releases/tools`}
-            size="compact"
-            startIcon={<MdOutlineDownloadForOffline />}
-            variant="outlined"
-            collapsible
-            className={css`
-              margin-right: 0.25rem;
-              margin-left: 0.25rem;
-            `}
-          >
-            {t("downloadCodes")}
-          </ArtistButtonLink>
-          {artist ? <NewAlbumButton artist={artist} /> : undefined}
-        </div>
-      </div>
+          {t("downloadCodes")}
+        </ArtistButtonLink>
+        {artist ? <NewAlbumButton artist={artist} /> : undefined}
+      </SectionActionStrip>
+      {trackGroups?.results.length === 0 && !isLoadingTrackGroups && (
+        <div>{t("noAlbumsYet")}</div>
+      )}
 
-      <div className="flex flex-col gap-10 px-2">
+      <div className="flex flex-col gap-6 px-2">
         {isLoading && <LoadingBlocks />}
-        {(unpublishedReleases.length ?? 0) > 0 && (
-          <div>
-            <h3>{t("unpublishedReleases")}</h3>
-            <ManageArtistAlbumsTable releases={unpublishedReleases} />
-          </div>
-        )}
-        {(publishedReleases.length ?? 0) > 0 && (
-          <div>
-            <h3>{t("publishedReleases")}</h3>
-            <ManageArtistAlbumsTable releases={publishedReleases} />
-          </div>
-        )}
-
-        {artist?.isLabelProfile && unpublishedLabelReleases.length > 0 && (
-          <div className="flex gap-2 flex-col">
-            <h3>{t("unpublishedLabelReleases")}</h3>
-            <p>{t("labelReleasesDescription")}</p>
-            <ManageArtistAlbumsTable releases={unpublishedLabelReleases} />
-          </div>
-        )}
-        {artist?.isLabelProfile && publishedLabelReleases.length > 0 && (
-          <div className="flex gap-2 flex-col">
-            <h3>{t("labelReleases")}</h3>
-            <p>{t("labelReleasesDescription")}</p>
-            <ManageArtistAlbumsTable releases={publishedLabelReleases} />
-          </div>
+        <ReleasesSection
+          title={t("unpublishedReleases")}
+          releases={unpublishedReleases}
+        />
+        <ReleasesSection
+          title={t("publishedReleases")}
+          releases={publishedReleases}
+        />
+        {artist?.isLabelProfile && (
+          <>
+            <ReleasesSection
+              title={t("unpublishedLabelReleases")}
+              description={t("labelReleasesDescription")}
+              releases={unpublishedLabelReleases}
+              showArtist
+            />
+            <ReleasesSection
+              title={t("labelReleases")}
+              description={t("labelReleasesDescription")}
+              releases={publishedLabelReleases}
+              showArtist
+            />
+          </>
         )}
       </div>
-    </div>
+    </ManageSectionWrapper>
   );
 };
 

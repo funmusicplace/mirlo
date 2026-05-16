@@ -1,23 +1,23 @@
-import React from "react";
-import { useParams } from "react-router-dom";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { bp } from "../../../constants";
 import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtist, queryManagedArtistMerch } from "queries";
-import { NewMerchButton } from "./NewMerchButton";
-import { ButtonLink } from "components/common/Button";
-import { FaEye, FaPen } from "react-icons/fa";
-import DashedList from "./DashedList";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import MerchFulfillmentLink from "./MerchFulfillmentLink";
-import Pill from "components/common/Pill";
-import { useTranslation } from "react-i18next";
-import { ImWarning } from "react-icons/im";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import Pill from "components/common/Pill";
+import SectionActionStrip from "components/common/SectionActionStrip";
+import { queryManagedArtist, queryManagedArtistMerch } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaEye, FaPen } from "react-icons/fa";
+import { ImWarning } from "react-icons/im";
+import { useParams } from "react-router-dom";
 import { getMerchUrl } from "utils/artist";
+
+import ManageSectionWrapper from "../ManageSectionWrapper";
+
+import DashedList from "./DashedList";
+import MerchFulfillmentLink from "./MerchFulfillmentLink";
+import { NewMerchButton } from "./NewMerchButton";
 
 const ManageMerch: React.FC<{}> = () => {
   const { artistId } = useParams();
@@ -40,23 +40,9 @@ const ManageMerch: React.FC<{}> = () => {
 
   return (
     <ManageSectionWrapper>
-      <div
-        className={css`
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          padding-top: 1rem;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding-top: 0.5rem;
-          }
-        `}
-      >
-        <SpaceBetweenDiv>
-          <div />
-          <NewMerchButton artist={artist} />
-        </SpaceBetweenDiv>
-      </div>
+      <SectionActionStrip>
+        <NewMerchButton artist={artist} />
+      </SectionActionStrip>
       <DashedList>
         {artist &&
           merch?.results.map((item) => {

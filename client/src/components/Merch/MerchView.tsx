@@ -77,8 +77,8 @@ function MerchView() {
           align-items: center;
 
           td {
-            padding: 0rem 0.4rem 0rem 0rem !important;
-            margin: 0.1rem 0rem !important;
+            padding: 0rem 0.4rem 0rem 0rem;
+            margin: 0.1rem 0rem;
           }
 
           a {
@@ -87,7 +87,7 @@ function MerchView() {
 
           @media screen and (max-width: ${bp.small}px) {
             td {
-              padding: 0.2rem 0.1rem 0.2rem 0rem !important;
+              padding: 0.2rem 0.1rem 0.2rem 0rem;
             }
           }
         `}
@@ -169,7 +169,7 @@ function MerchView() {
                   @media screen and (max-width: ${bp.small}px) {
                     max-width: 100%;
                     flex: 100%;
-                    margin-left: 0;
+                    margin: 1rem 0 0 0;
                   }
                 `}
               >
@@ -199,11 +199,20 @@ function MerchView() {
                 </Link>
               )}
               {merch.includePurchaseTrackGroup && (
-                <PublicTrackGroupListing
-                  tracks={merch.includePurchaseTrackGroup?.tracks}
-                  trackGroup={merch.includePurchaseTrackGroup}
-                  size="small"
-                />
+                <div
+                  className={css`
+                    @media screen and (min-width: ${bp.small}px) {
+                      margin-left: 0.5rem;
+                      margin-right: 0.5rem;
+                    }
+                  `}
+                >
+                  <PublicTrackGroupListing
+                    tracks={merch.includePurchaseTrackGroup?.tracks}
+                    trackGroup={merch.includePurchaseTrackGroup}
+                    size="compact"
+                  />
+                </div>
               )}
               <MerchDownloadableContent merch={merch} artist={artist} />
             </div>

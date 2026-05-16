@@ -238,4 +238,39 @@ button {
   }
 }
 
+@layer mi-defaults;
 @import "tailwindcss";
+
+@layer mi-defaults {
+  .mi-table th {
+    text-align: left;
+    background-color: var(--mi-darken-background-color);
+  }
+  .mi-table td,
+  .mi-table th {
+    padding: 0.4rem 0.3rem 0.4rem 0.5rem;
+    margin: 0;
+  }
+  .mi-table td.alignRight,
+  .mi-table th.alignRight {
+    text-align: right;
+  }
+
+  @media screen and (max-width: 768px) {
+    .mi-table td,
+    .mi-table th {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+  @media screen and (max-width: 576px) {
+    .mi-table tr {
+      max-width: 100%;
+      white-space: wrap;
+    }
+    .mi-table th {
+      font-size: var(--mi-font-size-small);
+      padding: 0 0.1rem;
+      margin: 0;
+    }
+  }
+}
