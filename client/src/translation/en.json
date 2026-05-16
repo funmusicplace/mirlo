@@ -646,8 +646,7 @@
     "edit": "Edit",
     "notAvailable": "This post is for subscribers only. <support>Support this artist</support> to get access.",
     "publishedAt": "Published {{ date }}",
-    "likedThisPost": "Liked this post?",
-    "willPublishAt": "Will publish at {{ date }}"
+    "likedThisPost": "Liked this post?"
   },
   "manage": {
     "manageArtists": "Manage artist pages",
@@ -759,7 +758,10 @@
     "isArtistConfirmed": "Has artist confirmed relationship?",
     "isLabelConfirmed": "Has label confirmed relationship?",
     "confirmRelationship": "Confirm relationship",
-    "willPublishAt": "Will publish at {{ date }}",
+    "willBePublishedAtLabel": "Will be published at:",
+    "draftLabel": "Draft",
+    "filterByTier": "Filter by tier",
+    "allTiers": "All",
     "publishedSuccess": "Your release has been published. People will be able to buy it after the release date!",
     "subscriptionTierReleases": "Releases included with subscription",
     "subscriptionTierReleasesHint": "Select albums that subscribers will automatically receive",
