@@ -361,6 +361,7 @@ model ArtistLabel {
   isArtistApproved     Boolean @default(false)
   canLabelManageArtist Boolean @default(false)
   canLabelAddReleases  Boolean @default(true)
+  orderIndex           Int?
 
   @@unique([labelUserId, artistId])
 }

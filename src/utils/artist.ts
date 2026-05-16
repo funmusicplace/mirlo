@@ -597,6 +597,7 @@ export const singleInclude = (queryOptions?: {
             isArtistApproved: true,
             artist: { deletedAt: null },
           },
+          orderBy: [{ orderIndex: { sort: "asc", nulls: "last" } }],
           include: {
             artist: {
               include: {

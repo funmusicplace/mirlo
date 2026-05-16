@@ -25,6 +25,7 @@ export default function () {
           labelUserId: user.id,
           artist: { deletedAt: null },
         },
+        orderBy: [{ orderIndex: { sort: "asc", nulls: "last" } }],
         include: {
           artist: {
             include: singleInclude({ includePrivate: true }),

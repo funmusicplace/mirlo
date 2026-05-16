@@ -40,6 +40,7 @@ export default function () {
               isLabelApproved: true,
               artist: { deletedAt: null },
             },
+            orderBy: [{ orderIndex: { sort: "asc", nulls: "last" } }],
             include: {
               artist: {
                 include: {

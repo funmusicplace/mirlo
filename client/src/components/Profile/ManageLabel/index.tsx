@@ -1,15 +1,29 @@
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useQuery } from "@tanstack/react-query";
-import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
 import { queryLabelArtists, queryManagedArtists } from "queries";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { AiOutlineDrag } from "react-icons/ai";
 import { MdCheckBox } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { getArtistManageUrl, getArtistUrl } from "utils/artist";
 import AddArtistToRoster from "./AddArtistToRoster";
-import { useFieldArray, useForm, useFormContext } from "react-hook-form";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import Button, { ButtonLink } from "components/common/Button";
@@ -38,22 +52,64 @@ type Relationship = {
   artistId: number;
 };
 
+const SortableRelationshipRow: React.FC<{
+  relationship: Relationship;
+  children: React.ReactNode;
+}> = ({ relationship, children }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "label" });
+  const {
+    attributes,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: relationship.artist.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : undefined,
+    zIndex: isDragging ? 1 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="flex flex-col md:flex-row md:items-center gap-4 p-3 md:p-1 md:px-3 bg-(--mi-normal-background-color)"
+    >
+      <button
+        ref={setActivatorNodeRef}
+        type="button"
+        aria-label={t("reorderRoster") ?? "Drag to reorder roster"}
+        className="cursor-grab touch-none p-1 self-start md:self-center text-(--mi-light-foreground-color)"
+        {...listeners}
+      >
+        <AiOutlineDrag />
+      </button>
+      {children}
+    </div>
+  );
+};
+
 const RelationshipsTable: React.FC = () => {
   const { data: { results: relationships } = { results: [] }, refetch } =
     useQuery(queryLabelArtists());
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "label" });
-  const { control, setValue } = useForm<{
-    relationships: Relationship[];
-  }>({
-    defaultValues: {
-      relationships,
-    },
-  });
-  const { fields } = useFieldArray({
-    control,
-    name: "relationships",
-  });
+  const [orderedRelationships, setOrderedRelationships] = React.useState<
+    Relationship[]
+  >(relationships);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const handleConfirm = async (artistId: number, newValue: boolean) => {
     if (!user) {
@@ -66,23 +122,46 @@ const RelationshipsTable: React.FC = () => {
     refetch();
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = orderedRelationships.findIndex(
+      (r) => r.artist.id === active.id
+    );
+    const newIndex = orderedRelationships.findIndex(
+      (r) => r.artist.id === over.id
+    );
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const next = [...orderedRelationships];
+    const [moved] = next.splice(oldIndex, 1);
+    next.splice(newIndex, 0, moved);
+    setOrderedRelationships(next);
+
+    await api.put("manage/label/artistOrder", {
+      artistIds: next.map((r) => r.artist.id),
+    });
+    refetch();
+  };
+
   React.useEffect(() => {
     if (relationships) {
-      setValue("relationships", relationships);
+      setOrderedRelationships(relationships);
     }
-  }, [relationships, setValue]);
+  }, [relationships]);
 
   return (
     <>
       <h3>{t("artistsOnYourRoster")}</h3>
       <div className="my-8 space-y-1 divide-y-1 divide-(--mi-darken-background-color)">
-        {relationships.length === 0 ? (
+        {orderedRelationships.length === 0 ? (
           <div className="text-center py-4 bg-(--mi-darken-background-color) rounded">
             {t("noArtists")}
           </div>
         ) : (
           <>
             <div className="hidden md:flex flex-col md:flex-row md:items-center gap-4 p-3 md:p-1 md:px-3 bg-(--mi-darken-background-color) text-xs">
+              <div className="w-6" aria-hidden />
               <div className="flex-1 col-span-2">{t("artist")}</div>
 
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4 flex-3 items-center">
@@ -93,11 +172,16 @@ const RelationshipsTable: React.FC = () => {
                 <div className="col-span-2 text-right">{t("actions")}</div>
               </div>
             </div>
-            {relationships.map((relationship, idx) => (
-              <div
-                key={relationship.artist.id}
-                className="flex flex-col md:flex-row md:items-center gap-4 p-3 md:p-1 md:px-3"
+            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+              <SortableContext
+                items={orderedRelationships.map((r) => r.artist.id)}
+                strategy={verticalListSortingStrategy}
               >
+                {orderedRelationships.map((relationship) => (
+                  <SortableRelationshipRow
+                    key={relationship.artist.id}
+                    relationship={relationship}
+                  >
                 <div className="flex items-center gap-3 flex-1">
                   <img
                     src={relationship.artist.avatar?.sizes?.[120]}
@@ -162,12 +246,10 @@ const RelationshipsTable: React.FC = () => {
                       labelId="isLabelConfirmed"
                       toggled={relationship.isLabelApproved}
                       onClick={() => {
-                        const newValue = !fields[idx].isLabelApproved;
-                        setValue(
-                          `relationships.${idx}.isLabelApproved`,
-                          newValue
+                        handleConfirm(
+                          relationship.artistId,
+                          !relationship.isLabelApproved
                         );
-                        handleConfirm(fields[idx].artistId, newValue);
                       }}
                       labelClassName="text-sm"
                       label={t("showOnPage")}
@@ -190,8 +272,10 @@ const RelationshipsTable: React.FC = () => {
                     </ButtonLink>
                   </div>
                 </div>
-              </div>
-            ))}
+                  </SortableRelationshipRow>
+                ))}
+              </SortableContext>
+            </DndContext>
           </>
         )}
       </div>
