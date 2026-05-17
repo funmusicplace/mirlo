@@ -338,9 +338,12 @@
     "viewFulfillment": "View Fulfillment",
     "platformCut": "Platform cut",
     "paymentProcessorCut": "Payment processor cut",
-    "downloadCsv": "Download CSV"
+    "downloadCsv": "Download CSV",
+    "expandDetails": "Show details",
+    "collapseDetails": "Hide details"
   },
   "fulfillment": {
+    "fulfillment": "Fulfillment",
     "artist": "Artist",
     "selectArtist": "Select an artist",
     "messageSent": "Message sent to artist",
@@ -367,6 +370,8 @@
     "shipped": "Shipped",
     "completed": "Completed",
     "purchaseDetails": "Purchase details",
+    "expandDetails": "Show details",
+    "collapseDetails": "Hide details",
     "shippingAddress": "Shipping address:",
     "itemPurchased": "Purchased",
     "viewSales": "View sales",
@@ -1660,6 +1665,15 @@
   "billing": {
     "noPaymentFound": "No payment found",
     "completePayment": "Complete Your Payment"
+  },
+  "dateRangeFilter": {
+    "filterByDate": "Filter by date",
+    "allDates": "All dates",
+    "currentMonthToDate": "Current month to date",
+    "previousMonth": "Previous month",
+    "currentYearToDate": "Current year to date",
+    "lastYear": "Last year",
+    "clearFilter": "Clear filter"
   },
   "common": {
     "subscriptionPaymentFailedBanner": "One or more of your subscription payments failed. Go to the artist profiles to renew them.",
