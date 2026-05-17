@@ -149,6 +149,7 @@ describe("artists", () => {
       const user2 = await prisma.user.create({
         data: {
           email: "label@test.com",
+          isLabelAccount: true,
         },
       });
 
@@ -220,11 +221,13 @@ describe("artists", () => {
       const user1 = await prisma.user.create({
         data: {
           email: "label1@test.com",
+          isLabelAccount: true,
         },
       });
       const user2 = await prisma.user.create({
         data: {
           email: "label2@test.com",
+          isLabelAccount: true,
         },
       });
 
@@ -290,16 +293,19 @@ describe("artists", () => {
       const user1 = await prisma.user.create({
         data: {
           email: "label1@test.com",
+          isLabelAccount: true,
         },
       });
       const user2 = await prisma.user.create({
         data: {
           email: "label2@test.com",
+          isLabelAccount: true,
         },
       });
       const user3 = await prisma.user.create({
         data: {
           email: "label3@test.com",
+          isLabelAccount: true,
         },
       });
 
@@ -338,6 +344,7 @@ describe("artists", () => {
       const labelUser = await prisma.user.create({
         data: {
           email: "label@test.com",
+          isLabelAccount: true,
         },
       });
       const signedArtistUser = await prisma.user.create({
@@ -382,10 +389,47 @@ describe("artists", () => {
       assert.equal(response.statusCode, 200);
     });
 
+    it("excludes labels whose owner has isLabelAccount = false (#1804)", async () => {
+      const activeLabelUser = await prisma.user.create({
+        data: { email: "active-label@test.com", isLabelAccount: true },
+      });
+      const turnedOffLabelUser = await prisma.user.create({
+        data: { email: "off-label@test.com", isLabelAccount: false },
+      });
+
+      const activeLabel = await createArtist(activeLabelUser.id, {
+        name: "Active Label",
+        isLabelProfile: true,
+      });
+      const turnedOffLabel = await createArtist(turnedOffLabelUser.id, {
+        name: "Turned-off Label",
+        isLabelProfile: true,
+        urlSlug: "turned-off-label",
+      });
+
+      // Both labels have published track groups so the
+      // "labels need published content" filter isn't what's hiding them.
+      const tgA = await createTrackGroup(activeLabel.id);
+      await createTrack(tgA.id);
+      const tgB = await createTrackGroup(turnedOffLabel.id, {
+        urlSlug: "off-album",
+      });
+      await createTrack(tgB.id);
+
+      const response = await request(baseURL)
+        .get("artists?isLabel=true")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].name, "Active Label");
+      assert.equal(response.statusCode, 200);
+    });
+
     it("should not show a label that only has signed artists without published track groups", async () => {
       const labelUser = await prisma.user.create({
         data: {
           email: "label@test.com",
+          isLabelAccount: true,
         },
       });
       const signedArtistUser = await prisma.user.create({

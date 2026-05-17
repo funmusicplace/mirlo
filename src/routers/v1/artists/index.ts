@@ -29,6 +29,11 @@ export default function () {
         isLabelProfile:
           isLabel === "true" ? true : isLabel === "false" ? false : false,
       };
+      // When listing labels, hide any whose owner has turned off
+      // Label/Collective mode (#1804).
+      if (where.isLabelProfile) {
+        where.user = { isLabelAccount: true, deletedAt: null };
+      }
       if (!includeUnpublished) {
         if (where.isLabelProfile) {
           where.OR = [

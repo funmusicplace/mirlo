@@ -25,6 +25,9 @@ export default function () {
     try {
       let where: Prisma.ArtistWhereInput = {
         isLabelProfile: true,
+        // Hide labels whose owner has turned off Label/Collective mode (#1804)
+        user: { isLabelAccount: true, deletedAt: null },
+        deletedAt: null,
       };
       if (!includeUnpublished) {
         where.trackGroups = {

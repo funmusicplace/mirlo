@@ -27,6 +27,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
   it("should return only track groups where label receives payments", async () => {
     const { user: labelUser } = await createUser({
       email: "label@example.com",
+      isLabelAccount: true,
     });
     const label = await createArtist(labelUser.id, {
       name: "My Record Label",
@@ -78,6 +79,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
   it("should include track groups where label IS the artist", async () => {
     const { user: labelUser } = await createUser({
       email: "label2@example.com",
+      isLabelAccount: true,
     });
     const label = await createArtist(labelUser.id, {
       name: "Label as Artist",
@@ -106,6 +108,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
   it("should not include artist-owned albums even if label manages the artist", async () => {
     const { user: labelUser } = await createUser({
       email: "label3@example.com",
+      isLabelAccount: true,
     });
     const label = await createArtist(labelUser.id, {
       name: "Managing Label",
@@ -169,6 +172,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
   it("should exclude unpublished track groups", async () => {
     const { user: labelUser } = await createUser({
       email: "label4@example.com",
+      isLabelAccount: true,
     });
     const label = await createArtist(labelUser.id, {
       name: "Draft Label",
@@ -219,6 +223,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
   it("should support excludeArtistId query parameter", async () => {
     const { user: labelUser } = await createUser({
       email: "label5@example.com",
+      isLabelAccount: true,
     });
     const label = await createArtist(labelUser.id, {
       name: "Filtering Label",
