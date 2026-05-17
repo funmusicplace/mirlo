@@ -5,6 +5,7 @@ import {
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
+import Modal from "components/common/Modal";
 import Pill from "components/common/Pill";
 import {
   queryLocationTags,
@@ -111,13 +112,17 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
     }));
   };
 
-  if (!isEditing) {
-    return (
-      <div className="flex items-center gap-2">
+  const watchedLocation = watch("location");
+
+  return (
+    <>
+      <div className="flex items-center gap-2 min-w-0 overflow-hidden">
         {artist?.location && (
           <div
             className={css`
               opacity: 0.5;
+              white-space: nowrap;
+              flex-shrink: 0;
             `}
           >
             {artist?.location}
@@ -129,6 +134,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             variant="link"
             color="foreground"
             to={`/search/locations/${tag.locationTag.slug}`}
+            className="overflow-hidden text-ellipsis whitespace-nowrap block! min-w-0 shrink opacity-50"
           >
             {[
               tag.locationTag.city,
@@ -162,93 +168,103 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           />
         )}
       </div>
-    );
-  }
-
-  const watchedLocation = watch("location");
-
-  return (
-    <div className="flex w-full items-start">
-      <div className="flex flex-col items-start gap-2">
-        {currentTags.length === 0 ? (
-          <p
-            className={css`
-              color: var(--mi-lighten-text-color);
-              font-size: 0.9rem;
-            `}
-          >
-            {t("noLocationsAdded")}
-          </p>
-        ) : (
-          currentTags.map((tag) => (
-            <Pill>
-              <span>
-                {[tag.city, tag.region, tag.country].filter(Boolean).join(", ")}
-              </span>
-              <ArtistButton
-                smallIcon
-                size="compact"
-                onClick={() => handleRemoveTag(tag.id)}
-                startIcon={<FaTimes />}
-                title={t("removeLocationTag")}
-              />
-            </Pill>
-          ))
-        )}
-        {watchedLocation ? (
-          <div className="flex items-center gap-1">
-            Custom location: {watchedLocation}{" "}
-            <ArtistButton
-              title={t("removeCustomLocation")}
-              smallIcon
-              size="compact"
-              onClick={() => setValue("location", "")}
-              startIcon={<FaTimes />}
-            />
-          </div>
-        ) : null}
-        <AutoComplete
-          placeholder={t("searchLocations")}
-          getOptions={handleSearchLocations}
-          id="input-location"
-          onSelect={(result) => {
-            if (typeof result === "object" && result !== null) {
-              if (result.isNew) {
-                // User entered a custom location
-                setValue("location", result.name);
-              } else {
-                // User selected an existing location tag
-                handleAddTag(Number(result.id));
+      <Modal
+        open={isEditing}
+        onClose={() => {
+          reset();
+          setIsEditing(false);
+        }}
+        title={t("editLocation") ?? ""}
+        size="small"
+      >
+        <div className="flex flex-col items-start gap-2 mt-1">
+          <AutoComplete
+            placeholder={t("searchLocations")}
+            getOptions={handleSearchLocations}
+            id="input-location"
+            onSelect={(result) => {
+              if (typeof result === "object" && result !== null) {
+                if (result.isNew) {
+                  setValue("location", result.name);
+                } else {
+                  handleAddTag(Number(result.id));
+                }
               }
-            }
-          }}
-          allowNew={true}
-        />
-      </div>
-      <div className="flex gap-1">
-        <ArtistButton
-          collapsible
-          size="compact"
-          startIcon={<FaSave />}
-          onClick={handleSubmit(handleSave)}
-          title={t("saveLocation")}
-        >
-          <p>{t("saveLocation")}</p>
-        </ArtistButton>
-        <ArtistButton
-          size="compact"
-          collapsible
-          startIcon={<FaTimes />}
-          title={t("cancel")}
-          onClick={() => {
-            reset();
-            setIsEditing(false);
-          }}
-        >
-          <p>{t("cancel")}</p>
-        </ArtistButton>
-      </div>
-    </div>
+            }}
+            allowNew={true}
+          />
+          {currentTags.length === 0 && !watchedLocation ? (
+            <p
+              className={css`
+                color: var(--mi-lighten-text-color);
+                font-size: 0.9rem;
+              `}
+            >
+              {t("noLocationsAdded")}
+            </p>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              {watchedLocation ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
+                    <span className="opacity-50 text-sm">
+                      {watchedLocation}
+                    </span>
+                    <span className="text-xs opacity-40">
+                      {t("customLocation")}
+                    </span>
+                  </div>
+                  <ArtistButton
+                    title={t("removeCustomLocation")}
+                    smallIcon
+                    size="compact"
+                    onClick={() => setValue("location", "")}
+                    startIcon={<FaTimes />}
+                    className="h-8! w-8! p-0!"
+                  />
+                </div>
+              ) : null}
+              {currentTags.map((tag) => (
+                <Pill>
+                  <span>
+                    {[tag.city, tag.region, tag.country]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </span>
+                  <ArtistButton
+                    smallIcon
+                    size="compact"
+                    onClick={() => handleRemoveTag(tag.id)}
+                    startIcon={<FaTimes />}
+                    title={t("removeLocationTag")}
+                  />
+                </Pill>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="flex gap-1 mt-4 justify-end">
+          <ArtistButton
+            size="compact"
+            startIcon={<FaTimes />}
+            variant="outlined"
+            onClick={() => {
+              reset();
+              setIsEditing(false);
+            }}
+          >
+            {t("cancel")}
+          </ArtistButton>
+          <ArtistButton
+            size="compact"
+            startIcon={<FaSave />}
+            onClick={handleSubmit(handleSave)}
+          >
+            {t("saveLocation")}
+          </ArtistButton>
+        </div>
+      </Modal>
+    </>
   );
 };
 
