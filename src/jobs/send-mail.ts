@@ -247,16 +247,24 @@ export const sendMail = async <T>(job: {
       transport,
     });
 
+    // Inject fromEmail into every template's locals so layout.pug can render
+    // the "Add us to your contacts" footer line without each call site
+    // remembering to pass it (#1676).
+    const locals = {
+      ...(job.data.locals as Record<string, unknown>),
+      fromEmail,
+    };
+
     if (process.env.NODE_ENV === "production" || process.env.MAILHOG_PORT) {
       await email.send({
         template: job.data.template,
         message,
-        locals: job.data.locals,
+        locals,
       });
     } else {
       // If there was a problem with mailhog, print to logs
       await email
-        .render(job.data.template + "/html", job.data.locals)
+        .render(job.data.template + "/html", locals)
         .then(logger.info);
     }
 

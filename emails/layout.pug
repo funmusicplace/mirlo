@@ -14,3 +14,6 @@ html
         block content
       block footer
         p.email-footer This email was sent using Mirlo.
+        if fromEmail
+          p.email-footer
+            | Add #{fromEmail} to your contacts so future emails from Mirlo don't end up in spam.

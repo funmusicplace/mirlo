@@ -258,6 +258,71 @@ describe("send-mail job", () => {
       );
     });
 
+    it("renders the fromEmail in the email footer (Add us to contacts, #1676)", async () => {
+      await createSiteSettings({
+        emailProvider: {
+          provider: "mailgun",
+          fromEmail: "hello@mirlo.test",
+          mailgun: {
+            apiKey: "key-test",
+            domain: "mg.mirlo.test",
+          },
+        },
+      });
+
+      // Capture the rendered HTML by stubbing the transport's sendMail.
+      let sentHtml = "";
+      const transport = {
+        sendMail: (mail: { html?: string }) => {
+          sentHtml = mail.html ?? "";
+          return Promise.resolve({ messageId: "test-123" });
+        },
+      };
+      sandbox.stub(nodemailer, "createTransport").returns(transport as any);
+
+      // Force the production send branch (NODE_ENV=test runs the render branch
+      // which logs instead of returning the body) — MAILHOG_PORT also triggers
+      // the send branch.
+      const originalMailhog = process.env.MAILHOG_PORT;
+      process.env.MAILHOG_PORT = "1025";
+      try {
+        // new-user extends layout.pug so the footer block runs.
+        await sendMail({
+          data: {
+            template: "new-user",
+            locals: {
+              user: {
+                id: 1,
+                email: "recipient@example.com",
+                emailConfirmationToken: "tok",
+              },
+              clientDomain: "http://localhost",
+              client: "frontend",
+              accountType: "LISTENER",
+            },
+            message: {
+              to: "recipient@example.com",
+            },
+          },
+        } as Job);
+      } finally {
+        if (originalMailhog === undefined) {
+          delete process.env.MAILHOG_PORT;
+        } else {
+          process.env.MAILHOG_PORT = originalMailhog;
+        }
+      }
+
+      assert.ok(
+        sentHtml.includes("hello@mirlo.test"),
+        `expected the rendered email body to contain the fromEmail, got: ${sentHtml.slice(0, 500)}`
+      );
+      assert.ok(
+        /add\s+hello@mirlo\.test\s+to your contacts/i.test(sentHtml),
+        `expected the 'Add us to your contacts' footer line, got: ${sentHtml.slice(0, 500)}`
+      );
+    });
+
     it("should use default when configured fromEmail is invalid", async () => {
       await createSiteSettings({
         emailProvider: {
