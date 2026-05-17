@@ -241,8 +241,8 @@ const CustomButton = styled.button<Sizable>(
     display: flex;
     border-radius: ${props.onlyIcon ? "100%" : "var(--mi-border-radius)"};
     justify-content: center;
-    min-width: var(--mi-touch-target-min);
-    min-height: var(--mi-touch-target-min);
+    min-width: ${props.variant === "link" ? "auto" : "var(--mi-touch-target-min)"};
+    min-height: ${props.variant === "link" ? "auto" : "var(--mi-touch-target-min)"};
 
     &[disabled] {
       opacity: 0.6;

@@ -638,7 +638,7 @@
   },
   "post": {
     "postByArtist": "by <link></link>",
-    "postBy": "by <link>{{artistName}}</link>",
+    "postByPrefix": "by",
     "byArtist": "by {{artist}}",
     "noPostFound": "No post found",
     "returnToArtist": ", return to <link>{{artistName}}</link>",
