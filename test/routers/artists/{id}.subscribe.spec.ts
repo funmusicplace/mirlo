@@ -79,7 +79,7 @@ describe("artists/{id}/subscribe", () => {
       assert.equal(response.status, 400);
     });
 
-    it("should return Stripe checkout URL", async () => {
+    it("should return a Stripe embedded clientSecret + stripeAccountId (#1168)", async () => {
       const { artistUser, artist, followerUser } = await createTestData();
 
       const response = await requestApp
@@ -92,9 +92,23 @@ describe("artists/{id}/subscribe", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 200);
-      assert.equal(
-        JSON.parse(response.text).sessionUrl,
-        "https://checkout.stripe.com/pay/c/cs_test_a1YS1URlnyQCN5fUUduORoQ7Pw41PJqDWkIVQCpJPqkfIhd6tVY8XB1OLY"
+      const body = JSON.parse(response.text);
+      // stripe-mock doesn't populate client_secret for embedded sessions in
+      // its fixture, but real Stripe does. Asserting the field is present
+      // (even null) verifies the response shape changed away from the old
+      // sessionUrl path.
+      assert.ok(
+        "clientSecret" in body,
+        `expected clientSecret key in response, got: ${response.text}`
+      );
+      assert.ok(
+        typeof body.stripeAccountId === "string" &&
+          body.stripeAccountId.length > 0,
+        `expected stripeAccountId in response, got: ${response.text}`
+      );
+      assert.ok(
+        !("sessionUrl" in body),
+        `should no longer return sessionUrl, got: ${response.text}`
       );
     });
 

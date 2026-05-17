@@ -744,10 +744,6 @@ export const createCheckoutSessionForSubscription = async ({
   }
 
   logger.info(`Created a new product for artist ${artistId}, ${productKey}`);
-  const cancelUrlParams = buildCheckoutCancelSearchParams({
-    artistId,
-    clientId: client?.id,
-  });
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   const currency = await getCurrency(
@@ -761,6 +757,8 @@ export const createCheckoutSessionForSubscription = async ({
     stripeAccount.country
   );
 
+  // Embedded checkout so subscriptions stay in-app like track/trackGroup/merch
+  // purchases instead of redirecting to Stripe's hosted page (#1168).
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
@@ -803,8 +801,9 @@ export const createCheckoutSessionForSubscription = async ({
         stripeAccountId,
       },
       mode: "subscription",
-      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${API_DOMAIN}/v1/checkout?${cancelUrlParams.toString()}`,
+      ui_mode: "embedded",
+      redirect_on_completion: "if_required",
+      return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
     },
     {
       stripeAccount: stripeAccountId,
