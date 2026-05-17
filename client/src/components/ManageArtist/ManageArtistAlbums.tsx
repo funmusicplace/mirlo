@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import ArtistFilterCombobox from "components/common/ArtistFilterCombobox";
+import ArtistFilter from "components/common/ArtistFilter";
 import SectionActionStrip from "components/common/SectionActionStrip";
 import Tooltip from "components/common/Tooltip";
 import {
@@ -232,7 +232,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
               showArtist
               filter={
                 labelArtists.length > 0 ? (
-                  <ArtistFilterCombobox
+                  <ArtistFilter
                     artists={labelArtists}
                     selectedArtistId={unpublishedLabelArtistFilter}
                     onChange={setUnpublishedLabelArtistFilter}
@@ -247,7 +247,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
               showArtist
               filter={
                 labelArtists.length > 0 ? (
-                  <ArtistFilterCombobox
+                  <ArtistFilter
                     artists={labelArtists}
                     selectedArtistId={publishedLabelArtistFilter}
                     onChange={setPublishedLabelArtistFilter}

@@ -5,7 +5,7 @@ import { useFilterableList } from "utils/useFilterableList";
 
 import { InputEl } from "./Input";
 
-interface ArtistFilterComboboxProps {
+interface ArtistFilterProps {
   artists: Artist[];
   selectedArtistId: number | null;
   onChange: (artistId: number | null) => void;
@@ -13,7 +13,7 @@ interface ArtistFilterComboboxProps {
 
 const getArtistSearchText = (a: Artist) => a.name;
 
-const ArtistFilterCombobox: React.FC<ArtistFilterComboboxProps> = ({
+const ArtistFilter: React.FC<ArtistFilterProps> = ({
   artists,
   selectedArtistId,
   onChange,
@@ -160,4 +160,4 @@ const ArtistFilterCombobox: React.FC<ArtistFilterComboboxProps> = ({
   );
 };
 
-export default ArtistFilterCombobox;
+export default ArtistFilter;
