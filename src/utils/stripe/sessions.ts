@@ -329,7 +329,11 @@ export const createStripeCheckoutSessionForPurchase = async ({
       },
     });
 
-    if (fundraiser?.isAllOrNothing) {
+    // Pledge flow (setupIntent rather than direct charge) only applies while
+    // the fundraiser is still ACTIVE — once the artist marks it SUCCESSFUL
+    // via Charge pledges, buyers should hit the regular checkout instead.
+    // See #1681.
+    if (fundraiser?.isAllOrNothing && fundraiser.status === "ACTIVE") {
       // For all or nothing track groups, we need to create a setupIntent for the payment
       // which we will charge when the project hits its goal.
       const setupIntent = await stripe.setupIntents.create(

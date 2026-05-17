@@ -122,6 +122,7 @@ interface TrackGroup {
     goalAmount: number;
     isAllOrNothing: boolean;
     endDate: string;
+    status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   } | null;
   paymentToUser?: {
     email: string;
@@ -560,6 +561,7 @@ interface Fundraiser {
   isAllOrNothing: boolean;
   goalAmount: number;
   endDate: string;
+  status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   trackGroups: TrackGroup[];
 }
 

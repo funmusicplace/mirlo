@@ -1004,6 +1004,7 @@
     "isAllOrNothing": "Is it all or nothing?",
     "isAllOrNothingDescription": "If this is enabled, supporters will only be charged if the fundraising goal is met.",
     "fundraisingGoal": "Fundraising goal",
+    "fundraiserComplete": "Fundraiser complete — pledges charged, release is now on sale.",
     "noTracks": "You have no tracks listed on this release, are you sure you want to continue?",
     "fundraisingEndDate": "Fundraising end date",
     "fundraisingGoalDescription": "The target amount you aim to raise in relation to this release.",

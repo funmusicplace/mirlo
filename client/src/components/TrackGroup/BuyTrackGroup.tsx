@@ -127,7 +127,15 @@ const BuyTrackGroup: React.FC<{
   }
   const isNegativePrice = isFinite(+chosenPrice) && Number(chosenPrice) < 0;
 
-  const purchaseText = trackGroup.fundraiser?.isAllOrNothing
+  // The pledge flow only applies while the fundraiser is still ACTIVE. Once
+  // the artist marks the fundraiser SUCCESSFUL (via Charge pledges) we fall
+  // through to the regular purchase flow even though the fundraiser row is
+  // still attached to the trackGroup. See #1681.
+  const isPledgeMode =
+    !!trackGroup.fundraiser?.isAllOrNothing &&
+    (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
+
+  const purchaseText = isPledgeMode
     ? "addPaymentInformation"
     : trackGroup.isPreorder
       ? "preOrder"
@@ -137,7 +145,7 @@ const BuyTrackGroup: React.FC<{
     lessThanMin ||
     isNegativePrice ||
     !isValid ||
-    (trackGroup.fundraiser?.isAllOrNothing && !consentToStoreData);
+    (isPledgeMode && !consentToStoreData);
 
   if (isPending) {
     return (
@@ -172,7 +180,7 @@ const BuyTrackGroup: React.FC<{
     return (
       <EmbeddedStripeForm
         clientSecret={clientSecret}
-        isSetupIntent={trackGroup.fundraiser?.isAllOrNothing}
+        isSetupIntent={isPledgeMode}
         stripeAccountId={stripeAccountStatus?.stripeAccountId}
         onComplete={onComplete}
       />
@@ -182,7 +190,7 @@ const BuyTrackGroup: React.FC<{
   return (
     <FormProvider {...methods}>
       <div className={noPadding ? "" : "p-4"}>
-        {trackGroup.fundraiser?.isAllOrNothing && (
+        {isPledgeMode && (
           <p
             className={css`
               margin-bottom: 1rem;
@@ -223,7 +231,7 @@ const BuyTrackGroup: React.FC<{
 
           {(user || verifiedEmail) && (
             <>
-              {trackGroup.fundraiser?.isAllOrNothing && (
+              {isPledgeMode && (
                 <FormComponent direction="row">
                   <InputEl
                     type="checkbox"
