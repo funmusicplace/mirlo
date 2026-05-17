@@ -98,7 +98,7 @@ const LogoWrapper = () => {
         <Logo />
       </span>
       <span aria-hidden className="md:hidden">
-        <Logo noWordmark />
+        <Logo noWordmark width={32} height={32} />
       </span>
     </Link>
   );
