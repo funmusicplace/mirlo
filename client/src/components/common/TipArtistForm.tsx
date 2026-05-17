@@ -46,7 +46,7 @@ const TipArtistForm: React.FC<{
     queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
   );
 
-  const currency = artistDetails?.user?.currency;
+  const currency = artistDetails?.user?.currency ?? "usd";
 
   const subscribeToTier = async () => {
     try {
@@ -89,48 +89,32 @@ const TipArtistForm: React.FC<{
       {currency && artistDetails && (
         <>
           <FormProvider {...methods}>
-            <ul
-              className={css`
-                display: flex;
-                gap: 0.5rem;
-                flex-wrap: wrap;
-              `}
-            >
+            <ul className="flex flex-wrap justify-center gap-2">
               {defaultGifts.map((gift) => (
-                <li
-                  key={gift.value}
-                  className={css`
-                    display: inline-block;
-
-                    input {
-                      display: none;
-                    }
-
-                    label {
-                      padding: 0.75rem 1rem;
-                      display: block;
-                      border-radius: 0.5rem;
-                      color: var(--mi-button-color);
-                      border: 1px dashed var(--mi-button-color);
-                      margin-right: 0.2rem;
-                      background-color: var(--mi-background-color);
-                      text-align: center;
-                      cursor: pointer;
-                    }
-
-                    input:checked + label {
-                      background-color: var(--mi-button-color);
-                      color: var(--mi-button-text-color);
-                    }
-                  `}
-                >
+                <li key={gift.value} className="inline-block">
                   <input
                     type="radio"
+                    className="sr-only"
                     value={gift.value}
                     {...methods.register("priceButton")}
                     id={`${artist.id}-priceButton-${gift.value}`}
                   />
-                  <label htmlFor={`${artist.id}-priceButton-${gift.value}`}>
+                  <label
+                    htmlFor={`${artist.id}-priceButton-${gift.value}`}
+                    className={
+                      "block p-2 mr-1 rounded-lg border text-center cursor-pointer " +
+                      css`
+                        border-color: var(--mi-button-color);
+                        background-color: var(--mi-background-color);
+                        color: var(--mi-button-color);
+
+                        input:checked + & {
+                          background-color: var(--mi-button-color);
+                          color: var(--mi-button-text-color);
+                        }
+                      `
+                    }
+                  >
                     {gift.value !== "other"
                       ? moneyDisplay({
                           amount: gift.value,

@@ -4,7 +4,6 @@ import Avatar from "components/Artist/Avatar";
 import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import TipArtist from "components/common/TipArtist";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -119,23 +118,6 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             `
           }
         >
-          {post.artistId && (
-            <div
-              className={css`
-                position: absolute;
-              `}
-            >
-              <div
-                className={css`
-                  position: fixed;
-                  right: 1rem;
-                  top: 4rem;
-                `}
-              >
-                <TipArtist artistId={post.artistId} />
-              </div>
-            </div>
-          )}
           <div
             className={css`
               flex: 100%;
