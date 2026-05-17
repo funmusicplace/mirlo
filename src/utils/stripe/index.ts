@@ -607,7 +607,8 @@ export const chargePledgePayments = async (
             application_fee_amount: await calculateAppFee(
               pledge.amount,
               currency,
-              pledge.fundraiser.trackGroups[0].platformPercent
+              pledge.fundraiser.trackGroups[0].platformPercent,
+              stripeAccount.country
             ),
             metadata: {
               userId: pledge.userId,
