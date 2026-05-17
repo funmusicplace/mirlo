@@ -3,11 +3,13 @@ import Tabs from "components/common/Tabs";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../../constants";
 
 const AccountNav: React.FC = () => {
   const { t } = useTranslation("translation");
+  const { user } = useAuthContext();
   return (
     <Tabs
       className={css`
@@ -23,6 +25,13 @@ const AccountNav: React.FC = () => {
         }
       `}
     >
+      {user?.isLabelAccount && (
+        <li>
+          <NavLink end to="/account/label">
+            {t("profile.label")}
+          </NavLink>
+        </li>
+      )}
       <li>
         <NavLink end to="/sales">
           {t("sales.sales")}

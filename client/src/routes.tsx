@@ -195,6 +195,14 @@ const routes: RouteObject[] = [
               return { Component };
             },
           },
+          {
+            path: "account/label",
+            async lazy() {
+              const { default: Component } =
+                await import("components/Profile/ManageLabel");
+              return { Component };
+            },
+          },
         ],
       },
       {
@@ -221,13 +229,7 @@ const routes: RouteObject[] = [
           },
           {
             path: "label",
-            async lazy() {
-              const { default: Component } =
-                await import("components/Profile/ManageLabel");
-              return {
-                Component: () => <Component />,
-              };
-            },
+            element: <Navigate to="/account/label" replace />,
           },
           {
             path: "collection",
