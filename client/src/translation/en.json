@@ -654,7 +654,7 @@
     "manageStripeStatus": "Manage your stripe status.",
     "error": "Something went wrong",
     "setUpBankAccount": "Set up bank account",
-    "stripeAccountVerified": "Stripe account verified! This means you'll be able to receive payments for purchases.",
+    "stripeAccountVerified": "<strong>Stripe account verified!</strong> This means you'll be able to receive payments for purchases.",
     "waitingStripeAccountVerification": "We're waiting on Stripe to verify your account.",
     "downloadSubscriberData": "Download subscriber data",
     "subscriptionTiers": "Your subscription tiers",
@@ -663,7 +663,7 @@
     "updateBankAccount": "Change bank account information",
     "countryCurrencyCode": "Country currency code:",
     "saveCountryCode": "Save",
-    "payoutCurrency": "Payout currency: {{currency}}",
+    "payoutCurrency": "Payout currency: <strong>{{currency}}</strong>",
     "success": "Details saved!",
     "label": "(Label)",
     "payoutsInfo": "See our documentation for more information <link>on payouts and fees</link>."

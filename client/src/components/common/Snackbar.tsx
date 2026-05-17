@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
-import SnackbarContext, { Position, Variant } from "state/SnackbarContext";
 import React from "react";
+import SnackbarContext, { Position, Variant } from "state/SnackbarContext";
+
 import { bp } from "../../constants";
 
 const Container = styled.div<{ variant: Variant; position?: Position }>`
@@ -10,19 +11,28 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${(props) => {
-    return `var(--mi-${props.variant ?? "light"}-background-color)`;
-  }};
   ${(props) => {
     switch (props.variant) {
       case "success":
         return `
-        color: var(--mi-text-color); 
+        background: var(--mi-green-500);
+        color: var(--mi-white);
         font-weight: bold;`;
+      case "warning":
+        return `
+        background: var(--mi-warning-color);
+        color: var(--mi-black);`;
+      case "error":
+        return `
+        background: var(--mi-pink);
+        color: var(--mi-white);`;
       default:
-        return `color: var(--mi-text-color)`;
+        return `
+        background: var(--mi-white);
+        color: var(--mi-black);`;
     }
   }};
+  border: 1px solid currentColor;
   z-index: 1000;
   margin: 16px;
   border-radius: 4px;
