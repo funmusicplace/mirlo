@@ -147,7 +147,8 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
         application_fee_amount: await calculateAppFee(
           discountedPriceNumber,
           currency,
-          track.trackGroup.platformPercent
+          track.trackGroup.platformPercent,
+          stripeAccount.country
         ),
       },
       ui_mode: "embedded",
@@ -215,7 +216,8 @@ export const createStripeCheckoutSessionForCatalogue = async ({
         application_fee_amount: await calculateAppFee(
           priceNumber,
           currency,
-          await getPlatformFeeForArtist(artist.id)
+          await getPlatformFeeForArtist(artist.id),
+          stripeAccount.country
         ),
       },
       line_items: [
@@ -358,7 +360,8 @@ export const createStripeCheckoutSessionForPurchase = async ({
         application_fee_amount: await calculateAppFee(
           discountedPriceNumber,
           currency,
-          trackGroup.platformPercent
+          trackGroup.platformPercent,
+          stripeAccount.country
         ),
       },
       ui_mode: "embedded",
@@ -568,7 +571,8 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
         application_fee_amount: await calculateAppFee(
           discountedPriceNumber,
           currency,
-          merch.platformPercent
+          merch.platformPercent,
+          stripeAccount.country
         ),
       },
       line_items: lineItems,
@@ -642,7 +646,8 @@ export const createStripeCheckoutSessionForTip = async ({
         application_fee_amount: await calculateAppFee(
           priceNumber,
           currency,
-          await getPlatformFeeForArtist(artistId)
+          await getPlatformFeeForArtist(artistId),
+          stripeAccount.country
         ),
       },
       line_items: [
@@ -752,7 +757,8 @@ export const createCheckoutSessionForSubscription = async ({
   );
   const platformPercent = await calculatePlatformPercent(
     currency,
-    tier.platformPercent
+    tier.platformPercent,
+    stripeAccount.country
   );
 
   const session = await stripe.checkout.sessions.create(
