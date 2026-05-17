@@ -8,5 +8,6 @@ block content
       p Supporter: #{purchase.user.name} (#{purchase.user.email})
       p Item: #{purchase.merch.title}
       p Status: #{purchase.fulfillmentStatus}
-      p "#{message}"
+      p
+        em "#{message}"
     p Please respond to the supporter directly via email at #{purchase.user.email}.
