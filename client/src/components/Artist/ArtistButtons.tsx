@@ -96,9 +96,15 @@ export const ArtistButton: React.FC<
 
         svg {
           fill: ${contrastColor} !important;
+        }
 
-          @media (prefers-color-scheme: dark) {
-            fill: ${contrastColor} !important;
+        &:hover:not(:disabled) {
+          background-color: ${contrastColor} !important;
+          color: ${accentColor} !important;
+          filter: none;
+
+          svg {
+            fill: ${accentColor} !important;
           }
         }
       `;
