@@ -85,6 +85,45 @@ describe("trackGroups/{id}/download", () => {
       assert.equal(response.body.message, "We've started generating the album");
     });
 
+    it("should GET / 403 with a clear error when the album hasn't been released yet (#1773)", async () => {
+      const { user } = await createUser({
+        email: "preorder-artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const futureRelease = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: futureRelease,
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "preorder-purchaser@artist.com",
+      });
+
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: purchaser.id,
+          trackGroupId: trackGroup.id,
+          singleDownloadToken: randomUUID(),
+        },
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}/download`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(
+        response.statusCode,
+        403,
+        "should not report a missing purchase when one exists"
+      );
+      assert.ok(
+        typeof response.body.error === "string" &&
+          response.body.error.toLowerCase().includes("isn't available"),
+        `error message should mention release availability, got: ${JSON.stringify(response.body.error)}`
+      );
+    });
+
     it("should GET / success with logged in user", async () => {
       const { user } = await createUser({
         email: "artist@artist.com",

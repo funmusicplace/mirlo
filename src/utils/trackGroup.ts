@@ -742,17 +742,14 @@ export const findPurchaseAndVoidToken = async (
   } catch (e) {}
   logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
 
+  // Look up the purchase without gating on publishedAt so we can distinguish
+  // "no purchase exists" from "purchase exists but the album isn't released
+  // yet" (e.g. preorders). #1773 was reported as "no purchase found" right
+  // after a successful purchase — the misleading message hid the real cause.
   const purchase = await prisma.userTrackGroupPurchase.findFirst({
     where: {
       trackGroupId: Number(trackGroupId),
-      ...(!isCreator
-        ? {
-            userId: Number(user.id),
-            trackGroup: {
-              publishedAt: { lte: new Date() },
-            },
-          }
-        : {}),
+      ...(!isCreator ? { userId: Number(user.id) } : {}),
     },
     include: {
       trackGroup: basicTrackGroupInclude,
@@ -763,6 +760,17 @@ export const findPurchaseAndVoidToken = async (
     throw new AppError({
       httpCode: 404,
       description: `trackGroupId: ${trackGroupId} no purchase found`,
+    });
+  }
+
+  if (
+    !isCreator &&
+    purchase.trackGroup?.publishedAt &&
+    purchase.trackGroup.publishedAt > new Date()
+  ) {
+    throw new AppError({
+      httpCode: 403,
+      description: `This release isn't available for download until ${purchase.trackGroup.publishedAt.toISOString()}`,
     });
   }
 

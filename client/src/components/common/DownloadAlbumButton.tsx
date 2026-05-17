@@ -7,10 +7,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
 import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
-import {
-  ArtistButton,
-  ArtistButtonAnchor,
-} from "components/Artist/ArtistButtons";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import { DropdownMenuItemButton } from "./DropdownMenuItem";
 import useErrorHandler from "services/useErrorHandler";
 
@@ -43,8 +40,9 @@ const DownloadAlbumButton: React.FC<{
   const errorHandler = useErrorHandler();
 
   const prefix = track ? `tracks/${track.id}` : `trackGroups/${trackGroup.id}`;
+  const snackbar = useSnackbar();
 
-  const getDownloadUrl = React.useCallback(() => {
+  const downloadFile = React.useCallback(async () => {
     const queryParams = new URLSearchParams();
     queryParams.append("format", chosenFormat);
     if (email) {
@@ -53,11 +51,72 @@ const DownloadAlbumButton: React.FC<{
     if (token) {
       queryParams.append("token", token);
     }
+    const endpoint = `${prefix}/download?${queryParams.toString()}`;
 
-    return api.getFileDownloadUrl(
-      `${prefix}/download?${queryParams.toString()}`
-    );
-  }, [track, trackGroup.id, prefix, chosenFormat, email, token]);
+    setIsDownloading(true);
+    try {
+      // Go through apiRequest so cookies + the mirlo-api-key header are sent.
+      // noProcess gives us the raw Response so we can read the blob (or the
+      // error JSON) without the helper trying to JSON.parse a binary stream.
+      const resp = await api.request<Response>(
+        endpoint,
+        { method: "GET", credentials: "include" },
+        { noProcess: true }
+      );
+
+      if (!resp.ok) {
+        let errorMessage = "";
+        try {
+          const errJson = await resp.json();
+          if (typeof errJson?.error === "string") {
+            errorMessage = errJson.error;
+          } else if (errJson?.error) {
+            errorMessage = JSON.stringify(errJson.error);
+          }
+        } catch {
+          // body wasn't JSON; fall back to a generic message
+        }
+        snackbar(errorMessage || t("downloadFailed"), { type: "warning" });
+        return;
+      }
+
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const fallbackName = `${trackGroup.artist?.name ?? "album"} - ${
+        trackGroup.title ?? "album"
+      }.zip`;
+      // Prefer the server's filename if it sent one
+      const disposition = resp.headers.get("content-disposition") ?? "";
+      const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^"';]+)"?/i);
+      const filename = match ? decodeURIComponent(match[1]) : fallbackName;
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+
+      setChosenFormat("");
+      setIsPopupOpen(false);
+    } catch (e) {
+      errorHandler(e);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [
+    chosenFormat,
+    email,
+    errorHandler,
+    prefix,
+    snackbar,
+    t,
+    token,
+    trackGroup.artist?.name,
+    trackGroup.title,
+  ]);
 
   const generateAlbum = React.useCallback(
     async (format: string) => {
@@ -161,7 +220,7 @@ const DownloadAlbumButton: React.FC<{
                   {t("downloadButtonGenerating")}
                 </p>
               ) : (
-                <ArtistButtonAnchor
+                <ArtistButton
                   size="compact"
                   className={css`
                     margin-top: 0.5rem;
@@ -169,14 +228,11 @@ const DownloadAlbumButton: React.FC<{
                     background: transparent;
                   `}
                   isLoading={isDownloading}
-                  href={getDownloadUrl()}
-                  onClick={async () => {
-                    setChosenFormat("");
-                    setIsPopupOpen(false);
-                  }}
+                  disabled={isDownloading}
+                  onClick={downloadFile}
                 >
                   {t("download")}
-                </ArtistButtonAnchor>
+                </ArtistButton>
               )}
               <p>
                 <ArtistButton

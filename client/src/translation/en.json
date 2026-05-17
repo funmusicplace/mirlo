@@ -322,6 +322,7 @@
     "justDownloadLoggedIn": "Want to just download the release? We'll email you a download link. You'll get added to {{artistName}}'s mailing list.",
     "justDownloadNoUser": "Want to just download the release? Enter your email and we'll email you a download link. You'll get added to {{artistName}}'s mailing list.",
     "downloadButtonGenerating": "We're generating the release! Hold on for a minute...",
+    "downloadFailed": "Couldn't download the release. Please try again in a moment.",
     "chooseAnotherFormat": "Choose another format",
     "downloadFiletypeQuery": "What file type do you want to download?"
   },
