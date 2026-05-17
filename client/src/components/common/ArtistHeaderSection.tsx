@@ -233,22 +233,6 @@ const ArtistHeaderSection: React.FC<{
               </SpaceBetweenDiv>
             </ArtistTitleWrapper>
           </AvatarWrapper>
-          {!artist.bio && artist.shortDescription && (
-            <div
-              className={css`
-                display: none;
-                @media screen and (max-width: ${bp.medium}px) {
-                  display: flex;
-                  font-size: var(--mi-font-size-xsmall);
-                  line-height: 1.1rem;
-                  margin-top: 1rem;
-                  margin-bottom: 0.5rem;
-                }
-              `}
-            >
-              {artist.shortDescription}
-            </div>
-          )}
         </Header>
         {!artistAvatar && (
           <div
