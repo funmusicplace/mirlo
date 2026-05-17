@@ -37,7 +37,7 @@ const Wishlist: React.FC<{
       <FixedButton
         onClick={onClick}
         aria-label={buttonLabel}
-        className="wishlist"
+        className="wishlist max-md:justify-center!"
         title={buttonLabel}
         rounded
         size="compact"
