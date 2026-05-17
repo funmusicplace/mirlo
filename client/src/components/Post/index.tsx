@@ -96,7 +96,9 @@ const Post: React.FC = () => {
   }
 
   return (
-    <div className="w-full relative">
+    <div
+      className={`w-full relative ${post.featuredImage ? "" : "bg-(--mi-tint-color)"}`}
+    >
       <MetaCard
         title={`${post.title} ${t("byArtist", { artist: post.artist?.name })}`}
         description={post.content.slice(0, 500)}
@@ -104,7 +106,13 @@ const Post: React.FC = () => {
       />
       <PostHeader post={post} />
 
-      <div className="max-w-3xl mx-auto px-4 pt-8">
+      <div
+        className={
+          post.featuredImage
+            ? "max-w-3xl mx-auto px-4 pt-8"
+            : "max-w-3xl mx-auto px-4 md:px-12 pt-4 pb-8 bg-(--mi-background-color)"
+        }
+      >
         <PageMarkdownWrapper>
           {post.isContentHidden && (
             <div className="py-8">

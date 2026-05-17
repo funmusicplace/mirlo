@@ -101,7 +101,9 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
       >
         <div
           className={
-            "max-w-3xl px-4 flex pt-8 w-full justify-center " +
+            (featuredImage
+              ? "max-w-3xl px-4 flex pt-8 w-full justify-center "
+              : "max-w-3xl px-4 md:px-12 flex pt-8 w-full justify-center bg-(--mi-background-color) ") +
             css`
               margin: 0 auto 0;
               position: relative;
@@ -138,6 +140,9 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             className={css`
               flex: 100%;
               width: 100%;
+              ${!featuredImage
+                ? "border-bottom: 1px solid var(--mi-tint-color); padding-bottom: 1rem;"
+                : ""}
             `}
           >
             <div
