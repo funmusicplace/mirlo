@@ -4,42 +4,11 @@ import jwt from "jsonwebtoken";
 
 import { userLoggedInWithoutRedirect } from "../../../../../../auth/passport";
 import logger from "../../../../../../logger";
-import {
-  finalAudioBucket,
-  getBufferBasedOnStat,
-  statFile,
-} from "../../../../../../utils/minio";
 import { canUserListenToTrack } from "../../../../../../utils/ownership";
 import socialMusic from "../../../../../../utils/socialMusic";
+import { fetchFile } from "../{segment}";
 
 const jwt_secret = process.env.JWT_SECRET ?? "secretkey";
-
-export const fetchFile = async (
-  res: Response,
-  filename: string,
-  segment: string
-) => {
-  const alias = `${filename}/${segment}`;
-
-  const { backblazeStat, minioStat } = await statFile(finalAudioBucket, alias);
-  if (!backblazeStat && !minioStat) {
-    res.send();
-  }
-  try {
-    const buffer = await getBufferBasedOnStat(
-      finalAudioBucket,
-      alias,
-      backblazeStat
-    );
-
-    res.end(buffer, "binary");
-  } catch (e) {
-    console.error("error", e);
-    res.status(400);
-    res.send();
-    return;
-  }
-};
 
 export default function () {
   const operations = {
@@ -79,6 +48,7 @@ export default function () {
       const isManifest = segment.includes("playlist.m3u8");
       if (isManifest && isUserAbleToListenToTrack === "exceeded") {
         res.status(402).send("Track play limit exceeded");
+        return next();
       }
 
       if (track.audio) {
@@ -126,6 +96,7 @@ export default function () {
           if (song !== id || reqUserId !== userid) {
             log.debug("Credentials error");
             res.status(403).send("Token doesn't match song and user");
+            return next();
           } else {
             log.debug("Credentials match");
           }
