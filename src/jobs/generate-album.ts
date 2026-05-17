@@ -65,7 +65,12 @@ const downloadTracks = async ({
   artist,
 }: {
   tracks: (Track & { audio?: TrackAudio; trackArtists: TrackArtist[] })[];
-  trackGroup: { title: string | null; coverLocation?: string };
+  trackGroup: {
+    title: string | null;
+    coverLocation?: string;
+    releaseDate?: Date | null;
+    totalTracks?: number | null;
+  };
   progress: number;
   job: Job;
   tempFolder: string;
@@ -323,6 +328,7 @@ const downloadAndZipTracks = async ({
     title: string | null;
     id: number;
     cover: TrackGroupCover;
+    releaseDate?: Date | null;
   };
   job: Job;
   artist: Artist;
@@ -359,6 +365,8 @@ const downloadAndZipTracks = async ({
       trackGroup: {
         title: trackGroup.title,
         coverLocation,
+        releaseDate: trackGroup.releaseDate,
+        totalTracks: tracks.filter((t) => !t.deletedAt).length,
       },
       artist,
     });

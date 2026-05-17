@@ -167,6 +167,106 @@ describe("utils/tracks.convertAudioToFormat", () => {
     assert.equal(command.savedDestination, "/tmp/output.320.mp3");
   });
 
+  it("writes track number with total (track=N/total) and a date from the trackGroup releaseDate when source metadata has none (#633)", () => {
+    const command = new FakeFfmpegCommand();
+    sinon
+      .stub(tracksUtils, "createFfmpegCommand")
+      .returns(command as unknown as any);
+    sinon.stub(tracksUtils, "fileExists").returns(false);
+
+    const track = createTrackWithAudio({
+      order: 3,
+      metadata: {
+        common: {
+          genre: ["Pop"],
+        },
+      } as any,
+    });
+
+    tracksUtils.convertAudioToFormat(
+      {
+        track,
+        artist: { name: "Album Artist" } as any,
+        trackGroup: {
+          title: "Numbered Album",
+          releaseDate: new Date("2024-07-04T00:00:00.000Z"),
+          totalTracks: 12,
+        },
+      },
+      Readable.from(Buffer.from("audio")),
+      {
+        format: "mp3",
+        audioCodec: "libmp3lame",
+        audioBitrate: "320",
+      },
+      "/tmp/output"
+    );
+
+    const metadataPairs = command.outputOptionCalls.filter(
+      ([option, value]) => option === "-metadata" && typeof value === "string"
+    );
+
+    assert.ok(
+      metadataPairs.some(([, v]) => v === "track=3/12"),
+      "expected track=N/total format"
+    );
+    assert.ok(
+      metadataPairs.some(([, v]) => v === "date=2024-07-04"),
+      "expected date fallback to releaseDate"
+    );
+    assert.ok(
+      metadataPairs.some(([, v]) => v === "year=2024"),
+      "expected year fallback to releaseDate"
+    );
+  });
+
+  it("prefers source-file date/year metadata over the trackGroup releaseDate", () => {
+    const command = new FakeFfmpegCommand();
+    sinon
+      .stub(tracksUtils, "createFfmpegCommand")
+      .returns(command as unknown as any);
+    sinon.stub(tracksUtils, "fileExists").returns(false);
+
+    const track = createTrackWithAudio({
+      metadata: {
+        common: {
+          date: "1999",
+          year: 1999,
+        },
+      } as any,
+    });
+
+    tracksUtils.convertAudioToFormat(
+      {
+        track,
+        artist: { name: "Album Artist" } as any,
+        trackGroup: {
+          title: "Album with both",
+          releaseDate: new Date("2024-01-15T00:00:00.000Z"),
+        },
+      },
+      Readable.from(Buffer.from("audio")),
+      {
+        format: "mp3",
+        audioCodec: "libmp3lame",
+      },
+      "/tmp/output"
+    );
+
+    const metadataPairs = command.outputOptionCalls.filter(
+      ([option, value]) => option === "-metadata" && typeof value === "string"
+    );
+
+    assert.ok(
+      metadataPairs.some(([, v]) => v === "date=1999"),
+      "expected source date to win over releaseDate"
+    );
+    assert.ok(
+      metadataPairs.some(([, v]) => v === "year=1999"),
+      "expected source year to win over releaseDate"
+    );
+  });
+
   it("attaches cover art for mp3 when a cover file exists", () => {
     const command = new FakeFfmpegCommand();
     sinon
