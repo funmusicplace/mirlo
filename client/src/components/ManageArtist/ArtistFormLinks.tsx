@@ -32,6 +32,8 @@ interface ArtistFormLinksProps {
   isManage: boolean;
   artist: Pick<Artist, "linksJson" | "links">;
   onSubmit: (data: Pick<Artist, "linksJson">) => Promise<void>;
+  isOpen?: boolean;
+  setIsOpen?: (open: boolean) => void;
 }
 
 const normalizeStoredLink = (link: Link): Link => ({
@@ -147,8 +149,12 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
   artist,
   isManage,
   onSubmit,
+  isOpen: controlledIsOpen,
+  setIsOpen: controlledSetIsOpen,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [internalIsOpen, setInternalIsOpen] = React.useState(false);
+  const isOpen = controlledIsOpen ?? internalIsOpen;
+  const setIsOpen = controlledSetIsOpen ?? setInternalIsOpen;
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const methods = useForm<FormData>({
