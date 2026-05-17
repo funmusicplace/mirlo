@@ -10,6 +10,7 @@ import {
 } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaTag } from "react-icons/fa";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
@@ -161,6 +162,15 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <SectionActionStrip>
         <SetEntireCataloguePrice />
+        <ArtistButtonLink
+          to={`/manage/artists/${artistId}/pricing`}
+          size="compact"
+          startIcon={<FaTag />}
+          variant="dashed"
+          collapsible
+        >
+          {t("bulkPricing")}
+        </ArtistButtonLink>
         <ArtistButtonLink
           to={`/manage/artists/${artistId}/releases/tools`}
           size="compact"
