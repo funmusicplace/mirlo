@@ -101,7 +101,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
       >
         <div
           className={
-            "max-w-3xl p-1 flex pt-8 w-full justify-center " +
+            "max-w-3xl px-4 flex pt-8 w-full justify-center " +
             css`
               margin: 0 auto 0;
               position: relative;
@@ -212,7 +212,9 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                     </small>
                   </div>
                 </div>
-                {post.artistId && <FollowArtist artistId={post.artistId} />}
+                {post.artistId && (
+                  <FollowArtist artistId={post.artistId} hideWhenSubscribed />
+                )}
               </SpaceBetweenDiv>
             )}
           </div>
