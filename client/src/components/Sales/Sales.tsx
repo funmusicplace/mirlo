@@ -106,7 +106,7 @@ export const Sales: React.FC = () => {
         </div>
       )}
       {(results.length > 0 || filteredArtistId || datePurchased) && (
-        <div className="flex flex-wrap-reverse items-center gap-2 mb-3">
+        <div className="flex flex-wrap-reverse items-center gap-2 max-md:gap-y-4 mb-3">
           <div className="flex flex-wrap items-center gap-2">
             <ArtistFilter
               artists={managedArtists?.results ?? []}

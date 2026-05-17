@@ -102,7 +102,7 @@ export const Fulfillment: React.FC = () => {
             </div>
           );
         })()}
-      <div className="flex flex-wrap-reverse items-center gap-2 mb-3">
+      <div className="flex flex-wrap-reverse items-center gap-2 max-md:gap-y-4 mb-3">
         <div className="flex flex-wrap items-center gap-2">
           <ArtistFilter
             artists={managedArtists?.results ?? []}
