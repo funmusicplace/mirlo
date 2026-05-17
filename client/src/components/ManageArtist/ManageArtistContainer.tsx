@@ -115,55 +115,62 @@ const ManageArtistContainer: React.FC<{}> = () => {
     (a) => a.isLabelProfile
   );
 
+  const hasTopWarning = !!(
+    (user && artist.userId !== user.id) ||
+    (user && stripeAccountStatus && !stripeAccountStatus?.chargesEnabled)
+  );
+
   return (
     <ArtistPageWrapper hasBackground={!!artistBackground}>
-      <div
-        className={css`
-          padding-top: 1rem;
-        `}
-      >
-        {user && artist.userId !== user.id && user.isAdmin && (
-          <ArtistBox variant="warning">
-            You are viewing this artist as an admin
-          </ArtistBox>
-        )}
+      <div>
+        {hasTopWarning && (
+          <div className="pt-4 max-md:px-2 max-md:text-sm">
+            {user && artist.userId !== user.id && user.isAdmin && (
+              <ArtistBox variant="warning">
+                You are viewing this artist as an admin
+              </ArtistBox>
+            )}
 
-        {user && artist.userId !== user.id && !user.isAdmin && (
-          <ArtistBox variant="warning">
-            You are viewing this user as their label
-          </ArtistBox>
-        )}
-        {user &&
-          stripeAccountStatus &&
-          !stripeAccountStatus?.chargesEnabled && (
-            <ArtistBox variant="warning">
-              <p>
-                <Trans
-                  t={t}
-                  i18nKey={"paymentProcessorNotSetUp"}
-                  components={{
-                    manage: (
-                      <a href={api.paymentProcessor.stripeConnect(user.id)}></a>
-                    ),
-                  }}
-                />
-              </p>
-              {labelStripeAccountStatus && labelProfile && (
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"linkedToLabel"}
-                    components={{
-                      label: <Link to={getArtistUrl(labelProfile)}></Link>,
-                    }}
-                    values={{
-                      label: labelProfile?.name || "the label",
-                    }}
-                  />
-                </p>
+            {user && artist.userId !== user.id && !user.isAdmin && (
+              <ArtistBox variant="warning">
+                You are viewing this user as their label
+              </ArtistBox>
+            )}
+            {user &&
+              stripeAccountStatus &&
+              !stripeAccountStatus?.chargesEnabled && (
+                <ArtistBox variant="warning">
+                  <p>
+                    <Trans
+                      t={t}
+                      i18nKey={"paymentProcessorNotSetUp"}
+                      components={{
+                        manage: (
+                          <a
+                            href={api.paymentProcessor.stripeConnect(user.id)}
+                          ></a>
+                        ),
+                      }}
+                    />
+                  </p>
+                  {labelStripeAccountStatus && labelProfile && (
+                    <p>
+                      <Trans
+                        t={t}
+                        i18nKey={"linkedToLabel"}
+                        components={{
+                          label: <Link to={getArtistUrl(labelProfile)}></Link>,
+                        }}
+                        values={{
+                          label: labelProfile?.name || "the label",
+                        }}
+                      />
+                    </p>
+                  )}
+                </ArtistBox>
               )}
-            </ArtistBox>
-          )}
+          </div>
+        )}
 
         {!dontShowHeader && (
           <ArtistHeaderSection
