@@ -1,20 +1,14 @@
 import React from "react";
+
 import Button from "./Button";
 import Money from "./Money";
-import { css } from "@emotion/css";
 
 const AddMoneyValueButtons: React.FC<{
   addMoneyAmount: (val: number) => void;
   currency: string;
 }> = ({ addMoneyAmount, currency }) => {
   return (
-    <div
-      className={css`
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.5rem;
-      `}
-    >
+    <div className="grid grid-cols-4 gap-2 max-md:[&_button]:text-xs! max-md:[&_button]:px-1.5!">
       <Button variant="dashed" type="button" onClick={() => addMoneyAmount(1)}>
         +<Money amount={1} currency={currency} />
       </Button>
