@@ -11,16 +11,16 @@ import { ProfileSection } from "components/Profile";
 import { finishedLanguages } from "i18n";
 import { useProfileMutation } from "queries";
 import React from "react";
-import { useTranslation } from "react-i18next";
-import api from "../../services/api";
-import { API_ROOT } from "../../constants";
-
-import { Link, useNavigate } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { FaChevronRight, FaEye } from "react-icons/fa";
-import { useSnackbar } from "state/SnackbarContext";
+import { Link, useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+
+import { API_ROOT } from "../../constants";
+import api from "../../services/api";
 
 type FormData = {
   name: string;
@@ -33,7 +33,7 @@ type FormData = {
   accountingEmail?: string;
 };
 
-const AccountSettings: React.FC = () => {
+const AccountContainer: React.FC = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -219,15 +219,6 @@ const AccountSettings: React.FC = () => {
           {t("resetPasswordLink")}
         </Link>
 
-        <CanCreateArtists>
-          <ProfileSection>
-            <h2>{t("manageArtists")}</h2>
-            <p>{t("manageArtistsDescription")}</p>
-            <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
-              {t("manageArtists")}
-            </ButtonLink>
-          </ProfileSection>
-        </CanCreateArtists>
         <ProfileSection>
           <h2>{t("deleteYourAccount")}</h2>
           <Button
@@ -246,4 +237,4 @@ const AccountSettings: React.FC = () => {
   );
 };
 
-export default AccountSettings;
+export default AccountContainer;

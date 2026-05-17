@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import CanCreateArtists from "components/CanCreateArtists";
 import Tabs from "components/common/Tabs";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -25,12 +26,20 @@ const AccountNav: React.FC = () => {
         }
       `}
     >
-      {user?.isLabelAccount && (
+      {user?.isLabelAccount ? (
         <li>
           <NavLink end to="/account/label">
             {t("profile.label")}
           </NavLink>
         </li>
+      ) : (
+        <CanCreateArtists>
+          <li>
+            <NavLink end to="/manage">
+              {t("profile.manageArtists")}
+            </NavLink>
+          </li>
+        </CanCreateArtists>
       )}
       <li>
         <NavLink end to="/sales">
