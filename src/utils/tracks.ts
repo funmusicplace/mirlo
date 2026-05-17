@@ -84,7 +84,11 @@ const addTrackMetadataTags = (
   processor: ffmpeg.FfmpegCommand,
   track: Track,
   trackGroupTitle: string | null,
-  albumArtistName: string
+  albumArtistName: string,
+  trackGroupContext?: {
+    releaseDate?: Date | null;
+    totalTracks?: number | null;
+  }
 ) => {
   const trackMetadata = (track.metadata ?? {}) as {
     common?: Record<string, unknown>;
@@ -97,7 +101,16 @@ const addTrackMetadataTags = (
   addMetadataTag(processor, "title", track.title);
   addMetadataTag(processor, "album", trackGroupTitle);
   addMetadataTag(processor, "album_artist", albumArtistName);
-  addMetadataTag(processor, "track", track.order);
+
+  // Many ID3 readers (Apple Music, foobar2000) expect "N/total" — without
+  // the total they may treat the album as un-numbered and fall back to
+  // alphabetical order. See #633.
+  const trackOrderTag =
+    track.order && trackGroupContext?.totalTracks
+      ? `${track.order}/${trackGroupContext.totalTracks}`
+      : track.order;
+  addMetadataTag(processor, "track", trackOrderTag);
+
   addMetadataTag(processor, "lyrics", lyricsValue);
   // Different ffmpeg/id3 readers expose lyrics via different frame mappings.
   addMetadataTag(processor, "unsynchronised_lyrics", lyricsValue);
@@ -105,8 +118,24 @@ const addTrackMetadataTags = (
 
   // Preserve common ID3-like metadata fields that often come from uploaded files.
   addMetadataTag(processor, "genre", common.genre);
-  addMetadataTag(processor, "date", common.date ?? common.year);
-  addMetadataTag(processor, "year", common.year);
+
+  // Fall back to the trackGroup's releaseDate for date/year when the source
+  // file's metadata doesn't carry them. Most artists upload "raw" files
+  // without these tags, which is why downloads have appeared dateless. See
+  // #633.
+  const releaseYear = trackGroupContext?.releaseDate
+    ? trackGroupContext.releaseDate.getUTCFullYear()
+    : undefined;
+  const releaseDateString = trackGroupContext?.releaseDate
+    ? trackGroupContext.releaseDate.toISOString().slice(0, 10)
+    : undefined;
+  addMetadataTag(
+    processor,
+    "date",
+    common.date ?? common.year ?? releaseDateString ?? releaseYear
+  );
+  addMetadataTag(processor, "year", common.year ?? releaseYear);
+
   addMetadataTag(processor, "composer", common.composer);
   addMetadataTag(processor, "lyricist", common.lyricist);
   addMetadataTag(processor, "copyright", common.copyright); // FIXME we can draw this from our own licenseId
@@ -173,7 +202,12 @@ export const convertAudioToFormat = (
   content: {
     track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
     artist: Artist;
-    trackGroup: { title: string | null; coverLocation?: string };
+    trackGroup: {
+      title: string | null;
+      coverLocation?: string;
+      releaseDate?: Date | null;
+      totalTracks?: number | null;
+    };
   },
   stream: Readable,
   formatDetails: Format,
@@ -233,7 +267,11 @@ export const convertAudioToFormat = (
     processor,
     content.track,
     content.trackGroup.title,
-    content.artist.name
+    content.artist.name,
+    {
+      releaseDate: content.trackGroup.releaseDate,
+      totalTracks: content.trackGroup.totalTracks,
+    }
   );
   addTrackArtistRoleTags(
     processor,
