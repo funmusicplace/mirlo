@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import ArtistFilter from "components/common/ArtistFilter";
 import SectionActionStrip from "components/common/SectionActionStrip";
 import Tooltip from "components/common/Tooltip";
 import {
@@ -109,8 +110,9 @@ const ReleasesSection: React.FC<{
   description?: string;
   releases: TrackGroup[];
   showArtist?: boolean;
-}> = ({ title, description, releases, showArtist }) => {
-  if (releases.length === 0) return null;
+  filter?: React.ReactNode;
+}> = ({ title, description, releases, showArtist, filter }) => {
+  if (releases.length === 0 && !filter) return null;
   return (
     <div className="flex gap-2 flex-col">
       <h3>{title}</h3>
@@ -119,6 +121,7 @@ const ReleasesSection: React.FC<{
           {description}
         </p>
       )}
+      {filter}
       <ManageArtistAlbumsTable releases={releases} showArtist={showArtist} />
     </div>
   );
@@ -154,8 +157,34 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     labelTrackGroups?.results.filter(
       (a) => a.artist?.id !== Number(artistId)
     ) ?? [];
-  const publishedLabelReleases = labelReleases.filter(isPublished);
-  const unpublishedLabelReleases = labelReleases.filter((a) => !isPublished(a));
+
+  const [unpublishedLabelArtistFilter, setUnpublishedLabelArtistFilter] =
+    React.useState<number | null>(null);
+  const [publishedLabelArtistFilter, setPublishedLabelArtistFilter] =
+    React.useState<number | null>(null);
+
+  const labelArtists = React.useMemo(() => {
+    const map = new Map<number, Artist>();
+    for (const r of labelReleases) {
+      if (r.artist && !map.has(r.artist.id)) {
+        map.set(r.artist.id, r.artist);
+      }
+    }
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+  }, [labelReleases]);
+
+  const matchesArtistFilter = (r: TrackGroup, filter: number | null) =>
+    filter == null || r.artist?.id === filter;
+
+  const publishedLabelReleases = labelReleases.filter(
+    (r) => isPublished(r) && matchesArtistFilter(r, publishedLabelArtistFilter)
+  );
+  const unpublishedLabelReleases = labelReleases.filter(
+    (r) =>
+      !isPublished(r) && matchesArtistFilter(r, unpublishedLabelArtistFilter)
+  );
 
   return (
     <ManageSectionWrapper>
@@ -179,11 +208,19 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       <div className="flex flex-col gap-6 px-2">
         {isLoading && <LoadingBlocks />}
         <ReleasesSection
-          title={t("unpublishedReleases")}
+          title={t(
+            artist?.isLabelProfile
+              ? "unpublishedLabelOwnReleases"
+              : "unpublishedReleases"
+          )}
           releases={unpublishedReleases}
         />
         <ReleasesSection
-          title={t("publishedReleases")}
+          title={t(
+            artist?.isLabelProfile
+              ? "publishedLabelOwnReleases"
+              : "publishedReleases"
+          )}
           releases={publishedReleases}
         />
         {artist?.isLabelProfile && (
@@ -193,12 +230,30 @@ const ManageArtistAlbums: React.FC<{}> = () => {
               description={t("labelReleasesDescription")}
               releases={unpublishedLabelReleases}
               showArtist
+              filter={
+                labelArtists.length > 0 ? (
+                  <ArtistFilter
+                    artists={labelArtists}
+                    selectedArtistId={unpublishedLabelArtistFilter}
+                    onChange={setUnpublishedLabelArtistFilter}
+                  />
+                ) : undefined
+              }
             />
             <ReleasesSection
               title={t("labelReleases")}
               description={t("labelReleasesDescription")}
               releases={publishedLabelReleases}
               showArtist
+              filter={
+                labelArtists.length > 0 ? (
+                  <ArtistFilter
+                    artists={labelArtists}
+                    selectedArtistId={publishedLabelArtistFilter}
+                    onChange={setPublishedLabelArtistFilter}
+                  />
+                ) : undefined
+              }
             />
           </>
         )}

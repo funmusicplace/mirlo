@@ -1,9 +1,11 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-import LoadingSpinner from "./LoadingSpinner";
 import { useAuthContext } from "state/AuthContext";
+import { useFilterableList } from "utils/useFilterableList";
+
 import { InputEl } from "./Input";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface ReleaseListSelectorProps {
   artistId: number;
@@ -12,6 +14,9 @@ interface ReleaseListSelectorProps {
   maxHeight?: string;
   isSaving?: boolean;
 }
+
+const getReleaseSearchText = (r: TrackGroup) =>
+  `${r.title ?? ""} ${r.artist.name}`;
 
 const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
   artistId,
@@ -23,17 +28,17 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const [releases, setReleases] = React.useState<TrackGroup[]>([]);
-  const [filteredReleases, setFilteredReleases] = React.useState<TrackGroup[]>(
-    []
-  );
   const [isLoading, setIsLoading] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const {
+    searchQuery,
+    setSearchQuery,
+    filtered: filteredReleases,
+  } = useFilterableList(releases, getReleaseSearchText);
   const selected = React.useMemo(
     () => new Set(selectedReleaseIds),
     [selectedReleaseIds]
   );
 
-  // Fetch all releases for the artist
   React.useEffect(() => {
     const fetchReleases = async () => {
       try {
@@ -43,7 +48,6 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
           user?.isLabelAccount ? { includeLabelReleases: "true" } : undefined
         );
         setReleases(results.results);
-        setFilteredReleases(results.results);
       } catch (error) {
         console.error(t("failedToFetch"), error);
       } finally {
@@ -53,18 +57,6 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
 
     fetchReleases();
   }, [artistId]);
-
-  // Filter releases based on search query
-  React.useEffect(() => {
-    const filtered = releases.filter(
-      (release) =>
-        (release.title ?? "")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        release.artist.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredReleases(filtered);
-  }, [searchQuery, releases]);
 
   const handleCheckboxChange = (releaseId: number) => {
     const newSelected = new Set(selected);

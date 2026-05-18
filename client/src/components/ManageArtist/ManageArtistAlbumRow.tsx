@@ -3,9 +3,16 @@ import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
+import DropdownMenu from "components/common/DropdownMenu";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaChevronDown, FaChevronUp, FaEye, FaTrash } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaEye,
+  FaPen,
+  FaTrash,
+} from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
 
@@ -148,7 +155,53 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
             </div>
           )}
         </div>
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-1">
+          <DropdownMenu compact>
+            <ul>
+              <li>
+                <ArtistButtonLink
+                  to={getManageReleaseUrl(release.artist, release)}
+                  variant="link"
+                  startIcon={<FaPen />}
+                >
+                  {t("manageAlbum")}
+                </ArtistButtonLink>
+              </li>
+              {release.artist && isPublished && (
+                <li>
+                  <ArtistButtonLink
+                    to={getReleaseUrl(release.artist, release)}
+                    variant="link"
+                    startIcon={<FaEye />}
+                  >
+                    {t("viewLive")}
+                  </ArtistButtonLink>
+                </li>
+              )}
+              {release.artist && !isPublished && (
+                <li>
+                  <ArtistButtonLink
+                    to={getReleaseUrl(release.artist, release)}
+                    variant="link"
+                    startIcon={<FaEye />}
+                  >
+                    {t("preview")}
+                  </ArtistButtonLink>
+                </li>
+              )}
+              <li>
+                <ArtistButton
+                  type="button"
+                  variant="link"
+                  startIcon={<FaTrash />}
+                  onClick={() => onDelete(release.id)}
+                  isLoading={isDeletePending}
+                >
+                  {t("delete")}
+                </ArtistButton>
+              </li>
+            </ul>
+          </DropdownMenu>
           <ArtistButton
             type="button"
             variant="transparent"
@@ -214,7 +267,9 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
         </MetadataCell>
       </div>
 
-      <div className={`flex flex-wrap justify-end gap-2 ${albumCellDivider}`}>
+      <div
+        className={`max-md:hidden flex flex-wrap justify-end gap-2 ${albumCellDivider}`}
+      >
         <ArtistButtonLink
           to={getManageReleaseUrl(release.artist, release)}
           size="compact"
