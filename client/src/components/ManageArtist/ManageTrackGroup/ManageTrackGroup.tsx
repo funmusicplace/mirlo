@@ -130,7 +130,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
         <h1 className="mt-4">{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
       </div>
       <AlbumPaymentReceiver />
-      {/* <FeatureFlag flag="zipUpload"> */}
       {trackGroup && (
         <FormSection>
           <ZipDropZone
@@ -141,7 +140,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
           />
         </FormSection>
       )}
-      {/* </FeatureFlag> */}
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}
