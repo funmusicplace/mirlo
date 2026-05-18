@@ -1296,9 +1296,11 @@
     "deleteImage": "Delete image",
     "warningFeature": "Warning: this is an experimental feature. You shouldn't rely on it.",
     "enableActivityPub": "Enable The Social Web",
+    "enableFederatedStreaming": "Enable federated streaming",
     "groupName": "What should we show as the group type? Label? Collective?",
     "label": "Label",
-    "makeSearchable": "Do you want to make this artist searchable on the social web? This will enable the ActivityPub protocol for this artist."
+    "makeSearchable": "Do you want to make this artist searchable on the social web? This will enable the ActivityPub protocol for this artist.",
+    "makeStreamable": "Do you want to make this artist streamable on federated players like Fairplayer?"
   },
   "manageSubscriptions": {
     "uploadSuscribers": "Upload subscriber e-mail adresses",
