@@ -121,6 +121,7 @@ const ArtistHeaderSection: React.FC<{
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
   const snackbar = useSnackbar();
+  const [isLinksModalOpen, setIsLinksModalOpen] = React.useState(false);
 
   const handleSubmit = React.useCallback(
     async (data: UpdateArtistBody) => {
@@ -233,22 +234,6 @@ const ArtistHeaderSection: React.FC<{
               </SpaceBetweenDiv>
             </ArtistTitleWrapper>
           </AvatarWrapper>
-          {!artist.bio && artist.shortDescription && (
-            <div
-              className={css`
-                display: none;
-                @media screen and (max-width: ${bp.medium}px) {
-                  display: flex;
-                  font-size: var(--mi-font-size-xsmall);
-                  line-height: 1.1rem;
-                  margin-top: 1rem;
-                  margin-bottom: 0.5rem;
-                }
-              `}
-            >
-              {artist.shortDescription}
-            </div>
-          )}
         </Header>
         {!artistAvatar && (
           <div
@@ -263,6 +248,7 @@ const ArtistHeaderSection: React.FC<{
             artist={artist}
             isManage={!!isManage}
             onSubmit={handleSubmit}
+            onOpenLinksModal={() => setIsLinksModalOpen(true)}
           />
         </div>
       </HeaderWrapper>
@@ -276,6 +262,8 @@ const ArtistHeaderSection: React.FC<{
             isManage={!!isManage}
             artist={artist}
             onSubmit={handleSubmit}
+            isOpen={isLinksModalOpen}
+            setIsOpen={setIsLinksModalOpen}
           />
         </div>
       )}

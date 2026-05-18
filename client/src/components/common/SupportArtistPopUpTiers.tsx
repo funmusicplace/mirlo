@@ -20,8 +20,10 @@ const Label = styled.label`
   div {
     display: flex;
     flex-direction: column;
-    strong {
-      margin-bottom: 0.5rem;
+    gap: 0.5rem;
+
+    > span {
+      font-weight: 600;
     }
   }
 `;
@@ -90,7 +92,7 @@ const SupportArtistPopUpTiers = forwardRef<
               }}
             >
               <div>
-                <strong>
+                <span>
                   {tier.name === "follow" ? (
                     t("justFollow")
                   ) : (
@@ -108,8 +110,8 @@ const SupportArtistPopUpTiers = forwardRef<
                             : t("yearly"),
                       })
                     : ""}
-                </strong>
-                <p>{tier.description}</p>
+                </span>
+                {tier.description && <p>{tier.description}</p>}
               </div>
               {currentValue?.id === tier.id && (
                 <FaCheck aria-hidden className="self-center shrink-0 ml-2" />

@@ -1,7 +1,8 @@
 import { css } from "@emotion/css";
+import { useGlobalStateContext } from "state/GlobalState";
+
 import PauseButton from "./PauseButton";
 import PlayButton from "./PlayButton";
-import { useGlobalStateContext } from "state/GlobalState";
 
 export const PlayControlButton: React.FC<{
   isPlaying?: boolean;
@@ -29,13 +30,7 @@ export const PlayControlButton: React.FC<{
           span {
             ${playerButton ? "font-size: 1.1rem !important; " : ""}
           }
-        }  
-        @media (prefers-color-scheme: dark) {
-          button {
-            svg {
-              ${playerButton ? "fill: lightgrey; " : ""}
-            }
-          }
+        }
       `}
     >
       {!localIsPlaying && (

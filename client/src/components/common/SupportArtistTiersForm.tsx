@@ -124,13 +124,6 @@ const SupportArtistTiersForm: React.FC<{
         )}
       </FormProvider>
 
-      <Turnstile
-        className={css`
-          width: 100%;
-        `}
-        siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
-      />
-
       <ArtistButton
         onClick={() => subscribeToTier()}
         isLoading={isCheckingForSubscription}
@@ -180,6 +173,16 @@ const SupportArtistTiersForm: React.FC<{
           <small>{t("artistCheckoutPage")}</small>
         </div>
       )}
+
+      <div
+        className={css`
+          display: flex;
+          justify-content: center;
+          margin-top: 1rem;
+        `}
+      >
+        <Turnstile siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY} />
+      </div>
     </>
   );
 };

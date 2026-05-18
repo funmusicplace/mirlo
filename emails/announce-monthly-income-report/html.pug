@@ -1,9 +1,18 @@
-extends ../layout.pug
+extends ../layout-wide.pug
 
 block content
-    p Hi #{user.name}
-    p Your sales report for the past month : 
-    table
+  p Hi #{user.name}
+  p Your sales report for the past month:
+  table
+    thead
+      tr
+        th Artist
+        th Date
+        th Type
+        th Title
+        th Buyer
+        th.num Amount
+    tbody
       each val in userSales
         tr
           td #{val.artist.map(a => a.name).join(', ')}
@@ -11,8 +20,8 @@ block content
           td #{val.saleType}
           td #{val.title}
           td #{val.user.name} (#{val.user.email})
-          td #{val.currency} #{val.amount / 100}
+          td.num #{val.currency} #{val.amount / 100}
 
-    p Total Income: #{totalIncome / 100} #{userSales[0] ? userSales[0].currency || 'USD' :  'USD'}
-    p We love to see it.
-    p Enjoy!
+  p Total Income: #{totalIncome / 100} #{userSales[0] ? userSales[0].currency || 'USD' :  'USD'}
+  p We love to see it.
+  p Enjoy!

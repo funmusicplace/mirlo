@@ -1,28 +1,35 @@
 extends ../layout.pug
 
 block content
-    p 
-      | You bought #{artist.name} entire digital catalogue!
-      | This includes digital downloads of:
-    table 
+  p
+    | You bought #{artist.name} entire digital catalogue!
+    | This includes digital downloads of:
+  table
+    thead
+      tr
+        th Title
+        th Download
+    tbody
       each trackGroup in trackGroups
-        tr 
+        tr
           td #{trackGroup.title}
-          td 
+          td
             a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${email}`) download
 
-    p 
-    p 
-      | Consider supporting 
-      a(href!=`${client}/${artist.urlSlug}`) #{artist.name} 
-      | with monthly or annual support.
-    p 
-      | If you want to have access to all your purchases for this e-mail address, 
-      | simply 
-      a(href!=`${client}/password-reset?email=${email}`) set a password for it
-      | .
-    - const purchaseMessage = artist?.properties?.emails?.purchase
-    if purchaseMessage
-      div!= purchaseMessage
-    else
-      p Enjoy!
+  p
+    | Consider supporting
+    |
+    a(href!=`${client}/${artist.urlSlug}`) #{artist.name}
+    |
+    | with monthly or annual support.
+  p
+    | If you want to have access to all your purchases for this e-mail address,
+    | simply
+    |
+    a(href!=`${client}/password-reset?email=${email}`) set a password for it
+    | .
+  - const purchaseMessage = artist?.properties?.emails?.purchase
+  if purchaseMessage
+    div!= purchaseMessage
+  else
+    p Enjoy!

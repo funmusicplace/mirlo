@@ -12,7 +12,10 @@ import Box from "./Box";
 import Modal from "./Modal";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
 
-const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
+const FollowArtist: React.FC<{
+  artistId: number;
+  hideWhenSubscribed?: boolean;
+}> = ({ artistId, hideWhenSubscribed }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const { data: artist } = useQuery(
@@ -80,6 +83,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   }
 
   if (isSubscribed) {
+    if (hideWhenSubscribed) return null;
     return <>{t("isSubscribed")}</>;
   }
 

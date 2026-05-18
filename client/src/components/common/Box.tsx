@@ -71,12 +71,12 @@ const Box = styled.div<{
         return `
             background: var(--mi-success-background-color);
             border: var(--mi-success-background-color) 1px solid;
-            color: var(--mi-text-color);
+            color: var(--mi-white);
         `;
       case "info":
         return `
           background-color: var(--mi-info-background-color);
-          color: var(--mi-text-color);
+          color: var(--mi-white);
         `;
       case "warning":
         return `

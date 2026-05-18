@@ -82,6 +82,8 @@ const Player = () => {
     return null;
   }
 
+  // Portal to document.body is there to prevent the Player from using #artist-colors-root's CSS
+  // var cascade. Keeps a neutral Mirlo palette regardless of artist page.
   return createPortal(
     <div
       data-tone={tone}

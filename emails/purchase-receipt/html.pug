@@ -1,4 +1,4 @@
-extends ../layout.pug
+extends ../layout-wide.pug
 
 mixin purchaseRow(title, transaction)
   tr
@@ -14,7 +14,7 @@ block content
   if supportMessage
     div.border.pa3!= supportMessage
   - var receiptCurrency = transactions && transactions[0] && transactions[0].currency ? transactions[0].currency.toUpperCase() : ''
-  table.receipt
+  table
     thead
       tr
         th Transaction ID

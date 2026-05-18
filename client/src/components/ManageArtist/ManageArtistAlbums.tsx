@@ -54,7 +54,7 @@ const ManageArtistAlbumsTable: React.FC<{
 
   return (
     <div
-      className={`flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-tint-color) md:border md:border-(--mi-tint-color) ${
+      className={`flex flex-col gap-3 md:gap-0 text-xs md:divide-y-1 md:divide-(--mi-tint-color) md:border md:border-(--mi-tint-x-color) ${
         showArtist ? albumTableGridWithArtist : albumTableGrid
       }`}
     >

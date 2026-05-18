@@ -4,7 +4,6 @@ import Avatar from "components/Artist/Avatar";
 import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import TipArtist from "components/common/TipArtist";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -101,7 +100,9 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
       >
         <div
           className={
-            "max-w-3xl p-1 flex pt-8 w-full justify-center " +
+            (featuredImage
+              ? "max-w-3xl px-4 flex pt-8 w-full justify-center "
+              : "max-w-3xl px-4 md:px-12 flex pt-8 w-full justify-center bg-(--mi-background-color) ") +
             css`
               margin: 0 auto 0;
               position: relative;
@@ -117,27 +118,13 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             `
           }
         >
-          {post.artistId && (
-            <div
-              className={css`
-                position: absolute;
-              `}
-            >
-              <div
-                className={css`
-                  position: fixed;
-                  right: 1rem;
-                  top: 4rem;
-                `}
-              >
-                <TipArtist artistId={post.artistId} />
-              </div>
-            </div>
-          )}
           <div
             className={css`
               flex: 100%;
               width: 100%;
+              ${!featuredImage
+                ? "border-bottom: 1px solid var(--mi-tint-color); padding-bottom: 1rem;"
+                : ""}
             `}
           >
             <div
@@ -212,7 +199,9 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                     </small>
                   </div>
                 </div>
-                {post.artistId && <FollowArtist artistId={post.artistId} />}
+                {post.artistId && (
+                  <FollowArtist artistId={post.artistId} hideWhenSubscribed />
+                )}
               </SpaceBetweenDiv>
             )}
           </div>

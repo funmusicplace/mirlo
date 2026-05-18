@@ -1,13 +1,13 @@
-import React from "react";
-
-import api from "services/api";
-import Button from "../Button";
-import { Trans, useTranslation } from "react-i18next";
-import Box from "components/common/Box";
-import { useAuthContext } from "state/AuthContext";
-import { queryUserStripeStatus } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Box from "components/common/Box";
+import { queryUserStripeStatus } from "queries";
+import React from "react";
+import { Trans, useTranslation } from "react-i18next";
+import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+
+import Button from "../Button";
 
 const StripeStatus = () => {
   const { user } = useAuthContext();
@@ -28,12 +28,21 @@ const StripeStatus = () => {
           {!stripeAccountStatus?.chargesEnabled &&
             stripeAccountStatus?.detailsSubmitted &&
             t("waitingStripeAccountVerification")}
-          {stripeAccountStatus?.chargesEnabled && t("stripeAccountVerified")}
+          {stripeAccountStatus?.chargesEnabled && (
+            <Trans
+              t={t}
+              i18nKey="stripeAccountVerified"
+              components={{ strong: <strong /> }}
+            />
+          )}
           {stripeAccountStatus?.defaultCurrency && (
             <p>
-              {t("payoutCurrency", {
-                currency: stripeAccountStatus.defaultCurrency,
-              })}
+              <Trans
+                t={t}
+                i18nKey="payoutCurrency"
+                values={{ currency: stripeAccountStatus.defaultCurrency }}
+                components={{ strong: <strong /> }}
+              />
             </p>
           )}
         </Box>

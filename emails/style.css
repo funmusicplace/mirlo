@@ -5,7 +5,7 @@
 }
 
 body {
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.5;
   padding: 0.5rem;
   max-width: 540px;
@@ -88,7 +88,7 @@ img {
 .mw600 {
   max-width: 600px;
   margin: 0 auto;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .email-unsubscribe {
@@ -149,34 +149,35 @@ img {
   margin-left: auto;
 }
 
-/* Receipt-style tables (#1980) */
-table.receipt {
+/* Tables inside the email card get a consistent receipt-like styling. */
+.email-card table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.8125rem;
   line-height: 1.4;
 }
 
-table.receipt th,
-table.receipt td {
+.email-card th,
+.email-card td {
   padding: 0.4rem 0.5rem;
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
-table.receipt thead th {
+.email-card thead th {
   text-align: left;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   font-weight: 600;
   white-space: nowrap;
 }
 
-table.receipt th.num,
-table.receipt td.num {
+.email-card th.num,
+.email-card td.num {
   text-align: right;
   white-space: nowrap;
 }
 
-table.receipt tr.totals td {
+.email-card tr.totals td {
   border-top: 1px solid rgba(0, 0, 0, 0.4);
   font-weight: bold;
   padding-top: 0.6rem;

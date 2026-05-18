@@ -1,16 +1,18 @@
 import { css } from "@emotion/css";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import Button, { ButtonLink } from "components/common/Button";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 import SectionActionStrip from "components/common/SectionActionStrip";
 import {
   queryManagedArtist,
   queryManagedArtistSubscriptionTiers,
   useCreateSubscriptionTierMutation,
 } from "queries";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPlus, FaWrench } from "react-icons/fa";
-import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
@@ -74,7 +76,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <SectionActionStrip>
-        <ButtonLink
+        <ArtistButtonLink
           to="supporters"
           variant="dashed"
           size="compact"
@@ -82,8 +84,8 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           startIcon={<FaWrench />}
         >
           {t("supporters")}
-        </ButtonLink>
-        <Button
+        </ArtistButtonLink>
+        <ArtistButton
           onClick={handleAddNewTier}
           startIcon={<FaPlus />}
           size="compact"
@@ -93,7 +95,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           disabled={isPending}
         >
           {t("addNewTier")}
-        </Button>
+        </ArtistButton>
       </SectionActionStrip>
       <div className="grid md:grid-cols-3 gap-2">
         {tiers?.results

@@ -1,9 +1,11 @@
+import { css } from "@emotion/css";
+import AutoComplete from "components/common/AutoComplete";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import api from "services/api";
-import AutoComplete from "components/common/AutoComplete";
-import { css } from "@emotion/css";
+
+import { bp } from "../../constants";
 
 const constructUrl = (r: any) => {
   let url = "";
@@ -137,13 +139,23 @@ const HeaderSearch: React.FC = () => {
         margin-left: 0.5rem;
 
         input[type="search"] {
-          background: var(--mi-lighten-x-background-color) !important;
+          background: var(--mi-lighten-background-color) !important;
           color: var(--mi-black) !important;
           border-color: var(--mi-black) !important;
+        }
+        input[type="search"]:focus {
+          background: var(--mi-white) !important;
         }
         input[type="search"]::placeholder {
           color: var(--mi-black) !important;
           opacity: 0.6;
+        }
+
+        @media screen and (max-width: ${bp.medium}px) {
+          input[type="search"] {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.85rem !important;
+          }
         }
       `}
     >

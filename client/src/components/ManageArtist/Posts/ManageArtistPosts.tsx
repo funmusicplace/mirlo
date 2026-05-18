@@ -105,7 +105,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
       {draftPosts.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-3">{t("drafts")}</h2>
-          <div className="border border-(--mi-tint-color)">
+          <div className="border border-(--mi-tint-x-color)">
             <Table className="w-full border-collapse text-xs">
               <thead>
                 <tr>

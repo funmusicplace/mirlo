@@ -3,7 +3,6 @@ import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
-import Button from "components/common/Button";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp, FaEye, FaTrash } from "react-icons/fa";
@@ -116,7 +115,7 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
 
   return (
     <div
-      className={`flex flex-col gap-3 max-md:rounded-md max-md:bg-(--mi-button-tint-color) max-md:p-3 ${albumRowSubgrid}`}
+      className={`flex flex-col gap-3 max-md:rounded-md max-md:bg-(--mi-button-tint-color) max-md:border max-md:border-(--mi-tint-x-color) max-md:p-3 ${albumRowSubgrid}`}
     >
       <div className="flex items-center gap-3 min-w-0">
         {release.cover ? (
@@ -150,7 +149,7 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
           )}
         </div>
         <div className="md:hidden">
-          <Button
+          <ArtistButton
             type="button"
             variant="transparent"
             size="compact"

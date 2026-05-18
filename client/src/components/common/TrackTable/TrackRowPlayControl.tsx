@@ -74,11 +74,7 @@ const TrackRowPlayControl: React.FC<{
       ? "absolute inset-0 flex items-center justify-center text-sm"
       : "absolute inset-0 flex items-center justify-center";
 
-  const iconClass = inWidget
-    ? "text-[0.7rem] max-sm:text-[0.6rem]"
-    : compact
-      ? "text-sm"
-      : "text-sm";
+  const iconClass = inWidget ? "text-[0.7rem] max-sm:text-[0.6rem]" : "text-sm";
 
   if (isThisTrackPlaying) {
     return (

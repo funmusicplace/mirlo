@@ -1,6 +1,9 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import Button, { ButtonLink } from "components/common/Button";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
@@ -137,7 +140,7 @@ const FundraisingGoal: React.FC<{
         <small id="description-add-fundraiser">
           {t("addFundraiserDescription")}
         </small>
-        <Button
+        <ArtistButton
           type="button"
           onClick={onAddFundraiser}
           isLoading={isLoading}
@@ -145,7 +148,7 @@ const FundraisingGoal: React.FC<{
           className="mt-4"
         >
           {t("addFundraiserToThisRelease")}
-        </Button>
+        </ArtistButton>
       </div>
     );
   }
@@ -156,31 +159,31 @@ const FundraisingGoal: React.FC<{
         <h2>{t("fundraisingGoal")}</h2>
         <div className="flex gap-2">
           {fundraiser.isAllOrNothing && (
-            <ButtonLink
+            <ArtistButtonLink
               to={`/manage/fundraiser/${fundraiser.id}/pledges`}
               className="flex items-center gap-1"
             >
               {t("viewPledges")}
-            </ButtonLink>
+            </ArtistButtonLink>
           )}
           {chargePledgesVisible && (
-            <Button
+            <ArtistButton
               type="button"
               onClick={onChargePledges}
               isLoading={isLoading}
             >
               {t("chargePledges")}
-            </Button>
+            </ArtistButton>
           )}
           {fundraiser && (
-            <Button
+            <ArtistButton
               type="button"
               onClick={onRemoveFundraiser}
               isLoading={isLoading}
               startIcon={<FaTrash />}
             >
               {t(hasPledges ? "cancelFundraiser" : "removeFundraiser")}
-            </Button>
+            </ArtistButton>
           )}
         </div>
       </div>

@@ -1,15 +1,20 @@
 extends ../layout.pug
 
 block content
-    p Hi #{userSubscriptions[0].user.name}
-    p From all the folks at and using Mirlo, thank you! 
-    p Your support means a lot to us.
-    p You're supporting the following artists: 
-    table
+  p Hi #{userSubscriptions[0].user.name}
+  p From all the folks at and using Mirlo, thank you!
+  p Your support means a lot to us.
+  p You're supporting the following artists:
+  table
+    thead
+      tr
+        th Artist
+        th.num Amount
+    tbody
       each val in userSubscriptions
         tr
           td #{val.artistSubscriptionTier.artist.name}
-          td #{val.currency} #{val.amount / 100}
-        
-    p We love to see it.
-    p Enjoy!
+          td.num #{val.currency} #{val.amount / 100}
+
+  p We love to see it.
+  p Enjoy!

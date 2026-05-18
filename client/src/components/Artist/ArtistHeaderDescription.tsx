@@ -19,7 +19,7 @@ const collapsedHeight = 65;
 
 interface ArtistHeaderDescriptionProps {
   isManage: boolean;
-  artist: Pick<Artist, "bio" | "properties">;
+  artist: Pick<Artist, "bio" | "shortDescription" | "properties">;
   onSubmit: (data: Pick<Artist, "bio">) => Promise<void>;
 }
 
@@ -38,6 +38,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
   });
 
   let bio = artist?.bio;
+  const displayedContent = bio || artist?.shortDescription;
 
   const handleSave = React.useCallback(
     async (data: FormData) => {
@@ -48,7 +49,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
     [onSubmit, snackbar, t]
   );
 
-  if (!bio && !isManage) {
+  if (!displayedContent && !isManage) {
     return null;
   }
 
@@ -69,10 +70,10 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
               display: flex;
             `}
           >
-            {bio && (
+            {displayedContent && (
               <div>
                 <MarkdownContent
-                  content={bio}
+                  content={displayedContent}
                   className={css`
                     width: auto;
                     overflow: hidden;

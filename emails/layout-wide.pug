@@ -1,0 +1,11 @@
+extends ./layout.pug
+
+block append head
+  style.
+    .email-card.mw600 { max-width: 720px; }
+    .email-card p { overflow-wrap: anywhere; }
+    .email-card table { font-size: 0.75rem; }
+    .email-card th.num,
+    .email-card td.num { text-align: left; }
+    .email-card thead th,
+    .email-card thead th.num { white-space: normal; }

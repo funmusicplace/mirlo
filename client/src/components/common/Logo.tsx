@@ -1,6 +1,5 @@
-import React from "react";
 import { css } from "@emotion/css";
-import { useParams } from "react-router-dom";
+import React from "react";
 
 export const Logo: React.FC<{
   noWordmark?: boolean;
@@ -18,7 +17,7 @@ export const Logo: React.FC<{
       xmlns="http://www.w3.org/2000/svg"
       width={width}
       height={height}
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox={`0 0 ${noWordmark ? 40 : 119} 40`}
       className={
         className +
         " " +

@@ -119,16 +119,10 @@ const Content = styled.div<ContentProps>`
 
 const close = css`
   color: #aaa;
-  border: none;
   background: none;
-  cursor: pointer;
-  line-height: 1.5rem;
-  height: 2rem !important;
-  font-size: 1rem !important;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
+  border: none;
+  svg {
+    fill: #aaa;
   }
 `;
 
@@ -265,11 +259,11 @@ export const Modal: React.FC<{
 
               <Button
                 className={close}
-                size="compact"
+                onlyIcon
                 startIcon={<FaTimes />}
                 onClick={onCloseWrapper}
                 aria-label="close"
-              ></Button>
+              />
             </SpaceBetweenDiv>
             <ChildrenWrapper className={contentClassName}>
               <ScrollArea id={childrenWrapperId} noPadding={noPadding}>

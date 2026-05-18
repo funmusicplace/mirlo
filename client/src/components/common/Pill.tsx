@@ -17,8 +17,8 @@ const Pill = styled.span<{
     margin-left: 0.25rem;
     padding: 0;
     font-size: 0.8rem;
-    height: 1.75rem;
-    width: 1.75rem;
+    height: 2rem;
+    width: 2rem;
   }
   ${(props) => {
     switch (props.variant) {
