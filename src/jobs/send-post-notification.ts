@@ -136,9 +136,7 @@ export default async function sendPostNotification(job: {
         postId,
         userId: subscriber.id,
         notificationType: "NEW_ARTIST_POST" as const,
-        deliveryMethod: post.artist?.activityPub
-          ? ("BOTH" as const)
-          : ("EMAIL" as const),
+        deliveryMethod: post.artist?.activityPub ? "BOTH" : "EMAIL",
       })),
       skipDuplicates: true,
     });
@@ -150,6 +148,7 @@ export default async function sendPostNotification(job: {
     const notificationsToEmail = await prisma.notification.findMany({
       where: {
         postId,
+        notificationType: "NEW_ARTIST_POST",
         deliveryMethod: { in: ["EMAIL", "BOTH"] },
       },
       include: {
