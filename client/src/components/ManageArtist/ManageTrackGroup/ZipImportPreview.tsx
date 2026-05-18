@@ -65,8 +65,6 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
     albumMeta.releaseDate ||
     (albumMeta.genres?.length ?? 0) > 0;
 
-  console.log("hasreleasedate", albumMeta.releaseDate, albumMeta.date); // DEBUG
-
   const handleZipImportConfirm = React.useCallback(
     async (result: PreScanResult | null, coverIndex: number) => {
       if (!result) {
@@ -81,8 +79,6 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
         },
         artistId,
       });
-
-      console.log("Importing with result:", result, "cover is ", coverIndex);
 
       // Upload cover image using the same pattern as UploadArtistImage
       const coverFile = result.imageFiles[coverIndex]?.file;

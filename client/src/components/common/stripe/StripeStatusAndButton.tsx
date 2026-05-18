@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
 import { queryUserStripeStatus } from "queries";
@@ -9,17 +9,27 @@ import { useAuthContext } from "state/AuthContext";
 
 import Button from "../Button";
 
+import ResetStripeAccountModal from "./ResetStripeAccountModal";
+
 const StripeStatus = () => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
+  const queryClient = useQueryClient();
 
   const userId = user?.id;
 
-  const { data: stripeAccountStatus, isLoading: isLoadingStripe } = useQuery(
-    queryUserStripeStatus(user?.id)
-  );
+  const {
+    data: stripeAccountStatus,
+    isLoading: isLoadingStripe,
+    isError: stripeStatusError,
+  } = useQuery(queryUserStripeStatus(user?.id));
 
   if (isLoadingStripe) return <LoadingBlocks rows={2} height="2rem" />;
+
+  const handleReset = () => {
+    queryClient.invalidateQueries({ queryKey: ["fetchUserStripeStatus"] });
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <p>{t("manageStripeStatus")}</p>
@@ -47,27 +57,41 @@ const StripeStatus = () => {
           )}
         </Box>
       )}
-      {userId && (
-        <a href={api.paymentProcessor.stripeConnect(userId)}>
-          <Button>
-            {stripeAccountStatus?.detailsSubmitted
-              ? t("updateBankAccount")
-              : t("setUpBankAccount")}
-          </Button>
-        </a>
+      {stripeStatusError && (
+        <Box variant="warning">{t("stripeAccountUnreachable")}</Box>
       )}
+      <div className="flex gap-2">
+        {userId && (
+          <a href={api.paymentProcessor.stripeConnect(userId)}>
+            <Button>
+              {stripeAccountStatus?.detailsSubmitted
+                ? t("updateBankAccount")
+                : t("setUpBankAccount")}
+            </Button>
+          </a>
+        )}
+        {userId && user?.email && (
+          <ResetStripeAccountModal
+            userId={userId}
+            userEmail={user.email}
+            onReset={handleReset}
+          />
+        )}
+      </div>
       <p>
         <Trans
           t={t}
           i18nKey="payoutsInfo"
           components={{
-            link: (
+            payoutsLink: (
               <a
                 href="https://docs.mirlo.space/payouts"
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-600 hover:underline"
-              ></a>
+              >
+                Content
+              </a>
             ),
           }}
         />

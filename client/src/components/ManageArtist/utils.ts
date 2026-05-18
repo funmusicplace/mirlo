@@ -240,11 +240,6 @@ export const prescanAudioFiles = async (
       : null;
     const artists = metadata.metadata.common.artists || [];
 
-    console.log("metadata", metadata.metadata.common, {
-      title,
-      trackNumber,
-      artists,
-    }); // DEBUG
     return {
       ...af,
       title,

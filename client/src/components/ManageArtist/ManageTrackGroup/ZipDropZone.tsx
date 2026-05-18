@@ -110,14 +110,12 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
       }
 
       const extracted = await extractZipFiles(file);
-      console.log("extracted", extracted);
       if (extracted.errorMessage) {
         setError(extracted.errorMessage);
         return;
       }
 
       const result = await prescanAudioFiles(extracted.files);
-      console.log("result", result);
       setPreScanResult(result);
       setSelectedCoverIndex(0);
       setInvalidFilesAction(null);

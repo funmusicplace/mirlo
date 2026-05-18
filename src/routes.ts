@@ -79,6 +79,8 @@ const routes = [
   "users/{userId}/stripe/connect",
   "users/{userId}/stripe/connectComplete",
   "users/{userId}/stripe/checkAccountStatus",
+  "users/{userId}/stripe/reset",
+  "users/{userId}/stripe/resetCode",
   "manage/subscriptions",
   "manage/subscriptions/{subscriptionId}",
   "manage/artists",

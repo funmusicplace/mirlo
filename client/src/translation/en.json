@@ -667,7 +667,21 @@
     "payoutCurrency": "Payout currency: <strong>{{currency}}</strong>",
     "success": "Details saved!",
     "label": "(Label)",
-    "payoutsInfo": "See our documentation for more information <link>on payouts and fees</link>."
+    "payoutsInfo": "See our documentation for more information <payoutsLink>on payouts and fees</payoutsLink>.",
+    "stripeAccountUnreachable": "We couldn't reach your linked Stripe account. If you deleted or disconnected it outside of Mirlo, you can reset and reconnect below.",
+    "resetStripeAccount": "Reset Stripe account",
+    "resetStripeAccountDescription": "This clears the Stripe account stored against your Mirlo account so you can connect a different one. It does not delete the Stripe account itself.",
+    "resetStripeAccountConfirm": "Reset",
+    "stripeAccountReset": "Stripe account reset. You can now set up a new connection.",
+    "stripeAccountResetFailed": "Couldn't reset — check your code and password.",
+    "stripeResetStep1": "We'll email a 6-digit verification code to {{email}}. You'll need it plus your password to finish resetting.",
+    "stripeResetStep2": "Enter the verification code we just emailed to {{email}}, then your password.",
+    "stripeResetSendCode": "Email me a code",
+    "stripeResetCodeSent": "Verification code sent to {{email}}.",
+    "stripeResetCodeFailed": "Couldn't send the verification code. Try again in a moment.",
+    "verificationCodeLabel": "Verification code",
+    "confirmPasswordLabel": "Password",
+    "cancel": "Cancel"
   },
   "manageArtist": {
     "manageArtistNavigation": "Manage artist",
