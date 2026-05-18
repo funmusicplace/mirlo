@@ -135,6 +135,7 @@
     "about": "About",
     "admin": "Admin",
     "manageLabel": "Manage label",
+    "viewLabelPage": "View {{labelName}} page",
     "fulfillment": "Order fulfillment",
     "viewSalesPage": "View sales"
   },

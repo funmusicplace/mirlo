@@ -98,11 +98,26 @@ const Menu = forwardRef<
             </li>
             <CanCreateArtists>
               {isLabelAccount && (
-                <li>
-                  <MenuLink onClick={onClose} to="/profile/label">
-                    {t("manageLabel")}
-                  </MenuLink>
-                </li>
+                <>
+                  <li>
+                    <MenuLink onClick={onClose} to="/account/label">
+                      {t("manageLabel")}
+                    </MenuLink>
+                  </li>
+                  {(() => {
+                    const labelArtist = artists?.find((a) => a.isLabelProfile);
+                    return labelArtist?.urlSlug ? (
+                      <li>
+                        <MenuLink
+                          onClick={onClose}
+                          to={`/${labelArtist.urlSlug}`}
+                        >
+                          {t("viewLabelPage", { labelName: labelArtist.name })}
+                        </MenuLink>
+                      </li>
+                    ) : null;
+                  })()}
+                </>
               )}
               {!isLabelAccount && (
                 <li>
