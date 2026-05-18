@@ -1,19 +1,21 @@
 import express from "express";
 import { initialize } from "express-openapi";
+import slowDown from "express-slow-down";
+import qs from "qs";
 
+import { apiKeyCheck } from "./auth/apiKey";
+import logger from "./logger";
+import rateLimiter from "./rateLimiter";
 import apiDoc from "./routers/v1/api-doc";
 import "./auth/passport";
 
+import routes from "./routes";
 import errorHandler from "./utils/error";
 
-import logger from "./logger";
-import rateLimiter from "./rateLimiter";
-import slowDown from "express-slow-down";
-import routes from "./routes";
-import qs from "qs";
-import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
+
 import crypto from "crypto";
+
 import {
   sanitizeHeadersForLogs,
   sanitizeBodyForLogs,
@@ -33,7 +35,7 @@ apiApp.use((req, res, next) => {
   next();
 });
 
-apiApp.use(corsCheck);
+apiApp.use(apiKeyCheck);
 apiApp.use(cookieParser());
 apiApp.use(express.urlencoded({ extended: true }));
 
