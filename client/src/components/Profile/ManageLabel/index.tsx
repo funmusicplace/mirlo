@@ -145,7 +145,6 @@ const RelationshipsTable: React.FC = () => {
 
   React.useEffect(() => {
     if (relations) {
-      console.log("changed");
       setOrderedRelationships(relations);
     }
   }, [relations]);

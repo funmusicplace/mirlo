@@ -1675,9 +1675,10 @@
     "restoredFromDraft": "Restored from draft"
   },
   "uploadPanel": {
-    "uploadsInProgress_one": "{{count}} track uploading",
-    "uploadsInProgress_other": "{{count}} tracks uploading",
+    "uploadsInProgress_one": "{{count}} upload in progress",
+    "uploadsInProgress_other": "{{count}} uploads in progress",
     "uploadsComplete": "All tracks uploaded",
+    "processingImage": "Processing {{name}}",
     "keepBrowserOpen": "Keep this tab open until uploads finish. You can keep browsing."
   },
   "zipImport": {
@@ -1698,6 +1699,7 @@
     "genre": "Genre",
     "tracksFound": "Tracks found",
     "selectCoverImage": "Select cover image",
+    "albumCover": "Album cover",
     "downloadableContentFound": "Downloadable files found",
     "noAudioFilesFound": "No audio files were found in this ZIP archive.",
     "cancel": "Cancel",

@@ -5,7 +5,6 @@ import { useSaveAlbumFormMutation } from "queries";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-import api from "services/api";
 import { useUpload } from "state/UploadContext";
 
 interface ZipImportPreviewProps {
@@ -36,7 +35,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "zipImport" });
-  const { enqueue } = useUpload();
+  const { enqueue, enqueueImage } = useUpload();
   const saveMutation = useSaveAlbumFormMutation();
 
   const hasInvalidFiles = (preScanResult?.invalidFiles.length ?? 0) > 0;
@@ -70,6 +69,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       if (!result) {
         return;
       }
+
       // Update the track group with album meta data.
       await saveMutation.mutateAsync({
         trackGroupId,
@@ -80,16 +80,17 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
         artistId,
       });
 
-      // Upload cover image using the same pattern as UploadArtistImage
+      // Upload cover image — queued so the progress panel tracks the optimize-image job
       const coverFile = result.imageFiles[coverIndex]?.file;
       if (coverFile) {
-        try {
-          await api.uploadFile(`manage/trackGroups/${trackGroupId}/cover`, [
-            coverFile,
-          ]);
-        } catch (e) {
-          console.error("Error uploading cover image", e);
-        }
+        enqueueImage({
+          name: t("albumCover"),
+          endpoint: `manage/trackGroups/${trackGroupId}/cover`,
+          file: coverFile,
+          thumbnail: URL.createObjectURL(coverFile),
+          resourceKey: `trackGroup-${trackGroupId}`,
+          onComplete: reload,
+        });
       }
 
       // Enqueue audio files using UploadContext — same pattern as BulkTrackUpload
@@ -113,7 +114,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       onClose();
       reload();
     },
-    [trackGroupId, artistId, enqueue, reload, onClose]
+    [trackGroupId, artistId, enqueue, enqueueImage, reload, onClose]
   );
 
   return (
