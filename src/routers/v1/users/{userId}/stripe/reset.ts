@@ -21,9 +21,15 @@ type Params = {
  * "Set up bank account" attempt fail because Stripe rejects calls against the
  * missing account. See #2085.
  *
- * Requires the user's password and email in the body. Emailing is gated by
- * verifying the body's email matches the logged-in user's, so a leaked
- * session can't quietly reset Stripe.
+ * Requires:
+ *   - logged-in user matches the {userId} in the path
+ *   - the user's current password
+ *   - a 6-digit verification code that was just emailed to the user via
+ *     POST /users/{userId}/stripe/resetCode
+ *
+ * The code is the 2FA element — it proves the requester still controls the
+ * inbox associated with the account, not just the password (which could leak
+ * or be reused from another breach).
  */
 export default function () {
   const operations = {
@@ -32,9 +38,9 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
-    const { password, email } = req.body as {
+    const { password, code } = req.body as {
       password?: string;
-      email?: string;
+      code?: string;
     };
     assertLoggedIn(req);
     const loggedInUser = req.user;
@@ -54,6 +60,16 @@ export default function () {
         });
       }
 
+      const normalizedCode =
+        typeof code === "string" ? code.trim().replace(/\s+/g, "") : "";
+      if (!normalizedCode) {
+        throw new AppError({
+          httpCode: HttpCode.BAD_REQUEST,
+          description:
+            "Verification code is required. Request one via /resetCode first.",
+        });
+      }
+
       const user = await prisma.user.findUnique({
         where: { id: Number(userId) },
       });
@@ -61,16 +77,6 @@ export default function () {
         throw new AppError({
           httpCode: HttpCode.NOT_FOUND,
           description: "User not found",
-        });
-      }
-
-      if (
-        typeof email !== "string" ||
-        email.trim().toLowerCase() !== user.email.toLowerCase()
-      ) {
-        throw new AppError({
-          httpCode: HttpCode.UNAUTHORIZED,
-          description: "Email confirmation did not match",
         });
       }
 
@@ -82,8 +88,27 @@ export default function () {
         });
       }
 
+      if (
+        !user.userConfirmationCode ||
+        !user.userConfirmationCodeExpiration ||
+        user.userConfirmationCodeExpiration < new Date() ||
+        user.userConfirmationCode !== normalizedCode
+      ) {
+        throw new AppError({
+          httpCode: HttpCode.UNAUTHORIZED,
+          description: "Invalid or expired verification code",
+        });
+      }
+
       if (!user.stripeAccountId) {
-        // Nothing to clear — treat as a no-op so the UI can stay simple.
+        // Nothing to clear — still consume the code so it can't be reused.
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            userConfirmationCode: null,
+            userConfirmationCodeExpiration: null,
+          },
+        });
         return res.json({ result: { stripeAccountId: null } });
       }
 
@@ -93,7 +118,11 @@ export default function () {
 
       const updated = await prisma.user.update({
         where: { id: user.id },
-        data: { stripeAccountId: null },
+        data: {
+          stripeAccountId: null,
+          userConfirmationCode: null,
+          userConfirmationCodeExpiration: null,
+        },
         select: { stripeAccountId: true },
       });
 
@@ -119,10 +148,14 @@ export default function () {
         required: true,
         schema: {
           type: "object",
-          required: ["password", "email"],
+          required: ["password", "code"],
           properties: {
             password: { type: "string" },
-            email: { type: "string" },
+            code: {
+              type: "string",
+              description:
+                "6-digit verification code emailed via /resetCode endpoint",
+            },
           },
         },
       },

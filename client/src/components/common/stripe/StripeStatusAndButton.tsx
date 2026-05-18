@@ -17,6 +17,10 @@ import Button from "../Button";
 // the user has been deleted/disconnected out-of-band. Without resetting the
 // stale id, every subsequent "Set up bank account" attempt bounces off Stripe
 // with an opaque error. See #2085.
+//
+// Two-step 2FA flow per maintainer feedback on PR #2107:
+//   1. Send a 6-digit code to the user's email (POST /resetCode)
+//   2. User enters code + password to confirm (POST /reset)
 const ResetStripeAccountModal: React.FC<{
   userId: number;
   userEmail: string;
@@ -26,16 +30,35 @@ const ResetStripeAccountModal: React.FC<{
   const snackbar = useSnackbar();
   const [open, setOpen] = React.useState(false);
   const [password, setPassword] = React.useState("");
-  const [email, setEmail] = React.useState("");
+  const [code, setCode] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSendingCode, setIsSendingCode] = React.useState(false);
+  const [codeSent, setCodeSent] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const close = React.useCallback(() => {
     setOpen(false);
     setPassword("");
-    setEmail("");
+    setCode("");
     setError(null);
+    setCodeSent(false);
   }, []);
+
+  const handleSendCode = React.useCallback(async () => {
+    setError(null);
+    setIsSendingCode(true);
+    try {
+      await api.post(`users/${userId}/stripe/resetCode`, {});
+      setCodeSent(true);
+      snackbar(t("stripeResetCodeSent", { email: userEmail }), {
+        type: "success",
+      });
+    } catch (err) {
+      setError(t("stripeResetCodeFailed"));
+    } finally {
+      setIsSendingCode(false);
+    }
+  }, [userId, userEmail, snackbar, t]);
 
   const handleSubmit = React.useCallback(
     async (e: React.FormEvent) => {
@@ -43,7 +66,7 @@ const ResetStripeAccountModal: React.FC<{
       setError(null);
       setIsSubmitting(true);
       try {
-        await api.post(`users/${userId}/stripe/reset`, { password, email });
+        await api.post(`users/${userId}/stripe/reset`, { password, code });
         snackbar(t("stripeAccountReset"), { type: "success" });
         onReset();
         close();
@@ -53,7 +76,7 @@ const ResetStripeAccountModal: React.FC<{
         setIsSubmitting(false);
       }
     },
-    [userId, password, email, snackbar, t, onReset, close]
+    [userId, password, code, snackbar, t, onReset, close]
   );
 
   return (
@@ -73,58 +96,95 @@ const ResetStripeAccountModal: React.FC<{
         title={t("resetStripeAccount") ?? "Reset Stripe account"}
       >
         <p className="mb-4">{t("resetStripeAccountDescription")}</p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <FormComponent>
-            <label htmlFor="reset-stripe-email">
-              {t("confirmEmailLabel", { email: userEmail })}
-            </label>
-            <InputEl
-              id="reset-stripe-email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(ev) => setEmail(ev.target.value)}
-              required
-            />
-          </FormComponent>
-          <FormComponent>
-            <label htmlFor="reset-stripe-password">
-              {t("confirmPasswordLabel")}
-            </label>
-            <InputEl
-              id="reset-stripe-password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(ev) => setPassword(ev.target.value)}
-              required
-            />
-          </FormComponent>
-          {error && (
-            <p className="text-sm text-(--mi-red-700)" role="alert">
-              {error}
+        {!codeSent ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm">
+              {t("stripeResetStep1", { email: userEmail })}
             </p>
-          )}
-          <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="dashed"
-              size="compact"
-              onClick={close}
-              disabled={isSubmitting}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              size="compact"
-              disabled={isSubmitting || !email || !password}
-              isLoading={isSubmitting}
-            >
-              {t("resetStripeAccountConfirm")}
-            </Button>
+            {error && (
+              <p className="text-sm text-(--mi-red-700)" role="alert">
+                {error}
+              </p>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="dashed"
+                size="compact"
+                onClick={close}
+                disabled={isSendingCode}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="button"
+                size="compact"
+                onClick={handleSendCode}
+                disabled={isSendingCode}
+                isLoading={isSendingCode}
+              >
+                {t("stripeResetSendCode")}
+              </Button>
+            </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <p className="text-sm">
+              {t("stripeResetStep2", { email: userEmail })}
+            </p>
+            <FormComponent>
+              <label htmlFor="reset-stripe-code">
+                {t("verificationCodeLabel")}
+              </label>
+              <InputEl
+                id="reset-stripe-code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(ev) => setCode(ev.target.value)}
+                required
+              />
+            </FormComponent>
+            <FormComponent>
+              <label htmlFor="reset-stripe-password">
+                {t("confirmPasswordLabel")}
+              </label>
+              <InputEl
+                id="reset-stripe-password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(ev) => setPassword(ev.target.value)}
+                required
+              />
+            </FormComponent>
+            {error && (
+              <p className="text-sm text-(--mi-red-700)" role="alert">
+                {error}
+              </p>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="dashed"
+                size="compact"
+                onClick={close}
+                disabled={isSubmitting}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                size="compact"
+                disabled={isSubmitting || !code || !password}
+                isLoading={isSubmitting}
+              >
+                {t("resetStripeAccountConfirm")}
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
     </>
   );
