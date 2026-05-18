@@ -667,7 +667,7 @@
     "payoutCurrency": "Payout currency: <strong>{{currency}}</strong>",
     "success": "Details saved!",
     "label": "(Label)",
-    "payoutsInfo": "See our documentation for more information <link>on payouts and fees</link>.",
+    "payoutsInfo": "See our documentation for more information <payoutsLink>on payouts and fees</payoutsLink>.",
     "stripeAccountUnreachable": "We couldn't reach your linked Stripe account. If you deleted or disconnected it outside of Mirlo, you can reset and reconnect below.",
     "resetStripeAccount": "Reset Stripe account",
     "resetStripeAccountDescription": "This clears the Stripe account stored against your Mirlo account so you can connect a different one. It does not delete the Stripe account itself.",
