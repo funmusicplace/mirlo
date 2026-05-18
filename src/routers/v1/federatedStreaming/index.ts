@@ -2,7 +2,6 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import { turnItemsIntoRSS } from "../../../utils/rss";
 import { serializeSingleArtistIntoCanimus } from "../../../utils/serialize/artist";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
@@ -12,50 +11,38 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { format } = req.query;
-
-    const {
-      skip: skipQuery,
-      take = format === "rss" ? 50 : 10,
-      name,
-      orderBy,
-      isLabel,
-      locationSlug,
-      includeUnpublished,
-    } = req.query;
+    const { skip: skipQuery, take, fromDate } = req.query;
 
     try {
+      let fromDateFilter;
+      if (fromDate) {
+        fromDateFilter = { gte: new Date(fromDate as string) };
+      } else {
+        fromDateFilter = undefined;
+      }
+
       let where: Prisma.ArtistWhereInput = {
         federatedStreaming: true,
       };
 
-      if (name && typeof name === "string") {
-        where.name = { contains: name, mode: "insensitive" };
-      }
-
-      if (locationSlug && typeof locationSlug === "string") {
-        where.artistLocationTags = {
-          some: {
-            locationTag: {
-              slug: { endsWith: locationSlug },
-            },
+      if (fromDateFilter) {
+        where.OR = [
+          {
+            createdAt: fromDateFilter,
           },
-        };
+          {
+            updatedAt: fromDateFilter,
+          },
+        ];
       }
 
       const count = await prisma.artist.count({
         where,
       });
 
-      const orderByClause: Prisma.ArtistOrderByWithRelationInput = {};
-
-      if (orderBy && typeof orderBy === "string") {
-        if (orderBy === "name") {
-          orderByClause.name = "asc";
-        } else if (orderBy === "createdAt") {
-          orderByClause.createdAt = "desc";
-        }
-      }
+      const orderByClause: Prisma.ArtistOrderByWithRelationInput = {
+        createdAt: "desc",
+      };
 
       const artists = await prisma.artist.findMany({
         where,
@@ -76,60 +63,16 @@ export default function () {
               deletedAt: null,
             },
           },
-          background: {
-            where: {
-              deletedAt: null,
-            },
-          },
-          artistLocationTags: {
-            include: {
-              locationTag: true,
-            },
-          },
-          user: {
-            select: {
-              currency: true,
-            },
-          },
-          artistLabels: {
-            include: {
-              artist: {
-                include: {
-                  trackGroups: {
-                    where: whereForPublishedTrackGroups(),
-                    include: {
-                      cover: true,
-                    },
-                    take: 4,
-                    orderBy: { orderIndex: "asc" },
-                  },
-                },
-              },
-            },
-          },
         },
       });
-      if (format === "rss") {
-        const feed = await turnItemsIntoRSS(
-          {
-            name: "All Mirlo Artists",
-            apiEndpoint: "artists",
-            clientUrl: "/artists",
-          },
-          artists
-        );
-        res.set("Content-Type", "application/rss+xml");
-        res.send(feed.xml());
-      } else {
-        res.json({
-          type: "root",
-          url: "https://mirlo.space",
-          children: artists.map((artist) =>
-            serializeSingleArtistIntoCanimus(artist)
-          ),
-          total: count,
-        });
-      }
+      res.json({
+        type: "root",
+        url: "https://mirlo.space",
+        children: artists.map((artist) =>
+          serializeSingleArtistIntoCanimus(artist)
+        ),
+        total: count,
+      });
     } catch (e) {
       next(e);
     }
