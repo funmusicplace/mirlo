@@ -120,27 +120,32 @@ const AccountSettings: React.FC = () => {
           `}
         >
           <FormComponent>
-            <label>{t("email")}</label>
+            <label htmlFor="input-newEmail">{t("email")}</label>
             <InputEl
-              id="account-email"
+              id="input-newEmail"
               type="email"
               {...register("newEmail")}
             />
           </FormComponent>
           {newEmail !== user.email && (
             <FormComponent>
-              <label>{t("password")}</label>
-              <InputEl {...register("password")} required type="password" />
+              <label htmlFor="input-password">{t("password")}</label>
+              <InputEl
+                id="input-password"
+                {...register("password")}
+                required
+                type="password"
+              />
             </FormComponent>
           )}
           <FormComponent>
-            <label>{t("name")}</label>
-            <InputEl {...register("name")} />
+            <label htmlFor="input-name">{t("name")}</label>
+            <InputEl id="input-name" {...register("name")} />
           </FormComponent>
 
           <FormComponent>
-            <label>{t("language")}</label>
-            <SelectEl {...register("language")}>
+            <label htmlFor="input-language">{t("language")}</label>
+            <SelectEl id="input-language" {...register("language")}>
               {finishedLanguages.map((lang) => (
                 <option key={lang.short} value={lang.short}>
                   {lang.name}
@@ -175,7 +180,7 @@ const AccountSettings: React.FC = () => {
               {userLabel?.urlSlug && (
                 <>
                   <ButtonLink
-                    to={`/profile/label`}
+                    to={`/account/label`}
                     endIcon={<FaChevronRight />}
                     variant="link"
                   >
@@ -193,8 +198,13 @@ const AccountSettings: React.FC = () => {
             </div>
           )}
           <FormComponent>
-            <label htmlFor="accountingEmail">{t("accountingEmail")}</label>
-            <InputEl id="accountingEmail" {...register("accountingEmail")} />
+            <label htmlFor="input-accountingEmail">
+              {t("accountingEmail")}
+            </label>
+            <InputEl
+              id="input-accountingEmail"
+              {...register("accountingEmail")}
+            />
           </FormComponent>
           <FormComponent
             className={css`
