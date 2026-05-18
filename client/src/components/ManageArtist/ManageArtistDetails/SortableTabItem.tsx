@@ -69,12 +69,7 @@ const SortableTabItem: React.FC<{ tabId: TabId }> = ({ tabId }) => {
         `}
         aria-label={t("reorderTab", { tab: t(labelKey) })}
       />
-      <FormComponent
-        className={css`
-          flex: 1;
-          margin: 0;
-        `}
-      >
+      <FormComponent className="flex-1 max-md:m-0!">
         <label htmlFor={inputId}>{t(labelKey)}</label>
         <InputEl
           id={inputId}

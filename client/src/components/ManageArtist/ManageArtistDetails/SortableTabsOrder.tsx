@@ -10,7 +10,6 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { css } from "@emotion/css";
 import { produce } from "immer";
 import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -84,23 +83,10 @@ export const SortableTabsOrder: React.FC = () => {
   );
 
   return (
-    <div
-      className={css`
-        width: 100%;
-      `}
-    >
+    <div className="w-full">
       <h2>{t("customTabTitles")}</h2>
       <p>{t("customTabTitlesDescription")}</p>
-      <ul
-        className={css`
-          display: flex;
-          flex-direction: row;
-          gap: 0.5rem;
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        `}
-      >
+      <ul className="flex flex-col md:flex-row gap-0.5 md:gap-2 list-none p-0 m-0">
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
           <SortableContext items={visibleTabs}>
             {visibleTabs.map((tabId) => (
