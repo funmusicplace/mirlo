@@ -1,5 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
 import {
@@ -12,9 +14,11 @@ import {
 } from "queries/queryKeys";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { getManageReleaseUrl } from "utils/artist";
 
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 
@@ -34,11 +38,20 @@ const parseDollarsToCents = (raw: string): number | null => {
 const PriceRow: React.FC<{
   itemId: number | string;
   title?: string | null;
-  subtitle?: string | null;
+  imageSrc?: string;
+  subtitle?: React.ReactNode;
   initialMinPriceCents: number | null;
   currency: string;
   onSave: (nextCents: number) => Promise<void>;
-}> = ({ itemId, title, subtitle, initialMinPriceCents, currency, onSave }) => {
+}> = ({
+  itemId,
+  title,
+  imageSrc,
+  subtitle,
+  initialMinPriceCents,
+  currency,
+  onSave,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const [value, setValue] = React.useState(
     centsToDollarString(initialMinPriceCents)
@@ -60,40 +73,54 @@ const PriceRow: React.FC<{
     }
   }, [initialString]);
 
-  const commit = React.useCallback(async () => {
-    const cents = parseDollarsToCents(value);
-    if (cents === null) {
-      setError(t("priceMustBeZeroOrMore") ?? "Price must be zero or more");
-      return;
-    }
-    if (cents === (initialMinPriceCents ?? 0)) return;
-
-    setError(null);
-    setIsSaving(true);
-    try {
-      await onSave(cents);
-    } catch (e) {
-      setError(t("priceSaveFailed") ?? "Couldn't save price, try again");
-    } finally {
-      setIsSaving(false);
-    }
-  }, [value, initialMinPriceCents, onSave, t]);
-
   const inputId = `bulk-price-${itemId}`;
+  const currencyHintId = `${inputId}-currency`;
+  const errorId = `${inputId}-error`;
+  const isDirty = value.trim() !== initialString.trim();
+
+  const commit = React.useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
+      const cents = parseDollarsToCents(value);
+      if (cents === null) {
+        setError(t("priceMustBeZeroOrMore") ?? "Price must be zero or more");
+        return;
+      }
+      if (cents === (initialMinPriceCents ?? 0)) return;
+
+      setError(null);
+      setIsSaving(true);
+      try {
+        await onSave(cents);
+      } catch (err) {
+        setError(t("priceSaveFailed") ?? "Couldn't save price, try again");
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [value, initialMinPriceCents, onSave, t]
+  );
+
   return (
-    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 py-3 px-3 border-b border-(--mi-darken-x-background-color)">
-      <div className="flex-1 min-w-0">
-        <label htmlFor={inputId} className="font-semibold block truncate">
-          {title || t("untitled")}
-        </label>
-        {subtitle && (
-          <p className="text-xs text-(--mi-light-foreground-color) truncate">
-            {subtitle}
-          </p>
-        )}
+    <li className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 py-3 px-3 border-b border-(--mi-darken-x-background-color) list-none">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <ImageWithPlaceholder src={imageSrc} alt="" size={60} square />
+        <div className="min-w-0">
+          <label htmlFor={inputId} className="font-semibold block truncate">
+            {title || t("untitled")}
+          </label>
+          {subtitle && (
+            <p className="text-xs text-(--mi-light-foreground-color) truncate">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <span aria-hidden className="text-(--mi-light-foreground-color)">
+      <form
+        className="flex items-center gap-2 flex-wrap"
+        onSubmit={commit}
+      >
+        <span id={currencyHintId} className="text-(--mi-light-foreground-color)">
           {getCurrencySymbol(currency)}
         </span>
         <InputEl
@@ -103,28 +130,33 @@ const PriceRow: React.FC<{
           step="0.01"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onBlur={commit}
           className="w-[7rem]!"
           disabled={isSaving}
-          aria-describedby={error ? `${inputId}-error` : undefined}
+          aria-describedby={
+            error ? `${currencyHintId} ${errorId}` : currencyHintId
+          }
           aria-invalid={!!error}
         />
-        {isSaving && (
-          <span className="text-xs text-(--mi-light-foreground-color)">
-            {t("saving")}
-          </span>
-        )}
+        <ArtistButton
+          type="submit"
+          variant="outlined"
+          size="compact"
+          isLoading={isSaving}
+          disabled={isSaving || !isDirty}
+        >
+          {t("save")}
+        </ArtistButton>
         {error && (
           <span
-            id={`${inputId}-error`}
+            id={errorId}
             className="text-xs text-(--mi-red-700)"
             role="alert"
           >
             {error}
           </span>
         )}
-      </div>
-    </div>
+      </form>
+    </li>
   );
 };
 
@@ -133,6 +165,7 @@ const ManageArtistPricing: React.FC = () => {
   const { artistId } = useParams();
   const snackbar = useSnackbar();
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
 
   const { data: trackGroupsData, isLoading: isLoadingReleases } = useQuery(
     queryManagedArtistTrackGroups({ artistId: Number(artistId) })
@@ -181,19 +214,44 @@ const ManageArtistPricing: React.FC = () => {
             {t("noReleasesYet")}
           </p>
         ) : (
-          <div className="border border-(--mi-darken-x-background-color) rounded">
-            {releases.map((release) => (
-              <PriceRow
-                key={release.id}
-                itemId={release.id}
-                title={release.title}
-                subtitle={release.urlSlug}
-                initialMinPriceCents={release.minPrice ?? null}
-                currency={release.currency ?? "usd"}
-                onSave={(cents) => handleSaveTrackGroup(release.id, cents)}
-              />
-            ))}
-          </div>
+          <ul className="border border-(--mi-darken-x-background-color) rounded list-none p-0 m-0">
+            {releases.map((release) => {
+              const receivesPayment =
+                (release.paymentToUserId ?? release.artist?.userId) === user?.id;
+              const recipientName =
+                !receivesPayment && release.paymentToUser?.name
+                  ? release.paymentToUser.name
+                  : null;
+              const subtitleText = receivesPayment
+                ? t("youReceivePayments")
+                : recipientName
+                  ? t("namedReceivesPayments", { name: recipientName })
+                  : t("anotherAccountReceivesPayments");
+              const subtitle = release.artist ? (
+                <Link
+                  to={getManageReleaseUrl(release.artist, release)}
+                  className="underline"
+                >
+                  {subtitleText}
+                </Link>
+              ) : (
+                subtitleText
+              );
+
+              return (
+                <PriceRow
+                  key={release.id}
+                  itemId={release.id}
+                  title={release.title}
+                  imageSrc={release.cover?.sizes?.[60]}
+                  subtitle={subtitle}
+                  initialMinPriceCents={release.minPrice ?? null}
+                  currency={release.currency ?? "usd"}
+                  onSave={(cents) => handleSaveTrackGroup(release.id, cents)}
+                />
+              );
+            })}
+          </ul>
         )}
       </section>
 
@@ -206,19 +264,24 @@ const ManageArtistPricing: React.FC = () => {
             {t("noMerchYet")}
           </p>
         ) : (
-          <div className="border border-(--mi-darken-x-background-color) rounded">
+          <ul className="border border-(--mi-darken-x-background-color) rounded list-none p-0 m-0">
             {merch.map((item) => (
               <PriceRow
                 key={item.id}
                 itemId={item.id}
                 title={item.title}
-                subtitle={item.urlSlug}
+                imageSrc={item.images?.[0]?.sizes?.[60]}
+                subtitle={
+                  item.includePurchaseTrackGroupId
+                    ? t("includesDigitalDownload")
+                    : undefined
+                }
                 initialMinPriceCents={item.minPrice ?? null}
                 currency={item.currency ?? "usd"}
                 onSave={(cents) => handleSaveMerch(item.id, cents)}
               />
             ))}
-          </div>
+          </ul>
         )}
       </section>
     </ManageSectionWrapper>

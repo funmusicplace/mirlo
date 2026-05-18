@@ -10,7 +10,7 @@ import {
 } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaTag } from "react-icons/fa";
+import { FaTags } from "react-icons/fa";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
@@ -165,7 +165,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         <ArtistButtonLink
           to={`/manage/artists/${artistId}/pricing`}
           size="compact"
-          startIcon={<FaTag />}
+          startIcon={<FaTags />}
           variant="dashed"
           collapsible
         >

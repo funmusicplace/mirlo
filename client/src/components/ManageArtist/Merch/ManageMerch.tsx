@@ -8,7 +8,7 @@ import SectionActionStrip from "components/common/SectionActionStrip";
 import { queryManagedArtist, queryManagedArtistMerch } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaEye, FaPen } from "react-icons/fa";
+import { FaEye, FaPen, FaTags } from "react-icons/fa";
 import { ImWarning } from "react-icons/im";
 import { useParams } from "react-router-dom";
 import { getMerchUrl } from "utils/artist";
@@ -22,6 +22,9 @@ import { NewMerchButton } from "./NewMerchButton";
 const ManageMerch: React.FC<{}> = () => {
   const { artistId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
+  const { t: tArtist } = useTranslation("translation", {
+    keyPrefix: "manageArtist",
+  });
 
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryManagedArtist(Number(artistId))
@@ -41,6 +44,15 @@ const ManageMerch: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <SectionActionStrip>
+        <ArtistButtonLink
+          to={`/manage/artists/${artistId}/pricing`}
+          size="compact"
+          startIcon={<FaTags />}
+          variant="dashed"
+          collapsible
+        >
+          {tArtist("bulkPricing")}
+        </ArtistButtonLink>
         <NewMerchButton artist={artist} />
       </SectionActionStrip>
       <DashedList>
