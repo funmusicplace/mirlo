@@ -7,6 +7,7 @@ import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
+import { federation } from "../../src/activityPub/federation";
 import { parseMentionsFromContent } from "../../src/activityPub/utils";
 import sendPostToActivityPubFollowers from "../../src/jobs/send-post-to-activitypub-followers";
 import { clearTables, createArtist, createPost, createUser } from "../utils";
@@ -243,12 +244,30 @@ describe("send-post-to-activitypub-followers", () => {
       data: {
         artistId: artist.id,
         actor: "https://error.example/users/follower",
+        inboxUrl: "https://error.example/users/follower/inbox",
       },
     });
 
-    // fetchStub already rejects by default — fedify delivery will fail
+    // Stub sendActivity on the context directly so Fedify's retry machinery
+    // never runs. fetchStub already rejects the inbox POST, but going through
+    // InProcessMessageQueue would accumulate pending retries across tests and
+    // push this (the last test in the suite) past Mocha's 2000ms limit.
+    const origCreateContext = federation.createContext.bind(federation);
+    const createContextStub = sinon
+      .stub(federation as any, "createContext")
+      .callsFake(async (...args: any[]) => {
+        const ctx = await (origCreateContext as any)(...args);
+        sinon
+          .stub(ctx as any, "sendActivity")
+          .rejects(new Error("delivery failed"));
+        return ctx;
+      });
 
-    await sendPostToActivityPubFollowers();
+    try {
+      await sendPostToActivityPubFollowers();
+    } finally {
+      createContextStub.restore();
+    }
 
     const updatedNotif = await prisma.notification.findUnique({
       where: { id: notification.id },
@@ -448,12 +467,27 @@ describe("send-post-to-activitypub-followers", () => {
         data: {
           artistId: artist.id,
           actor: "https://other.example/users/follower",
+          inboxUrl: "https://other.example/users/follower/inbox",
         },
       });
 
-      // fetchStub rejects by default — mention actor fetch will fail
+      // Stub sendActivity directly — same reason as the follower error test above.
+      const origCreateContext = federation.createContext.bind(federation);
+      const createContextStub = sinon
+        .stub(federation as any, "createContext")
+        .callsFake(async (...args: any[]) => {
+          const ctx = await (origCreateContext as any)(...args);
+          sinon
+            .stub(ctx as any, "sendActivity")
+            .rejects(new Error("delivery failed"));
+          return ctx;
+        });
 
-      await sendPostToActivityPubFollowers();
+      try {
+        await sendPostToActivityPubFollowers();
+      } finally {
+        createContextStub.restore();
+      }
 
       const updatedNotif = await prisma.notification.findUnique({
         where: { id: notification.id },
