@@ -399,7 +399,7 @@ export const CustomizeLook: React.FC = () => {
                     }}
                   />
                   <small id="hint-enable-activity-pub">
-                    {t("makeSearchable")}
+                    {t("makeStreamable")}
                   </small>
                 </FormComponent>
               </FeatureFlag>
