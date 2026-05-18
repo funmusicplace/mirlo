@@ -12,6 +12,8 @@ export const artists: Prisma.ArtistCreateInput[] = [
       {
         name: "Official Website",
         url: "https://blackbird.example.com",
+        linkLabel: "Official Website",
+        linkType: "Website",
       },
     ],
   },
