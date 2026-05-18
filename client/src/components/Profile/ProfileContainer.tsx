@@ -46,8 +46,8 @@ const ProfileContainer: React.FC = () => {
               `}
             >
               <li>
-                <NavLink end to="/profile">
-                  {t("profile")}
+                <NavLink end to="/profile/followed">
+                  {t("followedArtists")}
                 </NavLink>
               </li>
               <li>
