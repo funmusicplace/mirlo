@@ -1,12 +1,12 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
+import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import {
   finalAudioBucket,
   getBufferBasedOnStat,
   statFile,
 } from "../../../../../utils/minio";
-import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
 
 export const fetchFile = async (

@@ -1,16 +1,15 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
   userAuthenticated,
   userLoggedInWithoutRedirect,
 } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-
-import { createCheckoutSessionForSubscription } from "../../../../utils/stripe/sessions";
-import { deleteStripeSubscriptions } from "../../../../utils/artist";
 import logger from "../../../../logger";
+import { deleteStripeSubscriptions } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { createCheckoutSessionForSubscription } from "../../../../utils/stripe/sessions";
 
 type Params = {
   id: string;
@@ -177,6 +176,19 @@ export default function () {
     const loggedInUser = req.user;
 
     try {
+      const subscription = await prisma.artistUserSubscription.findFirst({
+        where: {
+          artistSubscriptionTier: { artistId: Number(artistId) },
+          userId: loggedInUser.id,
+        },
+      });
+      if (!subscription) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Subscription not found",
+        });
+      }
+
       await deleteStripeSubscriptions({
         artistSubscriptionTier: { artistId: Number(artistId) },
         userId: loggedInUser.id,
@@ -185,11 +197,11 @@ export default function () {
       await prisma.artistUserSubscription.update({
         where: {
           userId_artistSubscriptionTierId: {
-            artistSubscriptionTierId: Number(artistId),
+            artistSubscriptionTierId: subscription.artistSubscriptionTierId,
             userId: loggedInUser.id,
           },
         },
-        data: { deleteReason: "USER_CANCELLED" },
+        data: { deleteReason: "USER_CANCELLED", stripeSubscriptionKey: null },
       });
 
       await prisma.artistUserSubscription.deleteMany({
