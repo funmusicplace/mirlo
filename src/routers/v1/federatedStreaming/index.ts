@@ -122,7 +122,9 @@ export default function () {
         res.send(feed.xml());
       } else {
         res.json({
-          results: artists.map((artist) =>
+          type: "root",
+          url: "https://mirlo.space",
+          children: artists.map((artist) =>
             serializeSingleArtistIntoCanimus(artist)
           ),
           total: count,
