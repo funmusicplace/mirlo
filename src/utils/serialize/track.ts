@@ -14,8 +14,6 @@ import { isTrackPlayableNested } from "../trackPlayability";
 
 import { processSingleTrackGroup } from "./trackGroup";
 
-const path = require("path");
-
 export const processSingleTrack = (
   track: Track & {
     trackGroup?: TrackGroup & {
@@ -47,8 +45,15 @@ export const serializeSingleTrackIntoCanimus = (
   track: Track,
   releaseUrl: string
 ) => {
-  const trackUrl = join(releaseUrl, "tracks", String(track.id));
+  const trackId = String(track.id);
+  const trackUrl = join(releaseUrl, "tracks", trackId);
   const metadata: any = track.metadata;
+  const mediaUrl = join(
+    String(process.env.API_DOMAIN),
+    "v1/tracks",
+    trackId,
+    "stream/authzd/playlist.m3u8"
+  );
   return {
     type: "track",
     name: track.title,
@@ -56,7 +61,7 @@ export const serializeSingleTrackIntoCanimus = (
     duration: metadata.format.duration,
     media: [
       {
-        src: `${process.env.API_DOMAIN}/v1/tracks/${track.id}/stream/playlist.m3u8`,
+        src: mediaUrl,
         type: "audio/x-mpegurl",
       },
     ],
