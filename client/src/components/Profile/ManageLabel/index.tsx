@@ -14,25 +14,25 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useQuery } from "@tanstack/react-query";
+import Button, { ButtonLink } from "components/common/Button";
+import StripeStatus from "components/common/stripe/StripeStatusAndButton";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
+import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import { queryLabelArtists, queryManagedArtists } from "queries";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { AiOutlineDrag } from "react-icons/ai";
+import { FaChevronRight, FaEdit } from "react-icons/fa";
 import { MdCheckBox } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { getArtistManageUrl, getArtistUrl } from "utils/artist";
-import AddArtistToRoster from "./AddArtistToRoster";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import Button, { ButtonLink } from "components/common/Button";
-import { FaChevronRight, FaEdit } from "react-icons/fa";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { css } from "@emotion/css";
+import { getArtistManageUrl, getArtistUrl } from "utils/artist";
+
 import { ProfileSection } from "..";
-import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
-import StripeStatus from "components/common/stripe/StripeStatusAndButton";
+
+import AddArtistToRoster from "./AddArtistToRoster";
 
 type Relationship = {
   artist: {
@@ -96,13 +96,12 @@ const SortableRelationshipRow: React.FC<{
 };
 
 const RelationshipsTable: React.FC = () => {
-  const { data: { results: relationships } = { results: [] }, refetch } =
-    useQuery(queryLabelArtists());
+  const { data, refetch } = useQuery(queryLabelArtists());
+  const relations = React.useMemo(() => data?.results ?? [], [data?.results]);
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "label" });
-  const [orderedRelationships, setOrderedRelationships] = React.useState<
-    Relationship[]
-  >(relationships);
+  const [orderedRelationships, setOrderedRelationships] =
+    React.useState<Relationship[]>(relations);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -145,10 +144,11 @@ const RelationshipsTable: React.FC = () => {
   };
 
   React.useEffect(() => {
-    if (relationships) {
-      setOrderedRelationships(relationships);
+    if (relations) {
+      console.log("changed");
+      setOrderedRelationships(relations);
     }
-  }, [relationships]);
+  }, [relations]);
 
   return (
     <>
@@ -182,96 +182,100 @@ const RelationshipsTable: React.FC = () => {
                     key={relationship.artist.id}
                     relationship={relationship}
                   >
-                <div className="flex items-center gap-3 flex-1">
-                  <img
-                    src={relationship.artist.avatar?.sizes?.[120]}
-                    className="w-10 h-10 object-cover flex-shrink-0 rounded"
-                  />
-                  <div className="flex-1">
-                    <p className="font-semibold">{relationship.artist.name}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 flex-3">
-                  <div className="flex flex-col gap-1 justify-center">
-                    <label className="md:sr-only text-sm opacity-70">
-                      {t("manage")}
-                    </label>
-                    {relationship.canLabelManageArtist ? (
-                      <Link to={getArtistManageUrl(relationship.artist.id)}>
-                        {t("manage")}
-                      </Link>
-                    ) : (
-                      <span>{t("askArtist")}</span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-1 justify-center">
-                    <label
-                      id="canLabelAddReleases"
-                      className="md:sr-only text-sm opacity-70"
-                    >
-                      {t("canLabelAddReleases")}
-                    </label>
-                    <div aria-labelledby="canLabelAddReleases">
-                      {relationship.canLabelAddReleases ? <MdCheckBox /> : null}
+                    <div className="flex items-center gap-3 flex-1">
+                      <img
+                        src={relationship.artist.avatar?.sizes?.[120]}
+                        className="w-10 h-10 object-cover flex-shrink-0 rounded"
+                      />
+                      <div className="flex-1">
+                        <p className="font-semibold">
+                          {relationship.artist.name}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex flex-col gap-1 justify-center">
-                    <label
-                      id="isArtistConfirmed"
-                      className="md:sr-only text-sm opacity-70"
-                    >
-                      {t("isArtistConfirmed")}
-                    </label>
-                    <div aria-labelledby="isArtistConfirmed">
-                      {relationship.isArtistApproved ? (
-                        <MdCheckBox />
-                      ) : (
-                        <span className="text-sm">{t("askArtist")}</span>
-                      )}
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 flex-3">
+                      <div className="flex flex-col gap-1 justify-center">
+                        <label className="md:sr-only text-sm opacity-70">
+                          {t("manage")}
+                        </label>
+                        {relationship.canLabelManageArtist ? (
+                          <Link to={getArtistManageUrl(relationship.artist.id)}>
+                            {t("manage")}
+                          </Link>
+                        ) : (
+                          <span>{t("askArtist")}</span>
+                        )}
+                      </div>
 
-                  <div className="flex flex-col gap-1 justify-center">
-                    <label
-                      id="isLabelConfirmed"
-                      className="md:sr-only text-sm opacity-70"
-                    >
-                      {t("isLabelConfirmed")}
-                    </label>
-                    <Toggle
-                      id="isLabelConfirmed"
-                      labelId="isLabelConfirmed"
-                      toggled={relationship.isLabelApproved}
-                      onClick={() => {
-                        handleConfirm(
-                          relationship.artistId,
-                          !relationship.isLabelApproved
-                        );
-                      }}
-                      labelClassName="text-sm"
-                      label={t("showOnPage")}
-                    />
-                  </div>
+                      <div className="flex flex-col gap-1 justify-center">
+                        <label
+                          id="canLabelAddReleases"
+                          className="md:sr-only text-sm opacity-70"
+                        >
+                          {t("canLabelAddReleases")}
+                        </label>
+                        <div aria-labelledby="canLabelAddReleases">
+                          {relationship.canLabelAddReleases ? (
+                            <MdCheckBox />
+                          ) : null}
+                        </div>
+                      </div>
 
-                  <div
-                    className="col-span-2 items-end md:items-center justify-end 
+                      <div className="flex flex-col gap-1 justify-center">
+                        <label
+                          id="isArtistConfirmed"
+                          className="md:sr-only text-sm opacity-70"
+                        >
+                          {t("isArtistConfirmed")}
+                        </label>
+                        <div aria-labelledby="isArtistConfirmed">
+                          {relationship.isArtistApproved ? (
+                            <MdCheckBox />
+                          ) : (
+                            <span className="text-sm">{t("askArtist")}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1 justify-center">
+                        <label
+                          id="isLabelConfirmed"
+                          className="md:sr-only text-sm opacity-70"
+                        >
+                          {t("isLabelConfirmed")}
+                        </label>
+                        <Toggle
+                          id="isLabelConfirmed"
+                          labelId="isLabelConfirmed"
+                          toggled={relationship.isLabelApproved}
+                          onClick={() => {
+                            handleConfirm(
+                              relationship.artistId,
+                              !relationship.isLabelApproved
+                            );
+                          }}
+                          labelClassName="text-sm"
+                          label={t("showOnPage")}
+                        />
+                      </div>
+
+                      <div
+                        className="col-span-2 items-end md:items-center justify-end 
                  flex flex-col md:flex-row gap-2"
-                  >
-                    {relationship.canLabelManageArtist && (
-                      <NewAlbumButton artist={relationship.artist} />
-                    )}
-                    <ButtonLink
-                      size="compact"
-                      variant="link"
-                      to={getArtistUrl(relationship.artist)}
-                    >
-                      {t("viewPage")}
-                    </ButtonLink>
-                  </div>
-                </div>
+                      >
+                        {relationship.canLabelManageArtist && (
+                          <NewAlbumButton artist={relationship.artist} />
+                        )}
+                        <ButtonLink
+                          size="compact"
+                          variant="link"
+                          to={getArtistUrl(relationship.artist)}
+                        >
+                          {t("viewPage")}
+                        </ButtonLink>
+                      </div>
+                    </div>
                   </SortableRelationshipRow>
                 ))}
               </SortableContext>

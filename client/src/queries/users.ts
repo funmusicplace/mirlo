@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+
 import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_ARTISTS,
@@ -49,7 +50,7 @@ export function queryManagedArtist(artistId: number) {
   return queryOptions({
     queryKey: ["fetchManagedArtist", { artistId }, QUERY_KEY_ARTISTS],
     queryFn: fetchManagedArtist,
-    enabled: isFinite(artistId),
+    enabled: isFinite(artistId) && artistId > 0,
   });
 }
 
@@ -87,6 +88,7 @@ export function queryManagedMerch(merchId: string) {
   return queryOptions({
     queryKey: ["fetchManagedMerch", { merchId }, QUERY_KEY_MERCH],
     queryFn: fetchManagedMerch,
+    enabled: !!merchId,
   });
 }
 
