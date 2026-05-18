@@ -72,15 +72,20 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       }
 
       // Update the track group with album meta data.
-      await saveMutation.mutateAsync({
-        trackGroupId,
-        formData: {
-          title: albumMeta.title ?? "",
-          releaseDate: albumMeta.releaseDate ?? undefined,
-          about: albumMeta.description ?? undefined,
-        },
-        artistId,
-      });
+      const meta = result.albumMeta;
+      try {
+        await saveMutation.mutateAsync({
+          trackGroupId,
+          formData: {
+            title: meta.title ?? "",
+            releaseDate: meta.releaseDate ?? undefined,
+            about: meta.description ?? undefined,
+          },
+          artistId,
+        });
+      } catch (e) {
+        console.error("Error saving album metadata", e);
+      }
 
       // Upload cover image — queued so the progress panel tracks the optimize-image job
       const coverFile = result.imageFiles[coverIndex]?.file;

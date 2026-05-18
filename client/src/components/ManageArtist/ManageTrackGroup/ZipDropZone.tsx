@@ -155,7 +155,7 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
   }, []);
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       <h2>{t("importFromZip")}</h2>
       <p>{t("importAlbumContent")}</p>
       <DropZoneContainer
@@ -209,6 +209,7 @@ export const ZipDropZone: React.FC<ZipDropZoneProps> = ({
         onInvalidFilesActionChange={setInvalidFilesAction}
         onClose={handleClose}
       />
-    </>
+      <p className="text-sm opacity-75">{t("zipUploadDescription")}</p>
+    </div>
   );
 };

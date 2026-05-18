@@ -1710,6 +1710,7 @@
     "scanning": "Scanning ZIP file…",
     "notAZipFile": "That file is not a ZIP archive.",
     "fileTooLarge": "File is too large (max {{size}}).",
-    "error": "Error"
+    "error": "Error",
+    "zipUploadDescription": "When you upload a zip file we'll do our best to parse the track information for content. This works best with flac files that have metadata tags filled out, but we'll try to parse whatever we can from any audio files. We'll also look for a cover image in the zip file, and any additional downloadable content. After the upload, you can review and edit the imported information before saving it to your release."
   }
 }
