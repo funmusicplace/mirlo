@@ -3,6 +3,12 @@ import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import { Trans, useTranslation } from "react-i18next";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
+const inlineLink = css`
+  display: inline !important;
+  white-space: normal !important;
+  word-break: break-word;
+`;
+
 const ArtistByLine: React.FC<{
   artist: Artist;
   trackGroup?: TrackGroup;
@@ -36,6 +42,7 @@ const ArtistByLine: React.FC<{
             components={{
               albumLink: (
                 <ArtistButtonLink
+                  className={inlineLink}
                   variant="link"
                   to={getReleaseUrl(artist, trackGroup)}
                 ></ArtistButtonLink>
@@ -53,6 +60,7 @@ const ArtistByLine: React.FC<{
         components={{
           artistLink: (
             <ArtistButtonLink
+              className={inlineLink}
               variant="link"
               to={getArtistUrl(artist)}
             ></ArtistButtonLink>
@@ -71,6 +79,7 @@ const ArtistByLine: React.FC<{
             components={{
               labelLink: (
                 <ArtistButtonLink
+                  className={inlineLink}
                   variant="link"
                   to={getArtistUrl(labelArtist)}
                 ></ArtistButtonLink>
