@@ -446,7 +446,8 @@
     "addNewArtistExplanation": "Create a new artist page and add it to your roster. This is useful if you want to create a page for an artist that doesn't have one yet. The artist will be able to claim the page and take over management of it.",
     "roster": "Roster",
     "releases": "Releases",
-    "labelNotFound": "Label not found"
+    "labelNotFound": "Label not found",
+    "reorderRoster": "Drag to reorder roster"
   },
   "artist": {
     "artistNavigation": "Artist",

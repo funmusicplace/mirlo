@@ -84,6 +84,7 @@ const routes = [
   "manage/artists",
   "manage/bulkTrackUpload",
   "manage/label",
+  "manage/label/artistOrder",
   "manage/label/artists/{artistId}",
   "manage/artists/{artistId}",
   "manage/artists/{artistId}/trackGroups",
