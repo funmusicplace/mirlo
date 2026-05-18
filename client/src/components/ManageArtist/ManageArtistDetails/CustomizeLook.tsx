@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import FeatureFlag from "components/common/FeatureFlag";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { Toggle } from "components/common/Toggle";
@@ -384,19 +385,24 @@ export const CustomizeLook: React.FC = () => {
                   {t("makeSearchable")}
                 </small>
               </FormComponent>
-              <FormComponent>
-                <Toggle
-                  ariaDescribedBy="hint-enable-federated-streaming"
-                  label={t("enableFederatedStreaming")}
-                  toggled={federatedStreaming}
-                  onClick={() => {
-                    methods.setValue("federatedStreaming", !federatedStreaming);
-                  }}
-                />
-                <small id="hint-enable-activity-pub">
-                  {t("makeSearchable")}
-                </small>
-              </FormComponent>
+              <FeatureFlag flag="federatedStreaming">
+                <FormComponent>
+                  <Toggle
+                    ariaDescribedBy="hint-enable-federated-streaming"
+                    label={t("enableFederatedStreaming")}
+                    toggled={federatedStreaming}
+                    onClick={() => {
+                      methods.setValue(
+                        "federatedStreaming",
+                        !federatedStreaming
+                      );
+                    }}
+                  />
+                  <small id="hint-enable-activity-pub">
+                    {t("makeSearchable")}
+                  </small>
+                </FormComponent>
+              </FeatureFlag>
               <FormComponent>
                 <Toggle
                   ariaDescribedBy="hint-allow-direct-messages"
