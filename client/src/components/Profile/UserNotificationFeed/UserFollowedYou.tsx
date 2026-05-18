@@ -1,8 +1,8 @@
+import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl } from "utils/artist";
-import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 
 const UserFollowedYou: React.FC<{
   notification: Notification;
@@ -66,8 +66,8 @@ const UserFollowedYou: React.FC<{
           <span
             className={
               compact
-                ? "inline-block text-xs font-semibold py-0 px-1.5 rounded-full bg-(--mi-red-100) text-(--mi-red-700) mt-0.5 whitespace-nowrap"
-                : "inline-block text-xs font-semibold py-0.5 px-2 rounded-full bg-(--mi-red-100) text-(--mi-red-700) mt-1 whitespace-nowrap"
+                ? "inline-block max-w-full break-words text-xs font-semibold py-0 px-1.5 rounded-full bg-(--mi-red-100) text-(--mi-red-700) mt-0.5"
+                : "inline-block max-w-full break-words text-xs font-semibold py-0.5 px-2 rounded-full bg-(--mi-red-100) text-(--mi-red-700) mt-1"
             }
           >
             {notification.subscription.artistSubscriptionTier.name}

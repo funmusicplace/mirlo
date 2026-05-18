@@ -1,13 +1,14 @@
 import { css } from "@emotion/css";
-import { WidthWrapper } from "components/common/WidthContainer";
-import { useTranslation } from "react-i18next";
-import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { WidthWrapper } from "components/common/WidthContainer";
 import {
   markAllNotificationsRead,
   queryNotifications,
 } from "queries/notifications";
 import React from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthContext } from "state/AuthContext";
+
 import NotificationColumn from "./NotificationColumn";
 
 const FOLLOW_TYPES: Notification["notificationType"][] = [
@@ -155,7 +156,7 @@ const UserNotificationFeed = () => {
 
         <div
           id="activity-column"
-          className="md:shrink-0 md:w-1/3 rounded-xl bg-(--mi-darken-background-color) p-4 w:full"
+          className="md:shrink-0 md:w-1/3 w-full min-w-0 rounded-xl bg-(--mi-darken-background-color) p-4"
         >
           <NotificationColumn
             title={t("timelineActivity")}
