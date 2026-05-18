@@ -62,6 +62,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
     albumMeta.date ||
     albumMeta.label ||
     albumMeta.releaseDate ||
+    albumMeta.description ||
     (albumMeta.genres?.length ?? 0) > 0;
 
   const handleZipImportConfirm = React.useCallback(
@@ -76,6 +77,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
         formData: {
           title: albumMeta.title ?? "",
           releaseDate: albumMeta.releaseDate ?? undefined,
+          about: albumMeta.description ?? undefined,
         },
         artistId,
       });
@@ -212,6 +214,16 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
                 </dt>
                 <dd className="m-0 text-[var(--mi-text-color)]">
                   {albumMeta.releaseDate ?? String(albumMeta.releaseDate)}
+                </dd>
+              </>
+            )}
+            {albumMeta.description && (
+              <>
+                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
+                  {t("albumDescription")}
+                </dt>
+                <dd className="m-0 text-[var(--mi-text-color)] whitespace-pre-wrap line-clamp-4">
+                  {albumMeta.description}
                 </dd>
               </>
             )}

@@ -640,6 +640,7 @@ interface AlbumMeta {
   genres?: string[];
   albumArtist?: string;
   releaseDate?: string;
+  description?: string;
 }
 
 interface ExtractedAudioFile {

@@ -1694,6 +1694,7 @@
     "importAlbumContent": "Want to import your entire album in one go? Just drop a ZIP file with your tracks and metadata, and we'll take care of the rest.",
     "albumTitle": "Title",
     "albumArtist": "Artist",
+    "albumDescription": "Description",
     "releaseDate": "Release date",
     "label": "Label",
     "genre": "Genre",
