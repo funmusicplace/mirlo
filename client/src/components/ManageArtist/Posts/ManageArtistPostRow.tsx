@@ -39,14 +39,14 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
     date: formatDate({ date: post.publishedAt, i18n }),
   });
   const tier = artist.subscriptionTiers?.find(
-    (t) => t.id === post.minimumSubscriptionTierId
+    ({ id }) => id === post.minimumSubscriptionTierId
   );
 
   return (
     <Box
       as="li"
       noPadding
-      className="relative mb-4 p-0! bg-(--mi-button-tint-color) border border-(--mi-tint-x-color) overflow-hidden"
+      className="relative mb-4 bg-(--mi-button-tint-color) border border-(--mi-tint-x-color) overflow-hidden"
     >
       <div className="flex flex-col sm:flex-row">
         {post.featuredImage && (
