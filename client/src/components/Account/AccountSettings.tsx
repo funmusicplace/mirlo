@@ -33,7 +33,7 @@ type FormData = {
   accountingEmail?: string;
 };
 
-const AccountContainer: React.FC = () => {
+const AccountSettings: React.FC = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -237,4 +237,4 @@ const AccountContainer: React.FC = () => {
   );
 };
 
-export default AccountContainer;
+export default AccountSettings;
