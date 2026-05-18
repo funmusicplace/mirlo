@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import CanCreateArtists from "components/CanCreateArtists";
@@ -6,7 +7,7 @@ import MenuLink from "components/Header/MenuLink";
 import { queryManagedArtists, useLogoutMutation } from "queries";
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { FaTimes } from "react-icons/fa";
+import { FaArrowRight, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
@@ -54,7 +55,7 @@ const Menu = forwardRef<
   return (
     <dialog
       aria-labelledby={buttonId}
-      className="inset-e-0 inset-s-auto max-w-full max-h-full w-full sm:w-[300px] h-full backdrop:bg-[rgba(0,0,0,.5)]"
+      className="inset-s-0 sm:inset-s-auto sm:inset-e-0 max-w-[100vw] max-h-full w-screen sm:w-[300px] h-full backdrop:bg-[rgba(0,0,0,.5)]"
       closedby="any"
       data-nosnippet
       id={dialogId}
@@ -86,8 +87,8 @@ const Menu = forwardRef<
         <nav className="flex-auto">
           <ul>
             <li>
-              <MenuLink onClick={onClose} to="/profile">
-                {t("profile")}
+              <MenuLink onClick={onClose} to="/profile/notifications">
+                {t("yourFeed")}
               </MenuLink>
             </li>
 
@@ -96,6 +97,10 @@ const Menu = forwardRef<
                 {t("collection")}
               </MenuLink>
             </li>
+            <li
+              aria-hidden
+              className="border-t border-(--mi-tint-x-color) my-2"
+            />
             <CanCreateArtists>
               {isLabelAccount && (
                 <>
@@ -112,7 +117,14 @@ const Menu = forwardRef<
                           onClick={onClose}
                           to={`/${labelArtist.urlSlug}`}
                         >
-                          {t("viewLabelPage", { labelName: labelArtist.name })}
+                          <span className="flex items-center gap-2">
+                            <span className="min-w-0 wrap-anywhere">
+                              {t("viewLabelPage", {
+                                labelName: labelArtist.name,
+                              })}
+                            </span>
+                            <FaArrowRight className="shrink-0 text-xs" />
+                          </span>
                         </MenuLink>
                       </li>
                     ) : null;
@@ -127,7 +139,20 @@ const Menu = forwardRef<
                 </li>
               )}
               <li>
-                <ul className="border-y border-y-(--mi-text-color)! m-0 p-0! max-h-[190px] overflow-auto">
+                <ul
+                  className={css`
+                    margin: 0;
+                    padding: 0;
+                    max-height: 190px;
+                    overflow-y: auto;
+                    border-top: 1px solid var(--mi-tint-x-color);
+                    border-bottom: 1px solid var(--mi-tint-x-color);
+                    background-color: var(--mi-darken-background-color);
+                    box-shadow:
+                      inset 0 4px 4px -4px rgba(0, 0, 0, 0.15),
+                      inset 0 -4px 4px -4px rgba(0, 0, 0, 0.15);
+                  `}
+                >
                   {isLoading && (
                     <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
                   )}
@@ -150,6 +175,20 @@ const Menu = forwardRef<
                 </ul>
               </li>
             </CanCreateArtists>
+            {seeOrderPages && (
+              <>
+                <li>
+                  <MenuLink onClick={onClose} to="/sales">
+                    {t("viewSalesPage")}
+                  </MenuLink>
+                </li>
+                <li>
+                  <MenuLink onClick={onClose} to="/fulfillment">
+                    {t("fulfillment")}
+                  </MenuLink>
+                </li>
+              </>
+            )}
             <li>
               <MenuLink onClick={onClose} to="/account">
                 {t("account")}
@@ -162,20 +201,10 @@ const Menu = forwardRef<
                 </MenuLink>
               </li>
             )}
-            {seeOrderPages && (
-              <>
-                <li>
-                  <MenuLink onClick={onClose} to="/fulfillment">
-                    {t("fulfillment")}
-                  </MenuLink>
-                </li>
-                <li>
-                  <MenuLink onClick={onClose} to="/sales">
-                    {t("viewSalesPage")}
-                  </MenuLink>
-                </li>
-              </>
-            )}
+            <li
+              aria-hidden
+              className="border-t border-(--mi-tint-x-color) my-2"
+            />
             <li>
               <MenuLink onClick={onClose} to="https://docs.mirlo.space">
                 {t("about")}
