@@ -1,6 +1,6 @@
 import NextButton from "components/common/NextButton";
 import PrevButton from "components/common/PrevButton";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

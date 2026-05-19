@@ -1,12 +1,10 @@
 import { cloneDeep } from "lodash";
 import React from "react";
-import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 
 import { CenteredSpinner } from "../Spinner";
-import Table from "../Table";
 
 import TrackRow from "./TrackRow";
 
@@ -17,9 +15,6 @@ export const PublicTrackGroupListing: React.FC<{
   showDropdown?: boolean;
   inWidget?: boolean;
 }> = ({ tracks, trackGroup, size, showDropdown = true, inWidget }) => {
-  const { t } = useTranslation("translation", {
-    keyPrefix: "trackGroupDetails",
-  });
   const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
@@ -56,21 +51,19 @@ export const PublicTrackGroupListing: React.FC<{
   }
 
   return (
-    <Table isTrackRow className={`max-sm:m-0 ${inWidget ? "table-fixed" : ""}`}>
-      <tbody>
-        {displayTracks?.map((track) => (
-          <TrackRow
-            showDropdown={showDropdown}
-            key={track.id}
-            track={track}
-            addTracksToQueue={addTracksToQueue}
-            trackGroup={track.trackGroup ?? trackGroup}
-            size={size}
-            inWidget={inWidget}
-          />
-        ))}
-      </tbody>
-    </Table>
+    <ul className="list-none m-0 p-0 w-full max-sm:m-0">
+      {displayTracks?.map((track) => (
+        <TrackRow
+          showDropdown={showDropdown}
+          key={track.id}
+          track={track}
+          addTracksToQueue={addTracksToQueue}
+          trackGroup={track.trackGroup ?? trackGroup}
+          size={size}
+          inWidget={inWidget}
+        />
+      ))}
+    </ul>
   );
 };
 

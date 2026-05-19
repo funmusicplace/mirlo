@@ -2,7 +2,9 @@ import { css } from "@emotion/css";
 import Button, { ButtonLink } from "components/common/Button";
 import Modal from "components/common/Modal";
 import Table from "components/common/Table";
+import TrackRowPlayControl from "components/common/TrackList/TrackRowPlayControl";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaEdit, FaEye } from "react-icons/fa";
 import {
   Outlet,
@@ -11,11 +13,10 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import api from "services/api";
-import usePagination from "utils/usePagination";
-import useAdminFilters from "./useAdminFilters";
-import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
 import { getTrackUrl } from "utils/artist";
-import { useTranslation } from "react-i18next";
+import usePagination from "utils/usePagination";
+
+import useAdminFilters from "./useAdminFilters";
 
 const pageSize = 100;
 

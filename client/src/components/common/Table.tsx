@@ -13,28 +13,26 @@ const StyledTable = styled.table`
   }
 `;
 
-type TableProps = React.TableHTMLAttributes<HTMLTableElement> & {
-  isTrackRow?: boolean;
-};
-
-export const Table = React.forwardRef<HTMLTableElement, TableProps>(
-  ({ className, isTrackRow, ...rest }, ref) => {
-    const reactId = React.useId();
-    const scrollId = `table-scroll-${reactId.replace(/:/g, "")}`;
-    const tableClass = isTrackRow
-      ? className
-      : `mi-table${className ? ` ${className}` : ""}`;
-    return (
-      <div className="relative">
-        <div id={scrollId} className="max-w-full overflow-x-auto">
-          <StyledTable ref={ref} className={tableClass} {...rest} />
-        </div>
-        <ScrollFadeOverlay scrollElementId={scrollId} position="left" />
-        <ScrollFadeOverlay scrollElementId={scrollId} position="right" />
+export const Table = React.forwardRef<
+  HTMLTableElement,
+  React.TableHTMLAttributes<HTMLTableElement>
+>(({ className, ...rest }, ref) => {
+  const reactId = React.useId();
+  const scrollId = `table-scroll-${reactId.replace(/:/g, "")}`;
+  return (
+    <div className="relative">
+      <div id={scrollId} className="max-w-full overflow-x-auto">
+        <StyledTable
+          ref={ref}
+          className={`mi-table${className ? ` ${className}` : ""}`}
+          {...rest}
+        />
       </div>
-    );
-  }
-);
+      <ScrollFadeOverlay scrollElementId={scrollId} position="left" />
+      <ScrollFadeOverlay scrollElementId={scrollId} position="right" />
+    </div>
+  );
+});
 
 Table.displayName = "Table";
 

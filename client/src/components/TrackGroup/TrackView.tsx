@@ -4,7 +4,7 @@ import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import WidthContainer from "components/common/WidthContainer";
 import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";

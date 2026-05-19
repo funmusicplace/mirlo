@@ -1,9 +1,10 @@
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import Modal from "../Modal";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { MdLyrics } from "react-icons/md";
+
 import { DropdownMenuItemButton } from "../DropdownMenuItem";
+import Modal from "../Modal";
 
 const LyricsModal: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
   track,
