@@ -26,6 +26,29 @@ export default function () {
       };
 
       if (fromDateFilter) {
+        const updatedTrackgroupsFilter = {
+          trackGroups: {
+            some: {
+              OR: [
+                {
+                  AND: [
+                    { deletedAt: null },
+                    {
+                      OR: [
+                        {
+                          createdAt: fromDateFilter,
+                        },
+                        {
+                          updatedAt: fromDateFilter,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        };
         where.OR = [
           {
             createdAt: fromDateFilter,
@@ -33,6 +56,7 @@ export default function () {
           {
             updatedAt: fromDateFilter,
           },
+          updatedTrackgroupsFilter,
         ];
       }
 

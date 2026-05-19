@@ -398,7 +398,7 @@ export const CustomizeLook: React.FC = () => {
                       );
                     }}
                   />
-                  <small id="hint-enable-activity-pub">
+                  <small id="hint-enable-federated-streaming">
                     {t("makeStreamable")}
                   </small>
                 </FormComponent>
