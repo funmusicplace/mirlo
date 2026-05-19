@@ -39,26 +39,8 @@ const ResetStripeAccountModal: React.FC<{
     queryUserStripeStatus(userId)
   );
 
-  const queryState = queryClient.getQueryState([
-    "fetchUserStripeStatus",
-    { userId },
-  ]);
-  console.log(
-    "query state",
-    queryState?.status,
-    queryState?.fetchStatus,
-    queryState?.error
-  );
-
   const isStripeGone =
     stripeError instanceof MirloFetchError && stripeError.status === 403;
-
-  console.log(
-    "isStripeGone",
-    isStripeGone,
-    stripeError,
-    (stripeError as MirloFetchError)?.status
-  );
 
   const close = React.useCallback(() => {
     setOpen(false);
@@ -103,7 +85,7 @@ const ResetStripeAccountModal: React.FC<{
     [userId, password, code, snackbar, t, onReset, close]
   );
 
-  if (!stripeAccountStatus?.detailsSubmitted && !isStripeGone) {
+  if (!stripeAccountStatus?.detailsSubmitted || !isStripeGone) {
     return null;
   }
 

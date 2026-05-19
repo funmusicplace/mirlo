@@ -7,7 +7,6 @@ export class MirloFetchError extends Error {
   }
 
   get status() {
-    console.log("getting status", this.res.status);
     return this.res.status;
   }
 }

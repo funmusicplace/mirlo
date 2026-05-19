@@ -37,14 +37,7 @@ export function queryUserStripeStatus(userId?: number) {
       const shouldRetry =
         !(err instanceof MirloFetchError && err.status === 403) &&
         failureCount < 1;
-      console.log(
-        "retrying?",
-        failureCount,
-        err,
-        err instanceof MirloFetchError,
-        err instanceof MirloFetchError && err.status,
-        shouldRetry
-      );
+
       return shouldRetry;
     },
     refetchOnWindowFocus: (query) =>
