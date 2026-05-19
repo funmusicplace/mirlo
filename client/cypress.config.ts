@@ -102,10 +102,12 @@ export default defineConfig({
           artistId: number;
           name?: string;
           minAmount?: number;
+          isDefaultTier?: boolean;
         }) => {
           return pkg.createTier(query.artistId, {
             name: query.name,
             minAmount: query.minAmount,
+            isDefaultTier: query.isDefaultTier,
           });
         },
         createSubscription: async (query: {
