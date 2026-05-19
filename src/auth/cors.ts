@@ -3,6 +3,8 @@ import { Client } from "@mirlo/prisma/client";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
 
+import logger from "../logger";
+
 const isTest = process.env.NODE_ENV === "test" || process.env.CI;
 
 const CACHE_TTL_MS = 60_000; // 1 minute
@@ -17,6 +19,8 @@ export const corsMiddleware = async (
   ...args: [Request, Response, NextFunction]
 ) => {
   const [req, , next] = args;
+  // @ts-ignore - req.logger added by middleware
+  const log = req.logger || logger;
   try {
     const isHealthCheck = req.path === "/health" && req.headers["health-check"];
 
@@ -42,6 +46,7 @@ export const corsMiddleware = async (
     if (process.env.NODE_ENV === "development") {
       origin.push("http://localhost:8080");
     }
+    log.debug("Allowed origins", { origin });
 
     return cors({ origin, credentials: true })(...args);
   } catch (e) {
