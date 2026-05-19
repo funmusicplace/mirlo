@@ -155,3 +155,14 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     ),
   };
 };
+
+export const serializeSingleDeletedArtistIntoCanimus = (
+  artist: LocalArtist
+) => {
+  const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
+  return {
+    type: "artist",
+    name: artist.name,
+    url: artistUrl,
+  };
+};
