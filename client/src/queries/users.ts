@@ -33,12 +33,13 @@ export function queryUserStripeStatus(userId?: number) {
     queryKey: ["fetchUserStripeStatus", { userId }],
     queryFn: fetchUserStripeStatus,
     enabled: !!userId && isFinite(userId),
-    retry: (_, err) => {
-      const shouldRetry = !(
-        err instanceof MirloFetchError && err.status === 403
-      );
+    retry: (failureCount, err) => {
+      const shouldRetry =
+        !(err instanceof MirloFetchError && err.status === 403) &&
+        failureCount < 1;
       console.log(
         "retrying?",
+        failureCount,
         err,
         err instanceof MirloFetchError,
         err instanceof MirloFetchError && err.status,
@@ -51,6 +52,7 @@ export function queryUserStripeStatus(userId?: number) {
         query.state.error instanceof MirloFetchError &&
         query.state.error.status === 403
       ),
+    retryOnMount: false,
   });
 }
 

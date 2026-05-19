@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
@@ -33,10 +33,23 @@ const ResetStripeAccountModal: React.FC<{
   const [isSendingCode, setIsSendingCode] = React.useState(false);
   const [codeSent, setCodeSent] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: stripeAccountStatus, error: stripeError } = useQuery(
     queryUserStripeStatus(userId)
   );
+
+  const queryState = queryClient.getQueryState([
+    "fetchUserStripeStatus",
+    { userId },
+  ]);
+  console.log(
+    "query state",
+    queryState?.status,
+    queryState?.fetchStatus,
+    queryState?.error
+  );
+
   const isStripeGone =
     stripeError instanceof MirloFetchError && stripeError.status === 403;
 
