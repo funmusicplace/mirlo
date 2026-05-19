@@ -33,7 +33,18 @@ export function queryUserStripeStatus(userId?: number) {
     queryKey: ["fetchUserStripeStatus", { userId }],
     queryFn: fetchUserStripeStatus,
     enabled: !!userId && isFinite(userId),
-    retry: (_, err) => !(err instanceof MirloFetchError && err.status === 403),
+    retry: (_, err) => {
+      const shouldRetry = !(
+        err instanceof MirloFetchError && err.status === 403
+      );
+      console.log(
+        "retrying?",
+        err,
+        err instanceof MirloFetchError,
+        shouldRetry
+      );
+      return shouldRetry;
+    },
   });
 }
 

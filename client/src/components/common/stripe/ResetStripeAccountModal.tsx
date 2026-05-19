@@ -40,6 +40,13 @@ const ResetStripeAccountModal: React.FC<{
   const isStripeGone =
     stripeError instanceof MirloFetchError && stripeError.status === 403;
 
+  console.log(
+    "isStripeGone",
+    isStripeGone,
+    stripeError,
+    (stripeError as MirloFetchError)?.status
+  );
+
   const close = React.useCallback(() => {
     setOpen(false);
     setPassword("");
