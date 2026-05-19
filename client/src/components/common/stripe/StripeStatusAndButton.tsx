@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
 import { queryUserStripeStatus } from "queries";
+import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import api from "services/api";
@@ -22,7 +23,11 @@ const StripeStatus = () => {
     data: stripeAccountStatus,
     isLoading: isLoadingStripe,
     isError: stripeStatusError,
+    error: stripeError,
   } = useQuery(queryUserStripeStatus(user?.id));
+
+  const isStripeGone =
+    stripeError instanceof MirloFetchError && stripeError.status === 403;
 
   if (isLoadingStripe) return <LoadingBlocks rows={2} height="2rem" />;
 
@@ -61,15 +66,16 @@ const StripeStatus = () => {
         <Box variant="warning">{t("stripeAccountUnreachable")}</Box>
       )}
       <div className="flex gap-2">
-        {userId && (
-          <a href={api.paymentProcessor.stripeConnect(userId)}>
-            <Button>
-              {stripeAccountStatus?.detailsSubmitted
-                ? t("updateBankAccount")
-                : t("setUpBankAccount")}
-            </Button>
-          </a>
-        )}
+        {!isStripeGone &&
+          userId && ( // if isStripeGone then we should show the resetStripeAccount button.
+            <a href={api.paymentProcessor.stripeConnect(userId)}>
+              <Button>
+                {stripeAccountStatus?.detailsSubmitted
+                  ? t("updateBankAccount")
+                  : t("setUpBankAccount")}
+              </Button>
+            </a>
+          )}
         {userId && user?.email && (
           <ResetStripeAccountModal
             userId={userId}
