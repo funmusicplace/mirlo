@@ -5,7 +5,6 @@ import { useSaveAlbumFormMutation } from "queries";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-import api from "services/api";
 import { useUpload } from "state/UploadContext";
 
 interface ZipImportPreviewProps {
@@ -36,7 +35,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "zipImport" });
-  const { enqueue } = useUpload();
+  const { enqueue, enqueueImage } = useUpload();
   const saveMutation = useSaveAlbumFormMutation();
 
   const hasInvalidFiles = (preScanResult?.invalidFiles.length ?? 0) > 0;
@@ -63,6 +62,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
     albumMeta.date ||
     albumMeta.label ||
     albumMeta.releaseDate ||
+    albumMeta.description ||
     (albumMeta.genres?.length ?? 0) > 0;
 
   const handleZipImportConfirm = React.useCallback(
@@ -70,26 +70,34 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       if (!result) {
         return;
       }
-      // Update the track group with album meta data.
-      await saveMutation.mutateAsync({
-        trackGroupId,
-        formData: {
-          title: albumMeta.title ?? "",
-          releaseDate: albumMeta.releaseDate ?? undefined,
-        },
-        artistId,
-      });
 
-      // Upload cover image using the same pattern as UploadArtistImage
+      // Update the track group with album meta data.
+      const meta = result.albumMeta;
+      try {
+        await saveMutation.mutateAsync({
+          trackGroupId,
+          formData: {
+            title: meta.title ?? "",
+            releaseDate: meta.releaseDate ?? undefined,
+            about: meta.description ?? undefined,
+          },
+          artistId,
+        });
+      } catch (e) {
+        console.error("Error saving album metadata", e);
+      }
+
+      // Upload cover image — queued so the progress panel tracks the optimize-image job
       const coverFile = result.imageFiles[coverIndex]?.file;
       if (coverFile) {
-        try {
-          await api.uploadFile(`manage/trackGroups/${trackGroupId}/cover`, [
-            coverFile,
-          ]);
-        } catch (e) {
-          console.error("Error uploading cover image", e);
-        }
+        enqueueImage({
+          name: t("albumCover"),
+          endpoint: `manage/trackGroups/${trackGroupId}/cover`,
+          file: coverFile,
+          thumbnail: URL.createObjectURL(coverFile),
+          resourceKey: `trackGroup-${trackGroupId}`,
+          onComplete: reload,
+        });
       }
 
       // Enqueue audio files using UploadContext — same pattern as BulkTrackUpload
@@ -113,7 +121,7 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       onClose();
       reload();
     },
-    [trackGroupId, artistId, enqueue, reload, onClose]
+    [trackGroupId, artistId, enqueue, enqueueImage, reload, onClose]
   );
 
   return (
@@ -211,6 +219,16 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
                 </dt>
                 <dd className="m-0 text-[var(--mi-text-color)]">
                   {albumMeta.releaseDate ?? String(albumMeta.releaseDate)}
+                </dd>
+              </>
+            )}
+            {albumMeta.description && (
+              <>
+                <dt className="text-[var(--mi-lighter-foreground-color)] font-semibold whitespace-nowrap">
+                  {t("albumDescription")}
+                </dt>
+                <dd className="m-0 text-[var(--mi-text-color)] whitespace-pre-wrap line-clamp-4">
+                  {albumMeta.description}
                 </dd>
               </>
             )}

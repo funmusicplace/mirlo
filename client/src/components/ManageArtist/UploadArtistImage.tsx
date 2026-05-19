@@ -106,6 +106,7 @@ const UploadArtistImage: React.FC<{
   maxDimensions: string;
   maxSize: string;
   imageTypeDescription: string;
+  isLoading?: boolean;
 }> = ({
   existing,
   imageType,
@@ -114,6 +115,7 @@ const UploadArtistImage: React.FC<{
   maxDimensions,
   maxSize,
   imageTypeDescription,
+  isLoading: externalIsLoading,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
@@ -191,8 +193,9 @@ const UploadArtistImage: React.FC<{
   );
 
   const isLoading =
-    uploadJobs?.[0]?.jobStatus !== undefined &&
-    uploadJobs?.[0]?.jobStatus !== "completed";
+    externalIsLoading ||
+    (uploadJobs?.[0]?.jobStatus !== undefined &&
+      uploadJobs?.[0]?.jobStatus !== "completed");
 
   const rounded = imageType === "avatar" ? true : false;
 

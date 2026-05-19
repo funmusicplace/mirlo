@@ -6,7 +6,6 @@ import {
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import FeatureFlag from "components/common/FeatureFlag";
 import {
   queryArtist,
   queryManagedTrackGroup,
@@ -131,18 +130,16 @@ const ManageTrackGroup: React.FC<{}> = () => {
         <h1 className="mt-4">{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
       </div>
       <AlbumPaymentReceiver />
-      <FeatureFlag flag="zipUpload">
-        {trackGroup && (
-          <FormSection>
-            <ZipDropZone
-              existingTracksCount={trackGroup?.tracks?.length ?? 0}
-              trackGroupId={trackGroup.id}
-              artistId={artist.id}
-              reload={refetch}
-            />
-          </FormSection>
-        )}
-      </FeatureFlag>
+      {trackGroup && (
+        <FormSection>
+          <ZipDropZone
+            existingTracksCount={trackGroup?.tracks?.length ?? 0}
+            trackGroupId={trackGroup.id}
+            artistId={artist.id}
+            reload={refetch}
+          />
+        </FormSection>
+      )}
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}

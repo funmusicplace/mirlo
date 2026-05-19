@@ -1,3 +1,4 @@
+import { logger } from "./queue-worker";
 import sendOnboardingEmail from "./send-onboarding-email";
 import sendSubscriptionRenewalReminders from "./send-subscription-renewal-reminders";
 
@@ -8,10 +9,10 @@ const triggerDailyTasks = async () => {
 
 triggerDailyTasks()
   .then(() => {
-    console.log("Daily tasks completed successfully");
+    logger.info("Daily tasks completed successfully");
     process.exit(0);
   })
   .catch((error) => {
-    console.error("Daily tasks failed:", error);
+    logger.error("Daily tasks failed:", error);
     process.exit(1);
   });

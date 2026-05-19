@@ -1,4 +1,5 @@
 import { endScheduledPreorders } from "./end-scheduled-preorders";
+import { logger } from "./queue-worker";
 import sendPostToActivityPubFollowers from "./send-post-to-activitypub-followers";
 import { triggerAutoPurchaseNewAlbums } from "./trigger-auto-purchase-new-albums";
 import { triggerPostNotifications } from "./trigger-post-notifications";
@@ -14,10 +15,10 @@ const everyMinuteTasks = async () => {
 
 everyMinuteTasks()
   .then(() => {
-    console.log("Every minute tasks completed successfully");
+    logger.info("Every minute tasks completed successfully");
     process.exit(0);
   })
   .catch((error) => {
-    console.error("Every minute tasks failed:", error);
+    logger.error("Every minute tasks failed:", error);
     process.exit(1);
   });

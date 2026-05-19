@@ -1,17 +1,41 @@
+import {
+  BulkTrackUploadRow,
+  PercentUpload,
+} from "components/ManageArtist/ManageTrackGroup/BulkTrackUploadRow";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { useUpload } from "state/UploadContext";
-import { BulkTrackUploadRow } from "components/ManageArtist/ManageTrackGroup/BulkTrackUploadRow";
+import { ImageQueueItem, useUpload } from "state/UploadContext";
+
+const ImageUploadRow: React.FC<{ item: ImageQueueItem }> = ({ item }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "uploadPanel" });
+  const percent =
+    item.status === "completed" ? 100 : item.status === "failed" ? 0 : 50;
+  return (
+    <div className="relative mb-[0.2rem] flex items-center gap-3 bg-[var(--mi-tint-color)]">
+      <PercentUpload percentUpload={percent} />
+      {item.thumbnail && (
+        <img
+          src={item.thumbnail}
+          alt={item.name}
+          className="relative z-[1] h-10 w-10 flex-shrink-0 rounded object-cover"
+        />
+      )}
+      <div className="relative z-[1] flex-1 px-4 py-2 text-sm">
+        {t("processingImage", { name: item.name })}
+      </div>
+    </div>
+  );
+};
 
 const UploadProgressPanel: React.FC = () => {
-  const { queue, isActive } = useUpload();
+  const { queue, imageQueue, isActive } = useUpload();
   const { t } = useTranslation("translation", { keyPrefix: "uploadPanel" });
   const [collapsed, setCollapsed] = React.useState(false);
 
   if (!isActive) return null;
 
-  const activeCount = queue.length;
+  const activeCount = queue.length + imageQueue.length;
 
   return (
     <div
@@ -35,6 +59,9 @@ const UploadProgressPanel: React.FC = () => {
               key={`${item.trackGroupId}-${item.title}`}
               track={item}
             />
+          ))}
+          {imageQueue.map((item) => (
+            <ImageUploadRow key={item.id} item={item} />
           ))}
           <p className="mt-2 text-xs text-[var(--mi-lighter-foreground-color)]">
             {t("keepBrowserOpen")}

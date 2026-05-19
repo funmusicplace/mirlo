@@ -10,6 +10,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
+import { useUpload } from "state/UploadContext";
 import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
 import useShow from "utils/useShow";
 
@@ -33,6 +34,14 @@ const AlbumFormContent: React.FC<{
   const { register, watch } = useFormContext<TrackGroupFormData>();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const headerShow = useShow();
+  const { imageQueue } = useUpload();
+
+  const isCoverImageProcessing = imageQueue.some(
+    (item) =>
+      item.resourceKey === `trackGroup-${existingObject.id}` &&
+      item.status !== "completed" &&
+      item.status !== "failed"
+  );
 
   const urlSlug = watch("urlSlug");
   const releaseDateValue = watch("releaseDate");
@@ -165,6 +174,7 @@ const AlbumFormContent: React.FC<{
             width="400"
             maxDimensions="1500x1500"
             maxSize="15mb"
+            isLoading={isCoverImageProcessing}
           />
         </FormComponent>
       </FormSection>

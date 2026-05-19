@@ -20,6 +20,14 @@ export type UploadQueueItem = {
   image?: string; // base64 data URL or URL string
 };
 
+export type ImageQueueItem = {
+  id: string;
+  name: string;
+  status: "waiting" | "active" | "completed" | "failed";
+  thumbnail?: string;
+  resourceKey?: string;
+};
+
 type Trackgroup = { artistId?: number; id: number; tracks: Track[] };
 
 type EnqueueArgs = {
@@ -29,18 +37,31 @@ type EnqueueArgs = {
   coverImage?: string; // base64 data URL for album cover from zip import
 };
 
+type EnqueueImageArgs = {
+  name: string;
+  endpoint: string;
+  file: File;
+  thumbnail?: string;
+  resourceKey?: string;
+  onComplete?: () => void;
+};
+
 type UploadContextValue = {
   queue: UploadQueueItem[];
+  imageQueue: ImageQueueItem[];
   isActive: boolean;
   activeTrackGroupIds: number[];
   enqueue: (args: EnqueueArgs) => void;
+  enqueueImage: (args: EnqueueImageArgs) => void;
 };
 
 const UploadContext = React.createContext<UploadContextValue>({
   queue: [],
+  imageQueue: [],
   isActive: false,
   activeTrackGroupIds: [],
   enqueue: () => {},
+  enqueueImage: () => {},
 });
 
 const alertUser = (event: BeforeUnloadEvent) => {
@@ -56,6 +77,7 @@ export const UploadContextProvider: React.FC<{
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "uploadPanel" });
   const [queue, setQueue] = React.useState<UploadQueueItem[]>([]);
+  const [imageQueue, setImageQueue] = React.useState<ImageQueueItem[]>([]);
   const activeBatchesRef = React.useRef<Set<number>>(new Set());
   const pendingBatchesRef = React.useRef<
     {
@@ -65,6 +87,12 @@ export const UploadContextProvider: React.FC<{
     }[]
   >([]);
   const runningRef = React.useRef(false);
+  const imageJobsRef = React.useRef<
+    { itemId: string; jobId: string; onComplete?: () => void }[]
+  >([]);
+  const imagePollerRef = React.useRef<
+    ReturnType<typeof setInterval> | undefined
+  >(undefined);
 
   const runNext = React.useCallback(async () => {
     if (runningRef.current) return;
@@ -186,6 +214,127 @@ export const UploadContextProvider: React.FC<{
     }
   }, [snackbar, t]);
 
+  const startImagePolling = React.useCallback(() => {
+    if (imagePollerRef.current !== undefined) return;
+    imagePollerRef.current = setInterval(async () => {
+      const jobs = imageJobsRef.current;
+      if (jobs.length === 0) {
+        clearInterval(imagePollerRef.current);
+        imagePollerRef.current = undefined;
+        return;
+      }
+      try {
+        const result = await api.getMany<{ jobStatus: string; jobId: string }>(
+          `jobs?queue=optimizeImage&${jobs.map((j) => `ids=${j.jobId}`).join("&")}`
+        );
+        setImageQueue((q) =>
+          q.map((item) => {
+            const job = jobs.find((j) => j.itemId === item.id);
+            if (!job) return item;
+            const jobResult = result.results.find((r) => r.jobId === job.jobId);
+            if (!jobResult) return item;
+            const status: ImageQueueItem["status"] =
+              jobResult.jobStatus === "completed" ||
+              jobResult.jobStatus === "unknown"
+                ? "completed"
+                : jobResult.jobStatus === "failed"
+                  ? "failed"
+                  : "active";
+            return { ...item, status };
+          })
+        );
+        const done = result.results.filter(
+          (r) =>
+            r.jobStatus === "completed" ||
+            r.jobStatus === "unknown" ||
+            r.jobStatus === "failed"
+        );
+        for (const doneJob of done) {
+          const jobEntry = imageJobsRef.current.find(
+            (j) => j.jobId === doneJob.jobId
+          );
+          if (jobEntry) {
+            if (
+              doneJob.jobStatus === "completed" ||
+              doneJob.jobStatus === "unknown"
+            ) {
+              jobEntry.onComplete?.();
+            }
+            imageJobsRef.current = imageJobsRef.current.filter(
+              (j) => j.jobId !== doneJob.jobId
+            );
+            setTimeout(() => {
+              setImageQueue((q) =>
+                q.filter((item) => item.id !== jobEntry.itemId)
+              );
+            }, 2000);
+          }
+        }
+      } catch (e) {
+        console.error("Error polling image jobs", e);
+      }
+    }, 5000);
+  }, []);
+
+  const enqueueImage = React.useCallback(
+    ({
+      name,
+      endpoint,
+      file,
+      thumbnail,
+      resourceKey,
+      onComplete,
+    }: EnqueueImageArgs) => {
+      const itemId = `img-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setImageQueue((q) => [
+        ...q,
+        { id: itemId, name, status: "waiting", thumbnail, resourceKey },
+      ]);
+      (async () => {
+        try {
+          const response = await api.uploadFile(endpoint, [file]);
+          const jobId = response?.result?.jobId;
+          if (jobId) {
+            imageJobsRef.current = [
+              ...imageJobsRef.current,
+              { itemId, jobId, onComplete },
+            ];
+            setImageQueue((q) =>
+              q.map((item) =>
+                item.id === itemId ? { ...item, status: "active" } : item
+              )
+            );
+            startImagePolling();
+          } else {
+            setImageQueue((q) =>
+              q.map((item) =>
+                item.id === itemId ? { ...item, status: "completed" } : item
+              )
+            );
+            onComplete?.();
+            setTimeout(
+              () =>
+                setImageQueue((q) => q.filter((item) => item.id !== itemId)),
+              2000
+            );
+          }
+        } catch (e) {
+          console.error("Error uploading image", e);
+          setImageQueue((q) =>
+            q.map((item) =>
+              item.id === itemId ? { ...item, status: "failed" } : item
+            )
+          );
+          setTimeout(
+            () => setImageQueue((q) => q.filter((item) => item.id !== itemId)),
+            3000
+          );
+        }
+      })();
+    },
+    [startImagePolling]
+  );
+
   const enqueue = React.useCallback(
     ({ trackgroup, files, reload, coverImage }: EnqueueArgs) => {
       const fileArray =
@@ -247,7 +396,7 @@ export const UploadContextProvider: React.FC<{
     [runNext]
   );
 
-  const isActive = queue.length > 0;
+  const isActive = queue.length > 0 || imageQueue.length > 0;
 
   React.useEffect(() => {
     if (isActive) {
@@ -264,8 +413,15 @@ export const UploadContextProvider: React.FC<{
   );
 
   const value = React.useMemo(
-    () => ({ queue, isActive, activeTrackGroupIds, enqueue }),
-    [queue, isActive, activeTrackGroupIds, enqueue]
+    () => ({
+      queue,
+      imageQueue,
+      isActive,
+      activeTrackGroupIds,
+      enqueue,
+      enqueueImage,
+    }),
+    [queue, imageQueue, isActive, activeTrackGroupIds, enqueue, enqueueImage]
   );
 
   return (

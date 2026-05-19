@@ -166,6 +166,28 @@ const IMAGE_MIME_TYPES = [
 // Use the same audio formats as ACCEPTED_AUDIO
 const AUDIO_MIME_TYPES = ACCEPTED_AUDIO.split(",").map((type) => type.trim());
 
+const TEXT_EXTENSIONS = ["txt", "md", "rtf"];
+
+const MAX_DESCRIPTION_BYTES = 50 * 1024; // 50 KB — "short" text file
+
+const isTextDescriptionFile = (filename: string): boolean => {
+  const ext = filename.split(".").pop()?.toLowerCase() || "";
+  return TEXT_EXTENSIONS.includes(ext);
+};
+
+const readTextFile = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result as string);
+    };
+    reader.onerror = () => {
+      reject(new Error("Failed to read text file"));
+    };
+    reader.readAsText(file, "utf-8");
+  });
+};
+
 export const extractZipFiles = async (
   zipFile: File
 ): Promise<{ files: File[]; errorMessage?: string }> => {
@@ -204,6 +226,7 @@ export const prescanAudioFiles = async (
   const imageFiles: ExtractedImageFile[] = [];
   const downloadableContentFiles: ExtractedDownloadableContentFile[] = [];
   const invalidFiles: { name: string; reason: string }[] = [];
+  let descriptionFromTextFile: string | undefined;
 
   // Separate audio and image files
   for (const file of files) {
@@ -219,6 +242,18 @@ export const prescanAudioFiles = async (
       imageFiles.push({ file, name: file.name });
     } else if (DOWNLOADABLE_CONTENT_MIME_TYPES.includes(mimeType)) {
       downloadableContentFiles.push({ file, name: file.name });
+    } else if (isTextDescriptionFile(file.name)) {
+      // Pick the first short text file as a potential album description
+      if (
+        descriptionFromTextFile === undefined &&
+        file.size <= MAX_DESCRIPTION_BYTES
+      ) {
+        try {
+          descriptionFromTextFile = await readTextFile(file);
+        } catch (e) {
+          console.error("Error reading text description file", e);
+        }
+      }
     } else {
       // Only flag as invalid if it's not a known system file
       if (!isSystemFile(file.name)) {
@@ -278,6 +313,8 @@ export const prescanAudioFiles = async (
       genres: parsed[0]?.metadata.common.genre,
       albumArtist: parsed[0]?.metadata.common.albumartist,
       releaseDate: parsed[0]?.metadata.common.date,
+      description:
+        parsed[0]?.metadata.common.comment?.[0] ?? descriptionFromTextFile,
     },
   };
 };
