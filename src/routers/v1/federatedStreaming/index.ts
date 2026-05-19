@@ -15,6 +15,7 @@ export default function () {
 
     try {
       let fromDateFilter;
+
       if (fromDate) {
         fromDateFilter = { gte: new Date(fromDate as string) };
       } else {
