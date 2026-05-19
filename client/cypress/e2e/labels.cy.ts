@@ -106,7 +106,7 @@ describe("labels", () => {
 
   describe("is label", () => {
     it("allows adding an existing artist to the label roster", () => {
-      cy.visit("/profile/label");
+      cy.visit("/account/label");
 
       // Type artist name in the autocomplete search field
       // The input has id="input-existing-artist"
@@ -125,8 +125,7 @@ describe("labels", () => {
     });
 
     it("displays added artist in the roster table", () => {
-      // Visit the profile/label page
-      cy.visit("/profile/label");
+      cy.visit("/account/label");
 
       // Search and add artist to roster
       cy.get("#input-existing-artist").first().type(artistName, { delay: 50 });
