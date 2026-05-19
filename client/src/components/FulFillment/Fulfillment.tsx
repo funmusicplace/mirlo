@@ -13,7 +13,8 @@ import { FaDownload } from "react-icons/fa";
 import api from "services/api";
 import usePagination from "utils/usePagination";
 
-import FulfillmentRow, { FulfillmentCard } from "./FulfillmentRow";
+import { FulfillmentCard } from "./FulfillmentCard";
+import FulfillmentRow from "./FulfillmentRow";
 
 const pageSize = 50;
 
