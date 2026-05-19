@@ -26,37 +26,41 @@ export default function () {
       };
 
       if (fromDateFilter) {
-        const updatedTrackgroupsFilter = {
-          trackGroups: {
-            some: {
+        const updatedOrCreatedFilter:
+          | Prisma.TrackGroupWhereInput
+          | Prisma.TrackWhereInput
+          | Prisma.ArtistWhereInput = {
+          AND: [
+            { deletedAt: null },
+            {
               OR: [
                 {
-                  AND: [
-                    { deletedAt: null },
-                    {
-                      OR: [
-                        {
-                          createdAt: fromDateFilter,
-                        },
-                        {
-                          updatedAt: fromDateFilter,
-                        },
-                      ],
-                    },
-                  ],
+                  createdAt: fromDateFilter,
+                },
+                {
+                  updatedAt: fromDateFilter,
                 },
               ],
             },
-          },
+          ],
         };
+
         where.OR = [
+          updatedOrCreatedFilter as Prisma.ArtistWhereInput,
           {
-            createdAt: fromDateFilter,
+            trackGroups: {
+              some: {
+                OR: [
+                  updatedOrCreatedFilter as Prisma.TrackGroupWhereInput,
+                  {
+                    tracks: {
+                      some: updatedOrCreatedFilter as Prisma.TrackWhereInput,
+                    },
+                  },
+                ],
+              },
+            },
           },
-          {
-            updatedAt: fromDateFilter,
-          },
-          updatedTrackgroupsFilter,
         ];
       }
 
