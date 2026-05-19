@@ -3,6 +3,7 @@ import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { queryUserStripeStatus } from "queries";
+import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -33,7 +34,11 @@ const ResetStripeAccountModal: React.FC<{
   const [codeSent, setCodeSent] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const { data: stripeAccountStatus } = useQuery(queryUserStripeStatus(userId));
+  const { data: stripeAccountStatus, error: stripeError } = useQuery(
+    queryUserStripeStatus(userId)
+  );
+  const isStripeGone =
+    stripeError instanceof MirloFetchError && stripeError.status === 403;
 
   const close = React.useCallback(() => {
     setOpen(false);
@@ -78,7 +83,7 @@ const ResetStripeAccountModal: React.FC<{
     [userId, password, code, snackbar, t, onReset, close]
   );
 
-  if (!stripeAccountStatus?.detailsSubmitted) {
+  if (!stripeAccountStatus?.detailsSubmitted && !isStripeGone) {
     return null;
   }
 

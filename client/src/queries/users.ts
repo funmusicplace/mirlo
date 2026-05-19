@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 
 import * as api from "./fetch/fetchWrapper";
+import { MirloFetchError } from "./fetch/MirloFetchError";
 import {
   QUERY_KEY_ARTISTS,
   QUERY_KEY_AUTH,
@@ -32,6 +33,7 @@ export function queryUserStripeStatus(userId?: number) {
     queryKey: ["fetchUserStripeStatus", { userId }],
     queryFn: fetchUserStripeStatus,
     enabled: !!userId && isFinite(userId),
+    retry: (_, err) => !(err instanceof MirloFetchError && err.status === 403),
   });
 }
 
