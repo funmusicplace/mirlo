@@ -11,9 +11,10 @@ import qs from "qs";
 import swaggerUi from "swagger-ui-express";
 
 import { federation } from "./activityPub/federation";
+import { isValidActivityPubEndpoint } from "./activityPub/utils";
 import apiApp from "./api";
 import "./auth/passport";
-import { corsCheck, isValidActivityPubEndpoint } from "./auth/cors";
+import { corsMiddleware } from "./auth/cors";
 import { userLoggedInWithoutRedirect } from "./auth/passport";
 import logger from "./logger";
 import parseIndex from "./parseIndex";
@@ -45,7 +46,7 @@ app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
-app.use(corsCheck);
+app.use(corsMiddleware);
 app.use(cookieParser());
 // @fedify/express's fromERequest builds the request URL using req.host, which
 // in Express returns the raw Host header including the port (e.g. "api:3000").

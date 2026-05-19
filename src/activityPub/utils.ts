@@ -123,3 +123,11 @@ export const headersAreForActivityPub = (
 
   return isActivityPubMimeType(accept);
 };
+
+export const isValidActivityPubEndpoint = (path: string) => {
+  return (
+    /^\/v1\/ap\/artists\/[\w-]+(?:\/(?:outbox|followers|following|inbox|activities|posts|releases)(?:\/[\w-]+)?)?$/.test(
+      path
+    ) || /^\/.well-known\/(webfinger|nodeinfo)/.test(path)
+  );
+};
