@@ -41,10 +41,16 @@ export function queryUserStripeStatus(userId?: number) {
         "retrying?",
         err,
         err instanceof MirloFetchError,
+        err instanceof MirloFetchError && err.status,
         shouldRetry
       );
       return shouldRetry;
     },
+    refetchOnWindowFocus: (query) =>
+      !(
+        query.state.error instanceof MirloFetchError &&
+        query.state.error.status === 403
+      ),
   });
 }
 
