@@ -15,7 +15,8 @@ import { FaDownload } from "react-icons/fa";
 import api from "services/api";
 import usePagination from "utils/usePagination";
 
-import SalesRow, { SalesCard } from "./SalesRow";
+import { SalesCard } from "./SalesCard";
+import SalesRow from "./SalesRow";
 
 const pageSize = 50;
 
