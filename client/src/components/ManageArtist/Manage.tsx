@@ -1,15 +1,15 @@
 import { css } from "@emotion/css";
-import React from "react";
-
-import api from "services/api";
-import { ButtonLink } from "../common/Button";
-import { bp } from "../../constants";
-import { useTranslation } from "react-i18next";
+import AccountNav from "components/Account/AccountNav";
+import StripeStatus from "components/common/stripe/StripeStatusAndButton";
 import WidthContainer from "components/common/WidthContainer";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaPlus } from "react-icons/fa";
+import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 
-import { FaPlus } from "react-icons/fa";
-import StripeStatus from "components/common/stripe/StripeStatusAndButton";
+import { bp } from "../../constants";
+import { ButtonLink } from "../common/Button";
 
 export const Manage: React.FC = () => {
   const { user } = useAuthContext();
@@ -34,6 +34,9 @@ export const Manage: React.FC = () => {
 
   return (
     <>
+      <WidthContainer variant="big" justify="center">
+        <AccountNav />
+      </WidthContainer>
       <div
         className={css`
           display: flex;

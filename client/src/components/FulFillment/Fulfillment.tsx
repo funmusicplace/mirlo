@@ -1,18 +1,20 @@
-import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import ArtistFilter from "components/common/ArtistFilter";
+import Button from "components/common/Button";
+import DateRangeFilter, {
+  DateRangeValue,
+} from "components/common/DateRangeFilter";
 import Table from "components/common/Table";
+import WidthContainer from "components/common/WidthContainer";
+import { queryUserPurchases, queryManagedArtists } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import api from "services/api";
-import FulfillmentRow from "./FulfillmentRow";
-import { useQuery } from "@tanstack/react-query";
-import { queryUserPurchases, queryManagedArtists } from "queries";
-import WidthContainer from "components/common/WidthContainer";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import Button, { ButtonLink } from "components/common/Button";
-import DropdownMenu from "components/common/DropdownMenu";
 import { FaDownload } from "react-icons/fa";
+import api from "services/api";
 import usePagination from "utils/usePagination";
-import { SelectEl } from "components/common/Select";
+
+import { FulfillmentCard } from "./FulfillmentCard";
+import FulfillmentRow from "./FulfillmentRow";
 
 const pageSize = 50;
 
@@ -23,7 +25,7 @@ export const Fulfillment: React.FC = () => {
   const [isLoadingFulfillments, setIsLoadingFulfillments] =
     React.useState(false);
   const [filteredArtistId, setFilteredArtistId] = React.useState<number>();
-  const [datePurchased, setDatePurchased] = React.useState<string>("");
+  const [datePurchased, setDatePurchased] = React.useState<DateRangeValue>("");
   const { page, PaginationComponent } = usePagination({ pageSize });
 
   const downloadOrderData = React.useCallback(async () => {
@@ -62,112 +64,99 @@ export const Fulfillment: React.FC = () => {
   const { data: managedArtists } = useQuery(queryManagedArtists());
 
   return (
-    <WidthContainer
-      variant="big"
-      className={css`
-        padding: 1rem;
-      `}
-    >
-      <SpaceBetweenDiv>
-        <h1
-          className={css`
-            margin: 0.5rem 0;
-          `}
-        >
-          {t("ordersAndFulfillment")}
-        </h1>
-        <div
-          className={css`
-            align-items: center;
-            display: flex;
-            gap: 1rem;
-          `}
-        >
-          <ButtonLink variant="outlined" to="/sales">
-            {t("viewSales")}
-          </ButtonLink>
-          <DropdownMenu>
-            <ul>
-              <li>
-                <Button
-                  onClick={downloadOrderData}
-                  size="compact"
-                  startIcon={<FaDownload />}
-                  isLoading={isLoadingFulfillments}
-                >
-                  {t("downloadOrderData")}
-                </Button>
-              </li>
-            </ul>
-          </DropdownMenu>
-        </div>
-      </SpaceBetweenDiv>
+    <WidthContainer variant="big" className="p-4">
+      <h1 className="my-2">{t("ordersAndFulfillment")}</h1>
       <p>{t("fulfillmentDescription")}</p>
-      <div className="flex gap-1 mb-1">
-        <SelectEl
-          onChange={(e) => {
-            const artistId = e.target.value
-              ? Number(e.target.value)
-              : undefined;
-            setFilteredArtistId(artistId);
-          }}
-          value={filteredArtistId ?? ""}
-        >
-          <option value="">{t("selectArtist")}</option>
-          {managedArtists?.results.map((artist) => (
-            <option key={artist.id} value={artist.id}>
-              {artist.name}
-            </option>
-          ))}
-        </SelectEl>
-        <SelectEl
-          onChange={(e) => {
-            setDatePurchased(e.target.value);
-          }}
-          value={datePurchased}
-        >
-          <option value="">All dates</option>
-          <option value="thisMonth">Current month to date</option>
-          <option value="previousMonth">Previous month</option>
-          <option value="thisYear">Current year to date</option>
-          <option value="lastYear">Last year</option>
-        </SelectEl>
-      </div>
-      <h4>{t("totalResults", { count: purchaseResults?.total })}</h4>
-      {(purchaseResults?.results.length ?? 0) > 0 && (
-        <div
-          className={css`
-            max-width: 100%;
-            overflow-x: auto;
-            background-color: var(--mi-lighten-background-color);
-          `}
-        >
-          <Table>
-            <thead>
-              <tr>
-                <th />
-                <th>{t("artist")}</th>
-                <th>{t("merchItem")}</th>
-                <th>{t("customer")}</th>
-                <th>{t("email")}</th>
-                <th>{t("quantity")}</th>
-                <th>{t("type")}</th>
-                <th>{t("fulfillmentStatus")}</th>
-                <th>{t("orderDate")}</th>
-                <th>{t("lastUpdated")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {purchaseResults?.results.map((purchase, index) => (
-                <FulfillmentRow key={purchase.id} purchase={purchase} />
+      {(purchaseResults?.results.length ?? 0) > 0 &&
+        (() => {
+          const counts = {
+            NO_PROGRESS: 0,
+            STARTED: 0,
+            SHIPPED: 0,
+            COMPLETED: 0,
+          };
+          for (const p of purchaseResults?.results ?? []) {
+            counts[p.fulfillmentStatus] =
+              (counts[p.fulfillmentStatus] ?? 0) + 1;
+          }
+          const statusKeys = [
+            { key: "NO_PROGRESS", labelKey: "noProgress" },
+            { key: "STARTED", labelKey: "started" },
+            { key: "SHIPPED", labelKey: "shipped" },
+            { key: "COMPLETED", labelKey: "completed" },
+          ] as const;
+          return (
+            <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 my-4">
+              {statusKeys.map(({ key, labelKey }) => (
+                <div
+                  key={key}
+                  className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4"
+                >
+                  <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
+                    {t(labelKey)}
+                  </div>
+                  <div className="text-2xl font-semibold mt-1">
+                    {counts[key]}
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </Table>
+            </div>
+          );
+        })()}
+      <div className="flex flex-wrap-reverse items-center gap-2 max-md:gap-y-4 mb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <ArtistFilter
+            artists={managedArtists?.results ?? []}
+            selectedArtistId={filteredArtistId ?? null}
+            onChange={(id) => setFilteredArtistId(id ?? undefined)}
+          />
+          <DateRangeFilter value={datePurchased} onChange={setDatePurchased} />
+        </div>
+        <Button
+          onClick={downloadOrderData}
+          variant="outlined"
+          startIcon={<FaDownload />}
+          isLoading={isLoadingFulfillments}
+          className="ml-auto max-md:w-full"
+        >
+          {t("downloadOrderData")}
+        </Button>
+      </div>
+      {(purchaseResults?.results.length ?? 0) > 0 && (
+        <>
+          <div className="hidden md:block">
+            <Table>
+              <thead>
+                <tr>
+                  <th />
+                  <th>{t("artist")}</th>
+                  <th>{t("merchItem")}</th>
+                  <th>{t("customer")}</th>
+                  <th>{t("email")}</th>
+                  <th>{t("quantity")}</th>
+                  <th>{t("type")}</th>
+                  <th>{t("fulfillmentStatus")}</th>
+                  <th>{t("orderDate")}</th>
+                  <th>{t("lastUpdated")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseResults?.results.map((purchase) => (
+                  <FulfillmentRow key={purchase.id} purchase={purchase} />
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          <ul className="flex flex-col gap-3 md:hidden">
+            {purchaseResults?.results.map((purchase) => (
+              <FulfillmentCard key={purchase.id} purchase={purchase} />
+            ))}
+          </ul>
           <PaginationComponent
             amount={purchaseResults?.results.length ?? 0}
             total={purchaseResults?.total ?? 0}
           />
-        </div>
+        </>
       )}
     </WidthContainer>
   );

@@ -141,9 +141,15 @@ describe("sales page", () => {
 
   it("renders sales from the API for a logged in user", () => {
     cy.contains("Sales");
-    cy.contains("Total sales income: $19.99");
-    cy.contains("Total supporters: 1");
-    cy.contains("Total sales: 2");
+    cy.contains("Total sales income")
+      .parent()
+      .within(() => cy.contains("$19.99"));
+    cy.contains(/^Total sales$/)
+      .parent()
+      .within(() => cy.contains("2"));
+    cy.contains("Total supporters")
+      .parent()
+      .within(() => cy.contains("1"));
 
     cy.get("table tbody").within(() => {
       cy.get("tr")

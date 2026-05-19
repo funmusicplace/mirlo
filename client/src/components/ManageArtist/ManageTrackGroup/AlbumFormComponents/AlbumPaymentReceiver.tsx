@@ -1,22 +1,23 @@
+import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import FormComponent from "components/common/FormComponent";
+import Pill from "components/common/Pill";
+import { queryManagedTrackGroup } from "queries";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { FaTimes } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 import { getArtistManageUrl } from "utils/artist";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
+
 import { hasId } from "./ManageTags";
-import { queryManagedTrackGroup, queryTrackGroup } from "queries";
-import { useQuery } from "@tanstack/react-query";
-import Pill from "components/common/Pill";
-import { FaTimes } from "react-icons/fa";
-import { css } from "@emotion/css";
-import { useAuthContext } from "state/AuthContext";
 
 const AlbumPaymentReceiver = () => {
   const { trackGroupId } = useParams();
@@ -105,7 +106,7 @@ const AlbumPaymentReceiver = () => {
               labelPage: (
                 <ArtistButtonLink
                   variant="link"
-                  to={"/profile/label"}
+                  to={"/account/label"}
                 ></ArtistButtonLink>
               ),
             }}

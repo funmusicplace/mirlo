@@ -38,7 +38,7 @@ const ManageArtist: React.FC<{}> = () => {
       id: "roster",
       label: rosterTitle,
       visible: !!artist.isLabelProfile,
-      to: "/profile/label",
+      to: "/account/label",
     },
     {
       id: "releases",

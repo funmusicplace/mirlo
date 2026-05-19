@@ -159,18 +159,51 @@ const routes: RouteObject[] = [
         },
       },
       {
-        path: "account",
         async lazy() {
-          const { default: Component } =
+          const { default: AccountContainer } =
             await import("components/Account/AccountContainer");
           return {
             Component: () => (
               <AuthWrapper>
-                <Component />
+                <AccountContainer />
               </AuthWrapper>
             ),
           };
         },
+        children: [
+          {
+            path: "account",
+            async lazy() {
+              const { default: Component } =
+                await import("components/Account/AccountSettings");
+              return { Component };
+            },
+          },
+          {
+            path: "fulfillment",
+            async lazy() {
+              const { default: Component } =
+                await import("components/FulFillment/Fulfillment");
+              return { Component };
+            },
+          },
+          {
+            path: "sales",
+            async lazy() {
+              const { default: Component } =
+                await import("components/Sales/Sales");
+              return { Component };
+            },
+          },
+          {
+            path: "account/label",
+            async lazy() {
+              const { default: Component } =
+                await import("components/Profile/ManageLabel");
+              return { Component };
+            },
+          },
+        ],
       },
       {
         path: "profile",
@@ -196,13 +229,7 @@ const routes: RouteObject[] = [
           },
           {
             path: "label",
-            async lazy() {
-              const { default: Component } =
-                await import("components/Profile/ManageLabel");
-              return {
-                Component: () => <Component />,
-              };
-            },
+            element: <Navigate to="/account/label" replace />,
           },
           {
             path: "collection",
@@ -620,33 +647,6 @@ const routes: RouteObject[] = [
             },
           },
         ],
-      },
-      {
-        path: "fulfillment",
-        async lazy() {
-          const { default: Fulfillment } =
-            await import("components/FulFillment/Fulfillment");
-          return {
-            Component: () => (
-              <AuthWrapper>
-                <Fulfillment />
-              </AuthWrapper>
-            ),
-          };
-        },
-      },
-      {
-        path: "sales",
-        async lazy() {
-          const { default: Sales } = await import("components/Sales/Sales");
-          return {
-            Component: () => (
-              <AuthWrapper>
-                <Sales />
-              </AuthWrapper>
-            ),
-          };
-        },
       },
       {
         path: "releases",

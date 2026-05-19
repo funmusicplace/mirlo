@@ -1,18 +1,15 @@
 import { css } from "@emotion/css";
 import Tabs from "components/common/Tabs";
+import UnreadCountPill from "components/common/UnreadCountPill";
 import WidthContainer from "components/common/WidthContainer";
-import { bp } from "../../constants";
 import React from "react";
 import { useTranslation } from "react-i18next";
-
 import { NavLink, Outlet } from "react-router-dom";
-import UnreadCountPill from "components/common/UnreadCountPill";
-import { useAuthContext } from "state/AuthContext";
+
+import { bp } from "../../constants";
 
 const ProfileContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
-
-  const { user } = useAuthContext();
 
   return (
     <>
@@ -62,11 +59,6 @@ const ProfileContainer: React.FC = () => {
               <li>
                 <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
               </li>
-              {user?.isLabelAccount && (
-                <li>
-                  <NavLink to="/profile/label">{t("label")}</NavLink>
-                </li>
-              )}
               <li>
                 <NavLink to="/profile/notifications">
                   {t("notifications")}

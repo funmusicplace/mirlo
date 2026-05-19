@@ -6,9 +6,8 @@ import { useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
 
 import CustomerPopUp from "./CustomerPopUp";
-import { css } from "@emotion/css";
 
-const statusMap = {
+export const statusMap = {
   SHIPPED: "shipped",
   NO_PROGRESS: "noProgress",
   STARTED: "started",
@@ -28,9 +27,7 @@ const FulfillmentRow: React.FC<{ purchase: MerchPurchase }> = ({
       <tr
         key={purchase.id}
         onClick={() => setIsEditing(true)}
-        className={css`
-          cursor: pointer;
-        `}
+        className="cursor-pointer"
       >
         <td>
           <Button onClick={() => setIsEditing(true)} startIcon={<FaEye />} />
@@ -39,7 +36,6 @@ const FulfillmentRow: React.FC<{ purchase: MerchPurchase }> = ({
         <td>{purchase.merch.title} </td>
         <td>{purchase.user.name}</td>
         <td>{purchase.user.email}</td>
-
         <td>{purchase.quantity}</td>
         <td>
           {purchase.options?.map((option) => (
@@ -49,7 +45,15 @@ const FulfillmentRow: React.FC<{ purchase: MerchPurchase }> = ({
           ))}
         </td>
         <td>
-          <Button>{t(statusMap[purchase.fulfillmentStatus])}</Button>
+          <Button
+            className={
+              purchase.fulfillmentStatus === "COMPLETED"
+                ? "bg-(--mi-green-100)! text-(--mi-green-700)! border-(--mi-green-500)!"
+                : ""
+            }
+          >
+            {t(statusMap[purchase.fulfillmentStatus])}
+          </Button>
         </td>
         <td>
           {formatDate({
