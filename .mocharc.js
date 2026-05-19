@@ -7,7 +7,7 @@ module.exports = {
   spec: "test/**/*.spec.ts",
   require: "ts-node/register",
   forbidOnly: inCI,
-  // watch: !inCI,
+  timeout: 3000,
   "watch-files": ["test/**/*.ts", "src/**/*.ts"],
   "watch-ignore": ["node_modules"],
 };

@@ -23,14 +23,6 @@ describe("artists", () => {
   });
 
   describe("/{id}", () => {
-    beforeEach(async () => {
-      try {
-        await clearTables();
-      } catch (e) {
-        console.error(e);
-      }
-    });
-
     it("should GET /{id} with artist slug", async () => {
       const artistSlug = "test-artist";
       const user = await prisma.user.create({
