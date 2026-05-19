@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import React from "react";
@@ -26,19 +25,9 @@ export const CustomNamesForTabs: React.FC = () => {
       </ArtistFormSection>
 
       <ArtistFormSection>
-        <div
-          className={css`
-            width: 100%;
-          `}
-        >
+        <div className="w-full">
           <h2>{t("otherText")}</h2>
-          <div
-            className={css`
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 1rem;
-            `}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormComponent>
               <label htmlFor="input-support-button-text">
                 {t("supportButtonText")}

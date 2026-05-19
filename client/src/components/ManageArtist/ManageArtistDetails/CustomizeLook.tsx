@@ -36,6 +36,7 @@ export interface ShareableTrackgroup {
 export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
   display: flex;
   padding: 2rem !important;
+  margin-top: 0.5rem;
   margin-bottom: 1rem;
   ${(props) => (!props.isOdd ? "background: var(--mi-tint-color);" : "")}
   gap: 1rem;
@@ -332,11 +333,7 @@ export const CustomizeLook: React.FC = () => {
               </div>
             </ArtistFormSection>
             <ArtistFormSection className="flex-col">
-              <FormComponent
-                className={css`
-                  width: 500px;
-                `}
-              >
+              <FormComponent className="w-full max-w-[500px]">
                 <PaymentSlider
                   label={t("defaultPlatformFee")}
                   url={`manage/artists/${artist.id}`}
@@ -351,11 +348,7 @@ export const CustomizeLook: React.FC = () => {
                 </small>
                 <ApplyPlatformFeeButton artistId={artist.id} />
               </FormComponent>
-              <FormComponent
-                className={css`
-                  width: 300px;
-                `}
-              >
+              <FormComponent className="w-full max-w-[300px]">
                 <label>{t("maxFreePlays")}</label>
                 <SavingInput
                   type="number"
@@ -466,9 +459,8 @@ const ApplyPlatformFeeButton: React.FC<{ artistId: number }> = ({
       onClick={onClick}
       disabled={isPending}
       isLoading={isPending}
-      className={css`
-        margin-top: 0.5rem;
-      `}
+      wrap
+      className="mt-2 max-w-full"
     >
       {t("applyPlatformFeeToAll")}
     </ArtistButton>

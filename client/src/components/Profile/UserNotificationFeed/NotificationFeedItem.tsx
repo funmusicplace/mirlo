@@ -1,13 +1,13 @@
 import styled from "@emotion/styled";
 import React from "react";
 
-import UserBoughtYourAlbum from "./UserBoughtYourAlbum";
-import NewArtistPost from "./NewArtistPost";
-import NewArtistAlbum from "./NewArtistAlbum";
-import UserFollowedYou from "./UserFollowedYou";
+import ArtistContactMessage from "./ArtistContactMessage";
 import FundraiserPledge from "./FundraiserPledge";
 import LabelInvite from "./LabelInvite";
-import ArtistContactMessage from "./ArtistContactMessage";
+import NewArtistAlbum from "./NewArtistAlbum";
+import NewArtistPost from "./NewArtistPost";
+import UserBoughtYourAlbum from "./UserBoughtYourAlbum";
+import UserFollowedYou from "./UserFollowedYou";
 
 const categoryBorderColor = (type: Notification["notificationType"]) => {
   switch (type) {
@@ -77,7 +77,7 @@ const NotificationFeedItem: React.FC<{
         <NewArtistAlbum notification={notification} />
       )}
       {notification.notificationType === "LABEL_ADDED_ARTIST" && (
-        <LabelInvite notification={notification} />
+        <LabelInvite notification={notification} compact={compact} />
       )}
       {notification.notificationType === "ARTIST_CONTACT_MESSAGE" && (
         <ArtistContactMessage notification={notification} compact={compact} />
