@@ -56,7 +56,7 @@ export const PublicTrackGroupListing: React.FC<{
   }
 
   return (
-    <Table className={`max-sm:m-0 ${inWidget ? "table-fixed" : ""}`}>
+    <Table isTrackRow className={`max-sm:m-0 ${inWidget ? "table-fixed" : ""}`}>
       <tbody>
         {displayTracks?.map((track) => (
           <TrackRow
