@@ -1,7 +1,9 @@
-import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
+import { processSingleArtist } from "../../../../utils/artist";
 
 type Params = {
   userId: string;
@@ -30,15 +32,31 @@ export default function () {
             include: {
               artistSubscriptionTier: {
                 include: {
-                  artist: true,
+                  artist: {
+                    include: {
+                      avatar: { where: { deletedAt: null } },
+                    },
+                  },
                 },
               },
             },
           },
         },
       });
+      const results = charges.map((c) => ({
+        ...c,
+        artistUserSubscription: {
+          ...c.artistUserSubscription,
+          artistSubscriptionTier: {
+            ...c.artistUserSubscription.artistSubscriptionTier,
+            artist: processSingleArtist(
+              c.artistUserSubscription.artistSubscriptionTier.artist
+            ),
+          },
+        },
+      }));
       res.json({
-        results: charges,
+        results,
       });
     } else {
       res.status(401);

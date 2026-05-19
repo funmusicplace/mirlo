@@ -43,7 +43,7 @@ function YourPurchases() {
   return (
     <div className="p-(--mi-side-paddings-xsmall)">
       <WidthContainer variant="big" justify="center">
-        <div className="flex flex-wrap md:flex-nowrap gap-8 items-start p-4">
+        <div className="flex flex-wrap md:flex-nowrap gap-8 items-start">
           <section className="flex-1 w-full min-w-0">
             <h1>{t("yourPurchases")}</h1>
             {(!purchases || purchases.length === 0) && (
@@ -88,7 +88,7 @@ function YourPurchases() {
           </section>
 
           {charges && charges.length > 0 && (
-            <aside className="md:shrink-0 md:w-1/3 w-full min-w-0 rounded-xl bg-(--mi-darken-background-color) p-4">
+            <aside className="md:shrink-0 md:w-1/3 w-full min-w-0 rounded-xl bg-(--mi-darken-background-color) p-4 text-sm">
               <h2 className="mt-0 text-base font-bold">
                 {t("subscriptionCharges")}
               </h2>
@@ -112,26 +112,27 @@ function YourPurchases() {
                   }
                 `}
               >
-                {charges.map((p) => (
-                  <li key={p.id}>
-                    {p.transaction && (
-                      <PurchaseComponent
-                        title={
-                          p.artistUserSubscription.artistSubscriptionTier.name
-                        }
-                        currencyPaid={p.transaction?.currency}
-                        pricePaid={p.transaction?.amount}
-                        artist={
-                          p.artistUserSubscription.artistSubscriptionTier.artist
-                        }
-                        url={getArtistUrl(
-                          p.artistUserSubscription.artistSubscriptionTier.artist
-                        )}
-                        purchaseDate={p.createdAt}
-                      />
-                    )}
-                  </li>
-                ))}
+                {charges.map((p) => {
+                  const artist =
+                    p.artistUserSubscription.artistSubscriptionTier.artist;
+                  return (
+                    <li key={p.id}>
+                      {p.transaction && (
+                        <PurchaseComponent
+                          title={
+                            p.artistUserSubscription.artistSubscriptionTier.name
+                          }
+                          currencyPaid={p.transaction?.currency}
+                          pricePaid={p.transaction?.amount}
+                          artist={artist}
+                          imageSrc={artist.avatar?.sizes?.["60"]}
+                          url={getArtistUrl(artist)}
+                          purchaseDate={p.createdAt}
+                        />
+                      )}
+                    </li>
+                  );
+                })}
               </ol>
             </aside>
           )}
