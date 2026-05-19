@@ -119,6 +119,7 @@
   },
   "headerMenu": {
     "logOutSuccess": "Logged out!",
+    "yourFeed": "Your feed",
     "collection": "Collection",
     "logOut": "Log out",
     "profile": "Profile",
