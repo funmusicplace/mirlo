@@ -85,7 +85,7 @@ const ResetStripeAccountModal: React.FC<{
     [userId, password, code, snackbar, t, onReset, close]
   );
 
-  if (!stripeAccountStatus?.detailsSubmitted || !isStripeGone) {
+  if (!stripeAccountStatus?.stripeAccountId || !isStripeGone) {
     return null;
   }
 
