@@ -65,7 +65,7 @@ export default function () {
           // - generate a playtoken for a song and user
           const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
 
-          if (req.client?.key !== apiHeader) {
+          if (!Boolean(apiHeader) || req.client?.key !== apiHeader) {
             res
               .status(401)
               .send(`Header ${MIRLO_API_KEY_HEADER} missing or invalid`);
@@ -92,7 +92,7 @@ export default function () {
           const reqUserId = req.query[socialMusic.USERID];
           if (!(playToken && reqUserId)) {
             res
-              .status(400)
+              .status(401)
               .send(
                 `${socialMusic.USERID} or ${socialMusic.PLAYTOKEN} missing`
               );
