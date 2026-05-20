@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { RxLoop } from "react-icons/rx";
 import { GlobalState, useGlobalStateContext } from "state/GlobalState";
 
@@ -25,6 +26,7 @@ const LoopingIndicator = styled.span`
 `;
 
 export const LoopButton: React.FC = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "player" });
   const {
     state: { looping },
     dispatch,
@@ -40,30 +42,43 @@ export const LoopButton: React.FC = () => {
     dispatch({ type: "setLooping", looping: nextLooping });
   }, [dispatch, looping]);
 
+  const stateLabel = t(
+    looping === "loopTrack"
+      ? "loopingTrack"
+      : looping === "loopQueue"
+        ? "loopingQueue"
+        : "loopMusic"
+  );
+
   return (
-    <Button
-      buttonRole={looping ? "primary" : undefined}
-      variant={looping ? "default" : "outlined"}
-      aria-label="Loop music"
-      onClick={onLoop}
-      startIcon={
-        <>
-          <RxLoop />
-          {looping === "loopTrack" && <LoopingIndicator>1</LoopingIndicator>}
-        </>
-      }
-      className={css`
-        margin-left: 0.25rem;
-        position: relative;
-        svg {
-          color: ${looping ? "white !important" : "inherit"};
+    <>
+      <Button
+        buttonRole={looping ? "primary" : undefined}
+        variant={looping ? "default" : "outlined"}
+        aria-label={stateLabel}
+        onClick={onLoop}
+        startIcon={
+          <>
+            <RxLoop />
+            {looping === "loopTrack" && <LoopingIndicator>1</LoopingIndicator>}
+          </>
         }
-        ${looping
-          ? `color: var(--mi-button-color) !important;
+        className={css`
+          margin-left: 0.25rem;
+          position: relative;
+          svg {
+            color: ${looping ? "white !important" : "inherit"};
+          }
+          ${looping
+            ? `color: var(--mi-button-color) !important;
              `
-          : ""}
-      `}
-    />
+            : ""}
+        `}
+      />
+      <span aria-live="polite" className="sr-only">
+        {stateLabel}
+      </span>
+    </>
   );
 };
 

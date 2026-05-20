@@ -648,7 +648,17 @@
     "playsRemaining_one": "{{count}} free play left — buy this release to keep listening.",
     "playsRemaining_other": "{{count}} free plays left — buy this release to keep listening.",
     "playsRemainingShort_one": "{{count}} free play left",
-    "playsRemainingShort_other": "{{count}} free plays left"
+    "playsRemainingShort_other": "{{count}} free plays left",
+    "audioPlayer": "Audio player",
+    "nextTrack": "Play next track",
+    "previousTrack": "Play previous track",
+    "loopMusic": "Loop music",
+    "loopingTrack": "Looping current track",
+    "loopingQueue": "Looping queue",
+    "shuffleMusic": "Shuffle music",
+    "volumeControl": "Volume control",
+    "muteVolume": "Mute volume",
+    "nowPlayingAnnouncement": "Now playing: {{title}} by {{artist}}"
   },
   "post": {
     "postByArtist": "by <link></link>",

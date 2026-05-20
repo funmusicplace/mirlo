@@ -1,7 +1,9 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import { useTranslation } from "react-i18next";
 import { FaVolumeMute } from "react-icons/fa";
 import { FaVolumeHigh } from "react-icons/fa6";
+import { useSliderKeyboard } from "utils/useSliderKeyboard";
 
 import { bp } from "../../constants";
 
@@ -9,6 +11,14 @@ export const VolumeControl: React.FC<{
   setVolume: React.Dispatch<React.SetStateAction<number>>;
   volume: number;
 }> = ({ setVolume, volume }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "player" });
+  const onKeyDown = useSliderKeyboard({
+    value: volume,
+    min: 0,
+    max: 1,
+    step: 0.1,
+    onChange: (next) => setVolume(+next.toFixed(1)),
+  });
   return (
     <div
       className={css`
@@ -29,7 +39,8 @@ export const VolumeControl: React.FC<{
         className={css`
           font-size: 1.25rem !important;
         `}
-        title="Mute volume"
+        aria-label={t("muteVolume")}
+        title={t("muteVolume")}
         onClick={() => {
           setVolume((val) => (val > 0 ? 0 : 0.5));
         }}
@@ -44,10 +55,20 @@ export const VolumeControl: React.FC<{
           margin: 0 0.25rem;
           top: 0;
           position: inherit;
+
+          &:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+          }
         `}
-        aria-label="Volume control"
-        role="button"
-        title="Volume control"
+        role="slider"
+        aria-label={t("volumeControl")}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(volume * 100)}
+        tabIndex={0}
+        title={t("volumeControl")}
+        onKeyDown={onKeyDown}
         onMouseUp={(event: React.MouseEvent<HTMLDivElement>) => {
           const divWidth = event.currentTarget.offsetWidth;
           const clickX = event.clientX - event.currentTarget.offsetLeft;

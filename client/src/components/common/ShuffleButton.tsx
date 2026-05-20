@@ -1,11 +1,13 @@
+import { css } from "@emotion/css";
 import React from "react";
-
+import { useTranslation } from "react-i18next";
 import { RxShuffle } from "react-icons/rx";
 import { useGlobalStateContext } from "state/GlobalState";
-import { css } from "@emotion/css";
+
 import Button from "./Button";
 
 export const ShuffleButton: React.FC = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "player" });
   const {
     state: { shuffle },
     dispatch,
@@ -20,7 +22,8 @@ export const ShuffleButton: React.FC = () => {
       startIcon={<RxShuffle />}
       buttonRole={shuffle ? "primary" : undefined}
       onClick={onShuffle}
-      aria-label="Shuffle music"
+      aria-label={t("shuffleMusic")}
+      aria-pressed={!!shuffle}
       variant={shuffle ? "default" : "outlined"}
       className={css`
         ${shuffle ? "color: white !important;" : ""}

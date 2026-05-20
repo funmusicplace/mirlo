@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { isEmpty } from "lodash";
 import React from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useBroadcastPlayerSync } from "utils/playerSync";
@@ -40,6 +41,7 @@ const ControlWrapper = styled.span`
 `;
 
 const Player = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "player" });
   const { user } = useAuthContext();
   const { state, dispatch } = useGlobalStateContext();
 
@@ -123,8 +125,18 @@ const Player = () => {
           }
         `}
         id="player"
+        role="region"
+        aria-label={t("audioPlayer")}
         data-mount-id={mountId}
       >
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {currentTrack.title
+            ? t("nowPlayingAnnouncement", {
+                title: currentTrack.title,
+                artist: currentTrack.trackGroup.artist?.name ?? "",
+              })
+            : ""}
+        </div>
         <div
           className={css`
             width: 100%;

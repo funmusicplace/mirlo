@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { TfiControlPause } from "react-icons/tfi";
 import { VscPlay } from "react-icons/vsc";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -25,6 +26,7 @@ const TrackRowPlayControl: React.FC<{
   inWidget,
   compact,
 }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex },
     dispatch,
@@ -77,7 +79,7 @@ const TrackRowPlayControl: React.FC<{
     return (
       <button
         type="button"
-        aria-label="Pause track"
+        aria-label={t("pause")}
         onClick={onTrackPause}
         className={`${baseButtonClass} ${stackClass} ${
           inWidget ? "justify-start" : ""
@@ -99,7 +101,7 @@ const TrackRowPlayControl: React.FC<{
       {canPlayTrack && !isDisabled && (
         <button
           type="button"
-          aria-label="Play track"
+          aria-label={t("play")}
           onClick={onTrackPlay}
           className={`${baseButtonClass} absolute inset-0 ${
             inWidget ? "justify-start" : ""

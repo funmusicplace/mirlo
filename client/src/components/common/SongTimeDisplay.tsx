@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
+import { useSliderKeyboard } from "utils/useSliderKeyboard";
 
 const SEEK_RESYNC_TOLERANCE = 0.02;
 const KEYBOARD_STEP_SECONDS = 5;
@@ -66,34 +67,14 @@ export const SongTimeDisplay: React.FC<{
     };
   }, [isDragging, computePercent, duration, seekTo]);
 
-  const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!isFinite(duration) || duration <= 0) return;
-    let newTime = currentSeconds;
-    switch (event.key) {
-      case "ArrowLeft":
-        newTime = currentSeconds - KEYBOARD_STEP_SECONDS;
-        break;
-      case "ArrowRight":
-        newTime = currentSeconds + KEYBOARD_STEP_SECONDS;
-        break;
-      case "PageDown":
-        newTime = currentSeconds - KEYBOARD_LARGE_STEP_SECONDS;
-        break;
-      case "PageUp":
-        newTime = currentSeconds + KEYBOARD_LARGE_STEP_SECONDS;
-        break;
-      case "Home":
-        newTime = 0;
-        break;
-      case "End":
-        newTime = duration;
-        break;
-      default:
-        return;
-    }
-    event.preventDefault();
-    seekTo(newTime);
-  };
+  const onKeyDown = useSliderKeyboard({
+    value: currentSeconds,
+    min: 0,
+    max: isFinite(duration) ? duration : 0,
+    step: KEYBOARD_STEP_SECONDS,
+    largeStep: KEYBOARD_LARGE_STEP_SECONDS,
+    onChange: seekTo,
+  });
 
   const displayPercent =
     isDragging && dragPercent !== null
