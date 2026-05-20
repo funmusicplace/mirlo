@@ -1,18 +1,13 @@
-import React from "react";
-import api from "../../services/api";
-import { useTranslation } from "react-i18next";
-import WidthContainer from "components/common/WidthContainer";
-import { useAuthContext } from "state/AuthContext";
-
-import {
-  getArtistUrl,
-  getMerchUrl,
-  getReleaseUrl,
-  getTrackUrl,
-} from "utils/artist";
-import { bp } from "../../constants";
 import { css } from "@emotion/css";
+import WidthContainer from "components/common/WidthContainer";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthContext } from "state/AuthContext";
 import { isUserTransaction } from "types/typeguards";
+import { getArtistUrl } from "utils/artist";
+
+import api from "../../services/api";
+
 import PurchaseComponent from "./PurchaseComponent";
 import TransactionComponent from "./TransactionComponent";
 
@@ -46,32 +41,20 @@ function YourPurchases() {
   }
 
   return (
-    <>
-      <div
-        className={css`
-          padding: var(--mi-side-paddings-xsmall);
-        `}
-      >
-        <WidthContainer variant="medium" justify="center">
-          <h1>{t("yourPurchases")}</h1>
-          <div
-            className={css`
-              display: flex;
-              width: 100%;
-              flex-direction: row;
-              flex-wrap: wrap;
-              margin: 0 auto;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                width: 100%;
-              }
-            `}
-          >
-            {!purchases || (purchases?.length === 0 && <>{t("noPurchases")}</>)}
-            {purchases && (
+    <div className="p-(--mi-side-paddings-xsmall)">
+      <WidthContainer variant="big" justify="center">
+        <div className="flex flex-wrap md:flex-nowrap gap-8 items-start">
+          <section className="flex-1 w-full min-w-0">
+            <h1>{t("yourPurchases")}</h1>
+            {(!purchases || purchases.length === 0) && (
+              <p className="text-(--mi-secondary-text-color) mt-4">
+                {t("noPurchases")}
+              </p>
+            )}
+            {purchases && purchases.length > 0 && (
               <ol
                 className={css`
-                  padding: 1rem;
+                  padding: 1rem 0;
                   width: 100%;
                   list-style: none;
 
@@ -101,37 +84,18 @@ function YourPurchases() {
                 ))}
               </ol>
             )}
-          </div>
-          <div>
             <p>{t("reimbursals")}</p>
-          </div>
-        </WidthContainer>
-        <WidthContainer variant="medium" justify="center">
-          <h1
-            className={css`
-              margin-top: 2rem !important;
-            `}
-          >
-            {t("subscriptionCharges")}
-          </h1>
-          <div
-            className={css`
-              display: flex;
-              width: 100%;
-              flex-direction: row;
-              flex-wrap: wrap;
-              margin: 0 auto;
+          </section>
 
-              @media screen and (max-width: ${bp.medium}px) {
-                width: 100%;
-              }
-            `}
-          >
-            {!charges || (charges?.length === 0 && <>{t("noCharges")}</>)}
-            {charges && (
+          {charges && charges.length > 0 && (
+            <aside className="md:shrink-0 md:w-1/3 w-full min-w-0 rounded-xl bg-(--mi-darken-background-color) p-4 text-sm">
+              <h2 className="mt-0 text-base font-bold">
+                {t("subscriptionCharges")}
+              </h2>
               <ol
                 className={css`
-                  padding: 1rem;
+                  padding: 0;
+                  margin-top: 0.75rem;
                   width: 100%;
                   list-style: none;
 
@@ -139,17 +103,8 @@ function YourPurchases() {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 1rem;
+                    padding: 0.75rem 0;
                     border-bottom: 1px solid var(--mi-darken-x-background-color);
-
-                    img {
-                      min-width: 50px;
-                    }
-
-                    span {
-                      min-width: 200px;
-                      text-align: right;
-                    }
                   }
 
                   li:last-child {
@@ -157,32 +112,33 @@ function YourPurchases() {
                   }
                 `}
               >
-                {charges.map((p) => (
-                  <li key={p.id}>
-                    {p.transaction && (
-                      <PurchaseComponent
-                        title={
-                          p.artistUserSubscription.artistSubscriptionTier.name
-                        }
-                        currencyPaid={p.transaction?.currency}
-                        pricePaid={p.transaction?.amount}
-                        artist={
-                          p.artistUserSubscription.artistSubscriptionTier.artist
-                        }
-                        url={getArtistUrl(
-                          p.artistUserSubscription.artistSubscriptionTier.artist
-                        )}
-                        purchaseDate={p.createdAt}
-                      />
-                    )}
-                  </li>
-                ))}
+                {charges.map((p) => {
+                  const artist =
+                    p.artistUserSubscription.artistSubscriptionTier.artist;
+                  return (
+                    <li key={p.id}>
+                      {p.transaction && (
+                        <PurchaseComponent
+                          title={
+                            p.artistUserSubscription.artistSubscriptionTier.name
+                          }
+                          currencyPaid={p.transaction?.currency}
+                          pricePaid={p.transaction?.amount}
+                          artist={artist}
+                          imageSrc={artist.avatar?.sizes?.["60"]}
+                          url={getArtistUrl(artist)}
+                          purchaseDate={p.createdAt}
+                        />
+                      )}
+                    </li>
+                  );
+                })}
               </ol>
-            )}
-          </div>
-        </WidthContainer>
-      </div>
-    </>
+            </aside>
+          )}
+        </div>
+      </WidthContainer>
+    </div>
   );
 }
 

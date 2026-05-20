@@ -221,6 +221,10 @@ const routes: RouteObject[] = [
         children: [
           {
             path: "",
+            element: <Navigate to="/profile/followed" replace />,
+          },
+          {
+            path: "followed",
             async lazy() {
               const { default: Component } =
                 await import("./components/Profile");
