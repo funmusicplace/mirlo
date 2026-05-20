@@ -317,12 +317,7 @@ const ClickToPlay: React.FC<
           <p aria-hidden>{t(linkLabelKey)}</p>
         </PlayWrapper>
 
-        {currentlyPlaying && (
-          <PlayingMusicBars
-            width={image?.width ?? 0}
-            height={image?.height ?? 0}
-          />
-        )}
+        {currentlyPlaying && <PlayingMusicBars />}
         {image && (
           <ImageWithPlaceholder
             src={image.url}

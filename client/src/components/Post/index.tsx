@@ -12,8 +12,10 @@ import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import useArtistQuery from "utils/useArtistQuery";
+import { useTracksQuery } from "utils/useTracksQuery";
 
 import PostHeader from "./PostHeader";
+import PostTracksDock from "./PostTracksDock";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
@@ -72,6 +74,15 @@ const Post: React.FC = () => {
   const { data: post, isLoading } = useQuery(
     queryPost({ postId: postId ?? "", artistId: artistId ?? "" })
   );
+
+  const trackIds = React.useMemo(
+    () =>
+      post && !post.isContentHidden
+        ? (post.tracks?.map((pt) => pt.trackId) ?? [])
+        : [],
+    [post]
+  );
+  const { data: tracksData } = useTracksQuery(trackIds);
 
   if (!post) {
     if (!isLoading) {
@@ -146,6 +157,9 @@ const Post: React.FC = () => {
           artist={post.artist}
           prefaceText={t("likedThisPost")}
         />
+      )}
+      {!post.isContentHidden && tracksData && tracksData.length > 0 && (
+        <PostTracksDock postId={post.id} tracks={tracksData} />
       )}
     </div>
   );

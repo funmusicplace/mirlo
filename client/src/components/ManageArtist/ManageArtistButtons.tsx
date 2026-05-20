@@ -77,19 +77,21 @@ const ManageArtistButtons: React.FC = () => {
         <div
           className={css`
             z-index: 999999;
-            bottom: ${isUp ? "90px" : "20px"};
+            bottom: ${isUp ? "80px" : "20px"};
             left: 1rem;
             position: fixed;
             display: flex;
             flex-direction: column;
-
-            a,
-            button {
-              margin-bottom: 0.5rem;
-            }
+            gap: 0.5rem;
             transition: all 0.3s ease;
 
             @media screen and (max-width: ${bp.medium}px) {
+              bottom: var(
+                --fixed-actions-bottom-offset-mobile,
+                var(--fixed-actions-bottom-offset, ${isUp ? "80px" : "20px"})
+              );
+              left: 0.5rem;
+
               .children {
                 display: none;
               }

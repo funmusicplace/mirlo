@@ -64,8 +64,11 @@ export const TrackTitleContent: React.FC<{
     (track.title ?? "")
   );
 
-  const byLineWrapperBase =
-    "text-sm leading-normal break-normal max-sm:text-xs max-xs:text-[0.65rem] [&_a:hover]:underline! flex items-center justify-between gap-2";
+  const byLineWrapperBase = `text-sm leading-normal break-normal ${
+    foldByLineAtSm
+      ? "max-sm:text-[0.65rem]"
+      : "max-sm:text-xs max-xs:text-[0.65rem]"
+  } [&_a:hover]:underline! flex items-center justify-between gap-2`;
   const byLineFoldClasses = foldByLineAtSm
     ? "max-sm:flex-col max-sm:items-start max-sm:gap-0"
     : "max-xs:flex-col max-xs:items-start max-xs:gap-0";
@@ -78,7 +81,7 @@ export const TrackTitleContent: React.FC<{
       <div
         className={`leading-tight truncate break-normal ${
           compactTitle
-            ? "text-base max-sm:text-sm max-xs:text-xs font-semibold"
+            ? "text-base max-sm:text-xs font-semibold"
             : "text-lg max-sm:text-base max-xs:text-sm font-bold"
         }`}
       >
