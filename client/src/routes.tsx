@@ -361,6 +361,14 @@ const routes: RouteObject[] = [
                     },
                   },
                   {
+                    path: "roster",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("components/ManageArtist/ManageArtistRoster");
+                      return { Component };
+                    },
+                  },
+                  {
                     path: "releases",
                     async lazy() {
                       const { default: Component } =
