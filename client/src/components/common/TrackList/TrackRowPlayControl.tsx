@@ -6,7 +6,7 @@ import { usePlayerSyncRequest } from "utils/playerSync";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
 
 const baseButtonClass =
-  "flex items-center justify-center bg-transparent hover:bg-transparent text-current cursor-pointer transition-opacity";
+  "flex items-center justify-center bg-transparent hover:bg-transparent text-current cursor-pointer transition-opacity p-0 border-0";
 
 const TrackRowPlayControl: React.FC<{
   trackNumber: number;
@@ -62,17 +62,14 @@ const TrackRowPlayControl: React.FC<{
     [dispatch, trackId, embeddedInMirlo, sendPlayerRequest]
   );
 
-  const stackClass = inWidget
-    ? "relative w-6 h-6 max-sm:w-5 max-sm:h-5"
-    : compact
+  const stackClass =
+    inWidget || compact
       ? "relative w-6 h-6 max-sm:w-5 max-sm:h-5"
       : "relative w-8 h-8 max-sm:w-7 max-sm:h-7";
 
   const numberClass = inWidget
     ? "absolute inset-0 flex items-center justify-start text-[0.7rem] max-sm:text-[0.6rem]"
-    : compact
-      ? "absolute inset-0 flex items-center justify-center text-sm"
-      : "absolute inset-0 flex items-center justify-center";
+    : "absolute inset-0 flex items-center justify-center text-sm";
 
   const iconClass = inWidget ? "text-[0.7rem] max-sm:text-[0.6rem]" : "text-sm";
 

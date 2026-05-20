@@ -7,7 +7,7 @@ import MarkdownContent from "components/common/MarkdownContent";
 import { MetaCard } from "components/common/MetaCard";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import WidthContainer from "components/common/WidthContainer";
 import {
   ImageAndDetailsWrapper,

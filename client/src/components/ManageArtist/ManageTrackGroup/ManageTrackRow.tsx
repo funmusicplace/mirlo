@@ -6,8 +6,8 @@ import {
 } from "components/Artist/ArtistButtons";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Tooltip from "components/common/Tooltip";
-import TrackAuthors from "components/common/TrackTable/TrackAuthors";
-import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
+import TrackAuthors from "components/common/TrackList/TrackAuthors";
+import TrackRowPlayControl from "components/common/TrackList/TrackRowPlayControl";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {

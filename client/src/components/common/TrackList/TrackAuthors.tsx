@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
+
 import Tooltip from "../Tooltip";
 
 const AuthorName: React.FC<{
@@ -51,6 +52,10 @@ const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
               a {
                 color: var(--mi-lighter-foreground-color);
                 text-decoration: none;
+              }
+
+              a:hover {
+                text-decoration: underline;
               }
             ` +
             " " +
