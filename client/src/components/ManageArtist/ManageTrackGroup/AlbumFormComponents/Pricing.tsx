@@ -23,7 +23,7 @@ import PaymentSlider from "./PaymentSlider";
 
 type PricingMode = "free-or-donate" | "paid" | "no-payments";
 
-const PriceAndSuch: React.FC<{
+const Pricing: React.FC<{
   existingObject: TrackGroup;
   reload: () => void;
 }> = ({ existingObject, reload }) => {
@@ -226,41 +226,6 @@ const PriceAndSuch: React.FC<{
             })}
           </div>
         </FormComponent>
-        <div className="w-full flex flex-col gap-2 border-1 border-(--mi-tint-x-color) px-4 py-3">
-          <p>
-            <Trans
-              i18nKey="manageOnSubscription"
-              t={t}
-              components={{
-                subscriptionLink: (
-                  <ArtistRouterLink
-                    to={getArtistManageTiersUrl(artist.id)}
-                  ></ArtistRouterLink>
-                ),
-              }}
-            />
-          </p>
-
-          {!isAlbumGettable && <p>{t("albumNotAvailableForPurchase")}</p>}
-          {artistHasTiersThatGrantThisAlbum.length > 0 && (
-            <p>
-              {t("albumGrantedBySubscriptionTier", {
-                tiers: artistHasTiersThatGrantThisAlbum
-                  .map((tier) => tier.name)
-                  .join(", "),
-              })}
-            </p>
-          )}
-          {artistHasTiersThatGrantNewAlbums.length > 0 && (
-            <p>
-              {t("albumGrantedToSubscriptionTiersWhenPublished", {
-                tiers: artistHasTiersThatGrantNewAlbums
-                  .map((tier) => tier.name)
-                  .join(", "),
-              })}
-            </p>
-          )}
-        </div>
         <div
           hidden={!isAlbumGettable}
           className={css`
@@ -389,8 +354,45 @@ const PriceAndSuch: React.FC<{
             />
           )}
       </div>
+      <div className="w-full flex flex-col gap-2 border-1 border-(--mi-tint-x-color) px-4 py-3">
+        {!isAlbumGettable && <p>{t("albumNotAvailableForPurchase")}</p>}
+        {artistHasTiersThatGrantThisAlbum.length > 0 && (
+          <p>
+            {t("albumGrantedBySubscriptionTier", {
+              tiers: artistHasTiersThatGrantThisAlbum
+                .map((tier) => tier.name)
+                .join(", "),
+            })}
+          </p>
+        )}
+        {artistHasTiersThatGrantNewAlbums.length > 0 && (
+          <p>
+            {t("albumGrantedToSubscriptionTiersWhenPublished", {
+              tiers: artistHasTiersThatGrantNewAlbums
+                .map((tier) => tier.name)
+                .join(", "),
+            })}
+          </p>
+        )}
+        {artistHasTiersThatGrantThisAlbum.length === 0 &&
+          artistHasTiersThatGrantNewAlbums.length === 0 && (
+            <p>
+              <Trans
+                i18nKey="manageOnSubscription"
+                t={t}
+                components={{
+                  subscriptionLink: (
+                    <ArtistRouterLink
+                      to={getArtistManageTiersUrl(artist.id)}
+                    ></ArtistRouterLink>
+                  ),
+                }}
+              />
+            </p>
+          )}
+      </div>
     </FormSection>
   );
 };
 
-export default PriceAndSuch;
+export default Pricing;

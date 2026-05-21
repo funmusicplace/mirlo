@@ -56,7 +56,7 @@ describe("manage album pricing", () => {
     );
     cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
     cy.wait("@authProfile");
-    cy.contains("h2", "Price & such").should("exist");
+    cy.contains("h2", "Pricing").should("exist");
   });
 
   it("pricing mode toggles only commit on Save draft click", () => {

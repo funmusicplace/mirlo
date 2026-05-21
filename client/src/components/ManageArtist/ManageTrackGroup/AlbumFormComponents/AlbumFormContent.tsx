@@ -21,7 +21,7 @@ import { TrackGroupFormData } from "../ManageTrackGroup";
 import FundraisingGoal from "./FundraisingGoal";
 import ManageTags from "./ManageTags";
 import PreOrderSection from "./PreOrderSection";
-import PriceAndSuch from "./PriceAndSuch";
+import Pricing from "./Pricing";
 import SaveDraftBar from "./SaveDraftBar";
 import SchedulePublication from "./SchedulePublication";
 import VisibilityRadio from "./VisibilityRadio";
@@ -178,7 +178,7 @@ const AlbumFormContent: React.FC<{
           />
         </FormComponent>
       </FormSection>
-      <PriceAndSuch reload={reload} existingObject={existingObject} />
+      <Pricing reload={reload} existingObject={existingObject} />
       <FormSection>
         <h2>{t("aboutTheAlbum")}</h2>
         <FormComponent>
