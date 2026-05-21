@@ -72,11 +72,12 @@ const SupportArtistTiersForm: React.FC<{
       const email = methods.getValues("email");
       if (!tier.isDefaultTier) {
         const response = await api.post<
-          { tierId: number; email: string },
+          { tierId: number; email: string; embedded: boolean },
           { clientSecret: string; stripeAccountId: string }
         >(`artists/${artist.id}/subscribe`, {
           tierId: tier.id,
           email,
+          embedded: true,
         });
         if (response.clientSecret) {
           setCheckout({

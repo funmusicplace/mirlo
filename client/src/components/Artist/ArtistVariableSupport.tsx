@@ -50,11 +50,12 @@ const ArtistVariableSupport: React.FC<{
     try {
       setIsCheckingForSubscription(true);
       const response = await api.post<
-        { tierId: number; amount?: number },
+        { tierId: number; amount?: number; embedded: boolean },
         { clientSecret: string; stripeAccountId: string }
       >(`artists/${tier.artistId}/subscribe`, {
         tierId: tier.id,
         amount: tier.allowVariable ? getValues("amount") * 100 : tier.minAmount,
+        embedded: true,
       });
       if (response.clientSecret) {
         setOpen(false);

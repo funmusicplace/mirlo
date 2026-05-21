@@ -49,10 +49,11 @@ const ArtistSupportBox: React.FC<{
       setIsCheckingForSubscription(true);
 
       const response = await api.post<
-        { tierId: number },
+        { tierId: number; embedded: boolean },
         { clientSecret: string; stripeAccountId: string }
       >(`artists/${tier.artistId}/subscribe`, {
         tierId: tier.id,
+        embedded: true,
       });
       if (response.clientSecret) {
         setCheckout({
