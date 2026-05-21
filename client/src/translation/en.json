@@ -984,6 +984,7 @@
     "chargePledgesSuccess": "Successfully charged all current pledges for this fundraiser.",
     "keyDetails": "Key details",
     "chargePledges": "Charge pledges now",
+    "markFundraiserDone": "Mark fundraiser as done",
     "addFundraiser": "Add fundraiser",
     "addFundraiserDescription": "Create a new fundraiser to support this release.",
     "addFundraiserToThisRelease": "Add a fundraiser to this release",

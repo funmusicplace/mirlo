@@ -56,9 +56,7 @@ const FundraisingGoal: React.FC<{
   const isFundraiserComplete = fundraiser?.status === "SUCCESSFUL";
   const chargePledgesVisible =
     !isFundraiserComplete &&
-    isAllOrNothing &&
-    totalAmount > 0 &&
-    Number(goal) < totalAmount;
+    (!isAllOrNothing || (totalAmount > 0 && Number(goal) < totalAmount));
 
   const onChargePledges = async () => {
     try {
@@ -70,6 +68,7 @@ const FundraisingGoal: React.FC<{
         message: `Fundraiser successfully funded!`,
       });
       snackbar(t("chargePledgesSuccess"), { type: "success" });
+      refetch();
     } catch (e) {
       console.error(e);
     } finally {
@@ -182,7 +181,7 @@ const FundraisingGoal: React.FC<{
               onClick={onChargePledges}
               isLoading={isLoading}
             >
-              {t("chargePledges")}
+              {t(isAllOrNothing ? "chargePledges" : "markFundraiserDone")}
             </ArtistButton>
           )}
           {fundraiser && (
