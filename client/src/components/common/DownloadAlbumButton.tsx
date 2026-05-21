@@ -52,53 +52,17 @@ const DownloadAlbumButton: React.FC<{
       queryParams.append("token", token);
     }
     const endpoint = `${prefix}/download?${queryParams.toString()}`;
+    const fallbackName = `${trackGroup.artist?.name ?? "album"} - ${
+      trackGroup.title ?? "album"
+    }.zip`;
 
     setIsDownloading(true);
     try {
-      // Go through apiRequest so cookies + the mirlo-api-key header are sent.
-      // noProcess gives us the raw Response so we can read the blob (or the
-      // error JSON) without the helper trying to JSON.parse a binary stream.
-      const resp = await api.request<Response>(
-        endpoint,
-        { method: "GET", credentials: "include" },
-        { noProcess: true }
-      );
-
-      if (!resp.ok) {
-        let errorMessage = "";
-        try {
-          const errJson = await resp.json();
-          if (typeof errJson?.error === "string") {
-            errorMessage = errJson.error;
-          } else if (errJson?.error) {
-            errorMessage = JSON.stringify(errJson.error);
-          }
-        } catch {
-          // body wasn't JSON; fall back to a generic message
-        }
-        snackbar(errorMessage || t("downloadFailed"), { type: "warning" });
+      const result = await api.downloadFile(endpoint, { fallbackName });
+      if (!result.ok) {
+        snackbar(result.error || t("downloadFailed"), { type: "warning" });
         return;
       }
-
-      const blob = await resp.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const fallbackName = `${trackGroup.artist?.name ?? "album"} - ${
-        trackGroup.title ?? "album"
-      }.zip`;
-      // Prefer the server's filename if it sent one
-      const disposition = resp.headers.get("content-disposition") ?? "";
-      const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^"';]+)"?/i);
-      const filename = match ? decodeURIComponent(match[1]) : fallbackName;
-
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-
       setChosenFormat("");
       setIsPopupOpen(false);
     } catch (e) {

@@ -196,6 +196,53 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
       return `${apiRoot}/v1/${fromEndpoint}`;
     },
 
+    downloadFile: async (
+      endpoint: string,
+      options: { fallbackName: string }
+    ): Promise<{ ok: true } | { ok: false; error?: string }> => {
+      const resp = await apiRequest<Response>(
+        endpoint,
+        { method: "GET", credentials: "include" },
+        { noProcess: true }
+      );
+
+      if (!resp.ok) {
+        try {
+          const errJson = await resp.json();
+          if (typeof errJson?.error === "string") {
+            return { ok: false, error: errJson.error };
+          }
+          if (errJson?.error) {
+            return { ok: false, error: JSON.stringify(errJson.error) };
+          }
+        } catch {
+          // body wasn't JSON; fall through to a generic failure
+        }
+        return { ok: false };
+      }
+
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const disposition = resp.headers.get("content-disposition") ?? "";
+      const match = disposition.match(
+        /filename\*?=(?:UTF-8'')?"?([^"';]+)"?/i
+      );
+      const filename = match
+        ? decodeURIComponent(match[1])
+        : options.fallbackName;
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+
+      return { ok: true };
+    },
+
     generateDownload: (endpoint: string) => {
       return apiRequest<Response>(
         endpoint,
