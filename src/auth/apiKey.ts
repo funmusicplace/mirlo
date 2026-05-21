@@ -5,7 +5,7 @@ import { isValidActivityPubEndpoint } from "../activityPub/utils";
 import logger from "../logger";
 import { AppError } from "../utils/error";
 
-const MIRLO_API_KEY_HEADER = "mirlo-api-key";
+export const MIRLO_API_KEY_HEADER = "mirlo-api-key";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 
@@ -41,14 +41,25 @@ export const apiKeyCheck = async (
       req.headers["access-control-request-headers"];
     const isMutatingRequest =
       req.path.startsWith("/v1") && !SAFE_METHODS.includes(req.method);
+    const isActivityPub = isValidActivityPubEndpoint(req.path);
+    const urlDoesNotRequireKey = isExcludedFromKeyCheck(req.path, req.query);
+
+    log.debug("API Key check, will pass if any of these is true", {
+      doesNotMutate: !isMutatingRequest,
+      isSameSite,
+      isCORSPreflight,
+      isActivityPub,
+      urlDoesNotRequireKey,
+    });
 
     if (
       !isMutatingRequest ||
       isSameSite ||
       isCORSPreflight ||
-      isValidActivityPubEndpoint(req.path) ||
-      isExcludedFromKeyCheck(req.path, req.query)
+      isActivityPub ||
+      urlDoesNotRequireKey
     ) {
+      log.debug("API check considered a safe method", req.path, req.query);
       // For safe methods, still try to identify the client for attribution
       // but don't require a key
       const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
