@@ -24,6 +24,7 @@ const FundraisingGoal: React.FC<{
     id: number;
     goalAmount: number;
     isAllOrNothing: boolean;
+    status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   } | null;
 }> = ({ trackGroupId, fundraiser }) => {
   const snackbar = useSnackbar();
@@ -52,8 +53,10 @@ const FundraisingGoal: React.FC<{
 
   const hasPledges = (totalPledges ?? 0) > 0;
 
+  const isFundraiserComplete = fundraiser?.status === "SUCCESSFUL";
   const chargePledgesVisible =
-    isAllOrNothing && totalAmount > 0 && Number(goal) < totalAmount;
+    !isFundraiserComplete &&
+    (!isAllOrNothing || (totalAmount > 0 && Number(goal) < totalAmount));
 
   const onChargePledges = async () => {
     try {
@@ -65,6 +68,7 @@ const FundraisingGoal: React.FC<{
         message: `Fundraiser successfully funded!`,
       });
       snackbar(t("chargePledgesSuccess"), { type: "success" });
+      refetch();
     } catch (e) {
       console.error(e);
     } finally {
@@ -157,6 +161,11 @@ const FundraisingGoal: React.FC<{
     <>
       <div className="flex justify-between items-center w-full">
         <h2>{t("fundraisingGoal")}</h2>
+        {isFundraiserComplete && (
+          <p className="text-sm text-(--mi-success-text-color) font-semibold">
+            {t("fundraiserComplete")}
+          </p>
+        )}
         <div className="flex gap-2">
           {fundraiser.isAllOrNothing && (
             <ArtistButtonLink
@@ -172,7 +181,7 @@ const FundraisingGoal: React.FC<{
               onClick={onChargePledges}
               isLoading={isLoading}
             >
-              {t("chargePledges")}
+              {t(isAllOrNothing ? "chargePledges" : "markFundraiserDone")}
             </ArtistButton>
           )}
           {fundraiser && (

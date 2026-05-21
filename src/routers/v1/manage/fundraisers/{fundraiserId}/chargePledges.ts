@@ -31,6 +31,12 @@ export default function () {
       });
 
       if (!pledgesForFundraiser.length) {
+        // No pledges to charge — still mark the fundraiser SUCCESSFUL so the
+        // trackGroup transitions out of pledge mode (#1681).
+        await prisma.fundraiser.update({
+          where: { id: Number(fundraiserId) },
+          data: { status: "SUCCESSFUL" },
+        });
         return res
           .status(200)
           .json({ success: true, message: "No pledges to charge" });
@@ -57,6 +63,13 @@ export default function () {
 
         await chargePledgePayments(pledge);
       }
+
+      // Mark the fundraiser SUCCESSFUL so future visitors get the regular
+      // buy flow instead of the pledge flow (#1681).
+      await prisma.fundraiser.update({
+        where: { id: Number(fundraiserId) },
+        data: { status: "SUCCESSFUL" },
+      });
 
       return res.status(200).json({ success: true });
     } catch (e) {
