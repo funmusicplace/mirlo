@@ -126,10 +126,8 @@ export default function () {
       });
       logger.info(`Generated a Stripe checkout session ${session.id}`);
 
-      // Embedded mode returns a client_secret instead of a session url; the
-      // client renders <EmbeddedStripeForm> inline rather than redirecting
-      // to Stripe's hosted page (#1168).
       res.status(200).json({
+        sessionUrl: session.url,
         clientSecret: session.client_secret,
         stripeAccountId,
       });

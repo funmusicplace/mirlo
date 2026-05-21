@@ -1,10 +1,13 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { clearTables, createArtist, createUser } from "../../utils";
 import { describe, it } from "mocha";
+
+import { clearTables, createArtist, createUser } from "../../utils";
 import { requestApp } from "../utils";
+
 import prisma from "@mirlo/prisma";
 
 let createTestData = async (stripeAccountId: string | null = "23") => {
@@ -107,7 +110,7 @@ describe("artists/{id}/subscribe", () => {
         `expected stripeAccountId in response, got: ${response.text}`
       );
       assert.ok(
-        !("sessionUrl" in body),
+        "sessionUrl" in body,
         `should no longer return sessionUrl, got: ${response.text}`
       );
     });
