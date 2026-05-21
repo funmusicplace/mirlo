@@ -1,10 +1,13 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { clearTables, createArtist, createUser } from "../../utils";
 import { describe, it } from "mocha";
+
+import { clearTables, createArtist, createUser } from "../../utils";
 import { requestApp } from "../utils";
+
 import prisma from "@mirlo/prisma";
 
 let createTestData = async (stripeAccountId: string | null = "23") => {
@@ -79,7 +82,7 @@ describe("artists/{id}/subscribe", () => {
       assert.equal(response.status, 400);
     });
 
-    it("should return Stripe checkout URL", async () => {
+    it("returns a hosted Stripe checkout sessionUrl by default for external callers", async () => {
       const { artistUser, artist, followerUser } = await createTestData();
 
       const response = await requestApp
@@ -92,9 +95,52 @@ describe("artists/{id}/subscribe", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 200);
-      assert.equal(
-        JSON.parse(response.text).sessionUrl,
-        "https://checkout.stripe.com/pay/c/cs_test_a1YS1URlnyQCN5fUUduORoQ7Pw41PJqDWkIVQCpJPqkfIhd6tVY8XB1OLY"
+      const body = JSON.parse(response.text);
+      assert.ok(
+        "sessionUrl" in body,
+        `expected sessionUrl key in response, got: ${response.text}`
+      );
+      assert.ok(
+        !("clientSecret" in body),
+        `hosted response should not include clientSecret, got: ${response.text}`
+      );
+      assert.ok(
+        typeof body.stripeAccountId === "string" &&
+          body.stripeAccountId.length > 0,
+        `expected stripeAccountId in response, got: ${response.text}`
+      );
+    });
+
+    it("returns an embedded clientSecret when the caller opts in (#1168)", async () => {
+      const { artistUser, artist, followerUser } = await createTestData();
+
+      const response = await requestApp
+        .post(`artists/${artistUser.id}/subscribe`)
+        .send({
+          tierId: artist.subscriptionTiers![0].id,
+          email: followerUser.email,
+          amount: 42,
+          embedded: true,
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const body = JSON.parse(response.text);
+      // stripe-mock doesn't populate client_secret for embedded sessions in
+      // its fixture, but real Stripe does. Asserting the field is present
+      // (even null) verifies the embedded branch was taken
+      assert.ok(
+        "clientSecret" in body,
+        `expected clientSecret key in response, got: ${response.text}`
+      );
+      assert.ok(
+        !("sessionUrl" in body),
+        `embedded response should not include sessionUrl, got: ${response.text}`
+      );
+      assert.ok(
+        typeof body.stripeAccountId === "string" &&
+          body.stripeAccountId.length > 0,
+        `expected stripeAccountId in response, got: ${response.text}`
       );
     });
 

@@ -6,12 +6,15 @@ import { isEmpty } from "lodash";
 import React from "react";
 import { FormProvider, Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { getArtistUrl } from "utils/artist";
 import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
 
+import EmbeddedStripeForm from "./stripe/EmbeddedStripe";
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
@@ -56,6 +59,12 @@ const SupportArtistTiersForm: React.FC<{
     },
   });
 
+  const navigate = useNavigate();
+  const [checkout, setCheckout] = React.useState<{
+    clientSecret: string;
+    stripeAccountId: string;
+  } | null>(null);
+
   const subscribeToTier = async () => {
     try {
       setIsCheckingForSubscription(true);
@@ -63,13 +72,20 @@ const SupportArtistTiersForm: React.FC<{
       const email = methods.getValues("email");
       if (!tier.isDefaultTier) {
         const response = await api.post<
-          { tierId: number; email: string },
-          { sessionUrl: string }
+          { tierId: number; email: string; embedded: boolean },
+          { clientSecret: string; stripeAccountId: string }
         >(`artists/${artist.id}/subscribe`, {
           tierId: tier.id,
           email,
+          embedded: true,
         });
-        window.location.assign(response.sessionUrl);
+        if (response.clientSecret) {
+          setCheckout({
+            clientSecret: response.clientSecret,
+            stripeAccountId: response.stripeAccountId,
+          });
+          return;
+        }
       } else {
         // @ts-ignore
         const cfTurnstile = turnstile.getResponse();
@@ -89,6 +105,23 @@ const SupportArtistTiersForm: React.FC<{
       onFinishedSubscribing?.(false);
     }
   };
+
+  const handleEmbeddedComplete = React.useCallback(() => {
+    const params = new URLSearchParams();
+    params.set("purchaseType", "subscription");
+    refreshLoggedInUser();
+    navigate(`${getArtistUrl(artist)}/checkout-complete?${params.toString()}`);
+  }, [artist, navigate, refreshLoggedInUser]);
+
+  if (checkout) {
+    return (
+      <EmbeddedStripeForm
+        clientSecret={checkout.clientSecret}
+        stripeAccountId={checkout.stripeAccountId}
+        onComplete={handleEmbeddedComplete}
+      />
+    );
+  }
   const value = methods.watch("tier");
 
   const noErrors =

@@ -2,15 +2,17 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import Box from "components/common/Box";
 import MarkdownContent from "components/common/MarkdownContent";
+import Modal from "components/common/Modal";
 import PlatformPercent from "components/common/PlatformPercent";
+import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistManageTiersUrl } from "utils/artist";
+import { getArtistManageTiersUrl, getArtistUrl } from "utils/artist";
 
 import Money from "../common/Money";
 
@@ -36,17 +38,29 @@ const ArtistSupportBox: React.FC<{
 
   const errorHandler = useErrorHandler();
 
+  const navigate = useNavigate();
+  const [checkout, setCheckout] = React.useState<{
+    clientSecret: string;
+    stripeAccountId: string;
+  } | null>(null);
+
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     try {
       setIsCheckingForSubscription(true);
 
       const response = await api.post<
-        { tierId: number },
-        { sessionUrl: string }
+        { tierId: number; embedded: boolean },
+        { clientSecret: string; stripeAccountId: string }
       >(`artists/${tier.artistId}/subscribe`, {
         tierId: tier.id,
+        embedded: true,
       });
-      window.location.assign(response.sessionUrl);
+      if (response.clientSecret) {
+        setCheckout({
+          clientSecret: response.clientSecret,
+          stripeAccountId: response.stripeAccountId,
+        });
+      }
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -55,6 +69,16 @@ const ArtistSupportBox: React.FC<{
       refreshLoggedInUser();
     }
   };
+
+  const handleEmbeddedComplete = React.useCallback(() => {
+    if (!artist) return;
+    const params = new URLSearchParams();
+    params.set("purchaseType", "subscription");
+    refreshLoggedInUser();
+    refresh();
+    setCheckout(null);
+    navigate(`${getArtistUrl(artist)}/checkout-complete?${params.toString()}`);
+  }, [artist, navigate, refresh, refreshLoggedInUser]);
 
   const cancelSubscription = async () => {
     try {
@@ -279,6 +303,20 @@ const ArtistSupportBox: React.FC<{
           </ul>
         </>
       )}
+      <Modal
+        size="small"
+        open={!!checkout}
+        onClose={() => setCheckout(null)}
+        title={t("support") ?? ""}
+      >
+        {checkout && (
+          <EmbeddedStripeForm
+            clientSecret={checkout.clientSecret}
+            stripeAccountId={checkout.stripeAccountId}
+            onComplete={handleEmbeddedComplete}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

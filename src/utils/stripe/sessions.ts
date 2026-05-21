@@ -723,6 +723,7 @@ export const createCheckoutSessionForSubscription = async ({
   artistId,
   tier,
   amount,
+  embedded = false,
 }: {
   loggedInUser?: User;
   email?: string;
@@ -730,6 +731,10 @@ export const createCheckoutSessionForSubscription = async ({
   artistId: number;
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>;
   amount: number;
+  // In-app callers opt in to embedded so the Stripe form renders inline
+  // (#1168). External callers (links from email, third-party embeds, etc.)
+  // leave this off and get a hosted Stripe checkout URL they can redirect to.
+  embedded?: boolean;
 }) => {
   const client = await prisma.client.findFirst({
     where: {
@@ -748,10 +753,6 @@ export const createCheckoutSessionForSubscription = async ({
   }
 
   logger.info(`Created a new product for artist ${artistId}, ${productKey}`);
-  const cancelUrlParams = buildCheckoutCancelSearchParams({
-    artistId,
-    clientId: client?.id,
-  });
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   const currency = await getCurrency(
@@ -764,6 +765,26 @@ export const createCheckoutSessionForSubscription = async ({
     tier.platformPercent,
     stripeAccount.country
   );
+
+  const cancelUrlParams = buildCheckoutCancelSearchParams({
+    artistId,
+    clientId: client?.id,
+  });
+  const returnUrl = `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`;
+
+  // Embedded checkout (in-app) and hosted checkout (external callers) need
+  // different field sets — Stripe rejects sessions that mix them. Pick one
+  // up front from the caller's intent.
+  const checkoutSurface: Stripe.Checkout.SessionCreateParams = embedded
+    ? {
+        ui_mode: "embedded",
+        redirect_on_completion: "if_required",
+        return_url: returnUrl,
+      }
+    : {
+        success_url: returnUrl,
+        cancel_url: `${API_DOMAIN}/v1/checkout?${cancelUrlParams.toString()}`,
+      };
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -807,8 +828,7 @@ export const createCheckoutSessionForSubscription = async ({
         stripeAccountId,
       },
       mode: "subscription",
-      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${API_DOMAIN}/v1/checkout?${cancelUrlParams.toString()}`,
+      ...checkoutSurface,
     },
     {
       stripeAccount: stripeAccountId,

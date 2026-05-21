@@ -39,7 +39,7 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    let { tierId, email, amount } = req.body;
+    let { tierId, email, amount, embedded } = req.body;
 
     const loggedInUser = req.user;
 
@@ -116,6 +116,7 @@ export default function () {
         });
       }
 
+      const useEmbedded = Boolean(embedded);
       const session = await createCheckoutSessionForSubscription({
         loggedInUser,
         email,
@@ -123,12 +124,15 @@ export default function () {
         artistId: newTier.artistId,
         tier: newTier,
         amount,
+        embedded: useEmbedded,
       });
       logger.info(`Generated a Stripe checkout session ${session.id}`);
 
-      res.status(200).json({
-        sessionUrl: session.url,
-      });
+      res.status(200).json(
+        useEmbedded
+          ? { clientSecret: session.client_secret, stripeAccountId }
+          : { sessionUrl: session.url, stripeAccountId }
+      );
     } catch (e) {
       next(e);
     }

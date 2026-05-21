@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { getCurrencySymbol } from "components/common/Money";
@@ -8,10 +9,11 @@ import { queryArtist } from "queries";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
+import { getArtistUrl } from "utils/artist";
 
 import { ArtistButton } from "./ArtistButtons";
 import IncludedReleases from "./IncludedReleases";
@@ -38,17 +40,30 @@ const ArtistVariableSupport: React.FC<{
   const supportButtonText =
     artist?.properties?.titles?.supportButton?.trim() || t("support");
 
+  const navigate = useNavigate();
+  const [checkout, setCheckout] = React.useState<{
+    clientSecret: string;
+    stripeAccountId: string;
+  } | null>(null);
+
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     try {
       setIsCheckingForSubscription(true);
       const response = await api.post<
-        { tierId: number; amount?: number },
-        { sessionUrl: string }
+        { tierId: number; amount?: number; embedded: boolean },
+        { clientSecret: string; stripeAccountId: string }
       >(`artists/${tier.artistId}/subscribe`, {
         tierId: tier.id,
         amount: tier.allowVariable ? getValues("amount") * 100 : tier.minAmount,
+        embedded: true,
       });
-      window.location.assign(response.sessionUrl);
+      if (response.clientSecret) {
+        setOpen(false);
+        setCheckout({
+          clientSecret: response.clientSecret,
+          stripeAccountId: response.stripeAccountId,
+        });
+      }
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -57,6 +72,16 @@ const ArtistVariableSupport: React.FC<{
       refreshLoggedInUser();
     }
   };
+
+  const handleEmbeddedComplete = React.useCallback(() => {
+    if (!artist) return;
+    const params = new URLSearchParams();
+    params.set("purchaseType", "subscription");
+    refreshLoggedInUser();
+    refresh();
+    setCheckout(null);
+    navigate(`${getArtistUrl(artist)}/checkout-complete?${params.toString()}`);
+  }, [artist, navigate, refresh, refreshLoggedInUser]);
 
   return (
     <>
@@ -135,6 +160,20 @@ const ArtistVariableSupport: React.FC<{
             <small>{t("artistCheckoutPage")}</small>
           </div>
         </form>
+      </Modal>
+      <Modal
+        size="small"
+        open={!!checkout}
+        onClose={() => setCheckout(null)}
+        title={t("support") ?? ""}
+      >
+        {checkout && (
+          <EmbeddedStripeForm
+            clientSecret={checkout.clientSecret}
+            stripeAccountId={checkout.stripeAccountId}
+            onComplete={handleEmbeddedComplete}
+          />
+        )}
       </Modal>
     </>
   );
