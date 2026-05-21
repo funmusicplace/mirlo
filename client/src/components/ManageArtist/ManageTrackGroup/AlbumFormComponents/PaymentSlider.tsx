@@ -70,7 +70,7 @@ const PaymentSlider: React.FC<{
     <>
       <label htmlFor="input-platform-percent">{label}</label>
       <div className="w-full">
-        <div className="flex gap-1">
+        <div className="flex gap-1 mbe-4">
           <input
             aria-hidden="true"
             tabIndex={-1}
@@ -118,45 +118,50 @@ const PaymentSlider: React.FC<{
               }
             `}
           />
-          <InputEl
-            aria-describedby={`output-platform-percent ${ariaDescribedBy}`}
-            id="input-platform-percent"
-            min={0}
-            max={100}
-            type="number"
-            name={field.name}
-            value={current.toString()}
-            onChange={(event) => field.onChange(Number(event.target.value))}
-            onBlur={() => {
-              field.onBlur();
-              onInstantSave();
-            }}
-            className="w-[100px]!"
-          />
         </div>
         <div className="flex gap-2 items-center justify-between">
-          <output
-            aria-atomic="true"
-            aria-live="polite"
-            className="flex flex-auto gap-2 items-center justify-between"
-            htmlFor="input-platform-percent"
-            id="output-platform-percent"
-          >
-            <span>{current}%</span>
-            <Pill>
-              {current == 0 && t("none")}
-              {current > 0 && current < 5 && t("solidarity")}
-              {current >= 5 && current < 10 && t("sustain")}
-              {current >= 10 && current < 15 && t("fullCost")}
-              {current >= 15 && t("redistribution")}
-            </Pill>
-          </output>
-          <ArtistButton
-            aria-label={t("platformCutTierWhatIsThis")}
-            startIcon={<IoHelp />}
-            type="button"
-            onClick={() => setIsInfoOpen(true)}
-          />
+          <div className="flex gap-2 items-center">
+            <InputEl
+              aria-describedby={`output-platform-percent ${ariaDescribedBy}`}
+              id="input-platform-percent"
+              min={0}
+              max={100}
+              type="number"
+              name={field.name}
+              value={current.toString()}
+              onChange={(event) => field.onChange(Number(event.target.value))}
+              onBlur={() => {
+                field.onBlur();
+                onInstantSave();
+              }}
+              className="w-[100px]!"
+            />
+            <span aria-hidden="true">%</span>
+          </div>
+          <div className="flex gap-2 items-center">
+            <output
+              aria-atomic="true"
+              aria-live="polite"
+              className="flex gap-2 items-center"
+              htmlFor="input-platform-percent"
+              id="output-platform-percent"
+            >
+              <span className="sr-only">{current}%</span>
+              <Pill>
+                {current == 0 && t("none")}
+                {current > 0 && current < 5 && t("solidarity")}
+                {current >= 5 && current < 10 && t("sustain")}
+                {current >= 10 && current < 15 && t("fullCost")}
+                {current >= 15 && t("redistribution")}
+              </Pill>
+            </output>
+            <ArtistButton
+              aria-label={t("platformCutTierWhatIsThis")}
+              startIcon={<IoHelp />}
+              type="button"
+              onClick={() => setIsInfoOpen(true)}
+            />
+          </div>
         </div>
 
         <Modal
