@@ -250,7 +250,7 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
           {release.catalogNumber || "×"}
         </MetadataCell>
         <MetadataCell labelKey="price" releaseId={release.id}>
-          {release.minPrice ? `${release.minPrice} ${release.currency}` : "×"}
+          {release.minPrice ? release.minPrice / 100 : "×"}
         </MetadataCell>
         <MetadataCell labelKey="visibility" releaseId={release.id}>
           {!isPublished
