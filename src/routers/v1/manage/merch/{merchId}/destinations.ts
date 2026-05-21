@@ -1,15 +1,12 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   userAuthenticated,
   merchBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-import countries from "../../../../../utils/country-codes-currencies";
-import {
-  getUserCountry,
-  getUserCurrencyString,
-} from "../../../../../utils/user";
+import { getUserCountry } from "../../../../../utils/user";
 
 type Params = {
   merchId: string;
@@ -33,8 +30,6 @@ export default function () {
     const user = req.user;
 
     try {
-      const currencyString = await getUserCurrencyString(user.id);
-
       await prisma.merchShippingDestination.deleteMany({
         where: {
           merchId,
@@ -49,7 +44,6 @@ export default function () {
           homeCountry: dest.homeCountry ?? country?.countryCode ?? "us",
           destinationCountry: dest.destinationCountry,
           costUnit: dest.costUnit,
-          currency: currencyString,
           costExtraUnit: dest.costExtraUnit,
         })),
       });

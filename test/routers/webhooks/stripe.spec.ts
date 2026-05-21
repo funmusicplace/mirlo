@@ -51,7 +51,6 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           name: "Premium",
           minAmount: 1000,
-          currency: "usd",
           artistId: artist.id,
         },
       });
@@ -63,7 +62,6 @@ describe("Stripe Webhooks - Failed Payments", () => {
           artistSubscriptionTierId: tier.id,
           stripeSubscriptionKey: "sub_1234567890",
           amount: 1000,
-          currency: "usd",
         },
       });
 
@@ -599,7 +597,6 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           name: "Basic",
           minAmount: 500,
-          currency: "usd",
           artistId: artist.id,
         },
       });

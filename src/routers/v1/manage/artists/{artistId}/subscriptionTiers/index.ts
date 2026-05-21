@@ -1,11 +1,12 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
 import {
   addSizesToImage,
   getPlatformFeeForArtist,
@@ -83,14 +84,6 @@ export default function () {
     const user = req.user;
 
     try {
-      const userForCurrency = await prisma.user.findFirst({
-        where: { id: user.id },
-        select: {
-          currency: true,
-          promoCodes: true,
-        },
-      });
-
       const {
         name,
         description,
@@ -116,7 +109,6 @@ export default function () {
           interval,
           autoPurchaseAlbums,
           platformPercent: await getPlatformFeeForArtist(artistId),
-          currency: userForCurrency?.currency ?? "usd",
           allowVariable,
           defaultAmount,
           digitalDiscountPercent,

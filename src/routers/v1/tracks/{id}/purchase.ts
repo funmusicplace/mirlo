@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
-import { createStripeCheckoutSessionForTrackPurchase } from "../../../../utils/stripe/sessions";
-import { handleTrackPurchase } from "../../../../utils/handleFinishedTransactions";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { handleTrackPurchase } from "../../../../utils/handleFinishedTransactions";
+import { createStripeCheckoutSessionForTrackPurchase } from "../../../../utils/stripe/sessions";
 import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
 
 type Params = {
@@ -65,8 +65,6 @@ export default function () {
           description: `Track with ID ${trackId} not found`,
         });
       }
-      const currency = track?.currency ?? track.trackGroup?.currency;
-
       if (loggedInUser) {
         await subscribeUserToArtist(track.trackGroup?.artist, loggedInUser);
       }
@@ -94,6 +92,7 @@ export default function () {
       const priceZero = (track.minPrice ?? 0) === 0 && priceNumber === 0;
 
       if (track.minPrice && priceNumber < track.minPrice) {
+        const currency = track.trackGroup.artist.user.currency ?? "usd";
         throw new AppError({
           httpCode: 400,
           description: `Have to pay at least ${track.minPrice / 100} ${currency} for this track. ${priceNumber / 100} ${currency} is not enough`,

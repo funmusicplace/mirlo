@@ -387,7 +387,6 @@ model ArtistSubscriptionTier {
   allowVariable          Boolean?
   maxAmount              Int? // in cents
   defaultAmount          Int? // in cents
-  currency               String                    @default("usd")
   interval               Interval                  @default(MONTH)
   userSubscriptions      ArtistUserSubscription[]
   stripeProductKey       String?
@@ -459,7 +458,6 @@ model ArtistTipTier {
   allowVariable     Boolean?
   maxAmount         Int? // in cents
   defaultAmount     Int? // in cents
-  currency          String          @default("usd")
   userSubscriptions UserArtistTip[]
   stripeProductKey  String?
   createdAt         DateTime        @default(now())
@@ -476,7 +474,6 @@ model ArtistUserSubscription {
   user                          User                           @relation(fields: [userId], references: [id])
   amount                        Int // In cents
   platformCut                   Int? // in cents
-  currency                      String                         @default("usd")
   stripeSubscriptionKey         String?
   createdAt                     DateTime                       @default(now())
   updatedAt                     DateTime                       @default(now()) @updatedAt
@@ -518,7 +515,6 @@ model Merch {
   title                       String
   description                 String
   minPrice                    Int // In cents
-  currency                    String?                    @default("usd")
   quantityRemaining           Int?
   startShippingDate           DateTime?
   platformPercent             Int?                       @default(7)
@@ -568,7 +564,6 @@ model MerchShippingDestination {
   merch              Merch   @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   merchId            String  @db.Uuid
   costUnit           Int // in cents
-  currency           String
   costExtraUnit      Int // in cents
 }
 
@@ -729,7 +724,6 @@ model TrackGroup {
   deletedAt                       DateTime?
   minPrice                        Int? // in cents
   suggestedPrice                  Int? // in cents
-  currency                        String?                         @default("usd")
   isPriceFixed                    Boolean                         @default(false)
   defaultTrackMinPrice            Int? // in cents
   defaultTrackAllowIndividualSale Boolean                         @default(false)
@@ -857,7 +851,6 @@ model Track {
   isrc                String?
   stripeProductKey    String?
   minPrice            Int? // in cents
-  currency            String?             @default("usd")
   allowIndividualSale Boolean             @default(false)
   postTracks          PostTrack[]
   userTrackPurchases  UserTrackPurchase[]

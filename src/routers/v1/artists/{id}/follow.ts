@@ -1,9 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import prisma from "@mirlo/prisma";
-
 import {
   confirmArtistIdExists,
   createSubscriptionConfirmation,
@@ -121,10 +120,7 @@ export default function () {
 
         const results = await subscribeUserToArtist(
           artist,
-          {
-            id: user.id,
-            currency: user.currency,
-          },
+          { id: user.id },
           message
         );
 

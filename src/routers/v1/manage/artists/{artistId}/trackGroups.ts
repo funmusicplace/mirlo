@@ -130,13 +130,6 @@ export default function () {
     }
 
     try {
-      const userForCurrency = await prisma.user.findFirst({
-        where: { id: user.id },
-        select: {
-          currency: true,
-          promoCodes: true,
-        },
-      });
       const existingSlug = await prisma.trackGroup.findFirst({
         where: {
           artistId: Number(artistId),
@@ -189,7 +182,6 @@ export default function () {
             ? { connect: { id: paymentToUserId } }
             : undefined,
           platformPercent: await getPlatformFeeForArtist(artist.id),
-          currency: userForCurrency?.currency ?? "usd",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,
           urlSlug,

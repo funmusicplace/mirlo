@@ -376,7 +376,6 @@ export const createSubscription = async (
       userId,
       artistSubscriptionTierId: tierId,
       amount,
-      currency: "usd",
     },
   });
 };

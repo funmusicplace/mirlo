@@ -78,7 +78,6 @@ export default function () {
               name: "follow",
               description: "follow an artist",
               minAmount: 0,
-              currency: artist.user.currency ?? "usd",
               isDefaultTier: true,
               artistId: artist.id,
             },

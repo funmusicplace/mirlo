@@ -587,10 +587,7 @@ export const chargePledgePayments = async (
       logger.info(
         "Found stripe paymentMethodId: " + paymentMethods.data[0]?.id
       );
-      const currency =
-        (stripeAccount.default_currency ||
-          pledge.fundraiser.trackGroups[0].currency) ??
-        "usd";
+      const currency = stripeAccount.default_currency ?? "usd";
 
       if (paymentMethods.data[0]?.id) {
         const paymentIntent = await stripe.paymentIntents.create(
@@ -625,7 +622,7 @@ export const chargePledgePayments = async (
           `Created payment intent ${paymentIntent.id} for pledge ${pledge.id}`
         );
 
-        await handleFundraiserPledge(pledge, paymentIntent.id);
+        await handleFundraiserPledge(pledge, paymentIntent.id, currency);
       }
     }
   } catch (err) {

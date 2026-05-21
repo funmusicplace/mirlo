@@ -13,7 +13,6 @@ export type SubscriptionRenewalReminderEmailType = {
   artistUserSubscription: {
     id: number;
     amount: number;
-    currency: string;
     artistSubscriptionTier: {
       name: string;
     };
@@ -105,7 +104,6 @@ const sendSubscriptionRenewalReminders = async () => {
               artistUserSubscription: {
                 id: subscription.id,
                 amount: subscription.amount,
-                currency: subscription.currency,
                 artistSubscriptionTier: {
                   name: subscription.artistSubscriptionTier.name,
                 },

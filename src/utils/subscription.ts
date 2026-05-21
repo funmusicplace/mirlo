@@ -27,7 +27,6 @@ export type ArtistNewSubscriberAnnounceEmailType = {
     artistSubscriptionTierId: number;
     id: number;
     amount: number;
-    currency: string;
     artistSubscriptionTier: {
       name: string;
     };
@@ -203,7 +202,6 @@ export const manageSubscriptionReceipt = async ({
           artistUserSubscription: {
             id: artistUserSubscription.id,
             amount: artistUserSubscription.amount,
-            currency: artistUserSubscription.currency,
             artistSubscriptionTierId:
               artistUserSubscription.artistSubscriptionTierId,
             artistSubscriptionTier: {
@@ -236,7 +234,7 @@ export const manageSubscriptionReceipt = async ({
           email: encodeURIComponent(artistUserSubscription.user.email),
           host: process.env.API_DOMAIN,
           cardChargeContext: `your subscription to "${artistUserSubscription.artistSubscriptionTier.artist.name}'s ${artistUserSubscription.artistSubscriptionTier.name}" tier`,
-          currency: artistUserSubscription.currency,
+          currency: transaction.currency,
           pledgedAmountFormatted: artistUserSubscription.amount / 100,
           client: client.applicationUrl,
           urlParams,

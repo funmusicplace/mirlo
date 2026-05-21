@@ -1,14 +1,14 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
+import { userAuthenticated } from "../../../../auth/passport";
+import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
 import {
   getPresignedUploadUrl,
   incomingAudioBucket,
 } from "../../../../utils/minio";
-import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
+import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
 
 export default function () {
   const operations = {
@@ -99,7 +99,6 @@ export default function () {
           allowIndividualSale:
             allowIndividualSale ?? trackGroup?.defaultTrackAllowIndividualSale,
           minPrice: minPrice ?? trackGroup?.defaultTrackMinPrice,
-          currency: trackGroup?.currency,
           trackGroup: {
             connect: {
               id: Number(trackGroupId),

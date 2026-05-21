@@ -1,10 +1,13 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { clearTables, createArtist, createUser } from "../../utils";
 import { describe, it } from "mocha";
+
+import { clearTables, createArtist, createUser } from "../../utils";
 import { requestApp } from "../utils";
+
 import prisma from "@mirlo/prisma";
 
 let createTestData = async (stripeAccountId: string | null = "23") => {
@@ -27,7 +30,7 @@ let createTestData = async (stripeAccountId: string | null = "23") => {
     subscriptionTiers: {
       create: [
         { name: "Tier 1", isDefaultTier: true },
-        { name: "Tier 2", currency: "eur", minAmount: 4 },
+        { name: "Tier 2", minAmount: 4 },
       ],
     },
   });
