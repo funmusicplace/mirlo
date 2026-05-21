@@ -4,12 +4,16 @@ import logger from "../logger";
 import { sendPostNotificationQueue } from "../queues/send-post-notification-queue";
 
 /**
- * Trigger function: Finds posts ready to send notifications
+ * Trigger function: Finds posts ready to process notifications for
  * Discovers both manually published and scheduled posts where:
  * - Post is published (isDraft = false)
  * - publishedAt <= now (either published or scheduled time has arrived)
- * - Email hasn't been sent yet
- * - Post has content and shouldSendEmail is true
+ * - Notifications haven't been processed yet
+ * - Post has content
+ *
+ * shouldSendEmail is intentionally NOT filtered here so in-app notifications
+ * are created for every published post; the email delivery step downstream
+ * decides whether to actually queue an email (#2071).
  *
  * This is the single source of truth for post notifications.
  * Unpublish logic still works to cancel pending jobs within the grace period.
@@ -26,7 +30,6 @@ export async function triggerPostNotifications() {
       },
       hasAnnounceEmailBeenSent: false,
       content: { not: "" },
-      shouldSendEmail: true,
       artist: {
         enabled: true,
         deletedAt: null,
