@@ -1,9 +1,7 @@
 import prisma from "@mirlo/prisma";
-import {
-  downloadableContentBucket,
-  removeObjectsFromBucket,
-} from "../utils/minio";
+
 import logger from "../logger";
+import { removeDownloadableContent } from "../utils/minio";
 
 export const deleteDownloadableContent = async (contentId: string) => {
   await prisma.trackGroupDownloadableContent.deleteMany({
@@ -25,7 +23,7 @@ export const deleteDownloadableContent = async (contentId: string) => {
 
   if (content) {
     try {
-      await removeObjectsFromBucket(downloadableContentBucket, content.id);
+      await removeDownloadableContent(content.id);
     } catch (e) {
       logger.error("no object found, that's all right though");
     }

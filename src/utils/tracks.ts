@@ -7,7 +7,7 @@ import ffmpeg from "fluent-ffmpeg";
 
 import { Format } from "../jobs/generate-album";
 import logger from "../logger";
-import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
+import { removeAudioFiles } from "../utils/minio";
 
 export const deleteTrack = async (trackId: number) => {
   await prisma.track.delete({
@@ -23,7 +23,7 @@ export const deleteTrack = async (trackId: number) => {
   });
   if (audio) {
     try {
-      await removeObjectsFromBucket(finalAudioBucket, audio.id);
+      await removeAudioFiles(audio.id);
     } catch (e) {
       logger.error("no object found, that's all right though");
     }

@@ -1,20 +1,16 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
-import { logger } from "../../../../../logger";
+import filenamify from "filenamify";
+
 import {
-  artistBelongsToLoggedInUser,
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
-
-import {
-  FormatOptions,
-  basicTrackGroupInclude,
-} from "../../../../../utils/trackGroup";
-import { finalAudioBucket, getReadStream } from "../../../../../utils/minio";
-import filenamify from "filenamify";
-import { cleanHeaderValue } from "../../../../../utils/validate-http-headers";
+import { logger } from "../../../../../logger";
 import { AppError } from "../../../../../utils/error";
+import { streamOriginalAudio } from "../../../../../utils/minio";
+import { basicTrackGroupInclude } from "../../../../../utils/trackGroup";
+import { cleanHeaderValue } from "../../../../../utils/validate-http-headers";
 
 export default function () {
   const operations = {
@@ -59,9 +55,9 @@ export default function () {
         res.set("Content-Transfer-Encoding", "binary");
         res.set("Accept-Ranges", "bytes");
 
-        const stream = await getReadStream(
-          finalAudioBucket,
-          `${track.audio.id}/original.${track.audio.fileExtension}`
+        const stream = await streamOriginalAudio(
+          track.audio.id,
+          track.audio.fileExtension ?? ""
         );
 
         if (stream) {
@@ -69,7 +65,7 @@ export default function () {
         } else {
           throw new AppError({
             httpCode: 500,
-            description: `Remote file not found for ${finalAudioBucket}/${track.audio.id}/original.${track.audio.fileExtension}`,
+            description: `Remote file not found for audio ${track.audio.id}`,
           });
         }
       } catch (e) {

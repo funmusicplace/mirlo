@@ -15,15 +15,10 @@ import { Job } from "bullmq";
 import filenamify from "filenamify";
 
 import {
-  createBucketIfNotExists,
-  downloadableContentBucket,
-  finalAudioBucket,
-  finalCoversBucket,
-  getBufferFromStorage,
-  getFile,
-  trackFormatBucket,
-  trackGroupFormatBucket,
-  uploadWrapper,
+  downloadOriginalAudio,
+  getDownloadableContentBuffer,
+  getCoverBuffer,
+  uploadZip,
 } from "../utils/minio";
 import { convertAudioToFormat } from "../utils/tracks";
 
@@ -94,15 +89,17 @@ const downloadTracks = async ({
       );
       continue;
     }
-    const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
-    logger.info(`audioId ${track.audio.id}: Fetching ${originalTrackLocation}`);
     const tempTrackPath = `${tempFolder}/${track.audio.id}-original.${track.audio.fileExtension}`;
     logger.info(`audioId ${track.audio.id}: Downloading to ${tempTrackPath}`);
     try {
-      await getFile(finalAudioBucket, originalTrackLocation, tempTrackPath);
+      await downloadOriginalAudio(
+        track.audio.id,
+        track.audio.fileExtension ?? "mp3",
+        tempTrackPath
+      );
     } catch (e) {
       logger.error(
-        `Error fetching original track: ${e}: ${originalTrackLocation}`
+        `Error fetching original track: ${e}: ${track.audio.id}/original.${track.audio.fileExtension}`
       );
       await fsPromises.rm(tempTrackPath, { force: true });
 
@@ -112,7 +109,7 @@ const downloadTracks = async ({
     i += 1;
     await job.updateProgress(progress);
     logger.info(
-      `audioId ${track.audio.id}: going to convert audio ${originalTrackLocation} to format ${format.format}${format.audioBitrate ? `@${format.audioBitrate}` : ""}`
+      `audioId ${track.audio.id}: going to convert audio to format ${format.format}${format.audioBitrate ? `@${format.audioBitrate}` : ""}`
     );
 
     await new Promise((resolve, reject) => {
@@ -150,12 +147,14 @@ const downloadTracks = async ({
 
 const zipFilesInFolder = async ({
   tempFolder,
-  zipFileName,
-  destinationBucket,
+  type,
+  id,
+  format,
 }: {
   tempFolder: string;
-  zipFileName: string;
-  destinationBucket: string;
+  type: "track" | "trackGroup";
+  id: number;
+  format: string;
 }) => {
   const profiler = logger.startTimer();
 
@@ -163,7 +162,7 @@ const zipFilesInFolder = async ({
     const finalFilesInFolder = await fsPromises.readdir(tempFolder);
 
     logger.info(
-      `zipFilesInFolder: ${tempFolder}: Zipping files to ${zipFileName} in bucket ${destinationBucket}: ${finalFilesInFolder.join(", ")}`
+      `zipFilesInFolder: ${tempFolder}: Zipping ${id}/${format}.zip: ${finalFilesInFolder.join(", ")}`
     );
 
     const archive = archiver("zip", {
@@ -201,12 +200,9 @@ const zipFilesInFolder = async ({
 
     archive.pipe(pass);
     archive.finalize();
-
-    // Resolve only after the upload completes. Resolving on archive's "finish"
-    // event was too early: the archive signals it has finished writing to the
-    // PassThrough, but MinIO may not have finished receiving the upload yet.
     try {
-      await uploadWrapper(destinationBucket, zipFileName, pass);
+      await uploadZip(type, id, format, pass);
+
       logger.info(
         `zipFilesInFolder: ${tempFolder}: Cleaned up incoming bucket`
       );
@@ -250,10 +246,7 @@ const downloadTrackGroupContent = async ({
         logger.info(
           `downloadTrackGroupContent: ${trackGroupId}: Fetching content ${item.id}`
         );
-        const { buffer } = await getBufferFromStorage(
-          downloadableContentBucket,
-          item.id
-        );
+        const { buffer } = await getDownloadableContentBuffer(item.id);
 
         if (buffer) {
           logger.info(
@@ -284,10 +277,7 @@ const downloadCover = async ({
     logger.info(`downloadCover: ${coverId}: Adding cover`);
 
     try {
-      const { buffer } = await getBufferFromStorage(
-        finalCoversBucket,
-        `${coverId}-x1500.webp`
-      );
+      const { buffer } = await getCoverBuffer(coverId, "webp");
       if (buffer) {
         await fsPromises.writeFile(coverDestination, buffer);
         chosenCoverLocation = coverDestination;
@@ -299,10 +289,7 @@ const downloadCover = async ({
     }
 
     try {
-      const { buffer: buffer2 } = await getBufferFromStorage(
-        finalCoversBucket,
-        `${coverId}-x1500.jpg`
-      );
+      const { buffer: buffer2 } = await getCoverBuffer(coverId, "jpg");
       if (buffer2) {
         const jpgDestination = coverDestination.replace(".webp", ".jpg");
         await fsPromises.writeFile(jpgDestination, buffer2);
@@ -326,7 +313,7 @@ const downloadAndZipTracks = async ({
   trackGroup,
   job,
   artist,
-  destinationBucket,
+  destinationType,
 }: {
   formatString: string;
   tempFolder: string;
@@ -339,7 +326,7 @@ const downloadAndZipTracks = async ({
   };
   job: Job;
   artist: Artist;
-  destinationBucket: DestinationBucket;
+  destinationType: "track" | "trackGroup";
 }) => {
   try {
     const format = parseFormat(formatString);
@@ -347,8 +334,6 @@ const downloadAndZipTracks = async ({
 
     let progress = 10;
     const coverDestination = `${tempFolder}/cover.webp`;
-
-    await createBucketIfNotExists(destinationBucket, logger);
 
     logger.info(`Checking if folder exists, if not creating it ${tempFolder}`);
     try {
@@ -387,10 +372,12 @@ const downloadAndZipTracks = async ({
 
     logger.info(`trackGroupId ${trackGroup.id}: Building zip`);
 
+    const zipId = destinationType === "track" ? tracks[0].id : trackGroup.id;
     await zipFilesInFolder({
       tempFolder,
-      zipFileName: `${destinationBucket === trackFormatBucket ? tracks[0].id : trackGroup.id}/${formatString}.zip`,
-      destinationBucket,
+      type: destinationType,
+      id: zipId,
+      format: formatString,
     });
 
     await job.updateProgress(90);
@@ -400,16 +387,12 @@ const downloadAndZipTracks = async ({
   }
 };
 
-type DestinationBucket =
-  | typeof trackFormatBucket
-  | typeof trackGroupFormatBucket;
-
 export default async (job: Job) => {
   const {
     trackGroup,
     format: formatString,
     tracks,
-    destinationBucket,
+    destinationType = "trackGroup",
   } = job.data as {
     tracks: (Track & {
       audio: TrackAudio;
@@ -419,11 +402,11 @@ export default async (job: Job) => {
       cover: TrackGroupCover;
     };
     format: string;
-    destinationBucket: DestinationBucket;
+    destinationType: "track" | "trackGroup";
   };
   let tempFolder = `${TEMP_LOCATION}trackGroup/${trackGroup.id}/${formatString}`;
 
-  if (destinationBucket === "track-format") {
+  if (destinationType === "track") {
     tempFolder = `${TEMP_LOCATION}track/${tracks[0].id}/${formatString}`;
   }
 
@@ -443,7 +426,7 @@ export default async (job: Job) => {
       trackGroup,
       job,
       artist,
-      destinationBucket,
+      destinationType,
     });
   } catch (e) {
     logger.error(`Error creating zip of tracks folder: ${tempFolder}`);

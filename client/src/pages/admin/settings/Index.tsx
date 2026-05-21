@@ -30,10 +30,12 @@ interface FormSettings {
   s3?: SettingsFromAPI["settings"]["s3"];
   cloudflareTurnstileSecret?: string;
   defconLevel?: number;
+  bucketPrefix?: string;
 }
 
 interface SettingsFromAPI {
   cdnUrl?: string;
+  bucketNames?: { prefix: string } | null;
   settings: {
     platformPercent: number;
     instanceArtistId: number;
@@ -136,6 +138,7 @@ const Index = () => {
         s3: {
           ...response.result.settings?.s3,
         },
+        bucketPrefix: response.result.bucketNames?.prefix ?? "",
         cloudflareTurnstileSecret:
           response.result.settings?.cloudflareTurnstileSecret,
         terms: response.result.terms,
@@ -172,6 +175,10 @@ const Index = () => {
             featuredArtistIds: featuredArtists.map((a) => a.id),
           },
           cdnUrl: data.cdnUrl,
+          bucketNames:
+            data.bucketPrefix !== undefined
+              ? { prefix: data.bucketPrefix }
+              : undefined,
           terms: data.terms,
           showQueueDashboard: data.showQueueDashboard,
           isClosedToPublicArtistSignup: data.isClosedToPublicArtistSignup,
@@ -508,6 +515,26 @@ const Index = () => {
             <td>
               <InputEl
                 {...register("s3.region")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Bucket prefix
+              <br />
+              <small>
+                Leave empty for legacy mode (separate per-type buckets). Set to
+                any string (e.g. "") to use consolidated 3-bucket mode:
+                mirlo-audio, mirlo-images, mirlo-downloads.
+              </small>
+            </td>
+            <td>
+              <InputEl
+                {...register("bucketPrefix")}
+                placeholder="(empty = legacy mode)"
                 className={css`
                   text-align: right;
                 `}

@@ -7,10 +7,11 @@ import ico from "sharp-ico";
 import tempSharpConfig from "../config/sharp";
 import { generateFullStaticImageUrl } from "../utils/images";
 import {
-  createBucketIfNotExists,
-  getBufferFromStorage,
-  removeObjectFromStorage,
-  uploadWrapper,
+  ImageType,
+  downloadIncomingImageByType,
+  uploadOptimizedImageByType,
+  removeIncomingImageByType,
+  getImageFinalBucket,
 } from "../utils/minio";
 
 import { logger } from "./queue-worker";
@@ -34,27 +35,27 @@ const optimizeImage = async (job: Job) => {
     config = sharpConfig.artwork,
     destinationId,
     model,
-    incomingMinioBucket,
-    finalMinioBucket,
-  } = job.data;
+    imageType,
+  } = job.data as {
+    config: typeof sharpConfig.artwork;
+    destinationId: string;
+    model: string;
+    imageType: ImageType;
+  };
 
   try {
     const profiler = logger.startTimer();
 
     logger.info(`Starting to optimize images ${model}/${destinationId}`);
-    const { buffer } = await getBufferFromStorage(
-      incomingMinioBucket,
+    const { buffer } = await downloadIncomingImageByType(
+      imageType,
       destinationId
     );
 
     if (!buffer) {
-      logger.error(
-        `No buffer found for ${incomingMinioBucket}/${destinationId}`
-      );
+      logger.error(`No buffer found for incoming image ${destinationId}`);
       return { error: "No buffer found" };
     }
-
-    await createBucketIfNotExists(finalMinioBucket, logger);
 
     // logger.info(`Got object of size ${size}`);
     const promises = Object.entries(config)
@@ -116,8 +117,8 @@ const optimizeImage = async (job: Job) => {
               const originalSize =
                 await originalPipeline[outputType](outputOptions).toBuffer();
 
-              await uploadWrapper(
-                finalMinioBucket,
+              await uploadOptimizedImageByType(
+                imageType,
                 `${destinationId}-original${ext}`,
                 originalSize,
                 {
@@ -192,8 +193,8 @@ const optimizeImage = async (job: Job) => {
                 );
 
                 logger.info("Uploading image to bucket");
-                await uploadWrapper(
-                  finalMinioBucket,
+                await uploadOptimizedImageByType(
+                  imageType,
                   finalFileName,
                   newBuffer,
                   {
@@ -263,14 +264,19 @@ const optimizeImage = async (job: Job) => {
       });
     } else if (model === "userAvatar") {
       try {
-        const faviconFinalName = `${destinationId}_user_avatar_favicon.ico`;
         const sharpBuffer = await sharp(buffer).png().toBuffer();
         const faviconBuffer = ico.encode([sharpBuffer]);
         logger.info("Uploading user avatar favicon to bucket");
-        await uploadWrapper(finalMinioBucket, faviconFinalName, faviconBuffer, {
-          contentType: "image/x-icon",
-          cacheControl: "public, max-age=604800, stale-while-revalidate=604800",
-        });
+        await uploadOptimizedImageByType(
+          imageType,
+          `${destinationId}_user_avatar_favicon.ico`,
+          faviconBuffer,
+          {
+            contentType: "image/x-icon",
+            cacheControl:
+              "public, max-age=604800, stale-while-revalidate=604800",
+          }
+        );
         logger.info("User avatar favicon uploaded successfully");
       } catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
@@ -288,14 +294,19 @@ const optimizeImage = async (job: Job) => {
       });
     } else if (model === "artistAvatar") {
       try {
-        const faviconFinalName = `${destinationId}_artist_avatar_favicon.ico`;
         const sharpBuffer = await sharp(buffer).png().toBuffer();
         const faviconBuffer = ico.encode([sharpBuffer]);
         logger.info("Uploading artist avatar favicon to bucket");
-        await uploadWrapper(finalMinioBucket, faviconFinalName, faviconBuffer, {
-          contentType: "image/x-icon",
-          cacheControl: "public, max-age=604800, stale-while-revalidate=604800",
-        });
+        await uploadOptimizedImageByType(
+          imageType,
+          `${destinationId}_artist_avatar_favicon.ico`,
+          faviconBuffer,
+          {
+            contentType: "image/x-icon",
+            cacheControl:
+              "public, max-age=604800, stale-while-revalidate=604800",
+          }
+        );
         logger.info("Artist avatar favicon uploaded successfully");
       } catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
@@ -314,9 +325,9 @@ const optimizeImage = async (job: Job) => {
     }
 
     profiler.done({ message: "Done optimizing image" });
-    logger.info(`Removing from Bucket ${incomingMinioBucket}`);
+    logger.info(`Removing incoming image ${destinationId}`);
 
-    await removeObjectFromStorage(incomingMinioBucket, destinationId);
+    await removeIncomingImageByType(imageType, destinationId);
 
     if (urls.length === 0) {
       logger.warn(
@@ -330,7 +341,7 @@ const optimizeImage = async (job: Job) => {
       const searchParams = new URLSearchParams();
       searchParams.append(
         "url",
-        generateFullStaticImageUrl(urls[0], finalMinioBucket)
+        generateFullStaticImageUrl(urls[0], getImageFinalBucket(imageType))
       );
       searchParams.append("models", "nudity-2.1");
       searchParams.append("api_user", SIGHTENGINE_USER);

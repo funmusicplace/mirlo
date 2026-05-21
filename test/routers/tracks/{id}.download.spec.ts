@@ -1,7 +1,14 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
+import {
+  createBucketIfNotExists,
+  finalAudioBucket,
+  uploadZip,
+} from "../../../src/utils/minio";
 import {
   clearTables,
   createArtist,
@@ -10,17 +17,15 @@ import {
   createUser,
   createUserTrackGroupPurchase,
 } from "../../utils";
+
 import prisma from "@mirlo/prisma";
+
 import { randomUUID } from "crypto";
 
 import { requestApp } from "../utils";
-import {
-  createBucketIfNotExists,
-  finalAudioBucket,
-  trackFormatBucket,
-  uploadWrapper,
-} from "../../../src/utils/minio";
+
 import archiver from "archiver";
+
 import { PassThrough } from "node:stream";
 
 describe("tracks/{id}/download", () => {
@@ -80,14 +85,8 @@ describe("tracks/{id}/download", () => {
       const trackGroup = await createTrackGroup(artist.id);
       const track = await createTrack(trackGroup.id);
 
-      await createBucketIfNotExists(finalAudioBucket);
-      await createBucketIfNotExists(trackFormatBucket);
       const passthrough = await generateMockArchive();
-      await uploadWrapper(
-        trackFormatBucket,
-        `${track.id}/flac.zip`,
-        passthrough
-      );
+      await uploadZip("track", track.id, "flac", passthrough);
 
       const { user: purchaser } = await createUser({
         email: "purchaser@artist.com",
@@ -118,13 +117,8 @@ describe("tracks/{id}/download", () => {
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
       const track = await createTrack(trackGroup.id);
-      await createBucketIfNotExists(trackFormatBucket);
       const passthrough = await generateMockArchive();
-      await uploadWrapper(
-        trackFormatBucket,
-        `${track.id}/flac.zip`,
-        passthrough
-      );
+      await uploadZip("track", track.id, "flac", passthrough);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
@@ -194,9 +188,8 @@ describe("tracks/{id}/download", () => {
       });
       const track = await createTrack(trackGroup.id, { isPreview: true });
 
-      await createBucketIfNotExists(trackFormatBucket);
       const passthrough = await generateMockArchive();
-      await uploadWrapper(trackFormatBucket, `${track.id}/flac.zip`, passthrough);
+      await uploadZip("track", track.id, "flac", passthrough);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",

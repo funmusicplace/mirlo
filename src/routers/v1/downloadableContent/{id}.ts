@@ -1,13 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../auth/passport";
-import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../auth/passport";
 import { AppError } from "../../../utils/error";
 import {
-  downloadableContentBucket,
-  getBufferBasedOnStat,
-  statFile,
+  statDownloadableContent,
+  getDownloadableContentBufferFromStat,
 } from "../../../utils/minio";
 
 type Params = {
@@ -44,11 +43,8 @@ export default function () {
           description: "You do not have access to this content",
         });
       }
-
-      const { backblazeStat } = await statFile(
-        downloadableContentBucket,
-        contentId
-      );
+      // FIXME: Remove knowledge of BackBlaze from this location.
+      const { backblazeStat } = await statDownloadableContent(contentId);
 
       if (!backblazeStat) {
         throw new AppError({
@@ -69,8 +65,7 @@ export default function () {
       res.setHeader("ETag", `"${backblazeStat.ETag}"`);
 
       try {
-        const buffer = await getBufferBasedOnStat(
-          downloadableContentBucket,
+        const buffer = await getDownloadableContentBufferFromStat(
           contentId,
           backblazeStat
         );

@@ -5,11 +5,13 @@ import { startCleaningUpOldFiles } from "../../queues/clean-up-old-files-queue";
 import {
   removeObjectsFromBucket,
   trackGroupFormatBucket,
+  getDownloadsBucket,
 } from "../../utils/minio";
 
 const cleanUpFiles = async (incomingFolder: string) => {
   logger.info("cleanUpFiles");
-  if (incomingFolder.startsWith(trackGroupFormatBucket)) {
+  const effectiveTrackGroupBucket = getDownloadsBucket(trackGroupFormatBucket);
+  if (incomingFolder.startsWith(effectiveTrackGroupBucket)) {
     const split = incomingFolder.split(/\/(.*)/);
     const bucket = split[0];
     const albumId = split[1];

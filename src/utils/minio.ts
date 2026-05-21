@@ -59,6 +59,96 @@ export const downloadableContentBucket =
 export const incomingImageBucket = s3UniquePrefix + "incoming-mirlo-images";
 export const finalImageBucket = s3UniquePrefix + "mirlo-images";
 
+// Consolidated bucket config (Phase 1 self-hosting support).
+// null = legacy mode: use per-type bucket constants above (for existing installs).
+// Set = consolidated mode: 3 buckets with path prefixes (for new installs).
+export type BucketConfig = { prefix: string };
+
+// Per-image-type routing table.
+// incoming: legacy bucket for uploads before optimization; final: legacy bucket after.
+// prefix: path prefix within mirlo-images in consolidated mode (= final bucket name, or
+//         undefined for the generic "image" type which sits at the bucket root).
+// queue: whether to add a BullMQ optimize-image job after upload.
+const imageTypeBuckets = {
+  artistAvatar: {
+    incoming: incomingArtistAvatarBucket,
+    final: finalArtistAvatarBucket,
+    prefix: finalArtistAvatarBucket as string | undefined,
+    queue: true,
+  },
+  artistBackground: {
+    incoming: incomingArtistBackgroundBucket,
+    final: finalArtistBackgroundBucket,
+    prefix: finalArtistBackgroundBucket as string | undefined,
+    queue: true,
+  },
+  userAvatar: {
+    incoming: incomingArtistAvatarBucket,
+    final: finalUserAvatarBucket,
+    prefix: finalUserAvatarBucket as string | undefined,
+    queue: true,
+  },
+  userBanner: {
+    incoming: incomingUserBannerBucket,
+    final: finalUserBannerBucket,
+    prefix: finalUserBannerBucket as string | undefined,
+    queue: true,
+  },
+  trackGroupCover: {
+    incoming: incomingCoversBucket,
+    final: finalCoversBucket,
+    prefix: finalCoversBucket as string | undefined,
+    queue: true,
+  },
+  merch: {
+    incoming: incomingMerchImageBucket,
+    final: finalMerchImageBucket,
+    prefix: finalMerchImageBucket as string | undefined,
+    queue: true,
+  },
+  postImage: {
+    incoming: finalPostImageBucket,
+    final: finalPostImageBucket,
+    prefix: finalPostImageBucket as string | undefined,
+    queue: false,
+  },
+  image: {
+    incoming: incomingImageBucket,
+    final: finalImageBucket,
+    prefix: undefined as string | undefined,
+    queue: true,
+  },
+};
+export type ImageType = keyof typeof imageTypeBuckets;
+
+let _bucketConfig: BucketConfig | null = null;
+const _ensuredBuckets = new Set<string>();
+
+export const setBucketConfig = (config: BucketConfig | null) => {
+  _bucketConfig = config;
+  _ensuredBuckets.clear();
+};
+
+const ensureBucketCached = async (bucket: string) => {
+  if (!_ensuredBuckets.has(bucket)) {
+    await createBucketIfNotExists(bucket, logger);
+    _ensuredBuckets.add(bucket);
+  }
+};
+
+const isConsolidatedMode = (): boolean => _bucketConfig !== null;
+
+export const getImagesBucket = (legacyFallback: string): string =>
+  _bucketConfig ? `${_bucketConfig.prefix}mirlo-images` : legacyFallback;
+
+export const getAudioBucket = (
+  legacyFallback: string = finalAudioBucket
+): string =>
+  _bucketConfig ? `${_bucketConfig.prefix}mirlo-audio` : legacyFallback;
+
+export const getDownloadsBucket = (legacyFallback: string): string =>
+  _bucketConfig ? `${_bucketConfig.prefix}mirlo-downloads` : legacyFallback;
+
 const {
   MINIO_HOST = "",
   MINIO_PUBLIC_HOST = "",
@@ -654,4 +744,221 @@ export const removeObjectsFromBucket = async (
       minioObojects.map((o) => o.name!)
     );
   }
+};
+
+// ─── Domain storage operations ────────────────────────────────────────────────
+// All bucket selection and key construction lives here.
+// Call sites express intent; this layer handles the routing.
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+
+const audioIncomingKey = (audioId: string) =>
+  isConsolidatedMode() ? `incoming/${audioId}` : audioId;
+
+export const uploadIncomingAudio = async (
+  audioId: string,
+  stream: Readable
+) => {
+  const bucket = getAudioBucket(incomingAudioBucket);
+  await ensureBucketCached(bucket);
+  return uploadWrapper(bucket, audioIncomingKey(audioId), stream);
+};
+
+export const downloadIncomingAudio = (audioId: string, destPath: string) =>
+  getFile(
+    getAudioBucket(incomingAudioBucket),
+    audioIncomingKey(audioId),
+    destPath
+  );
+
+export const getAudioUploadUrl = (audioId: string) =>
+  getPresignedUploadUrl(
+    getAudioBucket(incomingAudioBucket),
+    audioIncomingKey(audioId)
+  );
+
+export const removeIncomingAudio = (audioId: string) =>
+  removeObjectFromStorage(
+    getAudioBucket(incomingAudioBucket),
+    audioIncomingKey(audioId)
+  );
+
+export const downloadOriginalAudio = (
+  audioId: string,
+  ext: string,
+  destPath: string
+) => getFile(getAudioBucket(), `${audioId}/original.${ext}`, destPath);
+
+export const streamOriginalAudio = (audioId: string, ext: string) =>
+  getReadStream(getAudioBucket(), `${audioId}/original.${ext}`);
+
+export const statAudioSegment = (audioId: string, segment: string) =>
+  statFile(getAudioBucket(), `${audioId}/${segment}`);
+
+export const getAudioSegmentBuffer = (
+  audioId: string,
+  segment: string,
+  stat?: HeadObjectCommandOutput
+) => getBufferBasedOnStat(getAudioBucket(), `${audioId}/${segment}`, stat);
+
+export const uploadAudioHlsFile = async (
+  audioId: string,
+  filename: string,
+  stream: Readable
+) => {
+  const bucket = getAudioBucket();
+  await ensureBucketCached(bucket);
+  return uploadWrapper(bucket, `${audioId}/${filename}`, stream);
+};
+
+export const removeAudioFiles = (audioId: string) =>
+  removeObjectsFromBucket(getAudioBucket(), audioId);
+
+// ── Images ────────────────────────────────────────────────────────────────────
+
+export const getImageFinalBucket = (imageType: ImageType): string =>
+  imageTypeBuckets[imageType].final;
+
+export const imageTypeUsesQueue = (imageType: ImageType): boolean =>
+  imageTypeBuckets[imageType].queue;
+
+export const uploadIncomingImageByType = async (
+  imageType: ImageType,
+  fileName: string,
+  stream: Readable,
+  options?: { contentType?: string }
+) => {
+  const { incoming, prefix } = imageTypeBuckets[imageType];
+  const bucket = getImagesBucket(incoming);
+  await ensureBucketCached(bucket);
+  const key =
+    isConsolidatedMode() && prefix
+      ? `incoming/${prefix}/${fileName}`
+      : fileName;
+  return uploadWrapper(bucket, key, stream, options);
+};
+
+export const downloadIncomingImageByType = (
+  imageType: ImageType,
+  imageId: string
+) => {
+  const { incoming, prefix } = imageTypeBuckets[imageType];
+  return getBufferFromStorage(
+    getImagesBucket(incoming),
+    isConsolidatedMode() && prefix ? `incoming/${prefix}/${imageId}` : imageId
+  );
+};
+
+export const uploadOptimizedImageByType = async (
+  imageType: ImageType,
+  fileName: string,
+  buffer: Buffer,
+  options?: { contentType?: string; cacheControl?: string }
+) => {
+  const { final, prefix } = imageTypeBuckets[imageType];
+  const bucket = getImagesBucket(final);
+  await ensureBucketCached(bucket);
+  const key =
+    isConsolidatedMode() && prefix ? `${prefix}/${fileName}` : fileName;
+  return uploadWrapper(bucket, key, buffer, options);
+};
+
+export const removeIncomingImageByType = (
+  imageType: ImageType,
+  imageId: string
+) => {
+  const { incoming, prefix } = imageTypeBuckets[imageType];
+  return removeObjectFromStorage(
+    getImagesBucket(incoming),
+    isConsolidatedMode() && prefix ? `incoming/${prefix}/${imageId}` : imageId
+  );
+};
+
+export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>
+  getBufferFromStorage(
+    getImagesBucket(finalCoversBucket),
+    `${isConsolidatedMode() ? `${finalCoversBucket}/` : ""}${coverId}-x1500.${ext}`
+  );
+
+export const removeCoverImages = (coverId: string) =>
+  removeObjectsFromBucket(
+    getImagesBucket(finalCoversBucket),
+    isConsolidatedMode() ? `${finalCoversBucket}/${coverId}` : coverId
+  );
+
+// ── Downloadable content ──────────────────────────────────────────────────────
+
+const contentKey = (id: string) =>
+  isConsolidatedMode() ? `content/${id}` : id;
+
+export const getDownloadableContentUploadUrl = (id: string) =>
+  getPresignedUploadUrl(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id)
+  );
+
+export const statDownloadableContent = (id: string) =>
+  statFile(getDownloadsBucket(downloadableContentBucket), contentKey(id));
+
+export const getDownloadableContentBufferFromStat = (
+  id: string,
+  stat?: HeadObjectCommandOutput
+) =>
+  getBufferBasedOnStat(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id),
+    stat
+  );
+
+export const getDownloadableContentBuffer = (id: string) =>
+  getBufferFromStorage(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id)
+  );
+
+export const removeDownloadableContent = (id: string) =>
+  removeObjectsFromBucket(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id)
+  );
+
+// ── Zips ──────────────────────────────────────────────────────────────────────
+
+const zipBucket = (type: "track" | "trackGroup") =>
+  type === "track"
+    ? getDownloadsBucket(trackFormatBucket)
+    : getDownloadsBucket(trackGroupFormatBucket);
+
+const zipKey = (type: "track" | "trackGroup", id: number, format: string) =>
+  `${isConsolidatedMode() ? `${type === "track" ? "track" : "trackgroup"}/` : ""}${id}/${format}.zip`;
+
+export const statZip = (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string
+) => statFile(zipBucket(type), zipKey(type, id, format));
+
+export const streamZip = (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string
+) => getReadStream(zipBucket(type), zipKey(type, id, format));
+
+export const presignZip = (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string,
+  options?: Parameters<typeof getPresignedDownloadUrl>[2]
+) =>
+  getPresignedDownloadUrl(zipBucket(type), zipKey(type, id, format), options);
+
+export const uploadZip = async (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string,
+  stream: Readable
+) => {
+  const bucket = zipBucket(type);
+  await ensureBucketCached(bucket);
+  return uploadWrapper(bucket, zipKey(type, id, format), stream);
 };

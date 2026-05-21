@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
-import { statFile, trackGroupFormatBucket } from "../../../../utils/minio";
+import { statZip } from "../../../../utils/minio";
 import {
   basicTrackGroupInclude,
   FormatOptions,
@@ -37,14 +37,13 @@ export default function () {
 
     logger.info(`trackGroupId: ${trackGroupId} Found a trackgroup`);
 
-    const zipName = `${trackGroup.id}/${format}.zip`;
-    logger.info(`zipName: ${zipName}`);
-
     try {
       logger.info("checking if trackgroup is already zipped");
-      const { backblazeStat, minioStat } = await statFile(
-        trackGroupFormatBucket,
-        zipName
+      // FIXME: Our controller shouldn't have to know about backblaze
+      const { backblazeStat, minioStat } = await statZip(
+        "trackGroup",
+        trackGroup.id,
+        format
       );
       if (backblazeStat || minioStat) {
         logger.info("the trackgroup is already zipped");

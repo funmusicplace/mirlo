@@ -19,14 +19,11 @@ import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
 import { generateFullStaticImageUrl } from "./images";
-import {
-  finalCoversBucket,
-  finalAudioBucket,
-  removeObjectsFromBucket,
-  getReadStream,
-} from "./minio";
-export { processSingleTrackGroup } from "./serialize/trackGroup";
+import { streamOriginalAudio, removeCoverImages } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
+export { processSingleTrackGroup } from "./serialize/trackGroup";
+import { processSingleTrackGroup } from "./serialize/trackGroup";
+import { deleteTrack } from "./tracks";
 
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
   id: number;
@@ -96,8 +93,6 @@ export const finalizeTrackGroupPublication = async (
   return updated;
 };
 
-import { deleteTrack } from "./tracks";
-
 export const whereForPublishedTrackGroups = (opts?: {
   includePrivate?: boolean;
 }): Prisma.TrackGroupWhereInput => {
@@ -136,7 +131,7 @@ export const deleteTrackGroupCover = async (trackGroupId: number) => {
     });
 
     try {
-      removeObjectsFromBucket(finalCoversBucket, cover.id);
+      removeCoverImages(cover.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }
@@ -389,12 +384,11 @@ export async function buildZipFileForPath(
         const order = track.order ? track.order : i + 1;
         const trackTitle = `${order} - ${track.title}.${format}`;
 
-        const trackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
-        logger.info(`${track.audio.id}: Fetching ${trackLocation}`);
+        logger.info(`${track.audio.id}: Fetching original audio`);
         try {
-          const trackStream = await getReadStream(
-            finalAudioBucket,
-            trackLocation
+          const trackStream = await streamOriginalAudio(
+            track.audio.id,
+            track.audio.fileExtension ?? ""
           );
 
           if (trackStream) {
@@ -908,13 +902,6 @@ export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
   return orderByObj;
 };
 
-import { processSingleTrackGroup } from "./serialize/trackGroup";
-
-export default {
-  cover: generateFullStaticImageUrl,
-  single: processSingleTrackGroup,
-};
-
 export const createOrUpdatePledge = async ({
   userId,
   message,
@@ -973,6 +960,7 @@ export const createOrUpdatePledge = async ({
   }
 };
 
-const chargePledges = (fundraiserId: number) => {
-  // Logic to charge pledges for the given fundraiserId
+export default {
+  cover: generateFullStaticImageUrl,
+  single: processSingleTrackGroup,
 };

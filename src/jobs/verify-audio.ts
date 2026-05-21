@@ -2,7 +2,7 @@ import { promises as fsPromises } from "fs";
 
 import { Job } from "bullmq";
 
-import { finalAudioBucket, getFile } from "../utils/minio";
+import { downloadOriginalAudio } from "../utils/minio";
 
 import { logger } from "./queue-worker";
 const TEMP_LOCATION = process.env.TEMP_LOCATION;
@@ -26,10 +26,9 @@ export default async (job: Job) => {
       await fsPromises.mkdir(tempFolder, { recursive: true });
     }
 
-    const remoteTrackLocation = `${audioId}/original.${fileExtension}`;
     const localTrackPath = `${tempFolder}/original.${fileExtension}`;
 
-    await getFile(finalAudioBucket, remoteTrackLocation, localTrackPath);
+    await downloadOriginalAudio(audioId, fileExtension, localTrackPath);
 
     logger.info(`audioId: ${audioId} \t got the track audio`);
 

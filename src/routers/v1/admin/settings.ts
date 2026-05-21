@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { setCdnUrl } from "../../../utils/images";
+import { setBucketConfig, BucketConfig } from "../../../utils/minio";
 import { getSiteSettings } from "../../../utils/settings";
 import { refreshStripeClient } from "../../../utils/stripe";
 
@@ -32,6 +33,7 @@ export default function () {
       isClosedToPublicArtistSignup,
       showQueueDashboard,
       cdnUrl,
+      bucketNames,
     } = req.body;
     try {
       let existingSettings = await prisma.settings.findFirst();
@@ -67,6 +69,7 @@ export default function () {
           defconLevel: Number(defconLevel),
           showQueueDashboard,
           cdnUrl,
+          ...(bucketNames !== undefined && { bucketNames }),
         },
         where: {
           id: existingSettings.id,
@@ -74,8 +77,11 @@ export default function () {
       });
       setCdnUrl(cdnUrl ?? undefined);
       await refreshStripeClient();
+      if (bucketNames !== undefined) {
+        setBucketConfig((bucketNames as BucketConfig | null) ?? null);
+      }
       const refreshedSettings = await getSiteSettings();
-      return res.status(200).json({ result: maskStripeKey(refreshedSettings) });
+      return res.status(200).json({ result: refreshedSettings });
     } catch (e) {
       next(e);
     }
