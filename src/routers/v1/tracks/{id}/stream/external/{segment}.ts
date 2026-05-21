@@ -1,3 +1,6 @@
+// This module implements the "authorized streaming" protocol defined in:
+// https://codeberg.org/fairplayer/interop/src/branch/main/streaming/index.md#authorization-based-streaming
+
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -5,6 +8,7 @@ import jwt from "jsonwebtoken";
 import { MIRLO_API_KEY_HEADER } from "../../../../../../auth/apiKey";
 import { userLoggedInWithoutRedirect } from "../../../../../../auth/passport";
 import logger from "../../../../../../logger";
+import { AppError, HttpCode } from "../../../../../../utils/error";
 import { canUserListenToTrack } from "../../../../../../utils/ownership";
 import socialMusic from "../../../../../../utils/socialMusic";
 import { fetchFile } from "../{segment}";
@@ -42,17 +46,23 @@ export default function () {
       );
 
       if (!track || !isUserAbleToListenToTrack) {
-        res.status(404);
-        return next();
+        throw new AppError({
+          httpCode: 404,
+          description: "Not found",
+        });
       }
 
       const isManifest = segment.includes("playlist.m3u8");
       if (isManifest && isUserAbleToListenToTrack === "exceeded") {
-        res.status(402).send("Track play limit exceeded");
-        return next();
+        throw new AppError({
+          httpCode: HttpCode.PAYMENT_REQUIRED,
+          description: "Track play limit exceeded",
+        });
       }
 
       if (track.audio) {
+        // userid is an external user, i.e. its identifier coming
+        // from the external client
         const userid = req.get(socialMusic.HEADER_USERID);
         log.debug("Streaming remote", {
           segment,
@@ -66,41 +76,49 @@ export default function () {
           const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
 
           if (!Boolean(apiHeader) || req.client?.key !== apiHeader) {
-            res
-              .status(401)
-              .send(`Header ${MIRLO_API_KEY_HEADER} missing or invalid`);
-            return next();
+            throw new AppError({
+              httpCode: 401,
+              description: `Header ${MIRLO_API_KEY_HEADER} missing or invalid`,
+            });
           }
 
           if (!userid) {
-            res.status(400).send(`Header ${socialMusic.HEADER_USERID} missing`);
-            return next();
+            throw new AppError({
+              httpCode: 400,
+              description: `Header ${socialMusic.HEADER_USERID} missing`,
+            });
           }
 
           const payload = { song: id, userid };
-          if (userid) {
-            log.debug("Generate playtoken:", payload);
-            const playToken = jwt.sign(payload, jwt_secret, {
-              expiresIn: "4w",
-            });
-            res.setHeader(socialMusic.HEADER_PLAYTOKEN, playToken);
-          }
+          log.debug("Generate playtoken:", payload);
+          const playToken = jwt.sign(payload, jwt_secret, {
+            expiresIn: "4h",
+          });
+          res.setHeader(socialMusic.HEADER_PLAYTOKEN, playToken);
         } else {
           // On a segment request, check that the token matches user and song
 
           const playToken = req.query[socialMusic.PLAYTOKEN];
           const reqUserId = req.query[socialMusic.USERID];
           if (!(playToken && reqUserId)) {
-            res
-              .status(401)
-              .send(
-                `${socialMusic.USERID} or ${socialMusic.PLAYTOKEN} missing`
-              );
-            return next();
+            throw new AppError({
+              httpCode: 401,
+              description: `${socialMusic.USERID} or ${socialMusic.PLAYTOKEN} missing`,
+            });
           }
 
-          // @ts-ignore playtoken type may not be a string?
-          const decoded = jwt.verify(playToken, jwt_secret);
+          let decoded;
+          try {
+            // @ts-ignore playtoken type may not be a string?
+            decoded = jwt.verify(playToken, jwt_secret);
+          } catch (e: any) {
+            throw new AppError({
+              httpCode: 400,
+              // jwt verify errors typically include a message
+              // https://github.com/auth0/node-jsonwebtoken#errors--codes
+              description: e.message || "Invalid token",
+            });
+          }
           const { song, userid } = decoded;
 
           log.debug("Matching token to request", {
@@ -110,10 +128,10 @@ export default function () {
 
           if (song !== id || reqUserId !== userid) {
             log.debug("Credentials error");
-            res.status(403).send("Token doesn't match song and user");
-            return next();
-          } else {
-            log.debug("Credentials match");
+            throw new AppError({
+              httpCode: 403,
+              description: "Token doesn't match song and user",
+            });
           }
         }
 
@@ -121,8 +139,7 @@ export default function () {
       }
     } catch (e) {
       console.error(e);
-      res.status(500);
-      return next();
+      return next(e);
     }
   }
 

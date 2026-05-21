@@ -87,6 +87,14 @@ describe("tracks/{id}/stream/external/", () => {
       assert.equal(response.statusCode, 401);
     });
 
+    it("should GET segment 400 if playToken invalid", async () => {
+      const response = await requestApp.get(
+        `${segmentPath(track.id)}?userid=remoteuser&playtoken=not-really-a-token`
+      );
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should GET segment 200 if playToken matches", async () => {
       const playToken = jwt.sign(
         { userid: "remoteuser", song: track.id.toString() },
