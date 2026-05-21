@@ -1,4 +1,4 @@
-import { backendStorage } from "./minio";
+import { backendStorage, getImagesBucket } from "./minio";
 
 const { S3_REGION = "" } = process.env;
 
@@ -22,13 +22,18 @@ export const generateFullStaticImageUrl = (
   bucket: string,
   extension?: string
 ) => {
+  const imagesBucket = getImagesBucket(bucket);
+  const effectiveBucket = imagesBucket;
+  const effectiveKey =
+    bucket !== imagesBucket ? `${bucket}/${imageName}` : imageName;
+
   if (backendStorage === "minio") {
-    return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${imageName}.${extension ?? "webp"}`;
+    return `${process.env.STATIC_MEDIA_HOST}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
   } else {
     if (_cdnUrl) {
-      return `${_cdnUrl}/file/${bucket}/${imageName}.${extension ?? "webp"}`;
+      return `${_cdnUrl}/file/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
     }
-    return `https://${bucket}.s3.${S3_REGION}.backblazeb2.com/${imageName}.${extension ?? "webp"}`;
+    return `https://${effectiveBucket}.s3.${S3_REGION}.backblazeb2.com/${effectiveKey}.${extension ?? "webp"}`;
   }
 };
 

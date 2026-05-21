@@ -25,6 +25,7 @@ import auth from "./routers/auth";
 import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
 import { setCdnUrl } from "./utils/images";
+import { setBucketConfig, BucketConfig } from "./utils/minio";
 import { sanitizeHeadersForLogs } from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
 import { refreshStripeClient } from "./utils/stripe";
@@ -283,6 +284,7 @@ app.listen(process.env.PORT, async () => {
   const settings = await getSiteSettings();
   setCdnUrl(settings.cdnUrl ?? undefined);
   await refreshStripeClient();
+  setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`);
 });

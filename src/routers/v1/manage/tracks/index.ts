@@ -4,10 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
-import {
-  getPresignedUploadUrl,
-  incomingAudioBucket,
-} from "../../../../utils/minio";
+import { getAudioUploadUrl } from "../../../../utils/minio";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
 
 export default function () {
@@ -141,7 +138,7 @@ export default function () {
             trackId: Number(track.id),
           },
         });
-        uploadUrl = await getPresignedUploadUrl(incomingAudioBucket, audio.id);
+        uploadUrl = await getAudioUploadUrl(audio.id);
       }
       res.json({ result: track, uploadUrl });
     } catch (e) {

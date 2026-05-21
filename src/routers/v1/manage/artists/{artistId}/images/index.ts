@@ -1,19 +1,16 @@
+import prisma from "@mirlo/prisma";
+import busboy from "connect-busboy";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
+import { logger } from "../../../../../../logger";
 import { uploadAndSendToImageQueue } from "../../../../../../queues/processImages";
-import busboy from "connect-busboy";
-import prisma from "@mirlo/prisma";
 import { deleteArtistAvatar } from "../../../../../../utils/artist";
 import { busboyOptions } from "../../../../../../utils/images";
-import {
-  finalImageBucket,
-  incomingImageBucket,
-} from "../../../../../../utils/minio";
-import { logger } from "../../../../../../logger";
 
 type Params = {
   artistId: string;
@@ -37,7 +34,7 @@ export default function () {
     try {
       const { jobId, imageId } = await uploadAndSendToImageQueue(
         { req, res },
-        incomingImageBucket,
+        "image",
         "image",
         "inFormData",
         async (
@@ -68,8 +65,7 @@ export default function () {
           }
           logger.info("Done upserting image, id: " + image.id);
           return image;
-        },
-        finalImageBucket
+        }
       );
 
       res.json({ result: { jobId, imageId } });

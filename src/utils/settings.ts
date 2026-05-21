@@ -1,9 +1,12 @@
 import prisma from "@mirlo/prisma";
 import { Settings } from "@mirlo/prisma/client";
 
+import { BucketConfig } from "./minio";
+
 interface SettingsType extends Partial<Settings> {
   platformPercent: number;
   cdnUrl?: string;
+  bucketNames?: BucketConfig | null;
 }
 
 const defaultSettings = {
@@ -12,6 +15,10 @@ const defaultSettings = {
     showHeroOnHome: true,
   },
 };
+
+// Default bucket config for fresh installs: consolidated 3-bucket structure.
+// Existing installs with null bucketNames stay in legacy mode (no change to bucket layout).
+const DEFAULT_BUCKET_CONFIG: BucketConfig = { prefix: "" };
 
 export const getSiteSettings = async (): Promise<SettingsType> => {
   let [result] = await prisma.settings.findMany();
@@ -24,6 +31,7 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
             showHeroOnHome: true,
           },
         },
+        bucketNames: DEFAULT_BUCKET_CONFIG,
       },
     });
   }
@@ -33,5 +41,6 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
     ...settings,
     ...result,
     cdnUrl: result.cdnUrl ?? undefined,
+    bucketNames: (result.bucketNames as BucketConfig | null) ?? null,
   };
 };

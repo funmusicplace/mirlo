@@ -3,9 +3,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import {
-  finalAudioBucket,
-  getBufferBasedOnStat,
-  statFile,
+  statAudioSegment,
+  getAudioSegmentBuffer,
 } from "../../../../../utils/minio";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
 
@@ -14,16 +13,17 @@ export const fetchFile = async (
   filename: string,
   segment: string
 ) => {
-  const alias = `${filename}/${segment}`;
-
-  const { backblazeStat, minioStat } = await statFile(finalAudioBucket, alias);
+  const { backblazeStat, minioStat } = await statAudioSegment(
+    filename,
+    segment
+  );
   if (!backblazeStat && !minioStat) {
     res.send();
   }
   try {
-    const buffer = await getBufferBasedOnStat(
-      finalAudioBucket,
-      alias,
+    const buffer = await getAudioSegmentBuffer(
+      filename,
+      segment,
       backblazeStat
     );
 

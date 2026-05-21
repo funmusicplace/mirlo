@@ -8,18 +8,9 @@ import { logger } from "../jobs/queue-worker";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
 import {
-  createBucketIfNotExists,
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-  finalMerchImageBucket,
-  finalPostImageBucket,
-  finalUserAvatarBucket,
-  finalUserBannerBucket,
-  incomingArtistAvatarBucket,
-  incomingArtistBackgroundBucket,
-  incomingMerchImageBucket,
-  incomingUserBannerBucket,
-  uploadWrapper,
+  ImageType,
+  imageTypeUsesQueue,
+  uploadIncomingImageByType,
 } from "../utils/minio";
 
 const queueOptions = {
@@ -98,7 +89,7 @@ const isUnsupportedImageCodecError = (error: unknown) => {
 
 export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
-  incomingBucket: string,
+  imageType: ImageType,
   model: string,
   sharpConfigKey: "artwork" | "avatar" | "background" | "banner" | "inFormData",
   createDatabaseEntry: (
@@ -111,7 +102,6 @@ export const uploadAndSendToImageQueue = async (
     },
     details: { dimensions: "square" | "background" | "banner" }
   ) => Promise<{ id: string } | void>,
-  finalBucket?: string, // If this is not supplied, we this basically just uploads to the first bucket,0
   storeWithExtension?: boolean
 ) => {
   logger.info(`Uploading ${sharpConfigKey} to object storage`);
@@ -141,9 +131,6 @@ export const uploadAndSendToImageQueue = async (
     ctx.req.busboy.on("error", reject);
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
       try {
-        await createBucketIfNotExists(incomingBucket, logger);
-        logger.info("Made bucket");
-
         if (sharpConfigKey === "inFormData" && !fromBody.dimensions) {
           reject("Must provide dimensions field in form data");
           return;
@@ -190,9 +177,12 @@ export const uploadAndSendToImageQueue = async (
           const fileName = storeWithExtension
             ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
             : image.id;
-          await uploadWrapper(incomingBucket, `${fileName}`, optimizedStream, {
-            contentType: fileInfo.mimeType || "application/octet-stream",
-          });
+          await uploadIncomingImageByType(
+            imageType,
+            fileName,
+            optimizedStream,
+            { contentType: fileInfo.mimeType || "application/octet-stream" }
+          );
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
 
@@ -217,14 +207,13 @@ export const uploadAndSendToImageQueue = async (
           return;
         }
 
-        if (finalBucket) {
+        if (imageTypeUsesQueue(imageType)) {
           logger.info("Adding image to queue");
 
           const job = await imageQueue.add("optimize-image", {
             destinationId: image.id,
             model,
-            incomingMinioBucket: incomingBucket,
-            finalMinioBucket: finalBucket,
+            imageType,
             config: sharpConfig.config[config],
           });
           resolve({ jobId: job.id, imageId: image.id });
@@ -247,7 +236,7 @@ export const processUserAvatar = (ctx: APIContext) => {
   return async (userId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistAvatarBucket,
+      "userAvatar",
       "userAvatar",
       "avatar",
       async (fileInfo: { filename: string }) => {
@@ -265,8 +254,7 @@ export const processUserAvatar = (ctx: APIContext) => {
             userId,
           },
         });
-      },
-      finalUserAvatarBucket
+      }
     );
   };
 };
@@ -275,7 +263,7 @@ export const processUserBanner = (ctx: APIContext) => {
   return async (userId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingUserBannerBucket,
+      "userBanner",
       "userBanner",
       "banner",
       async (fileInfo: { filename: string }) => {
@@ -293,8 +281,7 @@ export const processUserBanner = (ctx: APIContext) => {
             userId,
           },
         });
-      },
-      finalUserBannerBucket
+      }
     );
   };
 };
@@ -303,7 +290,7 @@ export const processArtistAvatar = (ctx: APIContext) => {
   return async (artistId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistAvatarBucket,
+      "artistAvatar",
       "artistAvatar",
       "avatar",
       async (fileInfo: { filename: string }) => {
@@ -321,8 +308,7 @@ export const processArtistAvatar = (ctx: APIContext) => {
             artistId,
           },
         });
-      },
-      finalArtistAvatarBucket
+      }
     );
   };
 };
@@ -331,7 +317,7 @@ export const processArtistBackground = (ctx: APIContext) => {
   return async (artistId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistBackgroundBucket,
+      "artistBackground",
       "artistBackground",
       "background",
       async (fileInfo: { filename: string }) => {
@@ -348,8 +334,7 @@ export const processArtistBackground = (ctx: APIContext) => {
             artistId,
           },
         });
-      },
-      finalArtistBackgroundBucket
+      }
     );
   };
 };
@@ -358,7 +343,7 @@ export const processMerchImage = (ctx: APIContext) => {
   return async (merchId: string) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingMerchImageBucket,
+      "merch",
       "merchImage",
       "artwork",
       async (_fileInfo: { filename: string }) => {
@@ -375,8 +360,7 @@ export const processMerchImage = (ctx: APIContext) => {
             merchId,
           },
         });
-      },
-      finalMerchImageBucket
+      }
     );
   };
 };
@@ -385,7 +369,7 @@ export const processPostImage = (ctx: APIContext) => {
   return async (postId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      finalPostImageBucket,
+      "postImage",
       "postImage",
       "artwork",
       async (fileInfo: { filename: string; mimeType: string }) => {
@@ -399,7 +383,6 @@ export const processPostImage = (ctx: APIContext) => {
           },
         });
       },
-      undefined,
       true
     );
   };

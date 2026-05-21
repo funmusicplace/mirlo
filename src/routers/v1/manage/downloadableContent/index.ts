@@ -4,10 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
-import {
-  downloadableContentBucket,
-  getPresignedUploadUrl,
-} from "../../../../utils/minio";
+import { getDownloadableContentUploadUrl } from "../../../../utils/minio";
 import {
   doesMerchBelongToUser,
   doesTrackGroupBelongToUser,
@@ -103,11 +100,8 @@ export default function () {
 
       let uploadUrl = null;
       if (downloadableContent) {
-        uploadUrl = await getPresignedUploadUrl(
-          downloadableContentBucket,
-          downloadableContent.id,
-          undefined,
-          size
+        uploadUrl = await getDownloadableContentUploadUrl(
+          downloadableContent.id
         );
       }
       res.json({ result: refreshedContent, uploadUrl });

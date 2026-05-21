@@ -3,24 +3,32 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import yargs from "yargs";
 import { Job, Worker } from "bullmq";
 import winston from "winston";
-import uploadAudioJob from "./upload-audio";
-import verifyAudioJob from "./verify-audio";
+import yargs from "yargs";
+
+import { REDIS_CONFIG } from "../config/redis";
+import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
+import { setBucketConfig, BucketConfig } from "../utils/minio";
+import { getSiteSettings } from "../utils/settings";
+
+import cleanUpOldFilesJob from "./clean-up-old-files";
 import generateAlbumJob from "./generate-album";
 import optimizeImage from "./optimize-image";
-import cleanUpOldFilesJob from "./clean-up-old-files";
-import sendPostNotification from "./send-post-notification";
-import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
-
 import sendMail from "./send-mail";
+import sendPostNotification from "./send-post-notification";
 
 import "../queues/send-mail-queue";
 import "../queues/send-post-notification-queue";
 import "../queues/auto-purchase-new-albums-queue";
 
-import { REDIS_CONFIG } from "../config/redis";
+import uploadAudioJob from "./upload-audio";
+import verifyAudioJob from "./verify-audio";
+
+// Initialize storage config from DB so job processors use the correct bucket names.
+getSiteSettings().then((settings) => {
+  setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+});
 
 export const logger = winston.createLogger({
   level: "info",
@@ -86,7 +94,7 @@ function createWorkerWithLogging(
   return worker;
 }
 
-yargs // eslint-disable-line
+yargs
   .command("run", "starts file processing queue", (argv: any) => {
     logger.info("STARTING WORKER QUEUE");
     audioQueue();
