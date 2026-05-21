@@ -1,18 +1,19 @@
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
-import Table from "components/common/Table";
-import api from "services/api";
-import React from "react";
-import { ArtistSection } from "components/Artist/Artist";
-import Money from "components/common/Money";
-import styled from "@emotion/styled";
-import { bp } from "../../constants";
-import ArtistSubscriberUploadData from "./ArtistSubscriberUploadData";
 import DropdownMenu from "components/common/DropdownMenu";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { ArtistSection } from "components/Artist/Artist";
+import Money from "components/common/Money";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import Table from "components/common/Table";
 import { sumBy } from "lodash";
+import React from "react";
 import { useTranslation } from "react-i18next";
+import api from "services/api";
 import useArtistQuery from "utils/useArtistQuery";
+import { bp } from "../../constants";
+
+import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
+import ArtistSubscriberUploadData from "./ArtistSubscriberUploadData";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -94,11 +95,7 @@ const Supporters = () => {
             <strong className="text-right">
               <Money
                 amount={amountMonthly / 100}
-                currency={
-                  monthlySupporters[0]?.artistSubscriptionTier.currency ??
-                  artist?.user?.currency ??
-                  "usd"
-                }
+                currency={artist?.user?.currency ?? "usd"}
               />
             </strong>
           </p>
@@ -107,11 +104,7 @@ const Supporters = () => {
             <strong className="text-right">
               <Money
                 amount={amountAnnual / 100}
-                currency={
-                  annualSupporters[0]?.artistSubscriptionTier.currency ??
-                  artist?.user?.currency ??
-                  "usd"
-                }
+                currency={artist?.user?.currency ?? "usd"}
               />
             </strong>
           </p>
@@ -120,11 +113,7 @@ const Supporters = () => {
             <strong className="text-right">
               <Money
                 amount={(amountAnnual + amountMonthly * 12) / 100}
-                currency={
-                  annualSupporters[0]?.artistSubscriptionTier.currency ??
-                  artist?.user?.currency ??
-                  "usd"
-                }
+                currency={artist?.user?.currency ?? "usd"}
               />
             </strong>
           </p>
@@ -158,11 +147,7 @@ const Supporters = () => {
                 <td>
                   <Money
                     amount={r.amount / 100}
-                    currency={
-                      r.artistSubscriptionTier.currency ??
-                      artist?.user?.currency ??
-                      "usd"
-                    }
+                    currency={artist?.user?.currency ?? "usd"}
                   />
                 </td>
               </tr>

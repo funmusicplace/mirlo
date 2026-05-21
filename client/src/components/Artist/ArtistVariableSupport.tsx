@@ -89,7 +89,7 @@ const ArtistVariableSupport: React.FC<{
           <strong>{t("chooseAnAmount")}</strong>
           <div className="flex items-center gap-2 ">
             <span className="whitespace-nowrap">
-              {getCurrencySymbol(tier.currency)}
+              {getCurrencySymbol(artist?.user?.currency ?? "usd")}
             </span>
             <InputEl
               {...register("amount", {

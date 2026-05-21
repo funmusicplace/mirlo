@@ -69,6 +69,7 @@ export const USER_PROFILE_SELECT = {
           artist: {
             include: {
               avatar: true,
+              user: { select: { currency: true } },
             },
           },
         },

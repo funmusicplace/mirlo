@@ -107,6 +107,7 @@ const SupportArtistTiersForm: React.FC<{
           render={({ ...props }) => (
             <SupportArtistPopUpTiers
               {...props}
+              currency={artistDetails?.user?.currency ?? "usd"}
               options={
                 excludeDefault
                   ? options.filter((option) => !option.isDefaultTier)

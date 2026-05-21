@@ -56,8 +56,9 @@ const SupportArtistPopUpTiers = forwardRef<
   HTMLInputElement,
   {
     options: ArtistSubscriptionTier[];
+    currency?: string;
   }
->(function ({ options, ...props }, ref) {
+>(function ({ options, currency = "usd", ...props }, ref) {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const methods = useFormContext();
   const currentValue: undefined | ArtistSubscriptionTier =
@@ -102,7 +103,7 @@ const SupportArtistPopUpTiers = forwardRef<
                     ? t("tierMonthly", {
                         amount: moneyDisplay({
                           amount: tier.minAmount ? tier.minAmount / 100 : 0,
-                          currency: tier.currency,
+                          currency,
                         }),
                         interval:
                           tier.interval === "MONTH"
