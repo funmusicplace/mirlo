@@ -32,12 +32,13 @@ const Pricing: React.FC<{
   const { data: artist } = useManagedArtistQuery();
   const {
     control,
-    formState: { errors },
+    formState: { dirtyFields, errors, touchedFields },
     register,
     watch,
     setValue,
     getValues,
   } = useFormContext<TrackGroupFormData>();
+
   const { field: isGettableField } = useController({
     control,
     name: "isGettable",
@@ -54,11 +55,18 @@ const Pricing: React.FC<{
 
   const isAlbumGettable = isGettableField.value ?? false;
   const minPrice = Number(watch("minPrice") || 0);
-  const suggestedPrice = watch("suggestedPrice");
-  const hasSuggestedPrice =
-    suggestedPrice !== undefined &&
-    suggestedPrice !== null &&
-    suggestedPrice !== "";
+  const suggestedPrice = Number(watch("suggestedPrice") || minPrice);
+
+  React.useEffect(() => {
+    const minChanged = dirtyFields.minPrice || touchedFields.minPrice;
+    const suggestedChanged = dirtyFields.suggestedPrice;
+    if (minChanged && minPrice > suggestedPrice && !suggestedChanged) {
+      // Touch minPrice in case user changes minPrice back to be "not dirty"
+      setValue("minPrice", minPrice.toString(), { shouldTouch: true });
+      // Don't dirty suggestedPrice from a programmatic change
+      setValue("suggestedPrice", minPrice.toString(), { shouldDirty: false });
+    }
+  }, [dirtyFields, minPrice, suggestedPrice, touchedFields.minPrice]);
 
   const selectedPricingMode: PricingMode = !isAlbumGettable
     ? "no-payments"
@@ -69,13 +77,13 @@ const Pricing: React.FC<{
   const onSelectPricingMode = React.useCallback(
     (mode: PricingMode) => {
       const currentMinPrice = Number(getValues("minPrice") || 0);
-      const currentSuggestedPrice = Number(getValues("suggestedPrice") || 0);
+      const currentSuggestedPrice = Number(
+        getValues("suggestedPrice") || currentMinPrice
+      );
 
       let isGettable = true;
       let nextMinPrice = currentMinPrice;
-      let nextSuggestedPrice: number | null | undefined = hasSuggestedPrice
-        ? currentSuggestedPrice
-        : null;
+      let nextSuggestedPrice = currentSuggestedPrice;
 
       if (mode === "no-payments") {
         isGettable = false;
@@ -94,47 +102,13 @@ const Pricing: React.FC<{
       }
 
       setValue("isGettable", isGettable, { shouldDirty: true });
-      setValue("minPrice", `${nextMinPrice}`, { shouldDirty: true });
-      setValue(
-        "suggestedPrice",
-        nextSuggestedPrice === null || nextSuggestedPrice === undefined
-          ? ""
-          : `${nextSuggestedPrice}`,
-        { shouldDirty: true }
-      );
+      setValue("minPrice", nextMinPrice.toString(), { shouldDirty: true });
+      setValue("suggestedPrice", nextSuggestedPrice.toString(), {
+        shouldDirty: true,
+      });
       pricingModeInputRefs[mode].current?.focus();
     },
-    [
-      getValues,
-      hasSuggestedPrice,
-      isGettableField,
-      pricingModeInputRefs,
-      setValue,
-    ]
-  );
-
-  const onToggleSuggestedPrice = React.useCallback(
-    (checked: boolean) => {
-      if (!isAlbumGettable || selectedPricingMode === "no-payments") {
-        return;
-      }
-
-      const currentMinPrice = Number(getValues("minPrice") || 0);
-      const nextSuggestedPrice = checked
-        ? Math.max(
-            currentMinPrice,
-            Number(getValues("suggestedPrice") || 0) ||
-              (currentMinPrice > 0 ? currentMinPrice : 1)
-          )
-        : null;
-
-      setValue(
-        "suggestedPrice",
-        nextSuggestedPrice === null ? "" : `${nextSuggestedPrice}`,
-        { shouldDirty: true }
-      );
-    },
-    [getValues, isAlbumGettable, selectedPricingMode, setValue]
+    [getValues, isGettableField, pricingModeInputRefs, setValue]
   );
 
   const artistHasTiersThatGrantThisAlbum =
@@ -270,65 +244,44 @@ const Pricing: React.FC<{
           </FormComponent>
 
           <FormComponent className="grow">
-            <div className="flex items-center gap-1">
-              <InputEl
-                aria-describedby="hint-has-suggested-price hint-has-suggested-price-clarifier"
-                id="input-has-suggested-price"
-                type="checkbox"
-                checked={hasSuggestedPrice}
-                onChange={(event) => {
-                  onToggleSuggestedPrice(event.target.checked);
-                }}
-              />
-              <label
-                htmlFor="input-has-suggested-price"
-                id="label-has-suggested-price"
-              >
-                {t("suggestAlternateDefaultPrice")}
-              </label>
-            </div>
+            <label htmlFor="input-suggested-price">{t("suggestedPrice")}</label>
 
-            {hasSuggestedPrice && (
-              <>
-                <small id="hint-has-suggested-price">
-                  {t("suggestedPriceDescription")}
-                </small>
-                <small id="hint-has-suggested-price-clarifier">
-                  {t("suggestedPriceDescriptionClarifier")}
-                </small>
+            <small id="hint-suggested-price">
+              {t("suggestedPriceDescription")}
+            </small>
+            <small id="hint-suggested-price-clarifier">
+              {t("suggestedPriceDescriptionClarifier")}
+            </small>
+            <div
+              className={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              {user?.currency && (
                 <div
                   className={css`
+                    width: 2rem;
+                    height: 89%;
                     display: flex;
                     align-items: center;
+                    justify-content: center;
+                    margin-bottom: 0.25rem;
                   `}
+                  id="unit-suggested-price"
                 >
-                  {user?.currency && (
-                    <div
-                      className={css`
-                        width: 2rem;
-                        height: 89%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-bottom: 0.25rem;
-                      `}
-                      id="unit-suggested-price"
-                    >
-                      {getCurrencySymbol(user?.currency)}
-                    </div>
-                  )}
-                  <InputEl
-                    aria-describedby="unit-suggested-price"
-                    aria-labelledby="label-has-suggested-price"
-                    id="input-suggested-price"
-                    type="number"
-                    step="0.01"
-                    min={0}
-                    {...register("suggestedPrice", { min: 0 })}
-                  />
+                  {getCurrencySymbol(user?.currency)}
                 </div>
-              </>
-            )}
+              )}
+              <InputEl
+                aria-describedby="unit-suggested-price hint-suggested-price hint-suggested-price-clarifier"
+                id="input-suggested-price"
+                type="number"
+                step="0.01"
+                min={minPrice}
+                {...register("suggestedPrice", { min: minPrice })}
+              />
+            </div>
           </FormComponent>
 
           <FormComponent className="max-w-150">
