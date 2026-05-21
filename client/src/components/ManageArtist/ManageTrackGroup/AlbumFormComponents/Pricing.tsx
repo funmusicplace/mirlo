@@ -226,16 +226,7 @@ const Pricing: React.FC<{
             })}
           </div>
         </FormComponent>
-        <div
-          hidden={!isAlbumGettable}
-          className={css`
-            width: 100%;
-            @media screen and (min-width: ${bp.medium}px) {
-              display: grid;
-              grid-template-columns: repeat(2, 1fr);
-            }
-          `}
-        >
+        <div hidden={!isAlbumGettable}>
           <FormComponent className="grow">
             <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
             <small id="description-minimum-price">
@@ -297,48 +288,50 @@ const Pricing: React.FC<{
               </label>
             </div>
 
-            <div hidden={!hasSuggestedPrice}>
-              <small id="hint-has-suggested-price">
-                {t("suggestedPriceDescription")}
-              </small>
-              <small id="hint-has-suggested-price-clarifier">
-                {t("suggestedPriceDescriptionClarifier")}
-              </small>
-              <div
-                className={css`
-                  display: flex;
-                  align-items: center;
-                `}
-              >
-                {user?.currency && (
-                  <div
-                    className={css`
-                      width: 2rem;
-                      height: 89%;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      margin-bottom: 0.25rem;
-                    `}
-                    id="unit-suggested-price"
-                  >
-                    {getCurrencySymbol(user?.currency)}
-                  </div>
-                )}
-                <InputEl
-                  aria-describedby="unit-suggested-price"
-                  aria-labelledby="label-has-suggested-price"
-                  id="input-suggested-price"
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  {...register("suggestedPrice", { min: 0 })}
-                />
-              </div>
-            </div>
+            {hasSuggestedPrice && (
+              <>
+                <small id="hint-has-suggested-price">
+                  {t("suggestedPriceDescription")}
+                </small>
+                <small id="hint-has-suggested-price-clarifier">
+                  {t("suggestedPriceDescriptionClarifier")}
+                </small>
+                <div
+                  className={css`
+                    display: flex;
+                    align-items: center;
+                  `}
+                >
+                  {user?.currency && (
+                    <div
+                      className={css`
+                        width: 2rem;
+                        height: 89%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 0.25rem;
+                      `}
+                      id="unit-suggested-price"
+                    >
+                      {getCurrencySymbol(user?.currency)}
+                    </div>
+                  )}
+                  <InputEl
+                    aria-describedby="unit-suggested-price"
+                    aria-labelledby="label-has-suggested-price"
+                    id="input-suggested-price"
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    {...register("suggestedPrice", { min: 0 })}
+                  />
+                </div>
+              </>
+            )}
           </FormComponent>
 
-          <FormComponent className="grow">
+          <FormComponent className="max-w-150">
             <PaymentSlider label={t("platformPercent")} />
             {errors.platformPercent && (
               <FormError>{t("platformPercent")}</FormError>
