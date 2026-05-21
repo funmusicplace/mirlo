@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { setCdnUrl } from "../../../utils/images";
 import { getSiteSettings } from "../../../utils/settings";
+import { refreshStripeClient } from "../../../utils/stripe";
 
 export default function () {
   const operations = {
@@ -60,6 +61,7 @@ export default function () {
         },
       });
       setCdnUrl(cdnUrl ?? undefined);
+      await refreshStripeClient();
       const refreshedSettings = await prisma.settings.findFirst();
       return res.status(200).json({ result: refreshedSettings });
     } catch (e) {
