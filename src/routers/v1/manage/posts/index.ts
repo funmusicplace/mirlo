@@ -143,7 +143,9 @@ export default function () {
     });
 
     res.json({
-      results: posts.map((post) => serializePost(post)),
+      results: posts.map((post) =>
+        serializePost(post, undefined, undefined, true)
+      ),
     });
   }
 

@@ -1,107 +1,138 @@
 import styled from "@emotion/styled";
+
 import { bp } from "../../constants";
 
-type WrapperProps = {
-  width: number;
-  height: number;
-};
-
-const Wrapper = styled.div<WrapperProps>`
-  bottom: 0;
-  right: 0;
-  left: 0;
-  top: 0;
+const CoverWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
+  inset: 0;
 
-  div {
-    justify-content: space-between;
-    height: 50px;
-    width: 50px;
-    display: flex;
-    filter: drop-shadow(0 0 1rem rgba(55, 55, 55, 0.5));
+  & > div {
     position: absolute;
-    z-index: 0;
     top: 40%;
+    z-index: 0;
+    display: flex;
+    justify-content: space-between;
+    width: 50px;
+    height: 50px;
+    filter: drop-shadow(0 0 1rem rgba(55, 55, 55, 0.5));
+
+    & > span {
+      width: 5px;
+      height: 80%;
+      background: white;
+      transform-origin: bottom;
+      animation: coverBounce 1.4s ease-in-out infinite;
+
+      &:nth-of-type(2) {
+        animation-delay: -0.2s;
+      }
+      &:nth-of-type(3) {
+        animation-delay: -0.4s;
+      }
+      &:nth-of-type(4) {
+        animation-delay: -0.6s;
+      }
+      &:nth-of-type(5) {
+        animation-delay: -0.8s;
+      }
+      &:nth-of-type(6) {
+        animation-delay: -1s;
+      }
+      &:nth-of-type(7) {
+        animation-delay: -1.2s;
+      }
+    }
   }
 
-  @keyframes bounce {
-    10% {
-      transform: scaleY(0.3); /* start by scaling to 30% */
-    }
-
-    30% {
-      transform: scaleY(1); /* scale up to 100% */
-    }
-
-    60% {
-      transform: scaleY(0.5); /* scale down to 50% */
-    }
-
-    70% {
-      transform: scaleY(0.4); /* scale down to 40% */
-    }
-
-    80% {
-      transform: scaleY(0.75); /* scale up to 75% */
-    }
-
-    100% {
-      transform: scaleY(0.6); /* scale down to 60% */
-    }
-  }
-
-  span {
-    width: 5px;
-    height: 80%;
-    background-color: white;
-    border-radius: 0px;
-    transform-origin: bottom;
-    animation: bounce 3.3s ease infinite alternate;
-    content: "";
-  }
-
-  span {
-    &:nth-of-type(2) {
-      animation-delay: -2.2s; /* Start at the end of animation */
-    }
-
-    &:nth-of-type(3) {
-      animation-delay: -3.7s; /* Start mid-way of return of animation */
-    }
-    &:nth-of-type(4) {
-      animation-delay: -4.6s; /* Start mid-way of return of animation */
-    }
-    &:nth-of-type(5) {
-      animation-delay: -5.7s; /* Start mid-way of return of animation */
-    }
-    &:nth-of-type(6) {
-      animation-delay: -6.8s; /* Start mid-way of return of animation */
-    }
-  }
   @media (max-width: ${bp.large}px) {
-    div {
-      height: 40px;
-      width: 40px;
-      filter: drop-shadow(10px 10px 4rem crimson);
+    & > div {
       top: 38%;
+      width: 40px;
+      height: 40px;
+      filter: drop-shadow(10px 10px 4rem crimson);
     }
-
-    span {
+    & > div > span {
       width: 3px;
+    }
+  }
+
+  @keyframes coverBounce {
+    0%,
+    100% {
+      transform: scaleY(0.4);
+    }
+    50% {
+      transform: scaleY(1);
     }
   }
 `;
 
-export const PlayingMusicBars: React.FC<{ width: number; height: number }> = ({
-  width,
-  height,
-}) => {
+const InlineWrapper = styled.span`
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 0.75rem;
+  margin-right: 0.375rem;
+  vertical-align: -0.0625rem;
+
+  & > span {
+    display: block;
+    width: 2px;
+    background: currentColor;
+    border-radius: 1px;
+    transform-origin: bottom center;
+    animation: inlineBounce 0.9s ease-in-out infinite;
+
+    &:nth-of-type(1) {
+      animation-delay: 0s;
+      height: 60%;
+    }
+    &:nth-of-type(2) {
+      animation-delay: 0.15s;
+      height: 100%;
+    }
+    &:nth-of-type(3) {
+      animation-delay: 0.3s;
+      height: 75%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    & > span {
+      animation: none;
+      transform: scaleY(0.8);
+    }
+  }
+
+  @keyframes inlineBounce {
+    0%,
+    100% {
+      transform: scaleY(0.4);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+`;
+
+export const PlayingMusicBars: React.FC<{
+  variant?: "cover" | "inline";
+}> = ({ variant = "cover" }) => {
+  if (variant === "inline") {
+    return (
+      <InlineWrapper aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </InlineWrapper>
+    );
+  }
   return (
-    <Wrapper width={width} height={height}>
+    <CoverWrapper>
       <div>
         <span />
         <span />
@@ -111,6 +142,6 @@ export const PlayingMusicBars: React.FC<{ width: number; height: number }> = ({
         <span />
         <span />
       </div>
-    </Wrapper>
+    </CoverWrapper>
   );
 };

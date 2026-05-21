@@ -72,43 +72,47 @@ export const serializePost = (
   userTrackGroupPurchases?: Array<{ userId: number; trackGroupId: number }>,
   userTrackPurchases?: Array<{ userId: number; trackId: number }>,
   isUserSubscriber?: boolean
-) => ({
-  ...post,
-  tracks: post.tracks?.map((pt) => {
-    // Use provided purchase arrays if available, otherwise extract from nested structure
-    const tgPurchases = userTrackGroupPurchases ?? [];
-    const trackPurchases = userTrackPurchases ?? [];
+) => {
+  const canSeeContent = !!(isUserSubscriber || post.isPublic);
+  return {
+    ...post,
+    tracks: canSeeContent
+      ? post.tracks?.map((pt) => {
+          const tgPurchases = userTrackGroupPurchases ?? [];
+          const trackPurchases = userTrackPurchases ?? [];
 
-    return {
-      isPlayable: isTrackPlayable({
-        isPreview: pt.track?.isPreview,
-        trackGroupId: pt.track?.trackGroupId,
-        trackId: pt.trackId,
-        trackGroupPurchases: tgPurchases,
-        trackPurchases: trackPurchases,
-        isUserSubscriber,
-      }),
-      title: pt.track?.title ?? undefined,
-      audioDuration: pt.track?.audio?.duration ?? undefined,
-      ...pt,
-    };
-  }),
-  artist: {
-    ...post.artist,
-    avatar: post.artist
-      ? addSizesToImage(finalArtistAvatarBucket, post.artist?.avatar)
-      : null,
-  },
-  featuredImage: post.featuredImage && {
-    ...post.featuredImage,
-    src: generateFullStaticImageUrl(
-      post.featuredImage.id,
-      finalPostImageBucket,
-      post.featuredImage.extension
-    ),
-  },
-  isContentHidden: !(isUserSubscriber || post.isPublic),
-  content: !(isUserSubscriber || post.isPublic)
-    ? extractFirstParagraph(post.content ?? "")
-    : post.content,
-});
+          return {
+            isPlayable: isTrackPlayable({
+              isPreview: pt.track?.isPreview,
+              trackGroupId: pt.track?.trackGroupId,
+              trackId: pt.trackId,
+              trackGroupPurchases: tgPurchases,
+              trackPurchases: trackPurchases,
+              isUserSubscriber,
+            }),
+            title: pt.track?.title ?? undefined,
+            audioDuration: pt.track?.audio?.duration ?? undefined,
+            ...pt,
+          };
+        })
+      : undefined,
+    artist: {
+      ...post.artist,
+      avatar: post.artist
+        ? addSizesToImage(finalArtistAvatarBucket, post.artist?.avatar)
+        : null,
+    },
+    featuredImage: post.featuredImage && {
+      ...post.featuredImage,
+      src: generateFullStaticImageUrl(
+        post.featuredImage.id,
+        finalPostImageBucket,
+        post.featuredImage.extension
+      ),
+    },
+    isContentHidden: !canSeeContent,
+    content: !canSeeContent
+      ? extractFirstParagraph(post.content ?? "")
+      : post.content,
+  };
+};

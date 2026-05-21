@@ -175,14 +175,19 @@ export default async function sendPostNotification(job: {
         continue;
       }
 
-      const postForEmail = serializePost({
-        id: post.id,
-        title: post.title,
-        urlSlug: post.urlSlug,
-        featuredImage: post.featuredImage,
-        content: post.content,
-        isPublic: post.isPublic,
-      });
+      const postForEmail = serializePost(
+        {
+          id: post.id,
+          title: post.title,
+          urlSlug: post.urlSlug,
+          featuredImage: post.featuredImage,
+          content: post.content,
+          isPublic: post.isPublic,
+        },
+        undefined,
+        undefined,
+        true
+      );
 
       await sendMailQueue.add(
         "send-mail",

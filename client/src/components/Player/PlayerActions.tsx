@@ -23,11 +23,19 @@ const PlayerActions: React.FC = () => {
     <div
       className={css`
         z-index: 999999;
-        bottom: 80px;
+        bottom: var(--player-actions-bottom-offset, 80px);
         right: 1rem;
         position: fixed;
         display: flex;
         gap: 0.5rem;
+
+        @media (max-width: 768px) {
+          bottom: var(
+            --player-actions-bottom-offset-mobile,
+            var(--player-actions-bottom-offset, 80px)
+          );
+          right: 0.5rem;
+        }
       `}
     >
       <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} fixed />

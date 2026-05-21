@@ -671,6 +671,9 @@
     "publishedAt": "Published {{ date }}",
     "likedThisPost": "Liked this post?"
   },
+  "postTracksDock": {
+    "label": "Playing in this post"
+  },
   "manage": {
     "manageArtists": "Manage artist pages",
     "managePayment": "Manage payment processor",
@@ -1450,6 +1453,9 @@
   "trackGroupDetails": {
     "trackgroup": "Release:",
     "untitled": "Untitled",
+    "nowPlaying": "Now playing:",
+    "playTrack": "Play {{title}}",
+    "pauseTrack": "Pause {{title}}",
     "allOrNothingFullyFunded": "This project is fully funded! Backing it now means you'll contribute to its future success.",
     "by": "by",
     "trackCount_one": "{{count}} track",
