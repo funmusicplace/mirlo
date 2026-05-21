@@ -1174,7 +1174,6 @@
     "albumGrantedBySubscriptionTier": "When published, supporters at these tiers will have receive this release: {{tiers}}.",
     "albumGrantedToSubscriptionTiersWhenPublished": "When published, this release will become available to supporters at these tiers: {{tiers}}.",
     "minimumPriceDescription": "Minimum price to pay to get download access.",
-    "suggestAlternateDefaultPrice": "Suggested price",
     "suggestedPrice": "Suggested price",
     "suggestedPriceDescription": "Shown as the starting amount at checkout.",
     "suggestedPriceDescriptionClarifier": "Supporters can change this amount, but they cannot pay below your minimum price.",

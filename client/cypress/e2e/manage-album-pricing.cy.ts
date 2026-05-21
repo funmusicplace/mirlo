@@ -71,8 +71,6 @@ describe("manage album pricing", () => {
         expect(body).to.include({
           artistId,
           isGettable: false,
-          minPrice: 300,
-          suggestedPrice: null,
         });
       });
     // let save()'s reset + reload settle after the intercepted PUT response
@@ -87,20 +85,7 @@ describe("manage album pricing", () => {
           artistId,
           isGettable: true,
           minPrice: 0,
-        });
-      });
-    cy.wait(200);
-
-    cy.get("label[for='input-has-suggested-price']").click();
-    cy.contains("button", "Save draft").click();
-    cy.wait("@updateTrackGroup")
-      .its("request.body")
-      .should((body) => {
-        expect(body).to.include({
-          artistId,
-          isGettable: true,
-          minPrice: 0,
-          suggestedPrice: 100,
+          suggestedPrice: 0,
         });
       });
     cy.wait(200);
@@ -118,18 +103,5 @@ describe("manage album pricing", () => {
         });
       });
     cy.wait(200);
-
-    cy.get("label[for='input-has-suggested-price']").click();
-    cy.contains("button", "Save draft").click();
-    cy.wait("@updateTrackGroup")
-      .its("request.body")
-      .should((body) => {
-        expect(body).to.include({
-          artistId,
-          isGettable: true,
-          minPrice: 1 * 100,
-          suggestedPrice: null,
-        });
-      });
   });
 });

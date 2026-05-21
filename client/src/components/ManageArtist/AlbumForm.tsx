@@ -21,7 +21,7 @@ const buildDefaultValues = (trackGroup: TrackGroup): TrackGroupFormData => {
       trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
     }`,
     suggestedPrice:
-      trackGroup?.suggestedPrice != null
+      trackGroup?.suggestedPrice !== undefined
         ? `${trackGroup.suggestedPrice / 100}`
         : "",
     goalAmount: `${
@@ -39,7 +39,9 @@ const AlbumForm: React.FC<{
   reload: () => Promise<unknown>;
 }> = ({ trackGroup, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const methods = useForm<TrackGroupFormData>();
+  const methods = useForm<TrackGroupFormData>({
+    defaultValues: buildDefaultValues(trackGroup),
+  });
 
   React.useEffect(() => {
     methods.reset(buildDefaultValues(trackGroup), {
