@@ -139,6 +139,7 @@ const OptionType: React.FC<{
               `}
             >
               <ArtistButton
+                wrap
                 onClick={() => {
                   append("");
                 }}
@@ -275,6 +276,7 @@ const MerchOptions: React.FC<{}> = () => {
           {isEditing && (
             <>
               <ArtistButton
+                wrap
                 onClick={() => {
                   append({ optionName: "" });
                 }}

@@ -1,19 +1,17 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import api from "services/api";
-import Button from "components/common/Button";
-import FormComponent from "components/common/FormComponent";
-import { useSnackbar } from "state/SnackbarContext";
-import { FaTrash } from "react-icons/fa";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
+import FormComponent from "components/common/FormComponent";
 import {
   queryManagedRecommendedTrackGroups,
   useAddRecommendedTrackGroupMutation,
   useRemoveRecommendedTrackGroupMutation,
 } from "queries/trackGroups";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaTrash } from "react-icons/fa";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
 
 const RecommendedTrackGroups: React.FC<{
   trackGroupId: number;
@@ -160,6 +158,7 @@ const RecommendedTrackGroups: React.FC<{
       <div>
         {!showSearch ? (
           <ArtistButton
+            wrap
             type="button"
             onClick={() => setShowSearch(true)}
             isLoading={addMutation.isPending}

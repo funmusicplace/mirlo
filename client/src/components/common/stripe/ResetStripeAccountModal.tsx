@@ -92,6 +92,7 @@ const ResetStripeAccountModal: React.FC<{
   return (
     <>
       <Button
+        wrap
         type="button"
         variant="dashed"
         size="compact"

@@ -161,6 +161,7 @@ const MerchDestinations: React.FC<{ artist?: Artist }> = ({ artist }) => {
           {isEditing && (
             <>
               <ArtistButton
+                wrap
                 onClick={() => {
                   append({
                     destinationCountry: null,

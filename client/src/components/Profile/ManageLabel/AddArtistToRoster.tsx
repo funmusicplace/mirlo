@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
@@ -63,6 +62,7 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
         <h3>{t("addNewArtistToRoster")}</h3>
         <p className="mbs-1">{t("addNewArtistExplanation")}</p>
         <ArtistButtonLink
+          wrap
           className="mbs-4"
           variant="outlined"
           to="/manage/welcome"

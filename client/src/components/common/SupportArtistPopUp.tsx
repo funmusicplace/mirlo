@@ -1,16 +1,16 @@
+import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { queryUserStripeStatus } from "queries";
 import React from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthContext } from "state/AuthContext";
+import useArtistQuery from "utils/useArtistQuery";
+
+import FollowArtist from "./FollowArtist";
 import Modal from "./Modal";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
-import { useTranslation } from "react-i18next";
-import FollowArtist from "./FollowArtist";
-
-import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { queryUserStripeStatus } from "queries";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import { css } from "@emotion/css";
-import useArtistQuery from "utils/useArtistQuery";
 
 const SupportArtistPopUp: React.FC<{
   artist: Pick<
@@ -59,7 +59,7 @@ const SupportArtistPopUp: React.FC<{
   return (
     <div className="flex flex-col items-center justify-center text-center mx-4 mt-12 mb-4">
       {prefaceText && <p className="mb-3">{prefaceText}</p>}
-      <ArtistButton size="big" rounded onClick={() => setIsOpen(true)}>
+      <ArtistButton wrap size="big" rounded onClick={() => setIsOpen(true)}>
         {isSubscribed
           ? t("manageArtistSubscription")
           : t("supportArtist", { artist: artist.name })}

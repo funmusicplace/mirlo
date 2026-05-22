@@ -145,6 +145,7 @@ const FundraisingGoal: React.FC<{
           {t("addFundraiserDescription")}
         </small>
         <ArtistButton
+          wrap
           type="button"
           onClick={onAddFundraiser}
           isLoading={isLoading}

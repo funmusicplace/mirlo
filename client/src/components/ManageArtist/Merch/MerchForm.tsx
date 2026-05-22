@@ -200,6 +200,7 @@ const MerchForm: React.FC<{
         <SelectTrackGroup merch={merch} reload={reload} />
         <DownloadableContent item={merch} reload={reload} itemType="merch" />
         <ArtistButton
+          wrap
           size="big"
           rounded
           type="submit"

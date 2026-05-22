@@ -1,7 +1,8 @@
 import { css } from "@emotion/css";
-import Button from "./common/Button";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
+import { useGlobalStateContext } from "state/GlobalState";
+
+import Button from "./common/Button";
 
 const CookieDisclaimer = () => {
   const { t } = useTranslation("translation", { keyPrefix: "cookies" });
@@ -37,7 +38,10 @@ const CookieDisclaimer = () => {
       data-nosnippet
     >
       {t("weUseCookies")}
-      <Button onClick={() => dispatch({ type: "setCookieDisclaimerRead" })}>
+      <Button
+        wrap
+        onClick={() => dispatch({ type: "setCookieDisclaimerRead" })}
+      >
         {t("gotIt")}
       </Button>
     </div>
