@@ -109,7 +109,8 @@ const ManageArtistContainer: React.FC<{}> = () => {
     (location.pathname.includes("/tiers/") &&
       !location.pathname.includes("supporters")) ||
     location.pathname.includes("/merch/") ||
-    location.pathname.includes("/post/");
+    location.pathname.includes("/post/") ||
+    location.pathname.endsWith("/links");
 
   const labelProfile = hasLabel?.labelUser.artists?.find(
     (a) => a.isLabelProfile
