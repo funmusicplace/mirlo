@@ -124,10 +124,10 @@ const addTrackMetadataTags = (
   // without these tags, which is why downloads have appeared dateless. See
   // #633.
   const releaseYear = trackGroupContext?.releaseDate
-    ? trackGroupContext.releaseDate.getUTCFullYear()
+    ? new Date(trackGroupContext.releaseDate).getUTCFullYear()
     : undefined;
   const releaseDateString = trackGroupContext?.releaseDate
-    ? trackGroupContext.releaseDate.toISOString().slice(0, 10)
+    ? new Date(trackGroupContext.releaseDate).toISOString().slice(0, 10)
     : undefined;
   addMetadataTag(
     processor,
