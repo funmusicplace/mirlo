@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import trackGroupProcessor from "../../../../utils/trackGroup";
+import { Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
 import { processSingleMerch } from "../../../../utils/merch";
+import trackGroupProcessor from "../../../../utils/trackGroup";
 
 type Params = {
   userId: string;
@@ -44,7 +45,7 @@ export default function () {
             include: {
               merch: {
                 include: {
-                  artist: true,
+                  artist: { include: { user: { select: { currency: true } } } },
                   includePurchaseTrackGroup: true,
                   images: true,
                 },
