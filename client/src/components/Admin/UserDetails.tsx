@@ -1,8 +1,7 @@
-import Tabs from "components/common/Tabs";
+import SectionNav from "components/common/SectionNav";
 import React from "react";
 import { NavLink, Outlet, useParams } from "react-router-dom";
 import api from "services/api";
-// import { AdminUser, fetchUser } from "services/api/Admin";
 
 export const UserDetails: React.FC = () => {
   const { userId } = useParams();
@@ -23,21 +22,25 @@ export const UserDetails: React.FC = () => {
   return (
     <>
       <h3>User: {user?.name}</h3>
-      <Tabs>
-        <li>
-          <NavLink to="">Details</NavLink>
-        </li>
-        <li>
-          <NavLink to="releases">Releases</NavLink>
-        </li>
-        <li>
-          <NavLink to="analytics">Analytics</NavLink>
-        </li>
-        <li>
-          <NavLink to="earnings">Earnings</NavLink>
-        </li>
-      </Tabs>
-      <Outlet context={[user]} />
+      <div className="mb-4">
+        <SectionNav uppercase={false} transparent>
+          <li>
+            <NavLink to="">Details</NavLink>
+          </li>
+          <li>
+            <NavLink to="releases">Releases</NavLink>
+          </li>
+          <li>
+            <NavLink to="analytics">Analytics</NavLink>
+          </li>
+          <li>
+            <NavLink to="earnings">Earnings</NavLink>
+          </li>
+        </SectionNav>
+      </div>
+      <div className="p-4">
+        <Outlet context={[user]} />
+      </div>
     </>
   );
 };

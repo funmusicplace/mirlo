@@ -1,33 +1,25 @@
-import { css } from "@emotion/css";
 import React from "react";
-
-import Tabs from "../common/Tabs";
-import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { NavLink, Outlet } from "react-router-dom";
+
+import SectionNav from "../common/SectionNav";
 
 export const AdminServerTasks: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
 
   return (
-    <div
-      className={css`
-        padding: 1rem;
-        width: 100%;
-      `}
-    >
-      <Tabs>
-        <li>
-          <NavLink to="fundraising">{t("fundraising")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="serverTasks">{t("serverTasks")}</NavLink>
-        </li>
-      </Tabs>
-      <div
-        className={css`
-          margin: 1rem 0 0;
-        `}
-      >
+    <div className="w-full flex flex-col">
+      <div className="mb-4">
+        <SectionNav uppercase={false} transparent>
+          <li>
+            <NavLink to="fundraising">{t("fundraising")}</NavLink>
+          </li>
+          <li>
+            <NavLink to="serverTasks">{t("serverTasks")}</NavLink>
+          </li>
+        </SectionNav>
+      </div>
+      <div className="p-4">
         <Outlet />
       </div>
     </div>

@@ -1,12 +1,10 @@
 import { css } from "@emotion/css";
-import Tabs from "components/common/Tabs";
+import SectionNav from "components/common/SectionNav";
 import UnreadCountPill from "components/common/UnreadCountPill";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
-
-import { bp } from "../../constants";
 
 const ProfileContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
@@ -15,9 +13,6 @@ const ProfileContainer: React.FC = () => {
     <>
       <div
         className={css`
-          z-index: 1;
-          top: calc(48px + 3rem);
-          left: 0;
           overflow-x: hidden;
           padding: 0 !important;
           width: 100%;
@@ -28,23 +23,7 @@ const ProfileContainer: React.FC = () => {
       >
         <div className="mb-4">
           <WidthContainer variant="big" justify="center">
-            <Tabs
-              className={css`
-                padding: 0;
-                text-transform: uppercase;
-                @media (prefers-color-scheme: dark) {
-                  color: pink;
-                }
-                @media screen and (max-width: ${bp.xlarge}px) {
-                  padding: var(--mi-side-paddings-xsmall);
-                }
-                @media screen and (max-width: ${bp.medium}px) {
-                  a {
-                    font-size: 1rem !important;
-                  }
-                }
-              `}
-            >
+            <SectionNav>
               <li>
                 <NavLink end to="/profile/followed">
                   {t("followedArtists")}
@@ -65,7 +44,7 @@ const ProfileContainer: React.FC = () => {
                   <UnreadCountPill />
                 </NavLink>
               </li>
-            </Tabs>
+            </SectionNav>
           </WidthContainer>
         </div>
 

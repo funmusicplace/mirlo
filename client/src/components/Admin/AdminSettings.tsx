@@ -167,7 +167,7 @@ const AdminSettings = () => {
   );
 
   return (
-    <div>
+    <div className="p-4">
       <h3>Settings</h3>
       <form onSubmit={handleSubmit(updateSettings)}>
         <Table>

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
 import { ArtistTabs } from "components/common/Tabs";
 import {
   queryArtist,
@@ -19,6 +20,7 @@ import {
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
+import { useScrollActiveTabIntoView } from "utils/useScrollActiveTabIntoView";
 
 import Box from "../common/Box";
 
@@ -56,6 +58,10 @@ function Artist() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const canReceivePayments = stripeAccountStatus?.chargesEnabled;
+
+  const reactId = React.useId();
+  const scrollId = `artist-nav-scroll-${reactId.replace(/:/g, "")}`;
+  useScrollActiveTabIntoView(scrollId);
 
   const urlSlug = artist?.urlSlug;
 
@@ -189,27 +195,42 @@ function Artist() {
           artist.isLabelProfile ? t("labelNavigation") : t("artistNavigation")
         }
       >
-        <ArtistTabs>
-          {tabs
-            .filter((tab) => tab.visible)
-            .map((tab) => (
-              <li key={tab.id}>
-                <NavLink to={tab.to} id={tab.navLinkId}>
-                  {tab.label}
-                </NavLink>
+        <div className="relative">
+          <ArtistTabs
+            id={scrollId}
+            className="whitespace-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {tabs
+              .filter((tab) => tab.visible)
+              .map((tab) => (
+                <li key={tab.id}>
+                  <NavLink to={tab.to} id={tab.navLinkId}>
+                    {tab.label}
+                  </NavLink>
+                </li>
+              ))}
+            {user && isArtistUser && !canReceivePayments && (
+              <li>
+                <a
+                  href={api.paymentProcessor.stripeConnect(user.id)}
+                  className="!flex items-center [&_svg]:ml-1"
+                >
+                  {t("configurePayment")} <FaChevronRight />
+                </a>
               </li>
-            ))}
-          {user && isArtistUser && !canReceivePayments && (
-            <li>
-              <a
-                href={api.paymentProcessor.stripeConnect(user.id)}
-                className="!flex items-center [&_svg]:ml-1"
-              >
-                {t("configurePayment")} <FaChevronRight />
-              </a>
-            </li>
-          )}
-        </ArtistTabs>
+            )}
+          </ArtistTabs>
+          <ScrollFadeOverlay
+            scrollElementId={scrollId}
+            position="left"
+            size="2rem"
+          />
+          <ScrollFadeOverlay
+            scrollElementId={scrollId}
+            position="right"
+            size="2rem"
+          />
+        </div>
       </nav>
 
       <ArtistSection>

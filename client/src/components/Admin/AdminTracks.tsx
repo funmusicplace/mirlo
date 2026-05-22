@@ -64,7 +64,7 @@ export const AdminTracks: React.FC = () => {
   );
 
   return (
-    <div className="grow">
+    <div className="grow p-4">
       <div className="flex justify-between align-center">
         <h3>Tracks</h3>
         <ButtonLink to="bulk-upload">{t("bulkTrackUpload")}</ButtonLink>

@@ -1,14 +1,14 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
+import SectionNav from "components/common/SectionNav";
+import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 import api from "services/api";
-import FormComponent from "components/common/FormComponent";
-import { SelectEl } from "components/common/Select";
-import Tabs from "components/common/Tabs";
-import { useTranslation } from "react-i18next";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -84,17 +84,21 @@ export const AdminUsers: React.FC = () => {
           </Button>
         </div>
       </FormSection>
-      <Tabs>
-        <li>
-          <NavLink to="" end>
-            {t("users")}
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="invites">{t("invites")}</NavLink>
-        </li>
-      </Tabs>
-      <Outlet />
+      <div className="mb-4">
+        <SectionNav uppercase={false} transparent>
+          <li>
+            <NavLink to="" end>
+              {t("users")}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="invites">{t("invites")}</NavLink>
+          </li>
+        </SectionNav>
+      </div>
+      <div className="p-4">
+        <Outlet />
+      </div>
     </div>
   );
 };
