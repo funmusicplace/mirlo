@@ -11,6 +11,7 @@ import { queryPost } from "queries";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 import useArtistQuery from "utils/useArtistQuery";
 import { useTracksQuery } from "utils/useTracksQuery";
 
@@ -70,6 +71,7 @@ const Post: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "post" });
 
   const { artistId, postId } = useParams();
+  const { user } = useAuthContext();
   const { data: artist } = useArtistQuery();
   const { data: post, isLoading } = useQuery(
     queryPost({ postId: postId ?? "", artistId: artistId ?? "" })
@@ -152,12 +154,15 @@ const Post: React.FC = () => {
           )}
         </PageMarkdownWrapper>
       </div>
-      {post.artist && (
-        <SupportArtistPopUp
-          artist={post.artist}
-          prefaceText={t("likedThisPost")}
-        />
-      )}
+      {post.artist &&
+        !user?.artistUserSubscriptions?.some(
+          (sub) => sub.artistSubscriptionTier.artistId === post.artist?.id
+        ) && (
+          <SupportArtistPopUp
+            artist={post.artist}
+            prefaceText={t("likedThisPost")}
+          />
+        )}
       {!post.isContentHidden && tracksData && tracksData.length > 0 && (
         <PostTracksDock postId={post.id} tracks={tracksData} />
       )}
