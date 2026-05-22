@@ -1,5 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import DropdownMenu from "components/common/DropdownMenu";
+import { DropdownMenuItemLink } from "components/common/DropdownMenuItem";
 import FixedButtonLink from "components/common/FixedButton";
 import {
   queryArtist,
@@ -11,8 +13,7 @@ import {
 } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaEdit, FaEye, FaPen } from "react-icons/fa";
-import { IoIosColorPalette } from "react-icons/io";
+import { FaEdit, FaEllipsisH, FaEye, FaPen, FaUserCog } from "react-icons/fa";
 import { RiAdminLine } from "react-icons/ri";
 import { useLocation, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
@@ -71,174 +72,187 @@ const ManageArtistButtons: React.FC = () => {
 
   const isPreorder = managedTrackGroup?.isPreorder ?? false;
 
+  if (!artist) {
+    return null;
+  }
+
+  type ButtonItem = {
+    key: string;
+    to: string;
+    icon: React.ReactElement;
+    label: string;
+  };
+
+  const buttonItems: ButtonItem[] = [];
+
+  if (user?.isAdmin) {
+    buttonItems.push({
+      key: "adminEditUser",
+      to: `/admin/users/${artist.userId}`,
+      icon: <RiAdminLine />,
+      label: t("adminEditUser"),
+    });
+    buttonItems.push({
+      key: "adminEditArtist",
+      to: `/admin/artists/${artist.id}`,
+      icon: <RiAdminLine />,
+      label: t("adminEditArtist"),
+    });
+    if (isAlbumPage && trackGroup) {
+      buttonItems.push({
+        key: "adminEditRelease",
+        to: `/admin/trackGroups/${trackGroup.id}`,
+        icon: <RiAdminLine />,
+        label: t("adminEditRelease"),
+      });
+    }
+  }
+
+  if (canEditArtist) {
+    if (!isAlbumPage) {
+      buttonItems.push({
+        key: "customizeLook",
+        to: `/manage/artists/${artist.id}/customize`,
+        icon: <FaUserCog />,
+        label: t(
+          artist.isLabelProfile ? "customizeLabelLook" : "customizeLook"
+        ),
+      });
+    }
+    if (!isManagePage && !isAlbumPage) {
+      buttonItems.push({
+        key: "editPage",
+        to: `/manage/artists/${artist.id}`,
+        icon: <FaPen />,
+        label: t(artist.isLabelProfile ? "editLabelPage" : "editPage"),
+      });
+    }
+    if (seeViewLink && !isAlbumPage && !merch && !tier && !post) {
+      buttonItems.push({
+        key: "viewLive",
+        to: `/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`,
+        icon: <FaEye />,
+        label: t("viewLive"),
+      });
+    }
+    if (trackGroup && isAlbumPage) {
+      buttonItems.push({
+        key: "editRelease",
+        to: getManageReleaseUrl(artist, trackGroup),
+        icon: <FaEdit />,
+        label: t("editRelease"),
+      });
+    }
+    if (post && !isManagePage) {
+      buttonItems.push({
+        key: "editPost",
+        to: `/manage/artists/${post.artistId}/post/${post.id}`,
+        icon: <FaEdit />,
+        label: t("editPost"),
+      });
+    }
+    if (managedTrackGroup) {
+      buttonItems.push({
+        key: "viewLiveTrackGroup",
+        to: getReleaseUrl(artist, managedTrackGroup),
+        icon: <FaEye />,
+        label: t(isPreorder ? "viewPreorder" : "viewLive"),
+      });
+    }
+    if (merch && isManagePage) {
+      buttonItems.push({
+        key: "viewLiveMerch",
+        to: getMerchUrl(artist, merch),
+        icon: <FaEye />,
+        label: t("viewLive"),
+      });
+    }
+    if (tier && isManagePage) {
+      buttonItems.push({
+        key: "viewLiveTier",
+        to: getArtistTiersUrl(artist),
+        icon: <FaEye />,
+        label: t("viewLive"),
+      });
+    }
+  }
+
+  if (buttonItems.length === 0) {
+    return null;
+  }
+
   return (
     <>
-      {artist && (
-        <div
-          className={css`
-            z-index: 999999;
-            bottom: ${isUp ? "80px" : "20px"};
-            left: 1rem;
-            position: fixed;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
+      <div
+        className={css`
+          z-index: 10;
+          bottom: ${isUp ? "80px" : "20px"};
+          left: 1rem;
+          position: fixed;
+          transition: all 0.3s ease;
 
-            @media screen and (max-width: ${bp.medium}px) {
-              bottom: var(
-                --fixed-actions-bottom-offset-mobile,
-                var(--fixed-actions-bottom-offset, ${isUp ? "80px" : "20px"})
-              );
-              left: 0.5rem;
-
-              .children {
-                display: none;
-              }
-
-              .endIcon {
-                margin: 0 !important;
-              }
-            }
-          `}
-        >
-          {user?.isAdmin && (
-            <>
-              <FixedButtonLink
-                to={`/admin/users/${artist.userId}`}
-                endIcon={<RiAdminLine />}
-                size="compact"
-                rounded
-                variant="dashed"
-              >
-                {t("adminEditUser")}
-              </FixedButtonLink>
-              <FixedButtonLink
-                to={`/admin/artists/${artist.id}`}
-                endIcon={<RiAdminLine />}
-                size="compact"
-                rounded
-                variant="dashed"
-              >
-                {t("adminEditArtist")}
-              </FixedButtonLink>
-              {isAlbumPage && trackGroup && (
-                <FixedButtonLink
-                  to={`/admin/trackGroups/${trackGroup.id}`}
-                  endIcon={<RiAdminLine />}
-                  size="compact"
-                  rounded
-                  variant="dashed"
-                >
-                  {t("adminEditRelease")}
-                </FixedButtonLink>
-              )}
-            </>
-          )}
-          {canEditArtist && (
-            <>
-              {!isAlbumPage && (
-                <FixedButtonLink
-                  to={`/manage/artists/${artist.id}/customize`}
-                  endIcon={<IoIosColorPalette />}
-                  size="compact"
-                  rounded
-                  variant="dashed"
-                >
-                  {t(
-                    artist.isLabelProfile
-                      ? "customizeLabelLook"
-                      : "customizeLook"
-                  )}
-                </FixedButtonLink>
-              )}
-              {!isManagePage && !isAlbumPage && (
-                <FixedButtonLink
-                  to={`/manage/artists/${artist.id}`}
-                  endIcon={<FaPen />}
-                  size="compact"
-                  variant="dashed"
-                  rounded
-                >
-                  {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
-                </FixedButtonLink>
-              )}
-              {seeViewLink && !isAlbumPage && !merch && !tier && !post && (
-                <FixedButtonLink
-                  to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-                  endIcon={<FaEye />}
-                  disabled={!artist}
-                  variant="dashed"
-                  size="compact"
-                  rounded
-                >
-                  {t("viewLive")}
-                </FixedButtonLink>
-              )}
-              {trackGroup && isAlbumPage && (
-                <FixedButtonLink
-                  to={getManageReleaseUrl(artist, trackGroup)}
-                  endIcon={<FaEdit />}
-                  disabled={!artist}
-                  variant="dashed"
-                  size="compact"
-                  rounded
-                >
-                  {t("editRelease")}
-                </FixedButtonLink>
-              )}
-              {post && !isManagePage && (
-                <FixedButtonLink
-                  to={`/manage/artists/${post.artistId}/post/${post.id}`}
-                  endIcon={<FaEdit />}
-                  disabled={!artist}
-                  variant="dashed"
-                  size="compact"
-                  rounded
-                >
-                  {t("editPost")}
-                </FixedButtonLink>
-              )}
-              {managedTrackGroup && (
-                <FixedButtonLink
-                  to={getReleaseUrl(artist, managedTrackGroup)}
-                  endIcon={<FaEye />}
-                  disabled={!artist}
-                  variant="dashed"
-                  size="compact"
-                  rounded
-                >
-                  {t(isPreorder ? "viewPreorder" : "viewLive")}
-                </FixedButtonLink>
-              )}
-              {merch && isManagePage && (
-                <FixedButtonLink
-                  to={getMerchUrl(artist, merch)}
-                  endIcon={<FaEye />}
-                  disabled={!artist}
-                  variant="dashed"
-                  size="compact"
-                  rounded
-                >
-                  {t("viewLive")}
-                </FixedButtonLink>
-              )}
-              {tier && isManagePage && (
-                <FixedButtonLink
-                  to={getArtistTiersUrl(artist)}
-                  endIcon={<FaEye />}
-                  disabled={!artist}
-                  variant="dashed"
-                  size="compact"
-                  rounded
-                >
-                  {t("viewLive")}
-                </FixedButtonLink>
-              )}
-            </>
-          )}
+          @media screen and (max-width: ${bp.medium}px) {
+            bottom: var(
+              --fixed-actions-bottom-offset-mobile,
+              var(--fixed-actions-bottom-offset, ${isUp ? "80px" : "20px"})
+            );
+            left: 0.5rem;
+          }
+        `}
+      >
+        <div className="hidden xl:flex flex-col gap-2">
+          {buttonItems.map((item) => (
+            <FixedButtonLink
+              key={item.key}
+              to={item.to}
+              endIcon={item.icon}
+              size="compact"
+              rounded
+              variant="dashed"
+            >
+              {item.label}
+            </FixedButtonLink>
+          ))}
         </div>
-      )}
+        <div className="xl:hidden">
+          <DropdownMenu
+            compact
+            icon={<FaEllipsisH />}
+            triggerClassName={css`
+              && {
+                box-shadow: 1px 1px 0.15rem rgba(0, 0, 0, 0.15);
+                background: var(--mi-fixed-bg-color) !important;
+                color: var(--mi-fixed-fg-color) !important;
+                border: 1px solid
+                  color-mix(in srgb, var(--mi-fixed-fg-color) 40%, transparent) !important;
+
+                svg {
+                  fill: var(--mi-fixed-fg-color) !important;
+                }
+
+                &:hover:not(:disabled) {
+                  background: var(--mi-fixed-fg-color) !important;
+                  color: var(--mi-fixed-bg-color) !important;
+
+                  svg {
+                    fill: var(--mi-fixed-bg-color) !important;
+                  }
+                }
+              }
+            `}
+          >
+            <ul>
+              {buttonItems.map((item) => (
+                <li key={item.key}>
+                  <DropdownMenuItemLink to={item.to} startIcon={item.icon}>
+                    {item.label}
+                  </DropdownMenuItemLink>
+                </li>
+              ))}
+            </ul>
+          </DropdownMenu>
+        </div>
+      </div>
     </>
   );
 };

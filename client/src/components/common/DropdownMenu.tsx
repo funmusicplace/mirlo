@@ -19,11 +19,22 @@ const DropdownMenu: React.FC<{
   icon?: React.ReactElement;
   compact?: boolean;
   label?: string;
-}> = ({ children, icon, compact, dashed, label, smallIcon }) => {
+  triggerClassName?: string;
+}> = ({
+  children,
+  icon,
+  compact,
+  dashed,
+  label,
+  smallIcon,
+  triggerClassName,
+}) => {
   const [buttonPosition, setButtonPosition] = React.useState<{
     x: number;
     y: number;
-  }>({ x: 0, y: 0 });
+    openUpward: boolean;
+    openRightward: boolean;
+  }>({ x: 0, y: 0, openUpward: false, openRightward: false });
 
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
@@ -57,11 +68,14 @@ const DropdownMenu: React.FC<{
             <div
               className={css`
                 position: fixed;
-                top: calc(${buttonPosition.y}px + 1.5rem);
+                ${buttonPosition.openUpward
+                  ? `bottom: calc(100vh - ${buttonPosition.y}px + 0.5rem);`
+                  : `top: calc(${buttonPosition.y}px + 1.5rem);`}
                 left: ${buttonPosition.x}px;
-                transform: translateX(-100%);
+                transform: ${buttonPosition.openRightward
+                  ? "none"
+                  : "translateX(-100%)"};
                 border-radius: var(--mi-border-radius);
-                right: 0em;
                 padding: 0.5rem;
                 z-index: 999;
                 overflow: hidden;
@@ -123,12 +137,16 @@ const DropdownMenu: React.FC<{
         variant={dashed ? "dashed" : "transparent"}
         aria-label={label}
         role="menu"
-        className={css`
-          background: transparent !important;
-
-          &:hover {
+        className={`${css`
+          ${!triggerClassName
+            ? `
             background: transparent !important;
-          }
+
+            &:hover {
+              background: transparent !important;
+            }
+          `
+            : ""}
 
           @media screen and (max-width: ${bp.medium}px) {
             ${smallIcon
@@ -138,13 +156,17 @@ const DropdownMenu: React.FC<{
               ${smallIcon ? "width: .3rem !important; margin-left:1rem;" : ""}
             }
           }
-        `}
+        `}${triggerClassName ? ` ${triggerClassName}` : ""}`}
         onClick={(e) => {
           e.stopPropagation();
           const rect = e.currentTarget.getBoundingClientRect();
+          const openRightward = rect.left < window.innerWidth / 2;
+          const openUpward = rect.top > window.innerHeight / 2;
           setButtonPosition({
-            x: rect.right,
+            x: openRightward ? rect.left : rect.right,
             y: rect.top,
+            openUpward,
+            openRightward,
           });
           setIsMenuOpen(true);
         }}
