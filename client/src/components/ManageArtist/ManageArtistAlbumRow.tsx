@@ -4,6 +4,10 @@ import {
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import DropdownMenu from "components/common/DropdownMenu";
+import {
+  DropdownMenuItemButton,
+  DropdownMenuItemLink,
+} from "components/common/DropdownMenuItem";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -159,46 +163,42 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
           <DropdownMenu compact>
             <ul>
               <li>
-                <ArtistButtonLink
+                <DropdownMenuItemLink
                   to={getManageReleaseUrl(release.artist, release)}
-                  variant="link"
                   startIcon={<FaPen />}
                 >
                   {t("manageAlbum")}
-                </ArtistButtonLink>
+                </DropdownMenuItemLink>
               </li>
               {release.artist && isPublished && (
                 <li>
-                  <ArtistButtonLink
+                  <DropdownMenuItemLink
                     to={getReleaseUrl(release.artist, release)}
-                    variant="link"
                     startIcon={<FaEye />}
                   >
                     {t("viewLive")}
-                  </ArtistButtonLink>
+                  </DropdownMenuItemLink>
                 </li>
               )}
               {release.artist && !isPublished && (
                 <li>
-                  <ArtistButtonLink
+                  <DropdownMenuItemLink
                     to={getReleaseUrl(release.artist, release)}
-                    variant="link"
                     startIcon={<FaEye />}
                   >
                     {t("preview")}
-                  </ArtistButtonLink>
+                  </DropdownMenuItemLink>
                 </li>
               )}
               <li>
-                <ArtistButton
+                <DropdownMenuItemButton
                   type="button"
-                  variant="link"
                   startIcon={<FaTrash />}
                   onClick={() => onDelete(release.id)}
                   isLoading={isDeletePending}
                 >
                   {t("delete")}
-                </ArtistButton>
+                </DropdownMenuItemButton>
               </li>
             </ul>
           </DropdownMenu>
