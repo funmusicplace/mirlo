@@ -34,6 +34,9 @@ describe("email change verification", () => {
         // Navigate to account/profile settings
         cy.visit("/account");
 
+        // Intercept the PUT request so we can wait for it to complete
+        cy.intercept("PUT", /\/v1\/users\/\d+/).as("updateUser");
+
         // Find and fill the email input (get the last one since there might be multiple)
         cy.get('input[type="email"]')
           .first()
@@ -49,13 +52,13 @@ describe("email change verification", () => {
           .first()
           .click({ force: true });
 
-        // Wait for success message or email sent confirmation
-        cy.contains(/email|confirm/i, {
-          timeout: 5000,
-        }).should("exist");
+        // Wait for the PUT request to complete and verify it succeeded
+        cy.wait("@updateUser", { timeout: 10000 })
+          .its("response.statusCode")
+          .should("eq", 200);
 
-        // Query MailHog API for the email
-        cy.wait(1000);
+        // Wait for the async email to be sent then check MailHog
+        cy.wait(3000);
         cy.request({
           method: "GET",
           url: "http://localhost:8025/api/v1/messages",

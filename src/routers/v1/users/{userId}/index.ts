@@ -12,6 +12,7 @@ import {
   userHasPermission,
 } from "../../../../auth/passport";
 import sendMail from "../../../../jobs/send-mail";
+import { logger } from "../../../../logger";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
 import { getClient } from "../../../../utils/getClient";
@@ -223,7 +224,12 @@ export default function () {
               host: process.env.API_DOMAIN,
             },
           },
-        } as Job);
+        } as Job).catch((emailError) => {
+          logger.error(
+            "Failed to send email change confirmation email",
+            emailError
+          );
+        });
       }
       res.json({ result: refreshedUser });
     } catch (e) {
