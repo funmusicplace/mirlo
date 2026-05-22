@@ -380,7 +380,6 @@ interface ArtistSubscriptionTier {
   id: number;
   artistId: number;
   artist: Artist;
-  currency: string;
   minAmount?: number;
   name: string;
   description: string;
@@ -413,7 +412,6 @@ interface SubscriptionTierRelease {
 interface ArtistUserSubscription {
   id: number;
   amount: number;
-  currency: string;
   userId: number;
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;

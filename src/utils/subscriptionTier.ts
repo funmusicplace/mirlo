@@ -1,11 +1,11 @@
 import prisma from "@mirlo/prisma";
+
 import logger from "../logger";
 
 export const registerSubscription = async ({
   tierId,
   userId,
   amount,
-  currency,
   paymentProcessorKey,
   platformCut = null,
   shippingAddress = null,
@@ -13,7 +13,6 @@ export const registerSubscription = async ({
   tierId: number;
   userId: number;
   amount: number;
-  currency: string;
   paymentProcessorKey: string;
   platformCut?: number | null;
   shippingAddress?: object | null;
@@ -23,7 +22,6 @@ export const registerSubscription = async ({
       artistSubscriptionTierId: tierId,
       userId: userId,
       amount: amount,
-      currency: currency,
       deletedAt: null,
       stripeSubscriptionKey: paymentProcessorKey,
       platformCut,
@@ -33,7 +31,6 @@ export const registerSubscription = async ({
       artistSubscriptionTierId: Number(tierId),
       userId: Number(userId),
       amount,
-      currency,
       deletedAt: null, // Undelete
       platformCut,
       stripeSubscriptionKey: paymentProcessorKey, // FIXME: should this be session id? Maybe subscriptionId?

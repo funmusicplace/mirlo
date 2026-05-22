@@ -1,8 +1,9 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
-import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { set } from "lodash";
+
+import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { getDateRange } from "../../../utils/dateRange";
 
 export default function () {
@@ -50,7 +51,9 @@ export default function () {
           user: true,
           artistSubscriptionTier: {
             include: {
-              artist: true,
+              artist: {
+                include: { user: { select: { currency: true } } },
+              },
             },
           },
           artistUserSubscriptionCharges: {

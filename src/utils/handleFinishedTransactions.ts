@@ -1040,7 +1040,6 @@ export const handleSubscription = async (
       userId: Number(userId),
       tierId: Number(tierId),
       amount: session.amount_total ?? 0,
-      currency: session.currency ?? "usd",
       paymentProcessorKey: session.subscription as string,
       platformCut: applicationFee ?? null,
       shippingAddress: session.shipping_details ?? null,
@@ -1054,13 +1053,14 @@ export const handleFundraiserPledge = async (
   pledge: FundraiserPledge & {
     fundraiser: Fundraiser & { trackGroups: TrackGroup[] };
   },
-  stripeId: string
+  stripeId: string,
+  currency: string
 ) => {
   const transaction = await prisma.userTransaction.create({
     data: {
       userId: pledge.userId,
       amount: pledge.amount,
-      currency: pledge.fundraiser.trackGroups[0].currency ?? "usd",
+      currency,
       createdAt: new Date(),
       paymentStatus: "PENDING",
       stripeId,
@@ -1125,7 +1125,6 @@ export const handleFundraiserPledgePaymentSuccess = async (
           trackGroups: {
             select: {
               title: true,
-              currency: true,
               urlSlug: true,
               artist: {
                 select: {
@@ -1180,7 +1179,7 @@ export const handleFundraiserPledgePaymentSuccess = async (
       email: encodeURIComponent(pledge.user.email),
       host: process.env.API_DOMAIN,
       trackGroup: pledge.fundraiser.trackGroups[0],
-      currency: pledge.fundraiser.trackGroups[0].currency,
+      currency: transaction.currency,
       pledgedAmountFormatted: pledge.amount / 100,
       fundraisingGoalFormatted: (pledge.fundraiser.goalAmount ?? 0) / 100,
       client: applicationUrl,
@@ -1242,7 +1241,7 @@ export const handleFundraiserPledgePaymentFailure = async (
       email: encodeURIComponent(transaction.associatedPledge?.user.email),
       host: process.env.API_DOMAIN,
       cardChargeContext: `your pledge to "${transaction.associatedPledge.fundraiser.trackGroups[0].artist.name}'s ${transaction.associatedPledge.fundraiser.trackGroups[0].title}" fundraiser`,
-      currency: transaction.associatedPledge.fundraiser.trackGroups[0].currency,
+      currency: transaction.currency,
       pledgedAmountFormatted: transaction.associatedPledge.amount / 100,
       client: applicationUrl,
       urlParams,

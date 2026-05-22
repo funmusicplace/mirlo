@@ -47,7 +47,6 @@ export async function seedPosts() {
         artistId: blackbird.id,
         minAmount: 500,
         defaultAmount: 500,
-        currency: "usd",
       },
     });
     console.log(
@@ -67,7 +66,6 @@ export async function seedPosts() {
         artistId: blackbird.id,
         minAmount: 1000,
         defaultAmount: 1000,
-        currency: "usd",
       },
     });
     console.log(
@@ -86,7 +84,6 @@ export async function seedPosts() {
         artistId: crow.id,
         minAmount: 300,
         defaultAmount: 300,
-        currency: "usd",
       },
     });
     console.log(`Created Crow Flock tier: ${crowSupporterTier.id}`);

@@ -122,7 +122,6 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
   }
 
   const currency = await getCurrency(
-    track.currency,
     track.trackGroup.artistId,
     stripeAccount.default_currency
   );
@@ -197,11 +196,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
     },
   });
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency = await getCurrency(
-    undefined,
-    artist.id,
-    stripeAccount.default_currency
-  );
+  const currency = await getCurrency(artist.id, stripeAccount.default_currency);
 
   const cancelUrlParams = buildCheckoutCancelSearchParams({
     artistId: artist.id,
@@ -299,7 +294,6 @@ export const createStripeCheckoutSessionForPurchase = async ({
   }
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   const currency = await getCurrency(
-    trackGroup.currency,
     trackGroup.artistId,
     stripeAccount.default_currency
   );
@@ -424,6 +418,7 @@ const SCHENGEN_COUNTRY_CODES = [
 const determineShipping = (
   shippingDestinations: MerchShippingDestination[],
   shippingDestinationId: string,
+  currency: string,
   quantity: number = 0
 ) => {
   const isShippingToSchengen = SCHENGEN_COUNTRY_CODES.includes(
@@ -435,7 +430,7 @@ const determineShipping = (
   );
 
   const destination = isShippingToSchengen
-    ? { currency: "usd", ...euCosts, destinationCountry: shippingDestinationId }
+    ? { ...euCosts, destinationCountry: shippingDestinationId }
     : shippingDestinations.find((s) => s.id === shippingDestinationId);
 
   if (!destination) {
@@ -476,7 +471,7 @@ const determineShipping = (
     shipping_rate_data: {
       display_name: `Shipping to ${!!destination.destinationCountry ? destination.destinationCountry : "Everywhere"}`,
       fixed_amount: {
-        currency: destination?.currency,
+        currency,
         amount: castToFixed(destinationCost),
       },
       type: "fixed_amount" as "fixed_amount",
@@ -533,7 +528,6 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   const currency = await getCurrency(
-    merch.currency,
     merch.artistId,
     stripeAccount.default_currency
   );
@@ -541,6 +535,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   const destinations = determineShipping(
     merch.shippingDestinations,
     shippingDestinationId,
+    currency,
     quantity
   );
 
@@ -608,7 +603,6 @@ export const createStripeCheckoutSessionForTip = async ({
   email,
   priceNumber,
   stripeAccountId,
-  currency,
   message,
   artistId,
   description,
@@ -617,7 +611,6 @@ export const createStripeCheckoutSessionForTip = async ({
   loggedInUser?: User;
   email?: string;
   priceNumber: number;
-  currency: string;
   stripeAccountId: string;
   artistId: number;
   message?: string;
@@ -636,11 +629,7 @@ export const createStripeCheckoutSessionForTip = async ({
   });
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  currency = await getCurrency(
-    currency,
-    artistId,
-    stripeAccount.default_currency
-  );
+  const currency = await getCurrency(artistId, stripeAccount.default_currency);
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -690,13 +679,9 @@ export const createStripeCheckoutSessionForTip = async ({
 };
 
 const getCurrency = async (
-  purchaseItemCurrency: string | undefined | null,
   artistId: number,
   stripeAccountDefaultCurrency: string | undefined
 ) => {
-  if (purchaseItemCurrency) {
-    return purchaseItemCurrency.toLowerCase();
-  }
   const artist = await prisma.artist.findUnique({
     where: {
       id: artistId,
@@ -756,7 +741,6 @@ export const createCheckoutSessionForSubscription = async ({
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   const currency = await getCurrency(
-    tier.currency,
     tier.artistId,
     stripeAccount.default_currency
   );

@@ -4,8 +4,8 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { beforeEach, describe, it } from "mocha";
 import request from "supertest";
-
 import prisma from "@mirlo/prisma";
+
 import {
   clearTables,
   createArtist,
@@ -70,7 +70,6 @@ describe("GET /v1/merch/{id}", () => {
             destinationCountry: null,
             costUnit: 0,
             costExtraUnit: 0,
-            currency: "usd",
           },
         },
       },

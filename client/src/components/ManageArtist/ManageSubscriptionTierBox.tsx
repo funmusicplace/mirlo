@@ -94,7 +94,7 @@ const ManageSubscriptionTierBox: React.FC<{
                 {tier.name}:{" "}
                 <Money
                   amount={tier.minAmount ? tier.minAmount / 100 : 0}
-                  currency={tier.currency}
+                  currency={artist.user?.currency ?? "usd"}
                 />{" "}
                 {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
               </strong>

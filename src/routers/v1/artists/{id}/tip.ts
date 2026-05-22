@@ -1,10 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
-import { createStripeCheckoutSessionForTip } from "../../../../utils/stripe/sessions";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { createStripeCheckoutSessionForTip } from "../../../../utils/stripe/sessions";
 
 type Params = {
   id: string;
@@ -86,7 +86,6 @@ export default function () {
           tipName: `One Time Gift for ${artist.name}`,
           description: `A one time gift that supports ${artist.name}.`,
           artistId: Number(artistId),
-          currency: artist.user.currency ?? "usd",
         });
         res.status(200).json({
           redirectUrl: session.url,

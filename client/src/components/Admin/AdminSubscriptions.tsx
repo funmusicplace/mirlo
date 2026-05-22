@@ -1,16 +1,20 @@
 import { css } from "@emotion/css";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import api from "services/api";
-import useAdminFilters from "./useAdminFilters";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { useTranslation } from "react-i18next";
 import usePagination from "utils/usePagination";
+
+import useAdminFilters from "./useAdminFilters";
 
 interface AdminSubscription extends ArtistUserSubscription {
   user: User;
+  artistSubscriptionTier: ArtistSubscriptionTier & {
+    artist: Artist & { user: { currency: string | null } };
+  };
   artistUserSubscriptionCharges: {
     id: string;
     createdAt: string;
@@ -60,10 +64,11 @@ export const AdminSubscriptions: React.FC = () => {
   }, [callback]);
 
   const total = results.reduce((aggr, r) => {
-    if (aggr[r.currency]) {
-      aggr[r.currency] += r.amount;
+    const currency = r.artistSubscriptionTier.artist.user?.currency ?? "usd";
+    if (aggr[currency]) {
+      aggr[currency] += r.amount;
     } else {
-      aggr[r.currency] = r.amount;
+      aggr[currency] = r.amount;
     }
     return aggr;
   }, {} as any);
@@ -127,7 +132,12 @@ export const AdminSubscriptions: React.FC = () => {
                   {sub.artistSubscriptionTier.artist.id})
                 </td>
                 <td>
-                  <Money amount={sub.amount / 100} currency={sub.currency} />
+                  <Money
+                    amount={sub.amount / 100}
+                    currency={
+                      sub.artistSubscriptionTier.artist.user?.currency ?? "usd"
+                    }
+                  />
                 </td>
                 <td>
                   {sub.artistUserSubscriptionCharges.map((charge) => (

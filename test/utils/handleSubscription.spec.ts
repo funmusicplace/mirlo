@@ -65,7 +65,6 @@ describe("handleSubscription", () => {
     assert.equal(subscription.userId, purchaser.id);
     assert.equal(subscription.artistSubscriptionTierId, tier.id);
     assert.equal(subscription.amount, 1000);
-    assert.equal(subscription.currency, "usd");
     assert.equal(subscription.stripeSubscriptionKey, "sub_test123");
   });
 
@@ -154,7 +153,6 @@ describe("handleSubscription", () => {
         userId: purchaser.id,
         artistSubscriptionTierId: tier.id,
         amount: 500,
-        currency: "usd",
         stripeSubscriptionKey: "sub_old",
         deletedAt: new Date(),
       },

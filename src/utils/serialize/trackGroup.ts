@@ -17,7 +17,10 @@ import { isTrackPlayableNested } from "../trackPlayability";
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
-    artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
+    artist?: Partial<Artist> & {
+      avatar?: ArtistAvatar | null;
+      user?: { currency?: string | null };
+    };
     merch?: (Merch & { images: MerchImage[] })[];
     tracks?: (Track & { userTrackPurchases?: { userId: number }[] })[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
@@ -30,6 +33,7 @@ export const processSingleTrackGroup = (
   options?: { loggedInUserId?: number }
 ) => ({
   ...tg,
+  currency: tg.artist?.user?.currency ?? "usd",
   hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
   tracks: tg.tracks?.map((track) => ({
     ...track,

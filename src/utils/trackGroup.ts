@@ -286,6 +286,9 @@ export const trackGroupSingleInclude = (options: {
     },
     artist: {
       include: {
+        user: {
+          select: { currency: true },
+        },
         artistLabels: {
           include: {
             labelUser: {

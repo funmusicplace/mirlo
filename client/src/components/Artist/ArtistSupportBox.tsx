@@ -170,7 +170,7 @@ const ArtistSupportBox: React.FC<{
               subscriptionTier?.minAmount ? subscriptionTier.minAmount / 100 : 0
             }
             artistName={artist?.name}
-            currency={subscriptionTier.currency}
+            currency={artist?.user?.currency ?? "usd"}
             alignRight
           />
         </div>
@@ -193,7 +193,7 @@ const ArtistSupportBox: React.FC<{
             amount={
               subscriptionTier.minAmount ? subscriptionTier.minAmount / 100 : 0
             }
-            currency={subscriptionTier.currency}
+            currency={artist?.user?.currency ?? "usd"}
           />{" "}
           / {t(subscriptionTier.interval === "MONTH" ? "monthly" : "yearly")}
         </div>

@@ -216,7 +216,7 @@ export const subscribeUserToArtist = async (
     subscriptionTiers: ArtistSubscriptionTier[];
     id: number;
   },
-  user?: { currency: string | null; id: number } | null,
+  user?: { id: number } | null,
   message?: string | null
 ) => {
   let defaultTier = artist.subscriptionTiers.find((tier) => tier.isDefaultTier);
@@ -227,7 +227,6 @@ export const subscribeUserToArtist = async (
         name: "follow",
         description: "follow an artist",
         minAmount: 0,
-        currency: artist.user.currency ?? "usd",
         isDefaultTier: true,
         artistId: artist.id,
       },

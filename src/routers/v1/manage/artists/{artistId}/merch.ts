@@ -1,17 +1,15 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-import {
-  getUserCountry,
-  getUserCurrencyString,
-} from "../../../../../utils/user";
-import { processSingleMerch } from "../../../../../utils/merch";
 import { getPlatformFeeForArtist } from "../../../../../utils/artist";
+import { processSingleMerch } from "../../../../../utils/merch";
+import { getUserCountry } from "../../../../../utils/user";
 
 export default function () {
   const operations = {
@@ -81,15 +79,12 @@ export default function () {
     const user = req.user;
 
     try {
-      const currencyString = await getUserCurrencyString(user.id);
-
       const result = await prisma.merch.create({
         data: {
           title,
           description: description ?? "",
           artist: { connect: { id: artistId } },
           minPrice: 0,
-          currency: currencyString,
           isPublic: false,
           platformPercent: await getPlatformFeeForArtist(artistId),
         },
@@ -102,7 +97,6 @@ export default function () {
           merchId: result.id,
           costUnit: 0,
           costExtraUnit: 0,
-          currency: currencyString,
           homeCountry: country?.countryCode ?? "us",
         },
       });

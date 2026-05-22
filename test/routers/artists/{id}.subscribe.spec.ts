@@ -30,7 +30,7 @@ let createTestData = async (stripeAccountId: string | null = "23") => {
     subscriptionTiers: {
       create: [
         { name: "Tier 1", isDefaultTier: true },
-        { name: "Tier 2", currency: "eur", minAmount: 4 },
+        { name: "Tier 2", minAmount: 4 },
       ],
     },
   });
