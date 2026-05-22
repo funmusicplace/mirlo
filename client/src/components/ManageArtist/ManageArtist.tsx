@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import { useTransparentContainer } from "components/ArtistColorsProvider";
 import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
 import { queryManagedArtist } from "queries";
@@ -10,6 +11,7 @@ import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const transparent = useTransparentContainer();
 
   const { artistId } = useParams();
 
@@ -105,7 +107,16 @@ const ManageArtist: React.FC<{}> = () => {
           </ArtistTabs>
         </nav>
       )}
-      <Outlet />
+      {/* Negative padding to keep a consistent look despite the initial padding happening at container level */}
+      <div
+        className={
+          transparent
+            ? "bg-(--mi-background-color) -mx-8 -mb-8 px-8 pb-8 max-md:m-0 max-md:p-0"
+            : ""
+        }
+      >
+        <Outlet />
+      </div>
     </>
   );
 };

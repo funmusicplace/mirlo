@@ -77,6 +77,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { artistId } = useParams();
   const { user } = useAuthContext();
+  const transparent = useTransparentContainer();
 
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryManagedArtist(Number(artistId))
@@ -104,13 +105,17 @@ const ManageArtistContainer: React.FC<{}> = () => {
     <Navigate to="/manage" />;
   }
 
+  const isLinksPage = location.pathname.endsWith("/links");
+
   const dontShowHeader =
     location.pathname.includes("/release/") ||
     (location.pathname.includes("/tiers/") &&
       !location.pathname.includes("supporters")) ||
     location.pathname.includes("/merch/") ||
     location.pathname.includes("/post/") ||
-    location.pathname.endsWith("/links");
+    isLinksPage;
+
+  const isDeepEditPage = dontShowHeader && !isLinksPage;
 
   const labelProfile = hasLabel?.labelUser.artists?.find(
     (a) => a.isLabelProfile
@@ -184,7 +189,16 @@ const ManageArtistContainer: React.FC<{}> = () => {
         {!artist.enabled && (
           <ArtistBox variant="warning">{t("notEnabled")}</ArtistBox>
         )}
-        <Outlet />
+        {/* Negative padding to keep a consistent look despite the initial padding happening at container level */}
+        <div
+          className={
+            transparent && isDeepEditPage
+              ? "bg-(--mi-background-color) -mx-8 -mb-8 px-8 pb-8 max-md:m-0 max-md:p-0"
+              : ""
+          }
+        >
+          <Outlet />
+        </div>
       </div>
     </ArtistPageWrapper>
   );
