@@ -1,25 +1,12 @@
+import { css } from "@emotion/css";
+import FormComponent from "components/common/FormComponent";
+import { moneyDisplay } from "components/common/Money";
+import { SelectEl } from "components/common/Select";
+import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-currencies";
+import React from "react";
+import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useQuery } from "@tanstack/react-query";
-import { queryUserStripeStatus } from "queries";
-import { bp } from "../../constants";
-
-import Button from "components/common/Button";
-import { InputEl } from "components/common/Input";
-import { useForm, useFormContext, useFormState } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
-import React from "react";
-import { css } from "@emotion/css";
-import api from "services/api";
-import { SelectEl } from "components/common/Select";
-import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
-import IncludesDigitalDownload from "./IncludesDigitalDownload";
-import { FaChevronRight } from "react-icons/fa";
-import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-currencies";
-import { flatten } from "lodash";
-import Box from "components/common/Box";
-import TextArea from "components/common/TextArea";
-import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import { BuyMerchFormData } from "./BuyMerchItem";
 
 const codeToCountryMap = countryCodesCurrencies.reduce(
@@ -103,11 +90,11 @@ const BuyMerchItem: React.FC<{ merch: Merch }> = ({ merch }) => {
           {t("destinationCost", {
             costUnit: moneyDisplay({
               amount: currentDestination.costUnit / 100,
-              currency: currentDestination.currency,
+              currency: merch.currency,
             }),
             costExtraUnit: moneyDisplay({
               amount: currentDestination.costExtraUnit / 100,
-              currency: currentDestination.currency,
+              currency: merch.currency,
             }),
           })}
         </small>

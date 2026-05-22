@@ -508,7 +508,6 @@ interface ShippingDestination {
   destinationCountry: string | null;
   merchId: string;
   costUnit: number;
-  currency: string;
   costExtraUnit: number;
 }
 

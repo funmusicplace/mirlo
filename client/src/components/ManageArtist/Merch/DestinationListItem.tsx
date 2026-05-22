@@ -1,21 +1,23 @@
-import { moneyDisplay } from "components/common/Money";
 import { css } from "@emotion/css";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import { moneyDisplay } from "components/common/Money";
+import { SelectEl } from "components/common/Select";
 import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
-import { SelectEl } from "components/common/Select";
-import countryCodesCurrencies from "./country-codes-currencies";
-import { InputEl } from "components/common/Input";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 import { FaTrash } from "react-icons/fa";
+
+import countryCodesCurrencies from "./country-codes-currencies";
 
 const DestinationListItem: React.FC<{
   dest: Partial<ShippingDestination>;
   index: number;
   isEditing: boolean;
+  currency: string;
   onRemove: () => void;
-}> = ({ dest, isEditing, index, onRemove }) => {
+}> = ({ dest, isEditing, index, currency, onRemove }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const methods = useFormContext();
   const { remove } = useFieldArray({
@@ -123,20 +125,16 @@ const DestinationListItem: React.FC<{
           <em>
             {dest.homeCountry} &#x2192; {destinationString}
           </em>
-          {dest.currency && (
-            <>
-              {moneyDisplay({
-                amount: dest.costUnit,
-                currency: dest.currency,
-              })}{" "}
-              (
-              {moneyDisplay({
-                amount: dest.costExtraUnit,
-                currency: dest.currency,
-              })}
-              )
-            </>
-          )}
+          {moneyDisplay({
+            amount: dest.costUnit,
+            currency,
+          })}{" "}
+          (
+          {moneyDisplay({
+            amount: dest.costExtraUnit,
+            currency,
+          })}
+          )
         </>
       )}
     </li>
