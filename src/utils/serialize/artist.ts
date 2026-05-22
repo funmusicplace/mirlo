@@ -28,6 +28,7 @@ import { serializePost } from "./post";
 import {
   processSingleTrackGroup,
   serializeSingleTrackGroupIntoCanimus,
+  serializeSingleDeletedTrackGroupIntoCanimus,
   LocalTrackGroup,
 } from "./trackGroup";
 
@@ -133,25 +134,24 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     name: artist.name,
     url: artistUrl,
     images: {
-      main: {
+      cover: {
         src: avatarString
           ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
           : undefined,
         alt: null,
+        width: 600,
+        height: 600,
       },
     },
     summary: artist.shortDescription,
     description: artist.bio,
-    links: Object.assign(
-      {},
-      ...artist.linksJson.map((link: any) => ({
-        name: link.linkLabel,
-        href: link.url,
-        type: link.linkType,
-      }))
-    ),
+    links: artist.linksJson.map((link: any) => ({
+      name: link.linkLabel,
+      href: link.url,
+      type: link.linkType,
+    })),
     children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
-      serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl)
+      serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl, artist.name)
     ),
   };
 };
@@ -160,9 +160,19 @@ export const serializeSingleDeletedArtistIntoCanimus = (
   artist: LocalArtist
 ) => {
   const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
-  return {
+  const deletedArtist = {
     type: "artist",
     name: artist.name,
     url: artistUrl,
   };
+
+  const deletedEntities: any = artist.trackGroups?.map((trackGroup) =>
+    serializeSingleDeletedTrackGroupIntoCanimus(trackGroup, artistUrl)
+  );
+  let output: any = [];
+  for (const e of deletedEntities) {
+    output = output.concat(e);
+  }
+
+  return [deletedArtist].concat(output);
 };

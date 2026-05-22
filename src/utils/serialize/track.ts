@@ -46,18 +46,17 @@ export const serializeSingleTrackIntoCanimus = (
   releaseUrl: string
 ) => {
   const trackId = String(track.id);
-  const trackUrl = join(releaseUrl, "tracks", trackId);
   const metadata: any = track.metadata;
   const mediaUrl = join(
     String(process.env.API_DOMAIN),
     "v1/tracks",
     trackId,
-    "stream/authzd/playlist.m3u8"
+    "stream/external/playlist.m3u8"
   );
   return {
     type: "track",
     name: track.title,
-    url: trackUrl,
+    url: join(releaseUrl, "tracks", trackId),
     duration: metadata.format.duration,
     media: [
       {
@@ -65,5 +64,17 @@ export const serializeSingleTrackIntoCanimus = (
         type: "audio/x-mpegurl",
       },
     ],
+  };
+};
+
+export const serializeSingleDeletedTrackIntoCanimus = (
+  track: Track,
+  releaseUrl: string
+) => {
+  const trackId = String(track.id);
+  return {
+    type: "track",
+    name: track.title,
+    url: join(releaseUrl, "tracks", trackId),
   };
 };

@@ -29,15 +29,30 @@ export default function () {
         federatedStreaming: true,
       };
 
-      let whereDeleted: Prisma.ArtistWhereInput = {
+      let artistOptedOut: Prisma.ArtistWhereInput = {
         AND: [
           {
             federatedStreaming: false,
             NOT: {
-              federatedStreamingOptOutDate: null, // discard artists that never opted in
+              federatedStreamingOptInDate: null, // discard artists that never opted in
             },
           },
         ],
+      };
+
+      let artistFederatedButDeletedFromMirlo: Prisma.ArtistWhereInput = {
+        AND: [
+          {
+            NOT: {
+              federatedStreamingOptInDate: null, // discard artists that never opted in
+              deletedAt: null,
+            },
+          },
+        ],
+      };
+
+      let artistOptedOutOrDeleted: Prisma.ArtistWhereInput = {
+        OR: [artistOptedOut, artistFederatedButDeletedFromMirlo],
       };
 
       if (fromDateFilter) {
@@ -84,7 +99,9 @@ export default function () {
         ];
       }
 
-      const orderByClause: Prisma.ArtistOrderByWithRelationInput = {
+      const orderByClause:
+        | Prisma.ArtistOrderByWithRelationInput
+        | Prisma.TrackGroupOrderByWithRelationInput = {
         createdAt: "desc",
       };
 
@@ -92,7 +109,7 @@ export default function () {
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
-        orderBy: orderByClause,
+        orderBy: orderByClause as Prisma.ArtistOrderByWithRelationInput,
         include: {
           trackGroups: {
             where: whereForPublishedTrackGroups(),
@@ -111,26 +128,34 @@ export default function () {
       });
 
       const deletedArtists = await prisma.artist.findMany({
-        where: whereDeleted,
+        where: artistOptedOutOrDeleted,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
-        orderBy: orderByClause,
+        orderBy: orderByClause as Prisma.ArtistOrderByWithRelationInput,
         include: {
           trackGroups: {
-            where: whereForPublishedTrackGroups(),
             include: {
-              cover: true,
               tracks: true,
             },
             orderBy: { orderIndex: "asc" },
           },
-          avatar: {
-            where: {
-              deletedAt: null,
-            },
-          },
         },
       });
+      // const deletedReleases = await prisma.trackGroup.findMany({
+      //   where: {
+      //     artist: artistOptedOutOrDeleted,
+      //   },
+      //   skip: skipQuery ? Number(skipQuery) : undefined,
+      //   take: take ? Number(take) : undefined,
+      //   orderBy: orderByClause as Prisma.TrackGroupOrderByWithRelationInput,
+      // });
+
+      let deletedEntities: any = [];
+      for (const deletedArtist of deletedArtists.map((artist) =>
+        serializeSingleDeletedArtistIntoCanimus(artist)
+      )) {
+        deletedEntities.concat(deletedArtist);
+      }
 
       res.json({
         type: "root",
@@ -138,9 +163,7 @@ export default function () {
         children: artists.map((artist) =>
           serializeSingleArtistIntoCanimus(artist)
         ),
-        deleted: deletedArtists.map((artist) =>
-          serializeSingleDeletedArtistIntoCanimus(artist)
-        ),
+        deleted: deletedEntities,
       });
     } catch (e) {
       next(e);
@@ -149,6 +172,7 @@ export default function () {
 
   GET.apiDoc = {
     summary: "Returns federated artists",
+    parameters: [{ in: "query", name: "fromDate", type: "string" }],
     responses: {
       200: {
         description: "A list of artists",
