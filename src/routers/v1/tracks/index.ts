@@ -3,9 +3,8 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userHasPermission } from "../../../auth/passport";
-import { addSizesToImage } from "../../../utils/artist";
-import { finalCoversBucket } from "../../../utils/minio";
 import { turnItemsIntoRSS } from "../../../utils/rss";
+import { processSingleTrackGroup } from "../../../utils/serialize/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -77,10 +76,9 @@ export default function () {
       res.json({
         results: tracks.map((tr) => ({
           ...tr,
-          trackGroup: {
-            ...tr.trackGroup,
-            cover: addSizesToImage(finalCoversBucket, tr.trackGroup.cover),
-          },
+          trackGroup: processSingleTrackGroup(tr.trackGroup, {
+            loggedInUserId: req.user?.id,
+          }),
         })),
       });
     } catch (e) {
