@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -19,17 +20,23 @@ function YourPurchases() {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
   const [charges, setCharges] =
     React.useState<ArtistUserSubscriptionCharge[]>();
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const fetchPurchases = React.useCallback(async () => {
-    const { results } = await api.getMany<UserTransaction>(
-      `users/${userId}/purchases`
-    );
-    setPurchases(results);
-    const { results: fetchedCharges } =
-      await api.getMany<ArtistUserSubscriptionCharge>(
-        `users/${userId}/charges`
+    setIsLoading(true);
+    try {
+      const { results } = await api.getMany<UserTransaction>(
+        `users/${userId}/purchases`
       );
-    setCharges(fetchedCharges);
+      setPurchases(results);
+      const { results: fetchedCharges } =
+        await api.getMany<ArtistUserSubscriptionCharge>(
+          `users/${userId}/charges`
+        );
+      setCharges(fetchedCharges);
+    } finally {
+      setIsLoading(false);
+    }
   }, [userId]);
 
   React.useEffect(() => {
@@ -46,12 +53,15 @@ function YourPurchases() {
         <div className="flex flex-wrap md:flex-nowrap gap-8 items-start">
           <section className="flex-1 w-full min-w-0">
             <h1>{t("yourPurchases")}</h1>
-            {(!purchases || purchases.length === 0) && (
+            {isLoading && (
+              <LoadingBlocks rows={5} height="2rem" margin=".5rem" />
+            )}
+            {!isLoading && (!purchases || purchases.length === 0) && (
               <p className="text-(--mi-secondary-text-color) mt-4">
                 {t("noPurchases")}
               </p>
             )}
-            {purchases && purchases.length > 0 && (
+            {!isLoading && purchases && purchases.length > 0 && (
               <ol
                 className={css`
                   padding: 1rem 0;
