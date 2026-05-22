@@ -1,7 +1,9 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { AppError } from "../../../../../utils/error";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 
 type Params = {
@@ -19,6 +21,17 @@ export default function () {
       trackId: number;
     };
     try {
+      assertLoggedIn(req);
+      const ownedTrack = await prisma.track.findFirst({
+        where: {
+          id: trackId,
+          trackGroup: { artist: { userId: req.user.id } },
+        },
+      });
+      if (!ownedTrack) {
+        throw new AppError({ httpCode: 403, description: "Forbidden" });
+      }
+
       const postTracks = await prisma.postTrack.findMany({
         where: {
           postId: Number(postId),

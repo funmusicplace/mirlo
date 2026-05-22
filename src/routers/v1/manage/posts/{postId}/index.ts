@@ -127,6 +127,15 @@ export default function () {
       assertLoggedIn(req);
       const user = req.user;
 
+      if (artistId !== undefined) {
+        const ownedArtist = await prisma.artist.findFirst({
+          where: { id: artistId, userId: user.id },
+        });
+        if (!ownedArtist) {
+          throw new AppError({ httpCode: 403, description: "Forbidden" });
+        }
+      }
+
       if (minimumSubscriptionTierId !== undefined) {
         const validTier = await prisma.artistSubscriptionTier.findFirst({
           where: {

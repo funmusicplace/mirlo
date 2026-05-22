@@ -74,7 +74,8 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { title, description, artistId } = req.body;
+    const artistId = Number(req.params.artistId);
+    const { title, description } = req.body;
     assertLoggedIn(req);
     const user = req.user;
 
