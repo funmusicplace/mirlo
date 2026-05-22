@@ -33,6 +33,17 @@ export const passwordResetConfirmation = async (
       accountIncomplete?: string;
     };
 
+    const allowedClient = await getClient();
+    try {
+      const redirectUrl = new URL(redirectClient);
+      const allowedUrl = new URL(allowedClient.applicationUrl);
+      if (redirectUrl.origin !== allowedUrl.origin) {
+        return res.status(400).json({ error: "Invalid redirect URL" });
+      }
+    } catch {
+      return res.status(400).json({ error: "Invalid redirect URL" });
+    }
+
     const user = await prisma.user.findFirst({
       where: {
         id: Number(id),

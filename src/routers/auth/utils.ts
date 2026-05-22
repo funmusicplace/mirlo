@@ -1,15 +1,20 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { Response } from "express";
-
-const jwt_secret = process.env.JWT_SECRET ?? "secretkey";
-const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "refreshkey";
+import jwt from "jsonwebtoken";
 
 export async function hashPassword(password: string) {
-  return await bcrypt.hash(password, 3);
+  return await bcrypt.hash(password, 12);
 }
 
 export const buildTokens = (user: { email: string; id: number }) => {
+  const jwt_secret = process.env.JWT_SECRET;
+  const refresh_secret = process.env.REFRESH_TOKEN_SECRET;
+  if (!jwt_secret || !refresh_secret) {
+    throw new Error(
+      "JWT_SECRET and REFRESH_TOKEN_SECRET environment variables must be set"
+    );
+  }
+
   const payload = {
     email: user.email,
     id: user.id,

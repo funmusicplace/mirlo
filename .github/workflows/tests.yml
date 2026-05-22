@@ -122,6 +122,8 @@ jobs:
         env:
           PORT: 8080
           CI: "1"
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
         with:
           wait-on: "http://localhost:3000"
           wait-on-timeout: 120
