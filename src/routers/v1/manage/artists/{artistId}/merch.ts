@@ -31,14 +31,14 @@ export default function () {
           deletedAt: null,
         },
         include: {
-          artist: true,
+          artist: { include: { user: { select: { currency: true } } } },
           images: true,
           optionTypes: { include: { options: true } },
         },
       });
 
       res.json({
-        results: results.map(processSingleMerch),
+        results: results.map((m) => processSingleMerch(m)),
       });
     } catch (e) {
       next(e);

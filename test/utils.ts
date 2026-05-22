@@ -207,7 +207,7 @@ export const createMerch = async (
       description: data?.description ?? "Test description",
       quantityRemaining: data?.quantityRemaining ?? 0,
       includePurchaseTrackGroupId: data?.includePurchaseTrackGroupId,
-      isPublic: false,
+      isPublic: data?.isPublic ?? false,
       title: data?.title ?? "Test trackGroup",
       artistId: artistId,
       urlSlug: slug(data?.title ?? "test-merch"),
@@ -215,6 +215,24 @@ export const createMerch = async (
   });
 
   return merch;
+};
+
+export const createMerchShippingDestination = async (data: {
+  merchId: string;
+  homeCountry?: string;
+  destinationCountry?: string | null;
+  costUnit?: number;
+  costExtraUnit?: number;
+}) => {
+  return prisma.merchShippingDestination.create({
+    data: {
+      merchId: data.merchId,
+      homeCountry: data.homeCountry ?? "us",
+      destinationCountry: data.destinationCountry ?? null,
+      costUnit: data.costUnit ?? 0,
+      costExtraUnit: data.costExtraUnit ?? 0,
+    },
+  });
 };
 
 export const createTrack = async (
@@ -380,6 +398,16 @@ export const createSubscription = async (
   });
 };
 
+export const createNotification = async (data: {
+  userId: number;
+  notificationType: string;
+  trackGroupId?: number;
+  relatedUserId?: number;
+  artistId?: number;
+}) => {
+  return prisma.notification.create({ data: data as any });
+};
+
 export default {
   createArtist,
   createPost,
@@ -396,4 +424,7 @@ export default {
   createClient,
   getUserByEmail,
   createSubscription,
+  createNotification,
+  createMerch,
+  createMerchShippingDestination,
 };

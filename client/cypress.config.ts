@@ -9,6 +9,7 @@ import pkg, {
   clearTables,
   createTrack,
   createSubscription,
+  createNotification,
 } from "../test/utils";
 
 // Inject JWT secrets needed by buildTokens (called from createUser task).
@@ -68,10 +69,12 @@ export default defineConfig({
         createUserTrackGroupPurchase: async (query: {
           purchaserUserId: number;
           trackGroupId: number;
+          data?: { amount?: number; currency?: string };
         }) => {
           return pkg.createUserTrackGroupPurchase(
             query.purchaserUserId,
-            query.trackGroupId
+            query.trackGroupId,
+            query.data
           );
         },
         createUserTrackPurchase: async (query: {
@@ -128,6 +131,33 @@ export default defineConfig({
           amount?: number;
         }) => {
           return createSubscription(query.userId, query.tierId, query.amount);
+        },
+        createNotification: async (query: {
+          userId: number;
+          notificationType: string;
+          trackGroupId?: number;
+          relatedUserId?: number;
+          artistId?: number;
+        }) => {
+          return createNotification(query);
+        },
+        createMerch: async (query: {
+          artistId: number;
+          title?: string;
+          minPrice?: number;
+          isPublic?: boolean;
+          quantityRemaining?: number;
+        }) => {
+          return pkg.createMerch(query.artistId, query);
+        },
+        createMerchShippingDestination: async (query: {
+          merchId: string;
+          homeCountry?: string;
+          destinationCountry?: string | null;
+          costUnit?: number;
+          costExtraUnit?: number;
+        }) => {
+          return pkg.createMerchShippingDestination(query);
         },
       });
     },

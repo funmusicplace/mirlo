@@ -38,6 +38,7 @@ interface LocalArtist extends Artist {
     releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
   })[];
   user?: {
+    currency?: string | null;
     artistLabels?: {
       artist: Artist & {
         avatar?: ArtistAvatar | null;
@@ -67,7 +68,11 @@ export const processSingleArtist = (
         isUserSubscriber || artist.userId === userId
       )
     ),
-    merch: artist?.merch?.map(processSingleMerch),
+    merch: artist?.merch?.map((m) =>
+      processSingleMerch(m, {
+        fallbackCurrency: artist?.user?.currency ?? undefined,
+      })
+    ),
     background: addSizesToImage(
       finalArtistBackgroundBucket,
       artist?.background

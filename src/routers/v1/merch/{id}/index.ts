@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
@@ -44,7 +44,7 @@ export default function () {
           },
         },
         include: {
-          artist: true,
+          artist: { include: { user: { select: { currency: true } } } },
           images: true,
           shippingDestinations: true,
           downloadableContent: {

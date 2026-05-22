@@ -52,7 +52,11 @@ export const processSingleTrackGroup = (
           : undefined,
       }
     : undefined,
-  merch: tg.merch?.map(processSingleMerch),
+  merch: tg.merch?.map((m) =>
+    processSingleMerch(m, {
+      fallbackCurrency: tg.artist?.user?.currency ?? undefined,
+    })
+  ),
   tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
   cover: addSizesToImage(finalCoversBucket, tg.cover),
   downloadableContent: tg.downloadableContent?.map((dc) => ({

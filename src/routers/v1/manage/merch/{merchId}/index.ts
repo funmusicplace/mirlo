@@ -1,16 +1,16 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
-import prisma from "@mirlo/prisma";
 
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   merchBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { AppError } from "../../../../../utils/error";
 import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
-import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
+import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
+import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -32,6 +32,7 @@ export default function () {
           id: merchId,
         },
         include: {
+          artist: { include: { user: { select: { currency: true } } } },
           shippingDestinations: true,
           images: true,
           includePurchaseTrackGroup: true,
@@ -121,11 +122,14 @@ export default function () {
       const updatedMerch = await prisma.merch.findFirst({
         where: { id: merchId },
         include: {
+          artist: { include: { user: { select: { currency: true } } } },
           includePurchaseTrackGroup: true,
         },
       });
 
-      res.json({ result: updatedMerch });
+      res.json({
+        result: updatedMerch ? processSingleMerch(updatedMerch) : null,
+      });
     } catch (error) {
       next(error);
     }
