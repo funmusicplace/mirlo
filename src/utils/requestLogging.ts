@@ -9,6 +9,13 @@ const SENSITIVE_HEADERS = new Set([
 
 const SENSITIVE_COOKIES = new Set(["jwt", "refresh"]);
 
+const SENSITIVE_BODY_FIELDS = new Set([
+  "password",
+  "newPassword",
+  "oldPassword",
+  "confirmPassword",
+]);
+
 const redactCookieHeader = (cookieHeader: string): string => {
   return cookieHeader
     .split(";")
@@ -62,6 +69,20 @@ export const sanitizeHeadersForLogs = (
   return sanitized;
 };
 
+const redactSensitiveFields = (obj: Record<string, unknown>): void => {
+  for (const key of Object.keys(obj)) {
+    if (SENSITIVE_BODY_FIELDS.has(key)) {
+      obj[key] = "[REDACTED]";
+    } else if (
+      obj[key] &&
+      typeof obj[key] === "object" &&
+      !Array.isArray(obj[key])
+    ) {
+      redactSensitiveFields(obj[key] as Record<string, unknown>);
+    }
+  }
+};
+
 export const sanitizeBodyForLogs = (body: unknown): unknown => {
   // Handle undefined, null, or non-serializable values
   if (body === undefined || body === null) {
@@ -71,8 +92,8 @@ export const sanitizeBodyForLogs = (body: unknown): unknown => {
   // Deep clone to avoid modifying the original body
   const sanitized = JSON.parse(JSON.stringify(body));
 
-  // Redact ActivityPub signatures
   if (sanitized && typeof sanitized === "object") {
+    // Redact ActivityPub signatures
     if (sanitized.signature && typeof sanitized.signature === "object") {
       if (
         sanitized.signature.signatureValue &&
@@ -81,6 +102,8 @@ export const sanitizeBodyForLogs = (body: unknown): unknown => {
         sanitized.signature.signatureValue = "[REDACTED]";
       }
     }
+
+    redactSensitiveFields(sanitized);
   }
 
   return sanitized;
