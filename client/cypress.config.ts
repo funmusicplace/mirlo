@@ -5,6 +5,7 @@ import pkg, {
   clearTables,
   createTrack,
   createSubscription,
+  createNotification,
 } from "../test/utils";
 
 export default defineConfig({
@@ -56,10 +57,12 @@ export default defineConfig({
         createUserTrackGroupPurchase: async (query: {
           purchaserUserId: number;
           trackGroupId: number;
+          data?: { amount?: number; currency?: string };
         }) => {
           return pkg.createUserTrackGroupPurchase(
             query.purchaserUserId,
-            query.trackGroupId
+            query.trackGroupId,
+            query.data
           );
         },
         createUserTrackPurchase: async (query: {
@@ -116,6 +119,15 @@ export default defineConfig({
           amount?: number;
         }) => {
           return createSubscription(query.userId, query.tierId, query.amount);
+        },
+        createNotification: async (query: {
+          userId: number;
+          notificationType: string;
+          trackGroupId?: number;
+          relatedUserId?: number;
+          artistId?: number;
+        }) => {
+          return createNotification(query);
         },
       });
     },

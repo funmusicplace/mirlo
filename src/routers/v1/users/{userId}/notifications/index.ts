@@ -1,16 +1,16 @@
-import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { AppError } from "../../../../../utils/error";
+import { Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../../auth/passport";
 import { addSizesToImage } from "../../../../../utils/artist";
+import { AppError } from "../../../../../utils/error";
+import { generateFullStaticImageUrl } from "../../../../../utils/images";
 import {
   finalCoversBucket,
   finalArtistAvatarBucket,
   finalPostImageBucket,
 } from "../../../../../utils/minio";
-
-import { generateFullStaticImageUrl } from "../../../../../utils/images";
 
 type Params = {
   userId: string;
@@ -54,7 +54,7 @@ export default function () {
           artist: true,
           trackGroup: {
             include: {
-              artist: true,
+              artist: { include: { user: { select: { currency: true } } } },
               cover: true,
               tracks: {
                 where: { deletedAt: null },
@@ -112,6 +112,7 @@ export default function () {
         trackGroup: n.trackGroup
           ? {
               ...n.trackGroup,
+              currency: n.trackGroup.artist?.user?.currency ?? "usd",
               cover: addSizesToImage(finalCoversBucket, n.trackGroup.cover),
               purchase: n.relatedUserId
                 ? (purchaseMap.get(`${n.relatedUserId}_${n.trackGroupId}`) ??

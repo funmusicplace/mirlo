@@ -380,6 +380,16 @@ export const createSubscription = async (
   });
 };
 
+export const createNotification = async (data: {
+  userId: number;
+  notificationType: string;
+  trackGroupId?: number;
+  relatedUserId?: number;
+  artistId?: number;
+}) => {
+  return prisma.notification.create({ data: data as any });
+};
+
 export default {
   createArtist,
   createPost,
@@ -396,4 +406,5 @@ export default {
   createClient,
   getUserByEmail,
   createSubscription,
+  createNotification,
 };
