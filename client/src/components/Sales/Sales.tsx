@@ -73,8 +73,8 @@ export const Sales: React.FC = () => {
   }, [filteredArtistId, datePurchased]);
 
   return (
-    <WidthContainer className="p-4" variant="big">
-      <h1 className="my-2">{t("sales")}</h1>
+    <WidthContainer variant="big">
+      <h1>{t("sales")}</h1>
       {results.length === 0 && !isLoading && (
         <p>{t(datePurchased ? "noSalesForThisPeriod" : "noSales")}</p>
       )}
@@ -120,6 +120,7 @@ export const Sales: React.FC = () => {
             />
           </div>
           <Button
+            wrap
             onClick={downloadSalesData}
             variant="outlined"
             startIcon={<FaDownload />}

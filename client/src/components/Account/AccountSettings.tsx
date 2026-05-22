@@ -109,7 +109,7 @@ const AccountSettings: React.FC = () => {
   const userLabel = user.artists.find((a) => a.isLabelProfile);
 
   return (
-    <WidthContainer variant="medium" justify="center" className="mt-4!">
+    <WidthContainer variant="medium" justify="center">
       <h1>{t("account")}</h1>
       <FormProvider {...methods}>
         <form

@@ -64,8 +64,8 @@ export const Fulfillment: React.FC = () => {
   const { data: managedArtists } = useQuery(queryManagedArtists());
 
   return (
-    <WidthContainer variant="big" className="p-4">
-      <h1 className="my-2">{t("ordersAndFulfillment")}</h1>
+    <WidthContainer variant="big">
+      <h1>{t("ordersAndFulfillment")}</h1>
       <p>{t("fulfillmentDescription")}</p>
       {(purchaseResults?.results.length ?? 0) > 0 &&
         (() => {
@@ -113,6 +113,7 @@ export const Fulfillment: React.FC = () => {
           <DateRangeFilter value={datePurchased} onChange={setDatePurchased} />
         </div>
         <Button
+          wrap
           onClick={downloadOrderData}
           variant="outlined"
           startIcon={<FaDownload />}
