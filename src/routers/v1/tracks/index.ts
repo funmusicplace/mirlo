@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
+import { NextFunction, Request, Response } from "express";
+
 import { userHasPermission } from "../../../auth/passport";
 import { addSizesToImage } from "../../../utils/artist";
 import { finalCoversBucket } from "../../../utils/minio";
@@ -14,8 +15,11 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { format } = req.query;
-    const { skip: skipQuery, take = format === "rss" ? 50 : 10, title } =
-      req.query;
+    const {
+      skip: skipQuery,
+      take = format === "rss" ? 50 : 10,
+      title,
+    } = req.query;
 
     try {
       let where: Prisma.TrackWhereInput = {
@@ -34,7 +38,15 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              artist: {
+                include: {
+                  user: {
+                    select: {
+                      currency: true,
+                    },
+                  },
+                },
+              },
               cover: true,
             },
           },
