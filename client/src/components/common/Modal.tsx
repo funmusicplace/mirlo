@@ -15,7 +15,7 @@ import SpaceBetweenDiv from "./SpaceBetweenDiv";
 const wrapper = css`
   position: fixed;
   pointer-events: none;
-  z-index: 999;
+  z-index: 1002;
   left: 0;
   top: 0;
   width: 100%;

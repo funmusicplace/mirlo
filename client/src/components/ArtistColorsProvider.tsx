@@ -39,6 +39,26 @@ export const useTransparentContainer = (): boolean => {
   return Boolean(ctx?.transparentContainer);
 };
 
+export const ArtistColorsWrapper: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className }) => {
+  const ctx = React.useContext(ArtistColorsContext);
+  const style: React.CSSProperties | undefined = ctx
+    ? {
+        ...(buildVarMap(ctx.colors) as React.CSSProperties),
+        ...tintStyleFor(ctx.colors.background),
+        ...buttonTintStyleFor(ctx.colors.button),
+        ...fixedStyleFor(ctx.colors.background),
+      }
+    : undefined;
+  return (
+    <div className={className} style={style}>
+      {children}
+    </div>
+  );
+};
+
 export const useIsArtistPageLight = (): boolean | null => {
   const ctx = React.useContext(ArtistColorsContext);
   const bg = ctx?.colors.background;

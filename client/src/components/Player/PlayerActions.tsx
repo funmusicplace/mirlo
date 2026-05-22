@@ -22,7 +22,7 @@ const PlayerActions: React.FC = () => {
   return (
     <div
       className={css`
-        z-index: 999999;
+        z-index: 10;
         bottom: var(--player-actions-bottom-offset, 80px);
         right: 1rem;
         position: fixed;

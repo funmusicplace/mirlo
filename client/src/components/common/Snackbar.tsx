@@ -33,7 +33,7 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
     }
   }};
   border: 1px solid currentColor;
-  z-index: 1000;
+  z-index: 1003;
   margin: 16px;
   border-radius: 4px;
   min-width: 344px;

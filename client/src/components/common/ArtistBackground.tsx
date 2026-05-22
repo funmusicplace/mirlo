@@ -1,8 +1,8 @@
-import { css } from "@emotion/css";
-import { useLocation, useParams } from "react-router-dom";
-import { bp } from "../../constants";
-import useArtistQuery from "utils/useArtistQuery";
 import styled from "@emotion/styled";
+import { useLocation, useParams } from "react-router-dom";
+import useArtistQuery from "utils/useArtistQuery";
+
+import { bp } from "../../constants";
 
 export const NoMargin = styled.div`
   @media screen and (max-width: ${bp.medium}px) {
