@@ -26,7 +26,9 @@ describe("utils/stripe.refreshStripeClient", () => {
 
   it("uses the key stored on the admin Settings row when present (#1147)", async () => {
     await prisma.settings.create({
-      data: { settings: { stripe: { key: "sk_test_from_db" } } },
+      data: {
+        settings: { platformPercent: 7, stripe: { key: "sk_test_from_db" } },
+      },
     });
 
     const apiKey = await refreshStripeClient();
@@ -48,7 +50,9 @@ describe("utils/stripe.refreshStripeClient", () => {
   it("prefers the env key when the saved settings key is blank", async () => {
     process.env.STRIPE_KEY = "sk_test_from_env";
     await prisma.settings.create({
-      data: { settings: { stripe: { key: "   " } } },
+      data: {
+        settings: { platformPercent: 7, stripe: { key: "   " } },
+      },
     });
 
     const apiKey = await refreshStripeClient();
