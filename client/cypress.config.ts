@@ -1,11 +1,23 @@
+import { readFileSync } from "fs";
+import { resolve } from "path";
+
 import { Prisma } from "@mirlo/prisma/client";
 import { defineConfig } from "cypress";
+import { parse } from "dotenv";
 
 import pkg, {
   clearTables,
   createTrack,
   createSubscription,
 } from "../test/utils";
+
+// Inject JWT secrets needed by buildTokens (called from createUser task).
+// We parse selectively to avoid setting DATABASE_URL, which Prisma loads
+// from prisma/.env pointing to localhost:5434 (the host-accessible port).
+const rootEnv = parse(readFileSync(resolve(__dirname, "../.env"), "utf-8"));
+if (!process.env.JWT_SECRET) process.env.JWT_SECRET = rootEnv.JWT_SECRET;
+if (!process.env.REFRESH_TOKEN_SECRET)
+  process.env.REFRESH_TOKEN_SECRET = rootEnv.REFRESH_TOKEN_SECRET;
 
 export default defineConfig({
   e2e: {
