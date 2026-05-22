@@ -1,19 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import { queryManagedMerch } from "queries";
-import { FaPen, FaPlus } from "react-icons/fa";
-import { useParams } from "react-router-dom";
-import DashedList from "./DashedList";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { queryManagedMerch } from "queries";
 import React from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { FaPen, FaPlus } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import DestinationListItem from "./DestinationListItem";
-import countryCodesCurrencies from "./country-codes-currencies";
-import styled from "@emotion/styled";
 import { useSnackbar } from "state/SnackbarContext";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+
+import countryCodesCurrencies from "./country-codes-currencies";
+import DashedList from "./DashedList";
+import DestinationListItem from "./DestinationListItem";
 
 const P = styled.p`
   margin: 0.25rem 0 0.5rem;
@@ -74,7 +75,9 @@ const MerchDestinations: React.FC<{ artist?: Artist }> = ({ artist }) => {
       destinations: merch?.shippingDestinations.map((dest) => ({
         ...dest,
         homeCountry: (
-          dest.homeCountry || defaultHomeCountry || ""
+          dest.homeCountry ||
+          defaultHomeCountry ||
+          ""
         ).toUpperCase(),
         costUnit: dest.costUnit / 100,
         costExtraUnit: dest.costExtraUnit / 100,
@@ -131,6 +134,7 @@ const MerchDestinations: React.FC<{ artist?: Artist }> = ({ artist }) => {
                 key={dest.id}
                 isEditing={isEditing}
                 index={index}
+                currency={merch?.currency ?? "usd"}
                 onRemove={() => remove(index)}
               />
             ))}
