@@ -7,7 +7,7 @@ import { getClient } from "../utils/getClient";
 
 export type SubscriptionRenewalReminderEmailType = {
   interval: "MONTH" | "YEAR";
-  artist: Artist;
+  artist: Artist & { user: { currency: string | null } };
   host: string;
   client: string;
   artistUserSubscription: {
@@ -67,7 +67,9 @@ const sendSubscriptionRenewalReminders = async () => {
         user: true,
         artistSubscriptionTier: {
           include: {
-            artist: true,
+            artist: {
+              include: { user: { select: { currency: true } } },
+            },
           },
         },
       },

@@ -129,6 +129,24 @@ export default defineConfig({
         }) => {
           return createNotification(query);
         },
+        createMerch: async (query: {
+          artistId: number;
+          title?: string;
+          minPrice?: number;
+          isPublic?: boolean;
+          quantityRemaining?: number;
+        }) => {
+          return pkg.createMerch(query.artistId, query);
+        },
+        createMerchShippingDestination: async (query: {
+          merchId: string;
+          homeCountry?: string;
+          destinationCountry?: string | null;
+          costUnit?: number;
+          costExtraUnit?: number;
+        }) => {
+          return pkg.createMerchShippingDestination(query);
+        },
       });
     },
   },

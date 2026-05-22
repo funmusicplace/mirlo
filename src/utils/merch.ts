@@ -1,14 +1,11 @@
-import { DownloadableContent, Merch, MerchImage } from "@mirlo/prisma/client";
-
 import prisma from "@mirlo/prisma";
-import {
-  downloadableContentBucket,
-  finalMerchImageBucket,
-  removeObjectsFromBucket,
-} from "./minio";
-import { addSizesToImage } from "./artist";
+import { Merch, MerchImage } from "@mirlo/prisma/client";
+
 import logger from "../logger";
+
+import { addSizesToImage } from "./artist";
 import { deleteDownloadableContent } from "./content";
+import { finalMerchImageBucket, removeObjectsFromBucket } from "./minio";
 
 export const deleteMerchCover = async (merchId: string) => {
   const image = await prisma.merchImage.findFirst({
@@ -68,13 +65,16 @@ export const deleteMerch = async (merchId: string) => {
 
 export const processSingleMerch = (
   merch: Merch & { images?: MerchImage[] } & {
+    artist?: { user?: { currency?: string | null } | null } | null;
     downloadableContent?: {
       downloadableContent: Record<string, unknown>;
       downloadableContentId: string;
     }[];
-  }
+  },
+  options?: { fallbackCurrency?: string }
 ) => ({
   ...merch,
+  currency: merch.artist?.user?.currency ?? options?.fallbackCurrency ?? "usd",
   downloadableContent: merch.downloadableContent?.map((dc) => ({
     ...dc,
     downloadableContent: {

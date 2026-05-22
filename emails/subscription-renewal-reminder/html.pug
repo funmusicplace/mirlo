@@ -13,7 +13,7 @@ block content
     tbody
       tr
         td #{artist.name}
-        td.num #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency} / #{interval === 'MONTH' ? 'month': 'year'}
+        td.num #{artistUserSubscription.amount / 100} #{artist.user.currency} / #{interval === 'MONTH' ? 'month': 'year'}
 
   p
     | If you'd like to make any changes to your subscription before the renewal, you can:
