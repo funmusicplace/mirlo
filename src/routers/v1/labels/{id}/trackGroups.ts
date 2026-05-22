@@ -68,6 +68,7 @@ export default function () {
               urlSlug: true,
               id: true,
               userId: true,
+              user: { select: { currency: true } },
             },
           },
         },

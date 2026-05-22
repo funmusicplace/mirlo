@@ -52,6 +52,7 @@ export default function () {
               name: true,
               urlSlug: true,
               id: true,
+              user: { select: { currency: true } },
             },
           },
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },

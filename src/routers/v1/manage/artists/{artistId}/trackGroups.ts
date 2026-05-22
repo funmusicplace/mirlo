@@ -58,7 +58,7 @@ export default function () {
               audio: true,
             },
           },
-          artist: true,
+          artist: { include: { user: { select: { currency: true } } } },
           cover: {
             where: {
               deletedAt: null,

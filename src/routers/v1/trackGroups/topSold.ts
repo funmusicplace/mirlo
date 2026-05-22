@@ -1,10 +1,11 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
+
+import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import processor, {
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
-import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 
 export default function () {
   const operations = {
@@ -73,6 +74,7 @@ export default function () {
               name: true,
               urlSlug: true,
               id: true,
+              user: { select: { currency: true } },
             },
           },
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
