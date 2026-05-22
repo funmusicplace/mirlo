@@ -76,12 +76,15 @@ describe("notification feed currency", () => {
 
   beforeEach(() => {
     cy.login({ email: artistEmail, password: artistPassword });
-    cy.intercept("GET", "/v1/users/*/notifications*").as("fetchNotifications");
+    cy.intercept(
+      "GET",
+      /\/v1\/users\/\d+\/notifications.*notificationType=USER_BOUGHT_YOUR_ALBUM/
+    ).as("fetchPurchaseNotifs");
   });
 
   it("returns trackGroup.currency in the notification feed API response", () => {
     cy.visit(`/profile/notifications`);
-    cy.wait("@fetchNotifications").then((interception) => {
+    cy.wait("@fetchPurchaseNotifs").then((interception) => {
       const results = interception.response?.body?.results;
       expect(results).to.have.length.greaterThan(0);
       const notification = results.find(
@@ -95,7 +98,7 @@ describe("notification feed currency", () => {
 
   it("displays the purchase amount with the correct currency symbol", () => {
     cy.visit(`/profile/notifications`);
-    cy.wait("@fetchNotifications");
+    cy.wait("@fetchPurchaseNotifs");
     cy.contains("€15.00").should("exist");
   });
 });
