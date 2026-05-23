@@ -1,4 +1,7 @@
-export const getCurrencySymbol = (currency: string, locale?: string) => {
+export const getCurrencySymbol = (currency?: string, locale?: string) => {
+  if (!currency) {
+    return null;
+  }
   return (0)
     .toLocaleString(locale, {
       style: "currency",
@@ -16,20 +19,20 @@ export const moneyDisplay = ({
   currency,
 }: {
   amount?: number | string;
-  currency: string;
+  currency?: string;
 }) => {
   if (amount === undefined || amount === null) {
     return "-";
   }
   return new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency,
+    currency: currency ?? "usd",
   }).format(+amount);
 };
 
 export const Money: React.FC<{
   amount?: number | string;
-  currency: string;
+  currency?: string;
 }> = ({ amount, currency }) => {
   return <>{moneyDisplay({ amount, currency })}</>;
 };

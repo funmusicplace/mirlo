@@ -1,15 +1,20 @@
 import React from "react";
+
 import { getCurrencySymbol } from "./Money";
 
 interface CurrencyCoinIconProps {
-  currency: string;
+  currency?: string;
   size?: number | string;
 }
 
 const CurrencyCoinIcon: React.FC<CurrencyCoinIconProps> = ({
   currency,
-  size = "1em"
+  size = "1em",
 }) => {
+  if (!currency) {
+    return null;
+  }
+
   const currencySymbol = getCurrencySymbol(currency);
 
   return (
