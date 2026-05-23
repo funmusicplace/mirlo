@@ -2,13 +2,32 @@ import styled from "@emotion/styled";
 import React from "react";
 
 export const SelectEl = styled.select`
-  font-size: 0.85rem;
+  border: 1px solid var(--mi-tint-x-color);
+  border-radius: var(--mi-border-radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
   max-width: 100%;
-  padding: 0.4rem;
+  color: var(--mi-text-color);
   background-color: var(--mi-background-color);
-  backdrop-filter: brightness(95%);
+  transition: 0.4s border-radius;
+
+  &:focus {
+    border-radius: var(--mi-border-radius-focus);
+  }
+
+  &[disabled] {
+    background-color: var(--mi-darken-background-color);
+    border: solid 1px var(--mi-lighten-background-color);
+    color: var(--mi-lighter-foreground-color);
+  }
+
   option {
     padding: 0.4rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--mi-darken-background-color);
+    border: var(--mi-border);
   }
 `;
 
