@@ -11,7 +11,7 @@ import { formatAcceptList } from "utils/uploadFormats";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 
 export const ACCEPTED_AUDIO =
-  "audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a";
+  "audio/flac,audio/wav,audio/x-flac,audio/x-wav,audio/aac,audio/aiff,audio/x-m4a";
 export interface FormData {
   trackFile: FileList;
 }
