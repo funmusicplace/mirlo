@@ -1,15 +1,17 @@
-import DropdownMenu from "components/common/DropdownMenu";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { ArtistSection } from "components/Artist/Artist";
+import DropdownMenu from "components/common/DropdownMenu";
 import Money, { moneyDisplay } from "components/common/Money";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
 import { sumBy } from "lodash";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import useArtistQuery from "utils/useArtistQuery";
+
 import { bp } from "../../constants";
 
 import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
@@ -95,39 +97,22 @@ const Supporters = () => {
           </DropdownMenu>
         </div>
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 mb-4">
-          <div className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4">
-            <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-              {t("totalComingInMonthly")}
-            </div>
-            <div className="text-2xl font-semibold mt-1">
-              {moneyDisplay({ amount: amountMonthly / 100, currency })}
-            </div>
-          </div>
-          <div className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4">
-            <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-              {t("totalComingInAnnually")}
-            </div>
-            <div className="text-2xl font-semibold mt-1">
-              {moneyDisplay({ amount: amountAnnual / 100, currency })}
-            </div>
-          </div>
-          <div className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4">
-            <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-              {t("totalProjectedAnnual")}
-            </div>
-            <div className="text-2xl font-semibold mt-1">
-              {moneyDisplay({
-                amount: (amountAnnual + amountMonthly * 12) / 100,
-                currency,
-              })}
-            </div>
-          </div>
-          <div className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4">
-            <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-              {t("supporters")}
-            </div>
-            <div className="text-2xl font-semibold mt-1">{totalSupporters}</div>
-          </div>
+          <StatCard
+            label={t("totalComingInMonthly")}
+            value={moneyDisplay({ amount: amountMonthly / 100, currency })}
+          />
+          <StatCard
+            label={t("totalComingInAnnually")}
+            value={moneyDisplay({ amount: amountAnnual / 100, currency })}
+          />
+          <StatCard
+            label={t("totalProjectedAnnual")}
+            value={moneyDisplay({
+              amount: (amountAnnual + amountMonthly * 12) / 100,
+              currency,
+            })}
+          />
+          <StatCard label={t("supporters")} value={totalSupporters} />
         </div>
         <SupporterTable>
           <thead>

@@ -6,6 +6,7 @@ import DateRangeFilter, {
   DateRangeValue,
 } from "components/common/DateRangeFilter";
 import { moneyDisplay } from "components/common/Money";
+import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
 import WidthContainer from "components/common/WidthContainer";
 import { queryManagedArtists, queryUserSales } from "queries";
@@ -81,29 +82,15 @@ export const Sales: React.FC = () => {
       {isLoading && <LoadingBlocks rows={5} height="2rem" margin=".5rem" />}
       {(totalAmount ?? 0) > 0 && (
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 mb-4">
-          <div className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4">
-            <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-              {t("totalSalesIncome")}
-            </div>
-            <div className="text-2xl font-semibold mt-1">
-              {moneyDisplay({
-                amount: (totalAmount ?? 0) / 100,
-                currency: results[0]?.currency ?? "usd",
-              })}
-            </div>
-          </div>
-          <div className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4">
-            <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-              {t("totalSales")}
-            </div>
-            <div className="text-2xl font-semibold mt-1">{total}</div>
-          </div>
-          <div className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4">
-            <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-              {t("totalSupporters")}
-            </div>
-            <div className="text-2xl font-semibold mt-1">{totalSupporters}</div>
-          </div>
+          <StatCard
+            label={t("totalSalesIncome")}
+            value={moneyDisplay({
+              amount: (totalAmount ?? 0) / 100,
+              currency: results[0]?.currency ?? "usd",
+            })}
+          />
+          <StatCard label={t("totalSales")} value={total} />
+          <StatCard label={t("totalSupporters")} value={totalSupporters} />
         </div>
       )}
       {(results.length > 0 || filteredArtistId || datePurchased) && (

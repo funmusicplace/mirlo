@@ -4,6 +4,7 @@ import Button from "components/common/Button";
 import DateRangeFilter, {
   DateRangeValue,
 } from "components/common/DateRangeFilter";
+import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
 import WidthContainer from "components/common/WidthContainer";
 import { queryUserPurchases, queryManagedArtists } from "queries";
@@ -88,17 +89,7 @@ export const Fulfillment: React.FC = () => {
           return (
             <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 my-4">
               {statusKeys.map(({ key, labelKey }) => (
-                <div
-                  key={key}
-                  className="rounded-md border border-(--mi-tint-x-color) bg-(--mi-button-tint-color) p-4"
-                >
-                  <div className="text-xs uppercase tracking-wide text-(--mi-secondary-text-color)">
-                    {t(labelKey)}
-                  </div>
-                  <div className="text-2xl font-semibold mt-1">
-                    {counts[key]}
-                  </div>
-                </div>
+                <StatCard key={key} label={t(labelKey)} value={counts[key]} />
               ))}
             </div>
           );
