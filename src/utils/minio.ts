@@ -75,7 +75,7 @@ export const backendStorage: "minio" | "backblaze" =
 
 // and access keys as shown below.
 export const minioClient =
-  backendStorage === "minio"
+  backendStorage === "minio" && MINIO_HOST
     ? new Minio.Client({
         endPoint: MINIO_HOST,
         port: +MINIO_API_PORT,

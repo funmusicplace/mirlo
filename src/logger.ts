@@ -6,7 +6,6 @@ export const logger = winston.createLogger({
   defaultMeta: { service: "api" },
   transports: [
     new winston.transports.Console({
-      level: "debug",
       format: winston.format.simple(),
     }),
     new winston.transports.File({
