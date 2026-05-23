@@ -1,5 +1,6 @@
-import { Request, Response, NextFunction } from "express";
 import prisma from "@mirlo/prisma";
+import { Request, Response, NextFunction } from "express";
+
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 
 export default function () {
@@ -98,6 +99,11 @@ export default function () {
                       select: {
                         id: true,
                         name: true,
+                        user: {
+                          select: {
+                            currency: true,
+                          },
+                        },
                       },
                     },
                   },

@@ -49,6 +49,8 @@ const PurchaseAlbumModal: React.FC<{
     return null;
   }
 
+  const currency = trackGroup.artist.user?.currency;
+
   const payOrNameYourPrice =
     trackGroup.minPrice === 0 ? "nameYourPriceLabel" : "buy";
 
@@ -78,9 +80,7 @@ const PurchaseAlbumModal: React.FC<{
       onClick={() => setIsPurchasingAlbum(true)}
       variant="outlined"
       startIcon={
-        collapse ? (
-          <CurrencyCoinIcon currency={trackGroup.currency} />
-        ) : undefined
+        collapse ? <CurrencyCoinIcon currency={currency} /> : undefined
       }
       className={css`
         font-size: 1rem !important;

@@ -5,8 +5,9 @@ import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistUrl } from "utils/artist";
-import useAdminFilters from "./useAdminFilters";
 import usePagination from "utils/usePagination";
+
+import useAdminFilters from "./useAdminFilters";
 
 interface AdminPurchase extends UserArtistTip {
   user: User;
@@ -47,10 +48,10 @@ export const AdminTips: React.FC = () => {
   }, [callback]);
 
   const total = results.reduce((aggr, r) => {
-    if (aggr[r.currencyPaid]) {
-      aggr[r.currencyPaid] += r.pricePaid;
+    if (aggr[r.transaction.currency]) {
+      aggr[r.transaction.currency] += r.pricePaid;
     } else {
-      aggr[r.currencyPaid] = r.pricePaid;
+      aggr[r.transaction.currency] = r.pricePaid;
     }
     return aggr;
   }, {} as any);

@@ -1,9 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../../utils/error";
 
 type Params = {

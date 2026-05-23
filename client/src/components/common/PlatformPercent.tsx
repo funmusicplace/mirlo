@@ -6,7 +6,7 @@ import { moneyDisplay } from "./Money";
 const PlatformPercent: React.FC<{
   percent: number;
   chosenPrice?: string | number;
-  currency: string;
+  currency?: string;
   artistName?: string;
   alignRight?: boolean;
 }> = ({

@@ -1,13 +1,11 @@
-import { Artist, User } from "@mirlo/prisma/client";
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
+
 import {
   fundraiserBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-
-import prisma from "@mirlo/prisma";
-import { deleteTrackGroup } from "../../../../../utils/trackGroup";
 import { AppError } from "../../../../../utils/error";
 
 type Params = {
@@ -36,6 +34,11 @@ export default function () {
                 select: {
                   urlSlug: true,
                   id: true,
+                  user: {
+                    select: {
+                      currency: true,
+                    },
+                  },
                 },
               },
             },

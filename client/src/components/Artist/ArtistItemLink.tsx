@@ -5,7 +5,7 @@ import {
   isTrackgroup,
 } from "components/ManageArtist/UploadArtistImage";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   getArtistUrl,
   getMerchUrl,
@@ -34,7 +34,6 @@ export const determineItemLink = (artist: Artist, item?: Item) => {
 const ArtistItemLink: React.FC<{
   item: Item;
 }> = ({ item }) => {
-  const { artistId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
   const artist =

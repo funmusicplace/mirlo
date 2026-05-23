@@ -15,7 +15,6 @@ import { useAuthContext } from "state/AuthContext";
 import { getArtistManageTiersUrl } from "utils/artist";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
-import { bp } from "../../../../constants";
 import { TrackGroupFormData } from "../ManageTrackGroup";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
 

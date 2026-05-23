@@ -1,6 +1,7 @@
-import { logger } from "../logger";
-import { REDIS_CONFIG } from "../config/redis";
 import { Queue, QueueEvents, QueueOptions } from "bullmq";
+
+import { REDIS_CONFIG } from "../config/redis";
+import { logger } from "../logger";
 import { getSafeErrorContext } from "../utils/logging";
 
 const queueOptions: QueueOptions = {
@@ -56,6 +57,10 @@ sendMailQueueEvents.on("stalled", async (result: { jobId: string }) => {
   } catch (err) {
     logger.error(`sendMailQueueEvents.stalled ${JSON.stringify(err)}`);
   }
+});
+
+sendMailQueueEvents.on("added", async (result: { jobId: string }) => {
+  logger.info("send-mail-queue started job id", result.jobId);
 });
 
 sendMailQueueEvents.on("error", async (error) => {

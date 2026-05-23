@@ -47,6 +47,7 @@ const BuyMerchItem: React.FC<{
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(paymentUserId)
   );
+  const currency = artist.user?.currency;
 
   const minPrice = (merch?.minPrice ?? 0) / 100;
 
@@ -234,7 +235,7 @@ const BuyMerchItem: React.FC<{
         </div>
         <FormComponent>
           <PaymentInputElement
-            currency={merch.currency}
+            currency={currency}
             platformPercent={artist.defaultPlatformFee ?? 0}
             artistName={artist.name}
             minPrice={minPrice * 100}
@@ -289,7 +290,7 @@ const BuyMerchItem: React.FC<{
                             name: o.name,
                             costUnit: moneyDisplay({
                               amount: o.additionalPrice / 100,
-                              currency: merch.currency,
+                              currency,
                             }),
                           })
                         : o.name}
@@ -327,7 +328,7 @@ const BuyMerchItem: React.FC<{
             {t("orderTotal", {
               amount: moneyDisplay({
                 amount: price,
-                currency: merch.currency,
+                currency,
               }),
             })}
           </p>

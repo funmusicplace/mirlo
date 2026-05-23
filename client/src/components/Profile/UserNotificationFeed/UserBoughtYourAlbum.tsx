@@ -1,10 +1,10 @@
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { moneyDisplay } from "components/common/Money";
+import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
-import { moneyDisplay } from "components/common/Money";
 
 const UserBoughtYourAlbum: React.FC<{
   notification: Notification;
@@ -95,8 +95,7 @@ const UserBoughtYourAlbum: React.FC<{
               {moneyDisplay({
                 amount:
                   notification.trackGroup.purchase.transaction.amount / 100,
-                currency:
-                  notification.trackGroup.purchase.transaction.currency.toUpperCase(),
+                currency: notification.trackGroup.purchase.transaction.currency,
               })}
             </span>
           )}

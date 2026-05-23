@@ -14,7 +14,7 @@ interface FormData {
 }
 
 const PaymentInputElement: React.FC<{
-  currency: string;
+  currency?: string;
   isDigital?: boolean;
   platformPercent: number;
   minPrice?: number; // in cents

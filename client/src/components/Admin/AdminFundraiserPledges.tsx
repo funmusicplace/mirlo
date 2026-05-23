@@ -81,7 +81,9 @@ export default function AdminFundraiserPledges() {
                 <td>
                   <Money
                     amount={pledge.amount / 100}
-                    currency={pledge.currency ?? "usd"}
+                    currency={
+                      pledge.fundraiser?.[0]?.artist?.user?.currency ?? "usd"
+                    }
                   />
                 </td>
                 <td>
