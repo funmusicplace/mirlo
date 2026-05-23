@@ -45,6 +45,7 @@ function CampaignSummary({
   const { data: recommendedTrackGroups } = useQuery(
     queryPublicRecommendedTrackGroups(trackGroup.id)
   );
+  const currency = trackGroup.artist.user?.currency;
 
   const [searchParams] = useSearchParams();
   const [hasJustPledged] = useState(searchParams.get("setup_intent") || false);
@@ -115,7 +116,7 @@ function CampaignSummary({
               values={{
                 money: moneyDisplay({
                   amount: totalAmount / 100,
-                  currency: trackGroup?.currency,
+                  currency,
                 }),
               }}
               components={{
@@ -139,7 +140,7 @@ function CampaignSummary({
               values={{
                 goal: moneyDisplay({
                   amount: goal / 100,
-                  currency: trackGroup?.currency,
+                  currency,
                 }),
               }}
               components={{

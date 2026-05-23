@@ -1,16 +1,16 @@
-import React from "react";
-import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { moneyDisplay } from "components/common/Money";
+import { Select } from "components/common/Select";
+import Table from "components/common/Table";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 import {
   queryFundraiserPledges,
   queryManagedFundraiser,
 } from "queries/trackGroups";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import Table from "components/common/Table";
-import { moneyDisplay } from "components/common/Money";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { Select } from "components/common/Select";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Link, useParams } from "react-router-dom";
 import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
 
 const FundraiserPledges: React.FC = () => {
@@ -38,7 +38,8 @@ const FundraiserPledges: React.FC = () => {
   }
 
   const pledges = pledgesData?.results || [];
-  const currency = fundraiser?.trackGroups?.[0]?.currency || "usd";
+  const currency =
+    fundraiser?.trackGroups?.[0]?.artist?.user?.currency || "usd";
   const releaseTitle = fundraiser?.trackGroups?.[0]?.title || "Unknown Release";
 
   const totalAmount = pledges.reduce(

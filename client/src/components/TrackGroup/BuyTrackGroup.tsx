@@ -41,6 +41,7 @@ const BuyTrackGroup: React.FC<{
   const { user } = useAuthContext();
 
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
+  const currency = trackGroup.artist.user?.currency ?? "usd";
   const initialChosenPriceCents = track
     ? (minPrice ?? 0)
     : Math.max(trackGroup.suggestedPrice ?? 0, minPrice ?? 0);
@@ -201,14 +202,14 @@ const BuyTrackGroup: React.FC<{
         )}
         {!!minPrice && minPrice > 0 && (
           <p>
-            {t("price")}{" "}
-            <Money amount={minPrice / 100} currency={trackGroup.currency} />, or
+            {t("price")} <Money amount={minPrice / 100} currency={currency} />,
+            or
           </p>
         )}
         <form className="flex flex-col" onSubmit={handleSubmit(purchaseAlbum)}>
           <FormComponent>
             <PaymentInputElement
-              currency={trackGroup.currency}
+              currency={currency}
               platformPercent={trackGroup.platformPercent}
               minPrice={minPrice}
               artistName={trackGroup.artist?.name}
