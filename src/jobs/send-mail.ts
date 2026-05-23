@@ -1,9 +1,11 @@
 import path from "path";
-import nodemailer, { Transporter } from "nodemailer";
-import sendgrid from "nodemailer-sendgrid";
+
 import Email from "email-templates";
-import { logger } from "../logger";
+import nodemailer, { Transporter } from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
+import sendgrid from "nodemailer-sendgrid";
+
+import { logger } from "../logger";
 import { getSiteSettings } from "../utils/settings";
 
 const viewsDir = path.join(__dirname, "../emails");
@@ -263,16 +265,14 @@ export const sendMail = async <T>(job: {
       });
     } else {
       // If there was a problem with mailhog, print to logs
-      await email
-        .render(job.data.template + "/html", locals)
-        .then(logger.info);
+      await email.render(job.data.template + "/html", locals).then(logger.info);
     }
 
     logger.info(`sendMail: sent: ${job.data.template}`);
 
     return Promise.resolve({ fromEmail });
   } catch (err) {
-    console.error("MirloSendmailError", err);
+    logger.error("MirloSendmailError", err);
     throw err;
   }
 };
