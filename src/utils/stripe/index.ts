@@ -31,8 +31,6 @@ import { manageSubscriptionReceipt } from "../subscription";
 import { createOrUpdatePledge } from "../trackGroup";
 import { findOrCreateUserBasedOnEmail, updateCurrencies } from "../user";
 
-const { STRIPE_KEY } = process.env;
-
 export const OPTION_JOINER = ";;";
 
 let stripeConfig: Stripe.StripeConfig = { apiVersion: "2023-08-16" };
@@ -47,7 +45,31 @@ if (process.env.NODE_ENV === "test") {
   };
 }
 
-export const stripe = new Stripe(STRIPE_KEY ?? "", stripeConfig);
+let stripeClient = new Stripe(process.env.STRIPE_KEY ?? "", stripeConfig);
+
+// The runtime stripe key is held in the admin Settings row so self-hosters
+// can rotate it without redeploying (#1147). Falls back to STRIPE_KEY env so
+// existing deployments keep working before any admin saves a value
+export const refreshStripeClient = async (): Promise<string> => {
+  try {
+    const row = await prisma.settings.findFirst();
+    const dbKey = (row?.settings as { stripe?: { key?: string } } | null)
+      ?.stripe?.key;
+    const apiKey =
+      dbKey && dbKey.trim() ? dbKey : (process.env.STRIPE_KEY ?? "");
+    stripeClient = new Stripe(apiKey, stripeConfig);
+    return apiKey;
+  } catch (e) {
+    logger.error(`refreshStripeClient: failed to load key from settings`, e);
+    return process.env.STRIPE_KEY ?? "";
+  }
+};
+
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return Reflect.get(stripeClient as unknown as object, prop, stripeClient);
+  },
+});
 
 const buildProductDescription = async (
   title: string | null,

@@ -27,6 +27,7 @@ import errorHandler from "./utils/error";
 import { setCdnUrl } from "./utils/images";
 import { sanitizeHeadersForLogs } from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
+import { refreshStripeClient } from "./utils/stripe";
 import wellKnown from "./wellKnown";
 
 const { createBullBoard } = require("@bull-board/api");
@@ -275,6 +276,7 @@ process.on("unhandledRejection", (reason) => {
 app.listen(process.env.PORT, async () => {
   const settings = await getSiteSettings();
   setCdnUrl(settings.cdnUrl ?? undefined);
+  await refreshStripeClient();
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`);
 });

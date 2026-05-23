@@ -47,6 +47,7 @@ interface SettingsFromAPI {
     };
     stripe?: {
       key?: string;
+      keyConfigured?: boolean;
       webhookSigningSecret?: string;
       webhookConnectSigningSecret?: string;
     };
@@ -82,7 +83,8 @@ interface SettingsFromAPI {
 const AdminSettings = () => {
   const snackbar = useSnackbar();
   const [isLoading, setIsLoading] = React.useState(false);
-  const { reset, register, handleSubmit } = useForm<FormSettings>();
+  const { reset, register, handleSubmit, watch } = useForm<FormSettings>();
+  const stripeKeyConfigured = watch("stripe.keyConfigured");
 
   React.useEffect(() => {
     const callback = async () => {
@@ -107,6 +109,7 @@ const AdminSettings = () => {
         },
         stripe: {
           ...response.result.settings?.stripe,
+          key: "",
         },
         emailProvider: {
           ...response.result.settings?.emailProvider,
@@ -300,6 +303,12 @@ const AdminSettings = () => {
             <td>
               <InputEl
                 {...register("stripe.key")}
+                type="password"
+                placeholder={
+                  stripeKeyConfigured
+                    ? "sk_*** (leave blank to keep)"
+                    : "No key set"
+                }
                 className={css`
                   text-align: right;
                 `}

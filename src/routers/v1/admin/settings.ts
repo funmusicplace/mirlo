@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { setCdnUrl } from "../../../utils/images";
 import { getSiteSettings } from "../../../utils/settings";
+import { refreshStripeClient } from "../../../utils/stripe";
 
 export default function () {
   const operations = {
@@ -14,7 +15,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     try {
       const settings = await getSiteSettings();
-      return res.status(200).json({ result: settings });
+      return res.status(200).json({ result: maskStripeKey(settings) });
     } catch (e) {
       next(e);
     }
@@ -43,9 +44,20 @@ export default function () {
           },
         });
       }
+      const existingStripe = (
+        existingSettings.settings as Record<string, unknown> | null
+      )?.stripe as Record<string, unknown> | undefined;
+      const incomingStripeKey = (settings?.stripe?.key ?? "").trim();
+      const mergedSettings = {
+        ...settings,
+        stripe: {
+          ...(settings?.stripe ?? {}),
+          key: incomingStripeKey || existingStripe?.key,
+        },
+      };
       await prisma.settings.update({
         data: {
-          settings,
+          settings: mergedSettings,
           terms,
           privacyPolicy,
           isClosedToPublicArtistSignup,
@@ -60,12 +72,37 @@ export default function () {
         },
       });
       setCdnUrl(cdnUrl ?? undefined);
-      const refreshedSettings = await prisma.settings.findFirst();
-      return res.status(200).json({ result: refreshedSettings });
+      await refreshStripeClient();
+      const refreshedSettings = await getSiteSettings();
+      return res.status(200).json({ result: maskStripeKey(refreshedSettings) });
     } catch (e) {
       next(e);
     }
   }
 
   return operations;
+}
+
+function maskStripeKey(settings: object) {
+  const s = settings as Record<string, unknown>;
+  const settingsJson = s.settings as Record<string, unknown> | null | undefined;
+  const stripeJson = settingsJson?.stripe as
+    | Record<string, unknown>
+    | null
+    | undefined;
+  const result = {
+    ...s,
+    stripe: undefined,
+    settings: settingsJson
+      ? {
+          ...settingsJson,
+          stripe: {
+            ...(stripeJson ?? {}),
+            key: undefined,
+            keyConfigured: !!stripeJson?.key,
+          },
+        }
+      : settingsJson,
+  };
+  return result;
 }
