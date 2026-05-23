@@ -286,7 +286,7 @@ const BuyTrackGroup: React.FC<{
                 {t("lessThanMin", {
                   minPrice: moneyDisplay({
                     amount: minPrice / 100,
-                    currency: trackGroup.currency,
+                    currency: trackGroup.artist?.user?.currency ?? "usd",
                   }),
                   artistName: trackGroup.artist?.name,
                 })}
