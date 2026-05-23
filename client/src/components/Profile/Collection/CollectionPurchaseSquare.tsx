@@ -1,13 +1,13 @@
-import React from "react";
-import ClickToPlay from "../../common/ClickToPlay";
-
-import ArtistLink from "../../Artist/ArtistLink";
-import ArtistItemLink from "../../Artist/ArtistItemLink";
 import {
   TrackGroupInfo,
   TrackGroupLinks,
   TrackGroupWrapper,
 } from "components/Artist/ArtistTrackGroup";
+import React from "react";
+
+import ArtistItemLink from "../../Artist/ArtistItemLink";
+import ArtistLink from "../../Artist/ArtistLink";
+import ClickToPlay from "../../common/ClickToPlay";
 
 const CollectionPurchaseSquare: React.FC<{
   trackGroup: TrackGroup & { artist?: Artist };

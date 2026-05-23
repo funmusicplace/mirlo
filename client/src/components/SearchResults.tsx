@@ -1,30 +1,31 @@
-import { useId } from "react";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import { bp } from "../constants";
-import WidthContainer from "./common/WidthContainer";
-import { SectionHeader } from "./Home/Home";
-
-import usePagination from "utils/usePagination";
-import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
 import {
   queryArtists,
   queryTrackGroups,
   TrackGroupQueryOptions,
 } from "queries";
-import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
-import TrackGroupPills from "./TrackGroup/TrackGroupPills";
-import { ButtonLink } from "./common/Button";
-import { FaChevronRight } from "react-icons/fa";
+import { queryTracks } from "queries/tracks";
+import { useId } from "react";
 import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaChevronRight } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
+import usePagination from "utils/usePagination";
+
+import { bp } from "../constants";
+
 import ArtistSquare from "./Artist/ArtistSquare";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
-import { queryTracks } from "queries/tracks";
-import CollectionPurchaseSquare from "./Profile/Collection/CollectionPurchaseSquare";
 import LoadingBlocks from "./Artist/LoadingBlocks";
+import { ButtonLink } from "./common/Button";
 import SpaceBetweenDiv from "./common/SpaceBetweenDiv";
+import WidthContainer from "./common/WidthContainer";
+import { SectionHeader } from "./Home/Home";
+import CollectionPurchaseSquare from "./Profile/Collection/CollectionPurchaseSquare";
+import TrackGroupPills from "./TrackGroup/TrackGroupPills";
 
 const pageSize = 40;
 
