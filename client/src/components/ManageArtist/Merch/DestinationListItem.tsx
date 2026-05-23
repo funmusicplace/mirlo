@@ -9,6 +9,8 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
 
+import { bp } from "../../../constants";
+
 import countryCodesCurrencies from "./country-codes-currencies";
 
 const DestinationListItem: React.FC<{
@@ -51,8 +53,19 @@ const DestinationListItem: React.FC<{
 
             > div {
               max-width: 25%;
-              display: inline-block;
               margin-right: 1rem;
+            }
+
+            @media (max-width: ${bp.medium}px) {
+              flex-wrap: wrap;
+              gap: 1rem;
+
+              > div {
+                max-width: none;
+                flex: 1 1 100%;
+                margin-right: 0;
+                min-width: 0;
+              }
             }
           `}
         >

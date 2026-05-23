@@ -144,7 +144,9 @@ const MerchDestinations: React.FC<{ artist?: Artist }> = ({ artist }) => {
           className={css`
             margin-top: 1rem;
             display: flex;
+            flex-wrap: wrap-reverse;
             justify-content: space-between;
+            gap: 0.5rem;
           `}
         >
           {!isEditing && (
@@ -175,7 +177,7 @@ const MerchDestinations: React.FC<{ artist?: Artist }> = ({ artist }) => {
               >
                 {t("addNewShippingDestination")}
               </ArtistButton>
-              <ArtistButton>{t("saveDestinations")}</ArtistButton>
+              <ArtistButton wrap>{t("saveDestinations")}</ArtistButton>
             </>
           )}
         </div>
