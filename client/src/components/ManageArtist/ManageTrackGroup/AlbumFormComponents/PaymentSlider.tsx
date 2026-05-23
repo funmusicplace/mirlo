@@ -147,7 +147,7 @@ const PaymentSlider: React.FC<{
               id="output-platform-percent"
             >
               <span className="sr-only">{current}%</span>
-              <Pill>
+              <Pill variant="tint">
                 {current == 0 && t("none")}
                 {current > 0 && current < 5 && t("solidarity")}
                 {current >= 5 && current < 10 && t("sustain")}

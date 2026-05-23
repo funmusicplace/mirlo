@@ -113,6 +113,7 @@ const DownloadableContent: React.FC<{
           {item.downloadableContent.map((c) => (
             <li key={c.downloadableContentId}>
               <Pill
+                variant="tint"
                 className={css`
                   margin: 0.5rem 0 1rem;
                   gap: 0.25rem;

@@ -94,7 +94,7 @@ const TrackArtistFormFields: React.FC<{
             `}
           >
             {t(watchId ? "artistOnMirlo" : "artist")}:{" "}
-            <Pill>
+            <Pill variant="tint">
               {watchName}{" "}
               <ArtistButton
                 size="compact"
