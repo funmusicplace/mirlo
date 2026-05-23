@@ -6,12 +6,23 @@ import { bp } from "../../constants";
 
 import ScrollFadeOverlay from "./ScrollFadeOverlay";
 import Tabs from "./Tabs";
+import WidthContainer from "./WidthContainer";
 
-const baseTabsStyle = css`
-  padding: 0;
+const stripStyle = css`
+  width: 100%;
+  border-bottom: 1px solid var(--mi-tint-x-color);
+`;
+
+const opaqueStyle = css`
+  background: var(--mi-darken-background-color);
+`;
+
+const tabsStyle = css`
+  padding: var(--mi-side-paddings-xsmall);
   white-space: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
+  margin-top: 0 !important;
 
   &::-webkit-scrollbar {
     display: none;
@@ -21,34 +32,20 @@ const baseTabsStyle = css`
     margin-top: 1rem !important;
   }
 
-  @media (min-width: 640px) {
-    a {
+  & > li > a {
+    font-size: 0.75rem;
+  }
+
+  @media (min-width: ${bp.medium}px) {
+    & > li > a {
+      font-size: 1rem;
       padding-bottom: calc(1rem - 4px) !important;
-    }
-  }
-
-  @media (max-width: 1279px) {
-    padding: var(--mi-side-paddings-xsmall);
-  }
-
-  @media (max-width: ${bp.medium}px) {
-    border-bottom: 1px solid var(--mi-tint-x-color);
-    margin-top: 0 !important;
-
-    a {
-      font-size: 0.75rem !important;
     }
   }
 `;
 
 const uppercaseStyle = css`
   text-transform: uppercase;
-`;
-
-const opaqueMobileStyle = css`
-  @media (max-width: ${bp.medium}px) {
-    background: var(--mi-darken-background-color);
-  }
 `;
 
 export const SectionNav: React.FC<{
@@ -60,29 +57,33 @@ export const SectionNav: React.FC<{
   const scrollId = `section-nav-scroll-${reactId.replace(/:/g, "")}`;
   useScrollActiveTabIntoView(scrollId);
 
-  const className = [
-    baseTabsStyle,
-    uppercase ? uppercaseStyle : "",
-    transparent ? "" : opaqueMobileStyle,
-  ]
+  const tabsClassName = [tabsStyle, uppercase ? uppercaseStyle : ""]
+    .filter(Boolean)
+    .join(" ");
+
+  const stripClassName = [stripStyle, transparent ? "" : opaqueStyle]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <div className="relative">
-      <Tabs id={scrollId} className={className}>
-        {children}
-      </Tabs>
-      <ScrollFadeOverlay
-        scrollElementId={scrollId}
-        position="left"
-        size="2rem"
-      />
-      <ScrollFadeOverlay
-        scrollElementId={scrollId}
-        position="right"
-        size="2rem"
-      />
+    <div className={stripClassName}>
+      <WidthContainer variant="big" justify="center">
+        <div className="relative">
+          <Tabs id={scrollId} className={tabsClassName}>
+            {children}
+          </Tabs>
+          <ScrollFadeOverlay
+            scrollElementId={scrollId}
+            position="left"
+            size="2rem"
+          />
+          <ScrollFadeOverlay
+            scrollElementId={scrollId}
+            position="right"
+            size="2rem"
+          />
+        </div>
+      </WidthContainer>
     </div>
   );
 };

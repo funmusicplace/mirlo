@@ -15,13 +15,15 @@ const AccountContainer: React.FC = () => {
       `}`}
     >
       <div className="mb-4">
-        <WidthContainer variant="big" justify="center">
-          <AccountNav />
-        </WidthContainer>
+        <AccountNav />
       </div>
-      <div className="p-(--mi-side-paddings-xsmall)">
+      <WidthContainer
+        variant="big"
+        justify="center"
+        className="p-(--mi-side-paddings-xsmall)"
+      >
         <Outlet />
-      </div>
+      </WidthContainer>
     </div>
   );
 };

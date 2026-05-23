@@ -1,4 +1,5 @@
 import Table from "components/common/Table";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { FaCheck } from "react-icons/fa";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -46,7 +47,7 @@ export const AdminArtists: React.FC = () => {
   }, [callback]);
 
   return (
-    <div className="p-4 grow">
+    <WidthContainer variant="big" justify="center" className="p-4 grow">
       <h3>Artists</h3>
       <Filters />
       <h4>Total results: {total}</h4>
@@ -84,7 +85,7 @@ export const AdminArtists: React.FC = () => {
       )}
       {/* <LoadingButton /> */}
       <PaginationComponent amount={results.length} total={total} />
-    </div>
+    </WidthContainer>
   );
 };
 

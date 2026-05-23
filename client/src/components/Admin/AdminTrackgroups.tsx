@@ -1,5 +1,6 @@
 import Button from "components/common/Button";
 import Table from "components/common/Table";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -57,7 +58,7 @@ export const AdminTrackGroups: React.FC = () => {
   );
 
   return (
-    <div className="p-4 grow">
+    <WidthContainer variant="big" justify="center" className="p-4 grow">
       <h3>TrackGroups</h3>
       <Filters />
       <h4>Total results: {total}</h4>
@@ -100,7 +101,7 @@ export const AdminTrackGroups: React.FC = () => {
         </Table>
       )}
       <PaginationComponent amount={results.length} />
-    </div>
+    </WidthContainer>
   );
 };
 

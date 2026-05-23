@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 
 import SectionNav from "../common/SectionNav";
+import WidthContainer from "../common/WidthContainer";
 
 export const Admin: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
@@ -25,9 +26,9 @@ export const Admin: React.FC = () => {
           </li>
         </SectionNav>
       </div>
-      <div className="p-4">
+      <WidthContainer variant="big" justify="center" className="p-4">
         <Outlet />
-      </div>
+      </WidthContainer>
     </div>
   );
 };

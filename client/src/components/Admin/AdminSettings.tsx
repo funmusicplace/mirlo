@@ -5,6 +5,7 @@ import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
 import Table from "components/common/Table";
 import TextArea from "components/common/TextArea";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { useForm } from "react-hook-form";
 import api from "services/api";
@@ -167,7 +168,7 @@ const AdminSettings = () => {
   );
 
   return (
-    <div className="p-4">
+    <WidthContainer variant="big" justify="center" className="p-4">
       <h3>Settings</h3>
       <form onSubmit={handleSubmit(updateSettings)}>
         <Table>
@@ -511,7 +512,7 @@ const AdminSettings = () => {
           Save
         </Button>
       </form>
-    </div>
+    </WidthContainer>
   );
 };
 

@@ -1,10 +1,10 @@
-import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import SectionNav from "components/common/SectionNav";
 import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
@@ -47,43 +47,36 @@ export const AdminUsers: React.FC = () => {
   );
 
   return (
-    <div
-      className={css`
-        flex-grow: 1;
-      `}
-    >
-      <h2>Users</h2>
+    <div className="grow">
+      <WidthContainer variant="big" justify="center" className="p-4">
+        <h2>Users</h2>
 
-      <FormSection>
-        <FormComponent>
-          <label>Enter comma or newline separated e-mails here:</label>
-          <TextArea
-            onChange={(e) => setNewUsers(e.target.value)}
-            value={newUsers}
-          />
-        </FormComponent>
-        <FormComponent>
-          <label>Type of invite to send:</label>
-          <SelectEl value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="ARTIST">Artist</option>
-            <option value="LABEL">Label</option>
-            <option value="LISTENER">Listener</option>
-          </SelectEl>
-        </FormComponent>
-        <div
-          className={css`
-            display: flex;
-            gap: 10px;
-          `}
-        >
-          <Button type="button" onClick={() => processTextArea("add")}>
-            Bulk add emails as users directly
-          </Button>
-          <Button type="button" onClick={() => processTextArea("invite")}>
-            Invite e-mails
-          </Button>
-        </div>
-      </FormSection>
+        <FormSection>
+          <FormComponent>
+            <label>Enter comma or newline separated e-mails here:</label>
+            <TextArea
+              onChange={(e) => setNewUsers(e.target.value)}
+              value={newUsers}
+            />
+          </FormComponent>
+          <FormComponent>
+            <label>Type of invite to send:</label>
+            <SelectEl value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="ARTIST">Artist</option>
+              <option value="LABEL">Label</option>
+              <option value="LISTENER">Listener</option>
+            </SelectEl>
+          </FormComponent>
+          <div className="flex gap-2">
+            <Button type="button" onClick={() => processTextArea("add")}>
+              Bulk add emails as users directly
+            </Button>
+            <Button type="button" onClick={() => processTextArea("invite")}>
+              Invite e-mails
+            </Button>
+          </div>
+        </FormSection>
+      </WidthContainer>
       <div className="mb-4">
         <SectionNav uppercase={false} transparent>
           <li>
@@ -96,9 +89,9 @@ export const AdminUsers: React.FC = () => {
           </li>
         </SectionNav>
       </div>
-      <div className="p-4">
+      <WidthContainer variant="big" justify="center" className="p-4">
         <Outlet />
-      </div>
+      </WidthContainer>
     </div>
   );
 };

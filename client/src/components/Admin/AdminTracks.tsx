@@ -3,6 +3,7 @@ import Button, { ButtonLink } from "components/common/Button";
 import Modal from "components/common/Modal";
 import Table from "components/common/Table";
 import TrackRowPlayControl from "components/common/TrackList/TrackRowPlayControl";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaEdit, FaEye } from "react-icons/fa";
@@ -64,7 +65,7 @@ export const AdminTracks: React.FC = () => {
   );
 
   return (
-    <div className="grow p-4">
+    <WidthContainer variant="big" justify="center" className="grow p-4">
       <div className="flex justify-between align-center">
         <h3>Tracks</h3>
         <ButtonLink to="bulk-upload">{t("bulkTrackUpload")}</ButtonLink>
@@ -142,7 +143,7 @@ export const AdminTracks: React.FC = () => {
       >
         <Outlet />
       </Modal>
-    </div>
+    </WidthContainer>
   );
 };
 

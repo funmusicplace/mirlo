@@ -22,33 +22,33 @@ const ProfileContainer: React.FC = () => {
         `}
       >
         <div className="mb-4">
-          <WidthContainer variant="big" justify="center">
-            <SectionNav>
-              <li>
-                <NavLink end to="/profile/followed">
-                  {t("followedArtists")}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/profile/collection">{t("collection")}</NavLink>
-              </li>
-              <li>
-                <NavLink to="/profile/wishlist">{t("wishlist")}</NavLink>
-              </li>
-              <li>
-                <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
-              </li>
-              <li>
-                <NavLink to="/profile/notifications">
-                  {t("notifications")}
-                  <UnreadCountPill />
-                </NavLink>
-              </li>
-            </SectionNav>
-          </WidthContainer>
+          <SectionNav>
+            <li>
+              <NavLink end to="/profile/followed">
+                {t("followedArtists")}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/profile/collection">{t("collection")}</NavLink>
+            </li>
+            <li>
+              <NavLink to="/profile/wishlist">{t("wishlist")}</NavLink>
+            </li>
+            <li>
+              <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
+            </li>
+            <li>
+              <NavLink to="/profile/notifications">
+                {t("notifications")}
+                <UnreadCountPill />
+              </NavLink>
+            </li>
+          </SectionNav>
         </div>
 
-        <Outlet />
+        <WidthContainer variant="big" justify="center">
+          <Outlet />
+        </WidthContainer>
       </div>
     </>
   );
