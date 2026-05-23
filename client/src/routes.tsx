@@ -486,6 +486,10 @@ const routes: RouteObject[] = [
         },
         children: [
           {
+            index: true,
+            Component: () => <Navigate to="dashboard" replace />,
+          },
+          {
             path: "tasks",
             async lazy() {
               const { default: Component } =
