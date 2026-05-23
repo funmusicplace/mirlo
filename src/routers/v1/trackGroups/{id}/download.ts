@@ -125,6 +125,7 @@ export default function () {
         const originalTitle = `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`;
         const asciiTitle = filenamify(originalTitle);
 
+        res.setHeader("Content-Type", "application/zip");
         res.setHeader(
           "Content-Disposition",
           contentDisposition(`${asciiTitle}.zip`, { type: "attachment" })

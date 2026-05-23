@@ -159,7 +159,7 @@ const zipFilesInFolder = async ({
 }) => {
   const profiler = logger.startTimer();
 
-  await new Promise(async (resolve: (value?: unknown) => void) => {
+  await new Promise<void>(async (resolve, reject) => {
     const finalFilesInFolder = await fsPromises.readdir(tempFolder);
 
     logger.info(
@@ -181,18 +181,13 @@ const zipFilesInFolder = async ({
       }
     });
 
-    // good practice to catch this error explicitly
     archive.on("error", function (err) {
       console.error("erroring", err);
-      throw err;
+      reject(err);
     });
 
-    archive.on("finish", () => {
-      resolve();
-    });
-
-    for await (const file of finalFilesInFolder) {
-      const uploadStream = await createReadStream(`${tempFolder}/${file}`);
+    for (const file of finalFilesInFolder) {
+      const uploadStream = createReadStream(`${tempFolder}/${file}`);
       const trackTitle = file;
 
       archive.append(uploadStream, { name: trackTitle });
@@ -207,11 +202,20 @@ const zipFilesInFolder = async ({
     archive.pipe(pass);
     archive.finalize();
 
-    await uploadWrapper(destinationBucket, zipFileName, pass);
-
-    logger.info(`zipFilesInFolder: ${tempFolder}: Cleaned up incoming bucket`);
-    await fsPromises.rm(tempFolder, { recursive: true, force: true });
-    logger.info(`Cleaned up ${tempFolder}`);
+    // Resolve only after the upload completes. Resolving on archive's "finish"
+    // event was too early: the archive signals it has finished writing to the
+    // PassThrough, but MinIO may not have finished receiving the upload yet.
+    try {
+      await uploadWrapper(destinationBucket, zipFileName, pass);
+      logger.info(
+        `zipFilesInFolder: ${tempFolder}: Cleaned up incoming bucket`
+      );
+      await fsPromises.rm(tempFolder, { recursive: true, force: true });
+      logger.info(`Cleaned up ${tempFolder}`);
+      resolve();
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 
