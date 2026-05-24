@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
-import { statZip } from "../../../../utils/minio";
+import { zipExists } from "../../../../utils/minio";
 import {
   basicTrackGroupInclude,
   FormatOptions,
@@ -37,44 +37,24 @@ export default function () {
 
     logger.info(`trackGroupId: ${trackGroupId} Found a trackgroup`);
 
-    try {
-      logger.info("checking if trackgroup is already zipped");
-      // FIXME: Our controller shouldn't have to know about backblaze
-      const { backblazeStat, minioStat } = await statZip(
-        "trackGroup",
-        trackGroup.id,
-        format
-      );
-      if (backblazeStat || minioStat) {
-        logger.info("the trackgroup is already zipped");
-        return res.json({
-          message: "The album has already been generated",
-          result: true,
-        });
-      } else {
-        logger.info("trackGroup doesn't exist yet, start generating it");
-        const jobId = await startGeneratingZip(
-          trackGroup,
-          trackGroup.tracks,
-          format
-        );
-        return res.json({
-          message: "We've started generating the album",
-          result: { jobId },
-        });
-      }
-    } catch (e) {
-      logger.info("trackGroup doesn't exist yet, start generating it");
-      const jobId = await startGeneratingZip(
-        trackGroup,
-        trackGroup.tracks,
-        format
-      );
+    logger.info("checking if trackgroup is already zipped");
+    if (await zipExists("trackGroup", trackGroup.id, format)) {
+      logger.info("the trackgroup is already zipped");
       return res.json({
-        message: "We've started generating the album",
-        result: { jobId },
+        message: "The album has already been generated",
+        result: true,
       });
     }
+    logger.info("trackGroup doesn't exist yet, start generating it");
+    const jobId = await startGeneratingZip(
+      trackGroup,
+      trackGroup.tracks,
+      format
+    );
+    return res.json({
+      message: "We've started generating the album",
+      result: { jobId },
+    });
   }
 
   GET.apiDoc = {

@@ -5,7 +5,7 @@ import filenamify from "filenamify";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { AppError } from "../../../../utils/error";
-import { presignZip, statZip, streamZip } from "../../../../utils/minio";
+import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
 import {
   FormatOptions,
   basicTrackGroupInclude,
@@ -81,22 +81,9 @@ export default function () {
 
       logger.info(`trackId: ${trackId} Found a track, preparing download`);
 
-      try {
-        logger.info("checking if track already zipped");
-        // FIXME: our controller shouldn't have to know about backblaze
-        const { backblazeStat, minioStat } = await statZip(
-          "track",
-          track.id,
-          format
-        );
-        if (!backblazeStat && !minioStat) {
-          logger.info("Track not zipped");
-          throw new AppError({
-            httpCode: 400,
-            description: "Need to generate track folder first",
-          });
-        }
-      } catch (e) {
+      logger.info("checking if track already zipped");
+      if (!(await zipExists("track", track.id, format))) {
+        logger.info("Track not zipped");
         throw new AppError({
           httpCode: 400,
           description: "Need to generate track folder first",

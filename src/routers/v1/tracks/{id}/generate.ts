@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
-import { statZip } from "../../../../utils/minio";
+import { zipExists } from "../../../../utils/minio";
 import {
   basicTrackGroupInclude,
   FormatOptions,
@@ -43,46 +43,25 @@ export default function () {
 
     logger.info(`trackId: ${trackId} Found a track`);
 
-    try {
-      logger.info("checking if track is already zipped");
-      // FIXME: Our controller shouldn't have to care about backblaze
-      const { backblazeStat, minioStat } = await statZip(
-        "track",
-        track.id,
-        format
-      );
-      if (backblazeStat || minioStat) {
-        logger.info("there is already a zip for this track");
-        return res.json({
-          message: "The album has already been generated",
-          result: true,
-        });
-      } else {
-        logger.info("folder for track doesn't exist yet, start generating it");
-        const jobId = await startGeneratingZip(
-          track.trackGroup,
-          [track],
-          format,
-          "track"
-        );
-        return res.json({
-          message: "We've started generating the album",
-          result: { jobId },
-        });
-      }
-    } catch (e) {
-      logger.info("folder for track doesn't exist yet, start generating it");
-      const jobId = await startGeneratingZip(
-        track.trackGroup,
-        [track],
-        format,
-        "track"
-      );
+    logger.info("checking if track is already zipped");
+    if (await zipExists("track", track.id, format)) {
+      logger.info("there is already a zip for this track");
       return res.json({
-        message: "We've started generating the folder",
-        result: { jobId },
+        message: "The album has already been generated",
+        result: true,
       });
     }
+    logger.info("folder for track doesn't exist yet, start generating it");
+    const jobId = await startGeneratingZip(
+      track.trackGroup,
+      [track],
+      format,
+      "track"
+    );
+    return res.json({
+      message: "We've started generating the folder",
+      result: { jobId },
+    });
   }
 
   GET.apiDoc = {
