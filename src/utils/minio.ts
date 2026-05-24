@@ -21,43 +21,35 @@ import { Logger } from "winston";
 
 import logger from "../logger";
 
-const s3UniquePrefix = "";
+export const incomingArtistBackgroundBucket = "incoming-artist-banners";
+export const finalArtistBackgroundBucket = "artist-banners";
 
-export const incomingArtistBackgroundBucket =
-  s3UniquePrefix + "incoming-artist-banners";
-export const finalArtistBackgroundBucket = s3UniquePrefix + "artist-banners";
+export const incomingArtistAvatarBucket = "incoming-artist-avatars";
+export const finalArtistAvatarBucket = "artist-avatars";
 
-export const incomingArtistAvatarBucket =
-  s3UniquePrefix + "incoming-artist-avatars";
-export const finalArtistAvatarBucket = s3UniquePrefix + "artist-avatars";
+export const incomingUserAvatarBucket = "incoming-user-avatars";
+export const finalUserAvatarBucket = "mirlo-user-avatars";
 
-export const incomingUserAvatarBucket =
-  s3UniquePrefix + "incoming-user-avatars";
-export const finalUserAvatarBucket = s3UniquePrefix + "mirlo-user-avatars";
+export const incomingUserBannerBucket = "incoming-user-banners";
+export const finalUserBannerBucket = "mirlo-user-banners";
 
-export const incomingUserBannerBucket =
-  s3UniquePrefix + "incoming-user-banners";
-export const finalUserBannerBucket = s3UniquePrefix + "mirlo-user-banners";
+export const incomingCoversBucket = "incoming-covers";
+export const finalCoversBucket = "trackgroup-covers";
 
-export const incomingCoversBucket = s3UniquePrefix + "incoming-covers";
-export const finalCoversBucket = s3UniquePrefix + "trackgroup-covers";
+export const incomingMerchImageBucket = "incoming-merch-images";
+export const finalMerchImageBucket = "merch-images";
 
-export const incomingMerchImageBucket =
-  s3UniquePrefix + "incoming-merch-images";
-export const finalMerchImageBucket = s3UniquePrefix + "merch-images";
+export const finalPostImageBucket = "post-images";
 
-export const finalPostImageBucket = s3UniquePrefix + "post-images";
+export const incomingAudioBucket = "incoming-track-audio";
+export const finalAudioBucket = "track-audio";
 
-export const incomingAudioBucket = s3UniquePrefix + "incoming-track-audio";
-export const finalAudioBucket = s3UniquePrefix + "track-audio";
+export const trackGroupFormatBucket = "trackgroup-format";
+export const trackFormatBucket = "track-format";
 
-export const trackGroupFormatBucket = s3UniquePrefix + "trackgroup-format";
-export const trackFormatBucket = s3UniquePrefix + "track-format";
-
-export const downloadableContentBucket =
-  s3UniquePrefix + "mirlo-downloadable-content";
-export const incomingImageBucket = s3UniquePrefix + "incoming-mirlo-images";
-export const finalImageBucket = s3UniquePrefix + "mirlo-images";
+export const downloadableContentBucket = "mirlo-downloadable-content";
+export const incomingImageBucket = "incoming-mirlo-images";
+export const finalImageBucket = "mirlo-images";
 
 // Consolidated bucket config (Phase 1 self-hosting support).
 // null = legacy mode: use per-type bucket constants above (for existing installs).
@@ -296,6 +288,38 @@ export const statFile = async (bucket: string, filename: string) => {
     minioStat,
     backblazeStat,
   };
+};
+
+export interface FileMeta {
+  contentType?: string;
+  contentLength?: number;
+  lastModified?: Date;
+  etag?: string;
+}
+
+const normalizeStatToMeta = (stat: {
+  backblazeStat?: HeadObjectCommandOutput;
+  minioStat?: Awaited<ReturnType<Client["statObject"]>>;
+}): FileMeta | null => {
+  if (stat.backblazeStat) {
+    return {
+      contentType: stat.backblazeStat.ContentType,
+      contentLength: stat.backblazeStat.ContentLength,
+      lastModified: stat.backblazeStat.LastModified,
+      etag: stat.backblazeStat.ETag,
+    };
+  }
+  if (stat.minioStat) {
+    return {
+      contentType: stat.minioStat.metaData?.["content-type"] as
+        | string
+        | undefined,
+      contentLength: stat.minioStat.size,
+      lastModified: stat.minioStat.lastModified,
+      etag: stat.minioStat.etag,
+    };
+  }
+  return null;
 };
 
 export const createBucketIfNotExists = async (
@@ -801,6 +825,19 @@ export const getAudioSegmentBuffer = (
   stat?: HeadObjectCommandOutput
 ) => getBufferBasedOnStat(getAudioBucket(), `${audioId}/${segment}`, stat);
 
+export const getAudioSegmentBufferIfExists = async (
+  audioId: string,
+  segment: string
+): Promise<Buffer | undefined> => {
+  const stat = await statAudioSegment(audioId, segment);
+  if (!stat.backblazeStat && !stat.minioStat) return undefined;
+  const { buffer } = await getBufferFromStorage(
+    getAudioBucket(),
+    `${audioId}/${segment}`
+  );
+  return buffer as Buffer | undefined;
+};
+
 export const uploadAudioHlsFile = async (
   audioId: string,
   filename: string,
@@ -900,6 +937,13 @@ export const getDownloadableContentUploadUrl = (id: string) =>
 export const statDownloadableContent = (id: string) =>
   statFile(getDownloadsBucket(downloadableContentBucket), contentKey(id));
 
+export const getDownloadableContentMeta = async (
+  id: string
+): Promise<FileMeta | null> => {
+  const stat = await statDownloadableContent(id);
+  return normalizeStatToMeta(stat);
+};
+
 export const getDownloadableContentBufferFromStat = (
   id: string,
   stat?: HeadObjectCommandOutput
@@ -937,6 +981,15 @@ export const statZip = (
   id: number,
   format: string
 ) => statFile(zipBucket(type), zipKey(type, id, format));
+
+export const zipExists = async (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string
+): Promise<boolean> => {
+  const { backblazeStat, minioStat } = await statZip(type, id, format);
+  return !!(backblazeStat || minioStat);
+};
 
 export const streamZip = (
   type: "track" | "trackGroup",

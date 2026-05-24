@@ -7,7 +7,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
 import { AppError } from "../../../../utils/error";
-import { presignZip, statZip, streamZip } from "../../../../utils/minio";
+import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
 import {
   FormatOptions,
   basicTrackGroupInclude,
@@ -84,27 +84,8 @@ export default function () {
         `trackGroupId: ${trackGroupId} Found a trackgroup, preparing download`
       );
 
-      try {
-        logger.info("checking if trackgroup already zipped");
-        // FIXME Our controllers shouldn't have to care about the type of stat.
-        const { backblazeStat, minioStat } = await statZip(
-          "trackGroup",
-          trackGroup.id,
-          format
-        );
-        if (!backblazeStat && !minioStat) {
-          logger.info("trackGroup doesn't exist yet, start generating it");
-          const jobId = await startGeneratingZip(
-            trackGroup,
-            trackGroup.tracks,
-            format
-          );
-          return res.json({
-            message: "We've started generating the album",
-            result: { jobId },
-          });
-        }
-      } catch (e) {
+      logger.info("checking if trackgroup already zipped");
+      if (!(await zipExists("trackGroup", trackGroup.id, format))) {
         logger.info("trackGroup doesn't exist yet, start generating it");
         const jobId = await startGeneratingZip(
           trackGroup,
