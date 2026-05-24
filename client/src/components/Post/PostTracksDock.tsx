@@ -1,6 +1,8 @@
 import { css } from "@emotion/css";
+import { ArtistColorsWrapper } from "components/ArtistColorsProvider";
 import TrackRow from "components/common/TrackList/TrackRow";
 import React from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
@@ -21,7 +23,7 @@ const asideBase = css`
   position: fixed;
   right: 1rem;
   bottom: 5rem;
-  z-index: 9;
+  z-index: 11;
   width: 20rem;
   max-width: calc(100vw - 2rem);
   display: flex;
@@ -135,46 +137,49 @@ const PostTracksDock: React.FC<{
   const labelId = `post-tracks-dock-label-${postId}`;
   const listId = `post-tracks-dock-list-${postId}`;
 
-  return (
-    <aside
-      aria-labelledby={labelId}
-      className={`${asideBase} ${collapsed ? "" : expandedHeight}`}
-    >
-      <button
-        type="button"
-        onClick={() => setCollapsed((c) => !c)}
-        aria-expanded={!collapsed}
-        aria-controls={listId}
-        className="flex items-center justify-between gap-2 px-3 py-2 max-md:py-3.5 bg-(--mi-tint-color) border-0 border-b border-(--mi-tint-x-color) text-inherit text-left cursor-pointer [font:inherit]"
+  return createPortal(
+    <ArtistColorsWrapper>
+      <aside
+        aria-labelledby={labelId}
+        className={`${asideBase} ${collapsed ? "" : expandedHeight}`}
       >
-        <span
-          id={labelId}
-          className="flex-1 min-w-0 truncate text-xs font-semibold uppercase tracking-wider opacity-75"
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-expanded={!collapsed}
+          aria-controls={listId}
+          className="flex items-center justify-between gap-2 px-3 py-2 max-md:py-4 bg-(--mi-tint-color) border-0 border-b border-(--mi-tint-x-color) text-inherit text-left cursor-pointer [font:inherit]"
         >
-          {t("label")}
-        </span>
-        {collapsed ? (
-          <FaChevronUp aria-hidden className="shrink-0 opacity-60" />
-        ) : (
-          <FaChevronDown aria-hidden className="shrink-0 opacity-60" />
-        )}
-      </button>
-      <ul
-        id={listId}
-        hidden={collapsed}
-        className="list-none m-0 py-1 overflow-y-auto overscroll-contain flex-1 min-h-0 divide-y divide-(--mi-tint-color)"
-      >
-        {tracks.map((track) => (
-          <TrackRow
-            key={track.id}
-            track={track}
-            trackGroup={track.trackGroup ?? trackGroup}
-            addTracksToQueue={addTracksToQueue}
-            size="dock"
-          />
-        ))}
-      </ul>
-    </aside>
+          <span
+            id={labelId}
+            className="flex-1 min-w-0 truncate text-xs font-semibold uppercase tracking-wider opacity-75"
+          >
+            {t("label")}
+          </span>
+          {collapsed ? (
+            <FaChevronUp aria-hidden className="shrink-0 opacity-60" />
+          ) : (
+            <FaChevronDown aria-hidden className="shrink-0 opacity-60" />
+          )}
+        </button>
+        <ul
+          id={listId}
+          hidden={collapsed}
+          className="list-none m-0 py-1 overflow-y-auto overscroll-contain flex-1 min-h-0 divide-y divide-(--mi-tint-color)"
+        >
+          {tracks.map((track) => (
+            <TrackRow
+              key={track.id}
+              track={track}
+              trackGroup={track.trackGroup ?? trackGroup}
+              addTracksToQueue={addTracksToQueue}
+              size="dock"
+            />
+          ))}
+        </ul>
+      </aside>
+    </ArtistColorsWrapper>,
+    document.body
   );
 };
 

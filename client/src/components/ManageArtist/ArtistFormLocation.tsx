@@ -225,7 +225,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
                 </div>
               ) : null}
               {currentTags.map((tag) => (
-                <Pill>
+                <Pill variant="tint">
                   <span>
                     {[tag.city, tag.region, tag.country]
                       .filter(Boolean)

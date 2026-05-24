@@ -107,7 +107,7 @@ const Player = () => {
           justify-content: space-between;
           position: fixed;
           width: 100%;
-          z-index: 10;
+          z-index: 12;
           bottom: 0;
           filter: drop-shadow(
             0 0 0.1rem

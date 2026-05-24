@@ -1,20 +1,29 @@
+import styled from "@emotion/styled";
 import { cloneDeep } from "lodash";
 import React from "react";
-import { useGlobalStateContext } from "state/GlobalState";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
-import { bp } from "../../../constants";
-
+import { useAuthContext } from "state/AuthContext";
+import { useGlobalStateContext } from "state/GlobalState";
 import { determineNewTrackOrder } from "utils/tracks";
+
+import { bp } from "../../../constants";
 import { CenteredSpinner } from "../../common/Spinner";
 import Table from "../../common/Table";
+
 import ManageTrackRow from "./ManageTrackRow";
-import { useTranslation } from "react-i18next";
-import styled from "@emotion/styled";
-import { useAuthContext } from "state/AuthContext";
 
 const TrackTableComponent = styled(Table)`
   margin-bottom: 1.5rem;
   margin-top: 1rem;
+
+  &.mi-table tbody tr:nth-child(odd) {
+    background-color: transparent;
+  }
+
+  &.mi-table tbody tr:not(:last-child) {
+    border-bottom: 1px solid var(--mi-tint-color);
+  }
 
   @media screen and (max-width: ${bp.medium}px) {
     display: block;

@@ -54,6 +54,7 @@ const SelectTrackGroup: React.FC<{
       <label htmlFor="input-track-group">{t("relatedToTrackGroup")}</label>
       {currentTrackGroup && (
         <Pill
+          variant="tint"
           className={css`
             margin: 0.5rem 0 1rem;
           `}

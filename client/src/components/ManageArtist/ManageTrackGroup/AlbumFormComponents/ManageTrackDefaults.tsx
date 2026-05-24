@@ -1,13 +1,13 @@
-import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
-import React from "react";
-import { Trans, useTranslation } from "react-i18next";
-import { FormProvider, useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
 import styled from "@emotion/styled";
-
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
 import { useBulkSetTracksIsPreviewMutation } from "queries/trackGroups";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
+
 import SavingInput from "./SavingInput";
 
 interface BulkUpdateTracksProps {
@@ -79,10 +79,11 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
       </FormProvider>
       {(trackGroup.tracks ?? []).length > 0 && (
         <div className="flex flex-wrap gap-4 py-2">
-          <ArtistButton onClick={() => handleSetAllTracksPreview(true)}>
+          <ArtistButton wrap onClick={() => handleSetAllTracksPreview(true)}>
             {t("setAllTracksAsPreview")}
           </ArtistButton>
           <ArtistButton
+            wrap
             variant="dashed"
             onClick={() => handleSetAllTracksPreview(false)}
           >

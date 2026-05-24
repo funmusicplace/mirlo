@@ -401,28 +401,8 @@ const ProfileLabel: React.FC = () => {
 
   return (
     <WidthContainer variant="big" justify="center">
-      <div className="flex gap-2 flex-col p-4">
-        <div className="flex justify-between items-center">
-          <h1>{t("manageLabel")}</h1>
-          <div className="flex flex-wrap gap-4">
-            <ButtonLink
-              to={getArtistManageUrl(labelProfile.id)}
-              startIcon={<FaEdit />}
-              size="compact"
-              variant="dashed"
-            >
-              {t("editLabelProfile")}
-            </ButtonLink>
-            <ButtonLink
-              to={`/${labelProfile?.urlSlug}`}
-              endIcon={<FaChevronRight />}
-              variant="link"
-              size="compact"
-            >
-              {t("viewLabelPage")}
-            </ButtonLink>
-          </div>
-        </div>
+      <div className="flex gap-2 flex-col">
+        <h1>{t("manageLabel")}</h1>
         <p>{t("manageLabelDescription")}</p>
         <p>
           <Trans
@@ -433,6 +413,24 @@ const ProfileLabel: React.FC = () => {
             }}
           />
         </p>
+        <div className="flex flex-wrap justify-between gap-4 mt-4">
+          <ButtonLink
+            to={getArtistManageUrl(labelProfile.id)}
+            startIcon={<FaEdit />}
+            size="compact"
+            variant="dashed"
+          >
+            {t("editLabelProfile")}
+          </ButtonLink>
+          <ButtonLink
+            to={`/${labelProfile?.urlSlug}`}
+            endIcon={<FaChevronRight />}
+            variant="link"
+            size="compact"
+          >
+            {t("viewLabelPage")}
+          </ButtonLink>
+        </div>
         <ProfileSection>
           <h2>{t("manageArtists")}</h2>
           <RelationshipsTable />
@@ -442,10 +440,15 @@ const ProfileLabel: React.FC = () => {
           <div className="gap-2 flex flex-col md:flex-row justify-between md:items-center">
             <h2>{t("managePayment")}</h2>
             <div className="flex gap-2 ">
-              <ButtonLink variant="outlined" to="/sales" size="compact">
+              <ButtonLink wrap variant="outlined" to="/sales" size="compact">
                 {t("viewSalesPage")}
               </ButtonLink>
-              <ButtonLink variant="outlined" to="/fulfillment" size="compact">
+              <ButtonLink
+                wrap
+                variant="outlined"
+                to="/fulfillment"
+                size="compact"
+              >
                 {t("viewFulfillmentPage")}
               </ButtonLink>
             </div>

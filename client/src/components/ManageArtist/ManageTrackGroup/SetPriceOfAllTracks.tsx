@@ -83,10 +83,11 @@ const SetPriceOfAllTracks: React.FC<BulkUpdateTracksProps> = ({
           }}
         />
       </FormComponent>
-      <ArtistButton type="button" onClick={() => handleBulkUpdate(true)}>
+      <ArtistButton wrap type="button" onClick={() => handleBulkUpdate(true)}>
         {t("setPriceOfAllTracks")}
       </ArtistButton>
       <ArtistButton
+        wrap
         type="button"
         variant="dashed"
         onClick={() => handleBulkUpdate(false)}

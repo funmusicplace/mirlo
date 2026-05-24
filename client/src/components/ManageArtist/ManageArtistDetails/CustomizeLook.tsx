@@ -44,6 +44,7 @@ export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
   @media (max-width: ${bp.medium}px) {
     flex-direction: column;
     padding: 1rem !important;
+    margin-top: 0;
   }
   @media (prefers-color-scheme: dark) {
     ${(props) => (!props.isOdd ? "background: rgba(125, 125, 125, 0.1);" : "")}

@@ -11,7 +11,7 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const InputEl = styled.input`
-  border: 1px solid var(--mi-text-color);
+  border: 1px solid var(--mi-tint-x-color);
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;

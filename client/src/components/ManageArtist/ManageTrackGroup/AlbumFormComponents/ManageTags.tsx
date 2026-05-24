@@ -31,7 +31,7 @@ const ArtistTag: React.FC<{
   }, [removeTag, index]);
 
   return (
-    <Pill>
+    <Pill variant="tint">
       {tag}{" "}
       <ArtistButton
         aria-label={t("removeTag", { tagName: tag })}

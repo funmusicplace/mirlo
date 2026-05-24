@@ -77,102 +77,75 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
       >
         {t("dates")}
       </ArtistButton>
-      <Modal open={isOpen} size="small" onClose={() => setIsOpen(false)}>
+      <Modal
+        open={isOpen}
+        size="small"
+        onClose={() => setIsOpen(false)}
+        title={t("tourDatesModalTitle") ?? ""}
+      >
         {!isEditing && (
-          <div
-            className={css`
-              width: 100%;
-              display: flex;
-              flex-direction: column;
-            `}
-          >
-            {tourDates && (
-              <ul
-                className={css`
-                  list-style: none;
-                  padding: 0;
-
-                  li {
-                    margin-bottom: 0.5rem;
-                    font-size: 0.9rem;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    > div {
-                      display: flex;
-                      flex-direction: row;
-                      justify-content: space-between;
-                      flex-grow: 1;
-                      padding-right: 1rem;
-
-                      > div {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: flex-end;
-                        text-align: right;
-                      }
-
-                      em {
-                        font-style: italic;
-                        color: var(--mi-text-color);
-                      }
-                    }
-                    > a {
-                      min-width: 9rem;
-                    }
-                  }
-                `}
-              >
-                {tourDates.map((td) => (
-                  <li key={td.date + td.location}>
-                    <div>
-                      <span>{td.location}</span>
-                      <div>
-                        {formatDate({
-                          date: calculateDateWithTimezoneOffset(
-                            td.date
-                          ).toISOString(),
-                          i18n,
-                          options: { dateStyle: "short" },
-                        })}
-                        {new Date(td.date) < new Date() && (
-                          <em>{t("pastEvent")}</em>
-                        )}
+          <div className="w-full flex flex-col">
+            {tourDates && tourDates.length > 0 && (
+              <ul className="list-none p-0 m-0 flex flex-col">
+                {tourDates.map((td) => {
+                  const dateObj = calculateDateWithTimezoneOffset(td.date);
+                  const isPast = new Date(td.date) < new Date();
+                  const month = dateObj
+                    .toLocaleString(i18n.language, { month: "short" })
+                    .toUpperCase();
+                  const day = dateObj.getDate();
+                  return (
+                    <li
+                      key={td.date + td.location}
+                      className={`flex items-center gap-4 py-3 border-b border-(--mi-tint-color) last:border-b-0 ${
+                        isPast ? "opacity-50" : ""
+                      }`}
+                    >
+                      <div className="shrink-0 w-14 flex flex-col items-center justify-center rounded-md border border-(--mi-tint-x-color) py-1 leading-tight">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-(--mi-secondary-text-color)">
+                          {month}
+                        </span>
+                        <span className="text-xl font-semibold">{day}</span>
                       </div>
-                    </div>
-
-                    {td.ticketsUrl && (
-                      <ArtistButtonAnchor
-                        href={td.ticketsUrl}
-                        size="compact"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {new Date(td.date) < new Date()
-                          ? t("eventPage")
-                          : t("buyTickets")}
-                      </ArtistButtonAnchor>
-                    )}
-                  </li>
-                ))}
+                      <div className="flex-1 min-w-0 text-sm">
+                        <div className="font-medium truncate">
+                          {td.location}
+                        </div>
+                        <div className="text-xs text-(--mi-secondary-text-color)">
+                          {formatDate({
+                            date: dateObj.toISOString(),
+                            i18n,
+                            options: { dateStyle: "long" },
+                          })}
+                        </div>
+                      </div>
+                      {td.ticketsUrl && (
+                        <ArtistButtonAnchor
+                          href={td.ticketsUrl}
+                          size="compact"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0"
+                        >
+                          {isPast ? t("eventPage") : t("buyTickets")}
+                        </ArtistButtonAnchor>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
 
+            {(!tourDates || tourDates.length === 0) && (
+              <p className="text-center text-(--mi-secondary-text-color) py-4">
+                {t("noTourDatesYet")}
+              </p>
+            )}
+
             {isManage && (
-              <div
-                className={css`
-                  max-width: 5%;
-                  flex: 5%;
-                  margin-right: 0.2rem;
-                  margin-left: 0.2rem;
-                `}
-              >
+              <div className="flex justify-end mt-4 pt-4 border-t border-(--mi-tint-color)">
                 <ArtistButton
                   size="compact"
-                  className={css`
-                    white-space: nowrap;
-                  `}
                   variant="dashed"
                   onClick={() => setIsEditing(true)}
                   startIcon={<FaPen />}

@@ -1,19 +1,22 @@
-import DropdownMenu from "components/common/DropdownMenu";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { ArtistSection } from "components/Artist/Artist";
-import Money from "components/common/Money";
+import DropdownMenu from "components/common/DropdownMenu";
+import Money, { moneyDisplay } from "components/common/Money";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
 import { sumBy } from "lodash";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import useArtistQuery from "utils/useArtistQuery";
+
 import { bp } from "../../constants";
 
 import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
 import ArtistSubscriberUploadData from "./ArtistSubscriberUploadData";
+import { ManageSectionWrapper } from "./ManageSectionWrapper";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -78,8 +81,12 @@ const Supporters = () => {
   const amountMonthly = sumBy(monthlySupporters, "amount");
   const amountAnnual = sumBy(annualSupporters, "amount");
 
+  const currency = artist?.user?.currency ?? "usd";
+
+  const totalSupporters = monthlySupporters.length + annualSupporters.length;
+
   return (
-    <>
+    <ManageSectionWrapper>
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <h4>{t("supporters")}</h4>
@@ -89,39 +96,23 @@ const Supporters = () => {
             <ArtistSubscriberUploadData onDone={loadSupporters} />
           </DropdownMenu>
         </div>
-        <div className="flex gap-1 flex-col max-w-1/2">
-          <p className="grid gap-4 grid-cols-2">
-            {t("totalComingInMonthly")}:{" "}
-            <strong className="text-right">
-              <Money
-                amount={amountMonthly / 100}
-                currency={artist?.user?.currency ?? "usd"}
-              />
-            </strong>
-          </p>
-          <p className="grid gap-4 grid-cols-2">
-            {t("totalComingInAnnually")}:{" "}
-            <strong className="text-right">
-              <Money
-                amount={amountAnnual / 100}
-                currency={artist?.user?.currency ?? "usd"}
-              />
-            </strong>
-          </p>
-          <p className="grid gap-4 grid-cols-2">
-            {t("totalProjectedAnnual")}:{" "}
-            <strong className="text-right">
-              <Money
-                amount={(amountAnnual + amountMonthly * 12) / 100}
-                currency={artist?.user?.currency ?? "usd"}
-              />
-            </strong>
-          </p>
-          <p>
-            {t("totalSupporters", {
-              count: monthlySupporters.length + annualSupporters.length,
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 mb-4">
+          <StatCard
+            label={t("totalComingInMonthly")}
+            value={moneyDisplay({ amount: amountMonthly / 100, currency })}
+          />
+          <StatCard
+            label={t("totalComingInAnnually")}
+            value={moneyDisplay({ amount: amountAnnual / 100, currency })}
+          />
+          <StatCard
+            label={t("totalProjectedAnnual")}
+            value={moneyDisplay({
+              amount: (amountAnnual + amountMonthly * 12) / 100,
+              currency,
             })}
-          </p>
+          />
+          <StatCard label={t("supporters")} value={totalSupporters} />
         </div>
         <SupporterTable>
           <thead>
@@ -167,7 +158,7 @@ const Supporters = () => {
           </div>
         )}
       </div>
-      <ArtistSection>
+      <ArtistSection className="mt-8!">
         <SpaceBetweenDiv>
           <h4>{t("followers", { count: followers.length })}</h4>
         </SpaceBetweenDiv>
@@ -188,7 +179,7 @@ const Supporters = () => {
           </tbody>
         </SupporterTable>
       </ArtistSection>
-    </>
+    </ManageSectionWrapper>
   );
 };
 

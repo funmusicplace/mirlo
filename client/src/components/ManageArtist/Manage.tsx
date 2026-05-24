@@ -93,6 +93,7 @@ export const Manage: React.FC = () => {
                   </ButtonLink>
                 ))}
               <ButtonLink
+                wrap
                 to="/manage/welcome"
                 buttonRole="primary"
                 startIcon={<FaPlus />}

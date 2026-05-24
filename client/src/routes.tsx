@@ -437,6 +437,14 @@ const routes: RouteObject[] = [
                 ],
               },
               {
+                path: "links",
+                async lazy() {
+                  const { default: Component } =
+                    await import("components/ManageArtist/ManageArtistLinks");
+                  return { Component };
+                },
+              },
+              {
                 path: "release/:trackGroupId",
                 async lazy() {
                   const { default: Component } =

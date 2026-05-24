@@ -257,7 +257,7 @@ const SavingInput = React.forwardRef<
             position: absolute;
             right: 0.5rem;
             top: 0.5rem;
-            z-index: 99999;
+            z-index: 1;
             -webkit-filter: invert(100%);
             filter: invert(100%);
           `}

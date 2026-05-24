@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import ArtistHeaderActionsStrip from "components/Artist/ArtistHeaderActionsStrip";
 import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
@@ -10,6 +11,7 @@ import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetail
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -121,7 +123,6 @@ const ArtistHeaderSection: React.FC<{
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
   const snackbar = useSnackbar();
-  const [isLinksModalOpen, setIsLinksModalOpen] = React.useState(false);
 
   const handleSubmit = React.useCallback(
     async (data: UpdateArtistBody) => {
@@ -248,7 +249,6 @@ const ArtistHeaderSection: React.FC<{
             artist={artist}
             isManage={!!isManage}
             onSubmit={handleSubmit}
-            onOpenLinksModal={() => setIsLinksModalOpen(true)}
           />
         </div>
       </HeaderWrapper>
@@ -257,14 +257,18 @@ const ArtistHeaderSection: React.FC<{
       {(isManage ||
         (artist.linksJson?.length ?? 0) > 0 ||
         (artist.links?.length ?? 0) > 0) && (
-        <div className="max-md:hidden flex justify-end items-center pt-2">
-          <ArtistFormLinks
-            isManage={!!isManage}
-            artist={artist}
-            onSubmit={handleSubmit}
-            isOpen={isLinksModalOpen}
-            setIsOpen={setIsLinksModalOpen}
-          />
+        <div className="max-md:hidden flex justify-end items-center gap-2 pt-2">
+          <ArtistFormLinks artist={artist} />
+          {isManage && (
+            <ArtistButtonLink
+              to={`/manage/artists/${artist.id}/links`}
+              size="compact"
+              variant="dashed"
+              startIcon={<FaPen />}
+            >
+              {t("manageLinks")}
+            </ArtistButtonLink>
+          )}
         </div>
       )}
     </div>

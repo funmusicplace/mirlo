@@ -1,13 +1,15 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
-import api from "services/api";
 import { css } from "@emotion/css";
-import Table from "components/common/Table";
-import GenerateAlbumDownloadCodes from "../GenerateAlbumDownloadCodes";
-import { FaFileCsv } from "react-icons/fa";
 import Button from "components/common/Button";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import Table from "components/common/Table";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaFileCsv } from "react-icons/fa";
+import api from "services/api";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
+
+import GenerateAlbumDownloadCodes from "../GenerateAlbumDownloadCodes";
+
 import AlbumCodesRow from "./AlbumCodesRow";
 
 export type AlbumCode = {
@@ -36,9 +38,8 @@ const ShowAlbumCodes: React.FC<{}> = () => {
     | { type: "all" }
     | { type: "group"; group: string; trackGroupId: number };
 
-  const [downloadingTarget, setDownloadingTarget] = React.useState<
-    DownloadTarget | null
-  >(null);
+  const [downloadingTarget, setDownloadingTarget] =
+    React.useState<DownloadTarget | null>(null);
   const { data: artist } = useManagedArtistQuery();
   const userId = artist?.userId;
   const artistId = artist?.id;
@@ -133,6 +134,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
       <SpaceBetweenDiv>
         <h3>{t("existingAlbumCodes")}</h3>
         <Button
+          wrap
           startIcon={<FaFileCsv />}
           isLoading={downloadingTarget?.type === "all"}
           onClick={() => downloadCodes({ type: "all" })}

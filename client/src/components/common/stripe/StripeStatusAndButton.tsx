@@ -69,7 +69,7 @@ const StripeStatus = () => {
         {!isStripeGone &&
           userId && ( // if isStripeGone then we should show the resetStripeAccount button.
             <a href={api.paymentProcessor.stripeConnect(userId)}>
-              <Button>
+              <Button wrap>
                 {stripeAccountStatus?.detailsSubmitted
                   ? t("updateBankAccount")
                   : t("setUpBankAccount")}

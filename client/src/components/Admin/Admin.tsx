@@ -1,21 +1,15 @@
-import { css } from "@emotion/css";
 import React from "react";
-
-import Tabs from "../common/Tabs";
-import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { NavLink, Outlet } from "react-router-dom";
+
+import SectionNav from "../common/SectionNav";
 
 export const Admin: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
 
   return (
-    <div
-      className={css`
-        padding: 1rem;
-        width: 100%;
-      `}
-    >
-      <Tabs>
+    <div className="w-full flex flex-col">
+      <SectionNav>
         <li>
           <NavLink to="dashboard">{t("dashboard")}</NavLink>
         </li>
@@ -43,14 +37,8 @@ export const Admin: React.FC = () => {
         <li>
           <NavLink to="tasks/fundraising">{t("tasks")}</NavLink>
         </li>
-      </Tabs>
-      <div
-        className={css`
-          margin: 1rem 0 0;
-        `}
-      >
-        <Outlet />
-      </div>
+      </SectionNav>
+      <Outlet />
     </div>
   );
 };

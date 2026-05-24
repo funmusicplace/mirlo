@@ -1,14 +1,10 @@
 import ContactArtist from "components/common/ContactArtist";
-import { transformFromLinks } from "components/ManageArtist/ArtistFormLinks";
 import { UpdateArtistBody } from "queries";
 import { useTranslation } from "react-i18next";
 import { FaRss } from "react-icons/fa";
+import { transformFromLinks } from "utils/links";
 
-import {
-  ArtistButton,
-  ArtistButtonAnchor,
-  ArtistButtonLink,
-} from "./ArtistButtons";
+import { ArtistButtonAnchor, ArtistButtonLink } from "./ArtistButtons";
 import ArtistHeaderDescription from "./ArtistHeaderDescription";
 import ArtistShare from "./ArtistShare";
 import ArtistTourDates from "./ArtistTourDates";
@@ -21,8 +17,7 @@ const ArtistHeaderActionsStrip: React.FC<{
   artist: Artist;
   isManage: boolean;
   onSubmit: (data: UpdateArtistBody) => Promise<void>;
-  onOpenLinksModal?: () => void;
-}> = ({ artist, isManage, onSubmit, onOpenLinksModal }) => {
+}> = ({ artist, isManage, onSubmit }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const allLinks = transformFromLinks(artist).linkArray;
   const hasAnyLink = allLinks.length > 0;
@@ -40,25 +35,15 @@ const ArtistHeaderActionsStrip: React.FC<{
         artist={artist}
         onSubmit={onSubmit}
       />
-      {hasAnyLink &&
-        (isManage ? (
-          <ArtistButton
-            size="compact"
-            type="button"
-            onClick={() => onOpenLinksModal?.()}
-            className={`${tabButtonClass} ${hasHiddenLink ? "" : "md:hidden!"}`}
-          >
-            {t("links")}
-          </ArtistButton>
-        ) : (
-          <ArtistButtonLink
-            to="links"
-            size="compact"
-            className={`${tabButtonClass} ${hasHiddenLink ? "" : "md:hidden!"}`}
-          >
-            {t("links")}
-          </ArtistButtonLink>
-        ))}
+      {hasAnyLink && (
+        <ArtistButtonLink
+          to="links"
+          size="compact"
+          className={`${tabButtonClass} ${hasHiddenLink ? "" : "md:hidden!"}`}
+        >
+          {t("links")}
+        </ArtistButtonLink>
+      )}
       {!isManage && (
         <ContactArtist artist={artist} onlyIcon className={smallButtonClass} />
       )}

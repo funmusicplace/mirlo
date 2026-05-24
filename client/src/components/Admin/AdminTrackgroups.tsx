@@ -1,18 +1,13 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
-import Modal from "components/common/Modal";
 import Table from "components/common/Table";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
-import {
-  Outlet,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import api from "services/api";
-import useAdminFilters from "./useAdminFilters";
 import usePagination from "utils/usePagination";
+
+import useAdminFilters from "./useAdminFilters";
 
 const pageSize = 100;
 
@@ -63,11 +58,7 @@ export const AdminTrackGroups: React.FC = () => {
   );
 
   return (
-    <div
-      className={css`
-        flex-grow: 1;
-      `}
-    >
+    <WidthContainer variant="big" justify="center" className="p-4 grow">
       <h3>TrackGroups</h3>
       <Filters />
       <h4>Total results: {total}</h4>
@@ -110,7 +101,7 @@ export const AdminTrackGroups: React.FC = () => {
         </Table>
       )}
       <PaginationComponent amount={results.length} />
-    </div>
+    </WidthContainer>
   );
 };
 

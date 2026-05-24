@@ -1,18 +1,12 @@
-import { css } from "@emotion/css";
-import Modal from "components/common/Modal";
 import Table from "components/common/Table";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { FaCheck } from "react-icons/fa";
-import {
-  Link,
-  Outlet,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "services/api";
-import useAdminFilters from "./useAdminFilters";
 import usePagination from "utils/usePagination";
+
+import useAdminFilters from "./useAdminFilters";
 
 interface AdminArtist extends Artist {
   user: User;
@@ -53,11 +47,7 @@ export const AdminArtists: React.FC = () => {
   }, [callback]);
 
   return (
-    <div
-      className={css`
-        flex-grow: 1;
-      `}
-    >
+    <WidthContainer variant="big" justify="center" className="p-4 grow">
       <h3>Artists</h3>
       <Filters />
       <h4>Total results: {total}</h4>
@@ -95,7 +85,7 @@ export const AdminArtists: React.FC = () => {
       )}
       {/* <LoadingButton /> */}
       <PaginationComponent amount={results.length} total={total} />
-    </div>
+    </WidthContainer>
   );
 };
 

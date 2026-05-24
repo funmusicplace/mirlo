@@ -38,7 +38,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
   });
 
   let bio = artist?.bio;
-  const displayedContent = bio || artist?.shortDescription;
+  const displayedContent = isManage ? bio : bio || artist?.shortDescription;
 
   const handleSave = React.useCallback(
     async (data: FormData) => {
@@ -64,53 +64,50 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
       </ArtistButton>
       <Modal open={isOpen} size="small" onClose={() => setIsOpen(false)}>
         {!isEditing && (
-          <div
-            className={css`
-              width: 100%;
-              display: flex;
-            `}
-          >
-            {displayedContent && (
-              <div>
-                <MarkdownContent
-                  content={displayedContent}
-                  className={css`
-                    width: auto;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+          <div className="w-full">
+            {displayedContent ? (
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <MarkdownContent
+                    content={displayedContent}
+                    className={css`
+                      width: auto;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
 
-                    p img {
-                      float: left;
-                      margin: 0 1rem 1rem 0;
-                      width: 150px;
-                    }
-                  `}
-                />
+                      p img {
+                        float: left;
+                        margin: 0 1rem 1rem 0;
+                        width: 150px;
+                      }
+                    `}
+                  />
+                </div>
+                {isManage && (
+                  <div className="shrink-0">
+                    <ArtistButton
+                      size="compact"
+                      onlyIcon
+                      variant="dashed"
+                      onClick={() => setIsEditing(true)}
+                      startIcon={<FaPen />}
+                    />
+                  </div>
+                )}
               </div>
-            )}
-
-            {isManage && (
-              <div
-                className={css`
-                  max-width: 5%;
-                  flex: 5%;
-                  margin-right: 0.2rem;
-                  margin-left: 0.2rem;
-                `}
-              >
+            ) : (
+              isManage && (
                 <ArtistButton
+                  wrap
                   size="compact"
-                  className={css`
-                    white-space: nowrap;
-                  `}
-                  onlyIcon={!!bio}
                   variant="dashed"
                   onClick={() => setIsEditing(true)}
                   startIcon={<FaPen />}
+                  className="max-w-full"
                 >
-                  {!bio && t("noBioYet")}
+                  {t("noBioYet")}
                 </ArtistButton>
-              </div>
+              )
             )}
           </div>
         )}

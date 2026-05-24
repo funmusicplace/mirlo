@@ -113,7 +113,7 @@ const AlbumPaymentReceiver = () => {
           />
         </small>
         {trackGroup?.paymentToUser && (
-          <Pill>
+          <Pill variant="tint">
             {trackGroup.paymentToUser.name}{" "}
             <ArtistButton
               variant="dashed"

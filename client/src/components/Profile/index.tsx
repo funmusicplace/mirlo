@@ -12,7 +12,7 @@ import FilterGroup from "./UserNotificationFeed/FilterGroup";
 
 export const ProfileSection = styled.div`
   border-top: 1px solid var(--mi-darken-x-background-color);
-  margin-top: 2rem;
+  margin-top: 1rem;
   padding-top: 1rem;
 `;
 

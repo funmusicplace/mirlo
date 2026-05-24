@@ -49,7 +49,7 @@ const AdminSendEmail = () => {
   );
 
   return (
-    <WidthContainer variant="medium">
+    <WidthContainer variant="medium" className="p-4">
       <h3>Send Email</h3>
       <FormProvider {...methods}>
         <FormComponent>

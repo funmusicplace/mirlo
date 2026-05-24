@@ -247,6 +247,7 @@ const PreOrderSection: React.FC<{
             </div>
 
             <Button
+              wrap
               type="button"
               className="self-start"
               onClick={() => setShowEndModal(true)}

@@ -1,4 +1,5 @@
 import { moneyDisplay } from "components/common/Money";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import {
   LineChart,
@@ -122,7 +123,7 @@ export const AdminDashboard: React.FC = () => {
   const transactionCurrencies = Object.keys(transactionAmountByCurrency).sort();
 
   return (
-    <div className="flex-grow p-4">
+    <WidthContainer variant="big" justify="center" className="grow p-4">
       <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
 
       <div className="grid grid-cols-3 gap-4 mb-8">
@@ -224,7 +225,7 @@ export const AdminDashboard: React.FC = () => {
           </ChartContainer>
         ))}
       </div>
-    </div>
+    </WidthContainer>
   );
 };
 

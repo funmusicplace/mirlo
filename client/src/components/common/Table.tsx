@@ -5,7 +5,7 @@ import ScrollFadeOverlay from "./ScrollFadeOverlay";
 
 const StyledTable = styled.table`
   width: 100%;
-  border: none;
+  border: 1px solid var(--mi-tint-color);
   border-collapse: collapse;
 
   & tbody tr {

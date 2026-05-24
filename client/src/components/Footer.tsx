@@ -1,10 +1,12 @@
 import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import WidthContainer from "./common/WidthContainer";
-import { bp } from "../constants";
-import { FaInstagram, FaMastodon, FaTwitter } from "react-icons/fa";
+import { FaInstagram, FaMastodon } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
+import { Link } from "react-router-dom";
+
+import { bp } from "../constants";
+
+import WidthContainer from "./common/WidthContainer";
 
 export const Footer = () => {
   const { t } = useTranslation("translation", { keyPrefix: "footer" });
@@ -29,9 +31,9 @@ export const Footer = () => {
     >
       <WidthContainer variant="big" justify="center">
         <div
-          className={css`
+          className={`text-sm ${css`
             padding: 2rem;
-          `}
+          `}`}
         >
           <p
             className={css`
@@ -42,13 +44,8 @@ export const Footer = () => {
               t={t}
               i18nKey="getInTouch"
               components={{
-                github: (
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  <a href="https://github.com/funmusicplace/mirlo/"></a>
-                ),
-                // eslint-disable-next-line jsx-a11y/anchor-has-content,
+                github: <a href="https://github.com/funmusicplace/mirlo/"></a>,
                 discord: <a href="https://discord.gg/VjKq26raKX"></a>,
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
                 email: <a href="mailto:mirlodotspace@proton.me"></a>,
               }}
             />
@@ -63,7 +60,6 @@ export const Footer = () => {
               i18nKey="aboutUs"
               components={{
                 documentation: <Link to="https://docs.mirlo.space"></Link>,
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
                 about: <a href="https://docs.mirlo.space"></a>,
                 terms: <Link to="/pages/terms"></Link>,
                 privacy: <Link to="/pages/privacy"></Link>,
