@@ -81,7 +81,7 @@ export default function () {
         setBucketConfig((bucketNames as BucketConfig | null) ?? null);
       }
       const refreshedSettings = await getSiteSettings();
-      return res.status(200).json({ result: refreshedSettings });
+      return res.status(200).json({ result: maskStripeKey(refreshedSettings) });
     } catch (e) {
       next(e);
     }

@@ -2,12 +2,13 @@ import assert from "node:assert";
 
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it } from "mocha";
+import { afterEach, beforeEach, describe, it } from "mocha";
 
 import {
   createBucketIfNotExists,
   finalAudioBucket,
   uploadZip,
+  setBucketConfig,
 } from "../../../src/utils/minio";
 import {
   clearTables,
@@ -225,6 +226,65 @@ describe("tracks/{id}/download", () => {
         .set("Cookie", [`jwt=${accessToken}`]);
 
       assert.equal(response.statusCode, 404);
+    });
+
+    describe("consolidated mode", () => {
+      let adminToken: string;
+
+      beforeEach(async () => {
+        const { accessToken } = await createUser({
+          email: "admin@test.com",
+          isAdmin: true,
+        });
+        adminToken = accessToken;
+        await requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${adminToken}`])
+          .set("Accept", "application/json")
+          .send({
+            bucketNames: { prefix: "" },
+            settings: { platformPercent: 7 },
+          });
+        setBucketConfig({ prefix: "" });
+      });
+
+      afterEach(async () => {
+        setBucketConfig(null);
+        await requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${adminToken}`])
+          .set("Accept", "application/json")
+          .send({ bucketNames: null, settings: { platformPercent: 7 } });
+      });
+
+      it("serves a track zip uploaded to the consolidated bucket", async () => {
+        const { user } = await createUser({ email: "artist@artist.com" });
+        const artist = await createArtist(user.id);
+        const trackGroup = await createTrackGroup(artist.id);
+        const track = await createTrack(trackGroup.id);
+
+        const passthrough = await generateMockArchive();
+        await uploadZip("track", track.id, "flac", passthrough);
+
+        const { user: purchaser, accessToken } = await createUser({
+          email: "purchaser@artist.com",
+        });
+        await prisma.userTrackPurchase.create({
+          data: {
+            userId: purchaser.id,
+            trackId: track.id,
+            singleDownloadToken: randomUUID(),
+          },
+        });
+
+        const response = await requestApp
+          .get(`tracks/${track.id}/download`)
+          .set("Accept", "application/json")
+          .set("Cookie", [`jwt=${accessToken}`]);
+
+        assert.equal(response.statusCode, 200);
+        assert.equal(response.header["content-type"], "application/zip");
+      });
     });
 
     it("should GET / fail if not generated with logged in user", async () => {
