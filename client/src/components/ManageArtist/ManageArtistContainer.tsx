@@ -146,7 +146,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
         ${pageScaleCascade}
       `}
     >
-      <ManageArtistAnnouncement showButtons />
+      {!dontShowHeader && <ManageArtistAnnouncement showButtons />}
       <ArtistPageWrapper hasBackground={!!artistBackground}>
         <div>
           {hasTopWarning && (

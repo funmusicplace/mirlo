@@ -3,6 +3,8 @@ import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { Outlet } from "react-router-dom";
 
+export const MANAGE_ANNOUNCEMENT_MOUNT_ID = "manage-announcement-mount";
+
 const ManageContainer: React.FC = () => {
   return (
     <div
@@ -14,6 +16,7 @@ const ManageContainer: React.FC = () => {
         width: 100%;
       `}
     >
+      <div id={MANAGE_ANNOUNCEMENT_MOUNT_ID} />
       <WidthContainer variant="big" justify="center">
         <Outlet />
       </WidthContainer>
