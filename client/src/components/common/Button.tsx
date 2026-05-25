@@ -11,12 +11,19 @@ import { bp } from "../../constants";
 import LoadingSpinner from "./LoadingSpinner";
 
 export interface Sizable {
-  size?: "big" | "compact";
+  size?: "big" | "compact" | "tiny";
   wrap?: boolean;
   rounded?: boolean;
   collapsible?: boolean;
   buttonRole?: "primary" | "warning" | "black";
-  variant?: "link" | "outlined" | "dashed" | "transparent" | "default" | "pill";
+  variant?:
+    | "link"
+    | "outlined"
+    | "dashed"
+    | "transparent"
+    | "default"
+    | "pill"
+    | "chip";
   uppercase?: boolean;
   onlyIcon?: boolean;
   smallIcon?: boolean;
@@ -40,9 +47,9 @@ const CustomButton = styled.button<Sizable>(
     );
     const isOnlyIcon = props.onlyIcon
       ? `
-      padding: .5rem;
-      height: 2rem;
-      width: 2rem;
+      padding: ${size === "tiny" ? "0" : ".5rem"};
+      height: ${size === "tiny" ? "1.5rem" : "2rem"};
+      width: ${size === "tiny" ? "1.5rem" : "2rem"};
 
       @media screen and (max-width: ${bp.medium}px) {
         width: var(--mi-touch-target-min);
@@ -58,6 +65,13 @@ const CustomButton = styled.button<Sizable>(
         return `
           line-height: 1.2rem;
           padding: .3rem .5rem;
+          font-size: .8rem;
+        `;
+      } else if (size === "tiny") {
+        return `
+          height: 1.5rem;
+          line-height: 1.5rem;
+          padding: 0 .5rem;
           font-size: .8rem;
         `;
       } else if (size === "big") {
@@ -241,8 +255,22 @@ const CustomButton = styled.button<Sizable>(
     display: flex;
     border-radius: ${props.onlyIcon ? "100%" : "var(--mi-border-radius)"};
     justify-content: center;
-    min-width: ${props.variant === "link" ? "auto" : "var(--mi-touch-target-min)"};
-    min-height: ${props.variant === "link" ? "auto" : "var(--mi-touch-target-min)"};
+    min-width: ${props.variant === "link" || props.variant === "chip" || props.variant === "pill" ? "auto" : "var(--mi-touch-target-min)"};
+    min-height: ${props.variant === "link" || props.variant === "chip" || props.variant === "pill" ? "auto" : "var(--mi-touch-target-min)"};
+
+    ${
+      size === "tiny" &&
+      props.variant !== "link" &&
+      props.variant !== "chip" &&
+      props.variant !== "pill"
+        ? `
+      @media screen and (min-width: ${Number(bp.medium) + 1}px) {
+        min-width: auto;
+        min-height: auto;
+      }
+    `
+        : ""
+    }
 
     &[disabled] {
       opacity: 0.6;

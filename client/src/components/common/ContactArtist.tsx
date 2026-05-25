@@ -20,7 +20,8 @@ const ContactArtist: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "allowDirectMessages">;
   className?: string;
   onlyIcon?: boolean;
-}> = ({ artist, className, onlyIcon }) => {
+  size?: "compact" | "big" | "tiny";
+}> = ({ artist, className, onlyIcon, size }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
@@ -59,6 +60,7 @@ const ContactArtist: React.FC<{
         onClick={() => setIsOpen(true)}
         startIcon={<FaEnvelope />}
         onlyIcon={onlyIcon}
+        size={size}
         aria-label={onlyIcon ? t("contact") : undefined}
         className={className}
       >

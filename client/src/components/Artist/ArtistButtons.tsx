@@ -44,6 +44,38 @@ export const ArtistButton: React.FC<
     const contrastColor = "var(--mi-button-text-color)";
 
     switch (props.variant) {
+      case "chip":
+        return `
+        background-color: var(--mi-button-tint-color) !important;
+        color: var(--mi-button-color) !important;
+        border: none !important;
+        border-radius: 999px !important;
+        height: 1.5rem !important;
+        padding: 0 0.75rem !important;
+        font-size: calc(0.8rem * var(--page-scale, 1)) !important;
+        line-height: 1.4 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        vertical-align: middle;
+
+        svg {
+          height: 1em !important;
+          width: 1em !important;
+          fill: var(--mi-button-color) !important;
+        }
+
+        img {
+          height: 1em !important;
+          width: 1em !important;
+          object-fit: contain;
+        }
+
+        .startIcon {
+          margin-right: 0.35rem !important;
+        }
+      `;
       case "link":
         return `
         display: inline-flex !important;
