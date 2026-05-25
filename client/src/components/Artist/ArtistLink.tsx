@@ -7,10 +7,16 @@ const ArtistLink: React.FC<{ artist?: Artist }> = ({ artist }) => {
     return null;
   }
 
-  if (artist.urlSlug && location.pathname.includes(artist.urlSlug)) {
-    return artist.name;
-  }
+  const isCurrent =
+    !!artist.urlSlug && location.pathname.includes(artist.urlSlug);
 
-  return <Link to={getArtistUrl(artist)}>{artist?.name}</Link>;
+  return (
+    <Link
+      to={getArtistUrl(artist)}
+      aria-current={isCurrent ? "page" : undefined}
+    >
+      {artist.name}
+    </Link>
+  );
 };
 export default ArtistLink;

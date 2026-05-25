@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+
 import { bp } from "../../constants";
 
 const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
@@ -9,11 +10,12 @@ const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
   return (
     <div
       className={css`
-        max-width: 110px;
+        max-width: calc(110px * var(--page-scale, 1));
         display: flex;
+        flex-shrink: 0;
 
         @media screen and (max-width: ${bp.medium}px) {
-          max-width: 70px;
+          max-width: 56px;
           padding-bottom: 0rem;
           margin-bottom: 0rem;
         }

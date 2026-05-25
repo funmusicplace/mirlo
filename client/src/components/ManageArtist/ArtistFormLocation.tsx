@@ -116,46 +116,47 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
 
   return (
     <>
-      <div className="flex items-center gap-2 min-w-0 overflow-hidden">
-        {artist?.location && (
-          <div
-            className={css`
-              opacity: 0.5;
-              white-space: nowrap;
-              flex-shrink: 0;
-            `}
-          >
-            {artist?.location}
-          </div>
-        )}
-        {artist?.artistLocationTags?.map((tag) => (
-          <ArtistButtonLink
-            key={tag.locationTag.id}
-            variant="link"
-            color="foreground"
-            to={`/search/locations/${tag.locationTag.slug}`}
-            className="overflow-hidden text-ellipsis whitespace-nowrap block! min-w-0 shrink opacity-50"
-          >
-            {[
-              tag.locationTag.city,
-              tag.locationTag.region,
-              tag.locationTag.country,
-            ]
-              .filter(Boolean)
-              .join(", ")}
-          </ArtistButtonLink>
-        ))}
-        {!artist?.location &&
-          isManage &&
-          artist?.artistLocationTags?.length === 0 && (
-            <div
-              className={css`
-                opacity: 0.5;
-              `}
-            >
-              {t("editLocation")}
-            </div>
-          )}
+      <div className="flex items-center gap-2 min-w-0">
+        <div
+          className={css`
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+            flex: 1 1 auto;
+            opacity: 0.5;
+            line-height: 1.5;
+          `}
+        >
+          {artist?.location}
+          {(artist?.artistLocationTags ?? []).map((tag, i) => (
+            <React.Fragment key={tag.locationTag.id}>
+              {(artist?.location || i > 0) && ", "}
+              <ArtistButtonLink
+                variant="link"
+                color="foreground"
+                to={`/search/locations/${tag.locationTag.slug}`}
+                className={css`
+                  display: inline !important;
+                  line-height: inherit !important;
+                `}
+              >
+                {[
+                  tag.locationTag.city,
+                  tag.locationTag.region,
+                  tag.locationTag.country,
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
+              </ArtistButtonLink>
+            </React.Fragment>
+          ))}
+          {!artist?.location &&
+            isManage &&
+            artist?.artistLocationTags?.length === 0 &&
+            t("editLocation")}
+        </div>
         {isManage && (
           <ArtistButton
             variant="dashed"
@@ -165,6 +166,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             onClick={() => setIsEditing(true)}
             title={t("editLocation")}
             startIcon={<FaPen />}
+            className="shrink-0"
           />
         )}
       </div>

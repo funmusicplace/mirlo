@@ -1,9 +1,6 @@
-import { css } from "@emotion/css";
 import { i18n } from "i18next";
 import React from "react";
 import { useTranslation } from "react-i18next";
-
-import { bp } from "../../constants";
 
 export const formatDate = ({
   date,
@@ -86,18 +83,7 @@ const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
   });
 
   return (
-    <div
-      className={css`
-        color: var(--mi-secondary-text-color);
-        width: 100%;
-        font-size: var(--mi-font-size-small);
-        filter: opacity(80%);
-
-        @media screen and (max-width: ${bp.xlarge}px) {
-          font-size: var(--mi-font-size-xsmall);
-        }
-      `}
-    >
+    <div className="w-full text-sm opacity-80 max-xl:text-xs text-(--mi-secondary-text-color)">
       {t(beforeReleaseDate ? "futureRelease" : "pastRelease", {
         date: releaseFormat,
       })}

@@ -36,7 +36,7 @@ export const TrackGroupWrapper = styled.div`
 `;
 
 export const TrackGroupLinks = styled.div`
-  font-size: var(--mi-font-size-small);
+  font-size: calc(var(--mi-font-size-small) * var(--page-scale, 1));
   margin-bottom: 0.5rem;
   padding-top: 0.5rem;
   display: flex;
@@ -64,7 +64,9 @@ export const TrackGroupInfo = styled.div`
     margin-bottom: 0.2rem;
   }
   a:not(:first-of-type) {
-    font-size: var(--mi-font-size-xsmall);
+    font-size: calc(var(--mi-font-size-xsmall) * var(--page-scale, 1));
+    white-space: normal;
+    word-break: break-word;
   }
 
   a:hover {

@@ -1,40 +1,45 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import ArtistHeaderActionsStrip from "components/Artist/ArtistHeaderActionsStrip";
 import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { MetaCard } from "components/common/MetaCard";
-import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
-import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { useFitTitle } from "utils/useFitTitle";
 
-import { bp } from "../../constants";
+import { between, bp } from "../../constants";
 
 import FollowArtist from "./FollowArtist";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
-  font-size: 2.4rem;
-  line-height: 2.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-size: calc(2.4rem * var(--page-scale, 1) * var(--fit-scale, 1));
+  line-height: 1.05;
+  padding-bottom: 0.1em;
+
+  @media screen and (min-width: ${Number(bp.medium) + 1}px) {
+    white-space: nowrap;
+    overflow-x: clip;
+
+    &[data-fit-overflow="true"] {
+      white-space: normal;
+      overflow-x: visible;
+    }
+  }
 
   @media screen and (max-width: ${bp.medium}px) {
-    font-size: 1.2rem;
+    font-size: calc(1.2rem * var(--fit-scale, 1));
     line-height: 1.4rem;
     padding-top: 0rem;
     padding-bottom: 0rem;
     ${(props) =>
       !props.artistAvatar
-        ? "font-size: 1.3rem !important; line-height: 2rem;"
+        ? "font-size: calc(1.3rem * var(--fit-scale, 1)) !important; line-height: 2rem;"
         : ""}
   }
 `;
@@ -48,6 +53,10 @@ export const Header = styled.div`
   flex-grow: 1;
   font-size: var(--mi-font-size-normal);
 
+  @media screen and (max-width: ${bp.xlarge}px) {
+    font-size: var(--mi-font-size-small);
+  }
+
   @media screen and (max-width: ${bp.medium}px) {
     font-size: var(--mi-font-size-small);
     line-height: var(--mi-font-size-normal);
@@ -59,7 +68,7 @@ export const Header = styled.div`
 
 export const AvatarWrapper = styled.div<{ artistAvatar?: boolean }>`
   display: flex;
-  padding-top: 1rem;
+  padding-top: calc(1rem * var(--page-scale, 1));
   align-items: center;
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -70,9 +79,12 @@ export const AvatarWrapper = styled.div<{ artistAvatar?: boolean }>`
 
 export const ArtistTitleWrapper = styled.div<{ artistAvatar?: boolean }>`
   width: 100%;
+  min-width: 0;
   display: flex;
   ${(props) =>
-    props.artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
+    props.artistAvatar
+      ? "min-height: calc(85px * var(--page-scale, 1)); margin-left: 1rem;"
+      : ""}
   flex-direction: column;
   justify-content: center;
   @media screen and (max-width: ${bp.medium}px) {
@@ -82,7 +94,7 @@ export const ArtistTitleWrapper = styled.div<{ artistAvatar?: boolean }>`
 `;
 
 export const ArtistTitleText = styled.div`
-  min-height: 50px;
+  min-height: calc(50px * var(--page-scale, 1));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -123,6 +135,7 @@ const ArtistHeaderSection: React.FC<{
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
   const snackbar = useSnackbar();
+  const titleRef = useFitTitle<HTMLHeadingElement>({ deps: [artist?.name] });
 
   const handleSubmit = React.useCallback(
     async (data: UpdateArtistBody) => {
@@ -190,10 +203,10 @@ const ArtistHeaderSection: React.FC<{
                       min-width: 0;
                     `}
                   >
-                    <ArtistTitle artistAvatar={!!artistAvatar}>
+                    <ArtistTitle artistAvatar={!!artistAvatar} ref={titleRef}>
                       {artist.name}
                     </ArtistTitle>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       {artist.isLabelProfile && (
                         <>
                           <span className="max-md:hidden text-(--mi-button-color)">
@@ -213,14 +226,14 @@ const ArtistHeaderSection: React.FC<{
                     {artist.shortDescription && (
                       <div
                         className={css`
-                          font-size: 1rem;
-                          line-height: 1.2rem;
+                          font-size: var(--mi-font-size-small);
+                          line-height: 1.2;
                           margin-top: 0.25rem;
-                          font-size: var(--mi-font-size-small) !important;
+                          @media ${between(bp.medium, bp.xlarge)} {
+                            margin-top: 0;
+                          }
                           @media screen and (max-width: ${bp.medium}px) {
                             display: none;
-                            font-size: 0.9rem;
-                            line-height: 1.1rem;
                           }
                         `}
                       >
@@ -244,7 +257,7 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div className="w-full flex flex-row items-center justify-end py-2 max-md:py-1 max-md:border-t max-md:border-(--mi-button-color)/50">
+        <div className="w-full flex flex-row items-center justify-end pb-2 max-md:py-1 max-md:border-t max-md:border-(--mi-button-color)/50">
           <ArtistHeaderActionsStrip
             artist={artist}
             isManage={!!isManage}
@@ -252,25 +265,6 @@ const ArtistHeaderSection: React.FC<{
           />
         </div>
       </HeaderWrapper>
-
-      <ManageArtistAnnouncement showButtons={isManage} />
-      {(isManage ||
-        (artist.linksJson?.length ?? 0) > 0 ||
-        (artist.links?.length ?? 0) > 0) && (
-        <div className="max-md:hidden flex justify-end items-center gap-2 pt-2">
-          <ArtistFormLinks artist={artist} />
-          {isManage && (
-            <ArtistButtonLink
-              to={`/manage/artists/${artist.id}/links`}
-              size="compact"
-              variant="dashed"
-              startIcon={<FaPen />}
-            >
-              {t("manageLinks")}
-            </ArtistButtonLink>
-          )}
-        </div>
-      )}
     </div>
   );
 };

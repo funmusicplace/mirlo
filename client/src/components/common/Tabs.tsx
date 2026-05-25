@@ -41,6 +41,11 @@ export const ArtistTabs = styled(Tabs)`
   padding-inline-start: 0;
   margin: 0 0 1rem 0;
 
+  @media screen and (min-width: ${Number(bp.medium) +
+    1}px) and (max-width: 1280px) {
+    margin-bottom: 0.25rem;
+  }
+
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0.5rem 0.5rem 0 0.5rem;
     margin-bottom: 0;
@@ -51,6 +56,7 @@ export const ArtistTabs = styled(Tabs)`
     > a,
     button {
       color: var(--mi-button-color) !important;
+      font-size: calc(1.2rem * var(--page-scale, 1));
 
       &.active {
         border-bottom: 4px solid var(--mi-button-color) !important;
