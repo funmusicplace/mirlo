@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import DropdownMenu from "components/common/DropdownMenu";
+import DropdownMenu, { useDropdownMenu } from "components/common/DropdownMenu";
 import { DropdownMenuItemButton } from "components/common/DropdownMenuItem";
 import { FixedButton } from "components/common/FixedButton";
 import Modal from "components/common/Modal";
@@ -39,6 +39,7 @@ const PlayerActions: React.FC = () => {
 
   return (
     <div
+      data-cy="player-actions"
       className={css`
         z-index: 10;
         bottom: var(--player-actions-bottom-offset, 80px);
@@ -121,18 +122,20 @@ const WishlistTargetMenu: React.FC<{
 
   return (
     <DropdownMenu trigger={trigger}>
-      <WishlistMenuItem
-        active={trackInWishlist}
-        onToggle={toggleTrack}
-        labelAdd={t("wishlistThisTrack")}
-        labelRemove={t("removeTrackFromWishlist")}
-      />
-      <WishlistMenuItem
-        active={albumInWishlist}
-        onToggle={toggleAlbum}
-        labelAdd={t("wishlistThisAlbum")}
-        labelRemove={t("removeAlbumFromWishlist")}
-      />
+      <ul>
+        <WishlistMenuItem
+          active={trackInWishlist}
+          onToggle={toggleTrack}
+          labelAdd={t("wishlistThisTrack")}
+          labelRemove={t("removeTrackFromWishlist")}
+        />
+        <WishlistMenuItem
+          active={albumInWishlist}
+          onToggle={toggleAlbum}
+          labelAdd={t("wishlistThisAlbum")}
+          labelRemove={t("removeAlbumFromWishlist")}
+        />
+      </ul>
     </DropdownMenu>
   );
 };
@@ -142,19 +145,21 @@ const WishlistMenuItem: React.FC<{
   onToggle: () => void | Promise<void>;
   labelAdd: string;
   labelRemove: string;
-  setIsMenuOpen?: (open: boolean) => void;
-}> = ({ active, onToggle, labelAdd, labelRemove, setIsMenuOpen }) => {
+}> = ({ active, onToggle, labelAdd, labelRemove }) => {
+  const menu = useDropdownMenu();
   const label = active ? labelRemove : labelAdd;
   return (
-    <DropdownMenuItemButton
-      startIcon={active ? <IoIosHeart /> : <IoIosHeartEmpty />}
-      onClick={async () => {
-        await onToggle();
-        setIsMenuOpen?.(false);
-      }}
-    >
-      {label}
-    </DropdownMenuItemButton>
+    <li>
+      <DropdownMenuItemButton
+        startIcon={active ? <IoIosHeart /> : <IoIosHeartEmpty />}
+        onClick={async () => {
+          await onToggle();
+          menu?.close();
+        }}
+      >
+        {label}
+      </DropdownMenuItemButton>
+    </li>
   );
 };
 
@@ -214,16 +219,18 @@ const BuyTargetMenu: React.FC<{
   return (
     <>
       <DropdownMenu trigger={trigger}>
-        <BuyMenuItem
-          show={!trackOwned}
-          label={t("buyThisTrack")}
-          onSelect={() => setBuyTarget("track")}
-        />
-        <BuyMenuItem
-          show={!albumOwned}
-          label={t("buyThisAlbum")}
-          onSelect={() => setBuyTarget("album")}
-        />
+        <ul>
+          <BuyMenuItem
+            show={!trackOwned}
+            label={t("buyThisTrack")}
+            onSelect={() => setBuyTarget("track")}
+          />
+          <BuyMenuItem
+            show={!albumOwned}
+            label={t("buyThisAlbum")}
+            onSelect={() => setBuyTarget("album")}
+          />
+        </ul>
       </DropdownMenu>
       <Modal
         size="small"
@@ -245,20 +252,22 @@ const BuyMenuItem: React.FC<{
   show: boolean;
   label: string;
   onSelect: () => void;
-  setIsMenuOpen?: (open: boolean) => void;
-}> = ({ show, label, onSelect, setIsMenuOpen }) => {
+}> = ({ show, label, onSelect }) => {
+  const menu = useDropdownMenu();
   if (!show) {
     return null;
   }
   return (
-    <DropdownMenuItemButton
-      onClick={() => {
-        onSelect();
-        setIsMenuOpen?.(false);
-      }}
-    >
-      {label}
-    </DropdownMenuItemButton>
+    <li>
+      <DropdownMenuItemButton
+        onClick={() => {
+          onSelect();
+          menu?.close();
+        }}
+      >
+        {label}
+      </DropdownMenuItemButton>
+    </li>
   );
 };
 

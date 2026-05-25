@@ -12,6 +12,12 @@ import { bp } from "../../constants";
 
 import Button from "./Button";
 
+const DropdownMenuContext = React.createContext<{ close: () => void } | null>(
+  null
+);
+
+export const useDropdownMenu = () => React.useContext(DropdownMenuContext);
+
 const DropdownMenu: React.FC<{
   children: React.ReactElement | React.ReactElement[];
   dashed?: boolean;
@@ -39,6 +45,15 @@ const DropdownMenu: React.FC<{
   }>({ x: 0, y: 0, openUpward: false, openRightward: false });
 
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (!isMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMenuOpen]);
 
   const colors = useGetArtistColors();
   const LocalButton = colors ? ArtistButton : Button;
@@ -128,7 +143,7 @@ const DropdownMenu: React.FC<{
                   ? "none"
                   : "translateX(-100%)"};
                 border-radius: var(--mi-border-radius);
-                padding: 0.5rem;
+                padding: 0;
                 z-index: 999;
                 overflow: hidden;
                 min-width: 215px;
@@ -145,19 +160,19 @@ const DropdownMenu: React.FC<{
                 }
 
                 li > * {
-                  min-width: 200px;
+                  width: 100%;
+                  min-width: 0;
                   list-style-type: none;
                   text-decoration: none;
                   text-align: right;
-                  display: block;
                   white-space: normal;
                   color: var(--mi-text-color) !important;
                   background-color: var(--mi-background-color) !important;
                   word-break: break-word;
                   font-weight: normal;
                   border-radius: 0;
-                  padding: 0.5rem;
-                  margin: 0rem;
+                  padding: 0.5rem 0.75rem;
+                  margin: 0;
 
                   display: flex;
                   align-items: center;
@@ -174,11 +189,75 @@ const DropdownMenu: React.FC<{
                     border: none;
                   }
                 }
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  top: 50% !important;
+                  bottom: auto !important;
+                  left: 50% !important;
+                  right: auto !important;
+                  transform: translate(-50%, -50%) !important;
+                  min-width: 0;
+                  max-width: none;
+                  width: min(90vw, 360px);
+                  border-radius: var(--mi-border-radius-x);
+                  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+
+                  ul {
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    justify-content: center;
+                    column-gap: 0.75rem;
+                    padding: 0;
+                    margin: 0;
+                  }
+
+                  li {
+                    display: grid;
+                    grid-template-columns: subgrid;
+                    grid-column: 1 / -1;
+                    align-items: center;
+                    padding: 0.875rem 1rem;
+                    font-size: 0.875rem;
+                  }
+
+                  li + li {
+                    border-top: 1px solid var(--mi-darken-color);
+                  }
+
+                  li > * {
+                    display: contents !important;
+                  }
+
+                  li .startIcon {
+                    justify-self: end;
+                    grid-column: 1;
+                  }
+
+                  li .children {
+                    justify-self: start;
+                    grid-column: 2;
+                    text-align: left;
+                  }
+
+                  li:hover {
+                    background: var(--mi-text-color) !important;
+                    color: var(--mi-background-color) !important;
+                  }
+
+                  li svg {
+                    width: 1rem;
+                    height: 1rem;
+                  }
+                }
               `}
             >
-              {React.Children.map(children, (child) =>
-                React.cloneElement(child, { setIsMenuOpen })
-              )}
+              <DropdownMenuContext.Provider
+                value={{ close: () => setIsMenuOpen(false) }}
+              >
+                {React.Children.map(children, (child) =>
+                  React.cloneElement(child, { setIsMenuOpen })
+                )}
+              </DropdownMenuContext.Provider>
             </div>
           </>,
           document.body
