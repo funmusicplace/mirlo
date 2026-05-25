@@ -487,6 +487,9 @@ export const singleInclude = (queryOptions?: {
           },
         },
         fundraiser: true,
+        paymentToUser: {
+          select: { currency: true },
+        },
       },
     },
     tourDates: true,

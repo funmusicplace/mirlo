@@ -41,7 +41,7 @@ const BuyTrackGroup: React.FC<{
   const { user } = useAuthContext();
 
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
-  const currency = trackGroup.artist.user?.currency ?? "usd";
+  const currency = trackGroup.currency ?? "usd";
   const initialChosenPriceCents = track
     ? (minPrice ?? 0)
     : Math.max(trackGroup.suggestedPrice ?? 0, minPrice ?? 0);

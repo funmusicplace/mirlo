@@ -21,6 +21,7 @@ export const processSingleTrackGroup = (
       avatar?: ArtistAvatar | null;
       user?: { currency?: string | null };
     };
+    paymentToUser?: { currency?: string | null } | null;
     merch?: (Merch & { images: MerchImage[] })[];
     tracks?: (Track & { userTrackPurchases?: { userId: number }[] })[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
@@ -31,41 +32,45 @@ export const processSingleTrackGroup = (
     trackGroupPurchases?: { userId: number }[];
   },
   options?: { loggedInUserId?: number }
-) => ({
-  ...tg,
-  currency: tg.artist?.user?.currency ?? "usd",
-  hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
-  tracks: tg.tracks?.map((track) => ({
-    ...track,
-    isPlayable: isTrackPlayableNested({
-      isPreview: track.isPreview,
-      trackGroupPurchases: tg.trackGroupPurchases,
-      trackPurchases: track.userTrackPurchases,
-      userId: options?.loggedInUserId,
-    }),
-  })),
-  artist: tg.artist
-    ? {
-        ...tg.artist,
-        avatar: tg.artist.avatar
-          ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
-          : undefined,
-      }
-    : undefined,
-  merch: tg.merch?.map((m) =>
-    processSingleMerch(m, {
-      fallbackCurrency: tg.artist?.user?.currency ?? undefined,
-    })
-  ),
-  tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
-  cover: addSizesToImage(finalCoversBucket, tg.cover),
-  downloadableContent: tg.downloadableContent?.map((dc) => ({
-    ...dc,
-    downloadableContent: {
-      ...dc.downloadableContent,
-      downloadUrl:
-        process.env.API_DOMAIN +
-        `/v1/downloadableContent/${dc.downloadableContentId}`,
-    },
-  })),
-});
+) => {
+  const currency =
+    tg.paymentToUser?.currency ?? tg.artist?.user?.currency ?? "usd";
+  return {
+    ...tg,
+    currency,
+    hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
+    tracks: tg.tracks?.map((track) => ({
+      ...track,
+      isPlayable: isTrackPlayableNested({
+        isPreview: track.isPreview,
+        trackGroupPurchases: tg.trackGroupPurchases,
+        trackPurchases: track.userTrackPurchases,
+        userId: options?.loggedInUserId,
+      }),
+    })),
+    artist: tg.artist
+      ? {
+          ...tg.artist,
+          avatar: tg.artist.avatar
+            ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
+            : undefined,
+        }
+      : undefined,
+    merch: tg.merch?.map((m) =>
+      processSingleMerch(m, {
+        fallbackCurrency: currency,
+      })
+    ),
+    tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
+    cover: addSizesToImage(finalCoversBucket, tg.cover),
+    downloadableContent: tg.downloadableContent?.map((dc) => ({
+      ...dc,
+      downloadableContent: {
+        ...dc.downloadableContent,
+        downloadUrl:
+          process.env.API_DOMAIN +
+          `/v1/downloadableContent/${dc.downloadableContentId}`,
+      },
+    })),
+  };
+};

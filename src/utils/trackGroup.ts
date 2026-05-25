@@ -277,6 +277,7 @@ export const trackGroupSingleInclude = (options: {
         name: true,
         urlSlug: true,
         userAvatar: true,
+        currency: true,
       },
     },
     downloadableContent: {
