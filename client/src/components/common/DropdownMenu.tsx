@@ -20,6 +20,7 @@ const DropdownMenu: React.FC<{
   compact?: boolean;
   label?: string;
   triggerClassName?: string;
+  trigger?: React.ReactElement;
 }> = ({
   children,
   icon,
@@ -28,6 +29,7 @@ const DropdownMenu: React.FC<{
   label,
   smallIcon,
   triggerClassName,
+  trigger,
 }) => {
   const [buttonPosition, setButtonPosition] = React.useState<{
     x: number;
@@ -38,13 +40,63 @@ const DropdownMenu: React.FC<{
 
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
-  if (!icon) {
-    icon = <FaEllipsisV />;
-  }
-
   const colors = useGetArtistColors();
-
   const LocalButton = colors ? ArtistButton : Button;
+
+  const defaultTrigger = (
+    <LocalButton
+      size={compact ? "compact" : undefined}
+      variant={dashed ? "dashed" : "transparent"}
+      className={`${css`
+        ${!triggerClassName
+          ? `
+          background: transparent !important;
+
+          &:hover {
+            background: transparent !important;
+          }
+        `
+          : ""}
+
+        @media screen and (max-width: ${bp.medium}px) {
+          ${smallIcon ? "width: 2rem !important; height: 2rem !important;" : ""}
+          svg {
+            ${smallIcon ? "width: .3rem !important; margin-left:1rem;" : ""}
+          }
+        }
+      `}${triggerClassName ? ` ${triggerClassName}` : ""}`}
+      startIcon={icon ?? <FaEllipsisV />}
+    />
+  );
+
+  const renderedTrigger = trigger ?? defaultTrigger;
+
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const openRightward = rect.left < window.innerWidth / 2;
+    const openUpward = rect.top > window.innerHeight / 2;
+    setButtonPosition({
+      x: openRightward ? rect.left : rect.right,
+      y: rect.top,
+      openUpward,
+      openRightward,
+    });
+    setIsMenuOpen(true);
+  };
+
+  const triggerElement = React.cloneElement(renderedTrigger, {
+    "aria-label": renderedTrigger.props["aria-label"] ?? label,
+    "aria-haspopup": "menu",
+    "aria-expanded": isMenuOpen,
+    onClick: (e: React.MouseEvent<HTMLElement>) => {
+      renderedTrigger.props.onClick?.(e);
+      if (e.defaultPrevented) {
+        return;
+      }
+      openMenu(e);
+    },
+  });
 
   return (
     <div
@@ -132,46 +184,7 @@ const DropdownMenu: React.FC<{
           document.body
         )}
 
-      <LocalButton
-        size={compact ? "compact" : undefined}
-        variant={dashed ? "dashed" : "transparent"}
-        aria-label={label}
-        role="menu"
-        className={`${css`
-          ${!triggerClassName
-            ? `
-            background: transparent !important;
-
-            &:hover {
-              background: transparent !important;
-            }
-          `
-            : ""}
-
-          @media screen and (max-width: ${bp.medium}px) {
-            ${smallIcon
-              ? "width: 2rem !important; height: 2rem !important;"
-              : ""}
-            svg {
-              ${smallIcon ? "width: .3rem !important; margin-left:1rem;" : ""}
-            }
-          }
-        `}${triggerClassName ? ` ${triggerClassName}` : ""}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          const rect = e.currentTarget.getBoundingClientRect();
-          const openRightward = rect.left < window.innerWidth / 2;
-          const openUpward = rect.top > window.innerHeight / 2;
-          setButtonPosition({
-            x: openRightward ? rect.left : rect.right,
-            y: rect.top,
-            openUpward,
-            openRightward,
-          });
-          setIsMenuOpen(true);
-        }}
-        startIcon={icon}
-      />
+      {triggerElement}
     </div>
   );
 };
