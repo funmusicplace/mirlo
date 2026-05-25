@@ -48,7 +48,9 @@ const ManageArtistButtons: React.FC = () => {
   const { data: managedTrackGroup } = useQuery(
     queryManagedTrackGroup(Number(trackGroupId) ?? 0)
   );
-  const { data: merch } = useQuery(queryManagedMerch(merchId ?? ""));
+  const { data: merch } = useQuery(
+    queryManagedMerch(isManagePage ? (merchId ?? "") : "")
+  );
   const { data: tier } = useQuery(
     queryManagedArtistSubscriptionTier({
       artistId: Number(artistId),
