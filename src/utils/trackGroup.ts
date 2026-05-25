@@ -131,7 +131,7 @@ export const deleteTrackGroupCover = async (trackGroupId: number) => {
     });
 
     try {
-      removeCoverImages(cover.id);
+      await removeCoverImages(cover.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }

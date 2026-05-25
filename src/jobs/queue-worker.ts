@@ -25,11 +25,6 @@ import "../queues/auto-purchase-new-albums-queue";
 import uploadAudioJob from "./upload-audio";
 import verifyAudioJob from "./verify-audio";
 
-// Initialize storage config from DB so job processors use the correct bucket names.
-getSiteSettings().then((settings) => {
-  setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
-});
-
 export const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
@@ -95,7 +90,9 @@ function createWorkerWithLogging(
 }
 
 yargs
-  .command("run", "starts file processing queue", (argv: any) => {
+  .command("run", "starts file processing queue", async (argv: any) => {
+    const settings = await getSiteSettings();
+    setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
     logger.info("STARTING WORKER QUEUE");
     audioQueue();
     // audioDurationQueue();

@@ -8,6 +8,7 @@ import assert from "assert";
 import sinon from "sinon";
 
 import { Readable } from "stream";
+import { EventEmitter } from "events";
 
 import {
   setBucketConfig,
@@ -24,6 +25,10 @@ import {
   uploadAudioHlsFile,
   uploadZip,
   getDownloadableContentBuffer,
+  getCoverBuffer,
+  removeCoverImages,
+  removeDownloadableContent,
+  removeAudioFiles,
   minioClient,
   // Bucket name constants used in assertions
   incomingArtistAvatarBucket,
@@ -459,6 +464,139 @@ describe("minio bucket routing", () => {
       const [bucket, key] = getObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-downloads");
       assert.equal(key, "content/content-id");
+    });
+  });
+
+  describe("getCoverBuffer", () => {
+    it("legacy mode: reads from finalCoversBucket with bare key", async () => {
+      await getCoverBuffer("cover-id", "webp");
+      const [bucket, key] = getObjectStub.firstCall.args;
+      assert.equal(bucket, finalCoversBucket);
+      assert.equal(key, "cover-id-x1500.webp");
+    });
+
+    it("legacy mode: reads jpg from finalCoversBucket with bare key", async () => {
+      await getCoverBuffer("cover-id", "jpg");
+      const [bucket, key] = getObjectStub.firstCall.args;
+      assert.equal(bucket, finalCoversBucket);
+      assert.equal(key, "cover-id-x1500.jpg");
+    });
+
+    describe("consolidated mode (no prefix)", () => {
+      beforeEach(() => setBucketConfig({ prefix: "" }));
+
+      it("reads from mirlo-images with path-prefixed key", async () => {
+        await getCoverBuffer("cover-id", "webp");
+        const [bucket, key] = getObjectStub.firstCall.args;
+        assert.equal(bucket, "mirlo-images");
+        assert.equal(key, `${finalCoversBucket}/cover-id-x1500.webp`);
+      });
+    });
+
+    describe("consolidated mode (with prefix)", () => {
+      beforeEach(() => setBucketConfig({ prefix: "staging-" }));
+
+      it("reads from staging-mirlo-images with path-prefixed key", async () => {
+        await getCoverBuffer("cover-id", "webp");
+        const [bucket, key] = getObjectStub.firstCall.args;
+        assert.equal(bucket, "staging-mirlo-images");
+        assert.equal(key, `${finalCoversBucket}/cover-id-x1500.webp`);
+      });
+    });
+  });
+
+  describe("deletion operations", () => {
+    let listObjectsV2Stub: sinon.SinonStub;
+    let removeObjectsStub: sinon.SinonStub;
+
+    beforeEach(() => {
+      listObjectsV2Stub = sinon
+        .stub(minioClient!, "listObjectsV2")
+        .callsFake(() => {
+          const emitter = new EventEmitter();
+          setImmediate(() => {
+            emitter.emit("data", { name: "file1" });
+            emitter.emit("end");
+          });
+          return emitter as any;
+        });
+      removeObjectsStub = sinon.stub(minioClient!, "removeObjects").resolves();
+    });
+
+    describe("legacy mode", () => {
+      it("removeAudioFiles uses finalAudioBucket with audioId prefix", async () => {
+        await removeAudioFiles("audio-id");
+        assert.equal(listObjectsV2Stub.firstCall.args[0], finalAudioBucket);
+        assert.equal(listObjectsV2Stub.firstCall.args[1], "audio-id");
+      });
+
+      it("removeCoverImages uses finalCoversBucket with coverId prefix", async () => {
+        await removeCoverImages("cover-id");
+        assert.equal(listObjectsV2Stub.firstCall.args[0], finalCoversBucket);
+        assert.equal(listObjectsV2Stub.firstCall.args[1], "cover-id");
+      });
+
+      it("removeDownloadableContent uses downloadableContentBucket with contentId prefix", async () => {
+        await removeDownloadableContent("content-id");
+        assert.equal(
+          listObjectsV2Stub.firstCall.args[0],
+          downloadableContentBucket
+        );
+        assert.equal(listObjectsV2Stub.firstCall.args[1], "content-id");
+      });
+    });
+
+    describe("consolidated mode", () => {
+      beforeEach(() => setBucketConfig({ prefix: "" }));
+
+      it("removeAudioFiles uses mirlo-audio with audioId prefix", async () => {
+        await removeAudioFiles("audio-id");
+        assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-audio");
+        assert.equal(listObjectsV2Stub.firstCall.args[1], "audio-id");
+      });
+
+      it("removeCoverImages uses mirlo-images with prefixed coverId", async () => {
+        await removeCoverImages("cover-id");
+        assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-images");
+        assert.equal(
+          listObjectsV2Stub.firstCall.args[1],
+          `${finalCoversBucket}/cover-id`
+        );
+      });
+
+      it("removeDownloadableContent uses mirlo-downloads with content/ prefix", async () => {
+        await removeDownloadableContent("content-id");
+        assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-downloads");
+        assert.equal(listObjectsV2Stub.firstCall.args[1], "content/content-id");
+      });
+    });
+
+    describe("consolidated mode (with prefix)", () => {
+      beforeEach(() => setBucketConfig({ prefix: "staging-" }));
+
+      it("removeAudioFiles uses staging-mirlo-audio", async () => {
+        await removeAudioFiles("audio-id");
+        assert.equal(
+          listObjectsV2Stub.firstCall.args[0],
+          "staging-mirlo-audio"
+        );
+      });
+
+      it("removeCoverImages uses staging-mirlo-images", async () => {
+        await removeCoverImages("cover-id");
+        assert.equal(
+          listObjectsV2Stub.firstCall.args[0],
+          "staging-mirlo-images"
+        );
+      });
+
+      it("removeDownloadableContent uses staging-mirlo-downloads", async () => {
+        await removeDownloadableContent("content-id");
+        assert.equal(
+          listObjectsV2Stub.firstCall.args[0],
+          "staging-mirlo-downloads"
+        );
+      });
     });
   });
 });

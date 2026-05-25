@@ -1,21 +1,32 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it } from "mocha";
-import {
-  clearTables,
-  createArtist,
-  createTrackGroup,
-  createUser,
-} from "../../utils";
-import prisma from "@mirlo/prisma";
-import { randomUUID } from "crypto";
+import { afterEach, beforeEach, describe, it } from "mocha";
 
-import { requestApp } from "../utils";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
+  uploadZip,
+  setBucketConfig,
 } from "../../../src/utils/minio";
+import {
+  clearTables,
+  createArtist,
+  createTrack,
+  createTrackGroup,
+  createUser,
+} from "../../utils";
+
+import prisma from "@mirlo/prisma";
+
+import { randomUUID } from "crypto";
+
+import { requestApp } from "../utils";
+
+import archiver from "archiver";
+
+import { PassThrough } from "node:stream";
 
 describe("trackGroups/{id}/download", () => {
   beforeEach(async () => {
@@ -27,6 +38,24 @@ describe("trackGroups/{id}/download", () => {
   });
 
   describe("GET", () => {
+    const generateMockArchive = async () => {
+      const pass = new PassThrough();
+
+      await new Promise(async (resolve: (value?: unknown) => void) => {
+        const archive = archiver("zip", {
+          zlib: { level: 9 },
+        });
+
+        archive.on("finish", () => {
+          resolve();
+        });
+
+        archive.pipe(pass);
+        archive.finalize();
+      });
+      return pass;
+    };
+
     it("should GET / 404", async () => {
       const response = await requestApp
         .get("trackGroups/1/download")
@@ -163,6 +192,94 @@ describe("trackGroups/{id}/download", () => {
         },
       });
       assert.equal(updatedPurchase?.singleDownloadToken, downloadToken);
+    });
+
+    it("should GET / 200 and stream zip when trackgroup is already zipped", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+      const track = await createTrack(trackGroup.id);
+
+      const passthrough = await generateMockArchive();
+      await uploadZip("trackGroup", trackGroup.id, "mp3-320", passthrough);
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: purchaser.id,
+          trackGroupId: trackGroup.id,
+          singleDownloadToken: randomUUID(),
+        },
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}/download?format=mp3-320`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.header["content-type"], "application/zip");
+    });
+
+    describe("consolidated mode", () => {
+      let adminToken: string;
+
+      beforeEach(async () => {
+        const { accessToken } = await createUser({
+          email: "admin@test.com",
+          isAdmin: true,
+        });
+        adminToken = accessToken;
+        await requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${adminToken}`])
+          .set("Accept", "application/json")
+          .send({
+            bucketNames: { prefix: "" },
+            settings: { platformPercent: 7 },
+          });
+        setBucketConfig({ prefix: "" });
+      });
+
+      afterEach(async () => {
+        setBucketConfig(null);
+        await requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${adminToken}`])
+          .set("Accept", "application/json")
+          .send({ bucketNames: null, settings: { platformPercent: 7 } });
+      });
+
+      it("serves a trackgroup zip uploaded to the consolidated bucket", async () => {
+        const { user } = await createUser({ email: "artist@artist.com" });
+        const artist = await createArtist(user.id);
+        const trackGroup = await createTrackGroup(artist.id);
+        const track = await createTrack(trackGroup.id);
+
+        const passthrough = await generateMockArchive();
+        await uploadZip("trackGroup", trackGroup.id, "mp3-320", passthrough);
+
+        const { user: purchaser, accessToken } = await createUser({
+          email: "purchaser@artist.com",
+        });
+        await prisma.userTrackGroupPurchase.create({
+          data: {
+            userId: purchaser.id,
+            trackGroupId: trackGroup.id,
+            singleDownloadToken: randomUUID(),
+          },
+        });
+
+        const response = await requestApp
+          .get(`trackGroups/${trackGroup.id}/download?format=mp3-320`)
+          .set("Accept", "application/json")
+          .set("Cookie", [`jwt=${accessToken}`]);
+
+        assert.equal(response.statusCode, 200);
+        assert.equal(response.header["content-type"], "application/zip");
+      });
     });
   });
 });
