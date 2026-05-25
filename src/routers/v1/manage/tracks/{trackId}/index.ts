@@ -1,13 +1,13 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { doesTrackBelongToUser } from "../../../../../utils/ownership";
-import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../../utils/error";
-
+import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
 
 interface TrackBody {
@@ -68,7 +68,7 @@ export default function () {
       const newTrack = await prisma.track.update({
         where: { id: Number(trackId) },
         data: {
-          title: title,
+          title,
           lyrics,
           isrc,
           isPreview,
