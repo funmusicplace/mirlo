@@ -9,10 +9,11 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 
-import { bp } from "../../constants";
+import { between, bp } from "../../constants";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
 import ArtistByLine from "./ArtistByLine";
+import { coverSizeMax } from "./TrackGroup";
 import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 export const ItemViewTitle: React.FC<{
@@ -29,6 +30,11 @@ export const ItemViewTitle: React.FC<{
         align-items: center;
         justify-content: flex-start;
         max-width: 80%;
+
+        @media screen and ${between(bp.medium, bp.xlarge)} {
+          margin-top: 0.25rem;
+          margin-bottom: 0.25rem;
+        }
       `}
     >
       {showPlayButton && (
@@ -51,8 +57,13 @@ export const ItemViewTitle: React.FC<{
       <div>
         <h1
           className={css`
-            font-size: 2rem;
-            line-height: 2.2rem;
+            font-size: clamp(
+              1.25rem,
+              calc(var(--cover-size, ${coverSizeMax}) / 14),
+              2rem
+            );
+            line-height: 1.1;
+            margin: 0;
           `}
         >
           {title}

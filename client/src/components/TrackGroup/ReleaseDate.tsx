@@ -4,6 +4,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { bp } from "../../constants";
+
 export const formatDate = ({
   date,
   options: defaultOptions,
@@ -88,13 +89,12 @@ const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
     <div
       className={css`
         color: var(--mi-secondary-text-color);
-        font-size: 1rem;
         width: 100%;
         font-size: var(--mi-font-size-small);
         filter: opacity(80%);
 
-        @media screen and (max-width: ${bp.medium}px) {
-          font-size: var(--mi-font-size-small);
+        @media screen and (max-width: ${bp.xlarge}px) {
+          font-size: var(--mi-font-size-xsmall);
         }
       `}
     >

@@ -3,6 +3,8 @@ import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import { Trans, useTranslation } from "react-i18next";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
+import { coverSizeMax } from "./TrackGroup";
+
 const inlineLink = css`
   display: inline !important;
   white-space: normal !important;
@@ -27,7 +29,11 @@ const ArtistByLine: React.FC<{
   return (
     <div
       className={css`
-        font-size: 18px;
+        font-size: clamp(
+          0.875rem,
+          calc(var(--cover-size, ${coverSizeMax}) / 28),
+          1.125rem
+        );
         font-style: normal;
       `}
     >

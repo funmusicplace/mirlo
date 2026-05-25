@@ -11,10 +11,10 @@ import WidthContainer from "components/common/WidthContainer";
 import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPublished } from "utils/artist";
+import { useMatchMedia } from "utils/useMatchMedia";
 
-import { bp } from "../../constants";
+import { between, bp } from "../../constants";
 import Box, { ArtistBox } from "../common/Box";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
@@ -30,23 +30,21 @@ import TrackGroupMerch from "./TrackGroupMerch";
 import TrackGroupPills from "./TrackGroupPills";
 import Wishlist from "./Wishlist";
 
-export const Container = styled.div<{ user?: LoggedInUser | null }>`
-  ${(props) =>
-    props.user!
-      ? `
-    min-height: calc(100vh - 70px);
-    margin-top: 0vh;`
-      : `
-    min-height: calc(100vh - 130px);
-    margin-top: 1rem;`}
+export const coverSizeMin = "280px";
+export const coverSizeMax = "470px";
+
+export const Container = styled.div`
+  --cover-size: clamp(
+    ${coverSizeMin},
+    min(45vw, calc(100dvh - 270px)),
+    ${coverSizeMax}
+  );
+  --content-width: calc(var(--cover-size) * 2.3 + 0.5rem);
+
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   padding: var(--mi-side-paddings-xsmall);
-
-  @media screen and (max-width: ${bp.small}px) {
-    margin-top: 0rem;
-  }
 `;
 
 export const ImageWrapper = styled.div`
@@ -64,7 +62,20 @@ export const UnderneathImage = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     margin-top: 0.25rem;
-    flex-wrap: wrap;
+  }
+
+  @media screen and ${between(bp.medium, bp.xlarge)} {
+    --mi-touch-target-min: 24px;
+
+    button {
+      height: 2rem;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+    }
+    button svg {
+      width: 0.9rem;
+      height: 0.9rem;
+    }
   }
 `;
 
@@ -75,18 +86,36 @@ export const SmallScreenPlayWrapper = styled.div`
   }
 `;
 
-export const ImageAndDetailsWrapper = styled.div`
-  display: flex;
-  flex: 45%;
-  max-width: 45%;
-  flex-direction: column;
+export const ItemViewContentWrapper = styled.div`
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+
+  td {
+    padding: 0rem 0.4rem 0rem 0rem;
+    margin: 0.1rem 0rem;
+  }
+
+  a {
+    color: var(--mi-button-color);
+  }
 
   @media screen and (max-width: ${bp.small}px) {
-    flex: 100%;
     max-width: 100%;
+
+    td {
+      padding: 0.2rem 0.1rem 0.2rem 0rem;
+    }
+  }
+`;
+
+export const ImageAndDetailsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: var(--cover-size);
+
+  @media screen and (max-width: ${bp.small}px) {
     width: 100%;
-    min-width: 100%;
-    flex-direction: column;
   }
 `;
 
@@ -158,14 +187,12 @@ export const TrackgroupInfosWrapper = styled.div`
 `;
 
 export const TrackListingWrapper = styled.div`
-  max-width: 59%;
-  flex: 59%;
-  margin: 0 0 0 0.5rem;
+  width: calc(var(--cover-size) * 1.3);
+  min-width: 0;
+  font-size: clamp(0.8125rem, calc(var(--cover-size) / 30), 1rem);
 
   @media screen and (max-width: ${bp.small}px) {
-    max-width: 100%;
-    flex: 100%;
-    margin-left: 0;
+    width: 100%;
   }
 `;
 
@@ -173,13 +200,12 @@ function TrackGroup() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const isCompactLayout = useMatchMedia(between(bp.medium, bp.xlarge));
 
   const { artistId, trackGroupId } = useParams();
   const { data: artist, isPending: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
-
-  const { user } = useAuthContext();
 
   const { data: trackGroup, isPending: isLoadingTrackGroup } = useQuery(
     queryTrackGroup({ albumSlug: trackGroupId ?? "", artistId: artistId ?? "" })
@@ -211,28 +237,8 @@ function TrackGroup() {
         description={`An album by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`}
         image={trackGroup.cover?.sizes?.[600]}
       />
-      <Container user={user}>
-        <div
-          className={css`
-            width: 100%;
-            align-items: center;
-
-            td {
-              padding: 0rem 0.4rem 0rem 0rem;
-              margin: 0.1rem 0rem;
-            }
-
-            a {
-              color: var(--mi-button-color);
-            }
-
-            @media screen and (max-width: ${bp.small}px) {
-              td {
-                padding: 0.2rem 0.1rem 0.2rem 0rem;
-              }
-            }
-          `}
-        >
+      <Container>
+        <ItemViewContentWrapper>
           {!isPublished && (
             <div
               className={css`
@@ -264,11 +270,14 @@ function TrackGroup() {
             <div
               className={css`
                 display: flex;
-                justify-content: space-between;
+                justify-content: center;
+                align-items: flex-start;
                 flex-wrap: nowrap;
+                gap: 0.5rem;
 
                 @media screen and (max-width: ${bp.small}px) {
                   flex-direction: column;
+                  gap: 0;
                 }
               `}
             >
@@ -323,6 +332,9 @@ function TrackGroup() {
                   <PublicTrackGroupListing
                     tracks={trackGroup.tracks}
                     trackGroup={trackGroup}
+                    fluidText
+                    size={isCompactLayout ? "compact" : undefined}
+                    keepDropdownInCompact
                   />
                   {trackGroup.isGettable && (
                     <p
@@ -413,7 +425,7 @@ function TrackGroup() {
             <SupportArtistPopUp artist={trackGroup.artist} />
           )}
           <FlagContent trackGroupId={trackGroup.id} />
-        </div>
+        </ItemViewContentWrapper>
       </Container>
     </WidthContainer>
   );

@@ -14,7 +14,17 @@ export const PublicTrackGroupListing: React.FC<{
   size?: "small" | "compact";
   showDropdown?: boolean;
   inWidget?: boolean;
-}> = ({ tracks, trackGroup, size, showDropdown = true, inWidget }) => {
+  fluidText?: boolean;
+  keepDropdownInCompact?: boolean;
+}> = ({
+  tracks,
+  trackGroup,
+  size,
+  showDropdown = true,
+  inWidget,
+  fluidText,
+  keepDropdownInCompact,
+}) => {
   const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
@@ -61,6 +71,8 @@ export const PublicTrackGroupListing: React.FC<{
           trackGroup={track.trackGroup ?? trackGroup}
           size={size}
           inWidget={inWidget}
+          fluidText={fluidText}
+          keepDropdownInCompact={keepDropdownInCompact}
         />
       ))}
     </ul>
