@@ -1,3 +1,5 @@
+import { join } from "path";
+
 import {
   Artist,
   ArtistAvatar,
@@ -13,6 +15,7 @@ import {
 } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
+import { generateFullStaticImageUrl } from "../images";
 import { processSingleMerch } from "../merch";
 import {
   finalArtistAvatarBucket,
@@ -22,12 +25,11 @@ import {
 } from "../minio";
 
 import { serializePost } from "./post";
-import { processSingleTrackGroup } from "./trackGroup";
-
-interface LocalTrackGroup extends TrackGroup {
-  cover?: TrackGroupCover | null;
-  tracks?: Track[];
-}
+import {
+  processSingleTrackGroup,
+  serializeSingleTrackGroupIntoCanimus,
+  LocalTrackGroup,
+} from "./trackGroup";
 
 interface LocalArtist extends Artist {
   posts?: Post[];
@@ -123,14 +125,18 @@ export const processSingleArtist = (
 };
 
 export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
-  const artistUrl = `https://mirlo.space/${artist.urlSlug}`;
+  const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
+  const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
+
   return {
     type: "artist",
     name: artist.name,
     url: artistUrl,
     images: {
       main: {
-        src: `https://cdn.mirlo.space/file/artist-avatars/${artist.avatar?.url[0]}.webp`,
+        src: avatarString
+          ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
+          : undefined,
         alt: null,
       },
     },
@@ -147,49 +153,5 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
       serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl)
     ),
-  };
-};
-
-export const serializeSingleTrackGroupIntoCanimus = (
-  trackGroup: LocalTrackGroup,
-  artistUrl: string
-) => {
-  const releaseUrl = `${artistUrl}/release/${trackGroup.urlSlug}`;
-  return {
-    type: "album",
-    name: trackGroup.title,
-    url: releaseUrl,
-    release_date: trackGroup.releaseDate,
-    license: trackGroup.credits,
-    artist: trackGroup.artistId,
-    images: {
-      cover: {
-        src: `https://cdn.mirlo.space/file/trackgroup-covers/${trackGroup.cover?.url[0]}.webp`,
-      },
-    },
-    description: trackGroup.about,
-    children: trackGroup.tracks?.map((track: Track) =>
-      serializeSingleTrackIntoCanimus(track, releaseUrl)
-    ),
-  };
-};
-
-export const serializeSingleTrackIntoCanimus = (
-  track: Track,
-  releaseUrl: string
-) => {
-  const trackUrl = `${releaseUrl}/tracks/${track.id}`;
-  const metadata: any = track.metadata;
-  return {
-    type: "track",
-    name: track.title,
-    url: trackUrl,
-    duration: metadata.format.duration,
-    media: [
-      {
-        src: `https://mirlo.space/v1/tracks/${track.id}/stream/playlist.m3u8`,
-        type: "audio/x-mpegurl",
-      },
-    ],
   };
 };

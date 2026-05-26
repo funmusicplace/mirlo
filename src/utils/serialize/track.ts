@@ -1,3 +1,5 @@
+import { join } from "path";
+
 import {
   Artist,
   ArtistAvatar,
@@ -11,6 +13,8 @@ import {
 import { isTrackPlayableNested } from "../trackPlayability";
 
 import { processSingleTrackGroup } from "./trackGroup";
+
+const path = require("path");
 
 export const processSingleTrack = (
   track: Track & {
@@ -38,3 +42,23 @@ export const processSingleTrack = (
       })
     : undefined,
 });
+
+export const serializeSingleTrackIntoCanimus = (
+  track: Track,
+  releaseUrl: string
+) => {
+  const trackUrl = join(releaseUrl, "tracks", String(track.id));
+  const metadata: any = track.metadata;
+  return {
+    type: "track",
+    name: track.title,
+    url: trackUrl,
+    duration: metadata.format.duration,
+    media: [
+      {
+        src: `${process.env.API_DOMAIN}/v1/tracks/${track.id}/stream/playlist.m3u8`,
+        type: "audio/x-mpegurl",
+      },
+    ],
+  };
+};

@@ -1,3 +1,5 @@
+import { join } from "path";
+
 import {
   Artist,
   ArtistAvatar,
@@ -10,9 +12,17 @@ import {
 } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
+import { generateFullStaticImageUrl } from "../images";
 import { processSingleMerch } from "../merch";
 import { finalArtistAvatarBucket, finalCoversBucket } from "../minio";
 import { isTrackPlayableNested } from "../trackPlayability";
+
+import { serializeSingleTrackIntoCanimus } from "./track";
+
+export interface LocalTrackGroup extends TrackGroup {
+  cover?: TrackGroupCover | null;
+  tracks?: Track[];
+}
 
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
@@ -72,5 +82,33 @@ export const processSingleTrackGroup = (
           `/v1/downloadableContent/${dc.downloadableContentId}`,
       },
     })),
+  };
+};
+
+export const serializeSingleTrackGroupIntoCanimus = (
+  trackGroup: LocalTrackGroup,
+  artistUrl: string
+) => {
+  const releaseUrl = join(artistUrl, "release", trackGroup.urlSlug);
+  const coverString = trackGroup.cover?.url.find((u) => u.includes("x600"));
+
+  return {
+    type: "album",
+    name: trackGroup.title,
+    url: releaseUrl,
+    release_date: trackGroup.releaseDate,
+    license: trackGroup.credits,
+    artist: trackGroup.artistId,
+    images: {
+      cover: {
+        src: coverString
+          ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+          : undefined,
+      },
+    },
+    description: trackGroup.about,
+    children: trackGroup.tracks?.map((track: Track) =>
+      serializeSingleTrackIntoCanimus(track, releaseUrl)
+    ),
   };
 };

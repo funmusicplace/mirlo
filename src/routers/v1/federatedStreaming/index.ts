@@ -67,7 +67,7 @@ export default function () {
       });
       res.json({
         type: "root",
-        url: "https://mirlo.space",
+        url: process.env.API_DOMAIN,
         children: artists.map((artist) =>
           serializeSingleArtistIntoCanimus(artist)
         ),
