@@ -39,7 +39,7 @@ export interface ButtonProps {
   smallIcon?: boolean;
 }
 
-const CustomButton = styled.button<ButtonProps>(
+const StyledButton = styled.button<ButtonProps>(
   {},
   ({ buttonRole, size, ...props }) => {
     const bodyStyles = window.getComputedStyle(document.body);
@@ -321,7 +321,7 @@ export const Button: React.FC<
   ...props
 }) => {
   return (
-    <CustomButton
+    <StyledButton
       onClick={onClick}
       disabled={disabled}
       onlyIcon={!children || onlyIcon}
@@ -349,7 +349,7 @@ export const Button: React.FC<
       ) : (
         ""
       )}
-    </CustomButton>
+    </StyledButton>
   );
 };
 
