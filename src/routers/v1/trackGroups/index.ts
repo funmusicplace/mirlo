@@ -29,6 +29,7 @@ export default function () {
       locationSlug,
       artistName,
       isReleased,
+      q,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
     const loggedInUser = req.user;
@@ -122,6 +123,32 @@ export default function () {
           contains: title,
           mode: "insensitive",
         };
+      }
+
+      if (q && typeof q === "string") {
+        const tokens = q.split(/\s+/).filter(Boolean);
+        if (tokens.length > 0) {
+          const existingAnd = where.AND
+            ? Array.isArray(where.AND)
+              ? where.AND
+              : [where.AND]
+            : [];
+          where.AND = [
+            ...existingAnd,
+            ...tokens.map(
+              (token): Prisma.TrackGroupWhereInput => ({
+                OR: [
+                  { title: { contains: token, mode: "insensitive" } },
+                  {
+                    artist: {
+                      name: { contains: token, mode: "insensitive" },
+                    },
+                  },
+                ],
+              })
+            ),
+          ];
+        }
       }
 
       // Note that the distinct query does not support a count

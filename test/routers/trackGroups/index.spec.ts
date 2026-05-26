@@ -263,6 +263,109 @@ describe("trackGroups", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should match q against the title", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id, { name: "Robin" });
+      const tg = await createTrackGroup(artist.id, { title: "The Bird Album" });
+      await createTrackGroup(artist.id, {
+        title: "words",
+        urlSlug: "words",
+      });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .query("q=bird")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].id, tg.id);
+      assert(response.statusCode === 200);
+    });
+
+    it("should match q against the artist name", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id, { name: "Blackbird" });
+      const tg = await createTrackGroup(artist.id, { title: "words" });
+      const otherArtist = await createArtist(user.id, {
+        name: "Crow",
+        urlSlug: "crow",
+      });
+      await createTrackGroup(otherArtist.id, {
+        title: "CROW ATTACK",
+        urlSlug: "crow-attack",
+      });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .query("q=blackbird")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].id, tg.id);
+      assert(response.statusCode === 200);
+    });
+
+    it("should match q across multiple tokens (artist + title)", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id, { name: "Robin" });
+      const target = await createTrackGroup(artist.id, {
+        title: "The Bird Album",
+      });
+      await createTrackGroup(artist.id, {
+        title: "words",
+        urlSlug: "robin-words",
+      });
+      const otherArtist = await createArtist(user.id, {
+        name: "Crow",
+        urlSlug: "crow",
+      });
+      await createTrackGroup(otherArtist.id, {
+        title: "The Bird Album",
+        urlSlug: "crow-the-bird-album",
+      });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .query("q=robin bird")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].id, target.id);
+      assert(response.statusCode === 200);
+    });
+
+    it("q should be case insensitive", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id, { name: "Blackbird" });
+      const tg = await createTrackGroup(artist.id, { title: "The Bird Album" });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .query("q=BIRD")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].id, tg.id);
+      assert(response.statusCode === 200);
+    });
+
+    it("q should still exclude non-published trackGroups", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id, { name: "Crow" });
+      await createTrackGroup(artist.id, {
+        title: "CROW ATTACK",
+        publishedAt: null,
+      });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .query("q=crow attack")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 0);
+      assert(response.statusCode === 200);
+    });
+
     it("should only return albums filtered by artistId", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
