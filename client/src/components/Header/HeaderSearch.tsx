@@ -1,204 +1,419 @@
 import { css } from "@emotion/css";
-import AutoComplete from "components/common/AutoComplete";
+import { useQuery } from "@tanstack/react-query";
+import Button from "components/common/Button";
+import CommandSearch, {
+  CommandSearchFilter,
+  CommandSearchSection,
+} from "components/common/CommandSearch/CommandSearch";
+import {
+  queryArtists,
+  queryTags,
+  queryTrackGroups,
+  queryTracks,
+  queryUserCollection,
+  queryUserWishlistTrackGroups,
+} from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
-import api from "services/api";
+import { FaSearch } from "react-icons/fa";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
+import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
+import { useDebounce } from "use-debounce";
+import { matchesTokens } from "utils/matchesTokens";
 
 import { bp } from "../../constants";
 
-const constructUrl = (r: any) => {
-  let url = "";
+type Scope = "all" | "collection" | "wishlist";
+type Kind = "all" | "track" | "trackGroup" | "artist" | "label";
 
-  if (r.id === "more") {
-    url = `/releases?search=${r.query}`;
-    return url;
-  }
-
-  if (r.isTag) {
-    return `releases?tag=${encodeURIComponent(r.id)}`;
-  }
-
-  if (r.isLabel) {
-    url = `${r.labelId}`;
-    return url;
-  }
-
-  if (r.artistId) {
-    url += r.artistId;
-
-    if (r.trackGroupId) {
-      url += `/release/${r.trackGroupId}`;
-
-      if (r.id !== r.trackGroupId) {
-        url += `/tracks/${r.id}`;
-      }
-    }
-  }
-  return url;
+type HeaderResultBase = {
+  key: string;
+  name: string;
+  href: string;
 };
 
 const HeaderSearch: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
+  const { t: tShared } = useTranslation("translation", {
+    keyPrefix: "commandSearch",
+  });
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+  const { user } = useAuthContext();
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [scope, setScope] = React.useState<Scope>("all");
+  const [kind, setKind] = React.useState<Kind>("all");
 
-  const getOptions = React.useCallback(async (searchString: string) => {
-    const artists = await api.getMany<Artist>(`artists`, {
-      name: searchString.trim(),
-      take: "3",
-    });
-    const trackGroups = await api.getMany<TrackGroup>(`trackGroups`, {
-      title: searchString.trim(),
-      take: "3",
-    });
-    const tracks = await api.getMany<Track>(`tracks`, {
-      title: searchString.trim(),
-      take: "3",
-    });
+  const [debouncedQuery] = useDebounce(query, 300);
+  const trimmed = debouncedQuery.trim();
+  const searchActive = open && trimmed.length >= 2;
+  const useBackendSearch = !user || scope === "all";
 
-    const labels = await api.getMany<Label>(`artists`, {
-      name: searchString.trim(),
-      isLabel: "true",
-      take: "3",
-    });
+  const wantTracks = kind === "all" || kind === "track";
+  const wantTrackGroups = kind === "all" || kind === "trackGroup";
+  const wantArtists = kind === "all" || kind === "artist";
+  const wantTags = kind === "all";
+  const wantLabels = kind === "all" || kind === "label";
 
-    const tags = await api.getMany<Tag>(`tags`, {
-      tag: searchString.trim(),
-      orderBy: "count",
-      take: "3",
-    });
+  const collectionQ = useQuery({
+    ...queryUserCollection(user?.id),
+    enabled: open && !!user?.id,
+  });
+  const wishlistTGQ = useQuery({
+    ...queryUserWishlistTrackGroups(user?.id),
+    enabled: open && !!user?.id,
+  });
 
-    const manyMoreArtists = (artists.total ?? 0) > artists.results.length;
+  const tracksQ = useQuery({
+    ...queryTracks({ q: trimmed, take: 10 }),
+    enabled: searchActive && useBackendSearch && wantTracks,
+  });
+  const trackGroupsQ = useQuery({
+    ...queryTrackGroups({ q: trimmed, take: 10 }),
+    enabled: searchActive && useBackendSearch && wantTrackGroups,
+  });
+  const artistsQ = useQuery({
+    ...queryArtists({ name: trimmed, take: 10 }),
+    enabled: searchActive && useBackendSearch && wantArtists,
+  });
+  const labelsQ = useQuery({
+    ...queryArtists({ name: trimmed, isLabel: true, take: 10 }),
+    enabled: searchActive && useBackendSearch && wantLabels,
+  });
+  const tagsQ = useQuery({
+    ...queryTags({ tag: trimmed, orderBy: "count", take: 10 }),
+    enabled: searchActive && useBackendSearch && wantTags,
+  });
 
-    const results = [
-      ...tags.results.map((r, rid) => ({
-        firstInCategory: rid === 0,
-        category: t("tags"),
-        id: r.tag,
+  const navigateAndClose = React.useCallback(
+    (href: string) => {
+      navigate(href);
+      setOpen(false);
+    },
+    [navigate]
+  );
+
+  const trackHref = (tr: Track) =>
+    `/${tr.trackGroup.artist?.urlSlug ?? tr.trackGroup.artistId}/release/${tr.trackGroup.urlSlug ?? tr.trackGroupId}/tracks/${tr.id}`;
+  const trackGroupHref = (tg: TrackGroup) =>
+    `/${tg.artist?.urlSlug ?? tg.artistId}/release/${tg.urlSlug ?? tg.id}`;
+
+  const sections = React.useMemo<CommandSearchSection[]>(() => {
+    if (!searchActive) return [];
+    const out: CommandSearchSection[] = [];
+
+    const pushSection = (category: string, items: HeaderResultBase[]) => {
+      if (items.length === 0) return;
+      out.push({
+        category,
+        items: items.map((it) => ({
+          key: it.key,
+          node: it.name,
+          onSelect: () => navigateAndClose(it.href),
+        })),
+      });
+    };
+
+    if (user && scope === "collection") {
+      const tracks: HeaderResultBase[] = [];
+      const albums: HeaderResultBase[] = [];
+      (collectionQ.data ?? []).forEach((p) => {
+        if (
+          wantTracks &&
+          isTrackPurchase(p) &&
+          p.track &&
+          matchesTokens(
+            [p.track.title, p.track.trackGroup?.artist?.name],
+            trimmed
+          )
+        ) {
+          tracks.push({
+            key: `track-${p.track.id}`,
+            name: `${p.track.trackGroup?.artist?.name ?? ""} · ${p.track.title}`,
+            href: trackHref(p.track),
+          });
+        }
+        if (
+          wantTrackGroups &&
+          isTrackGroupPurchase(p) &&
+          p.trackGroup &&
+          matchesTokens(
+            [p.trackGroup.title, p.trackGroup.artist?.name],
+            trimmed
+          )
+        ) {
+          albums.push({
+            key: `trackGroup-${p.trackGroup.id}`,
+            name: `${p.trackGroup.artist?.name ?? ""} · ${p.trackGroup.title}`,
+            href: trackGroupHref(p.trackGroup),
+          });
+        }
+      });
+      pushSection(t("tracks"), tracks.slice(0, 10));
+      pushSection(t("albums"), albums.slice(0, 10));
+      return out;
+    }
+
+    if (user && scope === "wishlist") {
+      const tracks: HeaderResultBase[] = [];
+      const albums: HeaderResultBase[] = [];
+      if (wantTracks) {
+        (user.trackFavorites ?? []).forEach((tf) => {
+          if (
+            matchesTokens(
+              [tf.track.title, tf.track.trackGroup?.artist?.name],
+              trimmed
+            )
+          ) {
+            tracks.push({
+              key: `track-${tf.trackId}`,
+              name: `${tf.track.trackGroup?.artist?.name ?? ""} · ${tf.track.title}`,
+              href: trackHref(tf.track),
+            });
+          }
+        });
+      }
+      if (wantTrackGroups) {
+        (wishlistTGQ.data ?? []).forEach((w) => {
+          if (
+            w.trackGroup &&
+            matchesTokens(
+              [w.trackGroup.title, w.trackGroup.artist?.name],
+              trimmed
+            )
+          ) {
+            albums.push({
+              key: `trackGroup-${w.trackGroupId}`,
+              name: `${w.trackGroup.artist?.name ?? ""} · ${w.trackGroup.title}`,
+              href: trackGroupHref(w.trackGroup),
+            });
+          }
+        });
+      }
+      pushSection(t("tracks"), tracks.slice(0, 10));
+      pushSection(t("albums"), albums.slice(0, 10));
+      return out;
+    }
+
+    pushSection(
+      t("tags"),
+      (tagsQ.data?.results ?? []).map((r) => ({
+        key: `tag-${r.tag}`,
         name: r.tag,
-        isTag: true,
-      })),
-      ...(manyMoreArtists
-        ? [
-            {
-              id: "more",
-              firstInCategory: true,
-              category: t("artists"),
-              name: t("moreArtist"),
-              query: searchString,
-              isArtist: true,
-            },
-          ]
-        : []),
-      ...artists.results.map((r, rid) => ({
-        category: t("artists"),
-        firstInCategory: manyMoreArtists ? false : rid === 0,
-        artistId: r.urlSlug ?? r.id,
-        id: r.id,
-        name: r.name,
-        isArtist: true,
-      })),
-      ...trackGroups.results.map((tr, tid) => ({
-        firstInCategory: tid === 0,
-        category: t("albums"),
-        id: tr.urlSlug ?? tr.id,
-        artistId: tr.artist?.urlSlug ?? tr.artistId,
-        trackGroupId: tr.urlSlug ?? tr.id,
-        name: tr.title ?? t("untitled") ?? "",
-        isTrackGroup: true,
-      })),
-      ...tracks.results.map((tr, tid) => ({
-        firstInCategory: tid === 0,
-        id: tr.id,
-        category: t("tracks"),
-        trackGroupId: tr.trackGroup.urlSlug ?? tr.trackGroupId,
-        artistId: tr.trackGroup.artist.urlSlug ?? tr.trackGroup.artistId,
-        name: tr.title ?? t("untitled") ?? "",
-        isTrack: true,
-      })),
-      ...labels.results.map((label, tid) => ({
-        firstInCategory: tid === 0,
-        id: label.id,
-        category: t("labels"),
-        labelId: label.urlSlug ?? label.id,
-        name: label.name,
-        isLabel: true,
-      })),
-    ];
-    return results;
-  }, []);
+        href: `/releases?tag=${encodeURIComponent(r.tag)}`,
+      }))
+    );
 
-  const onEnter = React.useCallback((value: string) => {
-    navigate(`/search?search=${value}`);
-  }, []);
+    pushSection(
+      t("artists"),
+      (artistsQ.data?.results ?? []).map((r) => ({
+        key: `artist-${r.id}`,
+        name: r.name,
+        href: `/${r.urlSlug ?? r.id}`,
+      }))
+    );
+
+    pushSection(
+      t("albums"),
+      (trackGroupsQ.data?.results ?? []).map((tg) => ({
+        key: `trackGroup-${tg.id}`,
+        name: `${tg.artist?.name ?? ""} · ${tg.title ?? t("untitled")}`,
+        href: trackGroupHref(tg),
+      }))
+    );
+
+    pushSection(
+      t("tracks"),
+      (tracksQ.data?.results ?? []).map((tr) => ({
+        key: `track-${tr.id}`,
+        name: `${tr.trackGroup.artist?.name ?? ""} · ${tr.title ?? t("untitled")}`,
+        href: trackHref(tr),
+      }))
+    );
+
+    pushSection(
+      t("labels"),
+      (labelsQ.data?.results ?? []).map((label) => ({
+        key: `label-${label.id}`,
+        name: label.name,
+        href: `/${label.urlSlug ?? label.id}`,
+      }))
+    );
+
+    return out;
+  }, [
+    searchActive,
+    trimmed,
+    user,
+    scope,
+    wantTracks,
+    wantTrackGroups,
+    collectionQ.data,
+    wishlistTGQ.data,
+    tagsQ.data,
+    artistsQ.data,
+    trackGroupsQ.data,
+    tracksQ.data,
+    labelsQ.data,
+    navigateAndClose,
+    t,
+  ]);
+
+  const isLoading =
+    (useBackendSearch &&
+      (tracksQ.isFetching ||
+        trackGroupsQ.isFetching ||
+        artistsQ.isFetching ||
+        tagsQ.isFetching ||
+        labelsQ.isFetching)) ||
+    (!useBackendSearch && (collectionQ.isFetching || wishlistTGQ.isFetching));
+
+  const hasCollection = (collectionQ.data?.length ?? 0) > 0;
+  const hasWishlist =
+    (user?.trackFavorites?.length ?? 0) > 0 ||
+    (wishlistTGQ.data?.length ?? 0) > 0;
+
+  const filters: CommandSearchFilter[] = [];
+  if (user && (hasCollection || hasWishlist)) {
+    const scopeOptions: { value: string; label: string }[] = [
+      { value: "all", label: tShared("scopeEverywhere") },
+    ];
+    if (hasCollection) {
+      scopeOptions.push({
+        value: "collection",
+        label: tShared("scopeCollection"),
+      });
+    }
+    if (hasWishlist) {
+      scopeOptions.push({
+        value: "wishlist",
+        label: tShared("scopeWishlist"),
+      });
+    }
+    filters.push({
+      label: tShared("filterLabelScope"),
+      value: scope,
+      options: scopeOptions,
+      onChange: (v) => {
+        const next = v as Scope;
+        setScope(next);
+        if (next !== "all" && (kind === "artist" || kind === "label")) {
+          setKind("all");
+        }
+      },
+    });
+  }
+  const scopedToUserContent = !!user && scope !== "all";
+
+  React.useEffect(() => {
+    if (!open) {
+      setQuery("");
+      setScope("all");
+      setKind("all");
+    }
+  }, [open]);
+
+  const kindOptions = [
+    { value: "all", label: tShared("kindAll") },
+    { value: "track", label: t("tracks") },
+    { value: "trackGroup", label: t("albums") },
+    ...(scopedToUserContent
+      ? []
+      : [
+          { value: "artist", label: t("artists") },
+          { value: "label", label: t("labels") },
+        ]),
+  ];
+  filters.push({
+    label: tShared("filterLabelKind"),
+    value: kind,
+    options: kindOptions,
+    onChange: (v) => setKind(v as Kind),
+  });
 
   return (
-    <div
-      role="search"
-      className={css`
-        margin-left: 0.5rem;
-
-        input[type="search"] {
-          background: var(--mi-lighten-background-color) !important;
-          color: var(--mi-black) !important;
-          border-color: var(--mi-black) !important;
-        }
-        input[type="search"]:focus {
-          background: var(--mi-white) !important;
-        }
-        input[type="search"]::placeholder {
-          color: var(--mi-black) !important;
-          opacity: 0.6;
-        }
-
-        @media screen and (max-width: ${bp.medium}px) {
-          input[type="search"] {
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.85rem !important;
+    <div role="search">
+      <Button
+        aria-label={t("openSearch")}
+        variant="transparent"
+        onClick={() => setOpen(true)}
+        startIcon={<FaSearch size={20} />}
+        className={css`
+          color: var(--mi-contrast-color) !important;
+          font-weight: normal !important;
+          svg {
+            fill: var(--mi-contrast-color) !important;
           }
-        }
-      `}
-    >
-      <AutoComplete
-        getOptions={getOptions}
-        id="input-header-search"
-        showBackground
-        placeholder={t("search") ?? ""}
-        usesNavigation
-        onSelect={(value) => {
-          navigate(constructUrl(value));
-        }}
-        onEnter={onEnter}
-        optionDisplay={(r: {
-          id: number | string;
-          name: string;
-          artistId?: number | string;
-          trackGroupId?: number | string;
-        }) => {
-          return (
-            <Link
-              to={constructUrl(r)}
-              className={
-                r.id === "more"
-                  ? css`
-                      font-style: italic;
-                      text-decoration: none;
-                      text-align: right;
-                      font-size: 0.9rem;
-                      &:before {
-                        content: "→";
-                        margin-right: 0.5rem;
-                      }
-                    `
-                  : ""
+          &:hover:not(:disabled) {
+            background-color: var(--mi-tint-color) !important;
+            color: var(--mi-contrast-color) !important;
+            svg {
+              fill: var(--mi-contrast-color) !important;
+            }
+          }
+          @media screen and (max-width: ${bp.medium}px) {
+            width: var(--mi-touch-target-min);
+            height: var(--mi-touch-target-min);
+            padding: 0;
+
+            .startIcon {
+              margin: 0 !important;
+            }
+          }
+        `}
+      >
+        {isHome && (
+          <span
+            className={css`
+              @media screen and (max-width: ${bp.medium}px) {
+                display: none;
               }
-            >
-              {r.id !== "more" && r.name.length > 17
-                ? r.name.substring(0, 17) + "..."
-                : r.name}
-            </Link>
-          );
+            `}
+          >
+            {t("searchMusic")}
+          </span>
+        )}
+      </Button>
+
+      <CommandSearch
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("searchMusicOnMirlo")}
+        placeholder={t("search")}
+        query={query}
+        onQueryChange={setQuery}
+        onEnter={(value) => {
+          navigate(`/search?search=${encodeURIComponent(value)}`);
+          setOpen(false);
         }}
+        sections={sections}
+        isLoading={isLoading}
+        filters={filters}
+        footer={
+          trimmed.length >= 2 ? (
+            <button
+              type="button"
+              onClick={() => {
+                navigate(`/search?search=${encodeURIComponent(trimmed)}`);
+                setOpen(false);
+              }}
+              className={css`
+                background: none;
+                border: none;
+                color: inherit;
+                cursor: pointer;
+                padding: 0;
+                font: inherit;
+                text-decoration: underline;
+              `}
+            >
+              {t("moreResults")}
+            </button>
+          ) : undefined
+        }
       />
     </div>
   );

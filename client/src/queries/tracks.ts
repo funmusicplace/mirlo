@@ -7,16 +7,18 @@ export type TrackQueryOptions = {
   skip?: number;
   take?: number;
   title?: string;
+  q?: string;
 };
 
 const fetchTracks: QueryFunction<
   { results: Track[]; total?: number },
   ["fetchTracks", TrackQueryOptions, ...any]
-> = ({ queryKey: [_, { skip, take, title }], signal }) => {
+> = ({ queryKey: [_, { skip, take, title, q }], signal }) => {
   const params = new URLSearchParams();
   if (skip) params.append("skip", String(skip));
   if (take) params.append("take", String(take));
   if (title) params.append("title", title);
+  if (q) params.append("q", q);
 
   return api.get(`v1/tracks?${params}`, { signal });
 };
