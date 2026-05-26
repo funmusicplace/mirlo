@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import { PlayingMusicBars } from "components/common/PlayingMusicBars";
@@ -26,6 +27,18 @@ import TrackAuthors from "./TrackAuthors";
 import TrackRowPlayControl from "./TrackRowPlayControl";
 
 type Variant = "default" | "compact" | "widget" | "dock";
+
+const compactDropdownTrigger = css`
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+`;
 
 const LI = styled.li<{
   canPlayTrack: boolean;
@@ -121,7 +134,8 @@ const TrackDropdown: React.FC<{
   track: Track;
   trackGroup: TrackGroup;
   user: LoggedInUser | null | undefined;
-}> = ({ track, trackGroup, user }) => {
+  compact?: boolean;
+}> = ({ track, trackGroup, user, compact }) => {
   const ownsTrack = !!user?.userTrackPurchases?.find(
     (p) => p.trackId === track.id
   );
@@ -134,7 +148,12 @@ const TrackDropdown: React.FC<{
   const showLicense = track.license && track.license.short !== "copyright";
 
   return (
-    <DropdownMenu smallIcon compact label="Track options">
+    <DropdownMenu
+      smallIcon
+      compact
+      label="Track options"
+      triggerClassName={compact ? compactDropdownTrigger : undefined}
+    >
       <ul>
         <li>
           <GoToTrack
@@ -187,6 +206,8 @@ const TrackRow: React.FC<{
   addTracksToQueue: (id: number) => void;
   size?: "small" | "compact" | "dock";
   inWidget?: boolean;
+  fluidText?: boolean;
+  keepDropdownInCompact?: boolean;
 }> = ({
   track,
   addTracksToQueue,
@@ -194,6 +215,8 @@ const TrackRow: React.FC<{
   size,
   showDropdown,
   inWidget,
+  fluidText,
+  keepDropdownInCompact,
 }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
@@ -208,7 +231,10 @@ const TrackRow: React.FC<{
   const embeddedInMirlo = isEmbeddedInMirlo();
   const sendPlayerRequest = usePlayerSyncRequest();
   const showDropdownCell =
-    size !== "small" && size !== "compact" && size !== "dock" && showDropdown;
+    size !== "small" &&
+    size !== "dock" &&
+    showDropdown &&
+    (size !== "compact" || keepDropdownInCompact);
   const isCompact = size === "compact";
   const isDock = size === "dock";
   const variant: Variant = inWidget
@@ -223,6 +249,24 @@ const TrackRow: React.FC<{
       ? playerQueueIds[currentlyPlayingIndex]
       : undefined;
   const isThisTrackPlaying = playing && currentPlayingTrackId === track.id;
+
+  const titleSizeClass = fluidText
+    ? ""
+    : inWidget
+      ? "whitespace-nowrap break-normal min-w-0 text-xs"
+      : isCompact
+        ? "text-sm"
+        : "max-md:text-sm";
+
+  const durationSizeClass = fluidText
+    ? "text-[0.875em] max-md:font-bold"
+    : inWidget
+      ? "text-xs"
+      : isDock
+        ? "text-xs max-md:text-sm"
+        : isCompact
+          ? "text-sm"
+          : "text-sm max-md:text-xs max-md:font-bold";
 
   const onTrackPlay = React.useCallback(() => {
     if (!canPlayTrack) return;
@@ -315,13 +359,7 @@ const TrackRow: React.FC<{
           </div>
         ) : (
           <div
-            className={`overflow-hidden text-ellipsis grow [&_i]:opacity-80 ${
-              inWidget
-                ? "whitespace-nowrap break-normal min-w-0 text-xs"
-                : isCompact
-                  ? "text-sm"
-                  : "max-md:text-sm"
-            }`}
+            className={`overflow-hidden text-ellipsis grow [&_i]:opacity-80 ${titleSizeClass}`}
           >
             {track.title ?? <i>{t("untitled")}</i>}
             <TrackAuthors
@@ -331,23 +369,18 @@ const TrackRow: React.FC<{
           </div>
         )}
 
-        <div
-          className={`shrink-0 ${
-            inWidget
-              ? "text-xs"
-              : isDock
-                ? "text-xs max-md:text-sm"
-                : isCompact
-                  ? "text-sm"
-                  : "text-sm max-md:text-xs max-md:font-bold"
-          }`}
-        >
+        <div className={`shrink-0 ${durationSizeClass}`}>
           {track.audio?.duration && fmtMSS(track.audio.duration)}
         </div>
       </div>
 
       {showDropdownCell && (
-        <TrackDropdown track={track} trackGroup={trackGroup} user={user} />
+        <TrackDropdown
+          track={track}
+          trackGroup={trackGroup}
+          user={user}
+          compact={isCompact}
+        />
       )}
     </LI>
   );

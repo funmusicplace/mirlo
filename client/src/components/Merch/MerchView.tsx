@@ -10,6 +10,8 @@ import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import WidthContainer from "components/common/WidthContainer";
 import {
+  coverSizeMax,
+  coverSizeMin,
   ImageAndDetailsWrapper,
   ImageWrapper,
 } from "components/TrackGroup/TrackGroup";
@@ -73,6 +75,12 @@ function MerchView() {
       />
       <div
         className={css`
+          --cover-size: clamp(
+            ${coverSizeMin},
+            min(45vw, calc(100dvh - 320px)),
+            ${coverSizeMax}
+          );
+
           width: 100%;
           align-items: center;
 

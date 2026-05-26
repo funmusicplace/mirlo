@@ -9,7 +9,6 @@ import WidthContainer from "components/common/WidthContainer";
 import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 import { getReleaseUrl } from "utils/artist";
 
 import { bp } from "../../constants";
@@ -23,6 +22,7 @@ import {
   Container,
   ImageAndDetailsWrapper,
   ImageWrapper,
+  ItemViewContentWrapper,
   SmallScreenPlayWrapper,
   TrackListingWrapper,
   UnderneathImage,
@@ -39,8 +39,6 @@ function TrackView() {
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
-  const { user } = useAuthContext();
-
   const { data: trackGroup, isLoading: isLoadingTrackGroup } = useQuery(
     queryTrackGroup({ albumSlug: trackGroupId ?? "", artistId: artistId ?? "" })
   );
@@ -71,28 +69,8 @@ function TrackView() {
         description={`A track by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`}
         image={trackGroup.cover?.sizes?.[600]}
       />
-      <Container user={user}>
-        <div
-          className={css`
-            width: 100%;
-            align-items: center;
-
-            td {
-              padding: 0rem 0.4rem 0rem 0rem;
-              margin: 0.1rem 0rem;
-            }
-
-            a {
-              color: var(--mi-button-color);
-            }
-
-            @media screen and (max-width: ${bp.small}px) {
-              td {
-                padding: 0.2rem 0.1rem 0.2rem 0rem;
-              }
-            }
-          `}
-        >
+      <Container>
+        <ItemViewContentWrapper>
           <div
             className={css`
               display: flex;
@@ -112,11 +90,14 @@ function TrackView() {
             <div
               className={css`
                 display: flex;
-                justify-content: space-between;
+                justify-content: center;
+                align-items: flex-start;
                 flex-wrap: nowrap;
+                gap: 0.5rem;
 
                 @media screen and (max-width: ${bp.small}px) {
                   flex-direction: column;
+                  gap: 0;
                 }
               `}
             >
@@ -166,6 +147,7 @@ function TrackView() {
                   <PublicTrackGroupListing
                     tracks={[filteredTrack]}
                     trackGroup={trackGroup}
+                    fluidText
                   />
                 </TrackListingWrapper>
                 {filteredTrack.description && (
@@ -216,7 +198,7 @@ function TrackView() {
               <SupportArtistPopUp artist={trackGroup.artist} />
             )}
           </div>
-        </div>
+        </ItemViewContentWrapper>
       </Container>
     </WidthContainer>
   );
