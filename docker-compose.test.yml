@@ -1,7 +1,7 @@
 services:
   stripe-test:
     container_name: blackbird-stripe-mock-test
-    image: stripe/stripe-mock
+    image: stripe/stripe-mock:v0.199.0
     networks: !reset [test-network]
     ports: !reset []
     profiles: [test]
