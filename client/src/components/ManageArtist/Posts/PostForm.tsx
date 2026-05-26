@@ -21,6 +21,7 @@ import useGetUserObjectById from "utils/useGetUserObjectById";
 import api from "../../../services/api";
 
 import EditPostHeader from "./EditPostHeader";
+import PostSlugField from "./PostSlugField";
 
 export type PostFormData = {
   title: string;
@@ -28,6 +29,7 @@ export type PostFormData = {
   isPublic: boolean;
   minimumTier: string;
   shouldSendEmail: boolean;
+  urlSlug?: string;
 };
 
 const PostForm: React.FC<{
@@ -71,11 +73,13 @@ const PostForm: React.FC<{
       publishedAt: publishedAtIso,
       isPublic: postWithEmail.isPublic,
       shouldSendEmail: postWithEmail.shouldSendEmail,
+      urlSlug: postWithEmail.urlSlug,
     };
   }, [post]);
 
   const methods = useForm<PostFormData>({
     defaultValues: buildDefaultValues(),
+    mode: "onBlur",
   });
 
   // Body content uses its own hook + localStorage key because TextEditor only
@@ -167,6 +171,7 @@ const PostForm: React.FC<{
             id="input-title"
             {...register("title", { required: true })}
           />
+          <PostSlugField post={post} artist={artist} />
         </FormComponent>
         <FormComponent>
           <label htmlFor="input-publication-date">

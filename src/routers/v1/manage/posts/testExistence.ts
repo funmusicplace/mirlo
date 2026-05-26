@@ -1,13 +1,12 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../auth/passport";
+import { userAuthenticated } from "../../../../auth/passport";
 
 type Query = {
   urlSlug?: string;
-  artistId?: number;
-  email?: string;
-  forArtistId?: string;
+  artistId?: string;
+  forPostId?: string;
 };
 
 export default function () {
@@ -16,20 +15,17 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId, urlSlug, email, forArtistId } =
-      req.query as unknown as Query;
+    const { urlSlug, artistId, forPostId } = req.query as unknown as Query;
     try {
-      let exists = false;
-
-      const trackGroup = await prisma.trackGroup.findFirst({
+      const post = await prisma.post.findFirst({
         where: {
           urlSlug: { equals: urlSlug, mode: "insensitive" },
           artistId: Number(artistId),
+          ...(forPostId ? { id: { not: Number(forPostId) } } : {}),
         },
       });
-      exists = !!trackGroup;
       res.status(200);
-      res.json({ result: { exists } });
+      res.json({ result: { exists: !!post } });
     } catch (e) {
       next(e);
     }

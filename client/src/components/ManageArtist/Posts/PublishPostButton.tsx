@@ -54,7 +54,7 @@ const PublishPostButton: React.FC<{
           }
         }
         const picked = {
-          ...pick(data, ["title", "isPublic", "shouldSendEmail"]),
+          ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
           content: bodyContent,
           publishedAt: new Date(data.publishedAt + ":00").toISOString(),
           artistId: post.artistId,

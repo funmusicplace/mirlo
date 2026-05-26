@@ -185,10 +185,6 @@ button {
   font-family: var(--mi-font-family-stack);
 }
 
-small {
-  max-inline-size: 72ch;
-}
-
 @keyframes slide-down {
   from {
     opacity: 0;
