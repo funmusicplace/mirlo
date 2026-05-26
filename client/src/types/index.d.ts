@@ -154,7 +154,7 @@ interface TrackGroup {
   makeTracksPreviewableOnRelease: boolean;
   isPublic: boolean;
   hasNotifiedFollowers?: boolean;
-  tracksCount?: number;
+  totalTracks?: number;
 }
 
 interface Post {

@@ -39,7 +39,7 @@ export const processSingleTrackGroup = (
     tg.paymentToUser?.currency ?? tg.artist?.user?.currency ?? "usd";
   return {
     ...rest,
-    tracksCount: _count?.tracks ?? tg.tracks?.length,
+    totalTracks: _count?.tracks ?? tg.tracks?.length,
     currency,
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
     tracks: tg.tracks?.map((track) => ({

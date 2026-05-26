@@ -34,8 +34,8 @@ const PlayerActions: React.FC = () => {
     return null;
   }
 
-  const tracksCount = trackGroup.tracksCount ?? trackGroup.tracks?.length ?? 1;
-  const isMultiTrack = tracksCount > 1;
+  const totalTracks = trackGroup.totalTracks ?? trackGroup.tracks?.length ?? 1;
+  const isMultiTrack = totalTracks > 1;
 
   return (
     <div

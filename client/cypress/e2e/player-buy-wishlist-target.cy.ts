@@ -30,7 +30,7 @@ const buildTrack = ({
   trackGroupId: featuredRelease.id,
   trackGroup: {
     ...featuredRelease,
-    tracksCount: trackCount,
+    totalTracks: trackCount,
   },
   isPreview: true,
   audio: { id: `audio-${id}`, duration: 60, uploadState: "SUCCESS" },
