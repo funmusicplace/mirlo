@@ -10,7 +10,16 @@ import { bp } from "../../constants";
 
 import LoadingSpinner from "./LoadingSpinner";
 
-export interface Sizable {
+export interface ButtonProps {
+  children?: React.ReactNode;
+  startIcon?: React.ReactElement;
+  endIcon?: React.ReactElement;
+  disabled?: boolean;
+  style?: React.CSSProperties;
+  className?: string;
+  isLoading?: boolean;
+  as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
+  ref?: React.Ref<HTMLButtonElement>;
   size?: "big" | "compact" | "tiny";
   wrap?: boolean;
   rounded?: boolean;
@@ -30,7 +39,7 @@ export interface Sizable {
   smallIcon?: boolean;
 }
 
-const CustomButton = styled.button<Sizable>(
+const CustomButton = styled.button<ButtonProps>(
   {},
   ({ buttonRole, size, ...props }) => {
     const bodyStyles = window.getComputedStyle(document.body);
@@ -297,18 +306,6 @@ const CustomButton = styled.button<Sizable>(
     return style;
   }
 );
-
-export interface ButtonProps extends Sizable {
-  children?: React.ReactNode;
-  startIcon?: React.ReactElement;
-  endIcon?: React.ReactElement;
-  disabled?: boolean;
-  style?: React.CSSProperties;
-  className?: string;
-  isLoading?: boolean;
-  as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
-  ref?: React.Ref<HTMLButtonElement>;
-}
 
 export const Button: React.FC<
   ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
