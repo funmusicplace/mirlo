@@ -97,16 +97,17 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
               </div>
             ) : (
               isManage && (
-                <ArtistButton
-                  wrap
-                  size="compact"
-                  variant="dashed"
-                  onClick={() => setIsEditing(true)}
-                  startIcon={<FaPen />}
-                  className="max-w-full"
-                >
-                  {t("noBioYet")}
-                </ArtistButton>
+                <div className="flex flex-col items-start gap-2">
+                  <ArtistButton
+                    size="compact"
+                    variant="dashed"
+                    onClick={() => setIsEditing(true)}
+                    startIcon={<FaPen />}
+                  >
+                    {t("editBioButton")}
+                  </ArtistButton>
+                  <p>{t("noBioYet")}</p>
+                </div>
               )
             )}
           </div>
