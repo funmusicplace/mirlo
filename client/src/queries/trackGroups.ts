@@ -204,20 +204,28 @@ async function saveAlbumForm(opts: {
     artistId,
   };
 
-  const requests: Promise<unknown>[] = [
-    api.put(`v1/manage/trackGroups/${trackGroupId}`, trackGroupPayload),
+  const requests: [
+    Promise<{ result: TrackGroup }>,
+    Promise<{ result: Fundraiser }> | undefined,
+  ] = [
+    api.put<unknown, { result: TrackGroup }>(
+      `v1/manage/trackGroups/${trackGroupId}`,
+      trackGroupPayload
+    ),
+    undefined,
   ];
 
   if (fundraiserId) {
-    requests.push(
-      api.put(`v1/manage/fundraisers/${fundraiserId}`, {
+    requests[1] = api.put<unknown, { result: Fundraiser }>(
+      `v1/manage/fundraisers/${fundraiserId}`,
+      {
         goalAmount: toCentsOrNull(formData.goalAmount) ?? 0,
         isAllOrNothing: !!formData.isAllOrNothing,
-      })
+      }
     );
   }
 
-  await Promise.all(requests);
+  return Promise.all(requests);
 }
 
 export function useSaveAlbumFormMutation() {

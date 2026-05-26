@@ -16,7 +16,7 @@ const SaveDraftBar: React.FC<{
 }> = ({ existingObject, onSaveSuccess }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { isDirty } = useFormState<TrackGroupFormData>();
-  const methods = useFormContext<TrackGroupFormData>();
+  const { getValues, reset } = useFormContext<TrackGroupFormData>();
   const { artistId } = useParams();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
@@ -27,15 +27,18 @@ const SaveDraftBar: React.FC<{
   }
 
   const handleSaveDraft = async () => {
-    const values = methods.getValues();
+    const values = getValues();
     try {
-      await saveMutation.mutateAsync({
+      const response = await saveMutation.mutateAsync({
         formData: values,
         trackGroupId: existingObject.id,
         artistId: Number(artistId),
         fundraiserId: existingObject.fundraiser?.id,
       });
-      methods.reset(values);
+      reset({
+        ...values,
+        urlSlug: response[0].result.urlSlug ?? values.urlSlug,
+      });
       onSaveSuccess?.();
       snackbar(t("draftSaved"), { type: "success" });
     } catch (e) {

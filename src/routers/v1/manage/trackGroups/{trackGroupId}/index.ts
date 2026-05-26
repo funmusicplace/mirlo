@@ -158,11 +158,12 @@ export default function () {
           description: "TrackGroup not found",
         });
       }
-
       if (
         newValues.urlSlug &&
         newValues.urlSlug !== existingTrackGroup.urlSlug
       ) {
+        newValues.urlSlug =
+          generateSlug(newValues.urlSlug) || newValues.urlSlug;
         const slugConflict = await prisma.trackGroup.findFirst({
           where: {
             artistId: existingTrackGroup.artistId,

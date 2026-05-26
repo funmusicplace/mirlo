@@ -1042,6 +1042,7 @@
     "urlSlug": "Album URL",
     "fullUrlIs": "The full URL will be '{{currentUrlSlug}}'",
     "urlSlugWarning": "Changes to this value will break existing links to this album.",
+    "urlSlugHint": "The URL will be generated automatically from the album title.",
     "previewRelease": "Preview release",
     "isGettable": "Prevent users from downloading and buying this release",
     "isGettableTooltip": "Turn this on if you only want people to stream the release. When enabled, downloads and purchases are disabled.",

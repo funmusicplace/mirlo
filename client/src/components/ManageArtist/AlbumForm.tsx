@@ -43,8 +43,10 @@ const AlbumForm: React.FC<{
     defaultValues: buildDefaultValues(trackGroup),
   });
 
+  const { reset } = methods;
+
   React.useEffect(() => {
-    methods.reset(buildDefaultValues(trackGroup), {
+    reset(buildDefaultValues(trackGroup), {
       keepDirtyValues: true,
       keepDirty: true,
     });

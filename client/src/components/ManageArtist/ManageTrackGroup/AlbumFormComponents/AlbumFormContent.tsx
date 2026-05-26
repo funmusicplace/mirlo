@@ -44,6 +44,7 @@ const AlbumFormContent: React.FC<{
   );
 
   const urlSlug = watch("urlSlug");
+  const isTempSlug = urlSlug?.startsWith("mi-temp-slug");
   const releaseDateValue = watch("releaseDate");
 
   const hasReleaseDate = Boolean(releaseDateValue);
@@ -99,26 +100,29 @@ const AlbumFormContent: React.FC<{
               {t("title")}
             </RestoredLabel>
             <InputEl id="input-title" {...register("title")} />
+            {isTempSlug && <small>{t("urlSlugHint")}</small>}
           </FormComponent>
-          <FormComponent>
-            <RestoredLabel htmlFor="input-slug" field="urlSlug">
-              {t("urlSlug")}
-            </RestoredLabel>
-            <InputEl id="input-slug" {...register("urlSlug")} />
-            {isTrackGroupPublished(existingObject) && (
-              <small>
-                <span>
-                  {t("fullUrlIs", {
-                    currentUrlSlug: `${window.location.origin}/${existingObject.artist.urlSlug}/release/${urlSlug}`,
-                  })}
-                  .{" "}
-                </span>
-                <span className="bg-(--mi-background-color) text-(--mi-warning-color)">
-                  {t("urlSlugWarning")}
-                </span>
-              </small>
-            )}
-          </FormComponent>
+          {!isTempSlug && (
+            <FormComponent>
+              <RestoredLabel htmlFor="input-slug" field="urlSlug">
+                {t("urlSlug")}
+              </RestoredLabel>
+              <InputEl id="input-slug" {...register("urlSlug")} />
+              {isTrackGroupPublished(existingObject) && (
+                <small>
+                  <span>
+                    {t("fullUrlIs", {
+                      currentUrlSlug: `${window.location.origin}/${existingObject.artist.urlSlug}/release/${urlSlug}`,
+                    })}
+                    .{" "}
+                  </span>
+                  <span className="bg-(--mi-background-color) text-(--mi-warning-color)">
+                    {t("urlSlugWarning")}
+                  </span>
+                </small>
+              )}
+            </FormComponent>
+          )}
         </div>
         <div
           className={css`
