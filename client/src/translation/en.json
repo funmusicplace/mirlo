@@ -249,7 +249,13 @@
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",
-    "removeFromWishlist": "Remove from wishlist"
+    "removeFromWishlist": "Remove from wishlist",
+    "openWishlistMenu": "Add to wishlist",
+    "openWishlistMenuActive": "Wishlist options",
+    "wishlistThisTrack": "Wishlist this track",
+    "removeTrackFromWishlist": "Remove this track from wishlist",
+    "wishlistThisAlbum": "Wishlist this album",
+    "removeAlbumFromWishlist": "Remove this album from wishlist"
   },
   "trackGroupCard": {
     "publishedAt": "Publish date:",
@@ -685,7 +691,9 @@
     "shuffleMusic": "Shuffle music",
     "volumeControl": "Volume control",
     "muteVolume": "Mute volume",
-    "nowPlayingAnnouncement": "Now playing: {{title}} by {{artist}}"
+    "nowPlayingAnnouncement": "Now playing: {{title}} by {{artist}}",
+    "buyThisTrack": "Buy this track",
+    "buyThisAlbum": "Buy this album"
   },
   "post": {
     "postByArtist": "by <link></link>",

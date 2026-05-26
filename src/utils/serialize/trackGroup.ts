@@ -30,13 +30,16 @@ export const processSingleTrackGroup = (
       downloadableContentId: string;
     }[];
     trackGroupPurchases?: { userId: number }[];
+    _count?: { tracks?: number; userTrackGroupPurchases?: number };
   },
   options?: { loggedInUserId?: number }
 ) => {
+  const { _count, ...rest } = tg;
   const currency =
     tg.paymentToUser?.currency ?? tg.artist?.user?.currency ?? "usd";
   return {
-    ...tg,
+    ...rest,
+    totalTracks: _count?.tracks ?? tg.tracks?.length,
     currency,
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
     tracks: tg.tracks?.map((track) => ({

@@ -19,6 +19,9 @@ export default function () {
         include: {
           trackGroup: {
             include: {
+              _count: {
+                select: { tracks: true },
+              },
               artist: {
                 include: {
                   avatar: true,
