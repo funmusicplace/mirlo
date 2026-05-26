@@ -130,7 +130,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
         <h1 className="mt-4">{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
       </div>
       <AlbumPaymentReceiver />
-      {trackGroup && (
+      {trackGroup.tracks.length === 0 && trackGroup && (
         <FormSection>
           <ZipDropZone
             existingTracksCount={trackGroup?.tracks?.length ?? 0}
