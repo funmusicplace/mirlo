@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import FeatureFlag from "components/common/FeatureFlag";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { Toggle } from "components/common/Toggle";
@@ -58,6 +59,7 @@ export type ArtistFormData = {
   background: File[];
   avatar: File[];
   activityPub: boolean;
+  federatedStreaming: boolean;
   allowDirectMessages: boolean;
   defaultPlatformFee: number;
   properties: {
@@ -83,6 +85,7 @@ const generateDefaults = (existing?: Artist) => {
     bio: existing?.bio ?? "",
     urlSlug: existing?.urlSlug ?? "",
     activityPub: existing?.activityPub ?? false,
+    federatedStreaming: existing?.federatedStreaming ?? false,
     allowDirectMessages: existing?.allowDirectMessages ?? true,
     defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
     shortDescription: existing?.shortDescription ?? "",
@@ -147,6 +150,7 @@ export const CustomizeLook: React.FC = () => {
       const sending = {
         urlSlug: data.urlSlug?.toLowerCase(),
         activityPub: data.activityPub,
+        federatedStreaming: data.federatedStreaming,
         allowDirectMessages: data.allowDirectMessages,
         properties: { ...artist?.properties, ...data.properties },
       };
@@ -188,6 +192,7 @@ export const CustomizeLook: React.FC = () => {
   );
 
   const activityPub = methods.watch("activityPub");
+  const federatedStreaming = methods.watch("federatedStreaming");
   const allowDirectMessages = methods.watch("allowDirectMessages");
 
   if (!artist) {
@@ -380,6 +385,24 @@ export const CustomizeLook: React.FC = () => {
                   {t("makeSearchable")}
                 </small>
               </FormComponent>
+              <FeatureFlag flag="federatedStreaming">
+                <FormComponent>
+                  <Toggle
+                    ariaDescribedBy="hint-enable-federated-streaming"
+                    label={t("enableFederatedStreaming")}
+                    toggled={federatedStreaming}
+                    onClick={() => {
+                      methods.setValue(
+                        "federatedStreaming",
+                        !federatedStreaming
+                      );
+                    }}
+                  />
+                  <small id="hint-enable-federated-streaming">
+                    {t("makeStreamable")}
+                  </small>
+                </FormComponent>
+              </FeatureFlag>
               <FormComponent>
                 <Toggle
                   ariaDescribedBy="hint-allow-direct-messages"

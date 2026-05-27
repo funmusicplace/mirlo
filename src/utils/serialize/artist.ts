@@ -1,3 +1,5 @@
+import { join } from "path";
+
 import {
   Artist,
   ArtistAvatar,
@@ -13,6 +15,7 @@ import {
 } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
+import { generateFullStaticImageUrl } from "../images";
 import { processSingleMerch } from "../merch";
 import {
   finalArtistAvatarBucket,
@@ -22,16 +25,18 @@ import {
 } from "../minio";
 
 import { serializePost } from "./post";
-import { processSingleTrackGroup } from "./trackGroup";
+import {
+  processSingleTrackGroup,
+  serializeSingleTrackGroupIntoCanimus,
+  serializeSingleDeletedTrackGroupIntoCanimus,
+  LocalTrackGroup,
+} from "./trackGroup";
 
 interface LocalArtist extends Artist {
   posts?: Post[];
   background?: ArtistBackground | null;
   avatar?: ArtistAvatar | null;
-  trackGroups?: (TrackGroup & {
-    cover?: TrackGroupCover | null;
-    tracks?: Track[];
-  })[];
+  trackGroups?: LocalTrackGroup[] | null;
   merch?: (Merch & { images?: MerchImage[] })[];
   subscriptionTiers?: (ArtistSubscriptionTier & {
     images?: { image: Image }[];
@@ -118,4 +123,56 @@ export const processSingleArtist = (
         }
       : artist.user,
   };
+};
+
+export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
+  const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
+  const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
+
+  return {
+    type: "artist",
+    name: artist.name,
+    url: artistUrl,
+    images: {
+      cover: {
+        src: avatarString
+          ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
+          : undefined,
+        alt: null,
+        width: 600,
+        height: 600,
+      },
+    },
+    summary: artist.shortDescription,
+    description: artist.bio,
+    links: artist.linksJson.map((link: any) => ({
+      name: link.linkLabel,
+      href: link.url,
+      type: link.linkType,
+    })),
+    children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
+      serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl, artist.name)
+    ),
+  };
+};
+
+export const serializeSingleDeletedArtistIntoCanimus = (
+  artist: LocalArtist
+) => {
+  const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
+  const deletedArtist = {
+    type: "artist",
+    name: artist.name,
+    url: artistUrl,
+  };
+
+  const deletedEntities: any = artist.trackGroups?.map((trackGroup) =>
+    serializeSingleDeletedTrackGroupIntoCanimus(trackGroup, artistUrl)
+  );
+  let output: any = [];
+  for (const e of deletedEntities) {
+    output = output.concat(e);
+  }
+
+  return [deletedArtist].concat(output);
 };

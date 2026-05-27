@@ -37,6 +37,7 @@ export default function () {
       linksJson,
       location,
       activityPub,
+      federatedStreaming,
       purchaseEntireCatalogMinPrice,
       defaultPlatformFee,
       tourDates,
@@ -57,6 +58,19 @@ export default function () {
       // FIXME: check type of properties object.
       const oldProperties = existingArtist?.properties || {};
 
+      let federatedStreamingOptInDate =
+        existingArtist?.federatedStreamingOptInDate;
+      let federatedStreamingOptOutDate =
+        existingArtist?.federatedStreamingOptInDate;
+
+      if (existingArtist?.federatedStreaming != federatedStreaming) {
+        if (federatedStreaming) {
+          federatedStreamingOptInDate = new Date(Date.now());
+        } else {
+          federatedStreamingOptOutDate = new Date(Date.now());
+        }
+      }
+
       const updatedCount = await prisma.artist.updateMany({
         where: {
           id: Number(artistId),
@@ -68,6 +82,9 @@ export default function () {
           linksJson,
           location,
           activityPub,
+          federatedStreaming,
+          federatedStreamingOptInDate,
+          federatedStreamingOptOutDate,
           purchaseEntireCatalogMinPrice,
           defaultPlatformFee,
           shortDescription,

@@ -1,18 +1,18 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
+import { formatDate as formatDateForLocale } from "components/TrackGroup/ReleaseDate";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
-import { InputEl } from "components/common/Input";
-import { formatDate as formatDateForLocale } from "components/TrackGroup/ReleaseDate";
-import { useTranslation } from "react-i18next";
 
 const AdminManageUser = () => {
   const { id } = useParams();
@@ -217,7 +217,7 @@ const AdminManageUser = () => {
                       setFeatureFlags(selectedOptions);
                     }}
                   >
-                    {["activityPub"].map((flag) => (
+                    {["activityPub", "federatedStreaming"].map((flag) => (
                       <option key={flag} value={flag}>
                         {flag}
                       </option>

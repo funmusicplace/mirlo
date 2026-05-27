@@ -311,6 +311,9 @@ model Artist {
   maxFreePlays                       Int?
   merchStoreURL                      String?
   activityPub                        Boolean                              @default(false)
+  federatedStreaming                 Boolean                              @default(false)
+  federatedStreamingOptInDate        DateTime?
+  federatedStreamingOptOutDate       DateTime?
   apPublicKey                        String?
   apPrivateKey                       String?
   announcementText                   String?

@@ -1,3 +1,5 @@
+import { join } from "path";
+
 import {
   Artist,
   ArtistAvatar,
@@ -10,9 +12,20 @@ import {
 } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
+import { generateFullStaticImageUrl } from "../images";
 import { processSingleMerch } from "../merch";
 import { finalArtistAvatarBucket, finalCoversBucket } from "../minio";
 import { isTrackPlayableNested } from "../trackPlayability";
+
+import {
+  serializeSingleTrackIntoCanimus,
+  serializeSingleDeletedTrackIntoCanimus,
+} from "./track";
+
+export interface LocalTrackGroup extends TrackGroup {
+  cover?: TrackGroupCover | null;
+  tracks?: Track[];
+}
 
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
@@ -76,4 +89,49 @@ export const processSingleTrackGroup = (
       },
     })),
   };
+};
+
+export const serializeSingleTrackGroupIntoCanimus = (
+  trackGroup: LocalTrackGroup,
+  artistUrl: string,
+  artistName: string
+) => {
+  const releaseUrl = join(artistUrl, "release", trackGroup.urlSlug);
+  const coverString = trackGroup.cover?.url.find((u) => u.includes("x600"));
+
+  return {
+    type: "album",
+    name: trackGroup.title,
+    url: releaseUrl,
+    release_date: trackGroup.releaseDate,
+    license: trackGroup.credits,
+    artist: artistName,
+    images: {
+      cover: {
+        src: coverString
+          ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+          : undefined,
+      },
+    },
+    description: trackGroup.about,
+    children: trackGroup.tracks?.map((track: Track) =>
+      serializeSingleTrackIntoCanimus(track, releaseUrl)
+    ),
+  };
+};
+
+export const serializeSingleDeletedTrackGroupIntoCanimus = (
+  trackGroup: LocalTrackGroup,
+  artistUrl: string
+) => {
+  const releaseUrl = join(artistUrl, "release", trackGroup.urlSlug);
+  const deletedEntities: any = trackGroup.tracks?.map((track) =>
+    serializeSingleDeletedTrackIntoCanimus(track, releaseUrl)
+  );
+  const deletedTrackgroup = {
+    type: "album",
+    name: trackGroup.title,
+    url: releaseUrl,
+  };
+  return [deletedTrackgroup].concat(deletedEntities);
 };

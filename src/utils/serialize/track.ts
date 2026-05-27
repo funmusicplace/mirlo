@@ -1,3 +1,5 @@
+import { join } from "path";
+
 import {
   Artist,
   ArtistAvatar,
@@ -38,3 +40,41 @@ export const processSingleTrack = (
       })
     : undefined,
 });
+
+export const serializeSingleTrackIntoCanimus = (
+  track: Track,
+  releaseUrl: string
+) => {
+  const trackId = String(track.id);
+  const metadata: any = track.metadata;
+  const mediaUrl = join(
+    String(process.env.API_DOMAIN),
+    "v1/tracks",
+    trackId,
+    "stream/external/playlist.m3u8"
+  );
+  return {
+    type: "track",
+    name: track.title,
+    url: join(releaseUrl, "tracks", trackId),
+    duration: metadata.format.duration,
+    media: [
+      {
+        src: mediaUrl,
+        type: "audio/x-mpegurl",
+      },
+    ],
+  };
+};
+
+export const serializeSingleDeletedTrackIntoCanimus = (
+  track: Track,
+  releaseUrl: string
+) => {
+  const trackId = String(track.id);
+  return {
+    type: "track",
+    name: track.title,
+    url: join(releaseUrl, "tracks", trackId),
+  };
+};

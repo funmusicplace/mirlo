@@ -169,6 +169,7 @@ const routes = [
   "admin/stats",
   "oembed",
   "flag",
+  "sm/canimus.json",
 ];
 
 export default routes;
