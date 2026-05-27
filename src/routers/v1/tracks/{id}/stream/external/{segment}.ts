@@ -113,7 +113,7 @@ export default function () {
             decoded = jwt.verify(playToken, jwt_secret);
           } catch (e: any) {
             throw new AppError({
-              httpCode: 400,
+              httpCode: 401,
               // jwt verify errors typically include a message
               // https://github.com/auth0/node-jsonwebtoken#errors--codes
               description: e.message || "Invalid token",
