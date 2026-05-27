@@ -83,6 +83,74 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
     }
   };
 
+  const downloadFile = async (
+    endpoint: string,
+    options: { fallbackName: string },
+    isRetry = false
+  ): Promise<{ ok: true } | { ok: false; error?: string }> => {
+    const resp = await apiRequest<Response>(
+      endpoint,
+      { method: "GET", credentials: "include" },
+      { noProcess: true }
+    );
+
+    if (!resp.ok) {
+      // JWT expired — refresh token and retry once
+      if (resp.status === 401 && !isRetry) {
+        try {
+          const errJson = await resp.json();
+          if (errJson?.error === "jwt expired") {
+            await apiRequest("refresh", { method: "POST" });
+            return downloadFile(endpoint, options, true);
+          }
+        } catch {
+          // refresh failed; fall through to generic error
+        }
+      }
+
+      try {
+        const errJson = await resp.json();
+        if (typeof errJson?.error === "string") {
+          return { ok: false, error: errJson.error };
+        }
+        if (errJson?.error) {
+          return { ok: false, error: JSON.stringify(errJson.error) };
+        }
+      } catch {
+        // body wasn't JSON; fall through to a generic failure
+      }
+      return { ok: false };
+    }
+
+    // The /download endpoint can return 200 + JSON when the zip isn't ready
+    // yet (it queues a job and returns { result: { jobId } }). Treat that as a
+    // soft error rather than trying to save the JSON payload as a zip file.
+    const contentType = resp.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      let json: unknown;
+      try {
+        json = await resp.json();
+      } catch {
+        // ignore
+      }
+      return {
+        ok: false,
+        error: "The download is not ready yet. Please try again in a moment.",
+      };
+    }
+
+    const blob = await resp.blob();
+    const disposition = resp.headers.get("content-disposition") ?? "";
+    const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^"';]+)"?/i);
+    const filename = match
+      ? decodeURIComponent(match[1])
+      : options.fallbackName;
+
+    fileSaver.saveAs(blob, filename);
+
+    return { ok: true };
+  };
+
   return {
     root: api,
     paymentProcessor: {
@@ -195,6 +263,8 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
     getFileDownloadUrl: (fromEndpoint: string): string => {
       return `${apiRoot}/v1/${fromEndpoint}`;
     },
+
+    downloadFile,
 
     generateDownload: (endpoint: string) => {
       return apiRequest<Response>(

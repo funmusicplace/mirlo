@@ -92,7 +92,9 @@ describe("album zip generation and download", () => {
     cy.contains("We're generating the release!").should("be.visible");
 
     cy.wait("@jobStatus", { timeout: 10000 });
-    cy.get('[role="dialog"]').contains("a", "Download").should("be.visible");
+    cy.get('[role="dialog"]')
+      .contains("button", "Download")
+      .should("be.visible");
   });
 
   it("shows the download link immediately when the zip already exists", () => {
@@ -110,7 +112,9 @@ describe("album zip generation and download", () => {
 
     cy.wait("@generateAlbum");
     cy.contains("We're generating the release!").should("not.exist");
-    cy.get('[role="dialog"]').contains("a", "Download").should("be.visible");
+    cy.get('[role="dialog"]')
+      .contains("button", "Download")
+      .should("be.visible");
   });
 
   it("download link points to the correct endpoint with the chosen format", () => {
@@ -124,11 +128,24 @@ describe("album zip generation and download", () => {
     cy.get('[role="dialog"]').contains("button", "MP3 320kbps").click();
 
     cy.wait("@generateAlbum");
+
+    cy.intercept("GET", `/v1/trackGroups/*/download*`, {
+      statusCode: 200,
+      headers: {
+        "content-type": "application/zip",
+        "content-disposition": 'attachment; filename="test.zip"',
+      },
+      body: "",
+    }).as("downloadAlbum");
+
     cy.get('[role="dialog"]')
-      .contains("a", "Download")
+      .contains("button", "Download")
       .should("be.visible")
-      .should("have.attr", "href")
-      .and("include", "/download")
+      .click();
+
+    cy.wait("@downloadAlbum")
+      .its("request.url")
+      .should("include", "/download")
       .and("include", "format=320.mp3");
   });
 
@@ -143,7 +160,9 @@ describe("album zip generation and download", () => {
     cy.get('[role="dialog"]').contains("button", "FLAC").click();
 
     cy.wait("@generateAlbum");
-    cy.get('[role="dialog"]').contains("a", "Download").should("be.visible");
+    cy.get('[role="dialog"]')
+      .contains("button", "Download")
+      .should("be.visible");
 
     cy.get('[role="dialog"]')
       .contains("button", "Choose another format")
