@@ -11,12 +11,8 @@ import { bp } from "../../constants";
 import LoadingSpinner from "./LoadingSpinner";
 
 export interface ButtonProps {
-  children?: React.ReactNode;
   startIcon?: React.ReactElement;
   endIcon?: React.ReactElement;
-  disabled?: boolean;
-  style?: React.CSSProperties;
-  className?: string;
   isLoading?: boolean;
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
   ref?: React.Ref<HTMLButtonElement>;
@@ -319,7 +315,6 @@ export const Button: React.FC<
   endIcon,
   disabled,
   isLoading,
-  role,
   ...props
 }) => {
   return (
