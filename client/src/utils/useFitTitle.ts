@@ -2,6 +2,12 @@ import React from "react";
 
 const MOBILE_QUERY = "(max-width: 768px)";
 
+/**
+ * Shrinks a title to fit its container by writing a --fit-scale CSS
+ * variable (with a min size limit after which it wraps).
+ * Desktop: scales down if the title overflows width.
+ * Mobile: scales down if it exceeds the max number of lines.
+ */
 export function useFitTitle<T extends HTMLElement>({
   desktopMinScale = 0.5,
   mobileMaxLines = 2,

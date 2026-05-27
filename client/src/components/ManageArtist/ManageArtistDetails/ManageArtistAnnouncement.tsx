@@ -92,6 +92,10 @@ const ManageArtistAnnouncement: React.FC<{
 
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
 
+  // The announcement needs to span full viewport width above the page
+  // content, but on manage routes it's wrapped in a max-width container.
+  // ManageContainer renders a slot above that container and we portal
+  // into it here.
   const [mount, setMount] = React.useState<HTMLElement | null>(() =>
     typeof document === "undefined"
       ? null
