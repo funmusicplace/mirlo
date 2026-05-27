@@ -1,13 +1,14 @@
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { logger } from "../../../../logger";
+import { startGeneratingZip } from "../../../../queues/album-queue";
+import { statFile, trackGroupFormatBucket } from "../../../../utils/minio";
 import {
   basicTrackGroupInclude,
   FormatOptions,
 } from "../../../../utils/trackGroup";
-import { logger } from "../../../../logger";
-import { statFile, trackGroupFormatBucket } from "../../../../utils/minio";
-import { startGeneratingZip } from "../../../../queues/album-queue";
-import prisma from "@mirlo/prisma";
 
 export default function () {
   const operations = {
@@ -41,8 +42,11 @@ export default function () {
 
     try {
       logger.info("checking if trackgroup is already zipped");
-      const { backblazeStat } = await statFile(trackGroupFormatBucket, zipName);
-      if (backblazeStat) {
+      const { backblazeStat, minioStat } = await statFile(
+        trackGroupFormatBucket,
+        zipName
+      );
+      if (backblazeStat || minioStat) {
         logger.info("the trackgroup is already zipped");
         return res.json({
           message: "The album has already been generated",
