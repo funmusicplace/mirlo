@@ -45,9 +45,14 @@ export default function () {
           postForURLSlug = possiblePosts[0];
         }
       }
+      const resolvedId = postForURLSlug?.id ?? Number(id);
+      if (isNaN(resolvedId)) {
+        throw new AppError({ httpCode: 404, description: "Post not found" });
+      }
+
       const post = await prisma.post.findFirst({
         where: {
-          id: postForURLSlug?.id || Number(id),
+          id: resolvedId,
           publishedAt: {
             lte: new Date(),
           },
