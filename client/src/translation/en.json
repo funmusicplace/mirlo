@@ -149,7 +149,11 @@
     "tracks": "Tracks",
     "tags": "Tags",
     "labels": "Labels",
-    "moreArtist": "More artist results"
+    "moreResults": "See all results",
+    "openSearch": "Open search",
+    "searchMusic": "Search music",
+    "searchMusicOnMirlo": "Search music on Mirlo",
+    "untitled": "Untitled"
   },
   "artistAlbumsTable": {
     "title": "Title",
@@ -887,8 +891,6 @@
     "uploadImage": "Upload an image",
     "uploadImageDescription": "Choose an image to upload",
     "addImage": "Add image",
-    "insertATrack": "Search for a track:",
-    "insertATrackGroup": "Search for a release:",
     "uploadAVideo": "Add a video",
     "addUrl": "Insert a video url",
     "addVideo": "Add video",
@@ -896,10 +898,26 @@
     "songTitle": "Track title",
     "uploadNewSong": "Upload new track",
     "addTitleToUpload": "Add track title to upload",
-    "useExistingSong": "Use existing track",
-    "existingSongDescription": "Sharing a track from an existing release or pre-order? Find it here.",
     "uploadNewSongDescription": "Sharing a track that's not on one of your releases? A draft or WIP? Upload it here to share.",
-    "noMentionsFound": "No users found"
+    "noMentionsFound": "No users found",
+    "addSomeMusic": "Add some music",
+    "addMusicInThisPost": "Add music in this post",
+    "searchPlaceholder": "Search for a track or release...",
+    "orUploadANewTrack": "or upload a new track",
+    "uploadUnavailable": "Upload is available once a draft album exists for this artist."
+  },
+  "commandSearch": {
+    "dialogLabel": "Search",
+    "close": "Close",
+    "noResults": "No results",
+    "scopeEverywhere": "Everywhere on Mirlo",
+    "scopeCollection": "In my collection",
+    "scopeWishlist": "In my wishlist",
+    "filterLabelScope": "Where to search",
+    "filterLabelKind": "What to search for",
+    "kindAll": "All",
+    "categoryTracks": "Tracks",
+    "categoryReleases": "Releases"
   },
   "manageLicense": {
     "shortLabelForLicense": "What's a unique short label for this license?",

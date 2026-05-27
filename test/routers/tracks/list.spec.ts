@@ -84,6 +84,164 @@ describe("GET /v1/tracks", () => {
     assert.equal(response.body.results[0].title, "JSON Track");
   });
 
+  it("q matches against the track title", async () => {
+    const { user } = await createUser({ email: "q-title@example.com" });
+    const artist = await createArtist(user.id, {
+      name: "Robin",
+      urlSlug: "robin",
+    });
+    await createTrackGroup(artist.id, {
+      title: "The Bird Album",
+      urlSlug: "the-bird-album",
+      tracks: [
+        {
+          title: "Chirp",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+        {
+          title: "Quiet Forest",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+      ],
+    });
+
+    const response = await requestApp
+      .get("tracks")
+      .query({ q: "chirp" })
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.results.length, 1);
+    assert.equal(response.body.results[0].title, "Chirp");
+  });
+
+  it("q matches against the artist name", async () => {
+    const { user } = await createUser({ email: "q-artist@example.com" });
+    const artist = await createArtist(user.id, {
+      name: "Blackbird",
+      urlSlug: "blackbird",
+    });
+    await createTrackGroup(artist.id, {
+      title: "Migration",
+      urlSlug: "migration",
+      tracks: [
+        {
+          title: "Wing Beats",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+      ],
+    });
+    const otherUser = await createUser({ email: "q-other@example.com" });
+    const otherArtist = await createArtist(otherUser.user.id, {
+      name: "Crow",
+      urlSlug: "crow",
+    });
+    await createTrackGroup(otherArtist.id, {
+      title: "Stars",
+      urlSlug: "stars",
+      tracks: [
+        {
+          title: "Kaaw",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+      ],
+    });
+
+    const response = await requestApp
+      .get("tracks")
+      .query({ q: "blackbird" })
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.results.length, 1);
+    assert.equal(response.body.results[0].title, "Wing Beats");
+  });
+
+  it("q matches across multiple tokens (artist + title)", async () => {
+    const { user } = await createUser({ email: "q-multi@example.com" });
+    const artist = await createArtist(user.id, {
+      name: "Blackbird",
+      urlSlug: "blackbird-multi",
+    });
+    await createTrackGroup(artist.id, {
+      title: "Migration",
+      urlSlug: "migration-multi",
+      tracks: [
+        {
+          title: "Chirp",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+        {
+          title: "Kaaw",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+      ],
+    });
+
+    const response = await requestApp
+      .get("tracks")
+      .query({ q: "blackbird chirp" })
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.results.length, 1);
+    assert.equal(response.body.results[0].title, "Chirp");
+  });
+
+  it("q is case insensitive", async () => {
+    const { user } = await createUser({ email: "q-case@example.com" });
+    const artist = await createArtist(user.id, {
+      name: "Robin",
+      urlSlug: "robin-case",
+    });
+    await createTrackGroup(artist.id, {
+      title: "The Bird Album",
+      urlSlug: "the-bird-album-case",
+      tracks: [
+        {
+          title: "Migration",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+      ],
+    });
+
+    const response = await requestApp
+      .get("tracks")
+      .query({ q: "MIGRATION" })
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.results.length, 1);
+    assert.equal(response.body.results[0].title, "Migration");
+  });
+
+  it("q excludes tracks from unpublished trackGroups", async () => {
+    const { user } = await createUser({ email: "q-unpub@example.com" });
+    const artist = await createArtist(user.id, {
+      name: "Crow",
+      urlSlug: "crow-unpub",
+    });
+    await createTrackGroup(artist.id, {
+      title: "Hidden Album",
+      urlSlug: "hidden-album",
+      publishedAt: null,
+      tracks: [
+        {
+          title: "Hidden Chirp",
+          audio: { create: { uploadState: "SUCCESS" } },
+        },
+      ],
+    });
+
+    const response = await requestApp
+      .get("tracks")
+      .query({ q: "hidden" })
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.results.length, 0);
+  });
+
   it("does not include tracks from unpublished trackGroups in RSS", async () => {
     const { user } = await createUser({
       email: "draft-tracks@example.com",

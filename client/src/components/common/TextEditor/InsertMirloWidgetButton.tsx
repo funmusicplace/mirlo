@@ -1,229 +1,306 @@
 import { css } from "@emotion/css";
 import { useCommands } from "@remirror/react";
-import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
-import BulkTrackUpload from "components/ManageArtist/ManageTrackGroup/BulkTrackUpload";
+import { useQuery } from "@tanstack/react-query";
+import {
+  queryTrackGroups,
+  queryTracks,
+  queryUserCollection,
+  queryUserWishlistTrackGroups,
+} from "queries";
 import React from "react";
-import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaMusic } from "react-icons/fa";
-import api from "services/api";
-import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
+import { useDebounce } from "use-debounce";
+import { matchesTokens } from "utils/matchesTokens";
 import { widgetUrl } from "utils/tracks";
 
-import { bp } from "../../../constants";
-import AutoComplete from "../AutoComplete";
-import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
-import Box from "../Box";
 import Button from "../Button";
-import FormComponent from "../FormComponent";
-import { InputEl } from "../Input";
-import Modal from "../Modal";
+import CommandSearch, {
+  CommandSearchSection,
+} from "../CommandSearch/CommandSearch";
+
+import UploadMusicModal from "./UploadMusicModal";
+
+type Scope = "all" | "collection" | "wishlist";
+type Kind = "all" | "track" | "trackGroup";
 
 const InsertMirloWidgetButton: React.FC<{
-  postId?: number;
   artistId?: number;
-}> = ({ postId, artistId }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [draftAlbum, setDraftAlbum] = React.useState<TrackGroup>();
-  const [newSongs, setNewSongs] = React.useState<Track[]>([]);
-  const methods = useForm<{ titles: string[] }>();
+}> = ({ artistId }) => {
   const { addIframe } = useCommands();
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
-  const errorHandler = useErrorHandler();
+  const { t: tShared } = useTranslation("translation", {
+    keyPrefix: "commandSearch",
+  });
+  const { user } = useAuthContext();
 
-  const titles = methods.watch("titles");
+  const [view, setView] = React.useState<"closed" | "search" | "upload">(
+    "closed"
+  );
+  const [query, setQuery] = React.useState("");
+  const [scope, setScope] = React.useState<Scope>("all");
+  const [kind, setKind] = React.useState<Kind>("all");
 
-  React.useEffect(() => {
-    if (!isOpen) {
-      methods.reset({ titles: [] });
-      setNewSongs([]);
-    }
-  }, [methods, isOpen]);
-
-  const onAdd = async (
-    trackId: string | number,
-    variant: "track" | "trackGroup"
-  ) => {
-    addIframe({
-      src: widgetUrl(+trackId, variant),
-      height: variant === "track" ? 137 : 371,
-      width: 700,
-    });
-    setIsOpen(false);
-  };
-
-  const getTrackOptions = React.useCallback(async (searchString: string) => {
-    const results = await api.getMany<Track>(`tracks`, {
-      title: searchString,
-      take: "10",
-    });
-    return results.results.map((r) => ({
-      name: `${r.trackGroup.artist?.name} - ${r.title}`,
-      id: r.id,
-    }));
-  }, []);
-
-  const addNewSongs = React.useCallback(async () => {
-    const titles = methods.getValues("titles");
-    if (newSongs) {
-      try {
-        await Promise.all(
-          newSongs.map(async (song, idx) => {
-            await api.put(`manage/tracks/${song.id}`, { title: titles[idx] });
-          })
-        );
-        newSongs.forEach((song) => onAdd(song.id, "track"));
-      } catch (e) {
-        errorHandler(e, true);
-      }
-    }
-  }, [newSongs, methods]);
-
-  const setNewSongDetails = React.useCallback(async (newTrack?: Track) => {
-    if (newTrack) {
-      try {
-        const { result } = await api.get<Track>(`manage/tracks/${newTrack.id}`);
-        // setNewSong(result);
-        setNewSongs((existing) => [...(existing ?? []), result]);
-        loadDraft();
-      } catch (e) {
-        errorHandler(e, true);
-      }
-    }
-  }, []);
-
-  const loadDraft = React.useCallback(async () => {
-    if (artistId) {
-      const response = await api.get<TrackGroup>(
-        `manage/artists/${artistId}/drafts`
-      );
-      setDraftAlbum(response.result);
-    }
-  }, [artistId]);
+  const open = view === "search";
 
   React.useEffect(() => {
-    try {
-      loadDraft();
-    } catch (e) {
-      errorHandler(e, true);
+    if (view === "closed") {
+      setQuery("");
+      setScope("all");
+      setKind("all");
     }
-  }, []);
+  }, [view]);
 
-  const hasEmptyStrings = titles?.filter((title) => title === "").length > 0;
+  const [debouncedQuery] = useDebounce(query, 300);
+  const trimmed = debouncedQuery.trim();
+  const searchActive = open && trimmed.length >= 2;
+  const useBackendSearch = !user || scope === "all";
+
+  const wantTracks = kind === "all" || kind === "track";
+  const wantTrackGroups = kind === "all" || kind === "trackGroup";
+
+  const collectionQ = useQuery({
+    ...queryUserCollection(user?.id),
+    enabled: open && !!user?.id,
+  });
+  const wishlistTGQ = useQuery({
+    ...queryUserWishlistTrackGroups(user?.id),
+    enabled: open && !!user?.id,
+  });
+
+  const tracksQ = useQuery({
+    ...queryTracks({ q: trimmed, take: 10 }),
+    enabled: searchActive && useBackendSearch && wantTracks,
+  });
+  const trackGroupsQ = useQuery({
+    ...queryTrackGroups({ q: trimmed, take: 10 }),
+    enabled: searchActive && useBackendSearch && wantTrackGroups,
+  });
+
+  const embedTrack = React.useCallback(
+    (id: number) => {
+      addIframe({ src: widgetUrl(id, "track"), height: 137, width: 700 });
+      setView("closed");
+    },
+    [addIframe]
+  );
+
+  const embedTrackGroup = React.useCallback(
+    (id: number) => {
+      addIframe({ src: widgetUrl(id, "trackGroup"), height: 371, width: 700 });
+      setView("closed");
+    },
+    [addIframe]
+  );
+
+  const sections = React.useMemo<CommandSearchSection[]>(() => {
+    if (!searchActive) return [];
+    const out: CommandSearchSection[] = [];
+    let tracks: { id: number; name: string }[] = [];
+    let albums: { id: number; name: string }[] = [];
+
+    if (useBackendSearch) {
+      tracks = (tracksQ.data?.results ?? []).map((r) => ({
+        id: r.id,
+        name: `${r.trackGroup.artist?.name ?? ""} · ${r.title}`,
+      }));
+      albums = (trackGroupsQ.data?.results ?? []).map((r) => ({
+        id: r.id,
+        name: `${r.artist?.name ?? ""} · ${r.title}`,
+      }));
+    } else if (scope === "collection") {
+      (collectionQ.data ?? []).forEach((p) => {
+        if (
+          isTrackPurchase(p) &&
+          p.track &&
+          matchesTokens(
+            [p.track.title, p.track.trackGroup?.artist?.name],
+            trimmed
+          )
+        ) {
+          tracks.push({
+            id: p.track.id,
+            name: `${p.track.trackGroup?.artist?.name ?? ""} · ${p.track.title}`,
+          });
+        }
+        if (
+          isTrackGroupPurchase(p) &&
+          p.trackGroup &&
+          matchesTokens(
+            [p.trackGroup.title, p.trackGroup.artist?.name],
+            trimmed
+          )
+        ) {
+          albums.push({
+            id: p.trackGroup.id,
+            name: `${p.trackGroup.artist?.name ?? ""} · ${p.trackGroup.title}`,
+          });
+        }
+      });
+      tracks = tracks.slice(0, 10);
+      albums = albums.slice(0, 10);
+    } else {
+      (user?.trackFavorites ?? []).forEach((tf) => {
+        if (
+          matchesTokens(
+            [tf.track.title, tf.track.trackGroup?.artist?.name],
+            trimmed
+          )
+        ) {
+          tracks.push({
+            id: tf.trackId,
+            name: `${tf.track.trackGroup?.artist?.name ?? ""} · ${tf.track.title}`,
+          });
+        }
+      });
+      (wishlistTGQ.data ?? []).forEach((w) => {
+        if (
+          w.trackGroup &&
+          matchesTokens(
+            [w.trackGroup.title, w.trackGroup.artist?.name],
+            trimmed
+          )
+        ) {
+          albums.push({
+            id: w.trackGroupId,
+            name: `${w.trackGroup.artist?.name ?? ""} · ${w.trackGroup.title}`,
+          });
+        }
+      });
+      tracks = tracks.slice(0, 10);
+      albums = albums.slice(0, 10);
+    }
+
+    if (wantTracks && tracks.length > 0) {
+      out.push({
+        category: tShared("categoryTracks"),
+        items: tracks.map((tr) => ({
+          key: `track-${tr.id}`,
+          node: tr.name,
+          onSelect: () => embedTrack(tr.id),
+        })),
+      });
+    }
+    if (wantTrackGroups && albums.length > 0) {
+      out.push({
+        category: tShared("categoryReleases"),
+        items: albums.map((tg) => ({
+          key: `trackGroup-${tg.id}`,
+          node: tg.name,
+          onSelect: () => embedTrackGroup(tg.id),
+        })),
+      });
+    }
+    return out;
+  }, [
+    searchActive,
+    trimmed,
+    user,
+    scope,
+    useBackendSearch,
+    wantTracks,
+    wantTrackGroups,
+    tracksQ.data,
+    trackGroupsQ.data,
+    collectionQ.data,
+    wishlistTGQ.data,
+    embedTrack,
+    embedTrackGroup,
+    tShared,
+  ]);
+
+  const isLoading =
+    (useBackendSearch && (tracksQ.isFetching || trackGroupsQ.isFetching)) ||
+    (!useBackendSearch && (collectionQ.isFetching || wishlistTGQ.isFetching));
+
+  const hasCollection = (collectionQ.data?.length ?? 0) > 0;
+  const hasWishlist =
+    (user?.trackFavorites?.length ?? 0) > 0 ||
+    (wishlistTGQ.data?.length ?? 0) > 0;
+
+  const filters = [];
+  if (hasCollection || hasWishlist) {
+    const scopeOptions: { value: string; label: string }[] = [
+      { value: "all", label: tShared("scopeEverywhere") },
+    ];
+    if (hasCollection) {
+      scopeOptions.push({
+        value: "collection",
+        label: tShared("scopeCollection"),
+      });
+    }
+    if (hasWishlist) {
+      scopeOptions.push({
+        value: "wishlist",
+        label: tShared("scopeWishlist"),
+      });
+    }
+    filters.push({
+      label: tShared("filterLabelScope"),
+      value: scope,
+      options: scopeOptions,
+      onChange: (v: string) => setScope(v as Scope),
+    });
+  }
+  filters.push({
+    label: tShared("filterLabelKind"),
+    value: kind,
+    options: [
+      { value: "all", label: tShared("kindAll") },
+      { value: "track", label: tShared("categoryTracks") },
+      { value: "trackGroup", label: tShared("categoryReleases") },
+    ],
+    onChange: (v: string) => setKind(v as Kind),
+  });
 
   return (
     <>
       <Button
+        aria-label={t("addSomeMusic")}
         startIcon={<FaMusic />}
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => setView("search")}
       />
-      <Modal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        size="small"
-        title="Add some music"
-        contentClassName={css`
-          min-height: 160px;
-          overflow: inherit;
 
-          input + div + div {
-            z-index: 1000;
-            position: fixed;
-            width: calc(92% - 1rem);
-          }
-
-          input {
-            position: relative;
-            z-index: 999;
-          }
-
-          @media screen and (max-width: ${bp.small}px) {
-            input + div + div {
-              width: 90%;
-              margin-right: 1rem;
-              margin-left: 1rem;
-            }
-          }
-
-          ul {
-            margin-bottom: 1rem;
-          }
-        `}
-      >
-        {draftAlbum && (
-          <>
-            <div
+      <CommandSearch
+        open={open}
+        onClose={() => setView("closed")}
+        title={t("addMusicInThisPost")}
+        placeholder={t("searchPlaceholder")}
+        query={query}
+        onQueryChange={setQuery}
+        sections={sections}
+        isLoading={isLoading}
+        filters={filters}
+        footer={
+          artistId ? (
+            <button
+              type="button"
+              onClick={() => setView("upload")}
               className={css`
-                margin-bottom: 2rem;
+                background: none;
+                border: none;
+                color: inherit;
+                cursor: pointer;
+                padding: 0;
+                font: inherit;
+                text-decoration: underline;
               `}
             >
-              <h2>{t("useExistingSong")}</h2>
-              <p>{t("existingSongDescription")}</p>
+              {t("orUploadANewTrack")}
+            </button>
+          ) : undefined
+        }
+      />
 
-              {t("insertATrack")}
-              <AutoComplete
-                getOptions={getTrackOptions}
-                id="input-mirlo-track"
-                onSelect={(val) => {
-                  if (
-                    hasId(val) &&
-                    (typeof val.id === "string" || typeof val.id === "number")
-                  ) {
-                    onAdd(val.id, "track");
-                  }
-                }}
-              />
-              <br />
-              {t("insertATrackGroup")}
-              <AutoCompleteTrackGroup
-                id="input-mirlo-track-group"
-                onSelect={(val) => onAdd(val, "trackGroup")}
-              />
-            </div>
-            <h2>{t("uploadNewSong")}</h2>
-            <p>{t("uploadNewSongDescription")}</p>
-            {newSongs.length > 0 && (
-              <div
-                className={css`
-                  flex-direction: column;
-                  display: flex;
-
-                  > div {
-                    padding: 1rem;
-                    font-weight: bold;
-                    border: 1px dashed var(--mi-darken-xx-background-color);
-                    display: blox;
-                    margin-top: 1rem;
-                  }
-
-                  button {
-                    margin-top: 1rem;
-                  }
-                `}
-              >
-                {newSongs?.map((song, idx) => (
-                  <FormComponent key={song.id}>
-                    <label>{t("songTitle")}</label>
-                    <InputEl {...methods.register(`titles.${idx}`)} required />
-                    <small>{song.audio?.originalFilename}</small>
-                  </FormComponent>
-                ))}
-                {hasEmptyStrings && (
-                  <Box variant="warning">{t("addTitleToUpload")}</Box>
-                )}
-                <Button disabled={!!hasEmptyStrings} onClick={addNewSongs}>
-                  {t("addThisSong")}
-                </Button>
-              </div>
-            )}
-            <BulkTrackUpload
-              trackgroup={draftAlbum}
-              reload={setNewSongDetails}
-            />
-          </>
-        )}
-      </Modal>
+      <UploadMusicModal
+        open={view === "upload"}
+        onClose={() => setView("closed")}
+        artistId={artistId}
+        onTrackReady={embedTrack}
+      />
     </>
   );
 };

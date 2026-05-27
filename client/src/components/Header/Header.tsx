@@ -193,18 +193,18 @@ const Header = () => {
       <div className="absolute w-full h-full md:hidden!"></div>
       <Content artistId={artistId}>
         <LogoWrapper />
-        <div className="flex items-center">
-          <HeaderSearch />
+        <div className="flex items-center gap-3">
           {instanceArtist && !artistId && (
             <ButtonLink
               to={getArtistUrl(instanceArtist) + "/support"}
               collapsible
               startIcon={<FaHandHoldingHeart />}
-              className="block me-[.75rem] no-underline text-center hover:underline! color-white! &_svg:fill-white! bg-black! max-md:text-(--mi-font-size-xsmall)!"
+              className="block no-underline text-center hover:underline! color-white! &_svg:fill-white! bg-black! max-md:text-(--mi-font-size-xsmall)!"
             >
               <p>{t("donateNow", { keyPrefix: "kickstarter" })}</p>
             </ButtonLink>
           )}
+          <HeaderSearch />
           {!isLoggedIn && (
             <ButtonLink
               aria-label={t("logIn", { keyPrefix: "logIn" })}

@@ -378,3 +378,43 @@ export function queryUserSales(
     queryFn: fetchUserSales,
   });
 }
+
+type UserPurchase = UserTrackGroupPurchase | UserTrackPurchase;
+
+const fetchUserCollection: QueryFunction<
+  UserPurchase[],
+  ["fetchUserCollection", { userId?: number }, ...any]
+> = ({ queryKey: [_, { userId }], signal }) => {
+  return api
+    .get<{ results: UserPurchase[] }>(`v1/users/${userId}/collection`, {
+      signal,
+    })
+    .then((r) => r.results);
+};
+
+export function queryUserCollection(userId?: number) {
+  return queryOptions({
+    queryKey: ["fetchUserCollection", { userId }, QUERY_KEY_AUTH],
+    queryFn: fetchUserCollection,
+    enabled: !!userId,
+  });
+}
+
+const fetchUserWishlistTrackGroups: QueryFunction<
+  UserTrackGroupWishlist[],
+  ["fetchUserWishlistTrackGroups", { userId?: number }, ...any]
+> = ({ queryKey: [_, { userId }], signal }) => {
+  return api
+    .get<{
+      results: UserTrackGroupWishlist[];
+    }>(`v1/users/${userId}/wishlist`, { signal })
+    .then((r) => r.results);
+};
+
+export function queryUserWishlistTrackGroups(userId?: number) {
+  return queryOptions({
+    queryKey: ["fetchUserWishlistTrackGroups", { userId }, QUERY_KEY_AUTH],
+    queryFn: fetchUserWishlistTrackGroups,
+    enabled: !!userId,
+  });
+}

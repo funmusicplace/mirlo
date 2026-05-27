@@ -18,6 +18,7 @@ export default function () {
       skip: skipQuery,
       take = format === "rss" ? 50 : 10,
       title,
+      q,
     } = req.query;
 
     try {
@@ -31,6 +32,34 @@ export default function () {
 
       if (title && typeof title === "string") {
         where.title = { contains: title, mode: "insensitive" };
+      }
+
+      if (q && typeof q === "string") {
+        const tokens = q.split(/\s+/).filter(Boolean);
+        if (tokens.length > 0) {
+          const existingAnd = where.AND
+            ? Array.isArray(where.AND)
+              ? where.AND
+              : [where.AND]
+            : [];
+          where.AND = [
+            ...existingAnd,
+            ...tokens.map(
+              (token): Prisma.TrackWhereInput => ({
+                OR: [
+                  { title: { contains: token, mode: "insensitive" } },
+                  {
+                    trackGroup: {
+                      artist: {
+                        name: { contains: token, mode: "insensitive" },
+                      },
+                    },
+                  },
+                ],
+              })
+            ),
+          ];
+        }
       }
 
       const tracks = await prisma.track.findMany({
