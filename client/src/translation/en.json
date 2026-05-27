@@ -1046,6 +1046,7 @@
     "urlSlug": "Album URL",
     "fullUrlIs": "The full URL will be '{{currentUrlSlug}}'",
     "urlSlugWarning": "Changes to this value will break existing links to this album.",
+    "urlSlugHint": "The URL will be generated automatically from the album title.",
     "previewRelease": "Preview release",
     "isGettable": "Prevent users from downloading and buying this release",
     "isGettableTooltip": "Turn this on if you only want people to stream the release. When enabled, downloads and purchases are disabled.",
@@ -1689,7 +1690,12 @@
     "shouldSendEmail": "Send an email to your supporters when this post is published?",
     "shouldSendEmailContext": "If yes, an e-mail will be sent and they will get notified on the website, if not, they'll only get the notification.",
     "follow": "Everyone who pressed the \"Follow\" button on your profile",
-    "ifNotPublic": "Which of your subscription tiers should be the minimum tier to receive your posts?"
+    "ifNotPublic": "Which of your subscription tiers should be the minimum tier to receive your posts?",
+    "availableAt": "Available at {{url}},",
+    "changeSlug": "click here to change the link.",
+    "urlSlug": "Post URL slug",
+    "slugTaken": "This URL is taken, try something else.",
+    "slugWarning": "Changes to this value will break existing links to this post."
   },
   "errorPage": {
     "reactError": "React error ",

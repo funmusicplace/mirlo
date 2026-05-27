@@ -51,7 +51,7 @@ const SaveDraftButton: React.FC<{
           setIsSaving(true);
           let postId;
           const picked = {
-            ...pick(data, ["title", "isPublic", "shouldSendEmail"]),
+            ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
             content: getBodyContent(),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
             artistId: artistId,

@@ -202,7 +202,7 @@ const Pricing: React.FC<{
         <div hidden={!isAlbumGettable}>
           <FormComponent className="grow">
             <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
-            <small id="description-minimum-price">
+            <small id="description-minimum-price" className="max-w-[72ch]">
               {t("minimumPriceDescription")}
             </small>
             <div
@@ -235,9 +235,11 @@ const Pricing: React.FC<{
                 {...register("minPrice", { min: 0 })}
               />
             </div>
-            <small id="hint-minimum-price-access">{t("pricingHelp")}</small>
+            <small id="hint-minimum-price-access" className="max-w-[72ch]">
+              {t("pricingHelp")}
+            </small>
             {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
-            <small id="hint-minimum-price-currency">
+            <small id="hint-minimum-price-currency" className="max-w-[72ch]">
               {t("currencyIsSetOnManageArtist")}
             </small>
           </FormComponent>
@@ -245,10 +247,10 @@ const Pricing: React.FC<{
           <FormComponent className="grow">
             <label htmlFor="input-suggested-price">{t("suggestedPrice")}</label>
 
-            <small id="hint-suggested-price">
+            <small id="hint-suggested-price" className="max-w-[72ch]">
               {t("suggestedPriceDescription")}
             </small>
-            <small id="hint-suggested-price-clarifier">
+            <small id="hint-suggested-price-clarifier" className="max-w-[72ch]">
               {t("suggestedPriceDescriptionClarifier")}
             </small>
             <div

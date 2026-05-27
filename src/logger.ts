@@ -1,6 +1,5 @@
 import winston from "winston";
 
-console.log("process.env", process.env.LOG_LEVEL || "info");
 export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || "info",
   format: winston.format.json(),

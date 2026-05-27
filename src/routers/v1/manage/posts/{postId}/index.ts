@@ -168,9 +168,12 @@ export default function () {
           publishedAt,
           minimumSubscriptionTierId,
           shouldSendEmail,
-          urlSlug: !post?.urlSlug
-            ? generateSlug(urlSlug ?? title ?? post?.title)
-            : undefined,
+          urlSlug:
+            urlSlug !== undefined
+              ? urlSlug
+              : post?.urlSlug
+                ? undefined
+                : generateSlug(title ?? post?.title),
         },
         where: {
           id: Number(postId),
