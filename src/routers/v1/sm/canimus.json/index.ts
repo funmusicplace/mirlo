@@ -115,7 +115,13 @@ export default function () {
             where: whereForPublishedTrackGroups(),
             include: {
               cover: true,
-              tracks: true,
+              tracks: {
+                include: {
+                  audio: {
+                    select: { duration: true },
+                  },
+                },
+              },
             },
             orderBy: { orderIndex: "asc" },
           },
@@ -135,7 +141,13 @@ export default function () {
         include: {
           trackGroups: {
             include: {
-              tracks: true,
+              tracks: {
+                include: {
+                  audio: {
+                    select: { duration: true },
+                  },
+                },
+              },
             },
             orderBy: { orderIndex: "asc" },
           },

@@ -20,11 +20,12 @@ import { isTrackPlayableNested } from "../trackPlayability";
 import {
   serializeSingleTrackIntoCanimus,
   serializeSingleDeletedTrackIntoCanimus,
+  CanimusTrack,
 } from "./track";
 
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
-  tracks?: Track[];
+  tracks?: CanimusTrack[];
 }
 
 export const processSingleTrackGroup = (
@@ -114,7 +115,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
       },
     },
     description: trackGroup.about,
-    children: trackGroup.tracks?.map((track: Track) =>
+    children: trackGroup.tracks?.map((track: CanimusTrack) =>
       serializeSingleTrackIntoCanimus(track, releaseUrl)
     ),
   };
