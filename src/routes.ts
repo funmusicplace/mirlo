@@ -169,7 +169,7 @@ const routes = [
   "admin/stats",
   "oembed",
   "flag",
-  "federatedStreaming"
+  "sm/canimus.json",
 ];
 
 export default routes;

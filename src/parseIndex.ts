@@ -127,7 +127,7 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
 
   $("head").append(`
     <link rel="canonical" href="${url}" />
-    <link rel="alternate" href="/v1/federatedStreaming" type="application/canimus+json" title="Canimus feed (JSON)"/>
+    <link rel="alternate" href="/v1/sm/canimus.json" type="application/canimus+json" title="Canimus feed (JSON)"/>
     <meta property="og:type" content="${determineType(metadata)}">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">

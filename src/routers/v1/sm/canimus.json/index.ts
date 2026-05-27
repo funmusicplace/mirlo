@@ -5,8 +5,8 @@ import { NextFunction, Request, Response } from "express";
 import {
   serializeSingleArtistIntoCanimus,
   serializeSingleDeletedArtistIntoCanimus,
-} from "../../../utils/serialize/artist";
-import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
+} from "../../../../utils/serialize/artist";
+import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
