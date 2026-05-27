@@ -191,6 +191,8 @@ const LOW_NOISE_PROBE_PATHS = new Set([
   "/.vscode/settings.json",
   "/.prettierrc.json",
   "/.eslintrc.json",
+  "/.well-known/jwks.json",
+  "/.well-known/host-meta.json",
 ]);
 
 // This has to be the last thing used so that other things don't get over-written
