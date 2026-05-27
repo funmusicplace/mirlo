@@ -159,6 +159,31 @@ export default function () {
         },
       });
 
+      const effectiveSlug =
+        urlSlug !== undefined
+          ? urlSlug
+          : (post?.urlSlug ?? generateSlug(title ?? post?.title ?? ""));
+
+      const effectiveArtistId = artistId ?? post?.artistId;
+
+      if (effectiveSlug && effectiveArtistId) {
+        const conflict = await prisma.post.findFirst({
+          where: {
+            artistId: effectiveArtistId,
+            urlSlug: { equals: effectiveSlug, mode: "insensitive" },
+            id: { not: Number(postId) },
+          },
+          select: { id: true },
+        });
+        if (conflict) {
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "A post with that URL slug already exists for this artist",
+          });
+        }
+      }
+
       const updatedPost = await prisma.post.update({
         data: {
           title,
@@ -168,12 +193,7 @@ export default function () {
           publishedAt,
           minimumSubscriptionTierId,
           shouldSendEmail,
-          urlSlug:
-            urlSlug !== undefined
-              ? urlSlug
-              : post?.urlSlug
-                ? undefined
-                : generateSlug(title ?? post?.title),
+          urlSlug: effectiveSlug,
         },
         where: {
           id: Number(postId),

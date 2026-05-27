@@ -187,6 +187,12 @@ const LOW_NOISE_PROBE_PATHS = new Set([
   "/.anthropic/config.json",
   "/.openai/config.json",
   "/.cursor/mcp.json",
+  "/.vscode/launch.json",
+  "/.vscode/settings.json",
+  "/.prettierrc.json",
+  "/.eslintrc.json",
+  "/.well-known/jwks.json",
+  "/.well-known/host-meta.json",
 ]);
 
 // This has to be the last thing used so that other things don't get over-written
@@ -240,9 +246,9 @@ app.use("/", userLoggedInWithoutRedirect, async (req, res, next) => {
           return;
         }
 
-        const fileErr = err as NodeJS.ErrnoException;
+        const fileErr = err as NodeJS.ErrnoException & { status?: number };
 
-        if (fileErr.code === "ENOENT") {
+        if (fileErr.code === "ENOENT" || fileErr.status === 404) {
           // During deploys or browser cache mismatch, hashed asset paths can 404.
           // Treat this as expected noise instead of an application error.
           if (req.path.startsWith("/assets/")) {

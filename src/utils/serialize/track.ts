@@ -41,8 +41,12 @@ export const processSingleTrack = (
     : undefined,
 });
 
+export interface CanimusTrack extends Track {
+  audio?: { duration: number | null } | null;
+}
+
 export const serializeSingleTrackIntoCanimus = (
-  track: Track,
+  track: CanimusTrack,
   releaseUrl: string
 ) => {
   const trackId = String(track.id);
@@ -57,7 +61,7 @@ export const serializeSingleTrackIntoCanimus = (
     type: "track",
     name: track.title,
     url: join(releaseUrl, "tracks", trackId),
-    duration: metadata.format.duration,
+    duration: track.audio?.duration ?? metadata?.format?.duration,
     media: [
       {
         src: mediaUrl,

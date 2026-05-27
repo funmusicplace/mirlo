@@ -140,20 +140,20 @@ const errorHandler = (
       }
 
       message = `Value is not unique: ${err.meta?.target}`;
+    } else {
+      if (err.code === "P2025") {
+        message = `Not found: ${err.message}`;
+      }
+      log.error(
+        `PrismaClientKnownRequestError: ${message} - ${JSON.stringify({
+          cause: err.cause,
+          name: err.name,
+          code: err.code,
+          meta: err.meta,
+          stack: err.stack,
+        })}`
+      );
     }
-
-    if (err.code === "P2025") {
-      message = `Not found: ${err.message}`;
-    }
-    log.error(
-      `PrismaClientKnownRequestError: ${message} - ${JSON.stringify({
-        cause: err.cause,
-        name: err.name,
-        code: err.code,
-        meta: err.meta,
-        stack: err.stack,
-      })}`
-    );
     return res.status(400).json({
       error: message,
     });

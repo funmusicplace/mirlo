@@ -33,6 +33,8 @@ export default function () {
     try {
       const results = await prisma.trackGroup.findMany({
         where: {
+          isHiddenTrackGroupForSongDrafts: false,
+          deletedAt: null,
           ...(includeLabelReleases === "true"
             ? {
                 OR: [
