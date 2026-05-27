@@ -1,11 +1,13 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
+import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams } from "react-router-dom";
 
+import { pageScaleCascade } from "../../constants";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 
 const ArtistContainer: React.FC = () => {
@@ -22,9 +24,26 @@ const ArtistContainer: React.FC = () => {
   const isPostOrRelease = trackGroupId || postId;
 
   return (
-    <>
+    <div
+      className={css`
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        ${pageScaleCascade}
+
+        @media (min-width: 769px) {
+          --artist-content-width: clamp(
+            924px,
+            calc(3 * (100dvh - 340px) + 9rem),
+            var(--mi-container-big)
+          );
+        }
+      `}
+    >
       {!isPostOrRelease && (
         <>
+          <ManageArtistAnnouncement showButtons={false} />
           <ArtistPageWrapper hasBackground={!!artistBackground}>
             <ArtistHeaderSection
               artist={artist}
@@ -48,7 +67,7 @@ const ArtistContainer: React.FC = () => {
         </>
       )}
       {isPostOrRelease && <Outlet />}
-    </>
+    </div>
   );
 };
 

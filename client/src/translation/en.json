@@ -471,6 +471,8 @@
   "artist": {
     "artistNavigation": "Artist",
     "labelNavigation": "Label",
+    "scrollLinksLeft": "Show previous links",
+    "scrollLinksRight": "Show more links",
     "contact": "Contact",
     "contactArtistTitle": "Contact {{ artistName }}",
     "contactArtistDescription": "Send {{ artistName }} a message. They'll receive it as a notification and by email.",
@@ -657,8 +659,7 @@
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
     "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. The platform will receive {{ mirloCut }}. Their payment processor will take a cut of {{ paymentProcessorCut }}.",
     "helpTooltip": "Platform percentage breakdown",
-    "isSubscribed": "Subscribed",
-    "moreLinks": "More links"
+    "isSubscribed": "Subscribed"
   },
   "checkoutError": {
     "title": "Checkout not completed",
@@ -746,6 +747,8 @@
   },
   "manageArtist": {
     "manageLinks": "Manage links",
+    "scrollLinksLeft": "Show previous links",
+    "scrollLinksRight": "Show more links",
     "manageArtistNavigation": "Manage artist",
     "manageLabelNavigation": "Manage label",
     "albumTags": "Release tags",

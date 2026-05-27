@@ -9,7 +9,8 @@ import { getArtistUrl } from "utils/artist";
 const ArtistShare: React.FC<{
   artist: Artist;
   buttonClassName?: string;
-}> = ({ artist, buttonClassName }) => {
+  size?: "compact" | "big" | "tiny";
+}> = ({ artist, buttonClassName, size }) => {
   const { t } = useTranslation("translation", { keyPrefix: "share" });
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -45,6 +46,7 @@ const ArtistShare: React.FC<{
         title={t("share") ?? ""}
         onClick={handleShareClick}
         startIcon={<BsShare />}
+        size={size}
         className={buttonClassName}
       />
       <Modal

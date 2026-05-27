@@ -9,8 +9,55 @@ import { transformFromLinks } from "utils/links";
 
 import { bp } from "../../constants";
 
+export const navbarLinkStripStyles = css`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: safe flex-end;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > a {
+    flex-shrink: 0;
+  }
+`;
+
 interface ArtistFormLinksProps {
   artist: Pick<Artist, "linksJson" | "links">;
+}
+
+export function renderArtistLinkButtons(links: Link[]) {
+  return links
+    .slice()
+    .sort(
+      (a, b) =>
+        Number(findOutsideSite(a).showFull) -
+        Number(findOutsideSite(b).showFull)
+    )
+    .map((l) => {
+      const site = findOutsideSite(l);
+      const iconOnly = !site.showFull;
+      return (
+        <ArtistButtonAnchor
+          rel="me"
+          href={linkUrlHref(l.url, true)}
+          key={l.url}
+          variant={iconOnly ? "link" : "chip"}
+          onlyIcon={iconOnly}
+          startIcon={site?.icon}
+          target="_blank"
+        >
+          {site.showFull ? l.linkLabel || l.url : ""}
+        </ArtistButtonAnchor>
+      );
+    });
 }
 
 const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({ artist }) => {
@@ -42,20 +89,6 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({ artist }) => {
           background-color: rgba(100, 100, 100, 0.5);
         }
 
-        a {
-          display: inline-flex;
-          align-items: center;
-          margin-right: 0.75rem;
-
-          > svg {
-            margin-right: 0.5rem;
-          }
-
-          > img {
-            margin-right: 0.5rem;
-          }
-        }
-
         a:last-child {
           margin-right: 0;
         }
@@ -65,28 +98,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({ artist }) => {
         }
       `}
     >
-      {links
-        .slice()
-        .sort((l) => (findOutsideSite(l).showFull ? 1 : -1))
-        .map((l) => {
-          const site = findOutsideSite(l);
-          return (
-            <ArtistButtonAnchor
-              rel="me"
-              href={linkUrlHref(l.url, true)}
-              key={l.url}
-              variant="link"
-              startIcon={site?.icon}
-              target="_blank"
-              className={css`
-                display: inline-flex;
-                align-items: center;
-              `}
-            >
-              {site.showFull ? l.linkLabel || l.url : ""}
-            </ArtistButtonAnchor>
-          );
-        })}
+      {renderArtistLinkButtons(links)}
     </div>
   );
 };

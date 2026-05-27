@@ -31,7 +31,7 @@ export const ItemViewTitle: React.FC<{
         justify-content: flex-start;
         max-width: 80%;
 
-        @media screen and ${between(bp.medium, bp.xlarge)} {
+        @media ${between(bp.medium, bp.xlarge)} {
           margin-top: 0.25rem;
           margin-bottom: 0.25rem;
         }

@@ -24,12 +24,14 @@ interface ArtistHeaderDescriptionProps {
   isManage: boolean;
   artist: Pick<Artist, "tourDates" | "properties">;
   onSubmit: (data: Pick<Artist, "tourDates">) => Promise<void>;
+  size?: "tiny" | "compact";
 }
 
 const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
   isManage,
   artist,
   onSubmit,
+  size = "tiny",
 }) => {
   const snackbar = useSnackbar();
 
@@ -72,7 +74,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
     <>
       <ArtistButton
         onClick={() => setIsOpen(true)}
-        size="compact"
+        size={size}
         className={tabButtonClass}
       >
         {t("dates")}

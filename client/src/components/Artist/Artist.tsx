@@ -1,7 +1,13 @@
+import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
+import ScrollMoreButton from "components/common/ScrollMoreButton";
 import { ArtistTabs } from "components/common/Tabs";
+import {
+  navbarLinkStripStyles,
+  renderArtistLinkButtons,
+} from "components/ManageArtist/ArtistFormLinks";
 import {
   queryArtist,
   queryPublicLabelTrackGroups,
@@ -20,8 +26,10 @@ import {
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
+import { transformFromLinks } from "utils/links";
 import { useScrollActiveTabIntoView } from "utils/useScrollActiveTabIntoView";
 
+import { bp } from "../../constants";
 import Box from "../common/Box";
 
 export const ArtistSection: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
@@ -61,6 +69,7 @@ function Artist() {
 
   const reactId = React.useId();
   const scrollId = `artist-nav-scroll-${reactId.replace(/:/g, "")}`;
+  const linksScrollId = `artist-links-scroll-${reactId.replace(/:/g, "")}`;
   useScrollActiveTabIntoView(scrollId);
 
   const urlSlug = artist?.urlSlug;
@@ -187,6 +196,10 @@ function Artist() {
     artist.properties?.tabOrder as TabId[] | undefined
   );
 
+  const headerLinks = transformFromLinks(artist).linkArray.filter(
+    (l) => l.inHeader
+  );
+
   return (
     <>
       <nav
@@ -195,41 +208,82 @@ function Artist() {
           artist.isLabelProfile ? t("labelNavigation") : t("artistNavigation")
         }
       >
-        <div className="relative">
-          <ArtistTabs
-            id={scrollId}
-            className="whitespace-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {tabs
-              .filter((tab) => tab.visible)
-              .map((tab) => (
-                <li key={tab.id}>
-                  <NavLink to={tab.to} id={tab.navLinkId}>
-                    {tab.label}
-                  </NavLink>
+        <div
+          className={css`
+            display: contents;
+            @media screen and (min-width: ${Number(bp.medium) + 1}px) {
+              display: flex;
+              align-items: baseline;
+              justify-content: space-between;
+              gap: 1rem;
+            }
+          `}
+        >
+          <div className="relative max-md:flex-1 max-md:min-w-0 md:shrink-0">
+            <ArtistTabs
+              id={scrollId}
+              className="whitespace-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {tabs
+                .filter((tab) => tab.visible)
+                .map((tab) => (
+                  <li key={tab.id}>
+                    <NavLink to={tab.to} id={tab.navLinkId}>
+                      {tab.label}
+                    </NavLink>
+                  </li>
+                ))}
+              {user && isArtistUser && !canReceivePayments && (
+                <li>
+                  <a
+                    href={api.paymentProcessor.stripeConnect(user.id)}
+                    className="!flex items-center [&_svg]:ml-1"
+                  >
+                    {t("configurePayment")} <FaChevronRight />
+                  </a>
                 </li>
-              ))}
-            {user && isArtistUser && !canReceivePayments && (
-              <li>
-                <a
-                  href={api.paymentProcessor.stripeConnect(user.id)}
-                  className="!flex items-center [&_svg]:ml-1"
-                >
-                  {t("configurePayment")} <FaChevronRight />
-                </a>
-              </li>
-            )}
-          </ArtistTabs>
-          <ScrollFadeOverlay
-            scrollElementId={scrollId}
-            position="left"
-            size="2rem"
-          />
-          <ScrollFadeOverlay
-            scrollElementId={scrollId}
-            position="right"
-            size="2rem"
-          />
+              )}
+            </ArtistTabs>
+            <ScrollFadeOverlay
+              scrollElementId={scrollId}
+              position="left"
+              size="2rem"
+            />
+            <ScrollFadeOverlay
+              scrollElementId={scrollId}
+              position="right"
+              size="2rem"
+            />
+          </div>
+          {headerLinks.length > 0 && (
+            <div className="max-md:hidden flex-[1_1_0] min-w-0 flex items-center gap-2">
+              <ScrollMoreButton
+                scrollElementId={linksScrollId}
+                position="left"
+                ariaLabel={t("scrollLinksLeft")}
+              />
+              <div className="relative flex-1 min-w-0">
+                <div id={linksScrollId} className={navbarLinkStripStyles}>
+                  {renderArtistLinkButtons(headerLinks)}
+                </div>
+                <ScrollFadeOverlay
+                  scrollElementId={linksScrollId}
+                  position="left"
+                  size="2rem"
+                />
+                <ScrollFadeOverlay
+                  scrollElementId={linksScrollId}
+                  position="right"
+                  size="2rem"
+                />
+              </div>
+              <ScrollMoreButton
+                scrollElementId={linksScrollId}
+                position="right"
+                ariaLabel={t("scrollLinksRight")}
+              />
+            </div>
+          )}
         </div>
       </nav>
 

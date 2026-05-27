@@ -17,8 +17,10 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
 
-import { bp } from "../../constants";
+import { bp, pageScaleCascade } from "../../constants";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
+
+import ManageArtistAnnouncement from "./ManageArtistDetails/ManageArtistAnnouncement";
 
 const Container = styled.div<{ hasBackground: boolean }>`
   width: 100%;
@@ -26,7 +28,7 @@ const Container = styled.div<{ hasBackground: boolean }>`
   ${(props) =>
     !props.hasBackground ? "margin-top: 0px;" : "margin-top: calc(8vh);"}
   margin-top: calc(8vh - 39px);
-  max-width: var(--mi-container-big);
+  max-width: var(--artist-content-width, var(--mi-container-big));
 
   @media screen and (max-width: ${bp.large}px) {
     padding: var(--mi-side-paddings-xsmall);
@@ -127,80 +129,101 @@ const ManageArtistContainer: React.FC<{}> = () => {
   );
 
   return (
-    <ArtistPageWrapper hasBackground={!!artistBackground}>
-      <div>
-        {hasTopWarning && (
-          <div className="pt-4 max-md:px-2 max-md:text-sm">
-            {user && artist.userId !== user.id && user.isAdmin && (
-              <ArtistBox variant="warning">
-                You are viewing this artist as an admin
-              </ArtistBox>
-            )}
+    <div
+      className={css`
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
 
-            {user && artist.userId !== user.id && !user.isAdmin && (
-              <ArtistBox variant="warning">
-                You are viewing this user as their label
-              </ArtistBox>
-            )}
-            {user &&
-              stripeAccountStatus &&
-              !stripeAccountStatus?.chargesEnabled && (
+        @media (min-width: 769px) {
+          --artist-content-width: clamp(
+            924px,
+            calc(3 * (100dvh - 340px) + 9rem),
+            var(--mi-container-big)
+          );
+        }
+        ${pageScaleCascade}
+      `}
+    >
+      {!dontShowHeader && <ManageArtistAnnouncement showButtons />}
+      <ArtistPageWrapper hasBackground={!!artistBackground}>
+        <div>
+          {hasTopWarning && (
+            <div className="pt-4 max-md:px-2 max-md:text-sm">
+              {user && artist.userId !== user.id && user.isAdmin && (
                 <ArtistBox variant="warning">
-                  <p>
-                    <Trans
-                      t={t}
-                      i18nKey={"paymentProcessorNotSetUp"}
-                      components={{
-                        manage: (
-                          <a
-                            href={api.paymentProcessor.stripeConnect(user.id)}
-                          ></a>
-                        ),
-                      }}
-                    />
-                  </p>
-                  {labelStripeAccountStatus && labelProfile && (
+                  You are viewing this artist as an admin
+                </ArtistBox>
+              )}
+
+              {user && artist.userId !== user.id && !user.isAdmin && (
+                <ArtistBox variant="warning">
+                  You are viewing this user as their label
+                </ArtistBox>
+              )}
+              {user &&
+                stripeAccountStatus &&
+                !stripeAccountStatus?.chargesEnabled && (
+                  <ArtistBox variant="warning">
                     <p>
                       <Trans
                         t={t}
-                        i18nKey={"linkedToLabel"}
+                        i18nKey={"paymentProcessorNotSetUp"}
                         components={{
-                          label: <Link to={getArtistUrl(labelProfile)}></Link>,
-                        }}
-                        values={{
-                          label: labelProfile?.name || "the label",
+                          manage: (
+                            <a
+                              href={api.paymentProcessor.stripeConnect(user.id)}
+                            ></a>
+                          ),
                         }}
                       />
                     </p>
-                  )}
-                </ArtistBox>
-              )}
+                    {labelStripeAccountStatus && labelProfile && (
+                      <p>
+                        <Trans
+                          t={t}
+                          i18nKey={"linkedToLabel"}
+                          components={{
+                            label: (
+                              <Link to={getArtistUrl(labelProfile)}></Link>
+                            ),
+                          }}
+                          values={{
+                            label: labelProfile?.name || "the label",
+                          }}
+                        />
+                      </p>
+                    )}
+                  </ArtistBox>
+                )}
+            </div>
+          )}
+
+          {!dontShowHeader && (
+            <ArtistHeaderSection
+              artist={artist}
+              isLoading={isArtistLoading}
+              isManage={true}
+            />
+          )}
+
+          {!artist.enabled && (
+            <ArtistBox variant="warning">{t("notEnabled")}</ArtistBox>
+          )}
+          {/* Negative padding to keep a consistent look despite the initial padding happening at container level */}
+          <div
+            className={
+              transparent && isDeepEditPage
+                ? "bg-(--mi-background-color) -mx-8 -mb-8 px-8 pb-8 max-md:m-0 max-md:p-0"
+                : ""
+            }
+          >
+            <Outlet />
           </div>
-        )}
-
-        {!dontShowHeader && (
-          <ArtistHeaderSection
-            artist={artist}
-            isLoading={isArtistLoading}
-            isManage={true}
-          />
-        )}
-
-        {!artist.enabled && (
-          <ArtistBox variant="warning">{t("notEnabled")}</ArtistBox>
-        )}
-        {/* Negative padding to keep a consistent look despite the initial padding happening at container level */}
-        <div
-          className={
-            transparent && isDeepEditPage
-              ? "bg-(--mi-background-color) -mx-8 -mb-8 px-8 pb-8 max-md:m-0 max-md:p-0"
-              : ""
-          }
-        >
-          <Outlet />
         </div>
-      </div>
-    </ArtistPageWrapper>
+      </ArtistPageWrapper>
+    </div>
   );
 };
 

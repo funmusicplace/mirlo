@@ -3,17 +3,20 @@ import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import MarkdownContent from "components/common/MarkdownContent";
 import React from "react";
+import { createPortal } from "react-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import useArtistQuery from "utils/useArtistQuery";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
-import { bp } from "../../../constants";
+import { between, bp } from "../../../constants";
+import { MANAGE_ANNOUNCEMENT_MOUNT_ID } from "../ManageContainer";
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 
 export const AnnouncementWrapper: React.FC<{
   children: React.ReactNode;
-}> = ({ children }) => {
+  hasBackground?: boolean;
+}> = ({ children, hasBackground }) => {
   return (
     <div
       className={css`
@@ -23,8 +26,21 @@ export const AnnouncementWrapper: React.FC<{
         line-height: 1.5rem;
         position: relative;
 
-        color: var(--mi-button-color);
-        background-color: var(--mi-button-text-color);
+        ${hasBackground
+          ? `
+          color: var(--mi-text-color);
+          background-color: color-mix(
+            in srgb,
+            var(--mi-button-color) 30%,
+            transparent
+          );
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+        `
+          : `
+          color: var(--mi-button-color);
+          background-color: var(--mi-button-text-color);
+        `}
       `}
     >
       <div
@@ -38,6 +54,16 @@ export const AnnouncementWrapper: React.FC<{
           a {
             color: var(--mi-background-color);
             text-decoration: underline;
+          }
+
+          @media (min-width: ${Number(bp.medium) + 1}px) {
+            max-width: var(--artist-content-width, var(--mi-container-big));
+            margin: 0 auto;
+            padding: 1rem 4rem;
+          }
+
+          @media ${between(bp.medium, bp.xlarge)} {
+            padding: 0.5rem 4rem;
           }
         `}
       >
@@ -66,11 +92,27 @@ const ManageArtistAnnouncement: React.FC<{
 
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
 
+  // The announcement needs to span full viewport width above the page
+  // content, but on manage routes it's wrapped in a max-width container.
+  // ManageContainer renders a slot above that container and we portal
+  // into it here.
+  const [mount, setMount] = React.useState<HTMLElement | null>(() =>
+    typeof document === "undefined"
+      ? null
+      : document.getElementById(MANAGE_ANNOUNCEMENT_MOUNT_ID)
+  );
+  React.useLayoutEffect(() => {
+    setMount(document.getElementById(MANAGE_ANNOUNCEMENT_MOUNT_ID));
+  }, []);
+  const portalize = (node: React.ReactElement) =>
+    mount ? createPortal(node, mount) : node;
+
   if (!artist) return null;
+  if (showButtons && !mount) return null;
 
   if (!isOpen && artist.announcementText) {
-    return (
-      <AnnouncementWrapper>
+    return portalize(
+      <AnnouncementWrapper hasBackground={!!artist.background?.sizes}>
         <MarkdownContent content={artist.announcementText} />
         {showButtons && !isOpen && (
           <div
@@ -87,8 +129,9 @@ const ManageArtistAnnouncement: React.FC<{
               onClick={() => setIsOpen(true)}
               className={css`
                 position: absolute;
-                top: 0.75rem;
+                top: 50%;
                 right: 1rem;
+                transform: translateY(-50%);
                 background-color: var(--mi-background-color) !important;
                 color: var(--mi-button-color) !important;
               `}
@@ -102,7 +145,7 @@ const ManageArtistAnnouncement: React.FC<{
   }
 
   if (showButtons && !isOpen && !artist.announcementText) {
-    return (
+    return portalize(
       <div
         className={css`
           padding: var(--mi-side-paddings-xsmall);
@@ -133,7 +176,7 @@ const ManageArtistAnnouncement: React.FC<{
     );
   }
 
-  return (
+  return portalize(
     <FormProvider {...methods}>
       <div
         className={css`

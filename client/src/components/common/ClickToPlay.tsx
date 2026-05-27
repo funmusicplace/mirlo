@@ -85,6 +85,12 @@ const TrackgroupButtons = styled.div<{ compact?: boolean }>`
       font-size: 1.1rem;
     }
   }
+
+  @media (pointer: coarse) {
+    & > div:first-of-type {
+      display: none;
+    }
+  }
 `;
 
 const PlayWrapper = styled.div`

@@ -64,7 +64,7 @@ export const UnderneathImage = styled.div`
     margin-top: 0.25rem;
   }
 
-  @media screen and ${between(bp.medium, bp.xlarge)} {
+  @media ${between(bp.medium, bp.xlarge)} {
     --mi-touch-target-min: 24px;
 
     button {
