@@ -68,8 +68,8 @@ const PlayingTrackDetails: React.FC<{
 
         margin-right: 1rem;
         margin-left: 1rem;
-        margin-bottom: 0.5rem;
-        padding-top: 0.7rem;
+        margin-bottom: 0.25rem;
+        padding-top: 0.35rem;
 
         a {
           text-decoration: none;

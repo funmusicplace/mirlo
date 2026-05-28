@@ -188,7 +188,7 @@ const ManageArtistButtons: React.FC = () => {
       <div
         className={css`
           z-index: 10;
-          bottom: ${isUp ? "80px" : "20px"};
+          bottom: ${isUp ? "70px" : "20px"};
           left: 1rem;
           position: fixed;
           transition: all 0.3s ease;
@@ -196,7 +196,7 @@ const ManageArtistButtons: React.FC = () => {
           @media screen and (max-width: ${bp.medium}px) {
             bottom: var(
               --fixed-actions-bottom-offset-mobile,
-              var(--fixed-actions-bottom-offset, ${isUp ? "80px" : "20px"})
+              var(--fixed-actions-bottom-offset, ${isUp ? "70px" : "20px"})
             );
             left: 0.5rem;
           }
