@@ -1729,7 +1729,12 @@
     "copyAlbum": "Copy link to this page",
     "copyLabelLink": "Copy label/collective link",
     "copyIframe": "If you want to embed this music in another website, copy the code below:",
-    "copiedToClipboard": "Copied to clipboard!"
+    "copiedToClipboard": "Copied to clipboard!",
+    "chooseLayout": "Layout",
+    "variantCard": "Full cover",
+    "variantStrip": "Strip",
+    "variantStripWithTracklist": "Strip with tracklist",
+    "embedPreview": "Embed preview"
   },
   "home": {
     "support": "<red>Directly support artists.</red> Buy their music. Collectively owned and managed.",

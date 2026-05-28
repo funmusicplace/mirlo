@@ -23,6 +23,8 @@ export const widgetIframeHtml = (src: string, height: number = 230) => `<iframe
     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   ></iframe>`;
 
+type VariantOption = { key: string; height: number; labelKey: string };
+
 const Embed: React.FC<{
   title?: string;
   url?: string;
@@ -30,6 +32,7 @@ const Embed: React.FC<{
   buttonClassName?: string;
   translationString?: string;
   height?: number;
+  variants?: VariantOption[];
 }> = ({
   title,
   url,
@@ -37,10 +40,24 @@ const Embed: React.FC<{
   buttonClassName,
   translationString = "copyAlbum",
   height,
+  variants,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupEmbed" });
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
+  const [selectedVariant, setSelectedVariant] = React.useState(
+    variants?.[0]?.key
+  );
   const snackbar = useSnackbar();
+  const variantGroupId = React.useId();
+  const variantLabelId = `${variantGroupId}-label`;
+  const variantRadioName = `${variantGroupId}-radio`;
+
+  const currentVariant = variants?.find((v) => v.key === selectedVariant);
+  const effectiveSrc =
+    variants && selectedVariant && src
+      ? `${src}${src.includes("?") ? "&" : "?"}variant=${selectedVariant}`
+      : src;
+  const effectiveHeight = currentVariant?.height ?? height;
 
   return (
     <div>
@@ -48,6 +65,7 @@ const Embed: React.FC<{
         title={t("embed", { name: title }) ?? ""}
         open={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
+        size="medium"
       >
         <div
           className={css`
@@ -62,6 +80,7 @@ const Embed: React.FC<{
               padding: 1rem;
               background-color: black;
               color: white;
+              font-size: 0.875rem;
               margin-bottom: 0.75rem;
               cursor: pointer;
               position: relative;
@@ -86,16 +105,70 @@ const Embed: React.FC<{
             {t(translationString) ?? ""}
           </Button>
 
+          {variants && variants.length > 1 && (
+            <>
+              <p id={variantLabelId} className="m-0!">
+                {t("chooseLayout")}
+              </p>
+              <div
+                role="radiogroup"
+                aria-labelledby={variantLabelId}
+                className={css`
+                  display: flex;
+                  gap: 1rem;
+                  margin: 0.5rem 0;
+                  flex-wrap: wrap;
+                `}
+              >
+                {variants.map((v) => (
+                  <label
+                    key={v.key}
+                    className={css`
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 0.35rem;
+                      cursor: pointer;
+                    `}
+                  >
+                    <input
+                      type="radio"
+                      name={variantRadioName}
+                      value={v.key}
+                      checked={selectedVariant === v.key}
+                      onChange={() => setSelectedVariant(v.key)}
+                    />
+                    {t(v.labelKey)}
+                  </label>
+                ))}
+              </div>
+              {currentVariant && effectiveSrc && (
+                <iframe
+                  key={currentVariant.key}
+                  src={effectiveSrc}
+                  title={t("embedPreview") ?? ""}
+                  style={{
+                    width: "100%",
+                    height: `${effectiveHeight}px`,
+                    border: 0,
+                    borderRadius: 4,
+                    overflow: "hidden",
+                  }}
+                  sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+                />
+              )}
+            </>
+          )}
+
           <p>{t("copyIframe")}</p>
           <code
             onClick={() => {
               navigator.clipboard.writeText(
-                widgetIframeHtml(src ?? "", height)
+                widgetIframeHtml(effectiveSrc ?? "", effectiveHeight)
               );
               snackbar(t("copiedToClipboard"), { type: "success" });
             }}
           >
-            {widgetIframeHtml(src ?? "", height)}
+            {widgetIframeHtml(effectiveSrc ?? "", effectiveHeight)}
             <FaCopy />
           </code>
         </div>
@@ -137,7 +210,10 @@ export const TrackEmbed: React.FC<{
       title={track.title}
       url={getTrackUrl(artist, trackGroup, track)}
       src={trackWidget}
-      height={130}
+      variants={[
+        { key: "card", height: 130, labelKey: "variantCard" },
+        { key: "strip", height: 100, labelKey: "variantStrip" },
+      ]}
     />
   );
 };
@@ -158,7 +234,11 @@ const TrackGroupEmbed: React.FC<{
       title={trackGroup.title}
       url={getReleaseUrl(trackGroup.artist, trackGroup)}
       src={trackGroupWidget}
-      height={230}
+      variants={[
+        { key: "card", height: 230, labelKey: "variantCard" },
+        { key: "compact", height: 140, labelKey: "variantStrip" },
+        { key: "strip", height: 230, labelKey: "variantStripWithTracklist" },
+      ]}
     />
   );
 };
