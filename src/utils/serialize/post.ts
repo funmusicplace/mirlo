@@ -68,7 +68,7 @@ export const serializePost = (
         audio?: { duration: number | null } | null;
       };
     }[];
-  },
+  } & { _count?: { tracks?: number } },
   userTrackGroupPurchases?: Array<{ userId: number; trackGroupId: number }>,
   userTrackPurchases?: Array<{ userId: number; trackId: number }>,
   isUserSubscriber?: boolean
@@ -76,6 +76,7 @@ export const serializePost = (
   const canSeeContent = !!(isUserSubscriber || post.isPublic);
   return {
     ...post,
+    trackCount: post._count?.tracks ?? post.tracks?.length ?? 0,
     tracks: canSeeContent
       ? post.tracks?.map((pt) => {
           const tgPurchases = userTrackGroupPurchases ?? [];

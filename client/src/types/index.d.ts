@@ -178,6 +178,7 @@ interface Post {
     title?: string;
     audioDuration?: number;
   }[];
+  trackCount?: number;
 }
 
 interface PostImage {

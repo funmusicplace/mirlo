@@ -710,7 +710,10 @@
     "edit": "Edit",
     "notAvailable": "This post is for subscribers only. <support>Support this artist</support> to get access.",
     "publishedAt": "Published {{ date }}",
-    "likedThisPost": "Liked this post?"
+    "likedThisPost": "Liked this post?",
+    "readPost": "Read post",
+    "tracksInPost_one": "{{count}} track",
+    "tracksInPost_other": "{{count}} tracks"
   },
   "postTracksDock": {
     "label": "Playing in this post"
