@@ -10,6 +10,7 @@ import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { getReleaseUrl } from "utils/artist";
+import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../constants";
 import Box from "../common/Box";
@@ -35,6 +36,7 @@ function TrackView() {
     keyPrefix: "trackGroupDetails",
   });
   const navigate = useNavigate();
+  const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
   const { artistId, trackGroupId, trackId } = useParams();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
@@ -147,7 +149,7 @@ function TrackView() {
                   <PublicTrackGroupListing
                     tracks={[filteredTrack]}
                     trackGroup={trackGroup}
-                    fluidText
+                    fluidText={!isMobile}
                   />
                 </TrackListingWrapper>
                 {filteredTrack.description && (

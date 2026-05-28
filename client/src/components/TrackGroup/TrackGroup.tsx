@@ -189,7 +189,10 @@ export const TrackgroupInfosWrapper = styled.div`
 export const TrackListingWrapper = styled.div`
   width: calc(var(--cover-size) * 1.3);
   min-width: 0;
-  font-size: clamp(0.8125rem, calc(var(--cover-size) / 30), 1rem);
+
+  @media screen and (min-width: ${Number(bp.small) + 1}px) {
+    font-size: clamp(0.8125rem, calc(var(--cover-size) / 30), 1rem);
+  }
 
   @media screen and (max-width: ${bp.small}px) {
     width: 100%;
@@ -201,6 +204,7 @@ function TrackGroup() {
     keyPrefix: "trackGroupDetails",
   });
   const isCompactLayout = useMatchMedia(between(bp.medium, bp.xlarge));
+  const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
 
   const { artistId, trackGroupId } = useParams();
   const { data: artist, isPending: isLoadingArtist } = useQuery(
@@ -332,7 +336,7 @@ function TrackGroup() {
                   <PublicTrackGroupListing
                     tracks={trackGroup.tracks}
                     trackGroup={trackGroup}
-                    fluidText
+                    fluidText={!isMobile}
                     size={isCompactLayout ? "compact" : undefined}
                     keepDropdownInCompact
                   />
