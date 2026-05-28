@@ -24,22 +24,20 @@ const CookieDisclaimer = () => {
         left: 1rem;
         background: #333;
         color: white;
-        padding: 1rem 2rem;
+        padding: 1rem 1rem;
         z-index: 9999;
 
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
-
-        button {
-          margin-left: 1rem;
-        }
+        gap: 0.75rem;
       `}
       data-nosnippet
     >
       {t("weUseCookies")}
       <Button
-        wrap
+        className="shrink-0"
         onClick={() => dispatch({ type: "setCookieDisclaimerRead" })}
       >
         {t("gotIt")}

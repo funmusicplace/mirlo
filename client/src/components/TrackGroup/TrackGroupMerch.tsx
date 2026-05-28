@@ -24,7 +24,7 @@ const TrackGroupMerch: React.FC<{ merch: Merch[] }> = ({ merch }) => {
           margin-bottom: 1rem;
           border: 0;
           li {
-            padding: 0.25rem !important;
+            padding: 0.5rem !important;
           }
 
           a {
