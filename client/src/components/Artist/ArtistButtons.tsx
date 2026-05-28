@@ -114,7 +114,7 @@ export const ArtistButton: React.FC<
 
         &:hover:not(:disabled) {
           color: ${contrastColor} !important;
-          background-color: transparent !important;
+          background-color: ${accentColor} !important;
 
           svg {
             fill: ${contrastColor} !important;
