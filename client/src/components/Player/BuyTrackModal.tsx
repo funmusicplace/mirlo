@@ -1,41 +1,54 @@
+import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import Button from "components/common/Button";
+import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
+import { queryTrackGroup } from "queries";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 import Modal from "../common/Modal";
-import { useTranslation } from "react-i18next";
-import { queryTrackGroup } from "queries";
-import { useQuery } from "@tanstack/react-query";
-import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
-import { css } from "@emotion/css";
+
+const compactModal = css`
+  max-width: 400px !important;
+`;
 
 export const BuyTrackModal: React.FC<{
   showBuyModal: boolean;
   setShowBuyModal: (show: boolean) => void;
   trackGroupId: number;
-  trackId: number;
-}> = ({ showBuyModal, setShowBuyModal, trackGroupId, trackId }) => {
+}> = ({ showBuyModal, setShowBuyModal, trackGroupId }) => {
   const { data: trackGroup } = useQuery(
     queryTrackGroup({ albumSlug: `${trackGroupId}` })
   );
   const { t } = useTranslation("translation", { keyPrefix: "player" });
+  const [showPurchaseForm, setShowPurchaseForm] = React.useState(false);
+
+  const handleClose = () => {
+    setShowBuyModal(false);
+    setShowPurchaseForm(false);
+  };
+
   return (
     <Modal
       open={showBuyModal}
-      onClose={() => setShowBuyModal(false)}
+      onClose={handleClose}
       size="small"
+      className={showPurchaseForm ? undefined : compactModal}
     >
-      {t("trackLimitExplanation")}
-      <hr
-        className={css`
-          margin: 1rem 0;
-          border-color: var(--mi-darken-x-background-color);
-        `}
-      />
-      {trackGroup && (
-        <BuyTrackGroup
-          trackGroup={trackGroup}
-          noPadding
-          // track={trackGroup.tracks?.find((t) => t.id === trackId)}
-        />
+      {!showPurchaseForm ? (
+        <div className="flex flex-col gap-4">
+          <p>{t("trackLimitExplanation")}</p>
+          <div className="flex gap-2 justify-end">
+            <Button variant="dashed" onClick={handleClose}>
+              {t("goBackToMirlo")}
+            </Button>
+            <Button onClick={() => setShowPurchaseForm(true)}>
+              {t("buy")}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        trackGroup && <BuyTrackGroup trackGroup={trackGroup} noPadding />
       )}
     </Modal>
   );

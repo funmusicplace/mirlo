@@ -252,7 +252,6 @@ export const AudioWrapper: React.FC<{
       <BuyTrackModal
         showBuyModal={showBuyModal}
         setShowBuyModal={setShowBuyModal}
-        trackId={currentTrack.id}
         trackGroupId={currentTrack.trackGroupId}
       />
       <React.Suspense fallback={null}>
@@ -266,15 +265,13 @@ export const AudioWrapper: React.FC<{
           getHLSInstance={onHLSInstance}
           onError={(event: any, data: any) => {
             if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
-              if (data.networkDetails?.responseText) {
-                if (
-                  data.networkDetails.responseText.includes(
-                    "Track play limit exceeded"
-                  ) &&
-                  !hasShownBuyModalBeenShown
-                ) {
-                  setHasOverplayedSong(true);
-                }
+              const status = data.networkDetails?.status;
+              const responseText = data.networkDetails?.responseText ?? "";
+              const isPlayLimitExceeded =
+                status === 402 ||
+                responseText.includes("Track play limit exceeded");
+              if (isPlayLimitExceeded && !hasShownBuyModalBeenShown) {
+                setHasOverplayedSong(true);
               }
             }
           }}
