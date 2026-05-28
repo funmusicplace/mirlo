@@ -207,16 +207,15 @@ const ArtistHeaderSection: React.FC<{
                       {artist.name}
                     </ArtistTitle>
                     <div className="flex items-center gap-2 min-w-0">
-                      {artist.isLabelProfile && (
-                        <>
-                          <span className="max-md:hidden text-(--mi-button-color)">
-                            {artist.properties?.titles?.groupName ?? t("label")}
-                          </span>
-                          {artist.properties?.titles?.groupName && (
+                      {artist.isLabelProfile &&
+                        artist.properties?.titles?.groupName && (
+                          <>
+                            <span className="max-md:hidden text-(--mi-button-color)">
+                              {artist.properties.titles.groupName}
+                            </span>
                             <span className="max-md:hidden opacity-50">-</span>
-                          )}
-                        </>
-                      )}
+                          </>
+                        )}
                       <ArtistFormLocation
                         isManage={!!isManage}
                         artist={artist}
