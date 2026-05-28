@@ -1,22 +1,16 @@
-import React from "react";
-
-import Modal from "components/common/Modal";
-import { useTranslation } from "react-i18next";
-import Button from "components/common/Button";
-import { FaPlus, FaTimes } from "react-icons/fa";
-import AutoComplete from "components/common/AutoComplete";
-import api from "services/api";
-import { css } from "@emotion/css";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import SmallTileDetails from "components/common/SmallTileDetails";
-import { InputEl } from "components/common/Input";
-import FormComponent from "components/common/FormComponent";
-import { useForm } from "react-hook-form";
-import { useSnackbar } from "state/SnackbarContext";
-import { queryManagedArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import ReleaseListSelector from "components/common/ReleaseListSelector";
+import { queryManagedArtist } from "queries";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { FaPlus, FaTimes } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-import { hasId } from "./ManageTrackGroup/AlbumFormComponents/ManageTags";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
 
 type FormData = {
   group: string;
@@ -31,53 +25,25 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
   const snackbar = useSnackbar();
   const [isOpen, setIsOpen] = React.useState(false);
-  const [selectedTrackGroup, setSelectedTrackGroup] =
-    React.useState<TrackGroup>();
+  const [selectedTrackGroupId, setSelectedTrackGroupId] = React.useState<
+    number | null
+  >(null);
   const { t } = useTranslation("translation", {
     keyPrefix: "manageArtistTools",
   });
 
-  const onChooseAlbum = async (trackGroupId: string | number) => {
-    const trackGroup = await api.get<TrackGroup>(
-      `manage/trackGroups/${trackGroupId}`
-    );
-    setSelectedTrackGroup(trackGroup.result);
-  };
-
-  const getTrackGroupOptions = React.useCallback(
-    async (searchString: string) => {
-      if (artist) {
-        const results = await api.getMany<TrackGroup>(
-          `manage/artists/${artist.id}/trackGroups`,
-          {
-            title: searchString,
-            take: "10",
-          }
-        );
-        return results.results.map((r) => ({
-          name: `${r.artist?.name} - ${r.title}`,
-          id: r.id,
-        }));
-      }
-      return [];
-    },
-    [artist]
-  );
-
-  const trackGroupId = selectedTrackGroup?.id;
-
   const generateDownloadCodes = React.useCallback(
     async (data: FormData) => {
-      if (trackGroupId) {
+      if (selectedTrackGroupId) {
         try {
-          await api.post(`manage/trackGroups/${trackGroupId}/codes`, [
+          await api.post(`manage/trackGroups/${selectedTrackGroupId}/codes`, [
             {
               group: data.group,
               quantity: data.quantity,
             },
           ]);
           methods.reset();
-          setSelectedTrackGroup(undefined);
+          setSelectedTrackGroupId(null);
           snackbar(t("success"), { type: "success" });
           setIsOpen(false);
           onDone();
@@ -86,88 +52,82 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
         }
       }
     },
-    [methods, onDone, snackbar, trackGroupId]
+    [methods, onDone, snackbar, selectedTrackGroupId, t]
   );
 
-  return (
-    <>
-      <Button
+  if (!artistId) return null;
+
+  if (!isOpen) {
+    return (
+      <ArtistButton
         variant="dashed"
-        onClick={() => {
-          setIsOpen(true);
-        }}
+        onClick={() => setIsOpen(true)}
         startIcon={<FaPlus />}
         size="compact"
       >
         {t("addDownloadCodes")}
-      </Button>
+      </ArtistButton>
+    );
+  }
 
-      <Modal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        title={t("generateDownloadCodes") ?? ""}
-        contentClassName={css`
-          min-height: 300px;
-        `}
-      >
-        {!trackGroupId && (
-          <>
-            <label>{t("chooseAnAlbum")}</label>
-            <AutoComplete
-              getOptions={getTrackGroupOptions}
-              id="input-track-group"
-              onSelect={(val) => {
-                if (hasId(val) && typeof val.id === "number") {
-                  onChooseAlbum(val.id);
-                }
-              }}
+  return (
+    <div className="flex flex-col gap-4 border border-(--mi-tint-color) rounded p-4 bg-(--mi-button-tint-color)">
+      <div className="flex items-center justify-between">
+        <h3 className="m-0!">{t("generateDownloadCodes")}</h3>
+        <ArtistButton
+          variant="dashed"
+          size="compact"
+          startIcon={<FaTimes />}
+          onClick={() => {
+            setIsOpen(false);
+            setSelectedTrackGroupId(null);
+            methods.reset();
+          }}
+          aria-label={t("cancel")}
+        />
+      </div>
+
+      <div role="group" aria-labelledby="chooseAnAlbumLabel">
+        <p id="chooseAnAlbumLabel" className="block mb-2 text-sm font-semibold">
+          {t("chooseAnAlbum")}
+        </p>
+        <ReleaseListSelector
+          artistId={Number(artistId)}
+          single
+          selectedReleaseIds={
+            selectedTrackGroupId ? [selectedTrackGroupId] : []
+          }
+          onSelectChange={(ids) => setSelectedTrackGroupId(ids[0] ?? null)}
+          maxHeight="240px"
+          includeLabelReleases={!!artist?.isLabelProfile}
+        />
+      </div>
+
+      {selectedTrackGroupId && (
+        <>
+          <FormComponent>
+            <label htmlFor="input-group">{t("groupName")}</label>
+            <InputEl id="input-group" {...methods.register("group")} required />
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="input-quantity">{t("quantity")}</label>
+            <InputEl
+              id="input-quantity"
+              type="number"
+              {...methods.register("quantity")}
+              defaultValue={100}
+              required
             />
-          </>
-        )}
-        {selectedTrackGroup && artist && (
-          <div>
-            <label>{t("selectedAlbum")}</label>
-            <div
-              className={css`
-                display: flex;
-                margin-top: 1rem;
-              `}
-            >
-              <ImageWithPlaceholder
-                src={selectedTrackGroup.cover?.sizes?.[120]}
-                size={120}
-                alt={selectedTrackGroup.title ?? "Untitled release"}
-              />
-              <SmallTileDetails
-                title={selectedTrackGroup.title ?? ""}
-                subtitle={selectedTrackGroup.artist?.name ?? ""}
-              />
-              <Button
-                startIcon={<FaTimes />}
-                variant="dashed"
-                onClick={() => setSelectedTrackGroup(undefined)}
-              />
-            </div>
-            <FormComponent>
-              <label>{t("groupName")}</label>
-              <InputEl {...methods.register("group")} required />
-            </FormComponent>
-            <FormComponent>
-              <label>{t("quantity")}</label>
-              <InputEl
-                type="number"
-                {...methods.register("quantity")}
-                defaultValue={100}
-                required
-              />
-            </FormComponent>
-            <Button onClick={methods.handleSubmit(generateDownloadCodes)}>
-              {t("generate")}
-            </Button>
-          </div>
-        )}
-      </Modal>
-    </>
+          </FormComponent>
+          <ArtistButton
+            onClick={methods.handleSubmit(generateDownloadCodes)}
+            startIcon={<FaPlus />}
+          >
+            {t("generate")}
+          </ArtistButton>
+        </>
+      )}
+    </div>
   );
 };
 
