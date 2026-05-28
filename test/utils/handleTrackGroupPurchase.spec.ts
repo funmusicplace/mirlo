@@ -1,19 +1,20 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it } from "mocha";
-
-import { clearTables, createTrackGroup, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
+
 import assert from "assert";
+
+import { describe, it } from "mocha";
 import sinon from "sinon";
+
 import * as sendMail from "../../src/jobs/send-mail";
 import {
-  AlbumPurchaseArtistNotificationEmailType,
   AlbumPurchaseEmailType,
   ArtistPurchaseNotificationEmailType,
   handleTrackGroupPurchase,
 } from "../../src/utils/handleFinishedTransactions";
+import { clearTables, createTrackGroup, createUser } from "../utils";
 
 describe("handleTrackGroupPurchase", () => {
   beforeEach(async () => {
@@ -239,5 +240,68 @@ describe("handleTrackGroupPurchase", () => {
     assert.equal(allTransactions.length, 2);
     assert.equal(allTransactions[0].userFriendlyId, "0001");
     assert.equal(allTransactions[1].userFriendlyId, "0002");
+  });
+
+  it("should pass all variables required by artist-purchase-notification template", async () => {
+    const stub = sinon.spy(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const trackGroup = await createTrackGroup(artist.id, {
+      title: "Our Custom Title",
+    });
+
+    await handleTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+    assert.equal(stub.calledTwice, true);
+    const data = stub.getCall(1).args[0].data;
+    assert.equal(data.template, "artist-purchase-notification");
+
+    const locals = data.locals as ArtistPurchaseNotificationEmailType;
+
+    // html.pug line: Purchased by: #{email}
+    assert.equal(locals.email, "follower@follower.com");
+    // html.pug line: Gross (#{currency.toUpperCase()})
+    assert.equal(typeof locals.currency, "string");
+    // html.pug link: ${client}/${purchase.trackGroup.artist.urlSlug}/release/...
+    assert.ok(locals.client, "client must be present for template links");
+    // html.pug totals row: #{(totalGross / 100).toFixed(2)}
+    assert.equal(typeof locals.totalGross, "number");
+    // html.pug totals row: #{(totalNet / 100).toFixed(2)}
+    assert.equal(typeof locals.totalNet, "number");
+
+    const tx = locals.transactions[0];
+    assert.ok(tx, "transaction must be present");
+    const tgp = tx.trackGroupPurchases?.[0];
+    assert.ok(tgp, "trackGroupPurchase must be present");
+    // html.pug mixin title: `Digital: ${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`
+    assert.ok(
+      tgp.trackGroup.artist.name,
+      "artist.name must be included in the transaction query"
+    );
+    // html.pug link: `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`
+    assert.ok(
+      tgp.trackGroup.artist.urlSlug,
+      "artist.urlSlug must be included in the transaction query"
+    );
+    assert.ok(
+      tgp.trackGroup.urlSlug,
+      "trackGroup.urlSlug must be included in the transaction query"
+    );
   });
 });

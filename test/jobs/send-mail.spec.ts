@@ -1,10 +1,12 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it, beforeEach, afterEach } from "mocha";
+
 import assert from "assert";
+
+import nodemailer from "nodemailer";
 import sinon from "sinon";
 import { Job } from "bullmq";
-import nodemailer from "nodemailer";
 
 import sendMail from "../../src/jobs/send-mail";
 import { clearTables, createSiteSettings } from "../utils";
@@ -189,6 +191,200 @@ describe("send-mail job", () => {
         result.fromEmail,
         "db@example.com",
         "Should prioritize database config over env var"
+      );
+    });
+  });
+
+  describe("template rendering", () => {
+    it("renders artist-purchase-notification without crashing when all variables are provided", async () => {
+      await createSiteSettings({
+        emailProvider: {
+          provider: "mailgun",
+          fromEmail: "noreply@mirlo.test",
+          mailgun: { apiKey: "key-test", domain: "mg.mirlo.test" },
+        },
+      });
+
+      let sentHtml = "";
+      const transport = {
+        sendMail: (mail: { html?: string }) => {
+          sentHtml = mail.html ?? "";
+          return Promise.resolve({ messageId: "test-artist-receipt" });
+        },
+      };
+      sandbox.stub(nodemailer, "createTransport").returns(transport as any);
+
+      const originalMailhog = process.env.MAILHOG_PORT;
+      process.env.MAILHOG_PORT = "1025";
+      try {
+        await sendMail({
+          data: {
+            template: "artist-purchase-notification",
+            locals: {
+              email: "buyer@example.com",
+              currency: "usd",
+              client: "http://localhost:3000",
+              totalGross: 1500,
+              totalNet: 1250,
+              message: null,
+              transactions: [
+                {
+                  userFriendlyId: "TXN-001",
+                  amount: 1500,
+                  platformFee: 150,
+                  stripeCut: 100,
+                  trackGroupPurchases: [
+                    {
+                      proGratis: false,
+                      trackGroup: {
+                        title: "Test Album",
+                        urlSlug: "test-album",
+                        catalogNumber: "CAT-001",
+                        artist: { name: "Test Artist", urlSlug: "test-artist" },
+                      },
+                    },
+                  ],
+                  trackPurchases: [
+                    {
+                      track: {
+                        title: "Test Track",
+                        isrc: "USRC12345678",
+                        trackGroup: {
+                          title: "Test Album",
+                          urlSlug: "test-album",
+                          artist: {
+                            name: "Test Artist",
+                            urlSlug: "test-artist",
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  merchPurchases: [
+                    {
+                      merch: {
+                        title: "Test Shirt",
+                        sku: "SHIRT-M",
+                        artist: { name: "Test Artist" },
+                      },
+                    },
+                  ],
+                  tips: [
+                    {
+                      artist: { name: "Test Artist", id: 1 },
+                    },
+                  ],
+                },
+              ],
+            },
+            message: { to: "artist@example.com" },
+          },
+        } as Job);
+      } finally {
+        if (originalMailhog === undefined) {
+          delete process.env.MAILHOG_PORT;
+        } else {
+          process.env.MAILHOG_PORT = originalMailhog;
+        }
+      }
+
+      assert.ok(sentHtml.length > 0, "should render non-empty HTML");
+      assert.ok(
+        sentHtml.includes("Test Artist"),
+        `rendered HTML should contain the artist name, got: ${sentHtml.slice(0, 500)}`
+      );
+      assert.ok(
+        sentHtml.includes("Test Album"),
+        `rendered HTML should contain the album title, got: ${sentHtml.slice(0, 500)}`
+      );
+      assert.ok(
+        sentHtml.includes("buyer@example.com"),
+        `rendered HTML should contain the buyer email, got: ${sentHtml.slice(0, 500)}`
+      );
+      assert.ok(
+        sentHtml.includes("USD"),
+        `rendered HTML should contain the currency, got: ${sentHtml.slice(0, 500)}`
+      );
+    });
+
+    it("renders artist-new-subscriber-announce without crashing when all variables are provided", async () => {
+      await createSiteSettings({
+        emailProvider: {
+          provider: "mailgun",
+          fromEmail: "noreply@mirlo.test",
+          mailgun: { apiKey: "key-test", domain: "mg.mirlo.test" },
+        },
+      });
+
+      let sentHtml = "";
+      const transport = {
+        sendMail: (mail: { html?: string }) => {
+          sentHtml = mail.html ?? "";
+          return Promise.resolve({ messageId: "test-new-subscriber" });
+        },
+      };
+      sandbox.stub(nodemailer, "createTransport").returns(transport as any);
+
+      const originalMailhog = process.env.MAILHOG_PORT;
+      process.env.MAILHOG_PORT = "1025";
+      try {
+        await sendMail({
+          data: {
+            template: "artist-new-subscriber-announce",
+            locals: {
+              isNewSubscription: true,
+              interval: "MONTH",
+              artist: {
+                name: "Test Artist",
+                user: { currency: "usd" },
+              },
+              artistUserSubscription: {
+                id: 1,
+                amount: 1000,
+                artistSubscriptionTierId: 1,
+                artistSubscriptionTier: { name: "Fan" },
+              },
+              user: {
+                name: "Test Fan",
+                email: "fan@example.com",
+              },
+              transaction: {
+                amount: 1000,
+                currency: "usd",
+                platformCut: 100,
+                stripeCut: 50,
+              },
+              email: "fan@example.com",
+              client: "http://localhost:3000",
+              host: "http://localhost:3000",
+            },
+            message: { to: "artist@example.com" },
+          },
+        } as Job);
+      } finally {
+        if (originalMailhog === undefined) {
+          delete process.env.MAILHOG_PORT;
+        } else {
+          process.env.MAILHOG_PORT = originalMailhog;
+        }
+      }
+
+      assert.ok(sentHtml.length > 0, "should render non-empty HTML");
+      assert.ok(
+        sentHtml.includes("Test Artist"),
+        `rendered HTML should contain the artist name, got: ${sentHtml.slice(0, 500)}`
+      );
+      assert.ok(
+        sentHtml.includes("Test Fan"),
+        `rendered HTML should contain the subscriber name, got: ${sentHtml.slice(0, 500)}`
+      );
+      assert.ok(
+        sentHtml.includes("fan@example.com"),
+        `rendered HTML should contain the subscriber email, got: ${sentHtml.slice(0, 500)}`
+      );
+      assert.ok(
+        sentHtml.includes("Fan"),
+        `rendered HTML should contain the tier name, got: ${sentHtml.slice(0, 500)}`
       );
     });
   });

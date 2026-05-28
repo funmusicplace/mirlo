@@ -1,16 +1,19 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+import sinon from "sinon";
 
+import * as sendMailQueueModule from "../../src/queues/send-mail-queue";
+import { ArtistSubscriptionReceiptEmailType } from "../../src/utils/handleFinishedTransactions";
+import {
+  manageSubscriptionReceipt,
+  ArtistNewSubscriberAnnounceEmailType,
+} from "../../src/utils/subscription";
 import { clearTables, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
-import assert from "assert";
-import sinon from "sinon";
 
-import { manageSubscriptionReceipt } from "../../src/utils/subscription";
-import { ArtistSubscriptionReceiptEmailType } from "../../src/utils/handleFinishedTransactions";
-import * as sendMailQueueModule from "../../src/queues/send-mail-queue";
+import assert from "assert";
 
 describe("subscription", () => {
   beforeEach(async () => {
@@ -501,6 +504,97 @@ describe("subscription", () => {
       assert.equal(artistCall.template, "artist-new-subscriber-announce");
       assert.equal(artistCall.message.to, "artist@artist.com");
       assert.equal(artistCall.message.cc, "accounting@artist.com");
+    });
+
+    it("should pass all variables required by artist-new-subscriber-announce template", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+
+      const artist = await prisma.artist.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: {
+          artistId: artist.id,
+          name: "Supporter",
+        },
+      });
+
+      await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub-key-template-vars",
+          deletedAt: null,
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 1000,
+        },
+      });
+
+      await manageSubscriptionReceipt({
+        processorPaymentReferenceId: "inv-template-vars",
+        processorSubscriptionReferenceId: "sub-key-template-vars",
+        amountPaid: 1000,
+        currency: "usd",
+        platformCut: 100,
+        paymentProcessorFee: 29,
+        billingReason: "subscription_create",
+        status: "COMPLETED",
+      });
+
+      assert.equal(sendMailStub.callCount, 2);
+      const artistCallData = sendMailStub.getCall(1).args[1];
+      assert.equal(artistCallData.template, "artist-new-subscriber-announce");
+
+      const locals =
+        artistCallData.locals as ArtistNewSubscriberAnnounceEmailType;
+
+      // html.pug line: if isNewSubscription / else
+      assert.strictEqual(locals.isNewSubscription, true);
+      // html.pug line: interval === 'MONTH' ? 'monthly' : 'yearly'
+      assert.ok(locals.interval, "interval must be present");
+      // html.pug line: #{artist.name}
+      assert.equal(locals.artist.name, "Test artist");
+      // subject.pug: artist.user.currency.toUpperCase() — crashes if user or currency is missing
+      assert.ok(
+        (locals.artist as any).user,
+        "artist.user must be included in the query for subject.pug"
+      );
+      // html.pug line: #{artistUserSubscription.artistSubscriptionTier.name}
+      assert.equal(
+        locals.artistUserSubscription.artistSubscriptionTier.name,
+        "Supporter"
+      );
+      // html.pug table: if transaction
+      assert.ok(
+        locals.transaction,
+        "transaction must be present for a completed payment"
+      );
+      // html.pug: transaction.currency.toUpperCase()
+      assert.equal(locals.transaction.currency, "usd");
+      // html.pug: (transaction.amount / 100).toFixed(2)
+      assert.equal(locals.transaction.amount, 1000);
+      // html.pug: transaction.platformCut / 100
+      assert.equal(locals.transaction.platformCut, 100);
+      // html.pug: transaction.stripeCut / 100
+      assert.equal(locals.transaction.stripeCut, 29);
+      // html.pug: #{user.email} #{user.name}
+      assert.equal(locals.user.email, "subscriber@subscriber.com");
+      assert.ok(locals.user.name, "user.name must be present");
     });
   });
 });
