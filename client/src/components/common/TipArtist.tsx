@@ -1,23 +1,25 @@
-import React from "react";
-import Button from "./Button";
-import { FaDonate } from "react-icons/fa";
-import { useTranslation } from "react-i18next";
-import Modal from "./Modal";
-
-import { useAuthContext } from "state/AuthContext";
-import SupportArtistTiersForm from "./SupportArtistTiersForm";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryUserStripeStatus } from "queries";
 import { css } from "@emotion/css";
-import TipArtistForm from "./TipArtistForm";
-import { FixedButton } from "./FixedButton";
-import UnsubscribeButton from "./UnsubscribeButton";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { queryArtist, queryUserStripeStatus } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaDonate } from "react-icons/fa";
+import { useAuthContext } from "state/AuthContext";
 import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
 
-const TipArtist: React.FC<{ artistId: number; fixed?: boolean }> = ({
-  artistId,
-  fixed = false,
-}) => {
+import Button from "./Button";
+import { FixedButton } from "./FixedButton";
+import Modal from "./Modal";
+import SupportArtistTiersForm from "./SupportArtistTiersForm";
+import TipArtistForm from "./TipArtistForm";
+import UnsubscribeButton from "./UnsubscribeButton";
+
+const TipArtist: React.FC<{
+  artistId: number;
+  fixed?: boolean;
+  compact?: boolean;
+}> = ({ artistId, fixed = false, compact = false }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const { data: artist } = useQuery(
@@ -48,6 +50,20 @@ const TipArtist: React.FC<{ artistId: number; fixed?: boolean }> = ({
     >
       {t("tipArtist")}
     </FixedButton>
+  ) : compact ? (
+    <ArtistButton
+      className={`tip-artist ${css`
+        font-size: 0.75em !important;
+        background-color: var(--mi-button-tint-color) !important;
+      `}`}
+      size="compact"
+      variant="outlined"
+      type="button"
+      onClick={onTipClick}
+      startIcon={<FaDonate />}
+    >
+      {t("tipArtist")}
+    </ArtistButton>
   ) : (
     <Button
       className="tip-artist"

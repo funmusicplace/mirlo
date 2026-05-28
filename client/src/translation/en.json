@@ -580,7 +580,7 @@
     "enterEmail": "Enter your email:",
     "tipThisArtist": "Tip this artist",
     "manageArtistSubscription": "Manage artist subscription",
-    "tipArtist": "Tip artist",
+    "tipArtist": "Tip",
     "likeWhatTheyAreDoing": "Like what {{artistName}} is doing? The best way to support them is on a monthly basis.",
     "unsubscribeFromArtist": "Stop receiving emails from {{artistName}}",
     "stopReceivingUpdates": "Stop receiving posts from {{artistName}}",
@@ -1377,6 +1377,7 @@
     "copyLink": "Copy link",
     "share": "Share",
     "shareArtist": "Share {{artistName}}'s page",
+    "sharePost": "Share this post",
     "urlToShare": "URL to share"
   },
   "subscriptionForm": {

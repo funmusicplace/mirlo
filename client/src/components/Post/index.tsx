@@ -26,6 +26,10 @@ export const PageMarkdownWrapper = styled.div`
   flex-direction: column;
   gap: 1rem;
 
+  a {
+    color: #5c899c;
+  }
+
   blockquote {
     font-style: italic;
     border-left: 4px solid #d1d5db;
@@ -109,9 +113,7 @@ const Post: React.FC = () => {
   }
 
   return (
-    <div
-      className={`w-full relative ${post.featuredImage ? "" : "bg-(--mi-tint-color)"}`}
-    >
+    <div className="w-full relative bg-(--mi-darken-background-color) pb-12">
       <MetaCard
         title={`${post.title} ${t("byArtist", { artist: post.artist?.name })}`}
         description={post.content.slice(0, 500)}
@@ -120,11 +122,9 @@ const Post: React.FC = () => {
       <PostHeader post={post} />
 
       <div
-        className={
-          post.featuredImage
-            ? "max-w-3xl mx-auto px-4 pt-8"
-            : "max-w-3xl mx-auto px-4 md:px-12 pt-4 pb-8 bg-(--mi-background-color)"
-        }
+        className={`max-w-[824px] mx-auto px-4 md:px-12 pt-8 pb-8 md:pb-12 bg-(--mi-white) text-(--mi-black) ${
+          post.featuredImage ? "md:rounded-b-lg" : "md:rounded-lg"
+        }`}
       >
         <PageMarkdownWrapper>
           {post.isContentHidden && (
@@ -155,6 +155,7 @@ const Post: React.FC = () => {
         </PageMarkdownWrapper>
       </div>
       {post.artist &&
+        !post.isContentHidden &&
         !user?.artistUserSubscriptions?.some(
           (sub) => sub.artistSubscriptionTier.artistId === post.artist?.id
         ) && (
