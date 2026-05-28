@@ -215,7 +215,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         <div>{t("noAlbumsYet")}</div>
       )}
 
-      <div className="flex flex-col gap-6 px-2">
+      <div className="flex flex-col gap-6">
         {isLoading && <LoadingBlocks />}
         <ReleasesSection
           title={t(

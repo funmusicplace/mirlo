@@ -84,7 +84,7 @@ const ManageMerch: React.FC<{}> = () => {
                     square
                     objectFit="contain"
                   />
-                  <span>{item.title}</span>
+                  <span className="max-md:text-sm">{item.title}</span>
                   {!item.isPublic && (
                     <Pill variant="warning">
                       <ImWarning />
@@ -92,7 +92,7 @@ const ManageMerch: React.FC<{}> = () => {
                     </Pill>
                   )}
                 </div>
-                <div>{item.catalogNumber}</div>
+                <div className="max-md:text-sm">{item.catalogNumber}</div>
                 <div
                   className={css`
                     display: flex;
