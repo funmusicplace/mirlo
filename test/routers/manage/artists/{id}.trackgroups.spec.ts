@@ -81,6 +81,26 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should not GET / hidden song draft albums", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      await createTrackGroup(artist.id, {
+        isHiddenTrackGroupForSongDrafts: true,
+        urlSlug: "hidden-draft",
+      });
+      const visibleAlbum = await createTrackGroup(artist.id, {
+        urlSlug: "visible-album",
+      });
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/trackGroups`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].id, visibleAlbum.id);
+      assert(response.statusCode === 200);
+    });
+
     it("should GET / ordered by release date", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);

@@ -176,6 +176,9 @@ export const createTrackGroup = async (
       isPreorder: data?.isPreorder ?? false,
       hideFromSearch: data?.hideFromSearch ?? false,
       ...(data?.isPublic !== undefined && { isPublic: data.isPublic }),
+      ...(data?.isHiddenTrackGroupForSongDrafts !== undefined && {
+        isHiddenTrackGroupForSongDrafts: data.isHiddenTrackGroupForSongDrafts,
+      }),
       cover:
         data?.cover !== undefined
           ? data.cover
