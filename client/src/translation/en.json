@@ -970,6 +970,7 @@
     "merchUpdated": "Merch updated",
     "isPublicNotSet": "This merch item is not yet publicly visible. Toggle this to set it live!",
     "isPublicSet": "Should this merch item be publicly listed?",
+    "zeroShippingConfirmBody": "Your shipping costs are all set to 0. Are you sure you want to make this item public?",
     "costUnit": "Cost per unit",
     "costExtraUnit": "Cost per additional unit",
     "anywhere": "Anywhere",

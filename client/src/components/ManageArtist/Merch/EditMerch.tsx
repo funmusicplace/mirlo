@@ -1,27 +1,26 @@
-import React from "react";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { bp } from "../../../constants";
-import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryManagedMerch } from "queries";
-import MerchForm from "./MerchForm";
-import MerchDestinations from "./MerchDestinations";
-import UploadArtistImage from "../UploadArtistImage";
-import MerchOptions from "./MerchOptions";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
 import { Toggle } from "components/common/Toggle";
-import api from "services/api";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { getArtistManageUrl, getMerchUrl } from "utils/artist";
-import { useSnackbar } from "state/SnackbarContext";
-import DeleteMerchButton from "./DeleteMerchButton";
-import MerchFulfillmentLink from "./MerchFulfillmentLink";
-import { FaArrowLeft } from "react-icons/fa";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
+import { queryArtist, queryManagedMerch } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+import { useConfirm } from "utils/useConfirm";
+
+import { bp } from "../../../constants";
+import ManageSectionWrapper from "../ManageSectionWrapper";
+import UploadArtistImage from "../UploadArtistImage";
+
+import DeleteMerchButton from "./DeleteMerchButton";
+import MerchDestinations from "./MerchDestinations";
+import MerchForm from "./MerchForm";
+import MerchFulfillmentLink from "./MerchFulfillmentLink";
+import MerchOptions from "./MerchOptions";
 
 const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
@@ -29,20 +28,27 @@ const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
   const { merchId: merchParamId } = useParams();
 
   const { refetch } = useQuery(queryManagedMerch(merchParamId ?? ""));
+  const { ask } = useConfirm();
 
-  const updatePublic = React.useCallback(
-    async (val: boolean) => {
-      const packet = { isPublic: val };
-      try {
-        await api.put(`manage/merch/${merchParamId}`, packet);
-        refetch();
-        snackbar(t("merchUpdated"));
-      } catch (e) {
-        console.error("e", e);
+  const updatePublic = async (val: boolean) => {
+    if (val) {
+      const hasUntouchedShipping =
+        merch.shippingDestinations.length > 0 &&
+        merch.shippingDestinations.every(
+          (dest) => dest.costUnit === 0 && dest.costExtraUnit === 0
+        );
+      if (hasUntouchedShipping && !(await ask(t("zeroShippingConfirmBody")))) {
+        return;
       }
-    },
-    [merchParamId, refetch]
-  );
+    }
+    try {
+      await api.put(`manage/merch/${merchParamId}`, { isPublic: val });
+      refetch();
+      snackbar(t("merchUpdated"));
+    } catch (e) {
+      console.error("e", e);
+    }
+  };
 
   return (
     <Box
