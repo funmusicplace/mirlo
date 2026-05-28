@@ -173,16 +173,16 @@ describe("FollowArtist", () => {
       });
     });
 
-    test("opens modal with youCanFollowThisArtist when artist has no paid tiers", async () => {
+    test("opens modal with newsletter prompt and email form when artist has no paid tiers", async () => {
       renderFollowArtist();
 
       await waitFor(() => screen.getByRole("button", { name: /follow/i }));
       await userEvent.click(screen.getByRole("button", { name: /follow/i }));
 
-      expect(screen.getByText("youCanFollowThisArtist")).toBeInTheDocument();
       expect(
-        screen.queryByTestId("support-tiers-form")
-      ).not.toBeInTheDocument();
+        screen.getByText("enterEmailToSubscribeToNewsletter")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("support-tiers-form")).toBeInTheDocument();
     });
 
     test("opens modal with chooseSupportLevel and tiers form when artist has paid tiers", async () => {
