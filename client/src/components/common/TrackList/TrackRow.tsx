@@ -28,9 +28,9 @@ import TrackRowPlayControl from "./TrackRowPlayControl";
 
 type Variant = "default" | "compact" | "widget" | "dock";
 
-const compactDropdownTrigger = css`
-  width: 1.5rem !important;
-  height: 1.5rem !important;
+const dropdownTriggerSizing = css`
+  width: var(--track-row-lh) !important;
+  height: var(--track-row-lh) !important;
   min-width: 0 !important;
   min-height: 0 !important;
   padding: 0 !important;
@@ -45,7 +45,7 @@ const LI = styled.li<{
   isPlaying: boolean;
   variant: Variant;
 }>`
-  --track-row-lh: ${(p) => (p.variant === "default" ? "2rem" : "1.5rem")};
+  --track-row-lh: ${(p) => (p.variant === "default" ? "1.7rem" : "1.5rem")};
 
   @media (max-width: 768px) {
     --track-row-lh: ${(p) =>
@@ -134,8 +134,7 @@ const TrackDropdown: React.FC<{
   track: Track;
   trackGroup: TrackGroup;
   user: LoggedInUser | null | undefined;
-  compact?: boolean;
-}> = ({ track, trackGroup, user, compact }) => {
+}> = ({ track, trackGroup, user }) => {
   const ownsTrack = !!user?.userTrackPurchases?.find(
     (p) => p.trackId === track.id
   );
@@ -152,7 +151,7 @@ const TrackDropdown: React.FC<{
       smallIcon
       compact
       label="Track options"
-      triggerClassName={compact ? compactDropdownTrigger : undefined}
+      triggerClassName={dropdownTriggerSizing}
     >
       <ul>
         <li>
@@ -375,12 +374,7 @@ const TrackRow: React.FC<{
       </div>
 
       {showDropdownCell && (
-        <TrackDropdown
-          track={track}
-          trackGroup={trackGroup}
-          user={user}
-          compact={isCompact}
-        />
+        <TrackDropdown track={track} trackGroup={trackGroup} user={user} />
       )}
     </LI>
   );

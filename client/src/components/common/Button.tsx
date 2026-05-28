@@ -370,10 +370,17 @@ export const ButtonLink: React.FC<
     to: string;
     relative?: RelativeRoutingType;
   } & React.AnchorHTMLAttributes<HTMLAnchorElement>
-> = ({ to, relative, ...props }) => {
-  const handleClick = useLinkClickHandler(to, { relative });
+> = ({ to, relative, target, ...props }) => {
+  const handleClick = useLinkClickHandler(to, { relative, target });
   const href = useHref(to, { relative });
-  return <ButtonAnchor onClick={handleClick} href={href} {...props} />;
+  return (
+    <ButtonAnchor
+      onClick={handleClick}
+      href={href}
+      target={target}
+      {...props}
+    />
+  );
 };
 
 export default Button;

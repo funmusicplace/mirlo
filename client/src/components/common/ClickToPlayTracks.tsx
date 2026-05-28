@@ -1,7 +1,11 @@
+import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import { queryArtist } from "queries";
 import React from "react";
+import { useTranslation } from "react-i18next";
+import { VscPlay } from "react-icons/vsc";
 import { useParams } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 
@@ -40,12 +44,14 @@ const Wrapper = styled.div`
 const ClickToPlayTracks: React.FC<{
   trackIds: number[];
   className?: string;
-}> = ({ trackIds, className }) => {
+  playLabel?: "album" | "track";
+}> = ({ trackIds, className, playLabel }) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
   const params = useParams();
+  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: params.artistId ?? "" })
@@ -65,6 +71,25 @@ const ClickToPlayTracks: React.FC<{
 
   if (!artist) {
     return null;
+  }
+
+  if (playLabel) {
+    return (
+      <ArtistButton
+        startIcon={<VscPlay />}
+        onClick={onClickPlay}
+        disabled={trackIds.length === 0}
+        className={
+          css`
+            width: 70%;
+            justify-content: center;
+            border-radius: 9999px !important;
+          ` + (className ? ` ${className}` : "")
+        }
+      >
+        {t(playLabel === "album" ? "playAlbum" : "playTrack")}
+      </ArtistButton>
+    );
   }
 
   return (

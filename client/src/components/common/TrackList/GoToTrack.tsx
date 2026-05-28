@@ -22,6 +22,8 @@ const GoToTrack: React.FC<{
     <DropdownMenuItemLink
       to={`${getReleaseUrl(artist, trackGroup)}/tracks/${track.id}`}
       startIcon={<FaArrowRight />}
+      target="_blank"
+      rel="noopener noreferrer"
     >
       {t("goToTrack")}
     </DropdownMenuItemLink>

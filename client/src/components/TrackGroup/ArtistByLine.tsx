@@ -6,10 +6,41 @@ import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import { coverSizeMax } from "./TrackGroup";
 
 const inlineLink = css`
-  display: inline !important;
-  white-space: normal !important;
-  word-break: break-word;
+  && {
+    display: inline !important;
+    white-space: normal !important;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
 `;
+
+export const FromAlbum: React.FC<{
+  artist: Artist;
+  trackGroup: TrackGroup;
+}> = ({ artist, trackGroup }) => {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
+
+  return (
+    <Trans
+      t={t}
+      i18nKey="fromAlbum"
+      values={{
+        album: trackGroup.title,
+      }}
+      components={{
+        albumLink: (
+          <ArtistButtonLink
+            className="inline! whitespace-normal! underline!"
+            variant="link"
+            to={getReleaseUrl(artist, trackGroup)}
+          ></ArtistButtonLink>
+        ),
+      }}
+    />
+  );
+};
 
 const ArtistByLine: React.FC<{
   artist: Artist;
@@ -38,62 +69,50 @@ const ArtistByLine: React.FC<{
       `}
     >
       {showFromAlbum && trackGroup && (
-        <>
-          <Trans
-            t={t}
-            i18nKey="fromAlbum"
-            values={{
-              album: trackGroup.title,
-            }}
-            components={{
-              albumLink: (
-                <ArtistButtonLink
-                  className={inlineLink}
-                  variant="link"
-                  to={getReleaseUrl(artist, trackGroup)}
-                ></ArtistButtonLink>
-              ),
-            }}
-          />{" "}
-        </>
+        <div className="sm:hidden">
+          <FromAlbum artist={artist} trackGroup={trackGroup} />
+        </div>
       )}
-      <Trans
-        t={t}
-        i18nKey="byArtist"
-        values={{
-          artist: artist.name,
-        }}
-        components={{
-          artistLink: (
-            <ArtistButtonLink
-              className={inlineLink}
-              variant="link"
-              to={getArtistUrl(artist)}
-            ></ArtistButtonLink>
-          ),
-        }}
-      />
-      {labelArtist && (
-        <>
-          {" "}
-          <Trans
-            t={t}
-            i18nKey="onLabel"
-            values={{
-              label: labelArtist.name,
-            }}
-            components={{
-              labelLink: (
-                <ArtistButtonLink
-                  className={inlineLink}
-                  variant="link"
-                  to={getArtistUrl(labelArtist)}
-                ></ArtistButtonLink>
-              ),
-            }}
-          />
-        </>
-      )}
+      <div>
+        <Trans
+          t={t}
+          i18nKey="byArtist"
+          values={{
+            artist: artist.name,
+          }}
+          components={{
+            artistLink: (
+              <ArtistButtonLink
+                className={inlineLink}
+                variant="link"
+                to={getArtistUrl(artist)}
+              ></ArtistButtonLink>
+            ),
+          }}
+        />
+        {labelArtist && (
+          <>
+            {" "}
+            <span aria-hidden>·</span>{" "}
+            <Trans
+              t={t}
+              i18nKey="onLabel"
+              values={{
+                label: labelArtist.name,
+              }}
+              components={{
+                labelLink: (
+                  <ArtistButtonLink
+                    className={inlineLink}
+                    variant="link"
+                    to={getArtistUrl(labelArtist)}
+                  ></ArtistButtonLink>
+                ),
+              }}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 };
