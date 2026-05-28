@@ -116,10 +116,14 @@ export default function () {
             include: {
               cover: true,
               tracks: {
-                include: {
+                where: {
+                  deletedAt: null,
                   audio: {
-                    select: { duration: true },
+                    uploadState: "SUCCESS",
                   },
+                },
+                include: {
+                  audio: { select: { duration: true } },
                 },
               },
             },
