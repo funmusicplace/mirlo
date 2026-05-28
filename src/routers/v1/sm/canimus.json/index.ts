@@ -123,7 +123,7 @@ export default function () {
                   },
                 },
                 include: {
-                  audio: true,
+                  audio: { select: { duration: true } },
                 },
               },
             },
