@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
@@ -7,10 +6,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import Modal from "../common/Modal";
-
-const compactModal = css`
-  max-width: 400px !important;
-`;
 
 export const BuyTrackModal: React.FC<{
   showBuyModal: boolean;
@@ -33,7 +28,7 @@ export const BuyTrackModal: React.FC<{
       open={showBuyModal}
       onClose={handleClose}
       size="small"
-      className={showPurchaseForm ? undefined : compactModal}
+      className={showPurchaseForm ? undefined : "max-w-[400px]!"}
     >
       {!showPurchaseForm ? (
         <div className="flex flex-col gap-4">
