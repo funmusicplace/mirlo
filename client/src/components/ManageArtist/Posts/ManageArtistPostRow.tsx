@@ -59,7 +59,7 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
           </div>
         )}
         <div className="flex flex-col flex-1 min-w-0 p-2">
-          <div className="w-full flex items-center max-md:items-end justify-between gap-4">
+          <div className="w-full flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0 flex items-center gap-4">
               <ArtistButton
                 type="button"
@@ -78,7 +78,7 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
                 to={getPostURLReference({ ...post, artist })}
                 className="min-w-0 flex-1 flex flex-col justify-start items-start no-underline! hover:underline!"
               >
-                <h2 className="w-full line-clamp-2 mb-0! pb-1 text-base! md:text-lg!">
+                <h2 className="w-full line-clamp-2 mb-0! pb-1 text-sm! md:text-lg!">
                   {post.title === "" || !post.title ? (
                     <span className="italic">{t("untitledPost")}</span>
                   ) : (
@@ -102,14 +102,21 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
               </ArtistRouterLink>
             </div>
             <div className="flex flex-col md:flex-row items-end md:items-center gap-2 shrink-0 max-md:self-stretch max-md:justify-between">
-              {tier && (
+              {post.isPublic ? (
                 <Pill
                   variant="tint"
                   className="max-md:px-1! max-md:py-0! max-md:text-xs!"
                 >
+                  {t("publicLabel")}
+                </Pill>
+              ) : tier ? (
+                <Pill
+                  variant="tint"
+                  className="capitalize max-md:px-1! max-md:py-0! max-md:text-xs!"
+                >
                   {tier.name}
                 </Pill>
-              )}
+              ) : null}
               <div className="flex items-center gap-2">
                 <ArtistButtonLink
                   aria-label={t("editPost")}

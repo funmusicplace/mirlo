@@ -85,14 +85,18 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   const tierOptions = [
     { value: "all", label: t("allTiers") },
+    { value: "public", label: t("publicLabel") },
     ...(artist.subscriptionTiers ?? []).map((tier) => ({
       value: String(tier.id),
       label: tier.name,
     })),
   ];
 
-  const matchesTierFilter = (post: Post, filter: string) =>
-    filter === "all" || String(post.minimumSubscriptionTierId) === filter;
+  const matchesTierFilter = (post: Post, filter: string) => {
+    if (filter === "all") return true;
+    if (filter === "public") return post.isPublic;
+    return !post.isPublic && String(post.minimumSubscriptionTierId) === filter;
+  };
 
   const allDrafts = posts.filter((p) => p.isDraft);
   const allPublished = posts.filter((p) => !p.isDraft);
