@@ -121,5 +121,9 @@ export function queryAuthProfile() {
     queryKey: ["fetchProfile", QUERY_KEY_AUTH],
     queryFn: fetchProfile,
     initialData: getInjectedAuthUser,
+    // Always verify auth state in the background on page load. The server
+    // injects initialData into the HTML, so the UI is immediately populated,
+    // but a background refetch confirms the session is still valid.
+    refetchOnMount: "always",
   });
 }
