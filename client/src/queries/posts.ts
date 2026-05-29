@@ -91,16 +91,31 @@ export function queryManagedPost(postId?: number) {
   });
 }
 
-const fetchManagedArtistPosts: QueryFunction<
-  { results: Post[] },
-  ["fetchManagedArtistPosts", { artistId: number }]
-> = ({ queryKey: [_, { artistId }], signal }) => {
-  return api.get(`v1/manage/artists/${artistId}/posts`, { signal });
+type ManagedArtistPostsParams = {
+  artistId: number;
+  skip?: number;
+  take?: number;
+  isDraft?: boolean;
 };
 
-export function queryManagedArtistPosts(artistId: number) {
+const fetchManagedArtistPosts: QueryFunction<
+  { results: Post[]; total: number },
+  ["fetchManagedArtistPosts", ManagedArtistPostsParams]
+> = ({ queryKey: [_, { artistId, skip = 0, take = 10, isDraft }], signal }) => {
+  const params = new URLSearchParams({
+    skip: String(skip),
+    take: String(take),
+  });
+  if (isDraft !== undefined) params.set("isDraft", String(isDraft));
+  return api.get(`v1/manage/artists/${artistId}/posts?${params}`, { signal });
+};
+
+export function queryManagedArtistPosts(
+  artistId: number,
+  opts: { skip?: number; take?: number; isDraft?: boolean } = {}
+) {
   return queryOptions({
-    queryKey: ["fetchManagedArtistPosts", { artistId }],
+    queryKey: ["fetchManagedArtistPosts", { artistId, ...opts }],
     queryFn: fetchManagedArtistPosts,
     enabled: !!artistId,
   });

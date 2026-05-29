@@ -13,10 +13,13 @@ import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
+import usePagination from "utils/usePagination";
 
 import { ManageSectionWrapper } from "../ManageSectionWrapper";
 
 import ManageArtistPostRow from "./ManageArtistPostRow";
+
+const PAGE_SIZE = 10;
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const { t } = useTranslation("translation", {
@@ -28,8 +31,30 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   const artistId = artist?.id;
 
-  const { data } = useQuery(queryManagedArtistPosts(artistId ?? 0));
-  const posts = data?.results ?? [];
+  const { page: draftsPage, PaginationComponent: DraftsPagination } =
+    usePagination({ pageSize: PAGE_SIZE, pageParam: "dpage" });
+  const { page: publishedPage, PaginationComponent: PublishedPagination } =
+    usePagination({ pageSize: PAGE_SIZE, pageParam: "ppage" });
+
+  const { data: draftsData } = useQuery(
+    queryManagedArtistPosts(artistId ?? 0, {
+      skip: draftsPage * PAGE_SIZE,
+      take: PAGE_SIZE,
+      isDraft: true,
+    })
+  );
+  const { data: publishedData } = useQuery(
+    queryManagedArtistPosts(artistId ?? 0, {
+      skip: publishedPage * PAGE_SIZE,
+      take: PAGE_SIZE,
+      isDraft: false,
+    })
+  );
+
+  const allDraftPosts = draftsData?.results ?? [];
+  const allPublishedPosts = publishedData?.results ?? [];
+  const draftsTotal = draftsData?.total ?? 0;
+  const publishedTotal = publishedData?.total ?? 0;
 
   const { mutate: createPost } = useCreatePostMutation();
   const { mutate: deletePostMutate } = useDeletePostMutation();
@@ -82,12 +107,10 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const matchesTierFilter = (post: Post, filter: string) =>
     filter === "all" || String(post.minimumSubscriptionTierId) === filter;
 
-  const allDrafts = posts.filter((p) => p.isDraft);
-  const allPublished = posts.filter((p) => !p.isDraft);
-  const draftPosts = allDrafts.filter((p) =>
+  const draftPosts = allDraftPosts.filter((p) =>
     matchesTierFilter(p, draftsTierFilter)
   );
-  const publishedPosts = allPublished.filter((p) =>
+  const publishedPosts = allPublishedPosts.filter((p) =>
     matchesTierFilter(p, publishedTierFilter)
   );
 
@@ -105,7 +128,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         </ArtistButton>
       </SectionActionStrip>
 
-      {allDrafts.length > 0 && (
+      {draftsTotal > 0 && (
         <div className="mb-8">
           <h2 className="mb-3">{t("drafts")}</h2>
           <FilterGroup
@@ -126,10 +149,11 @@ const ManageArtistPosts: React.FC<{}> = () => {
               />
             ))}
           </ol>
+          <DraftsPagination amount={allDraftPosts.length} total={draftsTotal} />
         </div>
       )}
 
-      {allPublished.length > 0 && (
+      {publishedTotal > 0 && (
         <div>
           <h2 className="mb-3">{t("publishedPosts")}</h2>
           <FilterGroup
@@ -150,6 +174,10 @@ const ManageArtistPosts: React.FC<{}> = () => {
               />
             ))}
           </ol>
+          <PublishedPagination
+            amount={allPublishedPosts.length}
+            total={publishedTotal}
+          />
         </div>
       )}
     </ManageSectionWrapper>

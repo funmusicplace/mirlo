@@ -17,18 +17,34 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params;
+    const {
+      skip = 0,
+      take = 10,
+      isDraft,
+    } = req.query as { skip?: string; take?: string; isDraft?: string };
 
     try {
-      const posts = await prisma.post.findMany({
-        where: { artistId: Number(artistId) },
-        orderBy: { publishedAt: "desc" },
-        include: { featuredImage: true },
-      });
+      const where = {
+        artistId: Number(artistId),
+        ...(isDraft !== undefined ? { isDraft: isDraft === "true" } : {}),
+      };
+
+      const [posts, total] = await Promise.all([
+        prisma.post.findMany({
+          where,
+          orderBy: { publishedAt: "desc" },
+          include: { featuredImage: true },
+          skip: Number(skip),
+          take: Number(take),
+        }),
+        prisma.post.count({ where }),
+      ]);
 
       res.json({
         results: posts.map((post) =>
           serializePost(post, undefined, undefined, true)
         ),
+        total,
       });
     } catch (e) {
       next(e);
