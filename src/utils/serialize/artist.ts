@@ -134,14 +134,17 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     name: artist.name,
     url: artistUrl,
     images: {
-      cover: {
-        src: avatarString
-          ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
-          : undefined,
-        alt: null,
-        width: 600,
-        height: 600,
-      },
+      cover: avatarString
+        ? {
+            src: generateFullStaticImageUrl(
+              avatarString,
+              finalArtistAvatarBucket
+            ),
+            alt: null,
+            width: 600,
+            height: 600,
+          }
+        : undefined,
     },
     summary: artist.shortDescription,
     description: artist.bio,
