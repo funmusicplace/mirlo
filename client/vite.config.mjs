@@ -35,6 +35,7 @@ export default defineConfig({
     port: Number(process.env.PORT) || 8080,
   },
   build: {
+    sourcemap: true,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
