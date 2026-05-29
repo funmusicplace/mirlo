@@ -135,16 +135,13 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
           </div>
         </div>
       </div>
-      <div
-        id={detailsId}
-        className={
-          isExpanded ? "p-4 border-t border-(--mi-tint-color)" : "hidden"
-        }
-      >
-        <MarkdownWrapper className="line-clamp-5">
-          {parse(post.content ?? "")}
-        </MarkdownWrapper>
-      </div>
+      {isExpanded && (
+        <div id={detailsId} className="p-4 border-t border-(--mi-tint-color)">
+          <MarkdownWrapper className="line-clamp-5">
+            {parse(post.content ?? "")}
+          </MarkdownWrapper>
+        </div>
+      )}
     </Box>
   );
 };

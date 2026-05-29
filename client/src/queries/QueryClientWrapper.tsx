@@ -31,22 +31,27 @@ const queryClient = new QueryClient({
     },
   },
   queryCache: new QueryCache({
-    onError: async (error) => {
+    onError: (error) => {
       // Only 401 indicates an expired session — 400 is a client/validation error,
       // not an auth failure, and should not trigger a token refresh.
       if (error instanceof MirloFetchError && error.status === 401) {
         console.error("Received a 401 response - refreshing auth...");
         if (!pendingRefresh) {
+          // Invalidation is inside the chain so it fires exactly once even when
+          // many concurrent queries return 401 simultaneously. Scope the
+          // invalidation to the profile query only to avoid cascading refetches of unrelated queries
+          // like fetchUserCollection / fetchUserWishlistTrackGroups.
           pendingRefresh = authRefresh()
             .catch(() => {})
+            .then(() =>
+              queryClient.invalidateQueries({
+                queryKey: ["fetchProfile", QUERY_KEY_AUTH],
+              })
+            )
             .finally(() => {
               pendingRefresh = null;
             });
         }
-        await pendingRefresh;
-        queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey.includes(QUERY_KEY_AUTH),
-        });
       }
     },
   }),

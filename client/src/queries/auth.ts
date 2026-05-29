@@ -125,5 +125,10 @@ export function queryAuthProfile() {
     // injects initialData into the HTML, so the UI is immediately populated,
     // but a background refetch confirms the session is still valid.
     refetchOnMount: "always",
+    // Do not refetch on window focus. Every embedded widget iframe is a
+    // separate React app with its own QueryClient; with refetchOnWindowFocus
+    // enabled the visibilitychange event fires inside each iframe and causes
+    // one auth/profile request per widget every time the user switches tabs.
+    refetchOnWindowFocus: false,
   });
 }
