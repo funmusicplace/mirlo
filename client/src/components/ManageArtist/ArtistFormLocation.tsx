@@ -152,22 +152,18 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
               </ArtistButtonLink>
             </React.Fragment>
           ))}
-          {!artist?.location &&
-            isManage &&
-            artist?.artistLocationTags?.length === 0 &&
-            t("editLocation")}
         </div>
         {isManage && (
           <ArtistButton
             variant="dashed"
             size="compact"
-            onlyIcon
             smallIcon
             onClick={() => setIsEditing(true)}
-            title={t("editLocation")}
             startIcon={<FaPen />}
             className="shrink-0"
-          />
+          >
+            {t("editLocation")}
+          </ArtistButton>
         )}
       </div>
       <Modal
