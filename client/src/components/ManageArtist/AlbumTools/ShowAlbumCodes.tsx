@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import React from "react";
@@ -133,14 +133,14 @@ const ShowAlbumCodes: React.FC<{}> = () => {
       </div>
       <SpaceBetweenDiv>
         <h3>{t("existingAlbumCodes")}</h3>
-        <Button
+        <ArtistButton
           wrap
           startIcon={<FaFileCsv />}
           isLoading={downloadingTarget?.type === "all"}
           onClick={() => downloadCodes({ type: "all" })}
         >
           {t("downloadAllCodes")}
-        </Button>
+        </ArtistButton>
       </SpaceBetweenDiv>
       <Table>
         <thead>

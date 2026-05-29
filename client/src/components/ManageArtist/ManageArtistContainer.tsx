@@ -53,7 +53,7 @@ export const ArtistPageWrapper: React.FC<{
       <div
         className={css`
           ${hasBackground && !transparent
-            ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));"
+            ? "box-shadow: 0 0 0.5rem rgba(50, 50, 50, 0.3);"
             : ""}
           background-color: ${transparent
             ? "transparent"

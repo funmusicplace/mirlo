@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import FormComponent from "components/common/FormComponent";
 import ReleaseListSelector from "components/common/ReleaseListSelector";
+import { queryManagedArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -12,6 +14,7 @@ const ManageSubscriptionTierReleases: React.FC<{
   reload: () => void;
 }> = ({ tier, artistId, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const { data: artist } = useQuery(queryManagedArtist(artistId));
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -82,6 +85,7 @@ const ManageSubscriptionTierReleases: React.FC<{
           onSelectChange={handleSelectionsChange}
           isSaving={isSaving}
           maxHeight="350px"
+          includeLabelReleases={!!artist?.isLabelProfile}
         />
       </FormComponent>
     </div>

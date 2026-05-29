@@ -1,18 +1,14 @@
-import { useFormContext } from "react-hook-form";
+import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import FormComponent from "components/common/FormComponent";
+import LicenseForm from "components/common/LicenseForm";
+import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
 import { queryLicenses } from "queries/licenses";
-import { useQuery } from "@tanstack/react-query";
-import FormComponent from "components/common/FormComponent";
-import { Trans, useTranslation } from "react-i18next";
-import Button from "components/common/Button";
-import { css } from "@emotion/css";
-import Modal from "components/common/Modal";
 import React from "react";
-import LicenseForm from "components/common/LicenseForm";
-import Tooltip from "components/common/Tooltip";
-import { FaInfoCircle } from "react-icons/fa";
-import { IconOnly } from "components/common/Button.stories";
-import InfoModal from "components/common/InfoModal";
+import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 const ManageTrackLicense = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -55,7 +51,7 @@ const ManageTrackLicense = () => {
             `}
           >
             {t("dontSeeTheLicenseYouWant")}
-            <Button
+            <ArtistButton
               variant="dashed"
               onClick={() => setIsModalOpen(true)}
               type="button"
@@ -65,7 +61,7 @@ const ManageTrackLicense = () => {
               `}
             >
               {t("addIt")}
-            </Button>
+            </ArtistButton>
           </small>
         </div>
       </FormComponent>

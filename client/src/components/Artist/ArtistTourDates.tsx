@@ -228,6 +228,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
               <ArtistButton
                 size="compact"
                 variant="transparent"
+                wrap
                 className={css`
                   margin-right: 0.5rem;
                 `}

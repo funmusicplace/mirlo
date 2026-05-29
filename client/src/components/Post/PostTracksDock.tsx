@@ -22,7 +22,7 @@ const readBool = (key: string, fallback: boolean) => {
 const asideBase = css`
   position: fixed;
   right: 1rem;
-  bottom: 5rem;
+  bottom: 4.5rem;
   z-index: 11;
   width: 20rem;
   max-width: calc(100vw - 2rem);
@@ -38,7 +38,7 @@ const asideBase = css`
   @media (max-width: 768px) {
     right: 0;
     left: 0;
-    bottom: 4rem;
+    bottom: 3.5rem;
     width: auto;
     max-width: none;
     border-radius: 0;
@@ -97,9 +97,9 @@ const PostTracksDock: React.FC<{
   // ManageArtistButtons via global CSS vars on <html>. Single-mount invariant:
   // mounting two PostTracksDocks simultaneously would race on these vars.
   React.useEffect(() => {
-    const playerActionsDesktop = collapsed ? "8rem" : "17.5rem";
+    const playerActionsDesktop = collapsed ? "7.5rem" : "17rem";
     const playerActionsMobile = collapsed
-      ? "7.5rem"
+      ? "7rem"
       : "calc(100vh - var(--header-cover-sticky-height, 0px) - 3.5rem)";
     const root = document.documentElement.style;
     root.setProperty("--player-actions-bottom-offset", playerActionsDesktop);
@@ -107,8 +107,8 @@ const PostTracksDock: React.FC<{
       "--player-actions-bottom-offset-mobile",
       playerActionsMobile
     );
-    root.setProperty("--fixed-actions-bottom-offset", "8rem");
-    root.setProperty("--fixed-actions-bottom-offset-mobile", "7.5rem");
+    root.setProperty("--fixed-actions-bottom-offset", "7.5rem");
+    root.setProperty("--fixed-actions-bottom-offset-mobile", "7rem");
     return () => {
       root.removeProperty("--player-actions-bottom-offset");
       root.removeProperty("--player-actions-bottom-offset-mobile");

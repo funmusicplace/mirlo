@@ -76,7 +76,7 @@ const Menu = forwardRef<
         <Button
           aria-label="Close menu"
           autoFocus
-          className="self-end border-none bg-transparent hover:no-underline focus:no-underline"
+          className="self-end border-none bg-transparent! text-black! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-black!"
           // @ts-ignore React doesn't support Invoker Commands API
           command="close"
           commandfor={dialogId}

@@ -117,12 +117,47 @@ const Content = styled.div<ContentProps>`
   }
 `;
 
-const close = css`
-  color: #aaa;
-  background: none;
+const closeBase = `
+  background: transparent !important;
+  background-color: transparent !important;
   border: none;
+  filter: none !important;
+
+  &:hover:not(:disabled),
+  &:focus,
+  &:focus-visible {
+    background: transparent !important;
+    background-color: transparent !important;
+    filter: none !important;
+  }
+`;
+
+const closeOnLight = css`
+  color: var(--mi-black) !important;
+  ${closeBase}
+
   svg {
-    fill: #aaa;
+    fill: var(--mi-black) !important;
+  }
+`;
+
+const closeOnDark = css`
+  color: var(--mi-off-white) !important;
+  background: var(--mi-darken-background-color) !important;
+  background-color: var(--mi-darken-background-color) !important;
+  border: none;
+  filter: none !important;
+
+  svg {
+    fill: var(--mi-off-white) !important;
+  }
+
+  &:hover:not(:disabled),
+  &:focus,
+  &:focus-visible {
+    background: var(--mi-darken-x-background-color) !important;
+    background-color: var(--mi-darken-x-background-color) !important;
+    filter: none !important;
   }
 `;
 
@@ -204,10 +239,12 @@ export const Modal: React.FC<{
     return null;
   }
 
+  const closeClass = title ? closeOnLight : closeOnDark;
+
   return ReactDOM.createPortal(
     <FocusTrap
       focusTrapOptions={{
-        initialFocus: ".".concat(close),
+        initialFocus: ".".concat(closeClass),
         ...focusTrapOptions,
       }}
     >
@@ -258,7 +295,7 @@ export const Modal: React.FC<{
               {title && <h2 id={dialogLabelFromTitle(title)}>{title}</h2>}
 
               <Button
-                className={close}
+                className={closeClass}
                 onlyIcon
                 startIcon={<FaTimes />}
                 onClick={onCloseWrapper}

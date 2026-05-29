@@ -18,7 +18,7 @@ const Tabs = styled.ul`
       padding: 0rem 0.25rem calc(0.9rem - 4px) 0.25rem;
       line-height: 1rem;
       display: block;
-      font-size: 1.2rem;
+      font-size: var(--tab-font-size, 1.2rem);
       transition: 0.1s border-bottom;
       border-bottom: 4px solid transparent;
       @media screen and (max-width: ${bp.medium}px) {

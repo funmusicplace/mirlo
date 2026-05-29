@@ -42,7 +42,7 @@ const PlayerActions: React.FC = () => {
       data-cy="player-actions"
       className={css`
         z-index: 10;
-        bottom: var(--player-actions-bottom-offset, 80px);
+        bottom: var(--player-actions-bottom-offset, 70px);
         right: 1rem;
         position: fixed;
         display: flex;
@@ -51,7 +51,7 @@ const PlayerActions: React.FC = () => {
         @media (max-width: 768px) {
           bottom: var(
             --player-actions-bottom-offset-mobile,
-            var(--player-actions-bottom-offset, 80px)
+            var(--player-actions-bottom-offset, 70px)
           );
           right: 0.5rem;
         }

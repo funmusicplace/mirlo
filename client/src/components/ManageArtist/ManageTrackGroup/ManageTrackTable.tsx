@@ -25,6 +25,17 @@ const TrackTableComponent = styled(Table)`
     border-bottom: 1px solid var(--mi-tint-color);
   }
 
+  &.mi-table th:not(:last-child),
+  &.mi-table td:not(:last-child) {
+    border-right: none;
+  }
+
+  &.mi-table th:nth-child(4),
+  &.mi-table td:nth-child(4),
+  &.mi-table th:nth-child(5) {
+    text-align: center;
+  }
+
   @media screen and (max-width: ${bp.medium}px) {
     display: block;
 

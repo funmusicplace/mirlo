@@ -81,6 +81,10 @@ interface SettingsFromAPI {
   defconLevel: number;
 }
 
+const colorInputClass = css`
+  min-height: 2.5rem;
+`;
+
 const AdminSettings = () => {
   const snackbar = useSnackbar();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -174,7 +178,13 @@ const AdminSettings = () => {
     <WidthContainer variant="big" justify="center" className="p-4">
       <h3>Settings</h3>
       <form onSubmit={handleSubmit(updateSettings)}>
-        <Table>
+        <Table
+          className={css`
+            &.mi-table {
+              border: none;
+            }
+          `}
+        >
           <tr>
             <h3>General Settings</h3>
           </tr>
@@ -257,9 +267,7 @@ const AdminSettings = () => {
                 <InputEl
                   {...register("instanceCustomization.colors.button")}
                   type="color"
-                  className={css`
-                    text-align: right;
-                  `}
+                  className={colorInputClass}
                 />
               </FormComponent>
               <FormComponent>
@@ -267,9 +275,7 @@ const AdminSettings = () => {
                 <InputEl
                   {...register("instanceCustomization.colors.buttonText")}
                   type="color"
-                  className={css`
-                    text-align: right;
-                  `}
+                  className={colorInputClass}
                 />
               </FormComponent>
               <FormComponent>
@@ -277,9 +283,7 @@ const AdminSettings = () => {
                 <InputEl
                   {...register("instanceCustomization.colors.text")}
                   type="color"
-                  className={css`
-                    text-align: right;
-                  `}
+                  className={colorInputClass}
                 />
               </FormComponent>
               <FormComponent>
@@ -287,9 +291,7 @@ const AdminSettings = () => {
                 <InputEl
                   {...register("instanceCustomization.colors.background")}
                   type="color"
-                  className={css`
-                    text-align: right;
-                  `}
+                  className={colorInputClass}
                 />
               </FormComponent>
             </td>

@@ -95,7 +95,7 @@ const LogoWrapper = () => {
       className="mt-[-.1rem] leading-none text-[1.5rem] flex justify-start items-center"
     >
       <span aria-hidden className="max-md:hidden">
-        <Logo />
+        <Logo width={101} height={34} />
       </span>
       <span aria-hidden className="md:hidden">
         <Logo noWordmark width={32} height={32} />

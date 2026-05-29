@@ -78,7 +78,7 @@ const Strip: React.FC<{ showTracklist?: boolean }> = ({
     <div
       className={`${
         showTracklist ? "[grid-area:title]" : "flex-1"
-      } min-w-0 overflow-hidden border-l border-current/20 flex flex-col relative`}
+      } min-w-0 border-l border-current/20 flex flex-col relative`}
     >
       <div
         className={`flex-1 min-h-0 flex items-center ${

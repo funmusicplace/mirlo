@@ -127,6 +127,7 @@ const TrackArtistFormFields: React.FC<{
         variant="dashed"
         size="compact"
         disabled={disabled}
+        className="shrink-0"
       >
         {t("removeArtist")}
       </ArtistButton>

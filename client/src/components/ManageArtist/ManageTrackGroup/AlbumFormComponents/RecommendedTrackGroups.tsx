@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import AutoComplete from "components/common/AutoComplete";
-import FormComponent from "components/common/FormComponent";
+import CommandSearch, {
+  CommandSearchSection,
+} from "components/common/CommandSearch/CommandSearch";
+import { queryTrackGroups } from "queries";
 import {
   queryManagedRecommendedTrackGroups,
   useAddRecommendedTrackGroupMutation,
@@ -10,16 +12,19 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
-import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+import { useDebounce } from "use-debounce";
 
 const RecommendedTrackGroups: React.FC<{
   trackGroupId: number;
 }> = ({ trackGroupId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { t: tShared } = useTranslation("translation", {
+    keyPrefix: "commandSearch",
+  });
   const snackbar = useSnackbar();
-  const [showSearch, setShowSearch] = React.useState(false);
-  const [didAddRecommendation, setDidAddRecommendation] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
 
   const { data: { results } = {}, refetch } = useQuery(
     queryManagedRecommendedTrackGroups(trackGroupId)
@@ -28,54 +33,35 @@ const RecommendedTrackGroups: React.FC<{
   const addMutation = useAddRecommendedTrackGroupMutation();
   const removeMutation = useRemoveRecommendedTrackGroupMutation();
 
-  const searchTrackGroups = React.useCallback(
-    async (search: string) => {
-      try {
-        const response = await api.getMany<TrackGroup>(`trackGroups`, {
-          title: search,
-          take: `10`,
-        });
-        const searchResults = response.results || [];
-        // Filter out already recommended track groups and the current track group
-        return searchResults
-          .filter(
-            (tg) =>
-              tg.id !== trackGroupId &&
-              !results?.some((rec) => rec.id === tg.id)
-          )
-          .map((tg: TrackGroup) => ({
-            id: tg.id,
-            name: `${tg.title} by ${tg.artist?.name}`,
-          }));
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
-    },
-    [trackGroupId, results]
-  );
+  const [debouncedQuery] = useDebounce(query, 300);
+  const trimmed = debouncedQuery.trim();
+  const searchActive = open && trimmed.length >= 2;
+
+  const searchQ = useQuery({
+    ...queryTrackGroups({ q: trimmed, take: 10 }),
+    enabled: searchActive,
+  });
+
+  React.useEffect(() => {
+    if (!open) {
+      setQuery("");
+    }
+  }, [open]);
 
   const handleAddRecommendation = React.useCallback(
-    (value: string | number | { id: string | number; name: string }) => {
-      const recommendedTrackGroupId =
-        typeof value === "object" ? value.id : value;
+    (recommendedTrackGroupId: number) => {
       addMutation.mutate(
         {
           trackGroupId,
-          recommendedTrackGroupId: Number(recommendedTrackGroupId),
+          recommendedTrackGroupId,
         },
         {
           onSuccess: () => {
-            setShowSearch(false);
             refetch();
-            snackbar(t("recommendationAdded"), {
-              type: "success",
-            });
+            snackbar(t("recommendationAdded"), { type: "success" });
           },
           onError: () => {
-            snackbar(t("recommendationError"), {
-              type: "warning",
-            });
+            snackbar(t("recommendationError"), { type: "warning" });
           },
         }
       );
@@ -101,21 +87,29 @@ const RecommendedTrackGroups: React.FC<{
     );
   };
 
-  const searchRef = React.useRef<HTMLInputElement>(null);
-
-  React.useEffect(() => {
-    if (didAddRecommendation) {
-      searchRef.current?.focus();
-    }
-  }, [didAddRecommendation, searchRef.current]);
-
-  React.useEffect(() => {
-    if (showSearch) {
-      setDidAddRecommendation(true);
-    } else {
-      setDidAddRecommendation(false);
-    }
-  }, [showSearch]);
+  const sections = React.useMemo<CommandSearchSection[]>(() => {
+    if (!searchActive) return [];
+    const items = (searchQ.data?.results ?? [])
+      .filter(
+        (tg) =>
+          tg.id !== trackGroupId && !results?.some((rec) => rec.id === tg.id)
+      )
+      .map((tg) => ({
+        key: `trackGroup-${tg.id}`,
+        node: `${tg.artist?.name ?? ""} · ${tg.title}`,
+        onSelect: () => handleAddRecommendation(tg.id),
+      }));
+    return items.length > 0
+      ? [{ category: tShared("categoryReleases"), items }]
+      : [];
+  }, [
+    searchActive,
+    searchQ.data,
+    results,
+    trackGroupId,
+    handleAddRecommendation,
+    tShared,
+  ]);
 
   return (
     <>
@@ -156,40 +150,26 @@ const RecommendedTrackGroups: React.FC<{
       )}
 
       <div>
-        {!showSearch ? (
-          <ArtistButton
-            wrap
-            type="button"
-            onClick={() => setShowSearch(true)}
-            isLoading={addMutation.isPending}
-          >
-            {t("addRecommendedAlbum")}
-          </ArtistButton>
-        ) : (
-          <>
-            <FormComponent>
-              <label>{t("searchAlbums")}</label>
-              <AutoComplete
-                getOptions={searchTrackGroups}
-                id="input-track-group"
-                onSelect={handleAddRecommendation}
-                placeholder={t("searchPlaceholder")}
-                ref={searchRef}
-              />
-            </FormComponent>
-
-            <ArtistButton
-              type="button"
-              onClick={() => {
-                setShowSearch(false);
-              }}
-              className="mt-4"
-            >
-              {t("cancel")}
-            </ArtistButton>
-          </>
-        )}
+        <ArtistButton
+          wrap
+          type="button"
+          onClick={() => setOpen(true)}
+          isLoading={addMutation.isPending}
+        >
+          {t("addRecommendedAlbum")}
+        </ArtistButton>
       </div>
+
+      <CommandSearch
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("addRecommendedAlbum")}
+        placeholder={t("searchPlaceholder")}
+        query={query}
+        onQueryChange={setQuery}
+        sections={sections}
+        isLoading={searchQ.isFetching}
+      />
     </>
   );
 };

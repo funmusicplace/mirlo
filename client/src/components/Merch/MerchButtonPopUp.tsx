@@ -1,21 +1,20 @@
 import { css } from "@emotion/css";
-
+import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import Button from "components/common/Button";
+import Modal from "components/common/Modal";
+import { moneyDisplay } from "components/common/Money";
+import { queryUserStripeStatus } from "queries";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import BuyMerchItem from "./BuyMerchItem";
-import Button from "components/common/Button";
 
-import { moneyDisplay } from "components/common/Money";
-import Modal from "components/common/Modal";
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { queryUserStripeStatus } from "queries";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-
-const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
-  merch,
-  artist,
-}) => {
+const MerchButtonPopUp: React.FC<{
+  merch: Merch;
+  artist: Artist;
+  compact?: boolean;
+}> = ({ merch, artist, compact = false }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -56,7 +55,13 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
 
   return (
     <>
-      <ArtistButton onClick={() => setIsOpen(true)}>{buttonLabel}</ArtistButton>
+      <ArtistButton
+        wrap={compact}
+        size={compact ? "compact" : undefined}
+        onClick={() => setIsOpen(true)}
+      >
+        {buttonLabel}
+      </ArtistButton>
       <Modal
         open={isOpen}
         title={hasExternalUrl ? t("leavingMirloTitle") : t("buyMerch")}
@@ -95,10 +100,7 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
                 justify-content: flex-end;
               `}
             >
-              <ArtistButton
-                onClick={() => setIsOpen(false)}
-                variant="outlined"
-              >
+              <ArtistButton onClick={() => setIsOpen(false)} variant="outlined">
                 {t("cancel")}
               </ArtistButton>
               <ArtistButton

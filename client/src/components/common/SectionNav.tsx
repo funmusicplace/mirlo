@@ -18,6 +18,7 @@ const opaqueStyle = css`
 `;
 
 const tabsStyle = css`
+  --tab-font-size: 0.75rem;
   padding: var(--mi-side-paddings-xsmall);
   white-space: nowrap;
   overflow-x: auto;
@@ -32,13 +33,10 @@ const tabsStyle = css`
     margin-top: 1rem !important;
   }
 
-  & > li > a {
-    font-size: 0.75rem;
-  }
-
   @media (min-width: ${bp.medium}px) {
+    --tab-font-size: 1rem;
+
     & > li > a {
-      font-size: 1rem;
       padding-bottom: calc(1rem - 4px) !important;
     }
   }

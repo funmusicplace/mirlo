@@ -72,13 +72,6 @@ const DropdownMenu: React.FC<{
           }
         `
           : ""}
-
-        @media screen and (max-width: ${bp.medium}px) {
-          ${smallIcon ? "width: 2rem !important; height: 2rem !important;" : ""}
-          svg {
-            ${smallIcon ? "width: .3rem !important; margin-left:1rem;" : ""}
-          }
-        }
       `}${triggerClassName ? ` ${triggerClassName}` : ""}`}
       startIcon={icon ?? <FaEllipsisV />}
     />
@@ -149,14 +142,13 @@ const DropdownMenu: React.FC<{
                 min-width: 215px;
                 max-width: 215px;
                 text-overflow: ellipsis;
-                background: var(--mi-background-color) !important;
-
-                button {
-                  color: var(--mi-text-color) !important;
-                }
+                background: var(--mi-background-color);
+                color: var(--mi-text-color);
 
                 li {
                   list-style-type: none;
+                  background: var(--mi-background-color);
+                  color: var(--mi-text-color);
                 }
 
                 li > * {
@@ -166,8 +158,8 @@ const DropdownMenu: React.FC<{
                   text-decoration: none;
                   text-align: right;
                   white-space: normal;
-                  color: var(--mi-text-color) !important;
-                  background-color: var(--mi-background-color) !important;
+                  color: inherit !important;
+                  background: transparent !important;
                   word-break: break-word;
                   font-weight: normal;
                   border-radius: 0;
@@ -180,14 +172,15 @@ const DropdownMenu: React.FC<{
                   border: none;
                 }
 
-                li > a,
-                li > button {
-                  &:hover {
-                    border-radius: 0;
-                    background: var(--mi-text-color) !important;
-                    color: var(--mi-background-color) !important;
-                    border: none;
-                  }
+                li > * svg {
+                  fill: currentColor !important;
+                }
+
+                li:hover,
+                li:focus-within,
+                li:active {
+                  background: var(--mi-text-color);
+                  color: var(--mi-background-color);
                 }
 
                 @media screen and (max-width: ${bp.medium}px) {
@@ -204,8 +197,7 @@ const DropdownMenu: React.FC<{
 
                   ul {
                     display: grid;
-                    grid-template-columns: auto auto;
-                    justify-content: center;
+                    grid-template-columns: 1fr auto auto 1fr;
                     column-gap: 0.75rem;
                     padding: 0;
                     margin: 0;
@@ -215,8 +207,7 @@ const DropdownMenu: React.FC<{
                     display: grid;
                     grid-template-columns: subgrid;
                     grid-column: 1 / -1;
-                    align-items: center;
-                    padding: 0.875rem 1rem;
+                    padding: 0;
                     font-size: 0.875rem;
                   }
 
@@ -225,23 +216,23 @@ const DropdownMenu: React.FC<{
                   }
 
                   li > * {
-                    display: contents !important;
+                    display: grid !important;
+                    grid-template-columns: subgrid;
+                    grid-column: 1 / -1;
+                    align-items: center;
+                    padding: 0.875rem 1rem;
+                    width: 100%;
                   }
 
                   li .startIcon {
                     justify-self: end;
-                    grid-column: 1;
+                    grid-column: 2;
                   }
 
                   li .children {
                     justify-self: start;
-                    grid-column: 2;
+                    grid-column: 3;
                     text-align: left;
-                  }
-
-                  li:hover {
-                    background: var(--mi-text-color) !important;
-                    color: var(--mi-background-color) !important;
                   }
 
                   li svg {

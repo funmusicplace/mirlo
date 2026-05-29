@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-import { useAuthContext } from "state/AuthContext";
 import { useFilterableList } from "utils/useFilterableList";
 
 import { InputEl } from "./Input";
@@ -13,6 +12,8 @@ interface ReleaseListSelectorProps {
   onSelectChange: (releaseIds: number[]) => void;
   maxHeight?: string;
   isSaving?: boolean;
+  single?: boolean;
+  includeLabelReleases?: boolean;
 }
 
 const getReleaseSearchText = (r: TrackGroup) =>
@@ -24,8 +25,10 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
   onSelectChange,
   maxHeight = "400px",
   isSaving = false,
+  single = false,
+  includeLabelReleases = false,
 }) => {
-  const { user } = useAuthContext();
+  const radioName = React.useId();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const [releases, setReleases] = React.useState<TrackGroup[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -45,7 +48,7 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
         setIsLoading(true);
         const results = await api.getMany<TrackGroup>(
           `manage/artists/${artistId}/trackGroups`,
-          user?.isLabelAccount ? { includeLabelReleases: "true" } : undefined
+          includeLabelReleases ? { includeLabelReleases: "true" } : undefined
         );
         setReleases(results.results);
       } catch (error) {
@@ -56,9 +59,13 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
     };
 
     fetchReleases();
-  }, [artistId]);
+  }, [artistId, includeLabelReleases]);
 
   const handleCheckboxChange = (releaseId: number) => {
+    if (single) {
+      onSelectChange(selected.has(releaseId) ? [] : [releaseId]);
+      return;
+    }
     const newSelected = new Set(selected);
     if (newSelected.has(releaseId)) {
       newSelected.delete(releaseId);
@@ -99,7 +106,8 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
                   className="flex items-center gap-3 p-2 hover:backdrop-brightness-90 font-normal! cursor-pointer"
                 >
                   <input
-                    type="checkbox"
+                    type={single ? "radio" : "checkbox"}
+                    name={single ? radioName : undefined}
                     checked={selected.has(release.id)}
                     onChange={() => handleCheckboxChange(release.id)}
                     className="w-4 h-4 cursor-pointer"
