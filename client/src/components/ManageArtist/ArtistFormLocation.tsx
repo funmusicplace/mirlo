@@ -119,13 +119,14 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
       <div className="flex items-center gap-2 min-w-0">
         <div
           className={css`
-            display: block;
+            display: ${artist.location || currentTags.length > 0
+              ? "block"
+              : "none"};
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             min-width: 0;
             flex: 1 1 auto;
-            opacity: 0.5;
             line-height: 1.5;
           `}
         >
@@ -135,7 +136,6 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
               {(artist?.location || i > 0) && ", "}
               <ArtistButtonLink
                 variant="link"
-                color="foreground"
                 to={`/search/locations/${tag.locationTag.slug}`}
                 className={css`
                   display: inline !important;
