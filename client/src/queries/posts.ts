@@ -1,4 +1,9 @@
-import { QueryFunction, queryOptions } from "@tanstack/react-query";
+import {
+  QueryFunction,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { getInjectedPost } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";
@@ -83,5 +88,70 @@ export function queryManagedPost(postId?: number) {
   return queryOptions({
     queryKey: ["fetchManagedPost", { postId }, QUERY_KEY_POSTS],
     queryFn: fetchManagedPost,
+  });
+}
+
+type ManagedArtistPostsParams = {
+  artistId: number;
+  skip?: number;
+  take?: number;
+  isDraft?: boolean;
+};
+
+const fetchManagedArtistPosts: QueryFunction<
+  { results: Post[]; total: number },
+  ["fetchManagedArtistPosts", ManagedArtistPostsParams]
+> = ({ queryKey: [_, { artistId, skip = 0, take = 10, isDraft }], signal }) => {
+  const params = new URLSearchParams({
+    skip: String(skip),
+    take: String(take),
+  });
+  if (isDraft !== undefined) params.set("isDraft", String(isDraft));
+  return api.get(`v1/manage/artists/${artistId}/posts?${params}`, { signal });
+};
+
+export function queryManagedArtistPosts(
+  artistId: number,
+  opts: { skip?: number; take?: number; isDraft?: boolean } = {}
+) {
+  return queryOptions({
+    queryKey: ["fetchManagedArtistPosts", { artistId, ...opts }],
+    queryFn: fetchManagedArtistPosts,
+    enabled: !!artistId,
+  });
+}
+
+async function createPost(opts: { artistId: number }) {
+  return api.post<Partial<Post>, { result: Post }>(
+    `v1/manage/artists/${opts.artistId}/posts`,
+    { title: "", content: "", isPublic: false }
+  );
+}
+
+export function useCreatePostMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: createPost,
+    async onSuccess(_, { artistId }) {
+      await client.invalidateQueries({
+        queryKey: ["fetchManagedArtistPosts", { artistId }],
+      });
+    },
+  });
+}
+
+async function deletePost(opts: { postId: number; artistId: number }) {
+  return api.del(`v1/manage/posts/${opts.postId}`);
+}
+
+export function useDeletePostMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: deletePost,
+    async onSuccess(_, { artistId }) {
+      await client.invalidateQueries({
+        queryKey: ["fetchManagedArtistPosts", { artistId }],
+      });
+    },
   });
 }

@@ -1,26 +1,61 @@
 import prisma from "@mirlo/prisma";
-import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  artistEditableByUser,
+  artistBelongsToLoggedInUser,
   userAuthenticated,
-} from "../../../../auth/passport";
-import { AppError } from "../../../../utils/error";
-import { serializePost } from "../../../../utils/serialize/post";
+} from "../../../../../auth/passport";
+import { AppError } from "../../../../../utils/error";
+import { serializePost } from "../../../../../utils/serialize/post";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
-    GET: [userAuthenticated, GET],
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
   };
 
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { artistId } = req.params;
+    const {
+      skip = 0,
+      take = 10,
+      isDraft,
+    } = req.query as { skip?: string; take?: string; isDraft?: string };
+
+    try {
+      const where = {
+        artistId: Number(artistId),
+        ...(isDraft !== undefined ? { isDraft: isDraft === "true" } : {}),
+      };
+
+      const [posts, total] = await Promise.all([
+        prisma.post.findMany({
+          where,
+          orderBy: { publishedAt: "desc" },
+          include: { featuredImage: true },
+          skip: Number(skip),
+          take: Number(take),
+        }),
+        prisma.post.count({ where }),
+      ]);
+
+      res.json({
+        results: posts.map((post) =>
+          serializePost(post, undefined, undefined, true)
+        ),
+        total,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
   async function POST(req: Request, res: Response, next: NextFunction) {
+    const { artistId } = req.params;
     const {
       title,
       content,
-      artistId,
       isPublic,
       publishedAt,
       minimumSubscriptionTierId,
@@ -28,7 +63,6 @@ export default function () {
     } = req.body as unknown as {
       title: string;
       content: string;
-      artistId: number;
       isPublic: boolean;
       minimumSubscriptionTierId: number;
       publishedAt: string;
@@ -36,21 +70,19 @@ export default function () {
     };
 
     assertLoggedIn(req);
-    const user = req.user;
+
     try {
       const artist = await prisma.artist.findFirst({
-        where: { id: artistId, userId: user.id },
-        select: { id: true, user: { select: { currency: true } } },
+        where: { id: Number(artistId) },
+        select: { id: true },
       });
+
       if (!artist) {
-        throw new AppError({
-          description: "Artist must belong to logged in user",
-          httpCode: 400,
-        });
+        throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
       const mostRecentPost = await prisma.post.findFirst({
-        where: { artistId, deletedAt: null },
+        where: { artistId: Number(artistId), deletedAt: null },
         orderBy: { createdAt: "desc" },
         select: { minimumSubscriptionTierId: true, shouldSendEmail: true },
       });
@@ -63,14 +95,11 @@ export default function () {
       let validTier;
       if (resolvedTierId) {
         validTier = await prisma.artistSubscriptionTier.findFirst({
-          where: {
-            artistId,
-            id: resolvedTierId,
-          },
+          where: { artistId: Number(artistId), id: resolvedTierId },
         });
       } else {
         validTier = await prisma.artistSubscriptionTier.findFirst({
-          where: { artistId, isDefaultTier: true },
+          where: { artistId: Number(artistId), isDefaultTier: true },
         });
         if (!validTier) {
           await prisma.artistSubscriptionTier.create({
@@ -83,7 +112,7 @@ export default function () {
             },
           });
           validTier = await prisma.artistSubscriptionTier.findFirst({
-            where: { artistId, isDefaultTier: true },
+            where: { artistId: Number(artistId), isDefaultTier: true },
           });
         }
       }
@@ -96,10 +125,8 @@ export default function () {
             isPublic,
             publishedAt,
             shouldSendEmail: resolvedShouldSendEmail,
-            artist: { connect: { id: artistId } },
-            minimumSubscriptionTier: {
-              connect: { id: validTier?.id },
-            },
+            artist: { connect: { id: Number(artistId) } },
+            minimumSubscriptionTier: { connect: { id: validTier.id } },
           },
         });
         res.json({ result });
@@ -112,40 +139,6 @@ export default function () {
     } catch (e) {
       next(e);
     }
-  }
-
-  /** FIXME this should not be nested here, it should really live under /manage/artists/{id}/posts */
-  async function GET(req: Request, res: Response) {
-    const { artistId } = req.query;
-    assertLoggedIn(req);
-    if (!(await artistEditableByUser(artistId as string, req.user))) {
-      throw new AppError({
-        description:
-          "Artist not found or user does not have permission to edit",
-        httpCode: 404,
-      });
-    }
-
-    let where: Prisma.PostWhereInput = {};
-    if (artistId) {
-      where.artistId = Number(artistId);
-    }
-
-    const posts = await prisma.post.findMany({
-      where,
-      orderBy: {
-        publishedAt: "desc",
-      },
-      include: {
-        featuredImage: true,
-      },
-    });
-
-    res.json({
-      results: posts.map((post) =>
-        serializePost(post, undefined, undefined, true)
-      ),
-    });
   }
 
   return operations;
