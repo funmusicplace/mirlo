@@ -172,8 +172,10 @@ export default function () {
                 AND "adminEnabled" = true
                 AND "hideFromSearch" = false
                 AND "isPublic" = true
+                AND "deletedAt" IS NULL
+                AND "isHiddenTrackGroupForSongDrafts" = false
                 and exists (
-                	select id from "Track" t	
+                	select id from "Track" t
                 	where t."trackGroupId" = "TrackGroup".id
                 	and t."deletedAt" is null
                 	and exists (
@@ -181,15 +183,30 @@ export default function () {
 						        where ta."deletedAt" is null
                 		)
                 )
+                AND exists (
+                  select 1 from "Artist" a
+                  where a.id = "TrackGroup"."artistId"
+                  and a.enabled = true
+                  and a."deletedAt" is null
+                  and exists (
+                    select 1 from "User" u
+                    where u.id = a."userId"
+                    and u."canCreateArtists" = true
+                    and u."deletedAt" is null
+                  )
+                )
+                AND exists (
+                  select 1 from "TrackGroupCover" c
+                  where c."trackGroupId" = "TrackGroup".id
+                  and cardinality(c.url) > 0
+                )
               ORDER BY "artistId", "releaseDate" DESC
             ) AS distinct_groups
           ORDER BY RANDOM()
-          LIMIT ${Number(take) * 2}
+          LIMIT ${Number(take)}
         `;
 
-        const randomIds = rawTrackGroups
-          .map((row) => row.id)
-          .slice(0, Number(take));
+        const randomIds = rawTrackGroups.map((row) => row.id);
         where.id = { in: randomIds };
         delete where.releaseDate; // Remove releaseDate filter for random query
         delete where.tags;
