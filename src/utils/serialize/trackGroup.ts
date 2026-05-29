@@ -108,11 +108,13 @@ export const serializeSingleTrackGroupIntoCanimus = (
     license: trackGroup.credits,
     artist: artistName,
     images: {
-      cover: {
-        src: coverString
-          ? generateFullStaticImageUrl(coverString, finalCoversBucket)
-          : undefined,
-      },
+      cover: coverString
+        ? {
+            src: generateFullStaticImageUrl(coverString, finalCoversBucket),
+            width: 600,
+            height: 600,
+          }
+        : undefined,
     },
     description: trackGroup.about,
     children: trackGroup.tracks?.map((track: CanimusTrack) =>
