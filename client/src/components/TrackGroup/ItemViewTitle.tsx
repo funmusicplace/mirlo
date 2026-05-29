@@ -96,8 +96,8 @@ const TrackGroupTitle: React.FC<{
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        margin-top: 1rem;
-        margin-bottom: 1.25rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
 
         @media screen and (max-width: ${bp.small}px) {
           margin-bottom: 0.75rem;

@@ -36,7 +36,7 @@ export const coverSizeMax = "470px";
 export const Container = styled.div`
   --cover-size: clamp(
     ${coverSizeMin},
-    min(45vw, calc(100dvh - 250px)),
+    min(45vw, calc(100dvh - 275px)),
     ${coverSizeMax}
   );
   --content-width: calc(var(--cover-size) * 2.3 + 1.5rem);
