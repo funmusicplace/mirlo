@@ -62,6 +62,7 @@ export const serializeSingleTrackIntoCanimus = (
     name: track.title,
     url: join(releaseUrl, "tracks", trackId),
     duration: track.audio?.duration ?? metadata?.format?.duration,
+    track: track.order,
     media: [
       {
         src: mediaUrl,

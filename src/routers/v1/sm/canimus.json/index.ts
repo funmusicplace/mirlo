@@ -125,6 +125,7 @@ export default function () {
                 include: {
                   audio: { select: { duration: true } },
                 },
+                orderBy: { order: "asc" },
               },
             },
             orderBy: { orderIndex: "asc" },
