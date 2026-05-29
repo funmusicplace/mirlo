@@ -31,12 +31,16 @@ export function queryArtist(opts: {
   artistSlug?: string;
   includeDefaultTier?: boolean;
 }) {
+  // Normalize undefined → false so callers that omit includeDefaultTier share
+  // the same cache entry as callers that pass false explicitly, avoiding a
+  // third redundant network request for the same artist record.
+  const includeDefaultTier = opts.includeDefaultTier ?? false;
   return queryOptions({
     queryKey: [
       "fetchArtist",
       {
         artistSlug: opts.artistSlug,
-        includeDefaultTier: opts.includeDefaultTier,
+        includeDefaultTier,
       },
     ],
     queryFn: fetchArtist,

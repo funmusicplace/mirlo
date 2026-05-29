@@ -121,6 +121,5 @@ export function queryAuthProfile() {
     queryKey: ["fetchProfile", QUERY_KEY_AUTH],
     queryFn: fetchProfile,
     initialData: getInjectedAuthUser,
-    refetchOnMount: "always",
   });
 }
