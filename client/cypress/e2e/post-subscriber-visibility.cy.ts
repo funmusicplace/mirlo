@@ -125,9 +125,13 @@ describe("blog post subscriber visibility", () => {
     before(() => {
       cy.login({ email: ownerEmail, password: ownerPassword });
       cy.intercept("GET", `/v1/manage/artists/${artistId}*`).as("fetchArtist");
-      cy.intercept("POST", "/v1/manage/posts").as("createPost");
-      cy.intercept("PUT", "/v1/manage/posts/*").as("updatePost");
-      cy.intercept("PUT", "/v1/manage/posts/*/publish").as("publishPost");
+      cy.intercept("POST", `/v1/manage/artists/${artistId}/posts`).as(
+        "createPost"
+      );
+      cy.intercept("PUT", `/v1/manage/artists/${artistId}/posts/*`).as(
+        "updatePost"
+      );
+      cy.intercept("PUT", `/v1/manage/posts/*/publish`).as("publishPost");
 
       cy.visit(`/manage/artists/${artistId}/posts`);
       cy.wait("@fetchArtist");
