@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import ArtistRouterLink from "components/Artist/ArtistButtons";
+import ArtistRouterLink from "components/Artist/ArtistRouterLink";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { queryPublicRecommendedTrackGroups } from "queries/trackGroups";
 import React from "react";

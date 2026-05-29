@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
-import ArtistRouterLink, {
-  ArtistButton,
-} from "components/Artist/ArtistButtons";
+import ArtistRouterLink from "components/Artist/ArtistRouterLink";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import FormError from "components/common/FormError";
 import { InputEl } from "components/common/Input";

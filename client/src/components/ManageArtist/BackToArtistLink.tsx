@@ -1,7 +1,5 @@
 import { css } from "@emotion/css";
-import ArtistRouterLink, {
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import Tooltip from "components/common/Tooltip";
 import { useTranslation } from "react-i18next";
 import { FaChevronLeft } from "react-icons/fa";

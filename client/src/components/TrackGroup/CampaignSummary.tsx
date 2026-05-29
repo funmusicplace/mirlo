@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import ArtistRouterLink from "components/Artist/ArtistButtons";
+import ArtistRouterLink from "components/Artist/ArtistRouterLink";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Confetti from "components/common/Confetti";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";

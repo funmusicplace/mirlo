@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import Button, { ButtonProps } from "components/common/Button";
 import { queryArtist } from "queries";
 import {
-  Link,
-  LinkProps,
   RelativeRoutingType,
   useHref,
   useLinkClickHandler,
@@ -19,18 +17,6 @@ export const useGetArtistColors = () => {
   );
 
   return { colors: artist?.properties?.colors, isLoadingArtist };
-};
-
-const ArtistRouterLink: React.FC<LinkProps> = (props) => {
-  return (
-    <Link
-      {...props}
-      className={`
-          ${props.className} ${css`
-            color: var(--mi-button-color) !important;
-          `}`}
-    />
-  );
 };
 
 export const ArtistButton: React.FC<
@@ -178,5 +164,3 @@ export const ArtistButtonLink: React.FC<
   const href = useHref(to, { relative });
   return <ArtistButtonAnchor onClick={handleClick} href={href} {...props} />;
 };
-
-export default ArtistRouterLink;

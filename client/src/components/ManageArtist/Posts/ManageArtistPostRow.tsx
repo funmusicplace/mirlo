@@ -1,4 +1,5 @@
-import ArtistRouterLink, {
+import ArtistRouterLink from "components/Artist/ArtistRouterLink";
+import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
