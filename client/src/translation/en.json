@@ -580,7 +580,7 @@
     "enterEmail": "Enter your email:",
     "tipThisArtist": "Tip this artist",
     "manageArtistSubscription": "Manage artist subscription",
-    "tipArtist": "Tip artist",
+    "tipArtist": "Tip",
     "likeWhatTheyAreDoing": "Like what {{artistName}} is doing? The best way to support them is on a monthly basis.",
     "unsubscribeFromArtist": "Stop receiving emails from {{artistName}}",
     "stopReceivingUpdates": "Stop receiving posts from {{artistName}}",
@@ -654,7 +654,7 @@
     "contributionIsMonthly": "Make contribution monthly",
     "subscribeToArtist": "Subscribe to {{ artist }}",
     "chooseSupportLevel": "You can follow {{artistName}} or choose to support them financially",
-    "youCanFollowThisArtist": "You can follow {{artistName}}",
+    "enterEmailToSubscribeToNewsletter": "Enter your email to subscribe to {{artistName}}'s newsletter",
     "continueWithPriceMonthly": "Continue with {{ amount }}/month",
     "continueWithPriceYearly": "Continue with {{ amount }}/year",
     "chooseToContinue": "Choose a support tier to continue",
@@ -710,7 +710,10 @@
     "edit": "Edit",
     "notAvailable": "This post is for subscribers only. <support>Support this artist</support> to get access.",
     "publishedAt": "Published {{ date }}",
-    "likedThisPost": "Liked this post?"
+    "likedThisPost": "Liked this post?",
+    "readPost": "Read post",
+    "tracksInPost_one": "{{count}} track",
+    "tracksInPost_other": "{{count}} tracks"
   },
   "postTracksDock": {
     "label": "Playing in this post"
@@ -1374,6 +1377,7 @@
     "copyLink": "Copy link",
     "share": "Share",
     "shareArtist": "Share {{artistName}}'s page",
+    "sharePost": "Share this post",
     "urlToShare": "URL to share"
   },
   "subscriptionForm": {

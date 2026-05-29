@@ -39,6 +39,7 @@ export const getPostsVisibleToUser = async (
         minimumSubscriptionTier: true,
         postSubscriptionTiers: true,
         featuredImage: true,
+        _count: { select: { tracks: true } },
       },
       orderBy: { publishedAt: "desc" },
       take,

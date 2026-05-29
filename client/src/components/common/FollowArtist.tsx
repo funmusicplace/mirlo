@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { FaCheck, FaMinus, FaPlus } from "react-icons/fa";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
+import useIsSubscribedToArtist from "utils/useIsSubscribedToArtist";
 
 import Box from "./Box";
 import Modal from "./Modal";
@@ -24,13 +25,7 @@ const FollowArtist: React.FC<{
 
   const localArtistId = artistId ?? artist?.id;
   const artistUserSubscriptions = user?.artistUserSubscriptions;
-  const [isSubscribed, setIsSubscribed] = React.useState(
-    !!user?.artistUserSubscriptions?.find(
-      (aus) =>
-        aus.artistSubscriptionTier.artistId &&
-        !aus.artistSubscriptionTier.isDefaultTier
-    )
-  );
+  const isSubscribed = useIsSubscribedToArtist(localArtistId);
   const [isFollowing, setIsFollowing] = React.useState(
     !!user?.artistUserSubscriptions?.find(
       (aus) =>
@@ -49,13 +44,6 @@ const FollowArtist: React.FC<{
         aus.artistSubscriptionTier.artistId === localArtistId
     );
     setIsFollowing(!!found);
-
-    const foundSubscribed = artistUserSubscriptions?.find(
-      (aus) =>
-        !aus.artistSubscriptionTier.isDefaultTier &&
-        aus.artistSubscriptionTier.artistId === localArtistId
-    );
-    setIsSubscribed(!!foundSubscribed);
   }, [artistUserSubscriptions, localArtistId]);
 
   const onFollowClick = React.useCallback(async () => {
@@ -146,14 +134,14 @@ const FollowArtist: React.FC<{
             {t(
               hasNoneDefaultSubscriptionTiers
                 ? "chooseSupportLevel"
-                : "youCanFollowThisArtist",
+                : "enterEmailToSubscribeToNewsletter",
               {
                 artistName: artist?.name,
               }
             )}
           </p>
         )}
-        {hasNoneDefaultSubscriptionTiers && (
+        {(hasNoneDefaultSubscriptionTiers || !user) && (
           <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
         )}
       </Modal>
@@ -167,6 +155,7 @@ const FollowArtist: React.FC<{
         startIcon={isFollowing ? <FaMinus /> : <FaPlus />}
         className={css`
           font-size: 0.75em !important;
+          background-color: var(--mi-button-tint-color) !important;
         `}
       >
         {t(isFollowing ? "unfollow" : "follow")}

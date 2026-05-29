@@ -14,10 +14,10 @@ import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
 
-import EmbeddedStripeForm from "./stripe/EmbeddedStripe";
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
+import EmbeddedStripeForm from "./stripe/EmbeddedStripe";
 import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 
 const SupportArtistTiersForm: React.FC<{
@@ -124,6 +124,29 @@ const SupportArtistTiersForm: React.FC<{
   }
   const value = methods.watch("tier");
 
+  const effectiveOptions = excludeDefault
+    ? options.filter((option) => !option.isDefaultTier)
+    : options;
+
+  const singleOption =
+    effectiveOptions.length === 1 ? effectiveOptions[0] : null;
+
+  const singleOptionCurrency = artistDetails?.user?.currency ?? "usd";
+
+  React.useEffect(() => {
+    if (singleOption && value?.id !== singleOption.id) {
+      methods.setValue(
+        "tier",
+        {
+          ...singleOption,
+          currency: singleOptionCurrency,
+          minAmount: singleOption.minAmount ?? 0,
+        },
+        { shouldDirty: false }
+      );
+    }
+  }, [singleOption, singleOptionCurrency, value?.id, methods]);
+
   const noErrors =
     methods.formState.isValid || isEmpty(methods.formState.errors);
 
@@ -134,21 +157,19 @@ const SupportArtistTiersForm: React.FC<{
     <>
       {!artistDetails && <LoadingBlocks rows={1} margin="1rem" />}
       <FormProvider {...methods}>
-        <Controller
-          name="tier"
-          control={methods.control}
-          render={({ ...props }) => (
-            <SupportArtistPopUpTiers
-              {...props}
-              currency={artistDetails?.user?.currency ?? "usd"}
-              options={
-                excludeDefault
-                  ? options.filter((option) => !option.isDefaultTier)
-                  : options
-              }
-            />
-          )}
-        />
+        {!singleOption && (
+          <Controller
+            name="tier"
+            control={methods.control}
+            render={({ ...props }) => (
+              <SupportArtistPopUpTiers
+                {...props}
+                currency={artistDetails?.user?.currency ?? "usd"}
+                options={effectiveOptions}
+              />
+            )}
+          />
+        )}
 
         {!user && (
           <FormComponent>

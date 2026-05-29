@@ -1,115 +1,24 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
-import Box from "components/common/Box";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { sample } from "lodash";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaPlay } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
 import { useLinkContainer } from "utils/useLinkContainer";
 
-import { bp } from "../../constants";
-
-const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
-  color1,
-  color2,
-}) => {
-  return (
-    <div
-      className={css`
-        --mask: linear-gradient(rgb(0 0 0), rgb(0 0 0 / 0.5));
-        --stop1: 3%;
-        --stop2: 90%;
-
-        aspect-ratio: 1;
-        position: relative;
-        background: ${color1 || "var(--mi-white)"};
-        filter: contrast(50);
-
-        &:after {
-          content: "";
-          position: absolute;
-          inset: 0;
-
-          background-repeat: round;
-          mask-image: var(--mask);
-
-          --bgSize: ${sample([".7rem", ".5rem"])};
-          --bgPosition: calc(var(--bgSize) / 2);
-          --stop1: 3%;
-          --stop2: 65%;
-
-          background-image:
-            radial-gradient(
-              circle at center,
-              ${color2 || "var(--mi-button-color)"} var(--stop1),
-              transparent var(--stop2)
-            ),
-            radial-gradient(
-              circle at center,
-              ${color2 || "var(--mi-button-color)"} var(--stop1),
-              transparent var(--stop2)
-            );
-          background-size: var(--bgSize) var(--bgSize);
-          background-position:
-            0 0,
-            var(--bgPosition) var(--bgPosition);
-        }
-      `}
-    ></div>
-  );
-};
-
-const PostContainer = styled.li<{
-  isOnArtistPage?: boolean;
-}>`
+const cardStyle = css`
   display: flex;
-  border-radius: 5px;
-  border: var(--mi-border);
-  background-color: var(--mi-background-color);
+  flex-direction: column;
   position: relative;
+  min-width: 0;
   width: 100%;
+  min-height: 180px;
+  max-height: 360px;
+  overflow: hidden;
   cursor: pointer;
-
-  .post-container__link {
-    text-decoration: none;
-    overflow: hidden;
-    display: inline-block;
-    text-align: left;
-    width: 100%;
-    font-weight: normal;
-    justify-content: flex-start;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    .children {
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 5px;
-    z-index: 1;
-    background: var(--mi-button-tint-color);
-    transition: 0.2s background;
-    pointer-events: none;
-  }
-
-  &:hover::after {
-    background: var(--mi-button-tint-x-color);
-  }
-
-  &:hover {
-    .post-container__link {
-      text-decoration: underline;
-    }
-  }
+  background: var(--mi-button-tint-color);
+  border: 1px solid var(--mi-tint-color);
 
   &:focus-within {
     outline: 1px solid var(--mi-text-color);
@@ -124,140 +33,62 @@ const PostCard: React.FC<{
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
 
   const { artistId } = useParams();
-
   const isOnArtistPage = !!artistId;
 
-  const LinkToUse = isOnArtistPage ? ArtistButtonLink : Link;
+  const featuredImageSrc = post.featuredImage?.src;
+  const excerpt = post.content?.replace(/<[^>]*>/g, "").trim();
+  const trackCount = post.trackCount ?? post.tracks?.length ?? 0;
+  const hasTracks = trackCount > 0;
 
   return (
-    <PostContainer isOnArtistPage={isOnArtistPage} {...postContainerProps}>
-      <Box
-        noPadding
-        className={css`
-          height: 350px;
-          width: 100% !important;
-          border: solid 1px transparent;
-          margin-bottom: 0 !important;
-          overflow: hidden;
-          justify-content: space-between;
-          position: relative;
-
-          @media (prefers-color-scheme: dark) {
-            background-color: var(--mi-background-color);
-          }
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding: 0 !important;
-          }
-        `}
-      >
-        <div
-          className={css`
-            height: 65%;
-            z-index: 0;
-            position: relative;
-            overflow: hidden;
-          `}
-        >
-          {post.featuredImage ? (
-            <img
-              src={post.featuredImage?.src}
-              className={css`
-                object-fit: cover;
-                height: 100%;
-                width: 100%;
-              `}
-            />
-          ) : (
-            <HalfTone
-              color1="var(--mi-button-color)"
-              color2="var(--mi-background-color)"
-            />
-          )}
+    <li {...postContainerProps} className={cardStyle}>
+      {featuredImageSrc && (
+        <div className="relative w-full h-40 overflow-hidden">
+          <img
+            src={featuredImageSrc}
+            alt=""
+            className="block w-full h-full object-cover"
+          />
         </div>
-        <div
-          className={css`
-            padding: 1.5rem;
-            margin: 0;
-            z-index: 1;
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            transition: 0.2s ease-in-out;
-            ${!post.featuredImage ? "height: 100%;" : ""}
-            background-color: var(--mi-background-color);
-          `}
-        >
-          {post.artist && (
-            <div
-              className={css`
-                padding-bottom: 1.5rem;
-              `}
-            >
-              <p
-                className={css`
-                  white-space: nowrap;
-                  width: 90%;
-                  text-overflow: ellipsis;
-                  padding-right: 3rem;
-                  position: absolute;
-
-                  a {
-                    display: inline-block;
-                    width: auto;
-                    height: auto;
-                    margin-left: 0;
-                  }
-                `}
-              >
-                {t("postByPrefix")}{" "}
-                <LinkToUse variant="link" to={getArtistUrl(post.artist)}>
-                  {post.artist?.name}
-                </LinkToUse>
-              </p>
+      )}
+      <div className="flex flex-col flex-1 gap-1 py-3 px-4">
+        <h3 className="text-base font-semibold text-(--mi-text-color) line-clamp-2 leading-snug!">
+          <Link to={postUrl} className="no-underline! text-inherit!">
+            {post.title}
+          </Link>
+        </h3>
+        {hasTracks && (
+          <div
+            className={`flex items-center gap-2 px-3 py-2 rounded bg-(--mi-button-color) text-(--mi-button-text-color) text-xs ${
+              excerpt ? "mt-2" : "my-auto"
+            }`}
+          >
+            <FaPlay className="shrink-0 w-2.5 h-2.5" aria-hidden />
+            <span className="truncate">
+              {t("tracksInPost", { count: trackCount })}
+            </span>
+          </div>
+        )}
+        {excerpt && (
+          <div
+            className={`text-xs text-(--mi-text-color) leading-snug ${
+              featuredImageSrc ? "line-clamp-2" : "line-clamp-[11] mt-3"
+            }`}
+          >
+            {excerpt}
+          </div>
+        )}
+      </div>
+      <div className="px-4">
+        <div className="flex flex-col gap-1 py-2.5 border-t border-(--mi-tint-color)">
+          {post.artist && !isOnArtistPage && (
+            <div className="text-xs text-(--mi-secondary-text-color)">
+              {t("postByPrefix")}{" "}
+              <Link to={getArtistUrl(post.artist)}>{post.artist.name}</Link>
             </div>
           )}
-          <div
-            className={css`
-              width: 100%;
-              margin-bottom: 0.5rem;
-            `}
-          >
-            <h3
-              className={
-                "h4 " +
-                css`
-                  padding-bottom: 0.3rem;
-                  text-align: left;
-
-                  a {
-                    margin-left: 0;
-                  }
-                `
-              }
-            >
-              <LinkToUse
-                to={postUrl}
-                variant="link"
-                className={
-                  "post-container__link " +
-                  css`
-                    font-weight: normal;
-                    text-align: center;
-                    color: var(--mi-text-color);
-                  `
-                }
-              >
-                {post.title}
-              </LinkToUse>
-            </h3>
-            <p
-              className={css`
-                color: var(--mi-light-foreground-color);
-                text-transform: uppercase;
-                font-size: var(--mi-font-size-small);
-              `}
-            >
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-(--mi-secondary-text-color) uppercase">
               {formatDate({
                 date: post.publishedAt,
                 i18n,
@@ -267,11 +98,15 @@ const PostCard: React.FC<{
                   year: "numeric",
                 },
               })}
-            </p>
+            </div>
+            <span className="text-xs font-semibold text-(--mi-text-color) opacity-70">
+              {t("readPost")} →
+            </span>
           </div>
         </div>
-      </Box>
-    </PostContainer>
+      </div>
+    </li>
   );
 };
+
 export default PostCard;
