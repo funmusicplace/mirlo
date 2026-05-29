@@ -7,6 +7,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
 import { DropdownMenuItemButton } from "./DropdownMenuItem";
+import { FixedButton } from "./FixedButton";
 import LoadingSpinner from "./LoadingSpinner";
 import Modal from "./Modal";
 
@@ -192,7 +193,21 @@ const DownloadAlbumButton: React.FC<{
           )}
         </div>
       </Modal>
-      {dropdownItem ? (
+      {fixed ? (
+        <FixedButton
+          data-testid="download-button"
+          rounded
+          size="compact"
+          variant="dashed"
+          endIcon={<RiDownloadLine />}
+          onClick={() => {
+            setChosenFormat("");
+            setIsPopupOpen(true);
+          }}
+        >
+          {t("download")}
+        </FixedButton>
+      ) : dropdownItem ? (
         <DropdownMenuItemButton
           data-testid="download-button"
           startIcon={<RiDownloadLine />}

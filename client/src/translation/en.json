@@ -677,7 +677,9 @@
     "goToAlbum": "Go to release",
     "goToTrack": "Go to track",
     "play": "Play",
-    "pause": "Pause"
+    "pause": "Pause",
+    "playAlbum": "Play album",
+    "playTrack": "Play track"
   },
   "player": {
     "thisIsYourLastPlay": "This is your last free play — purchase this release to continue listening.",
@@ -764,6 +766,7 @@
     "actions": "Actions",
     "editRelease": "Edit release",
     "preview": "Preview",
+    "adminOptions": "Admin options",
     "adminEditUser": "Admin: edit user",
     "adminEditArtist": "Admin: edit artist",
     "adminEditRelease": "Admin: edit release",
@@ -1574,6 +1577,7 @@
     "copyTrackLink": "Copy track link",
     "copiedTrackLink": "Copied track link",
     "lyrics": "Lyrics",
+    "aboutThisTrack": "About this track",
     "buy": "Buy",
     "buyFor": "Buy for {{amount}}",
     "relatedMerch": "Related merch",

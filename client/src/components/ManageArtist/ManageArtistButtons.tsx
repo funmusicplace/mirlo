@@ -1,8 +1,9 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import DropdownMenu from "components/common/DropdownMenu";
 import { DropdownMenuItemLink } from "components/common/DropdownMenuItem";
-import FixedButtonLink from "components/common/FixedButton";
+import FixedButtonLink, { FixedButton } from "components/common/FixedButton";
 import {
   queryArtist,
   queryManagedArtistSubscriptionTier,
@@ -86,22 +87,23 @@ const ManageArtistButtons: React.FC = () => {
   };
 
   const buttonItems: ButtonItem[] = [];
+  const adminItems: ButtonItem[] = [];
 
   if (user?.isAdmin) {
-    buttonItems.push({
+    adminItems.push({
       key: "adminEditUser",
       to: `/admin/users/${artist.userId}`,
       icon: <RiAdminLine />,
       label: t("adminEditUser"),
     });
-    buttonItems.push({
+    adminItems.push({
       key: "adminEditArtist",
       to: `/admin/artists/${artist.id}`,
       icon: <RiAdminLine />,
       label: t("adminEditArtist"),
     });
     if (isAlbumPage && trackGroup) {
-      buttonItems.push({
+      adminItems.push({
         key: "adminEditRelease",
         to: `/admin/trackGroups/${trackGroup.id}`,
         icon: <RiAdminLine />,
@@ -179,7 +181,10 @@ const ManageArtistButtons: React.FC = () => {
     }
   }
 
-  if (buttonItems.length === 0) {
+  const showDownload = Boolean(user?.isAdmin && isAlbumPage && trackGroup);
+  const mobileItems = [...adminItems, ...buttonItems];
+
+  if (buttonItems.length === 0 && adminItems.length === 0 && !showDownload) {
     return null;
   }
 
@@ -203,6 +208,30 @@ const ManageArtistButtons: React.FC = () => {
         `}
       >
         <div className="hidden xl:flex flex-col gap-2">
+          {adminItems.length > 0 && (
+            <DropdownMenu
+              trigger={
+                <FixedButton
+                  size="compact"
+                  rounded
+                  variant="dashed"
+                  endIcon={<RiAdminLine />}
+                >
+                  {t("adminOptions")}
+                </FixedButton>
+              }
+            >
+              <ul>
+                {adminItems.map((item) => (
+                  <li key={item.key}>
+                    <DropdownMenuItemLink to={item.to} startIcon={item.icon}>
+                      {item.label}
+                    </DropdownMenuItemLink>
+                  </li>
+                ))}
+              </ul>
+            </DropdownMenu>
+          )}
           {buttonItems.map((item) => (
             <FixedButtonLink
               key={item.key}
@@ -215,6 +244,9 @@ const ManageArtistButtons: React.FC = () => {
               {item.label}
             </FixedButtonLink>
           ))}
+          {showDownload && trackGroup && (
+            <DownloadAlbumButton trackGroup={trackGroup} fixed />
+          )}
         </div>
         <div className="xl:hidden">
           <DropdownMenu
@@ -244,13 +276,18 @@ const ManageArtistButtons: React.FC = () => {
             `}
           >
             <ul>
-              {buttonItems.map((item) => (
+              {mobileItems.map((item) => (
                 <li key={item.key}>
                   <DropdownMenuItemLink to={item.to} startIcon={item.icon}>
                     {item.label}
                   </DropdownMenuItemLink>
                 </li>
               ))}
+              {showDownload && trackGroup && (
+                <li>
+                  <DownloadAlbumButton trackGroup={trackGroup} dropdownItem />
+                </li>
+              )}
             </ul>
           </DropdownMenu>
         </div>

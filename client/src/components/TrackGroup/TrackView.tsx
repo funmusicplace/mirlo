@@ -28,7 +28,7 @@ import {
   TrackListingWrapper,
   UnderneathImage,
 } from "./TrackGroup";
-import TrackGroupEmbed from "./TrackGroupEmbed";
+import { TrackEmbed } from "./TrackGroupEmbed";
 import TrackGroupMerch from "./TrackGroupMerch";
 
 function TrackView() {
@@ -99,6 +99,7 @@ function TrackView() {
 
                 @media screen and (max-width: ${bp.small}px) {
                   flex-direction: column;
+                  align-items: stretch;
                   gap: 0;
                 }
               `}
@@ -113,8 +114,8 @@ function TrackView() {
                 </ImageWrapper>
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
-                  <div>
-                    <TrackGroupEmbed trackGroup={trackGroup} />
+                  <div className="flex justify-end items-center gap-1">
+                    <TrackEmbed track={filteredTrack} trackGroup={trackGroup} />
                     {filteredTrack.allowIndividualSale && (
                       <PurchaseOrDownloadAlbum
                         trackGroup={trackGroup}
@@ -129,16 +130,14 @@ function TrackView() {
                 <SmallScreenPlayWrapper>
                   <ClickToPlayTracks
                     trackIds={[filteredTrack.id]}
-                    className={css`
-                      width: 50px !important;
-                      margin-right: 10px;
-                    `}
+                    playLabel="track"
                   />
                 </SmallScreenPlayWrapper>
               </ImageAndDetailsWrapper>
               <div
                 className={css`
                   flex-grow: 1;
+                  min-width: 0;
 
                   > div {
                     max-width: 100%;
@@ -152,38 +151,18 @@ function TrackView() {
                     fluidText={!isMobile}
                   />
                 </TrackListingWrapper>
-                {filteredTrack.description && (
-                  <div
-                    className={css`
-                      padding: 1rem;
-                      white-space: pre-line;
-                    `}
-                  >
-                    <h3
-                      className={css`
-                        margin-bottom: 1rem;
-                      `}
-                    >
-                      Description
-                    </h3>
-                    {filteredTrack.description}
+                {filteredTrack.lyrics && (
+                  <div className="pt-4 pb-8 pr-4 pl-9 whitespace-pre-line text-sm flex flex-col gap-2">
+                    <h3>{t("lyrics")}</h3>
+                    <span className="italic text-xs">
+                      {filteredTrack.lyrics}
+                    </span>
                   </div>
                 )}
-                {filteredTrack.lyrics && (
-                  <div
-                    className={css`
-                      padding: 1rem;
-                      white-space: pre-line;
-                    `}
-                  >
-                    <h3
-                      className={css`
-                        margin-bottom: 1rem;
-                      `}
-                    >
-                      Lyrics
-                    </h3>
-                    {filteredTrack.lyrics}
+                {filteredTrack.description && (
+                  <div className="border-t border-(--mi-tint-x-color) pt-8 pb-4 pr-4 pl-9 whitespace-pre-line text-sm flex flex-col gap-2">
+                    <h3>{t("aboutThisTrack")}</h3>
+                    <span>{filteredTrack.description}</span>
                   </div>
                 )}
               </div>

@@ -45,16 +45,17 @@ const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
         <span
           className={
             css`
-              color: var(--mi-lighter-foreground-color);
+              color: var(--mi-text-color);
+              opacity: 0.5;
               margin-left: 0.5rem;
               font-size: 0.85rem;
 
-              a {
-                color: var(--mi-lighter-foreground-color);
+              && a {
+                color: var(--mi-text-color);
                 text-decoration: none;
               }
 
-              a:hover {
+              && a:hover {
                 text-decoration: underline;
               }
             ` +

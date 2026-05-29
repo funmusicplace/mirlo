@@ -1,20 +1,17 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import DropdownMenu from "components/common/DropdownMenu";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 
 import { between, bp } from "../../constants";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
-import ArtistByLine from "./ArtistByLine";
+import ArtistByLine, { FromAlbum } from "./ArtistByLine";
 import { coverSizeMax } from "./TrackGroup";
-import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 export const ItemViewTitle: React.FC<{
   title: string;
@@ -62,6 +59,7 @@ export const ItemViewTitle: React.FC<{
               calc(var(--cover-size, ${coverSizeMax}) / 14),
               2rem
             );
+            font-weight: 600;
             line-height: 1.1;
             margin: 0;
           `}
@@ -86,8 +84,6 @@ const TrackGroupTitle: React.FC<{
     queryArtist({ artistSlug: params.artistId ?? "" })
   );
 
-  const { user } = useAuthContext();
-
   if (!artist && !isLoadingArtist) {
     return <LoadingBlocks rows={1} />;
   } else if (!artist) {
@@ -95,49 +91,73 @@ const TrackGroupTitle: React.FC<{
   }
 
   return (
-    <>
-      <ItemViewTitle
-        trackIds={trackGroup.tracks
-          .filter((t) => t.isPlayable)
-          .map((t) => t.id)}
-        title={title}
-        showPlayButton={trackGroup.tracks.length > 0}
-      />
+    <div
+      className={css`
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+
+        @media screen and (max-width: ${bp.small}px) {
+          margin-bottom: 0.75rem;
+        }
+      `}
+    >
+      {trackGroup.tracks.length > 0 && (
+        <ClickToPlayTracks
+          trackIds={trackGroup.tracks
+            .filter((t) => t.isPlayable)
+            .map((t) => t.id)}
+          className={css`
+            width: 64px !important;
+            flex-shrink: 0;
+
+            @media screen and (max-width: ${bp.small}px) {
+              display: none;
+            }
+          `}
+        />
+      )}
       <div
         className={css`
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 0.6rem;
+          min-width: 0;
+          flex: 1;
         `}
       >
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <h1
+            className={css`
+              font-size: clamp(
+                1.25rem,
+                calc(var(--cover-size, ${coverSizeMax}) / 14),
+                2rem
+              );
+              font-weight: 600;
+              line-height: 1.1;
+              margin: 0;
+
+              @media screen and (max-width: ${bp.small}px) {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+              }
+            `}
+          >
+            {title}
+          </h1>
+          {title !== trackGroup.title && (
+            <span className="hidden sm:inline text-base font-normal opacity-70">
+              <FromAlbum artist={artist} trackGroup={trackGroup} />
+            </span>
+          )}
+        </div>
         <ArtistByLine
           artist={artist}
           trackGroup={trackGroup}
           showFromAlbum={title !== trackGroup.title}
         />
-        <div
-          className={css`
-            text-align: right;
-            display: flex;
-            align-items: center;
-          `}
-        >
-          {user?.isAdmin && (
-            <div
-              className={css`
-                padding-left: 0.5rem;
-                padding-right: 0.4rem;
-              `}
-            >
-              <DropdownMenu smallIcon compact>
-                <TrackGroupAdminMenu trackGroupId={trackGroup.id} />
-              </DropdownMenu>
-            </div>
-          )}
-        </div>
       </div>
-    </>
+    </div>
   );
 };
 

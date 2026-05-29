@@ -36,10 +36,10 @@ export const coverSizeMax = "470px";
 export const Container = styled.div`
   --cover-size: clamp(
     ${coverSizeMin},
-    min(45vw, calc(100dvh - 270px)),
+    min(45vw, calc(100dvh - 275px)),
     ${coverSizeMax}
   );
-  --content-width: calc(var(--cover-size) * 2.3 + 0.5rem);
+  --content-width: calc(var(--cover-size) * 2.3 + 1.5rem);
 
   display: flex;
   align-items: flex-start;
@@ -80,7 +80,11 @@ export const UnderneathImage = styled.div`
 `;
 
 export const SmallScreenPlayWrapper = styled.div`
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: center;
   @media screen and (min-width: ${bp.small}px) {
     display: none;
   }
@@ -113,9 +117,10 @@ export const ImageAndDetailsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: var(--cover-size);
+  flex-shrink: 0;
 
   @media screen and (max-width: ${bp.small}px) {
-    width: 100%;
+    display: contents;
   }
 `;
 
@@ -271,20 +276,7 @@ function TrackGroup() {
               title={trackGroup.title ?? ""}
             />
 
-            <div
-              className={css`
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                flex-wrap: nowrap;
-                gap: 0.5rem;
-
-                @media screen and (max-width: ${bp.small}px) {
-                  flex-direction: column;
-                  gap: 0;
-                }
-              `}
-            >
+            <div className="flex flex-nowrap flex-col items-stretch gap-0 sm:flex-row sm:justify-center sm:items-start sm:gap-6">
               <ImageAndDetailsWrapper>
                 <ImageWrapper>
                   <ImageWithPlaceholder
@@ -317,17 +309,22 @@ function TrackGroup() {
                   </div>
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
-                  <TrackGroupMerch merch={trackGroup.merch} />
+                  <div
+                    className={css`
+                      @media screen and (max-width: ${bp.small}px) {
+                        order: 1;
+                      }
+                    `}
+                  >
+                    <TrackGroupMerch merch={trackGroup.merch} />
+                  </div>
                 )}
                 <SmallScreenPlayWrapper>
                   <ClickToPlayTracks
                     trackIds={trackGroup.tracks
                       .filter((t) => t.isPlayable)
                       .map((t) => t.id)}
-                    className={css`
-                      width: 50px !important;
-                      margin-right: 10px;
-                    `}
+                    playLabel="album"
                   />
                 </SmallScreenPlayWrapper>
               </ImageAndDetailsWrapper>
@@ -347,7 +344,6 @@ function TrackGroup() {
                         padding-bottom: 1rem !important;
 
                         @media screen and (min-width: ${bp.medium}px) {
-                          margin-left: 2.5rem;
                           margin-top: 1rem;
                         }
                       `}

@@ -212,7 +212,7 @@ export const TrackEmbed: React.FC<{
       src={trackWidget}
       variants={[
         { key: "card", height: 130, labelKey: "variantCard" },
-        { key: "strip", height: 100, labelKey: "variantStrip" },
+        { key: "strip", height: 120, labelKey: "variantStrip" },
       ]}
     />
   );
