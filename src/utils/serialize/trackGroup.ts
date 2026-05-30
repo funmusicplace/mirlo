@@ -17,11 +17,7 @@ import { processSingleMerch } from "../merch";
 import { finalArtistAvatarBucket, finalCoversBucket } from "../minio";
 import { isTrackPlayableNested } from "../trackPlayability";
 
-import {
-  serializeSingleTrackIntoCanimus,
-  serializeSingleDeletedTrackIntoCanimus,
-  CanimusTrack,
-} from "./track";
+import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
@@ -128,13 +124,9 @@ export const serializeSingleDeletedTrackGroupIntoCanimus = (
   artistUrl: string
 ) => {
   const releaseUrl = join(artistUrl, "release", trackGroup.urlSlug);
-  const deletedEntities: any = trackGroup.tracks?.map((track) =>
-    serializeSingleDeletedTrackIntoCanimus(track, releaseUrl)
-  );
-  const deletedTrackgroup = {
+  return {
     type: "album",
     name: trackGroup.title,
     url: releaseUrl,
   };
-  return [deletedTrackgroup].concat(deletedEntities);
 };
