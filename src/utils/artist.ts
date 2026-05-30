@@ -153,6 +153,32 @@ export const whereForAllArtistsThisLabelCanAddReleasesFor = (
   ],
 });
 
+export const artistDeleted: Prisma.ArtistWhereInput = {
+  deletedAt: { not: null },
+};
+
+export const federatedArtist: Prisma.ArtistWhereInput = {
+  federatedStreaming: true,
+};
+
+export const federatedArtistAtSomePoint: Prisma.ArtistWhereInput = {
+  federatedStreamingOptInDate: { not: null },
+};
+
+// Artists who opted out (had opted in before, but now are not federated)
+export const artistOptedOut: Prisma.ArtistWhereInput = {
+  AND: [federatedArtistAtSomePoint, { NOT: federatedArtist }],
+};
+
+// Artists who opted in at some point but were deleted
+export const artistFederatedButDeleted: Prisma.ArtistWhereInput = {
+  AND: [federatedArtistAtSomePoint, artistDeleted],
+};
+
+export const artistOptedOutOrDeleted: Prisma.ArtistWhereInput = {
+  OR: [artistOptedOut, artistFederatedButDeleted],
+};
+
 export const findArtistIdForURLSlug = async (id: string | number) => {
   if (typeof id !== "number" && Number.isNaN(Number(id))) {
     const artist = await prisma.artist.findFirst({

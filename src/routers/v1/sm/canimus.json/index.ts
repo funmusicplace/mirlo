@@ -5,6 +5,11 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import {
+  federatedArtistAtSomePoint,
+  federatedArtist,
+  artistOptedOutOrDeleted,
+} from "../../../../utils/artist";
+import {
   serializeSingleArtistIntoCanimus,
   serializeSingleDeletedArtistIntoCanimus,
 } from "../../../../utils/serialize/artist";
@@ -34,38 +39,16 @@ export default function () {
         | Prisma.TrackWhereInput = {
         deletedAt: { not: null },
       };
-      let federated: Prisma.ArtistWhereInput = {
-        federatedStreaming: true,
-      };
-
-      let federatedAtSomePoint: Prisma.ArtistWhereInput = {
-        federatedStreamingOptInDate: { not: null },
-      };
-
-      // Artists who opted out (had opted in before, but now are not federated)
-      let artistOptedOut: Prisma.ArtistWhereInput = {
-        AND: [federatedAtSomePoint, { NOT: federated }],
-      };
-
-      // Artists who opted in at some point but were deleted
-      let artistFederatedButDeletedFromMirlo: Prisma.ArtistWhereInput = {
-        AND: [federatedAtSomePoint, deleted as Prisma.ArtistWhereInput],
-      };
-
-      let artistOptedOutOrDeleted: Prisma.ArtistWhereInput = {
-        OR: [artistOptedOut, artistFederatedButDeletedFromMirlo],
-      };
-
       let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
         AND: [
-          { artist: federatedAtSomePoint },
+          { artist: federatedArtistAtSomePoint },
           deleted as Prisma.TrackGroupWhereInput,
         ],
       };
 
       let trackDeleted: Prisma.TrackWhereInput = {
         AND: [
-          { trackGroup: { artist: federatedAtSomePoint } },
+          { trackGroup: { artist: federatedArtistAtSomePoint } },
           deleted as Prisma.TrackWhereInput,
         ],
       };
@@ -110,7 +93,7 @@ export default function () {
           },
         };
 
-        federated.OR = [
+        federatedArtist.OR = [
           optInDateFilter,
           updatedOrCreatedFilter as Prisma.ArtistWhereInput,
           anyTrackGroupUpdatedOrCreated,
@@ -133,7 +116,7 @@ export default function () {
       };
 
       const artists = await prisma.artist.findMany({
-        where: federated,
+        where: federatedArtist,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.ArtistOrderByWithRelationInput,
