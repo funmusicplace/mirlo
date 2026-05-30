@@ -28,7 +28,10 @@ export default function () {
       } else {
         fromDateFilter = undefined;
       }
-      let deleted: Prisma.ArtistWhereInput = {
+      let deleted:
+        | Prisma.ArtistWhereInput
+        | Prisma.TrackGroupWhereInput
+        | Prisma.TrackWhereInput = {
         deletedAt: { not: null },
       };
       let federated: Prisma.ArtistWhereInput = {
@@ -46,7 +49,7 @@ export default function () {
 
       // Artists who opted in at some point but were deleted
       let artistFederatedButDeletedFromMirlo: Prisma.ArtistWhereInput = {
-        AND: [federatedAtSomePoint, deleted],
+        AND: [federatedAtSomePoint, deleted as Prisma.ArtistWhereInput],
       };
 
       let artistOptedOutOrDeleted: Prisma.ArtistWhereInput = {
@@ -54,14 +57,17 @@ export default function () {
       };
 
       let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
-        artist: federatedAtSomePoint,
-        deletedAt: { not: null },
+        AND: [
+          { artist: federatedAtSomePoint },
+          deleted as Prisma.TrackGroupWhereInput,
+        ],
       };
+
       let trackDeleted: Prisma.TrackWhereInput = {
-        trackGroup: {
-          artist: federatedAtSomePoint,
-        },
-        deletedAt: { not: null },
+        AND: [
+          { trackGroup: { artist: federatedAtSomePoint } },
+          deleted as Prisma.TrackWhereInput,
+        ],
       };
 
       if (fromDateFilter) {
@@ -84,23 +90,30 @@ export default function () {
           ],
         };
 
+        // Artist updated or created or with any
+        // TrackGroup updated or created or with any
+        // Track updated or created
+        let anyTrackUpdatedOrCreated: Prisma.TrackGroupWhereInput = {
+          tracks: {
+            some: updatedOrCreatedFilter as Prisma.TrackWhereInput,
+          },
+        };
+
+        let anyTrackGroupUpdatedOrCreated: Prisma.ArtistWhereInput = {
+          trackGroups: {
+            some: {
+              OR: [
+                updatedOrCreatedFilter as Prisma.TrackGroupWhereInput,
+                anyTrackUpdatedOrCreated,
+              ],
+            },
+          },
+        };
+
         federated.OR = [
           optInDateFilter,
           updatedOrCreatedFilter as Prisma.ArtistWhereInput,
-          {
-            trackGroups: {
-              some: {
-                OR: [
-                  updatedOrCreatedFilter as Prisma.TrackGroupWhereInput,
-                  {
-                    tracks: {
-                      some: updatedOrCreatedFilter as Prisma.TrackWhereInput,
-                    },
-                  },
-                ],
-              },
-            },
-          },
+          anyTrackGroupUpdatedOrCreated,
         ];
 
         artistOptedOutOrDeleted.AND = [

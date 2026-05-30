@@ -100,7 +100,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
     type: "album",
     name: trackGroup.title,
     url: releaseUrl,
-    release_date: trackGroup.releaseDate,
+    release_date: trackGroup.releaseDate?.toISOString().split("T")[0],
     license: trackGroup.credits,
     artist: artistName,
     images: {
