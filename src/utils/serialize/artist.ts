@@ -152,6 +152,7 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
       href: link.url,
       type: link.linkType,
     })),
+    updated_date: artist.updatedAt?.toISOString().split("T")[0],
     children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
       serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl, artist.name)
     ),
