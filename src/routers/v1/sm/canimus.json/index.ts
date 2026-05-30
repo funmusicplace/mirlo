@@ -8,6 +8,7 @@ import {
   serializeSingleArtistIntoCanimus,
   serializeSingleDeletedArtistIntoCanimus,
 } from "../../../../utils/serialize/artist";
+import { serializeSingleDeletedTrackIntoCanimus } from "../../../../utils/serialize/track";
 import { serializeSingleDeletedTrackGroupIntoCanimus } from "../../../../utils/serialize/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
@@ -52,6 +53,17 @@ export default function () {
         OR: [artistOptedOut, artistFederatedButDeletedFromMirlo],
       };
 
+      let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
+        artist: federatedAtSomePoint,
+        deletedAt: { not: null },
+      };
+      let trackDeleted: Prisma.TrackWhereInput = {
+        trackGroup: {
+          artist: federatedAtSomePoint,
+        },
+        deletedAt: { not: null },
+      };
+
       if (fromDateFilter) {
         const optInDateFilter: Prisma.ArtistWhereInput = {
           federatedStreamingOptInDate: fromDateFilter,
@@ -72,7 +84,7 @@ export default function () {
           ],
         };
 
-        federated.AND = [
+        federated.OR = [
           optInDateFilter,
           updatedOrCreatedFilter as Prisma.ArtistWhereInput,
           {
@@ -96,6 +108,9 @@ export default function () {
             federatedStreamingOptOutDate: fromDateFilter,
           },
         ];
+
+        trackGroupDeleted.deletedAt = fromDateFilter;
+        trackDeleted.deletedAt = fromDateFilter;
       }
 
       const orderByClause:
@@ -145,10 +160,7 @@ export default function () {
       });
 
       const deletedTrackGroups = await prisma.trackGroup.findMany({
-        where: {
-          artist: federatedAtSomePoint,
-          deletedAt: { not: null },
-        },
+        where: trackGroupDeleted,
         include: {
           artist: {
             select: {
@@ -159,6 +171,24 @@ export default function () {
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.TrackGroupOrderByWithRelationInput,
+      });
+
+      const deletedTracks = await prisma.track.findMany({
+        where: trackDeleted,
+        include: {
+          trackGroup: {
+            include: {
+              artist: {
+                select: {
+                  urlSlug: true,
+                },
+              },
+            },
+          },
+        },
+        skip: skipQuery ? Number(skipQuery) : undefined,
+        take: take ? Number(take) : undefined,
+        orderBy: orderByClause as Prisma.TrackOrderByWithRelationInput,
       });
 
       let deletedEntities: any = [];
@@ -173,6 +203,19 @@ export default function () {
             serializeSingleDeletedTrackGroupIntoCanimus(
               trackGroup,
               join(String(process.env.API_DOMAIN), trackGroup.artist.urlSlug)
+            )
+          )
+        )
+        .concat(
+          deletedTracks.map((track) =>
+            serializeSingleDeletedTrackIntoCanimus(
+              track,
+              join(
+                String(process.env.API_DOMAIN),
+                track.trackGroup.artist.urlSlug,
+                "release",
+                track.trackGroup.urlSlug
+              )
             )
           )
         );
