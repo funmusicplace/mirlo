@@ -58,7 +58,7 @@ export const ArtistPageWrapper: React.FC<{
           background-color: ${transparent
             ? "transparent"
             : "var(--mi-background-color)"};
-          padding: 0 2rem 2rem;
+          padding: ${hasBackground ? "1rem 2rem 2rem" : "0 2rem 2rem"};
           height: 100%;
 
           @media screen and (max-width: ${bp.medium}px) {

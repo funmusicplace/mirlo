@@ -1,15 +1,18 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import ArtistHeaderActionsStrip from "components/Artist/ArtistHeaderActionsStrip";
 import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { MetaCard } from "components/common/MetaCard";
+import ArtistFormLabel from "components/ManageArtist/ArtistFormLabel";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { getArtistUrl } from "utils/artist";
 import { useFitTitle } from "utils/useFitTitle";
 
 import { between, bp } from "../../constants";
@@ -19,6 +22,7 @@ import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: calc(2.4rem * var(--page-scale, 1) * var(--fit-scale, 1));
+  font-weight: 600;
   line-height: 1.05;
   padding-bottom: 0.1em;
 
@@ -132,10 +136,21 @@ const ArtistHeaderSection: React.FC<{
   const artistAvatar = artist?.avatar;
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
+  const { t: tArtist } = useTranslation("translation", { keyPrefix: "artist" });
+
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
   const snackbar = useSnackbar();
   const titleRef = useFitTitle<HTMLHeadingElement>({ deps: [artist?.name] });
+
+  const displayedLabelArtist = React.useMemo(() => {
+    if (!artist || artist.isLabelProfile) return null;
+    const match = (artist.artistLabels ?? []).find(
+      (al) =>
+        al.isDisplayedOnArtistPage && al.isArtistApproved && al.isLabelApproved
+    );
+    return match?.labelUser.artists?.[0] ?? null;
+  }, [artist]);
 
   const handleSubmit = React.useCallback(
     async (data: UpdateArtistBody) => {
@@ -206,7 +221,7 @@ const ArtistHeaderSection: React.FC<{
                     <ArtistTitle artistAvatar={!!artistAvatar} ref={titleRef}>
                       {artist.name}
                     </ArtistTitle>
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-baseline gap-2 min-w-0">
                       {artist.isLabelProfile &&
                         artist.properties?.titles?.groupName && (
                           <>
@@ -221,7 +236,7 @@ const ArtistHeaderSection: React.FC<{
                         artist={artist}
                         onSubmit={handleSubmit}
                       />
-                    </div>{" "}
+                    </div>
                     {artist.shortDescription && (
                       <div
                         className={css`
@@ -256,7 +271,37 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div className="w-full flex flex-row items-center justify-end pb-2 max-md:py-1 max-md:border-t max-md:border-(--mi-button-color)/50">
+        <div
+          className={`w-full flex flex-row items-baseline justify-end pb-2 md:justify-between max-md:py-1 max-md:border-t max-md:border-(--mi-button-color)/50 ${displayedLabelArtist ? "md:mt-2" : "md:mt-1"}`}
+        >
+          <div className="flex flex-row items-baseline gap-2">
+            {displayedLabelArtist && (
+              <ArtistButtonLink
+                variant="chip"
+                to={getArtistUrl(displayedLabelArtist)}
+                className={css`
+                  &[class] {
+                    background-color: color-mix(
+                      in srgb,
+                      var(--mi-button-color) 8%,
+                      transparent
+                    ) !important;
+                    filter: brightness(var(--mi-chip-brightness, 1));
+                  }
+                  @media screen and (max-width: ${bp.medium}px) {
+                    &[class] {
+                      display: none !important;
+                    }
+                  }
+                `}
+              >
+                {tArtist("onLabel", {
+                  name: displayedLabelArtist.name,
+                })}
+              </ArtistButtonLink>
+            )}
+            {isManage && <ArtistFormLabel artist={artist} />}
+          </div>
           <ArtistHeaderActionsStrip
             artist={artist}
             isManage={!!isManage}

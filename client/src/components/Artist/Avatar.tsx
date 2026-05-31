@@ -10,7 +10,7 @@ const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
   return (
     <div
       className={css`
-        max-width: calc(110px * var(--page-scale, 1));
+        max-width: calc(120px * var(--page-scale, 1));
         display: flex;
         flex-shrink: 0;
 
