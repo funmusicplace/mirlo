@@ -153,6 +153,7 @@ export default function () {
             canLabelManageArtist: true,
             canLabelAddReleases: true,
             isArtistApproved: true,
+            isDisplayedOnArtistPage: true,
           },
         });
       }

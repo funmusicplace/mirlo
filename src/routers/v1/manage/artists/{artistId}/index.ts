@@ -12,6 +12,7 @@ import {
   findArtistIdForURLSlug,
   singleInclude,
 } from "../../../../../utils/artist";
+import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { processSingleArtist } from "../../../../../utils/serialize/artist";
 
@@ -45,6 +46,7 @@ export default function () {
       maxFreePlays,
       announcementText,
       allowDirectMessages,
+      displayLabelUserId,
     } = req.body;
     assertLoggedIn(req);
     const user = req.user;
@@ -71,49 +73,90 @@ export default function () {
         }
       }
 
-      const updatedCount = await prisma.artist.updateMany({
-        where: {
-          id: Number(artistId),
-        },
-        data: {
-          bio,
-          name,
-          links,
-          linksJson,
-          location,
-          activityPub,
-          federatedStreaming,
-          federatedStreamingOptInDate,
-          federatedStreamingOptOutDate,
-          purchaseEntireCatalogMinPrice,
-          defaultPlatformFee,
-          shortDescription,
-          maxFreePlays,
-          announcementText,
-          allowDirectMessages,
-          ...(urlSlug
-            ? {
-                urlSlug: generateSlug(urlSlug),
-              }
-            : {}),
-          properties: merge(oldProperties, properties),
-        },
-      });
-      if (tourDates) {
-        await prisma.artistTourDate.deleteMany({
+      const updatedCount = await prisma.$transaction(async (tx) => {
+        if (displayLabelUserId !== undefined) {
+          await tx.artistLabel.updateMany({
+            where: {
+              artistId: Number(artistId),
+              isDisplayedOnArtistPage: true,
+            },
+            data: { isDisplayedOnArtistPage: false },
+          });
+          if (displayLabelUserId !== null) {
+            const approvedLabel = await tx.artistLabel.findFirst({
+              where: {
+                artistId: Number(artistId),
+                labelUserId: Number(displayLabelUserId),
+                isArtistApproved: true,
+                isLabelApproved: true,
+              },
+            });
+            if (!approvedLabel) {
+              throw new AppError({
+                httpCode: 400,
+                description:
+                  "This label is not approved on both sides yet, so it can't be displayed on the artist page.",
+              });
+            }
+            await tx.artistLabel.update({
+              where: {
+                labelUserId_artistId: {
+                  artistId: Number(artistId),
+                  labelUserId: Number(displayLabelUserId),
+                },
+              },
+              data: { isDisplayedOnArtistPage: true },
+            });
+          }
+        }
+
+        const result = await tx.artist.updateMany({
           where: {
-            artistId: Number(artistId),
+            id: Number(artistId),
+          },
+          data: {
+            bio,
+            name,
+            links,
+            linksJson,
+            location,
+            activityPub,
+            federatedStreaming,
+            federatedStreamingOptInDate,
+            federatedStreamingOptOutDate,
+            purchaseEntireCatalogMinPrice,
+            defaultPlatformFee,
+            shortDescription,
+            maxFreePlays,
+            announcementText,
+            allowDirectMessages,
+            ...(urlSlug
+              ? {
+                  urlSlug: generateSlug(urlSlug),
+                }
+              : {}),
+            properties: merge(oldProperties, properties),
           },
         });
-        await prisma.artistTourDate.createMany({
-          data: tourDates.map((tourDate: any) => ({
-            artistId: Number(artistId),
-            location: tourDate.location,
-            date: new Date(tourDate.date),
-            ticketsUrl: tourDate.ticketsUrl,
-          })),
-        });
-      }
+
+        if (tourDates) {
+          await tx.artistTourDate.deleteMany({
+            where: {
+              artistId: Number(artistId),
+            },
+          });
+          await tx.artistTourDate.createMany({
+            data: tourDates.map((tourDate: any) => ({
+              artistId: Number(artistId),
+              location: tourDate.location,
+              date: new Date(tourDate.date),
+              ticketsUrl: tourDate.ticketsUrl,
+            })),
+          });
+        }
+
+        return result.count;
+      });
 
       if (updatedCount) {
         const artist = await prisma.artist.findFirst({
