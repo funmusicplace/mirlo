@@ -48,7 +48,7 @@ export const ArtistButton: React.FC<
         return `
         background-color: var(--mi-button-tint-color) !important;
         color: var(--mi-button-color) !important;
-        border: none !important;
+        border: 1px solid color-mix(in srgb, var(--mi-button-color) 25%, transparent) !important;
         border-radius: 999px !important;
         height: 1.5rem !important;
         padding: 0 0.75rem !important;
