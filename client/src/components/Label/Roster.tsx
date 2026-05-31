@@ -1,12 +1,10 @@
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
-
-import TrackgroupGrid from "components/common/TrackgroupGrid";
 import ArtistSquare from "components/Artist/ArtistSquare";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { queryArtist } from "queries";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 
 function Roster() {
   const { t } = useTranslation("translation", { keyPrefix: "label" });

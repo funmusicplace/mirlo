@@ -133,6 +133,28 @@ export default function () {
           user: {
             select: {
               currency: true,
+              artistLabels: {
+                where: {
+                  isLabelApproved: true,
+                  isArtistApproved: true,
+                  artist: { deletedAt: null },
+                },
+                orderBy: [{ orderIndex: { sort: "asc", nulls: "last" } }],
+                include: {
+                  artist: {
+                    include: {
+                      trackGroups: {
+                        where: whereForPublishedTrackGroups(),
+                        include: {
+                          cover: true,
+                        },
+                        take: 4,
+                        orderBy: { orderIndex: "asc" },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
           artistLabels: {

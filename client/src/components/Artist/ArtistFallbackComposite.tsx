@@ -1,6 +1,6 @@
-import React from "react";
 import styled from "@emotion/styled";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import React from "react";
 
 const getGridStyles = (coverCount: number) => {
   switch (coverCount) {
@@ -53,7 +53,7 @@ export const ArtistFallbackComposite: React.FC<{
 }> = ({ artist }) => {
   // Get covers: for regular artists use their trackGroups, for labels use roster artists' trackGroups
   const tracksForCovers = artist.isLabelProfile
-    ? (artist.artistLabels
+    ? (artist.user?.artistLabels
         ?.flatMap((label) => label.artist.trackGroups)
         .slice(0, 4) ?? [])
     : (artist.trackGroups?.slice(0, 4) ?? []);

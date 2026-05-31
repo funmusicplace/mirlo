@@ -1,23 +1,24 @@
-import React from "react";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
-import api from "services/api";
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { queryLocationTags } from "queries/locationTags";
+import React from "react";
 import { useTranslation } from "react-i18next";
+import { BsGrid, BsList } from "react-icons/bs";
+import { FaRss } from "react-icons/fa";
+import { Link, useSearchParams } from "react-router-dom";
+import api from "services/api";
+import { getArtistUrl } from "utils/artist";
+import usePagination from "utils/usePagination";
+
 import { bp } from "../constants";
+
+import ArtistSquare from "./Artist/ArtistSquare";
+import LoadingBlocks from "./Artist/LoadingBlocks";
+import Button, { ButtonAnchor } from "./common/Button";
+import { SelectEl } from "./common/Select";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
-
-import usePagination from "utils/usePagination";
-import ArtistSquare from "./Artist/ArtistSquare";
-import Button, { ButtonAnchor } from "./common/Button";
-import { FaRss } from "react-icons/fa";
-import { SelectEl } from "./common/Select";
-import { BsGrid, BsList } from "react-icons/bs";
-import { getArtistUrl } from "utils/artist";
-import { Link, useSearchParams } from "react-router-dom";
-import LoadingBlocks from "./Artist/LoadingBlocks";
-import { useQuery } from "@tanstack/react-query";
-import { queryLocationTags } from "queries/locationTags";
 
 const Artists = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artists" });
