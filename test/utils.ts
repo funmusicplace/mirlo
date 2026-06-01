@@ -103,6 +103,9 @@ export const createArtist = async (
       isLabelProfile: data?.isLabelProfile ?? false,
       paymentToUserId: data?.paymentToUserId,
       allowDirectMessages: data?.allowDirectMessages ?? false,
+      federatedStreaming: data?.federatedStreaming ?? false,
+      federatedStreamingOptInDate: data?.federatedStreamingOptInDate ?? null,
+      federatedStreamingOptOutDate: data?.federatedStreamingOptOutDate ?? null,
     },
     include: {
       subscriptionTiers: true,
