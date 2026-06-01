@@ -12,8 +12,8 @@ import { useAuthContext } from "state/AuthContext";
 import { getPaidTierCount, isTipOnlyArtist } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
-import { ArtistOutletContext } from "./Artist";
 import ArtistManageSubscription from "./ArtistManageSubscription";
+import { ArtistOutletContext } from "./artistOutletContext";
 import ArtistSupportBox from "./ArtistSupportBox";
 import ScrollButton from "./ScrollButton";
 

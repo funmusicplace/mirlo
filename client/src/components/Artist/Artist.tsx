@@ -320,8 +320,4 @@ function Artist() {
   );
 }
 
-export type ArtistOutletContext = {
-  openTipModal: () => void;
-};
-
 export default Artist;
