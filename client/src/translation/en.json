@@ -874,6 +874,8 @@
     "isArtistConfirmed": "Has artist confirmed relationship?",
     "isLabelConfirmed": "Has label confirmed relationship?",
     "confirmRelationship": "Confirm relationship",
+    "yes": "Yes",
+    "no": "No",
     "willBePublishedAtLabel": "Will be published at:",
     "draftLabel": "Draft",
     "filterByTier": "Filter by tier",
