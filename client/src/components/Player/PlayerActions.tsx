@@ -3,7 +3,7 @@ import DropdownMenu, { useDropdownMenu } from "components/common/DropdownMenu";
 import { DropdownMenuItemButton } from "components/common/DropdownMenuItem";
 import { FixedButton } from "components/common/FixedButton";
 import Modal from "components/common/Modal";
-import TipArtist from "components/common/TipArtist";
+import SupportArtist from "components/common/SupportArtist";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import Wishlist from "components/TrackGroup/Wishlist";
@@ -63,7 +63,7 @@ const PlayerActions: React.FC = () => {
         <Wishlist trackGroup={{ id: trackGroup.id }} fixed />
       )}
       {trackGroup.artistId && (
-        <TipArtist artistId={trackGroup.artistId} fixed />
+        <SupportArtist artistId={trackGroup.artistId} fixed />
       )}
       {isMultiTrack ? (
         <BuyTargetMenu track={currentTrack} trackGroup={trackGroup} />

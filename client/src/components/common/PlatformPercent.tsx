@@ -33,10 +33,11 @@ const PlatformPercent: React.FC<{
     <div className="relative inline-block">
       <button
         id={`${tooltipId}-button`}
-        className="w-6 h-6 border-1 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer p-0 transition-opacity hover:opacity-80"
+        className="w-5 h-5 border-1 rounded-full flex items-center justify-center text-xs font-semibold cursor-pointer p-0 transition-opacity hover:opacity-80"
         style={{
           borderColor: "var(--mi-button-color)",
           color: "var(--mi-button-color)",
+          backgroundColor: "var(--mi-button-tint-color)",
         }}
         onClick={() => setShowTooltip(!showTooltip)}
         type="button"

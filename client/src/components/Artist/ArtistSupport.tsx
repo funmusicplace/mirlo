@@ -1,22 +1,26 @@
 import { css } from "@emotion/css";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Box from "components/common/Box";
+import TipArtist from "components/common/TipArtist";
 import { queryUserStripeStatus } from "queries";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
+import { getPaidTierCount, isTipOnlyArtist } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
 import ArtistManageSubscription from "./ArtistManageSubscription";
+import { ArtistOutletContext } from "./artistOutletContext";
 import ArtistSupportBox from "./ArtistSupportBox";
 import ScrollButton from "./ScrollButton";
 
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
   const { data: artist } = useArtistQuery();
+  const { openTipModal } = useOutletContext<ArtistOutletContext>();
   const pageBackground = "var(--mi-background-color)";
   const { data: userStripeStatus, isPending } = useQuery(
     queryUserStripeStatus(artist?.userId || 0)
@@ -76,6 +80,15 @@ const ArtistSupport: React.FC = () => {
     return () => (interval ? clearTimeout(interval) : undefined);
   }, [queryClient, search]);
 
+  const isTipOnly = artist ? isTipOnlyArtist(artist) : false;
+  const canTip = !!userStripeStatus?.chargesEnabled;
+
+  React.useEffect(() => {
+    if (isTipOnly && canTip) {
+      openTipModal();
+    }
+  }, [isTipOnly, canTip, openTipModal]);
+
   if (!artist) {
     return null;
   }
@@ -110,15 +123,13 @@ const ArtistSupport: React.FC = () => {
     );
   }
 
-  const onlyOneTier =
-    artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length === 1;
-
-  const moreThanThreeTiers =
-    artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length > 3;
+  const paidTierCount = getPaidTierCount(artist);
+  const onlyOneTier = paidTierCount === 1;
+  const moreThanThreeTiers = paidTierCount > 3;
 
   return (
     <>
-      {artist.subscriptionTiers.length === 0 && (
+      {paidTierCount === 0 && !artist.properties?.showTipOnSupportPage && (
         <Box
           className={css`
             text-align: center;
@@ -126,6 +137,14 @@ const ArtistSupport: React.FC = () => {
         >
           {t("noSubscriptionTiersYet", { artistName: artist.name })}
         </Box>
+      )}
+      {paidTierCount > 0 && artist.properties?.showTipOnSupportPage && (
+        <div className="flex justify-end mb-3">
+          <TipArtist
+            artistId={artist.id}
+            label={t("tipArtistByName", { artistName: artist.name }) ?? ""}
+          />
+        </div>
       )}
       <div className="relative">
         {moreThanThreeTiers && (

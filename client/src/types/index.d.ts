@@ -314,6 +314,7 @@ interface Artist {
       support?: string | null;
       purchase?: string | null;
     };
+    showTipOnSupportPage?: boolean;
   };
   announcementText?: string;
   user?: Partial<User> & { artistLabels?: ArtistLabel[] };

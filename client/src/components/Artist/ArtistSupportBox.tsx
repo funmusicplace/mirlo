@@ -160,6 +160,11 @@ const ArtistSupportBox: React.FC<{
               }
               size="compact"
               variant="dashed"
+              className={css`
+                && {
+                  background-color: var(--mi-button-tint-x-color) !important;
+                }
+              `}
             >
               {t("editTier")}
             </ArtistButtonLink>
@@ -185,7 +190,7 @@ const ArtistSupportBox: React.FC<{
             className="cover w-full"
           />
         )}
-        <div className="px-2 py-1 pt-4 pb-4 border-b-1 text-center border-b-(--tier-inner-border-color)">
+        <div className="px-5 py-5 border-b-1 text-center border-b-(--tier-inner-border-color)">
           <h3 className="md:text-xl! text-base! font-bold!">
             {subscriptionTier.name}
           </h3>
