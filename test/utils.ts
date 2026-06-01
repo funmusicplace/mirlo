@@ -111,6 +111,28 @@ export const createArtist = async (
   return artist;
 };
 
+export const createArtistLabel = async (data: {
+  artistId: number;
+  labelUserId: number;
+  isLabelApproved?: boolean;
+  isArtistApproved?: boolean;
+  canLabelManageArtist?: boolean;
+  canLabelAddReleases?: boolean;
+  isDisplayedOnArtistPage?: boolean;
+}) => {
+  return prisma.artistLabel.create({
+    data: {
+      artistId: data.artistId,
+      labelUserId: data.labelUserId,
+      isLabelApproved: data.isLabelApproved ?? true,
+      isArtistApproved: data.isArtistApproved ?? true,
+      canLabelManageArtist: data.canLabelManageArtist ?? false,
+      canLabelAddReleases: data.canLabelAddReleases ?? true,
+      isDisplayedOnArtistPage: data.isDisplayedOnArtistPage ?? false,
+    },
+  });
+};
+
 export const createPost = async (
   artistId: number,
   data?: Partial<Prisma.PostCreateArgs["data"]>
@@ -464,6 +486,7 @@ export const seedTrackAudio = async (trackId: number, extension = "wav") => {
 
 export default {
   createArtist,
+  createArtistLabel,
   createPost,
   createTier,
   createTrackGroup,

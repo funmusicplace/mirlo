@@ -251,6 +251,7 @@ interface ArtistLabel {
   canLabelManageArtist: boolean;
   canLabelAddReleases: boolean;
   isArtistApproved: boolean;
+  isDisplayedOnArtistPage: boolean;
 }
 
 interface LocationTag {

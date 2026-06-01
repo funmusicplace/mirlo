@@ -235,7 +235,9 @@ export type UpdateArtistBody = Partial<
     | "properties"
     | "tourDates"
   >
->;
+> & {
+  displayLabelUserId?: number | null;
+};
 
 async function updateArtist({
   artistId,

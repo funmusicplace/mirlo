@@ -107,6 +107,7 @@ const tintStyleFor = (surface: string | undefined): React.CSSProperties => {
       ? "rgba(0, 0, 0, 0.3)"
       : "rgba(255, 255, 255, 0.35)",
     "--mi-contrast-color": light ? "#000000" : "#ffffff",
+    "--mi-chip-brightness": light ? ".9" : "1.3",
   } as React.CSSProperties;
 };
 
@@ -117,8 +118,8 @@ const buttonTintStyleFor = (
   const light = isLight(button);
   return {
     "--mi-button-tint-color": light
-      ? "rgba(0, 0, 0, 0.1)"
-      : "rgba(255, 255, 255, 0.12)",
+      ? "rgba(0, 0, 0, 0.05)"
+      : "rgba(255, 255, 255, 0.06)",
     "--mi-button-tint-x-color": light
       ? "rgba(0, 0, 0, 0.2)"
       : "rgba(255, 255, 255, 0.24)",

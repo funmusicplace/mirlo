@@ -120,26 +120,51 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
         <div
           className={css`
             display: ${artist.location || currentTags.length > 0
-              ? "block"
+              ? "flex"
               : "none"};
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            flex-direction: row;
+            align-items: baseline;
             min-width: 0;
             flex: 1 1 auto;
+            opacity: 0.5;
             line-height: 1.5;
+            white-space: nowrap;
           `}
         >
-          {artist?.location}
+          {artist?.location && (
+            <span
+              className={css`
+                flex: 0 0 auto;
+              `}
+            >
+              {artist.location}
+            </span>
+          )}
           {(artist?.artistLocationTags ?? []).map((tag, i) => (
             <React.Fragment key={tag.locationTag.id}>
-              {(artist?.location || i > 0) && ", "}
+              {(artist?.location || i > 0) && (
+                <span
+                  className={css`
+                    flex: 0 0 auto;
+                  `}
+                >
+                  ,&nbsp;
+                </span>
+              )}
               <ArtistButtonLink
                 variant="link"
+                color="foreground"
                 to={`/search/locations/${tag.locationTag.slug}`}
                 className={css`
-                  display: inline !important;
+                  &[class] {
+                    display: block !important;
+                    min-width: 0 !important;
+                  }
                   line-height: inherit !important;
+                  flex: 0 1 auto;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
                 `}
               >
                 {[

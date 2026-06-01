@@ -1,24 +1,24 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import ArtistHeaderActionsStrip from "components/Artist/ArtistHeaderActionsStrip";
 import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { MetaCard } from "components/common/MetaCard";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
-import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { useFitTitle } from "utils/useFitTitle";
 
 import { between, bp } from "../../constants";
 
+import ArtistHeaderActionsRow from "./ArtistHeaderActionsRow";
 import FollowArtist from "./FollowArtist";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: calc(2.4rem * var(--page-scale, 1) * var(--fit-scale, 1));
+  font-weight: 600;
   line-height: 1.05;
   padding-bottom: 0.1em;
 
@@ -130,7 +130,6 @@ const ArtistHeaderSection: React.FC<{
   isManage: boolean;
 }> = ({ artist, isLoading, isManage }) => {
   const artistAvatar = artist?.avatar;
-  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
@@ -206,7 +205,7 @@ const ArtistHeaderSection: React.FC<{
                     <ArtistTitle artistAvatar={!!artistAvatar} ref={titleRef}>
                       {artist.name}
                     </ArtistTitle>
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-baseline gap-2 min-w-0">
                       {artist.isLabelProfile &&
                         artist.properties?.titles?.groupName && (
                           <>
@@ -221,7 +220,7 @@ const ArtistHeaderSection: React.FC<{
                         artist={artist}
                         onSubmit={handleSubmit}
                       />
-                    </div>{" "}
+                    </div>
                     {artist.shortDescription && (
                       <div
                         className={css`
@@ -256,13 +255,11 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <div className="w-full flex flex-row items-center justify-end pb-2 max-md:py-1 max-md:border-t max-md:border-(--mi-button-color)/50">
-          <ArtistHeaderActionsStrip
-            artist={artist}
-            isManage={!!isManage}
-            onSubmit={handleSubmit}
-          />
-        </div>
+        <ArtistHeaderActionsRow
+          artist={artist}
+          isManage={!!isManage}
+          onSubmit={handleSubmit}
+        />
       </HeaderWrapper>
     </div>
   );

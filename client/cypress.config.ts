@@ -38,6 +38,17 @@ export default defineConfig({
         createArtist: async (data: { userId: number; name: string }) => {
           return pkg.createArtist(data.userId, data);
         },
+        createArtistLabel: async (data: {
+          artistId: number;
+          labelUserId: number;
+          isLabelApproved?: boolean;
+          isArtistApproved?: boolean;
+          canLabelManageArtist?: boolean;
+          canLabelAddReleases?: boolean;
+          isDisplayedOnArtistPage?: boolean;
+        }) => {
+          return pkg.createArtistLabel(data);
+        },
         clearTables: async () => {
           await clearTables();
           return true;

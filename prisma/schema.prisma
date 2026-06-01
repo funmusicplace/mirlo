@@ -356,15 +356,16 @@ model ArtistBackground {
 }
 
 model ArtistLabel {
-  artist               Artist  @relation(fields: [artistId], references: [id])
-  artistId             Int
-  labelUser            User    @relation(fields: [labelUserId], references: [id])
-  labelUserId          Int
-  isLabelApproved      Boolean @default(false)
-  isArtistApproved     Boolean @default(false)
-  canLabelManageArtist Boolean @default(false)
-  canLabelAddReleases  Boolean @default(true)
-  orderIndex           Int?
+  artist                  Artist  @relation(fields: [artistId], references: [id])
+  artistId                Int
+  labelUser               User    @relation(fields: [labelUserId], references: [id])
+  labelUserId             Int
+  isLabelApproved         Boolean @default(false)
+  isArtistApproved        Boolean @default(false)
+  canLabelManageArtist    Boolean @default(false)
+  canLabelAddReleases     Boolean @default(true)
+  isDisplayedOnArtistPage Boolean @default(false)
+  orderIndex              Int?
 
   @@unique([labelUserId, artistId])
 }
