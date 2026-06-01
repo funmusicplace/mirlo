@@ -1,9 +1,11 @@
 import { css } from "@emotion/css";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import React from "react";
 import { Link } from "react-router-dom";
-import { bp } from "../../constants";
 import { getArtistUrl } from "utils/artist";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+
+import { bp } from "../../constants";
+
 import ArtistFallbackComposite from "./ArtistFallbackComposite";
 import {
   TrackGroupWrapper,
@@ -13,7 +15,8 @@ import {
 
 const ArtistSquare: React.FC<{
   artist: Artist;
-}> = ({ artist }) => {
+  circle?: boolean;
+}> = ({ artist, circle }) => {
   const standardImageSrc =
     artist.avatar?.sizes?.[300] ?? artist.background?.sizes?.[625];
 
@@ -27,15 +30,20 @@ const ArtistSquare: React.FC<{
               alt={artist.name}
               size={300}
               square
-              objectFit="contain"
+              objectFit={circle ? "cover" : "contain"}
+              className={circle ? "rounded-full overflow-hidden" : undefined}
             />
           ) : (
-            <ArtistFallbackComposite artist={artist} />
+            <div
+              className={circle ? "rounded-full overflow-hidden" : undefined}
+            >
+              <ArtistFallbackComposite artist={artist} />
+            </div>
           )}
         </Link>
 
         <TrackGroupLinks>
-          <TrackGroupInfo>
+          <TrackGroupInfo className={circle ? "text-center" : ""}>
             {artist && <Link to={getArtistUrl(artist)}>{artist.name}</Link>}
           </TrackGroupInfo>
           <div

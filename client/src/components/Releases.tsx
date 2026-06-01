@@ -1,22 +1,23 @@
-import { useId } from "react";
-import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { queryTrackGroups, TrackGroupQueryOptions } from "queries";
+import { queryTags } from "queries/tags";
+import { useId } from "react";
+import React from "react";
 import { useTranslation, Trans } from "react-i18next";
+import { FaChevronRight, FaRss } from "react-icons/fa";
+import { useLocation, useSearchParams } from "react-router-dom";
+import usePagination from "utils/usePagination";
+
 import { bp } from "../constants";
+
+import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
+import { ButtonAnchor, ButtonLink } from "./common/Button";
+import Select from "./common/Select";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
-
-import usePagination from "utils/usePagination";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { queryTrackGroups, TrackGroupQueryOptions } from "queries";
-import { useQuery } from "@tanstack/react-query";
-import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
-import { ButtonAnchor, ButtonLink } from "./common/Button";
-import { FaChevronRight, FaRss } from "react-icons/fa";
-import Select from "./common/Select";
-import React from "react";
 
 const pageSize = 40;
 
@@ -49,7 +50,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const { data: tags } = useQuery(
     queryTags({
       orderBy: "count",
-      take: 20,
+      take: 24,
     })
   );
 

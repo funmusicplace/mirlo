@@ -1,21 +1,16 @@
-import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import WidthContainer from "../common/WidthContainer";
-import { FaChevronRight } from "react-icons/fa";
-import LinkWithIcon from "components/common/LinkWithIcon";
-
-import { bp } from "../../constants";
-import { ButtonLink } from "components/common/Button";
-import Releases from "components/Releases";
-import { SectionHeader } from "./Home";
-import { queryTopSoldTrackGroups } from "queries";
 import { useQuery } from "@tanstack/react-query";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
 import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import { ButtonLink } from "components/common/Button";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
+import Releases from "components/Releases";
+import { queryTopSoldTrackGroups } from "queries";
+import { useTranslation } from "react-i18next";
+import { FaChevronRight } from "react-icons/fa";
 
-const bgcolor = css`
-  width: 100%;
-`;
+import WidthContainer from "../common/WidthContainer";
+
+import { SectionHeader } from "./Home";
+import HomeFeaturedArtists from "./HomeFeaturedArtists";
 
 const futureReleasesPageSize = 6;
 
@@ -31,7 +26,8 @@ const HomeReleases = () => {
   );
 
   return (
-    <div className={bgcolor}>
+    <div className="w-full">
+      <HomeFeaturedArtists />
       <Releases limit={8} />
 
       {(popularReleases?.results ?? []).length > 0 && (
@@ -40,32 +36,16 @@ const HomeReleases = () => {
             <WidthContainer
               variant="big"
               justify="space-between"
-              className={css`
-                flex-direction: row;
-                display: flex;
-              `}
+              className="flex flex-row"
             >
               <h1 className="h5 section-header__heading" id="popular-releases">
                 {t("popularReleases")}
               </h1>
             </WidthContainer>
           </SectionHeader>
-          <div
-            className={css`
-              padding-top: 0.25rem;
-              margin-bottom: 4rem;
-            `}
-          >
+          <div className="pt-1 mb-16">
             <WidthContainer variant="big" justify="center">
-              <div
-                className={css`
-                  display: flex;
-                  width: 100%;
-                  flex-direction: row;
-                  flex-wrap: wrap;
-                  padding: var(--mi-side-paddings-xsmall);
-                `}
-              >
+              <div className="flex w-full flex-row flex-wrap p-[var(--mi-side-paddings-xsmall)]">
                 <TrackgroupGrid
                   gridNumber="6"
                   as="ul"
@@ -90,16 +70,7 @@ const HomeReleases = () => {
 
       <WidthContainer
         variant="big"
-        className={css`
-          display: flex;
-          gap: 1rem;
-          justify-content: flex-end !important;
-          margin-bottom: 4rem !important;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding: var(--mi-side-paddings-xsmall);
-          }
-        `}
+        className="flex gap-4 !justify-end !mb-16 max-md:p-[var(--mi-side-paddings-xsmall)]"
       >
         <ButtonLink wrap variant="outlined" to="/artists">
           {t("viewAllArtists")}

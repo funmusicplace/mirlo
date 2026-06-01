@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
@@ -6,10 +7,13 @@ import { SelectEl } from "components/common/Select";
 import Table from "components/common/Table";
 import TextArea from "components/common/TextArea";
 import WidthContainer from "components/common/WidthContainer";
+import { queryFeaturedArtists } from "queries/settings";
 import React from "react";
 import { useForm } from "react-hook-form";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+
+import FeaturedArtistsSelector from "./FeaturedArtistsSelector";
 
 interface FormSettings {
   platformPercent: number;
@@ -71,6 +75,7 @@ interface SettingsFromAPI {
       region?: string;
     };
     cloudflareTurnstileSecret?: string;
+    featuredArtistIds?: number[];
   };
   terms: string;
   privacyPolicy: string;
@@ -90,6 +95,12 @@ const AdminSettings = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const { reset, register, handleSubmit, watch } = useForm<FormSettings>();
   const stripeKeyConfigured = watch("stripe.keyConfigured");
+  const { data: initialFeaturedArtists } = useQuery(queryFeaturedArtists());
+  const [featuredArtistsOverride, setFeaturedArtistsOverride] = React.useState<
+    Artist[] | undefined
+  >(undefined);
+  const featuredArtists =
+    featuredArtistsOverride ?? initialFeaturedArtists ?? [];
 
   React.useEffect(() => {
     const callback = async () => {
@@ -155,6 +166,7 @@ const AdminSettings = () => {
               ...data.s3,
             },
             cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
+            featuredArtistIds: featuredArtists.map((a) => a.id),
           },
           cdnUrl: data.cdnUrl,
           terms: data.terms,
@@ -171,7 +183,7 @@ const AdminSettings = () => {
         snackbar("Oops something went wrong", { type: "warning" });
       }
     },
-    [snackbar]
+    [snackbar, featuredArtists]
   );
 
   return (
@@ -294,6 +306,19 @@ const AdminSettings = () => {
                   className={colorInputClass}
                 />
               </FormComponent>
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={2}>
+              <h3>Featured Artists</h3>
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={2}>
+              <FeaturedArtistsSelector
+                value={featuredArtists}
+                onChange={setFeaturedArtistsOverride}
+              />
             </td>
           </tr>
           <tr>
