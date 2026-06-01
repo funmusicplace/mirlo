@@ -160,7 +160,7 @@ export default function () {
       });
 
       const effectiveSlug =
-        urlSlug !== undefined
+        urlSlug != null
           ? urlSlug
           : (post?.urlSlug ?? generateSlug(title ?? post?.title ?? ""));
 
