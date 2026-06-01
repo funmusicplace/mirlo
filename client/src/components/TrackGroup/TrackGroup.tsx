@@ -50,6 +50,10 @@ export const Container = styled.div`
 export const ImageWrapper = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
+
+  .image-container {
+    width: 100%;
+  }
 `;
 
 export const UnderneathImage = styled.div`
@@ -285,6 +289,8 @@ function TrackGroup() {
                       title: trackGroup.title,
                     })}
                     size={600}
+                    square
+                    objectFit="contain"
                   />
                 </ImageWrapper>
                 <UnderneathImage>

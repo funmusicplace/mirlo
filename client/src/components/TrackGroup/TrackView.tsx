@@ -110,6 +110,8 @@ function TrackView() {
                     src={trackGroup.cover?.sizes?.[960]}
                     alt={trackGroup.title ?? "Untitled release"}
                     size={960}
+                    square
+                    objectFit="contain"
                   />
                 </ImageWrapper>
                 <UnderneathImage>
