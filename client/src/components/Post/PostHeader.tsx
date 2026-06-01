@@ -4,7 +4,7 @@ import Avatar from "components/Artist/Avatar";
 import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FollowArtist from "components/common/FollowArtist";
 import ShareButton from "components/common/ShareButton";
-import TipArtist from "components/common/TipArtist";
+import SupportArtist from "components/common/SupportArtist";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -118,7 +118,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
         gap: 0.5rem;
       `}
     >
-      <TipArtist artistId={post.artistId} compact />
+      <SupportArtist artistId={post.artistId} compact />
       <ShareButton
         title={post.title}
         url={`${import.meta.env.VITE_CLIENT_DOMAIN}${getPostURLReference(post)}`}
