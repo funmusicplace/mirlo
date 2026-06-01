@@ -60,6 +60,10 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
       <ArtistButton
         onClick={() => setIsOpen(true)}
         size={size}
+        variant="transparent"
+        color="foreground"
+        uppercase
+        bold={false}
         className={tabButtonClass}
       >
         {t("about")}

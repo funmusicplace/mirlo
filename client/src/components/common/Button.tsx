@@ -25,6 +25,7 @@ export interface Sizable {
     | "pill"
     | "chip";
   uppercase?: boolean;
+  bold?: boolean;
   onlyIcon?: boolean;
   smallIcon?: boolean;
 }
@@ -135,7 +136,7 @@ const CustomButton = styled.button<Sizable>(
           color: ${primaryColor};
           background-color: transparent;
           border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${primaryColor};
-          font-weight: bold;
+          font-weight: ${props.bold === false ? "normal" : "bold"};
 
           svg {
             fill: ${primaryColor};
@@ -184,7 +185,7 @@ const CustomButton = styled.button<Sizable>(
           return `
           color: ${primaryColor};
           background-color: transparent;
-          font-weight: bold;
+          font-weight: ${props.bold === false ? "normal" : "bold"};
 
           svg {
             fill: ${primaryColor};

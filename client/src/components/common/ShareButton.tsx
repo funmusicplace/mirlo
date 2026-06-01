@@ -1,4 +1,5 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { ButtonProps } from "components/common/Button";
 import Modal from "components/common/Modal";
 import ShareToSocials from "components/common/ShareToSocials";
 import React from "react";
@@ -11,7 +12,9 @@ const ShareButton: React.FC<{
   modalTitle: string;
   buttonClassName?: string;
   size?: "compact" | "big" | "tiny";
-}> = ({ title, url, modalTitle, buttonClassName, size }) => {
+  variant?: ButtonProps["variant"];
+  color?: string;
+}> = ({ title, url, modalTitle, buttonClassName, size, variant, color }) => {
   const { t } = useTranslation("translation", { keyPrefix: "share" });
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -44,6 +47,8 @@ const ShareButton: React.FC<{
         onClick={handleShareClick}
         startIcon={<BsShare />}
         size={size}
+        variant={variant}
+        color={color}
         className={buttonClassName}
       />
       <Modal
