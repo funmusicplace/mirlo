@@ -33,12 +33,11 @@ export default function () {
       } else {
         fromDateFilter = undefined;
       }
-      let deleted:
-        | Prisma.ArtistWhereInput
-        | Prisma.TrackGroupWhereInput
-        | Prisma.TrackWhereInput = {
+
+      let deleted = {
         deletedAt: { not: null },
       };
+
       let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
         AND: [
           { artist: federatedArtistAtSomePoint },
