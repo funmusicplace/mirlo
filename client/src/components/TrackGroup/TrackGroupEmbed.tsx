@@ -49,7 +49,6 @@ const Embed: React.FC<{
   );
   const snackbar = useSnackbar();
   const variantGroupId = React.useId();
-  const variantLabelId = `${variantGroupId}-label`;
   const variantRadioName = `${variantGroupId}-radio`;
 
   const currentVariant = variants?.find((v) => v.key === selectedVariant);
@@ -107,12 +106,9 @@ const Embed: React.FC<{
 
           {variants && variants.length > 1 && (
             <>
-              <p id={variantLabelId} className="m-0!">
-                {t("chooseLayout")}
-              </p>
               <div
                 role="radiogroup"
-                aria-labelledby={variantLabelId}
+                aria-label={t("chooseLayout") ?? ""}
                 className={css`
                   display: flex;
                   gap: 1rem;
