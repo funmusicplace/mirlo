@@ -53,7 +53,7 @@ const BuyTrackGroup: React.FC<{
     reValidateMode: "onChange",
   });
   const paymentUserId =
-    trackGroup.paymentToUser?.id ??
+    trackGroup.paymentToUserId ??
     trackGroup.artist?.paymentToUserId ??
     trackGroup.artist?.userId ??
     0;
