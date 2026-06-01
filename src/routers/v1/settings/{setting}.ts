@@ -1,8 +1,12 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import { addSizesToImage } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
-import { processSingleArtist } from "../../../utils/serialize/artist";
+import {
+  finalArtistAvatarBucket,
+  finalArtistBackgroundBucket,
+} from "../../../utils/minio";
 import { getSiteSettings } from "../../../utils/settings";
 
 export default function () {
@@ -67,9 +71,16 @@ export default function () {
             background: { where: { deletedAt: null } },
           },
         });
-        return res
-          .status(200)
-          .json({ result: artists.map(processSingleArtist) });
+        return res.status(200).json({
+          result: artists.map((a) => ({
+            ...a,
+            avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
+            background: addSizesToImage(
+              finalArtistBackgroundBucket,
+              a.background
+            ),
+          })),
+        });
       } else if (
         setting === "instanceArtist" &&
         settings.settings?.instanceCustomization?.artistId &&

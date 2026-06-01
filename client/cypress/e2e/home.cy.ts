@@ -71,7 +71,7 @@ describe("home page", () => {
 
     cy.intercept("GET", "/v1/tags*", (req) => {
       expect(req.query).to.include({
-        take: "20",
+        take: "24",
         orderBy: "count",
       });
 
@@ -90,6 +90,11 @@ describe("home page", () => {
         result: instanceArtist,
       },
     }).as("instanceArtist");
+
+    cy.intercept("GET", "/v1/settings/featuredArtists", {
+      statusCode: 200,
+      body: { result: [] },
+    }).as("featuredArtists");
 
     cy.intercept("POST", "/auth/verify-email", (req) => {
       if ("code" in req.body) {
@@ -123,6 +128,7 @@ describe("home page", () => {
       "@topSoldTrackGroups",
       "@tags",
       "@instanceArtist",
+      "@featuredArtists",
     ]);
   });
 

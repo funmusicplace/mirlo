@@ -1,8 +1,23 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import api from "services/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: "en" },
+  }),
+}));
+
+vi.mock("queries/settings", () => ({
+  queryFeaturedArtists: () => ({
+    queryKey: ["fetchFeaturedArtists"],
+    queryFn: () => Promise.resolve([]),
+  }),
+}));
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -73,6 +88,21 @@ function makeSettings(overrides: object = {}) {
   };
 }
 
+// ---- helpers ----------------------------------------------------------------
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
+
+function renderAdminSettings() {
+  return render(<AdminSettings />, { wrapper: createWrapper() });
+}
+
 // ---- tests ------------------------------------------------------------------
 
 describe("AdminSettings", () => {
@@ -83,7 +113,7 @@ describe("AdminSettings", () => {
   });
 
   test("fetches settings on mount and populates the form", async () => {
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith("admin/settings/");
@@ -96,7 +126,7 @@ describe("AdminSettings", () => {
   });
 
   test("shows success snackbar after settings load", async () => {
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => {
       expect(mockSnackbar).toHaveBeenCalledWith("Settings loaded", {
@@ -115,7 +145,7 @@ describe("AdminSettings", () => {
       }) as any
     );
 
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => {
       expect(
@@ -125,7 +155,7 @@ describe("AdminSettings", () => {
   });
 
   test("shows 'No key set' placeholder when stripe key is not configured", async () => {
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText("No key set")).toBeInTheDocument();
@@ -133,7 +163,7 @@ describe("AdminSettings", () => {
   });
 
   test("submits form with correct payload", async () => {
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => screen.getByDisplayValue("10"));
 
@@ -157,7 +187,7 @@ describe("AdminSettings", () => {
   });
 
   test("shows success snackbar after successful save", async () => {
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => screen.getByDisplayValue("10"));
     mockSnackbar.mockClear();
@@ -174,7 +204,7 @@ describe("AdminSettings", () => {
   test("shows warning snackbar when save fails", async () => {
     vi.mocked(api.post).mockRejectedValue(new Error("Network error"));
 
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => screen.getByDisplayValue("10"));
     mockSnackbar.mockClear();
@@ -189,7 +219,7 @@ describe("AdminSettings", () => {
   });
 
   test("renders all section headings", async () => {
-    render(<AdminSettings />);
+    renderAdminSettings();
 
     await waitFor(() => screen.getByDisplayValue("10"));
 
