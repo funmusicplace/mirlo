@@ -157,7 +157,7 @@ const BuyTrackGroup: React.FC<{
   }
 
   if (!stripeAccountStatus?.chargesEnabled) {
-    if (minPrice === 0) {
+    if (minPrice === 0 || minPrice === null) {
       return (
         <div className="m-4">
           <p className="mb-2">
