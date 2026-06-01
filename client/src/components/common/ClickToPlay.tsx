@@ -19,6 +19,8 @@ import PauseButton from "./PauseButton";
 import PlayButton from "./PlayButton";
 import { PlayingMusicBars } from "./PlayingMusicBars";
 
+export const longLabelClass = "is-long-label";
+
 const TrackgroupButtons = styled.div<{ compact?: boolean }>`
   width: 100%;
   position: absolute;
@@ -51,7 +53,7 @@ const TrackgroupButtons = styled.div<{ compact?: boolean }>`
       }
     }
 
-    button.is-long-label {
+    button.${longLabelClass} {
       font-size: 0.65rem !important;
       padding-left: 0.5rem !important;
       padding-right: 0.5rem !important;

@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { longLabelClass } from "components/common/ClickToPlay";
 import { FixedButton } from "components/common/FixedButton";
 import Modal from "components/common/Modal";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
@@ -78,22 +79,22 @@ const PurchaseAlbumModal: React.FC<{
       type="button"
       onClick={() => setIsPurchasingAlbum(true)}
       variant="outlined"
-      className={`${isLongLabel ? "is-long-label" : ""} ${css`
+      className={`${isLongLabel ? longLabelClass : ""} ${css`
         ${isLongLabel
           ? "font-size: 0.875rem !important; padding-left: 1rem !important; padding-right: 1rem !important;"
           : "padding-left: 2rem !important; padding-right: 2rem !important;"}
 
-        .children {
-          white-space: normal;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          line-height: 1.1;
-        }
-
         @media screen and (max-width: ${bp.medium}px) {
           width: 100%;
+
+          .children {
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.1;
+          }
         }
       `}`}
     >

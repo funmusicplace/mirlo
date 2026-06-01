@@ -114,15 +114,15 @@ function TrackView() {
                 </ImageWrapper>
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
-                  <div className="flex justify-end items-center gap-1">
-                    <TrackEmbed track={filteredTrack} trackGroup={trackGroup} />
-                    {filteredTrack.allowIndividualSale && (
+                  <TrackEmbed track={filteredTrack} trackGroup={trackGroup} />
+                  {filteredTrack.allowIndividualSale && (
+                    <div className="grow-0 max-md:grow min-w-0 flex justify-end">
                       <PurchaseOrDownloadAlbum
                         trackGroup={trackGroup}
                         track={filteredTrack}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
