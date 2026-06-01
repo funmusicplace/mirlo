@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import ItemTransactionCard from "components/common/ItemTransactionCard";
 import { WidthWrapper } from "components/common/WidthContainer";
 import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
 import RecommendedAlbums from "components/TrackGroup/RecommendedAlbums";
@@ -89,51 +89,25 @@ function CheckoutComplete() {
 
   return (
     <WidthWrapper className="mt-8 mb-12 flex flex-col gap-2">
-      <div className="flex flex-col items-center text-center gap-4 py-8 px-6 bg-(--mi-button-tint-color) border border-(--mi-tint-color) rounded-[var(--mi-border-radius-x)] max-w-2xl mx-auto w-full">
-        <h2 className="m-0! flex items-center gap-2">
-          <span
-            aria-hidden
-            className="w-5 h-5 rounded-full bg-(--mi-button-color) text-(--mi-button-text-color) grid place-items-center shrink-0"
-          >
-            <FaCheck className="w-2.5 h-2.5" />
-          </span>
-          {headerMessage}
-        </h2>
-
-        {!isSimpleMessage && itemCover && (
-          <div className="w-60 mt-2">
-            <ImageWithPlaceholder
-              src={itemCover}
-              alt={itemTitle ?? ""}
-              size={300}
-              className="w-full"
-            />
-          </div>
-        )}
-
-        {!isSimpleMessage && itemTitle && (
-          <div className="flex flex-col gap-1">
-            {itemLink ? (
-              <p className="font-bold text-lg m-0!">
-                <Link to={itemLink} className="no-underline! text-inherit!">
-                  {itemTitle}
-                </Link>
-              </p>
-            ) : (
-              <p className="font-bold text-lg m-0!">{itemTitle}</p>
-            )}
-            <p className="text-sm text-(--mi-secondary-text-color) m-0!">
-              {tPost("postByPrefix")}{" "}
-              <Link
-                to={getArtistUrl(artist)}
-                className="text-(--mi-button-color)!"
-              >
-                {artist.name}
-              </Link>
-            </p>
-          </div>
-        )}
-
+      <ItemTransactionCard
+        header={
+          <>
+            <span
+              aria-hidden
+              className="w-5 h-5 rounded-full bg-(--mi-button-color) text-(--mi-button-text-color) grid place-items-center shrink-0"
+            >
+              <FaCheck className="w-2.5 h-2.5" />
+            </span>
+            {headerMessage}
+          </>
+        }
+        cover={isSimpleMessage ? undefined : itemCover}
+        coverAlt={itemTitle ?? ""}
+        title={isSimpleMessage ? undefined : (itemTitle ?? undefined)}
+        titleLink={itemLink ?? undefined}
+        artistName={artist.name}
+        artistUrl={getArtistUrl(artist)}
+      >
         {(purchaseType === "trackGroup" || purchaseType === "track") &&
           trackGroup && (
             <div className="mt-4">
@@ -156,7 +130,7 @@ function CheckoutComplete() {
           )}
           <Link to={getArtistUrl(artist)}>{t("backToArtist")}</Link>
         </div>
-      </div>
+      </ItemTransactionCard>
 
       {purchaseType === "trackGroup" && trackGroup && (
         <RecommendedAlbums
