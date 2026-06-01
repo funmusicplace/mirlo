@@ -129,6 +129,7 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
             track={track}
             showWishlist={!showTrackWishlist}
             showTrackWishlist={showTrackWishlist}
+            compact={size === "small"}
           >
             <TrackGroupLinks>
               <TrackGroupInfo>

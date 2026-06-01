@@ -35,16 +35,26 @@ const TrackgroupButtons = styled.div<{ compact?: boolean }>`
       height: ${(props) => (props.compact ? "2rem" : "3rem")};
       color: white !important;
       font-weight: normal;
-      font-size: ${(props) => (props.compact ? "1rem" : "1.3rem")};
+      font-size: ${(props) => (props.compact ? "0.65rem" : "1rem")};
       text-overflow: ellipsis;
       overflow: hidden;
       text-transform: uppercase;
       width: 100%;
       border-color: transparent !important;
+      ${(props) =>
+        props.compact
+          ? "padding-left: 0.5rem !important; padding-right: 0.5rem !important;"
+          : ""}
 
       &:hover {
         color: white !important;
       }
+    }
+
+    button.is-long-label {
+      font-size: 0.65rem !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
     }
 
     svg {
