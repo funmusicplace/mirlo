@@ -46,6 +46,7 @@ const SupportArtist: React.FC<{
       onClick={onTipClick}
       startIcon={<FaDonate />}
       rounded
+      collapsible
       size="compact"
     >
       {label ?? t("tipArtist")}
