@@ -1,9 +1,10 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import { InputEl } from "components/common/Input";
+import MarkdownContent from "components/common/MarkdownContent";
 import Modal from "components/common/Modal";
 import { getCurrencySymbol } from "components/common/Money";
+import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import { isEmpty } from "lodash";
 import { queryArtist } from "queries";
 import React from "react";
@@ -110,7 +111,6 @@ const ArtistVariableSupport: React.FC<{
           onSubmit={handleSubmit(() => subscribeToTier(tier))}
           className="flex flex-col gap-3"
         >
-          <p>{tier.description}</p>
           <strong>{t("chooseAnAmount")}</strong>
           <div className="flex items-center gap-2 ">
             <span className="whitespace-nowrap">
@@ -131,11 +131,6 @@ const ArtistVariableSupport: React.FC<{
               </small>
             )}
           </div>
-
-          <div className="w-full">{t("includesNewReleasesLong")}</div>
-
-          <IncludedReleases tier={tier} />
-
           <ArtistButton
             isLoading={isCheckingForSubscription}
             disabled={isCheckingForSubscription || !isEmpty(formState.errors)}
@@ -159,6 +154,10 @@ const ArtistVariableSupport: React.FC<{
           >
             <small>{t("artistCheckoutPage")}</small>
           </div>
+          <hr className="border-(--mi-darken-x-background-color)" />
+          <MarkdownContent content={tier.description ?? ""} />
+          <div className="w-full">{t("includesNewReleasesLong")}</div>
+          <IncludedReleases tier={tier} />
         </form>
       </Modal>
       <Modal

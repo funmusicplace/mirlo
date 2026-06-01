@@ -112,7 +112,6 @@ const SupportArtistPopUpTiers = forwardRef<
                       })
                     : ""}
                 </span>
-                {tier.description && <p>{tier.description}</p>}
               </div>
               {currentValue?.id === tier.id && (
                 <FaCheck aria-hidden className="self-center shrink-0 ml-2" />
