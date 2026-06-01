@@ -5,6 +5,7 @@ export interface TabConfig {
   label: string;
   visible: boolean;
   to: string;
+  onClick?: () => void;
   navLinkId?: string;
 }
 

@@ -4,6 +4,7 @@ import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
 import ScrollMoreButton from "components/common/ScrollMoreButton";
 import { ArtistTabs } from "components/common/Tabs";
+import TipArtistModal from "components/common/TipArtistModal";
 import {
   navbarLinkStripStyles,
   renderArtistLinkButtons,
@@ -25,6 +26,7 @@ import {
 } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
+import { getPaidTierCount, isTipOnlyArtist } from "utils/artist";
 import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
 import { transformFromLinks } from "utils/links";
 import { useScrollActiveTabIntoView } from "utils/useScrollActiveTabIntoView";
@@ -72,6 +74,17 @@ function Artist() {
   const linksScrollId = `artist-links-scroll-${reactId.replace(/:/g, "")}`;
   useScrollActiveTabIntoView(scrollId);
 
+  const [isTipModalOpen, setIsTipModalOpen] = React.useState(false);
+
+  const openTipModal = React.useCallback(() => setIsTipModalOpen(true), []);
+
+  const closeTipModal = React.useCallback(() => {
+    setIsTipModalOpen(false);
+    if (pathname.endsWith("/support")) {
+      navigate(`/${artistId}`);
+    }
+  }, [pathname, navigate, artistId]);
+
   const urlSlug = artist?.urlSlug;
 
   React.useEffect(() => {
@@ -95,10 +108,9 @@ function Artist() {
           (artist.trackGroups.length ?? 0) > 0 ||
           (releases?.results.length ?? 0) > 0,
         posts: (artist.posts.length ?? 0) > 0,
-        support:
-          !!canReceivePayments &&
-          (artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
-            .length ?? 0) > 0,
+        // Auto-redirect deliberately ignores isTipOnly, as tip-only artists
+        // shouldn't be landed on /support, which just opens up a modal.
+        support: !!canReceivePayments && getPaidTierCount(artist) > 0,
         merch: (artist.merch.length ?? 0) > 0,
       };
 
@@ -150,6 +162,9 @@ function Artist() {
     artist.properties?.titles?.support || t("support", { artist: artist.name });
   const rosterTitle = artist.properties?.titles?.roster || t("roster");
 
+  const paidTierCount = getPaidTierCount(artist);
+  const isTipOnly = isTipOnlyArtist(artist);
+
   const allTabs: TabConfig[] = [
     {
       id: "roster",
@@ -177,11 +192,9 @@ function Artist() {
     {
       id: "support",
       label: supportTitle,
-      visible:
-        !!canReceivePayments &&
-        (artist?.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
-          .length ?? 0) > 0,
-      to: "support",
+      visible: !!canReceivePayments && (paidTierCount > 0 || isTipOnly),
+      to: isTipOnly ? "" : "support",
+      onClick: isTipOnly ? openTipModal : undefined,
     },
     {
       id: "merch",
@@ -228,9 +241,15 @@ function Artist() {
                 .filter((tab) => tab.visible)
                 .map((tab) => (
                   <li key={tab.id}>
-                    <NavLink to={tab.to} id={tab.navLinkId}>
-                      {tab.label}
-                    </NavLink>
+                    {tab.onClick ? (
+                      <button type="button" onClick={tab.onClick}>
+                        {tab.label}
+                      </button>
+                    ) : (
+                      <NavLink to={tab.to} id={tab.navLinkId}>
+                        {tab.label}
+                      </NavLink>
+                    )}
                   </li>
                 ))}
               {user && isArtistUser && !canReceivePayments && (
@@ -288,10 +307,21 @@ function Artist() {
       </nav>
 
       <ArtistSection>
-        <Outlet />
+        <Outlet context={{ openTipModal }} />
       </ArtistSection>
+      {isTipOnly && (
+        <TipArtistModal
+          artist={artist}
+          open={isTipModalOpen}
+          onClose={closeTipModal}
+        />
+      )}
     </>
   );
 }
+
+export type ArtistOutletContext = {
+  openTipModal: () => void;
+};
 
 export default Artist;

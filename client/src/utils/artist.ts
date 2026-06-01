@@ -1,3 +1,13 @@
+export const getPaidTierCount = (artist: {
+  subscriptionTiers: { isDefaultTier: boolean }[];
+}) => artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length;
+
+export const isTipOnlyArtist = (artist: {
+  subscriptionTiers: { isDefaultTier: boolean }[];
+  properties?: { showTipOnSupportPage?: boolean };
+}) =>
+  getPaidTierCount(artist) === 0 && !!artist.properties?.showTipOnSupportPage;
+
 export const getArtistUrlReference = (artist: {
   urlSlug?: string;
   id?: number;
