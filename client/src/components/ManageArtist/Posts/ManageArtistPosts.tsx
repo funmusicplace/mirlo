@@ -21,6 +21,63 @@ import ManageArtistPostRow from "./ManageArtistPostRow";
 
 const PAGE_SIZE = 10;
 
+interface PostSectionProps {
+  title: string;
+  filterName: string;
+  filterValue: string;
+  onFilterChange: (v: string) => void;
+  tierOptions: { value: string; label: string }[];
+  posts: Post[];
+  allPosts: Post[];
+  total: number;
+  PaginationComponent: React.FC<{ amount: number; total: number }>;
+  artist: Artist;
+  onDelete: (id: number) => void;
+  className?: string;
+}
+
+const PostSection: React.FC<PostSectionProps> = ({
+  title,
+  filterName,
+  filterValue,
+  onFilterChange,
+  tierOptions,
+  posts,
+  allPosts,
+  total,
+  PaginationComponent,
+  artist,
+  onDelete,
+  className,
+}) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  if (total === 0) return null;
+  return (
+    <div className={className}>
+      <h2 className="mb-3">{title}</h2>
+      <FilterGroup
+        legend={t("filterByTier")}
+        name={filterName}
+        options={tierOptions}
+        compact
+        value={filterValue}
+        onChange={onFilterChange}
+      />
+      <ol>
+        {posts.map((p) => (
+          <ManageArtistPostRow
+            key={p.id}
+            post={p}
+            artist={artist}
+            onDelete={onDelete}
+          />
+        ))}
+      </ol>
+      <PaginationComponent amount={allPosts.length} total={total} />
+    </div>
+  );
+};
+
 const ManageArtistPosts: React.FC<{}> = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageArtist",
@@ -33,6 +90,8 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   const { page: draftsPage, PaginationComponent: DraftsPagination } =
     usePagination({ pageSize: PAGE_SIZE, pageParam: "dpage" });
+  const { page: queuedPage, PaginationComponent: QueuedPagination } =
+    usePagination({ pageSize: PAGE_SIZE, pageParam: "qpage" });
   const { page: publishedPage, PaginationComponent: PublishedPagination } =
     usePagination({ pageSize: PAGE_SIZE, pageParam: "ppage" });
 
@@ -43,17 +102,28 @@ const ManageArtistPosts: React.FC<{}> = () => {
       isDraft: true,
     })
   );
+  const { data: queuedData } = useQuery(
+    queryManagedArtistPosts(artistId ?? 0, {
+      skip: queuedPage * PAGE_SIZE,
+      take: PAGE_SIZE,
+      isDraft: false,
+      isScheduled: true,
+    })
+  );
   const { data: publishedData } = useQuery(
     queryManagedArtistPosts(artistId ?? 0, {
       skip: publishedPage * PAGE_SIZE,
       take: PAGE_SIZE,
       isDraft: false,
+      isScheduled: false,
     })
   );
 
   const allDraftPosts = draftsData?.results ?? [];
+  const allQueuedPosts = queuedData?.results ?? [];
   const allPublishedPosts = publishedData?.results ?? [];
   const draftsTotal = draftsData?.total ?? 0;
+  const queuedTotal = queuedData?.total ?? 0;
   const publishedTotal = publishedData?.total ?? 0;
 
   const { mutate: createPost } = useCreatePostMutation();
@@ -89,6 +159,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
   );
 
   const [draftsTierFilter, setDraftsTierFilter] = React.useState<string>("all");
+  const [queuedTierFilter, setQueuedTierFilter] = React.useState<string>("all");
   const [publishedTierFilter, setPublishedTierFilter] =
     React.useState<string>("all");
 
@@ -114,6 +185,9 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const draftPosts = allDraftPosts.filter((p) =>
     matchesTierFilter(p, draftsTierFilter)
   );
+  const queuedPosts = allQueuedPosts.filter((p) =>
+    matchesTierFilter(p, queuedTierFilter)
+  );
   const publishedPosts = allPublishedPosts.filter((p) =>
     matchesTierFilter(p, publishedTierFilter)
   );
@@ -132,58 +206,47 @@ const ManageArtistPosts: React.FC<{}> = () => {
         </ArtistButton>
       </SectionActionStrip>
 
-      {draftsTotal > 0 && (
-        <div className="mb-8">
-          <h2 className="mb-3">{t("drafts")}</h2>
-          <FilterGroup
-            legend={t("filterByTier")}
-            name="drafts-tier-filter"
-            options={tierOptions}
-            compact
-            value={draftsTierFilter}
-            onChange={setDraftsTierFilter}
-          />
-          <ol>
-            {draftPosts.map((p) => (
-              <ManageArtistPostRow
-                key={p.id}
-                post={p}
-                artist={artist}
-                onDelete={deletePost}
-              />
-            ))}
-          </ol>
-          <DraftsPagination amount={allDraftPosts.length} total={draftsTotal} />
-        </div>
-      )}
-
-      {publishedTotal > 0 && (
-        <div>
-          <h2 className="mb-3">{t("publishedPosts")}</h2>
-          <FilterGroup
-            legend={t("filterByTier")}
-            name="published-tier-filter"
-            options={tierOptions}
-            compact
-            value={publishedTierFilter}
-            onChange={setPublishedTierFilter}
-          />
-          <ol>
-            {publishedPosts.map((p) => (
-              <ManageArtistPostRow
-                key={p.id}
-                post={p}
-                artist={artist}
-                onDelete={deletePost}
-              />
-            ))}
-          </ol>
-          <PublishedPagination
-            amount={allPublishedPosts.length}
-            total={publishedTotal}
-          />
-        </div>
-      )}
+      <PostSection
+        title={t("drafts")}
+        filterName="drafts-tier-filter"
+        filterValue={draftsTierFilter}
+        onFilterChange={setDraftsTierFilter}
+        tierOptions={tierOptions}
+        posts={draftPosts}
+        allPosts={allDraftPosts}
+        total={draftsTotal}
+        PaginationComponent={DraftsPagination}
+        artist={artist}
+        onDelete={deletePost}
+        className="mb-8"
+      />
+      <PostSection
+        title={t("queuedPosts")}
+        filterName="queued-tier-filter"
+        filterValue={queuedTierFilter}
+        onFilterChange={setQueuedTierFilter}
+        tierOptions={tierOptions}
+        posts={queuedPosts}
+        allPosts={allQueuedPosts}
+        total={queuedTotal}
+        PaginationComponent={QueuedPagination}
+        artist={artist}
+        onDelete={deletePost}
+        className="mb-8"
+      />
+      <PostSection
+        title={t("publishedPosts")}
+        filterName="published-tier-filter"
+        filterValue={publishedTierFilter}
+        onFilterChange={setPublishedTierFilter}
+        tierOptions={tierOptions}
+        posts={publishedPosts}
+        allPosts={allPublishedPosts}
+        total={publishedTotal}
+        PaginationComponent={PublishedPagination}
+        artist={artist}
+        onDelete={deletePost}
+      />
     </ManageSectionWrapper>
   );
 };

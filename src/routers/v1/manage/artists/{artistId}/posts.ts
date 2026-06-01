@@ -21,12 +21,23 @@ export default function () {
       skip = 0,
       take = 10,
       isDraft,
-    } = req.query as { skip?: string; take?: string; isDraft?: string };
+      isScheduled,
+    } = req.query as {
+      skip?: string;
+      take?: string;
+      isDraft?: string;
+      isScheduled?: string;
+    };
 
     try {
       const where = {
         artistId: Number(artistId),
         ...(isDraft !== undefined ? { isDraft: isDraft === "true" } : {}),
+        ...(isScheduled === "true"
+          ? { publishedAt: { gt: new Date() } }
+          : isScheduled === "false"
+            ? { publishedAt: { lte: new Date() } }
+            : {}),
       };
 
       const [posts, total] = await Promise.all([

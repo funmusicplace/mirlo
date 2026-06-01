@@ -5,6 +5,7 @@ import { artists } from "./seeds/artists";
 import { clients } from "./seeds/clients";
 import { fundraisers } from "./seeds/fundraisers";
 import { seedPosts } from "./seeds/posts";
+import { seedPublishedTrackGroups } from "./seeds/publishedTrackGroups";
 import { seedLocationTags } from "./seeds/seedLocationTags";
 import { trackGroups } from "./seeds/trackGroups";
 import { users } from "./seeds/users";
@@ -119,6 +120,7 @@ async function main() {
 
   await seedLocationTags();
   await seedPosts();
+  await seedPublishedTrackGroups();
 
   console.log(`Seeding finished.`);
 }
