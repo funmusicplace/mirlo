@@ -11,6 +11,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getPostURLReference } from "utils/artist";
 import useIsSubscribedToArtist from "utils/useIsSubscribedToArtist";
+import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../constants";
 
@@ -55,6 +56,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
   const { t: tShare } = useTranslation("translation", { keyPrefix: "share" });
   const isSubscribed = useIsSubscribedToArtist(post.artistId);
+  const isMobile = useMatchMedia(`screen and (max-width: ${bp.medium}px)`);
 
   const featuredImage = post.featuredImage?.src;
 
@@ -183,6 +185,12 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                 ? "var(--mi-white)"
                 : "var(--mi-button-color)"} !important;
 
+              @media (max-width: ${bp.medium}px) {
+                ${featuredImage
+                  ? "a { color: var(--mi-white) !important; }"
+                  : ""}
+              }
+
               @media (min-width: ${bp.medium}px) {
                 font-size: 1.2rem;
                 font-weight: 100;
@@ -284,6 +292,9 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                       <FollowArtist
                         artistId={post.artistId}
                         hideWhenSubscribed
+                        variant={
+                          featuredImage && isMobile ? "default" : "outlined"
+                        }
                       />
                       {actionButtons}
                     </div>

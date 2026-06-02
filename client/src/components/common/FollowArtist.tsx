@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { ButtonProps } from "components/common/Button";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -16,7 +17,8 @@ import SupportArtistTiersForm from "./SupportArtistTiersForm";
 const FollowArtist: React.FC<{
   artistId: number;
   hideWhenSubscribed?: boolean;
-}> = ({ artistId, hideWhenSubscribed }) => {
+  variant?: ButtonProps["variant"];
+}> = ({ artistId, hideWhenSubscribed, variant = "outlined" }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const { data: artist } = useQuery(
@@ -148,14 +150,16 @@ const FollowArtist: React.FC<{
 
       <ArtistButton
         size="compact"
-        variant="outlined"
+        variant={variant}
         type="button"
         onClick={onFollowClick}
         isLoading={isLoading}
         startIcon={isFollowing ? <FaMinus /> : <FaPlus />}
         className={css`
           font-size: 0.75em !important;
-          background-color: var(--mi-button-tint-color) !important;
+          ${variant === "outlined"
+            ? "background-color: var(--mi-button-tint-color) !important;"
+            : ""}
         `}
       >
         {t(isFollowing ? "unfollow" : "follow")}
