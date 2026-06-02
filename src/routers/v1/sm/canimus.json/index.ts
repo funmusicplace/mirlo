@@ -141,6 +141,8 @@ export default function () {
               deletedAt: null,
             },
           },
+          user: { select: { stripeAccountId: true } },
+          paymentToUser: { select: { stripeAccountId: true } },
         },
       });
 
