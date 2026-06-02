@@ -104,7 +104,6 @@ describe("canimus", () => {
       const response = await request(baseURL)
         .get("sm/canimus.json")
         .set("Accept", "application/json");
-      console.log(response.body);
       assert.equal(response.body.children.length, 1);
       assert.equal(response.body.deleted.length, 1);
     });

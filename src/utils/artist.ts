@@ -165,8 +165,7 @@ export const federatedArtistAtSomePoint: Prisma.ArtistWhereInput = {
   federatedStreamingOptInDate: { not: null },
 };
 
-// Artists who opted out (had opted in before, but now are not federated)
-export const artistOptedOut: Prisma.ArtistWhereInput = {
+export const artistNoLongerFederated: Prisma.ArtistWhereInput = {
   AND: [federatedArtistAtSomePoint, { NOT: federatedArtist }],
 };
 
@@ -176,7 +175,7 @@ export const artistFederatedButDeleted: Prisma.ArtistWhereInput = {
 };
 
 export const artistOptedOutOrDeleted: Prisma.ArtistWhereInput = {
-  OR: [artistOptedOut, artistFederatedButDeleted],
+  OR: [artistNoLongerFederated, artistFederatedButDeleted],
   deletedAt: {}, // this is to avoid the middleware filtering out softDeleted -> /mirlo/prisma/prisma.ts
 };
 
