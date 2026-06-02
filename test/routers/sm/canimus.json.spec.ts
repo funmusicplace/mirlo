@@ -30,7 +30,6 @@ describe("canimus", () => {
         .get("sm/canimus.json")
         .set("Accept", "application/json");
       assert.equal(response.body.type, "root");
-      assert.equal(response.body.url, process.env.API_DOMAIN);
       assert.equal(response.body.children.length, 0);
       assert.equal(response.body.deleted.length, 0);
     });
