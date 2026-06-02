@@ -28,7 +28,6 @@ import { serializePost } from "./post";
 import {
   processSingleTrackGroup,
   serializeSingleTrackGroupIntoCanimus,
-  serializeSingleDeletedTrackGroupIntoCanimus,
   LocalTrackGroup,
 } from "./trackGroup";
 
@@ -153,6 +152,7 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
       href: link.url,
       type: link.linkType,
     })),
+    updated_date: artist.updatedAt?.toISOString().split("T")[0],
     children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
       serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl, artist.name)
     ),
@@ -168,14 +168,5 @@ export const serializeSingleDeletedArtistIntoCanimus = (
     name: artist.name,
     url: artistUrl,
   };
-
-  const deletedEntities: any = artist.trackGroups?.map((trackGroup) =>
-    serializeSingleDeletedTrackGroupIntoCanimus(trackGroup, artistUrl)
-  );
-  let output: any = [];
-  for (const e of deletedEntities) {
-    output = output.concat(e);
-  }
-
-  return [deletedArtist].concat(output);
+  return deletedArtist;
 };

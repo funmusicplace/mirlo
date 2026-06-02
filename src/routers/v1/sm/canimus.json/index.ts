@@ -1,11 +1,20 @@
+import { join } from "path";
+
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import {
+  federatedArtistAtSomePoint,
+  federatedArtist,
+  artistOptedOutOrDeleted,
+} from "../../../../utils/artist";
+import {
   serializeSingleArtistIntoCanimus,
   serializeSingleDeletedArtistIntoCanimus,
 } from "../../../../utils/serialize/artist";
+import { serializeSingleDeletedTrackIntoCanimus } from "../../../../utils/serialize/track";
+import { serializeSingleDeletedTrackGroupIntoCanimus } from "../../../../utils/serialize/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -25,34 +34,24 @@ export default function () {
         fromDateFilter = undefined;
       }
 
-      let where: Prisma.ArtistWhereInput = {
-        federatedStreaming: true,
+      let deleted = {
+        deletedAt: { not: null },
       };
 
-      let artistOptedOut: Prisma.ArtistWhereInput = {
+      let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
         AND: [
-          {
-            federatedStreaming: false,
-            NOT: {
-              federatedStreamingOptInDate: null, // discard artists that never opted in
-            },
-          },
+          { artist: federatedArtistAtSomePoint },
+          deleted as Prisma.TrackGroupWhereInput,
         ],
+        deletedAt: {},
       };
 
-      let artistFederatedButDeletedFromMirlo: Prisma.ArtistWhereInput = {
+      let trackDeleted: Prisma.TrackWhereInput = {
         AND: [
-          {
-            NOT: {
-              federatedStreamingOptInDate: null, // discard artists that never opted in
-              deletedAt: null,
-            },
-          },
+          { trackGroup: { artist: federatedArtistAtSomePoint } },
+          deleted as Prisma.TrackWhereInput,
         ],
-      };
-
-      let artistOptedOutOrDeleted: Prisma.ArtistWhereInput = {
-        OR: [artistOptedOut, artistFederatedButDeletedFromMirlo],
+        deletedAt: {},
       };
 
       if (fromDateFilter) {
@@ -60,53 +59,60 @@ export default function () {
           federatedStreamingOptInDate: fromDateFilter,
         };
 
-        const updatedOrCreatedFilter:
-          | Prisma.TrackGroupWhereInput
-          | Prisma.TrackWhereInput
-          | Prisma.ArtistWhereInput = {
-          AND: [
-            { deletedAt: null },
+        const updatedOrCreatedFilter = {
+          deletedAt: null,
+          OR: [
             {
-              OR: [
-                {
-                  createdAt: fromDateFilter,
-                },
-                {
-                  updatedAt: fromDateFilter,
-                },
-              ],
+              createdAt: fromDateFilter,
+            },
+            {
+              updatedAt: fromDateFilter,
             },
           ],
         };
 
-        where.OR = [
-          optInDateFilter,
-          updatedOrCreatedFilter as Prisma.ArtistWhereInput,
-          {
-            trackGroups: {
-              some: {
-                OR: [
-                  updatedOrCreatedFilter as Prisma.TrackGroupWhereInput,
-                  {
-                    tracks: {
-                      some: updatedOrCreatedFilter as Prisma.TrackWhereInput,
-                    },
-                  },
-                ],
-              },
+        // Artist updated or created or with any
+        // TrackGroup updated or created or with any
+        // Track updated or created
+        let anyTrackUpdatedOrCreated: Prisma.TrackGroupWhereInput = {
+          tracks: {
+            some: updatedOrCreatedFilter as Prisma.TrackWhereInput,
+          },
+        };
+
+        let anyTrackGroupUpdatedOrCreated: Prisma.ArtistWhereInput = {
+          trackGroups: {
+            some: {
+              OR: [
+                updatedOrCreatedFilter as Prisma.TrackGroupWhereInput,
+                anyTrackUpdatedOrCreated,
+              ],
             },
           },
+        };
+
+        federatedArtist.OR = [
+          optInDateFilter,
+          updatedOrCreatedFilter as Prisma.ArtistWhereInput,
+          anyTrackGroupUpdatedOrCreated,
         ];
+
+        artistOptedOutOrDeleted.AND = [
+          {
+            federatedStreamingOptOutDate: fromDateFilter,
+          },
+        ];
+
+        trackGroupDeleted.deletedAt = fromDateFilter;
+        trackDeleted.deletedAt = fromDateFilter;
       }
 
-      const orderByClause:
-        | Prisma.ArtistOrderByWithRelationInput
-        | Prisma.TrackGroupOrderByWithRelationInput = {
+      const orderByClause = {
         createdAt: "desc",
       };
 
       const artists = await prisma.artist.findMany({
-        where,
+        where: federatedArtist,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.ArtistOrderByWithRelationInput,
@@ -143,36 +149,68 @@ export default function () {
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.ArtistOrderByWithRelationInput,
+      });
+
+      const deletedTrackGroups = await prisma.trackGroup.findMany({
+        where: trackGroupDeleted,
         include: {
-          trackGroups: {
+          artist: {
+            select: {
+              urlSlug: true,
+            },
+          },
+        },
+        skip: skipQuery ? Number(skipQuery) : undefined,
+        take: take ? Number(take) : undefined,
+        orderBy: orderByClause as Prisma.TrackGroupOrderByWithRelationInput,
+      });
+
+      const deletedTracks = await prisma.track.findMany({
+        where: trackDeleted,
+        include: {
+          trackGroup: {
             include: {
-              tracks: {
-                include: {
-                  audio: {
-                    select: { duration: true },
-                  },
+              artist: {
+                select: {
+                  urlSlug: true,
                 },
               },
             },
-            orderBy: { orderIndex: "asc" },
           },
         },
+        skip: skipQuery ? Number(skipQuery) : undefined,
+        take: take ? Number(take) : undefined,
+        orderBy: orderByClause as Prisma.TrackOrderByWithRelationInput,
       });
-      // const deletedReleases = await prisma.trackGroup.findMany({
-      //   where: {
-      //     artist: artistOptedOutOrDeleted,
-      //   },
-      //   skip: skipQuery ? Number(skipQuery) : undefined,
-      //   take: take ? Number(take) : undefined,
-      //   orderBy: orderByClause as Prisma.TrackGroupOrderByWithRelationInput,
-      // });
 
       let deletedEntities: any = [];
-      for (const deletedArtist of deletedArtists.map((artist) =>
-        serializeSingleDeletedArtistIntoCanimus(artist)
-      )) {
-        deletedEntities.concat(deletedArtist);
-      }
+      deletedEntities = deletedEntities
+        .concat(
+          deletedArtists.map((artist) =>
+            serializeSingleDeletedArtistIntoCanimus(artist)
+          )
+        )
+        .concat(
+          deletedTrackGroups.map((trackGroup) =>
+            serializeSingleDeletedTrackGroupIntoCanimus(
+              trackGroup,
+              join(String(process.env.API_DOMAIN), trackGroup.artist.urlSlug)
+            )
+          )
+        )
+        .concat(
+          deletedTracks.map((track) =>
+            serializeSingleDeletedTrackIntoCanimus(
+              track,
+              join(
+                String(process.env.API_DOMAIN),
+                track.trackGroup.artist.urlSlug,
+                "release",
+                track.trackGroup.urlSlug
+              )
+            )
+          )
+        );
 
       res.json({
         type: "root",

@@ -83,7 +83,15 @@ const prisma = baseClient.$extends({
           });
         }
 
-        // Handle findFirst and findMany to filter out soft deleted
+        // Handle findFirst and findMany to filter out soft deleted.
+
+        // In case that a findMany or findFirst need to include deleted entities using
+        // nested conditions (i.e. OR, AND) it is needed to add a hacky deletedAt
+        // in the where root
+        // where:{
+        //   AND: [...]
+        //   deletedAt: {}
+        // }
         if (operation === "findFirst" || operation === "findMany") {
           const whereArgs = (args.where as any) || {};
           if (whereArgs.deletedAt === undefined) {

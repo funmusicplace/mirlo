@@ -16,6 +16,12 @@ To clean up these containers afterwards, the `--profile=test` argument needs to 
 docker compose --profile=test down
 ```
 
+Specific tests can be run filtering by title with the grep argument:
+
+```
+docker compose --profile=test run --build test yarn api:test --grep "federated"
+```
+
 ## ffmpeg integration tests
 
 Some tests (for example [test/utils/tracks.integration.spec.ts](test/utils/tracks.integration.spec.ts)) run real audio conversion and run by default.
