@@ -1,20 +1,23 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import ArtistHeaderActionsStrip from "components/Artist/ArtistHeaderActionsStrip";
 import Avatar from "components/Artist/Avatar";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { MetaCard } from "components/common/MetaCard";
+import ArtistFormLabel from "components/ManageArtist/ArtistFormLabel";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { getArtistUrl } from "utils/artist";
 import { useFitTitle } from "utils/useFitTitle";
 
-import { between, bp } from "../../constants";
+import { bp } from "../../constants";
 
-import ArtistHeaderActionsRow from "./ArtistHeaderActionsRow";
 import FollowArtist from "./FollowArtist";
-import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: calc(2.4rem * var(--page-scale, 1) * var(--fit-scale, 1));
@@ -44,83 +47,85 @@ export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   }
 `;
 
-export const Header = styled.div`
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  align-items: left;
-  justify-content: space-between;
-  flex-grow: 1;
-  font-size: var(--mi-font-size-normal);
-
-  @media screen and (max-width: ${bp.xlarge}px) {
-    font-size: var(--mi-font-size-small);
-  }
-
-  @media screen and (max-width: ${bp.medium}px) {
-    font-size: var(--mi-font-size-small);
-    line-height: var(--mi-font-size-normal);
-    border-radius: 0;
-    padding: var(--mi-side-paddings-xsmall);
-    margin-bottom: 0rem !important;
-  }
-`;
-
-export const AvatarWrapper = styled.div<{ artistAvatar?: boolean }>`
-  display: flex;
-  padding-top: calc(1rem * var(--page-scale, 1));
+const HeaderGrid = styled.div<{ hasBackground: boolean }>`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    padding-top: 0rem;
-    ${(props) => (props.artistAvatar ? "margin-bottom: 0rem;" : "")}
-  }
-`;
-
-export const ArtistTitleWrapper = styled.div<{ artistAvatar?: boolean }>`
-  width: 100%;
-  min-width: 0;
-  display: flex;
-  ${(props) =>
-    props.artistAvatar
-      ? "min-height: calc(85px * var(--page-scale, 1)); margin-left: 1rem;"
-      : ""}
-  flex-direction: column;
-  justify-content: center;
-  @media screen and (max-width: ${bp.medium}px) {
-    ${(props) =>
-      props.artistAvatar ? "min-height: 55px; margin-left: .5rem;" : ""}
-  }
-`;
-
-export const ArtistTitleText = styled.div`
-  min-height: calc(50px * var(--page-scale, 1));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  word-break: break-word;
-  width: 100%;
-  gap: 1.5rem;
-  @media screen and (max-width: ${bp.medium}px) {
-    min-height: auto;
-    gap: 1rem;
-  }
-`;
-
-export const HeaderWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: space-around;
+  column-gap: 1rem;
+  row-gap: 0.5rem;
   border-bottom: solid 1px var(--mi-button-color);
+  grid-template-areas:
+    "avatar identity follow"
+    "strip  strip    strip";
 
   @media screen and (max-width: ${bp.medium}px) {
-    gap: 0.5rem;
+    padding: var(--mi-side-paddings-xsmall);
     border-bottom-color: color-mix(
       in srgb,
       var(--mi-button-color) 50%,
       transparent
     );
+  }
+
+  @media screen and (min-width: ${Number(bp.medium) + 1}px) {
+    padding-top: calc(
+      ${(props) => (props.hasBackground ? "1" : "0.5")}rem *
+        var(--page-scale, 1)
+    );
+    grid-template-areas:
+      "avatar identity follow"
+      "pill   pill     strip";
+  }
+`;
+
+const AvatarWrapper = styled.div`
+  grid-area: avatar;
+  display: flex;
+  align-items: center;
+`;
+
+const IdentityWrapper = styled.div`
+  grid-area: identity;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+`;
+
+const FollowWrapper = styled.div`
+  grid-area: follow;
+  justify-self: end;
+`;
+
+const PillWrapper = styled.div`
+  grid-area: pill;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    display: none;
+  }
+`;
+
+const StripWrapper = styled.div<{ pulledUp: boolean }>`
+  grid-area: strip;
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 0.5rem;
+
+  @media screen and (min-width: ${Number(bp.medium) + 1}px) {
+    justify-self: end;
+    ${(props) => (props.pulledUp ? "margin-top: -1rem;" : "")}
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-top: 1px solid
+      color-mix(in srgb, var(--mi-button-color) 50%, transparent);
   }
 `;
 
@@ -135,6 +140,16 @@ const ArtistHeaderSection: React.FC<{
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
   const snackbar = useSnackbar();
   const titleRef = useFitTitle<HTMLHeadingElement>({ deps: [artist?.name] });
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
+
+  const displayedLabelArtist = React.useMemo(() => {
+    if (!artist || artist.isLabelProfile) return null;
+    const match = (artist.artistLabels ?? []).find(
+      (al) =>
+        al.isDisplayedOnArtistPage && al.isArtistApproved && al.isLabelApproved
+    );
+    return match?.labelUser.artists?.[0] ?? null;
+  }, [artist]);
 
   const handleSubmit = React.useCallback(
     async (data: UpdateArtistBody) => {
@@ -170,97 +185,83 @@ const ArtistHeaderSection: React.FC<{
         description={artist.bio}
         image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />
-      <HeaderWrapper>
-        <Header>
-          <AvatarWrapper artistAvatar={!!artistAvatar}>
-            {artistAvatar && (
-              <Avatar
-                avatar={
-                  artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
-                }
-              />
-            )}
+      <HeaderGrid hasBackground={!!artist.background?.sizes}>
+        <AvatarWrapper>
+          {artistAvatar && (
+            <Avatar
+              avatar={
+                artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
+              }
+            />
+          )}
+        </AvatarWrapper>
 
-            <ArtistTitleWrapper artistAvatar={!!artistAvatar}>
-              <SpaceBetweenDiv
-                className={css`
-                  padding-bottom: 0 !important;
-                  margin-bottom: 0rem !important;
-                  @media screen and (max-width: ${bp.medium}px) {
-                    margin: 0rem !important;
-                  }
-                `}
-              >
-                <ArtistTitleText>
-                  <div
-                    className={css`
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: center;
-                      word-break: break-word;
-                      flex: 1 1 auto;
-                      min-width: 0;
-                    `}
-                  >
-                    <ArtistTitle artistAvatar={!!artistAvatar} ref={titleRef}>
-                      {artist.name}
-                    </ArtistTitle>
-                    <div className="flex items-baseline gap-2 min-w-0">
-                      {artist.isLabelProfile &&
-                        artist.properties?.titles?.groupName && (
-                          <>
-                            <span className="max-md:hidden text-(--mi-button-color)">
-                              {artist.properties.titles.groupName}
-                            </span>
-                            <span className="max-md:hidden opacity-50">-</span>
-                          </>
-                        )}
-                      <ArtistFormLocation
-                        isManage={!!isManage}
-                        artist={artist}
-                        onSubmit={handleSubmit}
-                      />
-                    </div>
-                    {artist.shortDescription && (
-                      <div
-                        className={css`
-                          font-size: var(--mi-font-size-small);
-                          line-height: 1.2;
-                          margin-top: 0.25rem;
-                          @media ${between(bp.medium, bp.xlarge)} {
-                            margin-top: 0;
-                          }
-                          @media screen and (max-width: ${bp.medium}px) {
-                            display: none;
-                          }
-                        `}
-                      >
-                        {artist.shortDescription}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-row items-center gap-1 shrink-0 text-right break-normal!">
-                    {!isManage && <FollowArtist artistId={artist.id} />}
-                  </div>
-                </ArtistTitleText>
-              </SpaceBetweenDiv>
-            </ArtistTitleWrapper>
-          </AvatarWrapper>
-        </Header>
-        {!artistAvatar && (
-          <div
-            className={css`
-              display: block;
-              height: 1rem;
-            `}
-          />
+        <IdentityWrapper>
+          <ArtistTitle
+            className="min-w-0"
+            artistAvatar={!!artistAvatar}
+            ref={titleRef}
+          >
+            {artist.name}
+          </ArtistTitle>
+          <div className="flex items-baseline gap-2 min-w-0 max-md:text-sm">
+            {artist.isLabelProfile && artist.properties?.titles?.groupName && (
+              <>
+                <span className="max-md:hidden text-(--mi-button-color)">
+                  {artist.properties.titles.groupName}
+                </span>
+                <span className="max-md:hidden opacity-50">-</span>
+              </>
+            )}
+            <ArtistFormLocation
+              isManage={!!isManage}
+              artist={artist}
+              onSubmit={handleSubmit}
+            />
+          </div>
+          {artist.shortDescription && (
+            <div className="mt-1 text-sm leading-tight max-md:hidden">
+              {artist.shortDescription}
+            </div>
+          )}
+        </IdentityWrapper>
+
+        {!isManage && (
+          <FollowWrapper>
+            <FollowArtist artistId={artist.id} />
+          </FollowWrapper>
         )}
-        <ArtistHeaderActionsRow
-          artist={artist}
-          isManage={!!isManage}
-          onSubmit={handleSubmit}
-        />
-      </HeaderWrapper>
+
+        <PillWrapper>
+          {displayedLabelArtist && (
+            <ArtistButtonLink
+              variant="chip"
+              to={getArtistUrl(displayedLabelArtist)}
+              className={css`
+                &[class] {
+                  background-color: color-mix(
+                    in srgb,
+                    var(--mi-button-color) 8%,
+                    transparent
+                  ) !important;
+                  filter: brightness(var(--mi-chip-brightness, 1));
+                }
+              `}
+            >
+              {t("onLabel", { name: displayedLabelArtist.name })}
+            </ArtistButtonLink>
+          )}
+          {isManage && <ArtistFormLabel artist={artist} />}
+        </PillWrapper>
+
+        <StripWrapper pulledUp={!displayedLabelArtist && !isManage}>
+          <ArtistHeaderActionsStrip
+            artist={artist}
+            isManage={isManage}
+            onSubmit={handleSubmit}
+          />
+        </StripWrapper>
+      </HeaderGrid>
     </div>
   );
 };
