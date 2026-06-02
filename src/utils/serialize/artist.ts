@@ -41,7 +41,11 @@ interface LocalArtist extends Artist {
     images?: { image: Image }[];
     releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
   })[];
+  paymentToUser?: {
+    stripeAccountId?: string | null;
+  } | null;
   user?: {
+    stripeAccountId?: string | null;
     currency?: string | null;
     artistLabels?: {
       artist: Artist & {
@@ -134,12 +138,17 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     type: link.linkType,
     rel: "me",
   }));
-  artistLinks.unshift({
-    name: "Support",
-    href: new URL("support", `${artistUrl}/`).href,
-    type: "Support",
-    rel: "support",
-  });
+  const artistSupportsPayment = Boolean(
+    artist.paymentToUser?.stripeAccountId ?? artist.user?.stripeAccountId
+  );
+  if (artistSupportsPayment) {
+    artistLinks.unshift({
+      name: "Support",
+      href: new URL("support", `${artistUrl}/`).href,
+      type: "Support",
+      rel: "support",
+    });
+  }
 
   return {
     type: "artist",
@@ -160,10 +169,15 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     },
     summary: artist.shortDescription,
     description: artist.bio,
-    updated_date: artist.updatedAt?.toISOString().split("T")[0],
     links: artistLinks,
+    updated_date: artist.updatedAt?.toISOString().split("T")[0],
     children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
-      serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl, artist.name)
+      serializeSingleTrackGroupIntoCanimus(
+        trackGroup,
+        artistUrl,
+        artist.name,
+        artistSupportsPayment
+      )
     ),
   };
 };

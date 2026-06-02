@@ -91,10 +91,24 @@ export const processSingleTrackGroup = (
 export const serializeSingleTrackGroupIntoCanimus = (
   trackGroup: LocalTrackGroup,
   artistUrl: string,
-  artistName: string
+  artistName: string,
+  canBePurchased: boolean
 ) => {
-  const releaseUrl = join(artistUrl, "release", trackGroup.urlSlug);
+  const releaseUrl = `${artistUrl}/release/${trackGroup.urlSlug}`;
   const coverString = trackGroup.cover?.url.find((u) => u.includes("x600"));
+  let links;
+  if (canBePurchased) {
+    // TODO: replace with a standalone buy page once that exists
+    const purchaseUrl = `${releaseUrl}?buy=true`;
+    links = [
+      {
+        name: `Buy ${trackGroup.title} on Mirlo`,
+        href: purchaseUrl,
+        type: "Purchase",
+        rel: "purchase",
+      },
+    ];
+  }
 
   return {
     type: "album",
@@ -113,6 +127,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
           }
         : undefined,
     },
+    links,
     description: trackGroup.about,
     children: trackGroup.tracks?.map((track: CanimusTrack) =>
       serializeSingleTrackIntoCanimus(track, releaseUrl)
