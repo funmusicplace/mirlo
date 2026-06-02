@@ -1,16 +1,16 @@
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import { bp } from "../constants";
-import WidthContainer from "./common/WidthContainer";
-import { SectionHeader } from "./Home/Home";
-
-import usePagination from "utils/usePagination";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
-import TrackGroupPills from "./TrackGroup/TrackGroupPills";
-import SpaceBetweenDiv from "./common/SpaceBetweenDiv";
-import Select, { SelectEl } from "./common/Select";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import usePagination from "utils/usePagination";
+
+import { bp } from "../constants";
+
+import Select from "./common/Select";
+import WidthContainer from "./common/WidthContainer";
+import { SectionHeader } from "./Home/Home";
+import TrackGroupPills from "./TrackGroup/TrackGroupPills";
 
 const pageSize = 200;
 
@@ -33,19 +33,34 @@ const Tags = () => {
     >
       <SectionHeader>
         <WidthContainer variant="big">
-          <SpaceBetweenDiv>
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 0.5rem;
+              margin-bottom: 0.5rem;
+            `}
+          >
             <h2 className="h5 section-header__heading">{t("popularTags")}</h2>
-            <Select
-              options={[
-                { label: t("mostPopular"), value: "count" },
-                { label: t("alphabetical"), value: "name" },
-              ]}
-              value={orderBy}
-              onChange={(e) => {
-                setOrderBy(e.target.value as "count" | "name");
-              }}
-            />
-          </SpaceBetweenDiv>
+            <div
+              className={css`
+                align-self: flex-end;
+                margin: var(--mi-side-paddings-xsmall);
+              `}
+            >
+              <Select
+                options={[
+                  { label: t("mostPopular"), value: "count" },
+                  { label: t("alphabetical"), value: "name" },
+                ]}
+                value={orderBy}
+                onChange={(e) => {
+                  setOrderBy(e.target.value as "count" | "name");
+                }}
+              />
+            </div>
+          </div>
           <div
             className={css`
               margin: 0 0.5rem;

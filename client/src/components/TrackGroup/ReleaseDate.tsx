@@ -83,7 +83,7 @@ const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
   });
 
   return (
-    <div className="w-full text-sm opacity-80 max-xl:text-xs text-(--mi-secondary-text-color)">
+    <div className="flex-1 min-w-0 max-md:grow-0 max-md:basis-auto text-sm opacity-80 max-xl:text-xs text-(--mi-secondary-text-color)">
       {t(beforeReleaseDate ? "futureRelease" : "pastRelease", {
         date: releaseFormat,
       })}

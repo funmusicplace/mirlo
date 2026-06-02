@@ -9,7 +9,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
-import Button from "./Button";
+import Button, { ButtonProps } from "./Button";
 import FormComponent from "./FormComponent";
 import Modal from "./Modal";
 import TextArea from "./TextArea";
@@ -21,7 +21,9 @@ const ContactArtist: React.FC<{
   className?: string;
   onlyIcon?: boolean;
   size?: "compact" | "big" | "tiny";
-}> = ({ artist, className, onlyIcon, size }) => {
+  variant?: ButtonProps["variant"];
+  color?: string;
+}> = ({ artist, className, onlyIcon, size, variant, color }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
@@ -61,6 +63,8 @@ const ContactArtist: React.FC<{
         startIcon={<FaEnvelope />}
         onlyIcon={onlyIcon}
         size={size}
+        variant={variant}
+        color={color}
         aria-label={onlyIcon ? t("contact") : undefined}
         className={className}
       >

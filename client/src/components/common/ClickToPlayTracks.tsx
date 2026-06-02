@@ -5,6 +5,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { TfiControlPause } from "react-icons/tfi";
 import { VscPlay } from "react-icons/vsc";
 import { useParams } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -64,6 +65,10 @@ const ClickToPlayTracks: React.FC<{
     });
   }, [dispatch, trackIds]);
 
+  const onClickPause = React.useCallback(async () => {
+    dispatch({ type: "setPlaying", playing: false });
+  }, [dispatch]);
+
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
@@ -76,8 +81,8 @@ const ClickToPlayTracks: React.FC<{
   if (playLabel) {
     return (
       <ArtistButton
-        startIcon={<VscPlay />}
-        onClick={onClickPlay}
+        startIcon={currentlyPlaying ? <TfiControlPause /> : <VscPlay />}
+        onClick={currentlyPlaying ? onClickPause : onClickPlay}
         disabled={trackIds.length === 0}
         className={
           css`
@@ -87,7 +92,9 @@ const ClickToPlayTracks: React.FC<{
           ` + (className ? ` ${className}` : "")
         }
       >
-        {t(playLabel === "album" ? "playAlbum" : "playTrack")}
+        {currentlyPlaying
+          ? t("pause")
+          : t(playLabel === "album" ? "playAlbum" : "playTrack")}
       </ArtistButton>
     );
   }

@@ -1,20 +1,13 @@
-import { css } from "@emotion/css";
-
-import { Navigate, useParams, useSearchParams } from "react-router-dom";
-
-import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import { MetaCard } from "components/common/MetaCard";
-import { useArtistContext } from "state/ArtistContext";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-
-import { WidthWrapper } from "components/common/WidthContainer";
-
-import SmallTileDetails from "components/common/SmallTileDetails";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
+import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import ItemTransactionCard from "components/common/ItemTransactionCard";
+import { MetaCard } from "components/common/MetaCard";
+import { WidthWrapper } from "components/common/WidthContainer";
+import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
@@ -86,40 +79,29 @@ function DownloadAlbum() {
   }
 
   return (
-    <WidthWrapper variant="small">
+    <WidthWrapper className="pt-8 mb-12">
       <MetaCard
         title={trackGroup.title ?? t("untitledRelease")}
         description={trackGroup.about ?? t("releaseOnMirlo")}
         image={trackGroup.cover?.sizes?.[600]}
       />
-      <div
-        className={css`
-          margin-top: 2rem;
-        `}
+      <ItemTransactionCard
+        header={t("downloadYourRelease")}
+        cover={trackGroup.cover?.sizes?.[300]}
+        coverAlt={trackGroup.title ?? t("untitledRelease").toString()}
+        title={trackGroup.title ?? t("untitledRelease").toString()}
+        titleLink={getReleaseUrl(artist, trackGroup)}
+        artistName={artist.name}
+        artistUrl={getArtistUrl(artist)}
       >
-        <h2>{t("downloadYourRelease")}</h2>
-        <div
-          className={css`
-            display: flex;
-            margin-bottom: 1rem;
-          `}
-        >
-          <ImageWithPlaceholder
-            src={trackGroup.cover?.sizes?.[120]}
-            size={120}
-            alt={trackGroup.title ?? t("untitledRelease")}
-          />
-          <SmallTileDetails
-            title={trackGroup.title ?? t("untitledRelease").toString()}
-            subtitle={trackGroup.artist?.name ?? ""}
+        <div className="mt-4">
+          <DownloadAlbumButton
+            trackGroup={trackGroup}
+            token={token ?? undefined}
+            email={email ?? undefined}
           />
         </div>
-        <DownloadAlbumButton
-          trackGroup={trackGroup}
-          token={token ?? undefined}
-          email={email ?? undefined}
-        />
-      </div>
+      </ItemTransactionCard>
     </WidthWrapper>
   );
 }

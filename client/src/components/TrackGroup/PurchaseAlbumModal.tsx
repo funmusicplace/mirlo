@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
+import { longLabelClass } from "components/common/ClickToPlay";
 import { FixedButton } from "components/common/FixedButton";
 import Modal from "components/common/Modal";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
@@ -16,8 +16,7 @@ const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
   fixed?: boolean;
-  collapse?: boolean;
-}> = ({ trackGroup, track, fixed, collapse }) => {
+}> = ({ trackGroup, track, fixed }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
@@ -49,19 +48,20 @@ const PurchaseAlbumModal: React.FC<{
     return null;
   }
 
-  const currency = trackGroup.artist.user?.currency;
-
   const payOrNameYourPrice =
     trackGroup.minPrice === 0 ? "nameYourPriceLabel" : "buy";
 
   const preOrderOrBuyText =
     trackGroup.minPrice === null
-      ? "saveAlbum"
+      ? "addToCollection"
       : trackGroup.fundraiser?.isAllOrNothing
         ? "backThisProject"
         : trackGroup.isPreorder
           ? "preOrder"
           : payOrNameYourPrice;
+  const isAddToCollection = preOrderOrBuyText === "addToCollection";
+  const isNameYourPrice = preOrderOrBuyText === "nameYourPriceLabel";
+  const isLongLabel = isAddToCollection || isNameYourPrice;
   const purchaseTitle = trackGroup.isPreorder
     ? "preOrderingTrackGroup"
     : "buyingTrackGroup";
@@ -79,25 +79,26 @@ const PurchaseAlbumModal: React.FC<{
       type="button"
       onClick={() => setIsPurchasingAlbum(true)}
       variant="outlined"
-      startIcon={
-        collapse ? <CurrencyCoinIcon currency={currency} /> : undefined
-      }
-      className={css`
-        font-size: 1rem !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
-
-        .children {
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+      className={`${isLongLabel ? longLabelClass : ""} ${css`
+        ${isLongLabel
+          ? "font-size: 0.875rem !important; padding-left: 1rem !important; padding-right: 1rem !important;"
+          : "padding-left: 2rem !important; padding-right: 2rem !important;"}
 
         @media screen and (max-width: ${bp.medium}px) {
           width: 100%;
+
+          .children {
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.1;
+          }
         }
-      `}
+      `}`}
     >
-      {collapse ? "" : t(preOrderOrBuyText)}
+      {t(preOrderOrBuyText)}
     </ArtistButton>
   );
 

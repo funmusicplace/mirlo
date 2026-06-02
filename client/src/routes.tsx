@@ -10,12 +10,19 @@ async function markdownPage(source: string) {
   const { PageMarkdownWrapper } = await import("components/Post");
   const { default: MarkdownContent } =
     await import("components/common/MarkdownContent");
+  const { default: WidthContainer } =
+    await import("components/common/WidthContainer");
 
   return {
     Component: () => (
-      <PageMarkdownWrapper>
-        <MarkdownContent source={source} />
-      </PageMarkdownWrapper>
+      <WidthContainer
+        variant="big"
+        className="max-md:p-(--mi-side-paddings-small)"
+      >
+        <PageMarkdownWrapper className="pt-8">
+          <MarkdownContent source={source} />
+        </PageMarkdownWrapper>
+      </WidthContainer>
     ),
   };
 }

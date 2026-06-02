@@ -134,7 +134,10 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           {artist?.location && (
             <span
               className={css`
-                flex: 0 0 auto;
+                flex: 0 1 auto;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
               `}
             >
               {artist.location}

@@ -31,11 +31,11 @@ export const AnnouncementWrapper: React.FC<{
           color: var(--mi-text-color);
           background-color: color-mix(
             in srgb,
-            var(--mi-button-color) 30%,
+            var(--mi-background-color) 70%,
             transparent
           );
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
         `
           : `
           color: var(--mi-button-color);

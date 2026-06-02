@@ -64,6 +64,8 @@ const HeaderWrapper = styled.div<{
            aspect-ratio: 4 / 1;
            width: auto;
            min-height: auto;
+           background: transparent;
+           box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
@@ -155,7 +157,8 @@ const Header = () => {
   const artistBackground = artist?.background?.sizes;
 
   const show = useShow();
-  const transparent = !!artistBackground && !!artistId;
+  const transparent =
+    !!artistBackground && !!artistId && !artist?.announcementText;
 
   const stripTint = artistId ? "var(--mi-button-tint-color)" : "transparent";
 

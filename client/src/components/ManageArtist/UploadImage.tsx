@@ -1,10 +1,11 @@
 import { css } from "@emotion/css";
-import LoadingSpinner from "components/common/LoadingSpinner";
-import { bp } from "../../constants";
-import React from "react";
 import styled from "@emotion/styled";
-import { FaFileUpload } from "react-icons/fa";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaFileUpload } from "react-icons/fa";
+
+import { bp } from "../../constants";
 
 export const Img = styled.img<{ rounded?: boolean }>`
   transition: .25s background-color, .25s filter;
@@ -70,45 +71,48 @@ export const UploadPrompt: React.FC<{
   height?: string;
   rounded?: boolean;
   imageTypeDescription?: string;
-}> = ({ width, height, rounded, imageTypeDescription }) => {
+  className?: string;
+}> = ({ width, height, rounded, imageTypeDescription, className }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
 
   return (
     <div
-      className={css`
-        flex-direction: column;
-        padding: 1rem;
-        text-align: center;
-        font-size: 1rem;
-        aspect-ratio: 1 / 1;
-        background: radial-gradient(
-          circle,
-          rgba(96, 96, 96, 0.1) 3%,
-          rgba(125, 125, 125, 0.25) 90%
-        );
-        width: ${width};
-        height: ${height};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--mi-tint-x-color);
-        ${rounded ? "border-radius: 100%;" : ""}
-        transition: .25s background-color;
-        cursor: pointer;
+      className={
+        css`
+          flex-direction: column;
+          padding: 1rem;
+          text-align: center;
+          font-size: 1rem;
+          aspect-ratio: 1 / 1;
+          background: radial-gradient(
+            circle,
+            rgba(96, 96, 96, 0.1) 3%,
+            rgba(125, 125, 125, 0.25) 90%
+          );
+          width: ${width};
+          height: ${height};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--mi-tint-x-color);
+          ${rounded ? "border-radius: 100%;" : ""}
+          transition: .25s background-color;
+          cursor: pointer;
 
-        > svg {
-          font-size: 2rem;
-          margin-bottom: 1rem;
-        }
+          > svg {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+          }
 
-        &:hover {
-          background-color: var(--mi-tint-color);
-        }
-        @media (max-width: ${bp.medium}px) {
-          padding: 0.2rem;
-          font-size: var(--mi-font-size-small);
-        }
-      `}
+          &:hover {
+            background-color: var(--mi-tint-color);
+          }
+          @media (max-width: ${bp.medium}px) {
+            padding: 0.2rem;
+            font-size: var(--mi-font-size-small);
+          }
+        ` + ` ${className ?? ""}`
+      }
     >
       <FaFileUpload />
       {t("clickToUploadType", { imageType: imageTypeDescription })}

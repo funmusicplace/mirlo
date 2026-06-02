@@ -44,13 +44,23 @@ const ArtistHeaderActionsStrip: React.FC<{
         <ArtistButtonLink
           to="links"
           size={buttonSize}
+          variant="transparent"
+          color="foreground"
+          uppercase
+          bold={false}
           className={`${tabButtonClass} ${hasHiddenLink ? "" : "md:hidden!"}`}
         >
           {t("links")}
         </ArtistButtonLink>
       )}
       {!isManage && (
-        <ContactArtist artist={artist} onlyIcon size={buttonSize} />
+        <ContactArtist
+          artist={artist}
+          onlyIcon
+          size={buttonSize}
+          variant="transparent"
+          color="foreground"
+        />
       )}
       <ArtistButtonAnchor
         target="_blank"
@@ -58,9 +68,16 @@ const ArtistHeaderActionsStrip: React.FC<{
         rel="noreferrer"
         onlyIcon
         size={buttonSize}
+        variant="transparent"
+        color="foreground"
         startIcon={<FaRss />}
       />
-      <ArtistShare artist={artist} size={buttonSize} />
+      <ArtistShare
+        artist={artist}
+        size={buttonSize}
+        variant="transparent"
+        color="foreground"
+      />
     </div>
   );
 };

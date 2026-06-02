@@ -4,9 +4,9 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle } from "react-icons/fa";
 import api from "services/api";
-import { InputEl } from "../Input";
-import { useSnackbar } from "state/SnackbarContext";
 import useErrorHandler from "services/useErrorHandler";
+
+import { InputEl } from "../Input";
 
 const ImagesInPostManager: React.FC<{
   images?: PostImage[];
@@ -122,6 +122,12 @@ const ImagesInPostManager: React.FC<{
               width="100px"
               height="100px"
               imageTypeDescription={t("featuredImage").toString()}
+              className={css`
+                && {
+                  padding: 0;
+                  font-size: 0.75rem;
+                }
+              `}
             />
           </label>
           <InputEl
