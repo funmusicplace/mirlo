@@ -125,8 +125,21 @@ export const processSingleArtist = (
 };
 
 export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
-  const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
+  const artistUrl = new URL(artist.urlSlug, String(process.env.API_DOMAIN))
+    .href;
   const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
+  const artistLinks = artist.linksJson.map((link: any) => ({
+    name: link.linkLabel,
+    href: link.url,
+    type: link.linkType,
+    rel: "me",
+  }));
+  artistLinks.unshift({
+    name: "Support",
+    href: new URL("support", `${artistUrl}/`).href,
+    type: "Support",
+    rel: "support",
+  });
 
   return {
     type: "artist",
@@ -147,12 +160,8 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     },
     summary: artist.shortDescription,
     description: artist.bio,
-    links: artist.linksJson.map((link: any) => ({
-      name: link.linkLabel,
-      href: link.url,
-      type: link.linkType,
-    })),
     updated_date: artist.updatedAt?.toISOString().split("T")[0],
+    links: artistLinks,
     children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
       serializeSingleTrackGroupIntoCanimus(trackGroup, artistUrl, artist.name)
     ),
