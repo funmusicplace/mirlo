@@ -43,6 +43,7 @@ export default function () {
           { artist: federatedArtistAtSomePoint },
           deleted as Prisma.TrackGroupWhereInput,
         ],
+        deletedAt: {},
       };
 
       let trackDeleted: Prisma.TrackWhereInput = {
@@ -50,6 +51,7 @@ export default function () {
           { trackGroup: { artist: federatedArtistAtSomePoint } },
           deleted as Prisma.TrackWhereInput,
         ],
+        deletedAt: {},
       };
 
       if (fromDateFilter) {
@@ -57,10 +59,7 @@ export default function () {
           federatedStreamingOptInDate: fromDateFilter,
         };
 
-        const updatedOrCreatedFilter:
-          | Prisma.TrackGroupWhereInput
-          | Prisma.TrackWhereInput
-          | Prisma.ArtistWhereInput = {
+        const updatedOrCreatedFilter = {
           deletedAt: null,
           OR: [
             {
@@ -108,9 +107,7 @@ export default function () {
         trackDeleted.deletedAt = fromDateFilter;
       }
 
-      const orderByClause:
-        | Prisma.ArtistOrderByWithRelationInput
-        | Prisma.TrackGroupOrderByWithRelationInput = {
+      const orderByClause = {
         createdAt: "desc",
       };
 

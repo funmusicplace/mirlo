@@ -177,6 +177,7 @@ export const artistFederatedButDeleted: Prisma.ArtistWhereInput = {
 
 export const artistOptedOutOrDeleted: Prisma.ArtistWhereInput = {
   OR: [artistOptedOut, artistFederatedButDeleted],
+  deletedAt: {}, // this is to avoid the middleware filtering out softDeleted -> /mirlo/prisma/prisma.ts
 };
 
 export const findArtistIdForURLSlug = async (id: string | number) => {
