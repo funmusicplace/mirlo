@@ -160,11 +160,13 @@ const BuyTrackGroup: React.FC<{
     if (minPrice === 0 || minPrice === null) {
       return (
         <div className="m-4">
-          <p className="mb-2">
-            {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
-          </p>
+          {user && (
+            <p className="mb-2">
+              {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
+            </p>
+          )}
           <AddToCollection trackGroup={trackGroup} />{" "}
-          <p className="mt-2">{t("addToCollectionDescription")}</p>
+          {user && <p className="mt-2">{t("addToCollectionDescription")}</p>}
         </div>
       );
     }
@@ -298,11 +300,13 @@ const BuyTrackGroup: React.FC<{
         <hr />
         {(minPrice === 0 || minPrice === null) && (
           <div className="mt-4">
-            <p className="mb-2">
-              {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
-            </p>
+            {user && (
+              <p className="mb-2">
+                {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
+              </p>
+            )}
             <AddToCollection trackGroup={trackGroup} />{" "}
-            <p className="mt-2">{t("addToCollectionDescription")}</p>
+            {user && <p className="mt-2">{t("addToCollectionDescription")}</p>}
           </div>
         )}
       </div>

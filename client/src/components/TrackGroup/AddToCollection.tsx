@@ -1,14 +1,14 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
-import Modal from "components/common/Modal";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { useSnackbar } from "state/SnackbarContext";
-import api from "services/api";
-import { useNavigate } from "react-router-dom";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import { IoAddSharp } from "react-icons/io5";
 import { FixedButton } from "components/common/FixedButton";
+import React from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { IoAddSharp } from "react-icons/io5";
+import { Link, useNavigate } from "react-router-dom";
+import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+
 import { bp } from "../../constants";
 
 const AddToCollection: React.FC<{
@@ -17,7 +17,9 @@ const AddToCollection: React.FC<{
 }> = ({ trackGroup, fixed }) => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+  const isLoggedOut = !user;
 
   const purchaseAlbum = React.useCallback(async () => {
     try {
@@ -37,9 +39,21 @@ const AddToCollection: React.FC<{
 
   return (
     <>
+      {isLoggedOut && (
+        <p className="mb-2 text-sm text-(--mi-light-foreground-color)">
+          <Trans
+            t={t}
+            i18nKey="addToCollectionLoggedOut"
+            components={{
+              signupLink: <Link to="/signup" className="underline" />,
+            }}
+          />
+        </p>
+      )}
       {fixed ? (
         <FixedButton
           rounded
+          disabled={isLoggedOut}
           onClick={() => purchaseAlbum()}
           startIcon={<IoAddSharp />}
         >
@@ -48,6 +62,7 @@ const AddToCollection: React.FC<{
       ) : (
         <ArtistButton
           variant="outlined"
+          disabled={isLoggedOut}
           onClick={() => purchaseAlbum()}
           className={css`
             font-size: 1rem !important;
