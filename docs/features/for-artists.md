@@ -92,6 +92,12 @@ can afford to give to us.
 
 You can set a price on your full catalog, so that a supporter can pay one price and get your entire current catalogue in one go.
 
+## The social web
+
+Want to be discoverable across the social web (Mastodon, etc.)?
+
+Enable social web following from your profile page so that fans can follow you from any ActivityPub-compatible platform and get your updates in their feed.
+
 ## Merch
 
 You can sell Merch using Mirlo. Merch shows up on your profile page,

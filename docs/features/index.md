@@ -14,5 +14,6 @@ features:
     details: On top of all the features available to artists, labels get to manage their own artist accounts and more
     link: /features/for-labels
   - title: For listeners
-    details: Docs to come!
+    details: See the features available to listeners.
+    link: /features/for-listeners
 ---
