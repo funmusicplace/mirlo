@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
 import { ButtonLink } from "components/common/Button";
@@ -14,6 +15,14 @@ import HomeFeaturedArtists from "./HomeFeaturedArtists";
 
 const futureReleasesPageSize = 6;
 
+const PopularReleasesSection = styled.div`
+  padding: 4rem 0;
+
+  & > :first-child {
+    margin-top: 0;
+  }
+`;
+
 const HomeReleases = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
 
@@ -27,11 +36,24 @@ const HomeReleases = () => {
 
   return (
     <div className="w-full">
-      <HomeFeaturedArtists />
       <Releases limit={8} />
 
+      <WidthContainer
+        variant="big"
+        className="flex gap-4 !justify-end !mb-16 max-md:p-[var(--mi-side-paddings-xsmall)]"
+      >
+        <ButtonLink wrap variant="outlined" to="/artists">
+          {t("viewAllArtists")}
+        </ButtonLink>
+        <ButtonLink wrap to="/releases" endIcon={<FaChevronRight />}>
+          {t("moreReleases")}
+        </ButtonLink>
+      </WidthContainer>
+
+      <HomeFeaturedArtists />
+
       {(popularReleases?.results ?? []).length > 0 && (
-        <>
+        <PopularReleasesSection>
           <SectionHeader>
             <WidthContainer
               variant="big"
@@ -43,7 +65,7 @@ const HomeReleases = () => {
               </h1>
             </WidthContainer>
           </SectionHeader>
-          <div className="pt-1 mb-16">
+          <div className="pt-1">
             <WidthContainer variant="big" justify="center">
               <div className="flex w-full flex-row flex-wrap p-[var(--mi-side-paddings-xsmall)]">
                 <TrackgroupGrid
@@ -65,20 +87,8 @@ const HomeReleases = () => {
               </div>
             </WidthContainer>
           </div>
-        </>
+        </PopularReleasesSection>
       )}
-
-      <WidthContainer
-        variant="big"
-        className="flex gap-4 !justify-end !mb-16 max-md:p-[var(--mi-side-paddings-xsmall)]"
-      >
-        <ButtonLink wrap variant="outlined" to="/artists">
-          {t("viewAllArtists")}
-        </ButtonLink>
-        <ButtonLink wrap to="/releases" endIcon={<FaChevronRight />}>
-          {t("moreReleases")}
-        </ButtonLink>
-      </WidthContainer>
     </div>
   );
 };

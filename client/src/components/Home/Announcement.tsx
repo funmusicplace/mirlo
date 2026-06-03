@@ -26,6 +26,10 @@ const Announcement: React.FC = () => {
         gap: 1rem;
         font-size: 1.2rem;
 
+        #markdown-content {
+          margin-top: 0;
+        }
+
         a {
           color: var(--mi-button-text-color);
           text-decoration: underline;
