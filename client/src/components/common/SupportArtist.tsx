@@ -8,7 +8,7 @@ import { FaDonate } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
 
-import Button from "./Button";
+import Button, { ButtonProps } from "./Button";
 import { FixedButton } from "./FixedButton";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
 import TipArtistModal from "./TipArtistModal";
@@ -19,7 +19,14 @@ const SupportArtist: React.FC<{
   fixed?: boolean;
   compact?: boolean;
   label?: string;
-}> = ({ artistId, fixed = false, compact = false, label }) => {
+  variant?: ButtonProps["variant"];
+}> = ({
+  artistId,
+  fixed = false,
+  compact = false,
+  label,
+  variant = "outlined",
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const { data: artist } = useQuery(
@@ -53,12 +60,14 @@ const SupportArtist: React.FC<{
     </FixedButton>
   ) : compact ? (
     <ArtistButton
+      variant={variant}
       className={`tip-artist ${css`
         font-size: 0.75em !important;
-        background-color: var(--mi-button-tint-color) !important;
+        ${variant === "outlined"
+          ? "background-color: var(--mi-button-tint-color) !important;"
+          : ""}
       `}`}
       size="compact"
-      variant="outlined"
       type="button"
       onClick={onTipClick}
       startIcon={<FaDonate />}
