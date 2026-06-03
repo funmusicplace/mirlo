@@ -175,6 +175,13 @@ const ArtistHeaderSection: React.FC<{
     return null;
   }
 
+  const hasHeaderContent =
+    !!artistAvatar ||
+    !!artist.shortDescription ||
+    !!artist.location ||
+    !!artist.artistLocationTags?.length ||
+    !!(artist.isLabelProfile && artist.properties?.titles?.groupName);
+
   return (
     <div
       className={css`
@@ -260,7 +267,9 @@ const ArtistHeaderSection: React.FC<{
           {isManage && <ArtistFormLabel artist={artist} />}
         </PillWrapper>
 
-        <StripWrapper pulledUp={!displayedLabelArtist && !isManage}>
+        <StripWrapper
+          pulledUp={!displayedLabelArtist && !isManage && hasHeaderContent}
+        >
           <ArtistHeaderActionsStrip
             artist={artist}
             isManage={isManage}
