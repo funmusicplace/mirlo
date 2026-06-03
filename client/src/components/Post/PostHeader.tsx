@@ -120,7 +120,11 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
         gap: 0.5rem;
       `}
     >
-      <SupportArtist artistId={post.artistId} compact />
+      <SupportArtist
+        artistId={post.artistId}
+        compact
+        variant={featuredImage && isMobile ? "default" : "outlined"}
+      />
       <ShareButton
         title={post.title}
         url={`${import.meta.env.VITE_CLIENT_DOMAIN}${getPostURLReference(post)}`}
