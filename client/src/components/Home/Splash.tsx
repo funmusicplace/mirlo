@@ -1,7 +1,9 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
 import { ButtonLink } from "components/common/Button";
 import Parallax from "parallax-js";
+import { queryInstanceArtist } from "queries/settings";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { FaArrowRight } from "react-icons/fa";
@@ -10,7 +12,7 @@ import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../../constants";
 
-export const SplashWrapper = styled.div`
+export const SplashWrapper = styled.div<{ hasAnnouncement?: boolean }>`
   display: var(--mi-instance-show-hero-on-home, flex);
   align-items: center;
   justify-content: center;
@@ -22,12 +24,11 @@ export const SplashWrapper = styled.div`
   background-repeat: repeat;
   background-size: 182px;
 
-  @media (orientation: landscape) {
-    min-height: calc(100vh - 177px);
-  }
+  min-height: calc(
+    100dvh - 50px - 54px ${(props) => (props.hasAnnouncement ? " - 61px" : "")}
+  );
 
   @media screen and (max-width: ${bp.medium}px) and (orientation: portrait) {
-    min-height: calc(100vh - 170px);
     padding: 0rem 0.5rem 1rem 0.5rem;
   }
 `;
@@ -77,9 +78,10 @@ const Splash = () => {
 
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "home" });
+  const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
   return (
-    <SplashWrapper>
+    <SplashWrapper hasAnnouncement={!!instanceArtist?.announcementText}>
       <div
         className={css`
           width: 100%;

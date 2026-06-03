@@ -53,6 +53,7 @@
     "noTracksFound": "No tracks found for your search.",
     "noTagsFound": "No tags matching your search.",
     "viewAllArtists": "Explore all artists",
+    "featuredArtists": "Featured",
     "viewAllLabels": "Explore all labels",
     "popularTags": "Popular Tags",
     "publicDomain": "Public Domain",
@@ -835,6 +836,7 @@
     "editPost": "Edit post",
     "deletePost": "Delete post",
     "drafts": "Drafts",
+    "queuedPosts": "Queued posts",
     "publishedPosts": "Published posts",
     "collapseDetails": "Collapse details",
     "expandDetails": "Expand details",
@@ -935,7 +937,8 @@
     "filterLabelKind": "What to search for",
     "kindAll": "All",
     "categoryTracks": "Tracks",
-    "categoryReleases": "Releases"
+    "categoryReleases": "Releases",
+    "categoryArtists": "Artists"
   },
   "manageLicense": {
     "shortLabelForLicense": "What's a unique short label for this license?",
@@ -1487,6 +1490,9 @@
     "donateNow": "Donate now"
   },
   "admin": {
+    "addFeaturedArtist": "Add featured artist",
+    "removeFeaturedArtist": "Remove",
+    "searchArtistsPlaceholder": "Search artists...",
     "users": "Users",
     "hideFromSearch": "Hide from search",
     "isPrivate": "Is private?",
@@ -1758,7 +1764,7 @@
     "embedPreview": "Embed preview"
   },
   "home": {
-    "support": "<red>Directly support artists.</red> Buy their music. Collectively owned and managed.",
+    "support": "<red>Directly support artists and independent labels.</red> Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "supportTeam": "Support Mirlo",
     "sustainedBy": "Mirlo's work is sustained by our community, not by venture capital.",

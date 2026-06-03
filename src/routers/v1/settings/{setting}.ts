@@ -1,7 +1,13 @@
-import { NextFunction, Request, Response } from "express";
-import { getSiteSettings } from "../../../utils/settings";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { addSizesToImage } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
+import {
+  finalArtistAvatarBucket,
+  finalArtistBackgroundBucket,
+} from "../../../utils/minio";
+import { getSiteSettings } from "../../../utils/settings";
 
 export default function () {
   const operations = {
@@ -20,6 +26,7 @@ export default function () {
         "contentPolicy",
         "isClosedToPublicArtistSignup",
         "platformPercent",
+        "featuredArtists",
         "instanceCustomization.title",
         "instanceCustomization.supportEmail",
         "instanceCustomization.artistId",
@@ -46,7 +53,35 @@ export default function () {
         });
       }
 
-      if (
+      if (setting === "featuredArtists") {
+        const settingsJson = settings.settings as
+          | Record<string, unknown>
+          | null
+          | undefined;
+        const featuredArtistIds = settingsJson?.featuredArtistIds as
+          | number[]
+          | undefined;
+        if (!featuredArtistIds?.length) {
+          return res.status(200).json({ result: [] });
+        }
+        const artists = await prisma.artist.findMany({
+          where: { id: { in: featuredArtistIds }, deletedAt: null },
+          include: {
+            avatar: { where: { deletedAt: null } },
+            background: { where: { deletedAt: null } },
+          },
+        });
+        return res.status(200).json({
+          result: artists.map((a) => ({
+            ...a,
+            avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
+            background: addSizesToImage(
+              finalArtistBackgroundBucket,
+              a.background
+            ),
+          })),
+        });
+      } else if (
         setting === "instanceArtist" &&
         settings.settings?.instanceCustomization?.artistId &&
         Number.isFinite(

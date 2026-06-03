@@ -75,7 +75,11 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
                 onClick={() => setIsExpanded((v) => !v)}
               />
               <ArtistRouterLink
-                to={getPostURLReference({ ...post, artist })}
+                to={
+                  post.isDraft || isFuture
+                    ? getManagePostURLReference(post)
+                    : getPostURLReference({ ...post, artist })
+                }
                 className="min-w-0 flex-1 flex flex-col justify-start items-start no-underline! hover:underline!"
               >
                 <h2 className="w-full line-clamp-2 mb-0! pb-1 text-sm! md:text-lg!">

@@ -96,23 +96,33 @@ type ManagedArtistPostsParams = {
   skip?: number;
   take?: number;
   isDraft?: boolean;
+  isScheduled?: boolean;
 };
 
 const fetchManagedArtistPosts: QueryFunction<
   { results: Post[]; total: number },
   ["fetchManagedArtistPosts", ManagedArtistPostsParams]
-> = ({ queryKey: [_, { artistId, skip = 0, take = 10, isDraft }], signal }) => {
+> = ({
+  queryKey: [_, { artistId, skip = 0, take = 10, isDraft, isScheduled }],
+  signal,
+}) => {
   const params = new URLSearchParams({
     skip: String(skip),
     take: String(take),
   });
   if (isDraft !== undefined) params.set("isDraft", String(isDraft));
+  if (isScheduled !== undefined) params.set("isScheduled", String(isScheduled));
   return api.get(`v1/manage/artists/${artistId}/posts?${params}`, { signal });
 };
 
 export function queryManagedArtistPosts(
   artistId: number,
-  opts: { skip?: number; take?: number; isDraft?: boolean } = {}
+  opts: {
+    skip?: number;
+    take?: number;
+    isDraft?: boolean;
+    isScheduled?: boolean;
+  } = {}
 ) {
   return queryOptions({
     queryKey: ["fetchManagedArtistPosts", { artistId, ...opts }],

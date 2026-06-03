@@ -54,6 +54,7 @@ export default function () {
           ...(settings?.stripe ?? {}),
           key: incomingStripeKey || existingStripe?.key,
         },
+        featuredArtistIds: settings?.featuredArtistIds ?? [],
       };
       await prisma.settings.update({
         data: {
