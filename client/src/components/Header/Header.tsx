@@ -212,7 +212,7 @@ const Header = () => {
               startIcon={<FaHandHoldingHeart />}
               className="block no-underline text-center hover:underline! color-white! &_svg:fill-white! bg-black! max-md:text-(--mi-font-size-xsmall)!"
             >
-              <p>{t("donateNow", { keyPrefix: "kickstarter" })}</p>
+              {t("donateNow", { keyPrefix: "kickstarter" })}
             </ButtonLink>
           )}
           <HeaderSearch />
