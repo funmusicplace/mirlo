@@ -138,7 +138,11 @@ export default function () {
         await fetchFile(res, track.audio.id, segment);
       }
     } catch (e) {
-      console.error(e);
+      if (e instanceof AppError) {
+        log.info(e);
+      } else {
+        log.error(e);
+      }
       return next(e);
     }
   }
