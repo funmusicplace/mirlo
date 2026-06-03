@@ -313,6 +313,7 @@
     "price": "Price:",
     "addToCollection": "Add to collection",
     "addToCollectionDescription": "You'll add this free release to your collection.",
+    "addToCollectionLoggedOut": "You can <signupLink>create a Mirlo account</signupLink> to add this release to your music collection.",
     "addAlbumToCollection": "Add {{ title }} to your collection",
     "getDownloadLink": "Get download link in email",
     "email": "Email",
