@@ -47,16 +47,18 @@ export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   }
 `;
 
-const HeaderGrid = styled.div<{ hasBackground: boolean }>`
+const HeaderGrid = styled.div<{ hasBackground: boolean; hasAvatar: boolean }>`
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: ${(props) =>
+    props.hasAvatar ? "auto minmax(0, 1fr) auto" : "minmax(0, 1fr) auto"};
   align-items: center;
   column-gap: 1rem;
   row-gap: 0.5rem;
   border-bottom: solid 1px var(--mi-button-color);
-  grid-template-areas:
-    "avatar identity follow"
-    "strip  strip    strip";
+  grid-template-areas: ${(props) =>
+    props.hasAvatar
+      ? `"avatar identity follow" "strip strip strip"`
+      : `"identity follow" "strip strip"`};
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);
@@ -72,9 +74,10 @@ const HeaderGrid = styled.div<{ hasBackground: boolean }>`
       ${(props) => (props.hasBackground ? "1" : "0.5")}rem *
         var(--page-scale, 1)
     );
-    grid-template-areas:
-      "avatar identity follow"
-      "pill   pill     strip";
+    grid-template-areas: ${(props) =>
+      props.hasAvatar
+        ? `"avatar identity follow" "pill pill strip"`
+        : `"identity follow" "pill strip"`};
   }
 `;
 
@@ -185,16 +188,19 @@ const ArtistHeaderSection: React.FC<{
         description={artist.bio}
         image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />
-      <HeaderGrid hasBackground={!!artist.background?.sizes}>
-        <AvatarWrapper>
-          {artistAvatar && (
+      <HeaderGrid
+        hasBackground={!!artist.background?.sizes}
+        hasAvatar={!!artistAvatar}
+      >
+        {artistAvatar && (
+          <AvatarWrapper>
             <Avatar
               avatar={
                 artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
               }
             />
-          )}
-        </AvatarWrapper>
+          </AvatarWrapper>
+        )}
 
         <IdentityWrapper>
           <ArtistTitle

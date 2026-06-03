@@ -27,6 +27,7 @@ const HeaderWrapper = styled.div<{
   artistId?: boolean;
   show?: string;
   trackGroupId?: boolean;
+  postId?: boolean;
   stripTint?: string;
 }>`
   position: sticky;
@@ -46,7 +47,7 @@ const HeaderWrapper = styled.div<{
       : ""}
 
   ${(props) =>
-    props.transparent && !props.trackGroupId
+    props.transparent && !props.trackGroupId && !props.postId
       ? `background: transparent;
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
       : `background-color: var(--mi-background-color);
@@ -59,7 +60,7 @@ const HeaderWrapper = styled.div<{
     align-items: flex-start;
 
     ${(props) =>
-      props.hasBackground && !props.trackGroupId
+      props.hasBackground && !props.trackGroupId && !props.postId
         ? `top: calc(var(--header-cover-sticky-height) - 25vw);
            aspect-ratio: 4 / 1;
            width: auto;
@@ -69,14 +70,20 @@ const HeaderWrapper = styled.div<{
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
-      props.hasBackground && !props.trackGroupId && props.show === "up"
+      props.hasBackground &&
+      !props.trackGroupId &&
+      !props.postId &&
+      props.show === "up"
         ? `top: calc(var(--header-cover-sticky-height) - 25vw);
            aspect-ratio: 4 / 1;
            width: auto;
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
-      props.hasBackground && !props.trackGroupId && props.show === "down"
+      props.hasBackground &&
+      !props.trackGroupId &&
+      !props.postId &&
+      props.show === "down"
         ? `top: calc(var(--header-cover-sticky-height) - 50vw);
            aspect-ratio: 4 / 1;
            width: auto;
@@ -85,7 +92,7 @@ const HeaderWrapper = styled.div<{
         : ""}
 
 
-    ${(props) => (props.trackGroupId ? "aspect-ratio: 0;" : "")}
+    ${(props) => (props.trackGroupId || props.postId ? "aspect-ratio: 0;" : "")}
   }
 `;
 
@@ -151,7 +158,7 @@ const Header = () => {
   const { user } = useAuthContext();
   const isLoggedIn = !!user?.id;
 
-  const { artistId, trackGroupId } = useParams();
+  const { artistId, trackGroupId, postId } = useParams();
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
   const artistBackground = artist?.background?.sizes;
@@ -186,6 +193,7 @@ const Header = () => {
       hasBackground={!!artistBackground}
       show={show}
       trackGroupId={!!trackGroupId}
+      postId={!!postId}
       artistId={!!artistId}
       stripTint={stripTint}
     >
