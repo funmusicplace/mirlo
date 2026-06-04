@@ -219,6 +219,7 @@ const Header = () => {
           {!isLoggedIn && (
             <ButtonLink
               aria-label={t("logIn", { keyPrefix: "logIn" })}
+              title={t("logIn", { keyPrefix: "logIn" })}
               startIcon={<FaUserAlt />}
               to="/login"
               variant="transparent"
