@@ -176,6 +176,7 @@ export const CreditsWrapper = styled.div<{
       : ""}
 
   @media screen and (max-width: ${bp.medium}px) {
+    display: block;
     ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
     max-width: 100%;
     padding: 0.5rem 0.25rem 0.5rem 0rem;
@@ -214,6 +215,9 @@ function TrackGroup() {
   });
   const isCompactLayout = useMatchMedia(between(bp.medium, bp.xlarge));
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
+  const isSingleColumn = useMatchMedia(
+    `screen and (max-width: ${bp.medium}px)`
+  );
 
   const { artistId, trackGroupId } = useParams();
   const { data: artist, isPending: isLoadingArtist } = useQuery(
@@ -294,7 +298,9 @@ function TrackGroup() {
                   />
                 </ImageWrapper>
                 <UnderneathImage>
-                  <ReleaseDate releaseDate={trackGroup.releaseDate} />
+                  {!isSingleColumn && (
+                    <ReleaseDate releaseDate={trackGroup.releaseDate} />
+                  )}
                   <TrackGroupEmbed trackGroup={trackGroup} />
                   <Wishlist trackGroup={trackGroup} inArtistPage />
                   <div className="grow-0 max-md:grow min-w-0 flex justify-end">
@@ -394,6 +400,9 @@ function TrackGroup() {
               trackGroupCredits={Boolean(trackGroupCredits)}
               trackGroupAbout={Boolean(trackGroupAbout)}
             >
+              {isSingleColumn && (
+                <ReleaseDate releaseDate={trackGroup.releaseDate} />
+              )}
               <MarkdownContent content={trackGroup.credits} />
             </CreditsWrapper>
           </TrackgroupInfosWrapper>
