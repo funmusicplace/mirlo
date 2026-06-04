@@ -236,7 +236,9 @@ const Pricing: React.FC<{
               />
             </div>
             <small id="hint-minimum-price-access" className="max-w-[72ch]">
-              {t("pricingHelp")}
+              {artist.maxFreePlays
+                ? t("pricingHelpWithLimit", { count: artist.maxFreePlays })
+                : t("pricingHelp")}
             </small>
             {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
             <small id="hint-minimum-price-currency" className="max-w-[72ch]">
