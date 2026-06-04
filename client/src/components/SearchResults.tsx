@@ -60,6 +60,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const { data: artists, isPending: isLoadingArtists } = useQuery(
     queryArtists({
       name: search ?? undefined,
+      isLabel: false,
       take: 20,
     })
   );

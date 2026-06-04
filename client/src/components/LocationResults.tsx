@@ -1,24 +1,26 @@
-import { useId } from "react";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { queryArtists, queryTrackGroups } from "queries";
+import { getLocationTagBySlug } from "queries/locationTags";
+import { useId } from "react";
+import React from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { FaChevronRight } from "react-icons/fa";
+import { useParams } from "react-router-dom";
+import usePagination from "utils/usePagination";
+
 import { bp } from "../constants";
+
+import NotFoundPage from "./404";
+import ArtistSquare from "./Artist/ArtistSquare";
+import { ButtonLink } from "./common/Button";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
 
-import usePagination from "utils/usePagination";
-import { useParams } from "react-router-dom";
-import { queryArtists, queryTrackGroups } from "queries";
-import { useQuery } from "@tanstack/react-query";
-import { ButtonLink } from "./common/Button";
-import { FaChevronRight } from "react-icons/fa";
-import React from "react";
-import ArtistSquare from "./Artist/ArtistSquare";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import LoadingBlocks from "./Artist/LoadingBlocks";
 import SpaceBetweenDiv from "./common/SpaceBetweenDiv";
-import { getLocationTagBySlug } from "queries/locationTags";
-import NotFoundPage from "./404";
 
 const pageSize = 40;
 
@@ -42,6 +44,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const { data: artists, isPending: isLoadingArtists } = useQuery(
     queryArtists({
       take: 20,
+      isLabel: false,
       locationSlug: locationSlug || undefined,
     })
   );

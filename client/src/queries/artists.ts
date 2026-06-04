@@ -280,7 +280,7 @@ const fetchArtists: QueryFunction<
   if (orderBy) params.append("orderBy", orderBy);
   if (name) params.append("name", name);
   if (locationSlug) params.append("locationSlug", locationSlug);
-  if (isLabel) params.append("isLabel", String(isLabel));
+  if (isLabel !== undefined) params.append("isLabel", String(isLabel));
 
   return api.get(`v1/artists?${params}`, { signal });
 };

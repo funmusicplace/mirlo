@@ -76,7 +76,7 @@ const HeaderSearch: React.FC = () => {
     enabled: searchActive && useBackendSearch && wantTrackGroups,
   });
   const artistsQ = useQuery({
-    ...queryArtists({ name: trimmed, take: 10 }),
+    ...queryArtists({ name: trimmed, isLabel: false, take: 10 }),
     enabled: searchActive && useBackendSearch && wantArtists,
   });
   const labelsQ = useQuery({

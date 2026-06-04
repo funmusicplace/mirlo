@@ -25,10 +25,10 @@ export default function () {
     } = req.query;
 
     try {
-      let where: Prisma.ArtistWhereInput = {
-        isLabelProfile:
-          isLabel === "true" ? true : isLabel === "false" ? false : false,
-      };
+      let where: Prisma.ArtistWhereInput = {};
+      if (isLabel !== undefined) {
+        where.isLabelProfile = isLabel === "true";
+      }
       // When listing labels, hide any whose owner has turned off
       // Label/Collective mode (#1804).
       if (where.isLabelProfile) {

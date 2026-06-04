@@ -1,16 +1,18 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+import Parser from "rss-parser";
 import request from "supertest";
 import prisma from "@mirlo/prisma";
+
 import {
   clearTables,
   createArtist,
   createTrack,
   createTrackGroup,
 } from "../../utils";
-import Parser from "rss-parser";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
@@ -102,7 +104,7 @@ describe("artists", () => {
   });
 
   describe("Label filtering", () => {
-    it("should return non-label artists by default", async () => {
+    it("should return all artists (labels and non-labels) when isLabel is not specified", async () => {
       const user1 = await prisma.user.create({
         data: {
           email: "artist@test.com",
@@ -134,9 +136,9 @@ describe("artists", () => {
         .get("artists/")
         .set("Accept", "application/json");
 
-      assert.equal(response.body.results.length, 1);
-      assert.equal(response.body.results[0].name, "Regular Artist");
-      assert.equal(response.body.results[0].isLabelProfile, false);
+      assert.equal(response.body.results.length, 2);
+      const names = response.body.results.map((r: any) => r.name).sort();
+      assert.deepEqual(names, ["My Label", "Regular Artist"]);
       assert.equal(response.statusCode, 200);
     });
 
