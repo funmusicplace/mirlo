@@ -1,6 +1,6 @@
 import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl } from "utils/artist";
 
@@ -51,8 +51,12 @@ const UserFollowedYou: React.FC<{
               : "text-sm text-(--mi-text-color)"
           }
         >
-          <strong>{userName}</strong>{" "}
-          {isSubscription ? t("subscribedToYou") : t("startedFollowingYou")}
+          <Trans
+            t={t}
+            i18nKey={isSubscription ? "subscribedToYou" : "startedFollowingYou"}
+            values={{ userName }}
+            components={{ author: <strong /> }}
+          />
           {notification.artist && (
             <>
               {": "}

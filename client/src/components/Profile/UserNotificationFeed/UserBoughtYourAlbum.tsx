@@ -2,7 +2,7 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { moneyDisplay } from "components/common/Money";
 import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
@@ -70,10 +70,15 @@ const UserBoughtYourAlbum: React.FC<{
               : "text-sm text-(--mi-text-color) truncate"
           }
         >
-          <strong>{buyerName}</strong> {t("bought")}{" "}
-          <Link to={releaseUrl}>
-            <strong>{notification.trackGroup.title}</strong>
-          </Link>
+          <Trans
+            t={t}
+            i18nKey="boughtRelease"
+            values={{ buyerName, title: notification.trackGroup.title }}
+            components={{
+              author: <strong />,
+              releaseLink: <Link to={releaseUrl} className="font-bold" />,
+            }}
+          />
         </div>
         {notification.trackGroup.artist && (
           <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
