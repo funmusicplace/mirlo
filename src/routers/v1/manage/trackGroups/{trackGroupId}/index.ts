@@ -14,7 +14,7 @@ import processor, {
 } from "../../../../../utils/trackGroup";
 import {
   deleteTrackGroup,
-  notifyFollowersOfNewAlbum,
+  finalizeTrackGroupPublication,
 } from "../../../../../utils/trackGroup";
 
 type Params = {
@@ -195,8 +195,11 @@ export default function () {
         existingTrackGroup.isPublic === false &&
         trackGroup?.isPublic === true &&
         isPublishedNow;
-      if (flippedToPublic && trackGroup) {
-        await notifyFollowersOfNewAlbum(trackGroup);
+      if (flippedToPublic && trackGroup?.publishedAt) {
+        trackGroup = await finalizeTrackGroupPublication(
+          trackGroup,
+          trackGroup.publishedAt
+        );
       }
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
