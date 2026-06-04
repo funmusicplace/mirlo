@@ -337,7 +337,7 @@ const HeaderSearch: React.FC = () => {
   return (
     <div role="search">
       <Button
-        aria-label={t("openSearch")}
+        aria-label={t("searchMusic")}
         variant="transparent"
         onClick={() => setOpen(true)}
         startIcon={<FaSearch size={20} />}
