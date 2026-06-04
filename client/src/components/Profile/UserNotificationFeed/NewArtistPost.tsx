@@ -1,8 +1,9 @@
+import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
-import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
+import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 
 const NewArtistPost: React.FC<{ notification: Notification }> = ({
   notification,
@@ -18,6 +19,12 @@ const NewArtistPost: React.FC<{ notification: Notification }> = ({
   const artist = notification.post.artist;
   const featuredImageSrc = notification.post.featuredImage?.src;
   const postUrl = getPostURLReference(notification.post);
+  const excerpt = notification.post.content
+    ? getHtmlExcerpt(notification.post.content.replace(/<br\s*\/?>/gi, " "))
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim()
+    : undefined;
 
   return (
     <Link to={postUrl} className="block no-underline! text-inherit">
@@ -42,9 +49,9 @@ const NewArtistPost: React.FC<{ notification: Notification }> = ({
         <div className="text-sm font-semibold mb-1 text-(--mi-text-color)">
           {notification.post.title}
         </div>
-        {notification.post.content && (
+        {excerpt && (
           <div className="text-xs text-(--mi-light-foreground-color) leading-snug line-clamp-2 mb-1.5">
-            {notification.post.content.replace(/<[^>]*>/g, "")}
+            {excerpt}
           </div>
         )}
         {artist && (

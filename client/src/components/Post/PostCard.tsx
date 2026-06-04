@@ -1,10 +1,11 @@
-import { css } from "@emotion/css";
+﻿import { css } from "@emotion/css";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPlay } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
+import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 import { useLinkContainer } from "utils/useLinkContainer";
 
 const cardStyle = css`
@@ -36,7 +37,12 @@ const PostCard: React.FC<{
   const isOnArtistPage = !!artistId;
 
   const featuredImageSrc = post.featuredImage?.src;
-  const excerpt = post.content?.replace(/<[^>]*>/g, "").trim();
+  const excerpt = post.content
+    ? getHtmlExcerpt(post.content.replace(/<br\s*\/?>/gi, " "))
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim()
+    : undefined;
   const trackCount = post.trackCount ?? post.tracks?.length ?? 0;
   const hasTracks = trackCount > 0;
 
