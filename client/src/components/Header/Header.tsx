@@ -251,6 +251,7 @@ const Header = () => {
               }
               variant="transparent"
               className={menuButtonOverride}
+              title={t("openMenu", { keyPrefix: "headerMenu" })}
             />
           )}
           {isLoggedIn &&
