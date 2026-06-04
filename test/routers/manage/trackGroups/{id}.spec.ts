@@ -149,6 +149,62 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(notifications[0].notificationType, "NEW_ARTIST_ALBUM");
     });
 
+    it("should backfill releaseDate when flipping a published trackGroup with no releaseDate to public", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist-backfill@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const publishedAt = new Date("2026-05-19T00:00:00.000Z");
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt,
+        isPublic: false,
+        releaseDate: null,
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, isPublic: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(
+        new Date(response.body.result.releaseDate).getTime(),
+        publishedAt.getTime()
+      );
+
+      const updated = await prisma.trackGroup.findUniqueOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(updated.releaseDate?.getTime(), publishedAt.getTime());
+    });
+
+    it("should not overwrite an existing releaseDate when flipping to public", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist-keep-date@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const releaseDate = new Date("2024-01-01T00:00:00.000Z");
+      const trackGroup = await createTrackGroup(artist.id, {
+        publishedAt: new Date("2026-05-19T00:00:00.000Z"),
+        isPublic: false,
+        releaseDate,
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: artist.id, isPublic: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+
+      const updated = await prisma.trackGroup.findUniqueOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(updated.releaseDate?.getTime(), releaseDate.getTime());
+    });
+
     it("should not notify followers when flipping isPublic on a draft trackGroup", async () => {
       const { user, accessToken } = await createUser({
         email: "artist-draft-flip@example.com",
