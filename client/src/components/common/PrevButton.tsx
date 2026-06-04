@@ -2,7 +2,7 @@ import React from "react";
 import { MdSkipPrevious } from "react-icons/md";
 import { useGlobalStateContext } from "state/GlobalState";
 
-import Button from "./Button";
+import { IconButton } from "./Button";
 
 export const PrevButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
   const { dispatch } = useGlobalStateContext();
@@ -12,13 +12,14 @@ export const PrevButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
   }, [dispatch]);
 
   return (
-    <Button
-      startIcon={<MdSkipPrevious size={compact ? undefined : 22} />}
+    <IconButton
       variant="transparent"
       className={compact ? "!h-6 !w-6 !p-1" : undefined}
-      aria-label="Play previous track"
+      label="Play previous track"
       onClick={onClickPrev}
-    />
+    >
+      <MdSkipPrevious size={compact ? undefined : 22} />
+    </IconButton>
   );
 };
 

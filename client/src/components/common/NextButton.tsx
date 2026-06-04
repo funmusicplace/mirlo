@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { MdSkipNext } from "react-icons/md";
 import { useGlobalStateContext } from "state/GlobalState";
 
-import Button from "./Button";
+import { IconButton } from "./Button";
 
 export const NextButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
   const { t } = useTranslation("translation", { keyPrefix: "player" });
@@ -17,13 +17,14 @@ export const NextButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
   }, [dispatch]);
 
   return (
-    <Button
-      startIcon={<MdSkipNext size={compact ? undefined : 22} />}
+    <IconButton
       variant="transparent"
       className={compact ? "!h-6 !w-6 !p-1" : undefined}
-      aria-label={t("nextTrack")}
+      label={t("nextTrack")}
       onClick={onClickNext}
-    />
+    >
+      <MdSkipNext size={compact ? undefined : 22} />
+    </IconButton>
   );
 };
 

@@ -13,11 +13,11 @@ import usePagination from "utils/usePagination";
 import { bp } from "../constants";
 
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
-import { ButtonAnchor, ButtonLink } from "./common/Button";
 import Select from "./common/Select";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
+import { IconButtonAnchor, ButtonLink } from "./common/Button";
 
 const pageSize = 40;
 
@@ -159,16 +159,18 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
                 ]}
               />
             )}
-            <ButtonAnchor
+            <IconButtonAnchor
               target="_blank"
               href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${tag}` : ""}&released=released&format=rss`}
               rel="noreferrer"
-              smallIcon
+              size="compact"
               className={css`
                 margin-top: 0.25rem;
               `}
-              startIcon={<FaRss />}
-            />
+              label="Open RSS feed"
+            >
+              <FaRss />
+            </IconButtonAnchor>
           </div>
         </WidthContainer>
       </SectionHeader>

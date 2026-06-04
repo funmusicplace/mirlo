@@ -185,7 +185,6 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           <ArtistButton
             variant="dashed"
             size="compact"
-            smallIcon
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
             className="shrink-0"

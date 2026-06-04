@@ -45,24 +45,11 @@ export const Default: Story = {
   },
 };
 
-export const IconOnly: Story = {
-  args: {
-    startIcon: <FaPen />,
-  },
-};
-
 export const Dashed: Story = {
   args: {
     startIcon: <FaPen />,
     children: "Edit...",
     variant: "dashed",
-  },
-};
-
-export const Uppercase: Story = {
-  args: {
-    children: "Edit...",
-    uppercase: true,
   },
 };
 

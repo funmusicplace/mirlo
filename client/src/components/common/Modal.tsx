@@ -8,7 +8,7 @@ import { FaTimes } from "react-icons/fa";
 import { bp } from "../../constants";
 
 import Background from "./Background";
-import Button from "./Button";
+import { IconButton } from "./Button";
 import ScrollFadeOverlay from "./ScrollFadeOverlay";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
@@ -294,12 +294,13 @@ export const Modal: React.FC<{
             >
               {title && <h2 id={dialogLabelFromTitle(title)}>{title}</h2>}
 
-              <Button
+              <IconButton
+                label="close"
                 className={closeClass}
-                startIcon={<FaTimes />}
                 onClick={onCloseWrapper}
-                aria-label="close"
-              />
+              >
+                <FaTimes />
+              </IconButton>
             </SpaceBetweenDiv>
             <ChildrenWrapper className={contentClassName}>
               <ScrollArea id={childrenWrapperId} noPadding={noPadding}>

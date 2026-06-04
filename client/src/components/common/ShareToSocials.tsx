@@ -4,7 +4,7 @@ import { FaCheck, FaCopy, FaFacebook } from "react-icons/fa";
 import { FaBluesky, FaMastodon, FaXTwitter } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 
-import Button, { ButtonAnchor } from "./Button";
+import Button, { IconButtonAnchor } from "./Button";
 
 type SocialKey = "bluesky" | "x" | "facebook" | "email" | "mastodon";
 
@@ -71,14 +71,15 @@ export default function ShareToSocials({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-2 justify-center">
         {socials.map((social) => (
-          <ButtonAnchor
+          <IconButtonAnchor
             key={social.name}
             href={social.href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={social.name}
-            startIcon={social.icon}
-          />
+            label={social.name}
+          >
+            {social.icon}
+          </IconButtonAnchor>
         ))}
       </div>
       <div className="flex items-stretch gap-2">

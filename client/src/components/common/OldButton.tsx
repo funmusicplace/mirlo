@@ -1,0 +1,345 @@
+import styled from "@emotion/styled";
+import React from "react";
+import {
+  RelativeRoutingType,
+  useHref,
+  useLinkClickHandler,
+} from "react-router-dom";
+
+import { bp } from "../../constants";
+
+import LoadingSpinner from "./LoadingSpinner";
+
+export interface ButtonProps {
+  startIcon?: React.ReactElement;
+  endIcon?: React.ReactElement;
+  isLoading?: boolean;
+  as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
+  ref?: React.Ref<HTMLButtonElement>;
+  size?: "big" | "compact";
+  wrap?: boolean;
+  rounded?: boolean;
+  collapsible?: boolean;
+  buttonRole?: "primary" | "warning" | "black";
+  variant?: "link" | "outlined" | "dashed" | "transparent" | "default" | "pill";
+  uppercase?: boolean;
+  smallIcon?: boolean;
+}
+
+interface StyledButtonProps extends ButtonProps {
+  onlyIcon: boolean;
+}
+
+const StyledButton = styled.button<StyledButtonProps>(
+  {},
+  ({ buttonRole, size, ...props }) => {
+    const bodyStyles = window.getComputedStyle(document.body);
+    // buttonRole "primary" maps to the artist accent (--mi-button-color in the
+    // new scheme; --mi-button-color in legacy), other roles keep their
+    // explicit Mirlo system var. Contrast color for filled buttons follows
+    // the same convention as ArtistButton: --mi-button-text-color.
+    const cssColorVariable =
+      buttonRole && buttonRole !== "primary"
+        ? `--mi-${buttonRole}-color`
+        : `--mi-button-color`;
+    const primaryColor = bodyStyles.getPropertyValue(cssColorVariable);
+    const secondaryColor = bodyStyles.getPropertyValue(
+      `--mi-button-text-color`
+    );
+    const isOnlyIcon = props.onlyIcon
+      ? `
+      padding: .5rem;
+      height: 2rem;
+      width: 2rem;
+
+      @media screen and (max-width: ${bp.medium}px) {
+        width: var(--mi-touch-target-min);
+        height: var(--mi-touch-target-min);
+        padding: 0;
+        ${props.smallIcon ? "svg { width: 0.6rem; };" : ""}
+      }
+    `
+      : "";
+
+    const sizeVariables = () => {
+      if (size === "compact") {
+        return `
+          line-height: 1.2rem;
+          padding: .3rem .5rem;
+          font-size: .8rem;
+        `;
+      } else if (size === "big") {
+        return `
+          line-height: 1.2rem;
+          padding: 1rem 1.3rem;
+          font-size: 1.2rem;
+        `;
+      } else {
+        return `
+          padding: .5rem .7rem;
+          font-size: 1rem;
+        `;
+      }
+    };
+
+    const collapsible = props.collapsible
+      ? `
+        @media screen and (max-width: ${bp.medium}px) {
+          border-radius: 100%;
+          width: var(--mi-touch-target-min);
+          height: var(--mi-touch-target-min);
+          min-width: auto;
+          min-height: auto;
+          aspect-ratio: 1;
+          padding: 0 !important;
+
+          > p,
+          .children {
+            display: none;
+          }
+          .startIcon, .endIcon {
+            margin: auto !important;
+          }
+        }
+      `
+      : "";
+
+    let variantStyles = () => {
+      switch (props.variant) {
+        case "link":
+          return `
+          color: ${primaryColor};
+          font-size: inherit;
+          padding: 0 !important;
+          background-color: transparent !important;
+          text-decoration: underline;
+          line-height: inherit;
+
+          svg {
+            fill: ${primaryColor};
+          }
+
+          &:hover:not(:disabled) {
+            filter: brightness(80%) saturate(30%);
+          }
+        `;
+        case "outlined":
+        case "dashed":
+          return `
+          color: ${primaryColor};
+          background-color: transparent;
+          border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${primaryColor};
+          font-weight: bold;
+
+          svg {
+            fill: ${primaryColor};
+          }
+
+          &:hover:not(:disabled) {
+            color: ${primaryColor};
+            background-color: ${secondaryColor};
+
+            svg {
+              fill: ${primaryColor};
+            }
+          }
+
+          &[disabled] {
+            color: #ddd;
+            border-color: #ddd;
+          }
+        `;
+        case "pill":
+          return `
+          color: currentColor;
+          background-color: transparent;
+          border: 1px solid;
+          border-color: color-mix(in srgb, currentColor 40%, transparent);
+          font-weight: 500;
+          font-size: 0.7rem;
+          line-height: 1;
+          padding: 0.25rem 0.625rem !important;
+          border-radius: 9999px !important;
+
+          svg {
+            fill: currentColor;
+          }
+
+          &:hover:not(:disabled) {
+            border-color: currentColor;
+            background-color: transparent;
+          }
+
+          &[disabled] {
+            opacity: 0.6;
+          }
+        `;
+        case "transparent":
+          return `
+          color: ${primaryColor};
+          background-color: transparent;
+          font-weight: bold;
+
+          svg {
+            fill: ${primaryColor};
+          }
+
+          &:hover:not(:disabled) {
+            color: ${primaryColor};
+            background-color: ${secondaryColor};
+
+            svg {
+              fill: ${primaryColor};
+            }
+          }
+
+          &[disabled] {
+            color: #ddd;
+            border-color: #ddd;
+          }`;
+        default:
+          return `
+          background-color: ${primaryColor};
+          color: ${secondaryColor};
+
+          svg {
+            fill: ${secondaryColor};
+          }
+
+          &:hover:not(:disabled) {
+            filter: brightness(95%) saturate(30%);
+          }
+        `;
+      }
+    };
+
+    const style = `
+    ${sizeVariables()}
+    ${isOnlyIcon}
+    ${props.rounded ? `border-radius: .5rem !important;` : ""}
+     ${
+       props.wrap
+         ? `white-space: normal !important;
+                   height: auto;
+                   word-break: break-word;
+                   hyphens: auto;`
+         : "white-space: nowrap;"
+     }
+    
+    border: none;
+    transition:
+      0.25s background-color,
+      0.25s color,
+      0.25s border-radius,
+      0.25s opacity,
+      0.25s filter
+      0.25s fill;
+    text-decoration: none;
+  
+    &:hover:not(:disabled) {
+      cursor: pointer;
+    }
+  
+    ${collapsible}
+  
+    ${props.uppercase ? "text-transform: uppercase;" : ""}
+    ${variantStyles()}
+  
+    align-items: center;
+    display: flex;
+    border-radius: ${props.onlyIcon ? "100%" : "var(--mi-border-radius)"};
+    justify-content: center;
+    min-width: ${props.variant === "link" ? "auto" : "var(--mi-touch-target-min)"};
+    min-height: ${props.variant === "link" ? "auto" : "var(--mi-touch-target-min)"};
+
+    &[disabled] {
+      opacity: 0.6;
+    }
+
+    .startIcon,
+    .endIcon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
+      margin-right: ${props.onlyIcon ? "0px" : "0.5rem"};
+    }
+
+    .endIcon {
+      margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
+      margin-right: 0;
+      margin-left: ${props.onlyIcon ? "0px" : "0.5rem"};
+    }
+
+  `;
+
+    return style;
+  }
+);
+
+export const Button: React.FC<
+  ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
+> = ({
+  children,
+  onClick,
+  startIcon,
+  endIcon,
+  disabled,
+  isLoading,
+  ...props
+}) => {
+  return (
+    <StyledButton
+      onClick={onClick}
+      disabled={disabled}
+      onlyIcon={!children}
+      title={children ? children.toString() : undefined}
+      aria-label={props["aria-label"] || (children ? children.toString() : "")}
+      {...props}
+    >
+      {isLoading && (
+        <span className="startIcon" aria-hidden>
+          <LoadingSpinner size="small" />
+        </span>
+      )}
+      {!isLoading && startIcon ? (
+        <span className="startIcon" aria-hidden>
+          {startIcon}
+        </span>
+      ) : (
+        ""
+      )}
+      <span className="children">{children}</span>
+      {endIcon ? (
+        <span className="endIcon" aria-hidden>
+          {endIcon}
+        </span>
+      ) : (
+        ""
+      )}
+    </StyledButton>
+  );
+};
+
+export const ButtonAnchor: React.FC<
+  ButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ ...props }) => {
+  return (
+    /*
+    // @ts-ignore Because of as="a", we can pass anchor attributes here - the types just don't like it. */
+    <Button as="a" {...props} />
+  );
+};
+
+export const ButtonLink: React.FC<
+  ButtonProps & {
+    to: string;
+    relative?: RelativeRoutingType;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ to, relative, ...props }) => {
+  const handleClick = useLinkClickHandler(to, { relative });
+  const href = useHref(to, { relative });
+  return <ButtonAnchor onClick={handleClick} href={href} {...props} />;
+};
+
+export default Button;

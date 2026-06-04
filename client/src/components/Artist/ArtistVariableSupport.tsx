@@ -89,7 +89,6 @@ const ArtistVariableSupport: React.FC<{
       <ArtistButton
         size="big"
         rounded
-        uppercase
         onClick={() =>
           tier.allowVariable ? setOpen(true) : subscribeToTier(tier)
         }
@@ -135,7 +134,6 @@ const ArtistVariableSupport: React.FC<{
             isLoading={isCheckingForSubscription}
             disabled={isCheckingForSubscription || !isEmpty(formState.errors)}
             size="big"
-            uppercase
             rounded
             type="submit"
             className="w-full mt-2"

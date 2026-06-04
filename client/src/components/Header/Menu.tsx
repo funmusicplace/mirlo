@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import CanCreateArtists from "components/CanCreateArtists";
-import Button from "components/common/Button";
+import { Button, IconButton } from "components/common/Button";
 import MenuLink from "components/Header/MenuLink";
 import { queryManagedArtists, useLogoutMutation } from "queries";
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
@@ -73,16 +73,17 @@ const Menu = forwardRef<
     >
       {/* This div can be removed once `closedby` is baseline*/}
       <div className="flex flex-col h-full p-[1rem]">
-        <Button
-          aria-label="Close menu"
+        <IconButton
+          label="Close menu"
           autoFocus
           className="self-end border-none bg-transparent! text-black! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-black!"
           // @ts-ignore React doesn't support Invoker Commands API
           command="close"
           commandfor={dialogId}
           onClick={() => onClose()}
-          startIcon={<FaTimes />}
-        />
+        >
+          <FaTimes />
+        </IconButton>
         <nav className="flex-auto">
           <ul>
             <li>

@@ -32,7 +32,7 @@ or ideally <Button><Icon />Save</Button>
 
 what about <IconButton><Icon /><span class="sr-only">Save</span></IconButton>
 or <Button icon><Icon />Save</Button> and <Button><Icon />Save</Button>
-by visually hiding child that is text node when icon prop is true?
+by visually hiding child that is text node when icon prop is true? would this work well with other props? most other props can be eliminated?
 
 Current pain points
 
@@ -40,6 +40,7 @@ Current pain points
 - possible to use Button that looks like a link and is a link, just to have an icon with it
 
 React Aria tells you to use Link with some button classes, which sounds appealing given the mess here
+Other alternatives?
 
 */
 
@@ -53,15 +54,8 @@ export interface BaseButtonProps {
   children: React.ReactNode;
   buttonRole?: "primary" | "warning" | "black";
   isLoading?: boolean;
-  size?: "big" | "compact" | "tiny";
-  variant?:
-    | "link"
-    | "outlined"
-    | "dashed"
-    | "transparent"
-    | "default"
-    | "pill"
-    | "chip";
+  size?: "big" | "compact";
+  variant?: "link" | "outlined" | "dashed" | "transparent" | "default" | "pill";
 }
 
 /*
@@ -80,13 +74,9 @@ export type AnchorElementButtonProps = BaseButtonProps &
  * Props for buttons with a visible label and optional icon
  */
 export interface ButtonProps extends BaseButtonProps {
-  startIcon?: React.ReactElement;
-  endIcon?: React.ReactElement;
   wrap?: boolean;
   rounded?: boolean;
   collapsible?: boolean;
-  uppercase?: boolean;
-  bold?: boolean;
 }
 
 /*
@@ -116,19 +106,6 @@ const stylesIconButton = css`
   }
 `;
 
-const stylesIconButtonSizeExtraSmall = css`
-  padding: 0;
-  height: 1.5rem;
-  width: 1.5rem;
-`;
-
-const stylesSizeExtraSmall = css`
-  height: 1.5rem;
-  line-height: 1.5rem;
-  padding: 0 0.5rem;
-  font-size: 0.8rem;
-`;
-
 const stylesSizeSmall = css`
   line-height: 1.2rem;
   padding: 0.3rem 0.5rem;
@@ -149,29 +126,6 @@ const stylesSizeLarge = css`
   font-size: 1.2rem;
 `;
 
-// these next three had bp md + 1
-
-const stylesSizeExtraSmallVariantBorderBase = css`
-  @media screen and (min-width: var(--breakpoint-md)) {
-    min-width: auto;
-    min-height: auto;
-  }
-`;
-
-const stylesSizeExtraSmallVariantTransparent = css`
-  @media screen and (min-width: var(--breakpoint-md)) {
-    min-width: auto;
-    min-height: auto;
-  }
-`;
-
-const stylesSizeExtraSmallVariantDefault = css`
-  @media screen and (min-width: var(--breakpoint-md)) {
-    min-width: auto;
-    min-height: auto;
-  }
-`;
-
 const stylesCollapsible = css`
   @media screen and (max-width: var(--breakpoint-md)) {
     border-radius: 100%;
@@ -186,15 +140,7 @@ const stylesCollapsible = css`
     .children {
       display: none;
     }
-    .startIcon,
-    .endIcon {
-      margin: auto !important;
-    }
   }
-`;
-
-const stylesBold = css`
-  font-weight: bold;
 `;
 
 const stylesButtonRolePrimary = css`
@@ -328,8 +274,6 @@ const stylesVariantPill = css`
   line-height: 1;
   padding: 0.25rem 0.625rem !important;
   border-radius: 9999px !important;
-  min-width: auto;
-  min-height: auto;
 
   svg {
     fill: currentColor;
@@ -343,11 +287,6 @@ const stylesVariantPill = css`
   &[disabled] {
     opacity: 0.6;
   }
-`;
-
-const stylesVariantChip = css`
-  min-width: auto;
-  min-height: auto;
 `;
 
 const stylesButtonRolePrimaryVariantTransparent = css`
@@ -455,6 +394,7 @@ const stylesBase = css`
 
   align-items: center;
   display: flex;
+  gap: 0.5rem;
   border-radius: var(--mi-border-radius);
   justify-content: center;
   min-width: var(--mi-touch-target-min);
@@ -465,29 +405,9 @@ const stylesBase = css`
   }
 `;
 
-const stylesButton = css`
-  .startIcon,
-  .endIcon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0.1rem;
-    margin-right: 0.5rem;
-  }
-
-  .endIcon {
-    margin-top: 0.1rem;
-    margin-right: 0;
-    margin-left: 0.5rem;
-  }
-`;
-
-// added some stuff here that might need to be mirrored in iconbutton
 const allButtonStyles = (props: ButtonProps) => css`
   ${stylesBase}
-  ${stylesButton}
-  ${props.size === "tiny" && stylesSizeExtraSmall}
-	${props.size === "compact" && stylesSizeSmall}
+  ${props.size === "compact" && stylesSizeSmall}
 	${!props.size && stylesSizeMedium}
 	${props.size === "big" && stylesSizeLarge}
 	${props.variant === "link" && stylesVariantLink}
@@ -497,22 +417,7 @@ const allButtonStyles = (props: ButtonProps) => css`
 	${props.variant === "dashed" && stylesVariantBorderDashed}
 	${!props.variant && stylesVariantDefault}
 	${props.variant === "pill" && stylesVariantPill}
-  ${props.variant === "chip" && stylesVariantChip}
 	${props.variant === "transparent" && stylesVariantTransparent}
-  ${props.size === "tiny" &&
-  (props.variant === "outlined" || props.variant === "dashed") &&
-  stylesSizeExtraSmallVariantBorderBase}
-    ${props.size === "tiny" &&
-  props.variant === "transparent" &&
-  stylesSizeExtraSmallVariantTransparent}
-  ${props.size === "tiny" &&
-  props.variant === "default" &&
-  stylesSizeExtraSmallVariantDefault}
-  ${props.bold &&
-  (props.variant === "outlined" ||
-    props.variant === "dashed" ||
-    props.variant === "transparent") &&
-  stylesBold}
 	${props.collapsible && stylesCollapsible}
 	${props.rounded && stylesRounded}
 	${props.wrap && stylesWrap}
@@ -557,9 +462,7 @@ const allButtonStyles = (props: ButtonProps) => css`
 const allIconButtonStyles = (props: StyledIconButtonProps) => css`
   ${stylesBase}
   ${stylesIconButton}
-	  ${props.size === "tiny" && stylesSizeExtraSmall}
-    	  ${props.size === "tiny" && stylesIconButtonSizeExtraSmall}
-${props.size === "compact" && stylesSizeSmall}
+	${props.size === "compact" && stylesSizeSmall}
 	${!props.size && stylesSizeMedium}
 	${props.size === "big" && stylesSizeLarge}
 	${props.variant === "link" && stylesVariantLink}
@@ -633,14 +536,10 @@ const IconButtonChildren = (
 ) => {
   const { children, isLoading } = props;
   return (
-    <>
-      {isLoading && (
-        <span className="startIcon" aria-hidden>
-          <LoadingSpinner size="small" />
-        </span>
-      )}
+    <span aria-hidden="true">
+      {isLoading && <LoadingSpinner size="small" />}
       {!isLoading && children}
-    </>
+    </span>
   );
 };
 
@@ -697,8 +596,6 @@ const ButtonChildren = (
     </>
   );
 };
-/*
- */
 
 export const Button = (props: ButtonElementButtonProps & ButtonProps) => {
   const { children, endIcon, isLoading, startIcon, ...rootProps } = props;
@@ -720,24 +617,18 @@ export const ButtonAnchor = (props: AnchorElementButtonProps & ButtonProps) => {
   );
 };
 
-export const ButtonLink = (
-  props: AnchorElementButtonProps &
-    ButtonProps & {
-      to: string;
-      relative?: RelativeRoutingType;
-    }
-) => {
-  const { to, relative, target, ...rootProps } = props;
-  const handleClick = useLinkClickHandler(to, { relative, target });
+export const ButtonLink = ({
+  to,
+  relative,
+  ...props
+}: AnchorElementButtonProps &
+  ButtonProps & {
+    to: string;
+    relative?: RelativeRoutingType;
+  }) => {
+  const handleClick = useLinkClickHandler(to, { relative });
   const href = useHref(to, { relative });
-  return (
-    <ButtonAnchor
-      onClick={handleClick}
-      href={href}
-      target={target}
-      {...rootProps}
-    />
-  );
+  return <ButtonAnchor onClick={handleClick} href={href} {...props} />;
 };
 
 export default Button;

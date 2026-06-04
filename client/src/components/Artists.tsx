@@ -13,12 +13,13 @@ import usePagination from "utils/usePagination";
 
 import { bp } from "../constants";
 
-import ArtistSquare from "./Artist/ArtistSquare";
-import LoadingBlocks from "./Artist/LoadingBlocks";
-import Button, { ButtonAnchor } from "./common/Button";
-import { SelectEl } from "./common/Select";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
+
+import ArtistSquare from "./Artist/ArtistSquare";
+import { IconButton, IconButtonAnchor } from "./common/Button";
+import { SelectEl } from "./common/Select";
+import LoadingBlocks from "./Artist/LoadingBlocks";
 
 const Artists = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artists" });
@@ -97,14 +98,12 @@ const Artists = () => {
               gap: 1rem;
             `}
           >
-            <Button
-              startIcon={<BsGrid />}
-              onClick={() => setTiles(true)}
-            ></Button>
-            <Button
-              startIcon={<BsList />}
-              onClick={() => setTiles(false)}
-            ></Button>
+            <IconButton label="View as grid" onClick={() => setTiles(true)}>
+              <BsGrid />
+            </IconButton>
+            <IconButton label="View as list" onClick={() => setTiles(false)}>
+              <BsList />
+            </IconButton>
             <div
               className={css`
                 display: flex;
@@ -147,15 +146,17 @@ const Artists = () => {
                 ))}
               </SelectEl>
             </div>
-            <ButtonAnchor
+            <IconButtonAnchor
               target="_blank"
               href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists?format=rss`}
               rel="noreferrer"
               className={css`
                 margin-top: 0.25rem;
               `}
-              startIcon={<FaRss />}
-            />
+              label="Open RSS feed"
+            >
+              <FaRss />
+            </IconButtonAnchor>
           </div>
         </WidthContainer>
       </SectionHeader>

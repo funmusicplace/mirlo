@@ -1,12 +1,13 @@
 import { css } from "@emotion/css";
-import { useQuery } from "@tanstack/react-query";
-import Button, { ButtonProps } from "components/common/Button";
-import { queryArtist } from "queries";
+import Button, {
+  AnchorElementButtonProps,
+  ButtonElementButtonProps,
+  ButtonProps,
+} from "components/common/Button";
 import {
   RelativeRoutingType,
   useHref,
   useLinkClickHandler,
-  useParams,
 } from "react-router-dom";
 
 export const useGetArtistColors = () => {
@@ -145,7 +146,7 @@ export const ArtistButton: React.FC<
 };
 
 export const ArtistButtonAnchor: React.FC<
-  ButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>
+  AnchorElementButtonProps & ButtonProps
 > = ({ ...props }) => {
   return (
     /*
@@ -155,10 +156,11 @@ export const ArtistButtonAnchor: React.FC<
 };
 
 export const ArtistButtonLink: React.FC<
-  ButtonProps & {
-    to: string;
-    relative?: RelativeRoutingType;
-  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
+  AnchorElementButtonProps &
+    ButtonProps & {
+      to: string;
+      relative?: RelativeRoutingType;
+    }
 > = ({ to, relative, ...props }) => {
   const handleClick = useLinkClickHandler(to, { relative });
   const href = useHref(to, { relative });

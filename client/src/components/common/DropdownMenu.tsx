@@ -1,16 +1,26 @@
 import { css } from "@emotion/css";
-import {
-  ArtistButton,
-  useGetArtistColors,
-} from "components/Artist/ArtistButtons";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import Background from "components/common/Background";
 import React from "react";
 import { createPortal } from "react-dom";
 import { FaEllipsisV } from "react-icons/fa";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries/artists";
 
 import { bp } from "../../constants";
 
 import Button from "./Button";
+
+const useGetArtistColors = () => {
+  const { artistId } = useParams();
+
+  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
+  );
+
+  return { colors: artist?.properties?.colors, isLoadingArtist };
+};
 
 const DropdownMenuContext = React.createContext<{ close: () => void } | null>(
   null

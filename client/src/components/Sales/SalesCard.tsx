@@ -1,4 +1,4 @@
-import { Button } from "components/common/Button";
+import { IconButton } from "components/common/Button";
 import { Modal } from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import { RenderAddress } from "components/FulFillment/CustomerPopUp";
@@ -44,16 +44,17 @@ export const SalesCard: React.FC<{ sale: Sale }> = ({ sale }) => {
           <span className="rounded-full bg-(--mi-darken-background-color) px-2 py-0.5 text-xs">
             {t(saleType)}
           </span>
-          <Button
+          <IconButton
             type="button"
             variant="transparent"
             size="compact"
-            startIcon={isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             aria-expanded={isExpanded}
             aria-controls={detailsId}
-            aria-label={isExpanded ? t("collapseDetails") : t("expandDetails")}
+            label={isExpanded ? t("collapseDetails") : t("expandDetails")}
             onClick={() => setIsExpanded((v) => !v)}
-          />
+          >
+            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+          </IconButton>
         </div>
       </div>
 

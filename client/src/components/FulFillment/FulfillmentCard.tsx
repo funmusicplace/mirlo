@@ -1,4 +1,4 @@
-import Button from "components/common/Button";
+import Button, { IconButton } from "components/common/Button";
 import Modal from "components/common/Modal";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
@@ -39,16 +39,17 @@ export const FulfillmentCard: React.FC<{ purchase: MerchPurchase }> = ({
           >
             {t(statusMap[purchase.fulfillmentStatus])}
           </span>
-          <Button
+          <IconButton
             type="button"
             variant="transparent"
             size="compact"
-            startIcon={isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             aria-expanded={isExpanded}
             aria-controls={detailsId}
-            aria-label={isExpanded ? t("collapseDetails") : t("expandDetails")}
+            label={isExpanded ? t("collapseDetails") : t("expandDetails")}
             onClick={() => setIsExpanded((v) => !v)}
-          />
+          >
+            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+          </IconButton>
         </div>
       </div>
 
