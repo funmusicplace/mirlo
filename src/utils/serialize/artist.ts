@@ -66,8 +66,9 @@ export const processSingleArtist = (
   userId?: number,
   isUserSubscriber?: boolean
 ) => {
+  const { apPrivateKey: _, ...artistPublic } = artist;
   return {
-    ...artist,
+    ...artistPublic,
     posts: artist?.posts?.map((p: Post) =>
       serializePost(
         p,
@@ -109,23 +110,26 @@ export const processSingleArtist = (
     user: artist.user
       ? {
           ...artist.user,
-          artistLabels: artist.user.artistLabels?.map((al) => ({
-            ...al,
-            artist: {
-              ...al.artist,
-              avatar: addSizesToImage(
-                finalArtistAvatarBucket,
-                al.artist?.avatar
-              ),
-              background: addSizesToImage(
-                finalArtistBackgroundBucket,
-                al.artist?.background
-              ),
-              trackGroups: al.artist?.trackGroups?.map((tg) =>
-                processSingleTrackGroup(tg, { loggedInUserId: userId })
-              ),
-            },
-          })),
+          artistLabels: artist.user.artistLabels?.map((al) => {
+            const { apPrivateKey: _pk, ...alArtistPublic } = al.artist ?? {};
+            return {
+              ...al,
+              artist: {
+                ...alArtistPublic,
+                avatar: addSizesToImage(
+                  finalArtistAvatarBucket,
+                  al.artist?.avatar
+                ),
+                background: addSizesToImage(
+                  finalArtistBackgroundBucket,
+                  al.artist?.background
+                ),
+                trackGroups: al.artist?.trackGroups?.map((tg) =>
+                  processSingleTrackGroup(tg, { loggedInUserId: userId })
+                ),
+              },
+            };
+          }),
         }
       : artist.user,
   };
