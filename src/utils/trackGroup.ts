@@ -252,6 +252,9 @@ export const trackGroupSingleInclude = (options: {
               },
             }),
       },
+      omit: {
+        metadata: true,
+      },
       include: {
         audio: true,
         trackArtists: true,

@@ -51,10 +51,13 @@ export default function () {
               featuredImage: true,
             },
           },
-          artist: true,
+          artist: { omit: { apPrivateKey: true } },
           trackGroup: {
             include: {
-              artist: { include: { user: { select: { currency: true } } } },
+              artist: {
+                omit: { apPrivateKey: true },
+                include: { user: { select: { currency: true } } },
+              },
               cover: true,
               tracks: {
                 where: { deletedAt: null },
@@ -67,7 +70,11 @@ export default function () {
             },
           },
           subscription: {
-            include: { artistSubscriptionTier: { include: { artist: true } } },
+            include: {
+              artistSubscriptionTier: {
+                include: { artist: { omit: { apPrivateKey: true } } },
+              },
+            },
           },
           relatedUser: {
             select: {

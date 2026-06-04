@@ -66,7 +66,7 @@ export const getPostsVisibleToUser = async (
 export const getAlbumsVisibleToUser = async (artist: Artist) => {
   const albums = await prisma.trackGroup.findMany({
     where: { ...whereForPublishedTrackGroups(), artistId: artist.id },
-    include: { artist: true },
+    include: { artist: { omit: { apPrivateKey: true } } },
     orderBy: {
       releaseDate: "desc",
     },

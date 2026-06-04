@@ -34,7 +34,9 @@ export const processSingleTrackGroup = (
     };
     paymentToUser?: { currency?: string | null } | null;
     merch?: (Merch & { images: MerchImage[] })[];
-    tracks?: (Track & { userTrackPurchases?: { userId: number }[] })[];
+    tracks?: (Omit<Track, "metadata"> & {
+      userTrackPurchases?: { userId: number }[];
+    })[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
     downloadableContent?: {
       downloadableContent: Record<string, unknown>;
@@ -63,12 +65,15 @@ export const processSingleTrackGroup = (
       }),
     })),
     artist: tg.artist
-      ? {
-          ...tg.artist,
-          avatar: tg.artist.avatar
-            ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
-            : undefined,
-        }
+      ? (() => {
+          const { apPrivateKey: _, ...artistPublic } = tg.artist;
+          return {
+            ...artistPublic,
+            avatar: tg.artist.avatar
+              ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
+              : undefined,
+          };
+        })()
       : undefined,
     merch: tg.merch?.map((m) =>
       processSingleMerch(m, {

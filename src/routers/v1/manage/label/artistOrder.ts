@@ -1,8 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
-import { userAuthenticated } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
 
 export default function () {
   const operations = {
@@ -15,8 +15,13 @@ export default function () {
     const { artistIds } = req.body as { artistIds?: unknown };
 
     try {
-      if (!Array.isArray(artistIds) || artistIds.some((id) => !Number.isFinite(Number(id)))) {
-        res.status(400).json({ error: "artistIds must be an array of numbers" });
+      if (
+        !Array.isArray(artistIds) ||
+        artistIds.some((id) => !Number.isFinite(Number(id)))
+      ) {
+        res
+          .status(400)
+          .json({ error: "artistIds must be an array of numbers" });
         return;
       }
 
@@ -38,7 +43,7 @@ export default function () {
           artist: { deletedAt: null },
         },
         orderBy: [{ orderIndex: { sort: "asc", nulls: "last" } }],
-        include: { artist: true },
+        include: { artist: { omit: { apPrivateKey: true } } },
       });
 
       res.json({ results: artists });

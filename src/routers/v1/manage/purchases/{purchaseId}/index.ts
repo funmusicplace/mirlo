@@ -1,10 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
 import {
   merchPurchaseBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 
 type Params = {
   purchaseId: string;
@@ -88,7 +88,9 @@ export default function () {
           id: purchaseId,
         },
         include: {
-          merch: { include: { images: true, artist: true } },
+          merch: {
+            include: { images: true, artist: { omit: { apPrivateKey: true } } },
+          },
           user: true,
         },
       });
