@@ -37,7 +37,6 @@ const ArtistTag: React.FC<{
         aria-label={t("removeTag", { tagName: tag })}
         startIcon={<FaTimes />}
         onClick={onClick}
-        onlyIcon
         type="button"
         variant="dashed"
       />

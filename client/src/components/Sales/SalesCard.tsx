@@ -48,7 +48,6 @@ export const SalesCard: React.FC<{ sale: Sale }> = ({ sale }) => {
             type="button"
             variant="transparent"
             size="compact"
-            onlyIcon
             startIcon={isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             aria-expanded={isExpanded}
             aria-controls={detailsId}

@@ -81,7 +81,6 @@ const Menu = forwardRef<
           command="close"
           commandfor={dialogId}
           onClick={() => onClose()}
-          onlyIcon
           startIcon={<FaTimes />}
         />
         <nav className="flex-auto">

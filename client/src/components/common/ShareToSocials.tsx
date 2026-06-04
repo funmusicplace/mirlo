@@ -78,7 +78,6 @@ export default function ShareToSocials({
             rel="noopener noreferrer"
             aria-label={social.name}
             startIcon={social.icon}
-            onlyIcon
           />
         ))}
       </div>

@@ -140,7 +140,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
           </ArtistButton>
         )}
         {showDownload && !fixed && (
-          <DownloadAlbumButton trackGroup={trackGroup} onlyIcon track={track} />
+          <DownloadAlbumButton trackGroup={trackGroup} track={track} />
         )}
       </div>
     </>

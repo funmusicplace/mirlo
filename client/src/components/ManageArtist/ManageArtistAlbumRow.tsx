@@ -206,7 +206,6 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
             type="button"
             variant="transparent"
             size="compact"
-            onlyIcon
             startIcon={isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             aria-expanded={isExpanded}
             aria-controls={metadataId}
@@ -283,7 +282,6 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
             size="compact"
             variant="outlined"
             startIcon={<FaEye />}
-            onlyIcon
           >
             {t("viewLive")}
           </ArtistButtonLink>
@@ -294,7 +292,6 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
             size="compact"
             variant="dashed"
             startIcon={<FaEye />}
-            onlyIcon
           >
             {t("preview")}
           </ArtistButtonLink>
@@ -305,7 +302,6 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
           startIcon={<FaTrash />}
           onClick={() => onDelete(release.id)}
           isLoading={isDeletePending}
-          onlyIcon
         >
           {t("delete")}
         </ArtistButton>

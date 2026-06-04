@@ -93,7 +93,6 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
                   <div className="shrink-0">
                     <ArtistButton
                       size="compact"
-                      onlyIcon
                       variant="dashed"
                       onClick={() => setIsEditing(true)}
                       startIcon={<FaPen />}

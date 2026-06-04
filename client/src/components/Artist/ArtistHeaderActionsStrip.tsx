@@ -56,7 +56,6 @@ const ArtistHeaderActionsStrip: React.FC<{
       {!isManage && (
         <ContactArtist
           artist={artist}
-          onlyIcon
           size={buttonSize}
           variant="transparent"
           color="foreground"
@@ -66,7 +65,6 @@ const ArtistHeaderActionsStrip: React.FC<{
         target="_blank"
         href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
         rel="noreferrer"
-        onlyIcon
         size={buttonSize}
         variant="transparent"
         color="foreground"

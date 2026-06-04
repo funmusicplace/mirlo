@@ -48,7 +48,6 @@ export const Default: Story = {
 export const IconOnly: Story = {
   args: {
     startIcon: <FaPen />,
-    onlyIcon: true,
   },
 };
 

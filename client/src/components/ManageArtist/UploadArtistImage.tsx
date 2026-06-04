@@ -313,7 +313,6 @@ const UploadArtistImage: React.FC<{
           aria-label={t("deleteImage")}
           onClick={deleteImage}
           variant="dashed"
-          onlyIcon
           type="button"
           startIcon={<AiFillDelete />}
         />

@@ -151,7 +151,6 @@ const Artists = () => {
               target="_blank"
               href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists?format=rss`}
               rel="noreferrer"
-              onlyIcon
               className={css`
                 margin-top: 0.25rem;
               `}

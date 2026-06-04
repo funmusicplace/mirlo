@@ -19,11 +19,10 @@ type FormData = { message: string };
 const ContactArtist: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "allowDirectMessages">;
   className?: string;
-  onlyIcon?: boolean;
   size?: "compact" | "big" | "tiny";
   variant?: ButtonProps["variant"];
   color?: string;
-}> = ({ artist, className, onlyIcon, size, variant, color }) => {
+}> = ({ artist, className, size, variant, color }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
@@ -61,11 +60,9 @@ const ContactArtist: React.FC<{
         type="button"
         onClick={() => setIsOpen(true)}
         startIcon={<FaEnvelope />}
-        onlyIcon={onlyIcon}
         size={size}
         variant={variant}
         color={color}
-        aria-label={onlyIcon ? t("contact") : undefined}
         className={className}
       >
         {t("contact")}

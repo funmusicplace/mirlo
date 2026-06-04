@@ -171,7 +171,6 @@ const Embed: React.FC<{
       </Modal>
       <div>
         <ArtistButton
-          onlyIcon
           title={t("embedOrShare") ?? ""}
           onClick={() => setIsPopupOpen(true)}
           startIcon={<BsShare />}

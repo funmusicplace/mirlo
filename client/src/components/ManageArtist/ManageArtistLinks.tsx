@@ -128,7 +128,6 @@ const SortableLinkCard: React.FC<{
             rel="noreferrer"
             size="compact"
             variant="transparent"
-            onlyIcon
             aria-label={link.url}
             startIcon={<FaExternalLinkAlt />}
             className="h-full rounded-none!"
@@ -137,7 +136,6 @@ const SortableLinkCard: React.FC<{
         <ArtistButton
           size="compact"
           variant="transparent"
-          onlyIcon
           onClick={onEdit}
           aria-label={t("editLink")}
           startIcon={<FaPen />}

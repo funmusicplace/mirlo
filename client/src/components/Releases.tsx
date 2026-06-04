@@ -163,7 +163,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               target="_blank"
               href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${tag}` : ""}&released=released&format=rss`}
               rel="noreferrer"
-              onlyIcon
               smallIcon
               className={css`
                 margin-top: 0.25rem;

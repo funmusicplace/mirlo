@@ -15,7 +15,6 @@ export const PrevButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
     <Button
       startIcon={<MdSkipPrevious size={compact ? undefined : 22} />}
       variant="transparent"
-      onlyIcon={compact}
       className={compact ? "!h-6 !w-6 !p-1" : undefined}
       aria-label="Play previous track"
       onClick={onClickPrev}

@@ -43,7 +43,6 @@ export const FulfillmentCard: React.FC<{ purchase: MerchPurchase }> = ({
             type="button"
             variant="transparent"
             size="compact"
-            onlyIcon
             startIcon={isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             aria-expanded={isExpanded}
             aria-controls={detailsId}

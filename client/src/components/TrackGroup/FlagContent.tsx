@@ -15,10 +15,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { bp } from "../../constants";
 
-const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
-  trackGroupId,
-  onlyIcon,
-}) => {
+const FlagContent: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
   const [isFlagOpen, setIsFlagOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const snackbar = useSnackbar();
@@ -58,8 +55,6 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
   return (
     <>
       <ArtistButton
-        onlyIcon={onlyIcon}
-        aria-label={t("flagContent") ?? undefined}
         variant="link"
         className={css`
           font-weight: normal !important;

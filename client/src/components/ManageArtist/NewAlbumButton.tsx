@@ -9,14 +9,9 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 
 interface NewAlbumButtonProps extends React.PropsWithChildren {
   artist: Pick<Artist, "id" | "userId">;
-  onlyIcon?: boolean;
 }
 
-export function NewAlbumButton({
-  artist,
-  onlyIcon,
-  children,
-}: NewAlbumButtonProps) {
+export function NewAlbumButton({ artist, children }: NewAlbumButtonProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -44,7 +39,6 @@ export function NewAlbumButton({
       startIcon={<FaPlus />}
       variant="dashed"
       collapsible
-      onlyIcon={onlyIcon}
       isLoading={isPending}
       onClick={handleClick}
     >

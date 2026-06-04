@@ -41,7 +41,6 @@ const ShareButton: React.FC<{
   return (
     <>
       <ArtistButton
-        onlyIcon
         aria-label={t("share") ?? ""}
         title={t("share") ?? ""}
         onClick={handleShareClick}

@@ -35,11 +35,14 @@ export interface ButtonProps {
     | "chip";
   uppercase?: boolean;
   bold?: boolean;
-  onlyIcon?: boolean;
   smallIcon?: boolean;
 }
 
-const StyledButton = styled.button<ButtonProps>(
+interface StyledButtonProps extends ButtonProps {
+  onlyIcon: boolean;
+}
+
+const StyledButton = styled.button<StyledButtonProps>(
   {},
   ({ buttonRole, size, ...props }) => {
     const bodyStyles = window.getComputedStyle(document.body);
@@ -316,7 +319,6 @@ export const Button: React.FC<
   endIcon,
   disabled,
   isLoading,
-  onlyIcon,
   role,
   ...props
 }) => {
@@ -324,7 +326,7 @@ export const Button: React.FC<
     <StyledButton
       onClick={onClick}
       disabled={disabled}
-      onlyIcon={!children || onlyIcon}
+      onlyIcon={!children}
       title={children ? children.toString() : undefined}
       aria-label={props["aria-label"] || (children ? children.toString() : "")}
       {...props}
@@ -341,7 +343,7 @@ export const Button: React.FC<
       ) : (
         ""
       )}
-      {!onlyIcon && <span className="children">{children}</span>}
+      <span className="children">{children}</span>
       {endIcon ? (
         <span className="endIcon" aria-hidden>
           {endIcon}

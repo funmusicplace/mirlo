@@ -243,7 +243,6 @@ const UploadGeneralImage: React.FC<{
         <ArtistButton
           onClick={deleteImage}
           variant="dashed"
-          onlyIcon
           type="button"
           startIcon={<AiFillDelete />}
         />

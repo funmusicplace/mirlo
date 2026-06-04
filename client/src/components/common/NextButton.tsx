@@ -20,7 +20,6 @@ export const NextButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
     <Button
       startIcon={<MdSkipNext size={compact ? undefined : 22} />}
       variant="transparent"
-      onlyIcon={compact}
       className={compact ? "!h-6 !w-6 !p-1" : undefined}
       aria-label={t("nextTrack")}
       onClick={onClickNext}

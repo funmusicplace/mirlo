@@ -296,7 +296,6 @@ export const Modal: React.FC<{
 
               <Button
                 className={closeClass}
-                onlyIcon
                 startIcon={<FaTimes />}
                 onClick={onCloseWrapper}
                 aria-label="close"

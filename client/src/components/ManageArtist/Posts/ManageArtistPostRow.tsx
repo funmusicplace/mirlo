@@ -66,7 +66,6 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
                 type="button"
                 variant="transparent"
                 size="compact"
-                onlyIcon
                 startIcon={isExpanded ? <FaChevronUp /> : <FaChevronDown />}
                 aria-expanded={isExpanded}
                 aria-controls={detailsId}
@@ -126,7 +125,6 @@ const ManageArtistPostRow: React.FC<ManageArtistPostRowProps> = ({
                 <ArtistButtonLink
                   aria-label={t("editPost")}
                   to={getManagePostURLReference(post)}
-                  onlyIcon
                   variant="dashed"
                   startIcon={<FaPen />}
                 />
