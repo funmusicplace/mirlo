@@ -67,6 +67,26 @@ describe("artists", () => {
       assert.equal(response.status, 404);
     });
 
+    it("should return the artist's currency on trackGroups, not 'usd'", async () => {
+      const { user } = await createUser({
+        email: "eur@test.com",
+        currency: "eur",
+      });
+      const artist = await createArtist(user.id, {
+        name: "Euro Artist",
+        urlSlug: "euro-artist",
+      });
+      await createTrackGroup(artist.id, { title: "Euro Album" });
+
+      const response = await requestApp
+        .get(`artists/${artist.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const trackGroup = response.body.result.trackGroups[0];
+      assert.equal(trackGroup.currency, "eur");
+    });
+
     it("should return trackGroup tracks ordered by 'order' asc", async () => {
       const { user } = await createUser({ email: "ordered@test.com" });
       const artist = await createArtist(user.id, {

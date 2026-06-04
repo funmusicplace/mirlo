@@ -21,6 +21,7 @@ import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
+  artist?: Partial<Artist>;
   tracks?: CanimusTrack[];
 }
 
@@ -29,7 +30,7 @@ export const processSingleTrackGroup = (
     cover?: TrackGroupCover | null;
     artist?: Partial<Artist> & {
       avatar?: ArtistAvatar | null;
-      user?: { currency?: string | null };
+      user?: { currency?: string | null } | null;
     };
     paymentToUser?: { currency?: string | null } | null;
     merch?: (Merch & { images: MerchImage[] })[];
