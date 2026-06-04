@@ -1,7 +1,7 @@
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getArtistManageUrl, getArtistUrl } from "utils/artist";
@@ -75,10 +75,16 @@ const LabelInvite: React.FC<{
               : "text-sm text-(--mi-text-color)"
           }
         >
-          <Link to={getArtistUrl(labelArtist)} className="font-bold">
-            {labelArtist.name}
-          </Link>{" "}
-          {t("inviteToJoinLabel")}
+          <Trans
+            t={t}
+            i18nKey="inviteToJoinLabel"
+            values={{ labelName: labelArtist.name }}
+            components={{
+              labelLink: (
+                <Link to={getArtistUrl(labelArtist)} className="font-bold" />
+              ),
+            }}
+          />
         </div>
         <div
           className={
