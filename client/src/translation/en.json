@@ -139,7 +139,8 @@
     "manageLabel": "Manage label",
     "viewLabelPage": "View {{labelName}} page",
     "fulfillment": "Order fulfillment",
-    "viewSalesPage": "View sales"
+    "viewSalesPage": "View sales",
+    "openMenu": "Open menu"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",
