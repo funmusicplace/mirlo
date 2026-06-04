@@ -87,7 +87,10 @@ export const processSingleArtist = (
     ),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map((tg) =>
-      processSingleTrackGroup(tg, { loggedInUserId: userId })
+      processSingleTrackGroup(
+        { ...tg, artist: { ...tg.artist, user: artist.user } },
+        { loggedInUserId: userId }
+      )
     ),
     subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
       ...tier,
