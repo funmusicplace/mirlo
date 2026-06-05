@@ -361,10 +361,7 @@ const TrackRow: React.FC<{
             className={`overflow-hidden text-ellipsis grow [&_i]:opacity-80 ${titleSizeClass}`}
           >
             {track.title ?? <i>{t("untitled")}</i>}
-            <TrackAuthors
-              track={track}
-              trackGroupArtistId={trackGroup.artistId}
-            />
+            <TrackAuthors track={track} />
           </div>
         )}
 

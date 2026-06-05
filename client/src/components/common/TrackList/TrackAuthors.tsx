@@ -31,47 +31,46 @@ const AuthorName: React.FC<{
   return content;
 };
 
-const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
-  track,
-  trackGroupArtistId,
-}) => {
+const TrackAuthors: React.FC<{ track: Track }> = ({ track }) => {
   const coAuthors = (
-    track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? []
+    track.trackArtists?.filter(
+      (artist) => artist.isCoAuthor && artist.artistName?.trim()
+    ) ?? []
   ).sort((a, b) => a.order - b.order);
 
+  if (coAuthors.length === 0) {
+    return null;
+  }
+
   return (
-    <>
-      {coAuthors.find((author) => author.artistId !== trackGroupArtistId) && (
-        <span
-          className={
-            css`
-              color: var(--mi-text-color);
-              opacity: 0.5;
-              margin-left: 0.5rem;
-              font-size: 0.85rem;
+    <span
+      className={
+        css`
+          color: var(--mi-text-color);
+          opacity: 0.5;
+          margin-left: 0.5rem;
+          font-size: 0.85rem;
 
-              && a {
-                color: var(--mi-text-color);
-                text-decoration: none;
-              }
-
-              && a:hover {
-                text-decoration: underline;
-              }
-            ` +
-            " " +
-            "track-authors"
+          && a {
+            color: var(--mi-text-color);
+            text-decoration: none;
           }
-        >
-          {coAuthors.map((artist, index) => (
-            <React.Fragment key={artist.artistName}>
-              <AuthorName artist={artist} />
-              {index < coAuthors.length - 1 && ", "}
-            </React.Fragment>
-          ))}
-        </span>
-      )}
-    </>
+
+          && a:hover {
+            text-decoration: underline;
+          }
+        ` +
+        " " +
+        "track-authors"
+      }
+    >
+      {coAuthors.map((artist, index) => (
+        <React.Fragment key={artist.artistName}>
+          <AuthorName artist={artist} />
+          {index < coAuthors.length - 1 && ", "}
+        </React.Fragment>
+      ))}
+    </span>
   );
 };
 

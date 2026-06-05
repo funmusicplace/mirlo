@@ -37,11 +37,10 @@ const TrackRow = styled("tr")`
 
 const ManageTrackRow: React.FC<{
   track: Track;
-  artistId: number;
   addTracksToQueue: (id: number) => void;
   reload: () => Promise<void>;
   handleDrop: (val: React.DragEvent<HTMLTableRowElement>) => void;
-}> = ({ track, artistId, addTracksToQueue, reload, handleDrop }) => {
+}> = ({ track, addTracksToQueue, reload, handleDrop }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageTrackTable",
   });
@@ -186,7 +185,7 @@ const ManageTrackRow: React.FC<{
                 <FaExclamationTriangle /> {t("missingTitle")}
               </div>
             )}
-            <TrackAuthors track={track} trackGroupArtistId={artistId} />
+            <TrackAuthors track={track} />
             <p>
               <small
                 className={css`
