@@ -154,7 +154,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
             tracks={trackGroup.tracks}
             editable
             trackGroupId={trackGroup.id}
-            artistId={artist.id}
             owned
             reload={refetch}
           />
