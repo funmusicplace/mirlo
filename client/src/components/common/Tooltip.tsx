@@ -1,30 +1,24 @@
 import styled from "@emotion/styled";
-import { bp } from "../../constants";
 import React from "react";
+import { createPortal } from "react-dom";
+
+import { bp } from "../../constants";
 
 const TooltipWrapper = styled.div<{ underline: boolean }>`
   position: relative;
-  z-index: 998;
   cursor: pointer;
   display: inline-block;
 
   ${(props) => (props.underline ? "border-bottom: 1px dotted black" : "")};
-
-  &:hover .tooltiptext {
-    visibility: visible;
-  }
-
-  @media screen and (max-width: ${bp.medium}px) {
-    display: none !important;
-  }
 `;
 
 const TooltipText = styled.span<{
   compact?: boolean;
   position?: "below" | "right";
 }>`
-  visibility: hidden;
   min-width: ${(props) => (props.compact ? "80px" : "200px")};
+  max-width: ${(props) => (props.compact ? "160px" : "240px")};
+  overflow-wrap: anywhere;
   font-size: ${(props) => (props.compact ? "0.75rem" : "1rem")};
   line-height: ${(props) => (props.compact ? "0.75rem" : "1rem")};
   background-color: black;
@@ -33,21 +27,19 @@ const TooltipText = styled.span<{
   padding: ${(props) => (props.compact ? "0.25rem" : "0.5rem")};
   border-radius: 6px;
 
-  position: absolute;
-  z-index: 999;
+  position: fixed;
+  z-index: 1004;
+  pointer-events: none;
 
   ${(props) => {
     if (props.position === "right") {
       return `
-        top: 50%;
-        left: calc(100% + 0.5rem);
         transform: translateY(-50%);
-        margin-top: 0;
 
         &:after {
           content: " ";
           position: absolute;
-          left: -10px;
+          left: -9px;
           top: 50%;
           transform: translateY(-50%);
           border-width: 5px;
@@ -57,15 +49,12 @@ const TooltipText = styled.span<{
       `;
     } else {
       return `
-        top: 100%;
-        left: 50%;
         transform: translateX(-50%);
-        margin-top: ${props.compact ? "0.25rem" : "0.75rem"};
 
         &:after {
           content: " ";
           position: absolute;
-          bottom: 100%;
+          bottom: calc(100% - 1px);
           left: 50%;
           margin-left: -5px;
           border-width: 5px;
@@ -94,16 +83,56 @@ export const Tooltip: React.FC<{
   compact,
   position = "below",
 }) => {
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
+  const computeCoords = React.useCallback(() => {
+    const rect = wrapperRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    if (position === "right") {
+      setCoords({ top: rect.top + rect.height / 2, left: rect.right + 8 });
+    } else {
+      setCoords({
+        top: rect.bottom + (compact ? 4 : 12),
+        left: rect.left + rect.width / 2,
+      });
+    }
+  }, [compact, position]);
+
+  React.useEffect(() => {
+    if (!coords) return;
+    const onReposition = () => computeCoords();
+    window.addEventListener("scroll", onReposition, true);
+    window.addEventListener("resize", onReposition);
+    return () => {
+      window.removeEventListener("scroll", onReposition, true);
+      window.removeEventListener("resize", onReposition);
+    };
+  }, [coords, computeCoords]);
+
   return (
-    <TooltipWrapper underline={underline}>
+    <TooltipWrapper
+      ref={wrapperRef}
+      underline={underline}
+      onMouseEnter={computeCoords}
+      onMouseLeave={() => setCoords(null)}
+    >
       {children}
-      <TooltipText
-        compact={compact}
-        className="tooltiptext"
-        position={position}
-      >
-        {hoverText}
-      </TooltipText>
+      {coords &&
+        createPortal(
+          <TooltipText
+            compact={compact}
+            className="tooltiptext"
+            position={position}
+            style={{ top: coords.top, left: coords.left }}
+          >
+            {hoverText}
+          </TooltipText>,
+          document.body
+        )}
     </TooltipWrapper>
   );
 };
