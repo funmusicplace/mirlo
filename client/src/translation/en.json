@@ -1224,7 +1224,7 @@
     "recommendationError": "Error managing recommendation",
     "remove": "Remove",
     "cancel": "Cancel",
-    "coAuthorCheck": "List them in the track listing, like a featured artist or as a secondary main artist",
+    "coAuthorCheck": "Display this artist's name next to the track title on the release page (as a featured guest or a secondary main artist)",
     "removeArtist": "Remove this artist",
     "moreTrackDetails": "More track details",
     "saveDraft": "Save draft",
