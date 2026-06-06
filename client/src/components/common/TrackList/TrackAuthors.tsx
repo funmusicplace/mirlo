@@ -1,19 +1,23 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
+import { useMatchMedia } from "utils/useMatchMedia";
 
+import { bp } from "../../../constants";
 import Tooltip from "../Tooltip";
 
 const AuthorName: React.FC<{
   artist: NonNullable<Track["trackArtists"]>[number];
-}> = ({ artist }) => {
-  const content = artist.artistId ? (
-    <Link to={`/${artist.artistId}`} id="player-artist-name">
-      {artist.artistName}
-    </Link>
-  ) : (
-    <span>{artist.artistName}</span>
-  );
+  disableLink?: boolean;
+}> = ({ artist, disableLink }) => {
+  const content =
+    artist.artistId && !disableLink ? (
+      <Link to={`/${artist.artistId}`} id="player-artist-name">
+        {artist.artistName}
+      </Link>
+    ) : (
+      <span>{artist.artistName}</span>
+    );
 
   if (artist.role) {
     return (
@@ -32,6 +36,7 @@ const AuthorName: React.FC<{
 };
 
 const TrackAuthors: React.FC<{ track: Track }> = ({ track }) => {
+  const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
   const coAuthors = (
     track.trackArtists?.filter(
       (artist) => artist.isCoAuthor && artist.artistName?.trim()
@@ -66,7 +71,7 @@ const TrackAuthors: React.FC<{ track: Track }> = ({ track }) => {
     >
       {coAuthors.map((artist, index) => (
         <React.Fragment key={artist.artistName}>
-          <AuthorName artist={artist} />
+          <AuthorName artist={artist} disableLink={isMobile} />
           {index < coAuthors.length - 1 && ", "}
         </React.Fragment>
       ))}
