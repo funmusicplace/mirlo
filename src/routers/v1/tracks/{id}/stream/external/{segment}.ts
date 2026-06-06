@@ -92,7 +92,7 @@ export default function () {
           const payload = { song: id, userid };
           log.debug("Generate playtoken:", payload);
           const playToken = jwt.sign(payload, jwt_secret, {
-            expiresIn: "4h",
+            expiresIn: "2d",
           });
           res.setHeader(socialMusic.HEADER_PLAYTOKEN, playToken);
         } else {
