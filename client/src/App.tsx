@@ -84,7 +84,7 @@ function App() {
           <div
             className={css`
               @media screen and (max-width: ${bp.medium}px) {
-                ${user ? "display: none !important;" : ""}
+                display: none !important;
               }
             `}
           >
