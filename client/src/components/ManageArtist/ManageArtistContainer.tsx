@@ -66,6 +66,7 @@ export const ArtistPageWrapper: React.FC<{
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            box-shadow: none;
           }
         `}
       >
