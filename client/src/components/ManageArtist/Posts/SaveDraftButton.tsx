@@ -54,7 +54,6 @@ const SaveDraftButton: React.FC<{
             ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
             content: getBodyContent(),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
-            artistId: artistId,
             minimumSubscriptionTierId:
               isFinite(+data.minimumTier) && +data.minimumTier !== 0
                 ? Number(data.minimumTier)

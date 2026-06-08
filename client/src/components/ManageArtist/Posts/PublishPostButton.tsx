@@ -57,7 +57,6 @@ const PublishPostButton: React.FC<{
           ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
           content: bodyContent,
           publishedAt: new Date(data.publishedAt + ":00").toISOString(),
-          artistId: post.artistId,
           minimumSubscriptionTierId:
             isFinite(+data.minimumTier) && +data.minimumTier !== 0
               ? Number(data.minimumTier)
