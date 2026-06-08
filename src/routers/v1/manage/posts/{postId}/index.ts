@@ -125,35 +125,8 @@ export default function () {
         urlSlug,
       } = req.body;
       assertLoggedIn(req);
-      const user = req.user;
 
-      if (artistId !== undefined) {
-        const ownedArtist = await prisma.artist.findFirst({
-          where: { id: artistId, userId: user.id },
-        });
-        if (!ownedArtist) {
-          throw new AppError({ httpCode: 403, description: "Forbidden" });
-        }
-      }
-
-      if (minimumSubscriptionTierId !== undefined) {
-        const validTier = await prisma.artistSubscriptionTier.findFirst({
-          where: {
-            artistId,
-            id: minimumSubscriptionTierId,
-          },
-        });
-
-        if (!validTier) {
-          throw new AppError({
-            httpCode: 400,
-            description:
-              "That subscription tier isn't associated with the artist",
-          });
-        }
-      }
-
-      const post = await prisma.post.findUnique({
+      const post = await prisma.post.findFirst({
         where: {
           id: Number(postId),
         },
@@ -184,10 +157,26 @@ export default function () {
         }
       }
 
+      if (post?.artistId && minimumSubscriptionTierId !== undefined) {
+        const validTier = await prisma.artistSubscriptionTier.findFirst({
+          where: {
+            artistId: post.artistId,
+            id: minimumSubscriptionTierId,
+          },
+        });
+
+        if (!validTier) {
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "That subscription tier isn't associated with the artist",
+          });
+        }
+      }
+
       const updatedPost = await prisma.post.update({
         data: {
           title,
-          artistId,
           content,
           isPublic,
           publishedAt,
