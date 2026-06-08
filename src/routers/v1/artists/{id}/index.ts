@@ -77,14 +77,27 @@ export default function () {
         name: "id",
         required: true,
         type: "string",
+        description: "Artist ID or urlSlug",
+      },
+      {
+        in: "query",
+        name: "includeDefaultTier",
+        required: false,
+        type: "boolean",
+        description:
+          "Include the default (free) subscription tier in subscriptionTiers",
       },
     ],
     responses: {
       200: {
-        description: "An artist that matches the id",
+        description:
+          "An artist matching the id, including trackGroups, merch, and subscriptionTiers",
         schema: {
           $ref: "#/definitions/Artist",
         },
+      },
+      404: {
+        description: "Artist not found",
       },
       default: {
         description: "An error occurred",

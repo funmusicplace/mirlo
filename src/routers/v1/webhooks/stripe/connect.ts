@@ -11,6 +11,10 @@ import {
   handleSetupIntentSucceeded,
   verifyStripeSignature,
 } from "../../../../utils/stripe";
+import {
+  handleTerminalReaderActionSucceeded,
+  handleTerminalReaderActionFailed,
+} from "../../../../utils/stripe/terminal";
 
 const { STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET } = process.env;
 
@@ -81,6 +85,18 @@ export default function () {
           const accountUpdate = event.data.object;
 
           handleAccountUpdate(accountUpdate);
+          break;
+        case "terminal.reader.action_succeeded":
+          // To test: stripe trigger terminal.reader.action_succeeded
+          const succeededReader = event.data.object;
+          handleTerminalReaderActionSucceeded(
+            succeededReader,
+            event.account ?? ""
+          );
+          break;
+        case "terminal.reader.action_failed":
+          const failedReader = event.data.object;
+          handleTerminalReaderActionFailed(failedReader);
           break;
         default:
           // Unexpected event type

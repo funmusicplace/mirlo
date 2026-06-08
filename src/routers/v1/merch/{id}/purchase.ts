@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
-import { createStripeCheckoutSessionForMerchPurchase } from "../../../../utils/stripe/sessions";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { determinePrice } from "../../../../utils/purchasing";
+import { createStripeCheckoutSessionForMerchPurchase } from "../../../../utils/stripe/sessions";
 import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
 
 type Params = {
@@ -158,23 +158,46 @@ export default function () {
   }
 
   POST.apiDoc = {
-    summary: "Purchase a TrackGroup",
+    summary: "Purchase a merch item",
     parameters: [
       {
         in: "path",
         name: "id",
         required: true,
         type: "string",
+        description: "Merch item ID",
       },
       {
         in: "body",
         name: "purchase",
         schema: {
           type: "object",
-          required: [],
+          required: ["shippingDestinationId"],
           properties: {
-            trackGroupId: {
+            price: {
+              type: "string",
+              description: "Price in cents",
+            },
+            email: {
+              type: "string",
+              description: "Buyer email (for non-logged-in purchases)",
+            },
+            quantity: {
               type: "number",
+              description: "Number of items",
+            },
+            merchOptionIds: {
+              type: "array",
+              items: { type: "string" },
+              description: "Selected option IDs (size, colour, etc.)",
+            },
+            shippingDestinationId: {
+              type: "string",
+              description: "ID of the shipping destination",
+            },
+            message: {
+              type: "string",
+              description: "Optional message to the artist",
             },
           },
         },
@@ -182,7 +205,17 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "purchased artist",
+        description: "Checkout session created",
+        schema: {
+          type: "object",
+          properties: {
+            clientSecret: { type: "string" },
+            redirectUrl: { type: "string" },
+          },
+        },
+      },
+      404: {
+        description: "Merch item not found",
       },
       default: {
         description: "An error occurred",

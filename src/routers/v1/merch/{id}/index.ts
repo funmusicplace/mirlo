@@ -93,7 +93,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns TrackGroup information",
+    summary: "Returns Merch information",
     parameters: [
       {
         in: "path",
@@ -101,13 +101,23 @@ export default function () {
         required: true,
         type: "string",
       },
+      {
+        in: "query",
+        name: "artistId",
+        required: false,
+        type: "string",
+        description: "Artist urlSlug to look up merch by urlSlug instead of ID",
+      },
     ],
     responses: {
       200: {
-        description: "A trackGroup that matches the id",
+        description: "A merch item matching the id",
         schema: {
-          $ref: "#/definitions/TrackGroup",
+          $ref: "#/definitions/Merch",
         },
+      },
+      404: {
+        description: "Merch item not found",
       },
       default: {
         description: "An error occurred",

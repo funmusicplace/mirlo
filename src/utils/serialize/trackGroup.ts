@@ -50,6 +50,7 @@ export const processSingleTrackGroup = (
   const { _count, ...rest } = tg;
   const currency =
     tg.paymentToUser?.currency ?? tg.artist?.user?.currency ?? "usd";
+  const { apPrivateKey: _, ...artistPublic } = tg.artist ?? {};
   return {
     ...rest,
     totalTracks: _count?.tracks ?? tg.tracks?.length,
@@ -65,15 +66,12 @@ export const processSingleTrackGroup = (
       }),
     })),
     artist: tg.artist
-      ? (() => {
-          const { apPrivateKey: _, ...artistPublic } = tg.artist;
-          return {
-            ...artistPublic,
-            avatar: tg.artist.avatar
-              ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
-              : undefined,
-          };
-        })()
+      ? {
+          ...artistPublic,
+          avatar: tg.artist.avatar
+            ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
+            : undefined,
+        }
       : undefined,
     merch: tg.merch?.map((m) =>
       processSingleMerch(m, {

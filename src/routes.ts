@@ -61,6 +61,8 @@ const routes = [
   "labels/{id}/trackGroups",
   "labels/{id}/tracks",
   "stripe/setupIntentStatus",
+  "purchase",
+  "purchase/{id}",
   "users",
   "users/testExistence",
   "users/{userId}",

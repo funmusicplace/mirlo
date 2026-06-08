@@ -71,6 +71,33 @@ export const stripe = new Proxy({} as Stripe, {
   },
 });
 
+export const createOnlinePaymentIntent = async ({
+  amount,
+  currency,
+  stripeAccountId,
+  applicationFeeAmount,
+  metadata,
+}: {
+  amount: number;
+  currency: string;
+  stripeAccountId: string;
+  applicationFeeAmount: number;
+  metadata: Record<string, string>;
+}) => {
+  return stripe.paymentIntents.create(
+    {
+      amount,
+      currency,
+      automatic_payment_methods: { enabled: true },
+      ...(applicationFeeAmount > 0 && {
+        application_fee_amount: applicationFeeAmount,
+      }),
+      metadata,
+    },
+    { stripeAccount: stripeAccountId }
+  );
+};
+
 const buildProductDescription = async (
   title: string | null,
   artistName: string,
@@ -803,15 +830,49 @@ export const handlePaymentIntentSucceeded = async (
 
   intent.metadata = intent.metadata || {};
 
-  const { purchaseType, transactionId } =
-    intent.metadata as unknown as SessionMetaData;
+  const metadata = intent.metadata as unknown as SessionMetaData;
+  const {
+    purchaseType,
+    transactionId,
+    userId,
+    userEmail,
+    trackGroupId,
+    artistId,
+  } = metadata;
 
-  if (
-    purchaseType === "fundraiserPledge" &&
-    transactionId &&
-    intent.status === "succeeded"
-  ) {
+  if (intent.status !== "succeeded") return;
+
+  if (purchaseType === "fundraiserPledge" && transactionId) {
     await handleFundraiserPledgePaymentSuccess(transactionId);
+    return;
+  }
+
+  const sessionAdapter = {
+    id: intent.id,
+    amount_total: intent.amount_received,
+    currency: intent.currency,
+    metadata: { ...metadata, stripeAccountId: accountId },
+    payment_intent: intent.id,
+  } as unknown as Stripe.Checkout.Session;
+
+  const { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
+    userEmail ?? "",
+    userId
+  );
+
+  if (purchaseType === "trackGroup" && trackGroupId) {
+    await handleTrackGroupPurchase(
+      Number(actualUserId),
+      Number(trackGroupId),
+      sessionAdapter,
+      newUser
+    );
+  } else if (purchaseType === "tip" && artistId) {
+    await handleArtistGift(
+      Number(actualUserId),
+      Number(artistId),
+      sessionAdapter
+    );
   }
 };
 
