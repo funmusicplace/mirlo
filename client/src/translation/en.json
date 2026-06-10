@@ -1849,7 +1849,8 @@
     "discardDraft": "Discard",
     "fieldsRestored_one": "{{count}} field restored: {{fields}}",
     "fieldsRestored_other": "{{count}} fields restored: {{fields}}",
-    "restoredFromDraft": "Restored from draft"
+    "restoredFromDraft": "Restored from draft",
+    "close": "Close"
   },
   "uploadPanel": {
     "uploadsInProgress_one": "{{count}} upload in progress",

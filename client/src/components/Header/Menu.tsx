@@ -73,7 +73,7 @@ const Menu = forwardRef<
       {/* This div can be removed once `closedby` is baseline*/}
       <div className="flex flex-col h-full p-[1rem]">
         <Button
-          aria-label="Close menu"
+          aria-label={t("close", { keyPrefix: "common" })}
           autoFocus
           className="self-end border-none bg-transparent! text-black! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-black!"
           // @ts-ignore React doesn't support Invoker Commands API
