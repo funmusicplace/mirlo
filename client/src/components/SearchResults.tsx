@@ -94,6 +94,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
         }
       `}
     >
+      <h1>{t("searchResults", { search })}</h1>
       {/* Tags Section */}
       <SectionHeader>
         <WidthContainer
@@ -104,9 +105,9 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h1 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading" id={headingId}>
             {search ? t("tagSearchResults", { search }) : t("tags")}
-          </h1>
+          </h2>
         </WidthContainer>
       </SectionHeader>
       <WidthContainer variant="big" justify="center">
@@ -146,9 +147,9 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h1 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading" id={headingId}>
             {search ? t("artistsForSearch", { search }) : t("artists")}
-          </h1>
+          </h2>
         </WidthContainer>
       </SectionHeader>
       <WidthContainer variant="big" justify="center">
@@ -192,9 +193,9 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h1 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading" id={headingId}>
             {search ? t("releasesForSearch", { search }) : t("recentReleases")}
-          </h1>
+          </h2>
         </WidthContainer>
       </SectionHeader>
       <WidthContainer variant="big" justify="center">
@@ -246,9 +247,9 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h1 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading" id={headingId}>
             {search ? t("tracksForSearch", { search }) : t("recentTracks")}
-          </h1>
+          </h2>
         </WidthContainer>
       </SectionHeader>
       <WidthContainer variant="big" justify="center">
@@ -299,9 +300,9 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h1 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading" id={headingId}>
             {search ? t("labelsForSearch", { search }) : t("labels")}
-          </h1>
+          </h2>
         </WidthContainer>
       </SectionHeader>
       <WidthContainer variant="big" justify="center">
