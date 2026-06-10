@@ -1,12 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
-import { createStripeCheckoutSessionForPurchase } from "../../../../utils/stripe/sessions";
-import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
 import { determinePrice } from "../../../../utils/purchasing";
+import { createStripeCheckoutSessionForPurchase } from "../../../../utils/stripe/sessions";
 import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
 
 type Params = {
@@ -135,6 +135,9 @@ export default function () {
 
   POST.apiDoc = {
     summary: "Purchase a TrackGroup",
+    deprecated: true,
+    description:
+      "Deprecated — use POST /v1/purchase instead. This endpoint uses Stripe Embedded Checkout and will be removed once the frontend migrates to the Payment Element.",
     parameters: [
       {
         in: "path",
@@ -149,8 +152,18 @@ export default function () {
           type: "object",
           required: [],
           properties: {
-            trackGroupId: {
-              type: "number",
+            price: {
+              type: "string",
+              description:
+                "Price in cents; omit for free or minimum-price releases",
+            },
+            email: {
+              type: "string",
+              description: "Buyer email (for non-logged-in purchases)",
+            },
+            message: {
+              type: "string",
+              description: "Optional message to the artist",
             },
           },
         },
@@ -158,13 +171,20 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "purchased artist",
+        description:
+          "Checkout session created, or purchase completed for free releases",
+        schema: {
+          type: "object",
+          properties: {
+            clientSecret: { type: "string" },
+            redirectUrl: { type: "string" },
+          },
+        },
       },
+      404: { description: "TrackGroup not found" },
       default: {
         description: "An error occurred",
-        schema: {
-          additionalProperties: true,
-        },
+        schema: { additionalProperties: true },
       },
     },
   };

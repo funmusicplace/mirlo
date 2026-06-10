@@ -17,7 +17,10 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
-    const { includeDefaultTier }: { includeDefaultTier?: boolean } = req.query;
+    const { includeDefaultTier: includeDefaultTierStr } = req.query as {
+      includeDefaultTier?: string;
+    };
+    const includeDefaultTier = includeDefaultTierStr === "true";
     const loggedInUser = req.user;
     if (!id || id === "undefined") {
       return res.status(400).json({ error: "Invalid artist ID" });
@@ -77,14 +80,28 @@ export default function () {
         name: "id",
         required: true,
         type: "string",
+        description: "Artist ID or urlSlug",
+      },
+      {
+        in: "query",
+        name: "includeDefaultTier",
+        required: false,
+        type: "string",
+        enum: ["true", "false"],
+        description:
+          "Include the default (free) subscription tier in subscriptionTiers. Defaults to false.",
       },
     ],
     responses: {
       200: {
-        description: "An artist that matches the id",
+        description:
+          "An artist matching the id, including trackGroups, merch, and subscriptionTiers",
         schema: {
           $ref: "#/definitions/Artist",
         },
+      },
+      404: {
+        description: "Artist not found",
       },
       default: {
         description: "An error occurred",

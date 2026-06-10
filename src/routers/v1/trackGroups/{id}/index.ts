@@ -77,13 +77,24 @@ export default function () {
         required: true,
         type: "string",
       },
+      {
+        in: "query",
+        name: "artistId",
+        required: false,
+        type: "string",
+        description:
+          "Artist urlSlug to look up release by urlSlug instead of ID",
+      },
     ],
     responses: {
       200: {
-        description: "A trackGroup that matches the id",
+        description: "A trackGroup matching the id",
         schema: {
           $ref: "#/definitions/TrackGroup",
         },
+      },
+      404: {
+        description: "TrackGroup not found",
       },
       default: {
         description: "An error occurred",

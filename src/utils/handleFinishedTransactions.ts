@@ -37,6 +37,39 @@ const getPaymentIntent = async (
   }
 };
 
+// Reads the platform application fee and the Stripe processing fee for a
+// (settled) PaymentIntent from its latest charge's balance transaction. Callers
+// keep their own error policy — this throws if Stripe can't be reached.
+export const getFeesFromPaymentIntent = async (
+  paymentIntent: Stripe.PaymentIntent,
+  stripeAccount: string
+): Promise<{ applicationFee: number; paymentProcessorFee: number }> => {
+  const chargeId =
+    typeof paymentIntent.latest_charge === "string"
+      ? paymentIntent.latest_charge
+      : (paymentIntent.latest_charge?.id ?? "");
+
+  let paymentProcessorFee = 0;
+  if (chargeId) {
+    const charge = await stripe.charges.retrieve(
+      chargeId,
+      { expand: ["balance_transaction"] },
+      { stripeAccount }
+    );
+    const balanceTransaction = charge.balance_transaction as
+      | Stripe.BalanceTransaction
+      | undefined;
+    paymentProcessorFee =
+      balanceTransaction?.fee_details.find((fee) => fee.type === "stripe_fee")
+        ?.amount ?? 0;
+  }
+
+  return {
+    applicationFee: paymentIntent.application_fee_amount ?? 0,
+    paymentProcessorFee,
+  };
+};
+
 const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
   try {
     const paymentIntentId =
@@ -58,31 +91,14 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
       paymentIntentId,
       stripeAccount
     );
-    const paymentIntentLatestCharge = await stripe.charges.retrieve(
-      typeof paymentIntent.latest_charge === "string"
-        ? paymentIntent.latest_charge
-        : (paymentIntent.latest_charge?.id ?? ""),
-      { expand: ["balance_transaction"] },
-      { stripeAccount }
-    );
 
-    const balance_transaction =
-      paymentIntentLatestCharge.balance_transaction as
-        | Stripe.BalanceTransaction
-        | undefined;
-
-    const stripeFee = balance_transaction?.fee_details.find(
-      (fee) => fee.type === "stripe_fee"
-    );
+    const fees = await getFeesFromPaymentIntent(paymentIntent, stripeAccount);
 
     logger.info(
-      `Application fee: ${paymentIntent.application_fee_amount}, Stripe fee: ${stripeFee?.amount}`
+      `Application fee: ${fees.applicationFee}, Stripe fee: ${fees.paymentProcessorFee}`
     );
 
-    return {
-      applicationFee: paymentIntent.application_fee_amount ?? 0,
-      paymentProcessorFee: stripeFee?.amount ?? 0,
-    };
+    return fees;
   } catch (error) {
     console.trace(error);
     logger.error(`Error retrieving application fee: ${error}`);

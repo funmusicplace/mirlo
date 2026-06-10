@@ -10,10 +10,17 @@ const apiDoc = {
       type: "object",
       required: [],
       properties: {
-        string: {
-          description: "Title of the trackGroup",
-          type: "string",
+        id: { type: "number" },
+        title: { type: "string" },
+        urlSlug: { type: "string" },
+        artistId: { type: "number" },
+        minPrice: {
+          type: ["number", "null"],
+          description: "Minimum price in cents",
         },
+        currency: { type: ["string", "null"] },
+        publishedAt: { type: ["string", "null"], format: "date-time" },
+        about: { type: ["string", "null"] },
       },
     },
     Fundraiser: {
@@ -30,10 +37,17 @@ const apiDoc = {
       type: "object",
       required: [],
       properties: {
-        string: {
-          description: "Title of the merch",
-          type: "string",
+        id: { type: "string" },
+        title: { type: "string" },
+        urlSlug: { type: ["string", "null"] },
+        artistId: { type: "number" },
+        description: { type: ["string", "null"] },
+        minPrice: {
+          type: ["number", "null"],
+          description: "Minimum price in cents",
         },
+        currency: { type: ["string", "null"] },
+        isPublic: { type: "boolean" },
       },
     },
     MerchPurchase: {
@@ -57,21 +71,93 @@ const apiDoc = {
     Artist: {
       type: "object",
       properties: {
-        name: {
-          description: "Name of the artist",
-          type: "string",
-        },
-        bio: {
-          description: "A little bit about the artist",
-          type: ["string", "null"],
-        },
+        id: { type: "number" },
+        name: { type: "string" },
+        bio: { type: ["string", "null"] },
         urlSlug: {
-          description: "The string that will appear in the URL",
           type: "string",
+          description: "Used in URLs and as lookup key",
         },
-        userId: {
-          description: "The ID of the user",
+        userId: { type: "number" },
+        trackGroups: {
+          type: "array",
+          description: "Published releases",
+          items: { $ref: "#/definitions/TrackGroup" },
+        },
+        merch: {
+          type: "array",
+          description: "Public merch items",
+          items: { $ref: "#/definitions/Merch" },
+        },
+        subscriptionTiers: {
+          type: "array",
+          description: "Available subscription tiers",
+          items: { $ref: "#/definitions/ArtistSubscriptionTierResult" },
+        },
+      },
+    },
+    PurchaseRequest: {
+      type: "object",
+      required: ["artistId", "items"],
+      properties: {
+        readerId: {
+          type: "string",
+          description:
+            "Stripe Terminal reader ID (tmr_*). Provide to dispatch to a physical reader; omit for an online PaymentIntent.",
+        },
+        artistId: {
           type: "number",
+          description:
+            "ID of the artist whose connected account will receive payment",
+        },
+        email: {
+          type: "string",
+          description:
+            "Buyer email — used when no logged-in session is present",
+        },
+        items: {
+          type: "array",
+          description:
+            "Items to purchase. Mix merch/trackGroup/tip freely for terminal. " +
+            "Online currently supports a single trackGroup item; other types coming soon. " +
+            "Subscription must be the only item.",
+          items: {
+            type: "object",
+            required: ["type"],
+            properties: {
+              type: {
+                type: "string",
+                enum: ["trackGroup", "merch", "tip", "subscription"],
+              },
+              id: {
+                type: ["number", "string"],
+                description:
+                  "trackGroup ID as a number (trackGroup items) or merch ID as a UUID string (merch items)",
+              },
+              tierId: {
+                type: "number",
+                description: "Subscription tier ID (subscription items only)",
+              },
+              price: {
+                type: "string",
+                description:
+                  "Price in cents — online trackGroup only; allows pay-what-you-want above the minimum",
+              },
+              quantity: {
+                type: "number",
+                description: "Quantity (merch only)",
+              },
+              amount: {
+                type: "number",
+                description:
+                  "Amount in cents — tip items (required) or subscription items (overrides tier default)",
+              },
+              message: {
+                type: "string",
+                description: "Optional message to the artist",
+              },
+            },
+          },
         },
       },
     },
