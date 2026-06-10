@@ -173,7 +173,6 @@ const Header = () => {
   const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
   const menuRef = useRef<HTMLDialogElement | null>(null);
-  const menuButtonId = "menu-button";
   const menuDialogId = "menu-dialog";
 
   const openMenu = () => {
@@ -237,7 +236,6 @@ const Header = () => {
               // @ts-ignore React doesn't support Invoker Commands API
               command="show-modal"
               commandfor={menuDialogId}
-              id={menuButtonId}
               onClick={() => openMenu()}
               startIcon={
                 <svg
@@ -260,7 +258,6 @@ const Header = () => {
           {isLoggedIn &&
             createPortal(
               <Menu
-                buttonId={menuButtonId}
                 dialogId={menuDialogId}
                 isAdmin={user.isAdmin}
                 isLabelAccount={user.isLabelAccount}

@@ -15,13 +15,12 @@ import { getArtistManageUrl } from "utils/artist";
 const Menu = forwardRef<
   HTMLDialogElement,
   {
-    buttonId: string;
     dialogId: string;
     isAdmin: boolean;
     isLabelAccount: boolean;
     onClose: () => void;
   }
->(({ buttonId, dialogId, isAdmin, isLabelAccount, onClose }, ref) => {
+>(({ dialogId, isAdmin, isLabelAccount, onClose }, ref) => {
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
 
   const {
@@ -54,7 +53,7 @@ const Menu = forwardRef<
 
   return (
     <dialog
-      aria-labelledby={buttonId}
+      aria-label={t("menu")}
       className="inset-s-0 sm:inset-s-auto sm:inset-e-0 max-w-[100vw] max-h-full w-screen sm:w-[300px] h-full backdrop:bg-[rgba(0,0,0,.5)]"
       closedby="any"
       data-nosnippet
