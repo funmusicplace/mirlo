@@ -8,7 +8,6 @@ import {
 } from "queries";
 import { queryTags } from "queries/tags";
 import { queryTracks } from "queries/tracks";
-import { useId } from "react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
@@ -80,9 +79,6 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const id = useId();
-  const headingId = `${id}-recent-releases`;
-
   return (
     <div
       className={css`
@@ -105,7 +101,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h2 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading">
             {search ? t("tagSearchResults", { search }) : t("tags")}
           </h2>
         </WidthContainer>
@@ -147,7 +143,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h2 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading">
             {search ? t("artistsForSearch", { search }) : t("artists")}
           </h2>
         </WidthContainer>
@@ -193,7 +189,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h2 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading">
             {search ? t("releasesForSearch", { search }) : t("recentReleases")}
           </h2>
         </WidthContainer>
@@ -221,12 +217,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               </ButtonLink>
             </SpaceBetweenDiv>
           )}
-          <TrackgroupGrid
-            gridNumber="4"
-            as="ul"
-            aria-labelledby={headingId}
-            role="list"
-          >
+          <TrackgroupGrid gridNumber="4" as="ul" role="list">
             {newReleases?.results?.map((trackGroup) => (
               <ArtistTrackGroup
                 key={trackGroup.id}
@@ -247,7 +238,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h2 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading">
             {search ? t("tracksForSearch", { search }) : t("recentTracks")}
           </h2>
         </WidthContainer>
@@ -275,12 +266,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               </ButtonLink>
             </SpaceBetweenDiv>
           )}
-          <TrackgroupGrid
-            gridNumber="4"
-            as="ul"
-            aria-labelledby={headingId}
-            role="list"
-          >
+          <TrackgroupGrid gridNumber="4" as="ul" role="list">
             {tracks?.results?.map((track) => (
               <CollectionPurchaseSquare
                 trackGroup={track.trackGroup}
@@ -300,7 +286,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h2 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading">
             {search ? t("labelsForSearch", { search }) : t("labels")}
           </h2>
         </WidthContainer>
