@@ -232,7 +232,7 @@ const Header = () => {
           {isLoggedIn && (
             <Button
               aria-controls={menuDialogId}
-              aria-label={t("openMenu", { keyPrefix: "headerMenu" })}
+              aria-label={t("menu", { keyPrefix: "headerMenu" })}
               data-cy="user-nav"
               // @ts-ignore React doesn't support Invoker Commands API
               command="show-modal"
@@ -254,7 +254,7 @@ const Header = () => {
               }
               variant="transparent"
               className={menuButtonOverride}
-              title={t("openMenu", { keyPrefix: "headerMenu" })}
+              title={t("menu", { keyPrefix: "headerMenu" })}
             />
           )}
           {isLoggedIn &&
