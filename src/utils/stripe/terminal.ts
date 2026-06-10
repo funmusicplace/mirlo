@@ -2,16 +2,12 @@ import prisma from "@mirlo/prisma";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import {
-  handleTrackGroupPurchase,
-  handleArtistGift,
-} from "../handleFinishedTransactions";
 import { registerSubscription } from "../subscriptionTier";
 import { findOrCreateUserBasedOnEmail } from "../user";
 
 import { getCurrency } from "./sessions";
 
-import { stripe } from "./index";
+import { completePurchaseFromIntent, stripe } from "./index";
 
 export const createTerminalPaymentIntent = async ({
   totalAmount,
@@ -187,56 +183,7 @@ export const handleTerminalReaderActionSucceeded = async (
       stripeAccountId: accountId,
     });
 
-    const metadata = paymentIntent.metadata as {
-      purchaseType: "trackGroup" | "merch" | "tip";
-      stripeAccountId: string;
-      userId?: string;
-      userEmail?: string;
-      artistId?: string;
-      trackGroupId?: string;
-      message?: string;
-      items?: string;
-    };
-
-    const { userId: actualUserId } = await findOrCreateUserBasedOnEmail(
-      metadata.userEmail ?? "",
-      metadata.userId
-    );
-
-    // Adapt the captured PaymentIntent into the shape the existing handlers
-    // expect. All handlers use optional chaining so missing session fields
-    // fall back to sensible defaults.
-    const sessionAdapter = {
-      id: paymentIntent.id,
-      amount_total: paymentIntent.amount_received,
-      currency: paymentIntent.currency,
-      metadata: {
-        ...metadata,
-        stripeAccountId: accountId,
-      },
-      payment_intent: paymentIntent.id,
-    } as unknown as Stripe.Checkout.Session;
-
-    if (metadata.purchaseType === "trackGroup" && metadata.trackGroupId) {
-      await handleTrackGroupPurchase(
-        Number(actualUserId),
-        Number(metadata.trackGroupId),
-        sessionAdapter
-      );
-    } else if (metadata.purchaseType === "tip" && metadata.artistId) {
-      await handleArtistGift(
-        Number(actualUserId),
-        Number(metadata.artistId),
-        sessionAdapter
-      );
-    } else if (metadata.purchaseType === "merch" && metadata.items) {
-      await handleTerminalMerchPurchases(
-        Number(actualUserId),
-        JSON.parse(metadata.items),
-        paymentIntent,
-        accountId
-      );
-    }
+    await completePurchaseFromIntent(paymentIntent, accountId);
   } catch (e) {
     logger.error(`handleTerminalReaderActionSucceeded: ${e}`);
     console.error(e);
@@ -391,84 +338,4 @@ const handleTerminalSetupIntentSucceeded = async (
   logger.info(
     `handleTerminalSetupIntentSucceeded: created subscription ${subscription.id} for user ${actualUserId}, tier ${tier.id}`
   );
-};
-
-type TerminalMerchItem = {
-  type: "merch";
-  id: string;
-  quantity: number;
-  amount: number;
-};
-
-// Handles merch post-purchase for terminal payments. Unlike the online checkout
-// path, terminal payments have no line_items so we work from metadata directly.
-const handleTerminalMerchPurchases = async (
-  userId: number,
-  items: TerminalMerchItem[],
-  paymentIntent: Stripe.PaymentIntent,
-  stripeAccountId: string
-) => {
-  let applicationFee = paymentIntent.application_fee_amount ?? 0;
-  let stripeFee = 0;
-
-  try {
-    const chargeId =
-      typeof paymentIntent.latest_charge === "string"
-        ? paymentIntent.latest_charge
-        : paymentIntent.latest_charge?.id;
-
-    if (chargeId) {
-      const charge = await stripe.charges.retrieve(
-        chargeId,
-        { expand: ["balance_transaction"] },
-        { stripeAccount: stripeAccountId }
-      );
-      const bt = charge.balance_transaction as
-        | Stripe.BalanceTransaction
-        | undefined;
-      stripeFee =
-        bt?.fee_details.find((f) => f.type === "stripe_fee")?.amount ?? 0;
-    }
-  } catch (e) {
-    logger.warn(`handleTerminalMerchPurchases: could not retrieve fees: ${e}`);
-  }
-
-  for (const item of items) {
-    if (item.type !== "merch") continue;
-
-    const merch = await prisma.merch.findFirst({
-      where: { id: item.id },
-    });
-
-    if (!merch) {
-      logger.warn(`handleTerminalMerchPurchases: merch ${item.id} not found`);
-      continue;
-    }
-
-    const transaction = await prisma.userTransaction.create({
-      data: {
-        userId,
-        amount: item.amount,
-        currency: paymentIntent.currency,
-        platformCut: applicationFee,
-        stripeCut: stripeFee,
-        stripeId: paymentIntent.id,
-        paymentStatus: "COMPLETED",
-      },
-    });
-
-    await prisma.merchPurchase.create({
-      data: {
-        userId,
-        merchId: merch.id,
-        transactionId: transaction.id,
-        fulfillmentStatus: "NO_PROGRESS",
-        quantity: item.quantity ?? 1,
-      },
-    });
-
-    logger.info(
-      `handleTerminalMerchPurchases: created purchase for merch ${merch.id}, userId ${userId}`
-    );
-  }
 };

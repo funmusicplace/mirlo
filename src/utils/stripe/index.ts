@@ -14,6 +14,7 @@ import { subscribeUserToArtist } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
+  getFeesFromPaymentIntent,
   handleArtistGift,
   handleArtistMerchPurchase,
   handleCataloguePurchase,
@@ -822,31 +823,91 @@ export const handlePaymentIntentFailed = async (
   }
 };
 
-export const handlePaymentIntentSucceeded = async (
+type MerchPurchaseItem = {
+  type: "merch";
+  id: string;
+  quantity?: number;
+  amount: number;
+};
+
+// Records merch purchases from a captured/succeeded PaymentIntent. Works for
+// both terminal and online flows — it only reads from the PaymentIntent (fees,
+// charge, currency) and the `items` carried in metadata.
+export const handleMerchPurchasesFromIntent = async (
+  userId: number,
+  items: MerchPurchaseItem[],
+  paymentIntent: Stripe.PaymentIntent,
+  stripeAccountId: string
+) => {
+  const merchItems = items.filter((item) => item.type === "merch");
+  if (merchItems.length === 0) return;
+
+  let applicationFee = paymentIntent.application_fee_amount ?? 0;
+  let stripeFee = 0;
+
+  try {
+    ({ applicationFee, paymentProcessorFee: stripeFee } =
+      await getFeesFromPaymentIntent(paymentIntent, stripeAccountId));
+  } catch (e) {
+    logger.warn(
+      `handleMerchPurchasesFromIntent: could not retrieve fees: ${e}`
+    );
+  }
+
+  // One PaymentIntent is one payment, so it gets one transaction with the fees
+  // recorded once. Each merch line item is attached to it as its own purchase.
+  const transaction = await prisma.userTransaction.create({
+    data: {
+      userId,
+      amount: merchItems.reduce((sum, item) => sum + item.amount, 0),
+      currency: paymentIntent.currency,
+      platformCut: applicationFee,
+      stripeCut: stripeFee,
+      stripeId: paymentIntent.id,
+      paymentStatus: "COMPLETED",
+    },
+  });
+
+  for (const item of merchItems) {
+    const merch = await prisma.merch.findFirst({ where: { id: item.id } });
+
+    if (!merch) {
+      logger.warn(`handleMerchPurchasesFromIntent: merch ${item.id} not found`);
+      continue;
+    }
+
+    await prisma.merchPurchase.create({
+      data: {
+        userId,
+        merchId: merch.id,
+        transactionId: transaction.id,
+        fulfillmentStatus: "NO_PROGRESS",
+        quantity: item.quantity ?? 1,
+      },
+    });
+
+    logger.info(
+      `handleMerchPurchasesFromIntent: created purchase for merch ${merch.id}, userId ${userId}`
+    );
+  }
+};
+
+// Dispatches a succeeded/captured PaymentIntent to the right post-purchase
+// handler based on `purchaseType` metadata. Shared by the online
+// (handlePaymentIntentSucceeded) and terminal (handleTerminalReaderActionSucceeded)
+// flows so the routing lives in exactly one place.
+export const completePurchaseFromIntent = async (
   intent: Stripe.PaymentIntent,
   accountId: string
 ) => {
-  logger.info(`payment_intent.succeeded: ${intent.id}`);
+  const metadata = (intent.metadata ?? {}) as unknown as SessionMetaData & {
+    items?: string;
+  };
+  const { purchaseType, userId, userEmail, trackGroupId, artistId } = metadata;
 
-  intent.metadata = intent.metadata || {};
-
-  const metadata = intent.metadata as unknown as SessionMetaData;
-  const {
-    purchaseType,
-    transactionId,
-    userId,
-    userEmail,
-    trackGroupId,
-    artistId,
-  } = metadata;
-
-  if (intent.status !== "succeeded") return;
-
-  if (purchaseType === "fundraiserPledge" && transactionId) {
-    await handleFundraiserPledgePaymentSuccess(transactionId);
-    return;
-  }
-
+  // Adapt the PaymentIntent into the shape the existing handlers expect. All
+  // handlers use optional chaining so missing session fields fall back to
+  // sensible defaults.
   const sessionAdapter = {
     id: intent.id,
     amount_total: intent.amount_received,
@@ -873,7 +934,35 @@ export const handlePaymentIntentSucceeded = async (
       Number(artistId),
       sessionAdapter
     );
+  } else if (purchaseType === "merch" && metadata.items) {
+    await handleMerchPurchasesFromIntent(
+      Number(actualUserId),
+      JSON.parse(metadata.items),
+      intent,
+      accountId
+    );
   }
+};
+
+export const handlePaymentIntentSucceeded = async (
+  intent: Stripe.PaymentIntent,
+  accountId: string
+) => {
+  logger.info(`payment_intent.succeeded: ${intent.id}`);
+
+  intent.metadata = intent.metadata || {};
+
+  const metadata = intent.metadata as unknown as SessionMetaData;
+  const { purchaseType, transactionId } = metadata;
+
+  if (intent.status !== "succeeded") return;
+
+  if (purchaseType === "fundraiserPledge" && transactionId) {
+    await handleFundraiserPledgePaymentSuccess(transactionId);
+    return;
+  }
+
+  await completePurchaseFromIntent(intent, accountId);
 };
 
 export const handleAccountUpdate = async (account: Stripe.Account) => {

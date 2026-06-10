@@ -66,31 +66,11 @@ export default function () {
           amount?: number;
         };
 
-        const tier = await prisma.artistSubscriptionTier.findFirst({
-          where: { id: subItem.tierId, artistId, deletedAt: null },
-          select: { id: true, minAmount: true, defaultAmount: true },
-        });
-        if (!tier) {
-          throw new AppError({
-            httpCode: 404,
-            description: "Subscription tier not found",
-          });
-        }
-
-        const resolvedAmount =
-          subItem.amount ?? tier.defaultAmount ?? tier.minAmount ?? 0;
-        if (resolvedAmount <= 0) {
-          throw new AppError({
-            httpCode: 400,
-            description: "Subscription amount must be greater than 0",
-          });
-        }
-
         const { setupIntentId } = await initiateSubscription({
           readerId,
           artistId,
           tierId: subItem.tierId,
-          amount: resolvedAmount,
+          amount: subItem.amount,
           userEmail: loggedInUser?.email ?? email ?? "",
           userId: loggedInUser ? String(loggedInUser.id) : undefined,
         });

@@ -16,6 +16,7 @@ import {
 import {
   clearTables,
   createArtist,
+  createMerch,
   createTier,
   createTrackGroup,
   createUser,
@@ -175,6 +176,75 @@ describe("terminal.reader webhooks", () => {
       assert.ok(
         !captureStub.called,
         "capture should not be called when payment_intent is absent"
+      );
+    });
+
+    it("should create a single transaction with all merch purchases attached for a multi-item cart", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const merchA = await createMerch(artist.id, { title: "Shirt" });
+      const merchB = await createMerch(artist.id, { title: "Mug" });
+
+      const items = [
+        { type: "merch", id: merchA.id, quantity: 1, amount: 500 },
+        { type: "merch", id: merchB.id, quantity: 2, amount: 800 },
+      ];
+
+      sinon.stub(stripeUtils.stripe.paymentIntents, "capture").resolves({
+        id: "pi_merch_capture",
+        amount_received: 1300,
+        currency: "usd",
+        application_fee_amount: 100,
+        metadata: {
+          purchaseType: "merch",
+          stripeAccountId: "acct_test",
+          userId: String(buyer.id),
+          userEmail: buyer.email,
+          artistId: String(artist.id),
+          items: JSON.stringify(items),
+        },
+        status: "succeeded",
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+      const reader = buildReader({
+        action: {
+          type: "process_payment_intent",
+          status: "succeeded",
+          process_payment_intent: { payment_intent: "pi_merch_capture" },
+        } as any,
+      });
+
+      await handleTerminalReaderActionSucceeded(reader, "acct_test");
+
+      const transactions = await prisma.userTransaction.findMany({
+        where: { stripeId: "pi_merch_capture" },
+        include: { merchPurchases: true },
+      });
+
+      assert.equal(
+        transactions.length,
+        1,
+        "exactly one transaction for the payment"
+      );
+      const [transaction] = transactions;
+      assert.equal(
+        transaction.amount,
+        1300,
+        "transaction amount is the cart total"
+      );
+      assert.equal(transaction.platformCut, 100, "platform fee recorded once");
+      assert.equal(transaction.stripeCut, 0);
+      assert.equal(
+        transaction.merchPurchases.length,
+        2,
+        "both merch purchases attached to the one transaction"
+      );
+      assert.deepEqual(
+        transaction.merchPurchases.map((m) => m.quantity).sort(),
+        [1, 2]
       );
     });
   });
