@@ -93,6 +93,24 @@ const errorHandler = (
     });
   }
 
+  // Stripe SDK errors (e.g. terminal reader failures, card declines). Surface
+  // Stripe's human-readable message and status code rather than dumping the raw
+  // error object (with its headers blob) and returning an empty `{}` body.
+  if (
+    (typeof err?.type === "string" && err.type.startsWith("Stripe")) ||
+    typeof err?.rawType === "string"
+  ) {
+    const statusCode =
+      typeof err.statusCode === "number" ? err.statusCode : 400;
+    log.error(
+      `Stripe error on ${req.method} ${req.path}: ${err.type ?? err.rawType} (code=${err.code ?? "n/a"}, requestId=${err.requestId ?? "n/a"}): ${err.message}`
+    );
+    return res.status(statusCode).json({
+      error: err.message,
+      ...(err.code && { code: err.code }),
+    });
+  }
+
   // Errors we should probably know about
   log.error(
     `ERROR: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`,
