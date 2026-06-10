@@ -91,7 +91,6 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
       `}
     >
       <h1>{t("searchResults", { search })}</h1>
-      {/* Tags Section */}
       <SectionHeader>
         <WidthContainer
           variant="big"
