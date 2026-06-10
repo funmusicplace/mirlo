@@ -217,7 +217,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               </ButtonLink>
             </SpaceBetweenDiv>
           )}
-          <TrackgroupGrid gridNumber="4" as="ul" role="list">
+          <TrackgroupGrid gridNumber="4" as="ul">
             {newReleases?.results?.map((trackGroup) => (
               <ArtistTrackGroup
                 key={trackGroup.id}
@@ -266,7 +266,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               </ButtonLink>
             </SpaceBetweenDiv>
           )}
-          <TrackgroupGrid gridNumber="4" as="ul" role="list">
+          <TrackgroupGrid gridNumber="4" as="ul">
             {tracks?.results?.map((track) => (
               <CollectionPurchaseSquare
                 trackGroup={track.trackGroup}
