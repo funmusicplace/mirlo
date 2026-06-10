@@ -17,7 +17,10 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
-    const { includeDefaultTier }: { includeDefaultTier?: boolean } = req.query;
+    const { includeDefaultTier: includeDefaultTierStr } = req.query as {
+      includeDefaultTier?: string;
+    };
+    const includeDefaultTier = includeDefaultTierStr === "true";
     const loggedInUser = req.user;
     if (!id || id === "undefined") {
       return res.status(400).json({ error: "Invalid artist ID" });
@@ -83,9 +86,10 @@ export default function () {
         in: "query",
         name: "includeDefaultTier",
         required: false,
-        type: "boolean",
+        type: "string",
+        enum: ["true", "false"],
         description:
-          "Include the default (free) subscription tier in subscriptionTiers",
+          "Include the default (free) subscription tier in subscriptionTiers. Defaults to false.",
       },
     ],
     responses: {
