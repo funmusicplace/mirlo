@@ -18,6 +18,7 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
 import DashedList from "./DashedList";
+import { toQuantityOrNull } from "./merchQuantity";
 
 type OptionTypesForm = {
   optionTypes: Partial<MerchOptionType>[];
@@ -211,9 +212,7 @@ const MerchOptions: React.FC<{}> = () => {
         ...ot,
         options: ot.options?.map((o) => ({
           ...o,
-          quantityRemaining: o.quantityRemaining
-            ? Number(o.quantityRemaining)
-            : 0,
+          quantityRemaining: toQuantityOrNull(o.quantityRemaining),
           additionalPrice: o.additionalPrice * 100,
         })),
       }));
