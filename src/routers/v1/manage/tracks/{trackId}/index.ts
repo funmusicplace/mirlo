@@ -176,6 +176,7 @@ export default function () {
       where: { id: Number(trackId) },
       include: {
         audio: true,
+        trackArtists: true,
       },
     });
     res.json({ result: track });
