@@ -19,6 +19,7 @@ import { useFormPersist } from "utils/useFormPersist";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 
 import DownloadableContent from "./DownloadableContent";
+import { toQuantityOrNull } from "./merchQuantity";
 import SelectTrackGroup from "./SelectTrackGroup";
 
 interface MerchFormData {
@@ -86,7 +87,7 @@ const MerchForm: React.FC<{
           title: values.title,
           description: values.description,
           minPrice: toCentsOrNull(values.minPrice) ?? 0,
-          quantityRemaining: Number(values.quantityRemaining),
+          quantityRemaining: toQuantityOrNull(values.quantityRemaining),
           catalogNumber: values.catalogNumber,
           externalUrl: values.externalUrl ?? null,
           platformPercent: values.platformPercent,

@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import { queryUserStripeStatus } from "queries";
@@ -28,13 +27,13 @@ const MerchButtonPopUp: React.FC<{
   const [isOpen, setIsOpen] = React.useState(false);
 
   if (merch.quantityRemaining === 0) {
-    return <Button disabled>{t("soldOut")}</Button>;
+    return <ArtistButton disabled>{t("soldOut")}</ArtistButton>;
   }
 
   // Externally-sold merch sidesteps Mirlo's Stripe checkout, so don't gate the
   // button on the artist's Stripe status. See #1424.
   if (!hasExternalUrl && !stripeAccountStatus?.chargesEnabled) {
-    return <Button disabled>{t("soldOut")}</Button>;
+    return <ArtistButton disabled>{t("soldOut")}</ArtistButton>;
   }
 
   const hasPricedOptions =
