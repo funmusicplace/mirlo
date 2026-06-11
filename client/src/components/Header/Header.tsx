@@ -11,7 +11,7 @@ import { useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
 import usePublicArtist from "utils/usePublicObjectById";
@@ -159,6 +159,7 @@ const Header = () => {
   const isLoggedIn = !!user?.id;
 
   const { artistId, trackGroupId, postId } = useParams();
+  const location = useLocation();
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
   const artistBackground = artist?.background?.sizes;
@@ -221,7 +222,9 @@ const Header = () => {
               aria-label={t("logIn", { keyPrefix: "logIn" })}
               title={t("logIn", { keyPrefix: "logIn" })}
               startIcon={<FaUserAlt />}
-              to="/login"
+              to={`/login?redirect=${encodeURIComponent(
+                location.pathname + location.search
+              )}`}
               variant="transparent"
               className={menuButtonOverride}
             />

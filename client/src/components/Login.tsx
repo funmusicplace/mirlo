@@ -1,17 +1,21 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import LogInForm from "./common/LogInForm";
 import WidthContainer from "components/common/WidthContainer";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import LogInForm from "./common/LogInForm";
 
 function Login() {
   const { t } = useTranslation("translation", { keyPrefix: "logIn" });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const afterLogIn = React.useCallback(() => {
-    navigate("/");
-  }, [navigate]);
+    // Only allow relative redirects to avoid sending users off-site.
+    const redirect = searchParams.get("redirect");
+    navigate(redirect && redirect.startsWith("/") ? redirect : "/");
+  }, [navigate, searchParams]);
 
   return (
     <WidthContainer variant="small">
