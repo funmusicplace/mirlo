@@ -5,6 +5,7 @@ import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 
 import { getClient } from "./getClient";
+import { grantSubscriptionTierReleases } from "./subscriptionTier";
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "MONTH" | "YEAR";
@@ -124,35 +125,14 @@ export const manageSubscriptionReceipt = async ({
       });
 
       if (isNewSubscription) {
-        const hasProGrataTrackGroups =
-          await prisma.subscriptionTierRelease.findMany({
-            where: {
-              tierId: artistUserSubscription.artistSubscriptionTierId,
-            },
-          });
-        if (hasProGrataTrackGroups.length > 0) {
+        const grantedCount = await grantSubscriptionTierReleases({
+          userId: artistUserSubscription.userId,
+          tierId: artistUserSubscription.artistSubscriptionTierId,
+          userTransactionId: transaction.id,
+        });
+        if (grantedCount > 0) {
           logger.info(
-            `invoice.paid: ${processorPaymentReferenceId} has ${hasProGrataTrackGroups.length} pro grata track groups, granting access`
-          );
-          await Promise.all(
-            hasProGrataTrackGroups.map((release) =>
-              prisma.userTrackGroupPurchase.upsert({
-                where: {
-                  userId_trackGroupId: {
-                    userId: artistUserSubscription.userId,
-                    trackGroupId: release.trackGroupId,
-                  },
-                },
-                update: {},
-                create: {
-                  userId: artistUserSubscription.userId,
-                  trackGroupId: release.trackGroupId,
-                  userTransactionId: transaction.id ?? undefined,
-                  createdAt: new Date(),
-                  proGratis: true,
-                },
-              })
-            )
+            `invoice.paid: ${processorPaymentReferenceId} has ${grantedCount} pro grata track groups, granting access`
           );
         }
       }

@@ -70,3 +70,45 @@ export const registerSubscription = async ({
 
   return artistUserSubscription;
 };
+
+/**
+ * Grants the logged-in user pro-grata access to all of a subscription tier's
+ * releases (the albums attached to the tier). Idempotent: existing purchases
+ * are left untouched. Used both when a subscription is paid for (Stripe) and
+ * when an artist adds a subscriber for free.
+ */
+export const grantSubscriptionTierReleases = async ({
+  userId,
+  tierId,
+  userTransactionId = null,
+}: {
+  userId: number;
+  tierId: number;
+  userTransactionId?: string | null;
+}) => {
+  const releases = await prisma.subscriptionTierRelease.findMany({
+    where: { tierId },
+  });
+
+  await Promise.all(
+    releases.map((release) =>
+      prisma.userTrackGroupPurchase.upsert({
+        where: {
+          userId_trackGroupId: {
+            userId,
+            trackGroupId: release.trackGroupId,
+          },
+        },
+        update: {},
+        create: {
+          userId,
+          trackGroupId: release.trackGroupId,
+          userTransactionId: userTransactionId ?? undefined,
+          proGratis: true,
+        },
+      })
+    )
+  );
+
+  return releases.length;
+};

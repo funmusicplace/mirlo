@@ -1,6 +1,6 @@
-import { expect, afterEach, vi } from "vitest";
-import { cleanup } from "@testing-library/react";
 import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup } from "@testing-library/react";
+import { expect, afterEach, vi } from "vitest";
 
 expect.extend(matchers);
 
@@ -34,9 +34,7 @@ const featuredRelease = {
       300: "/images/example-album.jpg",
     },
   },
-  tracks: [
-    { id: 1 },
-  ],
+  tracks: [{ id: 1 }],
 };
 
 const popularRelease = {
@@ -65,7 +63,12 @@ const posts = [
 ];
 
 const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-  const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+  const url =
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.href
+        : input.url;
 
   if (url.includes("/auth/profile")) {
     return jsonResponse({ result: null });
@@ -122,3 +125,12 @@ afterEach(() => {
 });
 
 vi.stubGlobal("scrollTo", vi.fn());
+
+// jsdom doesn't implement ResizeObserver, which several UI components observe
+// (e.g. useScrollOverflow behind Table/Select). Provide a no-op stub.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+vi.stubGlobal("ResizeObserver", ResizeObserverStub);
