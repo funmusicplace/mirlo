@@ -58,20 +58,21 @@ export const SplashButtonWrapper = styled.div`
 const ParallexObjectWrapper = styled.div`
   background-size: contain;
   background-repeat: no-repeat;
+  position: absolute;
 `;
 
 const Splash = () => {
   const sceneEl = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (sceneEl.current) {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (sceneEl.current && !prefersReducedMotion) {
       const parallaxInstance = new Parallax(sceneEl.current, {
         relativeInput: true,
         hoverOnly: true,
       });
-
-      parallaxInstance.enable();
-
       return () => parallaxInstance.disable();
     }
   }, []);
