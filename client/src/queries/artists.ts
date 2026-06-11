@@ -21,9 +21,12 @@ const fetchArtist: QueryFunction<
   return api
     .get<{
       result: Artist;
-    }>(`v1/artists/${artistSlug}?includeDefaultTier=${includeDefaultTier}`, {
-      signal,
-    })
+    }>(
+      `v1/artists/${artistSlug}?includeDefaultTier=${includeDefaultTier === true}`,
+      {
+        signal,
+      }
+    )
     .then((r) => r.result);
 };
 
