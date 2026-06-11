@@ -136,9 +136,8 @@ const Splash = () => {
             z-index: -1;
             background-image: url("/static/images/cloud-toneddowngrain-1-optimized.webp");
 
-            @media screen and (max-width: ${bp.medium}px) {
-              margin-bottom: 0rem;
-              top: 42% !important;
+            @media screen and (max-width: ${bp.xlarge}px) {
+              display: none !important;
             }
           `}
         ></ParallexObjectWrapper>
