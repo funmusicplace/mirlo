@@ -534,6 +534,10 @@ export const singleInclude = (queryOptions?: {
         isPublic: true,
         deletedAt: null,
       },
+      orderBy: [
+        { order: { sort: "asc", nulls: "last" } },
+        { createdAt: "asc" },
+      ],
       include: {
         images: true,
         includePurchaseTrackGroup: true,

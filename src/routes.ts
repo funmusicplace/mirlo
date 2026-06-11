@@ -103,6 +103,7 @@ const routes = [
   "manage/artists/{artistId}/avatar",
   "manage/artists/{artistId}/drafts",
   "manage/artists/{artistId}/trackGroupOrder",
+  "manage/artists/{artistId}/merchOrder",
   "manage/artists/{artistId}/locationTags",
   "manage/artists/{artistId}/locationTags/{locationTagId}",
   "manage/artists/{artistId}/subscriptionTiers",

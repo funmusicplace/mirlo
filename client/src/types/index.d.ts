@@ -556,6 +556,7 @@ interface Merch {
   downloadableContent?: MerchDownloadableContent[];
   platformPercent?: number;
   externalUrl?: string | null;
+  order?: number | null;
 }
 
 interface Fundraiser {
