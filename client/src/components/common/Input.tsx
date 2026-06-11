@@ -10,7 +10,7 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
 }
 
-export const InputEl = styled.input`
+const StyledInput = styled.input`
   border: 1px solid var(--mi-tint-x-color);
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
@@ -42,6 +42,29 @@ export const InputEl = styled.input`
     border: var(--mi-border);
   }
 `;
+
+// Wrapping the styled input so that scrolling the mouse wheel over a
+// focused number input doesn't accidentally change its value (a common
+// browser footgun with type="number"). We blur on wheel for number inputs.
+export const InputEl = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ onWheel, ...props }, ref) => {
+  return (
+    <StyledInput
+      ref={ref}
+      onWheel={(e) => {
+        if (e.currentTarget.type === "number") {
+          e.currentTarget.blur();
+        }
+        onWheel?.(e);
+      }}
+      {...props}
+    />
+  );
+});
+
+InputEl.displayName = "InputEl";
 
 export const Input: React.FC<Props> = ({ onChange, ...props }) => {
   return <InputEl onChange={onChange} {...props} />;
