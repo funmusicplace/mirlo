@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { ArtistSection } from "components/Artist/Artist";
 import DropdownMenu from "components/common/DropdownMenu";
 import Money, { moneyDisplay } from "components/common/Money";
+import Pill from "components/common/Pill";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
@@ -30,10 +31,17 @@ export const SupporterTable = styled(Table)`
 `;
 
 type SupportTier = {
+  id: number;
   user: User;
   amount: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
+  artistUserSubscriptionCharges?: { id: string; transactionId?: string }[];
 };
+
+// A subscription with no associated transaction was added by the artist
+// without payment (e.g. a comp), so we surface it as "Free".
+const isFreeSubscription = (r: SupportTier) =>
+  !r.artistUserSubscriptionCharges?.some((charge) => charge.transactionId);
 
 const Supporters = () => {
   const { data: artist } = useArtistQuery();
@@ -129,7 +137,18 @@ const Supporters = () => {
               <tr key={r.user.id}>
                 <td>{r.user.name ?? "-"}</td>
                 <td>{r.user.email}</td>
-                <td>{r.artistSubscriptionTier.name}</td>
+                <td>
+                  {r.artistSubscriptionTier.name}
+                  {isFreeSubscription(r) && (
+                    <Pill
+                      className={css`
+                        margin-left: 0.5rem;
+                      `}
+                    >
+                      {t("free")}
+                    </Pill>
+                  )}
+                </td>
                 <td>
                   {r.artistSubscriptionTier.interval === "MONTH"
                     ? t("monthly")

@@ -1,27 +1,25 @@
-import Button from "components/common/Button";
-import React from "react";
-import api from "services/api";
-import { useCSVReader } from "react-papaparse";
-
-import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
-import { FaUpload } from "react-icons/fa";
-import Modal from "components/common/Modal";
-import styled from "@emotion/styled";
-import Table from "components/common/Table";
 import { css } from "@emotion/css";
-import { useSnackbar } from "state/SnackbarContext";
-import { uniqBy } from "lodash";
+import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import Button from "components/common/Button";
+import Modal from "components/common/Modal";
+import { Select } from "components/common/Select";
+import Table from "components/common/Table";
 import TextArea from "components/common/TextArea";
+import { uniqBy } from "lodash";
+import { queryManagedArtistSubscriptionTiers } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { FaUpload } from "react-icons/fa";
+import { useCSVReader } from "react-papaparse";
+import api from "services/api";
+import { useArtistContext } from "state/ArtistContext";
+import { useSnackbar } from "state/SnackbarContext";
 
 const CSVReaderWrapper = styled.div`
   display: flex;
   flexdirection: row;
   margin-bottom: 10;
-`;
-
-const CSVUploadButton = styled(Button)`
-  width: 20%;
 `;
 
 const AcceptedFiles = styled.div`
@@ -63,6 +61,20 @@ const ArtistSubscriberUploadData: React.FC<{
   const artistId = artist?.id;
   const artistUserId = artist?.userId;
   const [emailText, setEmailText] = React.useState<string>();
+
+  const { data: tiersData } = useQuery(
+    queryManagedArtistSubscriptionTiers({ artistId, includeDefault: true })
+  );
+  const tiers = tiersData?.results;
+  const [selectedTierId, setSelectedTierId] = React.useState<string>("");
+
+  // Default the tier selection to the artist's default (follow) tier.
+  React.useEffect(() => {
+    if (tiers && tiers.length > 0 && !selectedTierId) {
+      const defaultTier = tiers.find((tier) => tier.isDefaultTier) ?? tiers[0];
+      setSelectedTierId(String(defaultTier.id));
+    }
+  }, [tiers, selectedTierId]);
 
   const processData = async (results: { data: string[][] }) => {
     const data = results.data;
@@ -108,6 +120,9 @@ const ArtistSubscriberUploadData: React.FC<{
         if (artistUserId && artistId) {
           await api.post(`manage/artists/${artistId}/subscribers`, {
             subscribers: users,
+            artistSubscriptionTierId: selectedTierId
+              ? Number(selectedTierId)
+              : undefined,
           });
         }
         snackbar(t("uploadedNewEmails"), { type: "success" });
@@ -122,7 +137,7 @@ const ArtistSubscriberUploadData: React.FC<{
         setIsLoadingSubscriberData(false);
       }
     },
-    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen, t]
+    [artistUserId, artistId, selectedTierId, snackbar, onDone, setIsMenuOpen, t]
   );
 
   const processTextArea = React.useCallback(() => {
@@ -179,6 +194,29 @@ const ArtistSubscriberUploadData: React.FC<{
             </Button>
           </div>
         )}
+        {tiers && tiers.length > 0 && (
+          <div
+            className={css`
+              margin-bottom: 1rem;
+              label {
+                display: block;
+                margin-bottom: 0.5rem;
+              }
+            `}
+          >
+            <label>{t("addToTier")}</label>
+            <Select
+              value={selectedTierId}
+              onChange={(e) => setSelectedTierId(e.target.value)}
+              options={tiers.map((tier) => ({
+                label: tier.isDefaultTier
+                  ? t("tierFollowLabel", { name: tier.name })
+                  : tier.name,
+                value: String(tier.id),
+              }))}
+            />
+          </div>
+        )}
         <h3
           className={css`
             width: 100%;
@@ -206,9 +244,13 @@ const ArtistSubscriberUploadData: React.FC<{
             }: any) => (
               <>
                 <CSVReaderWrapper>
-                  <CSVUploadButton type="button" {...getRootProps()}>
+                  <Button
+                    className="text-sm!"
+                    type="button"
+                    {...getRootProps()}
+                  >
                     {t("uploadACSV")}
-                  </CSVUploadButton>
+                  </Button>
                   <AcceptedFiles>
                     {acceptedFile && acceptedFile.name}
                   </AcceptedFiles>

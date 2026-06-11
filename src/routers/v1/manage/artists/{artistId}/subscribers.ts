@@ -1,15 +1,16 @@
-import { NextFunction, Request, Response } from "express";
-
 import prisma from "@mirlo/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { NextFunction, Request, Response } from "express";
+import { uniqBy } from "lodash";
+
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import logger from "../../../../../logger";
 import { findArtistIdForURLSlug } from "../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../utils/download";
-import { uniqBy } from "lodash";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import logger from "../../../../../logger";
+import { grantSubscriptionTierReleases } from "../../../../../utils/subscriptionTier";
 
 const csvColumns = [
   {
@@ -66,9 +67,16 @@ export default function () {
           deletedAt: null,
         },
         select: {
+          id: true,
           amount: true,
           user: true,
           artistSubscriptionTier: true,
+          artistUserSubscriptionCharges: {
+            select: {
+              id: true,
+              transactionId: true,
+            },
+          },
         },
       });
 
@@ -114,17 +122,32 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { artistId }: { artistId?: string } = req.params;
 
-    const { subscribers } = req.body as { subscribers: { email: string }[] };
+    const { subscribers, artistSubscriptionTierId } = req.body as {
+      subscribers: { email: string }[];
+      artistSubscriptionTierId?: number;
+    };
 
     try {
-      const followTier = await prisma.artistSubscriptionTier.findFirst({
-        where: {
-          isDefaultTier: true,
-          artistId: Number(artistId),
-        },
-      });
+      const parsedArtistId = await findArtistIdForURLSlug(artistId);
 
-      if (followTier) {
+      // When a specific tier is requested, add subscribers to it; otherwise
+      // fall back to the artist's default (follow) tier.
+      const tier = artistSubscriptionTierId
+        ? await prisma.artistSubscriptionTier.findFirst({
+            where: {
+              id: Number(artistSubscriptionTierId),
+              artistId: parsedArtistId ?? undefined,
+              deletedAt: null,
+            },
+          })
+        : await prisma.artistSubscriptionTier.findFirst({
+            where: {
+              isDefaultTier: true,
+              artistId: parsedArtistId ?? undefined,
+            },
+          });
+
+      if (tier) {
         await Promise.all(
           uniqBy(subscribers, "email").map(async (subscriber) => {
             const created = await prisma.user.upsert({
@@ -142,7 +165,7 @@ export default function () {
             const found = await prisma.artistUserSubscription.findFirst({
               where: {
                 userId: created.id,
-                artistSubscriptionTierId: followTier.id,
+                artistSubscriptionTierId: tier.id,
               },
             });
 
@@ -151,9 +174,17 @@ export default function () {
                 await prisma.artistUserSubscription.create({
                   data: {
                     userId: created.id,
-                    artistSubscriptionTierId: followTier.id,
+                    artistSubscriptionTierId: tier.id,
                     amount: 0,
                   },
+                });
+
+                // Match the privileges of a paying subscriber: grant access to
+                // any albums attached to the tier. No transaction is created,
+                // which is what marks this subscription as "free".
+                await grantSubscriptionTierReleases({
+                  userId: created.id,
+                  tierId: tier.id,
                 });
               } catch (e) {
                 logger.error(`subscribers error code: ${(e as any).code} ${e}`);
@@ -211,6 +242,11 @@ export default function () {
               items: {
                 type: "object",
               },
+            },
+            artistSubscriptionTierId: {
+              description:
+                "The tier to add subscribers to. Defaults to the artist's default (follow) tier.",
+              type: "integer",
             },
           },
         },
