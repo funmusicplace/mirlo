@@ -572,7 +572,7 @@ export type ArtistPurchaseNotificationEmailType = {
   client: string;
 };
 
-const sendSaleEmails = async (
+export const sendSaleEmails = async (
   artist: {
     user: User;
     properties?: { emails?: { purchase?: string } } | null;

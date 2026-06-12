@@ -24,6 +24,7 @@ import {
   handleSubscription,
   handleTrackGroupPurchase,
   handleTrackPurchase,
+  sendSaleEmails,
 } from "../handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "../images";
 import { finalCoversBucket, finalMerchImageBucket } from "../minio";
@@ -868,12 +869,21 @@ export const handleMerchPurchasesFromIntent = async (
     },
   });
 
+  let artist: Prisma.ArtistGetPayload<{ include: { user: true } }> | undefined;
+
   for (const item of merchItems) {
-    const merch = await prisma.merch.findFirst({ where: { id: item.id } });
+    const merch = await prisma.merch.findFirst({
+      where: { id: item.id },
+      include: { artist: { include: { user: true } } },
+    });
 
     if (!merch) {
       logger.warn(`handleMerchPurchasesFromIntent: merch ${item.id} not found`);
       continue;
+    }
+
+    if (!artist && merch.artist) {
+      artist = merch.artist;
     }
 
     await prisma.merchPurchase.create({
@@ -888,6 +898,17 @@ export const handleMerchPurchasesFromIntent = async (
 
     logger.info(
       `handleMerchPurchasesFromIntent: created purchase for merch ${merch.id}, userId ${userId}`
+    );
+  }
+
+  const purchaser = await prisma.user.findFirst({ where: { id: userId } });
+
+  if (purchaser && artist) {
+    await sendSaleEmails(
+      artist,
+      purchaser,
+      [transaction.id],
+      paymentIntent.metadata?.message
     );
   }
 };
