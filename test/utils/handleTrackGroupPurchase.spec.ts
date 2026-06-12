@@ -7,6 +7,7 @@ import assert from "assert";
 
 import { describe, it } from "mocha";
 import sinon from "sinon";
+import Stripe from "stripe";
 
 import * as sendMail from "../../src/jobs/send-mail";
 import {
@@ -14,6 +15,7 @@ import {
   ArtistPurchaseNotificationEmailType,
   handleTrackGroupPurchase,
 } from "../../src/utils/handleFinishedTransactions";
+import stripe from "../../src/utils/stripe";
 import { clearTables, createTrackGroup, createUser } from "../utils";
 
 describe("handleTrackGroupPurchase", () => {
@@ -176,6 +178,64 @@ describe("handleTrackGroupPurchase", () => {
     assert.equal(
       locals1.transactions[0].trackGroupPurchases?.[0].trackGroup.id,
       trackGroup.id
+    );
+  });
+
+  it("records the purchase and still notifies when the Stripe fee lookup fails", async () => {
+    const stub = sinon.spy(sendMail, "default");
+    // Simulate a Stripe outage while fetching the application fee. This used to
+    // throw and abort the whole handler, so the charge succeeded in Stripe but
+    // left no purchase record and sent no emails (#issue).
+    sinon
+      .stub(stripe.paymentIntents, "retrieve")
+      .rejects(new Error("Stripe is unreachable"));
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const trackGroup = await createTrackGroup(artist.id, {
+      title: "Our Custom Title",
+    });
+
+    await handleTrackGroupPurchase(purchaser.id, trackGroup.id, {
+      id: "cs_test_123",
+      amount_total: 1000,
+      currency: "usd",
+      payment_intent: "pi_test_123",
+      metadata: { stripeAccountId: "acct_123" },
+    } as unknown as Stripe.Checkout.Session);
+
+    const purchase = await prisma.userTrackGroupPurchase.findFirst({
+      where: { userId: purchaser.id, trackGroupId: trackGroup.id },
+    });
+    assert.ok(
+      purchase,
+      "purchase should be recorded even when the fee lookup fails"
+    );
+
+    assert.equal(
+      stub.calledTwice,
+      true,
+      "both the buyer receipt and the artist notification should still be sent"
+    );
+    assert.equal(
+      stub.getCall(1).args[0].data.template,
+      "artist-purchase-notification"
     );
   });
 

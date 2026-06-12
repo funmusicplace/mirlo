@@ -100,9 +100,16 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
 
     return fees;
   } catch (error) {
-    console.trace(error);
-    logger.error(`Error retrieving application fee: ${error}`);
-    throw new Error("Failed to retrieve application fee");
+    // A fee lookup failure must not abort recording the purchase or sending its
+    // confirmation emails — otherwise the charge succeeds in Stripe but leaves
+    // no record in Mirlo and notifies no one. Fall back to zero fees (same as
+    // when the metadata is missing above) and log loudly so it can be
+    // reconciled. The purchase still gets recorded.
+    logger.error(
+      `Error retrieving application fee for session ${session?.id}, recording purchase without fee details:`,
+      error
+    );
+    return { applicationFee: 0, paymentProcessorFee: 0 };
   }
 };
 
@@ -333,7 +340,10 @@ export const handleTrackGroupPurchase = async (
 
     return purchase;
   } catch (e) {
-    logger.error(`Error creating album purchase: ${e}`);
+    logger.error(
+      `Error creating album purchase for trackGroupId ${trackGroupId}, userId ${userId}, session ${session?.id}:`,
+      e
+    );
   }
 };
 
@@ -452,7 +462,10 @@ export const handleCataloguePurchase = async (
       } as Job);
     }
   } catch (e) {
-    logger.error(`Error creating album purchase: ${e}`);
+    logger.error(
+      `Error creating catalogue purchase for artistId ${artistId}, userId ${userId}, session ${session?.id}:`,
+      e
+    );
   }
 };
 
@@ -509,7 +522,10 @@ export const handleTrackPurchase = async (
 
     return purchase;
   } catch (e) {
-    logger.error(`Error creating album purchase: ${e}`);
+    logger.error(
+      `Error creating track purchase for trackId ${trackId}, userId ${userId}, session ${session?.id}:`,
+      e
+    );
   }
 };
 
