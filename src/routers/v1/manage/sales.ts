@@ -1,12 +1,11 @@
+import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
-import { userAuthenticated } from "../../../auth/passport";
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
-import { findSales } from "../artists/{id}/supporters";
-import { User } from "@mirlo/prisma/client";
+import { userAuthenticated } from "../../../auth/passport";
 import { getDateRange } from "../../../utils/dateRange";
 import { downloadCSVFile } from "../../../utils/download";
+import { findSales } from "../artists/{id}/supporters";
 
 export default function () {
   const operations = {
@@ -32,6 +31,11 @@ export default function () {
     const user = req.user;
 
     try {
+      // When the caller hasn't narrowed to a specific artist, "my sales" means
+      // sales of artists I own AND sales routed to me as a release's payee
+      // (e.g. a label). When they filter to a specific artist, show only that
+      // artist's sales.
+      const usingDefaultScope = !artistIds;
       if (!artistIds) {
         artistIds = (
           await prisma.artist.findMany({
@@ -68,6 +72,7 @@ export default function () {
               trackGroupIds: trackGroupIds.map((tg) => Number(tg)),
             }
           : undefined,
+        paymentToUserId: usingDefaultScope ? user.id : undefined,
       });
 
       // If CSV format is requested, fetch additional transaction details

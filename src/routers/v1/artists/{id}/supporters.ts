@@ -1,6 +1,7 @@
+import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
 const constructDateFilter = (
@@ -22,64 +23,96 @@ const queryUserTransactions = (
   artistId: number[],
   sinceDate?: string,
   untilDate?: string,
-  trackGroupIds?: number[]
+  trackGroupIds?: number[],
+  // When set, also include sales whose payment is routed to this user via the
+  // release's `paymentToUser` (e.g. a label that is the payee for a roster
+  // artist's release it doesn't directly own). Mirrors the label trackGroups
+  // endpoint so the label sees the sales it actually received money for.
+  paymentToUserId?: number
 ) => {
   const dateFilter = constructDateFilter(sinceDate, untilDate);
+
+  const or: Prisma.UserTransactionWhereInput[] = [
+    {
+      trackGroupPurchases: {
+        some: {
+          trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
+          trackGroup: {
+            artistId: { in: artistId },
+          },
+        },
+      },
+    },
+    {
+      merchPurchases: {
+        some: {
+          merch: {
+            artistId: { in: artistId },
+          },
+        },
+      },
+    },
+    {
+      trackPurchases: {
+        some: {
+          track: {
+            trackGroup: { artistId: { in: artistId } },
+          },
+        },
+      },
+    },
+    {
+      tips: {
+        some: {
+          artistId: {
+            in: artistId,
+          },
+        },
+      },
+    },
+    {
+      artistUserSubscriptionCharges: {
+        some: {
+          artistUserSubscription: {
+            artistSubscriptionTier: {
+              artistId: { in: artistId },
+            },
+          },
+        },
+      },
+    },
+  ];
+
+  if (paymentToUserId !== undefined) {
+    // Only trackGroups and tracks carry a release-level `paymentToUser`; merch,
+    // tips and subscriptions are always paid to the artist's own account, so a
+    // label is never the payee for those.
+    or.push(
+      {
+        trackGroupPurchases: {
+          some: {
+            trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
+            trackGroup: { paymentToUserId },
+          },
+        },
+      },
+      {
+        trackPurchases: {
+          some: {
+            track: {
+              trackGroup: { paymentToUserId },
+            },
+          },
+        },
+      }
+    );
+  }
 
   return prisma.userTransaction.findMany({
     where: {
       amount: { gt: 0 },
       createdAt: dateFilter,
-      OR: [
-        {
-          trackGroupPurchases: {
-            some: {
-              trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
-              trackGroup: {
-                artistId: { in: artistId },
-              },
-            },
-          },
-        },
-        {
-          merchPurchases: {
-            some: {
-              merch: {
-                artistId: { in: artistId },
-              },
-            },
-          },
-        },
-        {
-          trackPurchases: {
-            some: {
-              track: {
-                trackGroup: { artistId: { in: artistId } },
-              },
-            },
-          },
-        },
-        {
-          tips: {
-            some: {
-              artistId: {
-                in: artistId,
-              },
-            },
-          },
-        },
-        {
-          artistUserSubscriptionCharges: {
-            some: {
-              artistUserSubscription: {
-                artistSubscriptionTier: {
-                  artistId: { in: artistId },
-                },
-              },
-            },
-          },
-        },
-      ],
+      OR: or,
     },
     select: {
       amount: true,
@@ -201,6 +234,7 @@ export const findSales = async ({
   untilDate,
   filters,
   orderBy,
+  paymentToUserId,
 }: {
   artistId: number[];
   sinceDate?: string;
@@ -209,6 +243,9 @@ export const findSales = async ({
     trackGroupIds?: number[];
   };
   orderBy?: { datePurchased: "asc" | "desc" };
+  // Also include sales routed to this user as the release's payee (see
+  // queryUserTransactions).
+  paymentToUserId?: number;
 }) => {
   if (sinceDate) {
     const date = new Date(sinceDate);
@@ -229,14 +266,17 @@ export const findSales = async ({
     userTransactions = await queryUserTransactions(
       artistId,
       sinceDate,
-      untilDate
+      untilDate,
+      undefined,
+      paymentToUserId
     );
   } else if (filters.trackGroupIds) {
     userTransactions = await queryUserTransactions(
       artistId,
       sinceDate,
       untilDate,
-      filters.trackGroupIds
+      filters.trackGroupIds,
+      paymentToUserId
     );
   }
 
