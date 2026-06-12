@@ -153,12 +153,12 @@ export default function () {
           required: [],
           properties: {
             price: {
-              type: "string",
+              type: ["number", "string"],
               description:
                 "Price in cents; omit for free or minimum-price releases",
             },
             email: {
-              type: "string",
+              type: ["string", "null"],
               description: "Buyer email (for non-logged-in purchases)",
             },
             message: {

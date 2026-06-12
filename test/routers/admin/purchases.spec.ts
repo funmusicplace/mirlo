@@ -1,14 +1,17 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+
 import {
   clearTables,
   createArtist,
   createTrackGroup,
   createUser,
 } from "../../utils";
+
 import prisma from "@mirlo/prisma";
 import { faker } from "@faker-js/faker";
 
