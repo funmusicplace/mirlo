@@ -92,6 +92,69 @@ describe("manage/posts/{postId}", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should PUT / generate a urlSlug from the title when post has none", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const artist = await createArtist(user.id);
+      const post = await prisma.post.create({
+        data: {
+          title: "",
+          artistId: artist.id,
+          isPublic: true,
+          urlSlug: null,
+          content: "The content",
+          isDraft: true,
+          publishedAt: new Date(),
+        },
+      });
+      assert.equal(post.urlSlug, null);
+
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({
+          title: "My Great Post",
+          urlSlug: null,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.urlSlug, "my-great-post");
+    });
+
+    it("should PUT / generate a urlSlug when urlSlug is sent as empty string", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const artist = await createArtist(user.id);
+      const post = await prisma.post.create({
+        data: {
+          title: "",
+          artistId: artist.id,
+          isPublic: true,
+          urlSlug: null,
+          content: "The content",
+          isDraft: true,
+          publishedAt: new Date(),
+        },
+      });
+
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({
+          title: "My Great Post",
+          urlSlug: "",
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.urlSlug, "my-great-post");
+    });
+
     it("should PUT / handle a non-existing minimum tier", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
