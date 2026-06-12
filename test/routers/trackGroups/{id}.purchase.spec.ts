@@ -1,21 +1,23 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 import { Request, Response } from "express";
 
 dotenv.config();
 import { describe, it } from "mocha";
+import sinon from "sinon";
+
+import purchaseAlbumEndpoint from "../../../src/routers/v1/trackGroups/{id}/purchase";
+import * as stripeUtils from "../../../src/utils/stripe";
 import {
   clearTables,
   createArtist,
   createTrackGroup,
   createUser,
 } from "../../utils";
-import sinon from "sinon";
-
 import { requestApp } from "../utils";
+
 import prisma from "@mirlo/prisma";
-import purchaseAlbumEndpoint from "../../../src/routers/v1/trackGroups/{id}/purchase";
-import * as stripeUtils from "../../../src/utils/stripe";
 
 describe("trackGroups/{id}/purchase", () => {
   beforeEach(async () => {
@@ -78,6 +80,38 @@ describe("trackGroups/{id}/purchase", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
+      assert.match(response.body.error, /.*payment processor.*/);
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should accept a numeric price and a null email (matches the frontend purchase request)", async () => {
+      // Regression: the frontend sends `price` as a number (cents) and may
+      // send `email: null`. The OpenAPI body schema previously required both
+      // to be strings, so request validation rejected the body with a 400
+      // before the handler ran. This asserts the request gets *past*
+      // validation (it fails later on the missing payment processor instead).
+      const { user, accessToken } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        minPrice: 500,
+      });
+
+      const response = await requestApp
+        .post(`trackGroups/${trackGroup.id}/purchase`)
+        .send({
+          price: 500,
+          email: null,
+          message: "",
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      // Should not be a request-validation error (which returns an array of
+      // field errors); it should reach the handler and fail on the missing
+      // payment processor instead.
+      assert.equal(Array.isArray(response.body.error), false);
       assert.match(response.body.error, /.*payment processor.*/);
       assert.equal(response.statusCode, 400);
     });
