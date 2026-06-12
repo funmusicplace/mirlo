@@ -27,7 +27,7 @@ export const DOWNLOADABLE_CONTENT_MIME_TYPES = [
 export const DOWNLOADABLE_CONTENT_EXTENSIONS = [".txt", ".md", ".epub"];
 
 // Keep in sync with the limit enforced on the server.
-export const MAX_DOWNLOADABLE_CONTENT_SIZE_MB = 20;
+export const MAX_DOWNLOADABLE_CONTENT_SIZE_MB = 100;
 export const MAX_DOWNLOADABLE_CONTENT_SIZE_BYTES =
   MAX_DOWNLOADABLE_CONTENT_SIZE_MB * 1024 * 1024;
 

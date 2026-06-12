@@ -26,7 +26,7 @@ const isAllowedMimeType = (mimeType?: string): boolean =>
   (ALLOWED_MIME_TYPES.includes(mimeType) || mimeType.startsWith("image/"));
 
 // Keep in sync with MAX_DOWNLOADABLE_CONTENT_SIZE on the client.
-const MAX_SIZE_MB = 20;
+const MAX_SIZE_MB = 100;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export default function () {
