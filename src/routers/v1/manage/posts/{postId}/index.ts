@@ -132,10 +132,17 @@ export default function () {
         },
       });
 
+      // Treat a missing or blank urlSlug (null, undefined, "" or whitespace)
+      // as "no slug provided" and fall back to the post's existing slug, then
+      // to one auto-generated from the title. A post should never be left with
+      // an empty slug since it needs to be linkable.
+      const providedSlug =
+        typeof urlSlug === "string" ? urlSlug.trim() : urlSlug;
+      const existingSlug = post?.urlSlug?.trim() || null;
       const effectiveSlug =
-        urlSlug != null
-          ? urlSlug
-          : (post?.urlSlug ?? generateSlug(title ?? post?.title ?? ""));
+        providedSlug ||
+        existingSlug ||
+        generateSlug(title ?? post?.title ?? "");
 
       const effectiveArtistId = artistId ?? post?.artistId;
 
