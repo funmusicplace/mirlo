@@ -85,68 +85,7 @@ function Artist() {
     }
   }, [pathname, navigate, artistId]);
 
-  const urlSlug = artist?.urlSlug;
-
-  React.useEffect(() => {
-    const subPages = [
-      "posts",
-      "tip",
-      "releases",
-      "support",
-      "links",
-      "merch",
-      "roster",
-      "checkout-complete",
-    ];
-    const end = pathname.split("/")[2];
-
-    if (!subPages.includes(end) && artist && urlSlug) {
-      const tabVisible: Record<TabId, boolean> = {
-        roster:
-          artist.isLabelProfile && (artist.user?.artistLabels?.length ?? 0) > 0,
-        releases:
-          (artist.trackGroups.length ?? 0) > 0 ||
-          (releases?.results.length ?? 0) > 0,
-        posts: (artist.posts.length ?? 0) > 0,
-        // Auto-redirect deliberately ignores isTipOnly, as tip-only artists
-        // shouldn't be landed on /support, which just opens up a modal.
-        support: !!canReceivePayments && getPaidTierCount(artist) > 0,
-        merch: (artist.merch.length ?? 0) > 0,
-      };
-
-      const defaultOrder: TabId[] = [
-        "roster",
-        "releases",
-        "posts",
-        "support",
-        "merch",
-      ];
-
-      const ordered = sortTabsByOrder(
-        defaultOrder.map((id) => ({
-          id,
-          visible: tabVisible[id],
-          label: "",
-          to: id,
-        })),
-        artist.properties?.tabOrder as TabId[] | undefined
-      );
-
-      const firstVisible = ordered.find((tab) => tab.visible);
-      if (firstVisible) {
-        navigate(`/${urlSlug}/${firstVisible.to}`, { replace: true });
-      } else if (artist.linksJson?.length) {
-        navigate(`/${urlSlug}/links`, { replace: true });
-      }
-    }
-  }, [
-    pathname,
-    navigate,
-    urlSlug,
-    artist,
-    releases?.results.length,
-    canReceivePayments,
-  ]);
+  const atBasePath = !pathname.split("/")[2];
 
   if (!artist && !isPending) {
     return <Box>{t("doesNotExist")}</Box>;
@@ -209,6 +148,12 @@ function Artist() {
     artist.properties?.tabOrder as TabId[] | undefined
   );
 
+  // The section rendered at the artist's home URL: the first tab with content.
+  // Tip-only support is skipped — it only opens a modal, so it's a poor landing.
+  const defaultSectionId = tabs.find(
+    (tab) => tab.visible && !(tab.id === "support" && isTipOnly)
+  )?.id;
+
   const headerLinks = transformFromLinks(artist).linkArray.filter(
     (l) => l.inHeader
   );
@@ -246,7 +191,16 @@ function Artist() {
                         {tab.label}
                       </button>
                     ) : (
-                      <NavLink to={tab.to} id={tab.navLinkId}>
+                      <NavLink
+                        to={tab.to}
+                        id={tab.navLinkId}
+                        className={({ isActive }) =>
+                          isActive ||
+                          (atBasePath && tab.id === defaultSectionId)
+                            ? "active"
+                            : ""
+                        }
+                      >
                         {tab.label}
                       </NavLink>
                     )}
@@ -307,7 +261,7 @@ function Artist() {
       </nav>
 
       <ArtistSection>
-        <Outlet context={{ openTipModal }} />
+        <Outlet context={{ openTipModal, defaultSectionId }} />
       </ArtistSection>
       {isTipOnly && (
         <TipArtistModal
