@@ -2,6 +2,7 @@ import produce from "immer";
 import type {
   IAudioMetadata,
   ICommonTagsResult,
+  ITag,
 } from "music-metadata/lib/type";
 
 import { ACCEPTED_AUDIO } from "./ManageTrackGroup/AlbumFormComponents/ReplaceTrackAudioInput";
@@ -83,6 +84,64 @@ type ParsedItem = {
   metadata: IAudioMetadata;
 };
 
+export interface ParsedTrackArtist {
+  artistName: string;
+  role: string;
+  isCoAuthor: boolean;
+}
+
+/**
+ * Determine the track artists from parsed audio metadata.
+ *
+ * Vorbis comments (FLAC) distinguish ARTIST (the entity responsible for the
+ * work — for a cover, the composer / original artist) from PERFORMER (who
+ * actually performed this recording). The `music-metadata` library does not
+ * map PERFORMER into its common model, so we read it from the native tags
+ * ourselves (see https://github.com/funmusicplace/mirlo/issues/650).
+ *
+ * Logic: prefer PERFORMER. When both PERFORMER and ARTIST are present, the
+ * PERFORMER is the primary artist and the ARTIST is credited as a secondary
+ * "composer". When there is no PERFORMER, fall back to the common `artists`
+ * field (which covers every other format and the common case where pop music
+ * omits PERFORMER).
+ */
+export const extractTrackArtists = (
+  metadata: IAudioMetadata
+): ParsedTrackArtist[] => {
+  const nativeTags: ITag[] = Object.values(metadata.native ?? {}).flat();
+  const valuesForTag = (id: string) =>
+    nativeTags
+      .filter((tag) => tag.id?.toUpperCase() === id)
+      .map((tag) => tag.value)
+      .filter((value): value is string => typeof value === "string" && !!value);
+
+  const performers = valuesForTag("PERFORMER");
+
+  if (performers.length > 0) {
+    const composers = valuesForTag("ARTIST").filter(
+      (composer) => !performers.includes(composer)
+    );
+    return [
+      ...performers.map((artistName) => ({
+        artistName,
+        role: "",
+        isCoAuthor: true,
+      })),
+      ...composers.map((artistName) => ({
+        artistName,
+        role: "composer",
+        isCoAuthor: false,
+      })),
+    ];
+  }
+
+  return (metadata.common.artists ?? []).map((artistName) => ({
+    artistName: artistName ?? "",
+    role: "",
+    isCoAuthor: true,
+  }));
+};
+
 export const convertMetaData = (
   p: ParsedItem,
   i: number,
@@ -115,15 +174,16 @@ export const convertMetaData = (
     status: trackGroup.defaultIsPreview === false ? "must-own" : "preview",
     lyrics: p.metadata.common.lyrics,
     isrc: isrc,
-    trackArtists:
-      p.metadata.common.artists?.map((artist, idx) => ({
-        artistName: artist ?? "",
-        role: "",
-        isCoAuthor: true,
-        order: idx,
-        artistId:
-          artist === trackGroup.artist?.name ? trackGroup.artistId : undefined,
-      })) ?? [],
+    trackArtists: extractTrackArtists(p.metadata).map((artist, idx) => ({
+      artistName: artist.artistName,
+      role: artist.role,
+      isCoAuthor: artist.isCoAuthor,
+      order: idx,
+      artistId:
+        artist.artistName === trackGroup.artist?.name
+          ? trackGroup.artistId
+          : undefined,
+    })),
   } as TrackData;
 };
 
@@ -273,13 +333,15 @@ export const prescanAudioFiles = async (
     const trackNumber = metadata.metadata.common.track.no
       ? Number(metadata.metadata.common.track.no)
       : null;
-    const artists = metadata.metadata.common.artists || [];
+    const artists = extractTrackArtists(metadata.metadata).map(
+      (artist) => artist.artistName
+    );
 
     return {
       ...af,
       title,
       trackNumber,
-      artists: artists as string[],
+      artists,
       duration: metadata.metadata.format.duration,
       isrc: metadata.metadata.common.isrc?.[0],
       lyrics: metadata.metadata.common.lyrics,
