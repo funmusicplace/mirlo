@@ -954,6 +954,7 @@
   },
   "manageMerch": {
     "untitledMerch": "Untitled merch",
+    "reorder": "Drag to reorder",
     "saveDestinations": "Save destinations",
     "updatedShippingDestinations": "Updated shipping destinations",
     "catalogNumber": "Catalog number",
@@ -966,6 +967,7 @@
     "dropFilesHere": "Drop files here, or click to select files.",
     "fileUploaded": "File uploaded",
     "fileDeleted": "File deleted",
+    "fileTooLarge": "\"{{filename}}\" is too large. Downloadable content must be {{maxSize}}MB or smaller.",
     "destinationCountry": "Destination country",
     "deleteMerch": "Delete merch item",
     "deleteCategory": "Delete merch category",

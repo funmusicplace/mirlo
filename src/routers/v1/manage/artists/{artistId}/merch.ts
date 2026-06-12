@@ -30,6 +30,10 @@ export default function () {
           artistId: Number(artistId),
           deletedAt: null,
         },
+        orderBy: [
+          { order: { sort: "asc", nulls: "last" } },
+          { createdAt: "asc" },
+        ],
         include: {
           artist: { include: { user: { select: { currency: true } } } },
           images: true,

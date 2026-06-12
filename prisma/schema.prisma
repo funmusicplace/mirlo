@@ -537,6 +537,7 @@ model Merch {
   deletedAt                   DateTime?
   artistId                    Int
   urlSlug                     String?
+  order                       Int?
   artist                      Artist                     @relation(fields: [artistId], references: [id])
   images                      MerchImage[]
   shippingDestinations        MerchShippingDestination[]
