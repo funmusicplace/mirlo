@@ -323,5 +323,63 @@ describe("manage/sales", () => {
       assert(Object.prototype.hasOwnProperty.call(sale, "stripeId"));
       assert(Object.prototype.hasOwnProperty.call(sale, "discountPercent"));
     });
+
+    it("should include sales routed to the user as the release payee (e.g. a label)", async () => {
+      const label = await createUser({ email: "label@test.com" });
+      const artistOwner = await createUser({ email: "artist@test.com" });
+      const buyer = await createUser({ email: "buyer@test.com" });
+
+      // The release belongs to the artist's own account, but its payments are
+      // routed to the label via paymentToUser.
+      const artist = await createArtist(artistOwner.user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        paymentToUserId: label.user.id,
+      });
+
+      await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
+        amount: 600,
+        currency: "gbp",
+      });
+
+      // The label sees the sale even though it does not own the artist.
+      const labelResponse = await requestApp
+        .get("manage/sales")
+        .set("Cookie", [`jwt=${label.accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(labelResponse.statusCode, 200);
+      assert.equal(labelResponse.body.results.length, 1);
+      assert.equal(labelResponse.body.results[0].amount, 600);
+
+      // ...and the owning artist still sees it too.
+      const artistResponse = await requestApp
+        .get("manage/sales")
+        .set("Cookie", [`jwt=${artistOwner.accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(artistResponse.body.results.length, 1);
+    });
+
+    it("should not show a user sales for releases not routed to them", async () => {
+      const label = await createUser({ email: "label@test.com" });
+      const artistOwner = await createUser({ email: "artist@test.com" });
+      const buyer = await createUser({ email: "buyer@test.com" });
+
+      const artist = await createArtist(artistOwner.user.id);
+      // No paymentToUser: the money goes to the artist, not the label.
+      const trackGroup = await createTrackGroup(artist.id);
+
+      await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
+        amount: 600,
+      });
+
+      const labelResponse = await requestApp
+        .get("manage/sales")
+        .set("Cookie", [`jwt=${label.accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(labelResponse.statusCode, 200);
+      assert.equal(labelResponse.body.results.length, 0);
+    });
   });
 });
