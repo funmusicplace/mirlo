@@ -64,7 +64,7 @@ const SupportMirlo = () => {
               gap: 24px;
             `}
           >
-            <SplashTitle>{t("sustainedBy")}</SplashTitle>
+            <SplashTitle as="h2">{t("sustainedBy")}</SplashTitle>
             <SplashButtonWrapper>
               <ButtonLink
                 to={

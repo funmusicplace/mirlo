@@ -3,11 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { queryTrackGroups, TrackGroupQueryOptions } from "queries";
 import { queryTags } from "queries/tags";
-import { useId } from "react";
 import React from "react";
 import { useTranslation, Trans } from "react-i18next";
 import { FaChevronRight, FaRss } from "react-icons/fa";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import usePagination from "utils/usePagination";
 
 import { bp } from "../constants";
@@ -21,28 +20,24 @@ import TrackGroupPills from "./TrackGroup/TrackGroupPills";
 
 const pageSize = 40;
 
-const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
-  const location = useLocation();
-  const { pathname } = location;
+const Releases = () => {
   const [params] = useSearchParams();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
-  const { page, PaginationComponent } = usePagination({ pageSize: limit });
+  const { page, PaginationComponent } = usePagination({ pageSize });
   const tag = params.get("tag");
   const search = params.get("search");
   const [license, setLicense] = React.useState<
     TrackGroupQueryOptions["license"] | ""
   >((params.get("license") as TrackGroupQueryOptions["license"]) ?? "");
 
-  const onReleasesPage = pathname.includes("releases");
-
   const { data: newReleases } = useQuery(
     queryTrackGroups({
-      skip: limit * page,
-      take: limit,
-      orderBy: pathname?.includes("releases") ? undefined : "random",
+      skip: pageSize * page,
+      take: pageSize,
+      orderBy: undefined,
       tag: tag || undefined,
       title: search ?? undefined,
-      isReleased: pathname?.includes("releases") ? undefined : "released",
+      isReleased: undefined,
       license: license || undefined,
     })
   );
@@ -54,9 +49,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const id = useId();
-  const headingId = `${id}-recent-releases`;
-
   return (
     <div
       className={css`
@@ -67,6 +59,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
         }
       `}
     >
+      <h1>{t("explore")}</h1>
       {!tag && (
         <SectionHeader
           className={css`
@@ -117,7 +110,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             display: flex;
           `}
         >
-          <h1 className="h5 section-header__heading" id={headingId}>
+          <h2 className="h5 section-header__heading">
             {tag ? (
               <Trans
                 t={t}
@@ -130,7 +123,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             ) : (
               t("recentReleases")
             )}
-          </h1>
+          </h2>
           <div
             className={css`
               display: flex;
@@ -140,26 +133,26 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               }
             `}
           >
-            {onReleasesPage && (
-              <Select
-                value={license ?? ""}
-                onChange={(e) => {
-                  const newLicense = e.target
-                    .value as TrackGroupQueryOptions["license"];
-                  setLicense(newLicense);
-                }}
-                options={[
-                  { label: t("all"), value: "" },
-                  { label: t("publicDomain"), value: "public-domain" },
-                  { label: t("creativeCommons"), value: "creative-commons" },
-                  {
-                    label: t("allRightsReserved"),
-                    value: "all-rights-reserved",
-                  },
-                ]}
-              />
-            )}
+            <Select
+              value={license ?? ""}
+              onChange={(e) => {
+                const newLicense = e.target
+                  .value as TrackGroupQueryOptions["license"];
+                setLicense(newLicense);
+              }}
+              options={[
+                { label: t("all"), value: "" },
+                { label: t("publicDomain"), value: "public-domain" },
+                { label: t("creativeCommons"), value: "creative-commons" },
+                {
+                  label: t("allRightsReserved"),
+                  value: "all-rights-reserved",
+                },
+              ]}
+            />
             <ButtonAnchor
+              aria-label={t("rssFeed")}
+              title={t("rssFeed")}
               target="_blank"
               href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${tag}` : ""}&released=released&format=rss`}
               rel="noreferrer"
@@ -189,12 +182,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               padding: var(--mi-side-paddings-xsmall);
             `}
           >
-            <TrackgroupGrid
-              gridNumber="4"
-              as="ul"
-              aria-labelledby={headingId}
-              role="list"
-            >
+            <TrackgroupGrid gridNumber="4" as="ul">
               {newReleases?.results?.map((trackGroup) => (
                 <ArtistTrackGroup
                   key={trackGroup.id}
@@ -206,7 +194,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             </TrackgroupGrid>
           </div>
 
-          {pathname.includes("releases") && newReleases && (
+          {newReleases && (
             <PaginationComponent amount={newReleases.results.length} />
           )}
         </WidthContainer>
