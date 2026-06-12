@@ -33,7 +33,8 @@ const BuyTrackGroup: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
   noPadding?: boolean;
-}> = ({ trackGroup, track, noPadding }) => {
+  onPurchaseComplete?: () => void;
+}> = ({ trackGroup, track, noPadding, onPurchaseComplete }) => {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const [stripeLoading, setStripeLoading] = React.useState(false);
@@ -101,12 +102,13 @@ const BuyTrackGroup: React.FC<{
             params.set("purchaseType", track ? "track" : "trackGroup");
             params.set("trackGroupId", trackGroup.id.toString());
             if (track) params.set("trackId", track.id.toString());
-            setOnComplete(
-              () => () =>
-                navigate(
-                  `/${artistSlug}/checkout-complete?${params.toString()}`
-                )
-            );
+            setOnComplete(() => () => {
+              // Let callers (e.g. the in-player buy modal) clear any
+              // play-limit / overplayed state that's keeping the player
+              // blocked before we navigate away (#1630).
+              onPurchaseComplete?.();
+              navigate(`/${artistSlug}/checkout-complete?${params.toString()}`);
+            });
             setClientSecret(response.clientSecret);
           } else {
             window.location.assign(response.redirectUrl);
@@ -118,7 +120,15 @@ const BuyTrackGroup: React.FC<{
         setStripeLoading(false);
       }
     },
-    [snackbar, t, trackGroup, track, verifiedEmail, navigate]
+    [
+      snackbar,
+      t,
+      trackGroup,
+      track,
+      verifiedEmail,
+      navigate,
+      onPurchaseComplete,
+    ]
   );
 
   let lessThanMin = false;

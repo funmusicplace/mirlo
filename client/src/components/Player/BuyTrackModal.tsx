@@ -11,7 +11,8 @@ export const BuyTrackModal: React.FC<{
   showBuyModal: boolean;
   setShowBuyModal: (show: boolean) => void;
   trackGroupId: number;
-}> = ({ showBuyModal, setShowBuyModal, trackGroupId }) => {
+  onPurchaseComplete?: () => void;
+}> = ({ showBuyModal, setShowBuyModal, trackGroupId, onPurchaseComplete }) => {
   const { data: trackGroup } = useQuery(
     queryTrackGroup({ albumSlug: `${trackGroupId}` })
   );
@@ -43,7 +44,13 @@ export const BuyTrackModal: React.FC<{
           </div>
         </div>
       ) : (
-        trackGroup && <BuyTrackGroup trackGroup={trackGroup} noPadding />
+        trackGroup && (
+          <BuyTrackGroup
+            trackGroup={trackGroup}
+            noPadding
+            onPurchaseComplete={onPurchaseComplete}
+          />
+        )
       )}
     </Modal>
   );

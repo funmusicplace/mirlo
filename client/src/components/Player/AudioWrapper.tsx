@@ -103,6 +103,17 @@ export const AudioWrapper: React.FC<{
     }
   }, [currentTrack.id]);
 
+  // Once the listener buys the album from the buy modal the play limit no
+  // longer applies, but the player otherwise stays stuck on the overplayed
+  // state (the modal keeps reappearing and playback won't resume). Clear that
+  // state so playback can continue when they return to the track (#1630).
+  const onPurchaseComplete = React.useCallback(() => {
+    setShowBuyModal(false);
+    setHasOverplayedSong(false);
+    setHasShownBuyModalBeenShown(false);
+    onPlayLimitChange?.(null);
+  }, [onPlayLimitChange]);
+
   const onListen = React.useCallback(
     async (e: any) => {
       // setCurrentTime(fmtMSS(e.target.currentTime.toFixed()));
@@ -253,6 +264,7 @@ export const AudioWrapper: React.FC<{
         showBuyModal={showBuyModal}
         setShowBuyModal={setShowBuyModal}
         trackGroupId={currentTrack.trackGroupId}
+        onPurchaseComplete={onPurchaseComplete}
       />
       <React.Suspense fallback={null}>
         <ReactHlsPlayer
