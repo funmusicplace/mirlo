@@ -70,7 +70,9 @@
     "releasesForSearch": "Releases for '{{ search }}'",
     "labelsForSearch": "Labels for '{{ search }}'",
     "labels": "Labels",
-    "searchResults": "Search results for '{{ search }}'"
+    "searchResults": "Search results for '{{ search }}'",
+    "rssFeed": "RSS feed",
+    "explore": "Explore"
   },
   "cookies": {
     "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",
@@ -1802,7 +1804,8 @@
     "newsletterEnterCode": "Verification code",
     "newsletterVerifyAndSubscribe": "Verify & subscribe",
     "newsletterResend": "Resend code",
-    "newsletterResendSuccess": "Code resent!"
+    "newsletterResendSuccess": "Code resent!",
+    "exploreMusic": "Explore music"
   },
   "mobileApp.searchScreen": {
     "bestSelling": "Best Selling",
