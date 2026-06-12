@@ -1,16 +1,33 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
-import {
-  doesMerchBelongToUser,
-  doesTrackGroupBelongToUser,
-} from "../../../../utils/ownership";
+import { userAuthenticated } from "../../../../auth/passport";
+import { AppError } from "../../../../utils/error";
 import {
   downloadableContentBucket,
   getPresignedUploadUrl,
 } from "../../../../utils/minio";
+import {
+  doesMerchBelongToUser,
+  doesTrackGroupBelongToUser,
+} from "../../../../utils/ownership";
+
+// Keep in sync with DOWNLOADABLE_CONTENT_MIME_TYPES on the client.
+const ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "text/plain",
+  "text/markdown",
+  "application/epub+zip",
+];
+
+const isAllowedMimeType = (mimeType?: string): boolean =>
+  !!mimeType &&
+  (ALLOWED_MIME_TYPES.includes(mimeType) || mimeType.startsWith("image/"));
+
+// Keep in sync with MAX_DOWNLOADABLE_CONTENT_SIZE on the client.
+const MAX_SIZE_MB = 100;
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export default function () {
   const operations = {
@@ -21,8 +38,22 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
 
-    const { filename, trackGroupId, merchId, mimeType } = req.body;
+    const { filename, trackGroupId, merchId, mimeType, size } = req.body;
     try {
+      if (!isAllowedMimeType(mimeType)) {
+        throw new AppError({
+          httpCode: 400,
+          description: `File type "${mimeType}" is not allowed for downloadable content`,
+        });
+      }
+
+      if (typeof size !== "number" || size <= 0 || size > MAX_SIZE_BYTES) {
+        throw new AppError({
+          httpCode: 400,
+          description: `Downloadable content must be ${MAX_SIZE_MB}MB or smaller`,
+        });
+      }
+
       let trackGroup;
       let merch;
       if (trackGroupId) {
@@ -44,6 +75,7 @@ export default function () {
         data: {
           originalFilename: filename,
           mimeType: mimeType,
+          size: size,
         },
       });
 
@@ -73,7 +105,9 @@ export default function () {
       if (downloadableContent) {
         uploadUrl = await getPresignedUploadUrl(
           downloadableContentBucket,
-          downloadableContent.id
+          downloadableContent.id,
+          undefined,
+          size
         );
       }
       res.json({ result: refreshedContent, uploadUrl });

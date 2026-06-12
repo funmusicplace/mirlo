@@ -256,7 +256,12 @@ export const uploadFilesToBackblaze = async (
 export const getPresignedUploadUrl = async (
   bucket: string,
   fileName: string,
-  expiresInSeconds = 3600
+  expiresInSeconds = 3600,
+  // When provided, the upload is pinned to exactly this many bytes: the
+  // client must send a body of this size or the storage backend rejects the
+  // request. Note: only the Backblaze (S3) backend enforces this — the MinIO
+  // client used in development cannot sign content-length on a presigned PUT.
+  contentLength?: number
 ) => {
   await createBucketIfNotExists(bucket);
   if (backendStorage === "backblaze") {
@@ -266,10 +271,15 @@ export const getPresignedUploadUrl = async (
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: fileName,
+      ...(contentLength !== undefined ? { ContentLength: contentLength } : {}),
     });
 
     const url = await getSignedUrl(backblazeClient, command, {
       expiresIn: expiresInSeconds,
+      // Force content-length into the signature so the size pin is enforced.
+      ...(contentLength !== undefined
+        ? { signableHeaders: new Set(["host", "content-length"]) }
+        : {}),
     });
     return url;
   } else if (backendStorage === "minio" && minioClient) {

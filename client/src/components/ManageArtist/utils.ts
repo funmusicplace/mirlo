@@ -300,10 +300,9 @@ export const prescanAudioFiles = async (
       });
     } else if (IMAGE_MIME_TYPES.includes(mimeType)) {
       imageFiles.push({ file, name: file.name });
-    } else if (DOWNLOADABLE_CONTENT_MIME_TYPES.includes(mimeType)) {
-      downloadableContentFiles.push({ file, name: file.name });
     } else if (isTextDescriptionFile(file.name)) {
-      // Pick the first short text file as a potential album description
+      // Pick the first short text file as a potential album description;
+      // any other text files become downloadable content.
       if (
         descriptionFromTextFile === undefined &&
         file.size <= MAX_DESCRIPTION_BYTES
@@ -312,8 +311,13 @@ export const prescanAudioFiles = async (
           descriptionFromTextFile = await readTextFile(file);
         } catch (e) {
           console.error("Error reading text description file", e);
+          downloadableContentFiles.push({ file, name: file.name });
         }
+      } else {
+        downloadableContentFiles.push({ file, name: file.name });
       }
+    } else if (DOWNLOADABLE_CONTENT_MIME_TYPES.includes(mimeType)) {
+      downloadableContentFiles.push({ file, name: file.name });
     } else {
       // Only flag as invalid if it's not a known system file
       if (!isSystemFile(file.name)) {

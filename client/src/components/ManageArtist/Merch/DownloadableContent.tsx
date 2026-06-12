@@ -14,7 +14,22 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
-export const DOWNLOADABLE_CONTENT_MIME_TYPES = ["application/pdf", "image/*"];
+export const DOWNLOADABLE_CONTENT_MIME_TYPES = [
+  "application/pdf",
+  "image/*",
+  "text/plain",
+  "text/markdown",
+  "application/epub+zip",
+];
+
+// Some browsers don't report a MIME type for .md/.epub files, so we also
+// accept these extensions explicitly in the file picker.
+export const DOWNLOADABLE_CONTENT_EXTENSIONS = [".txt", ".md", ".epub"];
+
+// Keep in sync with the limit enforced on the server.
+export const MAX_DOWNLOADABLE_CONTENT_SIZE_MB = 100;
+export const MAX_DOWNLOADABLE_CONTENT_SIZE_BYTES =
+  MAX_DOWNLOADABLE_CONTENT_SIZE_MB * 1024 * 1024;
 
 export const uploadDownloadableContentFile = async (
   file: File,
@@ -26,6 +41,7 @@ export const uploadDownloadableContentFile = async (
   >("manage/downloadableContent", {
     filename: file.name,
     mimeType: file.type,
+    size: file.size,
     ...params,
   });
 
@@ -55,16 +71,36 @@ const DownloadableContent: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
 
   const handleFileChange = (files: FileList | null) => {
-    setIsSaving(true);
-    if (files) {
-      const newContent = Array.from(files).map((file) => ({
-        downloadableContentId: file.name,
-        originalFilename: file.name,
-        file: file,
-      }));
-      uploadNextFile(newContent);
-      // setDownloadableContent(newContent);
+    if (!files) {
+      return;
     }
+    const allFiles = Array.from(files);
+    allFiles
+      .filter((file) => file.size > MAX_DOWNLOADABLE_CONTENT_SIZE_BYTES)
+      .forEach((file) =>
+        snackbar(
+          t("fileTooLarge", {
+            filename: file.name,
+            maxSize: MAX_DOWNLOADABLE_CONTENT_SIZE_MB,
+          }),
+          { type: "warning" }
+        )
+      );
+
+    const validFiles = allFiles.filter(
+      (file) => file.size <= MAX_DOWNLOADABLE_CONTENT_SIZE_BYTES
+    );
+    if (validFiles.length === 0) {
+      return;
+    }
+
+    setIsSaving(true);
+    const newContent = validFiles.map((file) => ({
+      downloadableContentId: file.name,
+      originalFilename: file.name,
+      file: file,
+    }));
+    uploadNextFile(newContent);
   };
 
   const uploadNextFile = async (files: { file: File }[]) => {
@@ -146,7 +182,10 @@ const DownloadableContent: React.FC<{
         </ul>
       )}
       <UploadFiles
-        accept={DOWNLOADABLE_CONTENT_MIME_TYPES.join(",")}
+        accept={[
+          ...DOWNLOADABLE_CONTENT_MIME_TYPES,
+          ...DOWNLOADABLE_CONTENT_EXTENSIONS,
+        ].join(",")}
         hint={
           itemType !== "release"
             ? t("relatedDownloadableContentInfo")
