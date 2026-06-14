@@ -4,9 +4,9 @@ import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { queryTrackGroups } from "queries";
 import { queryTags } from "queries/tags";
 import { useTranslation } from "react-i18next";
-import { FaChevronRight, FaRss } from "react-icons/fa";
+import { FaRedoAlt, FaChevronRight, FaRss } from "react-icons/fa";
 import { bp } from "../../constants";
-import { ButtonAnchor, ButtonLink } from "components/common/Button";
+import { Button, ButtonAnchor, ButtonLink } from "components/common/Button";
 import WidthContainer from "components/common/WidthContainer";
 import { SectionHeader } from "components/Home/Home";
 import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
@@ -36,8 +36,8 @@ const HomeReleases = () => {
     })
   );
 
-  const { data: newReleases } = useQuery(
-    queryTrackGroups({
+  const { data: newReleases, refetch } = useQuery({
+    ...queryTrackGroups({
       skip: 0,
       take: 8,
       orderBy: "random",
@@ -45,8 +45,9 @@ const HomeReleases = () => {
       title: undefined,
       isReleased: "released",
       license: undefined,
-    })
-  );
+    }),
+    refetchOnWindowFocus: false,
+  });
 
   const { data: popularReleases } = useQuery(
     queryTopSoldTrackGroups({
@@ -113,10 +114,7 @@ const HomeReleases = () => {
           <WidthContainer
             variant="big"
             justify="space-between"
-            className={css`
-              flex-direction: row;
-              display: flex;
-            `}
+            className="flex items-center"
           >
             <h3 className="h5 section-header__heading">
               {t("recentReleases")}
@@ -130,6 +128,13 @@ const HomeReleases = () => {
                 }
               `}
             >
+              <Button
+                onClick={() => refetch()}
+                startIcon={<FaRedoAlt />}
+                variant="transparent"
+              >
+                {t("refreshReleases", { keyPrefix: "home" })}
+              </Button>
               <ButtonAnchor
                 aria-label={t("rssFeed")}
                 title={t("rssFeed")}
