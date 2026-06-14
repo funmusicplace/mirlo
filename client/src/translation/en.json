@@ -1825,7 +1825,8 @@
     "newsletterVerifyAndSubscribe": "Verify & subscribe",
     "newsletterResend": "Resend code",
     "newsletterResendSuccess": "Code resent!",
-    "exploreMusic": "Explore music"
+    "exploreMusic": "Explore music",
+    "refreshReleases": "Refresh"
   },
   "mobileApp.searchScreen": {
     "bestSelling": "Best Selling",
