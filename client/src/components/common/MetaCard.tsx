@@ -15,7 +15,7 @@ export const MetaCard: React.FC<{
     <>
       {/* @ts-ignore */}
       <Helmet>
-        <title>{`${title} on Mirlo`}</title>
+        <title>{`${title}`}</title>
         <meta name="description" content={description} />
       </Helmet>
     </>
