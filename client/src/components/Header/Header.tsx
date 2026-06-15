@@ -231,6 +231,7 @@ const Header = () => {
           {isLoggedIn && (
             <Button
               aria-controls={menuDialogId}
+              aria-haspopup="dialog"
               aria-label={t("menu", { keyPrefix: "headerMenu" })}
               data-cy="user-nav"
               // @ts-ignore React doesn't support Invoker Commands API
