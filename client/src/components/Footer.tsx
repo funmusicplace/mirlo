@@ -69,32 +69,38 @@ export const Footer = () => {
               }}
             />
           </p>
-          <p className="flex justify-center gap-1 pb-1">
-            <a
-              href="https://instagram.com/mirlo.space"
-              title="Instagram"
-              className="text-2xl"
-              aria-label={`${t("socialInstagram", { username: "@mirlo.space" })}`}
-            >
-              <FaInstagram aria-hidden />
-            </a>
-            <a
-              href="https://musician.social/@mirlo"
-              title="Mastodon"
-              className="text-2xl"
-              aria-label={`${t("socialMastodon", { username: "@mirlo@musician.social" })}`}
-            >
-              <FaMastodon aria-hidden />
-            </a>
-            <a
-              href="https://bsky.app/profile/mirlo.space"
-              title="BlueSky"
-              className="text-2xl"
-              aria-label={`${t("socialBlueSky", { username: "mirlo.bsky.social" })}`}
-            >
-              <FaBluesky />
-            </a>
-          </p>
+          <ul className="flex justify-center gap-4 pb-1">
+            <li>
+              <a
+                href="https://instagram.com/mirlo.space"
+                title="Instagram"
+                className="text-2xl"
+                aria-label="Instagram"
+              >
+                <FaInstagram aria-hidden />
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://musician.social/@mirlo"
+                title="Mastodon"
+                className="text-2xl"
+                aria-label="Mastodon"
+              >
+                <FaMastodon aria-hidden />
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://bsky.app/profile/mirlo.space"
+                title="Bluesky"
+                className="text-2xl"
+                aria-label="Bluesky"
+              >
+                <FaBluesky aria-hidden />
+              </a>
+            </li>
+          </ul>
         </div>
       </WidthContainer>
     </footer>

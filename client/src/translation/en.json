@@ -1450,11 +1450,7 @@
   },
   "footer": {
     "getInTouch": "If you'd like to get in touch with Mirlo, join <discord>our Discord</discord>, <email>email us</email>, or check out <github>our Github</github>.",
-    "aboutUs": "<about>About us</about>, <documentation>Documentation</documentation>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>, <content>Content policy</content>, <contact>Contact us</contact>",
-    "socialInstagram": "{{username}} on Instagram",
-    "socialMastodon": "{{username}} on Mastodon",
-    "socialX": "{{username}} on X",
-    "socialBlueSky": "{{username}} on BlueSky"
+    "aboutUs": "<about>About us</about>, <documentation>Documentation</documentation>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>, <content>Content policy</content>, <contact>Contact us</contact>"
   },
   "notifications": {
     "notifications": "Notifications",
