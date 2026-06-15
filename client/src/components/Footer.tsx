@@ -12,7 +12,7 @@ export const Footer = () => {
   const { t } = useTranslation("translation", { keyPrefix: "footer" });
 
   return (
-    <div
+    <footer
       className={css`
         text-align: center;
         display: block;
@@ -97,6 +97,6 @@ export const Footer = () => {
           </p>
         </div>
       </WidthContainer>
-    </div>
+    </footer>
   );
 };

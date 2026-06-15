@@ -21,7 +21,7 @@ import { bp } from "../../constants";
 
 import HeaderSearch from "./HeaderSearch";
 
-const HeaderWrapper = styled.div<{
+const HeaderWrapper = styled.header<{
   hasBackground?: boolean;
   transparent?: boolean;
   artistId?: boolean;
