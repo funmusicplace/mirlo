@@ -50,25 +50,29 @@ export const Footer = () => {
               }}
             />
           </p>
-          <p
-            className={css`
-              margin-bottom: 1rem;
-            `}
-          >
-            <Trans
-              t={t}
-              i18nKey="aboutUs"
-              components={{
-                documentation: <Link to="https://docs.mirlo.space"></Link>,
-                about: <a href="https://docs.mirlo.space"></a>,
-                terms: <Link to="/pages/terms"></Link>,
-                privacy: <Link to="/pages/privacy"></Link>,
-                cookie: <Link to="/pages/cookie-policy"></Link>,
-                contact: <a href="mailto:hi@mirlo.space"></a>,
-                content: <Link to="/pages/content-policy"></Link>,
-              }}
-            />
-          </p>
+          <ul className="flex gap-4 justify-center flex-wrap mbe-4">
+            <li>
+              <a href="https://docs.mirlo.space">{t("about")}</a>
+            </li>
+            <li>
+              <a href="https://docs.mirlo.space">{t("documentation")}</a>
+            </li>
+            <li>
+              <Link to="/pages/terms">{t("terms")}</Link>
+            </li>
+            <li>
+              <Link to="/pages/privacy">{t("privacy")}</Link>
+            </li>
+            <li>
+              <Link to="/pages/cookie-policy">{t("cookies")}</Link>
+            </li>
+            <li>
+              <Link to="/pages/content-policy">{t("content")}</Link>
+            </li>
+            <li>
+              <a href="mailto:hi@mirlo.space">{t("contact")}</a>
+            </li>
+          </ul>
           <ul className="flex justify-center gap-4 pb-1">
             <li>
               <a
