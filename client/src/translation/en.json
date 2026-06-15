@@ -1,4 +1,8 @@
 {
+  "app": {
+    "skipToMainContent": "Skip to main content",
+    "skipToAudioPlayer": "Skip to audio player"
+  },
   "signUp": {
     "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to proceed.",
     "register": "Sign up",
