@@ -102,7 +102,7 @@ function App() {
           >
             <ManageArtistButtons />
             <div className="w-full flex flex-col min-h-screen">
-              <div
+              <main
                 className={css`
                   margin: 0 auto;
                   width: 100%;
@@ -115,7 +115,7 @@ function App() {
                 `}
               >
                 <Outlet />
-              </div>
+              </main>
               <Footer />
             </div>
           </div>
