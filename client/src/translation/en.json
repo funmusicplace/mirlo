@@ -141,7 +141,8 @@
     "viewLabelPage": "View {{labelName}} page",
     "fulfillment": "Order fulfillment",
     "viewSalesPage": "View sales",
-    "menu": "Menu"
+    "menu": "Menu",
+    "main": "Main"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",

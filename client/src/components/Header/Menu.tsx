@@ -83,7 +83,7 @@ const Menu = forwardRef<
           onlyIcon
           startIcon={<FaTimes />}
         />
-        <nav className="flex-auto">
+        <nav aria-label={t("main")} className="flex-auto">
           <ul>
             <li>
               <MenuLink onClick={onClose} to="/profile/notifications">
