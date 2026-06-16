@@ -7,7 +7,10 @@ import {
   userLoggedInWithoutRedirect,
 } from "../../../../auth/passport";
 import logger from "../../../../logger";
-import { deleteStripeSubscriptions } from "../../../../utils/artist";
+import {
+  cancelStripeSubscriptionsAtPeriodEnd,
+  deleteStripeSubscriptions,
+} from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { createCheckoutSessionForSubscription } from "../../../../utils/stripe/sessions";
 
@@ -128,11 +131,13 @@ export default function () {
       });
       logger.info(`Generated a Stripe checkout session ${session.id}`);
 
-      res.status(200).json(
-        useEmbedded
-          ? { clientSecret: session.client_secret, stripeAccountId }
-          : { sessionUrl: session.url, stripeAccountId }
-      );
+      res
+        .status(200)
+        .json(
+          useEmbedded
+            ? { clientSecret: session.client_secret, stripeAccountId }
+            : { sessionUrl: session.url, stripeAccountId }
+        );
     } catch (e) {
       next(e);
     }
@@ -193,27 +198,38 @@ export default function () {
         });
       }
 
-      await deleteStripeSubscriptions({
-        artistSubscriptionTier: { artistId: Number(artistId) },
-        userId: loggedInUser.id,
-      });
-
-      await prisma.artistUserSubscription.update({
-        where: {
-          userId_artistSubscriptionTierId: {
-            artistSubscriptionTierId: subscription.artistSubscriptionTierId,
-            userId: loggedInUser.id,
-          },
-        },
-        data: { deleteReason: "USER_CANCELLED", stripeSubscriptionKey: null },
-      });
-
-      await prisma.artistUserSubscription.deleteMany({
-        where: {
+      if (subscription.stripeSubscriptionKey) {
+        // Paid subscription: let it run until the end of the period the user
+        // already paid for. Stripe stops billing and fires
+        // `customer.subscription.deleted` at period end, which sets `deletedAt`
+        // and actually revokes access. We keep the row (and its
+        // stripeSubscriptionKey) so that webhook can match it; access checks
+        // filter on `deletedAt: null`, so the subscription stays active until
+        // then. We record the reason now rather than future-dating `deletedAt`.
+        await cancelStripeSubscriptionsAtPeriodEnd({
           artistSubscriptionTier: { artistId: Number(artistId) },
           userId: loggedInUser.id,
-        },
-      });
+        });
+
+        await prisma.artistUserSubscription.update({
+          where: { id: subscription.id },
+          data: { deleteReason: "USER_CANCELLED" },
+        });
+      } else {
+        // Free/follow tier: nothing is billed, so there is no period to honour.
+        // Remove it immediately.
+        await prisma.artistUserSubscription.update({
+          where: { id: subscription.id },
+          data: { deleteReason: "USER_CANCELLED" },
+        });
+
+        await prisma.artistUserSubscription.deleteMany({
+          where: {
+            artistSubscriptionTier: { artistId: Number(artistId) },
+            userId: loggedInUser.id,
+          },
+        });
+      }
 
       res.status(200).json({ message: "success" });
     } catch (e) {
