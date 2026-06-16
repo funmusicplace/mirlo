@@ -10,6 +10,7 @@ pkgs.mkShell {
 
 	shellHook = ''
 		export PATH="$PWD/node_modules/.bin/:$PATH"
+		export DATABASE_URL="postgresql://nomads:nomads@localhost:5434/nomads?schema=public"
 		export CYPRESS_INSTALL_BINARY=0
 		export CYPRESS_RUN_BINARY=${pkgs.cypress}/bin/Cypress
 		export PKG_CONFIG_PATH="${pkgs.openssl}/lib/pkgconfig"
