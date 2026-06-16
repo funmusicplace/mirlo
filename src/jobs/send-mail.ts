@@ -3,6 +3,7 @@ import path from "path";
 import Email from "email-templates";
 import nodemailer, { Transporter } from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
+import postmarkTransport from "nodemailer-postmark-transport";
 import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
@@ -27,8 +28,9 @@ async function createTransport(): Promise<Transporter> {
       });
     }
 
+    // TODO: some condition for locally testing with a given transport?
     if (process.env.NODE_ENV !== "production") {
-      logger.info("Creating MailHog transport");
+      logger.info("Creating MailHog transport (development)");
       return nodemailer.createTransport({
         host: "mailhog",
         port: parseInt(process.env.MAILHOG_PORT || "1025"),
@@ -63,6 +65,20 @@ async function createTransport(): Promise<Transporter> {
       return nodemailer.createTransport(
         sendgrid({
           apiKey: emailSettings.sendgrid.apiKey,
+        })
+      );
+    }
+
+    if (
+      emailSettings?.provider === "postmark" &&
+      emailSettings?.postmark?.apiKey
+    ) {
+      logger.info("Creating Postmark transport");
+      return nodemailer.createTransport(
+        postmarkTransport({
+          auth: {
+            apiKey: emailSettings.postmark.apiKey,
+          },
         })
       );
     }

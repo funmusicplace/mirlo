@@ -66,6 +66,9 @@ interface SettingsFromAPI {
         apiKey?: string;
         domain?: string;
       };
+      postmark?: {
+        apiKey?: string;
+      };
     };
     s3?: {
       keyId?: string;
@@ -366,6 +369,7 @@ const AdminSettings = () => {
                 <option value="">None</option>
                 <option value="sendgrid">SendGrid</option>
                 <option value="mailgun">Mailgun</option>
+                <option value="postmark">Postmark</option>
               </SelectEl>
             </td>
           </tr>
@@ -426,6 +430,24 @@ const AdminSettings = () => {
             <td>
               <InputEl
                 {...register("emailProvider.mailgun.domain")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          {/* Postmark Settings */}
+          <tr>
+            <td colSpan={2}>
+              <h4>Postmark Settings</h4>
+            </td>
+          </tr>
+          <tr>
+            <td>API Key</td>
+            <td>
+              <InputEl
+                {...register("emailProvider.postmark.apiKey")}
+                type="text"
                 className={css`
                   text-align: right;
                 `}
