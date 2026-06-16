@@ -6,6 +6,7 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
 
+import { getClient } from "../../src/utils/getClient";
 import {
   initiatePayment,
   initiateSubscription,
@@ -208,6 +209,86 @@ describe("purchase", () => {
       assert.ok(response.body.clientSecret);
     });
 
+    it("should return 200 with a hosted redirectUrl when hosted is true", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_tg_hosted",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          hosted: true,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      // Hosted mode returns a redirect to Mirlo's pay page, not a raw secret.
+      assert.ok(response.body.redirectUrl, "should return a redirectUrl");
+      assert.ok(response.body.redirectUrl.includes("/checkout"));
+      assert.ok(response.body.redirectUrl.includes("paymentIntentId="));
+      assert.ok(response.body.redirectUrl.includes("stripeAccountId="));
+      assert.ok(
+        !response.body.clientSecret,
+        "should not leak clientSecret in hosted mode"
+      );
+    });
+
+    it("should reject a successUrl whose origin is not allowed", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_tg_badurl",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          hosted: true,
+          successUrl: "https://evil.example.com/thanks",
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should accept a successUrl on Mirlo's own origin", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_tg_goodurl",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      // getClient() seeds the "frontend" client at http://localhost:8080 in test.
+      const client = await getClient();
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          hosted: true,
+          successUrl: `${client.applicationUrl}/thanks`,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.redirectUrl, "should return a redirectUrl");
+    });
+
     it("should return 200 with clientSecret for an online tip", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
@@ -227,6 +308,8 @@ describe("purchase", () => {
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
+      // The frontend needs the connected account id to load Stripe.js.
+      assert.equal(response.body.stripeAccountId, "acct_tip_test");
     });
 
     it("should return 200 with clientSecret for an online merch purchase", async () => {
@@ -361,6 +444,11 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.result.id, "should return a result id");
       assert.ok(response.body.result.status, "should return a result status");
+      // The hosted checkout page reads the secret from here.
+      assert.ok(
+        "clientSecret" in response.body.result,
+        "should include a clientSecret field"
+      );
     });
 
     it("should return the SetupIntent status for a seti_ prefixed id", async () => {

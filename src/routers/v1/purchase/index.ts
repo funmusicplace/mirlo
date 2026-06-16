@@ -3,7 +3,9 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { subscribeUserToArtist } from "../../../utils/artist";
+import { buildCheckoutRedirectUrl, originOf } from "../../../utils/clientUrl";
 import { AppError } from "../../../utils/error";
+import { getClient } from "../../../utils/getClient";
 import { handleTrackGroupPurchase } from "../../../utils/handleFinishedTransactions";
 import {
   initiatePayment,
@@ -24,6 +26,53 @@ type PostBody = {
   artistId: number;
   items: PurchaseItem[];
   email?: string;
+  /**
+   * When true, an online paid purchase returns a `redirectUrl` to Mirlo's
+   * hosted checkout page instead of a raw `clientSecret`. Lets external API
+   * consumers (e.g. a WordPress plugin) integrate with a single redirect,
+   * the way the deleted per-resource endpoints used to behave.
+   */
+  hosted?: boolean;
+  /**
+   * Where the hosted checkout page sends the buyer after payment. Must share
+   * an origin with the calling client's registered application URL / allowed
+   * CORS origins (or Mirlo's own frontend). Defaults to Mirlo's post-purchase
+   * page when omitted.
+   */
+  successUrl?: string;
+};
+
+/**
+ * Guards the hosted checkout against being used as an open redirect: the
+ * caller-supplied `successUrl` must share an origin with Mirlo's own frontend
+ * or with the authenticated client's registered application/CORS origins.
+ */
+const assertAllowedSuccessUrl = (
+  successUrl: string,
+  mirloApplicationUrl: string,
+  client?: { applicationUrl: string; allowedCorsOrigins: string[] }
+) => {
+  const target = originOf(successUrl);
+  if (!target) {
+    throw new AppError({ httpCode: 400, description: "Invalid successUrl" });
+  }
+
+  const allowed = new Set(
+    [
+      mirloApplicationUrl,
+      client?.applicationUrl,
+      ...(client?.allowedCorsOrigins ?? []),
+    ]
+      .map((v) => v && originOf(v))
+      .filter((v): v is string => Boolean(v))
+  );
+
+  if (!allowed.has(target)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "successUrl origin is not allowed for this client",
+    });
+  }
 };
 
 export default function () {
@@ -32,8 +81,10 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { readerId, artistId, items, email } = req.body as PostBody;
+    const { readerId, artistId, items, email, hosted, successUrl } =
+      req.body as PostBody;
     const loggedInUser = req.user;
+    const clientId = req.client?.id;
 
     try {
       if (!artistId || !items?.length) {
@@ -41,6 +92,16 @@ export default function () {
           httpCode: 400,
           description: "artistId and items are required",
         });
+      }
+
+      const mirloClient = successUrl || hosted ? await getClient() : null;
+
+      if (successUrl && mirloClient) {
+        assertAllowedSuccessUrl(
+          successUrl,
+          mirloClient.applicationUrl,
+          req.client ?? undefined
+        );
       }
 
       const hasSubscription = items.some((i) => i.type === "subscription");
@@ -204,8 +265,25 @@ export default function () {
         items: resolvedItems,
         userEmail: loggedInUser?.email ?? email ?? "",
         userId: loggedInUser ? String(loggedInUser.id) : undefined,
+        clientId,
+        successUrl,
         stripeAccountId: resolvedStripeAccountId,
       });
+
+      // Hosted checkout: hand external integrators a single redirect to Mirlo's
+      // own pay page (which loads the Payment Element) instead of a clientSecret
+      // they would have to drive Stripe.js with themselves.
+      if (hosted && mirloClient && "clientSecret" in result) {
+        const redirectUrl = buildCheckoutRedirectUrl(
+          mirloClient.applicationUrl,
+          "checkout",
+          new URLSearchParams({
+            paymentIntentId: result.paymentIntentId,
+            stripeAccountId: result.stripeAccountId,
+          })
+        );
+        return res.status(200).json({ redirectUrl });
+      }
 
       res.status(200).json(result);
     } catch (e) {
@@ -221,8 +299,12 @@ export default function () {
       "omit it for an online PaymentIntent that the frontend completes with Stripe.js. " +
       "Returns `paymentIntentId` (terminal — poll GET /v1/purchase/:id), " +
       "`setupIntentId` (terminal subscription — poll GET /v1/purchase/:id), " +
-      "`clientSecret` (online paid — pass to Stripe.js Payment Element), " +
-      "or `redirectUrl` (online free trackGroup).",
+      "`clientSecret` + `stripeAccountId` (online paid — load Stripe.js for that " +
+      "connected account and pass the secret to the Payment Element), " +
+      "or `redirectUrl` (online free trackGroup). " +
+      "Pass `hosted: true` to receive a `redirectUrl` to Mirlo's hosted checkout " +
+      "page for an online paid purchase instead of a `clientSecret` — intended " +
+      "for external API consumers that integrate with a single redirect.",
     parameters: [
       {
         in: "body",
@@ -240,6 +322,7 @@ export default function () {
             paymentIntentId: { type: "string" },
             setupIntentId: { type: "string" },
             clientSecret: { type: "string" },
+            stripeAccountId: { type: "string" },
             redirectUrl: { type: "string" },
           },
         },

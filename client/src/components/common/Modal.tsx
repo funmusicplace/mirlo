@@ -234,6 +234,7 @@ export const Modal: React.FC<{
   }, [open]);
 
   const childrenWrapperId = React.useId();
+  const dialogRef = React.useRef<HTMLDivElement>(null);
 
   if (!open) {
     return null;
@@ -245,10 +246,16 @@ export const Modal: React.FC<{
     <FocusTrap
       focusTrapOptions={{
         initialFocus: ".".concat(closeClass),
+        // The dialog itself is always focusable (tabIndex={-1}), so the trap
+        // never throws "must have at least one tabbable node" — even while a
+        // modal's content is still empty (async/loading states).
+        fallbackFocus: () => dialogRef.current ?? document.body,
         ...focusTrapOptions,
       }}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         id={id || dialogIDFromTitle(title)}
         role="dialog"
         aria-describedby={ariaDescribedBy || undefined}

@@ -6,14 +6,14 @@ import { queryArtist } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import api from "services/api";
-import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { useSnackbar } from "state/SnackbarContext";
+import { getArtistUrl } from "utils/artist";
 
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
+import PurchaseModal from "./Purchase/PurchaseModal";
+import { usePurchase } from "./Purchase/usePurchase";
 import TextArea from "./TextArea";
 
 const defaultGifts = [
@@ -28,12 +28,9 @@ const TipArtistForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
 }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const errorHandler = useErrorHandler();
 
-  const { user, refreshLoggedInUser } = useAuthContext();
-  const [isCheckingForSubscription, setIsCheckingForSubscription] =
-    React.useState(false);
-  const snackbar = useSnackbar();
+  const { user } = useAuthContext();
+  const { checkout, isLoading, startPurchase, reset } = usePurchase();
 
   const methods = useForm<{
     price: number;
@@ -48,33 +45,22 @@ const TipArtistForm: React.FC<{
 
   const currency = artistDetails?.user?.currency ?? "usd";
 
-  const subscribeToTier = async () => {
-    try {
-      if (artistDetails) {
-        setIsCheckingForSubscription(true);
-        const buttonPrice = methods.getValues("priceButton");
-        const price =
-          buttonPrice === "other" ? methods.getValues("price") : buttonPrice;
-        const email = methods.getValues("email");
-        const response = await api.post<
-          { price: number; email: string; message?: string },
-          { redirectUrl: string }
-        >(`artists/${artistDetails.id}/tip`, {
-          price: Number(price) * 100,
-          email,
-          message: methods.getValues("message"),
-        });
-        window.location.assign(response.redirectUrl);
-        if (!user) {
-          snackbar(t("verificationEmailSent"), { type: "success" });
-        }
-      }
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      setIsCheckingForSubscription(false);
-      refreshLoggedInUser();
-    }
+  const startTip = () => {
+    const buttonPrice = methods.getValues("priceButton");
+    const price =
+      buttonPrice === "other" ? methods.getValues("price") : buttonPrice;
+    if (!price) return;
+    startPurchase({
+      artistId: artist.id,
+      items: [
+        {
+          type: "tip",
+          amount: Math.round(Number(price) * 100),
+          message: methods.getValues("message") || undefined,
+        },
+      ],
+      email: user ? undefined : methods.getValues("email"),
+    });
   };
 
   const value = methods.watch("price");
@@ -168,9 +154,11 @@ const TipArtistForm: React.FC<{
                   />
                 </FormComponent>
                 <ArtistButton
-                  onClick={() => subscribeToTier()}
-                  isLoading={isCheckingForSubscription}
-                  disabled={!methods.formState.isValid || !actualValue}
+                  onClick={() => startTip()}
+                  isLoading={isLoading}
+                  disabled={
+                    isLoading || !methods.formState.isValid || !actualValue
+                  }
                   wrap
                   className={css`
                     width: 100% !important;
@@ -189,6 +177,17 @@ const TipArtistForm: React.FC<{
           </FormProvider>
         </>
       )}
+      <PurchaseModal
+        open={!!checkout}
+        onClose={reset}
+        clientSecret={checkout?.clientSecret}
+        stripeAccountId={checkout?.stripeAccountId}
+        returnUrl={`${window.location.origin}${getArtistUrl(
+          artist
+        )}/checkout-complete?purchaseType=tip`}
+        title={t("tipArtistByName", { artistName: artist.name }) ?? ""}
+        buttonLabel={t("completePayment")}
+      />
     </div>
   );
 };

@@ -115,6 +115,20 @@ const apiDoc = {
           description:
             "Buyer email — used when no logged-in session is present",
         },
+        hosted: {
+          type: "boolean",
+          description:
+            "When true, an online paid purchase returns a `redirectUrl` to Mirlo's " +
+            "hosted checkout page instead of a `clientSecret`. Lets external API " +
+            "consumers complete payment with a single redirect.",
+        },
+        successUrl: {
+          type: "string",
+          description:
+            "Where the hosted checkout page sends the buyer after payment. Must " +
+            "share an origin with the calling client's registered application URL " +
+            "or allowed CORS origins. Defaults to Mirlo's post-purchase page.",
+        },
         items: {
           type: "array",
           description:
