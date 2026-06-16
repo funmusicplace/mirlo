@@ -618,6 +618,8 @@
     "purchaseComplete": "You've completed your purchase!",
     "successfullyFollowedArtist": "You've successfully followed this artist!",
     "youveTippedArtist": "Tip sent, thanks for supporting {{artistName}}!",
+    "completePayment": "Complete payment",
+    "preparingPayment": "Preparing payment…",
     "viewInCollection": "View in your collection",
     "justFollow": "Just follow",
     "manageSubscription": "Manage subscription",
@@ -683,6 +685,17 @@
     "paymentFailed": "Stripe couldn't process your payment method. Please try another card or contact support if this continues.",
     "expired": "This checkout session expired before the payment was completed. Please restart the checkout to continue.",
     "returnHome": "Return to Mirlo"
+  },
+  "hostedCheckout": {
+    "title": "Complete your purchase",
+    "payingArtistAmount": "Paying {{amount}} to {{artistName}}",
+    "payingArtist": "Paying {{artistName}}",
+    "payingAmount": "Total: {{amount}}",
+    "payNow": "Pay now",
+    "preparingPayment": "Preparing payment…",
+    "missingParameters": "This checkout link is missing required information. Please return to where you started and try again.",
+    "couldNotLoad": "We couldn't load this checkout. The link may have expired — please start over.",
+    "alreadyComplete": "This purchase has already been completed."
   },
   "clickToPlay": {
     "untitled": "Untitled",

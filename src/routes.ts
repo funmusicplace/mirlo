@@ -47,7 +47,6 @@ const routes = [
   "artists/{id}/supporters",
   "artists/{id}/confirmFollow",
   "artists/{id}/unfollow",
-  "artists/{id}/tip",
   "artists/{id}/contact",
   "downloadableContent/{id}",
   "images/{id}",
