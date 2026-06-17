@@ -824,6 +824,40 @@ export const handlePaymentIntentFailed = async (
   }
 };
 
+// Fires when Stripe ends a subscription — either because we scheduled it to
+// cancel at period end (user cancellation, see subscribe.ts) or because Stripe
+// exhausted its dunning retries after repeated payment failures. This is the
+// single place we set `deletedAt`, so access (gated on `deletedAt: null`)
+// continues through any paid-up period and is revoked exactly when Stripe
+// considers the subscription over.
+export const handleSubscriptionDeleted = async (
+  subscription: Stripe.Subscription
+) => {
+  logger.info(`customer.subscription.deleted: ${subscription.id}`);
+
+  // Honour any reason we recorded at cancellation time; only override it when
+  // Stripe tells us the subscription died because billing ultimately failed.
+  const deleteReason =
+    subscription.cancellation_details?.reason === "payment_failed"
+      ? "PAYMENT_FAILURE"
+      : undefined;
+
+  const result = await prisma.artistUserSubscription.updateMany({
+    where: {
+      stripeSubscriptionKey: subscription.id,
+      deletedAt: null,
+    },
+    data: {
+      deletedAt: new Date(),
+      ...(deleteReason ? { deleteReason } : {}),
+    },
+  });
+
+  logger.info(
+    `customer.subscription.deleted: ${subscription.id} marked ${result.count} subscription(s) deleted`
+  );
+};
+
 type MerchPurchaseItem = {
   type: "merch";
   id: string;
