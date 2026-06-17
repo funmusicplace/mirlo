@@ -74,6 +74,7 @@ export default function () {
         isUserAbleToListenToTrack === "exceeded"
       ) {
         res.status(402).send("Track play limit exceeded");
+        return;
       }
 
       if (track.audio) {

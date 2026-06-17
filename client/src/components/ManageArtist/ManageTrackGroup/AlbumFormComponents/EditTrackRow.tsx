@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormError from "components/common/FormError";
-import InfoModal from "components/common/InfoModal";
+import Modal from "components/common/Modal";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import TextArea from "components/common/TextArea";
@@ -12,13 +12,14 @@ import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
 import React from "react";
 import { useFieldArray, useForm, FormProvider } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
-import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaQuestionCircle, FaSave, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
 import useJobStatusCheck from "utils/useJobStatusCheck";
+import { Button } from "components/common/Button";
 
 import SelectTrackPreview from "../../SelectTrackPreview";
 import TrackUploadingState from "../../TrackUploadingState";
@@ -59,6 +60,8 @@ const EditTrackRow: React.FC<{
   reload: () => void;
 }> = ({ track, onCancelEditing: cancelEditing, reload }) => {
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isTrackLicenseModalOpen, setIsTrackLicenseModalOpen] =
+    React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: cancelEditing,
@@ -408,15 +411,20 @@ const EditTrackRow: React.FC<{
             `}
           >
             {t("license")}
-            <InfoModal
-              info={
-                <Trans
-                  t={t}
-                  i18nKey={"whatMeanLicense"}
-                  components={{ a: <a></a> }}
-                />
-              }
+            <Button
+              onClick={() => setIsTrackLicenseModalOpen(true)}
+              startIcon={<FaQuestionCircle />}
             />
+            <Modal
+              onClose={() => setIsTrackLicenseModalOpen(false)}
+              open={isTrackLicenseModalOpen}
+            >
+              <Trans
+                t={t}
+                i18nKey={"whatMeanLicense"}
+                components={{ a: <a></a> }}
+              />
+            </Modal>
           </div>
         </td>
         <td colSpan={99}>

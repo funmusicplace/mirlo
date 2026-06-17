@@ -33,6 +33,7 @@ export const SupporterTable = styled(Table)`
 type SupportTier = {
   id: number;
   user: User;
+  createdAt: string;
   amount: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
   artistUserSubscriptionCharges?: { id: string; transactionId?: string }[];
@@ -133,35 +134,37 @@ const Supporters = () => {
             </tr>
           </thead>
           <tbody>
-            {[...monthlySupporters, ...annualSupporters].map((r) => (
-              <tr key={r.user.id}>
-                <td>{r.user.name ?? "-"}</td>
-                <td>{r.user.email}</td>
-                <td>
-                  {r.artistSubscriptionTier.name}
-                  {isFreeSubscription(r) && (
-                    <Pill
-                      className={css`
-                        margin-left: 0.5rem;
-                      `}
-                    >
-                      {t("free")}
-                    </Pill>
-                  )}
-                </td>
-                <td>
-                  {r.artistSubscriptionTier.interval === "MONTH"
-                    ? t("monthly")
-                    : t("yearly")}
-                </td>
-                <td>
-                  <Money
-                    amount={r.amount / 100}
-                    currency={artist?.user?.currency ?? "usd"}
-                  />
-                </td>
-              </tr>
-            ))}
+            {[...monthlySupporters, ...annualSupporters]
+              .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
+              .map((r) => (
+                <tr key={r.user.id}>
+                  <td>{r.user.name ?? "-"}</td>
+                  <td>{r.user.email}</td>
+                  <td>
+                    {r.artistSubscriptionTier.name}
+                    {isFreeSubscription(r) && (
+                      <Pill
+                        className={css`
+                          margin-left: 0.5rem;
+                        `}
+                      >
+                        {t("free")}
+                      </Pill>
+                    )}
+                  </td>
+                  <td>
+                    {r.artistSubscriptionTier.interval === "MONTH"
+                      ? t("monthly")
+                      : t("yearly")}
+                  </td>
+                  <td>
+                    <Money
+                      amount={r.amount / 100}
+                      currency={artist?.user?.currency ?? "usd"}
+                    />
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </SupporterTable>
         {monthlySupporters.length + annualSupporters.length === 0 && (

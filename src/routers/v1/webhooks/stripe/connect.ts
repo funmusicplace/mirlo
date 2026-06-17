@@ -9,6 +9,7 @@ import {
   handlePaymentIntentFailed,
   handlePaymentIntentSucceeded,
   handleSetupIntentSucceeded,
+  handleSubscriptionDeleted,
   verifyStripeSignature,
 } from "../../../../utils/stripe";
 import {
@@ -80,6 +81,14 @@ export default function () {
           const failedPaymentIntent = event.data.object;
 
           handlePaymentIntentFailed(failedPaymentIntent, event.account);
+          break;
+        case "customer.subscription.deleted":
+          // Fires when a subscription actually ends — at the close of a paid
+          // period we scheduled for cancellation, or after Stripe's dunning
+          // retries are exhausted. This is when access is revoked.
+          const deletedSubscription = event.data.object;
+
+          await handleSubscriptionDeleted(deletedSubscription);
           break;
         case "account.updated":
           const accountUpdate = event.data.object;

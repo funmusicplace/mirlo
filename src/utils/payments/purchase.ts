@@ -57,6 +57,8 @@ export const initiatePayment = async ({
   items,
   userEmail,
   userId,
+  clientId,
+  successUrl,
   stripeAccountId: stripeAccountIdOverride,
 }: {
   readerId?: string;
@@ -64,9 +66,20 @@ export const initiatePayment = async ({
   items: ResolvedItem[];
   userEmail: string;
   userId?: string;
+  /** Registered API consumer (Client.id) — carried in metadata so the post-payment return can bounce to that client's applicationUrl. */
+  clientId?: number;
+  /** Where the hosted checkout page returns the buyer after payment (validated upstream). */
+  successUrl?: string;
   /** Pre-resolved account ID — use when the item (e.g. trackGroup) has its own paymentToUser that takes precedence over the artist's. */
   stripeAccountId?: string;
-}): Promise<{ paymentIntentId: string } | { clientSecret: string | null }> => {
+}): Promise<
+  | { paymentIntentId: string }
+  | {
+      clientSecret: string | null;
+      stripeAccountId: string;
+      paymentIntentId: string;
+    }
+> => {
   const { artist, stripeAccountId, currency } =
     await resolveArtistPaymentContext(artistId, stripeAccountIdOverride);
 
@@ -90,6 +103,8 @@ export const initiatePayment = async ({
     artistId: String(artistId),
     userEmail,
     ...(userId && { userId }),
+    ...(clientId !== undefined && { clientId: String(clientId) }),
+    ...(successUrl && { successUrl }),
     ...(purchaseType === "trackGroup" &&
       items[0]?.id && { trackGroupId: items[0].id }),
     items: JSON.stringify(items),
@@ -118,7 +133,11 @@ export const initiatePayment = async ({
     applicationFeeAmount,
     metadata,
   });
-  return { clientSecret: paymentIntent.client_secret };
+  return {
+    clientSecret: paymentIntent.client_secret,
+    stripeAccountId,
+    paymentIntentId: paymentIntent.id,
+  };
 };
 
 export const initiateSubscription = async ({

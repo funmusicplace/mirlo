@@ -48,6 +48,9 @@ const sendSubscriptionRenewalReminders = async () => {
       where: {
         amount: { gt: 0 },
         deletedAt: null,
+        // Skip subscriptions the user has cancelled but that are still running
+        // out their paid period — they won't renew, so don't remind.
+        deleteReason: null,
         artistSubscriptionTier: {
           isDefaultTier: false,
           interval: "YEAR", // Only year-long subscriptions

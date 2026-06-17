@@ -592,86 +592,6 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   return session;
 };
 
-export const createStripeCheckoutSessionForTip = async ({
-  loggedInUser,
-  email,
-  priceNumber,
-  stripeAccountId,
-  message,
-  artistId,
-  description,
-  tipName,
-}: {
-  loggedInUser?: User;
-  email?: string;
-  priceNumber: number;
-  stripeAccountId: string;
-  artistId: number;
-  message?: string;
-  tipName?: string;
-  description?: string;
-}) => {
-  const client = await prisma.client.findFirst({
-    where: {
-      applicationName: "frontend",
-    },
-  });
-
-  const cancelUrlParams = buildCheckoutCancelSearchParams({
-    artistId,
-    clientId: client?.id,
-  });
-
-  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency = await getCurrency(artistId, stripeAccountId);
-
-  const session = await stripe.checkout.sessions.create(
-    {
-      billing_address_collection: "auto",
-      customer_email: loggedInUser?.email || email,
-      payment_intent_data: {
-        application_fee_amount: await calculateAppFee(
-          priceNumber,
-          currency,
-          await getPlatformFeeForArtist(artistId),
-          stripeAccount.country
-        ),
-      },
-      line_items: [
-        {
-          price_data: {
-            tax_behavior: "exclusive",
-            unit_amount: castToFixed(priceNumber),
-            currency: currency?.toLowerCase() ?? "usd",
-            product_data: {
-              name: tipName ?? `One Time Gift`,
-              description:
-                description ?? `A one time gift to support the artist`,
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        clientId: client?.id ?? null,
-        artistId: artistId,
-        gaveGift: 1,
-        message: message ?? null,
-        purchaseType: "tip",
-        userId: loggedInUser?.id ?? null,
-        userEmail: email ?? null,
-        stripeAccountId,
-      },
-      mode: "payment",
-      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${API_DOMAIN}/v1/checkout?${cancelUrlParams.toString()}`,
-    },
-    { stripeAccount: stripeAccountId }
-  );
-
-  return session;
-};
-
 export const getCurrency = async (
   artistId: number,
   stripeAccountId: string
@@ -707,6 +627,7 @@ export const createCheckoutSessionForSubscription = async ({
   artistId,
   tier,
   amount,
+  userName,
   embedded = false,
 }: {
   loggedInUser?: User;
@@ -715,6 +636,8 @@ export const createCheckoutSessionForSubscription = async ({
   artistId: number;
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>;
   amount: number;
+  /** Optional self-chosen display name, captured when the buyer has no account name. */
+  userName?: string;
   // In-app callers opt in to embedded so the Stripe form renders inline
   // (#1168). External callers (links from email, third-party embeds, etc.)
   // leave this off and get a hosted Stripe checkout URL they can redirect to.
@@ -805,6 +728,7 @@ export const createCheckoutSessionForSubscription = async ({
         tierId: tier.id,
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
+        ...(userName?.trim() && { userName: userName.trim() }),
         stripeAccountId,
       },
       mode: "subscription",

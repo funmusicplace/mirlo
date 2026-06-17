@@ -4,19 +4,20 @@ pkgs.mkShell {
 		nodejs_22
 		corepack
 		cypress
-		prisma
+		prisma_6
 		openssl
 	];
 
 	shellHook = ''
 		export PATH="$PWD/node_modules/.bin/:$PATH"
+		export DATABASE_URL="postgresql://nomads:nomads@localhost:5434/nomads?schema=public"
 		export CYPRESS_INSTALL_BINARY=0
 		export CYPRESS_RUN_BINARY=${pkgs.cypress}/bin/Cypress
 		export PKG_CONFIG_PATH="${pkgs.openssl}/lib/pkgconfig"
-		export PRISMA_SCHEMA_ENGINE_BINARY="${pkgs.prisma-engines}/bin/schema-engine"
-		export PRISMA_QUERY_ENGINE_BINARY="${pkgs.prisma-engines}/bin/query-engine"
-		export PRISMA_QUERY_ENGINE_LIBRARY="${pkgs.prisma-engines}/lib/libquery_engine.node"
-		export PRISMA_FMT_BINARY="${pkgs.prisma-engines}/bin/prisma-fmt"
+		export PRISMA_SCHEMA_ENGINE_BINARY="${pkgs.prisma-engines_6}/bin/schema-engine"
+		export PRISMA_QUERY_ENGINE_BINARY="${pkgs.prisma-engines_6}/bin/query-engine"
+		export PRISMA_QUERY_ENGINE_LIBRARY="${pkgs.prisma-engines_6}/lib/libquery_engine.node"
+		export PRISMA_FMT_BINARY="${pkgs.prisma-engines_6}/bin/prisma-fmt"
 	'';
 }
 

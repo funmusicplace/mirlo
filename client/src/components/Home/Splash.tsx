@@ -58,20 +58,21 @@ export const SplashButtonWrapper = styled.div`
 const ParallexObjectWrapper = styled.div`
   background-size: contain;
   background-repeat: no-repeat;
+  position: absolute;
 `;
 
 const Splash = () => {
   const sceneEl = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (sceneEl.current) {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (sceneEl.current && !prefersReducedMotion) {
       const parallaxInstance = new Parallax(sceneEl.current, {
         relativeInput: true,
         hoverOnly: true,
       });
-
-      parallaxInstance.enable();
-
       return () => parallaxInstance.disable();
     }
   }, []);
@@ -135,9 +136,8 @@ const Splash = () => {
             z-index: -1;
             background-image: url("/static/images/cloud-toneddowngrain-1-optimized.webp");
 
-            @media screen and (max-width: ${bp.medium}px) {
-              margin-bottom: 0rem;
-              top: 42% !important;
+            @media screen and (max-width: ${bp.xlarge}px) {
+              display: none !important;
             }
           `}
         ></ParallexObjectWrapper>

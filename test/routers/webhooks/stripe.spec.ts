@@ -587,6 +587,128 @@ describe("Stripe Webhooks - Failed Payments", () => {
     });
   });
 
+  describe("customer.subscription.deleted webhook", () => {
+    it("sets deletedAt and preserves the cancellation reason when a cancelled subscription's period ends", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { name: "Premium" });
+
+      const subscription = await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_ending_123",
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 500,
+          deleteReason: "USER_CANCELLED",
+        },
+      });
+
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_ending_123",
+        object: "subscription",
+        cancellation_details: { reason: "cancellation_requested" },
+      } as unknown as Stripe.Subscription);
+
+      // Read raw: the Prisma client soft-delete extension filters deletedAt
+      // rows out of normal finds, so we'd never see the now-deleted row.
+      const [after] = await prisma.$queryRaw<
+        { deletedAt: Date | null; deleteReason: string | null }[]
+      >`SELECT "deletedAt", "deleteReason" FROM "ArtistUserSubscription" WHERE id = ${subscription.id}`;
+      assert.ok(after.deletedAt, "deletedAt should be set at period end");
+      assert.equal(
+        after.deleteReason,
+        "USER_CANCELLED",
+        "should preserve the reason recorded at cancellation time"
+      );
+    });
+
+    it("records PAYMENT_FAILURE when Stripe ends the subscription after exhausting retries", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { name: "Premium" });
+
+      const subscription = await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_failed_123",
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_failed_123",
+        object: "subscription",
+        cancellation_details: { reason: "payment_failed" },
+      } as unknown as Stripe.Subscription);
+
+      const [after] = await prisma.$queryRaw<
+        { deletedAt: Date | null; deleteReason: string | null }[]
+      >`SELECT "deletedAt", "deleteReason" FROM "ArtistUserSubscription" WHERE id = ${subscription.id}`;
+      assert.ok(after.deletedAt);
+      assert.equal(after.deleteReason, "PAYMENT_FAILURE");
+    });
+
+    it("does not touch an already-deleted subscription", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { name: "Premium" });
+
+      const alreadyDeletedAt = new Date("2020-01-01T00:00:00.000Z");
+      const subscription = await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_already_gone",
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 500,
+          deletedAt: alreadyDeletedAt,
+          deleteReason: "USER_CANCELLED",
+        },
+      });
+
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_already_gone",
+        object: "subscription",
+        cancellation_details: { reason: "payment_failed" },
+      } as unknown as Stripe.Subscription);
+
+      // The handler's deletedAt: null guard means an already-deleted row is
+      // left untouched — neither its deletedAt nor its reason should change.
+      const [after] = await prisma.$queryRaw<
+        { deletedAt: Date | null; deleteReason: string | null }[]
+      >`SELECT "deletedAt", "deleteReason" FROM "ArtistUserSubscription" WHERE id = ${subscription.id}`;
+      assert.equal(
+        new Date(after.deletedAt!).toISOString(),
+        alreadyDeletedAt.toISOString()
+      );
+      assert.equal(after.deleteReason, "USER_CANCELLED");
+    });
+
+    it("handles an unknown subscription key without throwing", async () => {
+      // No matching row exists; the handler should simply no-op
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_does_not_exist",
+        object: "subscription",
+        cancellation_details: { reason: "cancellation_requested" },
+      } as unknown as Stripe.Subscription);
+    });
+  });
+
   describe("webhook endpoint integration", () => {
     it("should process invoice.payment_failed event from webhook", async () => {
       const { user } = await createUser({
@@ -652,6 +774,45 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.equal(handleInvoicePaymentFailedStub.calledOnce, true);
 
       // Assert response was sent
+      assert.equal(mockResponse.send.calledOnce, true);
+    });
+
+    it("should process customer.subscription.deleted event from webhook", async () => {
+      const verifySignatureStub = sinon
+        .stub(stripeUtils, "verifyStripeSignature")
+        .resolves({
+          type: "customer.subscription.deleted",
+          account: "acct_1234",
+          data: {
+            object: {
+              id: "sub_webhook_del",
+              object: "subscription",
+              cancellation_details: { reason: "cancellation_requested" },
+            },
+          },
+        } as unknown as Stripe.Event);
+
+      const handleSubscriptionDeletedStub = sinon.stub(
+        stripeUtils,
+        "handleSubscriptionDeleted"
+      );
+
+      const mockResponse = {
+        send: sinon.stub(),
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+
+      const req = {} as unknown as Request;
+      const res = mockResponse as unknown as Response;
+      const next = () => {};
+
+      const handler = stripeConnectWebhook();
+
+      await handler.POST(req, res, next);
+
+      assert.equal(verifySignatureStub.calledOnce, true);
+      assert.equal(handleSubscriptionDeletedStub.calledOnce, true);
       assert.equal(mockResponse.send.calledOnce, true);
     });
 

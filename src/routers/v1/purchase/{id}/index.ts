@@ -1,3 +1,4 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
@@ -24,12 +25,22 @@ export default function () {
         });
       }
 
-      const { id: intentId, status } = await getIntentStatus({
+      const { artistId, ...intent } = await getIntentStatus({
         id,
         stripeAccountId,
       });
 
-      res.status(200).json({ result: { id: intentId, status } });
+      // Surface a name so the hosted checkout page can show who's being paid.
+      let artistName: string | null = null;
+      if (artistId) {
+        const artist = await prisma.artist.findFirst({
+          where: { id: Number(artistId) },
+          select: { name: true },
+        });
+        artistName = artist?.name ?? null;
+      }
+
+      res.status(200).json({ result: { ...intent, artistName } });
     } catch (e) {
       next(e);
     }
@@ -75,6 +86,30 @@ export default function () {
                     "succeeded",
                     "canceled",
                   ],
+                },
+                clientSecret: {
+                  type: "string",
+                  description:
+                    "Intent client secret — pass to Stripe.js on the hosted checkout page.",
+                },
+                successUrl: {
+                  type: "string",
+                  description:
+                    "Where the hosted checkout page should send the buyer after payment, if one was supplied at initiation.",
+                },
+                amount: {
+                  type: "number",
+                  description:
+                    "Total in the smallest currency unit (e.g. cents). Null for SetupIntents.",
+                },
+                currency: {
+                  type: "string",
+                  description: "ISO currency code. Null for SetupIntents.",
+                },
+                artistName: {
+                  type: "string",
+                  description:
+                    "Name of the artist being paid, for display on the checkout page.",
                 },
               },
             },

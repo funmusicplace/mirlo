@@ -21,7 +21,7 @@ import { bp } from "../../constants";
 
 import HeaderSearch from "./HeaderSearch";
 
-const HeaderWrapper = styled.div<{
+const HeaderWrapper = styled.header<{
   hasBackground?: boolean;
   transparent?: boolean;
   artistId?: boolean;
@@ -173,7 +173,6 @@ const Header = () => {
   const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
   const menuRef = useRef<HTMLDialogElement | null>(null);
-  const menuButtonId = "menu-button";
   const menuDialogId = "menu-dialog";
 
   const openMenu = () => {
@@ -232,12 +231,12 @@ const Header = () => {
           {isLoggedIn && (
             <Button
               aria-controls={menuDialogId}
-              aria-label={t("openMenu", { keyPrefix: "headerMenu" })}
+              aria-haspopup="dialog"
+              aria-label={t("menu", { keyPrefix: "headerMenu" })}
               data-cy="user-nav"
               // @ts-ignore React doesn't support Invoker Commands API
               command="show-modal"
               commandfor={menuDialogId}
-              id={menuButtonId}
               onClick={() => openMenu()}
               startIcon={
                 <svg
@@ -254,13 +253,12 @@ const Header = () => {
               }
               variant="transparent"
               className={menuButtonOverride}
-              title={t("openMenu", { keyPrefix: "headerMenu" })}
+              title={t("menu", { keyPrefix: "headerMenu" })}
             />
           )}
           {isLoggedIn &&
             createPortal(
               <Menu
-                buttonId={menuButtonId}
                 dialogId={menuDialogId}
                 isAdmin={user.isAdmin}
                 isLabelAccount={user.isLabelAccount}

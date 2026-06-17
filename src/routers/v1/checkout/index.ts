@@ -1,35 +1,11 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import {
+  buildCheckoutRedirectUrl,
+  normaliseBaseUrl,
+} from "../../../utils/clientUrl";
 import stripe from "../../../utils/stripe";
-
-const DEFAULT_CLIENT_BASE_URL = process.env.API_DOMAIN ?? "https://mirlo.space";
-
-const ensureTrailingSlash = (value: string) =>
-  value.endsWith("/") ? value : `${value}/`;
-
-const normaliseBaseUrl = (candidate?: string | null) => {
-  const fallback = ensureTrailingSlash(DEFAULT_CLIENT_BASE_URL);
-  if (!candidate) {
-    return fallback;
-  }
-
-  try {
-    const trimmed = candidate.trim();
-    if (!trimmed) {
-      return fallback;
-    }
-
-    const parsed = new URL(trimmed);
-    return ensureTrailingSlash(parsed.toString());
-  } catch (error) {
-    console.warn(
-      "Invalid client application URL provided, falling back to default domain",
-      error
-    );
-    return fallback;
-  }
-};
 
 const parseNumericQueryParam = (value: unknown) => {
   if (typeof value !== "string") {
@@ -38,19 +14,6 @@ const parseNumericQueryParam = (value: unknown) => {
 
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : null;
-};
-
-const buildCheckoutRedirectUrl = (
-  baseUrl: string | null | undefined,
-  path: string,
-  params: URLSearchParams
-) => {
-  const target = new URL(path.replace(/^\/+/, ""), normaliseBaseUrl(baseUrl));
-  params.forEach((value, key) => {
-    target.searchParams.set(key, value);
-  });
-
-  return target.toString();
 };
 
 export default function () {

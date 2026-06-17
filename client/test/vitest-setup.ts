@@ -4,7 +4,10 @@ import { expect, afterEach, vi } from "vitest";
 
 expect.extend(matchers);
 
-Object.assign(import.meta.env, { VITE_API_DOMAIN: "http://localhost:3000" });
+Object.assign(import.meta.env, {
+  VITE_API_DOMAIN: "http://localhost:3000",
+  VITE_PUBLISHABLE_STRIPE_KEY: "pk_test_fake",
+});
 
 // NOTE: Exercising the Vitest suite against a fully booted API environment
 // (via docker-compose) would dramatically increase setup time in CI and makes

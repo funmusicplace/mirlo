@@ -79,6 +79,14 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "checkout",
+        async lazy() {
+          const { default: Component } =
+            await import("components/Checkout/HostedCheckout");
+          return { Component };
+        },
+      },
+      {
         path: "widget/track/:id",
         async lazy() {
           const { default: Component } =

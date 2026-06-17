@@ -445,6 +445,7 @@ type SessionMetaData = {
   tierId: string;
   userEmail: string;
   userId: string;
+  userName: string;
   trackGroupId: string;
   stripeAccountId: string;
   gaveGift: string;
@@ -476,6 +477,7 @@ export const handleCheckoutSession = async (
       artistId,
     } = metadata;
     let { userId, userEmail } = metadata;
+    const { userName } = metadata;
     userEmail = userEmail || (session.customer_details?.email ?? "");
     logger.info(
       `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, ${JSON.stringify(metadata)}`
@@ -491,10 +493,14 @@ export const handleCheckoutSession = async (
       { stripeAccount: stripeAccountId }
     );
 
-    // If the user doesn't exist, we create one with an existing userEmail
+    // If the user doesn't exist, we create one with an existing userEmail.
+    // `userName` is the buyer's self-chosen display name (subscriptions only);
+    // we deliberately do NOT fall back to Stripe's billing name — a blank field
+    // means the supporter chose not to share a display name.
     let { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
       userEmail,
-      userId
+      userId,
+      userName
     );
     logger.info(`checkout.session: ${session.id} Processing session`);
     if (purchaseType === "tip") {
@@ -822,6 +828,40 @@ export const handlePaymentIntentFailed = async (
     const urlParams = `clientSecret=${secret}&stripeAccountId=${accountId}`;
     await handleFundraiserPledgePaymentFailure(transactionId, urlParams);
   }
+};
+
+// Fires when Stripe ends a subscription — either because we scheduled it to
+// cancel at period end (user cancellation, see subscribe.ts) or because Stripe
+// exhausted its dunning retries after repeated payment failures. This is the
+// single place we set `deletedAt`, so access (gated on `deletedAt: null`)
+// continues through any paid-up period and is revoked exactly when Stripe
+// considers the subscription over.
+export const handleSubscriptionDeleted = async (
+  subscription: Stripe.Subscription
+) => {
+  logger.info(`customer.subscription.deleted: ${subscription.id}`);
+
+  // Honour any reason we recorded at cancellation time; only override it when
+  // Stripe tells us the subscription died because billing ultimately failed.
+  const deleteReason =
+    subscription.cancellation_details?.reason === "payment_failed"
+      ? "PAYMENT_FAILURE"
+      : undefined;
+
+  const result = await prisma.artistUserSubscription.updateMany({
+    where: {
+      stripeSubscriptionKey: subscription.id,
+      deletedAt: null,
+    },
+    data: {
+      deletedAt: new Date(),
+      ...(deleteReason ? { deleteReason } : {}),
+    },
+  });
+
+  logger.info(
+    `customer.subscription.deleted: ${subscription.id} marked ${result.count} subscription(s) deleted`
+  );
 };
 
 type MerchPurchaseItem = {

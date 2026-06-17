@@ -4,7 +4,10 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import { describe, it } from "mocha";
+import sinon from "sinon";
 
+import { cancelStripeSubscriptionsAtPeriodEnd } from "../../../src/utils/artist";
+import { stripe } from "../../../src/utils/stripe";
 import { clearTables, createArtist, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -51,6 +54,10 @@ describe("artists/{id}/subscribe", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   describe("POST", () => {
@@ -172,6 +179,114 @@ describe("artists/{id}/subscribe", () => {
         },
       });
       assert.equal(subscriptions.length, 0);
+    });
+  });
+
+  describe("DELETE", () => {
+    it("should return 404 when the user has no subscription", async () => {
+      const { artist, followerAccessToken } = await createTestData();
+
+      const response = await requestApp
+        .delete(`artists/${artist.id}/subscribe`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${followerAccessToken}`]);
+
+      assert.equal(response.status, 404);
+    });
+
+    it("keeps a paid subscription active until period end rather than removing it", async () => {
+      const { artist, followerUser, followerAccessToken } =
+        await createTestData();
+      const paidTier = artist.subscriptionTiers![1]; // Tier 2, minAmount 4
+
+      const subscription = await prisma.artistUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: paidTier.id,
+          userId: followerUser.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_paid_123",
+        },
+      });
+
+      const response = await requestApp
+        .delete(`artists/${artist.id}/subscribe`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${followerAccessToken}`]);
+
+      assert.equal(response.status, 200);
+
+      // The subscription is still active (deletedAt null, so the soft-delete
+      // read filter still returns it), with the reason recorded now and the
+      // Stripe key kept so the customer.subscription.deleted webhook — which
+      // fires at period end — can match it and finally set deletedAt.
+      const after = await prisma.artistUserSubscription.findFirst({
+        where: { id: subscription.id },
+      });
+      assert.ok(after, "subscription should still be active until period end");
+      assert.equal(after?.deleteReason, "USER_CANCELLED");
+      assert.equal(after?.stripeSubscriptionKey, "sub_paid_123");
+    });
+
+    it("removes a free subscription immediately", async () => {
+      const { artist, followerUser, followerAccessToken } =
+        await createTestData();
+      const freeTier = artist.subscriptionTiers![0]; // default tier, no Stripe key
+
+      const subscription = await prisma.artistUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: freeTier.id,
+          userId: followerUser.id,
+          amount: 0,
+        },
+      });
+
+      const response = await requestApp
+        .delete(`artists/${artist.id}/subscribe`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${followerAccessToken}`]);
+
+      assert.equal(response.status, 200);
+
+      // A free tier has no paid period to honour, so it is soft-deleted now
+      // and no longer appears as an active subscription.
+      const after = await prisma.artistUserSubscription.findFirst({
+        where: { id: subscription.id },
+      });
+      assert.equal(after, null, "free subscription should no longer be active");
+    });
+
+    it("cancelStripeSubscriptionsAtPeriodEnd asks Stripe to cancel at period end", async () => {
+      // Exercised directly (in-process) so we can assert the Stripe params —
+      // the HTTP handler above runs in a separate container where stubs don't
+      // apply.
+      const { artist, followerUser } = await createTestData();
+      const paidTier = artist.subscriptionTiers![1];
+
+      await prisma.artistUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: paidTier.id,
+          userId: followerUser.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_paid_456",
+        },
+      });
+
+      const updateStub = sinon
+        .stub(stripe.subscriptions, "update")
+        .resolves({} as any);
+
+      await cancelStripeSubscriptionsAtPeriodEnd({
+        artistSubscriptionTier: { artistId: artist.id },
+        userId: followerUser.id,
+      });
+
+      assert.equal(updateStub.calledOnce, true);
+      assert.equal(updateStub.getCall(0).args[0], "sub_paid_456");
+      assert.deepEqual(updateStub.getCall(0).args[1], {
+        cancel_at_period_end: true,
+      });
+      // Connected-account subscriptions are cancelled on the artist's account
+      assert.deepEqual(updateStub.getCall(0).args[2], { stripeAccount: "23" });
     });
   });
 });

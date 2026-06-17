@@ -63,10 +63,13 @@ export const getUserCountry = async (userId: number) => {
 
 export const findOrCreateUserBasedOnEmail = async (
   userEmail: string,
-  userId?: string | number
+  userId?: string | number,
+  /** Optional self-chosen display name. Only set when the user has none — never overwrites an existing name. */
+  name?: string
 ) => {
   let newUser = false;
   let user: User | undefined | null;
+  const trimmedName = name?.trim() || undefined;
 
   if (!userId && userEmail) {
     newUser = true; // If this is true the user wasn't logged in when making the purchase
@@ -80,6 +83,7 @@ export const findOrCreateUserBasedOnEmail = async (
       user = await prisma.user.create({
         data: {
           email: userEmail,
+          ...(trimmedName && { name: trimmedName }),
         },
       });
     }
@@ -89,6 +93,16 @@ export const findOrCreateUserBasedOnEmail = async (
       where: { id: Number(userId) },
     });
   }
+
+  // Backfill a name for users who don't have one yet (a returning guest, or a
+  // logged-in account created without a name). Never overwrite an existing name.
+  if (user && trimmedName && !user.name) {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { name: trimmedName },
+    });
+  }
+
   return { userId, newUser, user };
 };
 

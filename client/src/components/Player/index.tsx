@@ -14,7 +14,7 @@ import { useIsArtistPageLight } from "../ArtistColorsProvider";
 import LoopButton from "../common/LoopButton";
 import NextButton from "../common/NextButton";
 import { PlayControlButton } from "../common/PlayControlButton";
-import PreviousButton from "../common/PreviousButton";
+import PrevButton from "../common/PrevButton";
 import ShuffleButton from "../common/ShuffleButton";
 import Spinner from "../common/Spinner";
 import { ElapsedTime } from "../Widget/utils";
@@ -259,7 +259,7 @@ const Player = () => {
                     }
                   `}
                 >
-                  <PreviousButton />
+                  <PrevButton />
                 </div>
                 <PlayControlButton playerButton />
                 <div

@@ -15,13 +15,12 @@ import { getArtistManageUrl } from "utils/artist";
 const Menu = forwardRef<
   HTMLDialogElement,
   {
-    buttonId: string;
     dialogId: string;
     isAdmin: boolean;
     isLabelAccount: boolean;
     onClose: () => void;
   }
->(({ buttonId, dialogId, isAdmin, isLabelAccount, onClose }, ref) => {
+>(({ dialogId, isAdmin, isLabelAccount, onClose }, ref) => {
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
 
   const {
@@ -54,7 +53,7 @@ const Menu = forwardRef<
 
   return (
     <dialog
-      aria-labelledby={buttonId}
+      aria-label={t("menu")}
       className="inset-s-0 sm:inset-s-auto sm:inset-e-0 max-w-[100vw] max-h-full w-screen sm:w-[300px] h-full backdrop:bg-[rgba(0,0,0,.5)]"
       closedby="any"
       data-nosnippet
@@ -74,7 +73,7 @@ const Menu = forwardRef<
       {/* This div can be removed once `closedby` is baseline*/}
       <div className="flex flex-col h-full p-[1rem]">
         <Button
-          aria-label="Close menu"
+          aria-label={t("close", { keyPrefix: "common" })}
           autoFocus
           className="self-end border-none bg-transparent! text-black! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-black!"
           // @ts-ignore React doesn't support Invoker Commands API
@@ -84,7 +83,7 @@ const Menu = forwardRef<
           onlyIcon
           startIcon={<FaTimes />}
         />
-        <nav className="flex-auto">
+        <nav aria-label={t("main")} className="flex-auto">
           <ul>
             <li>
               <MenuLink onClick={onClose} to="/profile/notifications">
