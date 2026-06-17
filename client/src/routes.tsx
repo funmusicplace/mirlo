@@ -820,12 +820,17 @@ const routes: RouteObject[] = [
                 },
               },
               {
-                path: "tip",
+                path: "connect",
                 async lazy() {
                   const { default: Component } =
                     await import("components/Artist/ArtistTip");
                   return { Component };
                 },
+              },
+              {
+                // Legacy path: the page now covers following too, not just tips.
+                path: "tip",
+                element: <Navigate to="../connect" replace />,
               },
               {
                 path: "posts",
