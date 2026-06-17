@@ -2,13 +2,9 @@ import prisma from "@mirlo/prisma";
 
 import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
-import { createOnlinePaymentIntent } from "../stripe";
 import { getCurrency } from "../stripe/sessions";
-import {
-  createTerminalPaymentIntent,
-  processPaymentOnReader,
-  createAndDispatchTerminalSetupIntent,
-} from "../stripe/terminal";
+
+import { getPaymentProcessor } from "./PaymentProcessor";
 
 export type ResolvedItem = {
   type: "trackGroup" | "merch" | "tip";
@@ -110,33 +106,31 @@ export const initiatePayment = async ({
     items: JSON.stringify(items),
   };
 
+  const processor = getPaymentProcessor();
+
   if (readerId) {
-    const paymentIntent = await createTerminalPaymentIntent({
-      totalAmount,
+    const { id } = await processor.createTerminalPayment({
+      amount: totalAmount,
       currency,
-      stripeAccountId,
+      accountId: stripeAccountId,
       applicationFeeAmount,
       metadata,
-    });
-    await processPaymentOnReader({
       readerId,
-      paymentIntentId: paymentIntent.id,
-      stripeAccountId,
     });
-    return { paymentIntentId: paymentIntent.id };
+    return { paymentIntentId: id };
   }
 
-  const paymentIntent = await createOnlinePaymentIntent({
+  const { id, clientSecret } = await processor.createOnlinePayment({
     amount: totalAmount,
     currency,
-    stripeAccountId,
+    accountId: stripeAccountId,
     applicationFeeAmount,
     metadata,
   });
   return {
-    clientSecret: paymentIntent.client_secret,
+    clientSecret,
     stripeAccountId,
-    paymentIntentId: paymentIntent.id,
+    paymentIntentId: id,
   };
 };
 
@@ -180,11 +174,11 @@ export const initiateSubscription = async ({
   const { stripeAccountId, currency } =
     await resolveArtistPaymentContext(artistId);
 
-  return createAndDispatchTerminalSetupIntent({
+  return getPaymentProcessor().createTerminalSubscriptionSetup({
     readerId,
     tierId,
     artistId,
-    stripeAccountId,
+    accountId: stripeAccountId,
     amount: resolvedAmount,
     currency,
     userEmail,
