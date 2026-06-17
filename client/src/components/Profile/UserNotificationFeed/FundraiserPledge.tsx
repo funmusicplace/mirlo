@@ -32,7 +32,7 @@ const FundraiserPledge: React.FC<{
           {coverUrl ? (
             <ImageWithPlaceholder
               src={coverUrl}
-              alt={trackGroup?.title ?? ""}
+              alt=""
               size={compact ? 28 : 40}
               square
               objectFit="cover"

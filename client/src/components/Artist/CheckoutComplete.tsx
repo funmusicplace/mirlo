@@ -102,7 +102,6 @@ function CheckoutComplete() {
           </>
         }
         cover={isSimpleMessage ? undefined : itemCover}
-        coverAlt={itemTitle ?? ""}
         title={isSimpleMessage ? undefined : (itemTitle ?? undefined)}
         titleLink={itemLink ?? undefined}
         artistName={artist.name}

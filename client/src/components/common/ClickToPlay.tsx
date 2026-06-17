@@ -339,7 +339,7 @@ const ClickToPlay: React.FC<
         {image && (
           <ImageWithPlaceholder
             src={image.url}
-            alt={title}
+            alt={trackGroup.coverImageAlt}
             size={image.width}
             square
             objectFit="contain"

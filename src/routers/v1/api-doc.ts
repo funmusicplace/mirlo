@@ -21,6 +21,7 @@ const apiDoc = {
         currency: { type: ["string", "null"] },
         publishedAt: { type: ["string", "null"], format: "date-time" },
         about: { type: ["string", "null"] },
+        coverImageAlt: { type: ["string", "null"] },
       },
     },
     Fundraiser: {

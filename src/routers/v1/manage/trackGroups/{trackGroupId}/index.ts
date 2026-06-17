@@ -141,6 +141,7 @@ export default function () {
         "defaultTrackMinPrice",
         "defaultIsPreview",
         "catalogNumber",
+        "coverImageAlt",
         "urlSlug",
         "isPreorder",
         "scheduleEndOnReleaseDate",

@@ -94,7 +94,7 @@ const TransactionComponent: React.FC<{
       >
         {imageSrc && (
           <div>
-            <ImageWithPlaceholder alt={title ?? ""} size={50} src={imageSrc} />
+            <ImageWithPlaceholder alt="" size={50} src={imageSrc} />
           </div>
         )}
         <div>

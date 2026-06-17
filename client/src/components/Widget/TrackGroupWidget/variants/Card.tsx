@@ -80,7 +80,7 @@ const Card = () => {
       {trackGroup.cover?.sizes?.[600] ? (
         <img
           src={trackGroup.cover.sizes[600]}
-          alt={trackGroup.title ?? "Untitled release"}
+          alt={trackGroup.coverImageAlt}
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
           decoding="async"

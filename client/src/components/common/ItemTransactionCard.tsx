@@ -7,7 +7,6 @@ const ItemTransactionCard: React.FC<
   React.PropsWithChildren<{
     header: React.ReactNode;
     cover?: string;
-    coverAlt?: string;
     title?: string;
     titleLink?: string;
     artistName?: string;
@@ -16,7 +15,6 @@ const ItemTransactionCard: React.FC<
 > = ({
   header,
   cover,
-  coverAlt,
   title,
   titleLink,
   artistName,
@@ -33,7 +31,7 @@ const ItemTransactionCard: React.FC<
         <div className="w-60 mt-2">
           <ImageWithPlaceholder
             src={cover}
-            alt={coverAlt ?? title ?? ""}
+            alt=""
             size={300}
             className="w-full"
           />

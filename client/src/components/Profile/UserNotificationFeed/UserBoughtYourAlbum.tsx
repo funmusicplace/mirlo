@@ -38,7 +38,7 @@ const UserBoughtYourAlbum: React.FC<{
         {coverUrl ? (
           <ImageWithPlaceholder
             src={coverUrl}
-            alt={notification.trackGroup.title ?? ""}
+            alt=""
             size={compact ? 28 : 40}
             square
             objectFit="cover"

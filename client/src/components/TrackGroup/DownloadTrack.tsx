@@ -109,7 +109,7 @@ function DownloadTrack() {
           <ImageWithPlaceholder
             src={track.trackGroup.cover?.sizes?.[120]}
             size={120}
-            alt={track.title ?? t("untitledTrack")}
+            alt=""
           />
           <SmallTileDetails
             title={track.title ?? ""}

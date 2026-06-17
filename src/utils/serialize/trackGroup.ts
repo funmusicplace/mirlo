@@ -126,6 +126,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
       cover: coverString
         ? {
             src: generateFullStaticImageUrl(coverString, finalCoversBucket),
+            alt: trackGroup.coverImageAlt,
             width: 600,
             height: 600,
           }

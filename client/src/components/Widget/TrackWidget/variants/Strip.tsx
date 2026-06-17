@@ -66,7 +66,7 @@ const Strip = () => {
             track.trackGroup.artist?.avatar?.sizes?.[600] ??
             ""
           }
-          alt={track.title ?? "Untitled track"}
+          alt=""
           size={600}
           square
           objectFit="cover"

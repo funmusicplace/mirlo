@@ -12,6 +12,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
 import { useUpload } from "state/UploadContext";
 import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
+import { useMatchMedia } from "utils/useMatchMedia";
 import useShow from "utils/useShow";
 
 import { bp } from "../../../../constants";
@@ -25,6 +26,8 @@ import Pricing from "./Pricing";
 import SaveDraftBar from "./SaveDraftBar";
 import SchedulePublication from "./SchedulePublication";
 import VisibilityRadio from "./VisibilityRadio";
+
+const COVER_IMAGE_ALT_MAX_LENGTH = 250;
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
@@ -48,6 +51,13 @@ const AlbumFormContent: React.FC<{
   const releaseDateValue = watch("releaseDate");
 
   const hasReleaseDate = Boolean(releaseDateValue);
+
+  const coverImageAlt = watch("coverImageAlt") ?? "";
+  const coverImageAltLength = coverImageAlt.length;
+
+  const isLargeViewport = useMatchMedia(`(min-width: ${bp.large}px)`);
+  const isSmallViewport = useMatchMedia(`(min-width: ${bp.small}px)`);
+  const coverImageAltRows = isLargeViewport ? 3 : isSmallViewport ? 4 : 5;
 
   return (
     <>
@@ -180,6 +190,36 @@ const AlbumFormContent: React.FC<{
             maxSize="15mb"
             isLoading={isCoverImageProcessing}
           />
+          <div className="flex flex-col gap-2 max-w-[72ch]">
+            <div className="flex items-baseline justify-between gap-2">
+              <RestoredLabel
+                htmlFor="input-cover-image-alt"
+                field="coverImageAlt"
+              >
+                {t("coverImageAlt")}
+              </RestoredLabel>
+              <span
+                id="counter-cover-image-alt"
+                aria-live="polite"
+                className="text-sm tabular-nums"
+              >
+                {t("coverImageAltCharacterCount", {
+                  count: coverImageAltLength,
+                  max: COVER_IMAGE_ALT_MAX_LENGTH,
+                })}
+              </span>
+            </div>
+            <TextArea
+              id="input-cover-image-alt"
+              rows={coverImageAltRows}
+              maxLength={COVER_IMAGE_ALT_MAX_LENGTH}
+              aria-describedby="hint-cover-image-alt counter-cover-image-alt"
+              {...register("coverImageAlt", {
+                maxLength: COVER_IMAGE_ALT_MAX_LENGTH,
+              })}
+            />
+            <small id="hint-cover-image-alt">{t("coverImageAltHint")}</small>
+          </div>
         </FormComponent>
       </FormSection>
       <Pricing reload={reload} existingObject={existingObject} />

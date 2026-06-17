@@ -132,7 +132,7 @@ const ManageArtistAlbumRow: React.FC<ManageArtistAlbumRowProps> = ({
         {release.cover ? (
           <img
             src={release.cover.sizes?.[120] ?? release.cover.url?.[0]}
-            alt={release.title}
+            alt=""
             className="h-10 w-10 flex-shrink-0 object-cover"
           />
         ) : (
