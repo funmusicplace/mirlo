@@ -447,7 +447,7 @@ const AdminSettings = () => {
             <td>
               <InputEl
                 {...register("emailProvider.postmark.apiKey")}
-                type="text"
+                // type="password"
                 className={css`
                   text-align: right;
                 `}

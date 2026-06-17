@@ -56,6 +56,12 @@ test1234
 
 On production email gets sent by sendgrid or mailgun. To see e-mails during development, navigate to http://localhost:8025 to view all emails. Emails will appear in real-time as they're sent through the queue.
 
+If during development you want to send actual emails (e.g. while testing an email provider), configure that provider on your Mirlo instance via the localhost admin UI, _and_ set environment variable:
+
+```sh
+SEND_EMAILS_IN_DEV=true
+```
+
 ## Background Jobs
 
 ### Making changes to background jobs.
