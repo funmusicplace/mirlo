@@ -42,7 +42,7 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    let { tierId, email, amount, embedded } = req.body;
+    let { tierId, email, amount, embedded, name } = req.body;
 
     const loggedInUser = req.user;
 
@@ -127,6 +127,7 @@ export default function () {
         artistId: newTier.artistId,
         tier: newTier,
         amount,
+        userName: name,
         embedded: useEmbedded,
       });
       logger.info(`Generated a Stripe checkout session ${session.id}`);

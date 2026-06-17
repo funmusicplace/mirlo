@@ -666,6 +666,8 @@
     "configurePayment": "Configure payment processor",
     "howMuch": "Your subscription amount",
     "mustBeAtLeast": "Must be at least {{minAmount}}",
+    "yourNameLabel": "What should {{artistName}} call you? (optional)",
+    "yourNameHint": "Shown to the artist alongside your support.",
     "letsSupport": "Support this artist",
     "cancelSubscription": "Cancel subscription",
     "subscriptionPaymentFailed": "Your last payment for this subscription failed. Please cancel it and choose again.",

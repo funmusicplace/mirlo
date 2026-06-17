@@ -627,6 +627,7 @@ export const createCheckoutSessionForSubscription = async ({
   artistId,
   tier,
   amount,
+  userName,
   embedded = false,
 }: {
   loggedInUser?: User;
@@ -635,6 +636,8 @@ export const createCheckoutSessionForSubscription = async ({
   artistId: number;
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>;
   amount: number;
+  /** Optional self-chosen display name, captured when the buyer has no account name. */
+  userName?: string;
   // In-app callers opt in to embedded so the Stripe form renders inline
   // (#1168). External callers (links from email, third-party embeds, etc.)
   // leave this off and get a hosted Stripe checkout URL they can redirect to.
@@ -725,6 +728,7 @@ export const createCheckoutSessionForSubscription = async ({
         tierId: tier.id,
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
+        ...(userName?.trim() && { userName: userName.trim() }),
         stripeAccountId,
       },
       mode: "subscription",

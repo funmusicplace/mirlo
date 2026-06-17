@@ -27,9 +27,17 @@ const ArtistVariableSupport: React.FC<{
   const { handleSubmit, register, formState, getValues } = useForm({
     defaultValues: {
       amount: tier.minAmount ? tier.minAmount / 100 : 0,
+      name: "",
     },
   });
-  const { refreshLoggedInUser } = useAuthContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
+  // Offer logged-out buyers (and accounts without a name) an optional display
+  // name so the artist sees who's supporting them — shown explicitly rather
+  // than scraped from Stripe's billing details.
+  const needsName = !user?.name;
+  // Open the pre-checkout modal whenever there's something to collect (a
+  // variable amount and/or a name); otherwise subscribe straight through.
+  const needsModal = tier.allowVariable || needsName;
   const [open, setOpen] = React.useState(false);
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
@@ -51,12 +59,13 @@ const ArtistVariableSupport: React.FC<{
     try {
       setIsCheckingForSubscription(true);
       const response = await api.post<
-        { tierId: number; amount?: number; embedded: boolean },
+        { tierId: number; amount?: number; embedded: boolean; name?: string },
         { clientSecret: string; stripeAccountId: string }
       >(`artists/${tier.artistId}/subscribe`, {
         tierId: tier.id,
         amount: tier.allowVariable ? getValues("amount") * 100 : tier.minAmount,
         embedded: true,
+        ...(needsName && { name: getValues("name") }),
       });
       if (response.clientSecret) {
         setOpen(false);
@@ -90,9 +99,7 @@ const ArtistVariableSupport: React.FC<{
         size="big"
         rounded
         uppercase
-        onClick={() =>
-          tier.allowVariable ? setOpen(true) : subscribeToTier(tier)
-        }
+        onClick={() => (needsModal ? setOpen(true) : subscribeToTier(tier))}
         isLoading={isCheckingForSubscription}
         disabled={isCheckingForSubscription}
         className={css`
@@ -105,32 +112,43 @@ const ArtistVariableSupport: React.FC<{
         size="small"
         open={open}
         onClose={() => setOpen(false)}
-        title={t("howMuch") ?? ""}
+        title={(tier.allowVariable ? t("howMuch") : t("letsSupport")) ?? ""}
       >
         <form
           onSubmit={handleSubmit(() => subscribeToTier(tier))}
           className="flex flex-col gap-3"
         >
-          <strong>{t("chooseAnAmount")}</strong>
-          <div className="flex items-center gap-2 ">
-            <span className="whitespace-nowrap">
-              {getCurrencySymbol(artist?.user?.currency ?? "usd")}
-            </span>
-            <InputEl
-              {...register("amount", {
-                min: tier.minAmount ? tier.minAmount / 100 : undefined,
-                required: true,
-              })}
-            />
-            <span className="whitespace-nowrap">
-              {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
-            </span>
-            {!!tier.minAmount && formState.errors?.amount && (
-              <small>
-                {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
-              </small>
-            )}
-          </div>
+          {tier.allowVariable && (
+            <>
+              <strong>{t("chooseAnAmount")}</strong>
+              <div className="flex items-center gap-2 ">
+                <span className="whitespace-nowrap">
+                  {getCurrencySymbol(artist?.user?.currency ?? "usd")}
+                </span>
+                <InputEl
+                  {...register("amount", {
+                    min: tier.minAmount ? tier.minAmount / 100 : undefined,
+                    required: true,
+                  })}
+                />
+                <span className="whitespace-nowrap">
+                  {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
+                </span>
+                {!!tier.minAmount && formState.errors?.amount && (
+                  <small>
+                    {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
+                  </small>
+                )}
+              </div>
+            </>
+          )}
+          {needsName && (
+            <label className="flex flex-col gap-1">
+              <span>{t("yourNameLabel", { artistName: artist?.name })}</span>
+              <InputEl {...register("name")} />
+              <small>{t("yourNameHint")}</small>
+            </label>
+          )}
           <ArtistButton
             isLoading={isCheckingForSubscription}
             disabled={isCheckingForSubscription || !isEmpty(formState.errors)}
