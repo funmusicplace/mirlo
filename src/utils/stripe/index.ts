@@ -445,6 +445,7 @@ type SessionMetaData = {
   tierId: string;
   userEmail: string;
   userId: string;
+  userName: string;
   trackGroupId: string;
   stripeAccountId: string;
   gaveGift: string;
@@ -476,6 +477,7 @@ export const handleCheckoutSession = async (
       artistId,
     } = metadata;
     let { userId, userEmail } = metadata;
+    const { userName } = metadata;
     userEmail = userEmail || (session.customer_details?.email ?? "");
     logger.info(
       `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, ${JSON.stringify(metadata)}`
@@ -491,10 +493,14 @@ export const handleCheckoutSession = async (
       { stripeAccount: stripeAccountId }
     );
 
-    // If the user doesn't exist, we create one with an existing userEmail
+    // If the user doesn't exist, we create one with an existing userEmail.
+    // `userName` is the buyer's self-chosen display name (subscriptions only);
+    // we deliberately do NOT fall back to Stripe's billing name — a blank field
+    // means the supporter chose not to share a display name.
     let { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
       userEmail,
-      userId
+      userId,
+      userName
     );
     logger.info(`checkout.session: ${session.id} Processing session`);
     if (purchaseType === "tip") {
