@@ -126,7 +126,7 @@ const RecommendedTrackGroups: React.FC<{
                 {rec.cover?.sizes?.[300] && (
                   <img
                     src={rec.cover.sizes[300]}
-                    alt={rec.title}
+                    alt={rec.coverImageAlt}
                     className="w-full h-auto rounded"
                   />
                 )}

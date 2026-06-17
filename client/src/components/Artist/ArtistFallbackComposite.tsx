@@ -67,7 +67,7 @@ export const ArtistFallbackComposite: React.FC<{
     return (
       <ImageWithPlaceholder
         src={undefined}
-        alt={artist.name}
+        alt=""
         size={300}
         square
       />
@@ -77,7 +77,7 @@ export const ArtistFallbackComposite: React.FC<{
   return (
     <CompositeContainer coverCount={covers.length}>
       {covers.map((coverUrl, idx) => (
-        <img key={idx} src={coverUrl} alt={`Album cover ${idx + 1}`} />
+        <img key={idx} src={coverUrl} alt="" />
       ))}
     </CompositeContainer>
   );

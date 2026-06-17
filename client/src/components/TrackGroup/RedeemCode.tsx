@@ -115,7 +115,7 @@ function RedeemCode() {
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[600]}
             size={600}
-            alt={trackGroup.title ?? t("untitledRelease")}
+            alt=""
           />
           <div
             className={css`

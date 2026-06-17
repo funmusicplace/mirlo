@@ -100,6 +100,7 @@ interface TrackGroup {
   title?: string;
   adminEnabled: boolean;
   catalogNumber?: string;
+  coverImageAlt?: string;
   id: number;
   releaseDate?: string;
   publishedAt?: string;

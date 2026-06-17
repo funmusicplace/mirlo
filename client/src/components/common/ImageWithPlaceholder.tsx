@@ -19,7 +19,7 @@ const ImageContainer = styled.div`
 
 export const ImageWithPlaceholder: React.FC<{
   src?: string;
-  alt: string;
+  alt?: string;
   size: number;
   className?: string;
   square?: boolean;

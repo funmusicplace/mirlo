@@ -315,6 +315,26 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(response.status, 200);
       assert.equal(response.body.result.urlSlug, "a-title-1");
     });
+
+    it("should update coverImageAlt on a track group", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ coverImageAlt: "Abstract blue album artwork" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(
+        response.body.result.coverImageAlt,
+        "Abstract blue album artwork"
+      );
+    });
   });
 
   describe("DELETE", () => {

@@ -740,6 +740,7 @@ model TrackGroup {
   orderIndex                      Int?
   credits                         String?
   catalogNumber                   String?
+  coverImageAlt                   String?
   userTrackGroupWishlist          UserTrackGroupWishlist[]
   platformPercent                 Int?                            @default(7)
   tags                            TrackGroupTag[]

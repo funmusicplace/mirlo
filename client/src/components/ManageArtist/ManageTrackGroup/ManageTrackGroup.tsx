@@ -46,6 +46,7 @@ export interface TrackGroupFormData {
   about?: string;
   coverFile?: File[];
   catalogNumber?: string;
+  coverImageAlt?: string;
   goalAmount?: string;
   isAllOrNothing?: boolean;
 }

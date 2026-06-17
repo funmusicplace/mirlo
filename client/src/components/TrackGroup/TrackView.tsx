@@ -108,7 +108,7 @@ function TrackView() {
                 <ImageWrapper>
                   <ImageWithPlaceholder
                     src={trackGroup.cover?.sizes?.[960]}
-                    alt={trackGroup.title ?? "Untitled release"}
+                    alt={trackGroup.coverImageAlt}
                     size={960}
                     square
                     objectFit="contain"

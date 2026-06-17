@@ -89,7 +89,7 @@ function CampaignSummary({
                     >
                       <ImageWithPlaceholder
                         src={rec.cover?.sizes?.[120]}
-                        alt={rec.title ?? ""}
+                        alt={rec.coverImageAlt}
                         size={120}
                       />
                       <p className="mt-2 font-bold overflow-hidden text-ellipsis whitespace-nowrap">

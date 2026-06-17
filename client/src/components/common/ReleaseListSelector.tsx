@@ -116,7 +116,7 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
                   {release.cover && (
                     <img
                       src={release.cover.sizes?.[120] ?? release.cover.url?.[0]}
-                      alt={release.title}
+                      alt=""
                       className="w-10 h-10 rounded object-cover flex-shrink-0"
                     />
                   )}

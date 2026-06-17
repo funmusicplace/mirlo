@@ -86,7 +86,7 @@ const PlayingTrackDetails: React.FC<{
         size={48}
         square
         objectFit="contain"
-        alt={currentTrack?.title ?? "Loading album"}
+        alt=""
         className={css`
           width: 48px;
           height: 48px;

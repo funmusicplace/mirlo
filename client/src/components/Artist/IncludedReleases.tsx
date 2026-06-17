@@ -20,7 +20,7 @@ const IncludedReleases: React.FC<{
                       release.trackGroup.cover.sizes?.[120] ??
                       release.trackGroup.cover.url?.[0]
                     }
-                    alt={release.trackGroup.title}
+                    alt=""
                     className="w-12 h-12 object-cover flex-shrink-0"
                   />
                 )}

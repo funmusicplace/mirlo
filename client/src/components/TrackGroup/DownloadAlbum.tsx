@@ -88,7 +88,6 @@ function DownloadAlbum() {
       <ItemTransactionCard
         header={t("downloadYourRelease")}
         cover={trackGroup.cover?.sizes?.[300]}
-        coverAlt={trackGroup.title ?? t("untitledRelease").toString()}
         title={trackGroup.title ?? t("untitledRelease").toString()}
         titleLink={getReleaseUrl(artist, trackGroup)}
         artistName={artist.name}

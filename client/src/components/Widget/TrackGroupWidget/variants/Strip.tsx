@@ -66,7 +66,7 @@ const Strip: React.FC<{ showTracklist?: boolean }> = ({
       </div>
       <ImageWithPlaceholder
         src={trackGroup.cover?.sizes?.[600] ?? ""}
-        alt={trackGroup.title ?? "Untitled release"}
+        alt=""
         size={600}
         square
         objectFit="cover"

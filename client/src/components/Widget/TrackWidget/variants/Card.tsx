@@ -77,7 +77,7 @@ const Card = () => {
       {cover ? (
         <img
           src={cover}
-          alt={track.title ?? "Untitled track"}
+          alt={track.trackGroup.coverImageAlt}
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
           decoding="async"

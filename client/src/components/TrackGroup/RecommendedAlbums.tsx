@@ -38,7 +38,7 @@ const RecommendedAlbums: React.FC<{
             <div>
               <ImageWithPlaceholder
                 src={rec.cover?.sizes?.[300]}
-                alt={rec.title ?? ""}
+                alt={rec.coverImageAlt}
                 size={300}
               />
               <p className="mt-2 text-sm font-bold overflow-hidden text-ellipsis whitespace-nowrap">
