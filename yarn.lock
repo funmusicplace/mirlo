@@ -9756,10 +9756,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"addressparser@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "addressparser@npm:1.0.1"
+  checksum: 10/9b718b0e6e3312888d6b341f8c2cae72ad398a227dd44d3461c52745fa7add442151425f80ba5edb033c6b98587274f0f9bd8251b6755c033cf99ca4928b27e7
+  languageName: node
+  linkType: hard
+
 "adler-32@npm:~1.3.0":
   version: 1.3.1
   resolution: "adler-32@npm:1.3.1"
   checksum: 10/e11d70c113a49e6f04c249d8201813d46fcbc331e6c4593c926b9700e26a09898b3c0dea8595fd83dcb804bde359012f129d2322f7cc8177737aa14979490cc9
+  languageName: node
+  linkType: hard
+
+"agent-base@npm:6":
+  version: 6.0.2
+  resolution: "agent-base@npm:6.0.2"
+  dependencies:
+    debug: "npm:4"
+  checksum: 10/21fb903e0917e5cb16591b4d0ef6a028a54b83ac30cd1fca58dece3d4e0990512a8723f9f83130d88a41e2af8b1f7be1386fda3ea2d181bb1a62155e75e95e23
   languageName: node
   linkType: hard
 
@@ -10278,6 +10294,18 @@ __metadata:
     form-data: "npm:^4.0.5"
     proxy-from-env: "npm:^2.1.0"
   checksum: 10/cf8b521ff732c21550b38c8739aef556ea5e14b268468bb89e4307416ab262b462e582474e810963a3d61c2392ab47ad35c11d05eff027de7c97113bc7411623
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.13.5":
+  version: 1.18.0
+  resolution: "axios@npm:1.18.0"
+  dependencies:
+    follow-redirects: "npm:^1.16.0"
+    form-data: "npm:^4.0.5"
+    https-proxy-agent: "npm:^5.0.1"
+    proxy-from-env: "npm:^2.1.0"
+  checksum: 10/586a1a9534531c6ec4ee8fbab07a536ecaa8d29bd16b40ab0f9fce361fcd24da1538a54aadde0562f08f30b55bf80f9b7ededf1987e6506f722e1fb338b09d5d
   languageName: node
   linkType: hard
 
@@ -15410,6 +15438,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"https-proxy-agent@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "https-proxy-agent@npm:5.0.1"
+  dependencies:
+    agent-base: "npm:6"
+    debug: "npm:4"
+  checksum: 10/f0dce7bdcac5e8eaa0be3c7368bb8836ed010fb5b6349ffb412b172a203efe8f807d9a6681319105ea1b6901e1972c7b5ea899672a7b9aad58309f766dcbe0df
+  languageName: node
+  linkType: hard
+
 "https-proxy-agent@npm:^7.0.5":
   version: 7.0.6
   resolution: "https-proxy-agent@npm:7.0.6"
@@ -16941,7 +16979,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libbase64@npm:1.3.0":
+"libbase64@npm:1.3.0, libbase64@npm:^1.2.1":
   version: 1.3.0
   resolution: "libbase64@npm:1.3.0"
   checksum: 10/e90f06c7c7af754521d254c53ef847bab8ca354ee38f4c5d866c3fc77b4cb7a2ab77aa220c0df433f8d17abd0e884cf322b2771d84c2f65760e22012dfecaa67
@@ -16960,7 +16998,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libmime@npm:5.3.8":
+"libmime@npm:5.3.8, libmime@npm:^5.0.0":
   version: 5.3.8
   resolution: "libmime@npm:5.3.8"
   dependencies:
@@ -18565,10 +18603,12 @@ __metadata:
     node-fetch: "npm:2"
     nodemailer: "npm:^8.0.5"
     nodemailer-mailgun-transport: "npm:^2.1.5"
+    nodemailer-postmark-transport: "npm:^7.0.0"
     nodemailer-sendgrid: "npm:^1.0.3"
     nodemon: "npm:^2.0.20"
     passport: "npm:^0.7.0"
     passport-jwt: "npm:^4.0.0"
+    postmark: "npm:^4.0.7"
     prettier: "npm:^3.2.5"
     prisma: "npm:6"
     qs: "npm:^6.14.0"
@@ -18936,6 +18976,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nodemailer-build-attachment@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "nodemailer-build-attachment@npm:3.0.0"
+  dependencies:
+    libbase64: "npm:^1.2.1"
+    libmime: "npm:^5.0.0"
+    nodemailer-fetch: "npm:^2.1.0"
+  checksum: 10/c651ffbcf8f4132bbb0937edbc9e196e4eedaf2e5c46252c7511fd4dc93b7d1c9a61b1659f18f81d1e1fe8dc971da0822ecebcf6ddd1bc97822fe833eff2131b
+  languageName: node
+  linkType: hard
+
+"nodemailer-fetch@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "nodemailer-fetch@npm:2.1.0"
+  checksum: 10/f8a7e86478c56f05c39c7a2b047d4a8977f0c7a14607addc94de36241fad2fd0d1d1e32f9f3684d58117e6e29f4a82df9494b7dfb3e2ecde06989e1aafdd73f3
+  languageName: node
+  linkType: hard
+
 "nodemailer-mailgun-transport@npm:^2.1.5":
   version: 2.1.5
   resolution: "nodemailer-mailgun-transport@npm:2.1.5"
@@ -18944,6 +19002,20 @@ __metadata:
     form-data: "npm:^4.0.0"
     mailgun.js: "npm:^8.0.1"
   checksum: 10/b9eca4822acfca3910e60aea673baced26ee76e16a1302df5598fa147e3e6c837dc4285be0f8ca3e6adcdd12ee94debd377bfb27c71da7cd912d8f8fa7fca8d8
+  languageName: node
+  linkType: hard
+
+"nodemailer-postmark-transport@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "nodemailer-postmark-transport@npm:7.0.0"
+  dependencies:
+    addressparser: "npm:^1.0.1"
+    async: "npm:^3.2.6"
+    nodemailer-build-attachment: "npm:^3.0.0"
+    postmark: "npm:^4.0.7"
+  peerDependencies:
+    nodemailer: ^7.0.0 || ^8.0.0
+  checksum: 10/12c1bcd712c3769452526f6bf0fe1d3104b677b07f936892cbd8c46faa0436b8d216d513e211add8dcc3fa96cbf9c46c88b7a3bfd5238c98026331301ef529a9
   languageName: node
   linkType: hard
 
@@ -20014,6 +20086,15 @@ __metadata:
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
   checksum: 10/9e4fbe97574091e9736d0e82a591e29aa100a0bf60276a926308f8c57249698935f35c5d2f4e80de778d0cbb8dcffab4f383d85fd50c5649aca421c3df729b86
+  languageName: node
+  linkType: hard
+
+"postmark@npm:^4.0.7":
+  version: 4.0.7
+  resolution: "postmark@npm:4.0.7"
+  dependencies:
+    axios: "npm:^1.13.5"
+  checksum: 10/245eaf9c2d3d260eb7a86cc2fc95a6cf338556fd77d60dc910ea3c52b1d1d135b5bfc2930f1bf315431b8e9adaa80b51485fa89e71f95315ae65dbf13184a2d1
   languageName: node
   linkType: hard
 

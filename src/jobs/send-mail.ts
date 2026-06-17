@@ -3,6 +3,7 @@ import path from "path";
 import Email from "email-templates";
 import nodemailer, { Transporter } from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
+import postmarkTransport from "nodemailer-postmark-transport";
 import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
@@ -24,15 +25,6 @@ async function createTransport(): Promise<Transporter> {
       logger.info("Creating JSON transport for tests");
       return nodemailer.createTransport({
         jsonTransport: true,
-      });
-    }
-
-    if (process.env.NODE_ENV !== "production") {
-      logger.info("Creating MailHog transport");
-      return nodemailer.createTransport({
-        host: "mailhog",
-        port: parseInt(process.env.MAILHOG_PORT || "1025"),
-        secure: false,
       });
     }
 
@@ -67,6 +59,20 @@ async function createTransport(): Promise<Transporter> {
       );
     }
 
+    if (
+      emailSettings?.provider === "postmark" &&
+      emailSettings?.postmark?.apiKey
+    ) {
+      logger.info("Creating Postmark transport");
+      return nodemailer.createTransport(
+        postmarkTransport({
+          auth: {
+            apiKey: emailSettings.postmark.apiKey,
+          },
+        })
+      );
+    }
+
     // Fallback: check legacy environment variable
     if (process.env.SENDGRID_API_KEY) {
       logger.info("Creating SendGrid transport from environment variable");
@@ -77,8 +83,17 @@ async function createTransport(): Promise<Transporter> {
       );
     }
 
+    if (process.env.NODE_ENV !== "production") {
+      logger.info("Creating MailHog transport (for development)");
+      return nodemailer.createTransport({
+        host: "mailhog",
+        port: parseInt(process.env.MAILHOG_PORT || "1025"),
+        secure: false,
+      });
+    }
+
     logger.warn(
-      "No email provider configured, using JSON transport for development"
+      "No email provider configured. As this is set up as a production environment, no emails will be sent."
     );
     return { jsonTransport: true } as unknown as Transporter;
   } catch (err) {
@@ -257,7 +272,11 @@ export const sendMail = async <T>(job: {
       fromEmail,
     };
 
-    if (process.env.NODE_ENV === "production" || process.env.MAILHOG_PORT) {
+    if (
+      process.env.NODE_ENV === "production" ||
+      process.env.MAILHOG_PORT ||
+      process.env.SEND_EMAILS_IN_DEV === "true"
+    ) {
       await email.send({
         template: job.data.template,
         message,
