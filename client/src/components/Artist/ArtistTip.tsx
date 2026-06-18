@@ -1,17 +1,41 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import FollowArtistFromFediverse from "components/common/FollowArtistFromFediverse";
+import FollowArtistWithEmail from "components/common/FollowArtistWithEmail";
+import SupportArtistTiersForm from "components/common/SupportArtistTiersForm";
+import TipArtistForm from "components/common/TipArtistForm";
+import WidthContainer from "components/common/WidthContainer";
+import { queryArtist, queryUserStripeStatus } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
+
 import { bp } from "../../constants";
 
-import { queryArtist, queryUserStripeStatus } from "queries";
-import { useQuery } from "@tanstack/react-query";
-import { Navigate, useParams } from "react-router-dom";
 import LoadingBlocks from "./LoadingBlocks";
-import TipArtistForm from "components/common/TipArtistForm";
-import SupportArtistTiersForm from "components/common/SupportArtistTiersForm";
-import { useAuthContext } from "state/AuthContext";
-import { getArtistUrl } from "utils/artist";
-import WidthContainer from "components/common/WidthContainer";
+
+const DividerWithText: React.FC<{ text: string }> = ({ text }) => (
+  <div
+    className={css`
+      display: flex;
+      justify-content: stretch;
+      align-items: center;
+      margin: 1rem 0;
+      width: 100%;
+
+      hr {
+        flex-grow: 1;
+        margin: 1rem;
+        border-color: var(--mi-tint-x-color);
+      }
+    `}
+  >
+    <hr />
+    {text}
+    <hr />
+  </div>
+);
 
 const ArtistTip: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -33,12 +57,10 @@ const ArtistTip: React.FC = () => {
     return null;
   }
 
-  if (!stripeAccountStatus?.chargesEnabled) {
-    return <Navigate to={getArtistUrl(artist)} />;
-  }
+  const canReceivePayments = !!stripeAccountStatus?.chargesEnabled;
 
   return (
-    <WidthContainer variant="small">
+    <WidthContainer variant="medium">
       <div
         className={css`
           margin-bottom: 4rem;
@@ -60,28 +82,24 @@ const ArtistTip: React.FC = () => {
             }
           `}
         >
-          <h2>{t("supportThisArtist")}</h2>
-          <SupportArtistTiersForm artist={artist} />
-          <div
-            className={css`
-              display: flex;
-              justify-content: stretch;
-              align-items: center;
-              margin: 1rem 0;
-              width: 100%;
-
-              hr {
-                flex-grow: 1;
-                margin: 1rem;
-                border-color: var(--mi-tint-x-color);
-              }
-            `}
-          >
-            <hr />
-            {t("orTipJustOnce")}
-            <hr />
-          </div>{" "}
-          <TipArtistForm artist={artist} />
+          {canReceivePayments ? (
+            <>
+              <h2>{t("supportThisArtist")}</h2>
+              <SupportArtistTiersForm artist={artist} excludeDefault />
+              <DividerWithText text={t("orTipJustOnce")} />
+              <TipArtistForm artist={artist} />
+              <DividerWithText text={t("orFollowWithEmail")} />
+            </>
+          ) : (
+            <h2>{t("followThisArtist")}</h2>
+          )}
+          <FollowArtistWithEmail artist={artist} />
+          {artist.activityPub && (
+            <>
+              <DividerWithText text={t("orFollowFromFediverse")} />
+              <FollowArtistFromFediverse artist={artist} />
+            </>
+          )}
         </div>
       </div>
     </WidthContainer>

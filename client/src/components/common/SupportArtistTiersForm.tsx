@@ -113,15 +113,6 @@ const SupportArtistTiersForm: React.FC<{
     navigate(`${getArtistUrl(artist)}/checkout-complete?${params.toString()}`);
   }, [artist, navigate, refreshLoggedInUser]);
 
-  if (checkout) {
-    return (
-      <EmbeddedStripeForm
-        clientSecret={checkout.clientSecret}
-        stripeAccountId={checkout.stripeAccountId}
-        onComplete={handleEmbeddedComplete}
-      />
-    );
-  }
   const value = methods.watch("tier");
 
   const effectiveOptions = excludeDefault
@@ -146,6 +137,18 @@ const SupportArtistTiersForm: React.FC<{
       );
     }
   }, [singleOption, singleOptionCurrency, value?.id, methods]);
+
+  // All hooks must run before this early return, otherwise React throws
+  // "Rendered fewer hooks than expected" once `checkout` is set.
+  if (checkout) {
+    return (
+      <EmbeddedStripeForm
+        clientSecret={checkout.clientSecret}
+        stripeAccountId={checkout.stripeAccountId}
+        onComplete={handleEmbeddedComplete}
+      />
+    );
+  }
 
   const noErrors =
     methods.formState.isValid || isEmpty(methods.formState.errors);
