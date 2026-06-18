@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 import { WidgetLink } from "./utils";
+import { MdLyrics } from "react-icons/md";
 
 export const TrackTitleContent: React.FC<{
   track: Track;
@@ -59,7 +60,15 @@ export const TrackTitleContent: React.FC<{
   ) : null;
 
   const titleNode = titleLinkTo ? (
-    <Link to={titleLinkTo}>{track.title ?? ""}</Link>
+    <Link className="hover:underline! ms-1" to={titleLinkTo}>
+      {track.title ?? ""}
+      {track.lyrics && (
+        <>
+          <MdLyrics aria-hidden className="inline-block ms-1" />
+          <span className="sr-only">, {tTrackGroup("viewLyrics")}</span>
+        </>
+      )}
+    </Link>
   ) : (
     (track.title ?? "")
   );
@@ -79,7 +88,7 @@ export const TrackTitleContent: React.FC<{
   return (
     <>
       <div
-        className={`leading-tight truncate break-normal ${
+        className={`leading-normal truncate break-normal ${titleLinkTo && "-ms-1"} ${
           compactTitle
             ? "text-base max-sm:text-xs font-semibold"
             : "text-lg max-sm:text-base max-xs:text-sm font-bold"
