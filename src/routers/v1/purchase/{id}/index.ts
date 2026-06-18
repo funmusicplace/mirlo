@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
-import { getIntentStatus } from "../../../../utils/stripe/status";
+import { getPaymentProcessor } from "../../../../utils/payments/PaymentProcessor";
 
 export default function () {
   const operations = {
@@ -25,9 +25,9 @@ export default function () {
         });
       }
 
-      const { artistId, ...intent } = await getIntentStatus({
+      const { artistId, ...intent } = await getPaymentProcessor().getStatus({
         id,
-        stripeAccountId,
+        accountId: stripeAccountId,
       });
 
       // Surface a name so the hosted checkout page can show who's being paid.
