@@ -6,7 +6,8 @@ import api from "services/api";
 import { Trans, useTranslation } from "react-i18next";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
-import CollectionPurchaseSquare from "components/Profile/Collection/CollectionPurchaseSquare";
+import ReleaseCard from "components/common/ReleaseCard";
+import TrackCard from "components/common/TrackCard";
 import {
   isTrackGroupPurchase,
   isTrackPurchase,
@@ -77,17 +78,21 @@ function Index() {
               {purchases?.map((purchase) => {
                 if (isTrackGroupPurchase(purchase) && purchase.trackGroup) {
                   return (
-                    <CollectionPurchaseSquare
+                    <ReleaseCard
                       trackGroup={purchase.trackGroup}
                       key={purchase.trackGroupId}
+                      showArtist
+                      showWishlist={false}
+                      headingLevel="h2"
                     />
                   );
                 } else if (isTrackPurchase(purchase) && purchase.track) {
                   return (
-                    <CollectionPurchaseSquare
-                      trackGroup={purchase.track.trackGroup}
+                    <TrackCard
                       track={purchase.track}
                       key={purchase.track.id}
+                      showArtist
+                      headingLevel="h2"
                     />
                   );
                 }

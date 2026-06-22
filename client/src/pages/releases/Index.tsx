@@ -11,7 +11,7 @@ import usePagination from "utils/usePagination";
 
 import { bp } from "../../constants";
 
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
 import { ButtonAnchor, ButtonLink } from "components/common/Button";
 import Select from "components/common/Select";
 import WidthContainer from "components/common/WidthContainer";
@@ -186,11 +186,12 @@ const Index = () => {
           >
             <TrackgroupGrid gridNumber="4" as="ul">
               {newReleases?.results?.map((trackGroup) => (
-                <ArtistTrackGroup
+                <ReleaseCard
                   key={trackGroup.id}
                   trackGroup={trackGroup}
                   as="li"
                   showArtist
+                  headingLevel="h3"
                 />
               ))}
             </TrackgroupGrid>

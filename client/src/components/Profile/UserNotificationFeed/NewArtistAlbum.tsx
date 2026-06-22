@@ -1,76 +1,105 @@
-import React from "react";
+import { cx } from "@emotion/css";
+import PlayableCover, {
+  buildCoverImage,
+  playableCoverCardRevealClass,
+} from "components/common/PlayableCover";
+import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
+import Wishlist from "components/TrackGroup/Wishlist";
+import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
+import React, { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
-import ClickToPlay from "components/common/ClickToPlay";
-import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
+import { useAuthContext } from "state/AuthContext";
 
-const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
-  notification,
-}) => {
+function NewArtistAlbum({ notification }: { notification: Notification }) {
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "notifications",
   });
+  const { t: tPlay } = useTranslation("translation", {
+    keyPrefix: "playableCover",
+  });
+  const { user } = useAuthContext();
+  const goToId = useId();
 
-  if (!notification.trackGroup) {
+  if (!notification.trackGroup?.artist) {
     return null;
   }
 
   const { trackGroup } = notification;
-  const coverUrl = trackGroup.cover?.sizes?.[300] ?? "";
+  const { artist } = trackGroup;
   const isPreorder = notification.notificationType === "NEW_ARTIST_PREORDER";
+  const previewTrackIds = [...((trackGroup as TrackGroup).tracks ?? [])]
+    .filter((t) => t.isPreview)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((t) => t.id);
+  const releaseUrl = getReleaseUrl(artist, trackGroup);
+  const goToLabel = tPlay("goToAlbum");
 
   return (
-    <div className="flex items-center gap-4 p-4 min-h-[200px] relative">
-      <div className="shrink-0 w-40">
-        <ClickToPlay
-          trackGroup={trackGroup as any}
-          trackIds={
-            (trackGroup as any).tracks
-              ?.filter((t: any) => t.isPreview)
-              .map((t: any) => t.id) ?? []
-          }
-          title={trackGroup.title ?? ""}
-          image={{ width: 160, height: 160, url: coverUrl }}
-          showWishlist
-          compact
-        />
-      </div>
-
-      <div className="flex-1 min-w-0">
+    <div
+      className={cx(
+        "flex items-center gap-4 p-4 min-h-[200px]",
+        playableCoverCardRevealClass
+      )}
+    >
+      <div className="order-2 flex-1 min-w-0">
         <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-pink) mb-1">
           {isPreorder ? t("availableForPreorder") : t("newRelease")}
         </div>
-        <div className="text-sm font-semibold truncate text-(--mi-text-color)">
-          {trackGroup.title}
+        <div className="text-sm font-semibold truncate">
+          <Link
+            to={releaseUrl}
+            aria-describedby={goToId}
+            className="text-(--mi-text-color)! font-semibold underline focus:outline-none"
+          >
+            {trackGroup.title}
+          </Link>
         </div>
-        <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
+        <div className="metadata text-xs text-(--mi-light-foreground-color) mt-0.5">
           {t("newReleaseCount", {
-            count: (trackGroup as any).tracks?.length ?? 0,
+            count: (trackGroup as TrackGroup).tracks?.length ?? 0,
           })}{" "}
           {t("by")}{" "}
-          {trackGroup.artist ? (
-            <Link to={getArtistUrl(trackGroup.artist)} className="underline">
-              {trackGroup.artist.name}
-            </Link>
-          ) : (
-            <strong>{trackGroup.title}</strong>
-          )}
+          <Link
+            to={getArtistUrl(artist)}
+            className="underline focus-visible:outline-auto"
+          >
+            {artist.name}
+          </Link>
         </div>
         <div className="text-xs text-(--mi-light-foreground-color) mt-1.5">
           {formatRelativeTime({ date: notification.createdAt, i18n })}
         </div>
       </div>
-      {trackGroup.artist && (
-        <Link
-          to={getReleaseUrl(trackGroup.artist, trackGroup)}
-          className="absolute bottom-3 right-4 text-xs font-semibold text-(--mi-text-color) no-underline opacity-70 hover:opacity-100"
-        >
-          {t("goToRelease")} →
-        </Link>
-      )}
+
+      <div className="order-1 shrink-0 w-40">
+        <PlayableCover
+          trackIds={previewTrackIds}
+          title={trackGroup.title ?? ""}
+          image={buildCoverImage(trackGroup.cover?.sizes)}
+          goToId={goToId}
+          goToLabel={goToLabel}
+          goToUrl={releaseUrl}
+          overlayActions={
+            <>
+              <PlayableCover.WideAction>
+                <PurchaseOrDownloadAlbum
+                  trackGroup={trackGroup as TrackGroup}
+                  collapse
+                />
+              </PlayableCover.WideAction>
+              {user ? (
+                <PlayableCover.SquareAction>
+                  <Wishlist trackGroup={trackGroup as TrackGroup} />
+                </PlayableCover.SquareAction>
+              ) : null}
+            </>
+          }
+        />
+      </div>
     </div>
   );
-};
+}
 
 export default NewArtistAlbum;

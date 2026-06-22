@@ -117,6 +117,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
             trackGroup={trackGroup}
             track={track}
             fixed={fixed}
+            compact={collapse}
           />
         )}
         {showPreOrdered && (

@@ -21,10 +21,12 @@ export const ImageWithPlaceholder: React.FC<{
   src?: string;
   alt?: string;
   size: number;
+  srcSet?: string;
+  sizes?: string;
   className?: string;
   square?: boolean;
   objectFit?: "contain" | "cover";
-}> = ({ src, alt, size, square, className, objectFit }) => {
+}> = ({ src, alt, size, srcSet, sizes, square, className, objectFit }) => {
   const [isLoading, setLoading] = React.useState(true);
   const [isError, setError] = React.useState(false);
 
@@ -33,6 +35,8 @@ export const ImageWithPlaceholder: React.FC<{
       {src && (
         <img
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
           alt={alt}
           width={size}
           height={size}

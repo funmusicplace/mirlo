@@ -3,7 +3,7 @@ import React from "react";
 import { useAuthContext } from "state/AuthContext";
 import useArtistQuery from "utils/useArtistQuery";
 
-import ArtistTrackGroup from "./ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
 
 const SortableTrackGroupItem: React.FC<{
   id: number;
@@ -14,7 +14,7 @@ const SortableTrackGroupItem: React.FC<{
 
   return (
     <SortableGridItem id={props.id} showHandle={user?.id === artist?.userId}>
-      <ArtistTrackGroup trackGroup={props.trackGroup} as="li" />
+      <ReleaseCard trackGroup={props.trackGroup} as="li" headingLevel="h2" />
     </SortableGridItem>
   );
 };

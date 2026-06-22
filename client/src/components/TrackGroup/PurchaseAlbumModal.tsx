@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import { longLabelClass } from "components/common/ClickToPlay";
 import { FixedButton } from "components/common/FixedButton";
 import Modal from "components/common/Modal";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
@@ -16,7 +15,8 @@ const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
   fixed?: boolean;
-}> = ({ trackGroup, track, fixed }) => {
+  compact?: boolean;
+}> = ({ trackGroup, track, fixed, compact }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
@@ -79,10 +79,12 @@ const PurchaseAlbumModal: React.FC<{
       type="button"
       onClick={() => setIsPurchasingAlbum(true)}
       variant="outlined"
-      className={`${isLongLabel ? longLabelClass : ""} ${css`
-        ${isLongLabel
-          ? "font-size: 0.875rem !important; padding-left: 1rem !important; padding-right: 1rem !important;"
-          : "padding-left: 2rem !important; padding-right: 2rem !important;"}
+      className={css`
+        ${isLongLabel && compact
+          ? "font-size: 0.65rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important;"
+          : isLongLabel
+            ? "font-size: 0.875rem !important; padding-left: 1rem !important; padding-right: 1rem !important;"
+            : "padding-left: 2rem !important; padding-right: 2rem !important;"}
 
         @media screen and (max-width: ${bp.medium}px) {
           width: 100%;
@@ -96,7 +98,7 @@ const PurchaseAlbumModal: React.FC<{
             line-height: 1.1;
           }
         }
-      `}`}
+      `}
     >
       {t(preOrderOrBuyText)}
     </ArtistButton>

@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { cx } from "@emotion/css";
 import {
   isMerch,
   isTrack,
@@ -33,8 +33,9 @@ export const determineItemLink = (artist: Artist, item?: Item) => {
 
 const ArtistItemLink: React.FC<{
   item: Item;
-}> = ({ item }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
+  className?: string;
+}> = ({ item, className }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "playableCover" });
 
   const artist =
     isTrackgroup(item) || isMerch(item) ? item.artist : item.trackGroup.artist;
@@ -54,16 +55,11 @@ const ArtistItemLink: React.FC<{
     <Link
       to={url}
       aria-label={`${t(labelKey)}: ${item.title || t("untitled")}`}
-      className={
-        item.title?.length
-          ? css`
-              color: var(--mi-text-color);
-            `
-          : css`
-              color: var(--mi-text-color);
-              font-style: italic;
-            `
-      }
+      className={cx(
+        "text-(--mi-text-color)!",
+        !item.title?.length && "italic",
+        className
+      )}
     >
       {item.title?.length ? item.title : t("untitled")}
     </Link>

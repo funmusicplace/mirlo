@@ -14,7 +14,7 @@ import { useAuthContext } from "state/AuthContext";
 import { bp } from "../../../constants";
 
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
 import SortableArtistAlbums from "components/Artist/SortableArtistAlbums";
 
 const Index: React.FC = () => {
@@ -27,7 +27,9 @@ const Index: React.FC = () => {
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
-  const { data: releases } = useQuery(queryPublicLabelTrackGroups(artistId));
+  const { data: labelTrackGroups } = useQuery(
+    queryPublicLabelTrackGroups(artistId)
+  );
 
   const [loadingStripe, setLoadingStripe] = React.useState(false);
 
@@ -51,10 +53,13 @@ const Index: React.FC = () => {
     return null;
   }
 
-  const hasArtistReleases = (artist.trackGroups?.length ?? 0) > 0;
-  const hasLabelReleases = (releases?.results.length ?? 0) > 0;
+  const releases = artist.isLabelProfile
+    ? labelTrackGroups?.results
+    : artist.trackGroups.map((tg) => ({ ...tg, artist }));
 
-  if (!hasArtistReleases && !hasLabelReleases && artist.userId !== user?.id) {
+  const isArtistUserLoggedInUser = artist.userId === user?.id;
+
+  if ((releases?.length ?? 0) === 0 && !isArtistUserLoggedInUser) {
     return null;
   }
 
@@ -69,28 +74,34 @@ const Index: React.FC = () => {
         }
       `}
     >
-      {artist.userId === user?.id && (
+      {isArtistUserLoggedInUser && (
         <SectionActionStrip tight>
           <NewAlbumButton artist={artist} />
         </SectionActionStrip>
       )}
-      {!artist.isLabelProfile && <SortableArtistAlbums />}
-      {artist.isLabelProfile && (
-        <TrackgroupGrid
-          gridNumber={String(artist.properties?.releasesPerRow ?? 3)}
-          wrap
-          as="ul"
-          role="list"
-          aria-labelledby="artist-navlink-releases"
-        >
-          {releases?.results.map((release) => (
-            <ArtistTrackGroup
-              key={release.id}
-              trackGroup={release}
-              showArtist
-            />
-          ))}
-        </TrackgroupGrid>
+      {isArtistUserLoggedInUser && !artist.isLabelProfile && (
+        <SortableArtistAlbums />
+      )}
+      {(!isArtistUserLoggedInUser ||
+        (isArtistUserLoggedInUser && artist.isLabelProfile)) && (
+        <>
+          <TrackgroupGrid
+            gridNumber={"3"}
+            wrap
+            as="ul"
+            role="list"
+            aria-labelledby="artist-navlink-releases"
+          >
+            {releases?.map((release) => (
+              <ReleaseCard
+                key={release.id}
+                trackGroup={release}
+                showArtist={artist.isLabelProfile}
+                headingLevel="h2"
+              />
+            ))}
+          </TrackgroupGrid>
+        </>
       )}
       <div
         className={css`

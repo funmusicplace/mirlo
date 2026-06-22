@@ -19,7 +19,7 @@ export const PlayButton: React.FC<{
     dispatch({ type: "setPlaying", playing: true });
   }, [dispatch]);
 
-  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
+  const { t } = useTranslation("translation", { keyPrefix: "playableCover" });
 
   return (
     <div

@@ -52,7 +52,7 @@ const ClickToPlayTracks: React.FC<{
     dispatch,
   } = useGlobalStateContext();
   const params = useParams();
-  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
+  const { t } = useTranslation("translation", { keyPrefix: "playableCover" });
 
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: params.artistId ?? "" })
