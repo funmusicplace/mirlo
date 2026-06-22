@@ -1,11 +1,7 @@
+import { cx } from "@emotion/css";
 import React from "react";
 
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import {
-  TrackGroupInfo,
-  TrackGroupLinks,
-  TrackGroupWrapper,
-} from "components/Artist/ArtistTrackGroup";
 import ArtistItemLink from "components/Artist/ArtistItemLink";
 import ArtistLink from "components/Artist/ArtistLink";
 import { Link } from "react-router-dom";
@@ -17,8 +13,16 @@ const ArtistMerchListItem: React.FC<{
 }> = ({ merch, as }) => {
   const merchImageUrl =
     merch.images?.[0]?.sizes?.[600] + "?" + merch.images?.[0]?.updatedAt;
+  const Root = as ?? "div";
+
   return (
-    <TrackGroupWrapper as={as}>
+    <Root
+      className={cx(
+        "mb-2",
+        "max-md:p-0 max-md:mb-4 max-md:mt-0",
+        "max-sm:text-(--mi-font-size-small)"
+      )}
+    >
       <div>
         <Link to={getMerchUrl(merch.artist, merch)}>
           <ImageWithPlaceholder
@@ -27,16 +31,28 @@ const ArtistMerchListItem: React.FC<{
             size={400}
             square
             objectFit="contain"
+            className="[&_img]:w-full!"
           />
         </Link>
-        <TrackGroupLinks>
-          <TrackGroupInfo>
-            <ArtistItemLink item={merch} />
-            <ArtistLink artist={merch.artist} />
-          </TrackGroupInfo>
-        </TrackGroupLinks>
+        <div
+          className={cx(
+            "flex justify-between flex-nowrap items-start w-full min-h-10 pt-2 mb-2 max-md:mb-0",
+            "text-[calc(var(--mi-font-size-small)*var(--page-scale,1))]"
+          )}
+        >
+          <div className="flex flex-col w-full">
+            <ArtistItemLink
+              item={merch}
+              className="no-underline! hover:underline! font-normal mb-[0.2rem]"
+            />
+            <ArtistLink
+              artist={merch.artist}
+              className="no-underline! hover:underline! text-[calc(var(--mi-font-size-xsmall)*var(--page-scale,1))] break-words"
+            />
+          </div>
+        </div>
       </div>
-    </TrackGroupWrapper>
+    </Root>
   );
 };
 

@@ -11,7 +11,7 @@ export const PauseButton: React.FC<{ className?: string }> = ({
 }) => {
   const { dispatch } = useGlobalStateContext();
 
-  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
+  const { t } = useTranslation("translation", { keyPrefix: "playableCover" });
 
   const onPause = React.useCallback(
     (e: any) => {

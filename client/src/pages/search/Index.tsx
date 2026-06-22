@@ -17,13 +17,13 @@ import usePagination from "utils/usePagination";
 import { bp } from "../../constants";
 
 import ArtistSquare from "components/Artist/ArtistSquare";
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
+import TrackCard from "components/common/TrackCard";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { ButtonLink } from "components/common/Button";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import WidthContainer from "components/common/WidthContainer";
 import { SectionHeader } from "components/common/SectionHeader";
-import CollectionPurchaseSquare from "components/Profile/Collection/CollectionPurchaseSquare";
 import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 
 const pageSize = 40;
@@ -218,11 +218,12 @@ const Index: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           )}
           <TrackgroupGrid gridNumber="4" as="ul">
             {newReleases?.results?.map((trackGroup) => (
-              <ArtistTrackGroup
+              <ReleaseCard
                 key={trackGroup.id}
                 trackGroup={trackGroup}
                 as="li"
                 showArtist
+                headingLevel="h3"
               />
             ))}
           </TrackgroupGrid>
@@ -267,10 +268,12 @@ const Index: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           )}
           <TrackgroupGrid gridNumber="4" as="ul">
             {tracks?.results?.map((track) => (
-              <CollectionPurchaseSquare
-                trackGroup={track.trackGroup}
-                key={track.id}
+              <TrackCard
                 track={track}
+                key={track.id}
+                as="li"
+                showArtist
+                headingLevel="h3"
               />
             ))}
           </TrackgroupGrid>

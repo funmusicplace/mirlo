@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryPublicLabelTrackGroups } from "queries";
 
 import TrackgroupGrid from "components/common/TrackgroupGrid";
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
 
 function Label() {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
@@ -30,7 +30,12 @@ function Label() {
     <>
       <TrackgroupGrid gridNumber="4" as="ul" role="list">
         {releases.results.map((tg) => (
-          <ArtistTrackGroup key={tg.id} trackGroup={tg} showArtist />
+          <ReleaseCard
+            key={tg.id}
+            trackGroup={tg}
+            showArtist
+            headingLevel="h2"
+          />
         ))}
       </TrackgroupGrid>
     </>

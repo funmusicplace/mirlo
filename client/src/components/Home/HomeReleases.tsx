@@ -12,7 +12,7 @@ import { SectionHeader } from "components/common/SectionHeader";
 import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
 import { queryTopSoldTrackGroups } from "queries";
 import HomeFeaturedArtists from "components/Home/HomeFeaturedArtists";
 
@@ -169,11 +169,12 @@ const HomeReleases = () => {
             >
               <TrackgroupGrid gridNumber="4" as="ul">
                 {newReleases?.results?.map((trackGroup) => (
-                  <ArtistTrackGroup
+                  <ReleaseCard
                     key={trackGroup.id}
                     trackGroup={trackGroup}
                     as="li"
                     showArtist
+                    headingLevel="h4"
                   />
                 ))}
               </TrackgroupGrid>
@@ -214,12 +215,12 @@ const HomeReleases = () => {
               <div className="flex w-full flex-row flex-wrap p-[var(--mi-side-paddings-xsmall)]">
                 <TrackgroupGrid gridNumber="6" as="ul">
                   {popularReleases?.results?.map((trackGroup) => (
-                    <ArtistTrackGroup
+                    <ReleaseCard
                       key={trackGroup.id}
                       trackGroup={trackGroup}
                       as="li"
-                      size="small"
                       showArtist
+                      headingLevel="h4"
                     />
                   ))}
                 </TrackgroupGrid>

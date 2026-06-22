@@ -715,14 +715,16 @@
     "couldNotLoad": "We couldn't load this checkout. The link may have expired — please start over.",
     "alreadyComplete": "This purchase has already been completed."
   },
-  "clickToPlay": {
+  "playableCover": {
     "untitled": "Untitled",
     "goToAlbum": "Go to release",
     "goToTrack": "Go to track",
     "play": "Play",
     "pause": "Pause",
     "playAlbum": "Play album",
-    "playTrack": "Play track"
+    "playTrack": "Play track",
+    "overlayActions": "Release actions",
+    "byArtist": "by {{artist}}"
   },
   "player": {
     "thisIsYourLastPlay": "This is your last free play — purchase this release to continue listening.",

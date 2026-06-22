@@ -1,17 +1,10 @@
-import { css } from "@emotion/css";
+import { cx } from "@emotion/css";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import React from "react";
 import { Link } from "react-router-dom";
 import { getArtistUrl } from "utils/artist";
 
-import { bp } from "../../constants";
-
 import ArtistFallbackComposite from "./ArtistFallbackComposite";
-import {
-  TrackGroupWrapper,
-  TrackGroupLinks,
-  TrackGroupInfo,
-} from "./ArtistTrackGroup";
 
 const ArtistSquare: React.FC<{
   artist: Artist;
@@ -21,7 +14,13 @@ const ArtistSquare: React.FC<{
     artist.avatar?.sizes?.[300] ?? artist.background?.sizes?.[625];
 
   return (
-    <TrackGroupWrapper>
+    <div
+      className={cx(
+        "mb-2",
+        "max-md:p-0 max-md:mb-4 max-md:mt-0",
+        "max-sm:text-(--mi-font-size-small)"
+      )}
+    >
       <div>
         <Link to={getArtistUrl(artist)} aria-label={artist.name}>
           {standardImageSrc ? (
@@ -31,7 +30,10 @@ const ArtistSquare: React.FC<{
               size={300}
               square
               objectFit={circle ? "cover" : "contain"}
-              className={circle ? "rounded-full overflow-hidden" : undefined}
+              className={cx(
+                "[&_img]:w-full!",
+                circle && "rounded-full overflow-hidden"
+              )}
             />
           ) : (
             <div
@@ -42,30 +44,25 @@ const ArtistSquare: React.FC<{
           )}
         </Link>
 
-        <TrackGroupLinks>
-          <TrackGroupInfo className={circle ? "text-center" : ""}>
-            {artist && <Link to={getArtistUrl(artist)}>{artist.name}</Link>}
-          </TrackGroupInfo>
-          <div
-            className={css`
-              button {
-                margin-top: -0.25rem;
-              }
-              @media screen and (max-width: ${bp.small}px) {
-                button {
-                  margin-top: -0.1rem;
-                  opacity: 0.5;
-                }
-              }
-
-              @media screen and (min-width: ${bp.small}px) {
-                display: none!;
-              }
-            `}
-          ></div>
-        </TrackGroupLinks>
+        <div
+          className={cx(
+            "flex justify-between flex-nowrap items-start w-full min-h-10 pt-2 mb-2 max-md:mb-0",
+            "text-[calc(var(--mi-font-size-small)*var(--page-scale,1))]"
+          )}
+        >
+          <div className={cx("flex flex-col w-full", circle && "text-center")}>
+            {artist && (
+              <Link
+                to={getArtistUrl(artist)}
+                className="no-underline! hover:underline! font-normal mb-[0.2rem]"
+              >
+                {artist.name}
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
-    </TrackGroupWrapper>
+    </div>
   );
 };
 

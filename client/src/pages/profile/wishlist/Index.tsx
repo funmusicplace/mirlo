@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
+import TrackCard from "components/common/TrackCard";
 import Box from "components/common/Box";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import WidthContainer from "components/common/WidthContainer";
@@ -109,15 +110,24 @@ function Index() {
         >
           {filtered.length === 0 && <Box>{t("wishlistEmpty")}</Box>}
           <TrackgroupGrid gridNumber="6">
-            {filtered.map((item) => (
-              <ArtistTrackGroup
-                key={item.key}
-                trackGroup={item.trackGroup}
-                track={item.kind === "track" ? item.track : undefined}
-                showTrackWishlist={item.kind === "track"}
-                showArtist
-              />
-            ))}
+            {filtered.map((item) =>
+              item.kind === "album" ? (
+                <ReleaseCard
+                  key={item.key}
+                  trackGroup={item.trackGroup}
+                  showArtist
+                  headingLevel="h2"
+                />
+              ) : (
+                <TrackCard
+                  key={item.key}
+                  track={{ ...item.track, trackGroup: item.trackGroup }}
+                  showTrackWishlist
+                  showArtist
+                  headingLevel="h2"
+                />
+              )
+            )}
           </TrackgroupGrid>
         </div>
       </WidthContainer>

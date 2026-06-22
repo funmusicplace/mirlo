@@ -18,7 +18,7 @@ import { ButtonLink } from "components/common/Button";
 import WidthContainer from "components/common/WidthContainer";
 import { SectionHeader } from "components/common/SectionHeader";
 
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import ReleaseCard from "components/common/ReleaseCard";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 
@@ -183,11 +183,12 @@ const Index: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
                 role="list"
               >
                 {newReleases?.results?.map((trackGroup) => (
-                  <ArtistTrackGroup
+                  <ReleaseCard
                     key={trackGroup.id}
                     trackGroup={trackGroup}
                     as="li"
                     showArtist
+                    headingLevel="h3"
                   />
                 ))}
               </TrackgroupGrid>

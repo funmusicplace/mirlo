@@ -26,7 +26,7 @@ const TrackRowPlayControl: React.FC<{
   inWidget,
   compact,
 }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
+  const { t } = useTranslation("translation", { keyPrefix: "playableCover" });
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex },
     dispatch,
