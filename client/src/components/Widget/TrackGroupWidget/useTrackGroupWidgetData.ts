@@ -20,9 +20,6 @@ export const useTrackGroupWidgetData = () => {
 
   const embeddedInMirlo = isEmbeddedInMirlo();
   const playerSyncState = usePlayerSyncState();
-  const elapsedSeconds = embeddedInMirlo
-    ? (playerSyncState?.currentSeconds ?? 0)
-    : currentSeconds;
 
   React.useEffect(() => {
     const callback = async () => {
@@ -61,13 +58,28 @@ export const useTrackGroupWidgetData = () => {
   const playableTracks = trackGroup?.tracks.filter((track) =>
     isTrackOwnedOrPreview(track, user, trackGroup)
   );
+  const ownTrackIds = new Set(
+    trackGroup?.tracks.map((track) => track.id) ?? []
+  );
+  const syncedTrackId = playerSyncState?.currentTrackId ?? null;
+  const hasSyncedTrack =
+    syncedTrackId !== null && ownTrackIds.has(syncedTrackId);
+  const scopedCurrentTrack =
+    embeddedInMirlo && (!hasSyncedTrack || currentTrack?.id !== syncedTrackId)
+      ? undefined
+      : currentTrack;
+  const elapsedSeconds = embeddedInMirlo
+    ? hasSyncedTrack
+      ? playerSyncState?.currentSeconds ?? 0
+      : 0
+    : currentSeconds;
 
   return {
     trackGroup,
     artist,
     isLoading,
     user,
-    currentTrack,
+    currentTrack: scopedCurrentTrack,
     currentSeconds,
     setCurrentSeconds,
     elapsedSeconds,
