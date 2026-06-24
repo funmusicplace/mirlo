@@ -44,6 +44,10 @@ export default defineConfig({
           },
           { text: "Label Guide", link: "/how-tos/label-accounts" },
           {
+            text: "Accepting more payment types",
+            link: "/how-tos/accepting-more-payment-types",
+          },
+          {
             text: "Making your own album art",
             link: "/how-tos/making-your-own-album-art",
           },
