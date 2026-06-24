@@ -90,7 +90,15 @@ const Index: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
         }
       `}
     >
-      <h1>{t("searchResults", { search })}</h1>
+      <WidthContainer variant="big">
+        <h1
+          className={css`
+            margin: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {t("searchResults", { search })}
+        </h1>
+      </WidthContainer>
       <SectionHeader>
         <WidthContainer
           variant="big"
