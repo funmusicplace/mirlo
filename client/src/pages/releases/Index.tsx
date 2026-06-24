@@ -60,7 +60,13 @@ const Index = () => {
       `}
     >
       <WidthContainer variant="big">
-        <h1>{t("explore")}</h1>
+        <h1
+          className={css`
+            margin: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {t("explore")}
+        </h1>
       </WidthContainer>
       {!tag && (
         <SectionHeader
