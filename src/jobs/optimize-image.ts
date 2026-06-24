@@ -1,7 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { Job } from "bullmq";
 import { uniq } from "lodash";
-import fetch from "node-fetch";
 import sharp from "sharp";
 import ico from "sharp-ico";
 
@@ -344,7 +343,10 @@ const optimizeImage = async (job: Job) => {
         }
       );
       if (response.status === 200) {
-        const result = await response.json();
+        const result = (await response.json()) as {
+          nudity: { sexual_display: number };
+          request: { id: string };
+        };
         if (result.nudity.sexual_display > 0.9) {
           logger.info("Sending an email report about SightEngine");
           await sendMail({

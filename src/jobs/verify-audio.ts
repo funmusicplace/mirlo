@@ -1,7 +1,6 @@
 import { promises as fsPromises } from "fs";
 
 import { Job } from "bullmq";
-import fetch from "node-fetch";
 
 import { finalAudioBucket, getFile } from "../utils/minio";
 

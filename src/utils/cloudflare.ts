@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 import { AppError } from "./error";
 
 const { CLOUDFLARE_TURNSTILE_API_SECRET } = process.env;
@@ -58,7 +56,7 @@ export async function checkCloudFlareTurnstile({
     },
   });
 
-  const outcome = await result.json();
+  const outcome = (await result.json()) as { success: boolean };
   if (!outcome.success) {
     throw new AppError({
       httpCode: 400,
