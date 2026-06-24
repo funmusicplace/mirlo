@@ -53,7 +53,7 @@ fans automatically.
 
 - [Payment methods overview](https://docs.stripe.com/payments/payment-methods/overview) —
   the full catalog of what Stripe supports and where.
-- [Manage payment methods in the Dashboard](https://docs.stripe.com/payments/payment-methods/pmd-runtime) —
+- [Manage payment methods in the Dashboard](https://docs.stripe.com/payments/payment-method-configurations) —
   how the toggles above work.
 - [PayPal on Stripe](https://docs.stripe.com/payments/paypal) — supported
   countries, currencies, and requirements.
