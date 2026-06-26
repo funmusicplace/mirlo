@@ -4,7 +4,7 @@ import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { RestoredLabel } from "components/common/RestoredFields";
 import TextArea from "components/common/TextArea";
-import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
+import { FormSection } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
 import PublishButton from "components/ManageArtist/PublishButton";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -17,7 +17,7 @@ import useShow from "utils/useShow";
 
 import { bp } from "../../../../constants";
 import UploadArtistImage from "../../UploadArtistImage";
-import { TrackGroupFormData } from "../ManageTrackGroup";
+import { TrackGroupFormData } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
 
 import FundraisingGoal from "./FundraisingGoal";
 import ManageTags from "./ManageTags";

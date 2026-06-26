@@ -10,7 +10,7 @@ import useArtistQuery from "utils/useArtistQuery";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 import { between, bp } from "../../../constants";
-import { MANAGE_ANNOUNCEMENT_MOUNT_ID } from "../ManageContainer";
+import { MANAGE_ANNOUNCEMENT_MOUNT_ID } from "pages/manage/Layout";
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 
 export const AnnouncementWrapper: React.FC<{

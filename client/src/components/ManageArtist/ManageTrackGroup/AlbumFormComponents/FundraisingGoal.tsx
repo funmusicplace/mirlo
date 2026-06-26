@@ -16,7 +16,7 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
-import { TrackGroupFormData } from "../ManageTrackGroup";
+import { TrackGroupFormData } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
 
 const FundraisingGoal: React.FC<{
   trackGroupId: number;

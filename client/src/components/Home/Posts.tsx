@@ -1,6 +1,6 @@
 import React from "react";
 import { css } from "@emotion/css";
-import { SectionHeader } from "./Home";
+import { SectionHeader } from "components/common/SectionHeader";
 import WidthContainer from "components/common/WidthContainer";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";

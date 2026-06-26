@@ -3,7 +3,7 @@ import { CheckBoxLabel } from "components/common/FormCheckbox";
 import { InputEl } from "components/common/Input";
 import { Modal } from "components/common/Modal";
 import { Toggle } from "components/common/Toggle";
-import { FormSection } from "components/ManageArtist/ManageTrackGroup/ManageTrackGroup";
+import { FormSection } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
 import { useBulkSetTracksIsPreviewMutation } from "queries/trackGroups";
 import React from "react";
 import { useFormContext } from "react-hook-form";

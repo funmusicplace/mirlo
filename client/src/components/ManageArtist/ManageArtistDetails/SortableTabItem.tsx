@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { AiOutlineDrag } from "react-icons/ai";
 import { TabId } from "utils/artistTabs";
 
-import type { ArtistFormData } from "./CustomizeLook";
+import type { ArtistFormData } from "pages/manage/artists/:artistId/customize/Index";
 
 const TAB_LABEL_KEYS: Record<TabId, string> = {
   roster: "rosterTab",
