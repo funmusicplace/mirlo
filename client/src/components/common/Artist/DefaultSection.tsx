@@ -1,18 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
 import { renderArtistLinkButtons } from "components/ManageArtist/ArtistFormLinks";
-import { queryArtist } from "queries";
-import React from "react";
-import { useOutletContext, useParams } from "react-router-dom";
-import { TabId } from "utils/artistTabs";
-import { transformFromLinks } from "utils/links";
-
 import Roster from "pages/:artistId/roster/Index";
 import Merch from "pages/:artistId/merch/Index";
-
-import Releases from "./releases/Index";
-import { ArtistOutletContext } from "components/Artist/artistOutletContext";
-import Posts from "./posts/Index";
+import Posts from "pages/:artistId/posts/Index";
+import Releases from "pages/:artistId/releases/Index";
 import ArtistSupport from "pages/:artistId/support/Index";
+import React from "react";
+import { TabId } from "utils/artistTabs";
+import { transformFromLinks } from "utils/links";
 
 const sectionComponents: Record<TabId, React.FC> = {
   roster: Roster,
@@ -20,6 +14,11 @@ const sectionComponents: Record<TabId, React.FC> = {
   posts: Posts,
   support: ArtistSupport,
   merch: Merch,
+};
+
+type DefaultSectionProps = {
+  artist: Artist;
+  defaultSectionId?: TabId;
 };
 
 /**
@@ -31,19 +30,16 @@ const sectionComponents: Record<TabId, React.FC> = {
  * artist's links so links-only (and announcement-only) artists still land on a
  * real page.
  */
-const Home: React.FC = () => {
-  const { defaultSectionId } = useOutletContext<ArtistOutletContext>();
-  const { artistId } = useParams();
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
-  );
-
+export default function DefaultSection({
+  artist,
+  defaultSectionId,
+}: DefaultSectionProps) {
   if (defaultSectionId) {
     const Section = sectionComponents[defaultSectionId];
     return <Section />;
   }
 
-  const allLinks = artist ? transformFromLinks(artist).linkArray : [];
+  const allLinks = transformFromLinks(artist).linkArray;
   if (allLinks.length === 0) {
     return null;
   }
@@ -53,6 +49,4 @@ const Home: React.FC = () => {
       {renderArtistLinkButtons(allLinks)}
     </div>
   );
-};
-
-export default Home;
+}
