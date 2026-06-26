@@ -105,7 +105,7 @@ const ManageArtistButtons: React.FC = () => {
     if (isAlbumPage && trackGroup) {
       adminItems.push({
         key: "adminEditRelease",
-        to: `/admin/trackGroups/${trackGroup.id}`,
+        to: `/admin/track-groups/${trackGroup.id}`,
         icon: <RiAdminLine />,
         label: t("adminEditRelease"),
       });

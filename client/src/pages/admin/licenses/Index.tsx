@@ -56,7 +56,7 @@ export const Index: React.FC = () => {
         open={openModal}
         onClose={() => {
           setOpenModal(false);
-          navigate("/admin/trackgroups");
+          navigate("/admin/track-groups");
         }}
       >
         <Outlet />

@@ -56,7 +56,7 @@ export const Index: React.FC = () => {
           <div className="flex justify-between items-center gap-1">
             <h1 className={css``}>{t("manageArtists")}</h1>
             <ButtonLink
-              to="/manage/bulkTrackUpload"
+              to="/manage/bulk-track-upload"
               variant="outlined"
               size="compact"
             >

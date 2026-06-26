@@ -23,7 +23,7 @@ const Layout: React.FC = () => {
           <NavLink to="artists">{t("artists")}</NavLink>
         </li>
         <li>
-          <NavLink to="trackgroups">{t("trackgroups")}</NavLink>
+          <NavLink to="track-groups">{t("trackgroups")}</NavLink>
         </li>
         <li>
           <NavLink to="tracks">{t("tracks")}</NavLink>
@@ -32,7 +32,7 @@ const Layout: React.FC = () => {
           <NavLink to="transactions">{t("transactions")}</NavLink>
         </li>
         <li>
-          <NavLink to="sendEmails">{t("sendEmails")}</NavLink>
+          <NavLink to="send-emails">{t("sendEmails")}</NavLink>
         </li>
         <li>
           <NavLink to="tasks/fundraising">{t("tasks")}</NavLink>

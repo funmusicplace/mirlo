@@ -88,7 +88,7 @@ function Index() {
             >
               Upload Another File
             </Button>
-            <ButtonAnchor href="/admin/trackgroups" variant="outlined">
+            <ButtonAnchor href="/admin/track-groups" variant="outlined">
               View Albums
             </ButtonAnchor>
           </div>

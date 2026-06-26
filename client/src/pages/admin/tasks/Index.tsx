@@ -16,7 +16,7 @@ export const Index: React.FC = () => {
             <NavLink to="fundraising">{t("fundraising")}</NavLink>
           </li>
           <li>
-            <NavLink to="serverTasks">{t("serverTasks")}</NavLink>
+            <NavLink to="server-tasks">{t("serverTasks")}</NavLink>
           </li>
         </SectionNav>
       </div>

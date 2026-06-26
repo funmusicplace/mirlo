@@ -338,7 +338,7 @@ const routes: RouteObject[] = [
             },
           },
           {
-            path: "bulkTrackUpload",
+            path: "bulk-track-upload",
             async lazy() {
               const { default: Component } =
                 await import("pages/manage/bulk-track-upload/Index");
@@ -531,7 +531,7 @@ const routes: RouteObject[] = [
             },
             children: [
               {
-                path: "serverTasks",
+                path: "server-tasks",
                 async lazy() {
                   const { default: Component } =
                     await import("pages/admin/tasks/server-tasks/Index");
@@ -655,7 +655,7 @@ const routes: RouteObject[] = [
             ],
           },
           {
-            path: "trackGroups/:id",
+            path: "track-groups/:id",
             async lazy() {
               const { default: Component } =
                 await import("pages/admin/track-groups/:id/Index");
@@ -663,7 +663,7 @@ const routes: RouteObject[] = [
             },
           },
           {
-            path: "trackGroups",
+            path: "track-groups",
             async lazy() {
               const { default: Component } =
                 await import("pages/admin/track-groups/Index");
@@ -696,7 +696,7 @@ const routes: RouteObject[] = [
             },
           },
           {
-            path: "sendEmails",
+            path: "send-emails",
             async lazy() {
               const { default: Component } =
                 await import("pages/admin/send-emails/Index");
