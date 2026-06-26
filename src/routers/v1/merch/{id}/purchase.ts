@@ -175,7 +175,7 @@ export default function () {
           required: ["shippingDestinationId"],
           properties: {
             price: {
-              type: "string",
+              type: ["number", "string"],
               description: "Price in cents",
             },
             email: {
