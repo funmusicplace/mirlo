@@ -52,7 +52,7 @@ export const Index: React.FC = () => {
 
   const onClickQueue = React.useCallback(
     (id: number) => {
-      navigate(`/admin/trackGroups/${id}`);
+      navigate(`/admin/track-groups/${id}`);
     },
     [navigate]
   );

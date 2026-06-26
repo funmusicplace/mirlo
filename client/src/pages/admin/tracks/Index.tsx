@@ -68,7 +68,7 @@ export const Index: React.FC = () => {
     <WidthContainer variant="big" justify="center" className="grow p-4">
       <div className="flex justify-between align-center">
         <h3>Tracks</h3>
-        <ButtonLink to="bulk-upload">{t("bulkTrackUpload")}</ButtonLink>
+        <ButtonLink to="/manage/bulk-track-upload">{t("bulkTrackUpload")}</ButtonLink>
       </div>
       <Filters />
       {results.length > 0 && (
