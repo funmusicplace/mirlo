@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 import WidthContainer from "../common/WidthContainer";
 
-import { SectionHeader } from "./Home";
+import { SectionHeader } from "components/common/SectionHeader";
 
 const FeaturedArtistsSection = styled.section`
   width: 100%;

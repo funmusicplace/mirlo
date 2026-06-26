@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
 import { AiOutlineWarning } from "react-icons/ai";
-import { ArtistSection } from "components/Artist/Artist";
+import { ArtistSection } from "pages/:artistId/Index";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export const DeleteArtist: React.FC = () => {

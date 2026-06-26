@@ -10,7 +10,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { isTrackGroupPublished } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
-import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
+import { TrackGroupFormData } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;

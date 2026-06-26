@@ -11,7 +11,7 @@ import { between, bp } from "../../constants";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
 import ArtistByLine, { FromAlbum } from "./ArtistByLine";
-import { coverSizeMax } from "./TrackGroup";
+import { coverSizeMax } from "pages/:artistId/release/:trackGroupId/Index";
 
 export const ItemViewTitle: React.FC<{
   title: string;

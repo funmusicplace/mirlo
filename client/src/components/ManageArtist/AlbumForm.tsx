@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useFormPersist } from "utils/useFormPersist";
 
 import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
-import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
+import { TrackGroupFormData } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
 
 const buildDefaultValues = (trackGroup: TrackGroup): TrackGroupFormData => {
   const trackGroupIsGettable = trackGroup?.isGettable ?? false;

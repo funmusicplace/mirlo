@@ -182,7 +182,7 @@ const toCentsOrNull = (value: unknown) => {
 };
 
 async function saveAlbumForm(opts: {
-  formData: import("../components/ManageArtist/ManageTrackGroup/ManageTrackGroup").TrackGroupFormData;
+  formData: import("pages/manage/artists/:artistId/release/:trackGroupId/Index").TrackGroupFormData;
   trackGroupId: number;
   artistId: number;
   fundraiserId?: number;

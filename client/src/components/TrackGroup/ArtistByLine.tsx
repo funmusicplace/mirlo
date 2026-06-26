@@ -3,7 +3,7 @@ import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import { Trans, useTranslation } from "react-i18next";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
-import { coverSizeMax } from "./TrackGroup";
+import { coverSizeMax } from "pages/:artistId/release/:trackGroupId/Index";
 
 const inlineLink = css`
   && {

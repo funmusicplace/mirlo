@@ -8,7 +8,7 @@ import { FaRedoAlt, FaChevronRight, FaRss } from "react-icons/fa";
 import { bp } from "../../constants";
 import { Button, ButtonAnchor, ButtonLink } from "components/common/Button";
 import WidthContainer from "components/common/WidthContainer";
-import { SectionHeader } from "components/Home/Home";
+import { SectionHeader } from "components/common/SectionHeader";
 import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
