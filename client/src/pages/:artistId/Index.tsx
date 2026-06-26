@@ -34,6 +34,8 @@ import { useScrollActiveTabIntoView } from "utils/useScrollActiveTabIntoView";
 import { bp } from "../../constants";
 import Box from "components/common/Box";
 
+import DefaultSection from "components/common/Artist/DefaultSection";
+
 export const ArtistSection: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className,
   children,
@@ -261,7 +263,11 @@ function Index() {
       </nav>
 
       <ArtistSection>
-        <Outlet context={{ openTipModal, defaultSectionId }} />
+        {atBasePath ? (
+          <DefaultSection artist={artist} defaultSectionId={defaultSectionId} />
+        ) : (
+          <Outlet context={{ openTipModal }} />
+        )}
       </ArtistSection>
       {isTipOnly && (
         <TipArtistModal

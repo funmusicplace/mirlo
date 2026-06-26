@@ -822,14 +822,6 @@ const routes: RouteObject[] = [
             },
             children: [
               {
-                index: true,
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/:artistId/Home");
-                  return { Component };
-                },
-              },
-              {
                 path: "connect",
                 async lazy() {
                   const { default: Component } =
