@@ -1,22 +1,18 @@
 # Accepting more payment types
 
 By default, fans buying your music and merch on Mirlo can pay with credit and
-debit cards. But Stripe — the payment processor Mirlo uses — supports many more
+debit cards. But Stripe—the default payment processor Mirlo uses—supports many more
 payment methods, including PayPal, Apple Pay, Google Pay, bank transfers, and
 dozens of regional options (iDEAL, Bancontact, SEPA, etc.).
 
-Mirlo automatically offers whichever payment methods you've enabled in **your
-own Stripe account**, so turning on more options is done in your Stripe
-Dashboard, not in Mirlo.
+Mirlo automatically offers whichever payment methods you've enabled in **your own Stripe account**, so turning on more options is done in your Stripe Dashboard, not in Mirlo.
 
 ## How it works
 
 Mirlo asks Stripe to show fans every payment method that is both:
 
 1. **Enabled on your connected Stripe account**, and
-2. **Eligible for that particular transaction** (Stripe filters by the fan's
-   currency, country, and device — for example, Apple Pay only appears on Apple
-   devices).
+2. **Eligible for that particular transaction** (Stripe filters by the fan's currency, country, and device — for example, Apple Pay only appears on Apple devices).
 
 This means you control the list from your Stripe Dashboard. You don't need to
 change anything in Mirlo.

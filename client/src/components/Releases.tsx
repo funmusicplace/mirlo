@@ -59,7 +59,9 @@ const Releases = () => {
         }
       `}
     >
-      <h1>{t("explore")}</h1>
+      <WidthContainer variant="big">
+        <h1>{t("explore")}</h1>
+      </WidthContainer>
       {!tag && (
         <SectionHeader
           className={css`

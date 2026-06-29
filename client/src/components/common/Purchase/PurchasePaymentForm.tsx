@@ -18,13 +18,24 @@ import { Button } from "../Button";
 /**
  * Inner payment form, rendered inside an <Elements> provider that already holds
  * the PaymentIntent clientSecret. Collects the payment method and confirms the
- * payment, redirecting to `returnUrl` on success. Shared by every purchase flow
- * (tip, trackGroup, merch, …) via PurchaseModal.
+ * payment. Shared by every purchase flow (tip, trackGroup, merch, …) via
+ * PurchaseModal, and by the full-page HostedCheckout.
+ *
+ * Completion has two modes:
+ * - `onSuccess` provided → confirm with `redirect: "if_required"`. Payment
+ *   methods that don't need a redirect (most cards) resolve in JS and we call
+ *   `onSuccess` so the caller can navigate within the SPA — the page is not
+ *   reloaded, so anything playing in the global audio player keeps going.
+ *   Methods that genuinely require a redirect (3DS, bank redirects) still bounce
+ *   to `returnUrl`, as Stripe mandates.
+ * - `onSuccess` omitted → confirm with the default full redirect to `returnUrl`
+ *   (used by HostedCheckout / external integrators that have no SPA to return to).
  */
 const PurchasePaymentForm: React.FC<{
   returnUrl: string;
   buttonLabel: string;
-}> = ({ returnUrl, buttonLabel }) => {
+  onSuccess?: () => void;
+}> = ({ returnUrl, buttonLabel, onSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const handler = useErrorHandler();
@@ -41,6 +52,38 @@ const PurchasePaymentForm: React.FC<{
 
     if (!stripe || !elements) {
       // Stripe.js hasn't loaded yet.
+      setIsLoading(false);
+      return;
+    }
+
+    if (onSuccess) {
+      // Async completion: only redirect if the payment method requires it.
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: returnUrl },
+        redirect: "if_required",
+      });
+
+      if (error) {
+        console.error(error);
+        handler(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (
+        paymentIntent &&
+        (paymentIntent.status === "succeeded" ||
+          paymentIntent.status === "processing")
+      ) {
+        // Hand control back to the caller, which navigates within the SPA.
+        // Leave isLoading set — the view is about to change.
+        onSuccess();
+        return;
+      }
+
+      // Resolved without an error or a terminal status (e.g. it kicked off a
+      // redirect, or needs another action). Nothing more to do here.
       setIsLoading(false);
       return;
     }

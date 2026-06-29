@@ -6,6 +6,8 @@ import EmailVerification from "components/common/EmailVerification";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Money, { moneyDisplay } from "components/common/Money";
+import PurchaseElements from "components/common/Purchase/PurchaseElements";
+import { usePurchase } from "components/common/Purchase/usePurchase";
 import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import TextArea from "components/common/TextArea";
 import { queryUserStripeStatus } from "queries";
@@ -17,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { getArtistUrl } from "utils/artist";
 
 import AddToCollection from "./AddToCollection";
 import PaymentInputElement from "./PaymentInputElement";
@@ -70,17 +73,38 @@ const BuyTrackGroup: React.FC<{
   const [onComplete, setOnComplete] = React.useState<(() => void) | undefined>(
     undefined
   );
+  const { checkout, startPurchase } = usePurchase();
+
+  const isPledgeMode =
+    !!trackGroup.fundraiser?.isAllOrNothing &&
+    (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
+  // DEPRECATED — Flow A (per-resource Checkout Session + EmbeddedStripeForm).
+  // Track purchases (plan Phase 4) and fundraiser pledges (Phase 5) are not yet
+  // resolved by `POST /v1/purchase`, so they stay on the deprecated
+  // `tracks/:id/purchase` / `trackGroups/:id/purchase` endpoints. Remove this
+  // branch once both are migrated onto usePurchase/PurchaseModal — album
+  // (trackGroup) purchases already are.
+  const usesLegacyFlow = !!track || isPledgeMode;
+
+  const checkoutCompletePath = `${getArtistUrl(
+    trackGroup.artist
+  )}/checkout-complete?purchaseType=trackGroup&trackGroupId=${trackGroup.id}`;
 
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
       try {
         setStripeLoading(true);
-        const alreadyOwns = await testOwnership(trackGroup.id, data.userEmail);
+        const email = data.userEmail ?? verifiedEmail ?? "";
+        const alreadyOwns = await testOwnership(trackGroup.id, email);
         const confirmed = alreadyOwns
           ? window.confirm(t("albumExists") ?? "")
           : true;
 
-        if (confirmed) {
+        if (!confirmed) {
+          return;
+        }
+
+        if (usesLegacyFlow) {
           const url = track
             ? `tracks/${track.id}/purchase`
             : `trackGroups/${trackGroup.id}/purchase`;
@@ -91,7 +115,7 @@ const BuyTrackGroup: React.FC<{
             price: data.chosenPrice
               ? Number(data.chosenPrice) * 100
               : undefined,
-            email: data.userEmail ?? verifiedEmail,
+            email,
             message: data.message,
           });
 
@@ -113,10 +137,31 @@ const BuyTrackGroup: React.FC<{
           } else {
             window.location.assign(response.redirectUrl);
           }
+          return;
         }
+
+        // Album (trackGroup) → unified POST /v1/purchase. The modal/return-url
+        // handles completion; the post-payment full-page redirect resets the
+        // player, covering what onPurchaseComplete did inline (#1630).
+        await startPurchase({
+          artistId: trackGroup.artistId ?? trackGroup.artist.id,
+          items: [
+            {
+              type: "trackGroup",
+              id: trackGroup.id,
+              // determinePrice expects the chosen price in cents.
+              price: data.chosenPrice
+                ? String(Number(data.chosenPrice) * 100)
+                : undefined,
+              message: data.message,
+            },
+          ],
+          email: email || undefined,
+        });
       } catch (e) {
         snackbar(t("error"), { type: "warning" });
         console.error(e);
+      } finally {
         setStripeLoading(false);
       }
     },
@@ -128,6 +173,8 @@ const BuyTrackGroup: React.FC<{
       verifiedEmail,
       navigate,
       onPurchaseComplete,
+      usesLegacyFlow,
+      startPurchase,
     ]
   );
 
@@ -138,13 +185,8 @@ const BuyTrackGroup: React.FC<{
   }
   const isNegativePrice = isFinite(+chosenPrice) && Number(chosenPrice) < 0;
 
-  // The pledge flow only applies while the fundraiser is still ACTIVE. Once
-  // the artist marks the fundraiser SUCCESSFUL (via Charge pledges) we fall
-  // through to the regular purchase flow even though the fundraiser row is
-  // still attached to the trackGroup. See #1681.
-  const isPledgeMode =
-    !!trackGroup.fundraiser?.isAllOrNothing &&
-    (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
+  // The pledge flow only applies while the fundraiser is still ACTIVE (see
+  // #1681); `isPledgeMode` is computed up top alongside the legacy-flow check.
 
   const purchaseText = isPledgeMode
     ? "addPaymentInformation"
@@ -197,6 +239,28 @@ const BuyTrackGroup: React.FC<{
         stripeAccountId={stripeAccountStatus?.stripeAccountId}
         onComplete={onComplete}
       />
+    );
+  }
+
+  // Unified album purchase: swap the buy form for the Payment Element in place,
+  // within the same modal the trigger already opened — no second dialog.
+  if (checkout) {
+    return (
+      <div className={noPadding ? "" : "p-4"}>
+        <PurchaseElements
+          clientSecret={checkout.clientSecret}
+          stripeAccountId={checkout.stripeAccountId}
+          returnUrl={`${window.location.origin}${checkoutCompletePath}`}
+          onSuccess={() => {
+            // Clear any play-limit / overplayed state keeping the player
+            // blocked (#1630), then navigate within the SPA — no reload, so
+            // playback during the purchase continues.
+            onPurchaseComplete?.();
+            navigate(checkoutCompletePath);
+          }}
+          buttonLabel={t("completePayment")}
+        />
+      </div>
     );
   }
 

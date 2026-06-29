@@ -72,7 +72,7 @@ describe("customer purchase pricing", () => {
       },
     }).as("stripeStatus");
 
-    cy.intercept("POST", `/v1/trackGroups/${trackGroupId}/purchase`, (req) => {
+    cy.intercept("POST", "/v1/purchase", (req) => {
       req.reply({
         statusCode: 200,
         body: {
@@ -96,7 +96,11 @@ describe("customer purchase pricing", () => {
     cy.wait("@purchaseTrackGroup")
       .its("request.body")
       .should((body) => {
-        expect(body.price).to.eq(700);
+        expect(body.artistId).to.exist;
+        expect(body.items).to.have.length(1);
+        expect(body.items[0].type).to.eq("trackGroup");
+        expect(body.items[0].id).to.eq(trackGroupId);
+        expect(body.items[0].price).to.eq("700");
       });
   });
 });
