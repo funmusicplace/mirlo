@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import DividerWithText from "components/common/DividerWithText";
 import FollowArtistFromFediverse from "components/common/FollowArtistFromFediverse";
 import FollowArtistWithEmail from "components/common/FollowArtistWithEmail";
 import SupportArtistTiersForm from "components/common/SupportArtistTiersForm";
@@ -15,29 +16,7 @@ import { bp } from "../../constants";
 
 import LoadingBlocks from "./LoadingBlocks";
 
-const DividerWithText: React.FC<{ text: string }> = ({ text }) => (
-  <div
-    className={css`
-      display: flex;
-      justify-content: stretch;
-      align-items: center;
-      margin: 1rem 0;
-      width: 100%;
-
-      hr {
-        flex-grow: 1;
-        margin: 1rem;
-        border-color: var(--mi-tint-x-color);
-      }
-    `}
-  >
-    <hr />
-    {text}
-    <hr />
-  </div>
-);
-
-const ArtistTip: React.FC = () => {
+const Connect: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { artistId } = useParams();
   const { user } = useAuthContext();
@@ -106,4 +85,4 @@ const ArtistTip: React.FC = () => {
   );
 };
 
-export default ArtistTip;
+export default Connect;

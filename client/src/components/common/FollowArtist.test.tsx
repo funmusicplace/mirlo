@@ -46,6 +46,10 @@ vi.mock("components/common/SupportArtistTiersForm", () => ({
   default: () => <div data-testid="support-tiers-form" />,
 }));
 
+vi.mock("components/common/FollowArtistFromFediverse", () => ({
+  default: () => <div data-testid="follow-from-fediverse" />,
+}));
+
 vi.mock("@marsidev/react-turnstile", () => ({
   Turnstile: () => null,
 }));
@@ -60,12 +64,14 @@ const PAID_TIER = { id: 2, isDefaultTier: false, name: "Supporter" };
 function makeArtist(
   overrides: Partial<{
     subscriptionTiers: { id: number; isDefaultTier: boolean; name: string }[];
+    activityPub: boolean;
   }> = {}
 ) {
   return {
     id: 1,
     name: "Test Artist",
     urlSlug: "test-artist",
+    activityPub: false,
     subscriptionTiers: [] as {
       id: number;
       isDefaultTier: boolean;
@@ -197,6 +203,32 @@ describe("FollowArtist", () => {
 
       expect(screen.getByText("chooseSupportLevel")).toBeInTheDocument();
       expect(screen.getByTestId("support-tiers-form")).toBeInTheDocument();
+    });
+  });
+
+  describe("fediverse remote follow", () => {
+    test("shows the fediverse follow option in the modal when the artist has ActivityPub enabled", async () => {
+      mockArtistFetch(makeArtist({ activityPub: true }));
+
+      renderFollowArtist();
+
+      await waitFor(() => screen.getByRole("button", { name: /follow/i }));
+      await userEvent.click(screen.getByRole("button", { name: /follow/i }));
+
+      expect(screen.getByTestId("follow-from-fediverse")).toBeInTheDocument();
+    });
+
+    test("does not show the fediverse follow option when the artist has ActivityPub disabled", async () => {
+      mockArtistFetch(makeArtist({ activityPub: false }));
+
+      renderFollowArtist();
+
+      await waitFor(() => screen.getByRole("button", { name: /follow/i }));
+      await userEvent.click(screen.getByRole("button", { name: /follow/i }));
+
+      expect(
+        screen.queryByTestId("follow-from-fediverse")
+      ).not.toBeInTheDocument();
     });
   });
 
