@@ -6,6 +6,7 @@ import { queryArtist } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
 
@@ -30,7 +31,10 @@ const TipArtistForm: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   const { user } = useAuthContext();
+  const navigate = useNavigate();
   const { checkout, isLoading, startPurchase, reset } = usePurchase();
+
+  const tipCompletePath = `${getArtistUrl(artist)}/checkout-complete?purchaseType=tip`;
 
   const methods = useForm<{
     price: number;
@@ -182,9 +186,8 @@ const TipArtistForm: React.FC<{
         onClose={reset}
         clientSecret={checkout?.clientSecret}
         stripeAccountId={checkout?.stripeAccountId}
-        returnUrl={`${window.location.origin}${getArtistUrl(
-          artist
-        )}/checkout-complete?purchaseType=tip`}
+        returnUrl={`${window.location.origin}${tipCompletePath}`}
+        onSuccess={() => navigate(tipCompletePath)}
         title={t("tipArtistByName", { artistName: artist.name }) ?? ""}
         buttonLabel={t("completePayment")}
       />
