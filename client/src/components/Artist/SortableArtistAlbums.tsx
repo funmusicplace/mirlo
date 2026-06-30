@@ -30,7 +30,7 @@ const SortableArtistAlbums: React.FC = () => {
 
   return (
     <TrackgroupGrid
-      gridNumber={"3"}
+      gridNumber={String(artist?.properties?.releasesPerRow ?? 3)}
       wrap
       as="ul"
       role="list"

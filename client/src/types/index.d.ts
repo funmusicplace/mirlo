@@ -311,6 +311,7 @@ interface Artist {
       groupName?: string;
     };
     tabOrder?: Array<"roster" | "releases" | "posts" | "support" | "merch">;
+    releasesPerRow?: number;
     emails?: {
       support?: string | null;
       purchase?: string | null;
