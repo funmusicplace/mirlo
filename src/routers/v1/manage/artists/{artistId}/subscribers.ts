@@ -75,7 +75,15 @@ export default function () {
             select: {
               id: true,
               transactionId: true,
+              transaction: {
+                select: {
+                  platformCut: true,
+                  stripeCut: true,
+                  paymentStatus: true,
+                },
+              },
             },
+            orderBy: { createdAt: "desc" },
           },
         },
       });

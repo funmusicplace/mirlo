@@ -125,4 +125,49 @@ describe("Supporters", () => {
     await screen.findByText("paid@example.com");
     expect(screen.queryByText("free")).not.toBeInTheDocument();
   });
+
+  test("uses actual fees (no est. label) when charges have completed transactions", async () => {
+    mockSubscribers([
+      makeSupporter({
+        id: 5,
+        user: { id: 15, name: "Billed Fan", email: "billed@example.com" },
+        artistUserSubscriptionCharges: [
+          {
+            id: "c4",
+            transactionId: "txn_3",
+            transaction: {
+              platformCut: 35,
+              stripeCut: 45,
+              paymentStatus: "COMPLETED",
+            },
+          },
+        ],
+      }),
+    ]);
+
+    render(<Supporters />);
+
+    await screen.findByText("billed@example.com");
+    expect(screen.getByText("lessPlatformFee")).toBeInTheDocument();
+    expect(screen.getByText("lessStripeFee")).toBeInTheDocument();
+    expect(
+      screen.queryByText("lessStripeFeeEstimated")
+    ).not.toBeInTheDocument();
+  });
+
+  test("falls back to an estimated label when a paying supporter has no completed charge", async () => {
+    mockSubscribers([
+      makeSupporter({
+        id: 6,
+        user: { id: 16, name: "New Fan", email: "new@example.com" },
+        // Paid (has a transaction id) but the charge has not settled yet.
+        artistUserSubscriptionCharges: [{ id: "c5", transactionId: "txn_4" }],
+      }),
+    ]);
+
+    render(<Supporters />);
+
+    await screen.findByText("new@example.com");
+    expect(screen.getByText("lessStripeFeeEstimated")).toBeInTheDocument();
+  });
 });
