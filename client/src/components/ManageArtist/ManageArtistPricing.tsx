@@ -8,10 +8,7 @@ import {
   queryManagedArtistMerch,
   queryManagedArtistTrackGroups,
 } from "queries";
-import {
-  QUERY_KEY_MERCH,
-  QUERY_KEY_TRACK_GROUPS,
-} from "queries/queryKeys";
+import { QUERY_KEY_MERCH, QUERY_KEY_TRACK_GROUPS } from "queries/queryKeys";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
@@ -116,11 +113,11 @@ const PriceRow: React.FC<{
           )}
         </div>
       </div>
-      <form
-        className="flex items-center gap-2 flex-wrap"
-        onSubmit={commit}
-      >
-        <span id={currencyHintId} className="text-(--mi-light-foreground-color)">
+      <form className="flex items-center gap-2 flex-wrap" onSubmit={commit}>
+        <span
+          id={currencyHintId}
+          className="text-(--mi-light-foreground-color)"
+        >
           {getCurrencySymbol(currency)}
         </span>
         <InputEl
@@ -206,7 +203,12 @@ const ManageArtistPricing: React.FC = () => {
       </p>
 
       <section className="flex flex-col gap-2 mt-4">
-        <h2 className="text-lg font-semibold">{t("releases")}</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">{t("releases")}</h2>
+          {!!releases.length && (
+            <small>{t("totalCount", { count: releases.length })}</small>
+          )}
+        </div>
         {isLoadingReleases ? (
           <LoadingBlocks />
         ) : releases.length === 0 ? (
@@ -217,7 +219,8 @@ const ManageArtistPricing: React.FC = () => {
           <ul className="border border-(--mi-darken-x-background-color) rounded list-none p-0 m-0">
             {releases.map((release) => {
               const receivesPayment =
-                (release.paymentToUserId ?? release.artist?.userId) === user?.id;
+                (release.paymentToUserId ?? release.artist?.userId) ===
+                user?.id;
               const recipientName =
                 !receivesPayment && release.paymentToUser?.name
                   ? release.paymentToUser.name

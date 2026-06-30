@@ -113,10 +113,15 @@ const ReleasesSection: React.FC<{
   showArtist?: boolean;
   filter?: React.ReactNode;
 }> = ({ title, description, releases, showArtist, filter }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+
   if (releases.length === 0 && !filter) return null;
   return (
     <div className="flex gap-2 flex-col">
-      <h3>{title}</h3>
+      <div className="flex justify-between items-center">
+        <h3>{title}</h3>{" "}
+        <small>{t("totalCount", { count: releases.length })}</small>
+      </div>
       {description && (
         <p className="text-sm text-(--mi-secondary-text-color) mb-1">
           {description}
