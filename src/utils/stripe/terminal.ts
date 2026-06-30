@@ -95,9 +95,8 @@ export const processSetupIntentOnReader = async ({
     {
       setup_intent: setupIntentId,
       customer_consent_collected: true,
-      // allow_redisplay is required by the Stripe API spec for process_setup_intent
-      process_config: { allow_redisplay: "always" } as any,
-    },
+      allow_redisplay: "always",
+    } as any,
     { stripeAccount: stripeAccountId }
   );
 };
