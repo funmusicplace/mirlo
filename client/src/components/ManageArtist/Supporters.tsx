@@ -36,13 +36,71 @@ type SupportTier = {
   createdAt: string;
   amount: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
-  artistUserSubscriptionCharges?: { id: string; transactionId?: string }[];
+  artistUserSubscriptionCharges?: {
+    id: string;
+    transactionId?: string;
+    // Charges are returned newest-first. The transaction carries the actual
+    // fees Stripe and Mirlo took for that charge (in cents).
+    transaction?: {
+      platformCut: number | null;
+      stripeCut: number | null;
+      paymentStatus: "PENDING" | "COMPLETED" | "FAILED";
+    } | null;
+  }[];
 };
 
 // A subscription with no associated transaction was added by the artist
 // without payment (e.g. a comp), so we surface it as "Free".
 const isFreeSubscription = (r: SupportTier) =>
   !r.artistUserSubscriptionCharges?.some((charge) => charge.transactionId);
+
+// Stripe's standard processing fee (2.9% + $0.30 per transaction), matching
+// the estimate used in PlatformPercent.tsx. Amounts are in major units here.
+const STRIPE_PERCENT_FEE = 0.029;
+const STRIPE_FLAT_FEE = 0.3;
+
+// The most recent completed charge carries the real fees Stripe and Mirlo
+// took. Charges arrive newest-first from the API.
+const latestCompletedCharge = (r: SupportTier) =>
+  r.artistUserSubscriptionCharges?.find(
+    (c) => c.transaction?.paymentStatus === "COMPLETED"
+  );
+
+// Sums the platform + Stripe fees deducted from a set of supporters each
+// billing cycle. Free comp subscriptions incur no fees. For subscriptions
+// that have already been billed we use the actual amounts recorded on the
+// transaction; for any paying subscription not yet billed we fall back to an
+// estimate (platform percent + Stripe's 2.9% + $0.30) and flag the result.
+const sumDeductions = (supporters: SupportTier[]) => {
+  let platformFee = 0;
+  let stripeFee = 0;
+  let isEstimated = false;
+
+  for (const r of supporters) {
+    if (isFreeSubscription(r)) {
+      continue;
+    }
+
+    const transaction = latestCompletedCharge(r)?.transaction;
+    if (transaction && transaction.stripeCut != null) {
+      platformFee += (transaction.platformCut ?? 0) / 100;
+      stripeFee += transaction.stripeCut / 100;
+    } else {
+      const amount = r.amount / 100;
+      platformFee +=
+        amount * ((r.artistSubscriptionTier.platformPercent ?? 7) / 100);
+      stripeFee += amount * STRIPE_PERCENT_FEE + STRIPE_FLAT_FEE;
+      isEstimated = true;
+    }
+  }
+
+  return {
+    platformFee,
+    stripeFee,
+    total: platformFee + stripeFee,
+    isEstimated,
+  };
+};
 
 const Supporters = () => {
   const { data: artist } = useArtistQuery();
@@ -90,6 +148,8 @@ const Supporters = () => {
   const amountMonthly = sumBy(monthlySupporters, "amount");
   const amountAnnual = sumBy(annualSupporters, "amount");
 
+  const monthlyDeductions = sumDeductions(monthlySupporters);
+
   const currency = artist?.user?.currency ?? "usd";
 
   const totalSupporters = monthlySupporters.length + annualSupporters.length;
@@ -109,6 +169,41 @@ const Supporters = () => {
           <StatCard
             label={t("totalComingInMonthly")}
             value={moneyDisplay({ amount: amountMonthly / 100, currency })}
+            subtext={
+              monthlyDeductions.total > 0 && (
+                <>
+                  <div>
+                    {t("lessPlatformFee", {
+                      amount: moneyDisplay({
+                        amount: monthlyDeductions.platformFee,
+                        currency,
+                      }),
+                    })}
+                  </div>
+                  <div>
+                    {t(
+                      monthlyDeductions.isEstimated
+                        ? "lessStripeFeeEstimated"
+                        : "lessStripeFee",
+                      {
+                        amount: moneyDisplay({
+                          amount: monthlyDeductions.stripeFee,
+                          currency,
+                        }),
+                      }
+                    )}
+                  </div>
+                  <div className="font-semibold">
+                    {t("netMonthly", {
+                      amount: moneyDisplay({
+                        amount: amountMonthly / 100 - monthlyDeductions.total,
+                        currency,
+                      }),
+                    })}
+                  </div>
+                </>
+              )
+            }
           />
           <StatCard
             label={t("totalComingInAnnually")}
