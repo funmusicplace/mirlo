@@ -11,6 +11,8 @@ import { useAuthContext } from "state/AuthContext";
 import useIsSubscribedToArtist from "utils/useIsSubscribedToArtist";
 
 import Box from "./Box";
+import DividerWithText from "./DividerWithText";
+import FollowArtistFromFediverse from "./FollowArtistFromFediverse";
 import Modal from "./Modal";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
 
@@ -145,6 +147,12 @@ const FollowArtist: React.FC<{
         )}
         {(hasNoneDefaultSubscriptionTiers || !user) && (
           <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
+        )}
+        {artist.activityPub && (
+          <>
+            <DividerWithText text={t("orFollowFromFediverse")} />
+            <FollowArtistFromFediverse artist={artist} />
+          </>
         )}
       </Modal>
 

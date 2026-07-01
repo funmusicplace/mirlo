@@ -831,7 +831,7 @@ const routes: RouteObject[] = [
                 path: "connect",
                 async lazy() {
                   const { default: Component } =
-                    await import("components/Artist/ArtistTip");
+                    await import("components/Artist/Connect");
                   return { Component };
                 },
               },
