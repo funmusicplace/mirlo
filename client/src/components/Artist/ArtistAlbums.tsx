@@ -76,23 +76,21 @@ const ArtistAlbums: React.FC = () => {
       )}
       {!artist.isLabelProfile && <SortableArtistAlbums />}
       {artist.isLabelProfile && (
-        <>
-          <TrackgroupGrid
-            gridNumber={"3"}
-            wrap
-            as="ul"
-            role="list"
-            aria-labelledby="artist-navlink-releases"
-          >
-            {releases?.results.map((release) => (
-              <ArtistTrackGroup
-                key={release.id}
-                trackGroup={release}
-                showArtist
-              />
-            ))}
-          </TrackgroupGrid>
-        </>
+        <TrackgroupGrid
+          gridNumber={String(artist.properties?.releasesPerRow ?? 3)}
+          wrap
+          as="ul"
+          role="list"
+          aria-labelledby="artist-navlink-releases"
+        >
+          {releases?.results.map((release) => (
+            <ArtistTrackGroup
+              key={release.id}
+              trackGroup={release}
+              showArtist
+            />
+          ))}
+        </TrackgroupGrid>
       )}
       <div
         className={css`

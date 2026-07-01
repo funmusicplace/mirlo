@@ -27,6 +27,7 @@ import UploadArtistImage from "../UploadArtistImage";
 import ArtistFormColors from "./ArtistFormColors";
 import CustomNamesForTabs from "./CustomNamesForTabs";
 import LabelConfirmation from "./LabelConfirmation";
+import LayoutSettings from "./LayoutSettings";
 import ThankYouMessageEditors from "./ThankYouMessageEditors";
 
 export interface ShareableTrackgroup {
@@ -76,6 +77,7 @@ export type ArtistFormData = {
       groupName: string;
     };
     tabOrder?: Array<"roster" | "releases" | "posts" | "support" | "merch">;
+    releasesPerRow?: number;
   };
 };
 
@@ -100,6 +102,7 @@ const generateDefaults = (existing?: Artist) => {
           supportButton: "Support",
           roster: "Roster",
         },
+        releasesPerRow: 3,
       },
       existing?.properties ?? {}
     ),
@@ -421,6 +424,7 @@ export const CustomizeLook: React.FC = () => {
               </FormComponent>
             </ArtistFormSection>
             <CustomNamesForTabs />
+            <LayoutSettings />
             <ArtistFormSection isOdd>
               <ThankYouMessageEditors
                 artist={artist}
