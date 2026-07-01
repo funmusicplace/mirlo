@@ -1,7 +1,8 @@
-import { Prisma } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
-import { deleteTrackGroup } from "../utils/trackGroup";
+import { Prisma } from "@mirlo/prisma/client";
+
 import logger from "../logger";
+import { deleteTrackGroup } from "../utils/trackGroup";
 import { deleteTrack } from "../utils/tracks";
 
 const cleanUpTrackGroups = async () => {

@@ -1,6 +1,7 @@
-import { Job } from "bullmq";
-import path from "path";
 import { readdirSync, stat, statSync, unlink } from "fs";
+import path from "path";
+
+import { Job } from "bullmq";
 
 function walkDir(dir: string, callback: (filePath: string) => void) {
   readdirSync(dir).forEach((f) => {

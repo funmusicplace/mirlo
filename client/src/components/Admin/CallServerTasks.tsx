@@ -3,12 +3,9 @@ import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
-import Tabs from "components/common/Tabs";
 import React from "react";
 import { useForm } from "react-hook-form";
-
 import { useTranslation } from "react-i18next";
-import { NavLink } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 

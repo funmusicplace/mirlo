@@ -1,10 +1,11 @@
 import { promises as fsPromises } from "fs";
+
 import logger from "../../logger";
+import { startCleaningUpOldFiles } from "../../queues/clean-up-old-files-queue";
 import {
   removeObjectsFromBucket,
   trackGroupFormatBucket,
 } from "../../utils/minio";
-import { startCleaningUpOldFiles } from "../../queues/clean-up-old-files-queue";
 
 const cleanUpFiles = async (incomingFolder: string) => {
   logger.info("cleanUpFiles");
@@ -13,7 +14,7 @@ const cleanUpFiles = async (incomingFolder: string) => {
     const bucket = split[0];
     const albumId = split[1];
     logger.info(
-      `cleaning up ${albumId ?? "all files"} in the trackgroup minio container`
+      `cleaning up ${albumId ?? "all files"} in the ${trackGroupFormatBucket} container`
     );
 
     await removeBucket(bucket, albumId);

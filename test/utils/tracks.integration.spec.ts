@@ -8,6 +8,7 @@ import { afterEach, describe, it } from "mocha";
 import { parseFile } from "music-metadata";
 import { ITag } from "music-metadata/lib/type";
 
+import { Format } from "../../src/jobs/generate-album";
 import { convertAudioToFormat } from "../../src/utils/tracks";
 import { createSilentWavBuffer } from "../utils";
 
@@ -57,12 +58,14 @@ const convertAudio = async ({
   trackGroup,
   inputFile,
   outputBasename,
+  format = { format: "mp3", audioCodec: "libmp3lame" },
 }: {
   track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
   artist: Artist;
   trackGroup: { title: string | null; coverLocation?: string };
   inputFile: string;
   outputBasename: string;
+  format?: Format;
 }) => {
   await new Promise<void>((resolve, reject) => {
     const source = fsPromises
@@ -80,10 +83,7 @@ const convertAudio = async ({
             trackGroup,
           },
           stream,
-          {
-            format: "mp3",
-            audioCodec: "libmp3lame",
-          },
+          format,
           outputBasename,
           reject,
           () => resolve()
@@ -93,6 +93,18 @@ const convertAudio = async ({
 
     void source;
   });
+};
+
+// Vorbis comments (FLAC) are case-insensitive; ffmpeg writes "ALBUMARTIST" but
+// "artist" lowercase. Match on a case-insensitive key so the assertion mirrors
+// what a reader like Mixxx actually sees in the file. See #2245.
+const hasNativeTag = (
+  nativeTags: Record<string, ITag[]>,
+  id: string
+): boolean => {
+  return Object.values(nativeTags)
+    .flat()
+    .some((tag) => tag.id.toLowerCase() === id.toLowerCase());
 };
 
 const containsLyricsText = (value: unknown, expected: string): boolean => {
@@ -186,6 +198,52 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
     assert.ok(
       (parsed.common.picture?.length ?? 0) > 0,
       "expected embedded cover art"
+    );
+  });
+
+  // Regression test for #2245: FLAC downloads carried "Album artist" but were
+  // reported as missing an "Artist" field (Mixxx reads ARTIST, not
+  // ALBUMARTIST). Assert that both land in the exported FLAC.
+  it("writes flac with both artist and album_artist metadata", async () => {
+    tempDir = await fsPromises.mkdtemp(
+      path.join(os.tmpdir(), "mirlo-track-test-")
+    );
+
+    const inputWav = path.join(tempDir, "input.wav");
+    const outputBase = path.join(tempDir, "output");
+    const outputFlac = `${outputBase}.flac`;
+
+    await fsPromises.writeFile(inputWav, createSilentWavBuffer());
+
+    await convertAudio({
+      track: createTrack("audio-integration-flac", [
+        createTrackArtist({ artistName: "Lead Artist", role: "Vocal" }),
+      ]),
+      artist: { name: "Album Artist" } as Artist,
+      trackGroup: {
+        title: "Integration Album",
+      },
+      inputFile: inputWav,
+      outputBasename: outputBase,
+      format: { format: "flac", audioCodec: "flac" },
+    });
+
+    const parsed = await parseFile(outputFlac);
+
+    assert.equal(parsed.common.title, "Integration Track");
+    assert.equal(parsed.common.album, "Integration Album");
+    assert.equal(parsed.common.albumartist, "Album Artist");
+    assert.equal(parsed.common.artist, "Lead Artist");
+
+    // Guard against the exact #2245 symptom: the raw Vorbis comments must carry
+    // both fields, not just the normalized common view.
+    assert.ok(
+      hasNativeTag(parsed.native, "ARTIST"),
+      "expected an ARTIST vorbis comment"
+    );
+    assert.ok(
+      hasNativeTag(parsed.native, "ALBUMARTIST"),
+      "expected an ALBUMARTIST vorbis comment"
     );
   });
 });
