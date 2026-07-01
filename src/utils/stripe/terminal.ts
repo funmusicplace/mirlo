@@ -94,9 +94,11 @@ export const processSetupIntentOnReader = async ({
     readerId,
     {
       setup_intent: setupIntentId,
+      // On the pinned Stripe apiVersion 2023-08-16, process_setup_intent takes
+      // customer_consent_collected. allow_redisplay (which replaced it in later
+      // versions) does not exist here and is rejected as an unknown parameter.
       customer_consent_collected: true,
-      allow_redisplay: "always",
-    } as any,
+    },
     { stripeAccount: stripeAccountId }
   );
 };
