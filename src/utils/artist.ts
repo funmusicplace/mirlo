@@ -480,56 +480,30 @@ export const deleteStripeSubscriptions = async (
   });
 };
 
-// Schedules connected-account subscriptions to cancel at the end of the
-// current paid period instead of immediately. Stripe stops creating new
-// invoices and fires `customer.subscription.deleted` once the period ends,
-// which is when we flip `deletedAt` (see handleSubscriptionDeleted). Rows
-// without a stripeSubscriptionKey (free/follow tiers) are skipped — there is
-// no paid period to honour, so callers should delete those immediately.
-export const cancelStripeSubscriptionsAtPeriodEnd = async (
-  where: Prisma.ArtistUserSubscriptionWhereInput
+// Sends the buyer confirmation that their subscription has been cancelled.
+// For a paid subscription, `endsAt` is when access remains active until (the
+// end of the period they already paid for); for a free/follow tier it is null
+// and the cancellation is effective immediately.
+export const sendSubscriptionCancellationEmail = async (
+  email: string,
+  artist: Artist,
+  endsAt: Date | null
 ) => {
-  const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
-    where,
-    include: {
-      artistSubscriptionTier: true,
+  return sendMail({
+    data: {
+      template: "artist-subscription-cancelled",
+      message: {
+        to: email,
+      },
+      locals: {
+        artist,
+        email,
+        endsAt: endsAt ? endsAt.toISOString() : null,
+        host: process.env.API_DOMAIN,
+        client: (await getClient()).applicationUrl,
+      },
     },
-  });
-  await Promise.all(
-    stripeSubscriptions.map(async (sub) => {
-      if (sub.stripeSubscriptionKey) {
-        const artistUser = await prisma.user.findFirst({
-          where: {
-            artists: {
-              some: {
-                id: sub.artistSubscriptionTier.artistId,
-              },
-            },
-          },
-        });
-        try {
-          if (artistUser?.stripeAccountId) {
-            await stripe.subscriptions.update(
-              sub.stripeSubscriptionKey,
-              { cancel_at_period_end: true },
-              { stripeAccount: artistUser.stripeAccountId }
-            );
-          } else {
-            await stripe.subscriptions.update(sub.stripeSubscriptionKey, {
-              cancel_at_period_end: true,
-            });
-          }
-        } catch (e) {
-          console.error(
-            "Fail silently on scheduling stripe cancellation at period end",
-            e
-          );
-        }
-      }
-    })
-  ).catch((e) => {
-    console.error("truely a failure");
-  });
+  } as Job);
 };
 
 /**

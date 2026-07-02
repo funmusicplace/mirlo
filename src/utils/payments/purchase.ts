@@ -1,6 +1,8 @@
 import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import { uniq } from "lodash";
 
+import { sendSubscriptionCancellationEmail } from "../artist";
 import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
 import { getCurrency } from "../stripe/sessions";
@@ -185,4 +187,66 @@ export const initiateSubscription = async ({
     userEmail,
     userId,
   });
+};
+
+type CancellableSubscription = Prisma.ArtistUserSubscriptionGetPayload<{
+  include: { artistSubscriptionTier: true };
+}>;
+
+// Cancels a user's subscription to an artist and emails them a confirmation.
+// Paid subscriptions (with a `stripeSubscriptionKey`) are cancelled at period
+// end: billing stops but the row is kept — access stays until the processor's
+// subscription-deleted webhook flips `deletedAt` when the paid period ends. We
+// record `deleteReason` now so the UI can show a "cancellation scheduled" state.
+// Free/follow tiers have no paid period to honour, so they are removed
+// immediately.
+export const cancelUserSubscription = async (
+  subscription: CancellableSubscription,
+  userEmail: string
+) => {
+  const artistId = subscription.artistSubscriptionTier.artistId;
+
+  // Cancellation only needs the connected account — not the currency that
+  // resolveArtistPaymentContext also fetches from Stripe — so resolve the
+  // artist + account directly here. We don't filter on `enabled` so a
+  // subscription to a since-disabled artist can still be cancelled.
+  const artist = await prisma.artist.findFirst({
+    where: { id: artistId },
+    include: {
+      user: { select: { stripeAccountId: true } },
+      paymentToUser: { select: { stripeAccountId: true } },
+    },
+  });
+  const stripeAccountId =
+    artist?.paymentToUser?.stripeAccountId ?? artist?.user.stripeAccountId;
+
+  if (subscription.stripeSubscriptionKey) {
+    if (stripeAccountId) {
+      await getPaymentProcessor().cancelSubscription({
+        subscriptionKey: subscription.stripeSubscriptionKey,
+        accountId: stripeAccountId,
+        atPeriodEnd: true,
+      });
+    }
+
+    // Keep the row until the processor's webhook flips `deletedAt` at period
+    // end; record the reason now so the UI can show a "cancelled" state.
+    await prisma.artistUserSubscription.update({
+      where: { id: subscription.id },
+      data: { deleteReason: "USER_CANCELLED" },
+    });
+  } else {
+    // Free/follow tier: no paid period to honour, so remove it outright.
+    await prisma.artistUserSubscription.deleteMany({
+      where: { id: subscription.id },
+    });
+  }
+
+  if (artist) {
+    await sendSubscriptionCancellationEmail(
+      userEmail,
+      artist,
+      subscription.stripeSubscriptionKey ? subscription.nextBillingDate : null
+    );
+  }
 };
