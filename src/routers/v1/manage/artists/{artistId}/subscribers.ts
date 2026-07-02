@@ -10,6 +10,7 @@ import {
 import logger from "../../../../../logger";
 import { findArtistIdForURLSlug } from "../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../utils/download";
+import { AppError } from "../../../../../utils/error";
 import { grantSubscriptionTierReleases } from "../../../../../utils/subscriptionTier";
 
 const csvColumns = [
@@ -58,6 +59,14 @@ export default function () {
 
     try {
       const parsedId = await findArtistIdForURLSlug(artistId);
+
+      if (!parsedId) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Invalid artist id",
+        });
+      }
+
       const subscribers = await prisma.artistUserSubscription.findMany({
         where: {
           artistSubscriptionTier: {
@@ -138,20 +147,27 @@ export default function () {
     try {
       const parsedArtistId = await findArtistIdForURLSlug(artistId);
 
+      if (!parsedArtistId) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Invalid artist id",
+        });
+      }
+
       // When a specific tier is requested, add subscribers to it; otherwise
       // fall back to the artist's default (follow) tier.
       const tier = artistSubscriptionTierId
         ? await prisma.artistSubscriptionTier.findFirst({
             where: {
               id: Number(artistSubscriptionTierId),
-              artistId: parsedArtistId ?? undefined,
+              artistId: parsedArtistId,
               deletedAt: null,
             },
           })
         : await prisma.artistSubscriptionTier.findFirst({
             where: {
               isDefaultTier: true,
-              artistId: parsedArtistId ?? undefined,
+              artistId: parsedArtistId,
             },
           });
 
