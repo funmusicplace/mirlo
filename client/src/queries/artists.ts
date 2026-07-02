@@ -261,6 +261,40 @@ export function queryArtistSupporters(opts: {
   });
 }
 
+export type ArtistSubscriber = {
+  id: number;
+  user: User;
+  createdAt: string;
+  amount: number;
+  artistSubscriptionTier: ArtistSubscriptionTier;
+  artistUserSubscriptionCharges?: {
+    id: string;
+    transactionId?: string;
+    transaction?: {
+      platformCut: number | null;
+      stripeCut: number | null;
+      paymentStatus: "PENDING" | "COMPLETED" | "FAILED";
+    } | null;
+  }[];
+};
+
+const fetchManageArtistSubscribers: QueryFunction<
+  { results: ArtistSubscriber[] },
+  ["fetchManageArtistSubscribers", { artistId?: number }, ...any]
+> = ({ queryKey: [_, { artistId }], signal }) => {
+  return api.get(`v1/manage/artists/${artistId}/subscribers`, { signal });
+};
+
+export function queryManageArtistSubscribers(opts: { artistId?: number }) {
+  return queryOptions({
+    queryKey: ["fetchManageArtistSubscribers", opts, QUERY_KEY_ARTISTS],
+    queryFn: fetchManageArtistSubscribers,
+    // artistId is undefined until the parent artist query resolves; without
+    // this the request goes out as ".../artists/undefined/subscribers".
+    enabled: !!opts.artistId,
+  });
+}
+
 export type ArtistQueryOptions = {
   skip?: number;
   take?: number;

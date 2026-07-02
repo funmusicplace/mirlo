@@ -6,11 +6,14 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: "en" } }),
 }));
 
-const mockGetMany = vi.fn();
-vi.mock("services/api", () => ({
-  default: {
-    getMany: (...args: unknown[]) => mockGetMany(...args),
-  },
+// The component reads subscribers via a React Query hook; stub the hook so the
+// test drives the rendered table directly.
+const mockData = vi.fn();
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: () => ({ data: mockData(), refetch: vi.fn() }),
+}));
+vi.mock("queries", () => ({
+  queryManageArtistSubscribers: () => ({}),
 }));
 
 vi.mock("utils/useArtistQuery", () => ({
@@ -64,14 +67,15 @@ const makeSupporter = (overrides: object = {}) => ({
 // ---- helpers ----------------------------------------------------------------
 
 const mockSubscribers = (results: object[]) => {
-  mockGetMany.mockResolvedValue({ results });
+  mockData.mockReturnValue({ results });
 };
 
 // ---- tests ------------------------------------------------------------------
 
 describe("Supporters", () => {
   beforeEach(() => {
-    mockGetMany.mockReset();
+    mockData.mockReset();
+    mockData.mockReturnValue({ results: [] });
   });
 
   test("shows a Free pill for a supporter with no associated transaction", async () => {

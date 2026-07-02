@@ -1,23 +1,23 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { ArtistSection } from "pages/:artistId/Index";
+import { useQuery } from "@tanstack/react-query";
 import DropdownMenu from "components/common/DropdownMenu";
 import Money, { moneyDisplay } from "components/common/Money";
 import Pill from "components/common/Pill";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
-import { sumBy } from "lodash";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import api from "services/api";
-import useArtistQuery from "utils/useArtistQuery";
-
-import { bp } from "../../../../../../constants";
-
 import ArtistSubscriberDataDownload from "components/ManageArtist/ArtistSubscriberDataDownload";
 import ArtistSubscriberUploadData from "components/ManageArtist/ArtistSubscriberUploadData";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
+import { sumBy } from "lodash";
+import { ArtistSection } from "pages/:artistId/Index";
+import { queryManageArtistSubscribers } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import useArtistQuery from "utils/useArtistQuery";
+
+import { bp } from "../../../../../../constants";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -108,42 +108,37 @@ const Index = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "artistSupporters",
   });
-  const userId = artist?.userId;
-  const [monthlySupporters, setMonthlySupporters] = React.useState<
-    SupportTier[]
-  >([]);
-  const [annualSupporters, setAnnualSupporters] = React.useState<SupportTier[]>(
-    []
+  const { data: subscribersData, refetch } = useQuery(
+    queryManageArtistSubscribers({ artistId })
   );
-  const [followers, setFollowers] = React.useState<SupportTier[]>([]);
 
-  const loadSupporters = React.useCallback(async () => {
-    const response = await api.getMany<SupportTier>(
-      `manage/artists/${artistId}/subscribers`
-    );
+  const subscribers = React.useMemo(
+    () => (subscribersData?.results ?? []) as SupportTier[],
+    [subscribersData]
+  );
 
-    setMonthlySupporters(
-      response.results.filter(
+  const monthlySupporters = React.useMemo(
+    () =>
+      subscribers.filter(
         (r) =>
           !r.artistSubscriptionTier.isDefaultTier &&
           r.artistSubscriptionTier.interval === "MONTH"
-      )
-    );
-    setAnnualSupporters(
-      response.results.filter(
+      ),
+    [subscribers]
+  );
+  const annualSupporters = React.useMemo(
+    () =>
+      subscribers.filter(
         (r) =>
           !r.artistSubscriptionTier.isDefaultTier &&
           r.artistSubscriptionTier.interval === "YEAR"
-      )
-    );
-    setFollowers(
-      response.results.filter((r) => r.artistSubscriptionTier.isDefaultTier)
-    );
-  }, [artistId, userId]);
-
-  React.useEffect(() => {
-    loadSupporters();
-  }, [loadSupporters]);
+      ),
+    [subscribers]
+  );
+  const followers = React.useMemo(
+    () => subscribers.filter((r) => r.artistSubscriptionTier.isDefaultTier),
+    [subscribers]
+  );
 
   const amountMonthly = sumBy(monthlySupporters, "amount");
   const amountAnnual = sumBy(annualSupporters, "amount");
@@ -162,7 +157,7 @@ const Index = () => {
 
           <DropdownMenu dashed>
             <ArtistSubscriberDataDownload />
-            <ArtistSubscriberUploadData onDone={loadSupporters} />
+            <ArtistSubscriberUploadData onDone={() => refetch()} />
           </DropdownMenu>
         </div>
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 mb-4">
