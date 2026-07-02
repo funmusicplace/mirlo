@@ -1,0 +1,35 @@
+# The reverse proxy that fronts all previews. Runs once per host, long-lived:
+#
+#   docker network create caddy-net           # once
+#   cd preview
+#   ACME_EMAIL=... CLOUDFLARE_API_TOKEN=... docker compose -f docker-compose.caddy.yml up -d --build
+#
+# (Put ACME_EMAIL / CLOUDFLARE_API_TOKEN in preview/.env.caddy and pass
+# --env-file .env.caddy instead of inlining them.)
+
+services:
+  caddy:
+    build:
+      context: .
+      dockerfile: Caddy.Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - caddy-net
+
+networks:
+  caddy-net:
+    external: true
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}

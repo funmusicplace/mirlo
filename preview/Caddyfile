@@ -1,0 +1,30 @@
+# Reverse proxy for full-stack branch previews.
+#
+# One wildcard site block serves every preview. The subdomain is captured and used
+# directly as the upstream host: each preview's `api` container joins the shared
+# `caddy-net` network with a network alias equal to its subdomain (see
+# docker-compose.preview.yml), so `pr-123` resolves to that preview's api.
+#
+# TLS uses a single DNS-01 wildcard certificate for *.preview.mirlo.space, so no
+# per-host certificate issuance is needed. Requires a Cloudflare API token scoped
+# to edit DNS on the mirlo.space zone (see preview/Caddy.Dockerfile).
+
+{
+	email {env.ACME_EMAIL}
+}
+
+*.preview.mirlo.space {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+
+	@preview host_regexp preview ^(?P<sub>[a-z0-9][a-z0-9-]*)\.preview\.mirlo\.space$
+	handle @preview {
+		reverse_proxy {re.preview.sub}:3000
+	}
+
+	# Subdomain with no running preview.
+	handle {
+		respond "No such preview" 404
+	}
+}

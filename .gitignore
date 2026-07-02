@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .env
+preview/.env.preview
+preview/.env.caddy
 /data
 error.log
 client/build
