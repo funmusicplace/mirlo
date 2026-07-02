@@ -341,6 +341,26 @@ describe("purchase", () => {
   // These tests call initiatePayment / initiateSubscription directly so sinon stubs
   // work (same process), without going through the HTTP API container.
   describe("initiatePayment (direct)", () => {
+    // Stubs the two Stripe calls initiatePayment makes for an *online* purchase:
+    // the connected-account currency lookup and the PaymentIntent creation.
+    // Returns the create stub so tests can assert on the params/metadata that
+    // initiatePayment hands to Stripe.
+    const stubStripeForOnline = (currency = "usd") => {
+      sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
+        id: "acct_online",
+        default_currency: currency,
+        country: "US",
+      } as unknown as Stripe.Response<Stripe.Account>);
+      return sinon.stub(stripeUtils.stripe.paymentIntents, "create").resolves({
+        id: "pi_online_test",
+        client_secret: "pi_secret_test",
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+    };
+
+    const metadataOf = (createStub: sinon.SinonStub): Record<string, string> =>
+      (createStub.firstCall.args[0] as Stripe.PaymentIntentCreateParams)
+        .metadata as Record<string, string>;
+
     it("should return paymentIntentId for a terminal trackGroup purchase", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
@@ -380,6 +400,175 @@ describe("purchase", () => {
       assert.equal(
         (result as { paymentIntentId: string }).paymentIntentId,
         "pi_terminal_tg"
+      );
+    });
+
+    it("tags a single online trackGroup purchase with purchaseType 'trackGroup' and its trackGroupId", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_tg",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const createStub = stubStripeForOnline();
+
+      const result = await initiatePayment({
+        artistId: artist.id,
+        items: [
+          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
+        ],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+      });
+
+      assert.ok(
+        "clientSecret" in result,
+        "an online purchase returns a secret"
+      );
+      const metadata = metadataOf(createStub);
+      assert.equal(metadata.purchaseType, "trackGroup");
+      assert.equal(metadata.trackGroupId, String(tg.id));
+    });
+
+    it("keeps purchaseType 'trackGroup' for several trackGroup items (uniq collapses the type)", async () => {
+      // Regression guard: a Set built over item *objects* never collapsed to a
+      // single unique type, so a trackGroup cart wrongly defaulted to "merch"
+      // (and shipped without a trackGroupId), so the webhook never recorded it.
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_multi_tg",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg1 = await createTrackGroup(artist.id, {
+        title: "First album",
+        minPrice: 1000,
+      });
+      const tg2 = await createTrackGroup(artist.id, {
+        title: "Second album",
+        minPrice: 500,
+      });
+
+      const createStub = stubStripeForOnline();
+
+      await initiatePayment({
+        artistId: artist.id,
+        items: [
+          { type: "trackGroup", id: String(tg1.id), quantity: 1, amount: 1000 },
+          { type: "trackGroup", id: String(tg2.id), quantity: 1, amount: 500 },
+        ],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+      });
+
+      const metadata = metadataOf(createStub);
+      assert.equal(metadata.purchaseType, "trackGroup");
+      // trackGroupId points at the first trackGroup in the cart.
+      assert.equal(metadata.trackGroupId, String(tg1.id));
+    });
+
+    it("tags a single online tip as purchaseType 'tip' and omits trackGroupId", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_tip",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+
+      const createStub = stubStripeForOnline();
+
+      await initiatePayment({
+        artistId: artist.id,
+        items: [{ type: "tip", quantity: 1, amount: 500 }],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+      });
+
+      const metadata = metadataOf(createStub);
+      assert.equal(metadata.purchaseType, "tip");
+      assert.ok(!("trackGroupId" in metadata), "a tip carries no trackGroupId");
+    });
+
+    it("falls back to purchaseType 'merch' for mixed item types and omits trackGroupId", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_mixed",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const createStub = stubStripeForOnline();
+
+      await initiatePayment({
+        artistId: artist.id,
+        items: [
+          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
+          { type: "tip", quantity: 1, amount: 500 },
+        ],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+      });
+
+      const metadata = metadataOf(createStub);
+      assert.equal(metadata.purchaseType, "merch");
+      assert.ok(
+        !("trackGroupId" in metadata),
+        "a mixed cart carries no trackGroupId"
+      );
+    });
+
+    it("charges the summed amount on the artist's connected account and echoes the cart in metadata", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_sum",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const createStub = stubStripeForOnline("eur");
+
+      const items = [
+        {
+          type: "trackGroup" as const,
+          id: String(tg.id),
+          quantity: 1,
+          amount: 1200,
+          message: "thanks!",
+        },
+      ];
+
+      const result = await initiatePayment({
+        artistId: artist.id,
+        items,
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+      });
+
+      const params = createStub.firstCall
+        .args[0] as Stripe.PaymentIntentCreateParams;
+      const options = createStub.firstCall.args[1] as Stripe.RequestOptions;
+      assert.equal(params.amount, 1200);
+      assert.equal(params.currency, "eur");
+      assert.equal(options.stripeAccount, "acct_meta_sum");
+
+      const metadata = metadataOf(createStub);
+      assert.equal(metadata.items, JSON.stringify(items));
+      assert.equal(metadata.userEmail, buyer.email);
+      assert.equal(metadata.userId, String(buyer.id));
+      assert.equal(metadata.artistId, String(artist.id));
+
+      assert.ok("clientSecret" in result);
+      assert.equal(
+        (result as { stripeAccountId: string }).stripeAccountId,
+        "acct_meta_sum"
+      );
+      assert.equal(
+        (result as { paymentIntentId: string }).paymentIntentId,
+        "pi_online_test"
       );
     });
   });
