@@ -1,4 +1,5 @@
 import prisma from "@mirlo/prisma";
+import { uniq } from "lodash";
 
 import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
@@ -90,7 +91,7 @@ export const initiatePayment = async ({
       : undefined
   );
 
-  const purchaseTypes = [...new Set(items.map((i) => i.type))];
+  const purchaseTypes = uniq(items.map((i) => i.type));
   const purchaseType = purchaseTypes.length === 1 ? purchaseTypes[0] : "merch";
 
   const metadata: Record<string, string> = {
