@@ -142,7 +142,7 @@ const coverRootClass = css`
   }
 
   .overlay-actions [data-playable-square-action] button,
-  .overlay-actions button.play-button {
+  .overlay-actions [data-playable-play-control] button {
     width: 2rem !important;
     height: 2rem !important;
     min-width: 2rem;
@@ -171,7 +171,7 @@ const coverRootClass = css`
     }
 
     .overlay-actions [data-playable-square-action] button,
-    .overlay-actions button.play-button {
+    .overlay-actions [data-playable-play-control] button {
       width: 3rem !important;
       height: 3rem !important;
       min-width: 3rem;
@@ -224,7 +224,7 @@ const overlayActionsClass = css`
     z-index: 1;
   }
 
-  button.play-button {
+  [data-playable-play-control] button {
     padding: 0 !important;
     flex: 0 0 auto;
   }
@@ -343,10 +343,14 @@ function PlayableCover({
           )}
         >
           {overlayActions}
-          {!currentlyPlaying && trackIds.length > 0 && (
-            <PlayButton className="[&_button]:!mr-0" onPlay={onClickPlay} />
-          )}
-          {currentlyPlaying && <PauseButton />}
+          <div data-playable-play-control>
+            {!currentlyPlaying && trackIds.length > 0 && (
+              <PlayButton className="[&_button]:!mr-0" onPlay={onClickPlay} />
+            )}
+            {currentlyPlaying && (
+              <PauseButton className="[&_button]:!mr-0" />
+            )}
+          </div>
         </div>
 
         <Link
