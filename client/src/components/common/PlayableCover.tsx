@@ -37,13 +37,13 @@ export function buildCoverImage(coverSizes?: { [key: number]: string }) {
 }
 
 /**
- * CSS class that reveals a {@link PlayableCover} overlay on hover/focus-within.
+ * CSS class that reveals a {@link PlayableCover} overlay on hover or keyboard focus.
  * Apply to the card wrapper (e.g. {@link ReleaseCard}, {@link TrackCard}) so the
  * overlay appears when the pointer is anywhere on the card, not only the image.
  */
 export const playableCoverCardRevealClass = css`
   &:hover [data-playable-overlay],
-  &:focus-within [data-playable-overlay] {
+  &:focus-within:has(:focus-visible) [data-playable-overlay] {
     opacity: 1 !important;
     background-color: rgba(0, 0, 0, 0.25) !important;
   }
@@ -183,7 +183,7 @@ const coverRootClass = css`
 
 const coverHoverClass = css`
   &:hover [data-playable-overlay],
-  &:focus-within [data-playable-overlay] {
+  &:focus-within:has(:focus-visible) [data-playable-overlay] {
     opacity: 1 !important;
     background-color: rgba(0, 0, 0, 0.25) !important;
   }
