@@ -45,27 +45,27 @@ export default function ErrorPage() {
     t("unexpectedError");
 
   return (
-    <div className="mx-auto flex min-h-[70vh] w-full max-w-2xl flex-col items-center justify-center px-6 py-12 text-center">
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-2xl flex-col items-center justify-center bg-(--mi-background-color) px-6 py-12 text-center text-(--mi-text-color)">
       <img
         src="/static/images/stencil-bird.png"
         alt="Mirlo bird"
-        className="mb-6 h-28 w-28"
+        className="mb-6 h-28 w-28 [[data-mi-high-contrast=dark]_&]:invert"
       />
       <h1 className="mb-3 text-3xl font-semibold">{t("reactError")}</h1>
       <p className="mb-6 text-base">{t("unexpectedError")}</p>
-      <p className="mb-8 max-w-xl text-sm opacity-80">
+      <p className="mb-8 max-w-xl text-sm text-(--mi-secondary-text-color)">
         <i>{errorMessage}</i>
       </p>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <ButtonLink to="/" size="big">
-          Go back home
+          {t("goHome", { keyPrefix: "notFound" })}
         </ButtonLink>
         <button
           type="button"
-          className="rounded border border-current px-4 py-2 text-sm"
+          className="rounded border border-(--mi-text-color) px-4 py-2 text-sm text-(--mi-text-color) hover:bg-(--mi-button-color) hover:text-(--mi-button-text-color)"
           onClick={() => window.location.reload()}
         >
-          Reload page
+          {t("reloadPage")}
         </button>
       </div>
     </div>

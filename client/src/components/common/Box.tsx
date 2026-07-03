@@ -71,21 +71,25 @@ const Box = styled.div<{
         return `
             background: var(--mi-success-background-color);
             border: var(--mi-success-background-color) 1px solid;
-            color: var(--mi-white);
+            color: var(--mi-success-foreground-color);
+
+            svg {
+              fill: currentColor;
+            }
         `;
       case "info":
         return `
           background-color: var(--mi-info-background-color);
-          color: var(--mi-white);
+          color: var(--mi-info-foreground-color, var(--mi-white));
         `;
       case "warning":
         return `
             background: var(--mi-warning-background-color);
             border: var(--mi-warning-background-color) 1px solid;
-            color: var(--mi-text-color);
+            color: var(--mi-warning-foreground-color);
 
             a {
-              color: var(--mi-white);
+              color: var(--mi-warning-foreground-color);
             }
           `;
       default:

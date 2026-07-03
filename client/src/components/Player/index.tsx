@@ -89,7 +89,7 @@ const Player = () => {
   return createPortal(
     <div
       data-tone={tone}
-      className={css`
+      className={`mi-player-root ${css`
         --mi-fixed-bg-color: var(--mi-off-white);
         --mi-fixed-fg-color: var(--mi-black);
 
@@ -97,7 +97,7 @@ const Player = () => {
           --mi-fixed-bg-color: var(--mi-black);
           --mi-fixed-fg-color: var(--mi-off-white);
         }
-      `}
+      `}`}
     >
       <PlayerActions />
       <div

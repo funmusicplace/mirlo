@@ -31,6 +31,7 @@ const ChildrenWrapper = styled.div`
   min-height: 0;
   overflow: hidden;
   background-color: var(--mi-background-color);
+  color: var(--mi-text-color);
   border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) 0 0;
   padding-top: var(--mi-border-radius-x);
 `;
@@ -117,47 +118,29 @@ const Content = styled.div<ContentProps>`
   }
 `;
 
-const closeBase = `
+const closeButton = css`
+  color: var(--mi-text-color) !important;
   background: transparent !important;
   background-color: transparent !important;
-  border: none;
-  filter: none !important;
-
-  &:hover:not(:disabled),
-  &:focus,
-  &:focus-visible {
-    background: transparent !important;
-    background-color: transparent !important;
-    filter: none !important;
-  }
-`;
-
-const closeOnLight = css`
-  color: var(--mi-black) !important;
-  ${closeBase}
-
-  svg {
-    fill: var(--mi-black) !important;
-  }
-`;
-
-const closeOnDark = css`
-  color: var(--mi-off-white) !important;
-  background: var(--mi-darken-background-color) !important;
-  background-color: var(--mi-darken-background-color) !important;
-  border: none;
+  border: 1px solid var(--mi-text-color) !important;
   filter: none !important;
 
   svg {
-    fill: var(--mi-off-white) !important;
+    fill: var(--mi-text-color) !important;
   }
 
   &:hover:not(:disabled),
   &:focus,
   &:focus-visible {
-    background: var(--mi-darken-x-background-color) !important;
-    background-color: var(--mi-darken-x-background-color) !important;
+    color: var(--mi-button-text-color) !important;
+    background: var(--mi-button-color) !important;
+    background-color: var(--mi-button-color) !important;
+    border-color: var(--mi-button-color) !important;
     filter: none !important;
+
+    svg {
+      fill: var(--mi-button-text-color) !important;
+    }
   }
 `;
 
@@ -240,7 +223,7 @@ export const Modal: React.FC<{
     return null;
   }
 
-  const closeClass = title ? closeOnLight : closeOnDark;
+  const closeClass = closeButton;
 
   return ReactDOM.createPortal(
     <FocusTrap
@@ -281,7 +264,7 @@ export const Modal: React.FC<{
                   var(--mi-border-radius-x) 0 0;
                 background-color: inherit;
                 ${title
-                  ? "border-bottom: solid 1px rgba(125, 125, 125, 0.3);"
+                  ? "border-bottom: 1px solid var(--mi-tint-x-color);"
                   : ""}
                 z-index: 12;
 
@@ -296,6 +279,7 @@ export const Modal: React.FC<{
                   flex: 85%;
                   max-width: 85%;
                   margin-bottom: 0 !important;
+                  color: var(--mi-text-color);
                 }
               `}
             >

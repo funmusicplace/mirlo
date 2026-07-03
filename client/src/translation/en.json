@@ -214,6 +214,13 @@
     "isLabelAccount": "Label/Collective account",
     "combineSubscriptionEmails": "Combine subscription emails into monthly report",
     "combineSubscriptionEmailsDescription": "Instead of an email for every subscription payment, receive a single monthly summary. You'll still be notified when someone new supports you.",
+    "highContrast": "High contrast mode",
+    "highContrastDescription": "Use high-contrast black and white colors across Mirlo for improved readability, including artist pages. Follows your system's light or dark preference.",
+    "highContrastSystem": "Use system setting",
+    "highContrastOn": "On",
+    "highContrastOff": "Off",
+    "highContrastSystemActive": "Currently on — your system uses increased contrast",
+    "highContrastSystemInactive": "Currently off — follows your system setting",
     "notifications": "Notifications",
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API.",
@@ -1818,7 +1825,8 @@
   },
   "errorPage": {
     "reactError": "React error ",
-    "unexpectedError": "Sorry, an unexpected error has occurred."
+    "unexpectedError": "Sorry, an unexpected error has occurred.",
+    "reloadPage": "Reload page"
   },
   "trackGroupEmbed": {
     "embed": "Embed {{ name }} in another website",

@@ -25,9 +25,9 @@ export const ShuffleButton: React.FC = () => {
       aria-label={t("shuffleMusic")}
       aria-pressed={!!shuffle}
       variant={shuffle ? "default" : "outlined"}
-      className={css`
+      className={`${shuffle ? "mi-player-toggle-active" : ""} ${css`
         ${shuffle ? "color: white !important;" : ""}
-      `}
+      `}`}
     />
   );
 };

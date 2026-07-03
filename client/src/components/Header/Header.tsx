@@ -6,6 +6,7 @@ import Button, { ButtonLink } from "components/common/Button";
 import Logo from "components/common/Logo";
 import UserBanner from "components/common/UserBanner";
 import Menu from "components/Header/Menu";
+import { useHighContrast } from "hooks/useHighContrast";
 import { queryInstanceArtist } from "queries/settings";
 import { useRef } from "react";
 import { createPortal } from "react-dom";
@@ -139,15 +140,15 @@ const Content = styled.div<{ artistId?: string }>`
 `;
 
 const menuButtonOverride = css`
-  color: var(--mi-contrast-color) !important;
+  color: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
   svg {
-    fill: var(--mi-contrast-color) !important;
+    fill: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
   }
   &:hover:not(:disabled) {
     background-color: var(--mi-tint-color) !important;
-    color: var(--mi-contrast-color) !important;
+    color: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
     svg {
-      fill: var(--mi-contrast-color) !important;
+      fill: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
     }
   }
 `;
@@ -165,8 +166,12 @@ const Header = () => {
   const artistBackground = artist?.background?.sizes;
 
   const show = useShow();
+  const highContrast = useHighContrast();
   const transparent =
-    !!artistBackground && !!artistId && !artist?.announcementText;
+    !!artistBackground &&
+    !!artistId &&
+    !artist?.announcementText &&
+    !highContrast;
 
   const stripTint = artistId ? "var(--mi-button-tint-color)" : "transparent";
 
@@ -189,6 +194,8 @@ const Header = () => {
 
   return (
     <HeaderWrapper
+      className="mi-site-header"
+      data-artist-header={artistId ? "" : undefined}
       transparent={transparent}
       hasBackground={!!artistBackground}
       show={show}
@@ -197,10 +204,12 @@ const Header = () => {
       artistId={!!artistId}
       stripTint={stripTint}
     >
-      <div className="md:hidden!">
-        <PageBackground />
-        <UserBanner />
-      </div>
+      {!highContrast && (
+        <div className="md:hidden!">
+          <PageBackground />
+          <UserBanner />
+        </div>
+      )}
       <div className="absolute w-full h-full md:hidden!"></div>
       <Content artistId={artistId}>
         <LogoWrapper />
@@ -210,7 +219,7 @@ const Header = () => {
               to={getArtistUrl(instanceArtist) + "/support"}
               collapsible
               startIcon={<FaHandHoldingHeart />}
-              className="block no-underline text-center hover:underline! color-white! &_svg:fill-white! bg-black! max-md:text-(--mi-font-size-xsmall)!"
+              className="mi-header-donate max-md:text-(--mi-font-size-xsmall)!"
             >
               {t("donateNow", { keyPrefix: "kickstarter" })}
             </ButtonLink>
@@ -225,7 +234,7 @@ const Header = () => {
                 location.pathname + location.search
               )}`}
               variant="transparent"
-              className={menuButtonOverride}
+              className={`mi-header-chrome-button ${menuButtonOverride}`}
             />
           )}
           {isLoggedIn && (
@@ -252,7 +261,7 @@ const Header = () => {
                 </svg>
               }
               variant="transparent"
-              className={menuButtonOverride}
+              className={`mi-header-chrome-button ${menuButtonOverride}`}
               title={t("menu", { keyPrefix: "headerMenu" })}
             />
           )}

@@ -167,7 +167,9 @@ function Index() {
                   i18nKey="thisWillLookLikeURL"
                   t={t}
                   components={{
-                    span: <span className="font-bold p-1 bg-gray-200"></span>,
+                    span: (
+                      <span className="font-bold p-1 rounded bg-(--mi-button-tint-color) text-(--mi-text-color)"></span>
+                    ),
                   }}
                   values={{
                     url: `${window.location.host}/${vals.urlSlug}`,
