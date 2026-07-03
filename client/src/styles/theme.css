@@ -254,11 +254,6 @@ html:not([data-mi-high-contrast])
   fill: var(--mi-button-color) !important;
 }
 
-[data-mi-high-contrast] .go-to-faux {
-  color: var(--mi-chip-text-color) !important;
-  background-color: var(--mi-chip-background-color) !important;
-}
-
 @media screen and (max-width: 768px) {
   [data-mi-high-contrast] .mi-site-header {
     top: 0 !important;
