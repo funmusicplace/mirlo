@@ -31,7 +31,7 @@ const WelcomeUrlSlugStep: React.FC<{
             t={t}
             components={{
               span: (
-                <span className="font-bold p-1 bg-(--mi-tint-x-color)"></span>
+                <span className="font-bold p-1 bg-(--mi-button-tint-color) text-(--mi-text-color)"></span>
               ),
             }}
             values={{

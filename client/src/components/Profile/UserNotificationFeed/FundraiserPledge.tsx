@@ -61,7 +61,7 @@ const FundraiserPledge: React.FC<{
         >
           {notification.content}
         </div>
-        <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
+        <div className="text-xs text-(--mi-secondary-text-color) mt-0.5">
           {formatRelativeTime({ date: notification.createdAt, i18n })}
         </div>
       </div>

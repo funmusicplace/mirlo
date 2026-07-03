@@ -41,8 +41,24 @@ const LI = styled.li<{
   margin-bottom: 0.75rem;
   position: relative;
   overflow: hidden;
-  border-left: 3px solid
-    ${(props) => categoryBorderColor(props.notificationType)};
+
+  ${(props) =>
+    props.compact
+      ? `
+    background-color: var(--mi-background-color);
+    box-shadow: none;
+    border: 1px solid var(--mi-notification-item-border-color);
+  `
+      : `
+    background-color: ${
+      props.isRead
+        ? "var(--mi-darken-background-color)"
+        : "var(--mi-tint-color)"
+    };
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: none;
+    border-left: 3px solid ${categoryBorderColor(props.notificationType)};
+  `}
 `;
 
 const NotificationFeedItem: React.FC<{

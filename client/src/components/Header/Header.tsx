@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import PageBackground from "components/common/ArtistBackground";
 import Button, { ButtonLink } from "components/common/Button";
 import Menu from "components/Header/Menu";
+import { useHighContrast } from "hooks/useHighContrast";
 import { queryInstanceArtist } from "queries/settings";
 import { useRef } from "react";
 import { createPortal } from "react-dom";
@@ -121,15 +122,15 @@ const Content = styled.div<{ artistId?: string }>`
 `;
 
 const menuButtonOverride = css`
-  color: var(--mi-contrast-color) !important;
+  color: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
   svg {
-    fill: var(--mi-contrast-color) !important;
+    fill: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
   }
   &:hover:not(:disabled) {
     background-color: var(--mi-tint-color) !important;
-    color: var(--mi-contrast-color) !important;
+    color: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
     svg {
-      fill: var(--mi-contrast-color) !important;
+      fill: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
     }
   }
 `;
@@ -147,8 +148,12 @@ const Header = () => {
   const artistBackground = artist?.background?.sizes;
 
   const show = useShow();
+  const highContrast = useHighContrast();
   const transparent =
-    !!artistBackground && !!artistId && !artist?.announcementText;
+    !!artistBackground &&
+    !!artistId &&
+    !artist?.announcementText &&
+    !highContrast;
 
   const stripTint = artistId ? "var(--mi-button-tint-color)" : "transparent";
 
@@ -171,6 +176,8 @@ const Header = () => {
 
   return (
     <HeaderWrapper
+      className="mi-site-header"
+      data-artist-header={artistId ? "" : undefined}
       transparent={transparent}
       hasBackground={!!artistBackground}
       show={show}
@@ -179,9 +186,11 @@ const Header = () => {
       artistId={!!artistId}
       stripTint={stripTint}
     >
-      <div className="md:hidden!">
-        <PageBackground />
-      </div>
+      {!highContrast && (
+        <div className="md:hidden!">
+          <PageBackground />
+        </div>
+      )}
       <div className="absolute w-full h-full md:hidden!"></div>
       <Content artistId={artistId}>
         <HeaderLogo />
@@ -206,7 +215,7 @@ const Header = () => {
                 location.pathname + location.search
               )}`}
               variant="transparent"
-              className={menuButtonOverride}
+              className={`mi-header-chrome-button ${menuButtonOverride}`}
             />
           )}
           {isLoggedIn && (
@@ -232,7 +241,7 @@ const Header = () => {
                 </svg>
               }
               variant="transparent"
-              className={menuButtonOverride}
+              className={`mi-header-chrome-button ${menuButtonOverride}`}
               title={t("menu", { keyPrefix: "headerMenu" })}
             />
           )}

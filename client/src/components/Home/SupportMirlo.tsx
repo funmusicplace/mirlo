@@ -26,7 +26,7 @@ const SupportMirlo = () => {
 
   return (
     <div
-      className={css`
+      className={`mi-support-mirlo-section ${css`
         width: 100%;
         background-color: var(--mi-button-color) !important;
         color: var(--mi-button-text-color);
@@ -34,7 +34,7 @@ const SupportMirlo = () => {
         @media screen and (max-width: ${bp.medium}px) {
           margin: 0;
         }
-      `}
+      `}`}
     >
       <SplashWrapper
         className={css`
@@ -76,7 +76,7 @@ const SupportMirlo = () => {
                 }
                 size="big"
                 rounded
-                className={css`
+                className={`mi-support-mirlo-button ${css`
                   display: block;
                   border-radius: 9999px !important;
                   text-decoration: none;
@@ -88,7 +88,12 @@ const SupportMirlo = () => {
                   &:hover {
                     text-decoration: underline;
                   }
-                `}
+
+                  @media (prefers-color-scheme: dark) {
+                    background-color: var(--mi-white) !important;
+                    color: var(--mi-black) !important;
+                  }
+                `}`}
               >
                 {t("supportTeam")}
               </ButtonLink>

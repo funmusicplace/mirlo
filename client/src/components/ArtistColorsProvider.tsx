@@ -1,9 +1,12 @@
 import { css, cx } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
+import { useHighContrast } from "hooks/useHighContrast";
+import { usePrefersColorScheme } from "hooks/usePrefersColorScheme";
 import { queryArtist, queryManagedArtist } from "queries";
 import React from "react";
 import { useParams } from "react-router-dom";
+import { resolveArtistColors } from "utils/resolveArtistColors";
 
 import {
   ARTIST_THEME_PROFILE,
@@ -62,31 +65,13 @@ export const ArtistColorsWrapper: React.FC<{
   );
 };
 
-export const useIsArtistPageLight = (): boolean | null => {
-  const ctx = React.useContext(ArtistColorsContext);
-  const bg = ctx?.colors.background;
-  if (!bg) return null;
-  return isSchemeLight(bg);
-};
-
-export const resolveColors = (raw?: ArtistColors): ArtistColors => {
-  const c = raw ?? {};
-  const pick = (...vals: Array<string | undefined>) =>
-    vals.find(isDefined) ?? undefined;
-  return {
-    button: pick(c.button),
-    buttonText: pick(c.buttonText),
-    background: pick(c.background),
-    text: pick(c.text),
-    secondaryText: pick(c.secondaryText, c.text),
-  };
-};
-
 const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
   children,
 }) => {
   const params = useParams();
   const artistId = params?.artistId ?? "";
+  const highContrast = useHighContrast();
+  const prefersDark = usePrefersColorScheme();
 
   const { data: managedArtist } = useQuery(
     queryManagedArtist(Number(artistId))
@@ -98,17 +83,24 @@ const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
     boolean | null
   >(null);
 
-  const rawColors =
-    preview ?? managedArtist?.properties?.colors ?? artist?.properties?.colors;
+  const rawColors = highContrast
+    ? undefined
+    : preview ?? managedArtist?.properties?.colors ?? artist?.properties?.colors;
 
   const savedTransparent = Boolean(
     managedArtist?.properties?.transparentContainer ??
     artist?.properties?.transparentContainer
   );
-  const transparentContainer =
-    transparentPreview === null ? savedTransparent : transparentPreview;
+  const transparentContainer = highContrast
+    ? false
+    : transparentPreview === null
+      ? savedTransparent
+      : transparentPreview;
 
-  const colors = React.useMemo(() => resolveColors(rawColors), [rawColors]);
+  const colors = React.useMemo(
+    () => resolveArtistColors(rawColors, { highContrast, prefersDark }),
+    [rawColors, highContrast, prefersDark]
+  );
 
   const contextValue = React.useMemo(
     () => ({
@@ -125,7 +117,8 @@ const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
   const varStyle: React.CSSProperties = hasArtist
     ? (deriveThemeVariables(
         colors,
-        ARTIST_THEME_PROFILE
+        ARTIST_THEME_PROFILE,
+				highContrast
       ) as React.CSSProperties)
     : {};
   const rootBg =
@@ -142,6 +135,7 @@ const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
         style={varStyle}
         className={cx(
           hasArtist && transparentContainer && "transparent-container",
+          hasArtist && highContrast && "high-contrast",
           css`
             background-color: ${rootBg};
             color: ${rootFg};

@@ -10,11 +10,9 @@ export default function NotFoundPage() {
       <img
         src="/static/images/stencil-bird.png"
         alt="A Bird Stenciled, Sad It Couldn't Find What You're Looking For"
-        className="w-48 h-48 mb-6"
+        className="w-48 h-48 mb-6 [[data-mi-high-contrast=dark]_&]:invert"
       />
-      <p className="text-xl text-(--mi-light-foreground-color) mb-6">
-        {t("pageNotFound")}
-      </p>
+      <p className="text-xl text-(--mi-secondary-text-color) mb-6">{t("pageNotFound")}</p>
       <ButtonLink to="/" className="px-6 py-3" size="big">
         {t("goHome")}
       </ButtonLink>

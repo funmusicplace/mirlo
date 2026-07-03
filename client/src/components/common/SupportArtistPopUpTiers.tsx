@@ -13,6 +13,7 @@ const Label = styled.label`
   justify-content: space-between;
   padding: 1rem;
   border-radius: 8px;
+  color: var(--mi-text-color);
 
   transition: 0.5s background-color;
   cursor: pointer;

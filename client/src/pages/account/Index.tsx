@@ -8,6 +8,7 @@ import WidthContainer from "components/common/WidthContainer";
 import CurrencySelect from "components/ManageArtist/CountrySelectForm";
 import ConnectedApps from "components/Profile/ConnectedApps";
 import DeleteAccount from "components/Profile/DeleteAccount";
+import HighContrastRadio from "components/Profile/HighContrastRadio";
 import { useProfileMutation } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -41,11 +42,14 @@ const Index: React.FC = () => {
       isLabelAccount: user?.isLabelAccount,
       combineSubscriptionEmails: user?.combineSubscriptionEmails,
       urlSlug: user?.urlSlug,
-      properties: user?.properties || {},
+      properties: {
+        ...user?.properties,
+        highContrast: user?.properties?.highContrast ?? "system",
+      },
       accountingEmail: user?.accountingEmail,
     },
   });
-  const { register, handleSubmit, watch, setValue } = methods;
+  const { register, handleSubmit, watch, setValue, reset } = methods;
 
   const userId = user?.id;
   const snackbar = useSnackbar();
@@ -64,7 +68,20 @@ const Index: React.FC = () => {
             snackbar("Must set password", { type: "warning" });
           } else {
             const isEmailChange = user.email !== data.newEmail;
-            await mutateAsync({ ...data, userId });
+            const properties = {
+              ...(user.properties ?? {}),
+              ...(data.properties ?? {}),
+              highContrast:
+                data.properties?.highContrast ??
+                user.properties?.highContrast ??
+                "system",
+            };
+            await mutateAsync({ ...data, userId, properties });
+            reset({
+              ...data,
+              properties,
+            });
+            i18n.changeLanguage(data.language);
             snackbar(
               isEmailChange
                 ? i18n.t("verificationEmailSent")
@@ -79,7 +96,7 @@ const Index: React.FC = () => {
         }
       }
     },
-    [snackbar, userId, user?.email, errorHandler, i18n, mutateAsync, t]
+    [snackbar, userId, user?.email, user?.properties, errorHandler, i18n, mutateAsync, t, reset]
   );
 
   if (!user) {
@@ -122,7 +139,7 @@ const Index: React.FC = () => {
             <label htmlFor="input-name">{t("name")}</label>
             <InputEl id="input-name" {...register("name")} />
           </FormComponent>
-
+          <HighContrastRadio />
           <CanCreateArtists>
             <FormComponent>
               <Toggle

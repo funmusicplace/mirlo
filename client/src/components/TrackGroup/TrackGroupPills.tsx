@@ -21,8 +21,8 @@ const TrackGroupPills: React.FC<{ tags?: string[]; centered?: boolean }> = ({
       `}
     >
       {tags?.map((tag) => (
-        <Link to={`/releases?tag=${tag}`} key={tag}>
-          <Pill isHoverable variant="tint">
+        <Link to={`/releases?tag=${tag}`} key={tag} className="no-underline!">
+          <Pill isHoverable variant="tint" className="mi-release-tag-pill">
             {tag}
           </Pill>
         </Link>

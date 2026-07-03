@@ -16,16 +16,16 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
       case "success":
         return `
         background: var(--mi-green-500);
-        color: var(--mi-white);
+        color: var(--mi-success-foreground-color);
         font-weight: bold;`;
       case "warning":
         return `
         background: var(--mi-warning-color);
-        color: var(--mi-black);`;
+        color: var(--mi-warning-foreground-color);`;
       case "error":
         return `
         background: var(--mi-pink);
-        color: var(--mi-white);`;
+        color: var(--mi-error-foreground-color);`;
       default:
         return `
         background: var(--mi-white);

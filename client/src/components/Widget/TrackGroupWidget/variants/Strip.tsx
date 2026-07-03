@@ -3,6 +3,7 @@ import NextButton from "components/common/NextButton";
 import PrevButton from "components/common/PrevButton";
 import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
+import { useWidgetArtistColors } from "hooks/useResolvedArtistColors";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -36,6 +37,8 @@ const Strip: React.FC<{ showTracklist?: boolean }> = ({
     embeddedInMirlo,
     playableTracks,
   } = useTrackGroupWidgetData();
+
+  const artistColors = useWidgetArtistColors(artist?.properties?.colors);
 
   if ((!trackGroup || !trackGroup.id) && !isLoading) {
     return (
@@ -120,7 +123,7 @@ const Strip: React.FC<{ showTracklist?: boolean }> = ({
 
   return (
     <WidgetWrapper
-      artistColors={artist?.properties?.colors}
+      artistColors={artistColors}
       embeddedInMirlo={embeddedInMirlo}
       className="h-screen [&_a]:no-underline!"
     >

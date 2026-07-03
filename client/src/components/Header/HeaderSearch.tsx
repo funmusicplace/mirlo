@@ -342,17 +342,17 @@ const HeaderSearch: React.FC = () => {
         variant="transparent"
         onClick={() => setOpen(true)}
         startIcon={<FaSearch size={20} />}
-        className={css`
-          color: var(--mi-contrast-color) !important;
+        className={`mi-header-chrome-button ${css`
+          color: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
           font-weight: normal !important;
           svg {
-            fill: var(--mi-contrast-color) !important;
+            fill: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
           }
           &:hover:not(:disabled) {
             background-color: var(--mi-tint-color) !important;
-            color: var(--mi-contrast-color) !important;
+            color: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
             svg {
-              fill: var(--mi-contrast-color) !important;
+              fill: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
             }
           }
           @media screen and (max-width: ${bp.medium}px) {
@@ -364,7 +364,7 @@ const HeaderSearch: React.FC = () => {
               margin: 0 !important;
             }
           }
-        `}
+        `}`}
       >
         {isHome && (
           <span

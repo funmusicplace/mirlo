@@ -12,6 +12,7 @@ import "./styles/index.css";
 
 import routes from "routes";
 import { AuthContextProvider } from "state/AuthContext";
+import HighContrastProvider from "components/HighContrastProvider";
 import { SnackBarContextProvider } from "state/SnackbarContext";
 import { UploadContextProvider } from "state/UploadContext";
 import { applyInstanceStyles } from "utils/instanceSettings";
@@ -42,6 +43,7 @@ const bootstrap = async () => {
     <React.StrictMode>
       <QueryClientWrapper>
         <AuthContextProvider>
+        <HighContrastProvider>
           <GlobalStateProvider>
             <ConfirmContextProvider>
               <ConfirmDialog />
@@ -52,10 +54,11 @@ const bootstrap = async () => {
               </SnackBarContextProvider>
             </ConfirmContextProvider>
           </GlobalStateProvider>
-        </AuthContextProvider>
-      </QueryClientWrapper>
-    </React.StrictMode>
-  );
+        </HighContrastProvider>
+      </AuthContextProvider>
+    </QueryClientWrapper>
+  </React.StrictMode>
+);
 };
 
 void bootstrap();

@@ -25,9 +25,7 @@ export const ShuffleButton: React.FC = () => {
       aria-label={t("shuffleMusic")}
       aria-pressed={!!shuffle}
       variant={shuffle ? "default" : "outlined"}
-      className={css`
-        ${shuffle ? "color: var(--mi-button-text-color) !important;" : ""}
-      `}
+      className={shuffle ? "hover:border-[--mi-button-color] focus-visible:border-[--mi-button-color] hover:bg-[--mi-button-color] focus-visible:bg-[--mi-button-color] hover:text-[--mi-button-text-color] focus-visible:text-[--mi-button-text-color] hover:filter-[brightness(95%)_saturate(30%)] focus-visible:filter-[brightness(95%)_saturate(30%)]" : ""}
     />
   );
 };

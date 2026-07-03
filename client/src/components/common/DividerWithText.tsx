@@ -9,6 +9,7 @@ const DividerWithText: React.FC<{ text: string }> = ({ text }) => (
       align-items: center;
       margin: 1rem 0;
       width: 100%;
+      color: var(--mi-text-color);
 
       hr {
         flex-grow: 1;

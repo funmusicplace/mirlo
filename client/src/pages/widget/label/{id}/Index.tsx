@@ -1,3 +1,7 @@
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Link, useParams } from "react-router-dom";
+
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
@@ -9,9 +13,7 @@ import {
   TrackListWrapper,
   WidgetWrapper,
 } from "components/Widget/utils";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { useWidgetArtistColors } from "hooks/useResolvedArtistColors";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
@@ -32,6 +34,8 @@ const Index = () => {
   const [tracks, setTracks] = React.useState<Track[]>();
 
   const embeddedInMirlo = isEmbeddedInMirlo();
+
+  const artistColors = useWidgetArtistColors(label?.profile?.properties?.colors);
 
   React.useEffect(() => {
     const callback = async () => {
@@ -75,7 +79,7 @@ const Index = () => {
 
   return (
     <WidgetWrapper
-      artistColors={label?.profile?.properties?.colors}
+      artistColors={artistColors}
       embeddedInMirlo={embeddedInMirlo}
       className="h-screen [&_a]:no-underline!"
     >

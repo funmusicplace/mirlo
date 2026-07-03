@@ -1,6 +1,7 @@
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import NextButton from "components/common/NextButton";
 import PrevButton from "components/common/PrevButton";
+import { useWidgetArtistColors } from "hooks/useResolvedArtistColors";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { getArtistUrlReference, getPostURLReference } from "utils/artist";
@@ -32,6 +33,8 @@ const Card = () => {
     embeddedInMirlo,
     playableTracks,
   } = usePostWidgetData();
+
+  const artistColors = useWidgetArtistColors(post?.artist?.properties?.colors);
 
   if ((!post || !post.id) && !isLoading) {
     return (
@@ -135,7 +138,7 @@ const Card = () => {
 
   return (
     <WidgetWrapper
-      artistColors={artist?.properties?.colors}
+      artistColors={artistColors}
       embeddedInMirlo={embeddedInMirlo}
       className="h-screen [&_a]:no-underline!"
     >

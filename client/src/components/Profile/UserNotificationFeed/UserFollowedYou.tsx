@@ -31,8 +31,8 @@ const UserFollowedYou: React.FC<{
       <div
         className={
           compact
-            ? "w-7 h-7 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-xs text-white"
-            : "w-11 h-11 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-base text-white"
+            ? "w-7 h-7 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-xs text-(--mi-white)"
+            : "w-11 h-11 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-base text-(--mi-white)"
         }
       >
         {(userName?.[0] ?? "?").toUpperCase()}
@@ -77,7 +77,7 @@ const UserFollowedYou: React.FC<{
             {notification.subscription.artistSubscriptionTier.name}
           </span>
         )}
-        <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
+        <div className="text-xs text-(--mi-secondary-text-color) mt-0.5">
           {formatRelativeTime({ date: notification.createdAt, i18n })}
         </div>
       </div>

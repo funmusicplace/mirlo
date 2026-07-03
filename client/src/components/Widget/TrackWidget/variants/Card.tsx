@@ -1,5 +1,6 @@
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { MetaCard } from "components/common/MetaCard";
+import { useWidgetArtistColors } from "hooks/useResolvedArtistColors";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
@@ -29,6 +30,8 @@ const Card = () => {
     embeddedInMirlo,
   } = useTrackWidgetData();
 
+  const artistColors = useWidgetArtistColors(artist?.properties?.colors);
+
   const [useHeroLayout, setUseHeroLayout] = React.useState(true);
 
   React.useEffect(() => {
@@ -55,7 +58,7 @@ const Card = () => {
   }
 
   const bgColor =
-    artist?.properties?.colors?.background || "var(--mi-background-color)";
+    artistColors?.background || "var(--mi-background-color)";
 
   const cover =
     track.trackGroup.cover?.sizes?.[600] ??
@@ -64,7 +67,7 @@ const Card = () => {
 
   return (
     <WidgetWrapper
-      artistColors={artist?.properties?.colors}
+      artistColors={artistColors}
       embeddedInMirlo={embeddedInMirlo}
       className="h-screen w-screen relative [&_a]:no-underline!"
     >

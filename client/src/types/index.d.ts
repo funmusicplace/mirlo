@@ -113,6 +113,8 @@ interface SettingsFromAPI {
   defconLevel: number;
 }
 
+type HighContrastPreference = "system" | "on" | "off";
+
 interface LoggedInUser {
   email: string;
   accountingEmail?: string;
@@ -134,7 +136,10 @@ interface LoggedInUser {
   featureFlags?: string[];
   isLabelAccount: boolean;
   combineSubscriptionEmails?: boolean;
-  properties?: { tileBackgroundImage?: boolean };
+  properties?: {
+    tileBackgroundImage?: boolean;
+    highContrast?: HighContrastPreference;
+  };
   trackFavorites?: {
     userId: number;
     trackId: number;

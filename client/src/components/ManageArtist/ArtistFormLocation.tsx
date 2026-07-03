@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
 import { FaSave, FaTimes } from "react-icons/fa";
+import { useHighContrast } from "hooks/useHighContrast";
 import { useSnackbar } from "state/SnackbarContext";
 
 interface FormData {
@@ -36,6 +37,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const snackbar = useSnackbar();
+  const highContrast = useHighContrast();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const queryClient = useQueryClient();
   const { handleSubmit, watch, reset, setValue } = useForm<FormData>({
@@ -126,7 +128,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             align-items: baseline;
             min-width: 0;
             flex: 1 1 auto;
-            opacity: 0.5;
+            opacity: ${highContrast ? 1 : 0.5};
             line-height: 1.5;
             white-space: nowrap;
           `}
