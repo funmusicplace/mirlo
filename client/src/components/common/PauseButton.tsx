@@ -25,23 +25,25 @@ export const PauseButton: React.FC<{ className?: string }> = ({
   );
 
   return (
-    <div>
+    <div
+      className={
+        css`
+          button {
+            font-size: 1.6rem;
+            margin-right: 0.25rem;
+            padding: 0.75rem 0.7rem 0.65rem 0.7rem;
+          }
+        ` +
+        " " +
+        className
+      }
+    >
       <Button
         startIcon={<TfiControlPause />}
         aria-label={`${t("pause")}`}
         title={`${t("pause")}`}
         onClick={onPause}
         variant="outlined"
-        className={
-          css`
-            font-size: 1.6rem;
-            margin-right: 0.25rem;
-            padding: 0.75rem 0.7rem 0.65rem 0.7rem;
-            border: solid 1.5px !important;
-          ` +
-          " " +
-          className
-        }
       />
     </div>
   );
