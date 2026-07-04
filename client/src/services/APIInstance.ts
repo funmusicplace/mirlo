@@ -122,16 +122,32 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
       return { ok: false };
     }
 
-    // The /download endpoint can return 200 + JSON when the zip isn't ready
-    // yet (it queues a job and returns { result: { jobId } }). Treat that as a
-    // soft error rather than trying to save the JSON payload as a zip file.
+    // The /download endpoint can return 200 + JSON in two cases:
+    // - { result: { url } }: a short-lived presigned storage URL — navigate
+    //   to it so the file downloads straight from storage. A plain anchor
+    //   navigation isn't subject to CORS (unlike fetching the cross-origin
+    //   URL and building a blob), and the URL's response-content-disposition
+    //   makes the browser save it with a proper filename.
+    // - { result: { jobId } }: the zip isn't ready yet (a generation job was
+    //   queued). Treat that as a soft error rather than trying to save the
+    //   JSON payload as a zip file.
     const contentType = resp.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
-      let json: unknown;
+      let json: { result?: { url?: unknown } } | undefined;
       try {
         json = await resp.json();
       } catch {
         // ignore
+      }
+      const url = json?.result?.url;
+      if (typeof url === "string") {
+        const link = document.createElement("a");
+        link.href = url;
+        link.rel = "noopener";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        return { ok: true };
       }
       return {
         ok: false,
