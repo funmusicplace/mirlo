@@ -14,6 +14,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import contentDisposition from "content-disposition";
 import { Client, BucketItem } from "minio";
 import * as Minio from "minio";
 import { Logger } from "winston";
@@ -60,6 +61,8 @@ export const finalImageBucket = s3UniquePrefix + "mirlo-images";
 
 const {
   MINIO_HOST = "",
+  MINIO_PUBLIC_HOST = "",
+  MINIO_PUBLIC_PORT = "",
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
   S3_ACCESS_KEY_ID = "",
@@ -80,6 +83,26 @@ export const minioClient =
         endPoint: MINIO_HOST,
         port: +MINIO_API_PORT,
         useSSL: false, // NODE_ENV !== "development",
+        accessKey: MINIO_ROOT_USER,
+        secretKey: MINIO_ROOT_PASSWORD,
+      })
+    : undefined;
+
+// A browser-reachable MinIO client used only for presigning download URLs.
+// The primary minioClient is configured with a docker-internal hostname
+// (e.g. "minio:9000") that a browser cannot resolve, and the hostname is part
+// of a presigned URL's signature — rewriting it after signing would invalidate
+// the signature. So when MINIO_PUBLIC_HOST is set (e.g. "localhost", since
+// docker-compose maps the MinIO API port to the host), we sign against a
+// second client configured with that public endpoint. When it isn't set,
+// presigning against MinIO is unavailable and callers fall back to streaming
+// file bytes through the API.
+export const minioPublicClient =
+  backendStorage === "minio" && MINIO_PUBLIC_HOST
+    ? new Minio.Client({
+        endPoint: MINIO_PUBLIC_HOST,
+        port: +(MINIO_PUBLIC_PORT || MINIO_API_PORT),
+        useSSL: false,
         accessKey: MINIO_ROOT_USER,
         secretKey: MINIO_ROOT_PASSWORD,
       })
@@ -292,6 +315,68 @@ export const getPresignedUploadUrl = async (
   } else {
     throw new Error("No storage backend configured");
   }
+};
+
+// Presign a short-lived GET URL against whichever storage backend actually
+// has the object, so downloads can go straight from the browser to storage
+// instead of being piped through the API (which burns server egress — see
+// the Render free-tier egress cap). Returns null when no presignable
+// endpoint is available — e.g. the object only exists in a MinIO instance
+// without a browser-reachable public host — in which case the caller should
+// fall back to streaming the bytes through the API itself.
+export const getPresignedDownloadUrl = async (
+  bucket: string,
+  filename: string,
+  options?: {
+    expiresInSeconds?: number;
+    downloadFilename?: string;
+    contentType?: string;
+  }
+): Promise<string | null> => {
+  const expiresInSeconds = options?.expiresInSeconds ?? 60 * 15;
+  const { backblazeStat, minioStat } = await statFile(bucket, filename);
+
+  if (backblazeStat && backblazeClient) {
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: filename,
+      ...(options?.downloadFilename
+        ? {
+            ResponseContentDisposition: contentDisposition(
+              options.downloadFilename,
+              { type: "attachment" }
+            ),
+          }
+        : {}),
+      ...(options?.contentType
+        ? { ResponseContentType: options.contentType }
+        : {}),
+    });
+    return getSignedUrl(backblazeClient, command, {
+      expiresIn: expiresInSeconds,
+    });
+  }
+
+  if (minioStat && minioPublicClient) {
+    const respHeaders: Record<string, string> = {};
+    if (options?.downloadFilename) {
+      respHeaders["response-content-disposition"] = contentDisposition(
+        options.downloadFilename,
+        { type: "attachment" }
+      );
+    }
+    if (options?.contentType) {
+      respHeaders["response-content-type"] = options.contentType;
+    }
+    return minioPublicClient.presignedGetObject(
+      bucket,
+      filename,
+      expiresInSeconds,
+      respHeaders
+    );
+  }
+
+  return null;
 };
 
 export const uploadWrapper = async (

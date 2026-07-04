@@ -135,6 +135,16 @@ export default function () {
           }
         }
 
+        if (!segment.includes("playlist.m3u8")) {
+          // Segment bytes are identical for every listener and keyed by audio id,
+          // so they can be edge-cached publicly. The manifest must stay uncached:
+          // it's where auth and the play limit are enforced.
+          res.setHeader(
+            "Cache-Control",
+            "public, max-age=604800, stale-while-revalidate=604800"
+          );
+        }
+
         await fetchFile(res, track.audio.id, segment);
       }
     } catch (e) {

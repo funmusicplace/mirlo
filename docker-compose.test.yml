@@ -38,6 +38,9 @@ services:
       STRIPE_PORT: 12111
       STRIPE_PROTOCOL: http
       STRIPE_KEY: sk_test_123
+      # Keep download tests deterministic: never presign against MinIO in
+      # tests, even if the developer's .env sets MINIO_PUBLIC_HOST for dev.
+      MINIO_PUBLIC_HOST: ""
     profiles: [test]
 
   minio-test:

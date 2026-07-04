@@ -8,6 +8,7 @@ import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
 import { AppError } from "../../../../utils/error";
 import {
+  getPresignedDownloadUrl,
   getReadStream,
   statFile,
   trackGroupFormatBucket,
@@ -125,6 +126,32 @@ export default function () {
         const originalTitle = `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`;
         const asciiTitle = filenamify(originalTitle);
 
+        // Prefer handing the browser a short-lived presigned storage URL so
+        // the zip bytes don't flow through this server (egress costs). Falls
+        // back to piping the file when presigning isn't available (e.g. local
+        // MinIO without a browser-reachable endpoint).
+        const presignedUrl = await getPresignedDownloadUrl(
+          trackGroupFormatBucket,
+          zipName,
+          {
+            downloadFilename: `${asciiTitle}.zip`,
+            contentType: "application/zip",
+          }
+        );
+
+        if (presignedUrl) {
+          logger.info(
+            `trackGroupId: ${trackGroupId} responding with presigned download URL`
+          );
+          await prisma.trackGroupDownload.create({
+            data: {
+              trackGroupId: trackGroup.id,
+              userId: req.user?.id ?? null,
+            },
+          });
+          return res.json({ result: { url: presignedUrl } });
+        }
+
         res.setHeader("Content-Type", "application/zip");
         res.setHeader(
           "Content-Disposition",
@@ -169,7 +196,8 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "A zip file of trackgroup tracks",
+        description:
+          "A JSON body with a short-lived presigned download URL ({ result: { url } }), a JSON body with a generation job id when the zip isn't built yet ({ result: { jobId } }), or the zip bytes themselves when presigning is unavailable",
       },
       default: {
         description: "An error occurred",

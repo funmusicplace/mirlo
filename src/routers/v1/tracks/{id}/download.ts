@@ -1,22 +1,23 @@
-import { NextFunction, Request, Response } from "express";
-import { logger } from "../../../../logger";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+import filenamify from "filenamify";
 
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { logger } from "../../../../logger";
+import { AppError } from "../../../../utils/error";
+import {
+  getPresignedDownloadUrl,
+  getReadStream,
+  statFile,
+  trackFormatBucket,
+} from "../../../../utils/minio";
 import {
   FormatOptions,
   basicTrackGroupInclude,
   findTrackPurchaseAndVoidToken,
   findTrackPurchaseBasedOnTokenAndUpdate,
 } from "../../../../utils/trackGroup";
-import {
-  getReadStream,
-  statFile,
-  trackFormatBucket,
-} from "../../../../utils/minio";
-import filenamify from "filenamify";
 import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
-import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -113,6 +114,27 @@ export default function () {
             `${track.trackGroup.artist.name} - ${track.title ?? "track"}`
           )
         );
+
+        // Prefer handing the browser a short-lived presigned storage URL so
+        // the zip bytes don't flow through this server (egress costs). Falls
+        // back to piping the file when presigning isn't available (e.g. local
+        // MinIO without a browser-reachable endpoint).
+        const presignedUrl = await getPresignedDownloadUrl(
+          trackFormatBucket,
+          zipName,
+          {
+            downloadFilename: `${title}.zip`,
+            contentType: "application/zip",
+          }
+        );
+
+        if (presignedUrl) {
+          logger.info(
+            `trackId: ${trackId} responding with presigned download URL`
+          );
+          return res.json({ result: { url: presignedUrl } });
+        }
+
         logger.info(`downloading ${title}.zip`);
         res.attachment(`${title}.zip`);
         res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
@@ -149,7 +171,8 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "A zip file of tracks",
+        description:
+          "A JSON body with a short-lived presigned download URL ({ result: { url } }), or the zip bytes themselves when presigning is unavailable",
       },
       default: {
         description: "An error occurred",
