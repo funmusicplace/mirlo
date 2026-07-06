@@ -10,8 +10,15 @@ const ArtistLink: React.FC<{ artist?: Artist; className?: string }> = ({
     return null;
   }
 
-  const isCurrent =
-    !!artist.urlSlug && location.pathname.includes(artist.urlSlug);
+  // location.pathname keeps percent-encoding, so decode before comparing
+  // against the slug (which is stored decoded, e.g. "rauðvik")
+  let pathname = location.pathname;
+  try {
+    pathname = decodeURIComponent(pathname);
+  } catch {
+    // malformed percent-encoding — compare against the raw pathname
+  }
+  const isCurrent = !!artist.urlSlug && pathname.includes(artist.urlSlug);
 
   return (
     <Link

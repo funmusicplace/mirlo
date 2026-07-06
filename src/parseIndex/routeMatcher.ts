@@ -141,6 +141,26 @@ const routePatterns: Array<RoutePattern<any>> = [
 ];
 
 /**
+ * Split a pathname into percent-decoded segments. Express's `req.path` (and
+ * `new URL().pathname`) keep percent-encoding, so non-ASCII slugs like
+ * `rau%C3%B0vik` would never match `urlSlug` values stored decoded in the
+ * database. Decoding happens per segment, after splitting, so an encoded
+ * `%2F` can't spawn a phantom segment.
+ */
+export const splitPathIntoSegments = (pathname: string): string[] =>
+  pathname
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        // Malformed percent-encoding (e.g. `%zz`) — keep the raw segment
+        return segment;
+      }
+    });
+
+/**
  * Match a pathname against route patterns and extract typed parameters
  */
 export const matchRoute = (segments: string[]): RouteParams | null => {

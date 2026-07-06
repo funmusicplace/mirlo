@@ -322,6 +322,42 @@ describe("analyzePathAndGenerateHTML", () => {
     });
   });
 
+  describe("percent-encoded paths", () => {
+    it("should handle percent-encoded non-ASCII slugs in the path", async () => {
+      // Express's req.path keeps percent-encoding, so an artist slug like
+      // "rauðvik" arrives as "rau%C3%B0vik" and must be decoded before the
+      // urlSlug lookup
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "rauðvik",
+        urlSlug: "rauðvik",
+      });
+      await createTrackGroup(artist.id, {
+        title: "My Album",
+        urlSlug: "test-album",
+      });
+
+      const $ = cheerio.load("<html></html>");
+      await analyzePathAndGenerateHTML("/rau%C3%B0vik/release/test-album", $);
+
+      const ogTitle = $('meta[property="og:title"]').attr("content");
+      assert.equal(ogTitle, "My Album");
+
+      const ogDesc = $('meta[property="og:description"]').attr("content");
+      assert(ogDesc?.includes("rauðvik"));
+    });
+
+    it("should not crash on malformed percent-encoding in the path", async () => {
+      const $ = cheerio.load("<html></html>");
+      await analyzePathAndGenerateHTML("/%zz/release/test-album", $);
+
+      // Malformed segments fall back to their raw value; no artist matches,
+      // so no album metadata is set — the important part is that decoding
+      // didn't throw
+      assert($);
+    });
+  });
+
   describe("route handling", () => {
     it("should handle artist/posts route listing all posts", async () => {
       const { user } = await createUser({ email: "artist@example.com" });

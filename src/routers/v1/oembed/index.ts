@@ -7,7 +7,10 @@ import {
   fetchPostMetadata,
   fetchMerchMetadata,
 } from "../../../parseIndex/metadata";
-import { matchRoute } from "../../../parseIndex/routeMatcher";
+import {
+  matchRoute,
+  splitPathIntoSegments,
+} from "../../../parseIndex/routeMatcher";
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
 import { generateFullStaticImageUrl } from "../../../utils/images";
@@ -67,7 +70,7 @@ export default function () {
 
       // Parse URL and extract path
       const urlObj = new URL(url, client.applicationUrl);
-      const pathSegments = urlObj.pathname.split("/").filter(Boolean);
+      const pathSegments = splitPathIntoSegments(urlObj.pathname);
 
       // Match against shared route patterns
       const routeParams = matchRoute(pathSegments);
