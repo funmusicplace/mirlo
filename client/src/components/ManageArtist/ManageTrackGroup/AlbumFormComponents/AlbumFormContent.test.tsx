@@ -19,7 +19,7 @@ vi.mock("utils/artist", () => ({
   getReleaseUrl: vi.fn(() => "/test-artist/release/test-album"),
 }));
 
-vi.mock("pages/manage/artists/:artistId/release/:trackGroupId/Index", () => ({
+vi.mock("pages/manage/artists/{artistId}/release/{trackGroupId}/Index", () => ({
   FormSection: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),

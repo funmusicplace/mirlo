@@ -11,7 +11,7 @@ import ArtistSubscriberDataDownload from "components/ManageArtist/ArtistSubscrib
 import ArtistSubscriberUploadData from "components/ManageArtist/ArtistSubscriberUploadData";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import { sumBy } from "lodash";
-import { ArtistSection } from "pages/:artistId/Index";
+import { ArtistSection } from "pages/{artistId}/Index";
 import { queryManageArtistSubscribers } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";

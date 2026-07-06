@@ -8,7 +8,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import { isTrackGroupPublished } from "utils/artist";
 
-import { TrackGroupFormData } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 
 const SaveDraftBar: React.FC<{
   existingObject: TrackGroup;

@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import { ArtistPageWrapper } from "pages/manage/artists/:artistId/Layout";
+import { ArtistPageWrapper } from "pages/manage/artists/{artistId}/Layout";
 import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import { queryArtist } from "queries";
 import React from "react";

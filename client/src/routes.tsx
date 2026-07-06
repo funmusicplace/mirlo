@@ -92,7 +92,7 @@ const routes: RouteObject[] = [
         path: "widget/track/:id",
         async lazy() {
           const { default: Component } =
-            await import("pages/widget/track/:id/Index");
+            await import("pages/widget/track/{id}/Index");
           return { Component };
         },
       },
@@ -100,7 +100,7 @@ const routes: RouteObject[] = [
         path: "widget/trackgroup/:id",
         async lazy() {
           const { default: Component } =
-            await import("pages/widget/trackgroup/:id/Index");
+            await import("pages/widget/trackgroup/{id}/Index");
           return { Component };
         },
       },
@@ -108,7 +108,7 @@ const routes: RouteObject[] = [
         path: "widget/post/:id",
         async lazy() {
           const { default: Component } =
-            await import("pages/widget/post/:id/Index");
+            await import("pages/widget/post/{id}/Index");
           return { Component };
         },
       },
@@ -116,14 +116,14 @@ const routes: RouteObject[] = [
         path: "widget/label/:id",
         async lazy() {
           const { default: Component } =
-            await import("pages/widget/label/:id/Index");
+            await import("pages/widget/label/{id}/Index");
           return { Component };
         },
       },
       {
         path: "post/:postId",
         async lazy() {
-          const { default: Component } = await import("pages/post/:postId/Index");
+          const { default: Component } = await import("pages/post/{postId}/Index");
           return { Component };
         },
       },
@@ -349,7 +349,7 @@ const routes: RouteObject[] = [
             path: "fundraiser/:fundraiserId/pledges",
             async lazy() {
               const { default: Component } =
-                await import("pages/manage/fundraiser/:fundraiserId/pledges/Index");
+                await import("pages/manage/fundraiser/{fundraiserId}/pledges/Index");
               return { Component };
             },
           },
@@ -357,7 +357,7 @@ const routes: RouteObject[] = [
             path: "artists/:artistId",
             async lazy() {
               const { default: Component } =
-                await import("pages/manage/artists/:artistId/Layout");
+                await import("pages/manage/artists/{artistId}/Layout");
               return { Component };
             },
             children: [
@@ -365,7 +365,7 @@ const routes: RouteObject[] = [
                 path: "",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/manage/artists/:artistId/Index");
+                    await import("pages/manage/artists/{artistId}/Index");
                   return { Component };
                 },
                 children: [
@@ -377,7 +377,7 @@ const routes: RouteObject[] = [
                     path: "customize",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/customize/Index");
+                        await import("pages/manage/artists/{artistId}/customize/Index");
                       return { Component };
                     },
                   },
@@ -385,7 +385,7 @@ const routes: RouteObject[] = [
                     path: "roster",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/roster/Index");
+                        await import("pages/manage/artists/{artistId}/roster/Index");
                       return { Component };
                     },
                   },
@@ -393,7 +393,7 @@ const routes: RouteObject[] = [
                     path: "releases",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/releases/Index");
+                        await import("pages/manage/artists/{artistId}/releases/Index");
                       return { Component };
                     },
                   },
@@ -401,7 +401,7 @@ const routes: RouteObject[] = [
                     path: "tiers",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/tiers/Index");
+                        await import("pages/manage/artists/{artistId}/tiers/Index");
                       return { Component };
                     },
                   },
@@ -409,7 +409,7 @@ const routes: RouteObject[] = [
                     path: "tiers/supporters",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/tiers/supporters/Index");
+                        await import("pages/manage/artists/{artistId}/tiers/supporters/Index");
                       return { Component };
                     },
                   },
@@ -417,7 +417,7 @@ const routes: RouteObject[] = [
                     path: "pos",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/pos/Index");
+                        await import("pages/manage/artists/{artistId}/pos/Index");
                       return { Component };
                     },
                   },
@@ -425,7 +425,7 @@ const routes: RouteObject[] = [
                     path: "posts",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/posts/Index");
+                        await import("pages/manage/artists/{artistId}/posts/Index");
                       return { Component };
                     },
                   },
@@ -436,7 +436,7 @@ const routes: RouteObject[] = [
                         path: "",
                         async lazy() {
                           const { default: Component } =
-                            await import("pages/manage/artists/:artistId/merch/Index");
+                            await import("pages/manage/artists/{artistId}/merch/Index");
                           return { Component };
                         },
                       },
@@ -447,7 +447,7 @@ const routes: RouteObject[] = [
                     path: "releases/tools",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/releases/tools/Index");
+                        await import("pages/manage/artists/{artistId}/releases/tools/Index");
                       return { Component };
                     },
                   },
@@ -455,7 +455,7 @@ const routes: RouteObject[] = [
                     path: "pricing",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/manage/artists/:artistId/pricing/Index");
+                        await import("pages/manage/artists/{artistId}/pricing/Index");
                       return { Component };
                     },
                   },
@@ -465,7 +465,7 @@ const routes: RouteObject[] = [
                 path: "links",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/manage/artists/:artistId/links/Index");
+                    await import("pages/manage/artists/{artistId}/links/Index");
                   return { Component };
                 },
               },
@@ -473,7 +473,7 @@ const routes: RouteObject[] = [
                 path: "release/:trackGroupId",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/manage/artists/:artistId/release/:trackGroupId/Index");
+                    await import("pages/manage/artists/{artistId}/release/{trackGroupId}/Index");
                   return { Component };
                 },
               },
@@ -481,7 +481,7 @@ const routes: RouteObject[] = [
                 path: "merch/:merchId",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/manage/artists/:artistId/merch/:merchId/Index");
+                    await import("pages/manage/artists/{artistId}/merch/{merchId}/Index");
                   return { Component };
                 },
               },
@@ -489,7 +489,7 @@ const routes: RouteObject[] = [
                 path: "tiers/:tierId",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/manage/artists/:artistId/tiers/:tierId/Index");
+                    await import("pages/manage/artists/{artistId}/tiers/{tierId}/Index");
                   return { Component };
                 },
               },
@@ -497,7 +497,7 @@ const routes: RouteObject[] = [
                 path: "post/:postId",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/manage/artists/:artistId/post/:postId/Index");
+                    await import("pages/manage/artists/{artistId}/post/{postId}/Index");
                   return { Component };
                 },
               },
@@ -626,7 +626,7 @@ const routes: RouteObject[] = [
                 path: ":id",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/users/:id/Index");
+                    await import("pages/admin/users/{id}/Index");
                   return { Component };
                 },
               },
@@ -648,7 +648,7 @@ const routes: RouteObject[] = [
                 path: ":id",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/artists/:id/Index");
+                    await import("pages/admin/artists/{id}/Index");
                   return { Component };
                 },
               },
@@ -658,7 +658,7 @@ const routes: RouteObject[] = [
             path: "track-groups/:id",
             async lazy() {
               const { default: Component } =
-                await import("pages/admin/track-groups/:id/Index");
+                await import("pages/admin/track-groups/{id}/Index");
               return { Component };
             },
           },
@@ -747,7 +747,7 @@ const routes: RouteObject[] = [
             path: "locations/:locationSlug",
             async lazy() {
               const { default: LocationResults } =
-                await import("pages/search/locations/:locationSlug/Index");
+                await import("pages/search/locations/{locationSlug}/Index");
               return {
                 Component: () => (
                   <div
@@ -801,7 +801,7 @@ const routes: RouteObject[] = [
         path: ":artistId/links",
         async lazy() {
           const { default: Component } =
-            await import("pages/:artistId/links/Index");
+            await import("pages/{artistId}/links/Index");
           return { Component };
         },
       },
@@ -809,7 +809,7 @@ const routes: RouteObject[] = [
         path: ":artistId",
         async lazy() {
           const { default: Component } =
-            await import("pages/:artistId/Layout");
+            await import("pages/{artistId}/Layout");
           return { Component };
         },
         children: [
@@ -817,7 +817,7 @@ const routes: RouteObject[] = [
             path: "",
             async lazy() {
               const { default: Component } =
-                await import("pages/:artistId/Index");
+                await import("pages/{artistId}/Index");
               return { Component };
             },
             children: [
@@ -825,7 +825,7 @@ const routes: RouteObject[] = [
                 path: "connect",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/:artistId/connect/Index");
+                    await import("pages/{artistId}/connect/Index");
                   return { Component };
                 },
               },
@@ -838,7 +838,7 @@ const routes: RouteObject[] = [
                 path: "posts",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/:artistId/posts/Index");
+                    await import("pages/{artistId}/posts/Index");
                   return { Component };
                 },
               },
@@ -849,7 +849,7 @@ const routes: RouteObject[] = [
                     path: ":merchId",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/:artistId/merch/:merchId/Index");
+                        await import("pages/{artistId}/merch/{merchId}/Index");
                       return {
                         Component: () => <Component />,
                       };
@@ -859,7 +859,7 @@ const routes: RouteObject[] = [
                     path: "",
                     async lazy() {
                       const { default: Component } =
-                        await import("pages/:artistId/merch/Index");
+                        await import("pages/{artistId}/merch/Index");
                       return {
                         Component: () => <Component />,
                       };
@@ -871,7 +871,7 @@ const routes: RouteObject[] = [
                 path: "checkout-complete",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/:artistId/checkout-complete/Index");
+                    await import("pages/{artistId}/checkout-complete/Index");
                   return {
                     Component: () => <Component />,
                   };
@@ -881,7 +881,7 @@ const routes: RouteObject[] = [
                 path: "checkout-error",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/:artistId/checkout-error/Index");
+                    await import("pages/{artistId}/checkout-error/Index");
                   return {
                     Component: () => <Component />,
                   };
@@ -891,7 +891,7 @@ const routes: RouteObject[] = [
                 path: "roster",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/:artistId/roster/Index");
+                    await import("pages/{artistId}/roster/Index");
                   return { Component };
                 },
               },
@@ -899,7 +899,7 @@ const routes: RouteObject[] = [
                 path: "releases",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/:artistId/releases/Index");
+                    await import("pages/{artistId}/releases/Index");
                   return { Component };
                 },
               },
@@ -907,7 +907,7 @@ const routes: RouteObject[] = [
                 path: "support",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/:artistId/support/Index");
+                    await import("pages/{artistId}/support/Index");
                   return { Component };
                 },
               },
@@ -917,7 +917,7 @@ const routes: RouteObject[] = [
             path: "unsubscribe",
             async lazy() {
               const { default: Component } =
-                await import("pages/:artistId/unsubscribe/Index");
+                await import("pages/{artistId}/unsubscribe/Index");
               return { Component };
             },
           },
@@ -925,7 +925,7 @@ const routes: RouteObject[] = [
             path: "release/:trackGroupId",
             async lazy() {
               const { default: Component } =
-                await import("pages/:artistId/release/:trackGroupId/Index");
+                await import("pages/{artistId}/release/{trackGroupId}/Index");
               return { Component };
             },
           },
@@ -933,7 +933,7 @@ const routes: RouteObject[] = [
             path: "release/:trackGroupId/redeem",
             async lazy() {
               const { default: Component } =
-                await import("pages/:artistId/release/:trackGroupId/redeem/Index");
+                await import("pages/{artistId}/release/{trackGroupId}/redeem/Index");
               return { Component };
             },
           },
@@ -941,7 +941,7 @@ const routes: RouteObject[] = [
             path: "release/:trackGroupId/download",
             async lazy() {
               const { default: Component } =
-                await import("pages/:artistId/release/:trackGroupId/download/Index");
+                await import("pages/{artistId}/release/{trackGroupId}/download/Index");
               return { Component };
             },
           },
@@ -950,7 +950,7 @@ const routes: RouteObject[] = [
             async lazy() {
               const { default: Component } =
                 await import(
-                  "pages/:artistId/release/:trackGroupId/tracks/:trackId/download/Index"
+                  "pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/download/Index"
                 );
               return { Component };
             },
@@ -960,7 +960,7 @@ const routes: RouteObject[] = [
             async lazy() {
               const { default: Component } =
                 await import(
-                  "pages/:artistId/release/:trackGroupId/tracks/:trackId/Index"
+                  "pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/Index"
                 );
               return { Component };
             },
@@ -969,7 +969,7 @@ const routes: RouteObject[] = [
             path: "posts/:postId",
             async lazy() {
               const { default: Component } =
-                await import("pages/:artistId/posts/:postId/Index");
+                await import("pages/{artistId}/posts/{postId}/Index");
               return { Component };
             },
           },

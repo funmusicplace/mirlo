@@ -14,7 +14,7 @@ import {
   coverSizeMin,
   ImageAndDetailsWrapper,
   ImageWrapper,
-} from "pages/:artistId/release/:trackGroupId/Index";
+} from "pages/{artistId}/release/{trackGroupId}/Index";
 import { queryArtist, queryMerch, queryUserStripeStatus } from "queries";
 import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";

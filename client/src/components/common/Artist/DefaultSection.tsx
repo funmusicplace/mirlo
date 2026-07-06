@@ -1,9 +1,9 @@
 import { renderArtistLinkButtons } from "components/ManageArtist/ArtistFormLinks";
-import Roster from "pages/:artistId/roster/Index";
-import Merch from "pages/:artistId/merch/Index";
-import Posts from "pages/:artistId/posts/Index";
-import Releases from "pages/:artistId/releases/Index";
-import ArtistSupport from "pages/:artistId/support/Index";
+import Roster from "pages/{artistId}/roster/Index";
+import Merch from "pages/{artistId}/merch/Index";
+import Posts from "pages/{artistId}/posts/Index";
+import Releases from "pages/{artistId}/releases/Index";
+import ArtistSupport from "pages/{artistId}/support/Index";
 import React from "react";
 import { TabId } from "utils/artistTabs";
 import { transformFromLinks } from "utils/links";
