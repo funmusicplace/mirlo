@@ -1,21 +1,22 @@
+import useAdminFilters from "components/Admin/useAdminFilters";
 import Button from "components/common/Button";
 import Table from "components/common/Table";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
-import { FaCheck, FaEdit } from "react-icons/fa";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { FaCheck, FaDollarSign, FaEdit } from "react-icons/fa";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
 
-import useAdminFilters from "components/Admin/useAdminFilters";
+import CreatePurchaseModal from "./CreatePurchaseModal";
 
 const pageSize = 100;
 
 export const Index: React.FC = () => {
   const navigate = useNavigate();
-  const { trackgroupId } = useParams();
   const [results, setResults] = React.useState<TrackGroup[]>([]);
-  const [openModal, setOpenModal] = React.useState(false);
+  const [purchaseTrackGroup, setPurchaseTrackGroup] =
+    React.useState<TrackGroup | null>(null);
   const [total, setTotal] = React.useState<number>();
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [searchParams] = useSearchParams();
@@ -43,12 +44,6 @@ export const Index: React.FC = () => {
   React.useEffect(() => {
     callback();
   }, [callback]);
-
-  React.useEffect(() => {
-    if (trackgroupId) {
-      setOpenModal(true);
-    }
-  }, [trackgroupId]);
 
   const onClickQueue = React.useCallback(
     (id: number) => {
@@ -89,11 +84,19 @@ export const Index: React.FC = () => {
                 <td>{trackgroup.createdAt}</td>
                 <td>{trackgroup.publishedAt ? <FaCheck /> : undefined}</td>
                 <td className="alignRight">
-                  <Button
-                    size="compact"
-                    startIcon={<FaEdit />}
-                    onClick={() => onClickQueue(trackgroup.id)}
-                  />
+                  <div className="flex gap-1 justify-end">
+                    <Button
+                      size="compact"
+                      startIcon={<FaDollarSign />}
+                      title="Add purchase for users"
+                      onClick={() => setPurchaseTrackGroup(trackgroup)}
+                    />
+                    <Button
+                      size="compact"
+                      startIcon={<FaEdit />}
+                      onClick={() => onClickQueue(trackgroup.id)}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}
@@ -101,6 +104,10 @@ export const Index: React.FC = () => {
         </Table>
       )}
       <PaginationComponent amount={results.length} />
+      <CreatePurchaseModal
+        trackGroup={purchaseTrackGroup}
+        onClose={() => setPurchaseTrackGroup(null)}
+      />
     </WidthContainer>
   );
 };

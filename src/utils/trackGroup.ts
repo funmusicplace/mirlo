@@ -460,6 +460,7 @@ export const registerPurchase = async ({
       },
       data: {
         singleDownloadToken: token,
+        ...(transactionId ? { userTransactionId: transactionId } : {}),
       },
     });
   }

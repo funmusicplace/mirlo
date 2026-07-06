@@ -28,6 +28,19 @@ describe("admin/purchases", () => {
     }
   });
 
+  const setupAdminAndPurchaser = async () => {
+    const { user: artistUser, accessToken } = await createUser({
+      email: "artist@artist.com",
+      isAdmin: true,
+    });
+    const { user: purchaser } = await createUser({
+      email: "purchaser@purchaser.com",
+    });
+    const artist = await createArtist(artistUser.id);
+    const trackGroup = await createTrackGroup(artist.id);
+    return { accessToken, purchaser, trackGroup };
+  };
+
   describe("/", () => {
     it("should GET / 401 without user", async () => {
       const response = await requestApp
@@ -184,6 +197,129 @@ describe("admin/purchases", () => {
         lastMonthResponse.body.results[0].trackGroupPurchases[0].trackGroupId,
         trackGroup.id
       );
+    });
+
+    it("should POST / 401 without admin", async () => {
+      const { accessToken } = await createUser({
+        email: "artist@artist.com",
+      });
+      const response = await requestApp
+        .post("admin/purchases")
+        .send({ users: [{ email: "someone@example.com" }], trackGroupId: 1 })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 401);
+    });
+
+    it("should POST / create purchases without a transaction", async () => {
+      const { accessToken, purchaser, trackGroup } =
+        await setupAdminAndPurchaser();
+
+      const response = await requestApp
+        .post("admin/purchases")
+        .send({
+          users: [
+            { email: purchaser.email },
+            { email: "not-a-user@example.com" },
+          ],
+          trackGroupId: trackGroup.id,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+      assert.deepEqual(response.body.notFoundEmails, [
+        "not-a-user@example.com",
+      ]);
+
+      const purchase = await prisma.userTrackGroupPurchase.findFirst({
+        where: { userId: purchaser.id, trackGroupId: trackGroup.id },
+      });
+      assert(purchase);
+      assert.equal(purchase.userTransactionId, null);
+    });
+
+    it("should POST / create purchases with a transaction", async () => {
+      const { accessToken, purchaser, trackGroup } =
+        await setupAdminAndPurchaser();
+
+      const response = await requestApp
+        .post("admin/purchases")
+        .send({
+          users: [{ email: purchaser.email }],
+          trackGroupId: trackGroup.id,
+          transaction: {
+            amount: 1500,
+            currency: "USD",
+            stripeId: "cs_test_123",
+          },
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+
+      const purchase = await prisma.userTrackGroupPurchase.findFirst({
+        where: { userId: purchaser.id, trackGroupId: trackGroup.id },
+        include: { transaction: true },
+      });
+      assert(purchase);
+      assert(purchase.transaction);
+      assert.equal(purchase.transaction.amount, 1500);
+      assert.equal(purchase.transaction.currency, "usd");
+      assert.equal(purchase.transaction.paymentStatus, "COMPLETED");
+      assert.equal(purchase.transaction.stripeId, "cs_test_123");
+      assert.equal(purchase.transaction.userId, purchaser.id);
+    });
+
+    it("should POST / attach a transaction to an existing purchase", async () => {
+      const { accessToken, purchaser, trackGroup } =
+        await setupAdminAndPurchaser();
+
+      await prisma.userTrackGroupPurchase.create({
+        data: { userId: purchaser.id, trackGroupId: trackGroup.id },
+      });
+
+      const response = await requestApp
+        .post("admin/purchases")
+        .send({
+          users: [{ email: purchaser.email }],
+          trackGroupId: trackGroup.id,
+          transaction: { amount: 500, currency: "usd" },
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const purchases = await prisma.userTrackGroupPurchase.findMany({
+        where: { userId: purchaser.id, trackGroupId: trackGroup.id },
+        include: { transaction: true },
+      });
+      assert.equal(purchases.length, 1);
+      assert.equal(purchases[0].transaction?.amount, 500);
+    });
+
+    it("should POST / 400 with a transaction missing an amount", async () => {
+      const { accessToken } = await createUser({
+        email: "artist@artist.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .post("admin/purchases")
+        .send({
+          users: [{ email: "purchaser@purchaser.com" }],
+          trackGroupId: 1,
+          transaction: { currency: "usd" },
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
     });
   });
 });

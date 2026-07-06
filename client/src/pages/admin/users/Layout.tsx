@@ -9,6 +9,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 import api from "services/api";
+import parseEmailList from "utils/parseEmailList";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -35,13 +36,7 @@ export const UsersLayout: React.FC = () => {
 
   const processTextArea = React.useCallback(
     (inviteType: "add" | "invite") => {
-      const emailsAsList =
-        newUsers
-          ?.split(/,|\r?\n/)
-          .map((email) => email.replaceAll(" ", ""))
-          .filter((email) => !!email) ?? [];
-      const users = emailsAsList?.map((email) => ({ email }));
-      uploadUsers(users, inviteType);
+      uploadUsers(parseEmailList(newUsers), inviteType);
     },
     [newUsers, uploadUsers]
   );
