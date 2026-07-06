@@ -189,19 +189,46 @@ const coverHoverClass = css`
   }
 `;
 
+/** Keep overlay controls readable regardless of artist page theming. */
+const coverNeutralColorsClass = css`
+  --mi-button-color: #ffffff;
+  --mi-button-text-color: #ffffff;
+  --mi-text-color: #ffffff;
+  --mi-secondary-text-color: rgba(255, 255, 255, 0.85);
+  --mi-tint-color: rgba(255, 255, 255, 0.08);
+  --mi-tint-x-color: rgba(255, 255, 255, 0.18);
+  --mi-tint-xx-color: rgba(255, 255, 255, 0.35);
+  --mi-button-tint-color: rgba(255, 255, 255, 0.06);
+  --mi-button-tint-x-color: rgba(255, 255, 255, 0.24);
+  --mi-contrast-color: #ffffff;
+  --mi-border: solid 1px rgba(255, 255, 255, 0.18);
+`;
+
 const playWrapperClass = css`
   &:has(.overlay-actions button:hover) .go-to-link:hover .go-to-faux {
     background-color: rgba(0, 0, 0, 1) !important;
   }
+`;
 
+const touchOverlayClass = css`
   @media (pointer: coarse) {
-    background-color: transparent;
-    opacity: 1;
-    justify-content: flex-end;
-    align-items: flex-end;
+    [data-playable-overlay] {
+      opacity: 1 !important;
+      background-color: transparent !important;
+      pointer-events: none;
+    }
 
-    button:active {
-      background-color: rgba(0, 0, 0, 0.7);
+    [data-playable-overlay] .go-to-link {
+      display: none;
+    }
+
+    [data-playable-overlay] [data-playable-wide-action] {
+      display: none !important;
+    }
+
+    [data-playable-overlay] .overlay-actions {
+      pointer-events: auto;
+      z-index: 5;
     }
   }
 `;
@@ -232,7 +259,9 @@ const overlayActionsClass = css`
 
 /**
  * Cover art with a hover overlay: play/pause controls, optional action slots,
- * and a centered link to the release or track page.
+ * and a centered link to the release or track page. On touchscreens the overlay
+ * scrim is hidden, wishlist and play/pause stay visible, and tapping the cover
+ * navigates to the release or track page.
  *
  * Compose overlay actions with compound subcomponents:
  *
@@ -321,6 +350,8 @@ function PlayableCover({
         "playable-cover @container/playable-cover relative w-full min-w-0 max-w-full",
         coverRootClass,
         coverHoverClass,
+        coverNeutralColorsClass,
+        touchOverlayClass,
         className
       )}
     >
@@ -338,7 +369,7 @@ function PlayableCover({
           aria-label={t("overlayActions")}
           className={cx(
             "overlay-actions absolute bottom-0 z-2 flex w-full justify-end",
-            "[&_button]:!bg-black/80 [&_button]:!text-(--mi-button-text-color) [&_button_svg]:!fill-(--mi-button-text-color) [&_button:hover:not(:disabled)]:!bg-black/60",
+            "[&_button]:!bg-black/80 [&_button]:!text-white [&_button_svg]:!fill-white [&_button:hover:not(:disabled)]:!bg-black/60",
             overlayActionsClass
           )}
         >
@@ -357,7 +388,7 @@ function PlayableCover({
           to={goToUrl}
           aria-hidden="true"
           tabIndex={-1}
-          className="go-to-link absolute inset-0 z-1 block bg-transparent no-underline focus-visible:outline-auto pointer-coarse:hidden hover:[&_.go-to-faux]:!bg-black/60"
+          className="go-to-link absolute inset-0 z-1 block bg-transparent no-underline focus-visible:outline-auto hover:[&_.go-to-faux]:!bg-black/60"
         >
           <span className="go-to-faux pointer-events-none absolute top-1/2 left-1/2 min-w-1/2 -translate-x-1/2 -translate-y-1/2 rounded-(--mi-border-radius) bg-black p-2 text-center uppercase whitespace-nowrap text-white">
             {goToLabel}
@@ -382,6 +413,12 @@ function PlayableCover({
           className="image-container w-full max-w-full overflow-hidden [&_img]:block [&_img]:w-full! [&_img]:border [&_img]:border-white/5"
         />
       )}
+      <Link
+        to={goToUrl}
+        aria-hidden="true"
+        tabIndex={-1}
+        className="go-to-touch-link absolute inset-0 z-3 hidden pointer-coarse:block"
+      />
     </div>
   );
 }
