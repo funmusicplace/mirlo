@@ -6,7 +6,7 @@ import FormComponent from "components/common/FormComponent";
 import FormError from "components/common/FormError";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
-import { FormSection } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
+import { FormSection } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -15,7 +15,7 @@ import { useAuthContext } from "state/AuthContext";
 import { getArtistManageTiersUrl } from "utils/artist";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
-import { TrackGroupFormData } from "pages/manage/artists/:artistId/release/:trackGroupId/Index";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
 
 import PaymentSlider from "./PaymentSlider";

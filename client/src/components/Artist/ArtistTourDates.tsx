@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { FaPen, FaPlus, FaSave, FaTimes } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
-import Artist from "pages/:artistId/Index";
+import Artist from "pages/{artistId}/Index";
 import { ArtistButton, ArtistButtonAnchor } from "./ArtistButtons";
 import { tabButtonClass } from "./ArtistHeaderActionsStrip";
 

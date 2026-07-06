@@ -41,7 +41,7 @@ vi.mock("components/common/DropdownMenu", () => ({
     <div>{children}</div>
   ),
 }));
-vi.mock("pages/:artistId/Index", () => ({
+vi.mock("pages/{artistId}/Index", () => ({
   ArtistSection: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),

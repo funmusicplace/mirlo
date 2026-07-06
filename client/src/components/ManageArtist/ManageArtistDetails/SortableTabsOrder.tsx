@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import { TabId } from "utils/artistTabs";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
-import type { ArtistFormData } from "pages/manage/artists/:artistId/customize/Index";
+import type { ArtistFormData } from "pages/manage/artists/{artistId}/customize/Index";
 import SortableTabItem from "./SortableTabItem";
 
 export const determineNewTabOrder = produce(

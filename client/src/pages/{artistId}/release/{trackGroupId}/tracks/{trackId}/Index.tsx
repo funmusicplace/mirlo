@@ -27,7 +27,7 @@ import {
   SmallScreenPlayWrapper,
   TrackListingWrapper,
   UnderneathImage,
-} from "pages/:artistId/release/:trackGroupId/Index";
+} from "pages/{artistId}/release/{trackGroupId}/Index";
 import TrackGroupEmbed, { TrackEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import TrackGroupMerch from "components/TrackGroup/TrackGroupMerch";
 
