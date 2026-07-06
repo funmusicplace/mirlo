@@ -20,7 +20,10 @@ import {
   fetchPostMetadata,
   fetchMerchMetadata,
 } from "./parseIndex/metadata";
-import { matchRoute as matchRoutePattern } from "./parseIndex/routeMatcher";
+import {
+  matchRoute as matchRoutePattern,
+  splitPathIntoSegments,
+} from "./parseIndex/routeMatcher";
 import {
   buildMusicGroupSchema,
   buildArticleSchema,
@@ -836,7 +839,7 @@ export const analyzePathAndGenerateHTML = async (
   $: cheerio.CheerioAPI,
   req?: Request
 ) => {
-  const segments = pathname.split("/").filter(Boolean);
+  const segments = splitPathIntoSegments(pathname);
   try {
     const client = await getClient();
     // Inject logged-in user state so the client doesn't need to wait for /auth/profile
