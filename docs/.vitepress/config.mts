@@ -68,6 +68,12 @@ export default defineConfig({
       {
         text: "Hosting Mirlo",
         link: "/hosting",
+        items: [
+          {
+            text: "Object storage & buckets",
+            link: "/hosting/object-storage",
+          },
+        ],
       },
       {
         text: "For Mirlo Maintainers",
