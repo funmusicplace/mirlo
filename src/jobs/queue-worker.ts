@@ -46,6 +46,18 @@ const workerOptions = {
   connection: REDIS_CONFIG,
 };
 
+// The bucket config lives in the Settings table and can be changed at runtime
+// through the admin UI. The API process refreshes its own in-memory copy when
+// settings are saved, but this is a separate process — without re-reading
+// before each job, a prefix change after startup makes workers read/write
+// different buckets than the API uploaded to.
+const withFreshBucketConfig =
+  (processor: (job: Job) => Promise<any>) => async (job: Job) => {
+    const settings = await getSiteSettings();
+    setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+    return processor(job);
+  };
+
 /**
  * Factory function to create a worker with standard event logging
  */
@@ -56,7 +68,11 @@ function createWorkerWithLogging(
   startupMessage: string,
   includeActiveEvent = false
 ): Worker {
-  const worker = new Worker(queueName, processor, options);
+  const worker = new Worker(
+    queueName,
+    withFreshBucketConfig(processor),
+    options
+  );
   logger.info(startupMessage);
 
   if (includeActiveEvent) {
