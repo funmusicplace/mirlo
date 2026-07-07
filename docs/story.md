@@ -78,6 +78,7 @@ It is impossible to list everyone who, through their unpaid labor, has made this
 - **[Danny](https://medium.com/@daspitzberg)**, who has connected us with people across the co-operative movement, and provided valuable insights and history.
 - **Obigre, [viiii](https://viiii.neocities.org/), and many others**, who have been instrumental in translation efforts of the Mirlo website.
 - **James**, who has helped significantly push forward the Mirlo code.
+- **Carles and Maci**, of [Fairplayer](https://fairplayer.band/player/), who have both made huge contributions to Mirlo's codebase and helped with the implementation of federated streaming protocols. 
 
 ## We need your support
 
