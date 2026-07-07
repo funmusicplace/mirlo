@@ -115,7 +115,10 @@ if (!isDev) {
 
 app.use(express.static("public", { maxAge: "1y", immutable: true }));
 
-app.use("/images/:bucket/:filename", serveStatic);
+// Note: only the bucket is a route param — in consolidated bucket mode the
+// object key contains slashes (e.g. trackgroup-covers/<id>-x600.webp), so
+// serveStatic reads the rest of the path itself.
+app.use("/images/:bucket", serveStatic);
 
 app.use("/admin/queues", async (req, res) => {
   const settings = await getSiteSettings();
