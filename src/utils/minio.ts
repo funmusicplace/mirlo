@@ -21,6 +21,12 @@ import { Logger } from "winston";
 
 import logger from "../logger";
 
+// Backend-agnostic object storage helpers: MinIO in development, any
+// S3-compatible provider (Backblaze B2 in production) via the AWS SDK.
+// The filename is historical — nothing here is MinIO-specific from the
+// caller's point of view. Bucket layout is documented in
+// docs/hosting/object-storage.md.
+
 export const incomingArtistBackgroundBucket = "incoming-artist-banners";
 export const finalArtistBackgroundBucket = "artist-banners";
 

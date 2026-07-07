@@ -34,6 +34,9 @@ export default function () {
     try {
       const { jobId, imageId } = await uploadAndSendToImageQueue(
         { req, res },
+        // imageType "image" = the generic type stored at the root of the
+        // images bucket; model "image" = update the Image table after
+        // optimization (other callers pass e.g. "trackGroupCover").
         "image",
         "image",
         "inFormData",
