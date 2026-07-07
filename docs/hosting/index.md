@@ -52,7 +52,30 @@ git clone https://github.com/funmusicplace/mirlo.git .
 
 ### 3. Configure Environment Variables
 
-Copy the example environment file and configure it:
+The easiest way is the setup script, which prompts for your instance's public
+URL and generates random credentials for PostgreSQL, Redis, MinIO and the JWT
+secrets. It writes both `.env` and `client/.env`, with `DATABASE_URL` derived
+from the same generated values so they can't disagree:
+
+```bash
+bash scripts/generate-env.sh
+```
+
+Or non-interactively:
+
+```bash
+MIRLO_DOMAIN=https://yourdomain.com bash scripts/generate-env.sh
+```
+
+Afterwards, open `.env` to fill in anything optional (Stripe keys, S3
+credentials if you're not using MinIO, etc.).
+
+> **Note**: the database, Redis and MinIO bake their credentials into their
+> data volumes on first start, so run this **before** the first
+> `docker compose up`. The script refuses to overwrite an existing `.env` for
+> the same reason.
+
+Alternatively, configure it manually:
 
 ```bash
 cp .env.example .env
@@ -369,10 +392,10 @@ In the Hetzner Cloud Console:
 
 - Click "Create Server"
 - **Image**: Ubuntu 22.04
-- **Type**: CPX22 (2 vCPU, 4GB RAM) - €6.99/month
+- **Type**: CPX22 (2 vCPU, 4GB RAM) - €6.99/month (these numbers likely variable)
 - **Location**: Choose closest to your users
 - **SSH Key**: Add your public SSH key
-- **Volume** (optional): Add 100GB volume for media storage (€.50/month per 10GB)
+- **Volume** (optional): Add 100GB volume for media storage (€.50/month per 10GB, probably different by the time you read this)
 - Create the server
 
 **3. Initial Server Setup**
