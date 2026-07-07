@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+
 import { getBufferBasedOnStat, statFile } from "./utils/minio";
 
 export const serveStatic = async (
@@ -6,10 +7,26 @@ export const serveStatic = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { backblazeStat, minioStat } = await statFile(
-    req.params.bucket,
-    req.params.filename
-  );
+  const bucket = req.params.bucket;
+  // The object key is everything after the bucket segment. It can't be a
+  // single route param because consolidated-mode keys contain slashes
+  // (e.g. trackgroup-covers/<id>-x600.webp).
+  let filename: string;
+  try {
+    filename = decodeURIComponent(req.path.slice(1));
+  } catch {
+    res.status(404);
+    next();
+    return;
+  }
+
+  if (!filename) {
+    res.status(404);
+    next();
+    return;
+  }
+
+  const { backblazeStat, minioStat } = await statFile(bucket, filename);
   if (!backblazeStat && !minioStat) {
     res.status(404);
     next();
@@ -36,11 +53,7 @@ export const serveStatic = async (
   }
 
   try {
-    const buffer = await getBufferBasedOnStat(
-      req.params.bucket,
-      req.params.filename,
-      backblazeStat
-    );
+    const buffer = await getBufferBasedOnStat(bucket, filename, backblazeStat);
 
     res.end(buffer, "binary");
 
