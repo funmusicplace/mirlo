@@ -87,7 +87,9 @@ export const AudioWrapper: React.FC<{
 
   const onEnded = React.useCallback(async () => {
     if (looping === "loopTrack") {
-      playerRef.current?.play();
+      playerRef.current?.play().catch(() => {
+        dispatch({ type: "setPlaying", playing: false });
+      });
     } else {
       dispatch({ type: "incrementCurrentlyPlayingIndex" });
     }
@@ -152,7 +154,9 @@ export const AudioWrapper: React.FC<{
           } else {
             playerRef.current.setAttribute("muted", "");
             playerRef.current.playsInline = true;
-            playerRef.current.play();
+            playerRef.current.play().catch(() => {
+              dispatch({ type: "setPlaying", playing: false });
+            });
           }
         }
       } else if (playerRef?.current && playing === false) {
