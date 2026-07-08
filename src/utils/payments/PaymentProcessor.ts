@@ -60,6 +60,18 @@ export interface PaymentProcessor {
     id: string;
     accountId: string;
   }): Promise<PaymentStatusResult>;
+
+  /**
+   * Cancel a recurring subscription on the connected account. `atPeriodEnd:
+   * true` lets the already-paid period run out — billing stops and the
+   * processor fires its subscription-deleted webhook when the period ends,
+   * which is when access is actually revoked. `false` cancels immediately.
+   */
+  cancelSubscription(args: {
+    subscriptionKey: string;
+    accountId: string;
+    atPeriodEnd: boolean;
+  }): Promise<void>;
 }
 
 /**

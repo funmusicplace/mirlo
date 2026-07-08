@@ -12,6 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageTiersUrl, getArtistUrl } from "utils/artist";
 
 import Money from "../common/Money";
@@ -20,12 +21,16 @@ import { ArtistButton, ArtistButtonLink } from "./ArtistButtons";
 import ArtistVariableSupport from "./ArtistVariableSupport";
 import IncludedReleases from "./IncludedReleases";
 import LoadingBlocks from "./LoadingBlocks";
+import SubscriptionCancelledNotice, {
+  isSubscriptionCancelled,
+} from "./SubscriptionCancelledNotice";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
 }> = ({ subscriptionTier }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
+  const snackbar = useSnackbar();
   const { artistId } = useParams();
   const { data: artist, refetch: refresh } = useQuery(
     queryArtist({ artistSlug: artistId })
@@ -83,6 +88,7 @@ const ArtistSupportBox: React.FC<{
   const cancelSubscription = async () => {
     try {
       await api.delete(`artists/${subscriptionTier.artistId}/subscribe`);
+      snackbar(t("subscriptionCancelled"), { type: "success" });
       refresh();
       refreshLoggedInUser();
     } catch (e) {
@@ -110,6 +116,8 @@ const ArtistSupportBox: React.FC<{
   const hasFailedPayment =
     currentSubscription?.artistUserSubscriptionCharges?.[0]?.transaction
       ?.paymentStatus === "FAILED";
+
+  const isCancelled = isSubscriptionCancelled(currentSubscription);
 
   const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
     (sub) =>
@@ -227,13 +235,19 @@ const ArtistSupportBox: React.FC<{
                 {t("chooseThisSubscription")}
               </ArtistButton>
             )}
-            {user && isSubscribedToTier && (
+            {user && isSubscribedToTier && !isCancelled && (
               <ArtistButton
                 onClick={() => cancelSubscription()}
                 variant="outlined"
               >
                 {t("cancelSubscription")}
               </ArtistButton>
+            )}
+            {user && isSubscribedToTier && (
+              <SubscriptionCancelledNotice
+                subscription={currentSubscription}
+                className="text-sm text-center"
+              />
             )}
             {hasFailedPayment && (
               <Box variant="warning" className="text-sm text-center">

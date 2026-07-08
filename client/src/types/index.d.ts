@@ -438,6 +438,11 @@ interface ArtistUserSubscription {
       paymentStatus: string;
     };
   }[];
+  // Set to "USER_CANCELLED" once the user cancels; for a paid subscription the
+  // row stays until `nextBillingDate`, so the UI shows a "cancelled, active
+  // until <date>" state rather than removing it.
+  deleteReason?: string;
+  nextBillingDate?: string;
 }
 
 interface ArtistUserSubscriptionCharge {

@@ -5,7 +5,7 @@
 // terminal webhook path and other callers that still use them directly are
 // untouched by this scaffolding step.
 
-import { createOnlinePaymentIntent } from "../stripe";
+import stripe, { createOnlinePaymentIntent } from "../stripe";
 import { getIntentStatus } from "../stripe/status";
 import {
   createTerminalPaymentIntent,
@@ -93,5 +93,27 @@ export class StripePaymentProcessor implements PaymentProcessor {
     accountId: string;
   }): Promise<PaymentStatusResult> {
     return getIntentStatus({ id, stripeAccountId: accountId });
+  }
+
+  async cancelSubscription({
+    subscriptionKey,
+    accountId,
+    atPeriodEnd,
+  }: {
+    subscriptionKey: string;
+    accountId: string;
+    atPeriodEnd: boolean;
+  }): Promise<void> {
+    if (atPeriodEnd) {
+      await stripe.subscriptions.update(
+        subscriptionKey,
+        { cancel_at_period_end: true },
+        { stripeAccount: accountId }
+      );
+    } else {
+      await stripe.subscriptions.cancel(subscriptionKey, {
+        stripeAccount: accountId,
+      });
+    }
   }
 }

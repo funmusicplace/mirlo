@@ -1,0 +1,16 @@
+extends ../layout.pug
+
+block content
+    p Hi,
+    if endsAt
+      p
+        | Your subscription to #{artist.name} on Mirlo has been cancelled.
+        | You won't be charged again, and you'll keep access until the end of the
+        | period you've already paid for, on #{new Date(endsAt).toLocaleDateString()}.
+    else
+      p Your subscription to #{artist.name} on Mirlo has been cancelled.
+    p
+      | Thank you for your support! You can subscribe again any time from
+      a(href!=`${client}`) our website
+      | .
+    p If you didn't request this, please get in touch.

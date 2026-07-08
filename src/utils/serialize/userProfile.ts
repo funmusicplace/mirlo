@@ -77,6 +77,8 @@ export const USER_PROFILE_SELECT = {
       id: true,
       userId: true,
       amount: true,
+      deleteReason: true,
+      nextBillingDate: true,
       artistUserSubscriptionCharges: {
         orderBy: {
           createdAt: "desc",

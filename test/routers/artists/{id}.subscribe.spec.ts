@@ -6,7 +6,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
-import { cancelStripeSubscriptionsAtPeriodEnd } from "../../../src/utils/artist";
+import { getPaymentProcessor } from "../../../src/utils/payments/PaymentProcessor";
 import { stripe } from "../../../src/utils/stripe";
 import { clearTables, createArtist, createUser } from "../../utils";
 import { requestApp } from "../utils";
@@ -255,29 +255,19 @@ describe("artists/{id}/subscribe", () => {
       assert.equal(after, null, "free subscription should no longer be active");
     });
 
-    it("cancelStripeSubscriptionsAtPeriodEnd asks Stripe to cancel at period end", async () => {
+    it("the payment processor asks Stripe to cancel at period end on the connected account", async () => {
       // Exercised directly (in-process) so we can assert the Stripe params —
       // the HTTP handler above runs in a separate container where stubs don't
-      // apply.
-      const { artist, followerUser } = await createTestData();
-      const paidTier = artist.subscriptionTiers![1];
-
-      await prisma.artistUserSubscription.create({
-        data: {
-          artistSubscriptionTierId: paidTier.id,
-          userId: followerUser.id,
-          amount: 500,
-          stripeSubscriptionKey: "sub_paid_456",
-        },
-      });
-
+      // apply. This is the one place the Stripe subscription SDK is touched for
+      // cancellation (StripePaymentProcessor.cancelSubscription).
       const updateStub = sinon
         .stub(stripe.subscriptions, "update")
         .resolves({} as any);
 
-      await cancelStripeSubscriptionsAtPeriodEnd({
-        artistSubscriptionTier: { artistId: artist.id },
-        userId: followerUser.id,
+      await getPaymentProcessor().cancelSubscription({
+        subscriptionKey: "sub_paid_456",
+        accountId: "23",
+        atPeriodEnd: true,
       });
 
       assert.equal(updateStub.calledOnce, true);
