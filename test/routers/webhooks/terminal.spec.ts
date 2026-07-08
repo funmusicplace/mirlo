@@ -262,7 +262,13 @@ describe("terminal.reader webhooks", () => {
       sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
         id: "seti_sub_test",
         status: "succeeded",
-        payment_method: "pm_card_test",
+        payment_method: "pm_card_present_test",
+        latest_attempt: {
+          id: "setatt_test",
+          payment_method_details: {
+            card_present: { generated_card: "pm_generated_card_test" },
+          },
+        },
         metadata: {
           tierId: String(tier.id),
           userId: String(buyer.id),
@@ -286,7 +292,7 @@ describe("terminal.reader webhooks", () => {
         email: buyer.email,
       } as unknown as Stripe.Response<Stripe.Customer>);
 
-      sinon
+      const attachStub = sinon
         .stub(stripeUtils.stripe.paymentMethods, "attach")
         .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
 
@@ -294,10 +300,12 @@ describe("terminal.reader webhooks", () => {
         id: "prod_test123",
       } as unknown as Stripe.Response<Stripe.Product>);
 
-      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
-        id: "sub_terminal_test",
-        status: "active",
-      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const subscriptionCreateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "create")
+        .resolves({
+          id: "sub_terminal_test",
+          status: "active",
+        } as unknown as Stripe.Response<Stripe.Subscription>);
 
       const reader = buildReader({
         action: {
@@ -315,6 +323,20 @@ describe("terminal.reader webhooks", () => {
       assert.ok(subscription, "subscription should be saved to DB");
       assert.equal(subscription.amount, 500);
       assert.equal(subscription.stripeSubscriptionKey, "sub_terminal_test");
+
+      // The reusable generated card — not the card_present payment method —
+      // must be attached and used for recurring billing.
+      assert.equal(
+        attachStub.getCall(0).args[0],
+        "pm_generated_card_test",
+        "generated card should be attached to the customer"
+      );
+      assert.equal(
+        (subscriptionCreateStub.getCall(0).args[0] as any)
+          .default_payment_method,
+        "pm_generated_card_test",
+        "generated card should be the subscription default payment method"
+      );
     });
 
     it("should log a warning and return early when setup_intent id is missing", async () => {

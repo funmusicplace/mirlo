@@ -218,7 +218,7 @@ const handleTerminalSetupIntentSucceeded = async (
 
   const setupIntent = await stripe.setupIntents.retrieve(
     setupIntentId,
-    {},
+    { expand: ["latest_attempt"] },
     { stripeAccount: stripeAccountId }
   );
 
@@ -234,14 +234,21 @@ const handleTerminalSetupIntentSucceeded = async (
     metadata.userId
   );
 
+  // card_present payment methods are single-use and can't be saved to a
+  // customer; recurring billing must use the reusable `card` payment method
+  // Stripe generates from the card_present setup.
+  const latestAttempt =
+    typeof setupIntent.latest_attempt === "string"
+      ? null
+      : setupIntent.latest_attempt;
+  const generatedCard =
+    latestAttempt?.payment_method_details?.card_present?.generated_card;
   const paymentMethodId =
-    typeof setupIntent.payment_method === "string"
-      ? setupIntent.payment_method
-      : setupIntent.payment_method?.id;
+    typeof generatedCard === "string" ? generatedCard : generatedCard?.id;
 
   if (!paymentMethodId) {
     logger.error(
-      `handleTerminalSetupIntentSucceeded: no payment method on setup intent ${setupIntentId}`
+      `handleTerminalSetupIntentSucceeded: no generated card on setup intent ${setupIntentId}`
     );
     return;
   }
