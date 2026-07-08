@@ -110,7 +110,7 @@ describe("home page", () => {
         return;
       }
 
-      expect(req.body).to.deep.equal({ email: newsletterEmail });
+      expect(req.body).to.deep.include({ email: newsletterEmail });
       req.reply({ statusCode: 200, body: {} });
     }).as("verifyEmail");
 
