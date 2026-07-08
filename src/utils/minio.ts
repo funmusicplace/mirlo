@@ -70,11 +70,28 @@ const {
   S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
   S3_REGION = "us-east-005",
   MINIO_API_PORT = 9000,
-  NODE_ENV,
 } = process.env;
 
-export const backendStorage: "minio" | "backblaze" =
-  NODE_ENV === "production" ? "backblaze" : "minio";
+// Storage backend selection. Set STORAGE_BACKEND=minio|s3|backblaze to choose
+// explicitly; when unset, the backend is inferred from what's configured —
+// S3 credentials present means an S3-compatible service (Backblaze, Hetzner
+// Object Storage, etc.), otherwise MinIO. Exported for tests.
+export const resolveBackendStorage = (
+  explicit: string | undefined = process.env.STORAGE_BACKEND,
+  hasS3Credentials: boolean = Boolean(S3_ACCESS_KEY_ID && S3_SECRET_ACCESS_KEY)
+): "minio" | "backblaze" => {
+  const normalized = explicit?.trim().toLowerCase();
+  if (normalized === "minio") return "minio";
+  if (normalized === "s3" || normalized === "backblaze") return "backblaze";
+  if (normalized) {
+    throw new Error(
+      `Invalid STORAGE_BACKEND "${explicit}" — expected "minio", "s3" or "backblaze"`
+    );
+  }
+  return hasS3Credentials ? "backblaze" : "minio";
+};
+
+export const backendStorage: "minio" | "backblaze" = resolveBackendStorage();
 
 // and access keys as shown below.
 export const minioClient =
@@ -108,9 +125,8 @@ export const minioPublicClient =
       })
     : undefined;
 
-// Toggle this to true if you want to test backblaze locally
-// Note: you'll need both the backblaze key id and app key
-// set for this to work.
+// To test backblaze locally, set S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY
+// (the backend auto-switches), or force it with STORAGE_BACKEND=s3.
 // FIXME: this should / could be set in the database as part
 // of the site settings.
 

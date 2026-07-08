@@ -24,6 +24,8 @@ services:
           name: blackbrd
           property: connectionString
       - fromGroup: blackbrd
+      - key: STORAGE_BACKEND
+        value: s3
       - key: REDIS_HOST
         fromService:
           type: redis
@@ -89,6 +91,8 @@ services:
           name: blackbrd
           property: connectionString
       - fromGroup: blackbrd
+      - key: STORAGE_BACKEND
+        value: s3
       - key: REDIS_HOST
         fromService:
           type: redis
@@ -131,6 +135,8 @@ services:
           name: blackbrd
           property: connectionString
       - fromGroup: blackbrd
+      - key: STORAGE_BACKEND
+        value: s3
       - key: MINIO_ROOT_PASSWORD
         fromService:
           type: web
@@ -186,6 +192,8 @@ services:
           name: redis
           property: port
       - fromGroup: blackbrd
+      - key: STORAGE_BACKEND
+        value: s3
 
     branch: main # optional (defaults to master)
 
@@ -215,6 +223,8 @@ services:
           name: redis
           property: port
       - fromGroup: blackbrd
+      - key: STORAGE_BACKEND
+        value: s3
     branch: main # optional (defaults to master)
 
   # A Redis instance
