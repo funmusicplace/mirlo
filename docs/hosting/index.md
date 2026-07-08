@@ -52,7 +52,30 @@ git clone https://github.com/funmusicplace/mirlo.git .
 
 ### 3. Configure Environment Variables
 
-Copy the example environment file and configure it:
+The easiest way is the setup script, which prompts for your instance's public
+URL and generates random credentials for PostgreSQL, Redis, MinIO and the JWT
+secrets. It writes both `.env` and `client/.env`, with `DATABASE_URL` derived
+from the same generated values so they can't disagree:
+
+```bash
+bash scripts/generate-env.sh
+```
+
+Or non-interactively:
+
+```bash
+MIRLO_DOMAIN=https://yourdomain.com bash scripts/generate-env.sh
+```
+
+Afterwards, open `.env` to fill in anything optional (Stripe keys, S3
+credentials if you're not using MinIO, etc.).
+
+> **Note**: the database, Redis and MinIO bake their credentials into their
+> data volumes on first start, so run this **before** the first
+> `docker compose up`. The script refuses to overwrite an existing `.env` for
+> the same reason.
+
+Alternatively, configure it manually:
 
 ```bash
 cp .env.example .env
@@ -63,6 +86,10 @@ Key variables to set:
 
 ```dotenv
 # Basic Configuration
+# ⚠️ NODE_ENV also selects the storage backend: "production" makes Mirlo use
+# Backblaze/S3, anything else makes it use MinIO. If you're running with
+# MinIO, do NOT set NODE_ENV=production — leave it unset (the compose files
+# default to "development").
 NODE_ENV=production
 PORT=3000
 API_DOMAIN=https://yourdomain.com
@@ -100,7 +127,23 @@ STRIPE_KEY=your-stripe-key
 
 ```
 
+If configuring manually, also create `client/.env` — the frontend bakes these
+values in at build time:
+
+```dotenv
+VITE_API_DOMAIN=https://yourdomain.com
+VITE_CLIENT_DOMAIN=https://yourdomain.com
+```
+
 ### 4. Build and Start Services
+
+> **Warning**: make sure `.env` is final before the first start — PostgreSQL
+> bakes its credentials into its data volume (`./data/pgsql`) when it first
+> initializes, and changing passwords in `.env` afterwards causes
+> authentication failures (see
+> [Troubleshooting](#database-connection-errors)). Also note that
+> `docker compose restart` does **not** re-read `.env`: after any `.env`
+> change, run `docker compose up -d` so changed containers get recreated.
 
 ```bash
 docker compose up -d
@@ -159,6 +202,32 @@ docker compose exec api yarn client:build
 ```
 
 This compiles the client code with Vite and places it in the `/client/dist` directory, which Mirlo serves automatically.
+
+On servers with 4GB RAM or less the build can run out of Node heap
+(`FATAL ERROR: ... JavaScript heap out of memory`). Give it more headroom
+(and consider [adding swap](#out-of-memory-errors)):
+
+```bash
+docker compose exec -e NODE_OPTIONS=--max-old-space-size=3072 api yarn client:build
+```
+
+> **Warning**: the built files live inside the api **container's** filesystem,
+> not on the host. Whenever the api container is recreated (e.g.
+> `docker compose up -d` after an `.env` change, or `--build` after a
+> `git pull`), the build is lost and the site serves nothing until you re-run
+> it. To make builds survive recreates, bind-mount the dist directory: create
+> `docker-compose.client.yml`:
+>
+> ```yaml
+> services:
+>   api:
+>     volumes:
+>       - ./client/dist:/var/www/api/client/dist
+> ```
+>
+> and include it in every compose invocation, e.g. by adding
+> `COMPOSE_FILE=docker-compose.prod.yml:docker-compose.client.yml` to `.env`.
+> Then run the client build once more; from then on it persists on the host.
 
 ### 7. Setup Reverse Proxy (Nginx)
 
@@ -272,6 +341,12 @@ docker compose restart api
 docker compose restart background
 ```
 
+> **Note**: `restart` keeps the container's original environment. If you
+> changed `.env`, use `docker compose up -d` instead — it recreates any
+> container whose configuration changed. And because the source code is baked
+> into the images, code changes (e.g. after `git pull`) need
+> `docker compose up -d --build`.
+
 ### Update to latest version of Mirlo:
 
 ```bash
@@ -326,6 +401,43 @@ Once connected, you can query the database. Useful commands:
 - `SELECT * FROM "User" LIMIT 5;` - query a table
 - `\q` - quit
 
+**"Authentication failed against database server"** (Prisma) usually means one
+of two things:
+
+1. **The containers are running with stale environment.** `docker compose
+restart` does not re-read `.env` — run `docker compose up -d` instead.
+   Compare what the app actually sees against your `.env`:
+
+   ```bash
+   docker compose exec api printenv DATABASE_URL
+   ```
+
+2. **PostgreSQL was first started with different credentials.**
+   `POSTGRES_USER`/`POSTGRES_PASSWORD` only take effect when the data volume
+   is empty; changing them later does nothing. Test whether the database
+   accepts your current password over TCP (the same auth path the app uses):
+
+   ```bash
+   docker compose exec pgsql psql "postgresql://mirlo_user:<password>@localhost:5432/mirlo" -c "select 1"
+   ```
+
+   If that fails too, either reset the password in place:
+
+   ```bash
+   docker compose exec pgsql psql -U mirlo_user -d postgres \
+     -c "ALTER ROLE mirlo_user WITH PASSWORD '<password-from-your-env>';"
+   ```
+
+   or — **only on a fresh install with nothing in the database** — wipe the
+   volume and let it re-initialize from `.env`:
+
+   ```bash
+   docker compose down
+   rm -rf ./data/pgsql
+   docker compose up -d
+   docker compose exec api yarn prisma:migrate:deploy
+   ```
+
 ### File upload failures
 
 Check MinIO is running and has adequate storage:
@@ -348,6 +460,46 @@ environment:
   - NODE_OPTIONS=--max-old-space-size=2048
 ```
 
+Most VPS images ship without swap, which makes memory spikes (like the client
+build) fatal instead of just slow. Adding a swapfile is cheap insurance:
+
+```bash
+fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+```
+
+### Nginx shows its default "Welcome to nginx" page
+
+The request is being answered by nginx's default site because no `server_name`
+matched. Check that:
+
+1. `server_name` in your config is your actual domain (not the
+   `yourdomain.com` placeholder);
+2. the site is enabled: `ls -la /etc/nginx/sites-enabled/` should show the
+   `mirlo` symlink;
+3. the default site is removed: `rm /etc/nginx/sites-enabled/default`.
+
+Then `nginx -t && systemctl reload nginx`. If certbot ran while the config was
+still wrong, re-run it after fixing — it installs the certificate into
+whichever server block matches the requested domain.
+
+### Redirect loop, or HTTPS redirects to itself
+
+`curl -sk -D- -o /dev/null https://localhost -H "Host: yourdomain.com"`
+on the server tells you which layer is redirecting:
+
+- **The origin returns `301` to its own URL**: a certbot `return 301` (or
+  `if ($host = ...)` block) ended up inside the `listen 443 ssl` server block.
+  The HTTP→HTTPS redirect must live **only** in the `listen 80` block; the 443
+  block should contain only the `proxy_pass` setup and certbot's `ssl_*`
+  lines. Find it with `grep -rn "return 301" /etc/nginx/sites-enabled/`.
+- **The origin returns `200` but the public URL loops**: your DNS record is
+  proxied through Cloudflare (orange cloud) with SSL mode "Flexible" —
+  Cloudflare fetches your origin over plain HTTP, hits the HTTP→HTTPS
+  redirect, and serves that redirect back on HTTPS, forever. Either switch the
+  record to "DNS only" (grey cloud), or set the Cloudflare SSL/TLS mode to
+  "Full (strict)" for this hostname.
+
 ---
 
 ## Hetzner Deployment
@@ -369,10 +521,10 @@ In the Hetzner Cloud Console:
 
 - Click "Create Server"
 - **Image**: Ubuntu 22.04
-- **Type**: CPX22 (2 vCPU, 4GB RAM) - €6.99/month
+- **Type**: CPX22 (2 vCPU, 4GB RAM) - €6.99/month (these numbers likely variable)
 - **Location**: Choose closest to your users
 - **SSH Key**: Add your public SSH key
-- **Volume** (optional): Add 100GB volume for media storage (€.50/month per 10GB)
+- **Volume** (optional): Add 100GB volume for media storage (€.50/month per 10GB, probably different by the time you read this)
 - Create the server
 
 **3. Initial Server Setup**
@@ -383,16 +535,19 @@ ssh root@<server-ip>
 # Update system
 apt-get update && apt-get upgrade -y
 
-# Install Docker
+# Install Docker (this also installs the Docker Compose v2 plugin —
+# don't apt-get install docker-compose, that's the obsolete v1)
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 rm get-docker.sh
 
-# Install Docker Compose
-apt-get install -y docker-compose
-
 # Install useful tools
-apt-get install -y git curl wget nano certbot nginx
+apt-get install -y git curl wget nano nginx certbot python3-certbot-nginx
+
+# Add swap — cloud images ship without it, and the client build can
+# exhaust 4GB of RAM (see Troubleshooting → Out of memory errors)
+fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
 
 **4. Mount Storage Volume (if added)**
 
@@ -453,6 +608,11 @@ A record: yourdomain.com → <server-ip>
 A record: www.yourdomain.com → <server-ip>
 ```
 
+If your DNS is on Cloudflare, either create the record as "DNS only" (grey
+cloud), or make sure the zone's SSL/TLS mode is "Full (strict)" — a proxied
+record with "Flexible" SSL causes an infinite redirect loop (see
+[Troubleshooting](#redirect-loop-or-https-redirects-to-itself)).
+
 **10. Setup Nginx & SSL**
 
 Follow the Nginx setup steps from Option 1, sections 7-8.
@@ -477,6 +637,24 @@ For higher performance, use a dedicated server with bare-metal installation:
    - Inbound: Allow HTTPS (port 443) from 0.0.0.0/0
    - Inbound: Deny all other traffic
 3. Attach firewall to server
+
+An external (cloud-level) firewall is not optional hardening here: Docker
+publishes ports by manipulating iptables directly, **bypassing `ufw`**, so
+MinIO (9000/9001), MailHog (1025/8025), the API (3000) and even PostgreSQL's
+host port are reachable from the internet unless something outside the host
+blocks them. Verify from your own machine after attaching the firewall:
+
+```bash
+nc -zv -w3 <server-ip> 9001   # should time out
+nc -zv -w3 <server-ip> 8025   # should time out
+```
+
+To use the blocked admin UIs, tunnel them over SSH instead of opening ports:
+
+```bash
+ssh -L 9001:localhost:9001 root@<server-ip>   # MinIO console → http://localhost:9001
+ssh -L 8025:localhost:8025 root@<server-ip>   # MailHog → http://localhost:8025
+```
 
 ---
 
