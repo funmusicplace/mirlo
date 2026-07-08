@@ -58,6 +58,7 @@ const MarkdownWrapper = styled.div`
 
   ul,
   ol {
+    list-style: disc;
     margin-left: 1rem;
     margin-bottom: 1rem;
     margin-top: 0.75rem;

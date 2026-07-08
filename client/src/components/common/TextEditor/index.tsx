@@ -247,6 +247,7 @@ const TextEditor: React.FC<{
 
       ul,
       ol {
+        list-style: disc;
         margin-left: 1rem;
         margin-bottom: 1.5rem;
       }

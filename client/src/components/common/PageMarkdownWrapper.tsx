@@ -32,6 +32,7 @@ export const PageMarkdownWrapper = styled.div`
 
   ul,
   ol {
+    list-style: disc;
     margin-left: 1.5rem;
     margin-bottom: 1rem;
   }
