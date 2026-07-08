@@ -125,7 +125,7 @@ function Index() {
 
         <div className="flex flex-wrap gap-6 justify-center mt-4 text-sm">
           {!isSimpleMessage && (
-            <Link to="/profile/collection">{t("viewInCollection")} →</Link>
+            <Link to="/listener/collection">{t("viewInCollection")} →</Link>
           )}
           <Link to={getArtistUrl(artist)}>{t("backToArtist")}</Link>
         </div>

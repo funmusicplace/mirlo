@@ -50,7 +50,7 @@ describe("manage album pricing", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.login({ email: userEmail, password: userPassword });
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
     cy.intercept("PUT", `/v1/manage/trackGroups/${trackGroupId}`).as(
       "updateTrackGroup"
     );

@@ -32,7 +32,7 @@ const popularRelease = {
 
 describe("home page", () => {
   beforeEach(() => {
-    cy.intercept("GET", "/auth/profile", {
+    cy.intercept("GET", "/auth/user", {
       statusCode: 200,
       body: { result: null },
     }).as("authProfile");

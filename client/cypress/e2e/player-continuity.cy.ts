@@ -35,7 +35,7 @@ const track = {
 
 describe("player continuity across navigation", () => {
   beforeEach(() => {
-    cy.intercept("GET", "/auth/profile", {
+    cy.intercept("GET", "/auth/user", {
       statusCode: 200,
       body: { result: null },
     });

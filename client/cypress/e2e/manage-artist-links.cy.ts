@@ -38,7 +38,7 @@ describe("manage artist links", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.login({ email: linksEmail, password: linksPassword });
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
     cy.intercept("PUT", `/v1/manage/artists/${artistId}`).as("updateArtist");
 
     cy.visit(`/manage/artists/${artistId}/links`, {

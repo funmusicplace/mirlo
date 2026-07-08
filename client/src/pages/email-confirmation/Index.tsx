@@ -52,7 +52,9 @@ function Index() {
       snackbar(t("confirmed"), { type: "success" });
       setIsConfirmed(true);
       setTimeout(() => {
-        navigate(accountType === "artist" ? "/manage/" : "/profile/collection");
+        navigate(
+          accountType === "artist" ? "/manage/" : "/listener/collection"
+        );
       }, 3000);
     } catch (e: unknown) {
       const errorMessage = (e as Error).message || t("confirmationFailed");

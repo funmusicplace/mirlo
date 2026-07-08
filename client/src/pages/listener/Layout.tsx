@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 
 const Layout: React.FC = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t } = useTranslation("translation", { keyPrefix: "listener" });
 
   return (
     <>
@@ -24,21 +24,21 @@ const Layout: React.FC = () => {
         <div className="mb-4">
           <SectionNav>
             <li>
-              <NavLink end to="/profile/followed">
+              <NavLink end to="/listener/followed">
                 {t("followedArtists")}
               </NavLink>
             </li>
             <li>
-              <NavLink to="/profile/collection">{t("collection")}</NavLink>
+              <NavLink to="/listener/collection">{t("collection")}</NavLink>
             </li>
             <li>
-              <NavLink to="/profile/wishlist">{t("wishlist")}</NavLink>
+              <NavLink to="/listener/wishlist">{t("wishlist")}</NavLink>
             </li>
             <li>
-              <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
+              <NavLink to="/listener/purchases">{t("purchases")}</NavLink>
             </li>
             <li>
-              <NavLink to="/profile/notifications">
+              <NavLink to="/listener/notifications">
                 {t("notifications")}
                 <UnreadCountPill />
               </NavLink>

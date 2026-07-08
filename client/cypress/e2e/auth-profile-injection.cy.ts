@@ -1,6 +1,6 @@
 /**
  * Tests that auth profile data is injected into the page HTML on direct load,
- * so the client doesn't need to wait for /auth/profile to show logged-in state.
+ * so the client doesn't need to wait for /auth/user to show logged-in state.
  */
 
 const email = "injectiontest@example.com";
@@ -49,7 +49,7 @@ describe("auth profile injection", () => {
   it("shows logged-in UI from injected auth data", () => {
     cy.login({ email, password });
 
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
 
     cy.visit("/");
 
@@ -67,7 +67,7 @@ describe("auth profile injection", () => {
     // Should show user-specific UI immediately from injected data
     cy.get("[data-cy='user-nav']").should("be.visible");
 
-    // Verify that /auth/profile is still called (after UI is already visible)
+    // Verify that /auth/user is still called (after UI is already visible)
     cy.wait("@authProfile").its("response.statusCode").should("eq", 200);
   });
 });

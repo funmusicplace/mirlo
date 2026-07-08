@@ -73,7 +73,7 @@ const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
         ? input.href
         : input.url;
 
-  if (url.includes("/auth/profile")) {
+  if (url.includes("/auth/user")) {
     return jsonResponse({ result: null });
   }
 

@@ -13,14 +13,14 @@ const AccountNav: React.FC = () => {
       {user?.isLabelAccount ? (
         <li>
           <NavLink end to="/account/label">
-            {t("profile.label")}
+            {t("listener.label")}
           </NavLink>
         </li>
       ) : (
         <CanCreateArtists>
           <li>
             <NavLink end to="/manage">
-              {t("profile.manageArtists")}
+              {t("listener.manageArtists")}
             </NavLink>
           </li>
         </CanCreateArtists>
@@ -37,7 +37,7 @@ const AccountNav: React.FC = () => {
       </li>
       <li>
         <NavLink end to="/account">
-          {t("profile.account")}
+          {t("listener.account")}
         </NavLink>
       </li>
     </SectionNav>

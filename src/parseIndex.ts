@@ -842,7 +842,7 @@ export const analyzePathAndGenerateHTML = async (
   const segments = splitPathIntoSegments(pathname);
   try {
     const client = await getClient();
-    // Inject logged-in user state so the client doesn't need to wait for /auth/profile
+    // Inject logged-in user state so the client doesn't need to wait for /auth/user
     if (req?.user) {
       const user = await prisma.user.findFirst({
         where: { email: (req.user as { email: string }).email },

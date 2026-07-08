@@ -83,7 +83,7 @@ describe("notification feed currency", () => {
   });
 
   it("returns trackGroup.currency in the notification feed API response", () => {
-    cy.visit(`/profile/notifications`);
+    cy.visit(`/listener/notifications`);
     cy.wait("@fetchPurchaseNotifs").then((interception) => {
       const results = interception.response?.body?.results;
       expect(results).to.have.length.greaterThan(0);
@@ -97,7 +97,7 @@ describe("notification feed currency", () => {
   });
 
   it("displays the purchase amount with the correct currency symbol", () => {
-    cy.visit(`/profile/notifications`);
+    cy.visit(`/listener/notifications`);
     cy.wait("@fetchPurchaseNotifs");
     cy.contains("€15.00").should("exist");
   });

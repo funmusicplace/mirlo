@@ -60,7 +60,7 @@ describe("manage subscription tier", () => {
   });
 
   beforeEach(() => {
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
     cy.intercept("GET", `/v1/manage/artists/${artistId}/subscriptionTiers*`).as(
       "getSubscriptionTiers"
     );

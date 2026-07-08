@@ -86,13 +86,13 @@ const Menu = forwardRef<
         <nav aria-label={t("main")} className="flex-auto">
           <ul>
             <li>
-              <MenuLink onClick={onClose} to="/profile/notifications">
+              <MenuLink onClick={onClose} to="/listener/notifications">
                 {t("yourFeed")}
               </MenuLink>
             </li>
 
             <li>
-              <MenuLink onClick={onClose} to="/profile/collection">
+              <MenuLink onClick={onClose} to="/listener/collection">
                 {t("collection")}
               </MenuLink>
             </li>

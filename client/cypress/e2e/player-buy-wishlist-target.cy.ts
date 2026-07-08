@@ -101,7 +101,7 @@ describe("player wishlist/buy target choice", () => {
     beforeEach(() => {
       stubCommonRoutes();
 
-      cy.intercept("GET", "/auth/profile", {
+      cy.intercept("GET", "/auth/user", {
         statusCode: 200,
         body: { result: baseUser },
       });
@@ -170,7 +170,7 @@ describe("player wishlist/buy target choice", () => {
     beforeEach(() => {
       stubCommonRoutes();
 
-      cy.intercept("GET", "/auth/profile", {
+      cy.intercept("GET", "/auth/user", {
         statusCode: 200,
         body: { result: baseUser },
       });

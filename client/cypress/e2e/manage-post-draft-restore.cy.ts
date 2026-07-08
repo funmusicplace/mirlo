@@ -62,7 +62,7 @@ describe("manage post draft restore", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.login({ email: postDraftEmail, password: postDraftPassword });
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
 
     cy.visit(`/manage/artists/${artistId}/post/${postId}`);
     cy.wait("@authProfile");

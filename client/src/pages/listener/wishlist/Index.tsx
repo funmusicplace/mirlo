@@ -10,7 +10,7 @@ import { useAuthContext } from "state/AuthContext";
 
 import api from "services/api";
 
-import FilterGroup from "components/Profile/UserNotificationFeed/FilterGroup";
+import FilterGroup from "components/Listener/UserNotificationFeed/FilterGroup";
 
 type Filter = "all" | "albums" | "tracks";
 
@@ -32,7 +32,7 @@ type WishlistItem =
 function Index() {
   const { user } = useAuthContext();
   const userId = user?.id;
-  const { t } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t } = useTranslation("translation", { keyPrefix: "listener" });
 
   const [wishlisted, setWishlisted] =
     React.useState<UserTrackGroupWishlist[]>();

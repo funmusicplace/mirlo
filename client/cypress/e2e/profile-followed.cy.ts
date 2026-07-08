@@ -4,7 +4,7 @@ const followArtistName = "Follow Me Band";
 const subscribeArtistName = "Subscribe Me Band";
 const paidTierName = "Gold tier";
 
-describe("/profile/followed", () => {
+describe("/listener/followed", () => {
   beforeEach(() => {
     cy.task("clearTables");
     cy.task("createClient", { key: "test" });
@@ -61,15 +61,15 @@ describe("/profile/followed", () => {
     });
   });
 
-  it("redirects /profile to /profile/followed when logged in", () => {
+  it("redirects /profile to /listener/followed when logged in", () => {
     cy.login({ email: followerEmail, password });
     cy.visit("/profile");
-    cy.location("pathname").should("eq", "/profile/followed");
+    cy.location("pathname").should("eq", "/listener/followed");
   });
 
   it("shows both followed and subscribed artists by default", () => {
     cy.login({ email: followerEmail, password });
-    cy.visit("/profile/followed");
+    cy.visit("/listener/followed");
 
     cy.contains("h1", "Followed artists").should("be.visible");
     cy.contains(followArtistName).should("be.visible");
@@ -79,7 +79,7 @@ describe("/profile/followed", () => {
 
   it("filters to subscriptions only when Subscriptions is selected", () => {
     cy.login({ email: followerEmail, password });
-    cy.visit("/profile/followed");
+    cy.visit("/listener/followed");
 
     cy.contains("label", "Subscriptions").click();
 
@@ -90,7 +90,7 @@ describe("/profile/followed", () => {
 
   it("filters to follows only when Following is selected", () => {
     cy.login({ email: followerEmail, password });
-    cy.visit("/profile/followed");
+    cy.visit("/listener/followed");
 
     cy.contains("label", "Following").click();
 

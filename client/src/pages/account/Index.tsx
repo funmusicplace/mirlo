@@ -7,7 +7,7 @@ import { SelectEl } from "components/common/Select";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
 import CurrencySelect from "components/ManageArtist/CountrySelectForm";
-import ProfileSection from "components/Profile/ProfileSection";
+import ProfileSection from "components/Listener/ProfileSection";
 import { finishedLanguages } from "i18n";
 import { useProfileMutation } from "queries";
 import React from "react";
@@ -34,7 +34,7 @@ type FormData = {
 };
 
 const Index: React.FC = () => {
-  const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "listener" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isSaving, setIsSaving] = React.useState(false);
   const errorHandler = useErrorHandler();

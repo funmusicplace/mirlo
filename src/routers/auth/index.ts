@@ -10,7 +10,7 @@ import {
   passwordResetInitiate,
   passwordResetSetPassword,
 } from "./passwordReset";
-import profile from "./profile";
+import user from "./user";
 import refresh from "./refresh";
 import resendVerificationEmail from "./resendVerificationEmail";
 import signup from "./signup";
@@ -74,7 +74,10 @@ router.get("/logout", (req, res) => {
   }
 });
 
-router.get("/profile", userAuthenticated, profile);
+router.get("/user", userAuthenticated, user);
+
+/** @deprecated Use GET /auth/user */
+router.get("/profile", userAuthenticated, user);
 
 router.post("/refresh", refresh);
 

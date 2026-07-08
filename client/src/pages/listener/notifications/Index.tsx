@@ -9,7 +9,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 
-import NotificationColumn from "components/Profile/UserNotificationFeed/NotificationColumn";
+import NotificationColumn from "components/Listener/UserNotificationFeed/NotificationColumn";
 
 const FOLLOW_TYPES: Notification["notificationType"][] = [
   "NEW_ARTIST_ALBUM",

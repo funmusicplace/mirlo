@@ -9,15 +9,15 @@ import { getArtistUrl } from "utils/artist";
 
 import api from "services/api";
 
-import PurchaseComponent from "components/Profile/PurchaseComponent";
-import TransactionComponent from "components/Profile/TransactionComponent";
+import PurchaseComponent from "components/Listener/PurchaseComponent";
+import TransactionComponent from "components/Listener/TransactionComponent";
 
 function Index() {
   const { user } = useAuthContext();
   const userId = user?.id;
 
   const [purchases, setPurchases] = React.useState<UserTransaction[]>();
-  const { t } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t } = useTranslation("translation", { keyPrefix: "listener" });
   const [charges, setCharges] =
     React.useState<ArtistUserSubscriptionCharge[]>();
   const [isLoading, setIsLoading] = React.useState(true);

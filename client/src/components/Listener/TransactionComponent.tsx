@@ -14,7 +14,7 @@ import MerchPopUp from "./MerchPopUp";
 const MerchPurchaseDetails: React.FC<{
   merchPurchase: MerchPurchase;
 }> = ({ merchPurchase }) => {
-  const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "listener" });
   const [isViewingMerchPopUp, setIsViewingMerchPopUp] = React.useState(false);
 
   return (
@@ -45,7 +45,7 @@ const MerchPurchaseDetails: React.FC<{
 const TransactionComponent: React.FC<{
   userTransaction: UserTransaction;
 }> = ({ userTransaction }) => {
-  const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "listener" });
   const isTrackGroupPurchase = !!userTransaction.trackGroupPurchases?.length;
   const isMerchPurchase = !!userTransaction.merchPurchases?.length;
   const isTrackPurchase = !!userTransaction.trackPurchases?.length;

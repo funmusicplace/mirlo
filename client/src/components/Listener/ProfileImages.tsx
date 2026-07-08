@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 
 const ProfileImages: React.FC = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t } = useTranslation("translation", { keyPrefix: "listener" });
   const { user } = useAuthContext();
 
   if (!user) {

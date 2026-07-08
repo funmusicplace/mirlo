@@ -3,7 +3,7 @@ import Box from "components/common/Box";
 import Pill from "components/common/Pill";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import WidthContainer from "components/common/WidthContainer";
-import FilterGroup from "components/Profile/UserNotificationFeed/FilterGroup";
+import FilterGroup from "components/Listener/UserNotificationFeed/FilterGroup";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
@@ -11,7 +11,7 @@ import { useAuthContext } from "state/AuthContext";
 type Filter = "all" | "follows" | "subscriptions";
 
 function Index() {
-  const { t } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t } = useTranslation("translation", { keyPrefix: "listener" });
   const { user } = useAuthContext();
   const [filter, setFilter] = React.useState<Filter>("all");
 

@@ -30,7 +30,7 @@ const PurchaseComponent: React.FC<{
   purchaseDate,
   merchPurchase,
 }) => {
-  const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "listener" });
   const [isViewingMerchPopUp, setIsViewingMerchPopUp] = React.useState(false);
 
   return (

@@ -34,7 +34,7 @@ describe("artist customize look", () => {
   beforeEach(() => {
     cy.login({ email: userEmail, password: userPassword });
 
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
     cy.intercept("GET", `/v1/manage/artists/${artistId}*`).as(
       "getManagedArtist"
     );

@@ -102,7 +102,7 @@ const fetchProfile: QueryFunction<
   ["fetchProfile", ...string[]]
 > = ({ signal }) => {
   return api
-    .get<{ result: LoggedInUser }>(`auth/profile`, { signal })
+    .get<{ result: LoggedInUser }>(`auth/user`, { signal })
     .then((r) => r.result)
     .catch((e) => {
       // If the user is logged out, return null as a successful response
@@ -128,7 +128,7 @@ export function queryAuthProfile() {
     // Do not refetch on window focus. Every embedded widget iframe is a
     // separate React app with its own QueryClient; with refetchOnWindowFocus
     // enabled the visibilitychange event fires inside each iframe and causes
-    // one auth/profile request per widget every time the user switches tabs.
+    // one auth/user request per widget every time the user switches tabs.
     refetchOnWindowFocus: false,
   });
 }

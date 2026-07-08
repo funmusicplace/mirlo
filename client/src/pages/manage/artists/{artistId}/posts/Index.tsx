@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import SectionActionStrip from "components/common/SectionActionStrip";
-import FilterGroup from "components/Profile/UserNotificationFeed/FilterGroup";
+import FilterGroup from "components/Listener/UserNotificationFeed/FilterGroup";
 import {
   queryManagedArtistPosts,
   useCreatePostMutation,

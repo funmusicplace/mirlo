@@ -50,7 +50,7 @@ describe("manage album explicit save", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.login({ email: explicitSaveEmail, password: explicitSavePassword });
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
     cy.intercept("PUT", `/v1/manage/trackGroups/${trackGroupId}`).as(
       "updateTrackGroup"
     );

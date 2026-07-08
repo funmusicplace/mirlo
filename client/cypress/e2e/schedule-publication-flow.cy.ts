@@ -55,7 +55,7 @@ describe("schedule publication flow", () => {
 
     beforeEach(() => {
       cy.login({ email: ownerEmail, password: ownerPassword });
-      cy.intercept("GET", "/auth/profile").as("authProfile");
+      cy.intercept("GET", "/auth/user").as("authProfile");
       cy.intercept("PUT", `/v1/manage/trackGroups/${trackGroupId}`).as(
         "updateTrackGroup"
       );
@@ -110,7 +110,7 @@ describe("schedule publication flow", () => {
 
     beforeEach(() => {
       cy.login({ email: ownerEmail, password: ownerPassword });
-      cy.intercept("GET", "/auth/profile").as("authProfile");
+      cy.intercept("GET", "/auth/user").as("authProfile");
       cy.intercept("PUT", `/v1/manage/trackGroups/${trackGroupId}`).as(
         "updateTrackGroup"
       );

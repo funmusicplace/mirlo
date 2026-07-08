@@ -6,7 +6,7 @@ import {
   serializeUserProfile,
 } from "../../utils/serialize/userProfile";
 
-const profile = async (req: Request, res: Response, next: NextFunction) => {
+const user = async (req: Request, res: Response, next: NextFunction) => {
   const { email } = req.user as { email: string };
   try {
     const foundUser = await prisma.user.findFirst({
@@ -22,4 +22,4 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default profile;
+export default user;

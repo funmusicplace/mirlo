@@ -109,7 +109,7 @@ describe("sales page", () => {
   });
 
   beforeEach(() => {
-    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/auth/user").as("authProfile");
     cy.intercept("GET", "/v1/settings/instanceArtist").as("instanceArtist");
 
     cy.intercept("GET", "/v1/manage/sales/*", (req) => {

@@ -22,7 +22,7 @@ function Index() {
   const userId = user?.id;
 
   const [purchases, setPurchases] = React.useState<UserPurchase[]>();
-  const { t } = useTranslation("translation", { keyPrefix: "profile" });
+  const { t } = useTranslation("translation", { keyPrefix: "listener" });
 
   const fetchCollection = React.useCallback(async () => {
     const { results } = await api.getMany<UserPurchase>(

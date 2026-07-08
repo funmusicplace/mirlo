@@ -23,7 +23,7 @@ const playableRelease = {
 };
 
 const stubHomeRoutes = () => {
-  cy.intercept("GET", "/auth/profile", {
+  cy.intercept("GET", "/auth/user", {
     statusCode: 200,
     body: { result: null },
   });
@@ -150,12 +150,12 @@ describe("PlayableCover go-to", () => {
     });
 
     it("still allows tapping the play control", () => {
-      getPlayableCover()
-        .find("[data-playable-play-control] button")
-        .click();
+      getPlayableCover().find("[data-playable-play-control] button").click();
 
       cy.window().then((win) => {
-        const state = JSON.parse(win.localStorage.getItem("nomadState") ?? "{}");
+        const state = JSON.parse(
+          win.localStorage.getItem("nomadState") ?? "{}"
+        );
         expect(state.playerQueueIds).to.deep.equal([101]);
       });
     });

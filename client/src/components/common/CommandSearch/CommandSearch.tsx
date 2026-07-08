@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import LoadingSpinner from "components/common/LoadingSpinner";
-import FilterGroup from "components/Profile/UserNotificationFeed/FilterGroup";
+import FilterGroup from "components/Listener/UserNotificationFeed/FilterGroup";
 import FocusTrap from "focus-trap-react";
 import React from "react";
 import { createPortal } from "react-dom";

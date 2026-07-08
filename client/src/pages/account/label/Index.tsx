@@ -30,9 +30,9 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistManageUrl, getArtistUrl } from "utils/artist";
 
-import ProfileSection from "components/Profile/ProfileSection";
+import ProfileSection from "components/Listener/ProfileSection";
 
-import AddArtistToRoster from "components/Profile/ManageLabel/AddArtistToRoster";
+import AddArtistToRoster from "components/Listener/ManageLabel/AddArtistToRoster";
 
 type Relationship = {
   artist: {
