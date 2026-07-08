@@ -10,7 +10,7 @@ services:
     plan: standard # Supposedly this should be free but
     # dockerCommand: ./start.sh
     # dockerfilePath: ./prod.Dockerfile
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && yarn client:build
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=3072 yarn client:build
     startCommand: yarn ts-node src/index.ts
     envVars:
       - key: SKIP_INSTALL_DEPS
