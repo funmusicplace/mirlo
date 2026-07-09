@@ -13,6 +13,7 @@ import {
   createAndDispatchTerminalSetupIntent,
   cancelIntent,
   cancelReaderActionForIntent,
+  listTerminalReaders,
 } from "../stripe/terminal";
 
 import {
@@ -20,6 +21,7 @@ import {
   CreatePaymentArgs,
   CreateSubscriptionSetupArgs,
   PaymentStatusResult,
+  TerminalReader,
 } from "./PaymentProcessor";
 
 export class StripePaymentProcessor implements PaymentProcessor {
@@ -147,5 +149,21 @@ export class StripePaymentProcessor implements PaymentProcessor {
     }
     const intent = await cancelIntent({ id, stripeAccountId: accountId });
     return { id: intent.id, status: intent.status };
+  }
+
+  async listReaders({
+    accountId,
+  }: {
+    accountId: string;
+  }): Promise<TerminalReader[]> {
+    const readers = await listTerminalReaders({
+      stripeAccountId: accountId,
+    });
+    return readers.map((r) => ({
+      id: r.id,
+      label: r.label ?? null,
+      deviceType: r.device_type,
+      status: r.status ?? null,
+    }));
   }
 }

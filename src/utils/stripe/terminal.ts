@@ -81,6 +81,18 @@ export const getTerminalPaymentStatus = async ({
   );
 };
 
+export const listTerminalReaders = async ({
+  stripeAccountId,
+}: {
+  stripeAccountId: string;
+}) => {
+  const readers = await stripe.terminal.readers.list(
+    { limit: 100 },
+    { stripeAccount: stripeAccountId }
+  );
+  return readers.data;
+};
+
 export const cancelIntent = async ({
   id,
   stripeAccountId,

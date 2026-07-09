@@ -8,10 +8,12 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "components/common/Button";
 import { InputEl } from "components/common/Input";
+import { SelectEl } from "components/common/Select";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import {
   queryManagedArtist,
   queryManagedArtistMerch,
+  queryManagedArtistReaders,
   queryManagedArtistSubscriptionTiers,
   queryManagedArtistTrackGroups,
   queryUserStripeStatus,
@@ -123,6 +125,9 @@ const Index: React.FC = () => {
   );
   const { data: tiers } = useQuery(
     queryManagedArtistSubscriptionTiers({ artistId: numericArtistId })
+  );
+  const { data: readers } = useQuery(
+    queryManagedArtistReaders({ artistId: numericArtistId })
   );
 
   const paymentUserId = artist?.paymentToUserId ?? artist?.userId;
@@ -236,22 +241,41 @@ const Index: React.FC = () => {
     <ManageSectionWrapper>
       <h2 className="text-xl font-bold mb-1">Point of sale</h2>
       <p className="text-sm mb-4">
-        Charges a single item through <code>POST /v1/purchase</code>. Enter a
-        Stripe Terminal reader id for in-person card-present payments; leave it
-        blank to complete an online payment with the Payment Element.
+        Charges a single item through <code>POST /v1/purchase</code>. Pick a
+        Stripe Terminal reader for in-person card-present payments; leave it
+        unset to complete an online payment with the Payment Element.
       </p>
 
       <div className="flex flex-col gap-2 mb-6 max-w-md">
         <label className="text-sm font-bold" htmlFor="pos-reader">
-          Reader id (optional)
+          Card reader (optional)
         </label>
-        <InputEl
-          id="pos-reader"
-          name="readerId"
-          placeholder="tmr_..."
-          value={readerId}
-          onChange={(e) => setReaderId(e.target.value)}
-        />
+        {(readers?.results?.length ?? 0) > 0 ? (
+          <SelectEl
+            id="pos-reader"
+            name="readerId"
+            value={readerId}
+            onChange={(e) => setReaderId(e.target.value)}
+          >
+            <option value="">No reader — online payment</option>
+            {readers?.results.map((reader) => (
+              <option key={reader.id} value={reader.id}>
+                {reader.label ?? reader.id} ({reader.deviceType},{" "}
+                {reader.status ?? "unknown"})
+              </option>
+            ))}
+          </SelectEl>
+        ) : (
+          // No readers registered on the connected account (or none listable):
+          // fall back to manual entry.
+          <InputEl
+            id="pos-reader"
+            name="readerId"
+            placeholder="tmr_..."
+            value={readerId}
+            onChange={(e) => setReaderId(e.target.value)}
+          />
+        )}
         <label className="text-sm font-bold" htmlFor="pos-email">
           Buyer email (optional)
         </label>
