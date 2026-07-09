@@ -36,7 +36,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns Artist information",
+    summary: "Returns Profile information",
     parameters: [
       {
         in: "path",
@@ -49,7 +49,7 @@ export default function () {
       200: {
         description: "An artist that matches the id",
         schema: {
-          $ref: "#/definitions/Artist",
+          $ref: "#/definitions/Profile",
         },
       },
       default: {

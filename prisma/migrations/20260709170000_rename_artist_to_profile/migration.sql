@@ -1,0 +1,13 @@
+-- Rename Artist* tables to Profile*
+ALTER TABLE "Artist" RENAME TO "Profile";
+ALTER TABLE "ArtistAvatar" RENAME TO "ProfileAvatar";
+ALTER TABLE "ArtistBackground" RENAME TO "ProfileBackground";
+ALTER TABLE "ArtistSubscriptionTier" RENAME TO "ProfileSubscriptionTier";
+ALTER TABLE "ArtistTipTier" RENAME TO "ProfileTipTier";
+ALTER TABLE "ArtistUserSubscription" RENAME TO "ProfileUserSubscription";
+ALTER TABLE "ArtistUserSubscriptionConfirmation" RENAME TO "ProfileUserSubscriptionConfirmation";
+ALTER TABLE "ArtistUserSubscriptionCharge" RENAME TO "ProfileUserSubscriptionCharge";
+ALTER TABLE "ArtistLocationTag" RENAME TO "ProfileLocationTag";
+ALTER TABLE "ActivityPubArtistFollowers" RENAME TO "ActivityPubProfileFollowers";
+ALTER TABLE "UserArtistNotificationSetting" RENAME TO "UserProfileNotificationSetting";
+ALTER TABLE "UserArtistTip" RENAME TO "UserProfileTip";

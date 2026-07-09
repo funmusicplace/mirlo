@@ -118,7 +118,7 @@ describe("artists", () => {
 
       // Create a regular artist with a published track group
       const artist = await createArtist(user1.id, {
-        name: "Regular Artist",
+        name: "Regular Profile",
         isLabelProfile: false,
       });
       const trackGroup = await createTrackGroup(artist.id);
@@ -138,7 +138,7 @@ describe("artists", () => {
 
       assert.equal(response.body.results.length, 2);
       const names = response.body.results.map((r: any) => r.name).sort();
-      assert.deepEqual(names, ["My Label", "Regular Artist"]);
+      assert.deepEqual(names, ["My Label", "Regular Profile"]);
       assert.equal(response.statusCode, 200);
     });
 
@@ -157,7 +157,7 @@ describe("artists", () => {
 
       // Create a regular artist with a published track group
       const artist = await createArtist(user1.id, {
-        name: "Regular Artist",
+        name: "Regular Profile",
         isLabelProfile: false,
       });
       const trackGroup = await createTrackGroup(artist.id);
@@ -195,7 +195,7 @@ describe("artists", () => {
 
       // Create a regular artist with a published track group
       const artist = await createArtist(user1.id, {
-        name: "Regular Artist",
+        name: "Regular Profile",
         isLabelProfile: false,
       });
       const trackGroup = await createTrackGroup(artist.id);
@@ -214,7 +214,7 @@ describe("artists", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.body.results.length, 1);
-      assert.equal(response.body.results[0].name, "Regular Artist");
+      assert.equal(response.body.results[0].name, "Regular Profile");
       assert.equal(response.body.results[0].isLabelProfile, false);
       assert.equal(response.statusCode, 200);
     });
@@ -270,13 +270,13 @@ describe("artists", () => {
 
       // Create a regular artist WITHOUT published track groups
       await createArtist(user1.id, {
-        name: "Artist Without Tracks",
+        name: "Profile Without Tracks",
         isLabelProfile: false,
       });
 
       // Create a regular artist WITH published track groups
       const artist2 = await createArtist(user2.id, {
-        name: "Artist With Tracks",
+        name: "Profile With Tracks",
         isLabelProfile: false,
       });
       const trackGroup2 = await createTrackGroup(artist2.id);
@@ -363,7 +363,7 @@ describe("artists", () => {
 
       // Create a signed artist under the label
       const signedArtist = await createArtist(signedArtistUser.id, {
-        name: "Signed Artist",
+        name: "Signed Profile",
       });
 
       // Create the ArtistLabel relationship
@@ -448,7 +448,7 @@ describe("artists", () => {
 
       // Create a signed artist under the label
       const signedArtist = await createArtist(signedArtistUser.id, {
-        name: "Signed Artist",
+        name: "Signed Profile",
         isLabelProfile: false,
       });
 

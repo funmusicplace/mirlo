@@ -24,7 +24,7 @@ describe("GET /v1/tracks", () => {
   it("returns RSS XML when format=rss is requested (#1099)", async () => {
     const { user } = await createUser({ email: "rss-tracks@example.com" });
     const artist = await createArtist(user.id, {
-      name: "RSS Artist",
+      name: "RSS Profile",
       urlSlug: "rss-artist",
     });
     await createTrackGroup(artist.id, {
@@ -51,8 +51,8 @@ describe("GET /v1/tracks", () => {
     );
     assert.match(response.text, /<rss/);
     assert.match(response.text, /All Mirlo Tracks Feed/);
-    assert.match(response.text, /First RSS Track by RSS Artist/);
-    assert.match(response.text, /Second RSS Track by RSS Artist/);
+    assert.match(response.text, /First RSS Track by RSS Profile/);
+    assert.match(response.text, /Second RSS Track by RSS Profile/);
     // Track URLs should point at /{artistSlug}/release/{albumSlug}/tracks/{id}
     assert.match(response.text, /\/rss-artist\/release\/rss-album\/tracks\//);
   });
@@ -60,7 +60,7 @@ describe("GET /v1/tracks", () => {
   it("still returns JSON by default (no format=rss)", async () => {
     const { user } = await createUser({ email: "json-tracks@example.com" });
     const artist = await createArtist(user.id, {
-      name: "JSON Artist",
+      name: "JSON Profile",
       urlSlug: "json-artist",
     });
     await createTrackGroup(artist.id, {
@@ -247,7 +247,7 @@ describe("GET /v1/tracks", () => {
       email: "draft-tracks@example.com",
     });
     const artist = await createArtist(user.id, {
-      name: "Draft Artist",
+      name: "Draft Profile",
       urlSlug: "draft-artist",
     });
     await createTrackGroup(artist.id, {

@@ -253,7 +253,7 @@ const handleTerminalSetupIntentSucceeded = async (
     return;
   }
 
-  const tier = await prisma.artistSubscriptionTier.findFirst({
+  const tier = await prisma.profileSubscriptionTier.findFirst({
     where: { id: Number(metadata.tierId), deletedAt: null },
     include: { artist: { select: { id: true } } },
   });
@@ -301,7 +301,7 @@ const handleTerminalSetupIntentSucceeded = async (
       { stripeAccount: stripeAccountId }
     );
     productKey = product.id;
-    await prisma.artistSubscriptionTier.update({
+    await prisma.profileSubscriptionTier.update({
       where: { id: tier.id },
       data: { stripeProductKey: productKey },
     });

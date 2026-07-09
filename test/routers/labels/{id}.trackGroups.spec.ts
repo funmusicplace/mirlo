@@ -38,7 +38,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "artist@example.com",
     });
     const artist = await createArtist(artistUser.id, {
-      name: "Featured Artist",
+      name: "Featured Profile",
     });
 
     // Create album with label as payment recipient (should appear)
@@ -53,7 +53,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
 
     // Create album without label payment (should NOT appear)
     const artistOwnedAlbum = await createTrackGroup(artist.id, {
-      title: "Artist Original Album",
+      title: "Profile Original Album",
       publishedAt: new Date(),
       urlSlug: "artist-original-album",
     });
@@ -82,7 +82,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       isLabelAccount: true,
     });
     const label = await createArtist(labelUser.id, {
-      name: "Label as Artist",
+      name: "Label as Profile",
       isLabelProfile: true,
     });
 
@@ -119,7 +119,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "artist2@example.com",
     });
     const artist = await createArtist(artistUser.id, {
-      name: "Managed Artist",
+      name: "Managed Profile",
     });
 
     // Set up label relationship
@@ -134,9 +134,9 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       },
     });
 
-    // Artist creates their own album
+    // Profile creates their own album
     const artistAlbum = await createTrackGroup(artist.id, {
-      title: "Artist Personal Album",
+      title: "Profile Personal Album",
       publishedAt: new Date(),
     });
 
@@ -183,7 +183,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "artist3@example.com",
     });
     const artist = await createArtist(artistUser.id, {
-      name: "Draft Artist",
+      name: "Draft Profile",
     });
 
     // Create unpublished album
@@ -234,19 +234,19 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "artist4@example.com",
     });
     const artist1 = await createArtist(artistUser1.id, {
-      name: "First Artist",
+      name: "First Profile",
     });
 
     const { user: artistUser2 } = await createUser({
       email: "artist5@example.com",
     });
     const artist2 = await createArtist(artistUser2.id, {
-      name: "Second Artist",
+      name: "Second Profile",
     });
 
     // Create albums for both artists
     const album1 = await createTrackGroup(artist1.id, {
-      title: "First Artist Album",
+      title: "First Profile Album",
       publishedAt: new Date(),
     });
     await prisma.trackGroup.update({
@@ -255,7 +255,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
     });
 
     const album2 = await createTrackGroup(artist2.id, {
-      title: "Second Artist Album",
+      title: "Second Profile Album",
       publishedAt: new Date(),
       urlSlug: "second-artist-album",
     });
@@ -280,7 +280,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
     assert.equal(filteredResponse.body.results.length, 1);
     assert.equal(
       filteredResponse.body.results[0].title,
-      "Second Artist Album",
+      "Second Profile Album",
       "Should exclude albums from specified artist"
     );
   });

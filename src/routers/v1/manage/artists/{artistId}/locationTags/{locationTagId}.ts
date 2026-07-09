@@ -16,7 +16,7 @@ export default function () {
       const artistId = parseInt(id, 10);
       const locTagId = parseInt(locationTagId, 10);
 
-      await prisma.artistLocationTag.deleteMany({
+      await prisma.profileLocationTag.deleteMany({
         where: { artistId, locationTagId: locTagId },
       });
 

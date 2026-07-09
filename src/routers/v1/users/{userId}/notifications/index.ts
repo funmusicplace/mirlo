@@ -8,7 +8,7 @@ import { AppError } from "../../../../../utils/error";
 import { generateFullStaticImageUrl } from "../../../../../utils/images";
 import {
   finalCoversBucket,
-  finalArtistAvatarBucket,
+  finalProfileAvatarBucket,
   finalPostImageBucket,
 } from "../../../../../utils/minio";
 
@@ -134,7 +134,7 @@ export default function () {
                 ? {
                     ...n.post.artist,
                     avatar: addSizesToImage(
-                      finalArtistAvatarBucket,
+                      finalProfileAvatarBucket,
                       n.post.artist.avatar
                     ),
                   }
@@ -156,7 +156,7 @@ export default function () {
               ...n.relatedUser,
               artists: n.relatedUser.artists.map((a) => ({
                 ...a,
-                avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
+                avatar: addSizesToImage(finalProfileAvatarBucket, a.avatar),
               })),
             }
           : null,

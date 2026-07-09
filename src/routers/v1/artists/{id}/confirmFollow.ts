@@ -27,7 +27,7 @@ export default function () {
 
     try {
       const { applicationUrl } = await getClient();
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
         },
@@ -38,7 +38,7 @@ export default function () {
       });
 
       const confirmation =
-        await prisma.artistUserSubscriptionConfirmation.findFirst({
+        await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             artistId: Number(artistId),
             email,
@@ -88,7 +88,7 @@ export default function () {
 
         if (artist) {
           await subscribeUserToArtist(artist, user, confirmation.message);
-          await prisma.artistUserSubscriptionConfirmation.delete({
+          await prisma.profileUserSubscriptionConfirmation.delete({
             where: {
               id: confirmation.id,
             },

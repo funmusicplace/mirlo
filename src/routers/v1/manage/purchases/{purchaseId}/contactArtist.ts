@@ -28,7 +28,7 @@ export default function () {
 
     if (purchase && purchase.userId === user?.id) {
       // User is authorized to contact the artist
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: purchase.merch.artistId,
         },

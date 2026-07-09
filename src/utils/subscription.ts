@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import { Artist } from "@mirlo/prisma/client";
+import { Profile } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
@@ -10,7 +10,7 @@ import { grantSubscriptionTierReleases } from "./subscriptionTier";
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "MONTH" | "YEAR";
-  artist: Artist;
+  artist: Profile;
   host: string;
   isNewSubscription: boolean;
   client: string;
@@ -23,7 +23,7 @@ export type ArtistSubscriptionReceiptEmailType = {
 
 export type ArtistNewSubscriberAnnounceEmailType = {
   interval: "MONTH" | "YEAR";
-  artist: Artist;
+  artist: Profile;
   isNewSubscription: boolean;
   artistUserSubscription: {
     artistSubscriptionTierId: number;
@@ -77,25 +77,27 @@ export const manageSubscriptionReceipt = async ({
   billingReason: null | string;
 }) => {
   const isNewSubscription = billingReason === "subscription_create";
-  const artistUserSubscription = await prisma.artistUserSubscription.findFirst({
-    where: {
-      stripeSubscriptionKey: processorSubscriptionReferenceId,
-      deletedAt: null,
-    },
-    include: {
-      user: true,
-      artistSubscriptionTier: {
-        include: {
-          artist: {
-            include: {
-              user: true,
-              paymentToUser: true,
+  const artistUserSubscription = await prisma.profileUserSubscription.findFirst(
+    {
+      where: {
+        stripeSubscriptionKey: processorSubscriptionReferenceId,
+        deletedAt: null,
+      },
+      include: {
+        user: true,
+        artistSubscriptionTier: {
+          include: {
+            artist: {
+              include: {
+                user: true,
+                paymentToUser: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    }
+  );
   if (artistUserSubscription) {
     const transaction = await prisma.userTransaction.create({
       data: {
@@ -108,7 +110,7 @@ export const manageSubscriptionReceipt = async ({
         paymentStatus: status,
       },
     });
-    const created = await prisma.artistUserSubscriptionCharge.create({
+    const created = await prisma.profileUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: artistUserSubscription.id,
         transactionId: transaction.id,
@@ -120,7 +122,7 @@ export const manageSubscriptionReceipt = async ({
 
     // Update next billing date if provided
     if (status === "COMPLETED" && nextBillingDate) {
-      await prisma.artistUserSubscription.update({
+      await prisma.profileUserSubscription.update({
         where: { id: artistUserSubscription.id },
         data: { nextBillingDate },
       });

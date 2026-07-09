@@ -106,7 +106,8 @@ export default function () {
         name: "artistId",
         required: false,
         type: "string",
-        description: "Artist urlSlug to look up merch by urlSlug instead of ID",
+        description:
+          "Profile urlSlug to look up merch by urlSlug instead of ID",
       },
     ],
     responses: {

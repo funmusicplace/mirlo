@@ -29,7 +29,7 @@ describe("users/{userId}/artists", () => {
       });
 
       const ownArtist = await createArtist(loggedInUser.id, {
-        name: "Owner Artist",
+        name: "Owner Profile",
       });
       await createTrackGroup(ownArtist.id, {
         title: "Owner Album",
@@ -39,7 +39,7 @@ describe("users/{userId}/artists", () => {
         email: "other@test.com",
       });
       const otherArtist = await createArtist(otherUser.id, {
-        name: "Other Artist",
+        name: "Other Profile",
       });
       await createTrackGroup(otherArtist.id, {
         title: "Other Album",
@@ -52,7 +52,7 @@ describe("users/{userId}/artists", () => {
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.results.length, 1);
-      assert.equal(response.body.results[0].name, "Owner Artist");
+      assert.equal(response.body.results[0].name, "Owner Profile");
       assert.equal(response.body.results[0].trackGroups.length, 1);
       assert.equal(
         response.body.results[0].trackGroups[0].title,

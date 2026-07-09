@@ -4,10 +4,10 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { processArtistAvatar } from "../../../../../queues/processImages";
+import { processProfileAvatar } from "../../../../../queues/processImages";
 import busboy from "connect-busboy";
 import prisma from "@mirlo/prisma";
-import { deleteArtistAvatar } from "../../../../../utils/artist";
+import { deleteProfileAvatar } from "../../../../../utils/artist";
 import { busboyOptions } from "../../../../../utils/images";
 
 type Params = {
@@ -30,7 +30,7 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
 
     try {
-      const { jobId, imageId } = await processArtistAvatar({ req, res })(
+      const { jobId, imageId } = await processProfileAvatar({ req, res })(
         Number(artistId)
       );
 
@@ -78,7 +78,7 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
           userId: loggedInUser.id,
@@ -92,7 +92,7 @@ export default function () {
         return next();
       }
 
-      await deleteArtistAvatar(artist.id);
+      await deleteProfileAvatar(artist.id);
 
       res.json({ message: "Success" });
     } catch (error) {

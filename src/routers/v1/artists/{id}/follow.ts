@@ -47,7 +47,7 @@ export default function () {
         });
       }
 
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
         },

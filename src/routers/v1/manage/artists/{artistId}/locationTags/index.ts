@@ -17,7 +17,7 @@ export default function () {
       const { artistId: id } = req.params;
       const artistId = parseInt(id, 10);
 
-      const locationTags = await prisma.artistLocationTag.findMany({
+      const locationTags = await prisma.profileLocationTag.findMany({
         where: { artistId },
         include: { locationTag: true },
       });
@@ -79,7 +79,7 @@ export default function () {
       }
 
       // Create or ignore if already exists
-      const result = await prisma.artistLocationTag.upsert({
+      const result = await prisma.profileLocationTag.upsert({
         where: { artistId_locationTagId: { artistId, locationTagId } },
         create: { artistId, locationTagId },
         update: {},

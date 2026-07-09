@@ -7,7 +7,7 @@ import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import { uploadAndSendToImageQueue } from "../../../../../../queues/processImages";
 import busboy from "connect-busboy";
 import prisma from "@mirlo/prisma";
-import { deleteArtistAvatar } from "../../../../../../utils/artist";
+import { deleteProfileAvatar } from "../../../../../../utils/artist";
 import { busboyOptions } from "../../../../../../utils/images";
 import {
   finalImageBucket,
@@ -116,7 +116,7 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
           userId: loggedInUser.id,
@@ -130,7 +130,7 @@ export default function () {
         return next();
       }
 
-      await deleteArtistAvatar(artist.id);
+      await deleteProfileAvatar(artist.id);
 
       res.json({ message: "Success" });
     } catch (error) {

@@ -99,7 +99,7 @@ describe("finalizeTrackGroupPublication", () => {
       email: "follower@follower.com",
       emailConfirmationToken: null,
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -109,7 +109,7 @@ describe("finalizeTrackGroupPublication", () => {
       },
       include: { subscriptionTiers: true },
     });
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,

@@ -4,8 +4,8 @@ import { NextFunction, Request, Response } from "express";
 import { addSizesToImage } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
 import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
+  finalProfileAvatarBucket,
+  finalProfileBackgroundBucket,
 } from "../../../utils/minio";
 import { getSiteSettings } from "../../../utils/settings";
 
@@ -64,7 +64,7 @@ export default function () {
         if (!featuredArtistIds?.length) {
           return res.status(200).json({ result: [] });
         }
-        const artists = await prisma.artist.findMany({
+        const artists = await prisma.profile.findMany({
           where: { id: { in: featuredArtistIds }, deletedAt: null },
           include: {
             avatar: { where: { deletedAt: null } },
@@ -74,9 +74,9 @@ export default function () {
         return res.status(200).json({
           result: artists.map((a) => ({
             ...a,
-            avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
+            avatar: addSizesToImage(finalProfileAvatarBucket, a.avatar),
             background: addSizesToImage(
-              finalArtistBackgroundBucket,
+              finalProfileBackgroundBucket,
               a.background
             ),
           })),
@@ -88,7 +88,7 @@ export default function () {
           Number(settings.settings.instanceCustomization.artistId)
         )
       ) {
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: {
             id: Number(settings.settings.instanceCustomization?.artistId),
           },

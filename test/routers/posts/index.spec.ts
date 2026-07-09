@@ -68,7 +68,7 @@ describe("posts", () => {
         email: "artist@artist.com",
       });
       const artist = await createArtist(user.id);
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { deletedAt: new Date() },
       });

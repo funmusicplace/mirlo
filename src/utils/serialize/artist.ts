@@ -1,10 +1,10 @@
 import { join } from "path";
 
 import {
-  Artist,
-  ArtistAvatar,
-  ArtistBackground,
-  ArtistSubscriptionTier,
+  Profile,
+  ProfileAvatar,
+  ProfileBackground,
+  ProfileSubscriptionTier,
   Image,
   Merch,
   MerchImage,
@@ -18,8 +18,8 @@ import { addSizesToImage } from "../artist";
 import { generateFullStaticImageUrl } from "../images";
 import { processSingleMerch } from "../merch";
 import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
+  finalProfileAvatarBucket,
+  finalProfileBackgroundBucket,
   finalCoversBucket,
   finalImageBucket,
 } from "../minio";
@@ -32,13 +32,13 @@ import {
   LocalTrackGroup,
 } from "./trackGroup";
 
-interface LocalArtist extends Artist {
+interface LocalArtist extends Profile {
   posts?: Post[];
-  background?: ArtistBackground | null;
-  avatar?: ArtistAvatar | null;
+  background?: ProfileBackground | null;
+  avatar?: ProfileAvatar | null;
   trackGroups?: LocalTrackGroup[] | null;
   merch?: (Merch & { images?: MerchImage[] })[];
-  subscriptionTiers?: (ArtistSubscriptionTier & {
+  subscriptionTiers?: (ProfileSubscriptionTier & {
     images?: { image: Image }[];
     releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
   })[];
@@ -49,9 +49,9 @@ interface LocalArtist extends Artist {
     stripeAccountId?: string | null;
     currency?: string | null;
     artistLabels?: {
-      artist: Artist & {
-        avatar?: ArtistAvatar | null;
-        background?: ArtistBackground | null;
+      artist: Profile & {
+        avatar?: ProfileAvatar | null;
+        background?: ProfileBackground | null;
         trackGroups?: (TrackGroup & {
           cover?: TrackGroupCover | null;
           tracks?: Track[];
@@ -84,10 +84,10 @@ export const processSingleArtist = (
       })
     ),
     background: addSizesToImage(
-      finalArtistBackgroundBucket,
+      finalProfileBackgroundBucket,
       artist?.background
     ),
-    avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
+    avatar: addSizesToImage(finalProfileAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
         { ...tg, artist: { ...tg.artist, user: artist.user } },
@@ -118,11 +118,11 @@ export const processSingleArtist = (
               artist: {
                 ...alArtistPublic,
                 avatar: addSizesToImage(
-                  finalArtistAvatarBucket,
+                  finalProfileAvatarBucket,
                   al.artist?.avatar
                 ),
                 background: addSizesToImage(
-                  finalArtistBackgroundBucket,
+                  finalProfileBackgroundBucket,
                   al.artist?.background
                 ),
                 trackGroups: al.artist?.trackGroups?.map((tg) =>
@@ -169,7 +169,7 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
         ? {
             src: generateFullStaticImageUrl(
               avatarString,
-              finalArtistAvatarBucket
+              finalProfileAvatarBucket
             ),
             alt: null,
             width: 600,

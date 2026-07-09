@@ -1,8 +1,8 @@
 import { join } from "path";
 
 import {
-  Artist,
-  ArtistAvatar,
+  Profile,
+  ProfileAvatar,
   Track,
   TrackAudio,
   TrackArtist,
@@ -17,7 +17,7 @@ import { processSingleTrackGroup } from "./trackGroup";
 export const processSingleTrack = (
   track: Track & {
     trackGroup?: TrackGroup & {
-      artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
+      artist?: Partial<Profile> & { avatar?: ProfileAvatar | null };
       cover?: TrackGroupCover | null;
       userTrackGroupPurchases?: { userId: number }[];
     };

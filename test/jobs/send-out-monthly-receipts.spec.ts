@@ -37,7 +37,7 @@ describe("send-out-monthly-receipts", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -54,7 +54,7 @@ describe("send-out-monthly-receipts", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -86,7 +86,7 @@ describe("send-out-monthly-receipts", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -103,7 +103,7 @@ describe("send-out-monthly-receipts", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -128,7 +128,7 @@ describe("send-out-monthly-receipts", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -145,7 +145,7 @@ describe("send-out-monthly-receipts", () => {
       },
     });
 
-    const artist2 = await prisma.artist.create({
+    const artist2 = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -162,7 +162,7 @@ describe("send-out-monthly-receipts", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist2.subscriptionTiers[0].id,
@@ -170,7 +170,7 @@ describe("send-out-monthly-receipts", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,

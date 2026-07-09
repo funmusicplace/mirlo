@@ -8,7 +8,7 @@ import { processUserAvatar } from "../../../../queues/processImages";
 import busboy from "connect-busboy";
 import { User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
-import { deleteArtistAvatar } from "../../../../utils/artist";
+import { deleteProfileAvatar } from "../../../../utils/artist";
 import { busboyOptions } from "../../../../utils/images";
 
 export default function () {
@@ -69,7 +69,7 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      await deleteArtistAvatar(loggedInUser.id);
+      await deleteProfileAvatar(loggedInUser.id);
 
       res.json({ message: "Success" });
     } catch (error) {

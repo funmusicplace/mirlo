@@ -83,7 +83,7 @@ export default function () {
         required: false,
         type: "string",
         description:
-          "Artist urlSlug to look up release by urlSlug instead of ID",
+          "Profile urlSlug to look up release by urlSlug instead of ID",
       },
     ],
     responses: {

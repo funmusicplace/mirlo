@@ -16,7 +16,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { skip: skipQuery, take, name, acceptPayments, email } = req.query;
     try {
-      let where: Prisma.ArtistWhereInput = {
+      let where: Prisma.ProfileWhereInput = {
         deletedAt: null,
       };
 
@@ -36,8 +36,8 @@ export default function () {
         }
         where.user.email = { contains: email, mode: "insensitive" };
       }
-      const itemCount = await prisma.artist.count({ where });
-      const artists = await prisma.artist.findMany({
+      const itemCount = await prisma.profile.count({ where });
+      const artists = await prisma.profile.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
@@ -67,7 +67,7 @@ export default function () {
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Artist",
+            $ref: "#/definitions/Profile",
           },
         },
       },

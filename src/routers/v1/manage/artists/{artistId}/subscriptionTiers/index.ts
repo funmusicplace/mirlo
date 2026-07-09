@@ -39,7 +39,7 @@ export default function () {
     const { includeDefault } = req.query as { includeDefault?: boolean };
 
     try {
-      const subscriptions = await prisma.artistSubscriptionTier.findMany({
+      const subscriptions = await prisma.profileSubscriptionTier.findMany({
         where: {
           artistId: Number(artistId),
           ...(includeDefault ? {} : { isDefaultTier: false }),
@@ -98,7 +98,7 @@ export default function () {
         merchDiscountPercent,
         imageId,
       } = req.body;
-      const subscription = await prisma.artistSubscriptionTier.create({
+      const subscription = await prisma.profileSubscriptionTier.create({
         data: {
           name,
           artistId: Number(artistId),
@@ -144,7 +144,7 @@ export default function () {
         in: "body",
         name: "subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTierCreate",
+          $ref: "#/definitions/ProfileSubscriptionTierCreate",
         },
       },
     ],
@@ -152,7 +152,7 @@ export default function () {
       200: {
         description: "Created artistSubscriptionTier",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTierResult",
+          $ref: "#/definitions/ProfileSubscriptionTierResult",
         },
       },
       default: {

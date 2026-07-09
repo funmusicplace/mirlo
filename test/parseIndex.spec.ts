@@ -130,7 +130,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should handle artist profile route with artist name", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
 
@@ -138,34 +138,34 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/test-artist", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
-      assert.equal(ogTitle, "My Artist");
+      assert.equal(ogTitle, "My Profile");
     });
 
     it("should handle artist/releases route with correct title", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const $ = cheerio.load("<html></html>");
       await analyzePathAndGenerateHTML("/test-artist/releases", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
-      assert(ogTitle?.includes("My Artist"));
+      assert(ogTitle?.includes("My Profile"));
       assert(ogTitle?.includes("releases"));
     });
 
     it("should handle artist/posts route listing all posts", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const $ = cheerio.load("<html></html>");
       await analyzePathAndGenerateHTML("/test-artist/posts", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
-      assert(ogTitle?.includes("My Artist"));
+      assert(ogTitle?.includes("My Profile"));
 
       const rssLink = $('link[type="application/rss+xml"]').attr("href");
       assert(rssLink?.includes("feed"));
@@ -174,7 +174,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should handle artist/posts/{slug} route with post slug lookup", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const post = await createPost(artist.id, {
@@ -192,7 +192,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should handle artist/merch route listing merch", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
 
@@ -201,13 +201,13 @@ describe("analyzePathAndGenerateHTML", () => {
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
       assert(ogTitle?.includes("merch"));
-      assert(ogTitle?.includes("My Artist"));
+      assert(ogTitle?.includes("My Profile"));
     });
 
     it("should handle artist/merch/{slug} route with merch title and image", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const merch = await createMerch(artist.id, { title: "Cool T-Shirt" });
@@ -222,13 +222,13 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(ogTitle, "Cool T-Shirt");
 
       const ogDesc = $('meta[property="og:description"]').attr("content");
-      assert(ogDesc?.includes("My Artist"));
+      assert(ogDesc?.includes("My Profile"));
     });
 
     it("should handle artist/support route", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
 
@@ -236,15 +236,15 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/test-artist/support", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
-      assert(ogTitle?.includes("My Artist"));
+      assert(ogTitle?.includes("My Profile"));
       const ogDesc = $('meta[property="og:description"]').attr("content");
-      assert(ogDesc?.includes("Support My Artist"));
+      assert(ogDesc?.includes("Support My Profile"));
     });
 
     it("should handle artist/release/{slug} route with album title", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       await createTrackGroup(artist.id, {
@@ -259,13 +259,13 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(ogTitle, "My Album");
 
       const ogDesc = $('meta[property="og:description"]').attr("content");
-      assert(ogDesc?.includes("My Artist"));
+      assert(ogDesc?.includes("My Profile"));
     });
 
     it("should handle artist/release/{slug}/tracks/{id} route with track details", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const trackGroup = await createTrackGroup(artist.id, {
@@ -284,7 +284,7 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(ogTitle, "Cool Song");
 
       const ogDesc = $('meta[property="og:description"]').attr("content");
-      assert(ogDesc?.includes("My Artist"));
+      assert(ogDesc?.includes("My Profile"));
     });
 
     it("should handle /login route", async () => {
@@ -362,7 +362,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should handle artist/posts route listing all posts", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
 
@@ -370,7 +370,7 @@ describe("analyzePathAndGenerateHTML", () => {
       await analyzePathAndGenerateHTML("/test-artist/posts", $);
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
-      assert(ogTitle?.includes("My Artist"));
+      assert(ogTitle?.includes("My Profile"));
 
       const rssLink = $('link[type="application/rss+xml"]').attr("href");
       assert(rssLink?.includes("feed"));
@@ -379,7 +379,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should handle artist/posts/{slug} route with post slug lookup", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const post = await createPost(artist.id, {
@@ -397,7 +397,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should handle artist/merch route listing merch", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
 
@@ -406,13 +406,13 @@ describe("analyzePathAndGenerateHTML", () => {
 
       const ogTitle = $('meta[property="og:title"]').attr("content");
       assert(ogTitle?.includes("merch"));
-      assert(ogTitle?.includes("My Artist"));
+      assert(ogTitle?.includes("My Profile"));
     });
 
     it("should handle artist/merch/{slug} route with merch title and image", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const merch = await createMerch(artist.id, { title: "Cool T-Shirt" });
@@ -427,13 +427,13 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(ogTitle, "Cool T-Shirt");
 
       const ogDesc = $('meta[property="og:description"]').attr("content");
-      assert(ogDesc?.includes("My Artist"));
+      assert(ogDesc?.includes("My Profile"));
     });
 
     it("should handle artist/release/{slug} route with album title and release date", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       await createTrackGroup(artist.id, {
@@ -448,13 +448,13 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(ogTitle, "My Album");
 
       const ogDesc = $('meta[property="og:description"]').attr("content");
-      assert(ogDesc?.includes("My Artist"));
+      assert(ogDesc?.includes("My Profile"));
     });
 
     it("should handle artist/release/{slug}/tracks/{id} route with track details", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const trackGroup = await createTrackGroup(artist.id, {
@@ -472,7 +472,7 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(ogTitle, "Cool Song");
 
       const ogDesc = $('meta[property="og:description"]').attr("content");
-      assert(ogDesc?.includes("My Artist"));
+      assert(ogDesc?.includes("My Profile"));
     });
 
     it("should handle /login route", async () => {
@@ -564,7 +564,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should inject __MIRLO_ARTIST__ script on artist profile page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
 
@@ -583,13 +583,13 @@ describe("analyzePathAndGenerateHTML", () => {
       const data = JSON.parse(script.html()!);
       assert(data.artist, "expected artist key in payload");
       assert.equal(data.artist.urlSlug, "test-artist");
-      assert.equal(data.artist.name, "My Artist");
+      assert.equal(data.artist.name, "My Profile");
     });
 
     it("should inject __MIRLO_TRACKGROUP__ script on album page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       await createTrackGroup(artist.id, {
@@ -621,7 +621,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should inject __MIRLO_ARTIST__ alongside __MIRLO_TRACKGROUP__ on album page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       await createTrackGroup(artist.id, {
@@ -645,7 +645,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should inject __MIRLO_TRACK__ script on track page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const trackGroup = await createTrackGroup(artist.id, {
@@ -677,7 +677,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should inject __MIRLO_POST__ script on published post page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
       const post = await createPost(artist.id, {
@@ -706,7 +706,7 @@ describe("analyzePathAndGenerateHTML", () => {
     it("should not inject __MIRLO_POST__ on artist posts index page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {
-        name: "My Artist",
+        name: "My Profile",
         urlSlug: "test-artist",
       });
 

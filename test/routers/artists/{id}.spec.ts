@@ -30,7 +30,7 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: artistSlug,
@@ -52,7 +52,7 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      await prisma.artist.create({
+      await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "other-artist-slug",
@@ -73,7 +73,7 @@ describe("artists", () => {
         currency: "eur",
       });
       const artist = await createArtist(user.id, {
-        name: "Euro Artist",
+        name: "Euro Profile",
         urlSlug: "euro-artist",
       });
       await createTrackGroup(artist.id, { title: "Euro Album" });
@@ -90,7 +90,7 @@ describe("artists", () => {
     it("should return trackGroup tracks ordered by 'order' asc", async () => {
       const { user } = await createUser({ email: "ordered@test.com" });
       const artist = await createArtist(user.id, {
-        name: "Ordered Artist",
+        name: "Ordered Profile",
         urlSlug: "ordered-artist",
       });
       await createTrackGroup(artist.id, {
@@ -146,7 +146,7 @@ describe("artists", () => {
         email: "rosterartist@test.com",
       });
       const rosterArtist = await createArtist(artistUser.id, {
-        name: "Roster Artist",
+        name: "Roster Profile",
         urlSlug: "roster-artist",
       });
       await prisma.artistLabel.create({
@@ -180,7 +180,7 @@ describe("artists", () => {
         email: "deletedrosterartist@test.com",
       });
       const deletedArtist = await createArtist(deletedArtistUser.id, {
-        name: "Deleted Roster Artist",
+        name: "Deleted Roster Profile",
         urlSlug: "deleted-roster-artist",
       });
       await prisma.artistLabel.create({
@@ -191,7 +191,7 @@ describe("artists", () => {
           isArtistApproved: true,
         },
       });
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: deletedArtist.id },
         data: { deletedAt: new Date() },
       });
@@ -218,7 +218,7 @@ describe("artists", () => {
         email: "pendingrosterartist@test.com",
       });
       const pendingArtist = await createArtist(artistUser.id, {
-        name: "Pending Roster Artist",
+        name: "Pending Roster Profile",
         urlSlug: "pending-roster-artist",
       });
       await prisma.artistLabel.create({

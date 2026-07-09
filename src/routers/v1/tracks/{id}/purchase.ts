@@ -103,7 +103,7 @@ export default function () {
       if (!stripeAccountId && !priceZero) {
         throw new AppError({
           httpCode: 400,
-          description: "Artist not set up with a payment processor yet",
+          description: "Profile not set up with a payment processor yet",
         });
       }
 

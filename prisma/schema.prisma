@@ -89,15 +89,15 @@ model User {
   pendingEmailToken                   String?                         @db.Uuid
   pendingEmailExpiration              DateTime?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
-  artistUserSubscriptions             ArtistUserSubscription[]
+  artistUserSubscriptions             ProfileUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
-  artists                             Artist[]                        @relation("artistUser")
+  artists                             Profile[]                        @relation("artistUser")
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
-  userArtistNotificationSettings      UserArtistNotificationSetting[]
+  userArtistNotificationSettings      UserProfileNotificationSetting[]
   receivingNotifications              Notification[]                  @relation("receivingUser")
   relatedNotifications                Notification[]                  @relation("relatedUser")
-  userArtistTips                      UserArtistTip[]
+  userArtistTips                      UserProfileTip[]
   merchPurchase                       MerchPurchase[]
   paymentTrackGroups                  TrackGroup[]
   artistLabels                        ArtistLabel[]
@@ -105,7 +105,7 @@ model User {
   userAvatar                          UserAvatar?
   userBanner                          UserBanner?
   trackFavorites                      UserTrackFavorite[]
-  receivesPaymentsFor                 Artist[]                        @relation("paymentToUser")
+  receivesPaymentsFor                 Profile[]                        @relation("paymentToUser")
   pledges                             FundraiserPledge[]
   invitesSent                         Invite[]                        @relation("invitedBy")
   invitesUsed                         Invite[]                        @relation("usedBy")
@@ -166,20 +166,20 @@ model UserBanner {
   originalFilename String?
 }
 
-model UserArtistNotificationSetting {
+model UserProfileNotificationSetting {
   userId       Int
   user         User             @relation(fields: [userId], references: [id])
   notification NotificationType
   isEnabled    Boolean          @default(true)
   artistId     Int
-  artist       Artist           @relation(fields: [artistId], references: [id])
+  artist       Profile           @relation(fields: [artistId], references: [id])
 
   @@unique([userId, notification])
 }
 
-model ActivityPubArtistFollowers {
+model ActivityPubProfileFollowers {
   artistId  Int
-  artist    Artist   @relation(fields: [artistId], references: [id])
+  artist    Profile   @relation(fields: [artistId], references: [id])
   actor     String
   inboxUrl  String?
   createdAt DateTime @default(now())
@@ -201,11 +201,11 @@ model Notification {
   trackId          Int?
   track            Track?                     @relation(fields: [trackId], references: [id])
   subscriptionId   Int?
-  subscription     ArtistUserSubscription?    @relation(fields: [subscriptionId], references: [id])
+  subscription     ProfileUserSubscription?    @relation(fields: [subscriptionId], references: [id])
   postId           Int?
   post             Post?                      @relation(fields: [postId], references: [id])
   artistId         Int?
-  artist           Artist?                    @relation(fields: [artistId], references: [id])
+  artist           Profile?                    @relation(fields: [artistId], references: [id])
   relatedUserId    Int?
   relatedUser      User?                      @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
   /// NotificationMetaData
@@ -245,13 +245,13 @@ model Post {
   content                   String?
   publishedAt               DateTime                @default(now())
   viewCount                 Int                     @default(0)
-  artist                    Artist?                 @relation(fields: [artistId], references: [id])
+  artist                    Profile?                 @relation(fields: [artistId], references: [id])
   artistId                  Int?
   urlSlug                   String?
   isDraft                   Boolean                 @default(true)
   isPublic                  Boolean                 @default(false) // is PUblic is different from is Draft. isPublic defined is the post is visible by non-followers
   minimumSubscriptionTierId Int?
-  minimumSubscriptionTier   ArtistSubscriptionTier? @relation(fields: [minimumSubscriptionTierId], references: [id])
+  minimumSubscriptionTier   ProfileSubscriptionTier? @relation(fields: [minimumSubscriptionTierId], references: [id])
   hasAnnounceEmailBeenSent  Boolean                 @default(false)
   hasActivityPubBeenSent    Boolean                 @default(false)
   postSubscriptionTiers     PostSubscriptionTier[]
@@ -280,12 +280,12 @@ model PostSubscriptionTier {
   postId                   Int
   post                     Post                    @relation(fields: [postId], references: [id])
   artistSubscriptionTierId Int
-  artistSubscriptionTier   ArtistSubscriptionTier? @relation(fields: [artistSubscriptionTierId], references: [id])
+  artistSubscriptionTier   ProfileSubscriptionTier? @relation(fields: [artistSubscriptionTierId], references: [id])
 
   @@unique([postId, artistSubscriptionTierId])
 }
 
-model Artist {
+model Profile {
   id                                 Int                                  @id @default(autoincrement())
   name                               String
   shortDescription                   String?
@@ -298,9 +298,9 @@ model Artist {
   createdAt                          DateTime                             @default(now())
   updatedAt                          DateTime                             @default(now()) @updatedAt
   deletedAt                          DateTime?
-  subscriptionTiers                  ArtistSubscriptionTier[]
-  background                         ArtistBackground?
-  avatar                             ArtistAvatar?
+  subscriptionTiers                  ProfileSubscriptionTier[]
+  background                         ProfileBackground?
+  avatar                             ProfileAvatar?
   urlSlug                            String
   /// [Properties]                              @unique
   properties                         Json?
@@ -321,26 +321,26 @@ model Artist {
   apPublicKey                        String?
   apPrivateKey                       String?
   announcementText                   String?
-  artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
-  userArtistNotificationSettings     UserArtistNotificationSetting[]
+  artistUserSubscriptionConfirmation ProfileUserSubscriptionConfirmation[]
+  userArtistNotificationSettings     UserProfileNotificationSetting[]
   notifications                      Notification[]
-  userArtistTip                      UserArtistTip[]
-  artistTipTier                      ArtistTipTier[]
+  userArtistTip                      UserProfileTip[]
+  artistTipTier                      ProfileTipTier[]
   merch                              Merch[]
   artistLabels                       ArtistLabel[]
-  activityPubArtistFollowers         ActivityPubArtistFollowers[]
+  activityPubArtistFollowers         ActivityPubProfileFollowers[]
   tourDates                          ArtistTourDate[]
   paymentToUserId                    Int? // User to which the payments for this artist go
   paymentToUser                      User?                                @relation(fields: [paymentToUserId], references: [id], name: "paymentToUser")
   isLabelProfile                     Boolean                              @default(false)
-  artistLocationTags                 ArtistLocationTag[]
+  artistLocationTags                 ProfileLocationTag[]
   allowDirectMessages                Boolean                              @default(false)
 }
 
-model ArtistAvatar {
+model ProfileAvatar {
   id               String    @id @default(uuid()) @db.Uuid
   url              String[]
-  artist           Artist    @relation(fields: [artistId], references: [id])
+  artist           Profile    @relation(fields: [artistId], references: [id])
   artistId         Int       @unique
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -348,10 +348,10 @@ model ArtistAvatar {
   originalFilename String?
 }
 
-model ArtistBackground {
+model ProfileBackground {
   id               String    @id @default(uuid()) @db.Uuid
   url              String[]
-  artist           Artist    @relation(fields: [artistId], references: [id])
+  artist           Profile    @relation(fields: [artistId], references: [id])
   artistId         Int       @unique
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -360,7 +360,7 @@ model ArtistBackground {
 }
 
 model ArtistLabel {
-  artist                  Artist  @relation(fields: [artistId], references: [id])
+  artist                  Profile  @relation(fields: [artistId], references: [id])
   artistId                Int
   labelUser               User    @relation(fields: [labelUserId], references: [id])
   labelUserId             Int
@@ -377,7 +377,7 @@ model ArtistLabel {
 model ArtistTourDate {
   id         Int      @id @default(autoincrement())
   artistId   Int
-  artist     Artist   @relation(fields: [artistId], references: [id])
+  artist     Profile   @relation(fields: [artistId], references: [id])
   date       DateTime
   location   String
   createdAt  DateTime @default(now())
@@ -385,18 +385,18 @@ model ArtistTourDate {
   ticketsUrl String?
 }
 
-model ArtistSubscriptionTier {
+model ProfileSubscriptionTier {
   id                     Int                       @id @default(autoincrement())
   name                   String
   description            String                    @default("")
   artistId               Int
-  artist                 Artist                    @relation(fields: [artistId], references: [id])
+  artist                 Profile                    @relation(fields: [artistId], references: [id])
   minAmount              Int? // in cents
   allowVariable          Boolean?
   maxAmount              Int? // in cents
   defaultAmount          Int? // in cents
   interval               Interval                  @default(MONTH)
-  userSubscriptions      ArtistUserSubscription[]
+  userSubscriptions      ProfileUserSubscription[]
   stripeProductKey       String?
   createdAt              DateTime                  @default(now())
   updatedAt              DateTime                  @default(now()) @updatedAt
@@ -417,14 +417,14 @@ model SubscriptionTierImage {
   imageId String                 @db.Uuid
   image   Image                  @relation(fields: [imageId], references: [id])
   tierId  Int
-  tier    ArtistSubscriptionTier @relation(fields: [tierId], references: [id])
+  tier    ProfileSubscriptionTier @relation(fields: [tierId], references: [id])
 
   @@unique([imageId, tierId])
 }
 
 model SubscriptionTierRelease {
   tierId       Int
-  tier         ArtistSubscriptionTier @relation(fields: [tierId], references: [id])
+  tier         ProfileSubscriptionTier @relation(fields: [tierId], references: [id])
   trackGroupId Int
   trackGroup   TrackGroup             @relation(fields: [trackGroupId], references: [id])
   createdAt    DateTime               @default(now())
@@ -456,17 +456,17 @@ enum SubscriptionDeleteReason {
   PAYMENT_FAILURE
 }
 
-model ArtistTipTier {
+model ProfileTipTier {
   id                Int             @id @default(autoincrement())
   name              String
   description       String          @default("")
   artistId          Int
-  artist            Artist          @relation(fields: [artistId], references: [id])
+  artist            Profile          @relation(fields: [artistId], references: [id])
   minAmount         Int? // in cents
   allowVariable     Boolean?
   maxAmount         Int? // in cents
   defaultAmount     Int? // in cents
-  userSubscriptions UserArtistTip[]
+  userSubscriptions UserProfileTip[]
   stripeProductKey  String?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @default(now()) @updatedAt
@@ -474,10 +474,10 @@ model ArtistTipTier {
   platformPercent   Int?            @default(7)
 }
 
-model ArtistUserSubscription {
+model ProfileUserSubscription {
   id                            Int                            @id @default(autoincrement())
   artistSubscriptionTierId      Int
-  artistSubscriptionTier        ArtistSubscriptionTier         @relation(fields: [artistSubscriptionTierId], references: [id])
+  artistSubscriptionTier        ProfileSubscriptionTier         @relation(fields: [artistSubscriptionTierId], references: [id])
   userId                        Int
   user                          User                           @relation(fields: [userId], references: [id])
   amount                        Int // In cents
@@ -489,7 +489,7 @@ model ArtistUserSubscription {
   deleteReason                  SubscriptionDeleteReason?
   notifications                 Notification[]
   message                       String?
-  artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
+  artistUserSubscriptionCharges ProfileUserSubscriptionCharge[]
   shippingAddress               Json?
   renewalReminderSentAt         DateTime? // When renewal reminder was last sent
   nextBillingDate               DateTime? // When Stripe will charge next (from invoice)
@@ -497,11 +497,11 @@ model ArtistUserSubscription {
   @@unique([userId, artistSubscriptionTierId])
 }
 
-model ArtistUserSubscriptionConfirmation {
+model ProfileUserSubscriptionConfirmation {
   id              String    @id @default(uuid()) @db.Uuid
   email           String
   artistId        Int
-  artist          Artist    @relation(fields: [artistId], references: [id])
+  artist          Profile    @relation(fields: [artistId], references: [id])
   message         String?
   token           String    @default(uuid())
   tokenExpiration DateTime? @default(dbgenerated("(NOW() + '06:00:00'::interval)"))
@@ -509,10 +509,10 @@ model ArtistUserSubscriptionConfirmation {
   @@unique([email, artistId])
 }
 
-model ArtistUserSubscriptionCharge {
+model ProfileUserSubscriptionCharge {
   id                       String                 @id @default(uuid()) @db.Uuid
   artistUserSubscriptionId Int
-  artistUserSubscription   ArtistUserSubscription @relation(fields: [artistUserSubscriptionId], references: [id])
+  artistUserSubscription   ProfileUserSubscription @relation(fields: [artistUserSubscriptionId], references: [id])
   createdAt                DateTime               @default(now())
   transactionId            String?
   transaction              UserTransaction?       @relation(fields: [transactionId], references: [id])
@@ -542,7 +542,7 @@ model Merch {
   artistId                    Int
   urlSlug                     String?
   order                       Int?
-  artist                      Artist                     @relation(fields: [artistId], references: [id])
+  artist                      Profile                     @relation(fields: [artistId], references: [id])
   images                      MerchImage[]
   shippingDestinations        MerchShippingDestination[]
   optionTypes                 MerchOptionType[]
@@ -623,14 +623,14 @@ enum FulfillmentStatus {
   COMPLETED
 }
 
-model UserArtistTip {
+model UserProfileTip {
   userId          Int
   user            User             @relation(fields: [userId], references: [id])
   artistId        Int
-  artist          Artist           @relation(fields: [artistId], references: [id])
+  artist          Profile           @relation(fields: [artistId], references: [id])
   datePurchased   DateTime         @default(now())
   message         String?
-  artistTipTier   ArtistTipTier?   @relation(fields: [artistTipTierId], references: [id])
+  artistTipTier   ProfileTipTier?   @relation(fields: [artistTipTierId], references: [id])
   artistTipTierId Int?
   id              String           @id @default(uuid()) @db.Uuid
   transactionId   String?
@@ -667,9 +667,9 @@ model UserTransaction {
   trackGroupPurchases           UserTrackGroupPurchase[]
   merchPurchases                MerchPurchase[]
   trackPurchases                UserTrackPurchase[]
-  tips                          UserArtistTip[]
+  tips                          UserProfileTip[]
   associatedPledge              FundraiserPledge?
-  artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
+  artistUserSubscriptionCharges ProfileUserSubscriptionCharge[]
   paymentStatus                 PaymentStatus                  @default(PENDING)
   discountPercent               Int?                           @default(0)
 }
@@ -717,7 +717,7 @@ model TrackGroupDownloadCodes {
 model TrackGroup {
   id                              Int                             @id @default(autoincrement())
   about                           String?
-  artist                          Artist                          @relation(fields: [artistId], references: [id])
+  artist                          Profile                          @relation(fields: [artistId], references: [id])
   artistId                        Int
   title                           String?
   isHiddenTrackGroupForSongDrafts Boolean                         @default(false)
@@ -892,7 +892,7 @@ model TrackArtist {
   track      Track   @relation(fields: [trackId], references: [id])
   artistName String?
   artistId   Int?
-  artist     Artist? @relation(fields: [artistId], references: [id])
+  artist     Profile? @relation(fields: [artistId], references: [id])
   role       String?
   isCoAuthor Boolean @default(false)
   order      Int     @default(0)
@@ -964,16 +964,16 @@ model LocationTag {
   region             String? // State, province, etc.
   country            String
   slug               String              @unique // For URLs and consistent querying
-  artistLocationTags ArtistLocationTag[]
+  artistLocationTags ProfileLocationTag[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
   @@unique([city, region, country]) // Ensure no duplicate locations
 }
 
-model ArtistLocationTag {
+model ProfileLocationTag {
   artistId      Int
-  artist        Artist      @relation(fields: [artistId], references: [id])
+  artist        Profile      @relation(fields: [artistId], references: [id])
   locationTagId Int
   locationTag   LocationTag @relation(fields: [locationTagId], references: [id])
 

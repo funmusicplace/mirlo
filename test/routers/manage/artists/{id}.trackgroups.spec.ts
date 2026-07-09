@@ -145,7 +145,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
         isLabelProfile: true,
       });
       const managedArtist = await createArtist(artistUser.id, {
-        name: "Managed Artist",
+        name: "Managed Profile",
         urlSlug: "managed-artist",
       });
 
@@ -159,7 +159,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       });
 
       const labelRelease = await createTrackGroup(managedArtist.id, {
-        title: "Managed Artist Release",
+        title: "Managed Profile Release",
         urlSlug: "managed-artist-release",
       });
 
@@ -186,7 +186,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
         isLabelProfile: true,
       });
       const unrelatedArtist = await createArtist(otherUser.id, {
-        name: "Unrelated Artist",
+        name: "Unrelated Profile",
         urlSlug: "unrelated-artist",
       });
 
@@ -217,7 +217,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
         isLabelProfile: true,
       });
       const managedArtist = await createArtist(artistUser.id, {
-        name: "Managed Artist 3",
+        name: "Managed Profile 3",
         urlSlug: "managed-artist-3",
       });
 
@@ -264,7 +264,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
         isLabelProfile: true,
       });
       const managedArtist = await createArtist(artistUser.id, {
-        name: "Managed Artist 4",
+        name: "Managed Profile 4",
         urlSlug: "managed-artist-4",
       });
 

@@ -23,13 +23,13 @@ import logger from "../logger";
 
 const s3UniquePrefix = "";
 
-export const incomingArtistBackgroundBucket =
+export const incomingProfileBackgroundBucket =
   s3UniquePrefix + "incoming-artist-banners";
-export const finalArtistBackgroundBucket = s3UniquePrefix + "artist-banners";
+export const finalProfileBackgroundBucket = s3UniquePrefix + "artist-banners";
 
-export const incomingArtistAvatarBucket =
+export const incomingProfileAvatarBucket =
   s3UniquePrefix + "incoming-artist-avatars";
-export const finalArtistAvatarBucket = s3UniquePrefix + "artist-avatars";
+export const finalProfileAvatarBucket = s3UniquePrefix + "artist-avatars";
 
 export const incomingUserAvatarBucket =
   s3UniquePrefix + "incoming-user-avatars";

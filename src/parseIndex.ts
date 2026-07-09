@@ -39,8 +39,8 @@ import { checkIsUserSubscriber } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
+  finalProfileAvatarBucket,
+  finalProfileBackgroundBucket,
   finalCoversBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
@@ -611,7 +611,7 @@ const resolveArtistImageUrl = (artist: {
   // Try avatar first
   const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
   if (avatarString) {
-    return generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket);
+    return generateFullStaticImageUrl(avatarString, finalProfileAvatarBucket);
   }
 
   // Fall back to background
@@ -621,7 +621,7 @@ const resolveArtistImageUrl = (artist: {
   if (backgroundString) {
     return generateFullStaticImageUrl(
       backgroundString,
-      finalArtistBackgroundBucket
+      finalProfileBackgroundBucket
     );
   }
 
@@ -662,7 +662,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   });
   if (!track) return;
 
-  const artist = await prisma.artist.findFirst({
+  const artist = await prisma.profile.findFirst({
     where: { id: track.trackGroup.artistId },
     include: {
       avatar: { where: { deletedAt: null } },
@@ -703,7 +703,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   });
   if (!trackGroup) return;
 
-  const artist = await prisma.artist.findFirst({
+  const artist = await prisma.profile.findFirst({
     where: { id: trackGroup.artistId },
     include: {
       avatar: { where: { deletedAt: null } },
@@ -857,7 +857,7 @@ export const analyzePathAndGenerateHTML = async (
 
     // Try to fetch avatar if artist exists
     let avatarUrl: string | undefined;
-    const artist = await prisma.artist.findFirst({
+    const artist = await prisma.profile.findFirst({
       where: { urlSlug: segments[0] },
       include: {
         avatar: true,

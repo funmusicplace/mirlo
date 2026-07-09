@@ -47,7 +47,7 @@ describe("send-onboarding-email", () => {
       createdAt: faker.date.recent({ days: 3, refDate: yesterday }), // Set to a date in the past
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -85,7 +85,7 @@ describe("send-onboarding-email", () => {
       }),
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -119,7 +119,7 @@ describe("send-onboarding-email", () => {
       }),
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -156,7 +156,7 @@ describe("send-onboarding-email", () => {
       }),
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -191,7 +191,7 @@ describe("send-onboarding-email", () => {
       createdAt: faker.date.recent({ days: 3, refDate: yesterday }), // Set to a date in the past
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -219,7 +219,7 @@ describe("send-onboarding-email", () => {
       createdAt: faker.date.recent({ days: 3, refDate: yesterday }), // Set to a date in the past
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -247,7 +247,7 @@ describe("send-onboarding-email", () => {
       createdAt: faker.date.recent({ days: 3, refDate: yesterday }), // Set to a date in the past
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",

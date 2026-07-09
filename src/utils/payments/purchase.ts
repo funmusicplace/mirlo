@@ -24,7 +24,7 @@ const resolveArtistPaymentContext = async (
   artistId: number,
   stripeAccountIdOverride?: string
 ) => {
-  const artist = await prisma.artist.findFirst({
+  const artist = await prisma.profile.findFirst({
     where: { id: artistId, enabled: true },
     include: {
       user: { select: { stripeAccountId: true, email: true } },
@@ -33,14 +33,14 @@ const resolveArtistPaymentContext = async (
   });
 
   if (!artist) {
-    throw new Error(`Artist ${artistId} not found`);
+    throw new Error(`Profile ${artistId} not found`);
   }
 
   const stripeAccountId =
     stripeAccountIdOverride ?? resolvePayee({ artist }).stripeAccountId;
 
   if (!stripeAccountId) {
-    throw new Error("Artist is not set up with a payment processor");
+    throw new Error("Profile is not set up with a payment processor");
   }
 
   const currency = await getCurrency(artistId, stripeAccountId);
@@ -154,7 +154,7 @@ export const initiateSubscription = async ({
 }): Promise<{ setupIntentId: string }> => {
   // Validate the tier first so a missing tier returns 404 even when the artist
   // has not finished setting up a payment processor (which throws below).
-  const tier = await prisma.artistSubscriptionTier.findFirst({
+  const tier = await prisma.profileSubscriptionTier.findFirst({
     where: { id: tierId, artistId, deletedAt: null },
     select: { id: true, minAmount: true, defaultAmount: true },
   });
@@ -188,7 +188,7 @@ export const initiateSubscription = async ({
   });
 };
 
-type CancellableSubscription = Prisma.ArtistUserSubscriptionGetPayload<{
+type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
   include: { artistSubscriptionTier: true };
 }>;
 
@@ -209,7 +209,7 @@ export const cancelUserSubscription = async (
   // resolveArtistPaymentContext also fetches from Stripe — so resolve the
   // artist + account directly here. We don't filter on `enabled` so a
   // subscription to a since-disabled artist can still be cancelled.
-  const artist = await prisma.artist.findFirst({
+  const artist = await prisma.profile.findFirst({
     where: { id: artistId },
     include: {
       user: { select: { stripeAccountId: true } },
@@ -230,13 +230,13 @@ export const cancelUserSubscription = async (
 
     // Keep the row until the processor's webhook flips `deletedAt` at period
     // end; record the reason now so the UI can show a "cancelled" state.
-    await prisma.artistUserSubscription.update({
+    await prisma.profileUserSubscription.update({
       where: { id: subscription.id },
       data: { deleteReason: "USER_CANCELLED" },
     });
   } else {
     // Free/follow tier: no paid period to honour, so remove it outright.
-    await prisma.artistUserSubscription.deleteMany({
+    await prisma.profileUserSubscription.deleteMany({
       where: { id: subscription.id },
     });
   }

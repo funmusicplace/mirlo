@@ -2,7 +2,7 @@ import { Prisma } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
 import {
-  finalArtistAvatarBucket,
+  finalProfileAvatarBucket,
   finalCoversBucket,
   finalUserAvatarBucket,
   finalUserBannerBucket,
@@ -124,7 +124,7 @@ export function serializeUserProfile(user: UserProfilePayload) {
         artist: {
           ...aus.artistSubscriptionTier.artist,
           avatar: addSizesToImage(
-            finalArtistAvatarBucket,
+            finalProfileAvatarBucket,
             aus.artistSubscriptionTier.artist.avatar
           ),
         },

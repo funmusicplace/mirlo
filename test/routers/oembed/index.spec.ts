@@ -284,7 +284,7 @@ describe("oembed", () => {
       });
     });
 
-    describe("Artist oEmbed", () => {
+    describe("Profile oEmbed", () => {
       it("should return oEmbed data for an artist", async () => {
         const user = await createUser({ email: "test@test.com" });
         const artist = await createArtist(user.user.id);
@@ -311,7 +311,7 @@ describe("oembed", () => {
         const user = await createUser({ email: "test@test.com" });
         const artist = await createArtist(user.user.id);
 
-        await prisma.artistAvatar.create({
+        await prisma.profileAvatar.create({
           data: {
             artistId: artist.id,
             url: ["https://example.com/avatar.jpgx600"],

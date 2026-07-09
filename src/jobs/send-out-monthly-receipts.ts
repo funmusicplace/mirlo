@@ -23,7 +23,7 @@ export type AnnounceMonthlyReceiptsEmailType = {
 const sendOutMonthlyReceipts = async () => {
   try {
     logger.info("Starting to send out monthly receipts");
-    const allSubscriptions = await prisma.artistUserSubscription.findMany({
+    const allSubscriptions = await prisma.profileUserSubscription.findMany({
       where: {
         amount: {
           gt: 0,

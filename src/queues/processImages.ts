@@ -9,14 +9,14 @@ import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
 import {
   createBucketIfNotExists,
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
+  finalProfileAvatarBucket,
+  finalProfileBackgroundBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
   finalUserAvatarBucket,
   finalUserBannerBucket,
-  incomingArtistAvatarBucket,
-  incomingArtistBackgroundBucket,
+  incomingProfileAvatarBucket,
+  incomingProfileBackgroundBucket,
   incomingMerchImageBucket,
   incomingUserBannerBucket,
   uploadWrapper,
@@ -247,7 +247,7 @@ export const processUserAvatar = (ctx: APIContext) => {
   return async (userId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistAvatarBucket,
+      incomingProfileAvatarBucket,
       "userAvatar",
       "avatar",
       async (fileInfo: { filename: string }) => {
@@ -299,16 +299,16 @@ export const processUserBanner = (ctx: APIContext) => {
   };
 };
 
-export const processArtistAvatar = (ctx: APIContext) => {
+export const processProfileAvatar = (ctx: APIContext) => {
   return async (artistId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistAvatarBucket,
+      incomingProfileAvatarBucket,
       "artistAvatar",
       "avatar",
       async (fileInfo: { filename: string }) => {
         logger.info(`Upserting artist avatar`);
-        return prisma.artistAvatar.upsert({
+        return prisma.profileAvatar.upsert({
           create: {
             originalFilename: fileInfo.filename,
             artistId: artistId,
@@ -322,20 +322,20 @@ export const processArtistAvatar = (ctx: APIContext) => {
           },
         });
       },
-      finalArtistAvatarBucket
+      finalProfileAvatarBucket
     );
   };
 };
 
-export const processArtistBackground = (ctx: APIContext) => {
+export const processProfileBackground = (ctx: APIContext) => {
   return async (artistId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
-      incomingArtistBackgroundBucket,
+      incomingProfileBackgroundBucket,
       "artistBackground",
       "background",
       async (fileInfo: { filename: string }) => {
-        return prisma.artistBackground.upsert({
+        return prisma.profileBackground.upsert({
           create: {
             originalFilename: fileInfo.filename,
             artistId: artistId,
@@ -349,7 +349,7 @@ export const processArtistBackground = (ctx: APIContext) => {
           },
         });
       },
-      finalArtistBackgroundBucket
+      finalProfileBackgroundBucket
     );
   };
 };
