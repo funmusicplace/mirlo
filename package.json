@@ -30,6 +30,7 @@
     "@fedify/fedify": "^2.2.0",
     "@prisma/client": "6",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/compression": "^1.8.1",
     "@types/connect-busboy": "^1.0.3",
     "@types/rss": "^0.0.30",
     "@types/showdown": "^2.0.2",
@@ -38,6 +39,7 @@
     "bullmq": "^5.65.1",
     "bytes": "^3.1.2",
     "cheerio": "^1.0.0",
+    "compression": "^1.8.1",
     "connect-busboy": "^1.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -148,5 +150,8 @@
     "prisma",
     "client"
   ],
+  "resolutions": {
+    "@types/compression/@types/express": "4.17.14"
+  },
   "packageManager": "yarn@4.1.1"
 }
