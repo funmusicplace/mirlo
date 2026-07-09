@@ -71,6 +71,10 @@ model User {
   onboardingEmailsSent                String[] // Used to track which onboarding emails have been sent
   lastOnboardingEmailSentAt           DateTime?
   receivePlatformEmails               Boolean                         @default(true)
+  // When true, suppress the per-renewal artist notification email; the
+  // monthly income report covers renewals instead. New-subscriber
+  // announcements are always sent.
+  combineSubscriptionEmails           Boolean                         @default(false)
   isLabelAccount                      Boolean                         @default(false)
   featureFlags                        String[]
   language                            String?

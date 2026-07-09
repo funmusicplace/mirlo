@@ -5,6 +5,7 @@ import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 
 import { getClient } from "./getClient";
+import { resolvePayee } from "./payments/payee";
 import { grantSubscriptionTierReleases } from "./subscriptionTier";
 
 export type ArtistSubscriptionReceiptEmailType = {
@@ -159,50 +160,53 @@ export const manageSubscriptionReceipt = async ({
         } as ArtistSubscriptionReceiptEmailType,
       });
 
-      // Notify the artist (or payment-to user if set) of the subscription payment/renewal
-      const artistNotificationEmail =
-        artistUserSubscription.artistSubscriptionTier.artist.paymentToUser
-          ?.email ??
-        artistUserSubscription.artistSubscriptionTier.artist.user.email;
-
-      await sendMailQueue.add("send-mail", {
-        template: "artist-new-subscriber-announce",
-        message: {
-          to: artistNotificationEmail,
-          cc:
-            artistUserSubscription.artistSubscriptionTier.artist.paymentToUser
-              ?.accountingEmail ??
-            artistUserSubscription.artistSubscriptionTier.artist.user
-              .accountingEmail,
-        },
-        locals: {
-          isNewSubscription,
-          interval: artistUserSubscription.artistSubscriptionTier.interval,
-          artist: artistUserSubscription.artistSubscriptionTier.artist,
-          artistUserSubscription: {
-            id: artistUserSubscription.id,
-            amount: artistUserSubscription.amount,
-            artistSubscriptionTierId:
-              artistUserSubscription.artistSubscriptionTierId,
-            artistSubscriptionTier: {
-              name: artistUserSubscription.artistSubscriptionTier.name,
-            },
-          },
-          user: {
-            name: artistUserSubscription.user.name || "A supporter",
-            email: artistUserSubscription.user.email,
-          },
-          transaction: {
-            amount: transaction.amount,
-            currency: transaction.currency,
-            platformCut: transaction.platformCut ?? 0,
-            stripeCut: transaction.stripeCut ?? 0,
-          },
-          email: artistUserSubscription.user.email,
-          host: process.env.API_DOMAIN,
-          client: client.applicationUrl,
-        } as ArtistNewSubscriberAnnounceEmailType,
+      // Notify the artist (or payment-to user if set) of the subscription payment/renewal.
+      // Renewals are skipped when the notification *recipient* opted into
+      // combining subscription emails into the monthly income report; new
+      // subscribers are always announced.
+      const payee = resolvePayee({
+        artist: artistUserSubscription.artistSubscriptionTier.artist,
       });
+
+      const shouldNotifyArtist =
+        isNewSubscription || !payee.combineSubscriptionEmails;
+
+      if (shouldNotifyArtist) {
+        await sendMailQueue.add("send-mail", {
+          template: "artist-new-subscriber-announce",
+          message: {
+            to: payee.email,
+            cc: payee.accountingEmail,
+          },
+          locals: {
+            isNewSubscription,
+            interval: artistUserSubscription.artistSubscriptionTier.interval,
+            artist: artistUserSubscription.artistSubscriptionTier.artist,
+            artistUserSubscription: {
+              id: artistUserSubscription.id,
+              amount: artistUserSubscription.amount,
+              artistSubscriptionTierId:
+                artistUserSubscription.artistSubscriptionTierId,
+              artistSubscriptionTier: {
+                name: artistUserSubscription.artistSubscriptionTier.name,
+              },
+            },
+            user: {
+              name: artistUserSubscription.user.name || "A supporter",
+              email: artistUserSubscription.user.email,
+            },
+            transaction: {
+              amount: transaction.amount,
+              currency: transaction.currency,
+              platformCut: transaction.platformCut ?? 0,
+              stripeCut: transaction.stripeCut ?? 0,
+            },
+            email: artistUserSubscription.user.email,
+            host: process.env.API_DOMAIN,
+            client: client.applicationUrl,
+          } as ArtistNewSubscriberAnnounceEmailType,
+        });
+      }
     } else if (urlParams && status === "FAILED") {
       await sendMailQueue.add("send-mail", {
         template: "charge-failure",

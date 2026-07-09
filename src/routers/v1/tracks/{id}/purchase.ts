@@ -5,6 +5,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { handleTrackPurchase } from "../../../../utils/handleFinishedTransactions";
+import { resolvePayee } from "../../../../utils/payments/payee";
 import { createStripeCheckoutSessionForTrackPurchase } from "../../../../utils/stripe/sessions";
 import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
 
@@ -81,10 +82,10 @@ export default function () {
         }, 0);
       }
 
-      const stripeAccountId =
-        track.trackGroup.paymentToUser?.stripeAccountId ??
-        track.trackGroup.artist.paymentToUser?.stripeAccountId ??
-        track.trackGroup.artist.user.stripeAccountId;
+      const stripeAccountId = resolvePayee({
+        artist: track.trackGroup.artist,
+        releasePaymentToUser: track.trackGroup.paymentToUser,
+      }).stripeAccountId;
 
       const priceNumber =
         (price ? Number(price) : undefined) ?? track.minPrice ?? 0;

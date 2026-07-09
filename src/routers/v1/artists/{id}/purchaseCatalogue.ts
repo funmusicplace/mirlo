@@ -1,11 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
-import { createStripeCheckoutSessionForCatalogue } from "../../../../utils/stripe/sessions";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { resolvePayee } from "../../../../utils/payments/payee";
 import { determinePrice } from "../../../../utils/purchasing";
+import { createStripeCheckoutSessionForCatalogue } from "../../../../utils/stripe/sessions";
 
 type Params = {
   id: string;
@@ -59,8 +60,7 @@ export default function () {
         await subscribeUserToArtist(artist, loggedInUser);
       }
 
-      const stripeAccountId =
-        artist.paymentToUser?.stripeAccountId ?? artist.user.stripeAccountId;
+      const stripeAccountId = resolvePayee({ artist }).stripeAccountId;
 
       const { isPriceZero, priceNumber } = determinePrice(
         price,

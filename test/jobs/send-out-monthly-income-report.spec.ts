@@ -1,16 +1,18 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-
-import { clearTables, createUser } from "../utils";
-
-import prisma from "@mirlo/prisma";
-import assert from "assert";
-import * as sendMail from "../../src/jobs/send-mail";
 import sinon from "sinon";
+
+import * as sendMail from "../../src/jobs/send-mail";
 import sendOutMonthlyIncomeReport, {
   MonthlyIncomeReportEmailType,
 } from "../../src/jobs/send-out-monthy-income-report";
+import { clearTables, createArtist, createUser } from "../utils";
+
+import prisma from "@mirlo/prisma";
+
+import assert from "assert";
+
 import { faker } from "@faker-js/faker";
 
 const lastDayPreviousMonth = new Date(
@@ -460,6 +462,103 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals2.userSales[0].amount, 7);
     assert.equal(locals2.userSales[0].saleType, "transaction");
     assert.equal(locals2.userSales[0].artist[0]?.id, artist2.id);
+  });
+
+  it("should include buyer details and last month's cancellations, excluding tier switches", async () => {
+    const stub = sinon.stub(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      name: "Fan",
+      emailConfirmationToken: null,
+    });
+
+    const { user: leaverUser } = await createUser({
+      email: "leaver@leaver.com",
+      name: "Leaver",
+      emailConfirmationToken: null,
+    });
+
+    const { user: switcherUser } = await createUser({
+      email: "switcher@switcher.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      subscriptionTiers: { create: { name: "a tier" } },
+    });
+
+    const aus = await prisma.artistUserSubscription.create({
+      data: {
+        userId: followerUser.id,
+        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 5,
+      },
+    });
+
+    const lastMonthDate = faker.date.recent({
+      days: 20,
+      refDate: lastDayPreviousMonth,
+    });
+
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        amount: 5,
+        createdAt: lastMonthDate,
+      },
+    });
+    await prisma.artistUserSubscriptionCharge.create({
+      data: {
+        artistUserSubscriptionId: aus.id,
+        createdAt: lastMonthDate,
+        transactionId: transaction.id,
+      },
+    });
+
+    // Cancelled last month: should appear in the report
+    await prisma.artistUserSubscription.create({
+      data: {
+        userId: leaverUser.id,
+        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 700,
+        deletedAt: lastMonthDate,
+        deleteReason: "USER_CANCELLED",
+      },
+    });
+
+    // Tier switch last month: not lost income, should be excluded
+    await prisma.artistUserSubscription.create({
+      data: {
+        userId: switcherUser.id,
+        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 300,
+        deletedAt: lastMonthDate,
+        deleteReason: "TIER_SWITCHED",
+      },
+    });
+
+    await sendOutMonthlyIncomeReport();
+
+    assert.equal(stub.calledOnce, true);
+    const data0 = stub.getCall(0).args[0].data;
+    const locals = data0.locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals.userSales.length, 1);
+    assert.equal(locals.userSales[0].user.name, "Fan");
+    assert.equal(locals.userSales[0].user.email, "follower@follower.com");
+    assert.equal(typeof locals.userSales[0].datePurchased, "string");
+    assert.equal(locals.cancelledSubscriptions.length, 1);
+    assert.equal(locals.cancelledSubscriptions[0].user.name, "Leaver");
+    assert.equal(locals.cancelledSubscriptions[0].amount, 700);
+    assert.equal(
+      locals.cancelledSubscriptions[0].deleteReason,
+      "USER_CANCELLED"
+    );
   });
 
   it("should send an income report for multiple artists if a user has more than one artist sales", async () => {

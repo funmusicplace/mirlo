@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { resolvePayee } from "../../../../utils/payments/payee";
 import { determinePrice } from "../../../../utils/purchasing";
 import { createStripeCheckoutSessionForMerchPurchase } from "../../../../utils/stripe/sessions";
 import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
@@ -112,9 +113,9 @@ export default function () {
         await subscribeUserToArtist(merch?.artist, loggedInUser);
       }
 
-      const stripeAccountId =
-        merch.artist.paymentToUser?.stripeAccountId ??
-        merch.artist.user.stripeAccountId;
+      const stripeAccountId = resolvePayee({
+        artist: merch.artist,
+      }).stripeAccountId;
 
       const { priceNumber, isPriceZero } = determinePrice(
         price,

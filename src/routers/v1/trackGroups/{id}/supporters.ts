@@ -1,6 +1,6 @@
+import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
 import { findSales } from "../../artists/{id}/supporters";
 
 export default function () {
@@ -38,12 +38,15 @@ export default function () {
         });
       }
 
-      const results: { amount: number; datePurchased: Date; userId: number }[] =
-        await findSales({
-          artistId: [trackGroup.artist.id],
-          sinceDate: sinceDate as string,
-          filters: { trackGroupIds: [Number(id)] },
-        });
+      const results: {
+        amount: number;
+        datePurchased: string;
+        userId: number;
+      }[] = await findSales({
+        artistId: [trackGroup.artist.id],
+        sinceDate: sinceDate as string,
+        filters: { trackGroupIds: [Number(id)] },
+      });
 
       if (
         trackGroup.fundraiser &&
@@ -61,7 +64,7 @@ export default function () {
           ...pledges.map((pledge) => ({
             ...pledge,
             amount: pledge.amount,
-            datePurchased: pledge.createdAt,
+            datePurchased: pledge.createdAt.toISOString(),
             urlSlug: trackGroup.urlSlug,
           }))
         );

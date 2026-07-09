@@ -7,6 +7,7 @@ import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
 import { getCurrency } from "../stripe/sessions";
 
+import { resolvePayee } from "./payee";
 import { getPaymentProcessor } from "./PaymentProcessor";
 
 export type ResolvedItem = {
@@ -36,9 +37,7 @@ const resolveArtistPaymentContext = async (
   }
 
   const stripeAccountId =
-    stripeAccountIdOverride ??
-    artist.paymentToUser?.stripeAccountId ??
-    artist.user.stripeAccountId;
+    stripeAccountIdOverride ?? resolvePayee({ artist }).stripeAccountId;
 
   if (!stripeAccountId) {
     throw new Error("Artist is not set up with a payment processor");
