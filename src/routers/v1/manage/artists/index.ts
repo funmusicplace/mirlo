@@ -56,7 +56,7 @@ export default function () {
       const where = {
         userId: Number(loggedInUser.id),
       };
-      const artists = await prisma.artist.findMany({
+      const artists = await prisma.profile.findMany({
         where,
         select: {
           id: true,
@@ -120,7 +120,7 @@ export default function () {
 
       const newSlug = generateSlug(urlSlug, name);
 
-      const result = await prisma.artist.create({
+      const result = await prisma.profile.create({
         data: {
           name,
           bio,

@@ -41,7 +41,7 @@ export const notifyFollowersOfNewAlbum = async (trackGroup: {
     data: { notifiedFollowersAt: new Date() },
   });
 
-  const artistFollowers = await prisma.artistUserSubscription.findMany({
+  const artistFollowers = await prisma.profileUserSubscription.findMany({
     where: {
       artistSubscriptionTier: { artistId: trackGroup.artistId },
     },

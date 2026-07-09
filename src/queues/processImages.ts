@@ -308,7 +308,7 @@ export const processArtistAvatar = (ctx: APIContext) => {
       "avatar",
       async (fileInfo: { filename: string }) => {
         logger.info(`Upserting artist avatar`);
-        return prisma.artistAvatar.upsert({
+        return prisma.profileAvatar.upsert({
           create: {
             originalFilename: fileInfo.filename,
             artistId: artistId,
@@ -335,7 +335,7 @@ export const processArtistBackground = (ctx: APIContext) => {
       "artistBackground",
       "background",
       async (fileInfo: { filename: string }) => {
-        return prisma.artistBackground.upsert({
+        return prisma.profileBackground.upsert({
           create: {
             originalFilename: fileInfo.filename,
             artistId: artistId,

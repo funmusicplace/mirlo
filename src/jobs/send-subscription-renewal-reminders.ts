@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import { Artist } from "@mirlo/prisma/client";
+import { Profile } from "@mirlo/prisma/client";
 
 import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
@@ -7,7 +7,7 @@ import { getClient } from "../utils/getClient";
 
 export type SubscriptionRenewalReminderEmailType = {
   interval: "MONTH" | "YEAR";
-  artist: Artist & { user: { currency: string | null } };
+  artist: Profile & { user: { currency: string | null } };
   host: string;
   client: string;
   artistUserSubscription: {
@@ -44,39 +44,41 @@ const sendSubscriptionRenewalReminders = async () => {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     // Find subscriptions that are about to renew
-    const subscriptionsToRemind = await prisma.artistUserSubscription.findMany({
-      where: {
-        amount: { gt: 0 },
-        deletedAt: null,
-        // Skip subscriptions the user has cancelled but that are still running
-        // out their paid period — they won't renew, so don't remind.
-        deleteReason: null,
-        artistSubscriptionTier: {
-          isDefaultTier: false,
-          interval: "YEAR", // Only year-long subscriptions
+    const subscriptionsToRemind = await prisma.profileUserSubscription.findMany(
+      {
+        where: {
+          amount: { gt: 0 },
+          deletedAt: null,
+          // Skip subscriptions the user has cancelled but that are still running
+          // out their paid period — they won't renew, so don't remind.
+          deleteReason: null,
+          artistSubscriptionTier: {
+            isDefaultTier: false,
+            interval: "YEAR", // Only year-long subscriptions
+          },
+          nextBillingDate: {
+            gte: sevenDaysFromNow,
+            lte: fourteenDaysFromNow,
+          },
+          // Only send if: never sent before, OR last sent more than 30 days ago
+          // This ensures one reminder per subscription per year
+          OR: [
+            { renewalReminderSentAt: null },
+            { renewalReminderSentAt: { lt: thirtyDaysAgo } },
+          ],
         },
-        nextBillingDate: {
-          gte: sevenDaysFromNow,
-          lte: fourteenDaysFromNow,
-        },
-        // Only send if: never sent before, OR last sent more than 30 days ago
-        // This ensures one reminder per subscription per year
-        OR: [
-          { renewalReminderSentAt: null },
-          { renewalReminderSentAt: { lt: thirtyDaysAgo } },
-        ],
-      },
-      include: {
-        user: true,
-        artistSubscriptionTier: {
-          include: {
-            artist: {
-              include: { user: { select: { currency: true } } },
+        include: {
+          user: true,
+          artistSubscriptionTier: {
+            include: {
+              artist: {
+                include: { user: { select: { currency: true } } },
+              },
             },
           },
         },
-      },
-    });
+      }
+    );
 
     logger.info(
       `Found ${subscriptionsToRemind.length} subscriptions to remind about renewal`
@@ -122,7 +124,7 @@ const sendSubscriptionRenewalReminders = async () => {
           });
 
           // Update timestamp
-          await prisma.artistUserSubscription.update({
+          await prisma.profileUserSubscription.update({
             where: { id: subscription.id },
             data: { renewalReminderSentAt: new Date() },
           });

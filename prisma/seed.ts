@@ -51,20 +51,20 @@ async function main() {
   }
 
   for (const a of artists) {
-    const find = await prisma.artist.findFirst({
+    const find = await prisma.profile.findFirst({
       where: { urlSlug: a.urlSlug },
     });
     if (find) {
       console.log(
         `Artist with urlSlug ${a.urlSlug} already exists, updating...`
       );
-      const updated = await prisma.artist.update({
+      const updated = await prisma.profile.update({
         where: { id: find.id },
         data: a,
       });
       console.log(`...updated artist with id: ${updated.id}`);
     } else {
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: a,
       });
       console.log(`Created artist with id: ${artist.id}`);

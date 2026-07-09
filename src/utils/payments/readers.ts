@@ -10,7 +10,7 @@ import { getPaymentProcessor, TerminalReader } from "./PaymentProcessor";
 export const listArtistReaders = async (
   artistId: number
 ): Promise<TerminalReader[]> => {
-  const artist = await prisma.artist.findFirst({
+  const artist = await prisma.profile.findFirst({
     where: { id: artistId },
     include: {
       user: { select: { stripeAccountId: true } },

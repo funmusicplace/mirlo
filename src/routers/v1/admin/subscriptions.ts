@@ -23,7 +23,7 @@ export default function () {
     };
 
     try {
-      let where: Prisma.ArtistUserSubscriptionWhereInput = {};
+      let where: Prisma.ProfileUserSubscriptionWhereInput = {};
 
       const dateRange = getDateRange(lastSubscription);
       if (dateRange) {
@@ -41,9 +41,9 @@ export default function () {
         }
       }
 
-      const itemCount = await prisma.artistUserSubscription.count({ where });
+      const itemCount = await prisma.profileUserSubscription.count({ where });
 
-      const subscriptions = await prisma.artistUserSubscription.findMany({
+      const subscriptions = await prisma.profileUserSubscription.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,

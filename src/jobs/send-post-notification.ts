@@ -31,7 +31,7 @@ async function findMentionedLocalArtistUserIds(
 
   if (urlSlugs.length === 0) return [];
 
-  const artists = await prisma.artist.findMany({
+  const artists = await prisma.profile.findMany({
     where: { urlSlug: { in: urlSlugs }, deletedAt: null },
     select: { userId: true },
   });

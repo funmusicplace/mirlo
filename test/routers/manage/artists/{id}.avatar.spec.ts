@@ -27,7 +27,7 @@ describe("manage/artists/{artistId}/avatar", () => {
       const artist = await createArtist(user.id);
       await createBucketIfNotExists(finalArtistAvatarBucket);
 
-      await prisma.artistAvatar.create({
+      await prisma.profileAvatar.create({
         data: {
           artistId: artist.id,
         },
@@ -38,7 +38,7 @@ describe("manage/artists/{artistId}/avatar", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
-      const foundOld = await prisma.artistAvatar.findFirst({
+      const foundOld = await prisma.profileAvatar.findFirst({
         where: { artistId: artist.id },
       });
 

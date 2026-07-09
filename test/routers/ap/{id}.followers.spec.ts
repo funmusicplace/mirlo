@@ -23,7 +23,7 @@ describe("ActivityPub followers endpoint", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -58,7 +58,7 @@ describe("ActivityPub followers endpoint", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -68,7 +68,7 @@ describe("ActivityPub followers endpoint", () => {
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://mastodon.social/users/testfollower",

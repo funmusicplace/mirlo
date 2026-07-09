@@ -37,7 +37,7 @@ export default function () {
         email = user?.email;
       }
 
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
         },

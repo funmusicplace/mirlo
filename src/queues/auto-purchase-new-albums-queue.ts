@@ -88,7 +88,7 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
           artist: true,
         },
       }),
-      prisma.artistUserSubscription.findUnique({
+      prisma.profileUserSubscription.findUnique({
         where: { id: artistUserSubscriptionId },
         include: {
           user: true,

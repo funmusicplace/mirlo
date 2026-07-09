@@ -20,7 +20,7 @@ export default function () {
       disableReason?: string;
     };
     try {
-      const artist = await prisma.artist.findUnique({
+      const artist = await prisma.profile.findUnique({
         where: { id: Number(req.params.id) },
         include: {
           user: {
@@ -36,7 +36,7 @@ export default function () {
         return res.status(404).json({ message: "Artist not found" });
       }
 
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: Number(req.params.id) },
         data: {
           enabled,
@@ -77,7 +77,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
-      const artist = await prisma.artist.findUnique({
+      const artist = await prisma.profile.findUnique({
         where: { id: Number(id) },
         select: {
           name: true,
@@ -105,7 +105,7 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: { id: Number(id) },
         select: {
           id: true,

@@ -47,7 +47,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -65,7 +65,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -108,7 +108,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -126,7 +126,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -173,7 +173,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -182,11 +182,11 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: (
-          await prisma.artistSubscriptionTier.create({
+          await prisma.profileSubscriptionTier.create({
             data: {
               artistId: artist.id,
               name: "tier",
@@ -218,7 +218,7 @@ describe("auto-purchase-new-albums", () => {
       email: "artist@artist.com",
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -257,7 +257,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -275,7 +275,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -327,7 +327,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -345,7 +345,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription1 = await prisma.artistUserSubscription.create({
+    const subscription1 = await prisma.profileUserSubscription.create({
       data: {
         userId: follower1.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -353,7 +353,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription2 = await prisma.artistUserSubscription.create({
+    const subscription2 = await prisma.profileUserSubscription.create({
       data: {
         userId: follower2.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -414,7 +414,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -432,7 +432,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -469,7 +469,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -487,7 +487,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -521,7 +521,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -539,7 +539,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -576,7 +576,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -594,7 +594,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -628,7 +628,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -646,7 +646,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -677,7 +677,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -695,7 +695,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -729,7 +729,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -747,7 +747,7 @@ describe("auto-purchase-new-albums", () => {
       },
     });
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,

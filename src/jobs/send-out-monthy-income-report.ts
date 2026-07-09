@@ -1,5 +1,8 @@
 import prisma from "@mirlo/prisma";
-import { SubscriptionDeleteReason } from "@mirlo/prisma/client";
+import {
+  ProfileUserSubscription,
+  SubscriptionDeleteReason,
+} from "@mirlo/prisma/client";
 import { Job } from "bullmq";
 import { groupBy, keyBy, uniq } from "lodash";
 
@@ -52,7 +55,7 @@ const sendOutMonthlyIncomeReport = async () => {
     startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1);
     const endOfLastMonth = new Date(startOfLastMonth);
     endOfLastMonth.setMonth(endOfLastMonth.getMonth() + 1);
-    const allArtists = await prisma.artist.findMany({
+    const allArtists = await prisma.profile.findMany({
       where: { deletedAt: null },
       select: {
         id: true,
@@ -81,7 +84,7 @@ const sendOutMonthlyIncomeReport = async () => {
       // Subscriptions that ended last month. TIER_SWITCHED is excluded: the
       // supporter is still subscribed on another tier, so it isn't lost
       // income.
-      prisma.artistUserSubscription.findMany({
+      prisma.profileUserSubscription.findMany({
         where: {
           deletedAt: { gte: startOfLastMonth, lt: endOfLastMonth },
           OR: [

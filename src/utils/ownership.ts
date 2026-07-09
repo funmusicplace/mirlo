@@ -1,4 +1,4 @@
-import { ArtistSubscriptionTier, User } from "@mirlo/prisma/client";
+import { ProfileSubscriptionTier, User } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import { AppError } from "./error";
@@ -6,14 +6,14 @@ import { AppError } from "./error";
 export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,
   userId: number
-): Promise<ArtistSubscriptionTier | null> => {
-  const artists = await prisma.artist.findMany({
+): Promise<ProfileSubscriptionTier | null> => {
+  const artists = await prisma.profile.findMany({
     where: {
       userId,
     },
   });
 
-  const subscription = await prisma.artistSubscriptionTier.findFirst({
+  const subscription = await prisma.profileSubscriptionTier.findFirst({
     where: {
       artistId: { in: artists.map((a) => a.id) },
       id: subscriptionId,

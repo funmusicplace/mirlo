@@ -31,7 +31,7 @@ export default function () {
       if (parsedId) {
         const canManage =
           !!loggedInUser &&
-          (await prisma.artist.findFirst({
+          (await prisma.profile.findFirst({
             where: {
               id: parsedId,
               enabled: true,
@@ -40,7 +40,7 @@ export default function () {
             select: { id: true },
           })) !== null;
 
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: {
             id: parsedId,
             enabled: true,

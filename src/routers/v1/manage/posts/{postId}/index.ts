@@ -165,7 +165,7 @@ export default function () {
       }
 
       if (post?.artistId && minimumSubscriptionTierId !== undefined) {
-        const validTier = await prisma.artistSubscriptionTier.findFirst({
+        const validTier = await prisma.profileSubscriptionTier.findFirst({
           where: {
             artistId: post.artistId,
             id: minimumSubscriptionTierId,

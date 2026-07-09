@@ -64,7 +64,7 @@ export default function () {
         if (!featuredArtistIds?.length) {
           return res.status(200).json({ result: [] });
         }
-        const artists = await prisma.artist.findMany({
+        const artists = await prisma.profile.findMany({
           where: { id: { in: featuredArtistIds }, deletedAt: null },
           include: {
             avatar: { where: { deletedAt: null } },
@@ -88,7 +88,7 @@ export default function () {
           Number(settings.settings.instanceCustomization.artistId)
         )
       ) {
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: {
             id: Number(settings.settings.instanceCustomization?.artistId),
           },

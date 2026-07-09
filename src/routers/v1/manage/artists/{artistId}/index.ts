@@ -52,7 +52,7 @@ export default function () {
     const user = req.user;
 
     try {
-      const existingArtist = await prisma.artist.findFirst({
+      const existingArtist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
         },
@@ -110,7 +110,7 @@ export default function () {
           }
         }
 
-        const result = await tx.artist.updateMany({
+        const result = await tx.profile.updateMany({
           where: {
             id: Number(artistId),
           },
@@ -159,7 +159,7 @@ export default function () {
       });
 
       if (updatedCount) {
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: { id: Number(artistId) },
         });
         res.json({ result: artist });
@@ -213,7 +213,7 @@ export default function () {
 
     const castArtistId = await findArtistIdForURLSlug(artistId);
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(castArtistId),
         },
