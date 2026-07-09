@@ -3,7 +3,7 @@ import { PassThrough } from "stream";
 
 import prisma from "@mirlo/prisma";
 import {
-  Artist,
+  Profile,
   Track,
   TrackArtist,
   TrackAudio,
@@ -78,7 +78,7 @@ const downloadTracks = async ({
   job: Job;
   tempFolder: string;
   format: Format;
-  artist: Artist;
+  artist: Profile;
 }) => {
   let i = 0;
 
@@ -338,7 +338,7 @@ const downloadAndZipTracks = async ({
     releaseDate?: Date | null;
   };
   job: Job;
-  artist: Artist;
+  artist: Profile;
   destinationBucket: DestinationBucket;
 }) => {
   try {
@@ -428,7 +428,7 @@ export default async (job: Job) => {
   }
 
   try {
-    const artist = await prisma.artist.findFirst({
+    const artist = await prisma.profile.findFirst({
       where: { id: trackGroup.artistId },
     });
 

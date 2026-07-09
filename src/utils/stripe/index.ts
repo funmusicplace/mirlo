@@ -382,7 +382,7 @@ export const createTrackStripeProduct = async (
 };
 
 export const createSubscriptionStripeProduct = async (
-  tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>,
+  tier: Prisma.ProfileSubscriptionTierGetPayload<{ include: { artist: true } }>,
   stripeAccountId: string
 ) => {
   let productKey = await checkForProductKey(
@@ -400,7 +400,7 @@ export const createSubscriptionStripeProduct = async (
         stripeAccount: stripeAccountId,
       }
     );
-    await prisma.artistSubscriptionTier.update({
+    await prisma.profileSubscriptionTier.update({
       where: {
         id: Number(tier.id),
       },
@@ -848,7 +848,7 @@ export const handleSubscriptionDeleted = async (
       ? "PAYMENT_FAILURE"
       : undefined;
 
-  const result = await prisma.artistUserSubscription.updateMany({
+  const result = await prisma.profileUserSubscription.updateMany({
     where: {
       stripeSubscriptionKey: subscription.id,
       deletedAt: null,
@@ -909,7 +909,7 @@ export const handleMerchPurchasesFromIntent = async (
     },
   });
 
-  let artist: Prisma.ArtistGetPayload<{ include: { user: true } }> | undefined;
+  let artist: Prisma.ProfileGetPayload<{ include: { user: true } }> | undefined;
 
   for (const item of merchItems) {
     const merch = await prisma.merch.findFirst({

@@ -20,7 +20,7 @@ export default function () {
     try {
       let exists = false;
       if (urlSlug) {
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: {
             AND: {
               urlSlug: { equals: urlSlug, mode: "insensitive" },

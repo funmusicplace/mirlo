@@ -29,7 +29,7 @@ describe(".well-known/webfinger", () => {
       email: "test@test.com",
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -69,7 +69,7 @@ describe(".well-known/webfinger", () => {
       email: "test@test.com",
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -105,7 +105,7 @@ describe(".well-known/webfinger", () => {
       email: "test@test.com",
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",

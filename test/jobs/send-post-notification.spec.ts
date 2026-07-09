@@ -55,7 +55,7 @@ describe("send-post-notification", () => {
       }),
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -66,7 +66,7 @@ describe("send-post-notification", () => {
       include: { subscriptionTiers: true },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -204,9 +204,8 @@ describe("send-post-notification", () => {
   // the post in their "Artists you follow" feed via an in-app notification.
   // See #2071.
   it("still creates in-app notifications when shouldSendEmail: false", async () => {
-    const { artist, subscriber } = await createArtistWithSubscriber(
-      "sub@test.com"
-    );
+    const { artist, subscriber } =
+      await createArtistWithSubscriber("sub@test.com");
     const post = await createPublishedPost(artist.id, {
       shouldSendEmail: false,
     });
@@ -287,7 +286,7 @@ describe("send-post-notification", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Multi Tier Artist",
         urlSlug: "multi-tier-artist",
@@ -302,7 +301,7 @@ describe("send-post-notification", () => {
 
     // Subscribe the same user to both tiers
     for (const tier of artist.subscriptionTiers) {
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           userId: subscriber.id,
           artistSubscriptionTierId: tier.id,
@@ -331,7 +330,7 @@ describe("send-post-notification", () => {
       emailConfirmationToken: null,
     });
 
-    const postingArtist = await prisma.artist.create({
+    const postingArtist = await prisma.profile.create({
       data: {
         name: "Posting Artist",
         urlSlug: "posting-artist",
@@ -340,7 +339,7 @@ describe("send-post-notification", () => {
       },
     });
 
-    await prisma.artist.create({
+    await prisma.profile.create({
       data: {
         name: "Mentioned Artist",
         urlSlug: "mentioned-artist",

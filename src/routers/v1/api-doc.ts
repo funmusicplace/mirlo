@@ -69,7 +69,7 @@ const apiDoc = {
         },
       },
     },
-    Artist: {
+    Profile: {
       type: "object",
       properties: {
         id: { type: "number" },
@@ -93,7 +93,7 @@ const apiDoc = {
         subscriptionTiers: {
           type: "array",
           description: "Available subscription tiers",
-          items: { $ref: "#/definitions/ArtistSubscriptionTierResult" },
+          items: { $ref: "#/definitions/ProfileSubscriptionTierResult" },
         },
       },
     },
@@ -206,7 +206,7 @@ const apiDoc = {
         },
       },
     },
-    ArtistSubscriptionTierResult: {
+    ProfileSubscriptionTierResult: {
       type: "object",
       properties: {
         name: {
@@ -233,7 +233,7 @@ const apiDoc = {
         },
       },
     },
-    ArtistSubscriptionTierCreate: {
+    ProfileSubscriptionTierCreate: {
       type: "object",
       required: ["name"],
       properties: {
@@ -261,7 +261,7 @@ const apiDoc = {
         },
       },
     },
-    ArtistSubscriptionTierUpdate: {
+    ProfileSubscriptionTierUpdate: {
       type: "object",
       properties: {
         name: {

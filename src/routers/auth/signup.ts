@@ -149,7 +149,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
             Number(settings.settings.instanceCustomization.artistId)
           )
         ) {
-          const artist = await prisma.artist.findFirst({
+          const artist = await prisma.profile.findFirst({
             where: {
               id:
                 Number(settings.settings.instanceCustomization.artistId) || -1,

@@ -7,7 +7,7 @@ import { deleteArtist, deleteStripeSubscriptions } from "./artist";
 import countries from "./country-codes-currencies";
 
 export const deleteUser = async (userId: number) => {
-  const userArtists = await prisma.artist.findMany({
+  const userArtists = await prisma.profile.findMany({
     where: { userId: Number(userId) },
   });
 
@@ -17,7 +17,7 @@ export const deleteUser = async (userId: number) => {
 
   await deleteStripeSubscriptions({ userId });
 
-  await prisma.artistUserSubscription.deleteMany({
+  await prisma.profileUserSubscription.deleteMany({
     where: {
       userId: userId,
     },
@@ -110,7 +110,7 @@ export const findUserDiscountPercentsForArtist = async (
   userId: number,
   artistId: number
 ) => {
-  const activeSubscriptions = await prisma.artistUserSubscription.findMany({
+  const activeSubscriptions = await prisma.profileUserSubscription.findMany({
     where: {
       userId,
       deletedAt: null,

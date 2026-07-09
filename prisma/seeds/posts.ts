@@ -25,10 +25,10 @@ const TIER_EXCLUSIVE_CONTENT = `<p>Right, so this is the stuff I only share with
 <p>There will be a listening session for subscribers before the public release. I'll send details once I have a finish date that I actually believe in.</p>`;
 
 export async function seedPosts() {
-  const blackbird = await prisma.artist.findFirst({
+  const blackbird = await prisma.profile.findFirst({
     where: { urlSlug: "blackbird" },
   });
-  const crow = await prisma.artist.findFirst({ where: { urlSlug: "crow" } });
+  const crow = await prisma.profile.findFirst({ where: { urlSlug: "crow" } });
 
   if (!blackbird || !crow) {
     console.log("Required artists not found, skipping post seeding");
@@ -36,11 +36,11 @@ export async function seedPosts() {
   }
 
   // Subscription tiers
-  let blackbirdSupporterTier = await prisma.artistSubscriptionTier.findFirst({
+  let blackbirdSupporterTier = await prisma.profileSubscriptionTier.findFirst({
     where: { artistId: blackbird.id, name: "Supporter" },
   });
   if (!blackbirdSupporterTier) {
-    blackbirdSupporterTier = await prisma.artistSubscriptionTier.create({
+    blackbirdSupporterTier = await prisma.profileSubscriptionTier.create({
       data: {
         name: "Supporter",
         description: "Support Blackbird and get access to exclusive posts",
@@ -54,11 +54,13 @@ export async function seedPosts() {
     );
   }
 
-  let blackbirdInnerCircleTier = await prisma.artistSubscriptionTier.findFirst({
-    where: { artistId: blackbird.id, name: "Inner Circle" },
-  });
+  let blackbirdInnerCircleTier = await prisma.profileSubscriptionTier.findFirst(
+    {
+      where: { artistId: blackbird.id, name: "Inner Circle" },
+    }
+  );
   if (!blackbirdInnerCircleTier) {
-    blackbirdInnerCircleTier = await prisma.artistSubscriptionTier.create({
+    blackbirdInnerCircleTier = await prisma.profileSubscriptionTier.create({
       data: {
         name: "Inner Circle",
         description:
@@ -73,11 +75,11 @@ export async function seedPosts() {
     );
   }
 
-  let crowSupporterTier = await prisma.artistSubscriptionTier.findFirst({
+  let crowSupporterTier = await prisma.profileSubscriptionTier.findFirst({
     where: { artistId: crow.id, name: "Crow Flock" },
   });
   if (!crowSupporterTier) {
-    crowSupporterTier = await prisma.artistSubscriptionTier.create({
+    crowSupporterTier = await prisma.profileSubscriptionTier.create({
       data: {
         name: "Crow Flock",
         description: "Join the murder. Exclusive updates from Crow HQ.",

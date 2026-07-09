@@ -28,7 +28,7 @@ export async function triggerAutoPurchaseNewAlbums() {
   );
 
   for (const album of recentAlbums) {
-    const artistSubscribers = await prisma.artistUserSubscription.findMany({
+    const artistSubscribers = await prisma.profileUserSubscription.findMany({
       where: {
         amount: {
           gte: 0,

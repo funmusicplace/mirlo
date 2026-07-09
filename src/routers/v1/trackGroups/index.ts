@@ -184,7 +184,7 @@ export default function () {
                 		)
                 )
                 AND exists (
-                  select 1 from "Artist" a
+                  select 1 from "Profile" a
                   where a.id = "TrackGroup"."artistId"
                   and a.enabled = true
                   and a."deletedAt" is null

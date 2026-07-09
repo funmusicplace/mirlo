@@ -1,10 +1,10 @@
 import { join } from "path";
 
 import {
-  Artist,
-  ArtistAvatar,
-  ArtistBackground,
-  ArtistSubscriptionTier,
+  Profile,
+  ProfileAvatar,
+  ProfileBackground,
+  ProfileSubscriptionTier,
   Image,
   Merch,
   MerchImage,
@@ -32,13 +32,13 @@ import {
   LocalTrackGroup,
 } from "./trackGroup";
 
-interface LocalArtist extends Artist {
+interface LocalArtist extends Profile {
   posts?: Post[];
-  background?: ArtistBackground | null;
-  avatar?: ArtistAvatar | null;
+  background?: ProfileBackground | null;
+  avatar?: ProfileAvatar | null;
   trackGroups?: LocalTrackGroup[] | null;
   merch?: (Merch & { images?: MerchImage[] })[];
-  subscriptionTiers?: (ArtistSubscriptionTier & {
+  subscriptionTiers?: (ProfileSubscriptionTier & {
     images?: { image: Image }[];
     releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
   })[];
@@ -49,9 +49,9 @@ interface LocalArtist extends Artist {
     stripeAccountId?: string | null;
     currency?: string | null;
     artistLabels?: {
-      artist: Artist & {
-        avatar?: ArtistAvatar | null;
-        background?: ArtistBackground | null;
+      artist: Profile & {
+        avatar?: ProfileAvatar | null;
+        background?: ProfileBackground | null;
         trackGroups?: (TrackGroup & {
           cover?: TrackGroupCover | null;
           tracks?: Track[];

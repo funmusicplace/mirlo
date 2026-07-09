@@ -16,7 +16,7 @@ export default function () {
     const user = req.user;
 
     try {
-      const paidTip = await prisma.userArtistTip.findFirst({
+      const paidTip = await prisma.userProfileTip.findFirst({
         where: {
           id,
           userId: user.id,

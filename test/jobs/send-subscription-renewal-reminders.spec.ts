@@ -42,7 +42,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -51,7 +51,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -64,7 +64,7 @@ describe("send-subscription-renewal-reminders", () => {
     const nextBillingDate = new Date();
     nextBillingDate.setDate(nextBillingDate.getDate() + 10);
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -101,7 +101,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -110,7 +110,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -122,7 +122,7 @@ describe("send-subscription-renewal-reminders", () => {
     const nextBillingDate = new Date();
     nextBillingDate.setDate(nextBillingDate.getDate() + 20);
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -149,7 +149,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -158,7 +158,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -173,7 +173,7 @@ describe("send-subscription-renewal-reminders", () => {
     const reminderSentDate = new Date();
     reminderSentDate.setDate(reminderSentDate.getDate() - 5); // 5 days ago
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -201,7 +201,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -210,7 +210,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -225,7 +225,7 @@ describe("send-subscription-renewal-reminders", () => {
     const reminderSentDate = new Date();
     reminderSentDate.setDate(reminderSentDate.getDate() - 365);
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -253,7 +253,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -262,7 +262,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const monthlyTier = await prisma.artistSubscriptionTier.create({
+    const monthlyTier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Monthly Tier",
@@ -273,7 +273,7 @@ describe("send-subscription-renewal-reminders", () => {
     const nextBillingDate = new Date();
     nextBillingDate.setDate(nextBillingDate.getDate() + 10);
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: monthlyTier.id,
@@ -300,7 +300,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -309,7 +309,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -321,7 +321,7 @@ describe("send-subscription-renewal-reminders", () => {
     nextBillingDate.setDate(nextBillingDate.getDate() + 10);
 
     // Create deleted subscription
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -349,7 +349,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -358,7 +358,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Free Tier",
@@ -370,7 +370,7 @@ describe("send-subscription-renewal-reminders", () => {
     const nextBillingDate = new Date();
     nextBillingDate.setDate(nextBillingDate.getDate() + 10);
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -396,7 +396,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -405,7 +405,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -416,7 +416,7 @@ describe("send-subscription-renewal-reminders", () => {
     const nextBillingDate = new Date();
     nextBillingDate.setDate(nextBillingDate.getDate() + 10);
 
-    const subscription = await prisma.artistUserSubscription.create({
+    const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -431,9 +431,11 @@ describe("send-subscription-renewal-reminders", () => {
     await sendSubscriptionRenewalReminders();
     const afterTime = new Date();
 
-    const updatedSubscription = await prisma.artistUserSubscription.findUnique({
-      where: { id: subscription.id },
-    });
+    const updatedSubscription = await prisma.profileUserSubscription.findUnique(
+      {
+        where: { id: subscription.id },
+      }
+    );
 
     assert.notEqual(updatedSubscription?.renewalReminderSentAt, null);
     assert.ok(
@@ -455,7 +457,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -464,7 +466,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -475,7 +477,7 @@ describe("send-subscription-renewal-reminders", () => {
     // Create subscription with specific next billing date
     const nextBillingDate = new Date("2025-05-15");
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -508,7 +510,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -517,7 +519,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -525,7 +527,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
         artistSubscriptionTierId: tier.id,
@@ -558,7 +560,7 @@ describe("send-subscription-renewal-reminders", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
@@ -567,7 +569,7 @@ describe("send-subscription-renewal-reminders", () => {
       },
     });
 
-    const tier = await prisma.artistSubscriptionTier.create({
+    const tier = await prisma.profileSubscriptionTier.create({
       data: {
         artistId: artist.id,
         name: "Premium Tier",
@@ -578,7 +580,7 @@ describe("send-subscription-renewal-reminders", () => {
     const nextBillingDate = new Date();
     nextBillingDate.setDate(nextBillingDate.getDate() + 10);
 
-    await prisma.artistUserSubscription.createMany({
+    await prisma.profileUserSubscription.createMany({
       data: [
         {
           userId: subscriber1.id,

@@ -55,7 +55,7 @@ export default function () {
       };
 
       if (fromDateFilter) {
-        const optInDateFilter: Prisma.ArtistWhereInput = {
+        const optInDateFilter: Prisma.ProfileWhereInput = {
           federatedStreamingOptInDate: fromDateFilter,
         };
 
@@ -80,7 +80,7 @@ export default function () {
           },
         };
 
-        let anyTrackGroupUpdatedOrCreated: Prisma.ArtistWhereInput = {
+        let anyTrackGroupUpdatedOrCreated: Prisma.ProfileWhereInput = {
           trackGroups: {
             some: {
               OR: [
@@ -93,7 +93,7 @@ export default function () {
 
         federatedArtist.OR = [
           optInDateFilter,
-          updatedOrCreatedFilter as Prisma.ArtistWhereInput,
+          updatedOrCreatedFilter as Prisma.ProfileWhereInput,
           anyTrackGroupUpdatedOrCreated,
         ];
 
@@ -111,11 +111,11 @@ export default function () {
         createdAt: "desc",
       };
 
-      const artists = await prisma.artist.findMany({
+      const artists = await prisma.profile.findMany({
         where: federatedArtist,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
-        orderBy: orderByClause as Prisma.ArtistOrderByWithRelationInput,
+        orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
         include: {
           trackGroups: {
             where: whereForPublishedTrackGroups(),
@@ -146,11 +146,11 @@ export default function () {
         },
       });
 
-      const deletedArtists = await prisma.artist.findMany({
+      const deletedArtists = await prisma.profile.findMany({
         where: artistOptedOutOrDeleted,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
-        orderBy: orderByClause as Prisma.ArtistOrderByWithRelationInput,
+        orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
       });
 
       const deletedTrackGroups = await prisma.trackGroup.findMany({
@@ -236,7 +236,7 @@ export default function () {
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Artist",
+            $ref: "#/definitions/Profile",
           },
         },
       },

@@ -34,7 +34,7 @@ export default function () {
     try {
       if (!artistIds) {
         artistIds = (
-          await prisma.artist.findMany({
+          await prisma.profile.findMany({
             where: {
               userId: user.id,
             },

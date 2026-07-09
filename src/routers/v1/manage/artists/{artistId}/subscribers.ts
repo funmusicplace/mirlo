@@ -67,7 +67,7 @@ export default function () {
         });
       }
 
-      const subscribers = await prisma.artistUserSubscription.findMany({
+      const subscribers = await prisma.profileUserSubscription.findMany({
         where: {
           artistSubscriptionTier: {
             artistId: parsedId,
@@ -157,14 +157,14 @@ export default function () {
       // When a specific tier is requested, add subscribers to it; otherwise
       // fall back to the artist's default (follow) tier.
       const tier = artistSubscriptionTierId
-        ? await prisma.artistSubscriptionTier.findFirst({
+        ? await prisma.profileSubscriptionTier.findFirst({
             where: {
               id: Number(artistSubscriptionTierId),
               artistId: parsedArtistId,
               deletedAt: null,
             },
           })
-        : await prisma.artistSubscriptionTier.findFirst({
+        : await prisma.profileSubscriptionTier.findFirst({
             where: {
               isDefaultTier: true,
               artistId: parsedArtistId,
@@ -186,7 +186,7 @@ export default function () {
               },
             });
 
-            const found = await prisma.artistUserSubscription.findFirst({
+            const found = await prisma.profileUserSubscription.findFirst({
               where: {
                 userId: created.id,
                 artistSubscriptionTierId: tier.id,
@@ -195,7 +195,7 @@ export default function () {
 
             if (!found) {
               try {
-                await prisma.artistUserSubscription.create({
+                await prisma.profileUserSubscription.create({
                   data: {
                     userId: created.id,
                     artistSubscriptionTierId: tier.id,

@@ -1,4 +1,4 @@
-import { Artist, ArtistAvatar, Post } from "@mirlo/prisma/client";
+import { Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
 import { generateFullStaticImageUrl } from "../images";
@@ -57,7 +57,7 @@ export const postIncludeForUser = (userId?: number) => ({
 
 export const serializePost = (
   post: Partial<Post> & { id: number; isPublic: boolean } & {
-    artist?: (Partial<Artist> & { avatar?: ArtistAvatar | null }) | null;
+    artist?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
   } & { featuredImage?: { extension: string; id: string } | null } & {
     tracks?: {
       trackId: number;

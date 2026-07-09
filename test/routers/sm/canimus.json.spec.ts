@@ -71,7 +71,7 @@ describe("canimus", () => {
         federatedStreaming: true,
         federatedStreamingOptInDate: new Date(Date.now()),
       });
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { deletedAt: new Date() },
       });
@@ -124,7 +124,7 @@ describe("canimus", () => {
         federatedStreaming: true,
         federatedStreamingOptInDate: dateNow,
       });
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { deletedAt: new Date() },
       });

@@ -56,7 +56,7 @@ describe("manage/label", () => {
         ],
       });
 
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: deletedArtist.id },
         data: { deletedAt: new Date() },
       });

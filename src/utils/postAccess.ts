@@ -6,7 +6,7 @@ export const getUserSubscriptionForArtist = async (
   artistId: number
 ) => {
   if (!user) return null;
-  return prisma.artistUserSubscription.findFirst({
+  return prisma.profileUserSubscription.findFirst({
     where: {
       userId: user.id,
       artistSubscriptionTier: { artistId },

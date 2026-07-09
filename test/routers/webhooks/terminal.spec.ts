@@ -317,7 +317,7 @@ describe("terminal.reader webhooks", () => {
 
       await handleTerminalReaderActionSucceeded(reader, "acct_sub_test");
 
-      const subscription = await prisma.artistUserSubscription.findFirst({
+      const subscription = await prisma.profileUserSubscription.findFirst({
         where: { userId: buyer.id, artistSubscriptionTierId: tier.id },
       });
       assert.ok(subscription, "subscription should be saved to DB");

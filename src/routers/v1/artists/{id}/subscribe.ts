@@ -18,7 +18,7 @@ type Params = {
 };
 
 const findTierById = async (tierId: number) => {
-  return prisma.artistSubscriptionTier.findFirst({
+  return prisma.profileSubscriptionTier.findFirst({
     where: {
       id: tierId,
     },
@@ -55,7 +55,7 @@ export default function () {
         });
         email = user?.email;
 
-        const oldTier = await prisma.artistSubscriptionTier.findFirst({
+        const oldTier = await prisma.profileSubscriptionTier.findFirst({
           where: {
             AND: {
               userSubscriptions: {
@@ -83,14 +83,14 @@ export default function () {
             artistSubscriptionTier: { artistId: Number(artistId) },
             userId,
           });
-          await prisma.artistUserSubscription.updateMany({
+          await prisma.profileUserSubscription.updateMany({
             where: {
               userId,
               artistSubscriptionTierId: oldTier.id,
             },
             data: { deleteReason: "TIER_SWITCHED" },
           });
-          await prisma.artistUserSubscription.deleteMany({
+          await prisma.profileUserSubscription.deleteMany({
             where: {
               artistSubscriptionTier: { artistId: Number(artistId) },
               userId,
@@ -185,7 +185,7 @@ export default function () {
     const loggedInUser = req.user;
 
     try {
-      const subscription = await prisma.artistUserSubscription.findFirst({
+      const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           artistSubscriptionTier: { artistId: Number(artistId) },
           userId: loggedInUser.id,

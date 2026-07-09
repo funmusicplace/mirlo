@@ -33,7 +33,7 @@ export default function () {
       }
 
       if (userIdToRemove) {
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: {
             id: Number(artistId),
           },
@@ -43,7 +43,7 @@ export default function () {
         });
 
         if (artist) {
-          await prisma.artistUserSubscription.deleteMany({
+          await prisma.profileUserSubscription.deleteMany({
             where: {
               artistSubscriptionTier: {
                 artistId: artist.id,

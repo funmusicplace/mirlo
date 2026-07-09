@@ -58,7 +58,7 @@ describe("artists/{id]/follow", () => {
       assert.equal(response.body.results[0].userId, followerUser.id);
       assert.equal(response.status, 200);
 
-      const subscription = await prisma.artistUserSubscription.findFirst({
+      const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: followerUser.id,
           artistSubscriptionTier: {
@@ -95,7 +95,7 @@ describe("artists/{id]/follow", () => {
       assert.equal(response.status, 200);
 
       const subscription =
-        await prisma.artistUserSubscriptionConfirmation.findFirst({
+        await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
             artistId: artist.id,
@@ -126,7 +126,7 @@ describe("artists/{id]/follow", () => {
       assert.equal(response.status, 200);
 
       const subscription =
-        await prisma.artistUserSubscriptionConfirmation.findFirst({
+        await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
             artistId: artist.id,

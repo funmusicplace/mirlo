@@ -6,13 +6,6 @@ import {
   addSizesToImage,
   findArtistIdForURLSlug,
 } from "../../../../utils/artist";
-import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-  finalCoversBucket,
-  finalUserAvatarBucket,
-  finalUserBannerBucket,
-} from "../../../../utils/minio";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -26,7 +19,7 @@ export default function () {
     try {
       const artistId = await findArtistIdForURLSlug(id);
 
-      const labelProfile = await prisma.artist.findFirst({
+      const labelProfile = await prisma.profile.findFirst({
         where: {
           id: artistId,
           isLabelProfile: true,
@@ -39,7 +32,7 @@ export default function () {
         return res.status(404).json({ error: "Label not found" });
       }
 
-      const labelArtists = await prisma.artist.findMany({
+      const labelArtists = await prisma.profile.findMany({
         where: {
           deletedAt: null,
           artistLabels: {

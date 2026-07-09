@@ -86,7 +86,7 @@ describe("artists/{id}/contact", () => {
         email: "sender@sender.com",
       });
       const artist = await createArtist(artistUser.id);
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { allowDirectMessages: false },
       });

@@ -206,7 +206,7 @@ export const artistEditableByUser = async (
         return true;
       }
 
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
           id: Number(castArtistId),

@@ -94,7 +94,7 @@ describe("trackGroups", () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       await createTrackGroup(artist.id, { title: "Super Hyper Galaxy" });
-      await prisma.artist.delete({ where: { id: artist.id } });
+      await prisma.profile.delete({ where: { id: artist.id } });
 
       const response = await requestApp
         .get("trackGroups?title=super")
