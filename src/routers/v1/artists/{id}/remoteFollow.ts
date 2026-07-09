@@ -50,7 +50,7 @@ export default function () {
 
       const server = cleaned.slice(atIndex + 1);
 
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: { id: Number(artistId), enabled: true },
       });
 

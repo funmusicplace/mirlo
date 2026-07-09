@@ -1,8 +1,8 @@
 import { join } from "path";
 
 import {
-  Artist,
-  ArtistAvatar,
+  Profile,
+  ProfileAvatar,
   Merch,
   MerchImage,
   Track,
@@ -21,15 +21,15 @@ import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
-  artist?: Partial<Artist>;
+  artist?: Partial<Profile>;
   tracks?: CanimusTrack[];
 }
 
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
-    artist?: Partial<Artist> & {
-      avatar?: ArtistAvatar | null;
+    artist?: Partial<Profile> & {
+      avatar?: ProfileAvatar | null;
       user?: { currency?: string | null } | null;
     };
     paymentToUser?: { currency?: string | null } | null;

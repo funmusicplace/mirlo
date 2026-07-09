@@ -48,7 +48,7 @@ export default function () {
           TO_CHAR(weeks.week_start, 'YYYY-MM-DD') AS week,
           COUNT(a."createdAt")::int AS count
         FROM weeks
-        LEFT JOIN "Artist" a
+        LEFT JOIN "Profile" a
           ON DATE_TRUNC('week', a."createdAt") = weeks.week_start
         GROUP BY weeks.week_start
         ORDER BY weeks.week_start ASC
@@ -165,7 +165,7 @@ export default function () {
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Artist",
+            $ref: "#/definitions/Profile",
           },
         },
       },

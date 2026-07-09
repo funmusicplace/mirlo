@@ -25,7 +25,7 @@ export default function () {
     } = req.query;
 
     try {
-      let where: Prisma.ArtistWhereInput = {};
+      let where: Prisma.ProfileWhereInput = {};
       if (isLabel !== undefined) {
         where.isLabelProfile = isLabel === "true";
       }
@@ -88,11 +88,11 @@ export default function () {
         };
       }
 
-      const count = await prisma.artist.count({
+      const count = await prisma.profile.count({
         where,
       });
 
-      const orderByClause: Prisma.ArtistOrderByWithRelationInput = {};
+      const orderByClause: Prisma.ProfileOrderByWithRelationInput = {};
 
       if (orderBy && typeof orderBy === "string") {
         if (orderBy === "name") {
@@ -102,7 +102,7 @@ export default function () {
         }
       }
 
-      const artists = await prisma.artist.findMany({
+      const artists = await prisma.profile.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
@@ -206,7 +206,7 @@ export default function () {
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Artist",
+            $ref: "#/definitions/Profile",
           },
         },
       },

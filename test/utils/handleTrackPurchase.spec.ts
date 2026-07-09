@@ -44,7 +44,7 @@ describe("handleTrackPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -91,7 +91,7 @@ describe("handleTrackPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",

@@ -52,7 +52,7 @@ export default function () {
       200: {
         description: "all artists associated with the label",
         schema: {
-          $ref: "#/definitions/Artist",
+          $ref: "#/definitions/Profile",
         },
       },
       default: {

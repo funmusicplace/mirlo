@@ -24,7 +24,7 @@ export default function () {
     };
 
     try {
-      let where: Prisma.UserArtistTipWhereInput = {};
+      let where: Prisma.UserProfileTipWhereInput = {};
 
       const dateRange = getDateRange(datePurchased);
       if (dateRange) {
@@ -41,9 +41,9 @@ export default function () {
         };
       }
 
-      const itemCount = await prisma.userArtistTip.count({ where });
+      const itemCount = await prisma.userProfileTip.count({ where });
 
-      const purchases = await prisma.userArtistTip.findMany({
+      const purchases = await prisma.userProfileTip.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,

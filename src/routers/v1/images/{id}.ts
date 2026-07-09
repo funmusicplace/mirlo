@@ -49,7 +49,7 @@ export default function () {
       200: {
         description: "An artist that matches the id",
         schema: {
-          $ref: "#/definitions/Artist",
+          $ref: "#/definitions/Profile",
         },
       },
       default: {

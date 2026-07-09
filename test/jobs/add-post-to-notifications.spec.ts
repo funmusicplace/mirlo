@@ -27,7 +27,7 @@ describe("add-post-to-notifications", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -44,7 +44,7 @@ describe("add-post-to-notifications", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -76,7 +76,7 @@ describe("add-post-to-notifications", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -93,7 +93,7 @@ describe("add-post-to-notifications", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -123,7 +123,7 @@ describe("add-post-to-notifications", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -140,7 +140,7 @@ describe("add-post-to-notifications", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,

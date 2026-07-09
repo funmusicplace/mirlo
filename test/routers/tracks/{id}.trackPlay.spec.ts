@@ -22,12 +22,12 @@ describe("register trackPlays", () => {
     }
   });
 
-    it("should GET / 404", async () => {
-      const response = await requestApp
-        .get("tracks/1/trackPlay")
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 404);
-    });
+  it("should GET / 404", async () => {
+    const response = await requestApp
+      .get("tracks/1/trackPlay")
+      .set("Accept", "application/json");
+    assert.equal(response.statusCode, 404);
+  });
 
   it("should GET /{id}/trackPlay when not logged in", async () => {
     const { user } = await createUser({
@@ -39,9 +39,9 @@ describe("register trackPlays", () => {
       title: "test track",
       description: "This is a test description",
     });
-    
+
     const response = await requestApp
-      .get("tracks/" + track.id +"/trackPlay")
+      .get("tracks/" + track.id + "/trackPlay")
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);
@@ -59,7 +59,7 @@ describe("register trackPlays", () => {
     });
 
     const response = await requestApp
-      .get("tracks/" + track.id +"/trackPlay")
+      .get("tracks/" + track.id + "/trackPlay")
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
@@ -96,7 +96,7 @@ describe("register trackPlays", () => {
       });
       const artist = await createArtist(artistUser.id);
       // Set the artist's free-play cap.
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { maxFreePlays: 3 },
       });
@@ -140,7 +140,7 @@ describe("register trackPlays", () => {
         email: "artist-owned@example.com",
       });
       const artist = await createArtist(artistUser.id);
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { maxFreePlays: 3 },
       });

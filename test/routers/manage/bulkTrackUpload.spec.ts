@@ -491,7 +491,7 @@ describe("manage/bulkTrackUpload", () => {
       assert.equal(response.body.result.trackGroupsCreated, 1);
       assert.equal(response.body.result.tracksCreated, 1);
 
-      const createdArtist = await prisma.artist.findFirst({
+      const createdArtist = await prisma.profile.findFirst({
         where: {
           userId: user.id,
           name: "My Band",
@@ -583,7 +583,7 @@ describe("manage/bulkTrackUpload", () => {
         },
       });
 
-      const labels = await prisma.artist.findMany({
+      const labels = await prisma.profile.findMany({
         where: {
           id: artist.id,
         },

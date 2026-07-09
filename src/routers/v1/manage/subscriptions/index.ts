@@ -20,7 +20,7 @@ export default function () {
     const loggedInUser = req.user;
     try {
       if (Number(userId) === Number(loggedInUser.id)) {
-        const where: Prisma.ArtistUserSubscriptionWhereInput = {
+        const where: Prisma.ProfileUserSubscriptionWhereInput = {
           userId: Number(userId),
           artistSubscriptionTier: { isDefaultTier: false },
         };
@@ -31,7 +31,7 @@ export default function () {
             deletedAt: null,
           };
         }
-        const subsciptions = await prisma.artistUserSubscription.findMany({
+        const subsciptions = await prisma.profileUserSubscription.findMany({
           where,
           include: {
             artistSubscriptionTier: true,
@@ -57,7 +57,7 @@ export default function () {
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Artist",
+            $ref: "#/definitions/Profile",
           },
         },
       },

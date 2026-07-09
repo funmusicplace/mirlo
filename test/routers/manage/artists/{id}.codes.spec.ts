@@ -58,7 +58,7 @@ describe("manage/artists/{artistId}/codes", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
 
-      await prisma.artistAvatar.create({
+      await prisma.profileAvatar.create({
         data: {
           artistId: artist.id,
         },

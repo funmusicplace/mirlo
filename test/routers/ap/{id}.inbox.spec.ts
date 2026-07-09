@@ -88,7 +88,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       const user = await prisma.user.create({
         data: { email: "target@test.com" },
       });
-      const targetArtist = await prisma.artist.create({
+      const targetArtist = await prisma.profile.create({
         data: {
           name: "Target artist",
           urlSlug: "target-artist",
@@ -118,7 +118,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       // Fedify's InProcessMessageQueue processes the activity after the 202
       // response, so we poll until the DB reflects the handler's writes.
       const stored = await waitFor(() =>
-        prisma.activityPubArtistFollowers.findFirst({
+        prisma.activityPubProfileFollowers.findFirst({
           where: { artistId: targetArtist.id, actor: actorUrl },
         })
       );
@@ -162,7 +162,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       const user = await prisma.user.create({
         data: { email: "target@test.com" },
       });
-      const targetArtist = await prisma.artist.create({
+      const targetArtist = await prisma.profile.create({
         data: {
           name: "Target artist",
           urlSlug: "target-artist",
@@ -175,7 +175,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       const actorUrl = "https://mastodon.social/users/someuser";
 
       // Pre-seed a follower record
-      await prisma.activityPubArtistFollowers.create({
+      await prisma.activityPubProfileFollowers.create({
         data: {
           artistId: targetArtist.id,
           actor: actorUrl,
@@ -200,7 +200,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       assert.equal(response.statusCode, 202);
 
       await waitFor(async () => {
-        const r = await prisma.activityPubArtistFollowers.findFirst({
+        const r = await prisma.activityPubProfileFollowers.findFirst({
           where: { artistId: targetArtist.id, actor: actorUrl },
         });
         return r === null ? true : null;
@@ -213,7 +213,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       const user = await prisma.user.create({
         data: { email: "target@test.com" },
       });
-      const targetArtist = await prisma.artist.create({
+      const targetArtist = await prisma.profile.create({
         data: {
           name: "Target artist",
           urlSlug: "target-artist",
@@ -225,7 +225,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
 
       const actorUrl = "https://mastodon.social/users/deleteduser";
 
-      await prisma.activityPubArtistFollowers.create({
+      await prisma.activityPubProfileFollowers.create({
         data: {
           artistId: targetArtist.id,
           actor: actorUrl,
@@ -241,7 +241,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       assert.equal(response.statusCode, 202);
 
       await waitFor(async () => {
-        const r = await prisma.activityPubArtistFollowers.findFirst({
+        const r = await prisma.activityPubProfileFollowers.findFirst({
           where: { artistId: targetArtist.id, actor: actorUrl },
         });
         return r === null ? true : null;
@@ -252,7 +252,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       const user = await prisma.user.create({
         data: { email: "target@test.com" },
       });
-      const targetArtist = await prisma.artist.create({
+      const targetArtist = await prisma.profile.create({
         data: {
           name: "Target artist",
           urlSlug: "target-artist",

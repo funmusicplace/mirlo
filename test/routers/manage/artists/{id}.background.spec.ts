@@ -7,7 +7,7 @@ import { clearTables, createArtist, createUser } from "../../../utils";
 import prisma from "@mirlo/prisma";
 import {
   createBucketIfNotExists,
-  finalArtistBackgroundBucket,
+  finalProfileBackgroundBucket,
 } from "../../../../src/utils/minio";
 
 import { requestApp } from "../../utils";
@@ -25,9 +25,9 @@ describe("manage/artists/{artistId}/background", () => {
     it("should DELETE with one artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createBucketIfNotExists(finalArtistBackgroundBucket);
+      await createBucketIfNotExists(finalProfileBackgroundBucket);
 
-      await prisma.artistBackground.create({
+      await prisma.profileBackground.create({
         data: {
           artistId: artist.id,
         },
@@ -38,7 +38,7 @@ describe("manage/artists/{artistId}/background", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
-      const foundOld = await prisma.artistBackground.findFirst({
+      const foundOld = await prisma.profileBackground.findFirst({
         where: { artistId: artist.id },
       });
 

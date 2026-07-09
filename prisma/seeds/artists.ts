@@ -1,6 +1,6 @@
 import { Prisma } from "../__generated__";
 
-export const artists: Prisma.ArtistCreateInput[] = [
+export const artists: Prisma.ProfileCreateInput[] = [
   {
     name: "Blackbird",
     bio: "Chirp",

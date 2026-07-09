@@ -46,7 +46,7 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -63,7 +63,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const aus = await prisma.artistUserSubscription.create({
+    const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -84,7 +84,7 @@ describe("send-out-monthly-income-report", () => {
         createdAt: chargeDate,
       },
     });
-    await prisma.artistUserSubscriptionCharge.create({
+    await prisma.profileUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         createdAt: chargeDate,
@@ -118,7 +118,7 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -130,7 +130,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const tip = await prisma.userArtistTip.create({
+    const tip = await prisma.userProfileTip.create({
       data: {
         datePurchased: faker.date.recent({
           days: 25,
@@ -179,7 +179,7 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -196,7 +196,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const aus = await prisma.artistUserSubscription.create({
+    const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -218,7 +218,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const charge = await prisma.artistUserSubscriptionCharge.create({
+    const charge = await prisma.profileUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         createdAt: createdDate,
@@ -243,7 +243,7 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -260,7 +260,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const aus = await prisma.artistUserSubscription.create({
+    const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -282,7 +282,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const charge = await prisma.artistUserSubscriptionCharge.create({
+    const charge = await prisma.profileUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         createdAt: date,
@@ -307,7 +307,7 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -324,7 +324,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -353,7 +353,7 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -370,7 +370,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const artist2 = await prisma.artist.create({
+    const artist2 = await prisma.profile.create({
       data: {
         name: "Test artist 2",
         urlSlug: "test-artist-2",
@@ -387,7 +387,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const aus = await prisma.artistUserSubscription.create({
+    const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -409,7 +409,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.artistUserSubscriptionCharge.create({
+    await prisma.profileUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         createdAt: createdDate,
@@ -417,7 +417,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const tip = await prisma.userArtistTip.create({
+    const tip = await prisma.userProfileTip.create({
       data: {
         datePurchased: faker.date.recent({
           days: 10,
@@ -492,7 +492,7 @@ describe("send-out-monthly-income-report", () => {
       subscriptionTiers: { create: { name: "a tier" } },
     });
 
-    const aus = await prisma.artistUserSubscription.create({
+    const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -513,7 +513,7 @@ describe("send-out-monthly-income-report", () => {
         createdAt: lastMonthDate,
       },
     });
-    await prisma.artistUserSubscriptionCharge.create({
+    await prisma.profileUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         createdAt: lastMonthDate,
@@ -522,7 +522,7 @@ describe("send-out-monthly-income-report", () => {
     });
 
     // Cancelled last month: should appear in the report
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: leaverUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -533,7 +533,7 @@ describe("send-out-monthly-income-report", () => {
     });
 
     // Tier switch last month: not lost income, should be excluded
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: switcherUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -574,7 +574,7 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -583,7 +583,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const artist2 = await prisma.artist.create({
+    const artist2 = await prisma.profile.create({
       data: {
         name: "Test artist 2",
         urlSlug: "test-artist-2",
@@ -602,7 +602,7 @@ describe("send-out-monthly-income-report", () => {
       to: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 20),
     });
 
-    const tip1 = await prisma.userArtistTip.create({
+    const tip1 = await prisma.userProfileTip.create({
       data: {
         datePurchased: tip1date,
         userId: followerUser.id,
@@ -610,7 +610,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const tip2 = await prisma.userArtistTip.create({
+    const tip2 = await prisma.userProfileTip.create({
       data: {
         datePurchased: tip2date,
         userId: followerUser.id,

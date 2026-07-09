@@ -208,7 +208,7 @@ describe("users/{userId}/collection", () => {
       });
 
       // Disable the artist
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { enabled: false },
       });

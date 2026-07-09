@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import { User, Prisma, Artist } from "@mirlo/prisma/client";
+import { User, Prisma, Profile } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
@@ -15,7 +15,7 @@ import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
 
 const sendArtistNotificationOfLabel = async (
-  artist: Artist,
+  artist: Profile,
   labelUser: User
 ) => {
   const client = await getClient();
@@ -59,7 +59,7 @@ const sendArtistNotificationOfLabel = async (
     });
 
     if (artistUser?.email) {
-      const labelProfile = await prisma.artist.findFirst({
+      const labelProfile = await prisma.profile.findFirst({
         where: {
           userId: labelUser.id,
           isLabelProfile: true,
@@ -170,7 +170,7 @@ export default function () {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
           deletedAt: null,

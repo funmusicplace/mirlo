@@ -60,7 +60,7 @@ export default function () {
               amount: Number(intent.metadata?.paymentIntentAmount),
               stripeSetupIntentId: intent.id,
             });
-            const artist = await prisma.artist.findFirst({
+            const artist = await prisma.profile.findFirst({
               where: {
                 trackGroups: {
                   some: {

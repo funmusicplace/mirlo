@@ -3,7 +3,7 @@ import { promises as fsPromises } from "fs";
 import os from "os";
 import path from "path";
 
-import { Artist, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
+import { Profile, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
 import { afterEach, describe, it } from "mocha";
 import { parseFile } from "music-metadata";
 import { ITag } from "music-metadata/lib/type";
@@ -61,7 +61,7 @@ const convertAudio = async ({
   format = { format: "mp3", audioCodec: "libmp3lame" },
 }: {
   track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
-  artist: Artist;
+  artist: Profile;
   trackGroup: { title: string | null; coverLocation?: string };
   inputFile: string;
   outputBasename: string;
@@ -171,7 +171,7 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
           order: 1,
         }),
       ]),
-      artist: { name: "Album Artist" } as Artist,
+      artist: { name: "Album Artist" } as Profile,
       trackGroup: {
         title: "Integration Album",
         coverLocation: coverPng,
@@ -219,7 +219,7 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
       track: createTrack("audio-integration-flac", [
         createTrackArtist({ artistName: "Lead Artist", role: "Vocal" }),
       ]),
-      artist: { name: "Album Artist" } as Artist,
+      artist: { name: "Album Artist" } as Profile,
       trackGroup: {
         title: "Integration Album",
       },

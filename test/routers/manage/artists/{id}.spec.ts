@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 import { clearTables, createArtist, createUser } from "../../../utils";
 import {
   createBucketIfNotExists,
-  finalArtistAvatarBucket,
+  finalProfileAvatarBucket,
 } from "../../../../src/utils/minio";
 
 import { requestApp } from "../../utils";
@@ -70,7 +70,7 @@ describe("manage/artists/{artistId}", () => {
         email: "test@testcom",
       });
       const artist = await createArtist(user.id);
-      await createBucketIfNotExists(finalArtistAvatarBucket);
+      await createBucketIfNotExists(finalProfileAvatarBucket);
 
       const response = await requestApp
         .delete(`manage/artists/${artist.id}`)

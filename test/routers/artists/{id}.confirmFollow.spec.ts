@@ -51,7 +51,7 @@ describe("artists/{id}/confirmFollow", () => {
         enabled: true,
       });
       const confirmation =
-        await prisma.artistUserSubscriptionConfirmation.create({
+        await prisma.profileUserSubscriptionConfirmation.create({
           data: {
             email: followerEmail,
             artistId: artist.id,
@@ -67,12 +67,11 @@ describe("artists/{id}/confirmFollow", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 302);
-      const redirectTo =
-        `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
+      const redirectTo = `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =
-        await prisma.artistUserSubscriptionConfirmation.findFirst({
+        await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
             artistId: artist.id,
@@ -81,7 +80,7 @@ describe("artists/{id}/confirmFollow", () => {
 
       assert(!subscription);
 
-      const follow = await prisma.artistUserSubscription.findFirst({
+      const follow = await prisma.profileUserSubscription.findFirst({
         where: {
           user: {
             email: followerEmail,
@@ -108,7 +107,7 @@ describe("artists/{id}/confirmFollow", () => {
         enabled: true,
       });
       const confirmation =
-        await prisma.artistUserSubscriptionConfirmation.create({
+        await prisma.profileUserSubscriptionConfirmation.create({
           data: {
             email: followerEmail,
             artistId: artist.id,
@@ -124,12 +123,11 @@ describe("artists/{id}/confirmFollow", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 302);
-      const redirectTo =
-        `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
+      const redirectTo = `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =
-        await prisma.artistUserSubscriptionConfirmation.findFirst({
+        await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
             artistId: artist.id,
@@ -138,7 +136,7 @@ describe("artists/{id}/confirmFollow", () => {
 
       assert(!subscription);
 
-      const follow = await prisma.artistUserSubscription.findFirst({
+      const follow = await prisma.profileUserSubscription.findFirst({
         where: {
           user: {
             email: followerEmail,

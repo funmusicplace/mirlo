@@ -101,7 +101,7 @@ export default function () {
         Number(user.id)
       );
 
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: { id: subscriptionTier?.artistId },
         select: { defaultPlatformFee: true },
       });
@@ -113,7 +113,7 @@ export default function () {
         return next();
       }
 
-      const updatedTier = await prisma.artistSubscriptionTier.update({
+      const updatedTier = await prisma.profileSubscriptionTier.update({
         where: { id: Number(subscriptionTierId) },
         data: {
           name: req.body.name,
@@ -170,7 +170,7 @@ export default function () {
         in: "body",
         name: "subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTierUpdate",
+          $ref: "#/definitions/ProfileSubscriptionTierUpdate",
         },
       },
     ],
@@ -178,7 +178,7 @@ export default function () {
       200: {
         description: "Updated subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTierResult",
+          $ref: "#/definitions/ProfileSubscriptionTierResult",
         },
       },
       default: {
@@ -214,7 +214,7 @@ export default function () {
         });
         return next();
       }
-      await prisma.artistSubscriptionTier.delete({
+      await prisma.profileSubscriptionTier.delete({
         where: {
           id: Number(subscriptionTierId),
         },
