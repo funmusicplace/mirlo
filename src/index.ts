@@ -3,6 +3,7 @@ import path from "node:path";
 import { ExpressAdapter } from "@bull-board/express";
 import { integrateFederation } from "@fedify/express";
 import prisma from "@mirlo/prisma";
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
 import express from "express";
@@ -47,6 +48,10 @@ app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
+// Compress compressible responses (JSON, HTML, JS/CSS) for clients that send
+// Accept-Encoding. The default filter skips responses without a compressible
+// Content-Type, so HLS segments, zips, and images pass through untouched.
+app.use(compression());
 app.use(corsMiddleware);
 app.use(cookieParser());
 // @fedify/express's fromERequest builds the request URL using req.host, which
