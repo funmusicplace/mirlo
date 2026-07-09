@@ -72,6 +72,17 @@ export interface PaymentProcessor {
     accountId: string;
     atPeriodEnd: boolean;
   }): Promise<void>;
+
+  /**
+   * Cancel a pending charge/authorisation. When `readerId` is supplied, also
+   * clears the reader's screen if it is still working on this intent (a
+   * customer walked away, wrong item, etc.).
+   */
+  cancel(args: {
+    id: string;
+    accountId: string;
+    readerId?: string;
+  }): Promise<{ id: string; status: string }>;
 }
 
 /**

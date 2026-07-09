@@ -81,6 +81,75 @@ export const getTerminalPaymentStatus = async ({
   );
 };
 
+export const cancelIntent = async ({
+  id,
+  stripeAccountId,
+}: {
+  id: string;
+  stripeAccountId: string;
+}) => {
+  if (id.startsWith("seti_")) {
+    return stripe.setupIntents.cancel(
+      id,
+      {},
+      { stripeAccount: stripeAccountId }
+    );
+  }
+  return stripe.paymentIntents.cancel(
+    id,
+    {},
+    { stripeAccount: stripeAccountId }
+  );
+};
+
+/**
+ * Clears the reader's current action, but only if it is still working on the
+ * given intent — cancelling blindly could kill a newer, unrelated sale that
+ * has since been dispatched to the same reader.
+ */
+export const cancelReaderActionForIntent = async ({
+  readerId,
+  intentId,
+  stripeAccountId,
+}: {
+  readerId: string;
+  intentId: string;
+  stripeAccountId: string;
+}): Promise<boolean> => {
+  const reader = await stripe.terminal.readers.retrieve(
+    readerId,
+    {},
+    { stripeAccount: stripeAccountId }
+  );
+
+  if (reader.deleted) {
+    return false;
+  }
+
+  const action = reader.action;
+  if (action?.status !== "in_progress") {
+    return false;
+  }
+
+  const rawIntent =
+    action.type === "process_payment_intent"
+      ? action.process_payment_intent?.payment_intent
+      : action.type === "process_setup_intent"
+        ? action.process_setup_intent?.setup_intent
+        : undefined;
+  const actionIntentId =
+    typeof rawIntent === "string" ? rawIntent : rawIntent?.id;
+
+  if (actionIntentId !== intentId) {
+    return false;
+  }
+
+  await stripe.terminal.readers.cancelAction(readerId, {
+    stripeAccount: stripeAccountId,
+  });
+  return true;
+};
+
 export const processSetupIntentOnReader = async ({
   readerId,
   setupIntentId,
@@ -139,11 +208,18 @@ export const createAndDispatchTerminalSetupIntent = async ({
     { stripeAccount: stripeAccountId }
   );
 
-  await processSetupIntentOnReader({
-    readerId,
-    setupIntentId: setupIntent.id,
-    stripeAccountId,
-  });
+  try {
+    await processSetupIntentOnReader({
+      readerId,
+      setupIntentId: setupIntent.id,
+      stripeAccountId,
+    });
+  } catch (e) {
+    // Reader offline/busy — don't leave the intent dangling in
+    // requires_payment_method.
+    await cancelIntent({ id: setupIntent.id, stripeAccountId }).catch(() => {});
+    throw e;
+  }
 
   return { setupIntentId: setupIntent.id };
 };

@@ -8,6 +8,7 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "components/common/Button";
 import { InputEl } from "components/common/Input";
+import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import {
   queryManagedArtist,
   queryManagedArtistMerch,
@@ -18,8 +19,6 @@ import {
 import React from "react";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-
-import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 
 const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 
@@ -138,6 +137,10 @@ const Index: React.FC = () => {
     clientSecret: string;
   } | null>(null);
   const [isCharging, setIsCharging] = React.useState(false);
+  const [pendingIntentId, setPendingIntentId] = React.useState<string | null>(
+    null
+  );
+  const [isCanceling, setIsCanceling] = React.useState(false);
 
   const pollIntent = React.useCallback(
     async (intentId: string) => {
@@ -148,19 +151,43 @@ const Index: React.FC = () => {
         );
         setMessage(`Reader status: ${result.status}`);
         if (result.status === "succeeded" || result.status === "canceled") {
+          setPendingIntentId(null);
           return;
         }
         await sleep(1500);
       }
-      setMessage("Timed out waiting for the reader to complete.");
+      // Leave pendingIntentId set: the intent is still live on the reader, so
+      // the cancel button must stay available after we stop polling.
+      setMessage(
+        "Timed out waiting for the reader to complete. You can still cancel the payment."
+      );
     },
     [stripeAccountId]
   );
+
+  const cancelPending = async () => {
+    if (!pendingIntentId || !stripeAccountId) return;
+    setIsCanceling(true);
+    try {
+      const params = new URLSearchParams({ stripeAccountId });
+      if (readerId.trim()) params.set("readerId", readerId.trim());
+      const { result } = await api.delete<{
+        result: { id: string; status: string };
+      }>(`purchase/${pendingIntentId}?${params}`);
+      setMessage(`Payment ${result.status}.`);
+      setPendingIntentId(null);
+    } catch (e) {
+      setMessage(`Error canceling: ${(e as Error).message}`);
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   const charge = async (item: PurchaseItem, label: string) => {
     setActiveLabel(label);
     setMessage(null);
     setOnlineCheckout(null);
+    setPendingIntentId(null);
     setIsCharging(true);
     try {
       const response = await api.post<
@@ -186,6 +213,7 @@ const Index: React.FC = () => {
       } else if (response.paymentIntentId || response.setupIntentId) {
         const intentId = (response.paymentIntentId ??
           response.setupIntentId) as string;
+        setPendingIntentId(intentId);
         setMessage(`Dispatched to reader (${intentId}). Polling…`);
         await pollIntent(intentId);
       } else {
@@ -245,6 +273,19 @@ const Index: React.FC = () => {
         <div className="mb-4 p-3 rounded bg-gray-100 text-sm">
           {activeLabel && <strong>{activeLabel}: </strong>}
           {message}
+        </div>
+      )}
+
+      {pendingIntentId && (
+        <div className="mb-4">
+          <Button
+            size="compact"
+            variant="outlined"
+            onClick={cancelPending}
+            isLoading={isCanceling}
+          >
+            Cancel payment
+          </Button>
         </div>
       )}
 

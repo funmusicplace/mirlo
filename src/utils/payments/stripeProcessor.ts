@@ -11,6 +11,8 @@ import {
   createTerminalPaymentIntent,
   processPaymentOnReader,
   createAndDispatchTerminalSetupIntent,
+  cancelIntent,
+  cancelReaderActionForIntent,
 } from "../stripe/terminal";
 
 import {
@@ -53,11 +55,21 @@ export class StripePaymentProcessor implements PaymentProcessor {
       applicationFeeAmount,
       metadata,
     });
-    await processPaymentOnReader({
-      readerId,
-      paymentIntentId: paymentIntent.id,
-      stripeAccountId: accountId,
-    });
+    try {
+      await processPaymentOnReader({
+        readerId,
+        paymentIntentId: paymentIntent.id,
+        stripeAccountId: accountId,
+      });
+    } catch (e) {
+      // Reader offline/busy — don't leave the intent dangling in
+      // requires_payment_method.
+      await cancelIntent({
+        id: paymentIntent.id,
+        stripeAccountId: accountId,
+      }).catch(() => {});
+      throw e;
+    }
     return { id: paymentIntent.id };
   }
 
@@ -115,5 +127,25 @@ export class StripePaymentProcessor implements PaymentProcessor {
         stripeAccount: accountId,
       });
     }
+  }
+
+  async cancel({
+    id,
+    accountId,
+    readerId,
+  }: {
+    id: string;
+    accountId: string;
+    readerId?: string;
+  }): Promise<{ id: string; status: string }> {
+    if (readerId) {
+      await cancelReaderActionForIntent({
+        readerId,
+        intentId: id,
+        stripeAccountId: accountId,
+      });
+    }
+    const intent = await cancelIntent({ id, stripeAccountId: accountId });
+    return { id: intent.id, status: intent.status };
   }
 }

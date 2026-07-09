@@ -7,6 +7,7 @@ import sinon from "sinon";
 import Stripe from "stripe";
 
 import { getClient } from "../../src/utils/getClient";
+import { getPaymentProcessor } from "../../src/utils/payments/PaymentProcessor";
 import {
   initiatePayment,
   initiateSubscription,
@@ -98,6 +99,40 @@ describe("purchase", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 401 when a readerId is supplied without being logged in", async () => {
+      const { user } = await createUser({ email: "artist@test.com" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          readerId: "tmr_test",
+          items: [{ type: "subscription", tierId: tier.id }],
+        })
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 401);
+    });
+
+    it("should return 404 when a readerId is supplied by a user who cannot edit the artist", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          readerId: "tmr_test",
+          items: [{ type: "subscription", tierId: tier.id }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 404);
     });
 
     it("should return 404 when subscription tier does not exist", async () => {
@@ -652,6 +687,184 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.result.id, "should return a result id");
       assert.ok(response.body.result.status, "should return a result status");
+    });
+  });
+
+  describe("DELETE /v1/purchase/:id", () => {
+    it("should return 401 when not logged in", async () => {
+      const response = await requestApp
+        .delete("purchase/pi_cancel_test")
+        .query({ stripeAccountId: "acct_test" })
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 401);
+    });
+
+    it("should return 400 when stripeAccountId query param is missing", async () => {
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const response = await requestApp
+        .delete("purchase/pi_cancel_test")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 404 for an intent that was not initiated by Mirlo", async () => {
+      // stripe-mock returns a canned PaymentIntent with empty metadata, i.e.
+      // no artistId — exactly what a foreign (non-Mirlo) intent looks like.
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const response = await requestApp
+        .delete("purchase/pi_cancel_test")
+        .query({ stripeAccountId: "acct_test" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 404);
+    });
+  });
+
+  // Direct-call tests for the cancellation plumbing, same pattern as
+  // "initiatePayment (direct)" above: sinon stubs only work in-process.
+  describe("cancel purchase (direct)", () => {
+    const readerProcessingIntent = (intentId: string) =>
+      ({
+        id: "tmr_test",
+        action: {
+          status: "in_progress",
+          type: "process_payment_intent",
+          process_payment_intent: { payment_intent: intentId },
+        },
+      }) as unknown as Stripe.Response<Stripe.Terminal.Reader>;
+
+    it("clears the reader action when the reader is still processing this intent", async () => {
+      sinon
+        .stub(stripeUtils.stripe.terminal.readers, "retrieve")
+        .resolves(readerProcessingIntent("pi_cancel_me"));
+      const cancelActionStub = sinon
+        .stub(stripeUtils.stripe.terminal.readers, "cancelAction")
+        .resolves();
+
+      const cleared = await terminalUtils.cancelReaderActionForIntent({
+        readerId: "tmr_test",
+        intentId: "pi_cancel_me",
+        stripeAccountId: "acct_test",
+      });
+
+      assert.equal(cleared, true);
+      assert.ok(cancelActionStub.calledOnce);
+      assert.equal(cancelActionStub.firstCall.args[0], "tmr_test");
+    });
+
+    it("leaves the reader alone when it has moved on to a different intent", async () => {
+      sinon
+        .stub(stripeUtils.stripe.terminal.readers, "retrieve")
+        .resolves(readerProcessingIntent("pi_someone_elses_sale"));
+      const cancelActionStub = sinon
+        .stub(stripeUtils.stripe.terminal.readers, "cancelAction")
+        .resolves();
+
+      const cleared = await terminalUtils.cancelReaderActionForIntent({
+        readerId: "tmr_test",
+        intentId: "pi_cancel_me",
+        stripeAccountId: "acct_test",
+      });
+
+      assert.equal(cleared, false);
+      assert.ok(cancelActionStub.notCalled);
+    });
+
+    it("cancels both the reader action and the intent through the processor", async () => {
+      sinon
+        .stub(stripeUtils.stripe.terminal.readers, "retrieve")
+        .resolves(readerProcessingIntent("pi_cancel_me"));
+      const cancelActionStub = sinon
+        .stub(stripeUtils.stripe.terminal.readers, "cancelAction")
+        .resolves();
+      const cancelIntentStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "cancel")
+        .resolves({
+          id: "pi_cancel_me",
+          status: "canceled",
+        } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+      const result = await getPaymentProcessor().cancel({
+        id: "pi_cancel_me",
+        accountId: "acct_test",
+        readerId: "tmr_test",
+      });
+
+      assert.equal(result.id, "pi_cancel_me");
+      assert.equal(result.status, "canceled");
+      assert.ok(cancelActionStub.calledOnce);
+      assert.ok(cancelIntentStub.calledOnce);
+      assert.equal(cancelIntentStub.firstCall.args[0], "pi_cancel_me");
+    });
+
+    it("cancels a SetupIntent for a seti_ prefixed id", async () => {
+      const cancelSetupStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "cancel")
+        .resolves({
+          id: "seti_cancel_me",
+          status: "canceled",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      const result = await getPaymentProcessor().cancel({
+        id: "seti_cancel_me",
+        accountId: "acct_test",
+      });
+
+      assert.equal(result.status, "canceled");
+      assert.ok(cancelSetupStub.calledOnce);
+    });
+
+    it("cancels the orphaned intent when reader dispatch fails", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_orphan",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
+        id: "acct_orphan",
+        default_currency: "usd",
+        country: "US",
+      } as unknown as Stripe.Response<Stripe.Account>);
+      sinon.stub(stripeUtils.stripe.paymentIntents, "create").resolves({
+        id: "pi_orphan",
+        client_secret: "secret",
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+      sinon
+        .stub(terminalUtils, "processPaymentOnReader")
+        .rejects(new Error("Reader is offline"));
+      const cancelIntentStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "cancel")
+        .resolves({
+          id: "pi_orphan",
+          status: "canceled",
+        } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+      await assert.rejects(
+        initiatePayment({
+          readerId: "tmr_test",
+          artistId: artist.id,
+          items: [
+            {
+              type: "trackGroup",
+              id: String(tg.id),
+              quantity: 1,
+              amount: 1000,
+            },
+          ],
+          userEmail: buyer.email,
+          userId: String(buyer.id),
+        }),
+        /Reader is offline/
+      );
+
+      assert.ok(
+        cancelIntentStub.calledOnceWith("pi_orphan"),
+        "the dangling intent should be canceled"
+      );
     });
   });
 });
