@@ -506,6 +506,183 @@ describe("subscription", () => {
       assert.equal(artistCall.message.cc, "accounting@artist.com");
     });
 
+    it("should send artist notification on renewal when combineSubscriptionEmails is off", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+
+      const artist = await prisma.artist.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: {
+          artistId: artist.id,
+          name: "Tier",
+        },
+      });
+
+      await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub-key-renewal-default",
+          deletedAt: null,
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 1200,
+        },
+      });
+
+      await manageSubscriptionReceipt({
+        processorPaymentReferenceId: "inv-renewal-default",
+        processorSubscriptionReferenceId: "sub-key-renewal-default",
+        amountPaid: 1200,
+        currency: "usd",
+        platformCut: 240,
+        paymentProcessorFee: 30,
+        billingReason: "subscription_cycle",
+        status: "COMPLETED",
+      });
+
+      // Both the subscriber receipt and the artist announce are sent
+      assert.equal(sendMailStub.callCount, 2);
+      const artistCall = sendMailStub.getCall(1).args[1];
+      assert.equal(artistCall.template, "artist-new-subscriber-announce");
+      assert.equal(artistCall.message.to, "artist@artist.com");
+      assert.strictEqual(artistCall.locals.isNewSubscription, false);
+    });
+
+    it("should not send artist notification on renewal when combineSubscriptionEmails is on", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+        combineSubscriptionEmails: true,
+      });
+
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+
+      const artist = await prisma.artist.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: {
+          artistId: artist.id,
+          name: "Tier",
+        },
+      });
+
+      await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub-key-renewal-combined",
+          deletedAt: null,
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 1200,
+        },
+      });
+
+      await manageSubscriptionReceipt({
+        processorPaymentReferenceId: "inv-renewal-combined",
+        processorSubscriptionReferenceId: "sub-key-renewal-combined",
+        amountPaid: 1200,
+        currency: "usd",
+        platformCut: 240,
+        paymentProcessorFee: 30,
+        billingReason: "subscription_cycle",
+        status: "COMPLETED",
+      });
+
+      // Only the subscriber receipt is sent; the artist announce is suppressed
+      assert.equal(sendMailStub.callCount, 1);
+      const subscriberCall = sendMailStub.getCall(0).args[1];
+      assert.equal(subscriberCall.template, "artist-subscription-receipt");
+      assert.equal(subscriberCall.message.to, "subscriber@subscriber.com");
+    });
+
+    it("should still send artist notification for new subscriptions when combineSubscriptionEmails is on", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+        combineSubscriptionEmails: true,
+      });
+
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+
+      const artist = await prisma.artist.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+
+      const tier = await prisma.artistSubscriptionTier.create({
+        data: {
+          artistId: artist.id,
+          name: "Tier",
+        },
+      });
+
+      await prisma.artistUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub-key-new-combined",
+          deletedAt: null,
+          userId: subscriber.id,
+          artistSubscriptionTierId: tier.id,
+          amount: 1200,
+        },
+      });
+
+      await manageSubscriptionReceipt({
+        processorPaymentReferenceId: "inv-new-combined",
+        processorSubscriptionReferenceId: "sub-key-new-combined",
+        amountPaid: 1200,
+        currency: "usd",
+        platformCut: 240,
+        paymentProcessorFee: 30,
+        billingReason: "subscription_create",
+        status: "COMPLETED",
+      });
+
+      assert.equal(sendMailStub.callCount, 2);
+      const artistCall = sendMailStub.getCall(1).args[1];
+      assert.equal(artistCall.template, "artist-new-subscriber-announce");
+      assert.equal(artistCall.message.to, "artist@artist.com");
+      assert.strictEqual(artistCall.locals.isNewSubscription, true);
+    });
+
     it("should pass all variables required by artist-new-subscriber-announce template", async () => {
       const sendMailStub = sinon
         .stub(sendMailQueueModule.sendMailQueue, "add")

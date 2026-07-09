@@ -178,6 +178,7 @@ type ProfileChangeBody = {
   newEmail?: string;
   language: string;
   isLabelAccount: boolean;
+  combineSubscriptionEmails?: boolean;
 };
 
 async function updateProfile(body: ProfileChangeBody) {

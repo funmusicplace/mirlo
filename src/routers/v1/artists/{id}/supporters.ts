@@ -284,7 +284,9 @@ export const findSales = async ({
     ...userTransactions.map((ut) => ({
       ...ut,
       paymentProcessorCut: ut.stripeCut,
-      datePurchased: ut.createdAt,
+      // ISO string, not Date: consumers treat this as a string — the income
+      // report template splits it on "T" without a JSON round-trip.
+      datePurchased: ut.createdAt.toISOString(),
       title: generateTitle(ut),
       artist: [
         ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.artist),

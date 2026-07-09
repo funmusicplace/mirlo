@@ -24,6 +24,7 @@ interface LoggedInUser {
   currency?: string;
   featureFlags?: string[];
   isLabelAccount: boolean;
+  combineSubscriptionEmails?: boolean;
   properties?: { tileBackgroundImage?: boolean };
   trackFavorites?: {
     userId: number;

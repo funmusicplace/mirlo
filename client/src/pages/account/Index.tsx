@@ -15,17 +15,18 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight, FaEye } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
 import { API_ROOT } from "../../constants";
-import api from "services/api";
 
 type FormData = {
   name: string;
   language: string;
   isLabelAccount: boolean;
+  combineSubscriptionEmails: boolean;
   newEmail?: string;
   password?: string;
   urlSlug?: string;
@@ -45,6 +46,7 @@ const Index: React.FC = () => {
       name: user?.name,
       language: language.split("-")[0],
       isLabelAccount: user?.isLabelAccount,
+      combineSubscriptionEmails: user?.combineSubscriptionEmails,
       urlSlug: user?.urlSlug,
       properties: user?.properties || {},
       accountingEmail: user?.accountingEmail,
@@ -59,6 +61,7 @@ const Index: React.FC = () => {
   const { mutateAsync } = useProfileMutation();
 
   const isLabelAccount = watch("isLabelAccount");
+  const combineSubscriptionEmails = watch("combineSubscriptionEmails");
   const newEmail = watch("newEmail");
 
   const doSave = React.useCallback(
@@ -205,6 +208,19 @@ const Index: React.FC = () => {
               id="input-accountingEmail"
               {...register("accountingEmail")}
             />
+          </FormComponent>
+          <FormComponent>
+            <Toggle
+              label={t("combineSubscriptionEmails")}
+              toggled={combineSubscriptionEmails}
+              onClick={() => {
+                setValue(
+                  "combineSubscriptionEmails",
+                  !combineSubscriptionEmails
+                );
+              }}
+            />
+            <small>{t("combineSubscriptionEmailsDescription")}</small>
           </FormComponent>
           <FormComponent
             className={css`

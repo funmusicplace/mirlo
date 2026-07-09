@@ -9,6 +9,7 @@ import {
 import logger from "../../../../logger";
 import { deleteStripeSubscriptions } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { resolvePayee } from "../../../../utils/payments/payee";
 import { cancelUserSubscription } from "../../../../utils/payments/purchase";
 import { createCheckoutSessionForSubscription } from "../../../../utils/stripe/sessions";
 
@@ -106,9 +107,9 @@ export default function () {
           description: "Tier not found",
         });
       }
-      const stripeAccountId =
-        newTier.artist.paymentToUser?.stripeAccountId ??
-        newTier.artist.user.stripeAccountId;
+      const stripeAccountId = resolvePayee({
+        artist: newTier.artist,
+      }).stripeAccountId;
 
       if (!stripeAccountId) {
         throw new AppError({

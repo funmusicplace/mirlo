@@ -212,6 +212,8 @@
     "label": "Label",
     "makeSearchable": "Enabling this will let artists find your label and request to be added to your roster. Artists will then be able to say for which albums payments will be sent to the payment processor linked to this Stripe account.",
     "isLabelAccount": "Label/Collective account",
+    "combineSubscriptionEmails": "Combine subscription emails into monthly report",
+    "combineSubscriptionEmailsDescription": "Instead of an email for every subscription payment, receive a single monthly summary. You'll still be notified when someone new supports you.",
     "notifications": "Notifications",
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API.",

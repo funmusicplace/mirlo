@@ -22,6 +22,7 @@ export const USER_PROFILE_SELECT = {
   featureFlags: true,
   properties: true,
   isLabelAccount: true,
+  combineSubscriptionEmails: true,
   canCreateArtists: true,
   trackFavorites: {
     include: {

@@ -23,5 +23,44 @@ block content
           td.num #{val.currency} #{val.amount / 100}
 
   p Total Income: #{totalIncome / 100} #{userSales[0] ? userSales[0].currency || 'USD' :  'USD'}
+
+  - const subscriptionPayments = userSales.filter((sale) => (sale.artistUserSubscriptionCharges || []).length > 0)
+  if subscriptionPayments.length
+    h2 Subscription payments this month
+    table
+      thead
+        tr
+          th Supporter
+          th Tier
+          th Interval
+          th.num Amount
+      tbody
+        each sale in subscriptionPayments
+          - const tier = sale.artistUserSubscriptionCharges[0].artistUserSubscription.artistSubscriptionTier
+          tr
+            td #{sale.user.name}
+            td #{tier.name}
+            td #{tier.interval === 'YEAR' ? 'Yearly' : 'Monthly'}
+            td.num #{sale.currency} #{sale.amount / 100}
+    - const subscriptionTotal = subscriptionPayments.reduce((sum, sale) => sum + sale.amount, 0)
+    p Subscription income: #{subscriptionTotal / 100} #{subscriptionPayments[0].currency || 'USD'}
+
+  if cancelledSubscriptions.length
+    h2 Cancelled subscriptions this month
+    table
+      thead
+        tr
+          th Supporter
+          th Tier
+          th Reason
+          th.num Amount no longer recurring
+      tbody
+        each cancelled in cancelledSubscriptions
+          tr
+            td #{cancelled.user.name || 'A supporter'}
+            td #{cancelled.artistSubscriptionTier.name}
+            td #{cancelled.deleteReasonLabel}
+            td.num #{cancelled.artistSubscriptionTier.artist.user.currency || 'USD'} #{cancelled.amount / 100}
+
   p We love to see it.
   p Enjoy!

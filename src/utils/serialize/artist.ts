@@ -23,6 +23,7 @@ import {
   finalCoversBucket,
   finalImageBucket,
 } from "../minio";
+import { resolvePayee } from "../payments/payee";
 
 import { serializePost } from "./post";
 import {
@@ -146,7 +147,9 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     rel: "me",
   }));
   const artistSupportsPayment = Boolean(
-    artist.paymentToUser?.stripeAccountId ?? artist.user?.stripeAccountId
+    resolvePayee({
+      artist: { user: artist.user, paymentToUser: artist.paymentToUser },
+    })?.stripeAccountId
   );
   if (artistSupportsPayment) {
     artistLinks.unshift({

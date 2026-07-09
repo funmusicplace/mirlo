@@ -82,6 +82,7 @@ export default function () {
       language,
       urlSlug,
       isLabelAccount,
+      combineSubscriptionEmails,
     } = req.body;
     assertLoggedIn(req);
     const user = req.user;
@@ -106,6 +107,7 @@ export default function () {
         accountingEmail,
         language,
         isLabelAccount,
+        combineSubscriptionEmails,
         urlSlug,
         properties,
       };
