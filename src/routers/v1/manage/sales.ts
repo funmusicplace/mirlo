@@ -38,7 +38,7 @@ export default function () {
       const usingDefaultScope = !artistIds;
       if (!artistIds) {
         artistIds = (
-          await prisma.artist.findMany({
+          await prisma.profile.findMany({
             where: {
               userId: user.id,
             },
@@ -180,9 +180,9 @@ export default function () {
 const csvColumns = [
   { label: "User-Friendly ID", value: "userFriendlyId" },
   { label: "Date", value: "datePurchased" },
-  { label: "Artist", value: "artist" },
+  { label: "Profile", value: "artist" },
   { label: "Type", value: "saleType" },
-  { label: "Artist", value: "artist" },
+  { label: "Profile", value: "artist" },
   { label: "Item", value: "title" },
   { label: "Amount", value: "amount" },
   { label: "Currency", value: "currency" },

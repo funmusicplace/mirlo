@@ -5,9 +5,9 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { processArtistBackground } from "../../../../../queues/processImages";
+import { processProfileBackground } from "../../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
-import { deleteArtistBackground } from "../../../../../utils/artist";
+import { deleteProfileBackground } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import { busboyOptions } from "../../../../../utils/images";
 
@@ -31,7 +31,7 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
 
     try {
-      const { jobId, imageId } = await processArtistBackground({ req, res })(
+      const { jobId, imageId } = await processProfileBackground({ req, res })(
         Number(artistId)
       );
 
@@ -79,7 +79,7 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
           userId: loggedInUser.id,
@@ -90,7 +90,7 @@ export default function () {
         throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
-      await deleteArtistBackground(artist.id);
+      await deleteProfileBackground(artist.id);
 
       res.json({ message: "Success" });
     } catch (error) {

@@ -18,7 +18,7 @@ import {
   finalCoversBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
-  finalArtistAvatarBucket,
+  finalProfileAvatarBucket,
 } from "../../../utils/minio";
 
 interface oEmbedResponse {
@@ -168,7 +168,7 @@ export default function () {
               width: 400,
               height: 300,
               title: post.title,
-              author_name: post.artist?.name || "Mirlo Artist",
+              author_name: post.artist?.name || "Mirlo Profile",
               author_url: `${client.applicationUrl}/${post.artist?.urlSlug}`,
               thumbnail_url: imageUrl,
               thumbnail_width: 400,
@@ -202,7 +202,7 @@ export default function () {
               width: 400,
               height: 300,
               title: merch.title,
-              author_name: merch.artist?.name || "Mirlo Artist",
+              author_name: merch.artist?.name || "Mirlo Profile",
               author_url: `${client.applicationUrl}/${merch.artist?.urlSlug}`,
               thumbnail_url: coverUrl
                 ? generateFullStaticImageUrl(coverUrl, finalMerchImageBucket)
@@ -226,11 +226,14 @@ export default function () {
               type: "link",
               width: 400,
               height: 300,
-              title: artist.name || "Mirlo Artist",
-              author_name: artist.name || "Mirlo Artist",
+              title: artist.name || "Mirlo Profile",
+              author_name: artist.name || "Mirlo Profile",
               author_url: `${client.applicationUrl}/${artist.urlSlug}`,
               thumbnail_url: avatarUrl
-                ? generateFullStaticImageUrl(avatarUrl, finalArtistAvatarBucket)
+                ? generateFullStaticImageUrl(
+                    avatarUrl,
+                    finalProfileAvatarBucket
+                  )
                 : undefined,
               thumbnail_width: 300,
               thumbnail_height: 300,

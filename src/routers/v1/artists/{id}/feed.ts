@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import {
   User,
   Prisma,
-  Artist,
-  ArtistSubscriptionTier,
+  Profile,
+  ProfileSubscriptionTier,
 } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 
@@ -20,7 +20,7 @@ import { isTrackGroup } from "../../../../utils/typeguards";
 
 export const getPostsVisibleToUser = async (
   user: User | undefined,
-  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] },
+  artist: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
   take: number = 20,
   skip: number = 0
 ) => {
@@ -63,7 +63,7 @@ export const getPostsVisibleToUser = async (
   return { posts: processedPosts, total };
 };
 
-export const getAlbumsVisibleToUser = async (artist: Artist) => {
+export const getAlbumsVisibleToUser = async (artist: Profile) => {
   const albums = await prisma.trackGroup.findMany({
     where: { ...whereForPublishedTrackGroups(), artistId: artist.id },
     include: { artist: { omit: { apPrivateKey: true } } },
@@ -76,7 +76,7 @@ export const getAlbumsVisibleToUser = async (artist: Artist) => {
 
 export const buildFeedForArtist = async (
   user: User | undefined,
-  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] },
+  artist: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
   take: number = 10000,
   skip: number = 0
 ) => {
@@ -114,7 +114,7 @@ export default function () {
       const parsedId = await findArtistIdForURLSlug(id);
       let artist;
       if (parsedId) {
-        artist = await prisma.artist.findFirst({
+        artist = await prisma.profile.findFirst({
           where: { id: Number(parsedId) },
           include: { subscriptionTiers: true },
         });

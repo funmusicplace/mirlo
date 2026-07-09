@@ -222,7 +222,7 @@ function pastDate(daysAgo: number): Date {
 export async function seedPublishedTrackGroups() {
   const artistResults = await Promise.all(
     ARTIST_SLUGS.map((slug) =>
-      prisma.artist.findFirst({ where: { urlSlug: slug } })
+      prisma.profile.findFirst({ where: { urlSlug: slug } })
     )
   );
   const artists = artistResults.filter(
@@ -241,7 +241,7 @@ export async function seedPublishedTrackGroups() {
     await ensureBuckets(minioClient);
 
     for (const artist of artists) {
-      const existing = await prisma.artistAvatar.findFirst({
+      const existing = await prisma.profileAvatar.findFirst({
         where: { artistId: artist.id },
       });
       if (existing) {
@@ -254,7 +254,7 @@ export async function seedPublishedTrackGroups() {
           FINAL_AVATAR_BUCKET,
           AVATAR_SIZES
         );
-        await prisma.artistAvatar.create({
+        await prisma.profileAvatar.create({
           data: {
             id,
             url: urls,

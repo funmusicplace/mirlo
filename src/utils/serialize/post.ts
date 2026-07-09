@@ -1,8 +1,8 @@
-import { Artist, ArtistAvatar, Post } from "@mirlo/prisma/client";
+import { Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../artist";
 import { generateFullStaticImageUrl } from "../images";
-import { finalArtistAvatarBucket, finalPostImageBucket } from "../minio";
+import { finalProfileAvatarBucket, finalPostImageBucket } from "../minio";
 import { isTrackPlayable } from "../trackPlayability";
 
 const extractFirstParagraph = (html: string): string | null => {
@@ -57,7 +57,7 @@ export const postIncludeForUser = (userId?: number) => ({
 
 export const serializePost = (
   post: Partial<Post> & { id: number; isPublic: boolean } & {
-    artist?: (Partial<Artist> & { avatar?: ArtistAvatar | null }) | null;
+    artist?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
   } & { featuredImage?: { extension: string; id: string } | null } & {
     tracks?: {
       trackId: number;
@@ -100,7 +100,7 @@ export const serializePost = (
     artist: {
       ...post.artist,
       avatar: post.artist
-        ? addSizesToImage(finalArtistAvatarBucket, post.artist?.avatar)
+        ? addSizesToImage(finalProfileAvatarBucket, post.artist?.avatar)
         : null,
     },
     featuredImage: post.featuredImage && {

@@ -173,7 +173,7 @@ export default function () {
       });
 
       if (data.isLabelAccount) {
-        const hasLabelProfile = await prisma.artist.findFirst({
+        const hasLabelProfile = await prisma.profile.findFirst({
           where: {
             userId: user.id,
             isLabelProfile: true,
@@ -181,7 +181,7 @@ export default function () {
           },
         });
         if (!hasLabelProfile) {
-          await prisma.artist.create({
+          await prisma.profile.create({
             data: {
               userId: user.id,
               name: updatedUser.name ?? updatedUser.email,

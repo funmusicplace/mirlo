@@ -20,7 +20,7 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     if (Number(userId) === Number(loggedInUser.id)) {
-      const charges = await prisma.artistUserSubscriptionCharge.findMany({
+      const charges = await prisma.profileUserSubscriptionCharge.findMany({
         where: {
           artistUserSubscription: {
             userId: Number(userId),

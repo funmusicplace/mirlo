@@ -1,5 +1,5 @@
 import {
-  Artist,
+  Profile,
   Merch,
   MerchPurchase,
   Post,
@@ -78,9 +78,9 @@ export function isPost(entity: unknown): entity is Post {
   return (entity as Post).content !== undefined;
 }
 
-export function isArtist(entity: unknown): entity is Artist {
+export function isArtist(entity: unknown): entity is Profile {
   if (!entity) {
     return false;
   }
-  return (entity as Artist).bio !== undefined;
+  return (entity as Profile).bio !== undefined;
 }

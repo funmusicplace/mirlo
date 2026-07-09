@@ -45,7 +45,7 @@ describe("GET /v1/merch/{id}", () => {
       email: "roster@example.com",
     });
     const rosterArtist = await createArtist(rosterUser.id, {
-      name: "Roster Artist",
+      name: "Roster Profile",
       urlSlug: "roster-artist",
     });
 

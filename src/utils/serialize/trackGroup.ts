@@ -1,8 +1,8 @@
 import { join } from "path";
 
 import {
-  Artist,
-  ArtistAvatar,
+  Profile,
+  ProfileAvatar,
   Merch,
   MerchImage,
   Track,
@@ -14,22 +14,22 @@ import {
 import { addSizesToImage } from "../artist";
 import { generateFullStaticImageUrl } from "../images";
 import { processSingleMerch } from "../merch";
-import { finalArtistAvatarBucket, finalCoversBucket } from "../minio";
+import { finalProfileAvatarBucket, finalCoversBucket } from "../minio";
 import { isTrackPlayableNested } from "../trackPlayability";
 
 import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
-  artist?: Partial<Artist>;
+  artist?: Partial<Profile>;
   tracks?: CanimusTrack[];
 }
 
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
-    artist?: Partial<Artist> & {
-      avatar?: ArtistAvatar | null;
+    artist?: Partial<Profile> & {
+      avatar?: ProfileAvatar | null;
       user?: { currency?: string | null } | null;
     };
     paymentToUser?: { currency?: string | null } | null;
@@ -69,7 +69,7 @@ export const processSingleTrackGroup = (
       ? {
           ...artistPublic,
           avatar: tg.artist.avatar
-            ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
+            ? addSizesToImage(finalProfileAvatarBucket, tg.artist.avatar)
             : undefined,
         }
       : undefined,

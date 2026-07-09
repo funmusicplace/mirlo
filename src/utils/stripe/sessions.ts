@@ -7,7 +7,7 @@ import { getPlatformFeeForArtist } from "../artist";
 import countryCodesCurrencies from "../country-codes-currencies";
 import { AppError } from "../error";
 import { generateFullStaticImageUrl } from "../images";
-import { finalArtistAvatarBucket } from "../minio";
+import { finalProfileAvatarBucket } from "../minio";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -187,7 +187,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
   email?: string;
   priceNumber: number;
   message?: string;
-  artist: Prisma.ArtistGetPayload<{ include: { user: true; avatar: true } }>;
+  artist: Prisma.ProfileGetPayload<{ include: { user: true; avatar: true } }>;
   stripeAccountId: string;
 }) => {
   const client = await prisma.client.findFirst({
@@ -228,7 +228,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
                 ? [
                     generateFullStaticImageUrl(
                       artist.avatar?.url[4],
-                      finalArtistAvatarBucket
+                      finalProfileAvatarBucket
                     ),
                   ]
                 : [],
@@ -596,7 +596,7 @@ export const getCurrency = async (
   artistId: number,
   stripeAccountId: string
 ): Promise<string> => {
-  const artist = await prisma.artist.findUnique({
+  const artist = await prisma.profile.findUnique({
     where: {
       id: artistId,
     },
@@ -634,7 +634,7 @@ export const createCheckoutSessionForSubscription = async ({
   email?: string;
   stripeAccountId: string;
   artistId: number;
-  tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>;
+  tier: Prisma.ProfileSubscriptionTierGetPayload<{ include: { artist: true } }>;
   amount: number;
   /** Optional self-chosen display name, captured when the buyer has no account name. */
   userName?: string;

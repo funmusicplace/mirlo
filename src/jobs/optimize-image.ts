@@ -257,7 +257,7 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistBackground") {
-      await prisma.artistBackground.update({
+      await prisma.profileBackground.update({
         where: { id: destinationId },
         data: { url: urls },
       });
@@ -296,13 +296,13 @@ const optimizeImage = async (job: Job) => {
           contentType: "image/x-icon",
           cacheControl: "public, max-age=604800, stale-while-revalidate=604800",
         });
-        logger.info("Artist avatar favicon uploaded successfully");
+        logger.info("Profile avatar favicon uploaded successfully");
       } catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
         logger.error(`Error creating artist avatar favicon: ${errorMessage}`);
       }
 
-      await prisma.artistAvatar.update({
+      await prisma.profileAvatar.update({
         where: { id: destinationId },
         data: { url: urls },
       });

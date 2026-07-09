@@ -19,7 +19,7 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
 
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: { id: Number(artistId) },
         select: { id: true, defaultPlatformFee: true },
       });
@@ -51,11 +51,11 @@ export default function () {
             where: { artistId: artist.id },
             data: { platformPercent },
           }),
-          prisma.artistSubscriptionTier.updateMany({
+          prisma.profileSubscriptionTier.updateMany({
             where: { artistId: artist.id },
             data: { platformPercent },
           }),
-          prisma.artistTipTier.updateMany({
+          prisma.profileTipTier.updateMany({
             where: { artistId: artist.id },
             data: { platformPercent },
           }),

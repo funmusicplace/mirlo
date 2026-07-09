@@ -28,39 +28,39 @@ describe("Soft Delete Extension (deletedAt)", () => {
       const artistId = artist.id;
 
       // Verify artist exists
-      const foundBefore = await prisma.artist.findFirst({
+      const foundBefore = await prisma.profile.findFirst({
         where: { id: artistId },
       });
-      assert.ok(foundBefore, "Artist should exist before delete");
+      assert.ok(foundBefore, "Profile should exist before delete");
       assert.strictEqual(
         foundBefore.deletedAt,
         null,
-        "Artist should not be soft deleted"
+        "Profile should not be soft deleted"
       );
 
       // Delete the artist via Prisma
-      await prisma.artist.delete({
+      await prisma.profile.delete({
         where: { id: artistId },
       });
 
       // Verify artist is not returned by normal find (soft delete filter)
-      const foundAfter = await prisma.artist.findFirst({
+      const foundAfter = await prisma.profile.findFirst({
         where: { id: artistId },
       });
       assert.strictEqual(
         foundAfter,
         null,
-        "Artist should not be found by normal query (filtered by deletedAt)"
+        "Profile should not be found by normal query (filtered by deletedAt)"
       );
 
       // Verify deletedAt is set in raw query (bypassing soft delete filter)
       const rawArtist = await prisma.$queryRaw<
         Array<{ deletedAt: Date | null }>
       >`
-        SELECT "deletedAt" FROM "Artist" WHERE id = ${artistId}
+        SELECT "deletedAt" FROM "Profile" WHERE id = ${artistId}
       `;
-      assert.ok(rawArtist[0], "Artist should still exist in database");
-      assert.ok(rawArtist[0].deletedAt, "Artist should have deletedAt set");
+      assert.ok(rawArtist[0], "Profile should still exist in database");
+      assert.ok(rawArtist[0].deletedAt, "Profile should have deletedAt set");
       assert.ok(
         rawArtist[0].deletedAt instanceof Date,
         "deletedAt should be a Date"
@@ -71,20 +71,20 @@ describe("Soft Delete Extension (deletedAt)", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist1 = await createArtist(user.id, { name: "Artist 1" });
-      const artist2 = await createArtist(user.id, { name: "Artist 2" });
+      const artist1 = await createArtist(user.id, { name: "Profile 1" });
+      const artist2 = await createArtist(user.id, { name: "Profile 2" });
 
       // Verify both artists exist
-      let allArtists = await prisma.artist.findMany();
+      let allArtists = await prisma.profile.findMany();
       assert.equal(allArtists.length, 2, "Should have 2 artists before delete");
 
       // Soft delete artist1
-      await prisma.artist.delete({
+      await prisma.profile.delete({
         where: { id: artist1.id },
       });
 
       // Verify only artist2 is returned
-      allArtists = await prisma.artist.findMany();
+      allArtists = await prisma.profile.findMany();
       assert.equal(allArtists.length, 1, "Should have 1 artist after delete");
       assert.equal(
         allArtists[0].id,
@@ -100,12 +100,12 @@ describe("Soft Delete Extension (deletedAt)", () => {
       const artist = await createArtist(user.id);
 
       // Soft delete the artist
-      await prisma.artist.delete({
+      await prisma.profile.delete({
         where: { id: artist.id },
       });
 
       // Verify artist is not found via slug query
-      const foundArtist = await prisma.artist.findFirst({
+      const foundArtist = await prisma.profile.findFirst({
         where: { urlSlug: artist.urlSlug },
       });
       assert.strictEqual(
@@ -276,21 +276,21 @@ describe("Soft Delete Extension (deletedAt)", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist1 = await createArtist(user.id, { name: "Artist 1" });
-      const artist2 = await createArtist(user.id, { name: "Artist 2" });
-      const artist3 = await createArtist(user.id, { name: "Artist 3" });
+      const artist1 = await createArtist(user.id, { name: "Profile 1" });
+      const artist2 = await createArtist(user.id, { name: "Profile 2" });
+      const artist3 = await createArtist(user.id, { name: "Profile 3" });
 
       // Query before delete
-      let allArtists = await prisma.artist.findMany();
+      let allArtists = await prisma.profile.findMany();
       assert.equal(allArtists.length, 3);
 
       // Delete multiple artists
-      await prisma.artist.deleteMany({
+      await prisma.profile.deleteMany({
         where: { id: { in: [artist1.id, artist2.id] } },
       });
 
       // Verify only artist3 is returned
-      allArtists = await prisma.artist.findMany();
+      allArtists = await prisma.profile.findMany();
       assert.equal(allArtists.length, 1, "Should have 1 artist remaining");
       assert.equal(allArtists[0].id, artist3.id, "Remaining should be artist3");
 
@@ -298,7 +298,7 @@ describe("Soft Delete Extension (deletedAt)", () => {
       const deletedArtists = await prisma.$queryRaw<
         Array<{ id: number; deletedAt: Date | null }>
       >`
-        SELECT id, "deletedAt" FROM "Artist" 
+        SELECT id, "deletedAt" FROM "Profile" 
         WHERE id IN (${artist1.id}, ${artist2.id})
       `;
       assert.equal(
@@ -307,7 +307,7 @@ describe("Soft Delete Extension (deletedAt)", () => {
         "Both deleted artists should still exist"
       );
       deletedArtists.forEach((a) => {
-        assert.ok(a.deletedAt, `Artist ${a.id} should have deletedAt set`);
+        assert.ok(a.deletedAt, `Profile ${a.id} should have deletedAt set`);
       });
     });
   });

@@ -83,7 +83,7 @@ export default function () {
     assertLoggedIn(req);
 
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: { id: Number(artistId) },
         select: { id: true },
       });
@@ -105,15 +105,15 @@ export default function () {
 
       let validTier;
       if (resolvedTierId) {
-        validTier = await prisma.artistSubscriptionTier.findFirst({
+        validTier = await prisma.profileSubscriptionTier.findFirst({
           where: { artistId: Number(artistId), id: resolvedTierId },
         });
       } else {
-        validTier = await prisma.artistSubscriptionTier.findFirst({
+        validTier = await prisma.profileSubscriptionTier.findFirst({
           where: { artistId: Number(artistId), isDefaultTier: true },
         });
         if (!validTier) {
-          await prisma.artistSubscriptionTier.create({
+          await prisma.profileSubscriptionTier.create({
             data: {
               name: "follow",
               description: "follow an artist",
@@ -122,7 +122,7 @@ export default function () {
               artistId: artist.id,
             },
           });
-          validTier = await prisma.artistSubscriptionTier.findFirst({
+          validTier = await prisma.profileSubscriptionTier.findFirst({
             where: { artistId: Number(artistId), isDefaultTier: true },
           });
         }

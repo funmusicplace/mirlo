@@ -121,8 +121,8 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist1 = await createArtist(user.id, { name: "Artist 1" });
-      const artist2 = await createArtist(user.id, { name: "Artist 2" });
+      const artist1 = await createArtist(user.id, { name: "Profile 1" });
+      const artist2 = await createArtist(user.id, { name: "Profile 2" });
 
       const trackGroup1 = await createTrackGroup(artist1.id);
       const trackGroup2 = await createTrackGroup(artist2.id);
@@ -172,7 +172,7 @@ describe("manage/sales", () => {
       assert.equal(response.type, "text/csv");
       assert(response.text.includes("User-Friendly ID"));
       assert(response.text.includes("Date"));
-      assert(response.text.includes("Artist"));
+      assert(response.text.includes("Profile"));
       assert(response.text.includes("Track Group Purchases"));
       assert(response.text.includes("Stripe ID"));
       assert(response.text.includes("Discount Percent"));

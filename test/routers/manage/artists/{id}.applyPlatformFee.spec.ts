@@ -29,7 +29,7 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
 
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { defaultPlatformFee: 15 },
       });
@@ -37,7 +37,7 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
       const trackGroup = await createTrackGroup(artist.id);
       const merch = await createMerch(artist.id, {});
       const tier = await createTier(artist.id);
-      const tipTier = await prisma.artistTipTier.create({
+      const tipTier = await prisma.profileTipTier.create({
         data: { name: "tips", artistId: artist.id, minAmount: 100 },
       });
 
@@ -56,10 +56,10 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
       const updatedMerch = await prisma.merch.findFirst({
         where: { id: merch.id },
       });
-      const updatedTier = await prisma.artistSubscriptionTier.findFirst({
+      const updatedTier = await prisma.profileSubscriptionTier.findFirst({
         where: { id: tier.id },
       });
-      const updatedTipTier = await prisma.artistTipTier.findFirst({
+      const updatedTipTier = await prisma.profileTipTier.findFirst({
         where: { id: tipTier.id },
       });
 
@@ -72,7 +72,7 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
     it("should not update entities belonging to other artists", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: artist.id },
         data: { defaultPlatformFee: 15 },
       });

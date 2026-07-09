@@ -32,7 +32,7 @@ export default function () {
           ? await prisma.client.findUnique({ where: { id: clientId } })
           : null;
         const artist = artistId
-          ? await prisma.artist.findUnique({ where: { id: artistId } })
+          ? await prisma.profile.findUnique({ where: { id: artistId } })
           : null;
 
         const checkoutPath = artist?.urlSlug
@@ -87,7 +87,7 @@ export default function () {
           const client = await prisma.client.findUnique({
             where: { id: +clientId },
           });
-          const artist = await prisma.artist.findUnique({
+          const artist = await prisma.profile.findUnique({
             where: { id: +artistId },
           });
 

@@ -27,7 +27,7 @@ describe("manage/label", () => {
         email: "live-roster-artist@example.com",
       });
       const liveArtist = await createArtist(liveArtistUser.id, {
-        name: "Live Roster Artist",
+        name: "Live Roster Profile",
         urlSlug: "live-roster-artist",
       });
 
@@ -35,7 +35,7 @@ describe("manage/label", () => {
         email: "deleted-roster-artist@example.com",
       });
       const deletedArtist = await createArtist(deletedArtistUser.id, {
-        name: "Deleted Roster Artist",
+        name: "Deleted Roster Profile",
         urlSlug: "deleted-roster-artist",
       });
 
@@ -56,7 +56,7 @@ describe("manage/label", () => {
         ],
       });
 
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: deletedArtist.id },
         data: { deletedAt: new Date() },
       });

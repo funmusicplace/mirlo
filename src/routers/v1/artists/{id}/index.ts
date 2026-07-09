@@ -31,7 +31,7 @@ export default function () {
       if (parsedId) {
         const canManage =
           !!loggedInUser &&
-          (await prisma.artist.findFirst({
+          (await prisma.profile.findFirst({
             where: {
               id: parsedId,
               enabled: true,
@@ -40,7 +40,7 @@ export default function () {
             select: { id: true },
           })) !== null;
 
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: {
             id: parsedId,
             enabled: true,
@@ -73,14 +73,14 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns Artist information",
+    summary: "Returns Profile information",
     parameters: [
       {
         in: "path",
         name: "id",
         required: true,
         type: "string",
-        description: "Artist ID or urlSlug",
+        description: "Profile ID or urlSlug",
       },
       {
         in: "query",
@@ -97,7 +97,7 @@ export default function () {
         description:
           "An artist matching the id, including trackGroups, merch, and subscriptionTiers",
         schema: {
-          $ref: "#/definitions/Artist",
+          $ref: "#/definitions/Profile",
         },
       },
       404: {

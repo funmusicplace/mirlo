@@ -240,7 +240,10 @@ describe("send-mail job", () => {
                         title: "Test Album",
                         urlSlug: "test-album",
                         catalogNumber: "CAT-001",
-                        artist: { name: "Test Artist", urlSlug: "test-artist" },
+                        artist: {
+                          name: "Test Profile",
+                          urlSlug: "test-artist",
+                        },
                       },
                     },
                   ],
@@ -253,7 +256,7 @@ describe("send-mail job", () => {
                           title: "Test Album",
                           urlSlug: "test-album",
                           artist: {
-                            name: "Test Artist",
+                            name: "Test Profile",
                             urlSlug: "test-artist",
                           },
                         },
@@ -265,13 +268,13 @@ describe("send-mail job", () => {
                       merch: {
                         title: "Test Shirt",
                         sku: "SHIRT-M",
-                        artist: { name: "Test Artist" },
+                        artist: { name: "Test Profile" },
                       },
                     },
                   ],
                   tips: [
                     {
-                      artist: { name: "Test Artist", id: 1 },
+                      artist: { name: "Test Profile", id: 1 },
                     },
                   ],
                 },
@@ -290,7 +293,7 @@ describe("send-mail job", () => {
 
       assert.ok(sentHtml.length > 0, "should render non-empty HTML");
       assert.ok(
-        sentHtml.includes("Test Artist"),
+        sentHtml.includes("Test Profile"),
         `rendered HTML should contain the artist name, got: ${sentHtml.slice(0, 500)}`
       );
       assert.ok(
@@ -335,7 +338,7 @@ describe("send-mail job", () => {
               isNewSubscription: true,
               interval: "MONTH",
               artist: {
-                name: "Test Artist",
+                name: "Test Profile",
                 user: { currency: "usd" },
               },
               artistUserSubscription: {
@@ -371,7 +374,7 @@ describe("send-mail job", () => {
 
       assert.ok(sentHtml.length > 0, "should render non-empty HTML");
       assert.ok(
-        sentHtml.includes("Test Artist"),
+        sentHtml.includes("Test Profile"),
         `rendered HTML should contain the artist name, got: ${sentHtml.slice(0, 500)}`
       );
       assert.ok(

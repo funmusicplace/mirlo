@@ -154,7 +154,7 @@ describe("artists/{id}/subscribe", () => {
     it("should remove user from old subscription tier", async () => {
       const { artistUser, artist, followerUser, followerAccessToken } =
         await createTestData();
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           artistSubscriptionTierId: artist.subscriptionTiers![0].id,
           userId: followerUser.id,
@@ -172,7 +172,7 @@ describe("artists/{id}/subscribe", () => {
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${followerAccessToken}`]);
 
-      const subscriptions = await prisma.artistUserSubscription.findMany({
+      const subscriptions = await prisma.profileUserSubscription.findMany({
         where: {
           artistSubscriptionTierId: newTierId,
           userId: followerUser.id,
@@ -199,7 +199,7 @@ describe("artists/{id}/subscribe", () => {
         await createTestData();
       const paidTier = artist.subscriptionTiers![1]; // Tier 2, minAmount 4
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           artistSubscriptionTierId: paidTier.id,
           userId: followerUser.id,
@@ -219,7 +219,7 @@ describe("artists/{id}/subscribe", () => {
       // read filter still returns it), with the reason recorded now and the
       // Stripe key kept so the customer.subscription.deleted webhook — which
       // fires at period end — can match it and finally set deletedAt.
-      const after = await prisma.artistUserSubscription.findFirst({
+      const after = await prisma.profileUserSubscription.findFirst({
         where: { id: subscription.id },
       });
       assert.ok(after, "subscription should still be active until period end");
@@ -232,7 +232,7 @@ describe("artists/{id}/subscribe", () => {
         await createTestData();
       const freeTier = artist.subscriptionTiers![0]; // default tier, no Stripe key
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           artistSubscriptionTierId: freeTier.id,
           userId: followerUser.id,
@@ -249,7 +249,7 @@ describe("artists/{id}/subscribe", () => {
 
       // A free tier has no paid period to honour, so it is soft-deleted now
       // and no longer appears as an active subscription.
-      const after = await prisma.artistUserSubscription.findFirst({
+      const after = await prisma.profileUserSubscription.findFirst({
         where: { id: subscription.id },
       });
       assert.equal(after, null, "free subscription should no longer be active");

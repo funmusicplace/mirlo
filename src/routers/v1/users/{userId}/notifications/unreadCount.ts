@@ -53,7 +53,7 @@ export default function () {
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Artist",
+            $ref: "#/definitions/Profile",
           },
         },
       },

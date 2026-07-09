@@ -33,7 +33,7 @@ export default function () {
       // Surface a name so the hosted checkout page can show who's being paid.
       let artistName: string | null = null;
       if (artistId) {
-        const artist = await prisma.artist.findFirst({
+        const artist = await prisma.profile.findFirst({
           where: { id: Number(artistId) },
           select: { name: true },
         });
@@ -63,7 +63,7 @@ export default function () {
         name: "stripeAccountId",
         required: true,
         type: "string",
-        description: "Artist's connected Stripe account ID",
+        description: "Profile's connected Stripe account ID",
       },
     ],
     responses: {

@@ -114,7 +114,7 @@ export const buildArticleSchema = (metadata: PageMetadata): string => {
     "image": "${imageUrl || ""}",
     "author": {
       "@type": "Person",
-      "name": "${escapeJsonString(artistName || "Mirlo Artist")}"
+      "name": "${escapeJsonString(artistName || "Mirlo Profile")}"
     },
     "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
   }`;

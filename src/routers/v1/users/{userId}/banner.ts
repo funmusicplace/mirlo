@@ -8,7 +8,7 @@ import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { processUserBanner } from "../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
-import { deleteArtistBackground } from "../../../../utils/artist";
+import { deleteProfileBackground } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { busboyOptions } from "../../../../utils/images";
 
@@ -76,7 +76,7 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           id: Number(artistId),
           userId: loggedInUser.id,
@@ -87,7 +87,7 @@ export default function () {
         throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
-      await deleteArtistBackground(artist.id);
+      await deleteProfileBackground(artist.id);
 
       res.json({ message: "Success" });
     } catch (error) {
@@ -107,7 +107,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Updated Artist",
+        description: "Updated Profile",
         schema: {
           type: "object",
         },

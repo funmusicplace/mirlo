@@ -1,4 +1,4 @@
-import { Track, TrackGroup, Post, Artist } from "@mirlo/prisma/client";
+import { Track, TrackGroup, Post, Profile } from "@mirlo/prisma/client";
 import RSS from "rss";
 
 import { getClient } from "./getClient";
@@ -24,7 +24,7 @@ export const turnItemsIntoRSS = async (
     | FeedTrackGroup
     | FeedTrack
     | (Post & { artist: { name: string; urlSlug: string; id: number } | null })
-    | Artist
+    | Profile
   )[]
 ) => {
   // TODO: probably want to convert this to some sort of module

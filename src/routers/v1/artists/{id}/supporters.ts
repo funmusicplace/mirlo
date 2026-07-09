@@ -341,7 +341,7 @@ export default function () {
       const parsedId = await findArtistIdForURLSlug(id);
       let artist;
       if (parsedId) {
-        artist = await prisma.artist.findFirst({
+        artist = await prisma.profile.findFirst({
           where: {
             id: Number(parsedId),
           },

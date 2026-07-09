@@ -16,7 +16,7 @@ async function createInstanceArtist() {
   });
 
   const artist = await createArtist(artistUser.id, {
-    name: "Instance Artist",
+    name: "Instance Profile",
     urlSlug: `instance-artist-${randomUUID()}`,
   });
 
@@ -98,7 +98,7 @@ describe("artists/{id}/follow newsletter", () => {
 
     assert.equal(subscriber.receiveMailingList, true);
 
-    const subscription = await prisma.artistUserSubscription.findFirst({
+    const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: subscriber.id,
         artistSubscriptionTier: {
@@ -137,7 +137,7 @@ describe("artists/{id}/follow newsletter", () => {
     assert(updatedUser);
     assert.equal(updatedUser?.receiveMailingList, true);
 
-    const subscription = await prisma.artistUserSubscription.findFirst({
+    const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: existingUser.id,
         artistSubscriptionTier: {
@@ -155,7 +155,7 @@ describe("artists/{id}/follow newsletter", () => {
     const token = randomUUID();
     const email = "new-listener@example.com";
 
-    await prisma.artistUserSubscriptionConfirmation.create({
+    await prisma.profileUserSubscriptionConfirmation.create({
       data: {
         email,
         artistId: artist.id,

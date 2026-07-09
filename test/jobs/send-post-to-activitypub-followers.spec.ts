@@ -35,7 +35,7 @@ describe("send-post-to-activitypub-followers", () => {
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
 
     const artist = await createArtist(artistUser.id, {
-      name: "Test Artist",
+      name: "Test Profile",
       urlSlug: "test-artist",
       activityPub: true,
     });
@@ -71,14 +71,14 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://mastodon.example/users/follower1",
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://pixelfed.example/users/follower2",
@@ -104,7 +104,7 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     const artist = await createArtist(artistUser.id, {
-      name: "Test Artist 3",
+      name: "Test Profile 3",
       urlSlug: "test-artist-3",
       activityPub: true,
     });
@@ -129,7 +129,7 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://example.com/user",
@@ -151,14 +151,14 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     const artist = await createArtist(artistUser.id, {
-      name: "Test Artist 4",
+      name: "Test Profile 4",
       urlSlug: "test-artist-4",
       activityPub: false,
     });
 
     const post = await createPost(artist.id, {
       title: "No ActivityPub",
-      content: "Artist has AP disabled",
+      content: "Profile has AP disabled",
       isDraft: false,
       isPublic: true,
       publishedAt: new Date(),
@@ -182,7 +182,7 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     const artist = await createArtist(artistUser.id, {
-      name: "Test Artist 5",
+      name: "Test Profile 5",
       urlSlug: "test-artist-5",
       activityPub: true,
     });
@@ -196,7 +196,7 @@ describe("send-post-to-activitypub-followers", () => {
       hasActivityPubBeenSent: true,
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://mastodon.example/users/follower",
@@ -215,7 +215,7 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     const artist = await createArtist(artistUser.id, {
-      name: "Test Artist 6",
+      name: "Test Profile 6",
       urlSlug: "test-artist-6",
       activityPub: true,
     });
@@ -240,7 +240,7 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://error.example/users/follower",
@@ -365,7 +365,7 @@ describe("send-post-to-activitypub-followers", () => {
       });
 
       const artist = await createArtist(artistUser.id, {
-        name: "Test Artist",
+        name: "Test Profile",
         urlSlug: "test-artist-mention",
         activityPub: true,
       });
@@ -395,7 +395,7 @@ describe("send-post-to-activitypub-followers", () => {
       });
 
       // Add a follower (different from the mentioned actor) so the post isn't skipped
-      await prisma.activityPubArtistFollowers.create({
+      await prisma.activityPubProfileFollowers.create({
         data: {
           artistId: artist.id,
           actor: "https://other.example/users/follower",
@@ -436,7 +436,7 @@ describe("send-post-to-activitypub-followers", () => {
       });
 
       const artist = await createArtist(artistUser.id, {
-        name: "Test Artist",
+        name: "Test Profile",
         urlSlug: "test-artist-err",
         activityPub: true,
       });
@@ -463,7 +463,7 @@ describe("send-post-to-activitypub-followers", () => {
         },
       });
 
-      await prisma.activityPubArtistFollowers.create({
+      await prisma.activityPubProfileFollowers.create({
         data: {
           artistId: artist.id,
           actor: "https://other.example/users/follower",
@@ -502,7 +502,7 @@ describe("send-post-to-activitypub-followers", () => {
       });
 
       const artist = await createArtist(artistUser.id, {
-        name: "Test Artist",
+        name: "Test Profile",
         urlSlug: "test-artist-mention-only",
         activityPub: true,
       });

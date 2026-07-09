@@ -49,7 +49,7 @@ export const endPreorderForTrackGroup = async (
       trackGroup.publishedAt && trackGroup.publishedAt <= new Date();
 
     if (isPublished) {
-      const artistFollowers = await tx.artistUserSubscription.findMany({
+      const artistFollowers = await tx.profileUserSubscription.findMany({
         where: {
           artistSubscriptionTier: {
             artistId: trackGroup.artistId,

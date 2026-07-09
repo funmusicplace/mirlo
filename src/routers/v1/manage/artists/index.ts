@@ -55,7 +55,7 @@ export default function () {
       const where = {
         userId: Number(loggedInUser.id),
       };
-      const artists = await prisma.artist.findMany({
+      const artists = await prisma.profile.findMany({
         where,
         include: {
           trackGroups: {
@@ -79,7 +79,7 @@ export default function () {
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Artist",
+            $ref: "#/definitions/Profile",
           },
         },
       },
@@ -115,7 +115,7 @@ export default function () {
 
       const newSlug = generateSlug(urlSlug, name);
 
-      const result = await prisma.artist.create({
+      const result = await prisma.profile.create({
         data: {
           name,
           bio,
@@ -170,7 +170,7 @@ export default function () {
         in: "body",
         name: "artist",
         schema: {
-          $ref: "#/definitions/Artist",
+          $ref: "#/definitions/Profile",
         },
       },
     ],
@@ -178,7 +178,7 @@ export default function () {
       200: {
         description: "Created artist",
         schema: {
-          $ref: "#/definitions/Artist",
+          $ref: "#/definitions/Profile",
         },
       },
       default: {

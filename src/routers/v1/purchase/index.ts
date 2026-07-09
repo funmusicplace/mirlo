@@ -328,7 +328,7 @@ export default function () {
         },
       },
       400: { description: "Missing or invalid parameters" },
-      404: { description: "Artist, item, or subscription tier not found" },
+      404: { description: "Profile, item, or subscription tier not found" },
       default: {
         description: "An error occurred",
         schema: { additionalProperties: true },

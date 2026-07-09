@@ -15,16 +15,16 @@ export const clearTables = async () => {
   // under CI load. CASCADE handles FK ordering so we don't have to.
   await prisma.$executeRawUnsafe(`
     TRUNCATE TABLE
-      "ActivityPubArtistFollowers",
-      "Artist",
-      "ArtistAvatar",
-      "ArtistBackground",
+      "ActivityPubProfileFollowers",
+      "Profile",
+      "ProfileAvatar",
+      "ProfileBackground",
       "ArtistLabel",
-      "ArtistSubscriptionTier",
-      "ArtistTipTier",
-      "ArtistUserSubscription",
-      "ArtistUserSubscriptionCharge",
-      "ArtistUserSubscriptionConfirmation",
+      "ProfileSubscriptionTier",
+      "ProfileTipTier",
+      "ProfileUserSubscription",
+      "ProfileUserSubscriptionCharge",
+      "ProfileUserSubscriptionConfirmation",
       "Client",
       "Fundraiser",
       "FundraiserPledge",
@@ -48,8 +48,8 @@ export const clearTables = async () => {
       "TrackGroupTag",
       "TrackPlay",
       "User",
-      "UserArtistNotificationSetting",
-      "UserArtistTip",
+      "UserProfileNotificationSetting",
+      "UserProfileTip",
       "UserTrackGroupPurchase",
       "UserTrackGroupWishlist",
       "UserTrackPurchase",
@@ -90,9 +90,9 @@ export const createUser = async (data: Prisma.UserCreateArgs["data"]) => {
 
 export const createArtist = async (
   userId: number,
-  data?: Partial<Prisma.ArtistCreateArgs["data"]>
+  data?: Partial<Prisma.ProfileCreateArgs["data"]>
 ) => {
-  const artist = await prisma.artist.create({
+  const artist = await prisma.profile.create({
     data: {
       name: data?.name ?? "Test artist",
       urlSlug: data?.urlSlug || (data?.name ? slug(data?.name) : "test-artist"),
@@ -158,9 +158,9 @@ export const createPost = async (
 
 export const createTier = async (
   artistId: number,
-  data?: Partial<Prisma.ArtistSubscriptionTierCreateArgs["data"]>
+  data?: Partial<Prisma.ProfileSubscriptionTierCreateArgs["data"]>
 ) => {
-  const tier = await prisma.artistSubscriptionTier.create({
+  const tier = await prisma.profileSubscriptionTier.create({
     data: {
       minAmount: data?.minAmount,
       allowVariable: data?.allowVariable,
@@ -421,7 +421,7 @@ export const createSubscription = async (
   tierId: number,
   amount: number = 500
 ) => {
-  return prisma.artistUserSubscription.create({
+  return prisma.profileUserSubscription.create({
     data: {
       userId,
       artistSubscriptionTierId: tierId,

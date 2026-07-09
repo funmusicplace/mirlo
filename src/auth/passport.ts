@@ -189,7 +189,7 @@ export const artistEditableByUser = async (
   try {
     if (!artistId) {
       throw new AppError({
-        description: "Artist ID is required",
+        description: "Profile ID is required",
         httpCode: 400,
       });
     }
@@ -206,7 +206,7 @@ export const artistEditableByUser = async (
         return true;
       }
 
-      const artist = await prisma.artist.findFirst({
+      const artist = await prisma.profile.findFirst({
         where: {
           ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
           id: Number(castArtistId),

@@ -50,7 +50,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Test Artist",
+              name: "Test Profile",
               trackGroups: [
                 {
                   title: "Test Album",
@@ -102,7 +102,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Main Artist",
+              name: "Main Profile",
               trackGroups: [
                 {
                   title: "Album With Roles",
@@ -120,7 +120,7 @@ describe("manage/bulkTrackUpload", () => {
                           role: "producer",
                         },
                         {
-                          artistName: "Featured Artist",
+                          artistName: "Featured Profile",
                           role: "featured_artist",
                         },
                       ],
@@ -158,17 +158,17 @@ describe("manage/bulkTrackUpload", () => {
         track.trackArtists.some((ta) => ta.artistName === "Producer Name")
       );
       assert(
-        track.trackArtists.some((ta) => ta.artistName === "Featured Artist")
+        track.trackArtists.some((ta) => ta.artistName === "Featured Profile")
       );
       assert(track.trackArtists.some((ta) => ta.role === "composer"));
       assert(track.trackArtists.some((ta) => ta.role === "producer"));
       assert(track.trackArtists.some((ta) => ta.role === "featured_artist"));
       assert.equal(track.isrc, "ISRC123456");
 
-      const collaboratorArtists = await prisma.artist.findMany({
+      const collaboratorArtists = await prisma.profile.findMany({
         where: {
           name: {
-            in: ["Composer Name", "Producer Name", "Featured Artist"],
+            in: ["Composer Name", "Producer Name", "Featured Profile"],
           },
         },
       });
@@ -183,7 +183,7 @@ describe("manage/bulkTrackUpload", () => {
       });
 
       const existingArtist = await createArtist(user.id, {
-        name: "Existing Artist",
+        name: "Existing Profile",
       });
 
       const response = await requestApp
@@ -192,7 +192,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Existing Artist",
+              name: "Existing Profile",
               trackGroups: [
                 {
                   title: "Album 1",
@@ -202,7 +202,7 @@ describe("manage/bulkTrackUpload", () => {
                       order: 1,
                       artists: [
                         {
-                          artistName: "Existing Artist",
+                          artistName: "Existing Profile",
                           role: "producer",
                         },
                       ],
@@ -243,7 +243,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Artist A",
+              name: "Profile A",
               trackGroups: [
                 {
                   title: "Album 1",
@@ -259,7 +259,7 @@ describe("manage/bulkTrackUpload", () => {
               ],
             },
             {
-              name: "Artist B",
+              name: "Profile B",
               trackGroups: [
                 {
                   title: "Album 2",
@@ -302,7 +302,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Artist",
+              name: "Profile",
               trackGroups: [
                 {
                   title: "Album",
@@ -353,7 +353,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Artist",
+              name: "Profile",
               trackGroups: [
                 {
                   title: "My Album",
@@ -419,7 +419,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Artist A",
+              name: "Profile A",
               trackGroups: [
                 {
                   title: "Album 1",
@@ -428,7 +428,7 @@ describe("manage/bulkTrackUpload", () => {
               ],
             },
             {
-              name: "Artist B",
+              name: "Profile B",
               trackGroups: [
                 {
                   title: "Album 2",
@@ -491,7 +491,7 @@ describe("manage/bulkTrackUpload", () => {
       assert.equal(response.body.result.trackGroupsCreated, 1);
       assert.equal(response.body.result.tracksCreated, 1);
 
-      const createdArtist = await prisma.artist.findFirst({
+      const createdArtist = await prisma.profile.findFirst({
         where: {
           userId: user.id,
           name: "My Band",
@@ -514,7 +514,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Recording Artist",
+              name: "Recording Profile",
               trackGroups: [
                 {
                   title: "Professional Album",
@@ -564,7 +564,7 @@ describe("manage/bulkTrackUpload", () => {
       const { user: artistUser } = await createUser({
         email: "artist@example.com",
       });
-      const artistName = "Label Featured Artist";
+      const artistName = "Label Featured Profile";
 
       const artist = await createArtist(artistUser.id, {
         name: artistName,
@@ -583,7 +583,7 @@ describe("manage/bulkTrackUpload", () => {
         },
       });
 
-      const labels = await prisma.artist.findMany({
+      const labels = await prisma.profile.findMany({
         where: {
           id: artist.id,
         },
@@ -642,7 +642,7 @@ describe("manage/bulkTrackUpload", () => {
       });
 
       const artist = await createArtist(artistUser.id, {
-        name: "Restricted Artist",
+        name: "Restricted Profile",
       });
 
       // Set up label relationship WITHOUT canLabelAddReleases permission
@@ -663,7 +663,7 @@ describe("manage/bulkTrackUpload", () => {
         .send({
           artists: [
             {
-              name: "Restricted Artist",
+              name: "Restricted Profile",
               trackGroups: [
                 {
                   title: "Restricted Release Album",

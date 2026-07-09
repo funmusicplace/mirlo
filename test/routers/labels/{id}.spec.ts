@@ -51,7 +51,7 @@ describe("GET /v1/labels/{id}", () => {
       email: "live-artist@example.com",
     });
     const liveArtist = await createArtist(liveArtistUser.id, {
-      name: "Live Artist",
+      name: "Live Profile",
       urlSlug: "live-artist",
     });
 
@@ -59,7 +59,7 @@ describe("GET /v1/labels/{id}", () => {
       email: "deleted-artist@example.com",
     });
     const deletedArtist = await createArtist(deletedArtistUser.id, {
-      name: "Deleted Artist",
+      name: "Deleted Profile",
       urlSlug: "deleted-artist",
     });
 
@@ -80,7 +80,7 @@ describe("GET /v1/labels/{id}", () => {
       ],
     });
 
-    await prisma.artist.update({
+    await prisma.profile.update({
       where: { id: deletedArtist.id },
       data: { deletedAt: new Date() },
     });
