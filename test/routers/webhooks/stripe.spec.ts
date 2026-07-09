@@ -47,7 +47,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const artist = await createArtist(user.id);
 
       // Create a subscription tier
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           name: "Premium",
           minAmount: 1000,
@@ -56,7 +56,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       });
 
       // Create a subscription
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           userId: user.id,
           artistSubscriptionTierId: tier.id,
@@ -336,7 +336,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
 
       // Create a subscription for the user
       const subscriptionKey = "sub_test123";
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -433,11 +433,10 @@ describe("Stripe Webhooks - Failed Payments", () => {
       );
 
       // Verify nextBillingDate was stored on subscription
-      const updatedSubscription = await prisma.artistUserSubscription.findFirst(
-        {
+      const updatedSubscription =
+        await prisma.profileUserSubscription.findFirst({
           where: { id: subscription.id },
-        }
-      );
+        });
       assert.ok(
         updatedSubscription?.nextBillingDate,
         "Next billing date should be set"
@@ -503,7 +502,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
 
       // Create a subscription for the user
       const subscriptionKey = "sub_test456";
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -598,7 +597,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const artist = await createArtist(artistUser.id);
       const tier = await createTier(artist.id, { name: "Premium" });
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: "sub_ending_123",
           userId: subscriber.id,
@@ -618,7 +617,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       // rows out of normal finds, so we'd never see the now-deleted row.
       const [after] = await prisma.$queryRaw<
         { deletedAt: Date | null; deleteReason: string | null }[]
-      >`SELECT "deletedAt", "deleteReason" FROM "ArtistUserSubscription" WHERE id = ${subscription.id}`;
+      >`SELECT "deletedAt", "deleteReason" FROM "ProfileUserSubscription" WHERE id = ${subscription.id}`;
       assert.ok(after.deletedAt, "deletedAt should be set at period end");
       assert.equal(
         after.deleteReason,
@@ -637,7 +636,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const artist = await createArtist(artistUser.id);
       const tier = await createTier(artist.id, { name: "Premium" });
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: "sub_failed_123",
           userId: subscriber.id,
@@ -654,7 +653,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
 
       const [after] = await prisma.$queryRaw<
         { deletedAt: Date | null; deleteReason: string | null }[]
-      >`SELECT "deletedAt", "deleteReason" FROM "ArtistUserSubscription" WHERE id = ${subscription.id}`;
+      >`SELECT "deletedAt", "deleteReason" FROM "ProfileUserSubscription" WHERE id = ${subscription.id}`;
       assert.ok(after.deletedAt);
       assert.equal(after.deleteReason, "PAYMENT_FAILURE");
     });
@@ -670,7 +669,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const tier = await createTier(artist.id, { name: "Premium" });
 
       const alreadyDeletedAt = new Date("2020-01-01T00:00:00.000Z");
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: "sub_already_gone",
           userId: subscriber.id,
@@ -691,7 +690,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       // left untouched — neither its deletedAt nor its reason should change.
       const [after] = await prisma.$queryRaw<
         { deletedAt: Date | null; deleteReason: string | null }[]
-      >`SELECT "deletedAt", "deleteReason" FROM "ArtistUserSubscription" WHERE id = ${subscription.id}`;
+      >`SELECT "deletedAt", "deleteReason" FROM "ProfileUserSubscription" WHERE id = ${subscription.id}`;
       assert.equal(
         new Date(after.deletedAt!).toISOString(),
         alreadyDeletedAt.toISOString()
@@ -715,7 +714,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         email: "webhook@test.com",
       });
       const artist = await createArtist(user.id);
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           name: "Basic",
           minAmount: 500,

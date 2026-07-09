@@ -54,7 +54,7 @@ describe("artists/{id]/unfollow", () => {
 
       assert.equal(response.status, 200);
 
-      const subscription = await prisma.artistUserSubscription.findFirst({
+      const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: followerUser.id,
           artistSubscriptionTier: {
@@ -92,7 +92,7 @@ describe("artists/{id]/unfollow", () => {
 
       assert.equal(response.status, 200);
 
-      const subscriptions = await prisma.artistUserSubscription.findMany({
+      const subscriptions = await prisma.profileUserSubscription.findMany({
         where: {
           userId: followerUser.id,
         },

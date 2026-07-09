@@ -39,7 +39,7 @@ describe("handleArtistGift", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -50,7 +50,7 @@ describe("handleArtistGift", () => {
 
     await handleArtistGift(purchaser.id, artist.id);
 
-    const tip = await prisma.userArtistTip.findFirst({
+    const tip = await prisma.userProfileTip.findFirst({
       where: { userId: purchaser.id, artistId: artist.id },
     });
 
@@ -81,7 +81,7 @@ describe("handleArtistGift", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -92,7 +92,7 @@ describe("handleArtistGift", () => {
 
     await handleArtistGift(purchaser.id, artist.id);
 
-    const subscription = await prisma.artistUserSubscription.findFirst({
+    const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: purchaser.id,
         artistSubscriptionTier: {

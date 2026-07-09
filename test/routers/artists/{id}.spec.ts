@@ -30,7 +30,7 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: artistSlug,
@@ -52,7 +52,7 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      await prisma.artist.create({
+      await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "other-artist-slug",
@@ -191,7 +191,7 @@ describe("artists", () => {
           isArtistApproved: true,
         },
       });
-      await prisma.artist.update({
+      await prisma.profile.update({
         where: { id: deletedArtist.id },
         data: { deletedAt: new Date() },
       });

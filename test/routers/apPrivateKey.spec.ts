@@ -32,7 +32,7 @@ function containsPrivateKey(value: unknown): boolean {
 
 async function artistWithPrivateKey(userId: number) {
   const artist = await createArtist(userId);
-  await prisma.artist.update({
+  await prisma.profile.update({
     where: { id: artist.id },
     data: { apPrivateKey: FAKE_PRIVATE_KEY },
   });

@@ -71,14 +71,14 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://mastodon.example/users/follower1",
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://pixelfed.example/users/follower2",
@@ -129,7 +129,7 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://example.com/user",
@@ -196,7 +196,7 @@ describe("send-post-to-activitypub-followers", () => {
       hasActivityPubBeenSent: true,
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://mastodon.example/users/follower",
@@ -240,7 +240,7 @@ describe("send-post-to-activitypub-followers", () => {
       },
     });
 
-    await prisma.activityPubArtistFollowers.create({
+    await prisma.activityPubProfileFollowers.create({
       data: {
         artistId: artist.id,
         actor: "https://error.example/users/follower",
@@ -395,7 +395,7 @@ describe("send-post-to-activitypub-followers", () => {
       });
 
       // Add a follower (different from the mentioned actor) so the post isn't skipped
-      await prisma.activityPubArtistFollowers.create({
+      await prisma.activityPubProfileFollowers.create({
         data: {
           artistId: artist.id,
           actor: "https://other.example/users/follower",
@@ -463,7 +463,7 @@ describe("send-post-to-activitypub-followers", () => {
         },
       });
 
-      await prisma.activityPubArtistFollowers.create({
+      await prisma.activityPubProfileFollowers.create({
         data: {
           artistId: artist.id,
           actor: "https://other.example/users/follower",

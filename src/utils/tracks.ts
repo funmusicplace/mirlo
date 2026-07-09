@@ -2,7 +2,7 @@ import { existsSync } from "fs";
 import { Readable } from "stream";
 
 import prisma from "@mirlo/prisma";
-import { Artist, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
+import { Profile, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
 import ffmpeg from "fluent-ffmpeg";
 
 import { Format } from "../jobs/generate-album";
@@ -201,7 +201,7 @@ const addTrackArtistRoleTags = (
 export const convertAudioToFormat = (
   content: {
     track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
-    artist: Artist;
+    artist: Profile;
     trackGroup: {
       title: string | null;
       coverLocation?: string;

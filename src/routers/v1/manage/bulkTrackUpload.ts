@@ -87,7 +87,7 @@ export default function () {
           const artistName = artistData.name;
 
           // Find or create the artist
-          let artist = await prisma.artist.findFirst({
+          let artist = await prisma.profile.findFirst({
             where: {
               name: artistName,
               OR: [
@@ -101,7 +101,7 @@ export default function () {
           });
 
           if (!artist) {
-            artist = await prisma.artist.create({
+            artist = await prisma.profile.create({
               data: {
                 name: artistName,
                 urlSlug: slug(artistName),
@@ -198,7 +198,7 @@ export default function () {
                     // Find or create the artist if artistName is provided
                     let contributingArtist = undefined;
                     if (trackArtist.artistName) {
-                      contributingArtist = await prisma.artist.findFirst({
+                      contributingArtist = await prisma.profile.findFirst({
                         where: {
                           name: trackArtist.artistName,
                         },

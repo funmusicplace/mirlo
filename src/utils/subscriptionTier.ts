@@ -17,7 +17,7 @@ export const registerSubscription = async ({
   platformCut?: number | null;
   shippingAddress?: object | null;
 }) => {
-  const artistUserSubscription = await prisma.artistUserSubscription.upsert({
+  const artistUserSubscription = await prisma.profileUserSubscription.upsert({
     create: {
       artistSubscriptionTierId: tierId,
       userId: userId,

@@ -1,6 +1,6 @@
 import prisma from "@mirlo/prisma";
 import {
-  Artist,
+  Profile,
   MerchOption,
   TrackGroup,
   User,
@@ -354,7 +354,7 @@ export const handleCataloguePurchase = async (
 ) => {
   try {
     const { applicationUrl } = await getClient();
-    const artist = await prisma.artist.findFirst({
+    const artist = await prisma.profile.findFirst({
       where: {
         id: artistId,
       },
@@ -751,7 +751,7 @@ export const handleArtistGift = async (
       },
     });
 
-    const createdTip = await prisma.userArtistTip.create({
+    const createdTip = await prisma.userProfileTip.create({
       data: {
         userId,
         artistId,
@@ -760,7 +760,7 @@ export const handleArtistGift = async (
       },
     });
 
-    const tip = await prisma.userArtistTip.findFirst({
+    const tip = await prisma.userProfileTip.findFirst({
       where: {
         id: createdTip.id,
       },
@@ -1022,7 +1022,7 @@ export const handleArtistMerchPurchase = async (
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "monthly" | "yearly";
-  artist: Artist;
+  artist: Profile;
   artistUserSubscription: {
     id: number;
     amount: number;
@@ -1043,7 +1043,7 @@ export type ArtistSubscriptionReceiptEmailType = {
 
 export type ArtistNewSubscriberAnnounceEmailType = {
   interval: "monthly" | "yearly";
-  artist: Artist;
+  artist: Profile;
   artistUserSubscription: {
     artistSubscriptionTierId: number;
     id: number;

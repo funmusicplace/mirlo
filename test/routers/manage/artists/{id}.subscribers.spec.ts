@@ -39,7 +39,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
 
-      await prisma.artistAvatar.create({
+      await prisma.profileAvatar.create({
         data: {
           artistId: artist.id,
         },
@@ -85,7 +85,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       assert.notEqual(created, null);
       assert(created);
 
-      const subscription = await prisma.artistUserSubscription.findFirst({
+      const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: created.id,
           artistSubscriptionTierId: tier.id,
@@ -127,7 +127,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       assert.notEqual(created, null);
       assert(created);
 
-      const subscriptions = await prisma.artistUserSubscription.findMany({
+      const subscriptions = await prisma.profileUserSubscription.findMany({
         where: {
           userId: created.id,
           artistSubscriptionTierId: tier.id,
@@ -167,7 +167,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
 
       assert.notEqual(created, null);
 
-      const subscription = await prisma.artistUserSubscription.findFirst({
+      const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: subscriber.id,
           artistSubscriptionTierId: tier.id,
@@ -189,7 +189,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const artist = await createArtist(user.id);
       const tier = await createTier(artist.id, { isDefaultTier: true });
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           userId: subscriber.id,
           artistSubscriptionTierId: tier.id,
@@ -276,7 +276,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       assert.notEqual(created, null);
       assert(created);
 
-      const subscription = await prisma.artistUserSubscription.findFirst({
+      const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: created.id,
           artistSubscriptionTierId: tier.id,

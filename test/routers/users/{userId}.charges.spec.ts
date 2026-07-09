@@ -26,23 +26,22 @@ describe("users/{userId}/charges", () => {
 
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
         },
       });
-      const artistUserSubscription = await prisma.artistUserSubscription.create(
-        {
+      const artistUserSubscription =
+        await prisma.profileUserSubscription.create({
           data: {
             artistSubscriptionTierId: tier.id,
             userId: purchaser.id,
             amount: 1000,
           },
-        }
-      );
+        });
 
-      await prisma.artistUserSubscriptionCharge.create({
+      await prisma.profileUserSubscriptionCharge.create({
         data: {
           artistUserSubscriptionId: artistUserSubscription.id,
         },

@@ -38,7 +38,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -61,7 +61,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -96,7 +96,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -177,7 +177,7 @@ describe("artists/{id}/feed", () => {
     const { user: followerUser, accessToken } = await createUser({
       email: "follower@follower.com",
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -206,7 +206,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -233,7 +233,7 @@ describe("artists/{id}/feed", () => {
     const { user: followerUser, accessToken } = await createUser({
       email: "follower@follower.com",
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -267,7 +267,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    await prisma.artistUserSubscription.create({
+    await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
         artistSubscriptionTierId: maxTier.id,
@@ -290,7 +290,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -325,7 +325,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -358,7 +358,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",

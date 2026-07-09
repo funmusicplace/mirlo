@@ -6,7 +6,7 @@ import { flatten, uniqBy } from "lodash";
 const addPostToNotifications = async () => {
   const date = new Date();
 
-  const nonDeletedArtistsWithSubscriptions = await prisma.artist.findMany({
+  const nonDeletedArtistsWithSubscriptions = await prisma.profile.findMany({
     where: {
       deletedAt: null,
       subscriptionTiers: {

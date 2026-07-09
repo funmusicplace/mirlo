@@ -35,7 +35,7 @@ describe("artists/{id}/supporters", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
+    const artist = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -145,7 +145,7 @@ describe("artists/{id}/supporters", () => {
       },
     });
 
-    await prisma.userArtistTip.create({
+    await prisma.userProfileTip.create({
       data: {
         userId: user.id,
         artistId: artist.id,

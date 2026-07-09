@@ -27,7 +27,7 @@ describe("manage/artists/{artistId}/background", () => {
       const artist = await createArtist(user.id);
       await createBucketIfNotExists(finalArtistBackgroundBucket);
 
-      await prisma.artistBackground.create({
+      await prisma.profileBackground.create({
         data: {
           artistId: artist.id,
         },
@@ -38,7 +38,7 @@ describe("manage/artists/{artistId}/background", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
-      const foundOld = await prisma.artistBackground.findFirst({
+      const foundOld = await prisma.profileBackground.findFirst({
         where: { artistId: artist.id },
       });
 

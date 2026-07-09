@@ -21,7 +21,7 @@ export default function () {
 
     try {
       const artistId = await findArtistIdForURLSlug(id);
-      const labelProfile = await prisma.artist.findFirst({
+      const labelProfile = await prisma.profile.findFirst({
         where: {
           id: artistId,
           isLabelProfile: true,
@@ -36,7 +36,7 @@ export default function () {
 
       const canManage =
         !!loggedInUser &&
-        (await prisma.artist.findFirst({
+        (await prisma.profile.findFirst({
           where: {
             id: artistId,
             enabled: true,

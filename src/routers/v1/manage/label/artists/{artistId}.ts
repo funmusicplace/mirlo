@@ -26,7 +26,7 @@ export default function () {
         });
       }
 
-      const artist = await prisma.artist.findUnique({
+      const artist = await prisma.profile.findUnique({
         where: {
           id: Number(artistId),
         },

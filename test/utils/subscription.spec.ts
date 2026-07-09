@@ -45,7 +45,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -54,7 +54,7 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
@@ -64,7 +64,7 @@ describe("subscription", () => {
       const subscriptionKey = "test-key";
       const invoiceId = "invoice-key";
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -125,7 +125,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -134,7 +134,7 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
@@ -144,7 +144,7 @@ describe("subscription", () => {
       const subscriptionKey = "test-key-billing-date";
       const invoiceId = "invoice-key-billing-date";
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -169,7 +169,7 @@ describe("subscription", () => {
       });
 
       const updatedSubscription =
-        await prisma.artistUserSubscription.findUnique({
+        await prisma.profileUserSubscription.findUnique({
           where: { id: subscription.id },
         });
 
@@ -189,7 +189,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -198,7 +198,7 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
@@ -208,7 +208,7 @@ describe("subscription", () => {
       const subscriptionKey = "test-key-failed";
       const invoiceId = "invoice-key-failed";
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -233,7 +233,7 @@ describe("subscription", () => {
       });
 
       const updatedSubscription =
-        await prisma.artistUserSubscription.findUnique({
+        await prisma.profileUserSubscription.findUnique({
           where: { id: subscription.id },
         });
 
@@ -252,7 +252,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -261,7 +261,7 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
@@ -271,7 +271,7 @@ describe("subscription", () => {
       const subscriptionKey = "test-key-null-date";
       const invoiceId = "invoice-key-null-date";
 
-      const subscription = await prisma.artistUserSubscription.create({
+      const subscription = await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -294,7 +294,7 @@ describe("subscription", () => {
       });
 
       const updatedSubscription =
-        await prisma.artistUserSubscription.findUnique({
+        await prisma.profileUserSubscription.findUnique({
           where: { id: subscription.id },
         });
 
@@ -315,7 +315,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -324,7 +324,7 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Premium Tier",
@@ -334,7 +334,7 @@ describe("subscription", () => {
       const subscriptionKey = "test-key-artist-notif";
       const invoiceId = "invoice-key-artist-notif";
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -391,7 +391,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -401,7 +401,7 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Premium Tier",
@@ -411,7 +411,7 @@ describe("subscription", () => {
       const subscriptionKey = "test-key-payment-to";
       const invoiceId = "invoice-key-payment-to";
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -456,7 +456,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist-accounting",
@@ -465,7 +465,7 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
@@ -475,7 +475,7 @@ describe("subscription", () => {
       const subscriptionKey = "test-key-accounting-cc";
       const invoiceId = "invoice-key-accounting-cc";
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
@@ -520,7 +520,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -529,14 +529,14 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
         },
       });
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: "sub-key-renewal-default",
           deletedAt: null,
@@ -580,7 +580,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -589,14 +589,14 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
         },
       });
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: "sub-key-renewal-combined",
           deletedAt: null,
@@ -639,7 +639,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -648,14 +648,14 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Tier",
         },
       });
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: "sub-key-new-combined",
           deletedAt: null,
@@ -696,7 +696,7 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.artist.create({
+      const artist = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
@@ -705,14 +705,14 @@ describe("subscription", () => {
         },
       });
 
-      const tier = await prisma.artistSubscriptionTier.create({
+      const tier = await prisma.profileSubscriptionTier.create({
         data: {
           artistId: artist.id,
           name: "Supporter",
         },
       });
 
-      await prisma.artistUserSubscription.create({
+      await prisma.profileUserSubscription.create({
         data: {
           stripeSubscriptionKey: "sub-key-template-vars",
           deletedAt: null,
