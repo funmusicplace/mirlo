@@ -17,10 +17,13 @@ import { SnackBarContextProvider } from "state/SnackbarContext";
 import { UploadContextProvider } from "state/UploadContext";
 import { ConfirmContextProvider } from "utils/useConfirm";
 
+import { initAnalytics } from "./analytics";
 import { GlobalStateProvider } from "./state/GlobalState";
 
 import { QueryClientWrapper } from "queries/QueryClientWrapper";
 import { ConfirmDialog } from "components/common/ConfirmDialog";
+
+initAnalytics();
 
 const router = createBrowserRouter(routes);
 

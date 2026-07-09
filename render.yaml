@@ -17,6 +17,10 @@ services:
         value: true
       - key: NODE_ENV
         value: production
+      # Baked into the client at build time; the website ID comes from the
+      # Umami dashboard after adding mirlo.space as a website there.
+      - key: VITE_UMAMI_WEBSITE_ID
+        sync: false
       - key: NODE_OPTIONS
         value: --max-old-space-size=1512
       - key: DATABASE_URL
@@ -71,6 +75,38 @@ services:
       name: data
       mountPath: /data
       sizeGB: 600 # optional
+
+  # Umami analytics (https://umami.is)
+  # Runs against a separate `umami` database inside the existing blackbrd
+  # Postgres instance. Umami is itself a Prisma app, so it must NOT share
+  # Mirlo's database — both would write to the same _prisma_migrations table.
+  # Blueprints don't support string interpolation, so the dockerCommand
+  # rewrites the blackbrd connection string to point at /umami at startup.
+  # One-time setup:
+  #   1. psql <blackbrd external connection string>
+  #   2. CREATE DATABASE umami;
+  # Default login is admin / umami — change it immediately after first deploy.
+  - type: web
+    name: umami
+    runtime: image
+    image:
+      url: ghcr.io/umami-software/umami:postgresql-latest
+    dockerCommand: sh -c 'export DATABASE_URL="${BASE_DATABASE_URL%/*}/umami" && npm run start-docker'
+    plan: starter
+    region: oregon
+    autoDeploy: false
+    healthCheckPath: /api/heartbeat
+    envVars:
+      - key: BASE_DATABASE_URL
+        fromDatabase:
+          name: blackbrd
+          property: connectionString
+      - key: DATABASE_TYPE
+        value: postgresql
+      - key: APP_SECRET
+        generateValue: true
+      - key: DISABLE_TELEMETRY
+        value: 1
 
   # A worker
   - type: worker
