@@ -1,6 +1,6 @@
 # Deploying Mirlo to a VPS
 
-This guide covers deploying Mirlo to a clean Virtual Private Server (VPS). It includes instructions for Docker-based deployments, bare-metal installations, and platform-specific guidance for DigitalOcean.
+This guide covers deploying Mirlo to a clean Virtual Private Server (VPS). It includes instructions for Docker-based deployments, bare-metal installations, and platform-specific guidance for Hetzner.
 
 > **Warning**: At the moment we don't make any guarantees about version, backwards compatability, or anything like that. **You're in charge or your own instance**, and while we'll respond to bugs or issues with the set up, we don't have the resources to help you debug your server setup.
 
@@ -28,13 +28,53 @@ Mirlo consists of several components:
 - Docker Engine 20.10+
 - Docker Compose 2.0+
 
+## Quick Install (recommended)
+
+Once Docker is installed on the server (see step 1 below) and the repo is
+cloned to `/opt/mirlo`, `scripts/install.sh` does the rest of this guide
+(steps 2 through 8: env generation, compose config, build + start, admin
+user, frontend build, and nginx + Let's Encrypt for public https domains) in
+one unattended run:
+
+```bash
+cd /opt/mirlo
+bash scripts/install.sh
+```
+
+Or non-interactively:
+
+```bash
+MIRLO_DOMAIN=https://yourdomain.com \
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=secure-password \
+bash scripts/install.sh
+```
+
+It's safe to re-run: existing `.env` / compose config / admin user are
+reused or updated, so a failed step (e.g. certbot before DNS propagated) can
+be fixed and retried by running the script again.
+
+To update an existing instance later:
+
+```bash
+bash scripts/update.sh
+```
+
+This pulls latest, rebuilds the images, restarts, and rebuilds the frontend
+(migrations run automatically on API boot — no separate migration step).
+
+The manual walkthrough below is what `install.sh` automates — useful if you
+want to understand or customize what it's doing, or if you're not using
+Docker/Ubuntu and need to adapt the steps.
+
+> **Note**: for now you'll still need to do the Stripe set up steps described in [section 3.5](#35-register-stripe-webhooks).
+
 ## General Installation Instructions
 
 Docker deployment is the simplest approach and ensures consistency across environments.
 
 ### 1. Initial Setup
 
-> Set up your server however you would normally host. See the instructions in [Hetzner](#option-2a-hetzner-cloud-with-docker-recommended) for specific instructions on a basic installation server.
+> Set up your server however you would normally host. See the instructions in [Hetzner Cloud with Docker](#hetzner-cloud-with-docker) for specific instructions on a basic installation server.
 
 Connect to your VPS and create a deployment directory:
 
@@ -100,8 +140,8 @@ JWT_SECRET=your-secure-jwt-secret-here
 REFRESH_TOKEN_SECRET=your-secure-refresh-token-secret-here
 
 # Database
-DATABASE_URL="postgresql://mirlo_user:secure-password@pgsql:5432/mirlo?schema=public"
-POSTGRES_USER=mirlo_user
+DATABASE_URL="postgresql://mirlo:secure-password@pgsql:5432/mirlo?schema=public"
+POSTGRES_USER=mirlo
 POSTGRES_PASSWORD=secure-password
 
 # Redis
@@ -115,9 +155,8 @@ REDIS_PASSWORD=secure-redis-password
 MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=secure-minio-password
 
-# Backblaze B2 / S3 / Hertzeg Object Storage
+# Backblaze B2 / S3 / Hetzner Object Storage
 S3_ACCESS_KEY_ID=
-S3_KEY_NAME=
 S3_SECRET_ACCESS_KEY=
 S3_REGION=
 S3_ENDPOINT=
@@ -192,7 +231,14 @@ Verify all services are running:
 docker compose ps
 ```
 
-You should see 5 services: api, background, pgsql, redis, minio
+You should see 6 services: api, background, pgsql, redis, minio, mailhog
+
+MailHog is a dev-only mail catcher — it runs in production too, but is only
+actually used until you configure a real email provider (Mailgun, Postmark,
+SendGrid, or SMTP) in the admin settings panel. Until then, password resets
+and other transactional emails go nowhere but MailHog's own inbox at
+`http://localhost:8025` (see [Hetzner Firewall](#hetzner-firewall--backup) for
+how to reach it over SSH).
 
 ### 5. Initialize Database
 
@@ -387,6 +433,12 @@ docker compose restart background
 ### Update to latest version of Mirlo:
 
 ```bash
+bash scripts/update.sh
+```
+
+This is what the script above does; equivalent manual steps:
+
+```bash
 cd /opt/mirlo
 git pull origin main
 docker compose build # This step can take a while
@@ -398,18 +450,18 @@ docker compose exec api yarn client:build
 ### Backup database:
 
 ```bash
-docker compose exec pgsql pg_dump -U mirlo_user mirlo > /backup/mirlo-$(date +%Y%m%d).sql
+docker compose exec pgsql pg_dump -U mirlo mirlo > /backup/mirlo-$(date +%Y%m%d).sql
 ```
 
 ```bash
-docker compose exec pgsql pg_dump -U mirlo_user mirlo | gzip > /backups/mirlo-$(date +%Y%m%d).sql.gz
+docker compose exec pgsql pg_dump -U mirlo mirlo | gzip > /backups/mirlo-$(date +%Y%m%d).sql.gz
 ```
 
 ### Restoring from Backup
 
 ```bash
 # Docker
-gunzip < backup.sql.gz | docker compose exec -T pgsql psql -U mirlo_user mirlo
+gunzip < backup.sql.gz | docker compose exec -T pgsql psql -U mirlo mirlo
 
 # Bare-metal
 gunzip < backup.sql.gz | sudo -u postgres psql mirlo
@@ -429,7 +481,7 @@ Verify connection string and credentials:
 
 ```bash
 # Docker - connect to the pgsql container directly
-docker compose exec pgsql psql -U mirlo_user nomads
+docker compose exec pgsql psql -U mirlo mirlo
 ```
 
 Once connected, you can query the database. Useful commands:
@@ -455,14 +507,14 @@ restart` does not re-read `.env` — run `docker compose up -d` instead.
    accepts your current password over TCP (the same auth path the app uses):
 
    ```bash
-   docker compose exec pgsql psql "postgresql://mirlo_user:<password>@localhost:5432/mirlo" -c "select 1"
+   docker compose exec pgsql psql "postgresql://mirlo:<password>@localhost:5432/mirlo" -c "select 1"
    ```
 
    If that fails too, either reset the password in place:
 
    ```bash
-   docker compose exec pgsql psql -U mirlo_user -d postgres \
-     -c "ALTER ROLE mirlo_user WITH PASSWORD '<password-from-your-env>';"
+   docker compose exec pgsql psql -U mirlo -d postgres \
+     -c "ALTER ROLE mirlo WITH PASSWORD '<password-from-your-env>';"
    ```
 
    or — **only on a fresh install with nothing in the database** — wipe the
@@ -486,6 +538,26 @@ docker compose exec minio mc admin info local
 ```
 
 Or check wherever your storage buckets are.
+
+> **First upload to a newly-created bucket gets `403 AccessDenied` (S3-compatible
+> providers, e.g. Hetzner Object Storage on Ceph/RadosGW):** Mirlo auto-creates
+> buckets on first use (`createBucketIfNotExists` in `src/utils/minio.ts`), and
+> on at least one Ceph-backed provider the bucket isn't immediately writable —
+> the `CreateBucket` call succeeds but the very next `PutObject` 403s. This is
+> propagation lag, not a credentials or token-scope problem. Just retry the
+> upload (or the request that triggers it); it succeeds once the bucket has
+> propagated, usually within seconds.
+
+> **Track audio upload fails silently in the browser, nothing in the API logs
+> past a bucket check:** track audio is uploaded straight from the browser to
+> your S3-compatible storage via a presigned URL — the API never sees the file
+> bytes, so a failure here won't show up in `docker compose logs api`. Check
+> the browser's network tab instead: a CORS error on the `PUT` to your storage
+> endpoint means the bucket's CORS configuration hasn't been applied yet.
+> Mirlo sets this automatically the same way it does the public-read policy on
+> image buckets (`applyCorsPolicyS3` in `src/utils/minio.ts`, run whenever a
+> bucket is created or checked at boot) — restarting the api/background
+> containers re-runs that check and should resolve it.
 
 ### Out of memory errors
 
@@ -566,10 +638,9 @@ In the Hetzner Cloud Console:
 
 **3. Initial Server Setup**
 
-````bash
+```bash
 ssh root@<server-ip>
 
-# Update system
 apt-get update && apt-get upgrade -y
 
 # Install Docker (this also installs the Docker Compose v2 plugin —
@@ -578,13 +649,8 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 rm get-docker.sh
 
-# Install useful tools
-apt-get install -y git curl wget nano nginx certbot python3-certbot-nginx
-
-# Add swap — cloud images ship without it, and the client build can
-# exhaust 4GB of RAM (see Troubleshooting → Out of memory errors)
-fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
-echo '/swapfile none swap sw 0 0' >> /etc/fstab
+apt-get install -y git
+```
 
 **4. Mount Storage Volume (if added)**
 
@@ -598,47 +664,12 @@ mkdir -p /mnt/mirlo-storage
 echo '/dev/sdb /mnt/mirlo-storage ext4 defaults 0 0' >> /etc/fstab
 mount /mnt/mirlo-storage
 chmod 755 /mnt/mirlo-storage
-````
-
-**5. Clone and Configure Mirlo**
-
-Follow the instructions in [Initial Setup](#_1-initial-setup).
-
-Configure environment variables (adjust `MEDIA_LOCATION` if using mounted volume):
-
-**6. Start Services**
-
-Use the production Docker Compose file to avoid exposing database/cache ports to the internet:
-
-```bash
-docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml exec api yarn prisma:migrate:deploy
 ```
 
-**Note:** `docker-compose.prod.yml` disables ports on PostgreSQL and Redis to prevent unauthorized access. Only the API (port 3000) is exposed.
+**5. Point Domain to Server**
 
-**8. Setup Hetzner Object Storage (S3-Compatible)**
-
-For production, use Hetzner's Object Storage instead of MinIO to reduce costs:
-
-1. In Hetzner Console, go to "Storage" → "Object Storage"
-2. Create a new Bucket (e.g., "mirlo-media")
-3. Create an API Token for the bucket
-4. Update `.env` to use S3:
-
-```dotenv
-# Use S3 backend instead of MinIO
-S3_ACCESS_KEY_ID=your-hetzner-key
-S3_SECRET_ACCESS_KEY=your-hetzner-secret
-S3_REGION=eu-central-1
-S3_ENDPOINT=https://mirlo-media.eu-central-1.linodeobjects.com
-```
-
-Alternatively, continue using MinIO for simplicity.
-
-**9. Point Domain to Server**
-
-Add an A record in your domain registrar:
+Add an A record in your domain registrar (do this before installing, so
+certbot's domain validation succeeds on the first try):
 
 ```
 A record: yourdomain.com → <server-ip>
@@ -650,9 +681,49 @@ cloud), or make sure the zone's SSL/TLS mode is "Full (strict)" — a proxied
 record with "Flexible" SSL causes an infinite redirect loop (see
 [Troubleshooting](#redirect-loop-or-https-redirects-to-itself)).
 
-**10. Setup Nginx & SSL**
+**6. Clone and Install**
 
-Follow the Nginx setup steps from Option 1, sections 7-8.
+```bash
+mkdir -p /opt/mirlo && cd /opt/mirlo
+git clone https://github.com/funmusicplace/mirlo.git .
+bash scripts/install.sh
+```
+
+This is the [Quick Install](#quick-install-recommended) covered above — it
+adds swap if needed, generates `.env`, builds and starts everything with
+`docker-compose.prod.yml` (no exposed database/cache ports), creates the
+admin user, builds the frontend, and configures nginx + Let's Encrypt against
+the domain you point it at.
+
+**7. Setup Hetzner Object Storage (S3-Compatible), optional**
+
+MinIO (bundled by default) is fine to start with. For production, Hetzner's
+Object Storage reduces costs. Mirlo creates its own buckets on first use
+(named `mirlo-audio`, `mirlo-images`, `mirlo-downloads`, or prefixed per your
+`bucketNames` setting — see
+[docs/hosting/object-storage.md](object-storage.md)), including the
+public-read and CORS policies each bucket needs (providers create buckets
+private with no CORS by default) — so there's no bucket to create or
+configure by hand, just an API token with bucket-creation permission. You can
+either enter these values at the `install.sh` storage prompt or set them
+directly in `.env`:
+
+1. In Hetzner Console, go to "Storage" → "Object Storage"
+2. Create an API Token (project-level, not scoped to a single bucket, since it needs to create one)
+3. Add the S3 variables to `.env` and recreate the api/background containers:
+
+```dotenv
+S3_ACCESS_KEY_ID=your-hetzner-key
+S3_SECRET_ACCESS_KEY=your-hetzner-secret
+# Region matches whichever location you picked for the Object Storage
+# instance in the console: nbg1 (Nuremberg), fsn1 (Falkenstein), hel1 (Helsinki)
+S3_REGION=fsn1
+S3_ENDPOINT=https://fsn1.your-objectstorage.com
+```
+
+```bash
+docker compose up -d
+```
 
 ### Hetzner Dedicated Servers
 

@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import FeaturedArtistsSelector from "components/Admin/FeaturedArtistsSelector";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
@@ -13,8 +14,6 @@ import { useForm } from "react-hook-form";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
-import FeaturedArtistsSelector from "components/Admin/FeaturedArtistsSelector";
-
 interface FormSettings {
   platformPercent: number;
   cdnUrl?: string;
@@ -27,9 +26,9 @@ interface FormSettings {
   isClosedToPublicArtistSignup: boolean;
   showQueueDashboard: boolean;
   emailProvider?: SettingsFromAPI["settings"]["emailProvider"];
-  s3?: SettingsFromAPI["settings"]["s3"];
   cloudflareTurnstileSecret?: string;
   defconLevel?: number;
+  useConsolidatedBuckets?: boolean;
   bucketPrefix?: string;
 }
 
@@ -72,13 +71,6 @@ interface SettingsFromAPI {
         apiKey?: string;
       };
     };
-    s3?: {
-      keyId?: string;
-      applicationKey?: string;
-      keyName?: string;
-      endpoint?: string;
-      region?: string;
-    };
     cloudflareTurnstileSecret?: string;
     featuredArtistIds?: number[];
   };
@@ -100,6 +92,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const { reset, register, handleSubmit, watch } = useForm<FormSettings>();
   const stripeKeyConfigured = watch("stripe.keyConfigured");
+  const useConsolidatedBuckets = watch("useConsolidatedBuckets");
   const { data: initialFeaturedArtists } = useQuery(queryFeaturedArtists());
   const [featuredArtistsOverride, setFeaturedArtistsOverride] = React.useState<
     Artist[] | undefined
@@ -119,14 +112,14 @@ const Index = () => {
         platformPercent: response.result.settings?.platformPercent,
         cdnUrl: response.result.cdnUrl,
         instanceCustomization: {
-          ...(response.result.settings?.instanceCustomization ?? {
-            colors: {
-              button: "#be3455",
-              buttonText: "#ffffff",
-              background: "#ffffff",
-              text: "#000000",
-            },
-          }),
+          ...response.result.settings?.instanceCustomization,
+          colors: {
+            button: "#be3455",
+            buttonText: "#ffffff",
+            background: "#ffffff",
+            text: "#000000",
+            ...response.result.settings?.instanceCustomization?.colors,
+          },
         },
         stripe: {
           ...response.result.settings?.stripe,
@@ -135,9 +128,7 @@ const Index = () => {
         emailProvider: {
           ...response.result.settings?.emailProvider,
         },
-        s3: {
-          ...response.result.settings?.s3,
-        },
+        useConsolidatedBuckets: response.result.bucketNames != null,
         bucketPrefix: response.result.bucketNames?.prefix ?? "",
         cloudflareTurnstileSecret:
           response.result.settings?.cloudflareTurnstileSecret,
@@ -168,17 +159,13 @@ const Index = () => {
             emailProvider: {
               ...data.emailProvider,
             },
-            s3: {
-              ...data.s3,
-            },
             cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
             featuredArtistIds: featuredArtists.map((a) => a.id),
           },
           cdnUrl: data.cdnUrl,
-          bucketNames:
-            data.bucketPrefix !== undefined
-              ? { prefix: data.bucketPrefix }
-              : undefined,
+          bucketNames: data.useConsolidatedBuckets
+            ? { prefix: data.bucketPrefix ?? "" }
+            : null,
           terms: data.terms,
           showQueueDashboard: data.showQueueDashboard,
           isClosedToPublicArtistSignup: data.isClosedToPublicArtistSignup,
@@ -462,85 +449,45 @@ const Index = () => {
             </td>
           </tr>
           <tr>
-            <td>
-              <h3>S3 Settings</h3>
-            </td>
-          </tr>
-          <tr>
-            <td>keyId</td>
-            <td>
-              <InputEl
-                {...register("s3.keyId")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>{" "}
-          <tr>
-            <td>applicationKey</td>
-            <td>
-              <InputEl
-                {...register("s3.applicationKey")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>{" "}
-          <tr>
-            <td>keyName</td>
-            <td>
-              <InputEl
-                {...register("s3.keyName")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>endpoint</td>
-            <td>
-              <InputEl
-                {...register("s3.endpoint")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>region</td>
-            <td>
-              <InputEl
-                {...register("s3.region")}
-                className={css`
-                  text-align: right;
-                `}
-              />
+            <td colSpan={2}>
+              <h3>Storage</h3>
             </td>
           </tr>
           <tr>
             <td>
-              Bucket prefix
+              Use consolidated bucket mode
               <br />
               <small>
-                Leave empty for legacy mode (separate per-type buckets). Set to
-                any string (e.g. "") to use consolidated 3-bucket mode:
-                mirlo-audio, mirlo-images, mirlo-downloads.
+                Off keeps legacy mode (separate per-type buckets) — leave off
+                for existing installs unless you've migrated their data. On
+                switches to the consolidated 3-bucket layout: mirlo-audio,
+                mirlo-images, mirlo-downloads.
               </small>
             </td>
             <td>
               <InputEl
-                {...register("bucketPrefix")}
-                placeholder="(empty = legacy mode)"
+                {...register("useConsolidatedBuckets")}
+                type="checkbox"
                 className={css`
                   text-align: right;
                 `}
               />
             </td>
           </tr>
+          {useConsolidatedBuckets && (
+            <tr>
+              <td>Bucket prefix</td>
+              <td>
+                <InputEl
+                  {...register("bucketPrefix")}
+                  placeholder="(optional prefix)"
+                  className={css`
+                    text-align: right;
+                  `}
+                />
+              </td>
+            </tr>
+          )}
           <tr>
             <td>cloudflareTurnstileSecret</td>
             <td>

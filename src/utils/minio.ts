@@ -8,12 +8,15 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   PutObjectCommand,
+  PutBucketPolicyCommand,
+  PutBucketCorsCommand,
   HeadObjectCommand,
   HeadObjectCommandOutput,
   ListObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 import contentDisposition from "content-disposition";
 import { Client, BucketItem } from "minio";
 import * as Minio from "minio";
@@ -127,9 +130,9 @@ export const setBucketConfig = (config: BucketConfig | null) => {
   _ensuredBuckets.clear();
 };
 
-const ensureBucketCached = async (bucket: string) => {
+const ensureBucketCached = async (bucket: string, makePublic?: boolean) => {
   if (!_ensuredBuckets.has(bucket)) {
-    await createBucketIfNotExists(bucket, logger);
+    await createBucketIfNotExists(bucket, logger, { makePublic });
     _ensuredBuckets.add(bucket);
   }
 };
@@ -155,10 +158,12 @@ const {
   MINIO_ROOT_PASSWORD = "",
   S3_ACCESS_KEY_ID = "",
   S3_SECRET_ACCESS_KEY = "",
-  S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
+  S3_ENDPOINT: RAW_S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
   S3_REGION = "us-east-005",
   MINIO_API_PORT = 9000,
 } = process.env;
+
+export const S3_ENDPOINT = RAW_S3_ENDPOINT;
 
 // Storage backend selection. Set STORAGE_BACKEND=minio|s3|backblaze to choose
 // explicitly; when unset, the backend is inferred from what's configured —
@@ -215,8 +220,10 @@ export const minioPublicClient =
 
 // To test backblaze locally, set S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY
 // (the backend auto-switches), or force it with STORAGE_BACKEND=s3.
-// FIXME: this should / could be set in the database as part
-// of the site settings.
+// Storage credentials live in .env rather than the Settings table
+// deliberately — the S3Client below is constructed once at module load,
+// before any DB read could happen, and .env is also what install.sh already
+// prompts for.
 
 // Instantiate a second minio client for backblaze
 export const backblazeClient =
@@ -228,27 +235,115 @@ export const backblazeClient =
           accessKeyId: S3_ACCESS_KEY_ID,
           secretAccessKey: S3_SECRET_ACCESS_KEY,
         },
+        // Path-style (endpoint/bucket/key) rather than virtual-hosted-style
+        // (bucket.endpoint/key). Virtual-hosted style depends on the provider
+        // having wildcard DNS/TLS for arbitrary bucket-name subdomains, which
+        // isn't reliable on every S3-compatible provider and has caused
+        // requests to hang indefinitely on newly-created buckets.
+        forcePathStyle: true,
         responseChecksumValidation: "WHEN_REQUIRED",
         requestChecksumCalculation: "WHEN_REQUIRED",
         maxAttempts: 4,
+        // Without explicit timeouts, a stalled connection (no response, no
+        // error) hangs forever — maxAttempts only retries attempts that
+        // actually fail, so a silent stall never gets retried at all.
+        requestHandler: new NodeHttpHandler({
+          connectionTimeout: 10_000,
+          requestTimeout: 30_000,
+        }),
       })
     : undefined;
 
-const createB2BucketIfNotExists = async (bucket: string) => {
+// Buckets holding processed images are fetched directly by browsers (see
+// docs/hosting/object-storage.md) and so need public read access. Providers
+// like Hetzner Object Storage/Backblaze B2 create buckets private by default,
+// so we apply this ourselves rather than relying on manual console setup.
+const publicReadPolicy = (bucket: string) =>
+  JSON.stringify({
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Sid: "PublicReadGetObject",
+        Effect: "Allow",
+        Principal: "*",
+        Action: "s3:GetObject",
+        Resource: `arn:aws:s3:::${bucket}/*`,
+      },
+    ],
+  });
+
+// The browser PUTs directly to a presigned URL for track audio uploads (and
+// GETs directly for some flows), which is a cross-origin request from the
+// site's own domain to the storage provider's domain. Providers create
+// buckets with no CORS configuration by default, so that PUT never reaches
+// storage — the browser blocks it at the preflight stage. AllowedOrigins is
+// left as "*" since the presigned signature (not CORS) is what actually
+// authorizes the request; CORS here only unblocks the browser's JS access.
+const corsConfiguration = () => ({
+  CORSRules: [
+    {
+      AllowedOrigins: ["*"],
+      AllowedMethods: ["GET", "PUT", "POST", "HEAD"],
+      AllowedHeaders: ["*"],
+      ExposeHeaders: ["ETag"],
+      MaxAgeSeconds: 3000,
+    },
+  ],
+});
+
+const applyCorsPolicyS3 = async (bucket: string) => {
+  if (!backblazeClient) return;
+  try {
+    await backblazeClient.send(
+      new PutBucketCorsCommand({
+        Bucket: bucket,
+        CORSConfiguration: corsConfiguration(),
+      })
+    );
+    logger.info(`backblaze: set CORS policy on bucket: ${bucket}`);
+  } catch (e) {
+    logger.error(`backblaze: failed to set CORS policy on bucket ${bucket}`);
+    logger.error(e);
+  }
+};
+
+const applyPublicReadPolicyS3 = async (bucket: string) => {
+  if (!backblazeClient) return;
+  try {
+    await backblazeClient.send(
+      new PutBucketPolicyCommand({
+        Bucket: bucket,
+        Policy: publicReadPolicy(bucket),
+      })
+    );
+    logger.info(`backblaze: set public-read policy on bucket: ${bucket}`);
+  } catch (e) {
+    logger.error(
+      `backblaze: failed to set public-read policy on bucket ${bucket} — ` +
+        `it may need to be made public manually via your provider's console`
+    );
+    logger.error(e);
+  }
+};
+
+const createB2BucketIfNotExists = async (
+  bucket: string,
+  makePublic?: boolean
+) => {
   if (!backblazeClient) {
     throw new Error("Backblaze client is not initialized");
   }
-  logger.info(`backblaze: checking if a bucket exists: ${bucket}`);
-  let exists;
   try {
-    exists = await backblazeClient.send(
-      new HeadBucketCommand({ Bucket: bucket })
-    );
+    await backblazeClient.send(new HeadBucketCommand({ Bucket: bucket }));
   } catch (e) {
-    logger.info(`backblaze: failed to check, creating bucket: ${bucket}`);
+    logger.info(`backblaze: bucket ${bucket} doesn't exist yet, creating it`);
     await backblazeClient.send(new CreateBucketCommand({ Bucket: bucket }));
-    logger.info(`backblaze: created bucket: ${bucket}`);
   }
+
+  if (makePublic) {
+    await applyPublicReadPolicyS3(bucket);
+  }
+  await applyCorsPolicyS3(bucket);
 
   return true;
 };
@@ -346,13 +441,14 @@ const normalizeStatToMeta = (stat: {
 
 export const createBucketIfNotExists = async (
   bucket: string,
-  logger?: Logger
+  logger?: Logger,
+  options?: { makePublic?: boolean }
 ) => {
   let exists;
   logger?.info(`${backendStorage}: checking if a bucket exists in: ${bucket}`);
 
   if (backendStorage === "backblaze") {
-    await createB2BucketIfNotExists(bucket);
+    await createB2BucketIfNotExists(bucket, options?.makePublic);
   } else if (backendStorage === "minio" && minioClient) {
     try {
       exists = await minioClient.bucketExists(bucket);
@@ -368,6 +464,18 @@ export const createBucketIfNotExists = async (
       logger?.info(`minio: does not exist, creating bucket: ${bucket}`);
       await minioClient.makeBucket(bucket);
       logger?.info(`minio: created bucket: ${bucket}`);
+    }
+
+    if (options?.makePublic) {
+      try {
+        await minioClient.setBucketPolicy(bucket, publicReadPolicy(bucket));
+        logger?.info(`minio: set public-read policy on bucket: ${bucket}`);
+      } catch (e) {
+        logger?.error(
+          `minio: failed to set public-read policy on bucket ${bucket}`
+        );
+        logger?.error(e);
+      }
     }
   }
 
@@ -889,7 +997,7 @@ export const uploadIncomingImageByType = async (
 ) => {
   const { incoming, prefix } = imageTypeBuckets[imageType];
   const bucket = getImagesBucket(incoming);
-  await ensureBucketCached(bucket);
+  await ensureBucketCached(bucket, true);
   const key =
     isConsolidatedMode() && prefix
       ? `incoming/${prefix}/${fileName}`
@@ -916,7 +1024,7 @@ export const uploadOptimizedImageByType = async (
 ) => {
   const { final, prefix } = imageTypeBuckets[imageType];
   const bucket = getImagesBucket(final);
-  await ensureBucketCached(bucket);
+  await ensureBucketCached(bucket, true);
   const key =
     isConsolidatedMode() && prefix ? `${prefix}/${fileName}` : fileName;
   return uploadWrapper(bucket, key, buffer, options);
@@ -1036,4 +1144,50 @@ export const uploadZip = async (
   const bucket = zipBucket(type);
   await ensureBucketCached(bucket);
   return uploadWrapper(bucket, zipKey(type, id, format), stream);
+};
+
+// ── Eager bucket creation ────────────────────────────────────────────────────
+// S3-compatible providers (Ceph-backed ones especially) can take a few
+// seconds to make a just-created bucket writable/reachable. Rather than let
+// that surface as a confusing failure on someone's first upload of a given
+// media type, create every bucket this instance will ever need right after
+// boot, so the delay happens once during startup instead of mid-upload.
+export const ensureAllBucketsExist = async () => {
+  const imageBuckets = new Set<string>();
+  Object.values(imageTypeBuckets).forEach(({ incoming, final }) => {
+    imageBuckets.add(getImagesBucket(incoming));
+    imageBuckets.add(getImagesBucket(final));
+  });
+
+  const audioBuckets = new Set([
+    getAudioBucket(incomingAudioBucket),
+    getAudioBucket(finalAudioBucket),
+  ]);
+
+  const downloadBuckets = new Set([
+    getDownloadsBucket(downloadableContentBucket),
+    getDownloadsBucket(trackFormatBucket),
+    getDownloadsBucket(trackGroupFormatBucket),
+  ]);
+
+  await Promise.all([
+    ...Array.from(imageBuckets).map((b) =>
+      ensureBucketCached(b, true).catch((e) => {
+        logger.error(`Failed to eagerly create image bucket ${b}`);
+        logger.error(e);
+      })
+    ),
+    ...Array.from(audioBuckets).map((b) =>
+      ensureBucketCached(b).catch((e) => {
+        logger.error(`Failed to eagerly create audio bucket ${b}`);
+        logger.error(e);
+      })
+    ),
+    ...Array.from(downloadBuckets).map((b) =>
+      ensureBucketCached(b).catch((e) => {
+        logger.error(`Failed to eagerly create downloads bucket ${b}`);
+        logger.error(e);
+      })
+    ),
+  ]);
 };

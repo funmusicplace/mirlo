@@ -74,15 +74,9 @@ function makeSettings(overrides: object = {}) {
           sendgrid: { apiKey: "" },
           mailgun: { apiKey: "", domain: "" },
         },
-        s3: {
-          keyId: "keyid123",
-          applicationKey: "appkey123",
-          keyName: "mykey",
-          endpoint: "https://s3.example.com",
-          region: "us-east-1",
-        },
         cloudflareTurnstileSecret: "cf-secret",
       },
+      bucketNames: null,
       ...overrides,
     },
   };
@@ -179,9 +173,44 @@ describe("Settings", () => {
           isClosedToPublicArtistSignup: false,
           settings: expect.objectContaining({
             platformPercent: 10,
-            s3: expect.objectContaining({ keyId: "keyid123" }),
           }),
+          bucketNames: null,
         })
+      );
+    });
+  });
+
+  test("preserves legacy (null) bucketNames when consolidated mode isn't enabled", async () => {
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith(
+        "admin/settings",
+        expect.objectContaining({ bucketNames: null })
+      );
+    });
+  });
+
+  test("sends a prefix when consolidated bucket mode is enabled", async () => {
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    const consolidatedCheckbox = document.querySelector(
+      'input[name="useConsolidatedBuckets"]'
+    ) as HTMLInputElement;
+    await userEvent.click(consolidatedCheckbox);
+
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith(
+        "admin/settings",
+        expect.objectContaining({ bucketNames: { prefix: "" } })
       );
     });
   });
@@ -226,7 +255,7 @@ describe("Settings", () => {
     expect(screen.getByText("General Settings")).toBeInTheDocument();
     expect(screen.getByText("Stripe Settings")).toBeInTheDocument();
     expect(screen.getByText("Email Provider Settings")).toBeInTheDocument();
-    expect(screen.getByText("S3 Settings")).toBeInTheDocument();
+    expect(screen.getByText("Storage")).toBeInTheDocument();
     expect(screen.getByText("Security")).toBeInTheDocument();
   });
 });

@@ -9,7 +9,11 @@ import yargs from "yargs";
 
 import { REDIS_CONFIG } from "../config/redis";
 import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
-import { setBucketConfig, BucketConfig } from "../utils/minio";
+import {
+  setBucketConfig,
+  BucketConfig,
+  ensureAllBucketsExist,
+} from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
 
 import cleanUpOldFilesJob from "./clean-up-old-files";
@@ -109,6 +113,10 @@ yargs
   .command("run", "starts file processing queue", async (argv: any) => {
     const settings = await getSiteSettings();
     setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+    ensureAllBucketsExist().catch((e) => {
+      logger.error("Failed to eagerly create storage buckets on boot");
+      logger.error(e);
+    });
     logger.info("STARTING WORKER QUEUE");
     audioQueue();
     // audioDurationQueue();

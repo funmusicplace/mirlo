@@ -8,6 +8,11 @@
 # Usage:
 #   bash scripts/generate-env.sh
 #   MIRLO_DOMAIN=https://mirlo.example.com bash scripts/generate-env.sh
+#
+# Optionally pass S3-compatible object storage credentials (Backblaze B2,
+# Hetzner Object Storage, etc.) to skip MinIO and use them instead:
+#   S3_ACCESS_KEY_ID=... S3_SECRET_ACCESS_KEY=... S3_REGION=... S3_ENDPOINT=... \
+#     bash scripts/generate-env.sh
 
 set -euo pipefail
 
@@ -75,9 +80,16 @@ sed -E \
   -e "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=${REDIS_PASSWORD}|" \
   -e "s|^MINIO_ROOT_USER=.*|MINIO_ROOT_USER=${MINIO_ROOT_USER}|" \
   -e "s|^MINIO_ROOT_PASSWORD=.*|MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}|" \
+  -e "s|^S3_ACCESS_KEY_ID=.*|S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}|" \
+  -e "s|^S3_SECRET_ACCESS_KEY=.*|S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-}|" \
+  -e "s|^S3_REGION=.*|S3_REGION=${S3_REGION:-}|" \
+  -e "s|^S3_ENDPOINT=.*|S3_ENDPOINT=${S3_ENDPOINT:-}|" \
   .env.example > .env
 
 echo "✓ Wrote .env"
+if [ -n "${S3_ACCESS_KEY_ID:-}" ]; then
+  echo "✓ Configured S3-compatible object storage (region: ${S3_REGION:-unset})"
+fi
 
 if [ -f client/.env ]; then
   echo "⚠️  client/.env already exists — leaving it untouched."
