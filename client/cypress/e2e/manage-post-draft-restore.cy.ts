@@ -3,6 +3,18 @@
 const postDraftEmail = "post-draft-admin@example.com";
 const postDraftPassword = "test1234";
 
+const bodyDraftKey = (id: number) => `postBodyDraft-${id}`;
+
+/** Wait until the debounced body draft is persisted (500ms debounce in useBodyDraft). */
+const waitForBodyDraft = (id: number, expectedText: string) => {
+  cy.window().should((win) => {
+    const draft = win.localStorage.getItem(bodyDraftKey(id));
+    expect(draft, "body draft should be in localStorage").to.be.a("string");
+    expect(draft!).to.include(expectedText);
+    expect(draft!).not.to.equal("<p>Original server body</p>");
+  });
+};
+
 describe("manage post draft restore", () => {
   let artistId: number;
   let postId: number;
@@ -59,7 +71,7 @@ describe("manage post draft restore", () => {
 
   it("restores the body content from local storage on reload", () => {
     cy.get(".ProseMirror").click().type(" plus mes edits");
-    cy.wait(700);
+    waitForBodyDraft(postId, "plus mes edits");
 
     cy.reload();
     cy.wait("@authProfile");
@@ -70,7 +82,7 @@ describe("manage post draft restore", () => {
 
   it("Discard reverts the body to the server value and clears the banner", () => {
     cy.get(".ProseMirror").click().type(" to be discarded");
-    cy.wait(700);
+    waitForBodyDraft(postId, "to be discarded");
 
     cy.reload();
     cy.wait("@authProfile");
@@ -87,7 +99,7 @@ describe("manage post draft restore", () => {
 
   it("Keep dismisses the banner and leaves the restored body untouched", () => {
     cy.get(".ProseMirror").click().type(" kept content");
-    cy.wait(700);
+    waitForBodyDraft(postId, "kept content");
 
     cy.reload();
     cy.wait("@authProfile");
