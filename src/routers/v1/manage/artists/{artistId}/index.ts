@@ -14,7 +14,7 @@ import {
 } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
-import { processSingleArtist } from "../../../../../utils/serialize/artist";
+import { processSingleArtist } from "../../../../../serializers/artist";
 
 type Params = {
   artistId: string;
@@ -162,7 +162,11 @@ export default function () {
         const artist = await prisma.profile.findFirst({
           where: { id: Number(artistId) },
         });
-        res.json({ result: artist });
+        res.json({
+          result: artist
+            ? processSingleArtist(artist, Number(user.id))
+            : artist,
+        });
       } else {
         res.json({
           error: "An unknown error occurred",

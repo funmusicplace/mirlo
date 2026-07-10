@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { serializeMerch } from "../../../../serializers/merch";
 import { AppError } from "../../../../utils/error";
-import { processSingleMerch } from "../../../../utils/merch";
 
 export default function () {
   const operations = {
@@ -26,7 +26,7 @@ export default function () {
             AND: [
               { urlSlug: { equals: id, mode: "insensitive" } },
               {
-                artist: {
+                profile: {
                   urlSlug: artistId,
                 },
               },
@@ -44,7 +44,7 @@ export default function () {
           },
         },
         include: {
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           images: true,
           shippingDestinations: true,
           downloadableContent: {
@@ -53,11 +53,11 @@ export default function () {
           includePurchaseTrackGroup: {
             include: {
               // Without the trackGroup's own artist the client falls back to
-              // `merch.artist` when building the album link — which 404s when a
+              // `merch.profile` when building the album link — which 404s when a
               // label attaches a roster artist's release to label-owned merch
               // (the URL ends up `/{labelSlug}/release/{trackGroupSlug}` and the
               // trackGroup actually lives under `{rosterArtistSlug}`). See #2008.
-              artist: true,
+              profile: true,
               tracks: {
                 where: {
                   deletedAt: null,
@@ -86,7 +86,7 @@ export default function () {
           httpCode: 404,
         });
       }
-      res.json({ result: processSingleMerch(merch) });
+      res.json({ result: serializeMerch(merch) });
     } catch (e) {
       next(e);
     }

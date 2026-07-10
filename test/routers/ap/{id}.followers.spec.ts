@@ -70,7 +70,7 @@ describe("ActivityPub followers endpoint", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         actor: "https://mastodon.social/users/testfollower",
         inboxUrl: "https://mastodon.social/users/testfollower/inbox",
       },

@@ -1,9 +1,11 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 type Params = {
   trackGroupId: string;
@@ -45,7 +47,9 @@ export default function () {
         },
       });
 
-      res.json({ result: trackGroup });
+      res.json({
+        result: trackGroup ? processSingleTrackGroup(trackGroup) : trackGroup,
+      });
     } catch (error) {
       next(error);
     }

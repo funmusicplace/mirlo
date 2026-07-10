@@ -5,7 +5,7 @@ export const trackGroups: Prisma.TrackGroupCreateInput[] = [
     title: "The Bird Album",
     about: "This album features various bird songs.",
     urlSlug: "the-bird-album",
-    artist: {
+    profile: {
       connect: {
         id: 1,
       },
@@ -15,7 +15,7 @@ export const trackGroups: Prisma.TrackGroupCreateInput[] = [
     title: "We hate birds actually",
     about: "This album features various bird songs.",
     urlSlug: "we-hate-birds-actually",
-    artist: {
+    profile: {
       connect: {
         id: 2,
       },
@@ -25,7 +25,7 @@ export const trackGroups: Prisma.TrackGroupCreateInput[] = [
     title: "CROW ATTACK",
     about: "This album features various bird songs.",
     urlSlug: "crow-attack",
-    artist: {
+    profile: {
       connect: {
         id: 2,
       },
@@ -35,7 +35,7 @@ export const trackGroups: Prisma.TrackGroupCreateInput[] = [
     title: "words",
     about: "This album features various bird songs.",
     urlSlug: "words",
-    artist: {
+    profile: {
       connect: {
         id: 3,
       },

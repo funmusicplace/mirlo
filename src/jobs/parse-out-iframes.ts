@@ -71,14 +71,14 @@ export const parseOutIframes = async (
       trackGroupIds.length
         ? prisma.trackGroup.findMany({
             where: { id: { in: trackGroupIds } },
-            include: { artist: true, tracks: true, cover: true },
+            include: { profile: true, tracks: true, cover: true },
           })
         : Promise.resolve([]),
       trackIds.length
         ? prisma.track.findMany({
             where: { id: { in: trackIds }, deletedAt: null },
             include: {
-              trackGroup: { include: { artist: true, cover: true } },
+              trackGroup: { include: { profile: true, cover: true } },
             },
           })
         : Promise.resolve([]),
@@ -97,17 +97,17 @@ export const parseOutIframes = async (
       (_match, _before, type, id, _after) => {
         if (type === "trackGroup" && trackGroupMap[id]) {
           const tg = trackGroupMap[id];
-          const button = tg.artist.properties?.colors?.button || "#be3455";
+          const button = tg.profile.properties?.colors?.button || "#be3455";
           const background =
-            tg.artist.properties?.colors?.background || "#f5f0f0";
-          const text = tg.artist.properties?.colors?.text || "#111";
+            tg.profile.properties?.colors?.background || "#f5f0f0";
+          const text = tg.profile.properties?.colors?.text || "#111";
           // If the trackGroup is unreachable (draft/private/deleted/unreleased),
           // fall back to the post URL so the recipient lands somewhere that
           // actually plays the track. See #1703.
           const trackGroupUrl =
             fallbackUrl && isTrackGroupUnreachable(tg)
               ? fallbackUrl
-              : `${applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}`;
+              : `${applicationUrl}/${tg.profile.urlSlug}/release/${tg.urlSlug}`;
           const cover = coverUrl(tg.cover);
           return `<div data-type="trackGroup" data-id="${id}" style="
                     display: flex;
@@ -133,7 +133,7 @@ export const parseOutIframes = async (
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                      ">by <a href="${applicationUrl}/${tg.artist.urlSlug}" target="_blank" rel="noopener noreferrer" style="color: ${button}; text-decoration: none;">${tg.artist?.name || "Unknown"}</a> &middot; ${tg.tracks.length} track${tg.tracks.length === 1 ? "" : "s"} album</span>
+                      ">by <a href="${applicationUrl}/${tg.profile.urlSlug}" target="_blank" rel="noopener noreferrer" style="color: ${button}; text-decoration: none;">${tg.profile?.name || "Unknown"}</a> &middot; ${tg.tracks.length} track${tg.tracks.length === 1 ? "" : "s"} album</span>
                     </div>
                     <div style="flex-shrink: 0;">
                       <a href="${trackGroupUrl}" target="_blank" rel="noopener noreferrer" style="
@@ -154,17 +154,17 @@ export const parseOutIframes = async (
         } else if (type === "track" && trackMap[id]) {
           const t = trackMap[id];
           const button =
-            t.trackGroup.artist.properties?.colors?.button || "#be3455";
+            t.trackGroup.profile.properties?.colors?.button || "#be3455";
           const background =
-            t.trackGroup.artist.properties?.colors?.background || "#f5f0f0";
-          const text = t.trackGroup.artist.properties?.colors?.text || "#111";
+            t.trackGroup.profile.properties?.colors?.background || "#f5f0f0";
+          const text = t.trackGroup.profile.properties?.colors?.text || "#111";
           // Same fallback as the trackGroup branch: when a track's parent
           // album is unreachable to the public, link to the post that embeds
           // the track instead of an unreachable URL.
           const trackUrl =
             fallbackUrl && isTrackGroupUnreachable(t.trackGroup)
               ? fallbackUrl
-              : `${applicationUrl}/${t.trackGroup.artist.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}`;
+              : `${applicationUrl}/${t.trackGroup.profile.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}`;
           const cover = coverUrl(t.trackGroup.cover);
           return `<div data-type="track" data-id="${id}" style="
                     display: flex;
@@ -190,7 +190,7 @@ export const parseOutIframes = async (
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                      ">by <a href="${applicationUrl}/${t.trackGroup.artist.urlSlug}" target="_blank" rel="noopener noreferrer" style="color: ${button}; text-decoration: none;">${t.trackGroup.artist?.name || "Unknown"}</a></span>
+                      ">by <a href="${applicationUrl}/${t.trackGroup.profile.urlSlug}" target="_blank" rel="noopener noreferrer" style="color: ${button}; text-decoration: none;">${t.trackGroup.profile?.name || "Unknown"}</a></span>
                     </div>
                     <div style="flex-shrink: 0;">
                       <a href="${trackUrl}" target="_blank" rel="noopener noreferrer" style="

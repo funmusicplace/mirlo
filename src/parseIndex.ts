@@ -35,7 +35,6 @@ import {
   getTrackGroupWidget,
   getTrackWidget,
 } from "./parseIndex/widgetUrls";
-import { checkIsUserSubscriber } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
@@ -45,12 +44,16 @@ import {
   finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
-import { processSingleArtist } from "./utils/serialize/artist";
-import { postIncludeForUser } from "./utils/serialize/post";
+import { processSingleArtist } from "./serializers/artist";
+import { postIncludeForUser } from "./serializers/post";
+import {
+  getCanUserSeePostContent,
+  loadPurchasesForPostTracks,
+} from "./utils/postAccess";
 import {
   USER_PROFILE_SELECT,
   serializeUserProfile,
-} from "./utils/serialize/userProfile";
+} from "./serializers/userProfile";
 import { getSiteSettings } from "./utils/settings";
 import { whereForPublishedTrackGroups } from "./utils/trackGroup";
 
@@ -243,7 +246,7 @@ const handlePost: RouteHandler<PostParams> = async ({
 
   if (post) {
     const hasTracks = post.tracks.length > 0;
-    const postUrl = `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`;
+    const postUrl = `${client.applicationUrl}/${post.profile?.urlSlug}/posts/${post.id}`;
     const postDescription = `A post by ${artistName}`;
     const postCreatedDate = post.createdAt
       ? post.createdAt.toISOString().split("T")[0]
@@ -311,11 +314,16 @@ const handlePost: RouteHandler<PostParams> = async ({
     });
     if (fullPost) {
       try {
-        const isUserSubscriber = await checkIsUserSubscriber(
-          user,
-          fullPost.artistId
+        const canSeeContent = await getCanUserSeePostContent(user, fullPost);
+        const { userTrackGroupPurchases, userTrackPurchases } =
+          await loadPurchasesForPostTracks(user, fullPost);
+        registerPostHydration(
+          hydrations,
+          fullPost,
+          userTrackGroupPurchases,
+          userTrackPurchases,
+          canSeeContent
         );
-        registerPostHydration(hydrations, fullPost);
       } catch (err) {
         console.error("Error appending __MIRLO_POST__:", err);
       }
@@ -361,7 +369,7 @@ const handleMerch: RouteHandler<MerchParams> = async ({
 
   if (merch) {
     const coverString = merch.images?.[0]?.url.find((u) => u.includes("x600"));
-    const merchUrl = `${client.applicationUrl}/${merch.artist?.urlSlug}/merch/${merch.id}`;
+    const merchUrl = `${client.applicationUrl}/${merch.profile?.urlSlug}/merch/${merch.id}`;
     const merchDescription = `Merch by ${artistName}`;
 
     const schema = buildArticleSchema({
@@ -430,25 +438,25 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     registerTrackHydration(hydrations, track);
 
     const coverString = tg.cover?.url.find((u) => u.includes("x600"));
-    const trackUrl = `${client.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`;
+    const trackUrl = `${client.applicationUrl}/${tg.profile?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`;
     const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
 
     const schema = buildMusicRecordingSchema({
       title: track.title ?? "A track on Mirlo",
-      description: `A track by ${tg.artist.name}\nReleased ${releaseDate}`,
+      description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverString
         ? generateFullStaticImageUrl(coverString, finalCoversBucket)
         : undefined,
-      artistName: tg.artist.name,
-      artistUrl: `${client.applicationUrl}/${tg.artist?.urlSlug}`,
+      artistName: tg.profile.name,
+      artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
       duration: track.audio?.duration || undefined,
     });
 
     buildOpenGraphTags($, {
       title: track.title ?? "A track on Mirlo",
-      description: `A track by ${tg.artist.name}\nReleased ${releaseDate}`,
+      description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverString
         ? generateFullStaticImageUrl(coverString, finalCoversBucket)
@@ -464,7 +472,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         width: 560,
         height: 315,
       },
-      artistName: tg.artist.name,
+      artistName: tg.profile.name,
       releaseDate: releaseDate,
       schemas: [schema],
     });
@@ -472,7 +480,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     // Album page
     const coverString = tg.cover?.url.find((u) => u.includes("x600"));
     const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
-    const albumUrl = `${client.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}`;
+    const albumUrl = `${client.applicationUrl}/${tg.profile?.urlSlug}/release/${tg.urlSlug}`;
 
     const tracksList = tg.tracks.map((track) => ({
       title: track.title ?? "Untitled Track",
@@ -480,7 +488,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       url: `${albumUrl}/tracks/${track.id}`,
     }));
 
-    let description = `An album by ${tg.artist.name}\nReleased ${releaseDate}`;
+    let description = `An album by ${tg.profile.name}\nReleased ${releaseDate}`;
 
     if (tg.about) {
       description += `\n${tg.about}`;
@@ -493,8 +501,8 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       imageUrl: coverString
         ? generateFullStaticImageUrl(coverString, finalCoversBucket)
         : undefined,
-      artistName: tg.artist.name,
-      artistUrl: `${client.applicationUrl}/${tg.artist?.urlSlug}`,
+      artistName: tg.profile.name,
+      artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
       trackCount: tg.tracks.length,
       tracks: tracksList,
@@ -518,7 +526,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         width: 560,
         height: 315,
       },
-      artistName: tg.artist.name,
+      artistName: tg.profile.name,
       releaseDate: releaseDate,
       schemas: [schema],
     });
@@ -652,7 +660,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
     include: {
       trackGroup: {
         include: {
-          artist: { include: { avatar: { where: { deletedAt: null } } } },
+          profile: { include: { avatar: { where: { deletedAt: null } } } },
           cover: { where: { deletedAt: null } },
         },
       },
@@ -663,7 +671,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   if (!track) return;
 
   const artist = await prisma.profile.findFirst({
-    where: { id: track.trackGroup.artistId },
+    where: { id: track.trackGroup.profileId },
     include: {
       avatar: { where: { deletedAt: null } },
       background: { where: { deletedAt: null } },
@@ -691,7 +699,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
         include: { audio: true, trackArtists: true, license: true },
         orderBy: { order: "asc" },
       },
-      artist: {
+      profile: {
         include: {
           avatar: { where: { deletedAt: null } },
         },
@@ -704,7 +712,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   if (!trackGroup) return;
 
   const artist = await prisma.profile.findFirst({
-    where: { id: trackGroup.artistId },
+    where: { id: trackGroup.profileId },
     include: {
       avatar: { where: { deletedAt: null } },
       background: { where: { deletedAt: null } },

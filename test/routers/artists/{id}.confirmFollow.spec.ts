@@ -54,7 +54,7 @@ describe("artists/{id}/confirmFollow", () => {
         await prisma.profileUserSubscriptionConfirmation.create({
           data: {
             email: followerEmail,
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 
@@ -74,7 +74,7 @@ describe("artists/{id}/confirmFollow", () => {
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 
@@ -85,9 +85,9 @@ describe("artists/{id}/confirmFollow", () => {
           user: {
             email: followerEmail,
           },
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             isDefaultTier: true,
-            artistId: artist.id,
+            profileId: artist.id,
           },
         },
       });
@@ -110,7 +110,7 @@ describe("artists/{id}/confirmFollow", () => {
         await prisma.profileUserSubscriptionConfirmation.create({
           data: {
             email: followerEmail,
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 
@@ -130,7 +130,7 @@ describe("artists/{id}/confirmFollow", () => {
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 
@@ -141,9 +141,9 @@ describe("artists/{id}/confirmFollow", () => {
           user: {
             email: followerEmail,
           },
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             isDefaultTier: true,
-            artistId: artist.id,
+            profileId: artist.id,
           },
         },
       });

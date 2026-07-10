@@ -75,7 +75,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        artistId: artist.id,
+        profileId: artist.id,
         isPublic: true,
         isDraft: false,
       },
@@ -110,7 +110,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        artistId: artist.id,
+        profileId: artist.id,
         isPublic: true,
         content: "# HI",
         isDraft: false,
@@ -148,7 +148,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        artistId: artist.id,
+        profileId: artist.id,
         isPublic: false,
         content: "<p>hi</p><p>this is a guest post</p>",
         publishedAt: faker.date.past().toISOString(),
@@ -199,7 +199,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        artistId: artist.id,
+        profileId: artist.id,
         isPublic: false,
         isDraft: false,
         minimumSubscriptionTierId: artist.subscriptionTiers[0].id,
@@ -209,7 +209,7 @@ describe("artists/{id}/feed", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -260,7 +260,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        artistId: artist.id,
+        profileId: artist.id,
         isPublic: false,
         isDraft: false,
         minimumSubscriptionTierId: minTier.id,
@@ -270,7 +270,7 @@ describe("artists/{id}/feed", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: maxTier.id,
+        profileSubscriptionTierId: maxTier.id,
         amount: 10,
       },
     });
@@ -372,7 +372,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        artistId: artist.id,
+        profileId: artist.id,
         isPublic: true,
         isDraft: false,
         content: "# HI",

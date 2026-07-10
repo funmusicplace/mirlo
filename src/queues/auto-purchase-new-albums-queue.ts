@@ -4,6 +4,8 @@ import { Queue, QueueEvents } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
 import { getClient } from "../utils/getClient";
+import { processSingleTrackGroup } from "../serializers/trackGroup";
+import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { registerPurchase } from "../utils/trackGroup";
 
 import { sendMailQueue } from "./send-mail-queue";
@@ -70,13 +72,13 @@ autoPurchaseNewAlbumsQueueEvents.on("error", async (error) => {
 export async function autoPurchaseNewAlbumsProcessor(job: {
   data: {
     trackGroupId: number;
-    artistUserSubscriptionId: number;
+    profileUserSubscriptionId: number;
   };
 }) {
-  const { trackGroupId, artistUserSubscriptionId } = job.data;
+  const { trackGroupId, profileUserSubscriptionId } = job.data;
 
   logger.info(
-    `autoPurchaseNewAlbums: processing album ${trackGroupId} for subscription ${artistUserSubscriptionId}`
+    `autoPurchaseNewAlbums: processing album ${trackGroupId} for subscription ${profileUserSubscriptionId}`
   );
 
   try {
@@ -85,16 +87,16 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
       prisma.trackGroup.findUnique({
         where: { id: trackGroupId },
         include: {
-          artist: true,
+          profile: true,
         },
       }),
       prisma.profileUserSubscription.findUnique({
-        where: { id: artistUserSubscriptionId },
+        where: { id: profileUserSubscriptionId },
         include: {
           user: true,
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             include: {
-              artist: true,
+              profile: true,
             },
           },
         },
@@ -110,7 +112,7 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
 
     if (!subscription) {
       logger.warn(
-        `autoPurchaseNewAlbums: subscription ${artistUserSubscriptionId} not found, skipping`
+        `autoPurchaseNewAlbums: subscription ${profileUserSubscriptionId} not found, skipping`
       );
       return;
     }
@@ -148,8 +150,10 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
         to: subscription.user.email,
       },
       locals: {
-        trackGroup: album,
-        artist: subscription.artistSubscriptionTier.artist,
+        trackGroup: processSingleTrackGroup(album),
+        artist:
+          serializeProfileUserSubscription(subscription).artistSubscriptionTier
+            .artist,
         host: process.env.API_DOMAIN,
         client: (await getClient()).applicationUrl,
       } as AutomaticallyReceivedAlbumEmailType,

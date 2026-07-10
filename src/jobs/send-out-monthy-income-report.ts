@@ -1,14 +1,12 @@
 import prisma from "@mirlo/prisma";
-import {
-  ProfileUserSubscription,
-  SubscriptionDeleteReason,
-} from "@mirlo/prisma/client";
-import { Job } from "bullmq";
+import { SubscriptionDeleteReason } from "@mirlo/prisma/client";
 import { groupBy, keyBy, uniq } from "lodash";
 
 import logger from "../logger";
 import { findSales } from "../routers/v1/artists/{id}/supporters";
 import { getClient } from "../utils/getClient";
+import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
+import { serializeUserTransaction } from "../serializers/userTransaction";
 
 import sendMail from "./send-mail";
 
@@ -23,7 +21,12 @@ export type MonthlyIncomeReportEmailType = {
     currency: string;
     amount: number;
     artistUserSubscriptionCharges?: {
-      artistUserSubscription?: { shippingAddress: true };
+      artistUserSubscription?: {
+        artistSubscriptionTier: {
+          name: string;
+          interval: string;
+        };
+      };
     }[];
   }[];
   cancelledSubscriptions: {
@@ -37,6 +40,8 @@ export type MonthlyIncomeReportEmailType = {
     };
   }[];
   totalIncome: number;
+  host: string;
+  client: string;
 };
 
 const deleteReasonLabels: Record<SubscriptionDeleteReason, string> = {
@@ -91,8 +96,8 @@ const sendOutMonthlyIncomeReport = async () => {
             { deleteReason: null },
             { deleteReason: { not: "TIER_SWITCHED" } },
           ],
-          artistSubscriptionTier: {
-            artist: {
+          profileSubscriptionTier: {
+            profile: {
               deletedAt: null,
               userId: { in: uniq(sales.map((sale) => sale.artist[0].userId)) },
             },
@@ -102,10 +107,10 @@ const sendOutMonthlyIncomeReport = async () => {
           amount: true,
           deleteReason: true,
           user: { select: { name: true } },
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             select: {
               name: true,
-              artist: {
+              profile: {
                 select: { userId: true, user: { select: { currency: true } } },
               },
             },
@@ -121,7 +126,7 @@ const sendOutMonthlyIncomeReport = async () => {
           ? deleteReasonLabels[subscription.deleteReason]
           : "Cancelled",
       })),
-      (subscription) => subscription.artistSubscriptionTier.artist.userId
+      (subscription) => subscription.profileSubscriptionTier.profile.userId
     );
 
     const mappedArtists = keyBy(allArtists, "id");
@@ -135,7 +140,11 @@ const sendOutMonthlyIncomeReport = async () => {
       const artist = userSales[0].artist;
       const totalIncome = userSales.reduce((sum, sale) => sum + sale.amount, 0);
 
-      const user = mappedArtists[Number(artist[0].id)]?.user;
+      // Ensure user.name is not null
+      const user = {
+        ...mappedArtists[Number(artist[0].id)]?.user,
+        name: mappedArtists[Number(artist[0].id)]?.user?.name || "",
+      };
       try {
         sendMail<MonthlyIncomeReportEmailType>({
           data: {
@@ -145,20 +154,24 @@ const sendOutMonthlyIncomeReport = async () => {
             },
             locals: {
               user,
-              userSales: userSales.map((sale) => ({
-                ...sale,
-                user: {
-                  name: buyers[sale.userId]?.name || "A supporter",
-                  email: buyers[sale.userId]?.email || "",
-                },
-              })),
-              cancelledSubscriptions: groupedCancellations[userId] ?? [],
+              userSales: userSales.map((sale) =>
+                serializeUserTransaction({
+                  ...sale,
+                  user: {
+                    name: buyers[sale.userId]?.name || "A supporter",
+                    email: buyers[sale.userId]?.email || "",
+                  },
+                })
+              ),
+              cancelledSubscriptions: (groupedCancellations[userId] ?? []).map(
+                (subscription) => serializeProfileUserSubscription(subscription)
+              ),
               totalIncome,
-              host: process.env.API_DOMAIN,
+              host: process.env.API_DOMAIN || "",
               client: clientUrl,
             },
           },
-        } as Job);
+        });
       } catch (error) {
         logger.error(
           `Error sending out monthly income report to artist ${userId} (${user.email})`,

@@ -16,6 +16,7 @@ import { logger } from "../../../../logger";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
 import { getClient } from "../../../../utils/getClient";
+import { serializeUser } from "../../../../serializers/user";
 import { deleteUser, updateCurrencies } from "../../../../utils/user";
 
 export default function () {
@@ -31,7 +32,7 @@ export default function () {
       const user = await prisma.user.findUnique({
         where: { id: Number(userId) },
         select: {
-          artists: true,
+          profiles: true,
           email: true,
           name: true,
           stripeAccountId: true,
@@ -39,7 +40,7 @@ export default function () {
           isAdmin: true,
         },
       });
-      res.json({ result: user });
+      res.json({ result: user ? serializeUser(user) : user });
     } catch (e) {
       next(e);
     }

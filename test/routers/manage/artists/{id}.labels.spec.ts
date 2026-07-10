@@ -177,7 +177,7 @@ describe("manage/artists/{artistId}/labels", () => {
             userId: artistUser.id,
             notificationType: "LABEL_ADDED_ARTIST",
             relatedUserId: labelUser.id,
-            artistId: artist.id,
+            profileId: artist.id,
             content: "Existing notification",
           },
         });
@@ -200,7 +200,7 @@ describe("manage/artists/{artistId}/labels", () => {
             userId: artistUser.id,
             notificationType: "LABEL_ADDED_ARTIST",
             relatedUserId: labelUser.id,
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 
@@ -365,7 +365,7 @@ describe("manage/artists/{artistId}/labels", () => {
       assert.equal(emailData.locals.artist.id, artist.id);
       assert.ok(emailData.locals.label, "Label profile should be included");
       assert.equal(emailData.locals.user.id, artistUser.id);
-      assert.equal(emailData.locals.labelArtist.id, label.id);
+      assert.equal(emailData.locals.label.id, label.id);
     });
 
     it("should create notification alongside email queue", async () => {
@@ -406,7 +406,7 @@ describe("manage/artists/{artistId}/labels", () => {
           userId: artistUser.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
       assert.ok(notification, "Notification should be created");
@@ -488,7 +488,7 @@ describe("manage/artists/{artistId}/labels", () => {
           userId: artistUser.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          artistId: artist.id,
+          profileId: artist.id,
           content: "Existing notification",
         },
       });
@@ -518,7 +518,7 @@ describe("manage/artists/{artistId}/labels", () => {
           userId: artistUser.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
       assert.equal(

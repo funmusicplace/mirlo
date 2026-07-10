@@ -22,16 +22,13 @@ import {
   PlatformCurrencyValue,
   withPlatformCurrency,
 } from "./handleFinishedTransactions";
-import { generateFullStaticImageUrl } from "./images";
 import { streamOriginalAudio, removeCoverImages } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
-export { processSingleTrackGroup } from "./serialize/trackGroup";
-import { processSingleTrackGroup } from "./serialize/trackGroup";
 import { deleteTrack } from "./tracks";
 
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
   id: number;
-  artistId: number;
+  profileId: number;
   isPreorder: boolean;
   notifiedFollowersAt: Date | null;
 }) => {
@@ -44,7 +41,7 @@ export const notifyFollowersOfNewAlbum = async (trackGroup: {
 
   const artistFollowers = await prisma.profileUserSubscription.findMany({
     where: {
-      artistSubscriptionTier: { artistId: trackGroup.artistId },
+      profileSubscriptionTier: { profileId: trackGroup.profileId },
     },
   });
 
@@ -105,7 +102,7 @@ export const whereForPublishedTrackGroups = (opts?: {
     isHiddenTrackGroupForSongDrafts: false,
     adminEnabled: true,
     ...(opts?.includePrivate ? {} : { isPublic: true }),
-    artist: {
+    profile: {
       enabled: true,
       deletedAt: null,
       user: { canCreateArtists: true, deletedAt: null },
@@ -218,13 +215,13 @@ export const findTrackGroupIdForSlug = async (
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           urlSlug: { equals: trackGroupIdOrSlug, mode: "insensitive" },
-          artistId: parsedArtistId,
+          profileId: parsedArtistId,
         },
       });
       foundtrackGroupId = trackGroup ? trackGroup.id : undefined;
     } else {
       logger.info(
-        `findTrackGroupIdForSlug: returning undefined for trackGroupId: ${trackGroupIdOrSlug}, artistId: ${artistId}`
+        `findTrackGroupIdForSlug: returning undefined for trackGroupId: ${trackGroupIdOrSlug}, profileId: ${artistId}`
       );
       return undefined;
     }
@@ -287,7 +284,7 @@ export const trackGroupSingleInclude = (options: {
         downloadableContent: true,
       },
     },
-    artist: {
+    profile: {
       include: {
         user: {
           select: { currency: true },
@@ -296,7 +293,7 @@ export const trackGroupSingleInclude = (options: {
           include: {
             labelUser: {
               include: {
-                artists: {
+                profiles: {
                   where: { isLabelProfile: true },
                   select: { name: true, urlSlug: true, id: true },
                 },
@@ -493,7 +490,7 @@ export const registerPurchase = async ({
       transaction: true,
       trackGroup: {
         include: {
-          artist: true,
+          profile: true,
         },
       },
       user: {
@@ -509,10 +506,10 @@ export const registerPurchase = async ({
     await prisma.notification.create({
       data: {
         notificationType: "USER_BOUGHT_YOUR_ALBUM",
-        userId: refreshedPurchase?.trackGroup.artist.userId,
+        userId: refreshedPurchase?.trackGroup.profile.userId,
         relatedUserId: Number(userId),
         trackGroupId: Number(trackGroupId),
-        artistId: refreshedPurchase?.trackGroup.artistId,
+        profileId: refreshedPurchase?.trackGroup.profileId,
       },
     });
   }
@@ -612,7 +609,7 @@ export const registerTrackPurchase = async ({
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
             },
           },
         },
@@ -631,11 +628,11 @@ export const registerTrackPurchase = async ({
     await prisma.notification.create({
       data: {
         notificationType: "USER_BOUGHT_YOUR_TRACK",
-        userId: refreshedPurchase?.track.trackGroup.artist.userId,
+        userId: refreshedPurchase?.track.trackGroup.profile.userId,
         relatedUserId: Number(userId),
         trackId: Number(trackId),
         trackGroupId: refreshedPurchase?.track.trackGroup.id,
-        artistId: refreshedPurchase?.track.trackGroup.artistId,
+        profileId: refreshedPurchase?.track.trackGroup.profileId,
       },
     });
   }
@@ -658,7 +655,7 @@ export const basicTrackGroupInclude = {
         trackGroup: false,
       },
     },
-    artist: {
+    profile: {
       include: {
         user: false,
       },
@@ -967,9 +964,4 @@ export const createOrUpdatePledge = async ({
       description: "Failed to create or update pledge.",
     });
   }
-};
-
-export default {
-  cover: generateFullStaticImageUrl,
-  single: processSingleTrackGroup,
 };

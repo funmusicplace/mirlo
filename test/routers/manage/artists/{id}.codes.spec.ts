@@ -60,7 +60,7 @@ describe("manage/artists/{artistId}/codes", () => {
 
       await prisma.profileAvatar.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
 

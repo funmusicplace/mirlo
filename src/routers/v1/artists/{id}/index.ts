@@ -8,7 +8,7 @@ import {
   singleInclude,
   whereForAllArtistsThisLabelCanEdit,
 } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleArtist } from "../../../../serializers/artist";
 
 export default function () {
   const operations = {

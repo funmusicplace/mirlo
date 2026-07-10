@@ -5,8 +5,11 @@ import { getClient } from "./getClient";
 import { markdownAsHtml } from "./post";
 import { isArtist, isPost, isTrack, isTrackGroup } from "./typeguards";
 
-type FeedTrackGroup = TrackGroup & {
-  artist: { name: string; urlSlug: string; id: number } | null;
+type FeedArtistRef = { name: string; urlSlug: string; id: number } | null;
+
+type FeedTrackGroup = Omit<TrackGroup, "profileId"> & {
+  artistId?: number;
+  artist: FeedArtistRef;
 };
 
 type FeedTrack = Track & {
@@ -23,8 +26,11 @@ export const turnItemsIntoRSS = async (
   zipped: (
     | FeedTrackGroup
     | FeedTrack
-    | (Post & { artist: { name: string; urlSlug: string; id: number } | null })
-    | Profile
+    | (Omit<Post, "profileId"> & {
+        artistId?: number;
+        artist: FeedArtistRef;
+      })
+    | Omit<Profile, "apPrivateKey">
   )[]
 ) => {
   // TODO: probably want to convert this to some sort of module
@@ -57,23 +63,28 @@ export const turnItemsIntoRSS = async (
         date: p.createdAt,
       });
     } else if (isTrackGroup(p)) {
+      const tg = p as FeedTrackGroup;
       feed.item({
-        title: p.title
-          ? `${p.title} by ${p.artist?.name}`
-          : `A release by ${p.artist?.name}`,
+        title: tg.title
+          ? `${tg.title} by ${tg.artist?.name}`
+          : `A release by ${tg.artist?.name}`,
         description:
-          p.about ?? `<h2>An release by artist ${p.artist?.name}.</h2>`,
-        url: `${client?.applicationUrl}/${p.artist?.urlSlug}/release/${p.urlSlug}`,
-        date: p.releaseDate ?? p.createdAt,
+          tg.about ?? `<h2>An release by artist ${tg.artist?.name}.</h2>`,
+        url: `${client?.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}`,
+        date: tg.releaseDate ?? tg.createdAt,
       });
     } else if (isPost(p)) {
+      const post = p as Omit<Post, "profileId"> & {
+        artistId?: number;
+        artist: FeedArtistRef;
+      };
       feed.item({
-        title: p.title
-          ? `${p.title} by ${p.artist?.name}`
-          : `A post by ${p.artist?.name}`,
-        description: markdownAsHtml(p.content),
-        url: `${client?.applicationUrl}/${p.artist?.urlSlug}/posts/${p.id}`,
-        date: p.publishedAt,
+        title: post.title
+          ? `${post.title} by ${post.artist?.name}`
+          : `A post by ${post.artist?.name}`,
+        description: markdownAsHtml(post.content),
+        url: `${client?.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`,
+        date: post.publishedAt,
       });
     } else if (isArtist(p)) {
       feed.item({

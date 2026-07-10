@@ -6,7 +6,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleArtist } from "../../../../serializers/artist";
 
 export default function () {
   const operations = {

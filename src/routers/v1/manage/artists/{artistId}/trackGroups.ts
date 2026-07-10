@@ -7,11 +7,11 @@ import {
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import {
   getPlatformFeeForArtist,
   whereForAllArtistsThisLabelCanAddReleasesFor,
 } from "../../../../../utils/artist";
-import processor from "../../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -39,14 +39,14 @@ export default function () {
             ? {
                 OR: [
                   {
-                    artist: whereForAllArtistsThisLabelCanAddReleasesFor(
+                    profile: whereForAllArtistsThisLabelCanAddReleasesFor(
                       loggedInUser.id
                     ),
                   },
                   { paymentToUserId: loggedInUser.id },
                 ],
               }
-            : { artistId: Number(artistId) }),
+            : { profileId: Number(artistId) }),
         },
         orderBy: {
           releaseDate: "desc",
@@ -60,7 +60,7 @@ export default function () {
               audio: true,
             },
           },
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           cover: {
             where: {
               deletedAt: null,
@@ -71,7 +71,7 @@ export default function () {
 
       res.json({
         results: results.map((tg) =>
-          processor.single(tg, {
+          processSingleTrackGroup(tg, {
             loggedInUserId: req.user?.id,
           })
         ),
@@ -113,7 +113,6 @@ export default function () {
     const {
       title,
       about,
-      artistId,
       releaseDate,
       publishedAt,
       credits,
@@ -122,6 +121,7 @@ export default function () {
       suggestedPrice,
       urlSlug,
     } = req.body;
+    const artistId = Number(req.params.artistId);
     assertLoggedIn(req);
     const user = req.user;
 
@@ -134,7 +134,7 @@ export default function () {
     try {
       const existingSlug = await prisma.trackGroup.findFirst({
         where: {
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           urlSlug,
         },
       });
@@ -176,7 +176,7 @@ export default function () {
           about,
           credits,
           type,
-          artist: { connect: { id: artistId } },
+          profile: { connect: { id: artistId } },
           publishedAt: publishedAt ? new Date(publishedAt) : undefined,
           minPrice,
           suggestedPrice,
@@ -189,7 +189,11 @@ export default function () {
           urlSlug,
         },
       });
-      return res.json({ result });
+      return res.json({
+        result: processSingleTrackGroup(result, {
+          loggedInUserId: user.id,
+        }),
+      });
     } catch (e) {
       next(e);
     }

@@ -60,7 +60,7 @@ export async function seedMerch() {
 
   for (const artist of artists) {
     const existing = await prisma.merch.findFirst({
-      where: { artistId: artist.id },
+      where: { profileId: artist.id },
     });
     if (existing) {
       console.log(`Merch already exists for ${artist.name}, skipping`);
@@ -85,7 +85,7 @@ export async function seedMerch() {
             minPrice: 1000 + i * 500,
             quantityRemaining: 20,
             isPublic: true,
-            artist: { connect: { id: artist.id } },
+            profile: { connect: { id: artist.id } },
           },
         });
 

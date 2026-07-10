@@ -49,8 +49,8 @@ export default function () {
           // since that's all a "stop receiving emails" link should do.
           await prisma.profileUserSubscription.deleteMany({
             where: {
-              artistSubscriptionTier: {
-                artistId: artist.id,
+              profileSubscriptionTier: {
+                profileId: artist.id,
                 isDefaultTier: true,
               },
               userId: userIdToRemove,
@@ -58,8 +58,8 @@ export default function () {
           });
           await prisma.profileUserSubscription.updateMany({
             where: {
-              artistSubscriptionTier: {
-                artistId: artist.id,
+              profileSubscriptionTier: {
+                profileId: artist.id,
                 isDefaultTier: false,
               },
               userId: userIdToRemove,

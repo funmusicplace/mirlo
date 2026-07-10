@@ -184,7 +184,7 @@ describe("Soft Delete Extension (deletedAt)", () => {
 
       // Verify both trackgroups exist
       let allTrackGroups = await prisma.trackGroup.findMany({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
       assert.equal(
         allTrackGroups.length,
@@ -199,7 +199,7 @@ describe("Soft Delete Extension (deletedAt)", () => {
 
       // Verify only trackGroup2 is returned
       allTrackGroups = await prisma.trackGroup.findMany({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
       assert.equal(
         allTrackGroups.length,
@@ -236,14 +236,14 @@ describe("Soft Delete Extension (deletedAt)", () => {
       // Delete multiple trackgroups
       await prisma.trackGroup.deleteMany({
         where: {
-          artistId: artist.id,
+          profileId: artist.id,
           id: { in: [trackGroup1.id, trackGroup2.id] },
         },
       });
 
       // Verify only trackGroup3 is returned
       const remaining = await prisma.trackGroup.findMany({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
       assert.equal(remaining.length, 1, "Should have 1 trackgroup remaining");
       assert.equal(

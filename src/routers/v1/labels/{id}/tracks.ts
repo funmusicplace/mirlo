@@ -1,11 +1,9 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { findUserIdForURLSlug } from "../../../../utils/user";
-import {
-  addSizesToImage,
-  findArtistIdForURLSlug,
-} from "../../../../utils/artist";
+import { NextFunction, Request, Response } from "express";
+
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { processSingleTrack } from "../../../../serializers/track";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -48,7 +46,7 @@ export default function () {
       const tracks = await prisma.track.findMany({
         where: {
           trackGroup: {
-            artistId: {
+            profileId: {
               in: [
                 ...(labelProfile ? [labelProfile.id] : []),
                 ...(labelArtists || []).map((a) => a.id),
@@ -59,12 +57,16 @@ export default function () {
           isPreview: true,
         },
         include: {
-          trackGroup: true,
+          trackGroup: {
+            include: {
+              profile: true,
+            },
+          },
         },
       });
 
       res.json({
-        results: tracks,
+        results: tracks.map((tr) => processSingleTrack(tr)),
       });
     } catch (e) {
       next(e);

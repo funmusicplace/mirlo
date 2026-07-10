@@ -1,19 +1,22 @@
 import { Prisma } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../artist";
+import { addSizesToImage } from "../utils/artist";
 import {
   finalArtistAvatarBucket,
   finalCoversBucket,
   finalUserAvatarBucket,
   finalUserBannerBucket,
-} from "../minio";
+} from "../utils/minio";
+
+import { omitApPrivateKey, Serialized } from "./utils";
+import { serializeProfileUserSubscription } from "./profileUserSubscription";
 
 export const USER_PROFILE_SELECT = {
   email: true,
   accountingEmail: true,
   id: true,
   name: true,
-  artists: true,
+  profiles: true,
   isAdmin: true,
   currency: true,
   language: true,
@@ -30,7 +33,7 @@ export const USER_PROFILE_SELECT = {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
             },
           },
@@ -60,14 +63,14 @@ export const USER_PROFILE_SELECT = {
   },
   userAvatar: true,
   userBanner: true,
-  artistUserSubscriptions: {
+  profileUserSubscriptions: {
     where: {
       deletedAt: null,
     },
     select: {
-      artistSubscriptionTier: {
+      profileSubscriptionTier: {
         include: {
-          artist: {
+          profile: {
             include: {
               avatar: true,
               user: { select: { currency: true } },
@@ -80,7 +83,8 @@ export const USER_PROFILE_SELECT = {
       amount: true,
       deleteReason: true,
       nextBillingDate: true,
-      artistUserSubscriptionCharges: {
+      profileSubscriptionTierId: true,
+      profileUserSubscriptionCharges: {
         orderBy: {
           createdAt: "desc",
         },
@@ -102,33 +106,50 @@ export type UserProfilePayload = Prisma.UserGetPayload<{
   select: typeof USER_PROFILE_SELECT;
 }>;
 
-export function serializeUserProfile(user: UserProfilePayload) {
+export function serializeUserProfile(
+  user: UserProfilePayload
+): Serialized<UserProfilePayload> {
+  const { profiles, profileUserSubscriptions, trackFavorites, ...userRest } =
+    user;
+
   return {
-    ...user,
+    ...userRest,
     userAvatar: addSizesToImage(finalUserAvatarBucket, user.userAvatar),
     userBanner: addSizesToImage(finalUserBannerBucket, user.userBanner),
-    trackFavorites: user.trackFavorites.map((tf) => ({
-      ...tf,
-      track: {
-        ...tf.track,
-        trackGroup: {
-          ...tf.track.trackGroup,
-          cover: addSizesToImage(finalCoversBucket, tf.track.trackGroup.cover),
+    artists: profiles.map(omitApPrivateKey),
+    trackFavorites: trackFavorites.map((tf) => {
+      const { profileId, profile, ...tgRest } = tf.track.trackGroup;
+      return {
+        ...tf,
+        track: {
+          ...tf.track,
+          trackGroup: {
+            ...tgRest,
+            artistId: profileId,
+            artist: profile ? omitApPrivateKey(profile) : profile,
+            cover: addSizesToImage(
+              finalCoversBucket,
+              tf.track.trackGroup.cover
+            ),
+          },
         },
-      },
-    })),
-    artistUserSubscriptions: user.artistUserSubscriptions.map((aus) => ({
-      ...aus,
-      artistSubscriptionTier: {
-        ...aus.artistSubscriptionTier,
-        artist: {
-          ...aus.artistSubscriptionTier.artist,
-          avatar: addSizesToImage(
-            finalArtistAvatarBucket,
-            aus.artistSubscriptionTier.artist.avatar
-          ),
+      };
+    }),
+    artistUserSubscriptions: profileUserSubscriptions.map((aus) => {
+      const remapped = serializeProfileUserSubscription(aus);
+      return {
+        ...remapped,
+        artistSubscriptionTier: {
+          ...remapped.artistSubscriptionTier,
+          artist: {
+            ...remapped.artistSubscriptionTier.artist,
+            avatar: addSizesToImage(
+              finalArtistAvatarBucket,
+              remapped.artistSubscriptionTier.artist.avatar
+            ),
+          },
         },
-      },
-    })),
-  };
+      };
+    }),
+  } as unknown as Serialized<UserProfilePayload>;
 }

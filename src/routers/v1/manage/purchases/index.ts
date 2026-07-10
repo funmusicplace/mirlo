@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
-import { downloadCSVFile } from "../../../../utils/download";
+import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
 import { getDateRange } from "../../../../utils/dateRange";
+import { downloadCSVFile } from "../../../../utils/download";
+import { serializeMerchPurchase } from "../../../../serializers/merchPurchase";
 
 type Params = {
   merchId: string;
@@ -31,18 +31,20 @@ export default function () {
       datePurchased?: string;
     };
 
+    let profileIds: string | string[] | number[] | undefined = artistIds;
+
     try {
-      if (!artistIds) {
-        artistIds = (
+      if (!profileIds) {
+        profileIds = (
           await prisma.profile.findMany({
             where: {
               userId: user.id,
             },
           })
         ).map((a) => a.id);
-      } else if (typeof artistIds === "string") {
-        // If artistIds is a string, split it into an array
-        artistIds = artistIds.split(",");
+      } else if (typeof profileIds === "string") {
+        // If profileIds is a string, split it into an array
+        profileIds = profileIds.split(",");
       }
 
       let sinceDate: string | undefined;
@@ -55,7 +57,7 @@ export default function () {
       }
 
       const whereClause: any = {
-        merch: { artist: { id: { in: artistIds.map((a) => Number(a)) } } },
+        merch: { profile: { id: { in: profileIds.map((a) => Number(a)) } } },
       };
 
       if (sinceDate && untilDate) {
@@ -74,7 +76,7 @@ export default function () {
         include: {
           merch: {
             include: {
-              artist: true,
+              profile: true,
             },
           },
           options: {
@@ -91,15 +93,18 @@ export default function () {
         take: Number(take),
         skip: Number(skip),
       });
+      const results = purchases.map((purchase) =>
+        serializeMerchPurchase(purchase)
+      );
 
       if (req.query?.format === "csv") {
-        return downloadCSVFile(res, "fulfillment.csv", csvColumns, purchases);
-      } else {
-        return res.status(200).json({
-          results: purchases,
-          total,
-        });
+        return downloadCSVFile(res, "fulfillment.csv", csvColumns, results);
       }
+
+      return res.status(200).json({
+        results,
+        total,
+      });
     } catch (e) {
       next(e);
     }

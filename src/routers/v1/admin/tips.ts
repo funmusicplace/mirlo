@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { getDateRange } from "../../../utils/dateRange";
+import { serializeUserProfileTip } from "../../../serializers/userProfileTip";
 
 export default function () {
   const operations = {
@@ -56,7 +57,7 @@ export default function () {
               urlSlug: true,
             },
           },
-          artist: true,
+          profile: true,
           transaction: true,
         },
         orderBy: {
@@ -64,7 +65,7 @@ export default function () {
         },
       });
       res.json({
-        results: purchases,
+        results: purchases.map((tip) => serializeUserProfileTip(tip)),
         total: itemCount,
       });
     } catch (e) {

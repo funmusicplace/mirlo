@@ -7,11 +7,8 @@ import {
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import {
-  addSizesToImage,
-  getPlatformFeeForArtist,
-} from "../../../../../../utils/artist";
-import { finalImageBucket } from "../../../../../../utils/minio";
+import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
+import { serializeProfileSubscriptionTier } from "../../../../../../serializers/profileSubscriptionTier";
 
 type Params = {
   artistId: string;
@@ -41,7 +38,7 @@ export default function () {
     try {
       const subscriptions = await prisma.profileSubscriptionTier.findMany({
         where: {
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           ...(includeDefault ? {} : { isDefaultTier: false }),
         },
         orderBy: {
@@ -56,7 +53,7 @@ export default function () {
               trackGroup: {
                 include: {
                   cover: true,
-                  artist: true,
+                  profile: true,
                 },
               },
             },
@@ -65,13 +62,7 @@ export default function () {
       });
 
       res.status(200).json({
-        results: subscriptions.map((s) => ({
-          ...s,
-          images: s.images.map((si) => ({
-            ...si,
-            image: addSizesToImage(finalImageBucket, si.image),
-          })),
-        })),
+        results: subscriptions.map((s) => serializeProfileSubscriptionTier(s)),
       });
     } catch (e) {
       next(e);
@@ -101,7 +92,7 @@ export default function () {
       const subscription = await prisma.profileSubscriptionTier.create({
         data: {
           name,
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           description,
           minAmount,
           collectAddress,
@@ -128,7 +119,9 @@ export default function () {
           },
         });
       }
-      res.json({ result: subscription });
+      res.json({
+        result: serializeProfileSubscriptionTier(subscription),
+      });
     } catch (e) {
       res.status(500).json({
         error:

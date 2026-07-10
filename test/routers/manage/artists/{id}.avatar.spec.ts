@@ -29,7 +29,7 @@ describe("manage/artists/{artistId}/avatar", () => {
 
       await prisma.profileAvatar.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
 
@@ -39,7 +39,7 @@ describe("manage/artists/{artistId}/avatar", () => {
         .set("Accept", "application/json");
 
       const foundOld = await prisma.profileAvatar.findFirst({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
 
       assert.equal(response.statusCode, 200);

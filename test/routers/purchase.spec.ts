@@ -206,7 +206,7 @@ describe("purchase", () => {
 
       await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: oldTier.id,
+          profileSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
           stripeSubscriptionKey: "sub_hosted_switch_existing",
@@ -1078,7 +1078,7 @@ describe("purchase", () => {
 
       const existing = await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: oldTier.id,
+          profileSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
           platformCut: 35,
@@ -1116,7 +1116,7 @@ describe("purchase", () => {
         where: { id: existing.id },
       });
       assert.ok(after, "the same subscription row should still exist");
-      assert.equal(after?.artistSubscriptionTierId, newTier.id);
+      assert.equal(after?.profileSubscriptionTierId, newTier.id);
       assert.equal(after?.amount, 1000);
       assert.equal(
         after?.platformCut,
@@ -1145,7 +1145,7 @@ describe("purchase", () => {
 
       await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: oldTier.id,
+          profileSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
           stripeSubscriptionKey: "sub_existing_456",
@@ -1170,7 +1170,7 @@ describe("purchase", () => {
       // a new SetupIntent was created — cancellation is deferred until the
       // new subscription is actually confirmed (finalizeSubscriptionSetup).
       const oldSubscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: buyer.id, artistSubscriptionTierId: oldTier.id },
+        where: { userId: buyer.id, profileSubscriptionTierId: oldTier.id },
       });
       assert.ok(
         oldSubscription,
@@ -1202,7 +1202,7 @@ describe("purchase", () => {
       };
       await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: oldTier.id,
+          profileSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
           platformCut: 35,
@@ -1245,7 +1245,7 @@ describe("purchase", () => {
       );
 
       const after = await prisma.profileUserSubscription.findFirst({
-        where: { userId: buyer.id, artistSubscriptionTierId: newTier.id },
+        where: { userId: buyer.id, profileSubscriptionTierId: newTier.id },
       });
       assert.deepEqual(
         after?.shippingAddress,
@@ -1269,7 +1269,7 @@ describe("purchase", () => {
 
       await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: oldTier.id,
+          profileSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
           stripeSubscriptionKey: "sub_existing_789",
@@ -1309,7 +1309,7 @@ describe("purchase", () => {
 
       await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: oldTier.id,
+          profileSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
           stripeSubscriptionKey: "sub_old_789",
@@ -1348,7 +1348,7 @@ describe("purchase", () => {
       });
 
       const newSubscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: buyer.id, artistSubscriptionTierId: newTier.id },
+        where: { userId: buyer.id, profileSubscriptionTierId: newTier.id },
       });
       assert.ok(newSubscription, "the new tier's subscription should exist");
       assert.equal(newSubscription?.stripeSubscriptionKey, "sub_new_999");
@@ -1360,7 +1360,7 @@ describe("purchase", () => {
       );
 
       const oldSubscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: buyer.id, artistSubscriptionTierId: oldTier.id },
+        where: { userId: buyer.id, profileSubscriptionTierId: oldTier.id },
       });
       assert.equal(
         oldSubscription,
@@ -1414,7 +1414,7 @@ describe("purchase", () => {
       });
 
       const subscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: buyer.id, artistSubscriptionTierId: tier.id },
+        where: { userId: buyer.id, profileSubscriptionTierId: tier.id },
       });
       assert.ok(subscription, "the subscription should be registered");
       assert.deepEqual(subscription?.shippingAddress, shippingAddress);
@@ -1439,7 +1439,7 @@ describe("purchase", () => {
 
       await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           userId: buyer.id,
           amount: 500,
           stripeSubscriptionKey: "sub_same_tier_old",
@@ -1483,7 +1483,7 @@ describe("purchase", () => {
       );
 
       const subscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: buyer.id, artistSubscriptionTierId: tier.id },
+        where: { userId: buyer.id, profileSubscriptionTierId: tier.id },
       });
       assert.equal(
         subscription?.stripeSubscriptionKey,
@@ -1554,7 +1554,7 @@ describe("purchase", () => {
       assert.equal(newUser?.name, "Anon Supporter");
 
       const subscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: newUser?.id, artistSubscriptionTierId: tier.id },
+        where: { userId: newUser?.id, profileSubscriptionTierId: tier.id },
       });
       assert.ok(subscription, "the subscription should be registered");
       assert.equal(subscription?.stripeSubscriptionKey, "sub_anon_new");
@@ -1621,7 +1621,7 @@ describe("purchase", () => {
       );
 
       const subscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: newUser?.id, artistSubscriptionTierId: tier.id },
+        where: { userId: newUser?.id, profileSubscriptionTierId: tier.id },
       });
       assert.ok(subscription, "the subscription should be registered");
       assert.deepEqual(subscription?.shippingAddress, shippingAddress);

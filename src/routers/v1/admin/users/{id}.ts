@@ -5,6 +5,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
+import { serializeUser } from "../../../../serializers/user";
 import { deleteUser } from "../../../../utils/user";
 
 export default function () {
@@ -66,7 +67,7 @@ export default function () {
           id: true,
           canCreateArtists: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           isAdmin: true,
           featureFlags: true,
@@ -80,7 +81,7 @@ export default function () {
       const { emailConfirmationToken, ...userWithoutToken } = user;
       res.json({
         result: {
-          ...userWithoutToken,
+          ...serializeUser(userWithoutToken),
           hasPendingEmailConfirmation: !!emailConfirmationToken,
         },
       });

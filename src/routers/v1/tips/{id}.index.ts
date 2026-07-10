@@ -4,6 +4,7 @@ import { userAuthenticated } from "../../../auth/passport";
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 
 import { AppError } from "../../../utils/error";
+import { serializeUserProfileTip } from "../../../serializers/userProfileTip";
 
 export default function () {
   const operations = {
@@ -31,7 +32,7 @@ export default function () {
       }
 
       res.json({
-        result: paidTip,
+        result: serializeUserProfileTip(paidTip),
       });
     } catch (e) {
       next(e);

@@ -11,48 +11,76 @@ import {
   TrackGroupTag,
 } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../artist";
-import { generateFullStaticImageUrl } from "../images";
-import { processSingleMerch } from "../merch";
-import { finalArtistAvatarBucket, finalCoversBucket } from "../minio";
-import { isTrackPlayableNested } from "../trackPlayability";
+import { addSizesToImage } from "../utils/artist";
+import { generateFullStaticImageUrl } from "../utils/images";
+import { finalArtistAvatarBucket, finalCoversBucket } from "../utils/minio";
+import { isTrackPlayableNested } from "../utils/trackPlayability";
 
+import {
+  omitApPrivateKey,
+  renameProfileIdToArtistId,
+  Serialized,
+} from "./utils";
+import { serializeMerch } from "./merch";
 import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
+
+type TrackGroupOwner = Partial<Profile> & {
+  avatar?: ProfileAvatar | null;
+  user?: { currency?: string | null } | null;
+  [key: string]: unknown;
+};
 
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
   artist?: Partial<Profile>;
+  profile?: Partial<Profile>;
   tracks?: CanimusTrack[];
 }
 
-export const processSingleTrackGroup = (
-  tg: TrackGroup & {
-    cover?: TrackGroupCover | null;
-    artist?: Partial<Profile> & {
-      avatar?: ProfileAvatar | null;
-      user?: { currency?: string | null } | null;
-    };
-    paymentToUser?: { currency?: string | null } | null;
-    merch?: (Merch & { images: MerchImage[] })[];
-    tracks?: (Omit<Track, "metadata"> & {
-      userTrackPurchases?: { userId: number }[];
-    })[];
-    tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
-    downloadableContent?: {
-      downloadableContent: Record<string, unknown>;
-      downloadableContentId: string;
-    }[];
-    trackGroupPurchases?: { userId: number }[];
-    _count?: { tracks?: number; userTrackGroupPurchases?: number };
-  },
+type TrackGroupInput = TrackGroup & {
+  cover?: TrackGroupCover | null;
+  artist?: TrackGroupOwner;
+  profile?: TrackGroupOwner;
+  paymentToUser?: { currency?: string | null } | null;
+  merch?: (Merch & { images: MerchImage[] })[];
+  tracks?: (Omit<Track, "metadata"> & {
+    userTrackPurchases?: { userId: number }[];
+  })[];
+  tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
+  downloadableContent?: {
+    downloadableContent: Record<string, unknown>;
+    downloadableContentId: string;
+  }[];
+  trackGroupPurchases?: { userId: number }[];
+  _count?: { tracks?: number; userTrackGroupPurchases?: number };
+};
+
+export const processSingleTrackGroup = <T extends TrackGroupInput>(
+  tg: T,
   options?: { loggedInUserId?: number }
-) => {
-  const { _count, ...rest } = tg;
-  const currency =
-    tg.paymentToUser?.currency ?? tg.artist?.user?.currency ?? "usd";
-  const { apPrivateKey: _, ...artistPublic } = tg.artist ?? {};
+): Serialized<T> & {
+  currency: string;
+  totalTracks?: number;
+  hasNotifiedFollowers: boolean;
+  tags: string[];
+} => {
+  const { _count, profile, profileId, artist, ...rest } = tg;
+  const owner = profile ?? artist;
+  const currency = tg.paymentToUser?.currency ?? owner?.user?.currency ?? "usd";
+
   return {
     ...rest,
+    artistId: profileId ?? owner?.id,
+    artist: owner
+      ? {
+          ...omitApPrivateKey(owner),
+          avatar: owner.avatar
+            ? renameProfileIdToArtistId(
+                addSizesToImage(finalArtistAvatarBucket, owner.avatar)
+              )
+            : undefined,
+        }
+      : undefined,
     totalTracks: _count?.tracks ?? tg.tracks?.length,
     currency,
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
@@ -65,16 +93,8 @@ export const processSingleTrackGroup = (
         userId: options?.loggedInUserId,
       }),
     })),
-    artist: tg.artist
-      ? {
-          ...artistPublic,
-          avatar: tg.artist.avatar
-            ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
-            : undefined,
-        }
-      : undefined,
     merch: tg.merch?.map((m) =>
-      processSingleMerch(m, {
+      serializeMerch(m, {
         fallbackCurrency: currency,
       })
     ),
@@ -89,7 +109,27 @@ export const processSingleTrackGroup = (
           `/v1/downloadableContent/${dc.downloadableContentId}`,
       },
     })),
+  } as Serialized<T> & {
+    currency: string;
+    totalTracks?: number;
+    hasNotifiedFollowers: boolean;
+    tags: string[];
   };
+};
+
+export const serializeTrackGroupPurchase = <
+  T extends { trackGroup?: TrackGroupInput | null },
+>(
+  purchase: T,
+  options?: { loggedInUserId?: number }
+): Serialized<T> => {
+  const { trackGroup, ...rest } = purchase;
+  return {
+    ...rest,
+    trackGroup: trackGroup
+      ? processSingleTrackGroup(trackGroup, options)
+      : trackGroup,
+  } as Serialized<T>;
 };
 
 export const serializeSingleTrackGroupIntoCanimus = (
