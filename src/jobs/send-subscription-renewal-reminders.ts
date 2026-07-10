@@ -10,10 +10,10 @@ export type SubscriptionRenewalReminderEmailType = {
   artist: Profile & { user: { currency: string | null } };
   host: string;
   client: string;
-  artistUserSubscription: {
+  profileUserSubscription: {
     id: number;
     amount: number;
-    artistSubscriptionTier: {
+    profileSubscriptionTier: {
       name: string;
     };
     createdAt: Date;
@@ -52,7 +52,7 @@ const sendSubscriptionRenewalReminders = async () => {
           // Skip subscriptions the user has cancelled but that are still running
           // out their paid period — they won't renew, so don't remind.
           deleteReason: null,
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             isDefaultTier: false,
             interval: "YEAR", // Only year-long subscriptions
           },
@@ -69,9 +69,9 @@ const sendSubscriptionRenewalReminders = async () => {
         },
         include: {
           user: true,
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             include: {
-              artist: {
+              profile: {
                 include: { user: { select: { currency: true } } },
               },
             },
@@ -106,13 +106,13 @@ const sendSubscriptionRenewalReminders = async () => {
               to: subscription.user.email,
             },
             locals: {
-              interval: subscription.artistSubscriptionTier.interval,
-              artist: subscription.artistSubscriptionTier.artist,
-              artistUserSubscription: {
+              interval: subscription.profileSubscriptionTier.interval,
+              artist: subscription.profileSubscriptionTier.profile,
+              profileUserSubscription: {
                 id: subscription.id,
                 amount: subscription.amount,
-                artistSubscriptionTier: {
-                  name: subscription.artistSubscriptionTier.name,
+                profileSubscriptionTier: {
+                  name: subscription.profileSubscriptionTier.name,
                 },
                 createdAt: subscription.createdAt,
                 updatedAt: subscription.updatedAt,

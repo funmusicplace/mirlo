@@ -69,7 +69,7 @@ export default function () {
               userTrackGroupPurchases: true,
             },
           },
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,

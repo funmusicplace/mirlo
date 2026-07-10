@@ -29,13 +29,13 @@ export default function () {
       if (dateRange) {
         set(
           where,
-          "artistUserSubscriptionCharges.some.createdAt.gte",
+          "profileUserSubscriptionCharges.some.createdAt.gte",
           dateRange.gte
         );
         if (dateRange.lt) {
           set(
             where,
-            "artistUserSubscriptionCharges.some.createdAt.lt",
+            "profileUserSubscriptionCharges.some.createdAt.lt",
             dateRange.lt
           );
         }
@@ -49,14 +49,14 @@ export default function () {
         take: take ? Number(take) : undefined,
         include: {
           user: true,
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             include: {
-              artist: {
+              profile: {
                 include: { user: { select: { currency: true } } },
               },
             },
           },
-          artistUserSubscriptionCharges: {
+          profileUserSubscriptionCharges: {
             include: {
               transaction: true,
             },
@@ -67,7 +67,36 @@ export default function () {
         },
       });
       res.json({
-        results: subscriptions,
+        results: subscriptions.map((sub) => {
+          const {
+            profileSubscriptionTierId,
+            profileSubscriptionTier,
+            profileUserSubscriptionCharges,
+            ...subRest
+          } = sub;
+          const { profileId, profile, ...tierRest } =
+            profileSubscriptionTier ?? ({} as typeof profileSubscriptionTier & {});
+          return {
+            ...subRest,
+            artistSubscriptionTierId: profileSubscriptionTierId,
+            artistSubscriptionTier: profileSubscriptionTier
+              ? {
+                  ...tierRest,
+                  artistId: profileId,
+                  artist: profile,
+                }
+              : profileSubscriptionTier,
+            artistUserSubscriptionCharges: profileUserSubscriptionCharges.map(
+              (charge) => {
+                const { profileUserSubscriptionId, ...chargeRest } = charge;
+                return {
+                  ...chargeRest,
+                  artistUserSubscriptionId: profileUserSubscriptionId,
+                };
+              }
+            ),
+          };
+        }),
         total: itemCount,
       });
     } catch (e) {

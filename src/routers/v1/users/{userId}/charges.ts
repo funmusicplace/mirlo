@@ -22,17 +22,17 @@ export default function () {
     if (Number(userId) === Number(loggedInUser.id)) {
       const charges = await prisma.profileUserSubscriptionCharge.findMany({
         where: {
-          artistUserSubscription: {
+          profileUserSubscription: {
             userId: Number(userId),
           },
         },
         include: {
           transaction: true,
-          artistUserSubscription: {
+          profileUserSubscription: {
             include: {
-              artistSubscriptionTier: {
+              profileSubscriptionTier: {
                 include: {
-                  artist: {
+                  profile: {
                     include: {
                       avatar: { where: { deletedAt: null } },
                     },
@@ -43,18 +43,27 @@ export default function () {
           },
         },
       });
-      const results = charges.map((c) => ({
-        ...c,
-        artistUserSubscription: {
-          ...c.artistUserSubscription,
-          artistSubscriptionTier: {
-            ...c.artistUserSubscription.artistSubscriptionTier,
-            artist: processSingleArtist(
-              c.artistUserSubscription.artistSubscriptionTier.artist
-            ),
+      const results = charges.map((c) => {
+        const { profileUserSubscription, ...chargeRest } = c;
+        const {
+          profileSubscriptionTierId,
+          profileSubscriptionTier,
+          ...subRest
+        } = profileUserSubscription;
+        const { profileId, profile, ...tierRest } = profileSubscriptionTier;
+        return {
+          ...chargeRest,
+          artistUserSubscription: {
+            ...subRest,
+            artistSubscriptionTierId: profileSubscriptionTierId,
+            artistSubscriptionTier: {
+              ...tierRest,
+              artistId: profileId,
+              artist: processSingleArtist(profile),
+            },
           },
-        },
-      }));
+        };
+      });
       res.json({
         results,
       });

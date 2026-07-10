@@ -155,7 +155,7 @@ export const initiateSubscription = async ({
   // Validate the tier first so a missing tier returns 404 even when the artist
   // has not finished setting up a payment processor (which throws below).
   const tier = await prisma.profileSubscriptionTier.findFirst({
-    where: { id: tierId, artistId, deletedAt: null },
+    where: { id: tierId, profileId: artistId, deletedAt: null },
     select: { id: true, minAmount: true, defaultAmount: true },
   });
   if (!tier) {
@@ -189,7 +189,7 @@ export const initiateSubscription = async ({
 };
 
 type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
-  include: { artistSubscriptionTier: true };
+  include: { profileSubscriptionTier: true };
 }>;
 
 // Cancels a user's subscription to an artist and emails them a confirmation.
@@ -203,14 +203,14 @@ export const cancelUserSubscription = async (
   subscription: CancellableSubscription,
   userEmail: string
 ) => {
-  const artistId = subscription.artistSubscriptionTier.artistId;
+  const artistId = subscription.profileSubscriptionTier.profileId;
 
   // Cancellation only needs the connected account — not the currency that
   // resolveArtistPaymentContext also fetches from Stripe — so resolve the
   // artist + account directly here. We don't filter on `enabled` so a
   // subscription to a since-disabled artist can still be cancelled.
   const artist = await prisma.profile.findFirst({
-    where: { id: artistId },
+    where: { id: artistId},
     include: {
       user: { select: { stripeAccountId: true } },
       paymentToUser: { select: { stripeAccountId: true } },

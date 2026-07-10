@@ -31,7 +31,7 @@ export default function () {
       const user = await prisma.user.findUnique({
         where: { id: Number(userId) },
         select: {
-          artists: true,
+          profiles: true,
           email: true,
           name: true,
           stripeAccountId: true,
@@ -39,7 +39,11 @@ export default function () {
           isAdmin: true,
         },
       });
-      res.json({ result: user });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const { profiles, ...rest } = user;
+      res.json({ result: { ...rest, artists: profiles } });
     } catch (e) {
       next(e);
     }

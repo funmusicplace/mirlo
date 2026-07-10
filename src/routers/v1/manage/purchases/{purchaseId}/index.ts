@@ -5,6 +5,7 @@ import {
   merchPurchaseBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { processSingleMerch } from "../../../../../utils/merch";
 
 type Params = {
   purchaseId: string;
@@ -89,7 +90,10 @@ export default function () {
         },
         include: {
           merch: {
-            include: { images: true, artist: { omit: { apPrivateKey: true } } },
+            include: {
+              images: true,
+              profile: { omit: { apPrivateKey: true } },
+            },
           },
           user: true,
         },
@@ -101,7 +105,12 @@ export default function () {
         });
       } else {
         return res.json({
-          result: purchase,
+          result: {
+            ...purchase,
+            merch: purchase.merch
+              ? processSingleMerch(purchase.merch)
+              : purchase.merch,
+          },
         });
       }
     } catch (e) {

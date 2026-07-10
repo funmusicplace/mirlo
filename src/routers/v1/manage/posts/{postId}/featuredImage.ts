@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { doesPostBelongToUser } from "../../../../../utils/post";
+import { serializePost } from "../../../../../utils/serialize/post";
 import { AppError } from "../../../../../utils/error";
 
 export default function () {
@@ -18,7 +19,9 @@ export default function () {
         where: { id: Number(postId) },
         data: { featuredImageId },
       });
-      res.json({ result: updatedPost });
+      res.json({
+        result: serializePost(updatedPost, undefined, undefined, true),
+      });
     } catch (error) {
       throw error;
     }

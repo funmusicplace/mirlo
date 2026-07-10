@@ -177,7 +177,7 @@ describe("manage/artists/{artistId}/labels", () => {
             userId: artistUser.id,
             notificationType: "LABEL_ADDED_ARTIST",
             relatedUserId: labelUser.id,
-            artistId: artist.id,
+            profileId: artist.id,
             content: "Existing notification",
           },
         });
@@ -200,7 +200,7 @@ describe("manage/artists/{artistId}/labels", () => {
             userId: artistUser.id,
             notificationType: "LABEL_ADDED_ARTIST",
             relatedUserId: labelUser.id,
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 
@@ -406,7 +406,7 @@ describe("manage/artists/{artistId}/labels", () => {
           userId: artistUser.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
       assert.ok(notification, "Notification should be created");
@@ -488,7 +488,7 @@ describe("manage/artists/{artistId}/labels", () => {
           userId: artistUser.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          artistId: artist.id,
+          profileId: artist.id,
           content: "Existing notification",
         },
       });
@@ -518,7 +518,7 @@ describe("manage/artists/{artistId}/labels", () => {
           userId: artistUser.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
       assert.equal(

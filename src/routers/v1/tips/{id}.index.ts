@@ -30,8 +30,13 @@ export default function () {
         });
       }
 
+      const { profileId, profileTipTierId, ...rest } = paidTip;
       res.json({
-        result: paidTip,
+        result: {
+          ...rest,
+          artistId: profileId,
+          artistTipTierId: profileTipTierId,
+        },
       });
     } catch (e) {
       next(e);

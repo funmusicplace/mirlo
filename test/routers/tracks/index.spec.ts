@@ -137,7 +137,7 @@ describe("trackGroups", () => {
       assert(response.statusCode === 200);
     });
 
-    it("should only return albums filtered by artistId", async () => {
+    it("should only return albums filtered by profileId", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const tg = await createTrackGroup(artist.id, {
@@ -151,7 +151,7 @@ describe("trackGroups", () => {
 
       const response = await requestApp
         .get("trackGroups")
-        .query(`artistId=${artist.id}`)
+        .query(`profileId=${artist.id}`)
         .set("Accept", "application/json");
 
       assert.equal(response.body.results.length, 1);

@@ -119,7 +119,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       // response, so we poll until the DB reflects the handler's writes.
       const stored = await waitFor(() =>
         prisma.activityPubProfileFollowers.findFirst({
-          where: { artistId: targetArtist.id, actor: actorUrl },
+          where: { profileId: targetArtist.id, actor: actorUrl },
         })
       );
       assert(stored, "follower record should be stored in DB");
@@ -177,7 +177,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       // Pre-seed a follower record
       await prisma.activityPubProfileFollowers.create({
         data: {
-          artistId: targetArtist.id,
+          profileId: targetArtist.id,
           actor: actorUrl,
           inboxUrl: "https://mastodon.social/users/someuser/inbox",
         },
@@ -201,7 +201,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
 
       await waitFor(async () => {
         const r = await prisma.activityPubProfileFollowers.findFirst({
-          where: { artistId: targetArtist.id, actor: actorUrl },
+          where: { profileId: targetArtist.id, actor: actorUrl },
         });
         return r === null ? true : null;
       });
@@ -227,7 +227,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
 
       await prisma.activityPubProfileFollowers.create({
         data: {
-          artistId: targetArtist.id,
+          profileId: targetArtist.id,
           actor: actorUrl,
           inboxUrl: "https://mastodon.social/users/deleteduser/inbox",
         },
@@ -242,7 +242,7 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
 
       await waitFor(async () => {
         const r = await prisma.activityPubProfileFollowers.findFirst({
-          where: { artistId: targetArtist.id, actor: actorUrl },
+          where: { profileId: targetArtist.id, actor: actorUrl },
         });
         return r === null ? true : null;
       });

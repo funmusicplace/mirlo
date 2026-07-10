@@ -9,7 +9,7 @@ import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../../../../utils/error";
 
 type Params = {
-  artistId: string;
+  profileId: string;
   subscriptionTierId: string;
 };
 
@@ -50,7 +50,7 @@ export default function () {
           trackGroup: {
             include: {
               cover: true,
-              artist: true,
+              profile: true,
             },
           },
         },
@@ -153,7 +153,7 @@ export default function () {
           trackGroup: {
             include: {
               cover: true,
-              artist: true,
+              profile: true,
             },
           },
         },

@@ -44,19 +44,19 @@ export default function () {
       const [trackGroups, merch, subscriptionTiers, tipTiers] =
         await prisma.$transaction([
           prisma.trackGroup.updateMany({
-            where: { artistId: artist.id },
+            where: { profileId: artist.id },
             data: { platformPercent },
           }),
           prisma.merch.updateMany({
-            where: { artistId: artist.id },
+            where: { profileId: artist.id },
             data: { platformPercent },
           }),
           prisma.profileSubscriptionTier.updateMany({
-            where: { artistId: artist.id },
+            where: { profileId: artist.id },
             data: { platformPercent },
           }),
           prisma.profileTipTier.updateMany({
-            where: { artistId: artist.id },
+            where: { profileId: artist.id },
             data: { platformPercent },
           }),
         ]);

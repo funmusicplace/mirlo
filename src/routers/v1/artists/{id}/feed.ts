@@ -15,6 +15,7 @@ import {
 } from "../../../../utils/postAccess";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
 import { serializePost } from "../../../../utils/serialize/post";
+import { processSingleTrackGroup } from "../../../../utils/serialize/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 
@@ -26,7 +27,7 @@ export const getPostsVisibleToUser = async (
 ) => {
   const where: Prisma.PostWhereInput = {
     publishedAt: { lte: new Date() },
-    artistId: Number(artist.id),
+    profileId: Number(artist.id),
     isDraft: false,
     deletedAt: null,
   };
@@ -35,7 +36,7 @@ export const getPostsVisibleToUser = async (
     prisma.post.findMany({
       where,
       include: {
-        artist: { include: { avatar: { where: { deletedAt: null } } } },
+        profile: { include: { avatar: { where: { deletedAt: null } } } },
         minimumSubscriptionTier: true,
         postSubscriptionTiers: true,
         featuredImage: true,
@@ -65,13 +66,13 @@ export const getPostsVisibleToUser = async (
 
 export const getAlbumsVisibleToUser = async (artist: Profile) => {
   const albums = await prisma.trackGroup.findMany({
-    where: { ...whereForPublishedTrackGroups(), artistId: artist.id },
-    include: { artist: { omit: { apPrivateKey: true } } },
+    where: { ...whereForPublishedTrackGroups(), profileId: artist.id },
+    include: { profile: { omit: { apPrivateKey: true } } },
     orderBy: {
       releaseDate: "desc",
     },
   });
-  return albums;
+  return albums.map((album) => processSingleTrackGroup(album));
 };
 
 export const buildFeedForArtist = async (

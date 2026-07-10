@@ -69,7 +69,7 @@ describe("send-post-notification", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -78,13 +78,13 @@ describe("send-post-notification", () => {
   }
 
   async function createPublishedPost(
-    artistId: number,
+    profileId: number,
     overrides: Record<string, any> = {}
   ) {
     return prisma.post.create({
       data: {
         title: "Test Post",
-        artistId,
+        profileId,
         content: "Hello world",
         isDraft: false,
         isPublic: true,
@@ -304,7 +304,7 @@ describe("send-post-notification", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 5,
         },
       });

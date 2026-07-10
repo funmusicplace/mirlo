@@ -35,7 +35,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, defaultIsPreview: false })
+        .send({ profileId: artist.id, defaultIsPreview: false })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -43,7 +43,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(response.body.result.defaultIsPreview, false);
     });
 
-    it("should update a track group without artistId in the body", async () => {
+    it("should update a track group without profileId in the body", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
@@ -120,7 +120,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { artistId: artist.id, name: "Tier" },
+        data: { profileId: artist.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-flip@example.com",
@@ -128,7 +128,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: follower.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 10,
           stripeSubscriptionKey: "sub-flip",
         },
@@ -136,7 +136,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, isPublic: true })
+        .send({ profileId: artist.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -163,7 +163,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, isPublic: true })
+        .send({ profileId: artist.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -193,7 +193,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, isPublic: true })
+        .send({ profileId: artist.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -216,7 +216,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { artistId: artist.id, name: "Tier" },
+        data: { profileId: artist.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-draft-flip@example.com",
@@ -224,7 +224,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: follower.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 10,
           stripeSubscriptionKey: "sub-draft-flip",
         },
@@ -232,7 +232,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, isPublic: true })
+        .send({ profileId: artist.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -255,7 +255,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { artistId: artist.id, name: "Tier" },
+        data: { profileId: artist.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-toggle@example.com",
@@ -263,7 +263,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: follower.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 10,
           stripeSubscriptionKey: "sub-toggle",
         },
@@ -271,17 +271,17 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, isPublic: true })
+        .send({ profileId: artist.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, isPublic: false })
+        .send({ profileId: artist.id, isPublic: false })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ artistId: artist.id, isPublic: true })
+        .send({ profileId: artist.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -305,7 +305,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       const response = await requestApp
         .put(`manage/trackGroups/${otherTrackGroup.id}`)
         .send({
-          artistId: artist.id,
+          profileId: artist.id,
           minPrice: 500,
           title: "A title",
         })

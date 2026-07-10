@@ -48,7 +48,7 @@ export default function () {
       const where = whereForPublishedTrackGroups({ includePrivate: canManage });
 
       if (excludeArtistId) {
-        where.artistId = { not: Number(excludeArtistId) };
+        where.profileId = { not: Number(excludeArtistId) };
       }
 
       const trackGroups = await prisma.trackGroup.findMany({
@@ -56,13 +56,13 @@ export default function () {
           ...where,
           OR: [
             { paymentToUserId: labelProfile?.userId },
-            { artistId: artistId },
+            { profileId: artistId },
           ],
         },
         include: {
           cover: true,
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,

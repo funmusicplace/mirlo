@@ -71,7 +71,7 @@ export default function () {
       const recentCount = await prisma.notification.count({
         where: {
           notificationType: "ARTIST_CONTACT_MESSAGE",
-          artistId: artist.id,
+          profileId: artist.id,
           relatedUserId: sender.id,
           createdAt: { gte: new Date(Date.now() - CONTACT_RATE_WINDOW_MS) },
         },
@@ -89,7 +89,7 @@ export default function () {
           notificationType: "ARTIST_CONTACT_MESSAGE",
           userId: artist.user.id,
           relatedUserId: sender.id,
-          artistId: artist.id,
+          profileId: artist.id,
           content: trimmed,
         },
       });

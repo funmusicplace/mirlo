@@ -19,7 +19,7 @@ export default function () {
             select: {
               id: true,
               title: true,
-              artist: {
+              profile: {
                 select: {
                   id: true,
                   name: true,
@@ -35,7 +35,19 @@ export default function () {
       });
 
       res.json({
-        result: fundraisers,
+        result: fundraisers.map((fundraiser) => ({
+          ...fundraiser,
+          trackGroups: fundraiser.trackGroups.map((tg) => {
+            const { profile, profileId, ...tgRest } = tg as typeof tg & {
+              profileId?: number;
+            };
+            return {
+              ...tgRest,
+              artistId: profileId ?? profile.id,
+              artist: profile,
+            };
+          }),
+        })),
       });
     } catch (error) {
       next(error);
@@ -68,7 +80,7 @@ export default function () {
                     properties: {
                       id: { type: "integer" },
                       title: { type: "string" },
-                      artist: {
+                      profile: {
                         type: "object",
                         properties: {
                           id: { type: "integer" },

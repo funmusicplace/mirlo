@@ -57,7 +57,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -106,7 +106,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 0,
       },
     });
@@ -165,7 +165,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist2.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist2.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -173,7 +173,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 0,
       },
     });
@@ -187,7 +187,7 @@ describe("send-out-monthly-receipts", () => {
     const locals = data0.locals as AnnounceMonthlyReceiptsEmailType;
     assert.equal(locals.userSubscriptions[0].amount, 5);
     assert.equal(
-      locals.userSubscriptions[0].artistSubscriptionTier.artistId,
+      locals.userSubscriptions[0].profileSubscriptionTier.profileId,
       artist2.id
     );
     assert.equal(locals.userSubscriptions.length, 1);

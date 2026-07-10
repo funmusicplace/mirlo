@@ -1,8 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
 
 type Params = {
   userId: string;
@@ -15,18 +15,18 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
-    const { artistId } = req.query as unknown as { artistId: string };
+    const { artistId } = req.query as unknown as { artistId?: string };
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
       if (Number(userId) === Number(loggedInUser.id)) {
         const where: Prisma.ProfileUserSubscriptionWhereInput = {
           userId: Number(userId),
-          artistSubscriptionTier: { isDefaultTier: false },
+          profileSubscriptionTier: { isDefaultTier: false },
         };
         if (artistId) {
-          where.artistSubscriptionTier = {
-            artistId: Number(artistId),
+          where.profileSubscriptionTier = {
+            profileId: Number(artistId),
             isDefaultTier: false,
             deletedAt: null,
           };
@@ -34,10 +34,28 @@ export default function () {
         const subsciptions = await prisma.profileUserSubscription.findMany({
           where,
           include: {
-            artistSubscriptionTier: true,
+            profileSubscriptionTier: true,
           },
         });
-        res.json({ results: subsciptions });
+        res.json({
+          results: subsciptions.map((sub) => {
+            const {
+              profileSubscriptionTierId,
+              profileSubscriptionTier,
+              ...subRest
+            } = sub;
+            const { profileId, profile, ...tierRest } = profileSubscriptionTier;
+            return {
+              ...subRest,
+              artistSubscriptionTierId: profileSubscriptionTierId,
+              artistSubscriptionTier: {
+                ...tierRest,
+                artistId: profileId,
+                artist: profile,
+              },
+            };
+          }),
+        });
       } else {
         res.status(401);
         res.json({

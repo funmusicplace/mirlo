@@ -22,7 +22,7 @@ const sendPostToActivityPubFollowers = async () => {
       isPublic: true,
       publishedAt: { lte: date },
       hasActivityPubBeenSent: false,
-      artist: { activityPub: true },
+      profile: { activityPub: true },
     },
     select: {
       id: true,
@@ -30,13 +30,13 @@ const sendPostToActivityPubFollowers = async () => {
       content: true,
       urlSlug: true,
       publishedAt: true,
-      artist: {
+      profile: {
         select: {
           id: true,
           urlSlug: true,
           name: true,
           activityPub: true,
-          activityPubArtistFollowers: {
+          activityPubProfileFollowers: {
             select: { actor: true, inboxUrl: true },
           },
         },
@@ -49,7 +49,7 @@ const sendPostToActivityPubFollowers = async () => {
   );
 
   for (const post of posts) {
-    if (!post.artist) {
+    if (!post.profile) {
       logger.warn(
         `sendPostToActivityPubFollowers: post ${post.id} has no artist, skipping`
       );
@@ -61,11 +61,11 @@ const sendPostToActivityPubFollowers = async () => {
     }
 
     const mentions = parseMentionsFromContent(post.content ?? "");
-    const hasFollowers = post.artist.activityPubArtistFollowers.length > 0;
+    const hasFollowers = post.profile.activityPubProfileFollowers.length > 0;
 
     if (!hasFollowers && mentions.length === 0) {
       logger.info(
-        `sendPostToActivityPubFollowers: artist ${post.artist.urlSlug} has no followers and no mentions, skipping`
+        `sendPostToActivityPubFollowers: artist ${post.profile.urlSlug} has no followers and no mentions, skipping`
       );
       await prisma.post.update({
         where: { id: post.id },
@@ -78,7 +78,7 @@ const sendPostToActivityPubFollowers = async () => {
       `sendPostToActivityPubFollowers: processing post ${post.id} (${mentions.length} mention(s), hasFollowers=${hasFollowers})`
     );
 
-    const identifier = post.artist.urlSlug;
+    const identifier = post.profile.urlSlug;
 
     const ctx = await federation.createContext(
       new Request(`https://${root}`),
@@ -117,7 +117,7 @@ const sendPostToActivityPubFollowers = async () => {
     // via sendPostNotification and don't need AP HTTP delivery.
     const localActorPrefix = `https://${root}/`;
     const followerActorIdsWithInbox = new Set(
-      post.artist.activityPubArtistFollowers
+      post.profile.activityPubProfileFollowers
         .filter((f) => f.inboxUrl !== null)
         .map((f) => f.actor)
     );

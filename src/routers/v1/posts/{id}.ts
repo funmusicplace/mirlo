@@ -27,7 +27,7 @@ export default function () {
             AND: [
               { urlSlug: { equals: id, mode: "insensitive" } },
               {
-                artist: {
+                profile: {
                   urlSlug: artistId,
                 },
               },
@@ -97,7 +97,7 @@ export default function () {
           featuredImage: true,
           minimumSubscriptionTier: true,
           postSubscriptionTiers: true,
-          artist: {
+          profile: {
             include: {
               avatar: {
                 where: {
@@ -115,9 +115,9 @@ export default function () {
           description: "Post not found",
         });
       }
-      const isArtistOwner = !!(user && post.artist?.userId === user.id);
-      const subscription = post.artistId
-        ? await getUserSubscriptionForArtist(user, post.artistId)
+      const isArtistOwner = !!(user && post.profile?.userId === user.id);
+      const subscription = post.profileId
+        ? await getUserSubscriptionForArtist(user, post.profileId)
         : null;
       const canSeeContent = canUserSeePostContent(post, {
         isArtistOwner,

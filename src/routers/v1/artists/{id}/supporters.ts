@@ -38,7 +38,7 @@ const queryUserTransactions = (
         some: {
           trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
           trackGroup: {
-            artistId: { in: artistId },
+            profileId: { in: artistId },
           },
         },
       },
@@ -47,7 +47,7 @@ const queryUserTransactions = (
       merchPurchases: {
         some: {
           merch: {
-            artistId: { in: artistId },
+            profileId: { in: artistId },
           },
         },
       },
@@ -56,7 +56,7 @@ const queryUserTransactions = (
       trackPurchases: {
         some: {
           track: {
-            trackGroup: { artistId: { in: artistId } },
+            trackGroup: { profileId: { in: artistId } },
           },
         },
       },
@@ -64,18 +64,18 @@ const queryUserTransactions = (
     {
       tips: {
         some: {
-          artistId: {
+          profileId: {
             in: artistId,
           },
         },
       },
     },
     {
-      artistUserSubscriptionCharges: {
+      profileUserSubscriptionCharges: {
         some: {
-          artistUserSubscription: {
-            artistSubscriptionTier: {
-              artistId: { in: artistId },
+          profileUserSubscription: {
+            profileSubscriptionTier: {
+              profileId: { in: artistId },
             },
           },
         },
@@ -132,7 +132,7 @@ const queryUserTransactions = (
           trackGroupId: true,
           trackGroup: {
             select: {
-              artist: {
+              profile: {
                 select: { name: true, id: true, urlSlug: true, userId: true },
               },
               title: true,
@@ -148,7 +148,7 @@ const queryUserTransactions = (
             select: {
               title: true,
               urlSlug: true,
-              artist: {
+              profile: {
                 select: { name: true, id: true, urlSlug: true, userId: true },
               },
             },
@@ -158,22 +158,22 @@ const queryUserTransactions = (
 
       tips: {
         select: {
-          artist: {
+          profile: {
             select: { name: true, id: true, urlSlug: true, userId: true },
           },
         },
       },
 
-      artistUserSubscriptionCharges: {
+      profileUserSubscriptionCharges: {
         select: {
-          artistUserSubscription: {
+          profileUserSubscription: {
             select: {
               shippingAddress: true,
-              artistSubscriptionTier: {
+              profileSubscriptionTier: {
                 select: {
                   name: true,
                   interval: true,
-                  artist: {
+                  profile: {
                     select: {
                       name: true,
                       id: true,
@@ -199,7 +199,7 @@ const queryUserTransactions = (
                 select: {
                   id: true,
                   urlSlug: true,
-                  artist: {
+                  profile: {
                     select: {
                       name: true,
                       id: true,
@@ -281,29 +281,130 @@ export const findSales = async ({
   }
 
   return [
-    ...userTransactions.map((ut) => ({
-      ...ut,
-      paymentProcessorCut: ut.stripeCut,
-      // ISO string, not Date: consumers treat this as a string — the income
-      // report template splits it on "T" without a JSON round-trip.
-      datePurchased: ut.createdAt.toISOString(),
-      title: generateTitle(ut),
-      artist: [
-        ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.artist),
-        ut.merchPurchases?.map((mp) => mp.merch.artist),
-        ut.trackPurchases?.map((tp) => tp.track.trackGroup.artist),
-        ut.tips?.map((tip) => tip.artist),
-        ut.artistUserSubscriptionCharges?.map(
-          (asc) => asc.artistUserSubscription.artistSubscriptionTier.artist
-        ),
-      ].flat(),
-      urlSlug: ut.trackGroupPurchases
-        .map((tgp) => tgp.trackGroup.urlSlug)
-        .join(", "),
-      amount: ut.amount,
-      currency: ut.currency,
-      saleType: "transaction",
-    })),
+    ...userTransactions.map((ut) => {
+      const { profileUserSubscriptionCharges, ...utRest } = ut;
+      return {
+        ...utRest,
+        trackGroupPurchases: ut.trackGroupPurchases?.map((tgp) => {
+          const { profile, ...tgRest } = tgp.trackGroup;
+          return {
+            ...tgp,
+            trackGroup: {
+              ...tgRest,
+              artistId: profile.id,
+              artist: profile,
+            },
+          };
+        }),
+        merchPurchases: ut.merchPurchases?.map((mp) => {
+          const { profile, ...merchRest } = mp.merch;
+          return {
+            ...mp,
+            merch: {
+              ...merchRest,
+              artistId: profile.id,
+              artist: profile,
+            },
+          };
+        }),
+        tips: ut.tips?.map((tip) => {
+          const { profile, ...tipRest } = tip;
+          return {
+            ...tipRest,
+            artistId: profile.id,
+            artist: profile,
+          };
+        }),
+        trackPurchases: ut.trackPurchases?.map((tp) => {
+          const { profile, ...tgRest } = tp.track.trackGroup;
+          return {
+            ...tp,
+            track: {
+              ...tp.track,
+              trackGroup: {
+                ...tgRest,
+                artistId: profile.id,
+                artist: profile,
+              },
+            },
+          };
+        }),
+        paymentProcessorCut: ut.stripeCut,
+        // ISO string, not Date: consumers treat this as a string — the income
+        // report template splits it on "T" without a JSON round-trip.
+        datePurchased: ut.createdAt.toISOString(),
+        title: generateTitle(ut),
+        artist: [
+          ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.profile),
+          ut.merchPurchases?.map((mp) => mp.merch.profile),
+          ut.trackPurchases?.map((tp) => tp.track.trackGroup.profile),
+          ut.tips?.map((tip) => tip.profile),
+          ut.profileUserSubscriptionCharges?.map(
+            (asc) => asc.profileUserSubscription.profileSubscriptionTier.profile
+          ),
+        ].flat(),
+        urlSlug: ut.trackGroupPurchases
+          .map((tgp) => tgp.trackGroup.urlSlug)
+          .join(", "),
+        amount: ut.amount,
+        currency: ut.currency,
+        saleType: "transaction",
+        ...(profileUserSubscriptionCharges !== undefined
+          ? {
+              artistUserSubscriptionCharges: profileUserSubscriptionCharges.map(
+                (charge) => {
+                  const { profileUserSubscription, ...chargeRest } = charge;
+                  if (profileUserSubscription === undefined) {
+                    return chargeRest;
+                  }
+                  const {
+                    profileSubscriptionTierId,
+                    profileSubscriptionTier,
+                    profileUserSubscriptionCharges: nestedCharges,
+                    ...subRest
+                  } = profileUserSubscription;
+                  const {
+                    profileId: tierProfileId,
+                    profile: tierProfile,
+                    ...tierRest
+                  } = (profileSubscriptionTier ?? {}) as {
+                    profileId?: number;
+                    profile?: unknown;
+                    [key: string]: unknown;
+                  };
+                  return {
+                    ...chargeRest,
+                    artistUserSubscription: {
+                      ...subRest,
+                      ...(profileSubscriptionTierId !== undefined
+                        ? {
+                            artistSubscriptionTierId:
+                              profileSubscriptionTierId,
+                          }
+                        : {}),
+                      ...(profileSubscriptionTier !== undefined
+                        ? {
+                            artistSubscriptionTier: {
+                              ...tierRest,
+                              ...(tierProfileId !== undefined
+                                ? { artistId: tierProfileId }
+                                : {}),
+                              ...(tierProfile !== undefined
+                                ? { artist: tierProfile }
+                                : {}),
+                            },
+                          }
+                        : {}),
+                      ...(nestedCharges !== undefined
+                        ? {
+                            artistUserSubscriptionCharges: nestedCharges,
+                          }
+                        : {}),
+                    },
+                  };
+                }
+              ),
+    } : {}),
   ].sort((a, b) => {
     if (orderBy?.datePurchased === "asc") {
       return (

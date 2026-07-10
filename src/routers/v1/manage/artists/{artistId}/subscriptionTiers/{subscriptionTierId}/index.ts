@@ -38,7 +38,7 @@ export default function () {
       if (user.isAdmin) {
         artistUser = await prisma.user.findFirst({
           where: {
-            artists: {
+            profiles: {
               some: {
                 subscriptionTiers: {
                   some: {
@@ -59,8 +59,16 @@ export default function () {
         Number(artistUser?.id)
       );
 
+      if (!subscriptionTier) {
+        return res.json({ result: subscriptionTier });
+      }
+
+      const { profileId, ...rest } = subscriptionTier;
       return res.json({
-        result: subscriptionTier,
+        result: {
+          ...rest,
+          artistId: profileId,
+        },
       });
     } catch (error) {
       next(error);
@@ -102,7 +110,7 @@ export default function () {
       );
 
       const artist = await prisma.profile.findFirst({
-        where: { id: subscriptionTier?.artistId },
+        where: { id: subscriptionTier?.profileId },
         select: { defaultPlatformFee: true },
       });
 
@@ -151,7 +159,13 @@ export default function () {
         });
       }
 
-      res.json({ result: updatedTier });
+      const { profileId: tierProfileId, ...rest } = updatedTier;
+      res.json({
+        result: {
+          ...rest,
+          artistId: tierProfileId,
+        },
+      });
     } catch (error) {
       next(error);
     }

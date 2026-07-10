@@ -6,6 +6,7 @@ import {
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { processSingleTrackGroup } from "../../../../../utils/serialize/trackGroup";
 
 type Params = {
   trackGroupId: number;
@@ -54,7 +55,11 @@ export default function () {
         },
       });
 
-      res.json({ result: updatedTrackGroup });
+      res.json({
+        result: updatedTrackGroup
+          ? processSingleTrackGroup(updatedTrackGroup)
+          : updatedTrackGroup,
+      });
     } catch (error) {
       next(error);
     }

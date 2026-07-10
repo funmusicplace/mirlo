@@ -6,6 +6,7 @@ import { difference } from "lodash";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { getDateRange } from "../../../utils/dateRange";
 import { AppError } from "../../../utils/error";
+import { processSingleTrackGroup } from "../../../utils/serialize/trackGroup";
 import { registerPurchase } from "../../../utils/trackGroup";
 
 export default function () {
@@ -54,7 +55,7 @@ export default function () {
           trackGroupPurchases: {
             include: {
               trackGroup: {
-                include: { artist: { omit: { apPrivateKey: true } } },
+                include: { profile: { omit: { apPrivateKey: true } } },
               },
             },
           },
@@ -64,7 +65,13 @@ export default function () {
         },
       });
       res.json({
-        results: purchases,
+        results: purchases.map((purchase) => ({
+          ...purchase,
+          trackGroupPurchases: purchase.trackGroupPurchases.map((tgp) => ({
+            ...tgp,
+            trackGroup: processSingleTrackGroup(tgp.trackGroup),
+          })),
+        })),
         total: itemCount,
       });
     } catch (e) {

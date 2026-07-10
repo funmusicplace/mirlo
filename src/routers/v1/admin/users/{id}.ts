@@ -68,7 +68,7 @@ export default function () {
           canCreateArtists: true,
           emailConfirmationToken: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           isAdmin: true,
           featureFlags: true,
@@ -78,7 +78,8 @@ export default function () {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json({ result: user });
+      const { profiles, ...rest } = user;
+      res.json({ result: { ...rest, artists: profiles } });
     } catch (e) {
       next(e);
     }

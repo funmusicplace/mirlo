@@ -31,7 +31,7 @@ export default function () {
           trackGroup = await prisma.trackGroup.findUnique({
             where: { id: Number(trackGroupId) },
             include: {
-              artist: true,
+              profile: true,
             },
           });
           if (!trackGroup) {

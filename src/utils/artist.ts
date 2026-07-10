@@ -90,8 +90,8 @@ export const checkIsUserSubscriber = async (
     const subscriber = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: user.id,
-        artistSubscriptionTier: {
-          artistId,
+        profileSubscriptionTier: {
+          profileId: artistId,
         },
       },
     });
@@ -205,7 +205,7 @@ export const createSubscriptionConfirmation = async (
         data: {
           message,
           email: email,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
 
@@ -245,7 +245,9 @@ export const subscribeUserToArtist = async (
   user?: { id: number } | null,
   message?: string | null
 ) => {
-  let defaultTier = artist.subscriptionTiers.find((tier) => tier.isDefaultTier);
+  let defaultTier = artist.subscriptionTiers.find(
+    (tier) => tier.isDefaultTier
+  );
 
   if (!defaultTier) {
     defaultTier = await prisma.profileSubscriptionTier.create({
@@ -254,7 +256,7 @@ export const subscribeUserToArtist = async (
         description: "follow an artist",
         minAmount: 0,
         isDefaultTier: true,
-        artistId: artist.id,
+        profileId: artist.id,
       },
     });
   }
@@ -264,15 +266,15 @@ export const subscribeUserToArtist = async (
       where: {
         userId: user.id,
         message,
-        artistSubscriptionTier: {
-          artistId: artist.id,
+        profileSubscriptionTier: {
+          profileId: artist.id,
         },
       },
     });
     if (!isSubscribed) {
       await prisma.profileUserSubscription.upsert({
         create: {
-          artistSubscriptionTierId: defaultTier.id,
+          profileSubscriptionTierId: defaultTier.id,
           userId: user.id,
           amount: 0,
         },
@@ -280,9 +282,9 @@ export const subscribeUserToArtist = async (
           deletedAt: null,
         },
         where: {
-          userId_artistSubscriptionTierId: {
+          userId_profileSubscriptionTierId: {
             userId: user.id,
-            artistSubscriptionTierId: defaultTier.id,
+            profileSubscriptionTierId: defaultTier.id,
           },
         },
       });
@@ -291,7 +293,7 @@ export const subscribeUserToArtist = async (
       data: {
         notificationType: "USER_FOLLOWED_YOU",
         userId: artist.userId,
-        artistId: artist.id,
+        profileId: artist.id,
         relatedUserId: user.id,
       },
     });
@@ -300,8 +302,8 @@ export const subscribeUserToArtist = async (
   const subscriptions = await prisma.profileUserSubscription.findMany({
     where: {
       userId: user?.id,
-      artistSubscriptionTier: {
-        artistId: artist.id,
+      profileSubscriptionTier: {
+        profileId: artist.id,
       },
     },
   });
@@ -332,29 +334,29 @@ export const deleteArtist = async (userId: number, artistId: number) => {
   // https://github.com/funmusicplace/mirlo/issues/19
   await prisma.post.deleteMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(artistId),
     },
   });
 
   await deleteStripeSubscriptions({
-    artistSubscriptionTier: { artistId: Number(artistId) },
+    profileSubscriptionTier: { profileId: Number(artistId) },
   });
 
   await prisma.profileSubscriptionTier.deleteMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(artistId),
     },
   });
 
   await prisma.profileUserSubscription.deleteMany({
     where: {
-      artistSubscriptionTier: { artistId: Number(artistId) },
+      profileSubscriptionTier: { profileId: Number(artistId) },
     },
   });
 
   const merch = await prisma.merch.findMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(artistId),
     },
   });
 
@@ -362,7 +364,7 @@ export const deleteArtist = async (userId: number, artistId: number) => {
 
   const trackGroups = await prisma.trackGroup.findMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(artistId),
     },
   });
 
@@ -376,16 +378,16 @@ export const deleteArtist = async (userId: number, artistId: number) => {
 };
 
 export const deleteArtistAvatar = async (artistId: number) => {
-  const avatar = await prisma.artistAvatar.findFirst({
+  const avatar = await prisma.profileAvatar.findFirst({
     where: {
-      artistId,
+      profileId: artistId,
     },
   });
 
   if (avatar) {
     await prisma.profileAvatar.delete({
       where: {
-        artistId,
+        profileId: artistId,
       },
     });
 
@@ -420,16 +422,16 @@ export const deleteUserAvatar = async (userId: number) => {
 };
 
 export const deleteArtistBackground = async (artistId: number) => {
-  const background = await prisma.artistBackground.findFirst({
+  const background = await prisma.profileBackground.findFirst({
     where: {
-      artistId,
+      profileId: artistId,
     },
   });
 
   if (background) {
     await prisma.profileBackground.delete({
       where: {
-        artistId,
+        profileId: artistId,
       },
     });
 
@@ -447,7 +449,7 @@ export const deleteStripeSubscriptions = async (
   const stripeSubscriptions = await prisma.profileUserSubscription.findMany({
     where,
     include: {
-      artistSubscriptionTier: true,
+      profileSubscriptionTier: true,
     },
   });
   await Promise.all(
@@ -455,9 +457,9 @@ export const deleteStripeSubscriptions = async (
       if (sub.stripeSubscriptionKey) {
         const artistUser = await prisma.user.findFirst({
           where: {
-            artists: {
+            profiles: {
               some: {
-                id: sub.artistSubscriptionTier.artistId,
+                id: sub.profileSubscriptionTier.profileId,
               },
             },
           },
@@ -596,7 +598,7 @@ export const singleInclude = (queryOptions?: {
                 id: true,
                 title: true,
                 urlSlug: true,
-                artist: {
+                profile: {
                   select: {
                     name: true,
                     id: true,
@@ -616,7 +618,7 @@ export const singleInclude = (queryOptions?: {
             id: true,
             name: true,
             email: true,
-            artists: {
+            profiles: {
               where: {
                 isLabelProfile: true,
               },
@@ -626,7 +628,7 @@ export const singleInclude = (queryOptions?: {
         },
       },
     },
-    artistLocationTags: {
+    profileLocationTags: {
       include: {
         locationTag: true,
       },
@@ -685,12 +687,15 @@ export const singleInclude = (queryOptions?: {
 
 export const addSizesToImage = (
   bucket: string,
-  image?: { url: string[] } | null
+  image?: { url: string[]; profileId?: number; [key: string]: unknown } | null
 ) => {
-  return image
-    ? {
-        ...image,
-        sizes: image && convertURLArrayToSizes(image?.url, bucket),
-      }
-    : null;
+  if (!image) {
+    return null;
+  }
+  const { profileId, ...imageRest } = image;
+  return {
+    ...imageRest,
+    ...(profileId !== undefined ? { artistId: profileId } : {}),
+    sizes: convertURLArrayToSizes(image.url, bucket),
+  };
 };

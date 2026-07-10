@@ -4,6 +4,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { processSingleTrackGroup } from "../../../../../utils/serialize/trackGroup";
 
 export default function () {
   const operations = {
@@ -42,7 +43,9 @@ export default function () {
         },
       });
 
-      res.json({ result: updatedTrackGroups });
+      res.json({
+        result: updatedTrackGroups.map((tg) => processSingleTrackGroup(tg)),
+      });
     } catch (error) {
       next(error);
     }

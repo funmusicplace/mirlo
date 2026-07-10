@@ -46,7 +46,7 @@ export default function () {
           trackArtists: true,
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 include: {
                   user: true,
                   paymentToUser: true,
@@ -67,14 +67,14 @@ export default function () {
         });
       }
       if (loggedInUser) {
-        await subscribeUserToArtist(track.trackGroup?.artist, loggedInUser);
+        await subscribeUserToArtist(track.trackGroup?.profile, loggedInUser);
       }
 
       let discountPercent: number | undefined;
       if (loggedInUser) {
         const discounts = await findUserDiscountPercentsForArtist(
           loggedInUser.id,
-          track.trackGroup.artistId
+          track.trackGroup.profileId
         );
 
         discountPercent = discounts.reduce((max, discount) => {
@@ -83,7 +83,7 @@ export default function () {
       }
 
       const stripeAccountId = resolvePayee({
-        artist: track.trackGroup.artist,
+        artist: track.trackGroup.profile,
         releasePaymentToUser: track.trackGroup.paymentToUser,
       }).stripeAccountId;
 
@@ -93,7 +93,7 @@ export default function () {
       const priceZero = (track.minPrice ?? 0) === 0 && priceNumber === 0;
 
       if (track.minPrice && priceNumber < track.minPrice) {
-        const currency = track.trackGroup.artist.user.currency ?? "usd";
+        const currency = track.trackGroup.profile.user.currency ?? "usd";
         throw new AppError({
           httpCode: 400,
           description: `Have to pay at least ${track.minPrice / 100} ${currency} for this track. ${priceNumber / 100} ${currency} is not enough`,
@@ -111,7 +111,7 @@ export default function () {
         await handleTrackPurchase(loggedInUser.id, track.id);
         return res.status(200).json({
           redirectUrl: `/${
-            track.trackGroup.artist.urlSlug ?? track.trackGroup.artist.id
+            track.trackGroup.profile.urlSlug ?? track.trackGroup.profile.id
           }/release/${track.trackGroup.urlSlug ?? track.trackGroup.id}/download?email=${
             loggedInUser.email
           }`,

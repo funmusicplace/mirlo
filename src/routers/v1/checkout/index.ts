@@ -66,7 +66,7 @@ export default function () {
         });
         const {
           clientId,
-          artistId,
+          profileId: artistId,
           trackGroupId,
           trackId,
           tierId,
@@ -75,7 +75,7 @@ export default function () {
           tipId,
         } = session.metadata as unknown as {
           clientId: number | null;
-          artistId: number | null;
+          profileId: number | null;
           tierId: number | null;
           trackGroupId: number | null;
           trackId: number | null;

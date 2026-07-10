@@ -162,7 +162,11 @@ export default function () {
         const artist = await prisma.profile.findFirst({
           where: { id: Number(artistId) },
         });
-        res.json({ result: artist });
+        res.json({
+          result: artist 
+            ? processSingleArtist(artist, Number(user.id))
+            : artist,
+        });
       } else {
         res.json({
           error: "An unknown error occurred",

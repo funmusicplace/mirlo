@@ -45,16 +45,16 @@ export default function () {
         include: {
           post: {
             include: {
-              artist: {
+              profile: {
                 include: { avatar: true },
               },
               featuredImage: true,
             },
           },
-          artist: { omit: { apPrivateKey: true } },
+          profile: { omit: { apPrivateKey: true } },
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 omit: { apPrivateKey: true },
                 include: { user: { select: { currency: true } } },
               },
@@ -71,8 +71,8 @@ export default function () {
           },
           subscription: {
             include: {
-              artistSubscriptionTier: {
-                include: { artist: { omit: { apPrivateKey: true } } },
+              profileSubscriptionTier: {
+                include: { profile: { omit: { apPrivateKey: true } } },
               },
             },
           },
@@ -81,7 +81,7 @@ export default function () {
               id: true,
               name: true,
               email: true,
-              artists: {
+              profiles: {
                 include: { avatar: true },
               },
             },
@@ -114,53 +114,136 @@ export default function () {
         purchases.map((p) => [`${p.userId}_${p.trackGroupId}`, p])
       );
 
-      const processed = notifications.map((n) => ({
-        ...n,
-        trackGroup: n.trackGroup
-          ? {
-              ...n.trackGroup,
-              currency: n.trackGroup.artist?.user?.currency ?? "usd",
-              cover: addSizesToImage(finalCoversBucket, n.trackGroup.cover),
-              purchase: n.relatedUserId
-                ? (purchaseMap.get(`${n.relatedUserId}_${n.trackGroupId}`) ??
-                  null)
-                : null,
-            }
-          : null,
-        post: n.post
-          ? {
-              ...n.post,
-              artist: n.post.artist
-                ? {
-                    ...n.post.artist,
-                    avatar: addSizesToImage(
+      const processed = notifications.map((n) => {
+        const {
+          profileId,
+          profile,
+          subscription,
+          post,
+          trackGroup,
+          relatedUser,
+          ...rest
+        } = n;
+
+        const { profileSubscriptionTierId, profileSubscriptionTier, ...subscriptionRest } =
+          subscription ?? ({} as NonNullable<typeof subscription>);
+
+        return {
+          ...rest,
+          artistId: profileId ?? undefined,
+          artist: profile,
+          subscription: subscription
+            ? {
+                ...subscriptionRest,
+                artistSubscriptionTierId: profileSubscriptionTierId,
+                artistSubscriptionTier: profileSubscriptionTier
+                  ? (() => {
+                      const {
+                        profileId: tierProfileId,
+                        profile: tierProfile,
+                        ...tierRest
+                      } = profileSubscriptionTier;
+                      return {
+                        ...tierRest,
+                        artistId: tierProfileId,
+                        artist: tierProfile,
+                      };
+                    })()
+                  : null,
+              }
+            : null,
+          trackGroup: trackGroup
+            ? (() => {
+                const { profileId: tgProfileId, profile: tgProfile, ...tgRest } =
+                  trackGroup;
+                return {
+                  ...tgRest,
+                  artistId: tgProfileId,
+                  artist: tgProfile,
+                  currency: tgProfile?.user?.currency ?? "usd",
+                  cover: addSizesToImage(finalCoversBucket, trackGroup.cover),
+                  purchase: n.relatedUserId
+                    ? (purchaseMap.get(
+                        `${n.relatedUserId}_${n.trackGroupId}`
+                      ) ?? null)
+                    : null,
+                };
+              })()
+            : null,
+          post: post
+            ? (() => {
+                const { profileId: postProfileId, profile: postProfile, ...postRest } =
+                  post;
+                return {
+                  ...postRest,
+                  artistId: postProfileId,
+                  artist: postProfile
+                    ? (() => {
+                        const { avatar, ...artistRest } = postProfile;
+                        const sizedAvatar = addSizesToImage(
+                          finalArtistAvatarBucket,
+                          avatar
+                        );
+                        if (!sizedAvatar) {
+                          return { ...artistRest, avatar: null };
+                        }
+                        const { profileId: avatarProfileId, ...avatarRest } =
+                          sizedAvatar as typeof sizedAvatar & {
+                            profileId?: number;
+                          };
+                        return {
+                          ...artistRest,
+                          avatar: {
+                            ...avatarRest,
+                            artistId: avatarProfileId,
+                          },
+                        };
+                      })()
+                    : null,
+                  featuredImage: post.featuredImage
+                    ? {
+                        ...post.featuredImage,
+                        src: generateFullStaticImageUrl(
+                          post.featuredImage.id,
+                          finalPostImageBucket,
+                          post.featuredImage.extension
+                        ),
+                      }
+                    : null,
+                };
+              })()
+            : null,
+          relatedUser: relatedUser
+            ? (() => {
+                const { profiles, ...relatedRest } = relatedUser;
+                return {
+                  ...relatedRest,
+                  artists: profiles.map((a) => {
+                    const { avatar, ...artistRest } = a;
+                    const sizedAvatar = addSizesToImage(
                       finalArtistAvatarBucket,
-                      n.post.artist.avatar
-                    ),
-                  }
-                : null,
-              featuredImage: n.post.featuredImage
-                ? {
-                    ...n.post.featuredImage,
-                    src: generateFullStaticImageUrl(
-                      n.post.featuredImage.id,
-                      finalPostImageBucket,
-                      n.post.featuredImage.extension
-                    ),
-                  }
-                : null,
-            }
-          : null,
-        relatedUser: n.relatedUser
-          ? {
-              ...n.relatedUser,
-              artists: n.relatedUser.artists.map((a) => ({
-                ...a,
-                avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
-              })),
-            }
-          : null,
-      }));
+                      avatar
+                    );
+                    if (!sizedAvatar) {
+                      return { ...artistRest, avatar: null };
+                    }
+                    const { profileId: avatarProfileId, ...avatarRest } =
+                      sizedAvatar as typeof sizedAvatar & {
+                        profileId?: number;
+                      };
+                    return {
+                      ...artistRest,
+                      avatar: {
+                        ...avatarRest,
+                        artistId: avatarProfileId,
+                      },
+                    };
+                  }),
+                };
+              })()
+            : null,
+        };
+      });
 
       res.json({
         results: processed,

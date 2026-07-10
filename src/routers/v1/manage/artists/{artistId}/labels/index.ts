@@ -24,7 +24,7 @@ const sendArtistNotificationOfLabel = async (
       userId: artist.userId,
       notificationType: "LABEL_ADDED_ARTIST",
       relatedUserId: labelUser.id,
-      artistId: artist.id,
+      profileId: artist.id,
     },
   });
   if (!existingNotification) {
@@ -46,7 +46,7 @@ const sendArtistNotificationOfLabel = async (
           you can ignore this message.
           </p>
         `,
-        artistId: artist.id,
+        profileId: artist.id,
         relatedUserId: labelUser.id,
       },
     });
@@ -99,7 +99,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { artistId } = req.params as unknown as { artistId: string };
+    const { artistId } = req.params as { artistId: string };
 
     try {
       const artistLabels = await prisma.artistLabel.findMany({

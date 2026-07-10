@@ -3,9 +3,9 @@ import { userAuthenticated } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
 import { downloadCSVFile } from "../../../../utils/download";
 import { getDateRange } from "../../../../utils/dateRange";
+import { processSingleMerch } from "../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -31,18 +31,20 @@ export default function () {
       datePurchased?: string;
     };
 
+    let profileIds: string | string[] | number[] | undefined = artistIds;
+
     try {
-      if (!artistIds) {
-        artistIds = (
+      if (!profileIds) {
+        profileIds = (
           await prisma.profile.findMany({
             where: {
               userId: user.id,
             },
           })
         ).map((a) => a.id);
-      } else if (typeof artistIds === "string") {
-        // If artistIds is a string, split it into an array
-        artistIds = artistIds.split(",");
+      } else if (typeof profileIds === "string") {
+        // If profileIds is a string, split it into an array
+        profileIds = profileIds.split(",");
       }
 
       let sinceDate: string | undefined;
@@ -55,7 +57,7 @@ export default function () {
       }
 
       const whereClause: any = {
-        merch: { artist: { id: { in: artistIds.map((a) => Number(a)) } } },
+        merch: { profile: { id: { in: profileIds.map((a) => Number(a)) } } },
       };
 
       if (sinceDate && untilDate) {
@@ -74,7 +76,7 @@ export default function () {
         include: {
           merch: {
             include: {
-              artist: true,
+              profile: true,
             },
           },
           options: {
@@ -92,11 +94,16 @@ export default function () {
         skip: Number(skip),
       });
 
+      const results = purchases.map((p) => ({
+        ...p,
+        merch: processSingleMerch(p.merch),
+      }));
+
       if (req.query?.format === "csv") {
-        return downloadCSVFile(res, "fulfillment.csv", csvColumns, purchases);
+        return downloadCSVFile(res, "fulfillment.csv", csvColumns, results);
       } else {
         return res.status(200).json({
-          results: purchases,
+          results,
           total,
         });
       }

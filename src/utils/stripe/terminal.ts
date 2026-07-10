@@ -187,7 +187,7 @@ export const processSetupIntentOnReader = async ({
 export const createAndDispatchTerminalSetupIntent = async ({
   readerId,
   tierId,
-  artistId,
+  profileId: artistId,
   stripeAccountId,
   amount,
   currency,
@@ -196,7 +196,7 @@ export const createAndDispatchTerminalSetupIntent = async ({
 }: {
   readerId: string;
   tierId: number;
-  artistId: number;
+  profileId: number;
   stripeAccountId: string;
   amount: number;
   currency: string;
@@ -209,7 +209,7 @@ export const createAndDispatchTerminalSetupIntent = async ({
       usage: "off_session",
       metadata: {
         tierId: String(tierId),
-        artistId: String(artistId),
+        profileId: String(artistId),
         stripeAccountId,
         amount: String(amount),
         currency,
@@ -343,7 +343,7 @@ const handleTerminalSetupIntentSucceeded = async (
 
   const tier = await prisma.profileSubscriptionTier.findFirst({
     where: { id: Number(metadata.tierId), deletedAt: null },
-    include: { artist: { select: { id: true } } },
+    include: { profile: { select: { id: true } } },
   });
 
   if (!tier) {
@@ -354,7 +354,7 @@ const handleTerminalSetupIntentSucceeded = async (
   }
 
   const amount = Number(metadata.amount);
-  const currency = await getCurrency(tier.artist.id, stripeAccountId);
+  const currency = await getCurrency(tier.profile.id, stripeAccountId);
 
   // Get or create a Stripe customer on the connected account for recurring billing
   let customerId: string;

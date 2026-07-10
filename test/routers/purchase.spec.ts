@@ -420,7 +420,7 @@ describe("purchase", () => {
 
       const result = await initiatePayment({
         readerId: "tmr_test",
-        artistId: artist.id,
+        profileId: artist.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -450,7 +450,7 @@ describe("purchase", () => {
       const createStub = stubStripeForOnline();
 
       const result = await initiatePayment({
-        artistId: artist.id,
+        profileId: artist.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -489,7 +489,7 @@ describe("purchase", () => {
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        artistId: artist.id,
+        profileId: artist.id,
         items: [
           { type: "trackGroup", id: String(tg1.id), quantity: 1, amount: 1000 },
           { type: "trackGroup", id: String(tg2.id), quantity: 1, amount: 500 },
@@ -515,7 +515,7 @@ describe("purchase", () => {
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        artistId: artist.id,
+        profileId: artist.id,
         items: [{ type: "tip", quantity: 1, amount: 500 }],
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -538,7 +538,7 @@ describe("purchase", () => {
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        artistId: artist.id,
+        profileId: artist.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
           { type: "tip", quantity: 1, amount: 500 },
@@ -577,7 +577,7 @@ describe("purchase", () => {
       ];
 
       const result = await initiatePayment({
-        artistId: artist.id,
+        profileId: artist.id,
         items,
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -635,7 +635,7 @@ describe("purchase", () => {
 
       const result = await initiateSubscription({
         readerId: "tmr_test",
-        artistId: artist.id,
+        profileId: artist.id,
         tierId: tier.id,
         amount: 1000,
         userEmail: buyer.email,

@@ -40,7 +40,7 @@ export default function () {
         where.title = { contains: title, mode: "insensitive" };
       }
       if (artistName && typeof artistName === "string") {
-        set(where, "trackGroup.artist.name", {
+        set(where, "trackGroup.profile.name", {
           contains: artistName,
           mode: "insensitive",
         });
@@ -61,7 +61,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   name: true,
                   urlSlug: true,

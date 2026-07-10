@@ -23,7 +23,7 @@ export default function () {
     const tracks = await prisma.track.findMany({
       where: {
         trackGroup: {
-          artist: {
+          profile: {
             userId: loggedInUser.id,
           },
         },

@@ -81,7 +81,7 @@ describe("artists/{id}/supporters", () => {
     const trackGroup = await createTrackGroup(artist.id, {
       title: "Test track group",
       urlSlug: "test-track-group",
-      artistId: artist.id,
+      profileId: artist.id,
     });
 
     const transaction = await prisma.userTransaction.create({
@@ -132,7 +132,7 @@ describe("artists/{id}/supporters", () => {
     const trackGroup = await createTrackGroup(artist.id, {
       title: "Test track group",
       urlSlug: "test-track-group",
-      artistId: artist.id,
+      profileId: artist.id,
     });
 
     const transactionTip = await prisma.userTransaction.create({
@@ -148,7 +148,7 @@ describe("artists/{id}/supporters", () => {
     await prisma.userProfileTip.create({
       data: {
         userId: user.id,
-        artistId: artist.id,
+        profileId: artist.id,
         transactionId: transactionTip.id,
       },
     });

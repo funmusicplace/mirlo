@@ -4,6 +4,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { processSingleTrackGroup } from "../../../../../utils/serialize/trackGroup";
 
 type Params = {
   trackGroupId: string;
@@ -45,7 +46,9 @@ export default function () {
         },
       });
 
-      res.json({ result: trackGroup });
+      res.json({
+        result: trackGroup ? processSingleTrackGroup(trackGroup) : trackGroup,
+      });
     } catch (error) {
       next(error);
     }

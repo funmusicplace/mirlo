@@ -30,7 +30,7 @@ export default function () {
             include: {
               trackGroup: {
                 include: {
-                  artist: true,
+                  profile: true,
                   cover: true,
                   tracks: {
                     orderBy: {
@@ -45,7 +45,9 @@ export default function () {
             include: {
               merch: {
                 include: {
-                  artist: { include: { user: { select: { currency: true } } } },
+                  profile: {
+                    include: { user: { select: { currency: true } } },
+                  },
                   includePurchaseTrackGroup: true,
                   images: true,
                 },
@@ -58,7 +60,7 @@ export default function () {
                 include: {
                   trackGroup: {
                     include: {
-                      artist: true,
+                      profile: true,
                       cover: true,
                     },
                   },

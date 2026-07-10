@@ -70,7 +70,7 @@ export default function () {
           createdAt: true,
           updatedAt: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           featureFlags: true,
           emailConfirmationToken: true,
@@ -81,7 +81,10 @@ export default function () {
         },
       });
       res.json({
-        results: users,
+        results: users.map(({ profiles, ...rest }) => ({
+          ...rest,
+          artists: profiles,
+        })),
         total: itemCount,
       });
     } catch (e) {

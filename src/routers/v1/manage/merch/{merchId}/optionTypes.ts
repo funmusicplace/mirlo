@@ -5,6 +5,7 @@ import {
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { isNumber } from "lodash";
+import { processSingleMerch } from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -69,7 +70,7 @@ export default function () {
         },
       });
       res.json({
-        result: merch,
+        result: merch.map((m) => processSingleMerch(m)),
       });
     } catch (error) {
       next(error);

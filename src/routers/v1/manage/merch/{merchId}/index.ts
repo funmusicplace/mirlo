@@ -32,7 +32,7 @@ export default function () {
           id: merchId,
         },
         include: {
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           shippingDestinations: true,
           images: true,
           includePurchaseTrackGroup: true,
@@ -93,9 +93,9 @@ export default function () {
           where: {
             id: Number(newValues.includePurchaseTrackGroupId),
             OR: [
-              { artistId: merch?.artistId },
+              { profileId: merch?.profileId },
               { paymentToUserId: user.id },
-              { artist: whereForAllArtistsThisLabelCanEdit(user.id) },
+              { profile: whereForAllArtistsThisLabelCanEdit(user.id) },
             ],
           },
         });
@@ -122,7 +122,7 @@ export default function () {
       const updatedMerch = await prisma.merch.findFirst({
         where: { id: merchId },
         include: {
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           includePurchaseTrackGroup: true,
         },
       });

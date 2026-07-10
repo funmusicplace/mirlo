@@ -56,7 +56,7 @@ export default function () {
               urlSlug: true,
             },
           },
-          artist: true,
+          profile: true,
           transaction: true,
         },
         orderBy: {
@@ -64,7 +64,14 @@ export default function () {
         },
       });
       res.json({
-        results: purchases,
+        results: purchases.map(
+          ({ profileId, profile, profileTipTierId, ...rest }) => ({
+            ...rest,
+            artistId: profileId,
+            artist: profile,
+            artistTipTierId: profileTipTierId,
+          })
+        ),
         total: itemCount,
       });
     } catch (e) {

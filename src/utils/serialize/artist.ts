@@ -33,6 +33,7 @@ import {
 } from "./trackGroup";
 
 interface LocalArtist extends Profile {
+  artistLabels?: LocalArtistLabel[];
   posts?: Post[];
   background?: ProfileBackground | null;
   avatar?: ProfileAvatar | null;
@@ -62,14 +63,114 @@ interface LocalArtist extends Profile {
   } | null;
 }
 
+interface LocalArtistLabel {
+  artistId: number;
+  artist?: LocalArtist;
+  labelUserId: number;
+  labelUser?: {
+    profiles?: LocalArtist[];
+    artists?: LocalArtist[];
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+const enrichRosterArtist = (
+  labelArtist: LocalArtist,
+  userId?: number
+): Record<string, unknown> => {
+  const { apPrivateKey: _, ...alArtistPublic } = labelArtist;
+  return {
+    ...alArtistPublic,
+    avatar: addSizesToImage(finalArtistAvatarBucket, labelArtist?.avatar),
+    background: addSizesToImage(
+      finalArtistBackgroundBucket,
+      labelArtist?.background
+    ),
+    trackGroups: labelArtist?.trackGroups?.map((tg) =>
+      processSingleTrackGroup(
+        {
+          ...tg,
+          profile: labelArtist,
+        } as Parameters<typeof processSingleTrackGroup>[0],
+        { loggedInUserId: userId }
+      )
+    ),
+  };
+};
+
+/** Label roster row on user.artistLabels: artist is the roster profile. */
+const serializeRosterArtistLabel = (
+  al: LocalArtistLabel & {
+    artist: Profile & {
+      avatar?: ProfileAvatar | null;
+      background?: ProfileBackground | null;
+      trackGroups?: (TrackGroup & {
+        cover?: TrackGroupCover | null;
+        tracks?: Track[];
+      })[];
+    };
+  },
+  userId?: number
+) => {
+  const { artist: labelArtist, profile: _profile, ...rest } = al as LocalArtistLabel & {
+    artist: LocalArtist;
+    profile?: unknown;
+  };
+  return {
+    ...rest,
+    artist: labelArtist ? enrichRosterArtist(labelArtist, userId) : undefined,
+  };
+};
+
+const serializeArtistLabel = (
+  al: LocalArtistLabel,
+  userId?: number,
+  isUserSubscriber?: boolean
+): Record<string, unknown> => {
+  const { artistId, artist, labelUser, profile: _profile, ...rest } = al as LocalArtistLabel & {
+    profile?: unknown;
+  };
+  const { profiles, artists, profileUserSubscriptions, ...labelUserRest } =
+    (labelUser ?? {}) as {
+      profiles?: LocalArtist[];
+      artists?: LocalArtist[];
+      profileUserSubscriptions?: unknown[];
+      [key: string]: unknown;
+    };
+  const labelProfiles = (artists ?? profiles) as LocalArtist[] | undefined;
+  const { apPrivateKey: _, ...artistPublic } = artist ?? {};
+  return {
+    ...rest,
+    artistId,
+    artist: artist ? artistPublic : undefined,
+    labelUser: labelUser
+      ? {
+          ...labelUserRest,
+          artists: labelProfiles?.map((labelProfile) =>
+            processSingleArtist(labelProfile, userId, isUserSubscriber)
+          ),
+          ...(profileUserSubscriptions !== undefined
+            ? {
+                artistUserSubscriptions: profileUserSubscriptions,
+              }
+            : {}),
+        }
+      : undefined,
+  };
+};
+
 export const processSingleArtist = (
   artist: LocalArtist,
   userId?: number,
   isUserSubscriber?: boolean
-) => {
-  const { apPrivateKey: _, ...artistPublic } = artist;
+): Record<string, unknown> => {
+  const { apPrivateKey: _, artistLabels, ...artistPublic } = artist;
   return {
     ...artistPublic,
+    artistLabels: artistLabels?.map((al) =>
+      serializeArtistLabel(al as LocalArtistLabel, userId, isUserSubscriber)
+    ),
     posts: artist?.posts?.map((p: Post) =>
       serializePost(
         p,
@@ -90,24 +191,37 @@ export const processSingleArtist = (
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
-        { ...tg, artist: { ...tg.artist, user: artist.user } },
+        { ...tg, profile: { ...tg.profile, user: artist.user } },
         { loggedInUserId: userId }
       )
     ),
-    subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
-      ...tier,
-      images: tier.images?.map((img) => ({
-        ...img,
-        image: addSizesToImage(finalImageBucket, img.image),
-      })),
-      releases: tier.releases?.map((rel) => ({
-        ...rel,
-        trackGroup: {
-          ...rel.trackGroup,
-          cover: addSizesToImage(finalCoversBucket, rel.trackGroup.cover),
-        },
-      })),
-    })),
+    subscriptionTiers: artist.subscriptionTiers?.map((tier) => {
+      const { profileId, profile: _profile, ...tierRest } = tier as ProfileSubscriptionTier & {
+        profileId?: number;
+        profile?: unknown;
+        images?: { image: Image }[];
+        releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
+      };
+      return {
+        ...tierRest,
+        artistId: profileId,
+        images: tier.images?.map((img) => ({
+          ...img,
+          image: addSizesToImage(finalImageBucket, img.image),
+        })),
+        releases: tier.releases?.map((rel) => ({
+          ...rel,
+          trackGroup: processSingleTrackGroup(
+            {
+              ...rel.trackGroup,
+              profileId: tier.profileId,
+              profile: artist,
+            } as Parameters<typeof processSingleTrackGroup>[0],
+            { loggedInUserId: userId }
+          ),
+        })),
+      };
+    }),
     user: artist.user
       ? {
           ...artist.user,

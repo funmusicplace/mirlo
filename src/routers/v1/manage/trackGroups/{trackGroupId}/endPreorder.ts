@@ -4,6 +4,7 @@ import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import { User } from "@mirlo/prisma/client";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { endPreorderForTrackGroup } from "../../../../../utils/endPreorder";
+import { processSingleTrackGroup } from "../../../../../utils/serialize/trackGroup";
 
 export default function () {
   const operations = {
@@ -45,7 +46,11 @@ export default function () {
         !!makeTracksPreviewable
       );
 
-      res.json({ result: updatedTrackGroup });
+      res.json({
+        result: updatedTrackGroup
+          ? processSingleTrackGroup(updatedTrackGroup)
+          : updatedTrackGroup,
+      });
     } catch (e) {
       next(e);
     }
