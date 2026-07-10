@@ -3,9 +3,8 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import processor, {
-  whereForPublishedTrackGroups,
-} from "../../../utils/trackGroup";
+import { processSingleTrackGroup } from "../../../serializers/trackGroup";
+import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -69,7 +68,7 @@ export default function () {
               userTrackGroupPurchases: true,
             },
           },
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,
@@ -95,7 +94,7 @@ export default function () {
 
       res.json({
         results: sortedTrackGroups.map((tg) => ({
-          ...processor.single(tg, {
+          ...processSingleTrackGroup(tg, {
             loggedInUserId: loggedInUser?.id,
           }),
           purchaseCount: purchaseCountMap.get(tg.id)?.trackGroupId,

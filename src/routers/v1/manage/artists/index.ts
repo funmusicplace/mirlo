@@ -8,7 +8,7 @@ import {
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleArtist } from "../../../../serializers/artist";
 import { getSiteSettings } from "../../../../utils/settings";
 
 const forbiddenNames = [
@@ -162,7 +162,9 @@ export default function () {
           },
         });
       }
-      res.json({ result });
+      res.json({
+        result: processSingleArtist(result as any, Number(user.id)),
+      });
     } catch (e) {
       next(e);
     }

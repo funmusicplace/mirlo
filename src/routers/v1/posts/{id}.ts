@@ -4,10 +4,10 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { AppError } from "../../../utils/error";
 import {
-  canUserSeePostContent,
-  getUserSubscriptionForArtist,
+  getCanUserSeePostContent,
+  loadPurchasesForPostTracks,
 } from "../../../utils/postAccess";
-import { serializePost } from "../../../utils/serialize/post";
+import { postIncludeForUser, serializePost } from "../../../serializers/post";
 
 export default function () {
   const operations = {
@@ -27,7 +27,7 @@ export default function () {
             AND: [
               { urlSlug: { equals: id, mode: "insensitive" } },
               {
-                artist: {
+                profile: {
                   urlSlug: artistId,
                 },
               },
@@ -58,55 +58,7 @@ export default function () {
           },
           isDraft: false,
         },
-        include: {
-          tracks: {
-            include: {
-              track: {
-                select: {
-                  title: true,
-                  isPreview: true,
-                  trackGroupId: true,
-                  audio: { select: { duration: true } },
-                  trackGroup: {
-                    select: {
-                      userTrackGroupPurchases: {
-                        where: {
-                          userId: user?.id,
-                        },
-                        select: {
-                          userId: true,
-                        },
-                      },
-                    },
-                  },
-                  userTrackPurchases: {
-                    where: {
-                      userId: user?.id,
-                    },
-                    select: {
-                      userId: true,
-                    },
-                  },
-                },
-              },
-            },
-            orderBy: {
-              order: "asc",
-            },
-          },
-          featuredImage: true,
-          minimumSubscriptionTier: true,
-          postSubscriptionTiers: true,
-          artist: {
-            include: {
-              avatar: {
-                where: {
-                  deletedAt: null,
-                },
-              },
-            },
-          },
-        },
+        include: postIncludeForUser(user?.id),
       });
 
       if (!post) {
@@ -115,35 +67,11 @@ export default function () {
           description: "Post not found",
         });
       }
-      const isArtistOwner = !!(user && post.artist?.userId === user.id);
-      const subscription = post.artistId
-        ? await getUserSubscriptionForArtist(user, post.artistId)
-        : null;
-      const canSeeContent = canUserSeePostContent(post, {
-        isArtistOwner,
-        subscription,
-      });
 
-      const userTrackGroupPurchases = user
-        ? await prisma.userTrackGroupPurchase.findMany({
-            where: {
-              userId: user.id,
-              trackGroupId: {
-                in: post.tracks
-                  ?.filter((t) => t.track?.trackGroupId)
-                  .map((t) => t.track?.trackGroupId) as number[],
-              },
-            },
-          })
-        : undefined;
-      const userTrackPurchases = user
-        ? await prisma.userTrackPurchase.findMany({
-            where: {
-              userId: user.id,
-              trackId: { in: post.tracks?.map((t) => t.trackId) as number[] },
-            },
-          })
-        : undefined;
+      const canSeeContent = await getCanUserSeePostContent(user, post);
+      const { userTrackGroupPurchases, userTrackPurchases } =
+        await loadPurchasesForPostTracks(user, post);
+
       res.json({
         result: serializePost(
           post,

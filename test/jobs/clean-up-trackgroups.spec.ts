@@ -31,7 +31,7 @@ describe("clean-up-trackgroups", () => {
     const artist = await createArtist(user.id);
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),
@@ -56,7 +56,7 @@ describe("clean-up-trackgroups", () => {
     const artist = await createArtist(user.id);
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),
@@ -81,7 +81,7 @@ describe("clean-up-trackgroups", () => {
     const artist = await createArtist(user.id);
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),

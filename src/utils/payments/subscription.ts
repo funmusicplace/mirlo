@@ -33,8 +33,8 @@ const resolveTierAndAmount = async (
   amount?: number
 ) => {
   const tier = await prisma.profileSubscriptionTier.findFirst({
-    where: { id: tierId, artistId, deletedAt: null },
-    include: { artist: true },
+    where: { id: tierId, profileId: artistId, deletedAt: null },
+    include: { profile: true },
   });
   if (!tier) {
     throw new AppError({
@@ -139,14 +139,14 @@ export const initiateOnlineSubscription = async ({
       resolveArtistPaymentContext(artistId),
       userId
         ? prisma.profileUserSubscription.findFirst({
-            where: { userId, artistSubscriptionTier: { artistId } },
+            where: { userId, profileSubscriptionTier: { profileId: artistId } },
           })
         : null,
     ]);
 
   const isTierSwitch =
     !!existingSubscription &&
-    existingSubscription.artistSubscriptionTierId !== tier.id;
+    existingSubscription.profileSubscriptionTierId !== tier.id;
 
   // Fast path: already paying for a tier on this artist, and either the new
   // tier doesn't need a shipping address collected, or it does but we
@@ -171,7 +171,7 @@ export const initiateOnlineSubscription = async ({
     await prisma.profileUserSubscription.update({
       where: { id: existingSubscription.id },
       data: {
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: resolvedAmount,
         // Keep in step with the new tier's fee — mirrors the
         // application_fee_percent update in updateSubscriptionTier, since the
@@ -202,7 +202,7 @@ export const initiateOnlineSubscription = async ({
       userId: userId ? String(userId) : undefined,
       userName,
       oldTierId: isTierSwitch
-        ? existingSubscription.artistSubscriptionTierId
+        ? existingSubscription.profileSubscriptionTierId
         : undefined,
       oldStripeSubscriptionKey,
     });
@@ -219,7 +219,7 @@ export const initiateOnlineSubscription = async ({
 };
 
 type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
-  include: { artistSubscriptionTier: true };
+  include: { profileSubscriptionTier: true };
 }>;
 
 // Cancels a user's subscription to an artist and emails them a confirmation.
@@ -234,7 +234,7 @@ export const cancelUserSubscription = async (
   userEmail: string,
   keepFollowing: boolean = false
 ) => {
-  const artistId = subscription.artistSubscriptionTier.artistId;
+  const artistId = subscription.profileSubscriptionTier.profileId;
 
   // Cancellation only needs the connected account — not the currency that
   // resolveArtistPaymentContext also fetches from Stripe — so resolve the

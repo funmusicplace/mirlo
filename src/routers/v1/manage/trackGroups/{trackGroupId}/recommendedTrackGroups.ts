@@ -8,7 +8,7 @@ import {
 } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import { processSingleTrackGroup } from "../../../../../utils/serialize/trackGroup";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 type Params = {
   trackGroupId: number;
@@ -39,7 +39,7 @@ export default function () {
         include: {
           recommendedTrackGroup: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   id: true,
                   name: true,
@@ -120,7 +120,7 @@ export default function () {
         include: {
           recommendedTrackGroup: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   id: true,
                   name: true,
@@ -133,7 +133,12 @@ export default function () {
         },
       });
 
-      res.json(recommendation);
+      res.json({
+        ...recommendation,
+        recommendedTrackGroup: processSingleTrackGroup(
+          recommendation.recommendedTrackGroup
+        ),
+      });
     } catch (error) {
       next(error);
     }

@@ -65,7 +65,7 @@ describe("manage/trackGroups/{id}/tracks", () => {
 
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),
@@ -102,7 +102,7 @@ describe("manage/trackGroups/{id}/tracks", () => {
 
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),
@@ -122,7 +122,9 @@ describe("manage/trackGroups/{id}/tracks", () => {
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.result.defaultIsPreview, true);
 
-    const refreshed = await prisma.track.findUnique({ where: { id: track1.id } });
+    const refreshed = await prisma.track.findUnique({
+      where: { id: track1.id },
+    });
     assert.equal(refreshed?.isPreview, true);
   });
 });

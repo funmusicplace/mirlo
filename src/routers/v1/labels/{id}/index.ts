@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleArtist } from "../../../../serializers/artist";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {

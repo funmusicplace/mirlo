@@ -6,6 +6,7 @@ import {
   userAuthenticated,
   merchBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
+import { serializeMerch } from "../../../../../serializers/merch";
 import { getUserCountry } from "../../../../../utils/user";
 
 type Params = {
@@ -54,7 +55,7 @@ export default function () {
         },
       });
       res.json({
-        result: merch,
+        result: merch.map((item) => serializeMerch(item)),
       });
     } catch (error) {
       next(error);

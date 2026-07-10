@@ -6,6 +6,7 @@ import sendMail from "../../jobs/send-mail";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
+import { processSingleTrackGroup } from "../../serializers/trackGroup";
 
 export default function () {
   const operations = {
@@ -31,7 +32,7 @@ export default function () {
           trackGroup = await prisma.trackGroup.findUnique({
             where: { id: Number(trackGroupId) },
             include: {
-              artist: true,
+              profile: true,
             },
           });
           if (!trackGroup) {
@@ -55,7 +56,9 @@ export default function () {
             reason,
             description,
             trackGroupId,
-            trackGroup,
+            trackGroup: trackGroup
+              ? processSingleTrackGroup(trackGroup)
+              : trackGroup,
           },
         },
       } as Job);

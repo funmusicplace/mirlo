@@ -58,8 +58,8 @@ describe("artists/{id]/unfollow", () => {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: followerUser.id,
-          artistSubscriptionTier: {
-            artistId: artist.id,
+          profileSubscriptionTier: {
+            profileId: artist.id,
           },
         },
       });
@@ -90,7 +90,7 @@ describe("artists/{id]/unfollow", () => {
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: paidTier.id,
+          profileSubscriptionTierId: paidTier.id,
           userId: followerUser.id,
           amount: 500,
           stripeSubscriptionKey: "sub_paid_email_opt_out",

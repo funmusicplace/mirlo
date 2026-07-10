@@ -61,8 +61,8 @@ describe("artists/{id]/follow", () => {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: followerUser.id,
-          artistSubscriptionTier: {
-            artistId: artist.id,
+          profileSubscriptionTier: {
+            profileId: artist.id,
           },
         },
       });
@@ -98,7 +98,7 @@ describe("artists/{id]/follow", () => {
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 
@@ -129,7 +129,7 @@ describe("artists/{id]/follow", () => {
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
 

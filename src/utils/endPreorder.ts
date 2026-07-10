@@ -51,8 +51,8 @@ export const endPreorderForTrackGroup = async (
     if (isPublished) {
       const artistFollowers = await tx.profileUserSubscription.findMany({
         where: {
-          artistSubscriptionTier: {
-            artistId: trackGroup.artistId,
+          profileSubscriptionTier: {
+            profileId: trackGroup.profileId,
           },
         },
       });

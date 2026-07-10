@@ -1,14 +1,8 @@
 import prisma from "@mirlo/prisma";
-import {
-  Merch,
-  MerchImage,
-  MerchOption,
-  MerchOptionType,
-} from "@mirlo/prisma/client";
+import { Merch, MerchOption, MerchOptionType } from "@mirlo/prisma/client";
 
 import logger from "../logger";
 
-import { addSizesToImage } from "./artist";
 import { deleteDownloadableContent } from "./content";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { AppError } from "./error";
@@ -69,30 +63,6 @@ export const deleteMerch = async (merchId: string) => {
     },
   });
 };
-
-export const processSingleMerch = (
-  merch: Merch & { images?: MerchImage[] } & {
-    artist?: { user?: { currency?: string | null } | null } | null;
-    downloadableContent?: {
-      downloadableContent: Record<string, unknown>;
-      downloadableContentId: string;
-    }[];
-  },
-  options?: { fallbackCurrency?: string }
-) => ({
-  ...merch,
-  currency: merch.artist?.user?.currency ?? options?.fallbackCurrency ?? "usd",
-  downloadableContent: merch.downloadableContent?.map((dc) => ({
-    ...dc,
-    downloadableContent: {
-      ...dc.downloadableContent,
-      downloadUrl:
-        process.env.API_DOMAIN +
-        `/v1/downloadableContent/${dc.downloadableContentId}`,
-    },
-  })),
-  images: merch.images?.map((t) => addSizesToImage(finalMerchImageBucket, t)),
-});
 
 // --- Order-resolution helpers for merch purchases ---
 //
@@ -295,8 +265,4 @@ export const decrementMerchStock = async (
     where: { id: merchId, quantityRemaining: { not: null } },
     data: { quantityRemaining: { decrement: quantity } },
   });
-};
-
-export default {
-  single: processSingleMerch,
 };

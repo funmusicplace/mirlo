@@ -6,7 +6,7 @@ import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
-import { serializePost } from "../utils/serialize/post";
+import { serializePost } from "../serializers/post";
 
 import { parseOutIframes } from "./parse-out-iframes";
 
@@ -60,7 +60,7 @@ export default async function sendPostNotification(job: {
             extension: true,
           },
         },
-        artist: {
+        profile: {
           include: {
             subscriptionTiers: {
               where: { deletedAt: null },
@@ -123,7 +123,7 @@ export default async function sendPostNotification(job: {
     // free follow alongside a paid tier), so OR their receiveEmail flags
     // together rather than taking whichever subscription happened first.
     const flatSubscriptions = flatten(
-      (post.artist?.subscriptionTiers ?? []).map((st) =>
+      (post.profile?.subscriptionTiers ?? []).map((st) =>
         st.userSubscriptions
           .filter(
             (us) =>
@@ -150,7 +150,7 @@ export default async function sendPostNotification(job: {
     // feed, just without the email side-effect (#2071). Subscribers who
     // opted out of email (receiveEmail=false) get the same treatment.
     const wantsEmail = post.shouldSendEmail;
-    const wantsActivityPub = !!post.artist?.activityPub;
+    const wantsActivityPub = !!post.profile?.activityPub;
     const deliveryMethodFor = (subscriberWantsEmail: boolean) =>
       wantsEmail && subscriberWantsEmail
         ? wantsActivityPub
@@ -194,7 +194,7 @@ export default async function sendPostNotification(job: {
       // to the post when their parent album is unreachable (draft, private,
       // unreleased, deleted). Otherwise the email link 404s. See #1703.
       const { applicationUrl } = await getClient();
-      const postUrl = `${applicationUrl}/${post.artist?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
+      const postUrl = `${applicationUrl}/${post.profile?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
       const htmlContent = await parseOutIframes(post.content || "", postUrl);
 
       for (const notification of notificationsToEmail) {
@@ -223,9 +223,9 @@ export default async function sendPostNotification(job: {
             },
             locals: {
               artist: {
-                id: post.artist?.id,
-                name: post.artist?.name,
-                urlSlug: post.artist?.urlSlug,
+                id: post.profile?.id,
+                name: post.profile?.name,
+                urlSlug: post.profile?.urlSlug,
               },
               post: {
                 ...postForEmail,

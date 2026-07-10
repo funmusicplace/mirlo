@@ -101,8 +101,8 @@ describe("artists/{id}/follow newsletter", () => {
     const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: subscriber.id,
-        artistSubscriptionTier: {
-          artistId: artist.id,
+        profileSubscriptionTier: {
+          profileId: artist.id,
         },
       },
     });
@@ -140,8 +140,8 @@ describe("artists/{id}/follow newsletter", () => {
     const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: existingUser.id,
-        artistSubscriptionTier: {
-          artistId: artist.id,
+        profileSubscriptionTier: {
+          profileId: artist.id,
         },
       },
     });
@@ -158,7 +158,7 @@ describe("artists/{id}/follow newsletter", () => {
     await prisma.profileUserSubscriptionConfirmation.create({
       data: {
         email,
-        artistId: artist.id,
+        profileId: artist.id,
         token,
         tokenExpiration: new Date(Date.now() + 60 * 60 * 1000),
       },

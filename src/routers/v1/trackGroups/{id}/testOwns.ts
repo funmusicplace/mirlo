@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 
 type Query = {
-  urlSlug?: string;
-  artistId?: number;
   email?: string;
 };
 

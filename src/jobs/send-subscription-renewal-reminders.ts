@@ -4,10 +4,11 @@ import { Profile } from "@mirlo/prisma/client";
 import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { getClient } from "../utils/getClient";
+import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 
 export type SubscriptionRenewalReminderEmailType = {
   interval: "MONTH" | "YEAR";
-  artist: Profile & { user: { currency: string | null } };
+  artist: Omit<Profile, "apPrivateKey"> & { user: { currency: string | null } };
   host: string;
   client: string;
   artistUserSubscription: {
@@ -52,7 +53,7 @@ const sendSubscriptionRenewalReminders = async () => {
           // Skip subscriptions the user has cancelled but that are still running
           // out their paid period — they won't renew, so don't remind.
           deleteReason: null,
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             isDefaultTier: false,
             interval: "YEAR", // Only year-long subscriptions
           },
@@ -69,9 +70,9 @@ const sendSubscriptionRenewalReminders = async () => {
         },
         include: {
           user: true,
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             include: {
-              artist: {
+              profile: {
                 include: { user: { select: { currency: true } } },
               },
             },
@@ -88,6 +89,9 @@ const sendSubscriptionRenewalReminders = async () => {
     await Promise.all(
       subscriptionsToRemind.map(async (subscription) => {
         try {
+          const serializedSubscription =
+            serializeProfileUserSubscription(subscription);
+
           const renewalDate = subscription.nextBillingDate
             ? new Date(subscription.nextBillingDate).toLocaleDateString(
                 "en-US",
@@ -106,16 +110,16 @@ const sendSubscriptionRenewalReminders = async () => {
               to: subscription.user.email,
             },
             locals: {
-              interval: subscription.artistSubscriptionTier.interval,
-              artist: subscription.artistSubscriptionTier.artist,
+              interval: serializedSubscription.artistSubscriptionTier.interval,
+              artist: serializedSubscription.artistSubscriptionTier.artist,
               artistUserSubscription: {
-                id: subscription.id,
-                amount: subscription.amount,
+                id: serializedSubscription.id,
+                amount: serializedSubscription.amount,
                 artistSubscriptionTier: {
-                  name: subscription.artistSubscriptionTier.name,
+                  name: serializedSubscription.artistSubscriptionTier.name,
                 },
-                createdAt: subscription.createdAt,
-                updatedAt: subscription.updatedAt,
+                createdAt: serializedSubscription.createdAt,
+                updatedAt: serializedSubscription.updatedAt,
               },
               host: process.env.API_DOMAIN,
               client: (await getClient()).applicationUrl,

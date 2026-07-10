@@ -240,7 +240,10 @@ describe("send-mail job", () => {
                         title: "Test Album",
                         urlSlug: "test-album",
                         catalogNumber: "CAT-001",
-                        artist: { name: "Test Artist", urlSlug: "test-artist" },
+                        artist: {
+                          name: "Test Artist",
+                          urlSlug: "test-artist",
+                        },
                       },
                     },
                   ],

@@ -1,10 +1,12 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+import { isNumber } from "lodash";
+
 import {
   userAuthenticated,
   merchBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
-import { isNumber } from "lodash";
+import { serializeMerch } from "../../../../../serializers/merch";
 
 type Params = {
   merchId: string;
@@ -69,7 +71,7 @@ export default function () {
         },
       });
       res.json({
-        result: merch,
+        result: merch.map((item) => serializeMerch(item)),
       });
     } catch (error) {
       next(error);

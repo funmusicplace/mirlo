@@ -25,10 +25,10 @@ export async function fetchAlbumMetadata(
     where: {
       urlSlug: albumSlug,
       deletedAt: null,
-      artist: { urlSlug: artistSlug },
+      profile: { urlSlug: artistSlug },
     },
     include: {
-      artist: true,
+      profile: true,
       cover: true,
       tracks: {
         where: { deletedAt: null },
@@ -56,16 +56,16 @@ export async function fetchPostMetadata(
 ) {
   const where =
     "id" in postLookup
-      ? { id: postLookup.id, artist: { urlSlug: artistSlug } }
+      ? { id: postLookup.id, profile: { urlSlug: artistSlug } }
       : {
           urlSlug: { equals: postLookup.slug, mode: "insensitive" as const },
-          artist: { urlSlug: artistSlug },
+          profile: { urlSlug: artistSlug },
         };
 
   return await prisma.post.findFirst({
     where,
     include: {
-      artist: true,
+      profile: true,
       featuredImage: true,
       tracks: { orderBy: { order: "asc" } },
     },
@@ -80,15 +80,15 @@ export async function fetchMerchMetadata(
     "id" in merchLookup
       ? {
           id: merchLookup.id,
-          artist: { urlSlug: artistSlug },
+          profile: { urlSlug: artistSlug },
         }
       : {
           urlSlug: { equals: merchLookup.slug, mode: "insensitive" as const },
-          artist: { urlSlug: artistSlug },
+          profile: { urlSlug: artistSlug },
         };
 
   return await prisma.merch.findFirst({
     where,
-    include: { artist: true, images: true },
+    include: { profile: true, images: true },
   });
 }

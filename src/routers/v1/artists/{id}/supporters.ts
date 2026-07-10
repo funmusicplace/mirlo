@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { serializeUserTransaction } from "../../../../serializers/userTransaction";
 
 const constructDateFilter = (
   sinceDate?: string,
@@ -38,7 +39,7 @@ const queryUserTransactions = (
         some: {
           trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
           trackGroup: {
-            artistId: { in: artistId },
+            profileId: { in: artistId },
           },
         },
       },
@@ -47,7 +48,7 @@ const queryUserTransactions = (
       merchPurchases: {
         some: {
           merch: {
-            artistId: { in: artistId },
+            profileId: { in: artistId },
           },
         },
       },
@@ -56,7 +57,7 @@ const queryUserTransactions = (
       trackPurchases: {
         some: {
           track: {
-            trackGroup: { artistId: { in: artistId } },
+            trackGroup: { profileId: { in: artistId } },
           },
         },
       },
@@ -64,18 +65,18 @@ const queryUserTransactions = (
     {
       tips: {
         some: {
-          artistId: {
+          profileId: {
             in: artistId,
           },
         },
       },
     },
     {
-      artistUserSubscriptionCharges: {
+      profileUserSubscriptionCharges: {
         some: {
-          artistUserSubscription: {
-            artistSubscriptionTier: {
-              artistId: { in: artistId },
+          profileUserSubscription: {
+            profileSubscriptionTier: {
+              profileId: { in: artistId },
             },
           },
         },
@@ -132,7 +133,7 @@ const queryUserTransactions = (
           trackGroupId: true,
           trackGroup: {
             select: {
-              artist: {
+              profile: {
                 select: { name: true, id: true, urlSlug: true, userId: true },
               },
               title: true,
@@ -148,7 +149,7 @@ const queryUserTransactions = (
             select: {
               title: true,
               urlSlug: true,
-              artist: {
+              profile: {
                 select: { name: true, id: true, urlSlug: true, userId: true },
               },
             },
@@ -158,22 +159,22 @@ const queryUserTransactions = (
 
       tips: {
         select: {
-          artist: {
+          profile: {
             select: { name: true, id: true, urlSlug: true, userId: true },
           },
         },
       },
 
-      artistUserSubscriptionCharges: {
+      profileUserSubscriptionCharges: {
         select: {
-          artistUserSubscription: {
+          profileUserSubscription: {
             select: {
               shippingAddress: true,
-              artistSubscriptionTier: {
+              profileSubscriptionTier: {
                 select: {
                   name: true,
                   interval: true,
-                  artist: {
+                  profile: {
                     select: {
                       name: true,
                       id: true,
@@ -199,7 +200,7 @@ const queryUserTransactions = (
                 select: {
                   id: true,
                   urlSlug: true,
-                  artist: {
+                  profile: {
                     select: {
                       name: true,
                       id: true,
@@ -289,12 +290,12 @@ export const findSales = async ({
       datePurchased: ut.createdAt.toISOString(),
       title: generateTitle(ut),
       artist: [
-        ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.artist),
-        ut.merchPurchases?.map((mp) => mp.merch.artist),
-        ut.trackPurchases?.map((tp) => tp.track.trackGroup.artist),
-        ut.tips?.map((tip) => tip.artist),
-        ut.artistUserSubscriptionCharges?.map(
-          (asc) => asc.artistUserSubscription.artistSubscriptionTier.artist
+        ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.profile),
+        ut.merchPurchases?.map((mp) => mp.merch.profile),
+        ut.trackPurchases?.map((tp) => tp.track.trackGroup.profile),
+        ut.tips?.map((tip) => tip.profile),
+        ut.profileUserSubscriptionCharges?.map(
+          (asc) => asc.profileUserSubscription.profileSubscriptionTier.profile
         ),
       ].flat(),
       urlSlug: ut.trackGroupPurchases
@@ -372,31 +373,41 @@ export default function () {
           : undefined,
       });
 
+      const total = results.length;
+      const totalAmount = results.reduce((acc, curr) => acc + curr.amount, 0);
+      const totalSupporters = Object.keys(
+        results.reduce(
+          (acc, curr) => {
+            if (acc[curr.userId]) {
+              return acc;
+            } else {
+              return {
+                ...acc,
+                [curr.userId]: 1,
+              };
+            }
+          },
+          {} as Record<number, number>
+        )
+      ).length;
+
+      const page = results.slice(Number(skip), Number(take)).map((r) => ({
+        ...r,
+        userId: undefined,
+      }));
+
+      const apiResults = page.map((ut) => {
+        if (!("trackGroupPurchases" in ut)) {
+          return ut;
+        }
+        return serializeUserTransaction(ut);
+      });
+
       res.json({
-        results: results.slice(Number(skip), Number(take)).map((r) => {
-          // Strip user ids from results
-          return {
-            ...r,
-            userId: undefined,
-          };
-        }),
-        total: results.length,
-        totalAmount: results.reduce((acc, curr) => acc + curr.amount, 0),
-        totalSupporters: Object.keys(
-          results.reduce(
-            (acc, curr) => {
-              if (acc[curr.userId]) {
-                return acc;
-              } else {
-                return {
-                  ...acc,
-                  [curr.userId]: 1,
-                };
-              }
-            },
-            {} as Record<number, number>
-          )
-        ).length,
+        results: apiResults,
+        total,
+        totalAmount,
+        totalSupporters,
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/followers ${e}`);

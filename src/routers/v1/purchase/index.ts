@@ -369,10 +369,10 @@ export default function () {
       for (const item of items) {
         if (item.type === "trackGroup") {
           const tg = await prisma.trackGroup.findFirst({
-            where: { id: item.id, artist: { id: artistId } },
+            where: { id: item.id, profile: { id: artistId } },
             include: {
               paymentToUser: { select: { stripeAccountId: true } },
-              artist: {
+              profile: {
                 include: {
                   user: true,
                   paymentToUser: true,
@@ -396,7 +396,7 @@ export default function () {
             price: item.price,
             message: item.message,
             minPrice: tg.minPrice,
-            artist: tg.artist,
+            artist: tg.profile,
             paymentToUser: tg.paymentToUser,
             releaseUrlSlug: tg.urlSlug,
             releaseId: tg.id,
@@ -411,11 +411,11 @@ export default function () {
           resolvedItems.push(result.item);
         } else if (item.type === "track") {
           const track = await prisma.track.findFirst({
-            where: { id: item.id, trackGroup: { artistId } },
+            where: { id: item.id, trackGroup: { profileId: artistId } },
             include: {
               trackGroup: {
                 include: {
-                  artist: {
+                  profile: {
                     include: {
                       user: true,
                       paymentToUser: true,
@@ -442,7 +442,7 @@ export default function () {
             price: item.price,
             message: item.message,
             minPrice: track.minPrice,
-            artist: track.trackGroup.artist,
+            artist: track.trackGroup.profile,
             paymentToUser: track.trackGroup.paymentToUser,
             releaseUrlSlug: track.trackGroup.urlSlug,
             releaseId: track.trackGroup.id,
@@ -460,7 +460,7 @@ export default function () {
             await prisma.merch.findFirst({
               where: {
                 id: item.id,
-                artistId,
+                profileId: artistId,
                 isPublic: true,
                 deletedAt: null,
               },

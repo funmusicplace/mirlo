@@ -298,14 +298,14 @@ export const processArtistAvatar = (ctx: APIContext) => {
         return prisma.profileAvatar.upsert({
           create: {
             originalFilename: fileInfo.filename,
-            artistId: artistId,
+            profileId: artistId,
           },
           update: {
             originalFilename: fileInfo.filename,
             deletedAt: null,
           },
           where: {
-            artistId,
+            profileId: artistId,
           },
         });
       }
@@ -324,14 +324,14 @@ export const processArtistBackground = (ctx: APIContext) => {
         return prisma.profileBackground.upsert({
           create: {
             originalFilename: fileInfo.filename,
-            artistId: artistId,
+            profileId: artistId,
           },
           update: {
             originalFilename: fileInfo.filename,
             deletedAt: null,
           },
           where: {
-            artistId,
+            profileId: artistId,
           },
         });
       }

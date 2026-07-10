@@ -313,7 +313,7 @@ describe("oembed", () => {
 
         await prisma.profileAvatar.create({
           data: {
-            artistId: artist.id,
+            profileId: artist.id,
             url: ["https://example.com/avatar.jpgx600"],
           },
         });

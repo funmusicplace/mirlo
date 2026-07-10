@@ -244,7 +244,7 @@ export async function seedPublishedTrackGroups() {
 
     for (const artist of artists) {
       const existing = await prisma.profileAvatar.findFirst({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
       if (existing) {
         console.log(`Avatar already exists for ${artist.name}, skipping`);
@@ -261,7 +261,7 @@ export async function seedPublishedTrackGroups() {
             id,
             url: urls,
             originalFilename: `seed-avatar-${id}.webp`,
-            artistId: artist.id,
+            profileId: artist.id,
           },
         });
         console.log(
@@ -287,7 +287,7 @@ export async function seedPublishedTrackGroups() {
       let clashes = true;
       for (let attempt = 0; attempt < 5; attempt++) {
         const clash = await prisma.trackGroup.findFirst({
-          where: { urlSlug, artistId: artist.id },
+          where: { urlSlug, profileId: artist.id },
         });
         if (!clash) {
           clashes = false;
@@ -313,7 +313,7 @@ export async function seedPublishedTrackGroups() {
             publishedAt,
             releaseDate,
             isPublic: true,
-            artist: { connect: { id: artist.id } },
+            profile: { connect: { id: artist.id } },
             tags: {
               create: genres.map((genre) => ({
                 tag: {

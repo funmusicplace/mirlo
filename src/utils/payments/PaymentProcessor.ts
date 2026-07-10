@@ -40,7 +40,9 @@ export type CreateSubscriptionSetupArgs = {
 export type UpdateSubscriptionTierArgs = {
   subscriptionKey: string;
   accountId: string;
-  tier: Prisma.ProfileSubscriptionTierGetPayload<{ include: { artist: true } }>;
+  tier: Prisma.ProfileSubscriptionTierGetPayload<{
+    include: { profile: true };
+  }>;
   amount: number;
   currency: string;
 };

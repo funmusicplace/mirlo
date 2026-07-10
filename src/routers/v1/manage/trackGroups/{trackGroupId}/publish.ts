@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { finalizeTrackGroupPublication } from "../../../../../utils/trackGroup";
 
 export default function () {
@@ -48,7 +49,7 @@ export default function () {
           now
         );
       }
-      res.json(updatedTrackgroup);
+      res.json(processSingleTrackGroup(updatedTrackgroup));
     } catch (e) {
       next(e);
     }

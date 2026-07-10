@@ -1,10 +1,11 @@
-import { User } from "@mirlo/prisma/client";
+import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import prisma from "@mirlo/prisma";
+import { processSingleArtist } from "../../../../serializers/artist";
 
 type Params = {
   userId: string;
@@ -37,7 +38,11 @@ export default function () {
       },
     });
 
-    res.json({ results: artists });
+    res.json({
+      results: artists.map((a) =>
+        processSingleArtist(a as Parameters<typeof processSingleArtist>[0])
+      ),
+    });
   }
 
   GET.apiDoc = {

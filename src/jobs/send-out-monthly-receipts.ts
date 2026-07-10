@@ -4,6 +4,7 @@ import { groupBy } from "lodash";
 
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
+import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 
 import sendMail from "./send-mail";
 
@@ -29,15 +30,15 @@ const sendOutMonthlyReceipts = async () => {
           gt: 0,
         },
         deletedAt: null,
-        artistSubscriptionTier: {
+        profileSubscriptionTier: {
           isDefaultTier: false,
           interval: "MONTH",
         },
       },
       include: {
-        artistSubscriptionTier: {
+        profileSubscriptionTier: {
           include: {
-            artist: true,
+            profile: true,
           },
         },
         user: true,
@@ -64,13 +65,15 @@ const sendOutMonthlyReceipts = async () => {
                 to: userSubscriptions[0].user.email,
               },
               locals: {
-                userSubscriptions,
+                userSubscriptions: userSubscriptions.map((sub) =>
+                  serializeProfileUserSubscription(sub)
+                ),
                 user: userSubscriptions[0].user,
-                host: process.env.API_DOMAIN,
+                host: process.env.API_DOMAIN || "",
                 client: (await getClient()).applicationUrl,
-              } as AnnounceMonthlyReceiptsEmailType,
+              },
             },
-          } as Job);
+          });
         }
       })
     );

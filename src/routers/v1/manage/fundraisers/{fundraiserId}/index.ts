@@ -7,6 +7,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
+import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 
 type Params = {
   fundraiserId: string;
@@ -30,7 +31,7 @@ export default function () {
         include: {
           trackGroups: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   urlSlug: true,
                   id: true,
@@ -53,7 +54,7 @@ export default function () {
         });
       }
 
-      return res.status(200).json({ result: fundraiser });
+      return res.status(200).json({ result: serializeFundraiser(fundraiser) });
     } catch (e) {
       next(e);
     }
@@ -80,7 +81,9 @@ export default function () {
         where: { id: Number(fundraiserId) },
       });
 
-      res.json({ result: fundraiser });
+      res.json({
+        result: fundraiser ? serializeFundraiser(fundraiser) : fundraiser,
+      });
     } catch (error) {
       next(error);
     }

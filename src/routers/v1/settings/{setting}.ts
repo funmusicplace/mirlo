@@ -1,12 +1,8 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { addSizesToImage } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
-import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-} from "../../../utils/minio";
+import { processSingleArtist } from "../../../serializers/artist";
 import { getSiteSettings } from "../../../utils/settings";
 
 export default function () {
@@ -72,14 +68,7 @@ export default function () {
           },
         });
         return res.status(200).json({
-          result: artists.map((a) => ({
-            ...a,
-            avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
-            background: addSizesToImage(
-              finalArtistBackgroundBucket,
-              a.background
-            ),
-          })),
+          result: artists.map((a) => processSingleArtist(a)),
         });
       } else if (
         setting === "instanceArtist" &&
@@ -93,7 +82,9 @@ export default function () {
             id: Number(settings.settings.instanceCustomization?.artistId),
           },
         });
-        return res.status(200).json({ result: artist });
+        return res.status(200).json({
+          result: artist ? processSingleArtist(artist) : artist,
+        });
       } else if (setting === "terms") {
         if (!settings.terms) {
           throw new AppError({ httpCode: 404, description: "No terms found" });

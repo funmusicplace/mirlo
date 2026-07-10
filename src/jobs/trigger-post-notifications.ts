@@ -30,7 +30,7 @@ export async function triggerPostNotifications() {
       },
       hasAnnounceEmailBeenSent: false,
       content: { not: "" },
-      artist: {
+      profile: {
         enabled: true,
         deletedAt: null,
       },

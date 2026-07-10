@@ -15,7 +15,7 @@ export const doesSubscriptionTierBelongToUser = async (
 
   const subscription = await prisma.profileSubscriptionTier.findFirst({
     where: {
-      artistId: { in: artists.map((a) => a.id) },
+      profileId: { in: artists.map((a) => a.id) },
       id: subscriptionId,
     },
     include: {
@@ -56,7 +56,7 @@ export const doesTrackGroupBelongToUser = async (
       where: {
         OR: [
           {
-            artist: {
+            profile: {
               userId: user.id,
             },
           },
@@ -97,7 +97,7 @@ export const doesMerchBelongToUser = async (merchId: string, user: User) => {
   } else {
     merch = await prisma.merch.findFirst({
       where: {
-        artist: {
+        profile: {
           userId: user.id,
         },
         id: merchId,
@@ -130,7 +130,7 @@ export const doesMerchPurchaseBelongToUser = async (
     merch = await prisma.merchPurchase.findFirst({
       where: {
         merch: {
-          artist: {
+          profile: {
             userId: user.id,
           },
         },
@@ -201,18 +201,18 @@ export const getPlayLimitContext = async (
       trackGroupId: true,
       trackGroup: {
         select: {
-          artist: { select: { maxFreePlays: true, userId: true } },
+          profile: { select: { maxFreePlays: true, userId: true } },
         },
       },
     },
   });
   if (!track || !track.isPreview) return null;
 
-  const max = track.trackGroup?.artist?.maxFreePlays ?? 0;
+  const max = track.trackGroup?.profile?.maxFreePlays ?? 0;
   if (!max) return null;
 
   if (user) {
-    if (track.trackGroup?.artist?.userId === user.id) return null;
+    if (track.trackGroup?.profile?.userId === user.id) return null;
     const owns = await prisma.userTrackGroupPurchase.findFirst({
       where: { trackGroupId: track.trackGroupId, userId: user.id },
       select: { userId: true },
@@ -261,7 +261,7 @@ export const canUserListenToTrack = async (
       trackGroupId: true,
       trackGroup: {
         select: {
-          artist: {
+          profile: {
             select: {
               maxFreePlays: true,
             },
@@ -300,7 +300,7 @@ export const canUserListenToTrack = async (
 
   if (track?.isPreview) {
     if (user) {
-      const maxFreePlays = track.trackGroup?.artist?.maxFreePlays;
+      const maxFreePlays = track.trackGroup?.profile?.maxFreePlays;
       if (!!maxFreePlays) {
         const userPlays = await prisma.trackPlay.count({
           where: {
@@ -313,7 +313,7 @@ export const canUserListenToTrack = async (
         }
       }
     } else if (ip) {
-      const maxFreePlays = track.trackGroup?.artist?.maxFreePlays;
+      const maxFreePlays = track.trackGroup?.profile?.maxFreePlays;
       if (!!maxFreePlays) {
         const ipPlays = await prisma.trackPlay.count({
           where: {

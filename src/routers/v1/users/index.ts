@@ -1,8 +1,9 @@
+import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
-import { Prisma, User } from "@mirlo/prisma/client";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
-import prisma from "@mirlo/prisma";
+import { serializeUser } from "../../../serializers/user";
 
 export default function () {
   const operations = {
@@ -35,7 +36,7 @@ export default function () {
     const users = await prisma.user.findMany({
       where,
       select: {
-        artists: {
+        profiles: {
           where: {
             deletedAt: null,
           },
@@ -48,7 +49,10 @@ export default function () {
         createdAt: "desc",
       },
     });
-    res.json({ results: users, total: itemCount });
+    res.json({
+      results: users.map((user) => serializeUser(user)),
+      total: itemCount,
+    });
   }
   return operations;
 }

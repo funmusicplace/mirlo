@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   USER_PROFILE_SELECT,
   serializeUserProfile,
-} from "../../utils/serialize/userProfile";
+} from "../../serializers/userProfile";
 
 const profile = async (req: Request, res: Response, next: NextFunction) => {
   const { email } = req.user as { email: string };

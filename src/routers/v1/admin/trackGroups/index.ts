@@ -4,9 +4,8 @@ import {
   userHasPermission,
 } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import processor, {
-  processTrackGroupQueryOrder,
-} from "../../../../utils/trackGroup";
+import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import { processTrackGroupQueryOrder } from "../../../../utils/trackGroup";
 import { Prisma } from "@mirlo/prisma/client";
 
 export default function () {
@@ -40,7 +39,7 @@ export default function () {
         where.title = { contains: title, mode: "insensitive" };
       }
       if (artistName && typeof artistName === "string") {
-        where.artist = { name: { contains: artistName, mode: "insensitive" } };
+        where.profile = { name: { contains: artistName, mode: "insensitive" } };
       }
       if (isPublished) {
         where.publishedAt = { lte: new Date() };
@@ -53,7 +52,7 @@ export default function () {
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         include: {
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,
@@ -65,7 +64,7 @@ export default function () {
       });
       res.json({
         results: trackGroups.map((tg) =>
-          processor.single(tg, {
+          processSingleTrackGroup(tg, {
             loggedInUserId: req.user?.id,
           })
         ),

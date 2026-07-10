@@ -1,11 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import processor, {
-  processTrackGroupQueryOrder,
-} from "../../../utils/trackGroup";
 import { Prisma } from "@mirlo/prisma/client";
+import { NextFunction, Request, Response } from "express";
 import { set } from "lodash";
+
+import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { processSingleTrack } from "../../../serializers/track";
 
 export default function () {
   const operations = {
@@ -40,7 +39,7 @@ export default function () {
         where.title = { contains: title, mode: "insensitive" };
       }
       if (artistName && typeof artistName === "string") {
-        set(where, "trackGroup.artist.name", {
+        set(where, "trackGroup.profile.name", {
           contains: artistName,
           mode: "insensitive",
         });
@@ -61,7 +60,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   name: true,
                   urlSlug: true,
@@ -74,7 +73,7 @@ export default function () {
         },
       });
       res.json({
-        results: tracks,
+        results: tracks.map((tr) => processSingleTrack(tr)),
         total: itemCount,
       });
     } catch (e) {

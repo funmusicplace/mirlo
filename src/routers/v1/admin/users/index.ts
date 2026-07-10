@@ -7,6 +7,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
+import { serializeUser } from "../../../../serializers/user";
 
 export default function () {
   const operations = {
@@ -70,7 +71,7 @@ export default function () {
           createdAt: true,
           updatedAt: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           featureFlags: true,
           currency: true,
@@ -80,7 +81,7 @@ export default function () {
         },
       });
       res.json({
-        results: users,
+        results: users.map((user) => serializeUser(user)),
         total: itemCount,
       });
     } catch (e) {
