@@ -194,9 +194,13 @@ async function generateAndUploadAudio(
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function pickGenres(count = 2): string[] {
-  return Array.from({ length: count }, () =>
-    faker.music.genre().toLowerCase().replace(/\s+/g, "-")
-  );
+  const genres = new Set<string>();
+  let attempts = 0;
+  while (genres.size < count && attempts < count * 20) {
+    genres.add(faker.music.genre().toLowerCase().replace(/\s+/g, "-"));
+    attempts++;
+  }
+  return [...genres];
 }
 
 const TITLE_PATTERNS = [
