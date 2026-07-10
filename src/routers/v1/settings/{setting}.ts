@@ -1,12 +1,8 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { addSizesToImage } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
-import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-} from "../../../utils/minio";
+import { processSingleArtist } from "../../../serializers/artist";
 import { getSiteSettings } from "../../../utils/settings";
 
 export default function () {
@@ -44,12 +40,23 @@ export default function () {
       const settings = await getSiteSettings();
       if (setting.includes("instanceCustomization.")) {
         const key = setting.split(".")[1];
+        const customization = settings.settings?.instanceCustomization as
+          | (Record<string, unknown> & {
+              artistId?: number;
+              profileId?: number;
+            })
+          | undefined;
+        if (!customization) {
+          return res.status(200).json({ result: undefined });
+        }
+        // Public API key is artistId; stored JSON may still use profileId.
+        if (key === "artistId") {
+          return res.status(200).json({
+            result: customization.artistId ?? customization.profileId,
+          });
+        }
         return res.status(200).json({
-          result: settings.settings?.instanceCustomization
-            ? settings.settings.instanceCustomization[
-                key as keyof typeof settings.settings.instanceCustomization
-              ]
-            : undefined,
+          result: customization[key],
         });
       }
 
@@ -72,28 +79,31 @@ export default function () {
           },
         });
         return res.status(200).json({
-          result: artists.map((a) => ({
-            ...a,
-            avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
-            background: addSizesToImage(
-              finalArtistBackgroundBucket,
-              a.background
-            ),
-          })),
+          result: artists.map((a) => processSingleArtist(a)),
         });
-      } else if (
-        setting === "instanceArtist" &&
-        settings.settings?.instanceCustomization?.artistId &&
-        Number.isFinite(
-          Number(settings.settings.instanceCustomization.artistId)
-        )
-      ) {
-        const artist = await prisma.profile.findFirst({
-          where: {
-            id: Number(settings.settings.instanceCustomization?.artistId),
-          },
-        });
-        return res.status(200).json({ result: artist });
+      } else if (setting === "instanceArtist") {
+        const customization = settings.settings?.instanceCustomization as
+          | (Record<string, unknown> & {
+              artistId?: number | string;
+              profileId?: number | string;
+            })
+          | undefined;
+        const instanceArtistId =
+          customization?.artistId ?? customization?.profileId;
+        if (instanceArtistId && Number.isFinite(Number(instanceArtistId))) {
+          const artist = await prisma.profile.findFirst({
+            where: {
+              id: Number(instanceArtistId),
+            },
+            include: {
+              avatar: { where: { deletedAt: null } },
+              background: { where: { deletedAt: null } },
+            },
+          });
+          return res.status(200).json({
+            result: artist ? processSingleArtist(artist) : artist,
+          });
+        }
       } else if (setting === "terms") {
         if (!settings.terms) {
           throw new AppError({ httpCode: 404, description: "No terms found" });

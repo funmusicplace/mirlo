@@ -3,8 +3,12 @@ import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { processSingleMerch } from "../../../../utils/merch";
-import trackGroupProcessor from "../../../../utils/trackGroup";
+import { serializeMerch } from "../../../../serializers/merch";
+import {
+  processSingleTrackGroup,
+  serializeTrackGroupPurchase,
+} from "../../../../serializers/trackGroup";
+import { serializeUserTransaction } from "../../../../serializers/userTransaction";
 
 type Params = {
   userId: string;
@@ -30,7 +34,7 @@ export default function () {
             include: {
               trackGroup: {
                 include: {
-                  artist: true,
+                  profile: true,
                   cover: true,
                   tracks: {
                     orderBy: {
@@ -45,7 +49,9 @@ export default function () {
             include: {
               merch: {
                 include: {
-                  artist: { include: { user: { select: { currency: true } } } },
+                  profile: {
+                    include: { user: { select: { currency: true } } },
+                  },
                   includePurchaseTrackGroup: true,
                   images: true,
                 },
@@ -58,7 +64,7 @@ export default function () {
                 include: {
                   trackGroup: {
                     include: {
-                      artist: true,
+                      profile: true,
                       cover: true,
                     },
                   },
@@ -73,31 +79,30 @@ export default function () {
         return a.createdAt > b.createdAt ? -1 : 1;
       });
 
-      res.json({
-        results: mergedPurchases.map((p) => ({
-          ...p,
-          trackGroupPurchases: p.trackGroupPurchases?.map((tgp) => ({
-            ...tgp,
-            trackGroup: trackGroupProcessor.single(tgp.trackGroup, {
+      const results = mergedPurchases.map((p) => ({
+        ...p,
+        trackGroupPurchases: p.trackGroupPurchases?.map((tgp) =>
+          serializeTrackGroupPurchase(tgp, {
+            loggedInUserId: loggedInUser.id,
+          })
+        ),
+        merchPurchases: p.merchPurchases?.map((mp) => ({
+          ...mp,
+          merch: serializeMerch(mp.merch),
+        })),
+        trackPurchases: p.trackPurchases?.map((tp) => ({
+          ...tp,
+          track: {
+            ...tp.track,
+            isPlayable: true,
+            trackGroup: processSingleTrackGroup(tp.track.trackGroup, {
               loggedInUserId: loggedInUser.id,
             }),
-          })),
-          merchPurchases: p.merchPurchases?.map((mp) => ({
-            ...mp,
-            merch: processSingleMerch(mp.merch),
-          })),
-          trackPurchases: p.trackPurchases?.map((tp) => ({
-            ...tp,
-            track: {
-              ...tp.track,
-              isPlayable: true,
-              trackGroup: trackGroupProcessor.single(tp.track.trackGroup, {
-                loggedInUserId: loggedInUser.id,
-              }),
-            },
-          })),
+          },
         })),
-      });
+      }));
+      const apiResults = results.map((p) => serializeUserTransaction(p));
+      res.json({ results: apiResults });
     } else {
       res.status(401);
       res.json({

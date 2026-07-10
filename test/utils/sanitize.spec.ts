@@ -55,9 +55,9 @@ describe("stripNullBytesFromObject", () => {
   });
 
   it("strips null bytes from object values that are arrays", () => {
-    const input = { artists: [`Art${NUL}ist`, "Other"] };
+    const input = { profiles: [`Art${NUL}ist`, "Other"] };
     const result = stripNullBytesFromObject(input) as typeof input;
-    assert.deepEqual(result, { artists: ["Artist", "Other"] });
+    assert.deepEqual(result, { profiles: ["Artist", "Other"] });
   });
 
   it("leaves non-string values untouched", () => {

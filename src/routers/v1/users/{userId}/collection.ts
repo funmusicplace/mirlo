@@ -5,7 +5,10 @@ import { set } from "lodash";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { processSingleTrackGroup } from "../../../../utils/serialize/trackGroup";
+import {
+  processSingleTrackGroup,
+  serializeTrackGroupPurchase,
+} from "../../../../serializers/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 type Params = {
@@ -38,7 +41,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
               tracks: {
                 orderBy: {
@@ -71,7 +74,7 @@ export default function () {
             include: {
               trackGroup: {
                 include: {
-                  artist: true,
+                  profile: true,
                   cover: true,
                   tracks: {
                     orderBy: {
@@ -86,10 +89,9 @@ export default function () {
         },
       });
 
-      const mappedTG = tgPurchases.map((purchase) => {
-        const processedTG = processSingleTrackGroup(purchase.trackGroup);
-        return { ...purchase, trackGroup: processedTG };
-      });
+      const mappedTG = tgPurchases.map((purchase) =>
+        serializeTrackGroupPurchase(purchase)
+      );
 
       const mappedTracks = trackPurchases.map((purchase) => {
         const processedTG = processSingleTrackGroup(purchase.track.trackGroup);

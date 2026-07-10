@@ -1,8 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
-import { addSizesToImage } from "../../../utils/artist";
-import { finalCoversBucket } from "../../../utils/minio";
+
+import { processSingleTrack } from "../../../serializers/track";
 
 export default function () {
   const operations = {
@@ -22,7 +22,7 @@ export default function () {
         trackGroup: {
           deletedAt: null,
           publishedAt: { lte: new Date() },
-          artist: {
+          profile: {
             deletedAt: null,
           },
         },
@@ -48,7 +48,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
             },
           },
@@ -61,13 +61,7 @@ export default function () {
         .filter((track): track is NonNullable<typeof track> => track != null);
 
       res.json({
-        results: sortedTracks.map((tr) => ({
-          ...tr,
-          trackGroup: {
-            ...tr.trackGroup,
-            cover: addSizesToImage(finalCoversBucket, tr.trackGroup.cover),
-          },
-        })),
+        results: sortedTracks.map((tr) => processSingleTrack(tr)),
       });
     } catch (e) {
       next(e);

@@ -5,6 +5,7 @@ import { set } from "lodash";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { getDateRange } from "../../../utils/dateRange";
+import { serializeProfileUserSubscription } from "../../../serializers/profileUserSubscription";
 
 export default function () {
   const operations = {
@@ -29,13 +30,13 @@ export default function () {
       if (dateRange) {
         set(
           where,
-          "artistUserSubscriptionCharges.some.createdAt.gte",
+          "profileUserSubscriptionCharges.some.createdAt.gte",
           dateRange.gte
         );
         if (dateRange.lt) {
           set(
             where,
-            "artistUserSubscriptionCharges.some.createdAt.lt",
+            "profileUserSubscriptionCharges.some.createdAt.lt",
             dateRange.lt
           );
         }
@@ -49,14 +50,14 @@ export default function () {
         take: take ? Number(take) : undefined,
         include: {
           user: true,
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             include: {
-              artist: {
+              profile: {
                 include: { user: { select: { currency: true } } },
               },
             },
           },
-          artistUserSubscriptionCharges: {
+          profileUserSubscriptionCharges: {
             include: {
               transaction: true,
             },
@@ -67,7 +68,9 @@ export default function () {
         },
       });
       res.json({
-        results: subscriptions,
+        results: subscriptions.map((sub) =>
+          serializeProfileUserSubscription(sub)
+        ),
         total: itemCount,
       });
     } catch (e) {

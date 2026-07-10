@@ -7,10 +7,11 @@ import {
   merchBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { serializeMerch } from "../../../../../serializers/merch";
 import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
-import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
+import { deleteMerch } from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -32,7 +33,7 @@ export default function () {
           id: merchId,
         },
         include: {
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           shippingDestinations: true,
           images: true,
           includePurchaseTrackGroup: true,
@@ -53,7 +54,7 @@ export default function () {
       }
 
       return res.status(200).json({
-        result: processSingleMerch(merch),
+        result: serializeMerch(merch),
       });
     } catch (e) {
       next(e);
@@ -93,9 +94,9 @@ export default function () {
           where: {
             id: Number(newValues.includePurchaseTrackGroupId),
             OR: [
-              { artistId: merch?.artistId },
+              { profileId: merch?.profileId },
               { paymentToUserId: user.id },
-              { artist: whereForAllArtistsThisLabelCanEdit(user.id) },
+              { profile: whereForAllArtistsThisLabelCanEdit(user.id) },
             ],
           },
         });
@@ -122,13 +123,13 @@ export default function () {
       const updatedMerch = await prisma.merch.findFirst({
         where: { id: merchId },
         include: {
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           includePurchaseTrackGroup: true,
         },
       });
 
       res.json({
-        result: updatedMerch ? processSingleMerch(updatedMerch) : null,
+        result: updatedMerch ? serializeMerch(updatedMerch) : null,
       });
     } catch (error) {
       next(error);

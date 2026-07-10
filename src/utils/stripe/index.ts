@@ -172,7 +172,7 @@ const checkForProductKey = async (
  */
 export const createMerchStripeProduct = async (
   merch: Prisma.MerchGetPayload<{
-    include: { artist: true; images: true };
+    include: { profile: true; images: true };
   }>,
   stripeAccountId: string,
   options?: { merchOptionIds?: string[] }
@@ -184,14 +184,14 @@ export const createMerchStripeProduct = async (
   );
   const about = await buildProductDescription(
     merch.title,
-    merch.artist.name,
+    merch.profile.name,
     merch.description,
     options
   );
   if (!productKey) {
     const product = await stripe.products.create(
       {
-        name: `${merch.title} by ${merch.artist.name}`,
+        name: `${merch.title} by ${merch.profile.name}`,
         description: about,
         tax_code: "txcd_99999999",
         metadata: {
@@ -279,7 +279,7 @@ export const findOrCreateStripeCustomer = async (
 
 export const createTrackGroupStripeProduct = async (
   trackGroup: Prisma.TrackGroupGetPayload<{
-    include: { artist: true; cover: true };
+    include: { profile: true; cover: true };
   }>,
   stripeAccountId: string
 ) => {
@@ -291,12 +291,12 @@ export const createTrackGroupStripeProduct = async (
   if (!productKey) {
     const about = await buildProductDescription(
       trackGroup.title,
-      trackGroup.artist.name,
+      trackGroup.profile.name,
       trackGroup.about
     );
     const product = await stripe.products.create(
       {
-        name: `${trackGroup.title} by ${trackGroup.artist.name}`,
+        name: `${trackGroup.title} by ${trackGroup.profile.name}`,
         description: about,
         tax_code: "txcd_10401100",
         images: trackGroup.cover
@@ -329,7 +329,7 @@ export const createTrackGroupStripeProduct = async (
 export const createTrackStripeProduct = async (
   track: Prisma.TrackGetPayload<{
     include: {
-      trackGroup: { include: { artist: true; cover: true } };
+      trackGroup: { include: { profile: true; cover: true } };
       trackArtists: true;
     };
   }>,
@@ -344,7 +344,7 @@ export const createTrackStripeProduct = async (
     const trackArtist =
       track.trackArtists?.length > 0
         ? track.trackArtists.map((a) => a.artistName).join(", ")
-        : track.trackGroup.artist.name;
+        : track.trackGroup.profile.name;
 
     const about = await buildProductDescription(
       track.title,
@@ -385,7 +385,9 @@ export const createTrackStripeProduct = async (
 };
 
 export const createSubscriptionStripeProduct = async (
-  tier: Prisma.ProfileSubscriptionTierGetPayload<{ include: { artist: true } }>,
+  tier: Prisma.ProfileSubscriptionTierGetPayload<{
+    include: { profile: true };
+  }>,
   stripeAccountId: string
 ) => {
   let productKey = await checkForProductKey(
@@ -396,7 +398,7 @@ export const createSubscriptionStripeProduct = async (
   if (!productKey) {
     const product = await stripe.products.create(
       {
-        name: `Supporting ${tier.artist.name} at ${tier.name}`,
+        name: `Supporting ${tier.profile.name} at ${tier.name}`,
         description: tier.description || "Thank you for your support!",
       },
       {
@@ -572,7 +574,7 @@ export const handleSetupIntentSucceeded = async (
       include: {
         trackGroups: {
           include: {
-            artist: {
+            profile: {
               include: {
                 user: true,
                 subscriptionTiers: true,
@@ -591,7 +593,7 @@ export const handleSetupIntentSucceeded = async (
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
       });
-      await subscribeUserToArtist(fundraiser.trackGroups[0].artist, user);
+      await subscribeUserToArtist(fundraiser.trackGroups[0].profile, user);
     }
   }
 };
@@ -600,14 +602,14 @@ export const chargePledgePayments = async (
   pledge: FundraiserPledge & { user: User } & {
     fundraiser: Fundraiser & {
       trackGroups: (TrackGroup & {
-        artist: { urlSlug: string; user: { stripeAccountId: string | null } };
+        profile: { urlSlug: string; user: { stripeAccountId: string | null } };
       })[];
     };
   }
 ) => {
   const client = await getClient();
 
-  if (!pledge.fundraiser.trackGroups[0].artist.user.stripeAccountId) {
+  if (!pledge.fundraiser.trackGroups[0].profile.user.stripeAccountId) {
     throw new AppError({
       description: "Artist does not have a connected stripe account",
       httpCode: 400,
@@ -615,7 +617,7 @@ export const chargePledgePayments = async (
   }
 
   const stripeAccountId =
-    pledge.fundraiser.trackGroups[0].artist.user.stripeAccountId;
+    pledge.fundraiser.trackGroups[0].profile.user.stripeAccountId;
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   try {
@@ -658,7 +660,7 @@ export const chargePledgePayments = async (
             automatic_payment_methods: { enabled: true },
             customer: customerId,
             payment_method: paymentMethods.data[0]?.id,
-            return_url: `${client.applicationUrl}/${pledge.fundraiser.trackGroups[0].artist.urlSlug}/release/${pledge.fundraiser.trackGroups[0].urlSlug}`,
+            return_url: `${client.applicationUrl}/${pledge.fundraiser.trackGroups[0].profile.urlSlug}/release/${pledge.fundraiser.trackGroups[0].urlSlug}`,
             off_session: true,
             confirm: true,
             application_fee_amount: await calculateAppFee(
@@ -919,7 +921,7 @@ export const handleMerchPurchasesFromIntent = async (
   for (const item of merchItems) {
     const merch = await prisma.merch.findFirst({
       where: { id: item.id },
-      include: { artist: { include: { user: true } } },
+      include: { profile: { include: { user: true } } },
     });
 
     if (!merch) {
@@ -927,8 +929,8 @@ export const handleMerchPurchasesFromIntent = async (
       continue;
     }
 
-    if (!artist && merch.artist) {
-      artist = merch.artist;
+    if (!artist && merch.profile) {
+      artist = merch.profile;
     }
 
     await prisma.merchPurchase.create({

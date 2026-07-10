@@ -66,7 +66,7 @@ export default function () {
 
       const settings = await getSiteSettings();
       const instanceArtistId = Number(
-        settings.settings?.instanceCustomization?.artistId
+        settings.settings?.instanceCustomization?.profileId
       );
       const isInstanceArtist =
         instanceArtistId !== undefined && instanceArtistId !== null

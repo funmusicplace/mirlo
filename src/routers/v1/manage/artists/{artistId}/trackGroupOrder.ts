@@ -1,9 +1,11 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 export default function () {
   const operations = {
@@ -42,7 +44,9 @@ export default function () {
         },
       });
 
-      res.json({ result: updatedTrackGroups });
+      res.json({
+        result: updatedTrackGroups.map((tg) => processSingleTrackGroup(tg)),
+      });
     } catch (error) {
       next(error);
     }

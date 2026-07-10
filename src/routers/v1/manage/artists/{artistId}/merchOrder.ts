@@ -5,6 +5,7 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { serializeMerch } from "../../../../../serializers/merch";
 
 export default function () {
   const operations = {
@@ -35,7 +36,7 @@ export default function () {
         },
       });
 
-      res.json({ results: updatedMerch });
+      res.json({ results: updatedMerch.map((m) => serializeMerch(m)) });
     } catch (error) {
       next(error);
     }

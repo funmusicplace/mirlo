@@ -6,6 +6,8 @@ import { difference } from "lodash";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { getDateRange } from "../../../utils/dateRange";
 import { AppError } from "../../../utils/error";
+import { serializeTrackGroupPurchase } from "../../../serializers/trackGroup";
+import { serializeUserTransaction } from "../../../serializers/userTransaction";
 import { registerPurchase } from "../../../utils/trackGroup";
 
 export default function () {
@@ -54,7 +56,7 @@ export default function () {
           trackGroupPurchases: {
             include: {
               trackGroup: {
-                include: { artist: { omit: { apPrivateKey: true } } },
+                include: { profile: { omit: { apPrivateKey: true } } },
               },
             },
           },
@@ -63,8 +65,16 @@ export default function () {
           createdAt: "desc",
         },
       });
+      const results = purchases.map((purchase) =>
+        serializeUserTransaction({
+          ...purchase,
+          trackGroupPurchases: purchase.trackGroupPurchases.map((tgp) =>
+            serializeTrackGroupPurchase(tgp)
+          ),
+        })
+      );
       res.json({
-        results: purchases,
+        results,
         total: itemCount,
       });
     } catch (e) {
@@ -137,7 +147,9 @@ export default function () {
           paymentProcessorKey: transaction?.stripeId ?? null,
           transactionId: userTransactionId,
         });
-        purchases.push(purchase);
+        purchases.push(
+          purchase ? serializeTrackGroupPurchase(purchase) : purchase
+        );
       }
 
       res.json({

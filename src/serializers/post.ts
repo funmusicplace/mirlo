@@ -1,9 +1,15 @@
 import { Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../artist";
-import { generateFullStaticImageUrl } from "../images";
-import { finalArtistAvatarBucket, finalPostImageBucket } from "../minio";
-import { isTrackPlayable } from "../trackPlayability";
+import { addSizesToImage } from "../utils/artist";
+import { generateFullStaticImageUrl } from "../utils/images";
+import { finalArtistAvatarBucket, finalPostImageBucket } from "../utils/minio";
+import { isTrackPlayable } from "../utils/trackPlayability";
+
+import {
+  omitApPrivateKey,
+  renameProfileIdToArtistId,
+  Serialized,
+} from "./utils";
 
 const extractFirstParagraph = (html: string): string | null => {
   const match = html.match(/<p[^>]*>[\s\S]*?<\/p>/);
@@ -29,7 +35,10 @@ export const postIncludeForUser = (userId?: number) => ({
     include: {
       track: {
         select: {
+          title: true,
           isPreview: true,
+          trackGroupId: true,
+          audio: { select: { duration: true } },
           trackGroup: {
             select: {
               userTrackGroupPurchases: {
@@ -48,36 +57,61 @@ export const postIncludeForUser = (userId?: number) => ({
     orderBy: { order: "asc" as const },
   },
   featuredImage: true,
-  artist: {
+  minimumSubscriptionTier: true,
+  postSubscriptionTiers: true,
+  profile: {
     include: {
       avatar: { where: { deletedAt: null } },
     },
   },
 });
 
-export const serializePost = (
-  post: Partial<Post> & { id: number; isPublic: boolean } & {
-    artist?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
-  } & { featuredImage?: { extension: string; id: string } | null } & {
-    tracks?: {
-      trackId: number;
-      track?: {
-        title?: string | null;
-        isPreview: boolean;
-        trackGroupId?: number;
-        audio?: { duration: number | null } | null;
-      };
-    }[];
-  } & { _count?: { tracks?: number } },
+type PostInput = Partial<Post> & {
+  id: number;
+  isPublic: boolean;
+  profileId?: number | null;
+  profile?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
+} & { featuredImage?: { extension: string; id: string } | null } & {
+  tracks?: {
+    trackId: number;
+    track?: {
+      title?: string | null;
+      isPreview: boolean;
+      trackGroupId?: number;
+      audio?: { duration: number | null } | null;
+    };
+  }[];
+} & { _count?: { tracks?: number } };
+
+export const serializePost = <T extends PostInput>(
+  post: T,
   userTrackGroupPurchases?: Array<{ userId: number; trackGroupId: number }>,
   userTrackPurchases?: Array<{ userId: number; trackId: number }>,
-  isUserSubscriber?: boolean
-) => {
-  const canSeeContent = !!(isUserSubscriber || post.isPublic);
+  /**
+   * Prefer getCanUserSeePostContent / canUserSeePostContent from postAccess.
+   * Still ORs `post.isPublic` so list endpoints can pass subscriber/owner only.
+   */
+  canSeeContent?: boolean
+): Serialized<T> & {
+  trackCount: number;
+  isContentHidden: boolean;
+} => {
+  const contentVisible = !!(canSeeContent || post.isPublic);
+  const { profile, profileId, ...postRest } = post;
+
   return {
-    ...post,
+    ...postRest,
+    artistId: profileId ?? undefined,
+    artist: profile
+      ? {
+          ...omitApPrivateKey(profile),
+          avatar: renameProfileIdToArtistId(
+            addSizesToImage(finalArtistAvatarBucket, profile.avatar)
+          ),
+        }
+      : undefined,
     trackCount: post._count?.tracks ?? post.tracks?.length ?? 0,
-    tracks: canSeeContent
+    tracks: contentVisible
       ? post.tracks?.map((pt) => {
           const tgPurchases = userTrackGroupPurchases ?? [];
           const trackPurchases = userTrackPurchases ?? [];
@@ -89,7 +123,8 @@ export const serializePost = (
               trackId: pt.trackId,
               trackGroupPurchases: tgPurchases,
               trackPurchases: trackPurchases,
-              isUserSubscriber,
+              // Same flag the API historically passed through for playability.
+              isUserSubscriber: canSeeContent,
             }),
             title: pt.track?.title ?? undefined,
             audioDuration: pt.track?.audio?.duration ?? undefined,
@@ -97,12 +132,6 @@ export const serializePost = (
           };
         })
       : undefined,
-    artist: {
-      ...post.artist,
-      avatar: post.artist
-        ? addSizesToImage(finalArtistAvatarBucket, post.artist?.avatar)
-        : null,
-    },
     featuredImage: post.featuredImage && {
       ...post.featuredImage,
       src: generateFullStaticImageUrl(
@@ -111,9 +140,12 @@ export const serializePost = (
         post.featuredImage.extension
       ),
     },
-    isContentHidden: !canSeeContent,
-    content: !canSeeContent
+    isContentHidden: !contentVisible,
+    content: !contentVisible
       ? extractFirstParagraph(post.content ?? "")
       : post.content,
+  } as Serialized<T> & {
+    trackCount: number;
+    isContentHidden: boolean;
   };
 };

@@ -6,6 +6,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
+import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 
 type Params = {
   trackGroupId: number;
@@ -38,7 +39,7 @@ export default function () {
       }
 
       if (trackGroup?.fundraiser) {
-        res.json({ result: trackGroup.fundraiser });
+        res.json({ result: serializeFundraiser(trackGroup.fundraiser) });
         return;
       }
 
@@ -56,7 +57,7 @@ export default function () {
         },
       });
 
-      res.json({ result: newFundraiser });
+      res.json({ result: serializeFundraiser(newFundraiser) });
     } catch (error) {
       next(error);
     }

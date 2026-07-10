@@ -40,7 +40,7 @@ describe("handleSubscription", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Tier",
       },
     });
@@ -57,13 +57,13 @@ describe("handleSubscription", () => {
     const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: purchaser.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
       },
     });
 
     assert.ok(subscription, "Subscription should be created");
     assert.equal(subscription.userId, purchaser.id);
-    assert.equal(subscription.artistSubscriptionTierId, tier.id);
+    assert.equal(subscription.profileSubscriptionTierId, tier.id);
     assert.equal(subscription.amount, 1000);
     assert.equal(subscription.stripeSubscriptionKey, "sub_test123");
   });
@@ -89,7 +89,7 @@ describe("handleSubscription", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Tier",
       },
     });
@@ -103,7 +103,7 @@ describe("handleSubscription", () => {
     await handleSubscription(purchaser.id, tier.id, mockSession);
 
     const subscription = await prisma.profileUserSubscription.findFirst({
-      where: { userId: purchaser.id, artistSubscriptionTierId: tier.id },
+      where: { userId: purchaser.id, profileSubscriptionTierId: tier.id },
     });
     assert.ok(subscription, "Subscription should be created");
 
@@ -143,7 +143,7 @@ describe("handleSubscription", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Tier",
       },
     });
@@ -151,7 +151,7 @@ describe("handleSubscription", () => {
     const existing = await prisma.profileUserSubscription.create({
       data: {
         userId: purchaser.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 500,
         stripeSubscriptionKey: "sub_old",
         deletedAt: new Date(),
@@ -169,7 +169,7 @@ describe("handleSubscription", () => {
     const subscriptions = await prisma.profileUserSubscription.findMany({
       where: {
         userId: purchaser.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
       },
     });
 

@@ -1,15 +1,17 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
-import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
-import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../../../../utils/error";
+import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
+import { processSingleTrackGroup } from "../../../../../../../serializers/trackGroup";
 
 type Params = {
-  artistId: string;
+  profileId: string;
   subscriptionTierId: string;
 };
 
@@ -50,7 +52,7 @@ export default function () {
           trackGroup: {
             include: {
               cover: true,
-              artist: true,
+              profile: true,
             },
           },
         },
@@ -59,7 +61,12 @@ export default function () {
         },
       });
 
-      res.status(200).json({ results: releases });
+      res.status(200).json({
+        results: releases.map((release) => ({
+          ...release,
+          trackGroup: processSingleTrackGroup(release.trackGroup),
+        })),
+      });
     } catch (e) {
       next(e);
     }
@@ -153,13 +160,18 @@ export default function () {
           trackGroup: {
             include: {
               cover: true,
-              artist: true,
+              profile: true,
             },
           },
         },
       });
 
-      res.status(201).json({ result: release });
+      res.status(201).json({
+        result: {
+          ...release,
+          trackGroup: processSingleTrackGroup(release.trackGroup),
+        },
+      });
     } catch (e) {
       next(e);
     }

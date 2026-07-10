@@ -1,12 +1,13 @@
-import { Prisma } from "@mirlo/prisma/client";
-
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
+import { NextFunction, Request, Response } from "express";
+import { uniqBy } from "lodash";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { uniqBy } from "lodash";
+import { serializeUser } from "../../../../serializers/user";
 
 export default function () {
   const operations = {
@@ -70,7 +71,7 @@ export default function () {
           createdAt: true,
           updatedAt: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           featureFlags: true,
           emailConfirmationToken: true,
@@ -81,7 +82,7 @@ export default function () {
         },
       });
       res.json({
-        results: users,
+        results: users.map((user) => serializeUser(user)),
         total: itemCount,
       });
     } catch (e) {

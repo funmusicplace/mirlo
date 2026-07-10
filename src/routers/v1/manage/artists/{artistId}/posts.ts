@@ -7,7 +7,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
-import { serializePost } from "../../../../../utils/serialize/post";
+import { serializePost } from "../../../../../serializers/post";
 
 export default function () {
   const operations = {
@@ -31,7 +31,7 @@ export default function () {
 
     try {
       const where = {
-        artistId: Number(artistId),
+        profileId: Number(artistId),
         ...(isDraft !== undefined ? { isDraft: isDraft === "true" } : {}),
         ...(isScheduled === "true"
           ? { publishedAt: { gt: new Date() } }
@@ -93,7 +93,7 @@ export default function () {
       }
 
       const mostRecentPost = await prisma.post.findFirst({
-        where: { artistId: Number(artistId), deletedAt: null },
+        where: { profileId: Number(artistId), deletedAt: null },
         orderBy: { createdAt: "desc" },
         select: { minimumSubscriptionTierId: true, shouldSendEmail: true },
       });
@@ -106,11 +106,11 @@ export default function () {
       let validTier;
       if (resolvedTierId) {
         validTier = await prisma.profileSubscriptionTier.findFirst({
-          where: { artistId: Number(artistId), id: resolvedTierId },
+          where: { profileId: Number(artistId), id: resolvedTierId },
         });
       } else {
         validTier = await prisma.profileSubscriptionTier.findFirst({
-          where: { artistId: Number(artistId), isDefaultTier: true },
+          where: { profileId: Number(artistId), isDefaultTier: true },
         });
         if (!validTier) {
           await prisma.profileSubscriptionTier.create({
@@ -119,11 +119,11 @@ export default function () {
               description: "follow an artist",
               minAmount: 0,
               isDefaultTier: true,
-              artistId: artist.id,
+              profileId: artist.id,
             },
           });
           validTier = await prisma.profileSubscriptionTier.findFirst({
-            where: { artistId: Number(artistId), isDefaultTier: true },
+            where: { profileId: Number(artistId), isDefaultTier: true },
           });
         }
       }
@@ -136,11 +136,13 @@ export default function () {
             isPublic,
             publishedAt,
             shouldSendEmail: resolvedShouldSendEmail,
-            artist: { connect: { id: Number(artistId) } },
+            profile: { connect: { id: Number(artistId) } },
             minimumSubscriptionTier: { connect: { id: validTier.id } },
           },
         });
-        res.json({ result });
+        res.json({
+          result: serializePost(result, undefined, undefined, true),
+        });
       } else {
         throw new AppError({
           description: "That tier doesn't belong to the current artist",

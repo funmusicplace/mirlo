@@ -20,7 +20,7 @@ const findNewSlug = async (
   const verifySlug = await prisma.trackGroup.findFirst({
     where: {
       urlSlug: `${slug}`,
-      artistId: artistId,
+      profileId: artistId,
     },
   });
   if (verifySlug) {

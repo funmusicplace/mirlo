@@ -2,7 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import processor, {
+import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import {
   findTrackGroupIdForSlug,
   trackGroupSingleInclude,
 } from "../../../../utils/trackGroup";
@@ -16,8 +17,8 @@ export default function () {
     let { id }: { id?: string } = req.params;
     const loggedInUser = req.user;
 
-    const { artistId }: { artistId: string } = req.query as {
-      artistId: string;
+    const { artistId }: { artistId?: string } = req.query as {
+      artistId?: string;
     };
     if (!id) {
       return res.status(400);
@@ -44,7 +45,8 @@ export default function () {
         trackGroup?.publishedAt && trackGroup.publishedAt < new Date();
 
       const canSeeUnpublished =
-        loggedInUser?.isAdmin || loggedInUser?.id === trackGroup?.artist.userId;
+        loggedInUser?.isAdmin ||
+        loggedInUser?.id === trackGroup?.profile.userId;
 
       if (trackGroup && !isPublished) {
         if (!canSeeUnpublished) {
@@ -59,7 +61,7 @@ export default function () {
         return next();
       }
       res.json({
-        result: processor.single(trackGroup, {
+        result: processSingleTrackGroup(trackGroup, {
           loggedInUserId: loggedInUser?.id,
         }),
       });

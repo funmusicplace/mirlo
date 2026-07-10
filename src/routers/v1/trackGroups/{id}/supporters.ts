@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
 import { findSales } from "../../artists/{id}/supporters";
+import { serializeUserTransaction } from "../../../../serializers/userTransaction";
 
 export default function () {
   const operations = {
@@ -27,7 +28,7 @@ export default function () {
           id: Number(id),
         },
         include: {
-          artist: true,
+          profile: true,
           fundraiser: true,
         },
       });
@@ -38,15 +39,21 @@ export default function () {
         });
       }
 
-      const results: {
-        amount: number;
-        datePurchased: string;
-        userId: number;
-      }[] = await findSales({
-        artistId: [trackGroup.artist.id],
+      const sales = await findSales({
+        artistId: [trackGroup.profile.id],
         sinceDate: sinceDate as string,
         filters: { trackGroupIds: [Number(id)] },
       });
+
+      let results: Array<
+        | Awaited<ReturnType<typeof findSales>>[number]
+        | {
+            amount: number;
+            datePurchased: string;
+            urlSlug: string;
+            userId: number;
+          }
+      > = [...sales];
 
       if (
         trackGroup.fundraiser &&
@@ -70,31 +77,41 @@ export default function () {
         );
       }
 
+      const total = results.length;
+      const totalAmount = results.reduce((acc, curr) => acc + curr.amount, 0);
+      const totalSupporters = Object.keys(
+        results.reduce(
+          (acc, curr) => {
+            if (acc[curr.userId]) {
+              return acc;
+            } else {
+              return {
+                ...acc,
+                [curr.userId]: 1,
+              };
+            }
+          },
+          {} as Record<number, number>
+        )
+      ).length;
+
+      const page = results.slice(Number(skip), Number(take)).map((r) => ({
+        ...r,
+        userId: undefined,
+      }));
+
+      const apiResults = page.map((ut) => {
+        if (!("trackGroupPurchases" in ut)) {
+          return ut;
+        }
+        return serializeUserTransaction(ut);
+      });
+
       res.json({
-        results: results.slice(Number(skip), Number(take)).map((r) => {
-          // Strip user ids from results
-          return {
-            ...r,
-            userId: undefined,
-          };
-        }),
-        total: results.length,
-        totalAmount: results.reduce((acc, curr) => acc + curr.amount, 0),
-        totalSupporters: Object.keys(
-          results.reduce(
-            (acc, curr) => {
-              if (acc[curr.userId]) {
-                return acc;
-              } else {
-                return {
-                  ...acc,
-                  [curr.userId]: 1,
-                };
-              }
-            },
-            {} as Record<number, number>
-          )
-        ).length,
+        results: apiResults,
+        total,
+        totalAmount,
+        totalSupporters,
         totalPledges: pledges.length,
       });
     } catch (e) {

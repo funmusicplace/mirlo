@@ -66,7 +66,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -86,7 +86,7 @@ describe("send-out-monthly-income-report", () => {
     });
     await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: chargeDate,
         transactionId: transaction.id,
       },
@@ -137,7 +137,7 @@ describe("send-out-monthly-income-report", () => {
           refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
-        artistId: artist.id,
+        profileId: artist.id,
       },
     });
 
@@ -199,7 +199,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -220,7 +220,7 @@ describe("send-out-monthly-income-report", () => {
 
     const charge = await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: createdDate,
         transactionId: transaction.id,
       },
@@ -263,7 +263,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -284,7 +284,7 @@ describe("send-out-monthly-income-report", () => {
 
     const charge = await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: date,
         transactionId: transaction.id,
       },
@@ -327,7 +327,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -390,7 +390,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -411,7 +411,7 @@ describe("send-out-monthly-income-report", () => {
 
     await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: createdDate,
         transactionId: transaction.id,
       },
@@ -424,7 +424,7 @@ describe("send-out-monthly-income-report", () => {
           refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
-        artistId: artist2.id,
+        profileId: artist2.id,
       },
     });
 
@@ -495,7 +495,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -515,7 +515,7 @@ describe("send-out-monthly-income-report", () => {
     });
     await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: lastMonthDate,
         transactionId: transaction.id,
       },
@@ -525,7 +525,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: leaverUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 700,
         deletedAt: lastMonthDate,
         deleteReason: "USER_CANCELLED",
@@ -536,7 +536,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: switcherUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 300,
         deletedAt: lastMonthDate,
         deleteReason: "TIER_SWITCHED",
@@ -606,7 +606,7 @@ describe("send-out-monthly-income-report", () => {
       data: {
         datePurchased: tip1date,
         userId: followerUser.id,
-        artistId: artist.id,
+        profileId: artist.id,
       },
     });
 
@@ -614,7 +614,7 @@ describe("send-out-monthly-income-report", () => {
       data: {
         datePurchased: tip2date,
         userId: followerUser.id,
-        artistId: artist2.id,
+        profileId: artist2.id,
       },
     });
 

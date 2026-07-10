@@ -1,11 +1,13 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
-import prisma from "@mirlo/prisma";
+import { serializeProfileSubscriptionTier } from "../../../../../../../serializers/profileSubscriptionTier";
 import { getSiteSettings } from "../../../../../../../utils/settings";
 
 const normalizeDiscountPercent = (value: unknown): number | undefined => {
@@ -38,7 +40,7 @@ export default function () {
       if (user.isAdmin) {
         artistUser = await prisma.user.findFirst({
           where: {
-            artists: {
+            profiles: {
               some: {
                 subscriptionTiers: {
                   some: {
@@ -60,7 +62,9 @@ export default function () {
       );
 
       return res.json({
-        result: subscriptionTier,
+        result: subscriptionTier
+          ? serializeProfileSubscriptionTier(subscriptionTier)
+          : subscriptionTier,
       });
     } catch (error) {
       next(error);
@@ -102,7 +106,7 @@ export default function () {
       );
 
       const artist = await prisma.profile.findFirst({
-        where: { id: subscriptionTier?.artistId },
+        where: { id: subscriptionTier?.profileId },
         select: { defaultPlatformFee: true },
       });
 
@@ -151,7 +155,9 @@ export default function () {
         });
       }
 
-      res.json({ result: updatedTier });
+      res.json({
+        result: serializeProfileSubscriptionTier(updatedTier),
+      });
     } catch (error) {
       next(error);
     }

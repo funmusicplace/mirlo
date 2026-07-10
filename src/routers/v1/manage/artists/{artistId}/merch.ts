@@ -7,8 +7,8 @@ import {
   canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { serializeMerch } from "../../../../../serializers/merch";
 import { getPlatformFeeForArtist } from "../../../../../utils/artist";
-import { processSingleMerch } from "../../../../../utils/merch";
 import { getUserCountry } from "../../../../../utils/user";
 
 export default function () {
@@ -27,7 +27,7 @@ export default function () {
     try {
       const results = await prisma.merch.findMany({
         where: {
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           deletedAt: null,
         },
         orderBy: [
@@ -35,14 +35,14 @@ export default function () {
           { createdAt: "asc" },
         ],
         include: {
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           images: true,
           optionTypes: { include: { options: true } },
         },
       });
 
       res.json({
-        results: results.map((m) => processSingleMerch(m)),
+        results: results.map((m) => serializeMerch(m)),
       });
     } catch (e) {
       next(e);
@@ -88,7 +88,7 @@ export default function () {
         data: {
           title,
           description: description ?? "",
-          artist: { connect: { id: artistId } },
+          profile: { connect: { id: artistId } },
           minPrice: 0,
           isPublic: false,
           platformPercent: await getPlatformFeeForArtist(artistId),
@@ -109,7 +109,9 @@ export default function () {
       const created = await prisma.merch.findFirst({
         where: { id: result.id },
       });
-      return res.json({ result: created });
+      return res.json({
+        result: created ? serializeMerch(created) : created,
+      });
     } catch (e) {
       next(e);
     }

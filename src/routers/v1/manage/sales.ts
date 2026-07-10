@@ -6,6 +6,7 @@ import { userAuthenticated } from "../../../auth/passport";
 import { getDateRange } from "../../../utils/dateRange";
 import { downloadCSVFile } from "../../../utils/download";
 import { findSales } from "../artists/{id}/supporters";
+import { serializeUserTransaction } from "../../../serializers/userTransaction";
 
 export default function () {
   const operations = {
@@ -75,6 +76,24 @@ export default function () {
         paymentToUserId: usingDefaultScope ? user.id : undefined,
       });
 
+      const total = results.length;
+      const totalAmount = results.reduce((acc, curr) => acc + curr.amount, 0);
+      const totalSupporters = Object.keys(
+        results.reduce(
+          (acc, curr) => {
+            if (acc[curr.userId]) {
+              return acc;
+            } else {
+              return {
+                ...acc,
+                [curr.userId]: 1,
+              };
+            }
+          },
+          {} as Record<number, number>
+        )
+      ).length;
+
       // If CSV format is requested, fetch additional transaction details
       if (req.query?.format === "csv") {
         const transformedResults = results.map((result) => ({
@@ -89,9 +108,10 @@ export default function () {
           merchPurchases:
             result.merchPurchases?.map((mp) => mp.merch.title).join(", ") || "",
           artistUserSubscriptionCharges:
-            result.artistUserSubscriptionCharges
+            result.profileUserSubscriptionCharges
               ?.map(
-                (asc) => asc.artistUserSubscription.artistSubscriptionTier.name
+                (asc) =>
+                  asc.profileUserSubscription?.profileSubscriptionTier?.name
               )
               .join(", ") || "",
         }));
@@ -103,49 +123,25 @@ export default function () {
         );
       }
 
-      const slicedResults = results.slice(
-        Number(skip),
-        Number(skip) + Number(take)
-      );
-
-      if (req.query?.format === "csv") {
-        const csvData = slicedResults.map((r) => ({
+      const page = results
+        .slice(Number(skip), Number(skip) + Number(take))
+        .map((r) => ({
           ...r,
-          artist: Array.isArray(r.artist)
-            ? r.artist
-                .map((a: any) => a?.name)
-                .filter(Boolean)
-                .join(", ")
-            : r.artist,
+          userId: undefined,
         }));
-        return downloadCSVFile(res, "sales.csv", csvColumns, csvData);
-      }
+
+      const apiResults = page.map((ut) => {
+        if (!("trackGroupPurchases" in ut)) {
+          return ut;
+        }
+        return serializeUserTransaction(ut);
+      });
 
       res.json({
-        results: slicedResults.map((r) => {
-          // Strip user ids from results
-          return {
-            ...r,
-            userId: undefined,
-          };
-        }),
-        total: results.length,
-        totalAmount: results.reduce((acc, curr) => acc + curr.amount, 0),
-        totalSupporters: Object.keys(
-          results.reduce(
-            (acc, curr) => {
-              if (acc[curr.userId]) {
-                return acc;
-              } else {
-                return {
-                  ...acc,
-                  [curr.userId]: 1,
-                };
-              }
-            },
-            {} as Record<number, number>
-          )
-        ).length,
+        results: apiResults,
+        total,
+        totalAmount,
+        totalSupporters,
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/followers ${e}`);
@@ -182,7 +178,6 @@ const csvColumns = [
   { label: "Date", value: "datePurchased" },
   { label: "Artist", value: "artist" },
   { label: "Type", value: "saleType" },
-  { label: "Artist", value: "artist" },
   { label: "Item", value: "title" },
   { label: "Amount", value: "amount" },
   { label: "Currency", value: "currency" },

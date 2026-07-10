@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import trackGroupProcessor from "../../../../utils/trackGroup";
+import { serializeTrackGroupPurchase } from "../../../../serializers/trackGroup";
 
 type Params = {
   userId: string;
@@ -32,7 +32,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
               tracks: {
                 orderBy: {
@@ -44,12 +44,11 @@ export default function () {
         },
       });
       res.json({
-        results: purchases.map((p) => ({
-          ...p,
-          trackGroup: trackGroupProcessor.single(p.trackGroup, {
+        results: purchases.map((p) =>
+          serializeTrackGroupPurchase(p, {
             loggedInUserId: loggedInUser.id,
-          }),
-        })),
+          })
+        ),
       });
     } else {
       res.status(401);

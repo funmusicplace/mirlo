@@ -8,6 +8,7 @@ import {
 } from "../../../../../auth/passport";
 import { downloadCSVFile } from "../../../../../utils/download";
 import { getClient } from "../../../../../utils/getClient";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 type Params = {
   artistId: string;
@@ -57,7 +58,7 @@ export default function () {
       const { applicationUrl } = await getClient();
       const where: Prisma.TrackGroupDownloadCodesWhereInput = {
         trackGroup: {
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           deletedAt: null,
         },
       };
@@ -71,7 +72,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
             },
           },
           redeemedByUser: true,
@@ -83,8 +84,17 @@ export default function () {
           "codes.csv",
           csvColumns,
           artistCodes.map((c) => ({
-            ...c,
-            url: `${applicationUrl}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+            trackGroupId: c.trackGroupId,
+            trackgroup: { title: c.trackGroup.title },
+            group: c.group,
+            downloadCode: c.downloadCode,
+            redeemedByUser: c.redeemedByUser
+              ? {
+                  name: c.redeemedByUser.name,
+                  email: c.redeemedByUser.email,
+                }
+              : null,
+            url: `${applicationUrl}/${c.trackGroup.profile.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
           }))
         );
       }
@@ -92,7 +102,8 @@ export default function () {
       res.json({
         results: artistCodes.map((c) => ({
           ...c,
-          url: `${applicationUrl}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+          trackGroup: processSingleTrackGroup(c.trackGroup),
+          url: `${applicationUrl}/${c.trackGroup.profile.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
         })),
       });
     } catch (error) {

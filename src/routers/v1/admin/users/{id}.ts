@@ -1,11 +1,11 @@
-import { User } from "@mirlo/prisma/client";
-
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
+import { serializeUser } from "../../../../serializers/user";
 import { deleteUser } from "../../../../utils/user";
 
 export default function () {
@@ -68,7 +68,7 @@ export default function () {
           canCreateArtists: true,
           emailConfirmationToken: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           isAdmin: true,
           featureFlags: true,
@@ -78,7 +78,7 @@ export default function () {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json({ result: user });
+      res.json({ result: serializeUser(user) });
     } catch (e) {
       next(e);
     }

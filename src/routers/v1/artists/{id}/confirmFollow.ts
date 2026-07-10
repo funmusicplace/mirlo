@@ -40,7 +40,7 @@ export default function () {
       const confirmation =
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
-            artistId: Number(artistId),
+            profileId: Number(artistId),
             email,
             token,
             tokenExpiration: { gte: new Date() },
@@ -70,7 +70,7 @@ export default function () {
 
         const settings = await getSiteSettings();
         const instanceArtistId = Number(
-          settings.settings?.instanceCustomization?.artistId
+          settings.settings?.instanceCustomization?.profileId
         );
 
         if (

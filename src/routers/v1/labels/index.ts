@@ -3,7 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { turnItemsIntoRSS } from "../../../utils/rss";
-import { processSingleArtist } from "../../../utils/serialize/artist";
+import { processSingleArtist } from "../../../serializers/artist";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -91,7 +91,9 @@ export default function () {
             apiEndpoint: "trackGroups",
             clientUrl: "/releases",
           },
-          artists
+          artists.map((artist) =>
+            processSingleArtist(artist)
+          ) as unknown as Parameters<typeof turnItemsIntoRSS>[1]
         );
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());

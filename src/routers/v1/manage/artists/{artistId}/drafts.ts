@@ -7,6 +7,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { deleteArtist } from "../../../../../utils/artist";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 type Params = {
   artistId: string;
@@ -24,7 +25,7 @@ export default function () {
       let draftAlbum = await prisma.trackGroup.findFirst({
         where: {
           isHiddenTrackGroupForSongDrafts: true,
-          artistId: Number(artistId),
+          profileId: Number(artistId),
         },
         include: {
           tracks: {
@@ -40,7 +41,7 @@ export default function () {
           data: {
             isHiddenTrackGroupForSongDrafts: true,
             urlSlug: "hidden-draft-album",
-            artistId: Number(artistId),
+            profileId: Number(artistId),
           },
           include: {
             tracks: {
@@ -53,7 +54,7 @@ export default function () {
       }
 
       return res.json({
-        result: draftAlbum,
+        result: processSingleTrackGroup(draftAlbum),
       });
     } catch (error) {
       next(error);
