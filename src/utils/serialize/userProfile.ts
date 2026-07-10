@@ -13,7 +13,7 @@ export const USER_PROFILE_SELECT = {
   accountingEmail: true,
   id: true,
   name: true,
-  artists: true,
+  profiles: true,
   isAdmin: true,
   currency: true,
   language: true,
@@ -30,7 +30,7 @@ export const USER_PROFILE_SELECT = {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
             },
           },
@@ -60,14 +60,14 @@ export const USER_PROFILE_SELECT = {
   },
   userAvatar: true,
   userBanner: true,
-  artistUserSubscriptions: {
+  profileUserSubscriptions: {
     where: {
       deletedAt: null,
     },
     select: {
-      artistSubscriptionTier: {
+      profileSubscriptionTier: {
         include: {
-          artist: {
+          profile: {
             include: {
               avatar: true,
               user: { select: { currency: true } },
@@ -80,7 +80,8 @@ export const USER_PROFILE_SELECT = {
       amount: true,
       deleteReason: true,
       nextBillingDate: true,
-      artistUserSubscriptionCharges: {
+      profileSubscriptionTierId: true,
+      profileUserSubscriptionCharges: {
         orderBy: {
           createdAt: "desc",
         },
@@ -103,32 +104,61 @@ export type UserProfilePayload = Prisma.UserGetPayload<{
 }>;
 
 export function serializeUserProfile(user: UserProfilePayload) {
+  const { profiles, profileUserSubscriptions, ...userRest } = user;
+
   return {
-    ...user,
+    ...userRest,
+    // API contract: owned profiles are exposed as `artists`
+    artists: profiles,
     userAvatar: addSizesToImage(finalUserAvatarBucket, user.userAvatar),
     userBanner: addSizesToImage(finalUserBannerBucket, user.userBanner),
-    trackFavorites: user.trackFavorites.map((tf) => ({
-      ...tf,
-      track: {
-        ...tf.track,
-        trackGroup: {
-          ...tf.track.trackGroup,
-          cover: addSizesToImage(finalCoversBucket, tf.track.trackGroup.cover),
+    trackFavorites: user.trackFavorites.map((tf) => {
+      const { profileId, profile, ...trackGroupRest } = tf.track.trackGroup;
+      return {
+        ...tf,
+        track: {
+          ...tf.track,
+          trackGroup: {
+            ...trackGroupRest,
+            artistId: profileId,
+            artist: profile,
+            cover: addSizesToImage(
+              finalCoversBucket,
+              tf.track.trackGroup.cover
+            ),
+          },
         },
-      },
-    })),
-    artistUserSubscriptions: user.artistUserSubscriptions.map((aus) => ({
-      ...aus,
-      artistSubscriptionTier: {
-        ...aus.artistSubscriptionTier,
-        artist: {
-          ...aus.artistSubscriptionTier.artist,
-          avatar: addSizesToImage(
-            finalArtistAvatarBucket,
-            aus.artistSubscriptionTier.artist.avatar
-          ),
-        },
-      },
-    })),
+      };
+    }),
+    artistUserSubscriptions: profileUserSubscriptions.map((aus) => {
+      const {
+        profileSubscriptionTierId,
+        profileSubscriptionTier,
+        profileUserSubscriptionCharges,
+        ...subRest
+      } = aus;
+      const { profileId, profile, ...tierRest } =
+        profileSubscriptionTier ?? ({} as typeof profileSubscriptionTier & {});
+      return {
+        ...subRest,
+        artistSubscriptionTierId: profileSubscriptionTierId,
+        artistSubscriptionTier: profileSubscriptionTier
+          ? {
+              ...tierRest,
+              artistId: profileId,
+              artist: profile
+                ? {
+                    ...profile,
+                    avatar: addSizesToImage(
+                      finalArtistAvatarBucket,
+                      profile.avatar
+                    ),
+                  }
+                : profile,
+            }
+          : profileSubscriptionTier,
+        artistUserSubscriptionCharges: profileUserSubscriptionCharges,
+      };
+    }),
   };
 }

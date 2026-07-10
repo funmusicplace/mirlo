@@ -27,7 +27,7 @@ export default function () {
         id: Number(userId),
       },
       select: {
-        artists: true,
+        profiles: true,
         email: true,
         name: true,
         stripeAccountId: true,

@@ -57,7 +57,7 @@ export default function () {
             },
             {
               user: {
-                artists: {
+                profiles: {
                   some: {
                     trackGroups: {
                       some: whereForPublishedTrackGroups(),
@@ -79,7 +79,7 @@ export default function () {
       }
 
       if (locationSlug && typeof locationSlug === "string") {
-        where.artistLocationTags = {
+        where.profileLocationTags = {
           some: {
             locationTag: {
               slug: { endsWith: locationSlug },
@@ -125,7 +125,7 @@ export default function () {
               deletedAt: null,
             },
           },
-          artistLocationTags: {
+          profileLocationTags: {
             include: {
               locationTag: true,
             },

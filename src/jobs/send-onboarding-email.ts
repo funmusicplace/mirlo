@@ -18,7 +18,7 @@ const sendOnboardingEmail = async () => {
       },
     },
     include: {
-      artists: true,
+      profiles: true,
     },
   });
 
@@ -48,7 +48,7 @@ const sendOnboardingEmail = async () => {
           }
 
           if (
-            user.artists.length > 0 &&
+            user.profiles.length > 0 &&
             user.stripeAccountId === null &&
             !user.onboardingEmailsSent.includes("payment-processor")
           ) {

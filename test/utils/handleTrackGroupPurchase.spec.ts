@@ -338,7 +338,7 @@ describe("handleTrackGroupPurchase", () => {
     assert.equal(locals.email, "follower@follower.com");
     // html.pug line: Gross (#{currency.toUpperCase()})
     assert.equal(typeof locals.currency, "string");
-    // html.pug link: ${client}/${purchase.trackGroup.artist.urlSlug}/release/...
+    // html.pug link: ${client}/${purchase.trackGroup.profile.urlSlug}/release/...
     assert.ok(locals.client, "client must be present for template links");
     // html.pug totals row: #{(totalGross / 100).toFixed(2)}
     assert.equal(typeof locals.totalGross, "number");
@@ -349,14 +349,14 @@ describe("handleTrackGroupPurchase", () => {
     assert.ok(tx, "transaction must be present");
     const tgp = tx.trackGroupPurchases?.[0];
     assert.ok(tgp, "trackGroupPurchase must be present");
-    // html.pug mixin title: `Digital: ${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`
+    // html.pug mixin title: `Digital: ${purchase.trackGroup.profile.name} \ ${purchase.trackGroup.title}`
     assert.ok(
-      tgp.trackGroup.artist.name,
+      tgp.trackGroup.profile.name,
       "artist.name must be included in the transaction query"
     );
-    // html.pug link: `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`
+    // html.pug link: `${client}/${purchase.trackGroup.profile.urlSlug}/release/${purchase.trackGroup.urlSlug}`
     assert.ok(
-      tgp.trackGroup.artist.urlSlug,
+      tgp.trackGroup.profile.urlSlug,
       "artist.urlSlug must be included in the transaction query"
     );
     assert.ok(

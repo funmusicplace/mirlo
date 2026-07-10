@@ -27,7 +27,7 @@ export default function () {
     try {
       const results = await prisma.merch.findMany({
         where: {
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           deletedAt: null,
         },
         orderBy: [
@@ -35,7 +35,7 @@ export default function () {
           { createdAt: "asc" },
         ],
         include: {
-          artist: { include: { user: { select: { currency: true } } } },
+          profile: { include: { user: { select: { currency: true } } } },
           images: true,
           optionTypes: { include: { options: true } },
         },
@@ -88,7 +88,7 @@ export default function () {
         data: {
           title,
           description: description ?? "",
-          artist: { connect: { id: artistId } },
+          profile: { connect: { id: artistId } },
           minPrice: 0,
           isPublic: false,
           platformPercent: await getPlatformFeeForArtist(artistId),

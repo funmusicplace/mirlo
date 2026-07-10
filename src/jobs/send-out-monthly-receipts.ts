@@ -10,7 +10,7 @@ import sendMail from "./send-mail";
 export type AnnounceMonthlyReceiptsEmailType = {
   userSubscriptions: {
     amount: number;
-    artistSubscriptionTier: { artistId: number; artist: { name: string } };
+    profileSubscriptionTier: { profileId: number; profile: { name: string } };
   }[];
   user: {
     id: number;
@@ -29,15 +29,15 @@ const sendOutMonthlyReceipts = async () => {
           gt: 0,
         },
         deletedAt: null,
-        artistSubscriptionTier: {
+        profileSubscriptionTier: {
           isDefaultTier: false,
           interval: "MONTH",
         },
       },
       include: {
-        artistSubscriptionTier: {
+        profileSubscriptionTier: {
           include: {
-            artist: true,
+            profile: true,
           },
         },
         user: true,

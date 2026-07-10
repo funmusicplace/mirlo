@@ -9,8 +9,8 @@ block content
       | trackgroupId: #{trackGroupId}
     if trackGroup
       .pa4
-        | trackGroup: #{trackGroup.title} by #{trackGroup.artist.name}
+        | trackGroup: #{trackGroup.title} by #{trackGroup.profile.name}
     .pa4
       | You can view and manage the album here:
     .pa4
-      a(href!=`${client}/${trackGroup.artist.urlSlug}/releases/${trackGroup.urlSlug}`).
+      a(href!=`${client}/${trackGroup.profile.urlSlug}/releases/${trackGroup.urlSlug}`).

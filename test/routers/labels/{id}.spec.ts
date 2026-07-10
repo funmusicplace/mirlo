@@ -92,6 +92,7 @@ describe("GET /v1/labels/{id}", () => {
     assert.equal(response.status, 200);
     const artistLabels = response.body.result.artistLabels ?? [];
     assert.equal(artistLabels.length, 1);
+    assert.equal(artistLabels[0].artistId, liveArtist.id);
     assert.equal(artistLabels[0].artist.id, liveArtist.id);
   });
 });

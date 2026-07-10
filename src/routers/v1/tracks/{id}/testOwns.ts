@@ -3,8 +3,6 @@ import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 
 type Query = {
-  urlSlug?: string;
-  artistId?: number;
   email?: string;
 };
 

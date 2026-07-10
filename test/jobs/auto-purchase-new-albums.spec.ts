@@ -68,7 +68,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -82,7 +82,7 @@ describe("auto-purchase-new-albums", () => {
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: tg.id,
-        artistUserSubscriptionId: subscription.id,
+        profileUserSubscriptionId: subscription.id,
       },
     });
 
@@ -92,7 +92,7 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals0 = data0.locals as AutomaticallyReceivedAlbumEmailType;
     assert.equal(locals0.trackGroup.id, tg.id);
-    assert.equal(locals0.artist.id, artist.id);
+    assert.equal(locals0.profile.id, artist.id);
   });
 
   it("should not send the e-mail twice", async () => {
@@ -129,7 +129,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -143,13 +143,13 @@ describe("auto-purchase-new-albums", () => {
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: tg.id,
-        artistUserSubscriptionId: subscription.id,
+        profileUserSubscriptionId: subscription.id,
       },
     });
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: tg.id,
-        artistUserSubscriptionId: subscription.id,
+        profileUserSubscriptionId: subscription.id,
       },
     });
 
@@ -161,7 +161,7 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals0 = data0.locals as AutomaticallyReceivedAlbumEmailType;
     assert.equal(locals0.trackGroup.id, tg.id);
-    assert.equal(locals0.artist.id, artist.id);
+    assert.equal(locals0.profile.id, artist.id);
   });
 
   it("should skip if album does not exist", async () => {
@@ -185,10 +185,10 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: (
+        profileSubscriptionTierId: (
           await prisma.profileSubscriptionTier.create({
             data: {
-              artistId: artist.id,
+              profileId: artist.id,
               name: "tier",
               autoPurchaseAlbums: true,
             },
@@ -202,7 +202,7 @@ describe("auto-purchase-new-albums", () => {
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: 99999,
-        artistUserSubscriptionId: subscription.id,
+        profileUserSubscriptionId: subscription.id,
       },
     });
 
@@ -236,7 +236,7 @@ describe("auto-purchase-new-albums", () => {
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: tg.id,
-        artistUserSubscriptionId: 99999,
+        profileUserSubscriptionId: 99999,
       },
     });
 
@@ -278,7 +278,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -292,7 +292,7 @@ describe("auto-purchase-new-albums", () => {
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: tg.id,
-        artistUserSubscriptionId: subscription.id,
+        profileUserSubscriptionId: subscription.id,
       },
     });
 
@@ -348,7 +348,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription1 = await prisma.profileUserSubscription.create({
       data: {
         userId: follower1.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -356,7 +356,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription2 = await prisma.profileUserSubscription.create({
       data: {
         userId: follower2.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -370,13 +370,13 @@ describe("auto-purchase-new-albums", () => {
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: tg.id,
-        artistUserSubscriptionId: subscription1.id,
+        profileUserSubscriptionId: subscription1.id,
       },
     });
     await autoPurchaseNewAlbums({
       data: {
         trackGroupId: tg.id,
-        artistUserSubscriptionId: subscription2.id,
+        profileUserSubscriptionId: subscription2.id,
       },
     });
 
@@ -435,7 +435,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -453,7 +453,7 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(addStub.calledOnce, true);
     const jobData = addStub.getCall(0).args[1];
     assert.equal(jobData.trackGroupId, tg.id);
-    assert.equal(jobData.artistUserSubscriptionId, subscription.id);
+    assert.equal(jobData.profileUserSubscriptionId, subscription.id);
   });
 
   it("trigger should not enqueue for disabled autoPurchase tiers", async () => {
@@ -490,7 +490,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -542,7 +542,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -560,7 +560,7 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(addStub.calledOnce, true);
     const jobData = addStub.getCall(0).args[1];
     assert.equal(jobData.trackGroupId, tg.id);
-    assert.equal(jobData.artistUserSubscriptionId, subscription.id);
+    assert.equal(jobData.profileUserSubscriptionId, subscription.id);
   });
 
   it("trigger should not enqueue for albums scheduled to publish in the future", async () => {
@@ -597,7 +597,7 @@ describe("auto-purchase-new-albums", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -649,7 +649,7 @@ describe("auto-purchase-new-albums", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -698,7 +698,7 @@ describe("auto-purchase-new-albums", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -750,7 +750,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
         deletedAt: new Date(), // Deleted
       },

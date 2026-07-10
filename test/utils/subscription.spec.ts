@@ -56,7 +56,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -69,7 +69,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 10,
         },
       });
@@ -90,14 +90,14 @@ describe("subscription", () => {
           stripeId: invoiceId,
         },
         include: {
-          artistUserSubscriptionCharges: true,
+          profileUserSubscriptionCharges: true,
         },
       });
 
       assert.equal(charge.length, 1);
       assert.equal(charge[0].amount, 10);
       assert.equal(
-        charge[0].artistUserSubscriptionCharges[0].artistUserSubscriptionId,
+        charge[0].profileUserSubscriptionCharges[0].profileUserSubscriptionId,
         subscription.id
       );
 
@@ -107,10 +107,10 @@ describe("subscription", () => {
       assert.equal(data0.message.to, "follower@follower.com");
       const locals = data0.locals as ArtistSubscriptionReceiptEmailType;
       assert.equal(
-        locals.artistUserSubscription.artistSubscriptionTierId,
+        locals.profileUserSubscription.profileSubscriptionTierId,
         tier.id
       );
-      assert.equal(locals.artistUserSubscription.amount, 10);
+      assert.equal(locals.profileUserSubscription.amount, 10);
     });
 
     it("should store nextBillingDate when provided", async () => {
@@ -136,7 +136,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -149,7 +149,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -200,7 +200,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -213,7 +213,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -263,7 +263,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -276,7 +276,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -326,7 +326,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Premium Tier",
         },
       });
@@ -339,7 +339,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -370,7 +370,7 @@ describe("subscription", () => {
       const artistLocals = artistCallData.locals;
       assert.equal(artistLocals.artist.name, "Test artist");
       assert.equal(artistLocals.user.email, "subscriber@subscriber.com");
-      assert.equal(artistLocals.artistUserSubscription.amount, 1200);
+      assert.equal(artistLocals.profileUserSubscription.amount, 1200);
     });
 
     it("should send artist notification to paymentToUser if set", async () => {
@@ -403,7 +403,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Premium Tier",
         },
       });
@@ -416,7 +416,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -467,7 +467,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -480,7 +480,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -531,7 +531,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -541,7 +541,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: "sub-key-renewal-default",
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -591,7 +591,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -601,7 +601,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: "sub-key-renewal-combined",
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -650,7 +650,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
@@ -660,7 +660,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: "sub-key-new-combined",
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
         },
       });
@@ -707,7 +707,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Supporter",
         },
       });
@@ -717,7 +717,7 @@ describe("subscription", () => {
           stripeSubscriptionKey: "sub-key-template-vars",
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1000,
         },
       });
@@ -751,9 +751,9 @@ describe("subscription", () => {
         (locals.artist as any).user,
         "artist.user must be included in the query for subject.pug"
       );
-      // html.pug line: #{artistUserSubscription.artistSubscriptionTier.name}
+      // html.pug line: #{profileUserSubscription.profileSubscriptionTier.name}
       assert.equal(
-        locals.artistUserSubscription.artistSubscriptionTier.name,
+        locals.profileUserSubscription.profileSubscriptionTier.name,
         "Supporter"
       );
       // html.pug table: if transaction

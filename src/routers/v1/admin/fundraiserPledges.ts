@@ -53,7 +53,7 @@ export default function () {
             fundraiser: {
               trackGroups: {
                 some: {
-                  artist: {
+                  profile: {
                     name: {
                       contains: search as string,
                       mode: "insensitive",
@@ -95,7 +95,7 @@ export default function () {
                   select: {
                     id: true,
                     title: true,
-                    artist: {
+                    profile: {
                       select: {
                         id: true,
                         name: true,
@@ -121,7 +121,20 @@ export default function () {
       ]);
 
       res.json({
-        results: pledges,
+        results: pledges.map((pledge) => ({
+          ...pledge,
+          fundraiser: {
+            ...pledge.fundraiser,
+            trackGroups: pledge.fundraiser.trackGroups.map((tg) => {
+              const { profileId, profile, ...tgRest } = tg;
+              return {
+                ...tgRest,
+                artistId: profileId ?? profile.id,
+                artist: profile,
+              };
+            }),
+          },
+        })),
         total,
         page: pageNum,
         limit: pageSize,
@@ -202,7 +215,7 @@ export default function () {
                           properties: {
                             id: { type: "integer" },
                             title: { type: "string" },
-                            artist: {
+                            profile: {
                               type: "object",
                               properties: {
                                 id: { type: "integer" },

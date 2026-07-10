@@ -40,7 +40,7 @@ export default function () {
 
       let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
         AND: [
-          { artist: federatedArtistAtSomePoint },
+          { profile: federatedArtistAtSomePoint },
           deleted as Prisma.TrackGroupWhereInput,
         ],
         deletedAt: {},
@@ -48,7 +48,7 @@ export default function () {
 
       let trackDeleted: Prisma.TrackWhereInput = {
         AND: [
-          { trackGroup: { artist: federatedArtistAtSomePoint } },
+          { trackGroup: { profile: federatedArtistAtSomePoint } },
           deleted as Prisma.TrackWhereInput,
         ],
         deletedAt: {},
@@ -156,7 +156,7 @@ export default function () {
       const deletedTrackGroups = await prisma.trackGroup.findMany({
         where: trackGroupDeleted,
         include: {
-          artist: {
+          profile: {
             select: {
               urlSlug: true,
             },
@@ -172,7 +172,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   urlSlug: true,
                 },
@@ -196,7 +196,7 @@ export default function () {
           deletedTrackGroups.map((trackGroup) =>
             serializeSingleDeletedTrackGroupIntoCanimus(
               trackGroup,
-              join(String(process.env.API_DOMAIN), trackGroup.artist.urlSlug)
+              join(String(process.env.API_DOMAIN), trackGroup.profile.urlSlug)
             )
           )
         )
@@ -206,7 +206,7 @@ export default function () {
               track,
               join(
                 String(process.env.API_DOMAIN),
-                track.trackGroup.artist.urlSlug,
+                track.trackGroup.profile.urlSlug,
                 "release",
                 track.trackGroup.urlSlug
               )

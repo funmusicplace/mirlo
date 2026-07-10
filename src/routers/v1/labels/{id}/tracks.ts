@@ -48,7 +48,7 @@ export default function () {
       const tracks = await prisma.track.findMany({
         where: {
           trackGroup: {
-            artistId: {
+            profileId: {
               in: [
                 ...(labelProfile ? [labelProfile.id] : []),
                 ...(labelArtists || []).map((a) => a.id),

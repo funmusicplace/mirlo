@@ -57,7 +57,7 @@ export default function () {
       const { applicationUrl } = await getClient();
       const where: Prisma.TrackGroupDownloadCodesWhereInput = {
         trackGroup: {
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           deletedAt: null,
         },
       };
@@ -71,7 +71,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
             },
           },
           redeemedByUser: true,
@@ -84,7 +84,7 @@ export default function () {
           csvColumns,
           artistCodes.map((c) => ({
             ...c,
-            url: `${applicationUrl}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+            url: `${applicationUrl}/${c.trackGroup.profile.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
           }))
         );
       }
@@ -92,7 +92,7 @@ export default function () {
       res.json({
         results: artistCodes.map((c) => ({
           ...c,
-          url: `${applicationUrl}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+          url: `${applicationUrl}/${c.trackGroup.profile.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
         })),
       });
     } catch (error) {

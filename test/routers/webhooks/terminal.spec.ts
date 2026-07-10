@@ -63,7 +63,7 @@ describe("terminal.reader webhooks", () => {
           stripeAccountId: "acct_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
-          artistId: String(artist.id),
+          profileId: String(artist.id),
           items: "[]",
         },
         status: "succeeded",
@@ -106,7 +106,7 @@ describe("terminal.reader webhooks", () => {
         currency: "usd",
         metadata: {
           purchaseType: "tip",
-          artistId: String(artist.id),
+          profileId: String(artist.id),
           stripeAccountId: "acct_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
@@ -203,7 +203,7 @@ describe("terminal.reader webhooks", () => {
           stripeAccountId: "acct_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
-          artistId: String(artist.id),
+          profileId: String(artist.id),
           items: JSON.stringify(items),
         },
         status: "succeeded",
@@ -318,7 +318,7 @@ describe("terminal.reader webhooks", () => {
       await handleTerminalReaderActionSucceeded(reader, "acct_sub_test");
 
       const subscription = await prisma.profileUserSubscription.findFirst({
-        where: { userId: buyer.id, artistSubscriptionTierId: tier.id },
+        where: { userId: buyer.id, profileSubscriptionTierId: tier.id },
       });
       assert.ok(subscription, "subscription should be saved to DB");
       assert.equal(subscription.amount, 500);

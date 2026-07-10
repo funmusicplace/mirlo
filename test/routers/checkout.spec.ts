@@ -66,7 +66,7 @@ describe("checkout", () => {
           .resolves({
             metadata: {
               clientId: `${client.id}`,
-              artistId: `${artist.id}`,
+              profileId: `${artist.id}`,
               trackGroupId: `${trackGroup.id}`,
               purchaseType: "trackGroup",
             },

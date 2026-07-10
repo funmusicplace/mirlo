@@ -338,11 +338,11 @@ describe("send-mail job", () => {
                 name: "Test Artist",
                 user: { currency: "usd" },
               },
-              artistUserSubscription: {
+              profileUserSubscription: {
                 id: 1,
                 amount: 1000,
-                artistSubscriptionTierId: 1,
-                artistSubscriptionTier: { name: "Fan" },
+                profileSubscriptionTierId: 1,
+                profileSubscriptionTier: { name: "Fan" },
               },
               user: {
                 name: "Test Fan",

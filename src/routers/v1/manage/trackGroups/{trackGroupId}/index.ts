@@ -30,7 +30,7 @@ const findNewSlug = async (
   const verifySlug = await prisma.trackGroup.findFirst({
     where: {
       urlSlug: `${slug}`,
-      artistId: artistId,
+      profileId: artistId,
     },
   });
   if (verifySlug) {
@@ -167,7 +167,7 @@ export default function () {
           generateSlug(newValues.urlSlug) || newValues.urlSlug;
         const slugConflict = await prisma.trackGroup.findFirst({
           where: {
-            artistId: existingTrackGroup.artistId,
+            profileId: existingTrackGroup.profileId,
             urlSlug: newValues.urlSlug,
             id: { not: Number(trackGroupId) },
             deletedAt: null,
@@ -208,7 +208,7 @@ export default function () {
         if (slug === "") {
           slug = "blank";
         }
-        const newSlug = await findNewSlug(slug, 0, trackGroup.artistId);
+        const newSlug = await findNewSlug(slug, 0, trackGroup.profileId);
         await prisma.trackGroup.update({
           where: { id: trackGroup.id },
           data: {

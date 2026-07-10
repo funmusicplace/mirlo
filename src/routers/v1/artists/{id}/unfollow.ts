@@ -45,8 +45,8 @@ export default function () {
         if (artist) {
           await prisma.profileUserSubscription.deleteMany({
             where: {
-              artistSubscriptionTier: {
-                artistId: artist.id,
+              profileSubscriptionTier: {
+                profileId: artist.id,
                 isDefaultTier: true,
               },
               userId: userIdToRemove,
@@ -85,7 +85,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Removed artistSubscriptionTier",
+        description: "Removed profileSubscriptionTier",
       },
       default: {
         description: "An error occurred",

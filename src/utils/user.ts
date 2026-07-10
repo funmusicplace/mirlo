@@ -114,12 +114,12 @@ export const findUserDiscountPercentsForArtist = async (
     where: {
       userId,
       deletedAt: null,
-      artistSubscriptionTier: {
-        artistId,
+      profileSubscriptionTier: {
+        profileId: artistId,
       },
     },
     select: {
-      artistSubscriptionTier: {
+      profileSubscriptionTier: {
         select: {
           digitalDiscountPercent: true,
           merchDiscountPercent: true,
@@ -130,9 +130,9 @@ export const findUserDiscountPercentsForArtist = async (
 
   return activeSubscriptions.map((subscription) => ({
     digitalDiscountPercent:
-      subscription.artistSubscriptionTier.digitalDiscountPercent ?? 0,
+      subscription.profileSubscriptionTier.digitalDiscountPercent ?? 0,
     merchDiscountPercent:
-      subscription.artistSubscriptionTier.merchDiscountPercent ?? 0,
+      subscription.profileSubscriptionTier.merchDiscountPercent ?? 0,
   }));
 };
 

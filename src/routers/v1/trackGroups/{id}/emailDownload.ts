@@ -23,7 +23,7 @@ export default function () {
           id: Number(trackGroupId),
         },
         include: {
-          artist: true,
+          profile: true,
           tracks: {
             include: {
               audio: true,

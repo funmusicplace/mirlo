@@ -15,7 +15,7 @@ block content
     tbody
       each val in userSales
         tr
-          td #{val.artist.map(a => a.name).join(', ')}
+          td #{val.profile.map(a => a.name).join(', ')}
           td #{val.datePurchased.split('T')[0]}
           td #{val.saleType}
           td #{val.title}
@@ -24,7 +24,7 @@ block content
 
   p Total Income: #{totalIncome / 100} #{userSales[0] ? userSales[0].currency || 'USD' :  'USD'}
 
-  - const subscriptionPayments = userSales.filter((sale) => (sale.artistUserSubscriptionCharges || []).length > 0)
+  - const subscriptionPayments = userSales.filter((sale) => (sale.profileUserSubscriptionCharges || []).length > 0)
   if subscriptionPayments.length
     h2 Subscription payments this month
     table
@@ -36,7 +36,7 @@ block content
           th.num Amount
       tbody
         each sale in subscriptionPayments
-          - const tier = sale.artistUserSubscriptionCharges[0].artistUserSubscription.artistSubscriptionTier
+          - const tier = sale.profileUserSubscriptionCharges[0].profileUserSubscription.profileSubscriptionTier
           tr
             td #{sale.user.name}
             td #{tier.name}
@@ -58,9 +58,9 @@ block content
         each cancelled in cancelledSubscriptions
           tr
             td #{cancelled.user.name || 'A supporter'}
-            td #{cancelled.artistSubscriptionTier.name}
+            td #{cancelled.profileSubscriptionTier.name}
             td #{cancelled.deleteReasonLabel}
-            td.num #{cancelled.artistSubscriptionTier.artist.user.currency || 'USD'} #{cancelled.amount / 100}
+            td.num #{cancelled.profileSubscriptionTier.profile.user.currency || 'USD'} #{cancelled.amount / 100}
 
   p We love to see it.
   p Enjoy!

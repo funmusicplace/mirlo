@@ -8,7 +8,7 @@ export type HydrationData = {
   scriptId: string;
   objectId: string | number;
   data: any;
-  artistId?: string | number;
+  profileId?: string | number;
 };
 /**
  * Appends a hydration script to the head with data-object-id and data-injected-at attributes
@@ -19,12 +19,12 @@ export const appendHydrationScript = (
   scriptId: string,
   objectId: string | number,
   data: any,
-  artistId?: string | number
+  profileId?: string | number
 ) => {
   try {
     const injectedAt = new Date().toISOString();
     $("head").append(
-      `<script id="${scriptId}" type="application/json" data-object-id="${objectId}" data-injected-at="${injectedAt}"${artistId ? ` data-artist-id="${artistId}"` : ""}>${JSON.stringify(data)}</script>`
+      `<script id="${scriptId}" type="application/json" data-object-id="${objectId}" data-injected-at="${injectedAt}"${profileId ? ` data-artist-id="${profileId}"` : ""}>${JSON.stringify(data)}</script>`
     );
   } catch (err) {
     console.error(
@@ -42,13 +42,13 @@ export const registerHydration = (
   scriptId: string,
   objectId: string | number,
   data: any,
-  artistId?: string | number
+  profileId?: string | number
 ) => {
   hydrations.push({
     scriptId,
     objectId,
     data,
-    artistId,
+    profileId,
   });
 };
 
@@ -93,9 +93,9 @@ export const registerPostHydration = (
  */
 export const registerArtistHydration = (
   hydrations: HydrationData[],
-  artist: any
+  profile: any
 ) => {
-  registerHydration(hydrations, "__MIRLO_ARTIST__", artist.urlSlug, {
-    artist: processSingleArtist(artist),
+  registerHydration(hydrations, "__MIRLO_ARTIST__", profile.urlSlug, {
+    artist: processSingleArtist(profile),
   });
 };

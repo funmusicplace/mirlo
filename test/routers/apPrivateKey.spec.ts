@@ -151,7 +151,7 @@ describe("apPrivateKey never leaks in API responses", () => {
     await prisma.notification.create({
       data: {
         userId: user.id,
-        artistId: artist.id,
+        profileId: artist.id,
         notificationType: "NEW_ARTIST_POST",
       },
     });

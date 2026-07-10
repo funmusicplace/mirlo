@@ -22,6 +22,7 @@ import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
   artist?: Partial<Profile>;
+  profile?: Partial<Profile>;
   tracks?: CanimusTrack[];
 }
 
@@ -29,6 +30,10 @@ export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
     artist?: Partial<Profile> & {
+      avatar?: ProfileAvatar | null;
+      user?: { currency?: string | null } | null;
+    };
+    profile?: Partial<Profile> & {
       avatar?: ProfileAvatar | null;
       user?: { currency?: string | null } | null;
     };
@@ -46,13 +51,24 @@ export const processSingleTrackGroup = (
     _count?: { tracks?: number; userTrackGroupPurchases?: number };
   },
   options?: { loggedInUserId?: number }
-) => {
-  const { _count, ...rest } = tg;
+): Record<string, unknown> => {
+  const { _count, profileId, profile, ...rest } = tg;
+  const { apPrivateKey: _, ...artistPublic } = profile ?? {};
   const currency =
-    tg.paymentToUser?.currency ?? tg.artist?.user?.currency ?? "usd";
-  const { apPrivateKey: _, ...artistPublic } = tg.artist ?? {};
+    tg.paymentToUser?.currency ?? profile?.user?.currency ?? "usd";
+  const artist = profile
+    ? {
+        ...artistPublic,
+        avatar: profile.avatar
+          ? addSizesToImage(finalArtistAvatarBucket, profile.avatar)
+          : undefined,
+      }
+    : undefined;
+
   return {
     ...rest,
+    artistId: profileId,
+    artist,
     totalTracks: _count?.tracks ?? tg.tracks?.length,
     currency,
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
@@ -65,14 +81,6 @@ export const processSingleTrackGroup = (
         userId: options?.loggedInUserId,
       }),
     })),
-    artist: tg.artist
-      ? {
-          ...artistPublic,
-          avatar: tg.artist.avatar
-            ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
-            : undefined,
-        }
-      : undefined,
     merch: tg.merch?.map((m) =>
       processSingleMerch(m, {
         fallbackCurrency: currency,

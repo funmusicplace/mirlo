@@ -24,7 +24,7 @@ export default function () {
       let draftAlbum = await prisma.trackGroup.findFirst({
         where: {
           isHiddenTrackGroupForSongDrafts: true,
-          artistId: Number(artistId),
+          profileId: Number(artistId),
         },
         include: {
           tracks: {
@@ -40,7 +40,7 @@ export default function () {
           data: {
             isHiddenTrackGroupForSongDrafts: true,
             urlSlug: "hidden-draft-album",
-            artistId: Number(artistId),
+            profileId: Number(artistId),
           },
           include: {
             tracks: {

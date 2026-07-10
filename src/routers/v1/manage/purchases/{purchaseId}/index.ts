@@ -89,7 +89,10 @@ export default function () {
         },
         include: {
           merch: {
-            include: { images: true, artist: { omit: { apPrivateKey: true } } },
+            include: {
+              images: true,
+              profile: { omit: { apPrivateKey: true } },
+            },
           },
           user: true,
         },

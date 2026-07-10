@@ -66,7 +66,7 @@ export default function () {
 
       const settings = await getSiteSettings();
       const instanceArtistId = Number(
-        settings.settings?.instanceCustomization?.artistId
+        settings.settings?.instanceCustomization?.profileId
       );
       const isInstanceArtist =
         instanceArtistId !== undefined && instanceArtistId !== null
@@ -174,7 +174,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Created artistSubscriptionTier",
+        description: "Created profileSubscriptionTier",
       },
       default: {
         description: "An error occurred",

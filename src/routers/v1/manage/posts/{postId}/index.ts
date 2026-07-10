@@ -116,7 +116,6 @@ export default function () {
     try {
       const {
         title,
-        artistId,
         content,
         isPublic,
         publishedAt,
@@ -144,12 +143,12 @@ export default function () {
         existingSlug ||
         generateSlug(title ?? post?.title ?? "");
 
-      const effectiveArtistId = artistId ?? post?.artistId;
+      const effectiveArtistId = post?.profileId;
 
       if (effectiveSlug && effectiveArtistId) {
         const conflict = await prisma.post.findFirst({
           where: {
-            artistId: effectiveArtistId,
+            profileId: effectiveArtistId,
             urlSlug: { equals: effectiveSlug, mode: "insensitive" },
             id: { not: Number(postId) },
           },
@@ -164,10 +163,10 @@ export default function () {
         }
       }
 
-      if (post?.artistId && minimumSubscriptionTierId !== undefined) {
+      if (post?.profileId && minimumSubscriptionTierId !== undefined) {
         const validTier = await prisma.profileSubscriptionTier.findFirst({
           where: {
-            artistId: post.artistId,
+            profileId: post.profileId,
             id: minimumSubscriptionTierId,
           },
         });

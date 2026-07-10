@@ -19,7 +19,7 @@ export default function () {
             select: {
               id: true,
               title: true,
-              artist: {
+              profile: {
                 select: {
                   id: true,
                   name: true,
@@ -68,7 +68,7 @@ export default function () {
                     properties: {
                       id: { type: "integer" },
                       title: { type: "string" },
-                      artist: {
+                      profile: {
                         type: "object",
                         properties: {
                           id: { type: "integer" },

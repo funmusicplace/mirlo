@@ -122,7 +122,7 @@ describe("artists/{id}/contact", () => {
       const notification = await prisma.notification.findFirst({
         where: {
           notificationType: "ARTIST_CONTACT_MESSAGE",
-          artistId: artist.id,
+          profileId: artist.id,
           relatedUserId: sender.id,
         },
       });
@@ -147,7 +147,7 @@ describe("artists/{id}/contact", () => {
           notificationType: "ARTIST_CONTACT_MESSAGE" as const,
           userId: artistUser.id,
           relatedUserId: sender.id,
-          artistId: artist.id,
+          profileId: artist.id,
           content: "prior",
         })),
       });

@@ -18,7 +18,7 @@ interface TrackData {
   order: number;
   isrc?: string;
   lyrics?: string;
-  artists: TrackArtistData[];
+  profiles: TrackArtistData[];
   metadata?: Record<string, unknown>;
 }
 
@@ -125,8 +125,8 @@ export default function () {
               let finalSlug = urlSlug;
               let existingTrackGroup = await prisma.trackGroup.findUnique({
                 where: {
-                  artistId_urlSlug: {
-                    artistId: artist.id,
+                  profileId_urlSlug: {
+                    profileId: artist.id,
                     urlSlug: finalSlug,
                   },
                 },
@@ -137,8 +137,8 @@ export default function () {
                 finalSlug = `${urlSlug}-${slugCounter}`;
                 existingTrackGroup = await prisma.trackGroup.findUnique({
                   where: {
-                    artistId_urlSlug: {
-                      artistId: artist.id,
+                    profileId_urlSlug: {
+                      profileId: artist.id,
                       urlSlug: finalSlug,
                     },
                   },
@@ -161,7 +161,7 @@ export default function () {
               const createdTrackGroup = await prisma.trackGroup.create({
                 data: {
                   title: trackGroup.title,
-                  artist: { connect: { id: artist.id } },
+                  profile: { connect: { id: artist.id } },
                   urlSlug: finalSlug,
                   about: trackGroup.about,
                   releaseDate: trackGroup.releaseDate
@@ -194,7 +194,7 @@ export default function () {
                   result.tracksCreated++;
 
                   // Create track artists
-                  for (const trackArtist of track.artists) {
+                  for (const trackArtist of track.profiles) {
                     // Find or create the artist if artistName is provided
                     let contributingArtist = undefined;
                     if (trackArtist.artistName) {
@@ -287,7 +287,7 @@ export default function () {
                             properties: {
                               title: { type: "string" },
                               order: { type: "number" },
-                              artists: {
+                              profiles: {
                                 type: "array",
                                 items: {
                                   type: "object",

@@ -41,7 +41,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
 
       await prisma.profileAvatar.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
 
@@ -88,7 +88,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: created.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
         },
       });
 
@@ -130,7 +130,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const subscriptions = await prisma.profileUserSubscription.findMany({
         where: {
           userId: created.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
         },
       });
 
@@ -170,15 +170,15 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
         },
         include: {
-          artistSubscriptionTier: true,
+          profileSubscriptionTier: true,
         },
       });
 
       assert.notEqual(subscription, null);
-      assert.equal(subscription?.artistSubscriptionTier.isDefaultTier, true);
+      assert.equal(subscription?.profileSubscriptionTier.isDefaultTier, true);
     });
 
     it("should handle an existing subscription", async () => {
@@ -192,7 +192,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 0,
         },
       });
@@ -279,7 +279,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: created.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
         },
       });
 

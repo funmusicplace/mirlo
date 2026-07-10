@@ -301,7 +301,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
-          artistId: artist.id,
+          profileId: artist.id,
           minPrice: 500,
           title: "A title",
           urlSlug: "a-title",
@@ -319,7 +319,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
-          artistId: artist.id,
+          profileId: artist.id,
           minPrice: 500,
           title: "A title",
         })
@@ -338,7 +338,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
-          artistId: artist.id,
+          profileId: artist.id,
           minPrice: 500,
           title: "A title",
           urlSlug: trackGroup.urlSlug,
@@ -360,7 +360,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
-          artistId: artist.id,
+          profileId: artist.id,
           minPrice: 500,
           title: "",
           urlSlug: "mi-temp-slug-new-album",
@@ -372,7 +372,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       assert.equal(response.body.result.title, "");
     });
 
-    it("should not POST an album when artistId doesn't belong to user", async () => {
+    it("should not POST an album when profileId doesn't belong to user", async () => {
       const { accessToken } = await createUser({ email: "test@testcom" });
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",
@@ -382,7 +382,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
-          artistId: artist.id,
+          profileId: artist.id,
           minPrice: 500,
           title: "A title",
         })
@@ -413,7 +413,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
-          artistId: artist.id,
+          profileId: artist.id,
           minPrice: 500,
           title: "A title",
           urlSlug: "a-title",

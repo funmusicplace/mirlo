@@ -40,7 +40,7 @@ export default function () {
         where.title = { contains: title, mode: "insensitive" };
       }
       if (artistName && typeof artistName === "string") {
-        where.artist = { name: { contains: artistName, mode: "insensitive" } };
+        where.profile = { name: { contains: artistName, mode: "insensitive" } };
       }
       if (isPublished) {
         where.publishedAt = { lte: new Date() };
@@ -53,7 +53,7 @@ export default function () {
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         include: {
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,

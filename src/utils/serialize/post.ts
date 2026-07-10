@@ -48,7 +48,7 @@ export const postIncludeForUser = (userId?: number) => ({
     orderBy: { order: "asc" as const },
   },
   featuredImage: true,
-  artist: {
+  profile: {
     include: {
       avatar: { where: { deletedAt: null } },
     },
@@ -56,8 +56,10 @@ export const postIncludeForUser = (userId?: number) => ({
 });
 
 export const serializePost = (
-  post: Partial<Post> & { id: number; isPublic: boolean } & {
-    artist?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
+  post: Partial<Post> & {
+    id: number;
+    isPublic: boolean;
+    profile?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
   } & { featuredImage?: { extension: string; id: string } | null } & {
     tracks?: {
       trackId: number;
@@ -74,8 +76,19 @@ export const serializePost = (
   isUserSubscriber?: boolean
 ) => {
   const canSeeContent = !!(isUserSubscriber || post.isPublic);
+  const { profileId, profile, ...postRest } = post;
+  const { apPrivateKey: _, ...artistPublic } = profile ?? {};
+  const artist = profile
+    ? {
+        ...artistPublic,
+        avatar: addSizesToImage(finalArtistAvatarBucket, profile.avatar),
+      }
+    : undefined;
+
   return {
-    ...post,
+    ...postRest,
+    artistId: profileId,
+    artist,
     trackCount: post._count?.tracks ?? post.tracks?.length ?? 0,
     tracks: canSeeContent
       ? post.tracks?.map((pt) => {
@@ -97,12 +110,6 @@ export const serializePost = (
           };
         })
       : undefined,
-    artist: {
-      ...post.artist,
-      avatar: post.artist
-        ? addSizesToImage(finalArtistAvatarBucket, post.artist?.avatar)
-        : null,
-    },
     featuredImage: post.featuredImage && {
       ...post.featuredImage,
       src: generateFullStaticImageUrl(
