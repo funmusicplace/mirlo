@@ -50,7 +50,7 @@ describe("manage/tracks POST", () => {
       data: {
         title: "Test TrackGroup",
         urlSlug: "test-trackgroup",
-        artistId: artist.id,
+        profileId: artist.id,
         publishedAt: new Date(),
         isGettable: true,
         defaultIsPreview: false,
@@ -76,7 +76,7 @@ describe("manage/tracks POST", () => {
       data: {
         title: "Test TrackGroup",
         urlSlug: "test-trackgroup",
-        artistId: artist.id,
+        profileId: artist.id,
         publishedAt: new Date(),
         isGettable: true,
         defaultIsPreview: false,
@@ -87,7 +87,11 @@ describe("manage/tracks POST", () => {
     // Explicit isPreview=true overrides defaultIsPreview=false
     const response = await requestApp
       .post("manage/tracks")
-      .send({ trackGroupId: trackGroup.id, title: "Test Track", isPreview: true })
+      .send({
+        trackGroupId: trackGroup.id,
+        title: "Test Track",
+        isPreview: true,
+      })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 

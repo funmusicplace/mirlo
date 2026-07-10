@@ -27,7 +27,7 @@ export default function () {
           id: Number(id),
         },
         include: {
-          artist: true,
+          profile: true,
           fundraiser: true,
         },
       });
@@ -43,7 +43,7 @@ export default function () {
         datePurchased: string;
         userId: number;
       }[] = await findSales({
-        artistId: [trackGroup.artist.id],
+        profileId: [trackGroup.profile.id],
         sinceDate: sinceDate as string,
         filters: { trackGroupIds: [Number(id)] },
       });

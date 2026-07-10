@@ -6,6 +6,7 @@ import {
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
+import { toApiArtistLabel } from "../../../../../../utils/serialize/apiNaming";
 
 export default function () {
   const operations = {
@@ -37,7 +38,7 @@ export default function () {
         },
       });
       res.json({
-        results: labels,
+        results: labels.map(toApiArtistLabel),
       });
     } catch (e) {
       next(e);
@@ -66,7 +67,7 @@ export default function () {
         },
       });
       res.json({
-        results: labels,
+        results: labels.map(toApiArtistLabel),
       });
     } catch (e) {
       next(e);

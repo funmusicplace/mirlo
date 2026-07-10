@@ -64,7 +64,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
   async createTerminalSubscriptionSetup({
     readerId,
     tierId,
-    artistId,
+    profileId,
     accountId,
     amount,
     currency,
@@ -76,7 +76,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
     return createAndDispatchTerminalSetupIntent({
       readerId,
       tierId,
-      artistId,
+      profileId,
       stripeAccountId: accountId,
       amount,
       currency,

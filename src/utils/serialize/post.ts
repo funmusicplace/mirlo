@@ -5,6 +5,8 @@ import { generateFullStaticImageUrl } from "../images";
 import { finalProfileAvatarBucket, finalPostImageBucket } from "../minio";
 import { isTrackPlayable } from "../trackPlayability";
 
+import { getRelation, stripApPrivateKey, withArtistFields } from "./apiNaming";
+
 const extractFirstParagraph = (html: string): string | null => {
   const match = html.match(/<p[^>]*>[\s\S]*?<\/p>/);
   return match ? match[0] : null;
@@ -48,7 +50,7 @@ export const postIncludeForUser = (userId?: number) => ({
     orderBy: { order: "asc" as const },
   },
   featuredImage: true,
-  artist: {
+  profile: {
     include: {
       avatar: { where: { deletedAt: null } },
     },
@@ -58,6 +60,7 @@ export const postIncludeForUser = (userId?: number) => ({
 export const serializePost = (
   post: Partial<Post> & { id: number; isPublic: boolean } & {
     artist?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
+    profile?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
   } & { featuredImage?: { extension: string; id: string } | null } & {
     tracks?: {
       trackId: number;
@@ -74,8 +77,27 @@ export const serializePost = (
   isUserSubscriber?: boolean
 ) => {
   const canSeeContent = !!(isUserSubscriber || post.isPublic);
+  const { profileId, artist, profile, ...postRest } = post;
+  const profileRelation = getRelation({ profile, artist }) as
+    | (Partial<Profile> & { avatar?: ProfileAvatar | null })
+    | null
+    | undefined;
+  const artistData = profileRelation
+    ? {
+        ...stripApPrivateKey(profileRelation),
+        avatar: addSizesToImage(
+          finalProfileAvatarBucket,
+          profileRelation?.avatar
+        ),
+      }
+    : undefined;
+
   return {
-    ...post,
+    ...postRest,
+    ...withArtistFields({
+      profileId: profileId ?? undefined,
+      artist: artistData,
+    }),
     trackCount: post._count?.tracks ?? post.tracks?.length ?? 0,
     tracks: canSeeContent
       ? post.tracks?.map((pt) => {
@@ -97,12 +119,6 @@ export const serializePost = (
           };
         })
       : undefined,
-    artist: {
-      ...post.artist,
-      avatar: post.artist
-        ? addSizesToImage(finalProfileAvatarBucket, post.artist?.avatar)
-        : null,
-    },
     featuredImage: post.featuredImage && {
       ...post.featuredImage,
       src: generateFullStaticImageUrl(

@@ -26,13 +26,13 @@ export default function () {
     try {
       if (canceled) {
         const clientId = parseNumericQueryParam(req.query.clientId);
-        const artistId = parseNumericQueryParam(req.query.artistId);
+        const profileId = parseNumericQueryParam(req.query.artistId);
 
         const client = clientId
           ? await prisma.client.findUnique({ where: { id: clientId } })
           : null;
-        const artist = artistId
-          ? await prisma.profile.findUnique({ where: { id: artistId } })
+        const artist = profileId
+          ? await prisma.profile.findUnique({ where: { id: profileId } })
           : null;
 
         const checkoutPath = artist?.urlSlug
@@ -66,7 +66,7 @@ export default function () {
         });
         const {
           clientId,
-          artistId,
+          profileId,
           trackGroupId,
           trackId,
           tierId,
@@ -75,7 +75,7 @@ export default function () {
           tipId,
         } = session.metadata as unknown as {
           clientId: number | null;
-          artistId: number | null;
+          profileId: number | null;
           tierId: number | null;
           trackGroupId: number | null;
           trackId: number | null;
@@ -83,12 +83,12 @@ export default function () {
           purchaseType: string | null;
           tipId: string | null;
         };
-        if (clientId && artistId) {
+        if (clientId && profileId) {
           const client = await prisma.client.findUnique({
             where: { id: +clientId },
           });
           const artist = await prisma.profile.findUnique({
-            where: { id: +artistId },
+            where: { id: +profileId },
           });
 
           const searchParams = new URLSearchParams();

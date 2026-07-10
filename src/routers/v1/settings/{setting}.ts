@@ -83,14 +83,14 @@ export default function () {
         });
       } else if (
         setting === "instanceArtist" &&
-        settings.settings?.instanceCustomization?.artistId &&
+        settings.settings?.instanceCustomization?.profileId &&
         Number.isFinite(
-          Number(settings.settings.instanceCustomization.artistId)
+          Number(settings.settings.instanceCustomization.profileId)
         )
       ) {
         const artist = await prisma.profile.findFirst({
           where: {
-            id: Number(settings.settings.instanceCustomization?.artistId),
+            id: Number(settings.settings.instanceCustomization?.profileId),
           },
         });
         return res.status(200).json({ result: artist });

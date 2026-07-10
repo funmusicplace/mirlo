@@ -16,7 +16,7 @@ export const getIntentStatus = async ({
   successUrl: string | null;
   amount: number | null;
   currency: string | null;
-  artistId: string | null;
+  profileId: string | null;
 }> => {
   if (id.startsWith("seti_")) {
     const si = await stripe.setupIntents.retrieve(
@@ -32,7 +32,7 @@ export const getIntentStatus = async ({
       // SetupIntents authorise a payment method; there's no immediate charge.
       amount: null,
       currency: null,
-      artistId: si.metadata?.artistId ?? null,
+      profileId: si.metadata?.profileId ?? null,
     };
   }
   const pi = await stripe.paymentIntents.retrieve(
@@ -47,6 +47,6 @@ export const getIntentStatus = async ({
     successUrl: pi.metadata?.successUrl ?? null,
     amount: pi.amount,
     currency: pi.currency,
-    artistId: pi.metadata?.artistId ?? null,
+    profileId: pi.metadata?.profileId ?? null,
   };
 };

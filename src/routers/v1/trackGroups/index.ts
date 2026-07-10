@@ -23,7 +23,7 @@ export default function () {
       take = format === "rss" ? 50 : 10,
       orderBy,
       tag,
-      artistId,
+      profileId,
       license,
       title,
       locationSlug,
@@ -59,15 +59,15 @@ export default function () {
         });
       }
 
-      if (artistId) {
-        where.artistId = Number(artistId);
+      if (profileId) {
+        where.profileId = Number(profileId);
       }
 
       if (locationSlug && typeof locationSlug === "string") {
-        if (!where.artist) {
-          where.artist = {};
+        if (!where.profile) {
+          where.profile = {};
         }
-        where.artist.artistLocationTags = {
+        where.profile.profileLocationTags = {
           some: {
             locationTag: {
               slug: { endsWith: locationSlug },
@@ -77,10 +77,10 @@ export default function () {
       }
 
       if (artistName && typeof artistName === "string") {
-        if (!where.artist) {
-          where.artist = {};
+        if (!where.profile) {
+          where.profile = {};
         }
-        where.artist.name = { contains: artistName, mode: "insensitive" };
+        where.profile.name = { contains: artistName, mode: "insensitive" };
       }
 
       if (license && license !== "" && license !== "all") {
@@ -140,7 +140,7 @@ export default function () {
                 OR: [
                   { title: { contains: token, mode: "insensitive" } },
                   {
-                    artist: {
+                    profile: {
                       name: { contains: token, mode: "insensitive" },
                     },
                   },
@@ -165,7 +165,7 @@ export default function () {
       if (orderBy === "random") {
         const rawTrackGroups = await prisma.$queryRaw<Array<{ id: number }>>`
               SELECT id FROM (
-              SELECT DISTINCT ON ("artistId") id
+              SELECT DISTINCT ON ("profileId") id
               FROM "TrackGroup"
               WHERE "releaseDate" <= NOW()
                 AND "publishedAt" <= NOW()
@@ -185,7 +185,7 @@ export default function () {
                 )
                 AND exists (
                   select 1 from "Profile" a
-                  where a.id = "TrackGroup"."artistId"
+                  where a.id = "TrackGroup"."profileId"
                   and a.enabled = true
                   and a."deletedAt" is null
                   and exists (
@@ -200,7 +200,7 @@ export default function () {
                   where c."trackGroupId" = "TrackGroup".id
                   and cardinality(c.url) > 0
                 )
-              ORDER BY "artistId", "releaseDate" DESC
+              ORDER BY "profileId", "releaseDate" DESC
             ) AS distinct_groups
           ORDER BY RANDOM()
           LIMIT ${Number(take)}
@@ -210,18 +210,18 @@ export default function () {
         where.id = { in: randomIds };
         delete where.releaseDate; // Remove releaseDate filter for random query
         delete where.tags;
-        delete where.artistId; // Remove artistId filter for random query
+        delete where.profileId; // Remove profileId filter for random query
         delete where.title;
       }
 
       const trackGroups = await prisma.trackGroup.findMany({
         where,
-        ...(distinctArtists ? { distinct: "artistId" } : {}),
+        ...(distinctArtists ? { distinct: "profileId" } : {}),
         orderBy: where.id ? undefined : orderByClause,
         skip: skip && !where.id ? Number(skip) : undefined,
         take: take && !where.id ? Number(take) : undefined,
         include: {
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,

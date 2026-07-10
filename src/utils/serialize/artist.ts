@@ -31,8 +31,16 @@ import {
   serializeSingleTrackGroupIntoCanimus,
   LocalTrackGroup,
 } from "./trackGroup";
+import {
+  stripApPrivateKey,
+  toApiArtistLabel,
+  toApiArtistLabelWithArtist,
+  toApiSubscriptionTier,
+  toApiUserFields,
+} from "./apiNaming";
 
 interface LocalArtist extends Profile {
+  artistLabels?: LocalArtistLabel[];
   posts?: Post[];
   background?: ProfileBackground | null;
   avatar?: ProfileAvatar | null;
@@ -62,14 +70,101 @@ interface LocalArtist extends Profile {
   } | null;
 }
 
+interface LocalArtistLabel {
+  artistId: number;
+  artist?: LocalArtist;
+  labelUserId: number;
+  labelUser?: {
+    profiles?: LocalArtist[];
+    artists?: LocalArtist[];
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+const enrichRosterArtist = (
+  labelArtist: LocalArtist,
+  userId?: number
+): Record<string, unknown> => {
+  const alArtistPublic = stripApPrivateKey(labelArtist);
+  return {
+    ...alArtistPublic,
+    avatar: addSizesToImage(finalProfileAvatarBucket, labelArtist?.avatar),
+    background: addSizesToImage(
+      finalProfileBackgroundBucket,
+      labelArtist?.background
+    ),
+    trackGroups: labelArtist?.trackGroups?.map((tg) =>
+      processSingleTrackGroup(
+        {
+          ...tg,
+          profile: labelArtist,
+        } as Parameters<typeof processSingleTrackGroup>[0],
+        { loggedInUserId: userId }
+      )
+    ),
+  };
+};
+
+/** Label roster row on user.artistLabels: artist is the roster profile. */
+const serializeRosterArtistLabel = (
+  al: LocalArtistLabel & {
+    artist: Profile & {
+      avatar?: ProfileAvatar | null;
+      background?: ProfileBackground | null;
+      trackGroups?: (TrackGroup & {
+        cover?: TrackGroupCover | null;
+        tracks?: Track[];
+      })[];
+    };
+  },
+  userId?: number
+) => {
+  const { artist: labelArtist } = al;
+  return toApiArtistLabelWithArtist(
+    al,
+    labelArtist ? enrichRosterArtist(labelArtist, userId) : undefined
+  );
+};
+
+const serializeArtistLabel = (
+  al: LocalArtistLabel,
+  userId?: number,
+  isUserSubscriber?: boolean
+): Record<string, unknown> => {
+  const { artistId, artist, labelUser, ...rest } = al;
+  const apiLabelUser = labelUser ? toApiUserFields(labelUser) : undefined;
+  const labelProfiles = (labelUser?.artists ?? labelUser?.profiles) as
+    | LocalArtist[]
+    | undefined;
+  return {
+    ...toApiArtistLabel({
+      ...rest,
+      artistId,
+      artist: artist ? stripApPrivateKey(artist) : undefined,
+    }),
+    labelUser: apiLabelUser
+      ? {
+          ...apiLabelUser,
+          artists: labelProfiles?.map((labelProfile) =>
+            processSingleArtist(labelProfile, userId, isUserSubscriber)
+          ),
+        }
+      : undefined,
+  };
+};
+
 export const processSingleArtist = (
   artist: LocalArtist,
   userId?: number,
   isUserSubscriber?: boolean
-) => {
-  const { apPrivateKey: _, ...artistPublic } = artist;
+): Record<string, unknown> => {
+  const { apPrivateKey: _, artistLabels, ...artistPublic } = artist;
   return {
     ...artistPublic,
+    artistLabels: artistLabels?.map((al) =>
+      serializeArtistLabel(al as LocalArtistLabel, userId, isUserSubscriber)
+    ),
     posts: artist?.posts?.map((p: Post) =>
       serializePost(
         p,
@@ -90,47 +185,37 @@ export const processSingleArtist = (
     avatar: addSizesToImage(finalProfileAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
-        { ...tg, artist: { ...tg.artist, user: artist.user } },
+        { ...tg, profile: { ...tg.profile, user: artist.user } },
         { loggedInUserId: userId }
       )
     ),
     subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
-      ...tier,
+      ...toApiSubscriptionTier(tier),
       images: tier.images?.map((img) => ({
         ...img,
         image: addSizesToImage(finalImageBucket, img.image),
       })),
       releases: tier.releases?.map((rel) => ({
         ...rel,
-        trackGroup: {
-          ...rel.trackGroup,
-          cover: addSizesToImage(finalCoversBucket, rel.trackGroup.cover),
-        },
+        trackGroup: processSingleTrackGroup(
+          {
+            ...rel.trackGroup,
+            profileId: tier.profileId,
+            profile: artist,
+          } as Parameters<typeof processSingleTrackGroup>[0],
+          { loggedInUserId: userId }
+        ),
       })),
     })),
     user: artist.user
       ? {
           ...artist.user,
-          artistLabels: artist.user.artistLabels?.map((al) => {
-            const { apPrivateKey: _pk, ...alArtistPublic } = al.artist ?? {};
-            return {
-              ...al,
-              artist: {
-                ...alArtistPublic,
-                avatar: addSizesToImage(
-                  finalProfileAvatarBucket,
-                  al.artist?.avatar
-                ),
-                background: addSizesToImage(
-                  finalProfileBackgroundBucket,
-                  al.artist?.background
-                ),
-                trackGroups: al.artist?.trackGroups?.map((tg) =>
-                  processSingleTrackGroup(tg, { loggedInUserId: userId })
-                ),
-              },
-            };
-          }),
+          artistLabels: artist.user.artistLabels?.map((al) =>
+            serializeRosterArtistLabel(
+              al as Parameters<typeof serializeRosterArtistLabel>[0],
+              userId
+            )
+          ),
         }
       : artist.user,
   };

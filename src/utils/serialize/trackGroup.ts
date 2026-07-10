@@ -18,10 +18,16 @@ import { finalProfileAvatarBucket, finalCoversBucket } from "../minio";
 import { isTrackPlayableNested } from "../trackPlayability";
 
 import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
+import {
+  getRelation,
+  stripApPrivateKey,
+  toApiTrackGroupFields,
+} from "./apiNaming";
 
 export interface LocalTrackGroup extends TrackGroup {
   cover?: TrackGroupCover | null;
   artist?: Partial<Profile>;
+  profile?: Partial<Profile>;
   tracks?: CanimusTrack[];
 }
 
@@ -29,6 +35,10 @@ export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
     artist?: Partial<Profile> & {
+      avatar?: ProfileAvatar | null;
+      user?: { currency?: string | null } | null;
+    };
+    profile?: Partial<Profile> & {
       avatar?: ProfileAvatar | null;
       user?: { currency?: string | null } | null;
     };
@@ -46,13 +56,35 @@ export const processSingleTrackGroup = (
     _count?: { tracks?: number; userTrackGroupPurchases?: number };
   },
   options?: { loggedInUserId?: number }
-) => {
-  const { _count, ...rest } = tg;
+): Record<string, unknown> => {
+  const { _count, profileId, artist, profile, ...rest } = tg;
+  const profileRelation = getRelation({ profile, artist }) as
+    | (Partial<Profile> & {
+        avatar?: ProfileAvatar | null;
+        user?: { currency?: string | null } | null;
+      })
+    | null
+    | undefined;
   const currency =
-    tg.paymentToUser?.currency ?? tg.artist?.user?.currency ?? "usd";
-  const { apPrivateKey: _, ...artistPublic } = tg.artist ?? {};
+    tg.paymentToUser?.currency ?? profileRelation?.user?.currency ?? "usd";
+  const artistPublic = profileRelation
+    ? stripApPrivateKey(profileRelation)
+    : {};
+  const artistData = profileRelation
+    ? {
+        ...artistPublic,
+        avatar: profileRelation.avatar
+          ? addSizesToImage(finalProfileAvatarBucket, profileRelation.avatar)
+          : undefined,
+      }
+    : undefined;
+
   return {
-    ...rest,
+    ...toApiTrackGroupFields({
+      ...rest,
+      profileId,
+      artist: artistData,
+    }),
     totalTracks: _count?.tracks ?? tg.tracks?.length,
     currency,
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
@@ -65,14 +97,6 @@ export const processSingleTrackGroup = (
         userId: options?.loggedInUserId,
       }),
     })),
-    artist: tg.artist
-      ? {
-          ...artistPublic,
-          avatar: tg.artist.avatar
-            ? addSizesToImage(finalProfileAvatarBucket, tg.artist.avatar)
-            : undefined,
-        }
-      : undefined,
     merch: tg.merch?.map((m) =>
       processSingleMerch(m, {
         fallbackCurrency: currency,

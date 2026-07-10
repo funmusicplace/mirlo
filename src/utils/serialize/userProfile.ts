@@ -8,12 +8,19 @@ import {
   finalUserBannerBucket,
 } from "../minio";
 
+import {
+  toApiSubscriptionTier,
+  toApiUserFields,
+  toApiUserSubscription,
+  withArtistFields,
+} from "./apiNaming";
+
 export const USER_PROFILE_SELECT = {
   email: true,
   accountingEmail: true,
   id: true,
   name: true,
-  artists: true,
+  profiles: true,
   isAdmin: true,
   currency: true,
   language: true,
@@ -30,7 +37,7 @@ export const USER_PROFILE_SELECT = {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
             },
           },
@@ -60,14 +67,14 @@ export const USER_PROFILE_SELECT = {
   },
   userAvatar: true,
   userBanner: true,
-  artistUserSubscriptions: {
+  profileUserSubscriptions: {
     where: {
       deletedAt: null,
     },
     select: {
-      artistSubscriptionTier: {
+      profileSubscriptionTier: {
         include: {
-          artist: {
+          profile: {
             include: {
               avatar: true,
               user: { select: { currency: true } },
@@ -80,7 +87,8 @@ export const USER_PROFILE_SELECT = {
       amount: true,
       deleteReason: true,
       nextBillingDate: true,
-      artistUserSubscriptionCharges: {
+      profileSubscriptionTierId: true,
+      profileUserSubscriptionCharges: {
         orderBy: {
           createdAt: "desc",
         },
@@ -103,32 +111,53 @@ export type UserProfilePayload = Prisma.UserGetPayload<{
 }>;
 
 export function serializeUserProfile(user: UserProfilePayload) {
+  const { profiles, profileUserSubscriptions, ...userRest } = user;
+
   return {
-    ...user,
+    ...toApiUserFields({ ...userRest, profiles }),
     userAvatar: addSizesToImage(finalUserAvatarBucket, user.userAvatar),
     userBanner: addSizesToImage(finalUserBannerBucket, user.userBanner),
-    trackFavorites: user.trackFavorites.map((tf) => ({
-      ...tf,
-      track: {
-        ...tf.track,
-        trackGroup: {
-          ...tf.track.trackGroup,
-          cover: addSizesToImage(finalCoversBucket, tf.track.trackGroup.cover),
+    trackFavorites: user.trackFavorites.map((tf) => {
+      const { profileId, profile, ...trackGroupRest } = tf.track.trackGroup;
+      return {
+        ...tf,
+        track: {
+          ...tf.track,
+          trackGroup: {
+            ...withArtistFields({
+              ...trackGroupRest,
+              profileId,
+              profile,
+            }),
+            cover: addSizesToImage(
+              finalCoversBucket,
+              tf.track.trackGroup.cover
+            ),
+          },
         },
-      },
-    })),
-    artistUserSubscriptions: user.artistUserSubscriptions.map((aus) => ({
-      ...aus,
-      artistSubscriptionTier: {
-        ...aus.artistSubscriptionTier,
-        artist: {
-          ...aus.artistSubscriptionTier.artist,
-          avatar: addSizesToImage(
-            finalProfileAvatarBucket,
-            aus.artistSubscriptionTier.artist.avatar
-          ),
-        },
-      },
-    })),
+      };
+    }),
+    artistUserSubscriptions: profileUserSubscriptions.map((aus) => {
+      const tier = aus.profileSubscriptionTier;
+      const tierWithAvatar = tier?.profile
+        ? {
+            ...tier,
+            profile: {
+              ...tier.profile,
+              avatar: addSizesToImage(
+                finalProfileAvatarBucket,
+                tier.profile.avatar
+              ),
+            },
+          }
+        : tier;
+
+      return toApiUserSubscription({
+        ...aus,
+        profileSubscriptionTier: tierWithAvatar
+          ? toApiSubscriptionTier(tierWithAvatar)
+          : tierWithAvatar,
+      });
+    }),
   };
 }

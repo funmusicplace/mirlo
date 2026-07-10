@@ -27,6 +27,8 @@ export default function () {
       datePurchased?: string;
     };
 
+    let profileIds: string | string[] | number[] | undefined = artistIds;
+
     assertLoggedIn(req);
     const user = req.user;
 
@@ -35,18 +37,18 @@ export default function () {
       // sales of artists I own AND sales routed to me as a release's payee
       // (e.g. a label). When they filter to a specific artist, show only that
       // artist's sales.
-      const usingDefaultScope = !artistIds;
-      if (!artistIds) {
-        artistIds = (
+      const usingDefaultScope = !profileIds;
+      if (!profileIds) {
+        profileIds = (
           await prisma.profile.findMany({
             where: {
               userId: user.id,
             },
           })
         ).map((a) => a.id);
-      } else if (typeof artistIds === "string") {
-        // If artistIds is a string, split it into an array
-        artistIds = artistIds.split(",");
+      } else if (typeof profileIds === "string") {
+        // If profileIds is a string, split it into an array
+        profileIds = profileIds.split(",");
       }
 
       if (typeof trackGroupIds === "string") {
@@ -64,7 +66,7 @@ export default function () {
       }
 
       const results = await findSales({
-        artistId: artistIds.map((a) => Number(a)),
+        profileId: profileIds.map((a) => Number(a)),
         sinceDate,
         untilDate,
         filters: trackGroupIds
@@ -78,20 +80,29 @@ export default function () {
       // If CSV format is requested, fetch additional transaction details
       if (req.query?.format === "csv") {
         const transformedResults = results.map((result) => ({
-          ...result,
-          artist: result.artist.map((a) => a.name).join(", "),
-          trackGroupPurchases:
-            result.trackGroupPurchases
-              ?.map((tgp) => tgp.trackGroup.title)
-              .join(", ") || "",
-          trackPurchases:
-            result.trackPurchases?.map((tp) => tp.track.title).join(", ") || "",
-          merchPurchases:
-            result.merchPurchases?.map((mp) => mp.merch.title).join(", ") || "",
+          userFriendlyId: result.userFriendlyId,
+          datePurchased: result.datePurchased,
+          artist: result.artist
+            .map((a: { name?: string }) => a?.name)
+            .filter(Boolean)
+            .join(", "),
+          saleType: result.saleType,
+          title: result.title,
+          amount: result.amount,
+          currency: result.currency,
+          platformCut: result.platformCut,
+          paymentProcessorCut: result.paymentProcessorCut,
+          shippingFeeAmount: result.shippingFeeAmount,
+          stripeId: result.stripeId,
+          discountPercent: result.discountPercent,
+          trackGroupPurchases: result.title,
+          trackPurchases: "",
+          merchPurchases: "",
           artistUserSubscriptionCharges:
             result.artistUserSubscriptionCharges
               ?.map(
-                (asc) => asc.artistUserSubscription.artistSubscriptionTier.name
+                (asc) =>
+                  asc.artistUserSubscription?.artistSubscriptionTier?.name
               )
               .join(", ") || "",
         }));
@@ -113,7 +124,7 @@ export default function () {
           ...r,
           artist: Array.isArray(r.artist)
             ? r.artist
-                .map((a: any) => a?.name)
+                .map((a: { name?: string }) => a?.name)
                 .filter(Boolean)
                 .join(", ")
             : r.artist,
@@ -182,7 +193,6 @@ const csvColumns = [
   { label: "Date", value: "datePurchased" },
   { label: "Profile", value: "artist" },
   { label: "Type", value: "saleType" },
-  { label: "Profile", value: "artist" },
   { label: "Item", value: "title" },
   { label: "Amount", value: "amount" },
   { label: "Currency", value: "currency" },

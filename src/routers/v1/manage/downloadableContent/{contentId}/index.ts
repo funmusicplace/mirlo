@@ -15,16 +15,16 @@ type Params = {
 const findNewSlug = async (
   slug: string,
   counter: number,
-  artistId: number
+  profileId: number
 ): Promise<string> => {
   const verifySlug = await prisma.trackGroup.findFirst({
     where: {
       urlSlug: `${slug}`,
-      artistId: artistId,
+      profileId: profileId,
     },
   });
   if (verifySlug) {
-    return await findNewSlug(`${slug}-${counter + 1}`, counter + 1, artistId);
+    return await findNewSlug(`${slug}-${counter + 1}`, counter + 1, profileId);
   } else {
     return slug;
   }

@@ -22,7 +22,7 @@ export type CreatePaymentArgs = {
 /** Args for a recurring subscription's payment-method authorisation (SetupIntent). */
 export type CreateSubscriptionSetupArgs = {
   tierId: number;
-  artistId: number;
+  profileId: number;
   accountId: string;
   amount: number;
   currency: string;
@@ -86,7 +86,7 @@ export type PaymentStatusResult = {
   successUrl: string | null;
   amount: number | null;
   currency: string | null;
-  artistId: string | null;
+  profileId: string | null;
 };
 
 import { StripePaymentProcessor } from "./stripeProcessor";

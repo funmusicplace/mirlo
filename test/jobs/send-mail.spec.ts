@@ -240,7 +240,7 @@ describe("send-mail job", () => {
                         title: "Test Album",
                         urlSlug: "test-album",
                         catalogNumber: "CAT-001",
-                        artist: {
+                        profile: {
                           name: "Test Profile",
                           urlSlug: "test-artist",
                         },
@@ -255,7 +255,7 @@ describe("send-mail job", () => {
                         trackGroup: {
                           title: "Test Album",
                           urlSlug: "test-album",
-                          artist: {
+                          profile: {
                             name: "Test Profile",
                             urlSlug: "test-artist",
                           },
@@ -268,13 +268,13 @@ describe("send-mail job", () => {
                       merch: {
                         title: "Test Shirt",
                         sku: "SHIRT-M",
-                        artist: { name: "Test Profile" },
+                        profile: { name: "Test Profile" },
                       },
                     },
                   ],
                   tips: [
                     {
-                      artist: { name: "Test Profile", id: 1 },
+                      profile: { name: "Test Profile", id: 1 },
                     },
                   ],
                 },
@@ -341,11 +341,11 @@ describe("send-mail job", () => {
                 name: "Test Profile",
                 user: { currency: "usd" },
               },
-              artistUserSubscription: {
+              profileUserSubscription: {
                 id: 1,
                 amount: 1000,
-                artistSubscriptionTierId: 1,
-                artistSubscriptionTier: { name: "Fan" },
+                profileSubscriptionTierId: 1,
+                profileSubscriptionTier: { name: "Fan" },
               },
               user: {
                 name: "Test Fan",

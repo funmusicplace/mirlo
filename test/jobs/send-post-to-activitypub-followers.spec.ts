@@ -73,14 +73,14 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         actor: "https://mastodon.example/users/follower1",
       },
     });
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         actor: "https://pixelfed.example/users/follower2",
       },
     });
@@ -131,7 +131,7 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         actor: "https://example.com/user",
       },
     });
@@ -198,7 +198,7 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         actor: "https://mastodon.example/users/follower",
       },
     });
@@ -242,7 +242,7 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         actor: "https://error.example/users/follower",
         inboxUrl: "https://error.example/users/follower/inbox",
       },
@@ -397,7 +397,7 @@ describe("send-post-to-activitypub-followers", () => {
       // Add a follower (different from the mentioned actor) so the post isn't skipped
       await prisma.activityPubProfileFollowers.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           actor: "https://other.example/users/follower",
         },
       });
@@ -465,7 +465,7 @@ describe("send-post-to-activitypub-followers", () => {
 
       await prisma.activityPubProfileFollowers.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           actor: "https://other.example/users/follower",
           inboxUrl: "https://other.example/users/follower/inbox",
         },

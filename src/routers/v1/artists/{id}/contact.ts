@@ -20,7 +20,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const { message } = req.body as { message?: string };
     const sender = req.user as User;
 
@@ -41,7 +41,7 @@ export default function () {
 
       const artist = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
           enabled: true,
           deletedAt: null,
         },
@@ -71,7 +71,7 @@ export default function () {
       const recentCount = await prisma.notification.count({
         where: {
           notificationType: "ARTIST_CONTACT_MESSAGE",
-          artistId: artist.id,
+          profileId: artist.id,
           relatedUserId: sender.id,
           createdAt: { gte: new Date(Date.now() - CONTACT_RATE_WINDOW_MS) },
         },
@@ -89,7 +89,7 @@ export default function () {
           notificationType: "ARTIST_CONTACT_MESSAGE",
           userId: artist.user.id,
           relatedUserId: sender.id,
-          artistId: artist.id,
+          profileId: artist.id,
           content: trimmed,
         },
       });

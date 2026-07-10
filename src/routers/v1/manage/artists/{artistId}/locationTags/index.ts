@@ -14,11 +14,11 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     try {
-      const { artistId: id } = req.params;
-      const artistId = parseInt(id, 10);
+      const { artistId: artistIdParam } = req.params;
+      const profileId = parseInt(artistIdParam, 10);
 
       const locationTags = await prisma.profileLocationTag.findMany({
-        where: { artistId },
+        where: { profileId },
         include: { locationTag: true },
       });
 
@@ -56,9 +56,9 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     try {
-      const { artistId: id } = req.params;
+      const { artistId: artistIdParam } = req.params;
       const { locationTagId } = req.body;
-      const artistId = parseInt(id, 10);
+      const profileId = parseInt(artistIdParam, 10);
 
       if (!locationTagId) {
         throw new AppError({
@@ -80,8 +80,8 @@ export default function () {
 
       // Create or ignore if already exists
       const result = await prisma.profileLocationTag.upsert({
-        where: { artistId_locationTagId: { artistId, locationTagId } },
-        create: { artistId, locationTagId },
+        where: { profileId_locationTagId: { profileId, locationTagId } },
+        create: { profileId, locationTagId },
         update: {},
         include: { locationTag: true },
       });

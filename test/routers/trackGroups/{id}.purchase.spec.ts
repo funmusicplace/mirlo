@@ -242,7 +242,7 @@ describe("trackGroups/{id}/purchase", () => {
         );
         assert.equal(stubCreate.calledOnce, true);
         const args = stubCreate.getCall(0).args as any; // Something wrong with how types get generated for the stub
-        assert.equal(args[0].metadata?.artistId, artist.id);
+        assert.equal(args[0].metadata?.profileId, artist.id);
         assert.equal(args[0].metadata?.trackGroupId, trackGroup.id);
         assert.equal(args[0].metadata?.stripeAccountId, user.stripeAccountId);
         assert.equal(args[0].line_items?.[0].quantity, 1);
@@ -291,7 +291,7 @@ describe("trackGroups/{id}/purchase", () => {
         );
         assert.equal(stubCreate.calledOnce, true);
         const args = stubCreate.getCall(0).args as any; // Something wrong with how types get generated for the stub
-        assert.equal(args[0].metadata?.artistId, artist.id);
+        assert.equal(args[0].metadata?.profileId, artist.id);
         assert.equal(args[0].metadata?.trackGroupId, trackGroup.id);
         assert.equal(
           args[0].metadata?.stripeAccountId,

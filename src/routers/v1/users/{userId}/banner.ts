@@ -13,7 +13,7 @@ import { AppError } from "../../../../utils/error";
 import { busboyOptions } from "../../../../utils/images";
 
 type Params = {
-  artistId: string;
+  profileId: string;
   userId: string;
 };
 
@@ -72,13 +72,13 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
       const artist = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
           userId: loggedInUser.id,
         },
       });

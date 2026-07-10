@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
+import { toApiArtistLabel } from "../../../../utils/serialize/apiNaming";
 
 export default function () {
   const operations = {
@@ -46,7 +47,7 @@ export default function () {
         include: { artist: { omit: { apPrivateKey: true } } },
       });
 
-      res.json({ results: artists });
+      res.json({ results: artists.map(toApiArtistLabel) });
     } catch (e) {
       next(e);
     }

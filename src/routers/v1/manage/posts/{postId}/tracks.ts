@@ -25,7 +25,7 @@ export default function () {
       const ownedTrack = await prisma.track.findFirst({
         where: {
           id: trackId,
-          trackGroup: { artist: { userId: req.user.id } },
+          trackGroup: { profile: { userId: req.user.id } },
         },
       });
       if (!ownedTrack) {

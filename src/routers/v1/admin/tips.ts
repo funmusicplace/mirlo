@@ -56,7 +56,7 @@ export default function () {
               urlSlug: true,
             },
           },
-          artist: true,
+          profile: true,
           transaction: true,
         },
         orderBy: {

@@ -12,12 +12,12 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     try {
-      const { artistId: id, locationTagId } = req.params;
-      const artistId = parseInt(id, 10);
+      const { artistId: artistIdParam, locationTagId } = req.params;
+      const profileId = parseInt(artistIdParam, 10);
       const locTagId = parseInt(locationTagId, 10);
 
       await prisma.profileLocationTag.deleteMany({
-        where: { artistId, locationTagId: locTagId },
+        where: { profileId, locationTagId: locTagId },
       });
 
       res.json({ success: true });

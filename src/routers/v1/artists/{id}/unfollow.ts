@@ -14,7 +14,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const user = req.user;
     const { email } = req.body ?? {};
 
@@ -35,7 +35,7 @@ export default function () {
       if (userIdToRemove) {
         const artist = await prisma.profile.findFirst({
           where: {
-            id: Number(artistId),
+            id: Number(profileId),
           },
           include: {
             subscriptionTiers: true,
@@ -45,8 +45,8 @@ export default function () {
         if (artist) {
           await prisma.profileUserSubscription.deleteMany({
             where: {
-              artistSubscriptionTier: {
-                artistId: artist.id,
+              profileSubscriptionTier: {
+                profileId: artist.id,
                 isDefaultTier: true,
               },
               userId: userIdToRemove,
@@ -85,7 +85,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Removed artistSubscriptionTier",
+        description: "Removed profileSubscriptionTier",
       },
       default: {
         description: "An error occurred",

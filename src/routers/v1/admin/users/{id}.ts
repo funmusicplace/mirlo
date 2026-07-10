@@ -68,7 +68,7 @@ export default function () {
           canCreateArtists: true,
           emailConfirmationToken: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           isAdmin: true,
           featureFlags: true,

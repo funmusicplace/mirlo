@@ -43,9 +43,9 @@ export const confirmArtistIdExists = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { id: artistId } = req.params as unknown as Params;
+  const { id: profileId } = req.params as unknown as Params;
 
-  if (!artistId || Number.isNaN(artistId)) {
+  if (!profileId || Number.isNaN(profileId)) {
     const error = new AppError({
       name: "Profile ID must be valid number",
       httpCode: 400,
@@ -56,7 +56,7 @@ export const confirmArtistIdExists = async (
   try {
     const artist = await prisma.profile.findFirst({
       where: {
-        id: Number(artistId),
+        id: Number(profileId),
       },
       select: {
         id: true,
@@ -78,11 +78,11 @@ export const confirmArtistIdExists = async (
 
 export const checkIsUserSubscriber = async (
   user?: User,
-  artistId?: number | null
+  profileId?: number | null
 ) => {
   let userSubscriber = false;
 
-  if (!artistId) {
+  if (!profileId) {
     return true;
   }
 
@@ -90,8 +90,8 @@ export const checkIsUserSubscriber = async (
     const subscriber = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: user.id,
-        artistSubscriptionTier: {
-          artistId,
+        profileSubscriptionTier: {
+          profileId,
         },
       },
     });
@@ -102,16 +102,16 @@ export const checkIsUserSubscriber = async (
 };
 
 export const getPlatformFeeForArtist = async (
-  artistId: number | string | null
+  profileId: number | string | null
 ): Promise<number> => {
   const settings = await getSiteSettings();
-  if (!artistId) {
+  if (!profileId) {
     return settings.platformPercent;
   }
 
   const artist = await prisma.profile.findFirst({
     where: {
-      id: Number(artistId),
+      id: Number(profileId),
     },
     select: {
       defaultPlatformFee: true,
@@ -205,7 +205,7 @@ export const createSubscriptionConfirmation = async (
         data: {
           message,
           email: email,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
 
@@ -236,7 +236,7 @@ export const createSubscriptionConfirmation = async (
 };
 
 export const subscribeUserToArtist = async (
-  artist: {
+  profile: {
     user: User;
     userId: number;
     subscriptionTiers: ProfileSubscriptionTier[];
@@ -245,7 +245,9 @@ export const subscribeUserToArtist = async (
   user?: { id: number } | null,
   message?: string | null
 ) => {
-  let defaultTier = artist.subscriptionTiers.find((tier) => tier.isDefaultTier);
+  let defaultTier = profile.subscriptionTiers.find(
+    (tier) => tier.isDefaultTier
+  );
 
   if (!defaultTier) {
     defaultTier = await prisma.profileSubscriptionTier.create({
@@ -254,7 +256,7 @@ export const subscribeUserToArtist = async (
         description: "follow an artist",
         minAmount: 0,
         isDefaultTier: true,
-        artistId: artist.id,
+        profileId: profile.id,
       },
     });
   }
@@ -264,15 +266,15 @@ export const subscribeUserToArtist = async (
       where: {
         userId: user.id,
         message,
-        artistSubscriptionTier: {
-          artistId: artist.id,
+        profileSubscriptionTier: {
+          profileId: profile.id,
         },
       },
     });
     if (!isSubscribed) {
       await prisma.profileUserSubscription.upsert({
         create: {
-          artistSubscriptionTierId: defaultTier.id,
+          profileSubscriptionTierId: defaultTier.id,
           userId: user.id,
           amount: 0,
         },
@@ -280,9 +282,9 @@ export const subscribeUserToArtist = async (
           deletedAt: null,
         },
         where: {
-          userId_artistSubscriptionTierId: {
+          userId_profileSubscriptionTierId: {
             userId: user.id,
-            artistSubscriptionTierId: defaultTier.id,
+            profileSubscriptionTierId: defaultTier.id,
           },
         },
       });
@@ -290,8 +292,8 @@ export const subscribeUserToArtist = async (
     await prisma.notification.create({
       data: {
         notificationType: "USER_FOLLOWED_YOU",
-        userId: artist.userId,
-        artistId: artist.id,
+        userId: profile.userId,
+        profileId: profile.id,
         relatedUserId: user.id,
       },
     });
@@ -300,8 +302,8 @@ export const subscribeUserToArtist = async (
   const subscriptions = await prisma.profileUserSubscription.findMany({
     where: {
       userId: user?.id,
-      artistSubscriptionTier: {
-        artistId: artist.id,
+      profileSubscriptionTier: {
+        profileId: profile.id,
       },
     },
   });
@@ -309,19 +311,19 @@ export const subscribeUserToArtist = async (
   return subscriptions;
 };
 
-export const deleteArtist = async (userId: number, artistId: number) => {
+export const deleteArtist = async (userId: number, profileId: number) => {
   await prisma.profile.update({
     where: {
-      id: artistId,
+      id: profileId,
       userId,
     },
     data: {
-      urlSlug: `deleted-${artistId}`,
+      urlSlug: `deleted-${profileId}`,
     },
   });
   await prisma.profile.deleteMany({
     where: {
-      id: artistId,
+      id: profileId,
       userId,
     },
   });
@@ -332,29 +334,29 @@ export const deleteArtist = async (userId: number, artistId: number) => {
   // https://github.com/funmusicplace/mirlo/issues/19
   await prisma.post.deleteMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
   await deleteStripeSubscriptions({
-    artistSubscriptionTier: { artistId: Number(artistId) },
+    profileSubscriptionTier: { profileId: Number(profileId) },
   });
 
   await prisma.profileSubscriptionTier.deleteMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
   await prisma.profileUserSubscription.deleteMany({
     where: {
-      artistSubscriptionTier: { artistId: Number(artistId) },
+      profileSubscriptionTier: { profileId: Number(profileId) },
     },
   });
 
   const merch = await prisma.merch.findMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
@@ -362,7 +364,7 @@ export const deleteArtist = async (userId: number, artistId: number) => {
 
   const trackGroups = await prisma.trackGroup.findMany({
     where: {
-      artistId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
@@ -370,22 +372,22 @@ export const deleteArtist = async (userId: number, artistId: number) => {
 
   await prisma.artistLabel.deleteMany({
     where: {
-      artistId: Number(artistId),
+      artistId: Number(profileId),
     },
   });
 };
 
-export const deleteProfileAvatar = async (artistId: number) => {
+export const deleteProfileAvatar = async (profileId: number) => {
   const avatar = await prisma.profileAvatar.findFirst({
     where: {
-      artistId,
+      profileId,
     },
   });
 
   if (avatar) {
     await prisma.profileAvatar.delete({
       where: {
-        artistId,
+        profileId,
       },
     });
 
@@ -419,17 +421,17 @@ export const deleteUserAvatar = async (userId: number) => {
   }
 };
 
-export const deleteProfileBackground = async (artistId: number) => {
+export const deleteProfileBackground = async (profileId: number) => {
   const background = await prisma.profileBackground.findFirst({
     where: {
-      artistId,
+      profileId,
     },
   });
 
   if (background) {
     await prisma.profileBackground.delete({
       where: {
-        artistId,
+        profileId,
       },
     });
 
@@ -447,7 +449,7 @@ export const deleteStripeSubscriptions = async (
   const stripeSubscriptions = await prisma.profileUserSubscription.findMany({
     where,
     include: {
-      artistSubscriptionTier: true,
+      profileSubscriptionTier: true,
     },
   });
   await Promise.all(
@@ -455,9 +457,9 @@ export const deleteStripeSubscriptions = async (
       if (sub.stripeSubscriptionKey) {
         const artistUser = await prisma.user.findFirst({
           where: {
-            artists: {
+            profiles: {
               some: {
-                id: sub.artistSubscriptionTier.artistId,
+                id: sub.profileSubscriptionTier.profileId,
               },
             },
           },
@@ -596,7 +598,7 @@ export const singleInclude = (queryOptions?: {
                 id: true,
                 title: true,
                 urlSlug: true,
-                artist: {
+                profile: {
                   select: {
                     name: true,
                     id: true,
@@ -616,7 +618,7 @@ export const singleInclude = (queryOptions?: {
             id: true,
             name: true,
             email: true,
-            artists: {
+            profiles: {
               where: {
                 isLabelProfile: true,
               },
@@ -626,7 +628,7 @@ export const singleInclude = (queryOptions?: {
         },
       },
     },
-    artistLocationTags: {
+    profileLocationTags: {
       include: {
         locationTag: true,
       },

@@ -25,16 +25,16 @@ export default function () {
         });
       }
 
-      const { artistId, ...intent } = await getPaymentProcessor().getStatus({
+      const { profileId, ...intent } = await getPaymentProcessor().getStatus({
         id,
         accountId: stripeAccountId,
       });
 
       // Surface a name so the hosted checkout page can show who's being paid.
       let artistName: string | null = null;
-      if (artistId) {
+      if (profileId) {
         const artist = await prisma.profile.findFirst({
-          where: { id: Number(artistId) },
+          where: { id: Number(profileId) },
           select: { name: true },
         });
         artistName = artist?.name ?? null;

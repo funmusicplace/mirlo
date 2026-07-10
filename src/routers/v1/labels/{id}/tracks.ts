@@ -24,11 +24,11 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const profileId = await findArtistIdForURLSlug(id);
 
       const labelProfile = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: profileId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },
@@ -55,7 +55,7 @@ export default function () {
       const tracks = await prisma.track.findMany({
         where: {
           trackGroup: {
-            artistId: {
+            profileId: {
               in: [
                 ...(labelProfile ? [labelProfile.id] : []),
                 ...(labelArtists || []).map((a) => a.id),

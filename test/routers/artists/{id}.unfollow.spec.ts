@@ -57,8 +57,8 @@ describe("artists/{id]/unfollow", () => {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
           userId: followerUser.id,
-          artistSubscriptionTier: {
-            artistId: artist.id,
+          profileSubscriptionTier: {
+            profileId: artist.id,
           },
         },
       });

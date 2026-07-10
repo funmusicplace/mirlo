@@ -41,7 +41,7 @@ export default function () {
     try {
       const subscriptions = await prisma.profileSubscriptionTier.findMany({
         where: {
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           ...(includeDefault ? {} : { isDefaultTier: false }),
         },
         orderBy: {
@@ -56,7 +56,7 @@ export default function () {
               trackGroup: {
                 include: {
                   cover: true,
-                  artist: true,
+                  profile: true,
                 },
               },
             },
@@ -101,7 +101,7 @@ export default function () {
       const subscription = await prisma.profileSubscriptionTier.create({
         data: {
           name,
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           description,
           minAmount,
           collectAddress,
@@ -132,13 +132,13 @@ export default function () {
     } catch (e) {
       res.status(500).json({
         error:
-          "Something went wrong while trying to create a artistSubscriptionTier",
+          "Something went wrong while trying to create a profileSubscriptionTier",
       });
     }
   }
 
   POST.apiDoc = {
-    summary: "Creates a artistSubscriptionTier belonging to a user",
+    summary: "Creates a profileSubscriptionTier belonging to a user",
     parameters: [
       {
         in: "body",
@@ -150,7 +150,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Created artistSubscriptionTier",
+        description: "Created profileSubscriptionTier",
         schema: {
           $ref: "#/definitions/ProfileSubscriptionTierResult",
         },

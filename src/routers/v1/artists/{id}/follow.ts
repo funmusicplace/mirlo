@@ -23,7 +23,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const loggedInuser = req.user;
 
     const { email, message, cfTurnstile } = req.body ?? {};
@@ -49,7 +49,7 @@ export default function () {
 
       const artist = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
         },
         include: {
           user: true,
@@ -66,7 +66,7 @@ export default function () {
 
       const settings = await getSiteSettings();
       const instanceArtistId = Number(
-        settings.settings?.instanceCustomization?.artistId
+        settings.settings?.instanceCustomization?.profileId
       );
       const isInstanceArtist =
         instanceArtistId !== undefined && instanceArtistId !== null
@@ -174,7 +174,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Created artistSubscriptionTier",
+        description: "Created profileSubscriptionTier",
       },
       default: {
         description: "An error occurred",

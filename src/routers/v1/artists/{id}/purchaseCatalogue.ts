@@ -18,7 +18,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     let { price, email, message } = req.body as unknown as {
       price?: string; // In cents
       email?: string;
@@ -39,7 +39,7 @@ export default function () {
 
       const artist = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
         },
         include: {
           user: true,
@@ -52,7 +52,7 @@ export default function () {
       if (!artist) {
         throw new AppError({
           httpCode: 404,
-          description: `Artist with ID ${artistId} not found`,
+          description: `Artist with ID ${profileId} not found`,
         });
       }
 

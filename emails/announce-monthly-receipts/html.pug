@@ -13,7 +13,7 @@ block content
     tbody
       each val in userSubscriptions
         tr
-          td #{val.artistSubscriptionTier.artist.name}
+          td #{val.profileSubscriptionTier.profile.name}
           td.num #{val.currency} #{val.amount / 100}
 
   p We love to see it.

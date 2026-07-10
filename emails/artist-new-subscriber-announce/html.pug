@@ -9,7 +9,7 @@ block content
       | (#{user.email}) #{user.name} is supporting your on Mirlo!
   p
     | Support for #{artist.name} on Mirlo with a #{interval === 'MONTH' ? 'monthly': 'yearly'}
-    | contribution at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
+    | contribution at the "#{profileUserSubscription.profileSubscriptionTier.name}" tier.
   if transaction
     table
       thead

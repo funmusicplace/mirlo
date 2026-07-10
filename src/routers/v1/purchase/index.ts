@@ -83,11 +83,12 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { readerId, artistId, items, email, hosted, successUrl } =
       req.body as PostBody;
+    const profileId = Number(artistId);
     const loggedInUser = req.user;
     const clientId = req.client?.id;
 
     try {
-      if (!artistId || !items?.length) {
+      if (!profileId || !items?.length) {
         throw new AppError({
           httpCode: 400,
           description: "artistId and items are required",
@@ -129,7 +130,7 @@ export default function () {
 
         const { setupIntentId } = await initiateSubscription({
           readerId,
-          artistId,
+          profileId,
           tierId: subItem.tierId,
           amount: subItem.amount,
           userEmail: loggedInUser?.email ?? email ?? "",
@@ -145,10 +146,10 @@ export default function () {
       for (const item of items) {
         if (item.type === "trackGroup") {
           const tg = await prisma.trackGroup.findFirst({
-            where: { id: item.id, artist: { id: artistId } },
+            where: { id: item.id, profile: { id: profileId } },
             include: {
               paymentToUser: { select: { stripeAccountId: true } },
-              artist: {
+              profile: {
                 include: {
                   user: true,
                   paymentToUser: true,
@@ -166,19 +167,19 @@ export default function () {
 
           resolvedStripeAccountId =
             tg.paymentToUser?.stripeAccountId ??
-            tg.artist.paymentToUser?.stripeAccountId ??
-            tg.artist.user.stripeAccountId ??
+            tg.profile.paymentToUser?.stripeAccountId ??
+            tg.profile.user.stripeAccountId ??
             undefined;
 
           if (loggedInUser) {
-            await subscribeUserToArtist(tg.artist, loggedInUser);
+            await subscribeUserToArtist(tg.profile, loggedInUser);
           }
 
           let discountPercent = 0;
           if (loggedInUser) {
             const discounts = await findUserDiscountPercentsForArtist(
               loggedInUser.id,
-              tg.artistId
+              tg.profileId
             );
             discountPercent = discounts.reduce(
               (max, d) => Math.max(max, d.digitalDiscountPercent ?? 0),
@@ -195,7 +196,7 @@ export default function () {
           if (isPriceZero && !readerId && loggedInUser) {
             await handleTrackGroupPurchase(loggedInUser.id, tg.id);
             return res.status(200).json({
-              redirectUrl: `/${tg.artist.urlSlug ?? tg.artist.id}/release/${
+              redirectUrl: `/${tg.profile.urlSlug ?? tg.profile.id}/release/${
                 tg.urlSlug ?? tg.id
               }/download?email=${loggedInUser.email}`,
             });
@@ -216,7 +217,7 @@ export default function () {
           const merch = await prisma.merch.findFirst({
             where: {
               id: item.id,
-              artistId,
+              profileId,
               isPublic: true,
               deletedAt: null,
             },
@@ -261,7 +262,7 @@ export default function () {
 
       const result = await initiatePayment({
         readerId,
-        artistId,
+        profileId,
         items: resolvedItems,
         userEmail: loggedInUser?.email ?? email ?? "",
         userId: loggedInUser ? String(loggedInUser.id) : undefined,

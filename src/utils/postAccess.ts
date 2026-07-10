@@ -3,16 +3,16 @@ import { User } from "@mirlo/prisma/client";
 
 export const getUserSubscriptionForArtist = async (
   user: User | undefined,
-  artistId: number
+  profileId: number
 ) => {
   if (!user) return null;
   return prisma.profileUserSubscription.findFirst({
     where: {
       userId: user.id,
-      artistSubscriptionTier: { artistId },
+      profileSubscriptionTier: { profileId },
     },
     orderBy: { amount: "desc" },
-    select: { amount: true, artistSubscriptionTierId: true },
+    select: { amount: true, profileSubscriptionTierId: true },
   });
 };
 
@@ -20,11 +20,11 @@ export const canUserSeePostContent = (
   post: {
     isPublic: boolean;
     minimumSubscriptionTier?: { minAmount: number | null } | null;
-    postSubscriptionTiers: { artistSubscriptionTierId: number }[];
+    postSubscriptionTiers: { profileSubscriptionTierId: number }[];
   },
   context: {
     isArtistOwner: boolean;
-    subscription: { amount: number; artistSubscriptionTierId: number } | null;
+    subscription: { amount: number; profileSubscriptionTierId: number } | null;
   }
 ): boolean => {
   if (post.isPublic || context.isArtistOwner) return true;
@@ -34,8 +34,8 @@ export const canUserSeePostContent = (
       context.subscription.amount ||
     post.postSubscriptionTiers.some(
       (t) =>
-        t.artistSubscriptionTierId ===
-        context.subscription!.artistSubscriptionTierId
+        t.profileSubscriptionTierId ===
+        context.subscription!.profileSubscriptionTierId
     )
   );
 };

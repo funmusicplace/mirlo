@@ -33,7 +33,7 @@ export default function () {
         include: {
           recommendedTrackGroup: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   id: true,
                   name: true,

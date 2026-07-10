@@ -33,8 +33,8 @@ export default function () {
 
       const followers = await prisma.profileUserSubscription.findMany({
         where: {
-          artistSubscriptionTier: {
-            artistId: Number(parsedId),
+          profileSubscriptionTier: {
+            profileId: Number(parsedId),
           },
         },
       });

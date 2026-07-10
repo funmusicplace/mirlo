@@ -49,7 +49,7 @@ describe("findTrackGroupIdForSlug", () => {
     assert.equal(id, trackGroup.id);
   });
 
-  it("should complain about missing artistId", async () => {
+  it("should complain about missing profileId", async () => {
     const { user } = await createUser({ email: "test@test.com" });
     const artist = await createArtist(user.id);
     const trackGroup = await createTrackGroup(artist.id, {
@@ -61,13 +61,13 @@ describe("findTrackGroupIdForSlug", () => {
     } catch (e) {
       assert.equal(
         (e as any).message,
-        "Searching for a TrackGroup by slug requires an artistId"
+        "Searching for a TrackGroup by slug requires an profileId"
       );
     }
     assert.equal(id, undefined);
   });
 
-  it("should handle a urlSlug that is a number if an artistId is defined", async () => {
+  it("should handle a urlSlug that is a number if an profileId is defined", async () => {
     const { user } = await createUser({ email: "test@test.com" });
     const artist = await createArtist(user.id);
     const trackGroup = await createTrackGroup(artist.id, {
@@ -112,7 +112,7 @@ describe("finalizeTrackGroupPublication", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });

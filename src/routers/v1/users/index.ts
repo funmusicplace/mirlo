@@ -35,7 +35,7 @@ export default function () {
     const users = await prisma.user.findMany({
       where,
       select: {
-        artists: {
+        profiles: {
           where: {
             deletedAt: null,
           },

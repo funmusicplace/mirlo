@@ -1,5 +1,8 @@
 import prisma from "@mirlo/prisma";
-import { ProfileUserSubscription, SubscriptionDeleteReason } from "@mirlo/prisma/client";
+import {
+  ProfileUserSubscription,
+  SubscriptionDeleteReason,
+} from "@mirlo/prisma/client";
 import { Job } from "bullmq";
 import { groupBy, keyBy, uniq } from "lodash";
 
@@ -12,15 +15,18 @@ import sendMail from "./send-mail";
 export type MonthlyIncomeReportEmailType = {
   user: { name: string; email: string };
   userSales: {
-    artist: { name: string; id: number }[];
+    profile: { name: string; id: number }[];
     datePurchased: string;
     saleType: string;
     title: string;
     user: { name: string; email: string };
     currency: string;
     amount: number;
-    artistUserSubscriptionCharges?: {
-      artistUserSubscription?: { shippingAddress: true };
+    profileUserSubscriptionCharges?: {
+      profileUserSubscription?: {
+        profileSubscriptionTier?: { name: string; interval?: string };
+        shippingAddress?: unknown;
+      };
     }[];
   }[];
   cancelledSubscriptions: {
@@ -28,9 +34,9 @@ export type MonthlyIncomeReportEmailType = {
     deleteReason: string | null;
     deleteReasonLabel: string;
     user: { name: string | null };
-    artistSubscriptionTier: {
+    profileSubscriptionTier: {
       name: string;
-      artist: { user: { currency: string | null } };
+      profile: { user: { currency: string | null } };
     };
   }[];
   totalIncome: number;
@@ -44,14 +50,52 @@ const deleteReasonLabels: Record<SubscriptionDeleteReason, string> = {
   TIER_SWITCHED: "Switched tiers", // filtered out of the report, listed for exhaustiveness
 };
 
+type EmailSaleRowWithoutUser = Omit<
+  MonthlyIncomeReportEmailType["userSales"][number],
+  "user"
+>;
+
+/** Map API sale rows (artist, artistUserSubscriptionCharges) to email template locals. */
+const toEmailSaleRow = (
+  sale: Awaited<ReturnType<typeof findSales>>[number]
+): EmailSaleRowWithoutUser => {
+  const { artist, artistUserSubscriptionCharges, ...rest } = sale;
+  return {
+    ...rest,
+    profile: artist,
+    profileUserSubscriptionCharges: artistUserSubscriptionCharges?.map(
+      (charge) => {
+        const { artistUserSubscription, ...chargeRest } = charge;
+        if (!artistUserSubscription) {
+          return chargeRest;
+        }
+        const { artistSubscriptionTier, artistSubscriptionTierId, ...subRest } =
+          artistUserSubscription;
+        return {
+          ...chargeRest,
+          profileUserSubscription: {
+            ...subRest,
+            ...(artistSubscriptionTierId !== undefined
+              ? { profileSubscriptionTierId: artistSubscriptionTierId }
+              : {}),
+            ...(artistSubscriptionTier !== undefined
+              ? { profileSubscriptionTier: artistSubscriptionTier }
+              : {}),
+          },
+        };
+      }
+    ) as MonthlyIncomeReportEmailType["userSales"][number]["profileUserSubscriptionCharges"],
+  };
+};
+
 type CancelledSubscriptionRow = Pick<
   ProfileUserSubscription,
   "amount" | "deleteReason"
 > & {
   user: { name: string | null };
-  artistSubscriptionTier: {
+  profileSubscriptionTier: {
     name: string;
-    artist: { userId: number; user: { currency: string | null } };
+    profile: { userId: number; user: { currency: string | null } };
   };
 };
 
@@ -73,7 +117,7 @@ const sendOutMonthlyIncomeReport = async () => {
     });
 
     const sales = await findSales({
-      artistId: allArtists.map((artist) => artist.id),
+      profileId: allArtists.map((artist) => artist.id),
       sinceDate: startOfLastMonth.toISOString(),
       untilDate: endOfLastMonth.toISOString(),
       orderBy: { datePurchased: "asc" },
@@ -99,8 +143,8 @@ const sendOutMonthlyIncomeReport = async () => {
             { deleteReason: null },
             { deleteReason: { not: "TIER_SWITCHED" } },
           ],
-          artistSubscriptionTier: {
-            artist: {
+          profileSubscriptionTier: {
+            profile: {
               deletedAt: null,
               userId: { in: uniq(sales.map((sale) => sale.artist[0].userId)) },
             },
@@ -110,10 +154,10 @@ const sendOutMonthlyIncomeReport = async () => {
           amount: true,
           deleteReason: true,
           user: { select: { name: true } },
-          artistSubscriptionTier: {
+          profileSubscriptionTier: {
             select: {
               name: true,
-              artist: {
+              profile: {
                 select: { userId: true, user: { select: { currency: true } } },
               },
             },
@@ -129,7 +173,7 @@ const sendOutMonthlyIncomeReport = async () => {
           ? deleteReasonLabels[subscription.deleteReason]
           : "Cancelled",
       })),
-      (subscription) => subscription.artistSubscriptionTier.artist.userId
+      (subscription) => subscription.profileSubscriptionTier.profile.userId
     );
 
     const mappedArtists = keyBy(allArtists, "id");
@@ -154,7 +198,7 @@ const sendOutMonthlyIncomeReport = async () => {
             locals: {
               user,
               userSales: userSales.map((sale) => ({
-                ...sale,
+                ...toEmailSaleRow(sale),
                 user: {
                   name: buyers[sale.userId]?.name || "A supporter",
                   email: buyers[sale.userId]?.email || "",

@@ -18,7 +18,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
 
     const { email, token } = req.query as unknown as {
       email?: string;
@@ -29,7 +29,7 @@ export default function () {
       const { applicationUrl } = await getClient();
       const artist = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
         },
         include: {
           user: true,
@@ -40,7 +40,7 @@ export default function () {
       const confirmation =
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
-            artistId: Number(artistId),
+            profileId: Number(profileId),
             email,
             token,
             tokenExpiration: { gte: new Date() },
@@ -70,7 +70,7 @@ export default function () {
 
         const settings = await getSiteSettings();
         const instanceArtistId = Number(
-          settings.settings?.instanceCustomization?.artistId
+          settings.settings?.instanceCustomization?.profileId
         );
 
         if (
@@ -117,7 +117,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Created artistSubscriptionTier",
+        description: "Created profileSubscriptionTier",
       },
       default: {
         description: "An error occurred",

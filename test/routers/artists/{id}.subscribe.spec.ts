@@ -156,7 +156,7 @@ describe("artists/{id}/subscribe", () => {
         await createTestData();
       await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: artist.subscriptionTiers![0].id,
+          profileSubscriptionTierId: artist.subscriptionTiers![0].id,
           userId: followerUser.id,
           amount: 3,
         },
@@ -174,7 +174,7 @@ describe("artists/{id}/subscribe", () => {
 
       const subscriptions = await prisma.profileUserSubscription.findMany({
         where: {
-          artistSubscriptionTierId: newTierId,
+          profileSubscriptionTierId: newTierId,
           userId: followerUser.id,
         },
       });
@@ -201,7 +201,7 @@ describe("artists/{id}/subscribe", () => {
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: paidTier.id,
+          profileSubscriptionTierId: paidTier.id,
           userId: followerUser.id,
           amount: 500,
           stripeSubscriptionKey: "sub_paid_123",
@@ -234,7 +234,7 @@ describe("artists/{id}/subscribe", () => {
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
-          artistSubscriptionTierId: freeTier.id,
+          profileSubscriptionTierId: freeTier.id,
           userId: followerUser.id,
           amount: 0,
         },

@@ -118,7 +118,7 @@ export type AlbumPurchaseEmailType = {
   trackGroup: {
     title: string;
     id: number;
-    artist: {
+    profile: {
       name: string;
       id: number;
       properties?: { emails?: { purchase?: string } };
@@ -180,7 +180,7 @@ export type AlbumPurchaseArtistNotificationEmailType = {
   trackGroup: {
     title: string;
     id: number;
-    artist: { name: string; id: number; user: { name: string } };
+    profile: { name: string; id: number; user: { name: string } };
   };
   purchase: {
     singleDownloadToken: string;
@@ -247,7 +247,7 @@ export const handleTrackGroupPurchase = async (
         id: trackGroupId,
       },
       include: {
-        artist: {
+        profile: {
           include: {
             subscriptionTiers: true,
             user: true,
@@ -297,7 +297,7 @@ export const handleTrackGroupPurchase = async (
             include: {
               trackGroup: {
                 include: {
-                  artist: true,
+                  profile: true,
                 },
               },
             },
@@ -306,7 +306,7 @@ export const handleTrackGroupPurchase = async (
       });
 
       const payee = resolvePayee({
-        artist: trackGroup.artist,
+        artist: trackGroup.profile,
         releasePaymentToUser: trackGroup.paymentToUser,
       });
 
@@ -334,7 +334,7 @@ export const handleTrackGroupPurchase = async (
       } as Job);
 
       await sendBasecampAMessage(
-        `New album purchase: <i>${trackGroup.title}</i> by ${trackGroup.artist.name}, purchased by <b>${user.email}</b>`
+        `New album purchase: <i>${trackGroup.title}</i> by ${trackGroup.profile.name}, purchased by <b>${user.email}</b>`
       );
     }
 
@@ -349,14 +349,14 @@ export const handleTrackGroupPurchase = async (
 
 export const handleCataloguePurchase = async (
   userId: number,
-  artistId: number,
+  profileId: number,
   session?: Stripe.Checkout.Session
 ) => {
   try {
     const { applicationUrl } = await getClient();
     const artist = await prisma.profile.findFirst({
       where: {
-        id: artistId,
+        id: profileId,
       },
       include: {
         user: true,
@@ -364,7 +364,7 @@ export const handleCataloguePurchase = async (
     });
     const artistTrackGroups = await prisma.trackGroup.findMany({
       where: {
-        artistId: artistId,
+        profileId: profileId,
         OR: [{ paymentToUserId: null }, { paymentToUserId: artist?.userId }],
         releaseDate: {
           lte: new Date(),
@@ -375,7 +375,7 @@ export const handleCataloguePurchase = async (
         adminEnabled: true,
       },
       include: {
-        artist: true,
+        profile: true,
       },
     });
 
@@ -463,7 +463,7 @@ export const handleCataloguePurchase = async (
     }
   } catch (e) {
     logger.error(
-      `Error creating catalogue purchase for artistId ${artistId}, userId ${userId}, session ${session?.id}:`,
+      `Error creating catalogue purchase for profileId ${profileId}, userId ${userId}, session ${session?.id}:`,
       e
     );
   }
@@ -502,7 +502,7 @@ export const handleTrackPurchase = async (
       include: {
         trackGroup: {
           include: {
-            artist: {
+            profile: {
               include: {
                 subscriptionTiers: true,
                 user: true,
@@ -515,7 +515,7 @@ export const handleTrackPurchase = async (
     });
 
     if (user && track && purchase && purchase.transactionId) {
-      await sendSaleEmails(track.trackGroup.artist, user, [
+      await sendSaleEmails(track.trackGroup.profile, user, [
         purchase.transactionId,
       ]);
     }
@@ -540,7 +540,7 @@ type PurchaseTransaction = {
       title: string;
       id: number;
       urlSlug: string;
-      artist: { name: string; urlSlug: string };
+      profile: { name: string; urlSlug: string };
     };
   }[];
   trackPurchases?: {
@@ -557,7 +557,7 @@ type PurchaseTransaction = {
     quantity: number;
   }[];
   tips?: {
-    artist: { name: string; id: number };
+    profile: { name: string; id: number };
   }[];
   amount: number;
   currency: string;
@@ -572,7 +572,7 @@ export type PurchaseReceiptEmailType = {
   email: string;
   client: string;
   host: string;
-  artist: {
+  profile: {
     user: User;
     properties?: { emails?: { purchase?: string } } | null;
   };
@@ -589,7 +589,7 @@ export type ArtistPurchaseNotificationEmailType = {
 };
 
 export const sendSaleEmails = async (
-  artist: {
+  profile: {
     user: User;
     properties?: { emails?: { purchase?: string } } | null;
   },
@@ -614,7 +614,7 @@ export const sendSaleEmails = async (
         },
         tips: {
           include: {
-            artist: {
+            profile: {
               include: {
                 user: {
                   select: {
@@ -633,7 +633,7 @@ export const sendSaleEmails = async (
                 id: true,
                 title: true,
                 urlSlug: true,
-                artist: {
+                profile: {
                   include: {
                     user: {
                       select: {
@@ -657,7 +657,7 @@ export const sendSaleEmails = async (
             },
             merch: {
               include: {
-                artist: {
+                profile: {
                   include: {
                     user: true,
                   },
@@ -672,7 +672,7 @@ export const sendSaleEmails = async (
               include: {
                 trackGroup: {
                   include: {
-                    artist: {
+                    profile: {
                       include: {
                         user: true,
                       },
@@ -693,7 +693,7 @@ export const sendSaleEmails = async (
           to: purchaser.email,
         },
         locals: {
-          artist,
+          profile,
           transactions,
           email: purchaser.email,
           client: applicationUrl,
@@ -706,10 +706,9 @@ export const sendSaleEmails = async (
       data: {
         template: "artist-purchase-notification",
         message: {
-          to: artist.user.email,
+          to: profile.user.email,
         },
         locals: {
-          artist,
           transactions,
           totalGross: transactions.reduce((acc, t) => acc + t.amount, 0),
           totalNet: transactions.reduce(
@@ -732,7 +731,7 @@ export const sendSaleEmails = async (
 
 export const handleArtistGift = async (
   userId: number,
-  artistId: number,
+  profileId: number,
   session?: Stripe.Checkout.Session
 ) => {
   try {
@@ -754,7 +753,7 @@ export const handleArtistGift = async (
     const createdTip = await prisma.userProfileTip.create({
       data: {
         userId,
-        artistId,
+        profileId,
         message: session?.metadata?.message ?? null,
         transactionId: transaction.id,
       },
@@ -764,7 +763,9 @@ export const handleArtistGift = async (
       where: {
         id: createdTip.id,
       },
-      include: { artist: { include: { user: true, subscriptionTiers: true } } },
+      include: {
+        profile: { include: { user: true, subscriptionTiers: true } },
+      },
     });
 
     const user = await prisma.user.findFirst({
@@ -774,11 +775,11 @@ export const handleArtistGift = async (
     });
 
     if (tip) {
-      subscribeUserToArtist(tip.artist, user);
+      subscribeUserToArtist(tip.profile, user);
     }
 
     if (user && tip) {
-      await sendSaleEmails(tip.artist, user, [transaction.id]);
+      await sendSaleEmails(tip.profile, user, [transaction.id]);
     }
 
     return tip;
@@ -967,7 +968,7 @@ export const handleArtistMerchPurchase = async (
                   },
                   include: {
                     merch: {
-                      include: { artist: { include: { user: true } } },
+                      include: { profile: { include: { user: true } } },
                     },
                     options: true,
                     transaction: true,
@@ -1002,9 +1003,9 @@ export const handleArtistMerchPurchase = async (
       },
     });
 
-    if (purchaser && purchases.length > 0 && purchases?.[0]?.merch?.artist) {
+    if (purchaser && purchases.length > 0 && purchases?.[0]?.merch?.profile) {
       await sendSaleEmails(
-        purchases[0].merch.artist,
+        purchases[0].merch.profile,
         purchaser,
         (purchases
           .map((p) => p?.transaction?.id)
@@ -1023,12 +1024,12 @@ export const handleArtistMerchPurchase = async (
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "monthly" | "yearly";
   artist: Profile;
-  artistUserSubscription: {
+  profileUserSubscription: {
     id: number;
     amount: number;
     currency: string;
-    artistSubscriptionTierId: number;
-    artistSubscriptionTier: {
+    profileSubscriptionTierId: number;
+    profileSubscriptionTier: {
       name: string;
     };
   };
@@ -1044,11 +1045,11 @@ export type ArtistSubscriptionReceiptEmailType = {
 export type ArtistNewSubscriberAnnounceEmailType = {
   interval: "monthly" | "yearly";
   artist: Profile;
-  artistUserSubscription: {
-    artistSubscriptionTierId: number;
+  profileUserSubscription: {
+    profileSubscriptionTierId: number;
     id: number;
     amount: number;
-    artistSubscriptionTier: {
+    profileSubscriptionTier: {
       name: string;
     };
   };
@@ -1158,7 +1159,7 @@ export const handleFundraiserPledgePaymentSuccess = async (
             select: {
               title: true,
               urlSlug: true,
-              artist: {
+              profile: {
                 select: {
                   name: true,
                   urlSlug: true,
@@ -1207,7 +1208,7 @@ export const handleFundraiserPledgePaymentSuccess = async (
       to: pledge.user.email,
     },
     locals: {
-      artist: pledge.fundraiser.trackGroups[0].artist,
+      artist: pledge.fundraiser.trackGroups[0].profile,
       email: encodeURIComponent(pledge.user.email),
       host: process.env.API_DOMAIN,
       trackGroup: pledge.fundraiser.trackGroups[0],
@@ -1233,7 +1234,7 @@ export const handleFundraiserPledgePaymentFailure = async (
         include: {
           user: true,
           fundraiser: {
-            include: { trackGroups: { include: { artist: true } } },
+            include: { trackGroups: { include: { profile: true } } },
           },
         },
       },
@@ -1269,10 +1270,10 @@ export const handleFundraiserPledgePaymentFailure = async (
       to: transaction.associatedPledge.user.email,
     },
     locals: {
-      artist: transaction.associatedPledge.fundraiser.trackGroups[0].artist,
+      artist: transaction.associatedPledge.fundraiser.trackGroups[0].profile,
       email: encodeURIComponent(transaction.associatedPledge?.user.email),
       host: process.env.API_DOMAIN,
-      cardChargeContext: `your pledge to "${transaction.associatedPledge.fundraiser.trackGroups[0].artist.name}'s ${transaction.associatedPledge.fundraiser.trackGroups[0].title}" fundraiser`,
+      cardChargeContext: `your pledge to "${transaction.associatedPledge.fundraiser.trackGroups[0].profile.name}'s ${transaction.associatedPledge.fundraiser.trackGroups[0].title}" fundraiser`,
       currency: transaction.currency,
       pledgedAmountFormatted: transaction.associatedPledge.amount / 100,
       client: applicationUrl,

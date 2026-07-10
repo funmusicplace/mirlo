@@ -19,10 +19,10 @@ export default function () {
             receivePlatformEmails: true,
           },
           include: {
-            artists: true,
+            profiles: true,
           },
         });
-        sendToUsers = users.filter((u) => u.artists.length > 0);
+        sendToUsers = users.filter((u) => u.profiles.length > 0);
       } else if (sendToOption === "emails") {
         const emails = sendTo.replace(/\s+/, "").split(",");
         sendToUsers = await prisma.user.findMany({

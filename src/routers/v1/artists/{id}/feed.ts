@@ -20,13 +20,13 @@ import { isTrackGroup } from "../../../../utils/typeguards";
 
 export const getPostsVisibleToUser = async (
   user: User | undefined,
-  artist: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
+  profile: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
   take: number = 20,
   skip: number = 0
 ) => {
   const where: Prisma.PostWhereInput = {
     publishedAt: { lte: new Date() },
-    artistId: Number(artist.id),
+    profileId: Number(profile.id),
     isDraft: false,
     deletedAt: null,
   };
@@ -35,7 +35,7 @@ export const getPostsVisibleToUser = async (
     prisma.post.findMany({
       where,
       include: {
-        artist: { include: { avatar: { where: { deletedAt: null } } } },
+        profile: { include: { avatar: { where: { deletedAt: null } } } },
         minimumSubscriptionTier: true,
         postSubscriptionTiers: true,
         featuredImage: true,
@@ -48,8 +48,8 @@ export const getPostsVisibleToUser = async (
     prisma.post.count({ where }),
   ]);
 
-  const isArtistOwner = !!(user && user.id === artist.userId);
-  const subscription = await getUserSubscriptionForArtist(user, artist.id);
+  const isArtistOwner = !!(user && user.id === profile.userId);
+  const subscription = await getUserSubscriptionForArtist(user, profile.id);
 
   const processedPosts = posts.map((post) =>
     serializePost(
@@ -65,8 +65,8 @@ export const getPostsVisibleToUser = async (
 
 export const getAlbumsVisibleToUser = async (artist: Profile) => {
   const albums = await prisma.trackGroup.findMany({
-    where: { ...whereForPublishedTrackGroups(), artistId: artist.id },
-    include: { artist: { omit: { apPrivateKey: true } } },
+    where: { ...whereForPublishedTrackGroups(), profileId: artist.id },
+    include: { profile: { omit: { apPrivateKey: true } } },
     orderBy: {
       releaseDate: "desc",
     },
@@ -76,17 +76,17 @@ export const getAlbumsVisibleToUser = async (artist: Profile) => {
 
 export const buildFeedForArtist = async (
   user: User | undefined,
-  artist: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
+  profile: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
   take: number = 10000,
   skip: number = 0
 ) => {
   const { posts, total } = await getPostsVisibleToUser(
     user,
-    artist,
+    profile,
     take,
     skip
   );
-  const albums = await getAlbumsVisibleToUser(artist);
+  const albums = await getAlbumsVisibleToUser(profile);
 
   return {
     results: [...posts, ...albums].sort((a, b) => {

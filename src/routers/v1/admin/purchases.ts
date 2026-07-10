@@ -54,7 +54,7 @@ export default function () {
           trackGroupPurchases: {
             include: {
               trackGroup: {
-                include: { artist: { omit: { apPrivateKey: true } } },
+                include: { profile: { omit: { apPrivateKey: true } } },
               },
             },
           },

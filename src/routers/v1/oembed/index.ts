@@ -99,9 +99,9 @@ export default function () {
               html: `<iframe src="${client.applicationUrl}/widget/trackGroup/${album.id}?variant=card" width="560" height="315" frameborder="0" allow="autoplay"></iframe>`,
               width: 560,
               height: 315,
-              title: `${album.title} by ${album.artist.name}`,
-              author_name: album.artist.name,
-              author_url: `${client.applicationUrl}/${album.artist.urlSlug}`,
+              title: `${album.title} by ${album.profile.name}`,
+              author_name: album.profile.name,
+              author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
               thumbnail_url: coverUrl
                 ? generateFullStaticImageUrl(coverUrl, finalCoversBucket)
                 : undefined,
@@ -127,9 +127,9 @@ export default function () {
                 html: `<iframe src="${client.applicationUrl}/widget/track/${track.id}?variant=card" width="560" height="315" frameborder="0" allow="autoplay"></iframe>`,
                 width: 560,
                 height: 315,
-                title: `${track.title} by ${album.artist.name}`,
-                author_name: album.artist.name,
-                author_url: `${client.applicationUrl}/${album.artist.urlSlug}`,
+                title: `${track.title} by ${album.profile.name}`,
+                author_name: album.profile.name,
+                author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
                 thumbnail_url: coverUrl
                   ? generateFullStaticImageUrl(coverUrl, finalCoversBucket)
                   : undefined,
@@ -164,12 +164,12 @@ export default function () {
 
             oembedData = {
               type: "rich",
-              html: `<a href="${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}">${post.title}</a>`,
+              html: `<a href="${client.applicationUrl}/${post.profile?.urlSlug}/posts/${post.id}">${post.title}</a>`,
               width: 400,
               height: 300,
               title: post.title,
-              author_name: post.artist?.name || "Mirlo Profile",
-              author_url: `${client.applicationUrl}/${post.artist?.urlSlug}`,
+              author_name: post.profile?.name || "Mirlo Profile",
+              author_url: `${client.applicationUrl}/${post.profile?.urlSlug}`,
               thumbnail_url: imageUrl,
               thumbnail_width: 400,
               thumbnail_height: 300,
@@ -198,12 +198,12 @@ export default function () {
             );
             oembedData = {
               type: "rich",
-              html: `<a href="${client.applicationUrl}/${merch.artist?.urlSlug}/merch/${merch.id}">${merch.title}</a>`,
+              html: `<a href="${client.applicationUrl}/${merch.profile?.urlSlug}/merch/${merch.id}">${merch.title}</a>`,
               width: 400,
               height: 300,
               title: merch.title,
-              author_name: merch.artist?.name || "Mirlo Profile",
-              author_url: `${client.applicationUrl}/${merch.artist?.urlSlug}`,
+              author_name: merch.profile?.name || "Mirlo Profile",
+              author_url: `${client.applicationUrl}/${merch.profile?.urlSlug}`,
               thumbnail_url: coverUrl
                 ? generateFullStaticImageUrl(coverUrl, finalMerchImageBucket)
                 : undefined,

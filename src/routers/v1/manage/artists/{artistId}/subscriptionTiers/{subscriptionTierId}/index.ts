@@ -38,7 +38,7 @@ export default function () {
       if (user.isAdmin) {
         artistUser = await prisma.user.findFirst({
           where: {
-            artists: {
+            profiles: {
               some: {
                 subscriptionTiers: {
                   some: {
@@ -102,7 +102,7 @@ export default function () {
       );
 
       const artist = await prisma.profile.findFirst({
-        where: { id: subscriptionTier?.artistId },
+        where: { id: subscriptionTier?.profileId },
         select: { defaultPlatformFee: true },
       });
 

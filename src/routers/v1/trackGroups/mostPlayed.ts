@@ -47,7 +47,7 @@ export default function () {
       const fullTrackGroups = await prisma.trackGroup.findMany({
         where: { id: { in: mostPlayedIds } },
         include: {
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,

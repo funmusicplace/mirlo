@@ -9,7 +9,7 @@ block content
     |
     | by
     |
-    strong #{track.trackGroup.artist.name}.
+    strong #{track.trackGroup.profile.name}.
 
   table
     thead
@@ -20,12 +20,12 @@ block content
       tr
         td #{track.title}
         td
-          a(href!=`${client}/${track.trackGroup.artist.urlSlug}/release/${track.trackGroup.urlSlug}/tracks/${track.id}/download?token=${token}&email=${email}`) download
+          a(href!=`${client}/${track.trackGroup.profile.urlSlug}/release/${track.trackGroup.urlSlug}/tracks/${track.id}/download?token=${token}&email=${email}`) download
 
   p
     | Consider supporting
     |
-    a(href!=`${client}/${track.trackGroup.artist.urlSlug}`) #{track.trackGroup.artist.name}
+    a(href!=`${client}/${track.trackGroup.profile.urlSlug}`) #{track.trackGroup.profile.name}
     |
     | with a subscription.
   p
@@ -34,7 +34,7 @@ block content
     |
     a(href!=`${client}/password-reset?email=${email}&accountIncomplete=true`) set a password for it
     | .
-  - const purchaseMessage = track.trackGroup.artist?.properties?.emails?.purchase
+  - const purchaseMessage = track.trackGroup.profile?.properties?.emails?.purchase
   if purchaseMessage
     div!= purchaseMessage
   else

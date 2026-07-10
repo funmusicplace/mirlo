@@ -58,7 +58,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Test Track",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -110,7 +110,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Collaborated Track",
                       order: 1,
-                      artists: [
+                      profiles: [
                         {
                           artistName: "Composer Name",
                           role: "composer",
@@ -200,7 +200,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track 1",
                       order: 1,
-                      artists: [
+                      profiles: [
                         {
                           artistName: "Existing Profile",
                           role: "producer",
@@ -251,7 +251,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track 1",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -267,13 +267,13 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track 2",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                     {
                       title: "Track 3",
                       order: 2,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -310,7 +310,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       lyrics: "Sample lyrics",
                       metadata: {
                         customField1: "value1",
@@ -361,7 +361,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track 1",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -372,7 +372,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track 2",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -436,7 +436,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track 2",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -475,7 +475,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "My Track",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -525,13 +525,13 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Track One",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                     {
                       title: "Track Two",
                       order: 2,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -606,7 +606,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Label Release Track",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],
@@ -671,7 +671,7 @@ describe("manage/bulkTrackUpload", () => {
                     {
                       title: "Restricted Release Track",
                       order: 1,
-                      artists: [],
+                      profiles: [],
                       metadata: {},
                     },
                   ],

@@ -34,8 +34,8 @@ export async function triggerAutoPurchaseNewAlbums() {
           gte: 0,
         },
         deletedAt: null,
-        artistSubscriptionTier: {
-          artistId: album.artistId,
+        profileSubscriptionTier: {
+          profileId: album.profileId,
           autoPurchaseAlbums: true,
         },
       },
@@ -58,7 +58,7 @@ export async function triggerAutoPurchaseNewAlbums() {
         "auto-purchase-new-album",
         {
           trackGroupId: album.id,
-          artistUserSubscriptionId: subscriber.id,
+          profileUserSubscriptionId: subscriber.id,
         },
         { removeOnComplete: true }
       );

@@ -429,7 +429,7 @@ export default async (job: Job) => {
 
   try {
     const artist = await prisma.profile.findFirst({
-      where: { id: trackGroup.artistId },
+      where: { id: trackGroup.profileId },
     });
 
     if (!artist) {

@@ -23,7 +23,7 @@ const findTierById = async (tierId: number) => {
       id: tierId,
     },
     include: {
-      artist: {
+      profile: {
         include: {
           user: true,
           paymentToUser: true,
@@ -40,7 +40,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     let { tierId, email, amount, embedded, name } = req.body;
 
     const loggedInUser = req.user;
@@ -63,11 +63,11 @@ export default function () {
                   userId: userId,
                 },
               },
-              artistId: Number(artistId),
+              profileId: Number(profileId),
             },
           },
           include: {
-            artist: {
+            profile: {
               include: {
                 user: true,
               },
@@ -77,22 +77,22 @@ export default function () {
 
         if (oldTier) {
           logger.info(
-            `Deleting old subscriptions for ${artistId}, old tier: ${oldTier.id}`
+            `Deleting old subscriptions for ${profileId}, old tier: ${oldTier.id}`
           );
           await deleteStripeSubscriptions({
-            artistSubscriptionTier: { artistId: Number(artistId) },
+            profileSubscriptionTier: { profileId: Number(profileId) },
             userId,
           });
           await prisma.profileUserSubscription.updateMany({
             where: {
               userId,
-              artistSubscriptionTierId: oldTier.id,
+              profileSubscriptionTierId: oldTier.id,
             },
             data: { deleteReason: "TIER_SWITCHED" },
           });
           await prisma.profileUserSubscription.deleteMany({
             where: {
-              artistSubscriptionTier: { artistId: Number(artistId) },
+              profileSubscriptionTier: { profileId: Number(profileId) },
               userId,
             },
           });
@@ -108,7 +108,7 @@ export default function () {
         });
       }
       const stripeAccountId = resolvePayee({
-        artist: newTier.artist,
+        artist: newTier.profile,
       }).stripeAccountId;
 
       if (!stripeAccountId) {
@@ -123,7 +123,7 @@ export default function () {
         loggedInUser,
         email,
         stripeAccountId,
-        artistId: newTier.artistId,
+        profileId: newTier.profileId,
         tier: newTier,
         amount,
         userName: name,
@@ -168,7 +168,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Created artistSubscriptionTier",
+        description: "Created profileSubscriptionTier",
       },
       default: {
         description: "An error occurred",
@@ -180,18 +180,18 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
 
     try {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
-          artistSubscriptionTier: { artistId: Number(artistId) },
+          profileSubscriptionTier: { profileId: Number(profileId) },
           userId: loggedInUser.id,
         },
         include: {
-          artistSubscriptionTier: true,
+          profileSubscriptionTier: true,
         },
       });
       if (!subscription) {

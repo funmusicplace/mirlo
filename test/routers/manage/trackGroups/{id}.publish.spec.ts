@@ -141,7 +141,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { artistId: artist.id, name: "Tier" },
+        data: { profileId: artist.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-public@example.com",
@@ -149,7 +149,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: follower.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 10,
           stripeSubscriptionKey: "sub-public",
         },
@@ -180,7 +180,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { artistId: artist.id, name: "Tier" },
+        data: { profileId: artist.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-private@example.com",
@@ -188,7 +188,7 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: follower.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 10,
           stripeSubscriptionKey: "sub-private",
         },

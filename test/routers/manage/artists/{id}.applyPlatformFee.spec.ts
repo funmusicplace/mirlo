@@ -38,7 +38,7 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
       const merch = await createMerch(artist.id, {});
       const tier = await createTier(artist.id);
       const tipTier = await prisma.profileTipTier.create({
-        data: { name: "tips", artistId: artist.id, minAmount: 100 },
+        data: { name: "tips", profileId: artist.id, minAmount: 100 },
       });
 
       const response = await requestApp

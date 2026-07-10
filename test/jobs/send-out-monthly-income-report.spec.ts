@@ -66,7 +66,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -86,7 +86,7 @@ describe("send-out-monthly-income-report", () => {
     });
     await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: chargeDate,
         transactionId: transaction.id,
       },
@@ -103,7 +103,7 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.totalIncome, 5);
     assert.equal(locals.userSales[0].amount, 5);
     assert.equal(locals.userSales[0].saleType, "transaction");
-    assert.equal(locals.userSales[0].artistUserSubscriptionCharges?.length, 1);
+    assert.equal(locals.userSales[0].profileUserSubscriptionCharges?.length, 1);
   });
 
   it("should send an income report to an artist who has gained a tip", async () => {
@@ -137,7 +137,7 @@ describe("send-out-monthly-income-report", () => {
           refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
-        artistId: artist.id,
+        profileId: artist.id,
       },
     });
 
@@ -199,7 +199,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -220,7 +220,7 @@ describe("send-out-monthly-income-report", () => {
 
     const charge = await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: createdDate,
         transactionId: transaction.id,
       },
@@ -263,7 +263,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -284,7 +284,7 @@ describe("send-out-monthly-income-report", () => {
 
     const charge = await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: date,
         transactionId: transaction.id,
       },
@@ -327,7 +327,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -390,7 +390,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -411,7 +411,7 @@ describe("send-out-monthly-income-report", () => {
 
     await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: createdDate,
         transactionId: transaction.id,
       },
@@ -424,7 +424,7 @@ describe("send-out-monthly-income-report", () => {
           refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
-        artistId: artist2.id,
+        profileId: artist2.id,
       },
     });
 
@@ -451,7 +451,7 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.totalIncome, 5);
     assert.equal(locals.userSales[0].amount, 5);
     assert.equal(locals.userSales[0].saleType, "transaction");
-    assert.equal(locals.userSales[0].artist[0]?.id, artist.id);
+    assert.equal(locals.userSales[0].profile[0]?.id, artist.id);
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "announce-monthly-income-report");
@@ -461,7 +461,7 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals2.totalIncome, 7);
     assert.equal(locals2.userSales[0].amount, 7);
     assert.equal(locals2.userSales[0].saleType, "transaction");
-    assert.equal(locals2.userSales[0].artist[0]?.id, artist2.id);
+    assert.equal(locals2.userSales[0].profile[0]?.id, artist2.id);
   });
 
   it("should include buyer details and last month's cancellations, excluding tier switches", async () => {
@@ -495,7 +495,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -515,7 +515,7 @@ describe("send-out-monthly-income-report", () => {
     });
     await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: aus.id,
+        profileUserSubscriptionId: aus.id,
         createdAt: lastMonthDate,
         transactionId: transaction.id,
       },
@@ -525,7 +525,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: leaverUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 700,
         deletedAt: lastMonthDate,
         deleteReason: "USER_CANCELLED",
@@ -536,7 +536,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: switcherUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 300,
         deletedAt: lastMonthDate,
         deleteReason: "TIER_SWITCHED",
@@ -606,7 +606,7 @@ describe("send-out-monthly-income-report", () => {
       data: {
         datePurchased: tip1date,
         userId: followerUser.id,
-        artistId: artist.id,
+        profileId: artist.id,
       },
     });
 
@@ -614,7 +614,7 @@ describe("send-out-monthly-income-report", () => {
       data: {
         datePurchased: tip2date,
         userId: followerUser.id,
-        artistId: artist2.id,
+        profileId: artist2.id,
       },
     });
 
@@ -653,10 +653,10 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.user.name, "Gia");
     assert.equal(locals.totalIncome, 10);
     assert.equal(locals.userSales[0].amount, 7);
-    assert.equal(locals.userSales[0].artist[0].id, artist.id);
+    assert.equal(locals.userSales[0].profile[0].id, artist.id);
     assert.equal(locals.userSales[0].saleType, "transaction");
     assert.equal(locals.userSales[1].amount, 3);
-    assert.equal(locals.userSales[1].artist[0].id, artist2.id);
+    assert.equal(locals.userSales[1].profile[0].id, artist2.id);
     assert.equal(locals.userSales[1].saleType, "transaction");
     assert.equal(locals.userSales[0].title, "Tip");
     assert.equal(locals.userSales[1].title, "Tip");

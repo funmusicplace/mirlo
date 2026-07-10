@@ -108,18 +108,18 @@ export const findOrCreateUserBasedOnEmail = async (
 
 export const findUserDiscountPercentsForArtist = async (
   userId: number,
-  artistId: number
+  profileId: number
 ) => {
   const activeSubscriptions = await prisma.profileUserSubscription.findMany({
     where: {
       userId,
       deletedAt: null,
-      artistSubscriptionTier: {
-        artistId,
+      profileSubscriptionTier: {
+        profileId,
       },
     },
     select: {
-      artistSubscriptionTier: {
+      profileSubscriptionTier: {
         select: {
           digitalDiscountPercent: true,
           merchDiscountPercent: true,
@@ -130,9 +130,9 @@ export const findUserDiscountPercentsForArtist = async (
 
   return activeSubscriptions.map((subscription) => ({
     digitalDiscountPercent:
-      subscription.artistSubscriptionTier.digitalDiscountPercent ?? 0,
+      subscription.profileSubscriptionTier.digitalDiscountPercent ?? 0,
     merchDiscountPercent:
-      subscription.artistSubscriptionTier.merchDiscountPercent ?? 0,
+      subscription.profileSubscriptionTier.merchDiscountPercent ?? 0,
   }));
 };
 

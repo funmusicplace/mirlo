@@ -14,7 +14,7 @@ export async function triggerTrackGroupPublishNotifications() {
       notifiedFollowersAt: null,
       deletedAt: null,
       adminEnabled: true,
-      artist: {
+      profile: {
         enabled: true,
         deletedAt: null,
       },

@@ -44,7 +44,7 @@ export default function () {
           id: Number(trackGroupId),
         },
         include: {
-          artist: {
+          profile: {
             include: {
               user: true,
               subscriptionTiers: true,
@@ -64,14 +64,14 @@ export default function () {
       }
 
       if (loggedInUser) {
-        await subscribeUserToArtist(trackGroup?.artist, loggedInUser);
+        await subscribeUserToArtist(trackGroup?.profile, loggedInUser);
       }
 
       let discountPercent: number | undefined;
       if (loggedInUser) {
         const discounts = await findUserDiscountPercentsForArtist(
           loggedInUser.id,
-          trackGroup.artistId
+          trackGroup.profileId
         );
 
         discountPercent = discounts.reduce((max, discount) => {
@@ -80,7 +80,7 @@ export default function () {
       }
 
       const stripeAccountId = resolvePayee({
-        artist: trackGroup.artist,
+        artist: trackGroup.profile,
         releasePaymentToUser: trackGroup.paymentToUser,
       }).stripeAccountId;
 
@@ -100,7 +100,7 @@ export default function () {
         await handleTrackGroupPurchase(loggedInUser.id, trackGroup.id);
         return res.status(200).json({
           redirectUrl: `/${
-            trackGroup.artist.urlSlug ?? trackGroup.artist.id
+            trackGroup.profile.urlSlug ?? trackGroup.profile.id
           }/release/${trackGroup.urlSlug ?? trackGroup.id}/download?email=${
             loggedInUser.email
           }`,

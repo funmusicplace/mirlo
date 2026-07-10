@@ -9,53 +9,91 @@ import prisma from "../prisma/prisma";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
 import { finalAudioBucket, uploadWrapper } from "../src/utils/minio";
 
+const TRUNCATE_TABLES_SQL = `
+  TRUNCATE TABLE
+    "ActivityPubProfileFollowers",
+    "ArtistLabel",
+    "ArtistTourDate",
+    "Client",
+    "DownloadableContent",
+    "EmailVerification",
+    "Fundraiser",
+    "FundraiserPledge",
+    "Image",
+    "Invite",
+    "License",
+    "LocationTag",
+    "Merch",
+    "MerchDownloadableContent",
+    "MerchImage",
+    "MerchItemType",
+    "MerchOption",
+    "MerchOptionType",
+    "MerchPurchase",
+    "MerchShippingDestination",
+    "Notification",
+    "Post",
+    "PostImage",
+    "PostSubscriptionTier",
+    "PostTrack",
+    "Profile",
+    "ProfileAvatar",
+    "ProfileBackground",
+    "ProfileLocationTag",
+    "ProfileSubscriptionTier",
+    "ProfileTipTier",
+    "ProfileUserSubscription",
+    "ProfileUserSubscriptionCharge",
+    "ProfileUserSubscriptionConfirmation",
+    "RecommendedTrackGroup",
+    "Settings",
+    "SubscriptionTierImage",
+    "SubscriptionTierRelease",
+    "Tag",
+    "Track",
+    "TrackArtist",
+    "TrackAudio",
+    "TrackGroup",
+    "TrackGroupCover",
+    "TrackGroupDownload",
+    "TrackGroupDownloadableContent",
+    "TrackGroupDownloadCodes",
+    "TrackGroupTag",
+    "TrackPlay",
+    "User",
+    "UserAvatar",
+    "UserBanner",
+    "UserProfileNotificationSetting",
+    "UserProfileTip",
+    "UserTrackFavorite",
+    "UserTrackGroupPurchase",
+    "UserTrackGroupWishlist",
+    "UserTrackPurchase",
+    "UserTransaction"
+  CASCADE
+`;
+
 export const clearTables = async () => {
   // Single TRUNCATE replaces ~40 sequential DELETE statements that were
-  // running per test and occasionally exceeding mocha's 2s hook timeout
+  // running per test and occasionally exceeding mocha's hook timeout
   // under CI load. CASCADE handles FK ordering so we don't have to.
-  await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE
-      "ActivityPubProfileFollowers",
-      "Profile",
-      "ProfileAvatar",
-      "ProfileBackground",
-      "ArtistLabel",
-      "ProfileSubscriptionTier",
-      "ProfileTipTier",
-      "ProfileUserSubscription",
-      "ProfileUserSubscriptionCharge",
-      "ProfileUserSubscriptionConfirmation",
-      "Client",
-      "Fundraiser",
-      "FundraiserPledge",
-      "Invite",
-      "Merch",
-      "MerchPurchase",
-      "Notification",
-      "Post",
-      "PostImage",
-      "RecommendedTrackGroup",
-      "Settings",
-      "SubscriptionTierRelease",
-      "Tag",
-      "Track",
-      "TrackArtist",
-      "TrackAudio",
-      "TrackGroup",
-      "TrackGroupCover",
-      "TrackGroupDownloadCodes",
-      "TrackGroupDownloadableContent",
-      "TrackGroupTag",
-      "TrackPlay",
-      "User",
-      "UserProfileNotificationSetting",
-      "UserProfileTip",
-      "UserTrackGroupPurchase",
-      "UserTrackGroupWishlist",
-      "UserTrackPurchase",
-      "UserTransaction"
-    CASCADE;
-  `);
+  // Retry with a lock timeout so we don't hang forever when the API
+  // container holds row-level locks during parallel HTTP traffic.
+  const maxAttempts = 5;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await prisma.$transaction([
+        prisma.$executeRawUnsafe(`SET LOCAL lock_timeout = '4000'`),
+        prisma.$executeRawUnsafe(TRUNCATE_TABLES_SQL),
+      ]);
+      return;
+    } catch (e) {
+      if (attempt === maxAttempts) {
+        throw e;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300 * attempt));
+    }
+  }
 };
 
 export const createClient = async (clientKey: string) => {
@@ -137,13 +175,13 @@ export const createArtistLabel = async (data: {
 };
 
 export const createPost = async (
-  artistId: number,
+  profileId: number,
   data?: Partial<Prisma.PostCreateArgs["data"]>
 ) => {
   const post = await prisma.post.create({
     data: {
       title: data?.title ?? "Test title",
-      artistId: artistId,
+      profileId: profileId,
       isPublic: data?.isPublic ?? true,
       urlSlug: data?.urlSlug || (data?.title ? slug(data?.title) : "test-post"),
       content: data?.content ?? "The content",
@@ -157,7 +195,7 @@ export const createPost = async (
 };
 
 export const createTier = async (
-  artistId: number,
+  profileId: number,
   data?: Partial<Prisma.ProfileSubscriptionTierCreateArgs["data"]>
 ) => {
   const tier = await prisma.profileSubscriptionTier.create({
@@ -165,7 +203,7 @@ export const createTier = async (
       minAmount: data?.minAmount,
       allowVariable: data?.allowVariable,
       name: data?.name ?? "Test title",
-      artistId: artistId,
+      profileId: profileId,
       isDefaultTier: data?.isDefaultTier,
     },
   });
@@ -173,7 +211,7 @@ export const createTier = async (
 };
 
 export const createTrackGroup = async (
-  artistId: number,
+  profileId: number,
   data?: {
     tracks?: {
       title: string;
@@ -190,7 +228,7 @@ export const createTrackGroup = async (
       title: data?.title ?? "Test trackGroup",
       urlSlug:
         data?.urlSlug || (data?.title ? slug(data?.title) : "test-trackgroup"),
-      artistId: artistId,
+      profileId: profileId,
       publishedAt:
         data?.publishedAt === null ? null : (data?.publishedAt ?? new Date()),
       isGettable: data?.isGettable ?? true,
@@ -230,7 +268,7 @@ export const createTrackGroup = async (
 };
 
 export const createMerch = async (
-  artistId: number,
+  profileId: number,
   data?: Partial<Prisma.MerchCreateArgs["data"]>
 ) => {
   const merch = await prisma.merch.create({
@@ -241,7 +279,7 @@ export const createMerch = async (
       includePurchaseTrackGroupId: data?.includePurchaseTrackGroupId,
       isPublic: data?.isPublic ?? false,
       title: data?.title ?? "Test trackGroup",
-      artistId: artistId,
+      profileId: profileId,
       urlSlug: slug(data?.title ?? "test-merch"),
     },
   });
@@ -424,7 +462,7 @@ export const createSubscription = async (
   return prisma.profileUserSubscription.create({
     data: {
       userId,
-      artistSubscriptionTierId: tierId,
+      profileSubscriptionTierId: tierId,
       amount,
     },
   });
@@ -435,9 +473,15 @@ export const createNotification = async (data: {
   notificationType: string;
   trackGroupId?: number;
   relatedUserId?: number;
-  artistId?: number;
+  artistId: number;
 }) => {
-  return prisma.notification.create({ data: data as any });
+  const { artistId, ...rest } = data;
+  return prisma.notification.create({
+    data: {
+      ...rest,
+      profileId: artistId,
+    } as Prisma.NotificationCreateArgs["data"],
+  });
 };
 
 export const createSilentWavBuffer = (durationSeconds = 0.5) => {

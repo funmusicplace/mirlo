@@ -11,9 +11,9 @@ html
   body.sans-serif
     p Wow! 
     if isBeforeReleaseDate
-      p Thank you for supporting #{track.trackGroup.artist.name} with your pre-order of #{track.title}.
+      p Thank you for supporting #{track.trackGroup.profile.name} with your pre-order of #{track.title}.
     else
-      p Thank you for supporting #{track.trackGroup.artist.name} with your purchase of #{track.title}.
+      p Thank you for supporting #{track.trackGroup.profile.name} with your purchase of #{track.title}.
      
     div 
       p #{track.title} from 
@@ -23,7 +23,7 @@ html
       p The track will become available in your collection for unlimited listening and downloading once it is released.
     else 
       p The track is now available in your collection for unlimited listening and downloading.
-    - const purchaseMessage = track.trackGroup.artist?.properties?.emails?.purchase
+    - const purchaseMessage = track.trackGroup.profile?.properties?.emails?.purchase
     if purchaseMessage
       div!= purchaseMessage
     else

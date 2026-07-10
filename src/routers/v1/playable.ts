@@ -35,7 +35,7 @@ export default function () {
             : {}),
           trackGroup: {
             select: {
-              artist: {
+              profile: {
                 select: {
                   userId: true,
                 },
@@ -63,7 +63,7 @@ export default function () {
             track.trackGroup.userTrackGroupPurchases &&
             track.trackGroup.userTrackGroupPurchases.length > 0;
           const isArtistOwner =
-            track.trackGroup.artist.userId === loggedInUser?.id;
+            track.trackGroup.profile.userId === loggedInUser?.id;
 
           return (
             hasPurchasedTrack ||

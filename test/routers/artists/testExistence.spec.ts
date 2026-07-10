@@ -47,7 +47,7 @@ describe("artists", () => {
       assert.equal(response.body.result.exists, false);
     });
 
-    it("should GET and return false if an artistId is supplied", async () => {
+    it("should GET and return false if an profileId is supplied", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });

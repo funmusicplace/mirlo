@@ -22,7 +22,7 @@ export default function () {
               _count: {
                 select: { tracks: true },
               },
-              artist: {
+              profile: {
                 include: {
                   avatar: true,
                 },

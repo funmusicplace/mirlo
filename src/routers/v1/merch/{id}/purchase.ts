@@ -53,7 +53,7 @@ export default function () {
           id: merchId,
         },
         include: {
-          artist: {
+          profile: {
             include: {
               user: true,
               subscriptionTiers: true,
@@ -101,7 +101,7 @@ export default function () {
       if (loggedInUser) {
         const discounts = await findUserDiscountPercentsForArtist(
           loggedInUser.id,
-          merch.artistId
+          merch.profileId
         );
 
         discountPercent = discounts.reduce((max, discount) => {
@@ -110,11 +110,11 @@ export default function () {
       }
 
       if (loggedInUser) {
-        await subscribeUserToArtist(merch?.artist, loggedInUser);
+        await subscribeUserToArtist(merch?.profile, loggedInUser);
       }
 
       const stripeAccountId = resolvePayee({
-        artist: merch.artist,
+        artist: merch.profile,
       }).stripeAccountId;
 
       const { priceNumber, isPriceZero } = determinePrice(

@@ -7,11 +7,11 @@ block content
       div!= supportMessage
     p
       | Thank you for supporting #{artist.name} with your #{interval === 'MONTH' ? 'monthly': 'yearly'} 
-      | support at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
+      | support at the "#{profileUserSubscription.profileSubscriptionTier.name}" tier.
     table 
       tr 
         td #{artist.name}
-        td.pa3 #{artistUserSubscription.amount / 100} #{artist.user.currency}
+        td.pa3 #{profileUserSubscription.amount / 100} #{artist.user.currency}
     p To view all your subscriptions log in or create an account with this email address.
     
     p Thank you!

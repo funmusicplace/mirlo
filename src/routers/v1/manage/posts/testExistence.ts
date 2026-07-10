@@ -20,7 +20,7 @@ export default function () {
       const post = await prisma.post.findFirst({
         where: {
           urlSlug: { equals: urlSlug, mode: "insensitive" },
-          artistId: Number(artistId),
+          profileId: Number(artistId),
           ...(forPostId ? { id: { not: Number(forPostId) } } : {}),
         },
       });

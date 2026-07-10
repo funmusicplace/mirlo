@@ -30,7 +30,7 @@ export default function () {
         include: {
           trackGroups: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   urlSlug: true,
                   id: true,

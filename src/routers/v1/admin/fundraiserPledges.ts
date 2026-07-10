@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { Request, Response, NextFunction } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { withArtistFields } from "../../../utils/serialize/apiNaming";
 
 export default function () {
   const operations = {
@@ -53,7 +54,7 @@ export default function () {
             fundraiser: {
               trackGroups: {
                 some: {
-                  artist: {
+                  profile: {
                     name: {
                       contains: search as string,
                       mode: "insensitive",
@@ -95,7 +96,7 @@ export default function () {
                   select: {
                     id: true,
                     title: true,
-                    artist: {
+                    profile: {
                       select: {
                         id: true,
                         name: true,
@@ -121,7 +122,20 @@ export default function () {
       ]);
 
       res.json({
-        results: pledges,
+        results: pledges.map((pledge) => ({
+          ...pledge,
+          fundraiser: {
+            ...pledge.fundraiser,
+            trackGroups: pledge.fundraiser.trackGroups.map((tg) => {
+              const { profile, ...tgRest } = tg;
+              return withArtistFields({
+                ...tgRest,
+                profileId: profile.id,
+                profile,
+              });
+            }),
+          },
+        })),
         total,
         page: pageNum,
         limit: pageSize,
@@ -202,7 +216,7 @@ export default function () {
                           properties: {
                             id: { type: "integer" },
                             title: { type: "string" },
-                            artist: {
+                            profile: {
                               type: "object",
                               properties: {
                                 id: { type: "integer" },

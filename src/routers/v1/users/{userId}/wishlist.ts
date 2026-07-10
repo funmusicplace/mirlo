@@ -32,7 +32,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
               tracks: {
                 orderBy: {

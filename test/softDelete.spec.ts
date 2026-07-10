@@ -25,11 +25,11 @@ describe("Soft Delete Extension (deletedAt)", () => {
         email: "test@testcom",
       });
       const artist = await createArtist(user.id);
-      const artistId = artist.id;
+      const profileId = artist.id;
 
       // Verify artist exists
       const foundBefore = await prisma.profile.findFirst({
-        where: { id: artistId },
+        where: { id: profileId },
       });
       assert.ok(foundBefore, "Profile should exist before delete");
       assert.strictEqual(
@@ -40,12 +40,12 @@ describe("Soft Delete Extension (deletedAt)", () => {
 
       // Delete the artist via Prisma
       await prisma.profile.delete({
-        where: { id: artistId },
+        where: { id: profileId },
       });
 
       // Verify artist is not returned by normal find (soft delete filter)
       const foundAfter = await prisma.profile.findFirst({
-        where: { id: artistId },
+        where: { id: profileId },
       });
       assert.strictEqual(
         foundAfter,
@@ -57,7 +57,7 @@ describe("Soft Delete Extension (deletedAt)", () => {
       const rawArtist = await prisma.$queryRaw<
         Array<{ deletedAt: Date | null }>
       >`
-        SELECT "deletedAt" FROM "Profile" WHERE id = ${artistId}
+        SELECT "deletedAt" FROM "Profile" WHERE id = ${profileId}
       `;
       assert.ok(rawArtist[0], "Profile should still exist in database");
       assert.ok(rawArtist[0].deletedAt, "Profile should have deletedAt set");
@@ -184,7 +184,7 @@ describe("Soft Delete Extension (deletedAt)", () => {
 
       // Verify both trackgroups exist
       let allTrackGroups = await prisma.trackGroup.findMany({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
       assert.equal(
         allTrackGroups.length,
@@ -199,7 +199,7 @@ describe("Soft Delete Extension (deletedAt)", () => {
 
       // Verify only trackGroup2 is returned
       allTrackGroups = await prisma.trackGroup.findMany({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
       assert.equal(
         allTrackGroups.length,
@@ -236,14 +236,14 @@ describe("Soft Delete Extension (deletedAt)", () => {
       // Delete multiple trackgroups
       await prisma.trackGroup.deleteMany({
         where: {
-          artistId: artist.id,
+          profileId: artist.id,
           id: { in: [trackGroup1.id, trackGroup2.id] },
         },
       });
 
       // Verify only trackGroup3 is returned
       const remaining = await prisma.trackGroup.findMany({
-        where: { artistId: artist.id },
+        where: { profileId: artist.id },
       });
       assert.equal(remaining.length, 1, "Should have 1 trackgroup remaining");
       assert.equal(

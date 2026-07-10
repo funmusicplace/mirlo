@@ -70,7 +70,7 @@ export default function () {
           createdAt: true,
           updatedAt: true,
           userAvatar: true,
-          artists: true,
+          profiles: true,
           isLabelAccount: true,
           featureFlags: true,
           emailConfirmationToken: true,

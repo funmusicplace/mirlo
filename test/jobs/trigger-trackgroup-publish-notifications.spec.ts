@@ -32,7 +32,7 @@ const setupArtistWithFollower = async (overrides?: {
   await prisma.profileUserSubscription.create({
     data: {
       userId: followerUser.id,
-      artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+      profileSubscriptionTierId: artist.subscriptionTiers[0].id,
       amount: 5,
     },
   });

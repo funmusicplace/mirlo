@@ -13,6 +13,7 @@ import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
+import { toApiArtistLabel } from "../../../../../../utils/serialize/apiNaming";
 
 const sendArtistNotificationOfLabel = async (
   artist: Profile,
@@ -24,7 +25,7 @@ const sendArtistNotificationOfLabel = async (
       userId: artist.userId,
       notificationType: "LABEL_ADDED_ARTIST",
       relatedUserId: labelUser.id,
-      artistId: artist.id,
+      profileId: artist.id,
     },
   });
   if (!existingNotification) {
@@ -46,7 +47,7 @@ const sendArtistNotificationOfLabel = async (
           you can ignore this message.
           </p>
         `,
-        artistId: artist.id,
+        profileId: artist.id,
         relatedUserId: labelUser.id,
       },
     });
@@ -99,7 +100,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { artistId } = req.params as unknown as { artistId: string };
+    const { artistId } = req.params as { artistId: string };
 
     try {
       const artistLabels = await prisma.artistLabel.findMany({
@@ -117,16 +118,18 @@ export default function () {
         },
       });
       res.json({
-        results: artistLabels.map((label) => ({
-          ...label,
-          labelUser: {
-            ...label.labelUser,
-            userAvatar: addSizesToImage(
-              finalUserAvatarBucket,
-              label.labelUser.userAvatar
-            ),
-          },
-        })),
+        results: artistLabels.map((label) =>
+          toApiArtistLabel({
+            ...label,
+            labelUser: {
+              ...label.labelUser,
+              userAvatar: addSizesToImage(
+                finalUserAvatarBucket,
+                label.labelUser.userAvatar
+              ),
+            },
+          })
+        ),
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/labels ${e}`);
@@ -254,7 +257,7 @@ export default function () {
         await sendArtistNotificationOfLabel(artist, loggedInUser);
       }
       res.json({
-        results: labels,
+        results: labels.map(toApiArtistLabel),
       });
     } catch (e) {
       next(e);
@@ -306,7 +309,7 @@ export default function () {
         },
       });
       res.json({
-        results: labels,
+        results: labels.map(toApiArtistLabel),
       });
     } catch (e) {
       next(e);

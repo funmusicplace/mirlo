@@ -51,7 +51,7 @@ describe("handleArtistGift", () => {
     await handleArtistGift(purchaser.id, artist.id);
 
     const tip = await prisma.userProfileTip.findFirst({
-      where: { userId: purchaser.id, artistId: artist.id },
+      where: { userId: purchaser.id, profileId: artist.id },
     });
 
     assert.equal(stub.calledTwice, true);
@@ -60,14 +60,14 @@ describe("handleArtistGift", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals = data0.locals as PurchaseReceiptEmailType;
     assert.equal(locals.transactions[0].userId, tip?.userId);
-    assert.equal(locals.transactions[0].tips?.[0].artist.id, tip?.artistId);
+    assert.equal(locals.transactions[0].tips?.[0].profile.id, tip?.profileId);
     assert.equal(locals.transactions[0].amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(locals1.transactions[0].userId, tip?.userId);
-    assert.equal(locals1.transactions[0].tips?.[0].artist.id, tip?.artistId);
+    assert.equal(locals1.transactions[0].tips?.[0].profile.id, tip?.profileId);
     assert.equal(locals1.transactions[0].amount, 0);
   });
 
@@ -95,19 +95,19 @@ describe("handleArtistGift", () => {
     const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: purchaser.id,
-        artistSubscriptionTier: {
-          artistId: artist.id,
+        profileSubscriptionTier: {
+          profileId: artist.id,
         },
       },
       include: {
-        artistSubscriptionTier: true,
+        profileSubscriptionTier: true,
       },
     });
 
     assert.ok(subscription, "Subscription should exist");
     assert.equal(subscription?.userId, purchaser.id);
-    assert.equal(subscription?.artistSubscriptionTier.artistId, artist.id);
-    assert.equal(subscription?.artistSubscriptionTier.isDefaultTier, true);
-    assert.equal(subscription?.artistSubscriptionTier.name, "follow");
+    assert.equal(subscription?.profileSubscriptionTier.profileId, artist.id);
+    assert.equal(subscription?.profileSubscriptionTier.isDefaultTier, true);
+    assert.equal(subscription?.profileSubscriptionTier.name, "follow");
   });
 });

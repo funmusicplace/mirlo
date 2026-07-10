@@ -24,7 +24,7 @@ export default function () {
    * the returned URL, landing the user on their own server's follow screen.
    */
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const { handle } = req.query;
 
     try {
@@ -51,7 +51,7 @@ export default function () {
       const server = cleaned.slice(atIndex + 1);
 
       const artist = await prisma.profile.findFirst({
-        where: { id: Number(artistId), enabled: true },
+        where: { id: Number(profileId), enabled: true },
       });
 
       if (!artist) {

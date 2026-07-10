@@ -51,7 +51,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           name: "Premium",
           minAmount: 1000,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
 
@@ -59,7 +59,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       await prisma.profileUserSubscription.create({
         data: {
           userId: user.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           stripeSubscriptionKey: "sub_1234567890",
           amount: 1000,
         },
@@ -341,7 +341,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 10,
         },
       });
@@ -389,7 +389,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
           stripeId: "in_test_invoice_123",
         },
         include: {
-          artistUserSubscriptionCharges: true,
+          profileUserSubscriptionCharges: true,
         },
       });
 
@@ -397,12 +397,12 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.equal(transaction.amount, 1000, "Amount should be 1000");
       assert.equal(transaction.userId, subscriber.id, "User ID should match");
       assert.equal(
-        transaction.artistUserSubscriptionCharges.length,
+        transaction.profileUserSubscriptionCharges.length,
         1,
         "Should have one subscription charge"
       );
       assert.equal(
-        transaction.artistUserSubscriptionCharges[0].artistUserSubscriptionId,
+        transaction.profileUserSubscriptionCharges[0].profileUserSubscriptionId,
         subscription.id,
         "Charge should be linked to correct subscription"
       );
@@ -507,7 +507,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
           stripeSubscriptionKey: subscriptionKey,
           deletedAt: null,
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 5,
         },
       });
@@ -601,7 +601,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           stripeSubscriptionKey: "sub_ending_123",
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 500,
           deleteReason: "USER_CANCELLED",
         },
@@ -640,7 +640,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           stripeSubscriptionKey: "sub_failed_123",
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 500,
         },
       });
@@ -673,7 +673,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           stripeSubscriptionKey: "sub_already_gone",
           userId: subscriber.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 500,
           deletedAt: alreadyDeletedAt,
           deleteReason: "USER_CANCELLED",
@@ -718,7 +718,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         data: {
           name: "Basic",
           minAmount: 500,
-          artistId: artist.id,
+          profileId: artist.id,
         },
       });
 

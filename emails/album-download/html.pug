@@ -5,24 +5,24 @@ block content
     | Here's your download of 
     strong #{trackGroup.title} 
     | by 
-    strong #{trackGroup.artist.name}.
+    strong #{trackGroup.profile.name}.
   table 
     tr 
       td #{trackGroup.title}
       td 
-        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${email}`) download
+        a(href!=`${client}/${trackGroup.profile.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${email}`) download
 
   p 
   p 
     | Consider supporting 
-    a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name}
+    a(href!=`${client}/${trackGroup.profile.urlSlug}`) #{trackGroup.profile.name}
     | with a subscription.
   p
     | If you want to have access to all your purchases for this e-mail address,
     | simply
     a(href!=`${client}/password-reset?email=${email}`) set a password for it
     | .
-  - const purchaseMessage = trackGroup.artist?.properties?.emails?.purchase
+  - const purchaseMessage = trackGroup.profile?.properties?.emails?.purchase
   if purchaseMessage
     div!= purchaseMessage
   else

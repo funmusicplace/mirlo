@@ -12,6 +12,10 @@ import { findArtistIdForURLSlug } from "../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../utils/download";
 import { AppError } from "../../../../../utils/error";
 import { grantSubscriptionTierReleases } from "../../../../../utils/subscriptionTier";
+import {
+  toApiSubscriptionTier,
+  toApiUserSubscription,
+} from "../../../../../utils/serialize/apiNaming";
 
 const csvColumns = [
   {
@@ -69,8 +73,8 @@ export default function () {
 
       const subscribers = await prisma.profileUserSubscription.findMany({
         where: {
-          artistSubscriptionTier: {
-            artistId: parsedId,
+          profileSubscriptionTier: {
+            profileId: parsedId,
             deletedAt: null,
           },
           deletedAt: null,
@@ -79,8 +83,8 @@ export default function () {
           id: true,
           amount: true,
           user: true,
-          artistSubscriptionTier: true,
-          artistUserSubscriptionCharges: {
+          profileSubscriptionTier: true,
+          profileUserSubscriptionCharges: {
             select: {
               id: true,
               transactionId: true,
@@ -101,7 +105,15 @@ export default function () {
         return downloadCSVFile(res, "subscribers.csv", csvColumns, subscribers);
       } else {
         res.json({
-          results: subscribers,
+          results: subscribers.map((sub) =>
+            toApiUserSubscription({
+              ...sub,
+              profileSubscriptionTierId: sub.profileSubscriptionTier.id,
+              profileSubscriptionTier: toApiSubscriptionTier(
+                sub.profileSubscriptionTier
+              ),
+            })
+          ),
         });
       }
     } catch (e) {
@@ -139,10 +151,14 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { artistId }: { artistId?: string } = req.params;
 
-    const { subscribers, artistSubscriptionTierId } = req.body as {
-      subscribers: { email: string }[];
-      artistSubscriptionTierId?: number;
-    };
+    const { subscribers, artistSubscriptionTierId, profileSubscriptionTierId } =
+      req.body as {
+        subscribers: { email: string }[];
+        artistSubscriptionTierId?: number;
+        profileSubscriptionTierId?: number;
+      };
+
+    const tierId = artistSubscriptionTierId ?? profileSubscriptionTierId;
 
     try {
       const parsedArtistId = await findArtistIdForURLSlug(artistId);
@@ -156,18 +172,18 @@ export default function () {
 
       // When a specific tier is requested, add subscribers to it; otherwise
       // fall back to the artist's default (follow) tier.
-      const tier = artistSubscriptionTierId
+      const tier = tierId
         ? await prisma.profileSubscriptionTier.findFirst({
             where: {
-              id: Number(artistSubscriptionTierId),
-              artistId: parsedArtistId,
+              id: Number(tierId),
+              profileId: parsedArtistId,
               deletedAt: null,
             },
           })
         : await prisma.profileSubscriptionTier.findFirst({
             where: {
               isDefaultTier: true,
-              artistId: parsedArtistId,
+              profileId: parsedArtistId,
             },
           });
 
@@ -189,7 +205,7 @@ export default function () {
             const found = await prisma.profileUserSubscription.findFirst({
               where: {
                 userId: created.id,
-                artistSubscriptionTierId: tier.id,
+                profileSubscriptionTierId: tier.id,
               },
             });
 
@@ -198,7 +214,7 @@ export default function () {
                 await prisma.profileUserSubscription.create({
                   data: {
                     userId: created.id,
-                    artistSubscriptionTierId: tier.id,
+                    profileSubscriptionTierId: tier.id,
                     amount: 0,
                   },
                 });

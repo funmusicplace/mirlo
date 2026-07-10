@@ -28,14 +28,14 @@ describe("users/{userId}/charges", () => {
       const artist = await createArtist(user.id);
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          artistId: artist.id,
+          profileId: artist.id,
           name: "Tier",
         },
       });
-      const artistUserSubscription =
+      const profileUserSubscription =
         await prisma.profileUserSubscription.create({
           data: {
-            artistSubscriptionTierId: tier.id,
+            profileSubscriptionTierId: tier.id,
             userId: purchaser.id,
             amount: 1000,
           },
@@ -43,7 +43,7 @@ describe("users/{userId}/charges", () => {
 
       await prisma.profileUserSubscriptionCharge.create({
         data: {
-          artistUserSubscriptionId: artistUserSubscription.id,
+          profileUserSubscriptionId: profileUserSubscription.id,
         },
       });
 

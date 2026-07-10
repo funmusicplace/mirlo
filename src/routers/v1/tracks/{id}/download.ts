@@ -111,7 +111,7 @@ export default function () {
       try {
         const title = cleanHeaderValue(
           filenamify(
-            `${track.trackGroup.artist.name} - ${track.title ?? "track"}`
+            `${track.trackGroup.profile.name} - ${track.title ?? "track"}`
           )
         );
 

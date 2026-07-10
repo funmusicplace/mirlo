@@ -101,7 +101,7 @@ describe("manage/posts/{postId}", () => {
       const post = await prisma.post.create({
         data: {
           title: "",
-          artistId: artist.id,
+          profileId: artist.id,
           isPublic: true,
           urlSlug: null,
           content: "The content",
@@ -133,7 +133,7 @@ describe("manage/posts/{postId}", () => {
       const post = await prisma.post.create({
         data: {
           title: "",
-          artistId: artist.id,
+          profileId: artist.id,
           isPublic: true,
           urlSlug: null,
           content: "The content",

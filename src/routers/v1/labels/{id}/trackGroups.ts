@@ -20,10 +20,10 @@ export default function () {
     const loggedInUser = req.user;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const profileId = await findArtistIdForURLSlug(id);
       const labelProfile = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: profileId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },
@@ -38,7 +38,7 @@ export default function () {
         !!loggedInUser &&
         (await prisma.profile.findFirst({
           where: {
-            id: artistId,
+            id: profileId,
             enabled: true,
             ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
           },
@@ -48,7 +48,7 @@ export default function () {
       const where = whereForPublishedTrackGroups({ includePrivate: canManage });
 
       if (excludeArtistId) {
-        where.artistId = { not: Number(excludeArtistId) };
+        where.profileId = { not: Number(excludeArtistId) };
       }
 
       const trackGroups = await prisma.trackGroup.findMany({
@@ -56,13 +56,13 @@ export default function () {
           ...where,
           OR: [
             { paymentToUserId: labelProfile?.userId },
-            { artistId: artistId },
+            { profileId: profileId },
           ],
         },
         include: {
           cover: true,
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,

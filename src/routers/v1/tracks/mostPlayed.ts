@@ -22,7 +22,7 @@ export default function () {
         trackGroup: {
           deletedAt: null,
           publishedAt: { lte: new Date() },
-          artist: {
+          profile: {
             deletedAt: null,
           },
         },
@@ -48,7 +48,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
               cover: true,
             },
           },

@@ -37,14 +37,14 @@ export async function seedPosts() {
 
   // Subscription tiers
   let blackbirdSupporterTier = await prisma.profileSubscriptionTier.findFirst({
-    where: { artistId: blackbird.id, name: "Supporter" },
+    where: { profileId: blackbird.id, name: "Supporter" },
   });
   if (!blackbirdSupporterTier) {
     blackbirdSupporterTier = await prisma.profileSubscriptionTier.create({
       data: {
         name: "Supporter",
         description: "Support Blackbird and get access to exclusive posts",
-        artistId: blackbird.id,
+        profileId: blackbird.id,
         minAmount: 500,
         defaultAmount: 500,
       },
@@ -56,7 +56,7 @@ export async function seedPosts() {
 
   let blackbirdInnerCircleTier = await prisma.profileSubscriptionTier.findFirst(
     {
-      where: { artistId: blackbird.id, name: "Inner Circle" },
+      where: { profileId: blackbird.id, name: "Inner Circle" },
     }
   );
   if (!blackbirdInnerCircleTier) {
@@ -65,7 +65,7 @@ export async function seedPosts() {
         name: "Inner Circle",
         description:
           "The full picture: process notes, early access, and honest updates",
-        artistId: blackbird.id,
+        profileId: blackbird.id,
         minAmount: 1000,
         defaultAmount: 1000,
       },
@@ -76,14 +76,14 @@ export async function seedPosts() {
   }
 
   let crowSupporterTier = await prisma.profileSubscriptionTier.findFirst({
-    where: { artistId: crow.id, name: "Crow Flock" },
+    where: { profileId: crow.id, name: "Crow Flock" },
   });
   if (!crowSupporterTier) {
     crowSupporterTier = await prisma.profileSubscriptionTier.create({
       data: {
         name: "Crow Flock",
         description: "Join the murder. Exclusive updates from Crow HQ.",
-        artistId: crow.id,
+        profileId: crow.id,
         minAmount: 300,
         defaultAmount: 300,
       },
@@ -96,7 +96,7 @@ export async function seedPosts() {
     {
       title: "Morning notes from the garden",
       urlSlug: "morning-notes-from-the-garden",
-      artistId: blackbird.id,
+      profileId: blackbird.id,
       content: SHORT_CONTENT,
       isPublic: true,
       isDraft: false,
@@ -105,7 +105,7 @@ export async function seedPosts() {
     {
       title: "A year of watching birds: everything I noticed",
       urlSlug: "a-year-of-watching-birds",
-      artistId: blackbird.id,
+      profileId: blackbird.id,
       content: LONG_CONTENT,
       isPublic: true,
       isDraft: false,
@@ -114,7 +114,7 @@ export async function seedPosts() {
     {
       title: "The honest numbers (subscribers only)",
       urlSlug: "the-honest-numbers",
-      artistId: blackbird.id,
+      profileId: blackbird.id,
       content: SUBSCRIBER_CONTENT,
       isPublic: false,
       isDraft: false,
@@ -124,7 +124,7 @@ export async function seedPosts() {
     {
       title: "Album update — inner circle only",
       urlSlug: "album-update-inner-circle",
-      artistId: blackbird.id,
+      profileId: blackbird.id,
       content: TIER_EXCLUSIVE_CONTENT,
       isPublic: false,
       isDraft: false,
@@ -133,7 +133,7 @@ export async function seedPosts() {
     {
       title: "Untitled new piece (in progress)",
       urlSlug: "untitled-new-piece",
-      artistId: blackbird.id,
+      profileId: blackbird.id,
       content: `<p>Not ready to share this yet but wanted to put some words down. Something about the relationship between repetition and discovery.</p><p>More soon.</p>`,
       isPublic: false,
       isDraft: true,
@@ -142,7 +142,7 @@ export async function seedPosts() {
     {
       title: "Why crows remember faces",
       urlSlug: "why-crows-remember-faces",
-      artistId: crow.id,
+      profileId: crow.id,
       content: `<p>There's a crow that lives near the studio. I've been watching it for two years now, and I'm fairly sure it watches me back.</p><p>Crows can recognise individual human faces and hold grudges for years. There are documented cases of crows that have remembered and harassed specific people for over a decade. They pass this knowledge on to their offspring and other members of their group. If you wrong a crow, you don't just make an enemy — you potentially make enemies for generations.</p><p>I find this deeply reassuring for reasons I can't fully articulate.</p>`,
       isPublic: true,
       isDraft: false,
@@ -151,7 +151,7 @@ export async function seedPosts() {
     {
       title: "Studio diary: what the microphone picks up that you don't",
       urlSlug: "studio-diary-microphone",
-      artistId: crow.id,
+      profileId: crow.id,
       content: `<p>A confession: most of what you're hearing on the new record isn't what I intended to record. The best sounds came from mistakes — a chair scraping, someone opening a door two floors up, the ventilation system that only kicks in at 2am when the building finally cools down.</p><p>I've started leaving the recorder running when I'm not playing. You'd be surprised what turns up.</p>`,
       isPublic: false,
       isDraft: false,
@@ -161,7 +161,7 @@ export async function seedPosts() {
     {
       title: "Draft: thoughts on silence",
       urlSlug: "draft-thoughts-on-silence",
-      artistId: crow.id,
+      profileId: crow.id,
       content: `<p>Silence isn't the absence of sound. It's the presence of attention.</p>`,
       isPublic: false,
       isDraft: true,
@@ -170,7 +170,7 @@ export async function seedPosts() {
 
   for (const postData of postSeeds) {
     const existing = await prisma.post.findFirst({
-      where: { urlSlug: postData.urlSlug, artistId: postData.artistId },
+      where: { urlSlug: postData.urlSlug, profileId: postData.profileId },
     });
     if (existing) {
       console.log(`Post "${postData.title}" already exists, skipping...`);
@@ -183,7 +183,7 @@ export async function seedPosts() {
 
   // Post with featured image — Blackbird's long post gets a fake image record
   const longPost = await prisma.post.findFirst({
-    where: { urlSlug: "a-year-of-watching-birds", artistId: blackbird.id },
+    where: { urlSlug: "a-year-of-watching-birds", profileId: blackbird.id },
   });
   if (longPost && !longPost.featuredImageId) {
     const imageId = randomUUID();
@@ -204,20 +204,20 @@ export async function seedPosts() {
 
   // Wire the inner-circle post to the specific tier via PostSubscriptionTier
   const innerCirclePost = await prisma.post.findFirst({
-    where: { urlSlug: "album-update-inner-circle", artistId: blackbird.id },
+    where: { urlSlug: "album-update-inner-circle", profileId: blackbird.id },
   });
   if (innerCirclePost) {
     const existing = await prisma.postSubscriptionTier.findFirst({
       where: {
         postId: innerCirclePost.id,
-        artistSubscriptionTierId: blackbirdInnerCircleTier.id,
+        profileSubscriptionTierId: blackbirdInnerCircleTier.id,
       },
     });
     if (!existing) {
       await prisma.postSubscriptionTier.create({
         data: {
           postId: innerCirclePost.id,
-          artistSubscriptionTierId: blackbirdInnerCircleTier.id,
+          profileSubscriptionTierId: blackbirdInnerCircleTier.id,
         },
       });
       console.log(`Linked inner-circle post to Inner Circle tier`);

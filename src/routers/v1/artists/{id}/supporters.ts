@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { toApiSaleResult } from "../../../../utils/serialize/apiNaming";
 
 const constructDateFilter = (
   sinceDate?: string,
@@ -20,7 +21,7 @@ const constructDateFilter = (
 };
 
 const queryUserTransactions = (
-  artistId: number[],
+  profileId: number[],
   sinceDate?: string,
   untilDate?: string,
   trackGroupIds?: number[],
@@ -38,7 +39,7 @@ const queryUserTransactions = (
         some: {
           trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
           trackGroup: {
-            artistId: { in: artistId },
+            profileId: { in: profileId },
           },
         },
       },
@@ -47,7 +48,7 @@ const queryUserTransactions = (
       merchPurchases: {
         some: {
           merch: {
-            artistId: { in: artistId },
+            profileId: { in: profileId },
           },
         },
       },
@@ -56,7 +57,7 @@ const queryUserTransactions = (
       trackPurchases: {
         some: {
           track: {
-            trackGroup: { artistId: { in: artistId } },
+            trackGroup: { profileId: { in: profileId } },
           },
         },
       },
@@ -64,18 +65,18 @@ const queryUserTransactions = (
     {
       tips: {
         some: {
-          artistId: {
-            in: artistId,
+          profileId: {
+            in: profileId,
           },
         },
       },
     },
     {
-      artistUserSubscriptionCharges: {
+      profileUserSubscriptionCharges: {
         some: {
-          artistUserSubscription: {
-            artistSubscriptionTier: {
-              artistId: { in: artistId },
+          profileUserSubscription: {
+            profileSubscriptionTier: {
+              profileId: { in: profileId },
             },
           },
         },
@@ -132,7 +133,7 @@ const queryUserTransactions = (
           trackGroupId: true,
           trackGroup: {
             select: {
-              artist: {
+              profile: {
                 select: { name: true, id: true, urlSlug: true, userId: true },
               },
               title: true,
@@ -148,7 +149,7 @@ const queryUserTransactions = (
             select: {
               title: true,
               urlSlug: true,
-              artist: {
+              profile: {
                 select: { name: true, id: true, urlSlug: true, userId: true },
               },
             },
@@ -158,22 +159,22 @@ const queryUserTransactions = (
 
       tips: {
         select: {
-          artist: {
+          profile: {
             select: { name: true, id: true, urlSlug: true, userId: true },
           },
         },
       },
 
-      artistUserSubscriptionCharges: {
+      profileUserSubscriptionCharges: {
         select: {
-          artistUserSubscription: {
+          profileUserSubscription: {
             select: {
               shippingAddress: true,
-              artistSubscriptionTier: {
+              profileSubscriptionTier: {
                 select: {
                   name: true,
                   interval: true,
-                  artist: {
+                  profile: {
                     select: {
                       name: true,
                       id: true,
@@ -199,7 +200,7 @@ const queryUserTransactions = (
                 select: {
                   id: true,
                   urlSlug: true,
-                  artist: {
+                  profile: {
                     select: {
                       name: true,
                       id: true,
@@ -229,14 +230,14 @@ const generateTitle = (
 };
 
 export const findSales = async ({
-  artistId,
+  profileId,
   sinceDate,
   untilDate,
   filters,
   orderBy,
   paymentToUserId,
 }: {
-  artistId: number[];
+  profileId: number[];
   sinceDate?: string;
   untilDate?: string;
   filters?: {
@@ -264,7 +265,7 @@ export const findSales = async ({
   let userTransactions: Awaited<ReturnType<typeof queryUserTransactions>> = [];
   if (!filters) {
     userTransactions = await queryUserTransactions(
-      artistId,
+      profileId,
       sinceDate,
       untilDate,
       undefined,
@@ -272,7 +273,7 @@ export const findSales = async ({
     );
   } else if (filters.trackGroupIds) {
     userTransactions = await queryUserTransactions(
-      artistId,
+      profileId,
       sinceDate,
       untilDate,
       filters.trackGroupIds,
@@ -281,29 +282,31 @@ export const findSales = async ({
   }
 
   return [
-    ...userTransactions.map((ut) => ({
-      ...ut,
-      paymentProcessorCut: ut.stripeCut,
-      // ISO string, not Date: consumers treat this as a string — the income
-      // report template splits it on "T" without a JSON round-trip.
-      datePurchased: ut.createdAt.toISOString(),
-      title: generateTitle(ut),
-      artist: [
-        ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.artist),
-        ut.merchPurchases?.map((mp) => mp.merch.artist),
-        ut.trackPurchases?.map((tp) => tp.track.trackGroup.artist),
-        ut.tips?.map((tip) => tip.artist),
-        ut.artistUserSubscriptionCharges?.map(
-          (asc) => asc.artistUserSubscription.artistSubscriptionTier.artist
-        ),
-      ].flat(),
-      urlSlug: ut.trackGroupPurchases
-        .map((tgp) => tgp.trackGroup.urlSlug)
-        .join(", "),
-      amount: ut.amount,
-      currency: ut.currency,
-      saleType: "transaction",
-    })),
+    ...userTransactions.map((ut) =>
+      toApiSaleResult({
+        ...ut,
+        paymentProcessorCut: ut.stripeCut,
+        // ISO string, not Date: consumers treat this as a string — the income
+        // report template splits it on "T" without a JSON round-trip.
+        datePurchased: ut.createdAt.toISOString(),
+        title: generateTitle(ut),
+        artist: [
+          ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.profile),
+          ut.merchPurchases?.map((mp) => mp.merch.profile),
+          ut.trackPurchases?.map((tp) => tp.track.trackGroup.profile),
+          ut.tips?.map((tip) => tip.profile),
+          ut.profileUserSubscriptionCharges?.map(
+            (asc) => asc.profileUserSubscription.profileSubscriptionTier.profile
+          ),
+        ].flat(),
+        urlSlug: ut.trackGroupPurchases
+          .map((tgp) => tgp.trackGroup.urlSlug)
+          .join(", "),
+        amount: ut.amount,
+        currency: ut.currency,
+        saleType: "transaction",
+      })
+    ),
   ].sort((a, b) => {
     if (orderBy?.datePurchased === "asc") {
       return (
@@ -363,7 +366,7 @@ export default function () {
       }
 
       const results = await findSales({
-        artistId: [Number(parsedId)],
+        profileId: [Number(parsedId)],
         sinceDate: sinceDate as string,
         filters: trackGroupIds
           ? {

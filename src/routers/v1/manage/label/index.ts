@@ -5,9 +5,10 @@ import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { singleInclude } from "../../../../utils/artist";
 import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { toApiArtistLabelWithArtist } from "../../../../utils/serialize/apiNaming";
 
 type Params = {
-  artistId: string;
+  profileId: string;
 };
 
 export default function () {
@@ -34,12 +35,11 @@ export default function () {
       });
 
       return res.json({
-        results: artists.map((artist) => ({
-          ...artist,
-
-          artist: processSingleArtist(artist.artist),
-          labelId: artist.labelUserId,
-        })),
+        results: artists.map((row) =>
+          toApiArtistLabelWithArtist(row, processSingleArtist(row.artist), {
+            labelId: row.labelUserId,
+          })
+        ),
       });
     } catch (e) {
       next(e);

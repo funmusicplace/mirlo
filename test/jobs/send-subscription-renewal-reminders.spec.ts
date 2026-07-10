@@ -53,7 +53,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
         minAmount: 1200, // $12/year
@@ -67,7 +67,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_test_123",
         nextBillingDate,
@@ -86,7 +86,7 @@ describe("send-subscription-renewal-reminders", () => {
     const locals = jobData.locals as SubscriptionRenewalReminderEmailType;
     assert.equal(locals.artist.name, "Test Profile");
     assert.equal(locals.interval, "YEAR");
-    assert.equal(locals.artistUserSubscription.amount, 1200);
+    assert.equal(locals.profileUserSubscription.amount, 1200);
   });
 
   it("should not send reminder for subscription renewing outside 7-14 day window", async () => {
@@ -112,7 +112,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -125,7 +125,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_test_456",
         nextBillingDate,
@@ -160,7 +160,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -176,7 +176,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_test_789",
         nextBillingDate,
@@ -212,7 +212,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -228,7 +228,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_test_old",
         nextBillingDate,
@@ -264,7 +264,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const monthlyTier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Monthly Tier",
         interval: "MONTH",
       },
@@ -276,7 +276,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: monthlyTier.id,
+        profileSubscriptionTierId: monthlyTier.id,
         amount: 100,
         stripeSubscriptionKey: "sub_monthly",
         nextBillingDate,
@@ -311,7 +311,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -324,7 +324,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_deleted",
         nextBillingDate,
@@ -360,7 +360,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Free Tier",
         interval: "YEAR",
         isDefaultTier: true,
@@ -373,7 +373,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 0,
         nextBillingDate,
       },
@@ -407,7 +407,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -419,7 +419,7 @@ describe("send-subscription-renewal-reminders", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_timestamp",
         nextBillingDate,
@@ -468,7 +468,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -480,7 +480,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_date_format",
         nextBillingDate,
@@ -521,7 +521,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -530,7 +530,7 @@ describe("send-subscription-renewal-reminders", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        artistSubscriptionTierId: tier.id,
+        profileSubscriptionTierId: tier.id,
         amount: 1200,
         stripeSubscriptionKey: "sub_no_date",
         nextBillingDate: null,
@@ -571,7 +571,7 @@ describe("send-subscription-renewal-reminders", () => {
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         name: "Premium Tier",
         interval: "YEAR",
       },
@@ -584,14 +584,14 @@ describe("send-subscription-renewal-reminders", () => {
       data: [
         {
           userId: subscriber1.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
           stripeSubscriptionKey: "sub_1",
           nextBillingDate,
         },
         {
           userId: subscriber2.id,
-          artistSubscriptionTierId: tier.id,
+          profileSubscriptionTierId: tier.id,
           amount: 1200,
           stripeSubscriptionKey: "sub_2",
           nextBillingDate,

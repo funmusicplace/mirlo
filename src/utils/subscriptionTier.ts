@@ -17,9 +17,9 @@ export const registerSubscription = async ({
   platformCut?: number | null;
   shippingAddress?: object | null;
 }) => {
-  const artistUserSubscription = await prisma.profileUserSubscription.upsert({
+  const profileUserSubscription = await prisma.profileUserSubscription.upsert({
     create: {
-      artistSubscriptionTierId: tierId,
+      profileSubscriptionTierId: tierId,
       userId: userId,
       amount: amount,
       deletedAt: null,
@@ -28,7 +28,7 @@ export const registerSubscription = async ({
       shippingAddress,
     },
     update: {
-      artistSubscriptionTierId: Number(tierId),
+      profileSubscriptionTierId: Number(tierId),
       userId: Number(userId),
       amount,
       deletedAt: null, // Undelete
@@ -37,16 +37,16 @@ export const registerSubscription = async ({
       shippingAddress,
     },
     where: {
-      userId_artistSubscriptionTierId: {
+      userId_profileSubscriptionTierId: {
         userId: Number(userId),
-        artistSubscriptionTierId: Number(tierId),
+        profileSubscriptionTierId: Number(tierId),
       },
     },
     include: {
       user: true,
-      artistSubscriptionTier: {
+      profileSubscriptionTier: {
         include: {
-          artist: {
+          profile: {
             include: {
               user: true,
             },
@@ -59,16 +59,16 @@ export const registerSubscription = async ({
   await prisma.notification.create({
     data: {
       notificationType: "USER_SUBSCRIBED_TO_YOU",
-      artistId: artistUserSubscription.artistSubscriptionTier.artistId,
-      userId: artistUserSubscription.artistSubscriptionTier.artist.userId,
+      profileId: profileUserSubscription.profileSubscriptionTier.profileId,
+      userId: profileUserSubscription.profileSubscriptionTier.profile.userId,
       relatedUserId: Number(userId),
-      subscriptionId: artistUserSubscription.id,
+      subscriptionId: profileUserSubscription.id,
     },
   });
 
-  logger.info(`Updated/created ${artistUserSubscription.id}`);
+  logger.info(`Updated/created ${profileUserSubscription.id}`);
 
-  return artistUserSubscription;
+  return profileUserSubscription;
 };
 
 /**

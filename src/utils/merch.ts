@@ -4,6 +4,8 @@ import { Merch, MerchImage } from "@mirlo/prisma/client";
 import logger from "../logger";
 
 import { addSizesToImage } from "./artist";
+import { withArtistFields } from "./serialize/apiNaming";
+import { processSingleTrackGroup } from "./serialize/trackGroup";
 import { deleteDownloadableContent } from "./content";
 import { finalMerchImageBucket, removeObjectsFromBucket } from "./minio";
 
@@ -65,27 +67,64 @@ export const deleteMerch = async (merchId: string) => {
 
 export const processSingleMerch = (
   merch: Merch & { images?: MerchImage[] } & {
-    artist?: { user?: { currency?: string | null } | null } | null;
+    artist?: Record<string, unknown> | null;
+    profile?: Record<string, unknown> | null;
+    includePurchaseTrackGroup?: Record<string, unknown> | null;
     downloadableContent?: {
       downloadableContent: Record<string, unknown>;
       downloadableContentId: string;
     }[];
   },
   options?: { fallbackCurrency?: string }
-) => ({
-  ...merch,
-  currency: merch.artist?.user?.currency ?? options?.fallbackCurrency ?? "usd",
-  downloadableContent: merch.downloadableContent?.map((dc) => ({
-    ...dc,
-    downloadableContent: {
-      ...dc.downloadableContent,
-      downloadUrl:
-        process.env.API_DOMAIN +
-        `/v1/downloadableContent/${dc.downloadableContentId}`,
-    },
-  })),
-  images: merch.images?.map((t) => addSizesToImage(finalMerchImageBucket, t)),
-});
+): Record<string, unknown> => {
+  const {
+    profileId,
+    artist,
+    profile,
+    includePurchaseTrackGroup,
+    ...merchRest
+  } = merch as Merch & {
+    profileId: number;
+    artist?: { user?: { currency?: string | null } | null } | null;
+    profile?: { user?: { currency?: string | null } | null } | null;
+    includePurchaseTrackGroup?: Record<string, unknown> | null;
+    images?: MerchImage[];
+    downloadableContent?: {
+      downloadableContent: Record<string, unknown>;
+      downloadableContentId: string;
+    }[];
+  };
+
+  const profileRelation = profile ?? artist;
+
+  return {
+    ...withArtistFields({ ...merchRest, profileId, profile: profileRelation }),
+    currency:
+      (profileRelation as { user?: { currency?: string | null } | null })?.user
+        ?.currency ??
+      options?.fallbackCurrency ??
+      "usd",
+    ...(includePurchaseTrackGroup
+      ? {
+          includePurchaseTrackGroup: processSingleTrackGroup(
+            includePurchaseTrackGroup as Parameters<
+              typeof processSingleTrackGroup
+            >[0]
+          ),
+        }
+      : {}),
+    downloadableContent: merch.downloadableContent?.map((dc) => ({
+      ...dc,
+      downloadableContent: {
+        ...dc.downloadableContent,
+        downloadUrl:
+          process.env.API_DOMAIN +
+          `/v1/downloadableContent/${dc.downloadableContentId}`,
+      },
+    })),
+    images: merch.images?.map((t) => addSizesToImage(finalMerchImageBucket, t)),
+  };
+};
 
 export default {
   single: processSingleMerch,

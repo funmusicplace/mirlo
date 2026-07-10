@@ -17,8 +17,8 @@ export default function () {
     try {
       const artistVisibility: Prisma.PostWhereInput = {
         OR: [
-          { artistId: null },
-          { artist: { enabled: true, deletedAt: null } },
+          { profileId: null },
+          { profile: { enabled: true, deletedAt: null } },
         ],
       };
 
@@ -51,7 +51,7 @@ export default function () {
                 {
                   postSubscriptionTiers: {
                     some: {
-                      artistSubscriptionTier: {
+                      profileSubscriptionTier: {
                         userSubscriptions: {
                           some: {
                             userId: user.id,
@@ -70,7 +70,7 @@ export default function () {
       const posts = await prisma.post.findMany({
         where,
         include: {
-          artist: true,
+          profile: true,
           featuredImage: true,
           tracks: {
             orderBy: {
@@ -91,9 +91,9 @@ export default function () {
             p,
             undefined,
             undefined,
-            (p.artistId
-              ? await checkIsUserSubscriber(user, p.artistId)
-              : false) || p.artist?.userId === user?.id
+            (p.profileId
+              ? await checkIsUserSubscriber(user, p.profileId)
+              : false) || p.profile?.userId === user?.id
           )
         )
       );

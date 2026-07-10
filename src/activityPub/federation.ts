@@ -237,13 +237,13 @@ const findAPReleaseById = async (id: number) => {
       deletedAt: null,
       isHiddenTrackGroupForSongDrafts: false,
       adminEnabled: true,
-      artist: {
+      profile: {
         enabled: true,
         activityPub: true,
       },
     },
     include: {
-      artist: true,
+      profile: true,
     },
   });
 };
@@ -255,13 +255,13 @@ const findAPPostById = async (id: number) => {
       deletedAt: null,
       isDraft: false,
       isPublic: true,
-      artist: {
+      profile: {
         enabled: true,
         activityPub: true,
       },
     },
     include: {
-      artist: true,
+      profile: true,
     },
   });
 };
@@ -274,7 +274,7 @@ federation.setObjectDispatcher(
     if (!parsedId) return null;
 
     const post = await findAPPostById(Number(postId));
-    if (!post || post.artistId !== parsedId) return null;
+    if (!post || post.profileId !== parsedId) return null;
 
     const client = await getClient();
     return new Article({
@@ -295,7 +295,7 @@ federation.setObjectDispatcher(
     if (!parsedId) return null;
 
     const trackGroup = await findAPReleaseById(Number(releaseId));
-    if (!trackGroup || trackGroup.artistId !== parsedId) return null;
+    if (!trackGroup || trackGroup.profileId !== parsedId) return null;
 
     return new Audio({
       id: ctx.getObjectUri(Audio, { identifier, releaseId }),
@@ -326,7 +326,7 @@ federation.setObjectDispatcher(
 
     if (type === "post") {
       const post = await findAPPostById(Number(rawId));
-      if (!post || post.artistId !== parsedId) return null;
+      if (!post || post.profileId !== parsedId) return null;
 
       return new Create({
         id: ctx.getObjectUri(Create, { identifier, activityId }),
@@ -339,7 +339,7 @@ federation.setObjectDispatcher(
       });
     } else if (type === "release") {
       const trackGroup = await findAPReleaseById(Number(rawId));
-      if (!trackGroup || trackGroup.artistId !== parsedId) return null;
+      if (!trackGroup || trackGroup.profileId !== parsedId) return null;
 
       return new Create({
         id: ctx.getObjectUri(Create, { identifier, activityId }),
@@ -369,7 +369,7 @@ federation
       if (!artist) return null;
 
       const followers = await prisma.activityPubProfileFollowers.findMany({
-        where: { artistId: parsedId },
+        where: { profileId: parsedId },
       });
 
       return {
@@ -390,7 +390,7 @@ federation
     });
     if (!artist) return 0n;
     const count = await prisma.activityPubProfileFollowers.count({
-      where: { artistId: parsedId },
+      where: { profileId: parsedId },
     });
     return BigInt(count);
   });
@@ -410,8 +410,8 @@ federation
     const actorHref = follow.actorId.href;
 
     await prisma.activityPubProfileFollowers.upsert({
-      where: { actor_artistId: { artistId: artist.id, actor: actorHref } },
-      create: { artistId: artist.id, actor: actorHref, inboxUrl: null },
+      where: { actor_profileId: { profileId: artist.id, actor: actorHref } },
+      create: { profileId: artist.id, actor: actorHref, inboxUrl: null },
       update: {},
     });
 
@@ -429,7 +429,7 @@ federation
         if (!followerActor?.inboxId) return;
 
         await prisma.activityPubProfileFollowers.updateMany({
-          where: { artistId: artist.id, actor: actorHref },
+          where: { profileId: artist.id, actor: actorHref },
           data: { inboxUrl: followerActor.inboxId.href },
         });
 
@@ -466,7 +466,7 @@ federation
     if (!parsedId || !undo.actorId) return;
 
     await prisma.activityPubProfileFollowers.deleteMany({
-      where: { artistId: parsedId, actor: undo.actorId.href },
+      where: { profileId: parsedId, actor: undo.actorId.href },
     });
 
     logger.info(`ActivityPub Follow removed for ${undo.actorId.href} via Undo`);
@@ -479,7 +479,7 @@ federation
     if (!parsedId) return;
 
     await prisma.activityPubProfileFollowers.deleteMany({
-      where: { artistId: parsedId, actor: del.actorId.href },
+      where: { profileId: parsedId, actor: del.actorId.href },
     });
 
     logger.info(

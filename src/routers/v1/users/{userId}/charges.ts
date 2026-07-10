@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { processSingleArtist } from "../../../../utils/artist";
+import { toApiUserSubscription } from "../../../../utils/serialize/apiNaming";
 
 type Params = {
   userId: string;
@@ -22,17 +23,17 @@ export default function () {
     if (Number(userId) === Number(loggedInUser.id)) {
       const charges = await prisma.profileUserSubscriptionCharge.findMany({
         where: {
-          artistUserSubscription: {
+          profileUserSubscription: {
             userId: Number(userId),
           },
         },
         include: {
           transaction: true,
-          artistUserSubscription: {
+          profileUserSubscription: {
             include: {
-              artistSubscriptionTier: {
+              profileSubscriptionTier: {
                 include: {
-                  artist: {
+                  profile: {
                     include: {
                       avatar: { where: { deletedAt: null } },
                     },
@@ -43,18 +44,20 @@ export default function () {
           },
         },
       });
-      const results = charges.map((c) => ({
-        ...c,
-        artistUserSubscription: {
-          ...c.artistUserSubscription,
-          artistSubscriptionTier: {
-            ...c.artistUserSubscription.artistSubscriptionTier,
-            artist: processSingleArtist(
-              c.artistUserSubscription.artistSubscriptionTier.artist
-            ),
-          },
-        },
-      }));
+      const results = charges.map((c) => {
+        const { profileUserSubscription, ...chargeRest } = c;
+        const tier = profileUserSubscription.profileSubscriptionTier;
+        return {
+          ...chargeRest,
+          artistUserSubscription: toApiUserSubscription({
+            ...profileUserSubscription,
+            profileSubscriptionTier: {
+              ...tier,
+              profile: processSingleArtist(tier.profile),
+            },
+          }),
+        };
+      });
       res.json({
         results,
       });

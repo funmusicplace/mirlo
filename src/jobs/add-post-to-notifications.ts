@@ -34,7 +34,7 @@ const addPostToNotifications = async () => {
       hasAnnounceEmailBeenSent: false,
       deletedAt: null,
       isDraft: false,
-      artist: {
+      profile: {
         id: {
           in: nonDeletedArtistsWithSubscriptions.map((a) => a.id),
         },
@@ -42,9 +42,9 @@ const addPostToNotifications = async () => {
     },
     select: {
       id: true,
-      artistId: true,
+      profileId: true,
       content: true,
-      artist: {
+      profile: {
         where: {
           deletedAt: null,
         },
@@ -76,12 +76,12 @@ const addPostToNotifications = async () => {
     await Promise.all(
       posts.map(async (post) => {
         const flatSubscriptions = flatten(
-          post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
+          post.profile?.subscriptionTiers.map((st) => st.userSubscriptions)
         );
         const subscriptions = uniqBy(flatSubscriptions, "userId");
 
         logger.info(
-          `addPostToNotifciations: creating notifications for ${post.id}, ${post.artistId}, to ${subscriptions.length} with content: ${post.content}`
+          `addPostToNotifciations: creating notifications for ${post.id}, ${post.profileId}, to ${subscriptions.length} with content: ${post.content}`
         );
 
         await prisma.$transaction(async (tx) => {
@@ -94,7 +94,7 @@ const addPostToNotifications = async () => {
               postId: post.id,
               userId: s.userId,
               notificationType: "NEW_ARTIST_POST",
-              deliveryMethod: post.artist?.activityPub ? "BOTH" : "EMAIL",
+              deliveryMethod: post.profile?.activityPub ? "BOTH" : "EMAIL",
             })),
             skipDuplicates: true,
           });

@@ -50,7 +50,7 @@ export default function () {
                   { title: { contains: token, mode: "insensitive" } },
                   {
                     trackGroup: {
-                      artist: {
+                      profile: {
                         name: { contains: token, mode: "insensitive" },
                       },
                     },
@@ -66,7 +66,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 include: {
                   user: {
                     select: {
