@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
   createUserTrackGroupPurchase,
@@ -35,8 +35,8 @@ describe("Top sold trackGroups", () => {
   it("should GET /topSold with 1 trackGroup", async () => {
     const { user } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test2@test.com" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
 
     await createUserTrackGroupPurchase(user2.id, trackGroup.id);
 
@@ -51,8 +51,8 @@ describe("Top sold trackGroups", () => {
 
   it("should GET /topSold not get without tracks", async () => {
     const { user } = await createUser({ email: "test@testcom" });
-    const artist = await createArtist(user.id);
-    await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    await createTrackGroup(profile.id, {
       tracks: [],
     });
     const response = await requestApp
@@ -65,8 +65,8 @@ describe("Top sold trackGroups", () => {
 
   it("should GET /topSold not get an unpublished", async () => {
     const { user } = await createUser({ email: "test@testcom" });
-    const artist = await createArtist(user.id);
-    await createTrackGroup(artist.id, { publishedAt: null });
+    const profile = await createProfile(user.id);
+    await createTrackGroup(profile.id, { publishedAt: null });
     const response = await requestApp
       .get("trackGroups/topSold")
       .set("Accept", "application/json");
@@ -78,8 +78,8 @@ describe("Top sold trackGroups", () => {
   it("should GET /topSold in descending order of number of purchases", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
-    const artist1 = await createArtist(user1.id);
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+    const profile1 = await createProfile(user1.id);
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist-2" });
 
     const { user: buyer1 } = await createUser({ email: "test2@test.com" });
     const { user: buyer2 } = await createUser({ email: "test3@test.com" });
@@ -95,20 +95,20 @@ describe("Top sold trackGroups", () => {
       4: buyer5,
     };
 
-    const mostPurchased = await createTrackGroup(artist1.id, {
+    const mostPurchased = await createTrackGroup(profile1.id, {
       title: "most purchased",
       urlSlug: "most-purchased",
     });
-    const secondPurchased = await createTrackGroup(artist1.id, {
+    const secondPurchased = await createTrackGroup(profile1.id, {
       title: "second most purchased",
       urlSlug: "second-most-purchased",
     });
-    const thirdPurchased = await createTrackGroup(artist1.id, {
+    const thirdPurchased = await createTrackGroup(profile1.id, {
       title: "third purchased",
       urlSlug: "third-purchased",
     });
 
-    const leastPurchased = await createTrackGroup(artist2.id, {
+    const leastPurchased = await createTrackGroup(profile2.id, {
       title: "least purchased",
       urlSlug: "least-purchased",
     });
@@ -154,8 +154,8 @@ describe("Top sold trackGroups", () => {
   it("should GET /topSold the queried number of top sold results in descending order", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
-    const artist1 = await createArtist(user1.id);
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+    const profile1 = await createProfile(user1.id);
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist-2" });
 
     const { user: buyer1 } = await createUser({ email: "test2@test.com" });
     const { user: buyer2 } = await createUser({ email: "test3@test.com" });
@@ -171,20 +171,20 @@ describe("Top sold trackGroups", () => {
       4: buyer5,
     };
 
-    const mostPurchased = await createTrackGroup(artist1.id, {
+    const mostPurchased = await createTrackGroup(profile1.id, {
       title: "most purchased",
       urlSlug: "most-purchased",
     });
-    const secondPurchased = await createTrackGroup(artist1.id, {
+    const secondPurchased = await createTrackGroup(profile1.id, {
       title: "second most purchased",
       urlSlug: "second-most-purchased",
     });
-    const thirdPurchased = await createTrackGroup(artist1.id, {
+    const thirdPurchased = await createTrackGroup(profile1.id, {
       title: "third purchased",
       urlSlug: "third-purchased",
     });
 
-    const leastPurchased = await createTrackGroup(artist2.id, {
+    const leastPurchased = await createTrackGroup(profile2.id, {
       title: "least purchased",
       urlSlug: "least-purchased",
     });
@@ -232,8 +232,8 @@ describe("Top sold trackGroups", () => {
   it("should GET /topSold only get the results from thisMonth if queried", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
-    const artist1 = await createArtist(user1.id);
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+    const profile1 = await createProfile(user1.id);
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist-2" });
 
     const { user: buyer1 } = await createUser({ email: "test2@test.com" });
     const { user: buyer2 } = await createUser({ email: "test3@test.com" });
@@ -249,20 +249,20 @@ describe("Top sold trackGroups", () => {
       4: buyer5,
     };
 
-    const mostPurchased = await createTrackGroup(artist1.id, {
+    const mostPurchased = await createTrackGroup(profile1.id, {
       title: "most purchased",
       urlSlug: "most-purchased",
     });
-    const secondPurchased = await createTrackGroup(artist1.id, {
+    const secondPurchased = await createTrackGroup(profile1.id, {
       title: "second most purchased",
       urlSlug: "second-most-purchased",
     });
-    const thirdPurchased = await createTrackGroup(artist1.id, {
+    const thirdPurchased = await createTrackGroup(profile1.id, {
       title: "third purchased",
       urlSlug: "third-purchased",
     });
 
-    const leastPurchased = await createTrackGroup(artist2.id, {
+    const leastPurchased = await createTrackGroup(profile2.id, {
       title: "least purchased",
       urlSlug: "least-purchased",
     });

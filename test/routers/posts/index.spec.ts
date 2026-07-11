@@ -2,7 +2,7 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import { clearTables, createArtist, createPost, createUser } from "../../utils";
+import { clearTables, createProfile, createPost, createUser } from "../../utils";
 
 import { faker } from "@faker-js/faker";
 import prisma from "@mirlo/prisma";
@@ -22,8 +22,8 @@ describe("posts", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { isDraft: false });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { isDraft: false });
 
       const response = await requestApp
         .get(`posts`)
@@ -37,8 +37,8 @@ describe("posts", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      await createPost(profile.id);
 
       const response = await requestApp
         .get(`posts`)
@@ -52,8 +52,8 @@ describe("posts", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id, { enabled: false });
-      await createPost(artist.id, { isDraft: false });
+      const profile = await createProfile(user.id, { enabled: false });
+      await createPost(profile.id, { isDraft: false });
 
       const response = await requestApp
         .get(`posts`)
@@ -67,12 +67,12 @@ describe("posts", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { deletedAt: new Date() },
       });
-      await createPost(artist.id, { isDraft: false });
+      await createPost(profile.id, { isDraft: false });
 
       const response = await requestApp
         .get(`posts`)
@@ -87,8 +87,8 @@ describe("posts", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      await createPost(artist.id, {
+      const profile = await createProfile(user.id);
+      await createPost(profile.id, {
         content: testContent,
         isDraft: false,
       });

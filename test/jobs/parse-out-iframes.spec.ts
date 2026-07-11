@@ -8,7 +8,7 @@ import prisma from "@mirlo/prisma";
 import { parseOutIframes } from "../../src/jobs/parse-out-iframes";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../utils";
@@ -23,12 +23,12 @@ describe("parse-out-iframes", () => {
   });
 
   it("should replace iframe with trackGroup", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
-    const artist = await createArtist(artistUser.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(profileOwner.id);
+    const trackGroup = await createTrackGroup(profile.id);
 
     const content = `<iframe src="https://mirlo.space/widget/trackGroup/${trackGroup.id}"></iframe>`;
     const result = await parseOutIframes(content);
@@ -51,11 +51,11 @@ describe("parse-out-iframes", () => {
 
   describe("fallback URL for unreachable trackGroups (#1703)", () => {
     it("links to the fallback URL when the trackGroup is a draft", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "drafter@artist.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(profileOwner.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         title: "Draft Album",
         urlSlug: "draft-album",
       });
@@ -79,13 +79,13 @@ describe("parse-out-iframes", () => {
     });
 
     it("still links to the trackGroup when it is published and public", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "publisher@artist.com",
       });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         urlSlug: "publisher-artist",
       });
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         title: "Public Album",
         urlSlug: "public-album",
       });
@@ -105,11 +105,11 @@ describe("parse-out-iframes", () => {
     });
 
     it("links to the fallback URL for a track whose album is unreachable", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "drafttrack@artist.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(profileOwner.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         title: "Draft Album with Track",
         urlSlug: "draft-album-with-track",
         tracks: [{ title: "draft track" }],

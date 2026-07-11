@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -29,12 +29,12 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const mainTrackGroup = await createTrackGroup(artist.id);
-      const recommendedTrackGroup1 = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id);
+      const recommendedTrackGroup1 = await createTrackGroup(profile.id, {
         urlSlug: "recommended-album-1",
       });
-      const recommendedTrackGroup2 = await createTrackGroup(artist.id, {
+      const recommendedTrackGroup2 = await createTrackGroup(profile.id, {
         urlSlug: "recommended-album-2",
       });
 
@@ -76,8 +76,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .get(`manage/trackGroups/${trackGroup.id}/recommendedTrackGroups`)
@@ -90,8 +90,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
 
     it("should require authentication", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .get(`manage/trackGroups/${trackGroup.id}/recommendedTrackGroups`)
@@ -104,8 +104,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user: user1, accessToken: accessToken1 } = await createUser({
         email: "test1@test.com",
       });
-      const artist1 = await createArtist(user1.id);
-      const trackGroup1 = await createTrackGroup(artist1.id);
+      const profile1 = await createProfile(user1.id);
+      const trackGroup1 = await createTrackGroup(profile1.id);
 
       const { user: user2, accessToken: accessToken2 } = await createUser({
         email: "test2@test.com",
@@ -125,9 +125,9 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const mainTrackGroup = await createTrackGroup(artist.id);
-      const recommendedTrackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id);
+      const recommendedTrackGroup = await createTrackGroup(profile.id, {
         urlSlug: "recommended-album",
       });
 
@@ -151,8 +151,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}/recommendedTrackGroups`)
@@ -173,8 +173,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const mainTrackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .put(`manage/trackGroups/${mainTrackGroup.id}/recommendedTrackGroups`)
@@ -192,8 +192,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}/recommendedTrackGroups`)
@@ -209,9 +209,9 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const mainTrackGroup = await createTrackGroup(artist.id);
-      const recommendedTrackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id);
+      const recommendedTrackGroup = await createTrackGroup(profile.id, {
         urlSlug: "recommended-album",
       });
 
@@ -247,8 +247,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
 
     it("should require authentication", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}/recommendedTrackGroups`)
@@ -262,9 +262,9 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
 
     it("should prevent access to other user's track groups", async () => {
       const { user: user1 } = await createUser({ email: "test1@test.com" });
-      const artist1 = await createArtist(user1.id);
-      const trackGroup1 = await createTrackGroup(artist1.id);
-      const trackGroup2 = await createTrackGroup(artist1.id, {
+      const profile1 = await createProfile(user1.id);
+      const trackGroup1 = await createTrackGroup(profile1.id);
+      const trackGroup2 = await createTrackGroup(profile1.id, {
         urlSlug: "recommended-album",
       });
 
@@ -289,9 +289,9 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const mainTrackGroup = await createTrackGroup(artist.id);
-      const recommendedTrackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id);
+      const recommendedTrackGroup = await createTrackGroup(profile.id, {
         urlSlug: "recommended-album",
       });
 
@@ -339,8 +339,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .delete(`manage/trackGroups/${trackGroup.id}/recommendedTrackGroups`)
@@ -352,8 +352,8 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
 
     it("should require authentication", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .delete(
@@ -366,9 +366,9 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
 
     it("should prevent access to other user's track groups", async () => {
       const { user: user1 } = await createUser({ email: "test1@test.com" });
-      const artist1 = await createArtist(user1.id);
-      const trackGroup1 = await createTrackGroup(artist1.id);
-      const trackGroup2 = await createTrackGroup(artist1.id, {
+      const profile1 = await createProfile(user1.id);
+      const trackGroup1 = await createTrackGroup(profile1.id);
+      const trackGroup2 = await createTrackGroup(profile1.id, {
         urlSlug: "recommended-album",
       });
 

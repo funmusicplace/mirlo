@@ -8,7 +8,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createTrackGroup,
   createUser,
@@ -35,7 +35,7 @@ describe("GET /v1/merch/{id}", () => {
       email: "label@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Timeless Records",
       urlSlug: "timeless-records",
       isLabelProfile: true,
@@ -44,13 +44,13 @@ describe("GET /v1/merch/{id}", () => {
     const { user: rosterUser } = await createUser({
       email: "roster@example.com",
     });
-    const rosterArtist = await createArtist(rosterUser.id, {
+    const rosterProfile = await createProfile(rosterUser.id, {
       name: "Roster Artist",
       urlSlug: "roster-artist",
     });
 
     // Album lives under the roster artist…
-    const album = await createTrackGroup(rosterArtist.id, {
+    const album = await createTrackGroup(rosterProfile.id, {
       title: "Roster Album",
       urlSlug: "roster-album",
     });
@@ -83,7 +83,7 @@ describe("GET /v1/merch/{id}", () => {
     assert.equal(response.body.result.artist?.urlSlug, label.urlSlug);
     assert.equal(
       response.body.result.includePurchaseTrackGroup?.artist?.urlSlug,
-      rosterArtist.urlSlug,
+      rosterProfile.urlSlug,
       "trackGroup carries its own artist so the album link points to /roster-artist/release/roster-album, not /timeless-records/release/..."
     );
   });

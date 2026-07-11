@@ -6,16 +6,16 @@ dotenv.config();
 import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
-import { clearTables, createArtist, createUser } from "../utils";
+import { clearTables, createProfile, createUser } from "../utils";
 
 import { requestApp } from "./utils";
 
 async function createInstanceArtist() {
-  const { user: artistUser } = await createUser({
+  const { user: profileOwner } = await createUser({
     email: "artist@example.com",
   });
 
-  const artist = await createArtist(artistUser.id, {
+  const profile = await createProfile(profileOwner.id, {
     name: "Instance Artist",
     urlSlug: `instance-artist-${randomUUID()}`,
   });
@@ -25,13 +25,13 @@ async function createInstanceArtist() {
       settings: {
         platformPercent: 10,
         instanceCustomization: {
-          profileId: `${artist.id}`,
+          profileId: `${profile.id}`,
         },
       },
     },
   });
 
-  return { artist };
+  return { profile };
 }
 
 describe("artists/{id}/follow newsletter", () => {
@@ -40,10 +40,10 @@ describe("artists/{id}/follow newsletter", () => {
   });
 
   it("requires an email address when not authenticated", async () => {
-    const { artist } = await createInstanceArtist();
+    const { profile } = await createInstanceArtist();
 
     const response = await requestApp
-      .post(`artists/${artist.id}/follow`)
+      .post(`artists/${profile.id}/follow`)
       .set("Accept", "application/json");
 
     assert.equal(response.status, 400);
@@ -51,7 +51,7 @@ describe("artists/{id}/follow newsletter", () => {
   });
 
   it("requires the email to be verified", async () => {
-    const { artist } = await createInstanceArtist();
+    const { profile } = await createInstanceArtist();
 
     const { user: listener, accessToken } = await createUser({
       email: "listener@example.com",
@@ -59,7 +59,7 @@ describe("artists/{id}/follow newsletter", () => {
     });
 
     const response = await requestApp
-      .post(`artists/${artist.id}/follow`)
+      .post(`artists/${profile.id}/follow`)
       .send({ email: listener.email })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
@@ -72,7 +72,7 @@ describe("artists/{id}/follow newsletter", () => {
   });
 
   it("subscribes a verified user", async () => {
-    const { artist } = await createInstanceArtist();
+    const { profile } = await createInstanceArtist();
 
     const { user: listener, accessToken } = await createUser({
       email: "listener@example.com",
@@ -82,7 +82,7 @@ describe("artists/{id}/follow newsletter", () => {
     });
 
     const response = await requestApp
-      .post(`artists/${artist.id}/follow`)
+      .post(`artists/${profile.id}/follow`)
       .send({ email: listener.email })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
@@ -102,7 +102,7 @@ describe("artists/{id}/follow newsletter", () => {
       where: {
         userId: subscriber.id,
         profileSubscriptionTier: {
-          profileId: artist.id,
+          profileId: profile.id,
         },
       },
     });
@@ -111,7 +111,7 @@ describe("artists/{id}/follow newsletter", () => {
   });
 
   it("updates an existing user to receive the mailing list", async () => {
-    const { artist } = await createInstanceArtist();
+    const { profile } = await createInstanceArtist();
 
     const { user: existingUser, accessToken } = await createUser({
       email: "existing@example.com",
@@ -121,7 +121,7 @@ describe("artists/{id}/follow newsletter", () => {
     });
 
     const response = await requestApp
-      .post(`artists/${artist.id}/follow`)
+      .post(`artists/${profile.id}/follow`)
       .send({ email: existingUser.email })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
@@ -141,7 +141,7 @@ describe("artists/{id}/follow newsletter", () => {
       where: {
         userId: existingUser.id,
         profileSubscriptionTier: {
-          profileId: artist.id,
+          profileId: profile.id,
         },
       },
     });
@@ -150,7 +150,7 @@ describe("artists/{id}/follow newsletter", () => {
   });
 
   it("marks confirmed subscribers for the mailing list", async () => {
-    const { artist } = await createInstanceArtist();
+    const { profile } = await createInstanceArtist();
 
     const token = randomUUID();
     const email = "new-listener@example.com";
@@ -158,7 +158,7 @@ describe("artists/{id}/follow newsletter", () => {
     await prisma.profileUserSubscriptionConfirmation.create({
       data: {
         email,
-        profileId: artist.id,
+        profileId: profile.id,
         token,
         tokenExpiration: new Date(Date.now() + 60 * 60 * 1000),
       },
@@ -167,7 +167,7 @@ describe("artists/{id}/follow newsletter", () => {
     process.env.API_DOMAIN = "https://example.com";
 
     const response = await requestApp
-      .get(`artists/${artist.id}/confirmFollow`)
+      .get(`artists/${profile.id}/confirmFollow`)
       .query({ email, token })
       .set("Accept", "application/json");
 

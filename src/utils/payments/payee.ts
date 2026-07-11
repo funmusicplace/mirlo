@@ -12,11 +12,11 @@
  * selected; the returned union only exposes fields present on every
  * candidate that was provided.
  */
-export const resolvePayee = <User, ArtistPayee = never, ReleasePayee = never>({
-  artist,
+export const resolvePayee = <User, ProfilePayee = never, ReleasePayee = never>({
+  profile,
   releasePaymentToUser,
 }: {
-  artist: { user: User; paymentToUser?: ArtistPayee | null };
+  profile: { user: User; paymentToUser?: ProfilePayee | null };
   releasePaymentToUser?: ReleasePayee | null;
-}): User | ArtistPayee | ReleasePayee =>
-  releasePaymentToUser ?? artist.paymentToUser ?? artist.user;
+}): User | ProfilePayee | ReleasePayee =>
+  releasePaymentToUser ?? profile.paymentToUser ?? profile.user;

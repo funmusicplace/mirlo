@@ -7,7 +7,7 @@ import { describe, it } from "mocha";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -29,8 +29,8 @@ describe("users/{userId}/collection", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const transaction = await prisma.userTransaction.create({
         data: {
@@ -58,7 +58,7 @@ describe("users/{userId}/collection", () => {
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.results.length, 1);
       assert.equal(response.body.results[0].trackGroupId, trackGroup.id);
-      assert.equal(response.body.results[0].trackGroup.artistId, artist.id);
+      assert.equal(response.body.results[0].trackGroup.artistId, profile.id);
     });
 
     it("should remove non-public (unpublished) albums from collection", async () => {
@@ -67,8 +67,8 @@ describe("users/{userId}/collection", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
       });
 
@@ -106,8 +106,8 @@ describe("users/{userId}/collection", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         hideFromSearch: true,
       });
@@ -146,8 +146,8 @@ describe("users/{userId}/collection", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         isPublic: false,
       });
@@ -186,8 +186,8 @@ describe("users/{userId}/collection", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const transaction = await prisma.userTransaction.create({
         data: {
@@ -209,7 +209,7 @@ describe("users/{userId}/collection", () => {
 
       // Disable the artist
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { enabled: false },
       });
 
@@ -229,11 +229,11 @@ describe("users/{userId}/collection", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup1 = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup1 = await createTrackGroup(profile.id, {
         title: "Album 1",
       });
-      const trackGroup2 = await createTrackGroup(artist.id, {
+      const trackGroup2 = await createTrackGroup(profile.id, {
         title: "Album 2",
       });
 

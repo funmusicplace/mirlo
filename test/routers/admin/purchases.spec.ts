@@ -7,7 +7,7 @@ import request from "supertest";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -29,15 +29,15 @@ describe("admin/purchases", () => {
   });
 
   const setupAdminAndPurchaser = async () => {
-    const { user: artistUser, accessToken } = await createUser({
+    const { user: profileOwner, accessToken } = await createUser({
       email: "artist@artist.com",
       isAdmin: true,
     });
     const { user: purchaser } = await createUser({
       email: "purchaser@purchaser.com",
     });
-    const artist = await createArtist(artistUser.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(profileOwner.id);
+    const trackGroup = await createTrackGroup(profile.id);
     return { accessToken, purchaser, trackGroup };
   };
 
@@ -62,7 +62,7 @@ describe("admin/purchases", () => {
     });
 
     it("should GET / 200 with admin", async () => {
-      const { user: artistUser, accessToken } = await createUser({
+      const { user: profileOwner, accessToken } = await createUser({
         email: "artist@artist.com",
         isAdmin: true,
       });
@@ -71,9 +71,9 @@ describe("admin/purchases", () => {
         email: "purchasesr@purchaser.com",
       });
 
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const transaction = await prisma.userTransaction.create({
         data: {
@@ -102,7 +102,7 @@ describe("admin/purchases", () => {
     });
 
     it("should GET / datePurchased filter", async () => {
-      const { user: artistUser, accessToken } = await createUser({
+      const { user: profileOwner, accessToken } = await createUser({
         email: "artist@artist.com",
         isAdmin: true,
       });
@@ -114,9 +114,9 @@ describe("admin/purchases", () => {
         email: "second@purchaser.com",
       });
 
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const startOfMonth = new Date();
       startOfMonth.setDate(1);

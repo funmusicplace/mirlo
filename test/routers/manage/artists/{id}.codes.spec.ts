@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -25,8 +25,8 @@ describe("manage/artists/{artistId}/codes", () => {
   describe("GET", () => {
     it("should get json", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await prisma.trackGroupDownloadCodes.createMany({
         data: [
           {
@@ -44,7 +44,7 @@ describe("manage/artists/{artistId}/codes", () => {
       });
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/codes`)
+        .get(`manage/artists/${profile.id}/codes`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 200);
@@ -56,15 +56,15 @@ describe("manage/artists/{artistId}/codes", () => {
 
     it("should get csv", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       await prisma.profileAvatar.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await prisma.trackGroupDownloadCodes.createMany({
         data: [
           {
@@ -82,7 +82,7 @@ describe("manage/artists/{artistId}/codes", () => {
       });
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/codes?format=csv`)
+        .get(`manage/artists/${profile.id}/codes?format=csv`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -93,7 +93,7 @@ describe("manage/artists/{artistId}/codes", () => {
       assert.equal(rows[1].split(",")[0], codes[0].trackGroupId);
       assert.equal(
         rows[1].split(",")[6].replaceAll('"', ""),
-        `http://localhost:8080/${artist.urlSlug}/release/${trackGroup.urlSlug}/redeem?code=${codes[0].downloadCode}`
+        `http://localhost:8080/${profile.urlSlug}/release/${trackGroup.urlSlug}/redeem?code=${codes[0].downloadCode}`
       );
     });
   });

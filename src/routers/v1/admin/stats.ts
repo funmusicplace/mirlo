@@ -34,7 +34,7 @@ export default function () {
         ORDER BY weeks.week_start ASC
       `;
 
-      const artistSignupsByWeek = await prisma.$queryRaw<
+      const profileSignupsByWeek = await prisma.$queryRaw<
         Array<{ week: string; count: number }>
       >`
         WITH weeks AS (
@@ -142,7 +142,7 @@ export default function () {
       res.json({
         result: {
           userSignupsByWeek,
-          artistSignupsByWeek,
+          profileSignupsByWeek,
           transactionsByWeek,
           transactionAmountByWeek,
           avgMonthlyPlays: avgMonthlyPlays[0]?.avgMonthlyPlays ?? 0,

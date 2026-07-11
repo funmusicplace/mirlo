@@ -6,7 +6,7 @@ import request from "supertest";
 import prisma from "@mirlo/prisma";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -45,8 +45,8 @@ describe("manage/trackGroups/{id}/tracks", () => {
 
   it("should PUT / 400 when isPreview is missing", async () => {
     const { user, accessToken } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id, {
       urlSlug: "a-title",
     });
 
@@ -61,11 +61,11 @@ describe("manage/trackGroups/{id}/tracks", () => {
 
   it("should bulk set all tracks to must-own (isPreview=false) and update defaultIsPreview", async () => {
     const { user, accessToken } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
 
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),
@@ -98,11 +98,11 @@ describe("manage/trackGroups/{id}/tracks", () => {
 
   it("should bulk set all tracks to preview (isPreview=true)", async () => {
     const { user, accessToken } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
 
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),

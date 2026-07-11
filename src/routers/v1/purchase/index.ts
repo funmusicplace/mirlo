@@ -2,10 +2,10 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistEditableByUser,
+  profileEditableByUser,
   userLoggedInWithoutRedirect,
 } from "../../../auth/passport";
-import { subscribeUserToArtist } from "../../../utils/artist";
+import { subscribeUserToProfile } from "../../../utils/artist";
 import { buildCheckoutRedirectUrl, originOf } from "../../../utils/clientUrl";
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
@@ -17,7 +17,7 @@ import {
   type ResolvedItem,
 } from "../../../utils/payments/purchase";
 import { determinePrice } from "../../../utils/purchasing";
-import { findUserDiscountPercentsForArtist } from "../../../utils/user";
+import { findUserDiscountPercentsForProfile } from "../../../utils/user";
 
 type PurchaseItem =
   | { type: "trackGroup"; id: number; price?: string; message?: string }
@@ -112,7 +112,7 @@ export default function () {
               "Dispatching to a terminal reader requires authentication",
           });
         }
-        await artistEditableByUser(artistId, loggedInUser);
+        await profileEditableByUser(artistId, loggedInUser);
       }
 
       const mirloClient = successUrl || hosted ? await getClient() : null;
@@ -187,17 +187,17 @@ export default function () {
 
           resolvedStripeAccountId =
             resolvePayee({
-              artist: tg.profile,
+              profile: tg.profile,
               releasePaymentToUser: tg.paymentToUser,
             }).stripeAccountId ?? undefined;
 
           if (loggedInUser) {
-            await subscribeUserToArtist(tg.profile, loggedInUser);
+            await subscribeUserToProfile(tg.profile, loggedInUser);
           }
 
           let discountPercent = 0;
           if (loggedInUser) {
-            const discounts = await findUserDiscountPercentsForArtist(
+            const discounts = await findUserDiscountPercentsForProfile(
               loggedInUser.id,
               tg.profileId
             );

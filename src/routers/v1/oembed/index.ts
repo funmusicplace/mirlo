@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import logger from "../../../logger";
 import {
-  fetchArtistMetadata,
+  fetchProfileMetadata,
   fetchAlbumMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
@@ -86,10 +86,10 @@ export default function () {
 
       if (routeType === "album") {
         // Album detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
+        const profileSlug = routeParams.profileSlug as string | undefined;
         const albumSlug = routeParams.albumSlug as string | undefined;
-        if (artistSlug && albumSlug) {
-          const album = await fetchAlbumMetadata(artistSlug, albumSlug);
+        if (profileSlug && albumSlug) {
+          const album = await fetchAlbumMetadata(profileSlug, albumSlug);
           if (album) {
             const coverUrl = album.cover?.url.find((u) => u.includes("x600"));
             const releaseDate =
@@ -113,11 +113,11 @@ export default function () {
         }
       } else if (routeType === "track") {
         // Track detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
+        const profileSlug = routeParams.profileSlug as string | undefined;
         const albumSlug = routeParams.albumSlug as string | undefined;
         const trackId = routeParams.trackId as number | undefined;
-        if (artistSlug && albumSlug && trackId) {
-          const album = await fetchAlbumMetadata(artistSlug, albumSlug);
+        if (profileSlug && albumSlug && trackId) {
+          const album = await fetchAlbumMetadata(profileSlug, albumSlug);
           if (album) {
             const track = album.tracks.find((t) => t.id === trackId);
             if (track) {
@@ -142,15 +142,15 @@ export default function () {
         }
       } else if (routeType === "post") {
         // Post detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
+        const profileSlug = routeParams.profileSlug as string | undefined;
         const postId = routeParams.postId as number | undefined;
         const postSlug = routeParams.postSlug as string | undefined;
 
-        if (artistSlug) {
+        if (profileSlug) {
           const post = postId
-            ? await fetchPostMetadata(artistSlug, { id: postId })
+            ? await fetchPostMetadata(profileSlug, { id: postId })
             : postSlug
-              ? await fetchPostMetadata(artistSlug, { slug: postSlug })
+              ? await fetchPostMetadata(profileSlug, { slug: postSlug })
               : null;
 
           if (post) {
@@ -179,17 +179,17 @@ export default function () {
         }
       } else if (routeType === "merch") {
         // Merch detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
+        const profileSlug = routeParams.profileSlug as string | undefined;
         const merchId = routeParams.merchId as string | undefined;
 
-        if (artistSlug && merchId) {
+        if (profileSlug && merchId) {
           // Try to fetch by ID first, then by slug if it fails
           let merch = null;
           try {
-            merch = await fetchMerchMetadata(artistSlug, { id: merchId });
+            merch = await fetchMerchMetadata(profileSlug, { id: merchId });
           } catch {
             // ID format invalid (not a UUID), try by slug
-            merch = await fetchMerchMetadata(artistSlug, { slug: merchId });
+            merch = await fetchMerchMetadata(profileSlug, { slug: merchId });
           }
 
           if (merch) {
@@ -215,20 +215,20 @@ export default function () {
         }
       } else if (routeType === "artist") {
         // Artist profile
-        const artistSlug = routeParams.artistSlug as string | undefined;
-        if (artistSlug) {
-          const artist = await fetchArtistMetadata(artistSlug);
-          if (artist) {
-            const avatarUrl = artist.avatar?.url.find((u: string) =>
+        const profileSlug = routeParams.profileSlug as string | undefined;
+        if (profileSlug) {
+          const profile = await fetchProfileMetadata(profileSlug);
+          if (profile) {
+            const avatarUrl = profile.avatar?.url.find((u: string) =>
               u.includes("x600")
             );
             oembedData = {
               type: "link",
               width: 400,
               height: 300,
-              title: artist.name || "Mirlo Artist",
-              author_name: artist.name || "Mirlo Artist",
-              author_url: `${client.applicationUrl}/${artist.urlSlug}`,
+              title: profile.name || "Mirlo Artist",
+              author_name: profile.name || "Mirlo Artist",
+              author_url: `${client.applicationUrl}/${profile.urlSlug}`,
               thumbnail_url: avatarUrl
                 ? generateFullStaticImageUrl(avatarUrl, finalArtistAvatarBucket)
                 : undefined,

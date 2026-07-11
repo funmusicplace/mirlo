@@ -36,7 +36,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -45,18 +45,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -116,7 +116,7 @@ describe("subscription", () => {
     it("should store nextBillingDate when provided", async () => {
       sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -125,18 +125,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -180,7 +180,7 @@ describe("subscription", () => {
     it("should not update nextBillingDate when status is FAILED", async () => {
       sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -189,18 +189,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -243,7 +243,7 @@ describe("subscription", () => {
     it("should handle nextBillingDate being null", async () => {
       sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -252,18 +252,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -306,7 +306,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -315,18 +315,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Premium Tier",
         },
       });
@@ -364,13 +364,13 @@ describe("subscription", () => {
       assert.equal(subscriberCallData.message.to, "subscriber@subscriber.com");
 
       // Second call: artist notification
-      const artistCallData = sendMailStub.getCall(1).args[1];
-      assert.equal(artistCallData.template, "artist-new-subscriber-announce");
-      assert.equal(artistCallData.message.to, "artist@artist.com");
-      const artistLocals = artistCallData.locals;
-      assert.equal(artistLocals.artist.name, "Test artist");
-      assert.equal(artistLocals.user.email, "subscriber@subscriber.com");
-      assert.equal(artistLocals.profileUserSubscription.amount, 1200);
+      const profileCallData = sendMailStub.getCall(1).args[1];
+      assert.equal(profileCallData.template, "artist-new-subscriber-announce");
+      assert.equal(profileCallData.message.to, "artist@artist.com");
+      const profileLocals = profileCallData.locals;
+      assert.equal(profileLocals.artist.name, "Test artist");
+      assert.equal(profileLocals.user.email, "subscriber@subscriber.com");
+      assert.equal(profileLocals.profileUserSubscription.amount, 1200);
     });
 
     it("should send artist notification to paymentToUser if set", async () => {
@@ -378,7 +378,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -391,11 +391,11 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
           paymentToUserId: paymentRecipient.id,
         },
@@ -403,7 +403,7 @@ describe("subscription", () => {
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Premium Tier",
         },
       });
@@ -436,9 +436,9 @@ describe("subscription", () => {
       assert.equal(sendMailStub.callCount, 2);
 
       // Second call: artist notification should go to paymentToUser
-      const artistCall = sendMailStub.getCall(1).args[1];
-      assert.equal(artistCall.template, "artist-new-subscriber-announce");
-      assert.equal(artistCall.message.to, "payments@manager.com");
+      const profileCall = sendMailStub.getCall(1).args[1];
+      assert.equal(profileCall.template, "artist-new-subscriber-announce");
+      assert.equal(profileCall.message.to, "payments@manager.com");
     });
 
     it("should CC accounting email to artist notification if provided", async () => {
@@ -446,7 +446,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
         accountingEmail: "accounting@artist.com",
       });
@@ -456,18 +456,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist-accounting",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -500,10 +500,10 @@ describe("subscription", () => {
       assert.equal(sendMailStub.callCount, 2);
 
       // Second call: artist notification should have accounting email in CC
-      const artistCall = sendMailStub.getCall(1).args[1];
-      assert.equal(artistCall.template, "artist-new-subscriber-announce");
-      assert.equal(artistCall.message.to, "artist@artist.com");
-      assert.equal(artistCall.message.cc, "accounting@artist.com");
+      const profileCall = sendMailStub.getCall(1).args[1];
+      assert.equal(profileCall.template, "artist-new-subscriber-announce");
+      assert.equal(profileCall.message.to, "artist@artist.com");
+      assert.equal(profileCall.message.cc, "accounting@artist.com");
     });
 
     it("should send artist notification on renewal when combineSubscriptionEmails is off", async () => {
@@ -511,7 +511,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -520,18 +520,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -559,10 +559,10 @@ describe("subscription", () => {
 
       // Both the subscriber receipt and the artist announce are sent
       assert.equal(sendMailStub.callCount, 2);
-      const artistCall = sendMailStub.getCall(1).args[1];
-      assert.equal(artistCall.template, "artist-new-subscriber-announce");
-      assert.equal(artistCall.message.to, "artist@artist.com");
-      assert.strictEqual(artistCall.locals.isNewSubscription, false);
+      const profileCall = sendMailStub.getCall(1).args[1];
+      assert.equal(profileCall.template, "artist-new-subscriber-announce");
+      assert.equal(profileCall.message.to, "artist@artist.com");
+      assert.strictEqual(profileCall.locals.isNewSubscription, false);
     });
 
     it("should not send artist notification on renewal when combineSubscriptionEmails is on", async () => {
@@ -570,7 +570,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
         combineSubscriptionEmails: true,
       });
@@ -580,18 +580,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -629,7 +629,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
         combineSubscriptionEmails: true,
       });
@@ -639,18 +639,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });
@@ -677,10 +677,10 @@ describe("subscription", () => {
       });
 
       assert.equal(sendMailStub.callCount, 2);
-      const artistCall = sendMailStub.getCall(1).args[1];
-      assert.equal(artistCall.template, "artist-new-subscriber-announce");
-      assert.equal(artistCall.message.to, "artist@artist.com");
-      assert.strictEqual(artistCall.locals.isNewSubscription, true);
+      const profileCall = sendMailStub.getCall(1).args[1];
+      assert.equal(profileCall.template, "artist-new-subscriber-announce");
+      assert.equal(profileCall.message.to, "artist@artist.com");
+      assert.strictEqual(profileCall.locals.isNewSubscription, true);
     });
 
     it("should pass all variables required by artist-new-subscriber-announce template", async () => {
@@ -688,7 +688,7 @@ describe("subscription", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
       const { user: subscriber } = await createUser({
@@ -696,18 +696,18 @@ describe("subscription", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
           urlSlug: "test-artist",
-          userId: artistUser.id,
+          userId: profileOwner.id,
           enabled: true,
         },
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Supporter",
         },
       });
@@ -734,11 +734,11 @@ describe("subscription", () => {
       });
 
       assert.equal(sendMailStub.callCount, 2);
-      const artistCallData = sendMailStub.getCall(1).args[1];
-      assert.equal(artistCallData.template, "artist-new-subscriber-announce");
+      const profileCallData = sendMailStub.getCall(1).args[1];
+      assert.equal(profileCallData.template, "artist-new-subscriber-announce");
 
       const locals =
-        artistCallData.locals as ArtistNewSubscriberAnnounceEmailType;
+        profileCallData.locals as ArtistNewSubscriberAnnounceEmailType;
 
       // html.pug line: if isNewSubscription / else
       assert.strictEqual(locals.isNewSubscription, true);

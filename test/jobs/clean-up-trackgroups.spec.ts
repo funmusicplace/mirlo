@@ -3,7 +3,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
-import { clearTables, createArtist, createUser } from "../utils";
+import { clearTables, createProfile, createUser } from "../utils";
 import cleanUpTrackGroups from "../../src/jobs/clean-up-trackgroups";
 import assert from "node:assert";
 
@@ -28,10 +28,10 @@ describe("clean-up-trackgroups", () => {
       email: "test@test.com",
     });
 
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),
@@ -53,10 +53,10 @@ describe("clean-up-trackgroups", () => {
       email: "test@test.com",
     });
 
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),
@@ -78,10 +78,10 @@ describe("clean-up-trackgroups", () => {
       email: "test@test.com",
     });
 
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),

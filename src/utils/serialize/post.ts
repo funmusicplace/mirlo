@@ -77,10 +77,10 @@ export const serializePost = (
 ) => {
   const canSeeContent = !!(isUserSubscriber || post.isPublic);
   const { profileId, profile, ...postRest } = post;
-  const { apPrivateKey: _, ...artistPublic } = profile ?? {};
+  const { apPrivateKey: _, ...profilePublic } = profile ?? {};
   const artist = profile
     ? {
-        ...artistPublic,
+        ...profilePublic,
         avatar: addSizesToImage(finalArtistAvatarBucket, profile.avatar),
       }
     : undefined;

@@ -8,7 +8,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -28,14 +28,14 @@ describe("manage/trackGroups/{trackGroupId}", () => {
   describe("PUT", () => {
     it("should update defaultIsPreview on a track group", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, defaultIsPreview: false })
+        .send({ profileId: profile.id, defaultIsPreview: false })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -45,8 +45,8 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
     it("should update a track group without profileId in the body", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 
@@ -62,8 +62,8 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
     it("should reject a negative minPrice", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 
@@ -78,8 +78,8 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
     it("should reject a negative suggestedPrice", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 
@@ -94,9 +94,9 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
     it("should reject a duplicate urlSlug for the same artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, { urlSlug: "taken-slug" });
-      const otherTrackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      await createTrackGroup(profile.id, { urlSlug: "taken-slug" });
+      const otherTrackGroup = await createTrackGroup(profile.id, {
         urlSlug: "another-slug",
       });
 
@@ -113,14 +113,14 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       const { user, accessToken } = await createUser({
         email: "artist-flip@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         isPublic: false,
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { profileId: artist.id, name: "Tier" },
+        data: { profileId: profile.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-flip@example.com",
@@ -136,7 +136,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, isPublic: true })
+        .send({ profileId: profile.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -153,9 +153,9 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       const { user, accessToken } = await createUser({
         email: "artist-backfill@example.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const publishedAt = new Date("2026-05-19T00:00:00.000Z");
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt,
         isPublic: false,
         releaseDate: null,
@@ -163,7 +163,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, isPublic: true })
+        .send({ profileId: profile.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -183,9 +183,9 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       const { user, accessToken } = await createUser({
         email: "artist-keep-date@example.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const releaseDate = new Date("2024-01-01T00:00:00.000Z");
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date("2026-05-19T00:00:00.000Z"),
         isPublic: false,
         releaseDate,
@@ -193,7 +193,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, isPublic: true })
+        .send({ profileId: profile.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -209,14 +209,14 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       const { user, accessToken } = await createUser({
         email: "artist-draft-flip@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
         isPublic: false,
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { profileId: artist.id, name: "Tier" },
+        data: { profileId: profile.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-draft-flip@example.com",
@@ -232,7 +232,7 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, isPublic: true })
+        .send({ profileId: profile.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -248,14 +248,14 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       const { user, accessToken } = await createUser({
         email: "artist-toggle@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         isPublic: false,
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { profileId: artist.id, name: "Tier" },
+        data: { profileId: profile.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-toggle@example.com",
@@ -271,17 +271,17 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
       await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, isPublic: true })
+        .send({ profileId: profile.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, isPublic: false })
+        .send({ profileId: profile.id, isPublic: false })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       await requestApp
         .put(`manage/trackGroups/${trackGroup.id}`)
-        .send({ profileId: artist.id, isPublic: true })
+        .send({ profileId: profile.id, isPublic: true })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -293,19 +293,19 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
     it("should find a new slug for a trackGroup", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
-      const otherTrackGroup = await createTrackGroup(artist.id, {
+      const otherTrackGroup = await createTrackGroup(profile.id, {
         urlSlug: "mi-temp-slug-album-4",
       });
 
       const response = await requestApp
         .put(`manage/trackGroups/${otherTrackGroup.id}`)
         .send({
-          profileId: artist.id,
+          profileId: profile.id,
           minPrice: 500,
           title: "A title",
         })
@@ -318,8 +318,8 @@ describe("manage/trackGroups/{trackGroupId}", () => {
 
     it("should update coverImageAlt on a track group", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 
@@ -340,9 +340,9 @@ describe("manage/trackGroups/{trackGroupId}", () => {
   describe("DELETE", () => {
     it("should delete a track group", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 

@@ -7,7 +7,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createFundraiser,
   createTrackGroup,
   createUser,
@@ -27,8 +27,8 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     const { user, accessToken } = await createUser({
       email: "fundraiser-owner@example.com",
     });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const fundraiser = await createFundraiser(trackGroup.id, {
       isAllOrNothing: true,
     });
@@ -56,8 +56,8 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     const { accessToken: otherToken } = await createUser({
       email: "other@example.com",
     });
-    const artist = await createArtist(owner.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(owner.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const fundraiser = await createFundraiser(trackGroup.id);
 
     const response = await requestApp

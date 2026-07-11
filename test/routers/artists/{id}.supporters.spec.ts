@@ -5,7 +5,7 @@ import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -35,7 +35,7 @@ describe("artists/{id}/supporters", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -45,7 +45,7 @@ describe("artists/{id}/supporters", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/followers`)
+      .get(`artists/${profile.id}/followers`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
@@ -53,7 +53,7 @@ describe("artists/{id}/supporters", () => {
   });
   it("should GET / no supporters correctly", async () => {
     const { user } = await createUser({ email: "supporter@test.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Test artist",
       urlSlug: "test-artist",
       userId: user.id,
@@ -61,7 +61,7 @@ describe("artists/{id}/supporters", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/supporters`)
+      .get(`artists/${profile.id}/supporters`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
@@ -71,17 +71,17 @@ describe("artists/{id}/supporters", () => {
 
   it("should GET / a supporter correctly", async () => {
     const { user } = await createUser({ email: "supporter@test.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Test artist",
       urlSlug: "test-artist",
       userId: user.id,
       enabled: true,
     });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "Test track group",
       urlSlug: "test-track-group",
-      profileId: artist.id,
+      profileId: profile.id,
     });
 
     const transaction = await prisma.userTransaction.create({
@@ -103,7 +103,7 @@ describe("artists/{id}/supporters", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/supporters`)
+      .get(`artists/${profile.id}/supporters`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
@@ -122,17 +122,17 @@ describe("artists/{id}/supporters", () => {
 
   it("should GET / multiple supporter sources correctly", async () => {
     const { user } = await createUser({ email: "supporter@test.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Test artist",
       urlSlug: "test-artist",
       userId: user.id,
       enabled: true,
     });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "Test track group",
       urlSlug: "test-track-group",
-      profileId: artist.id,
+      profileId: profile.id,
     });
 
     const transactionTip = await prisma.userTransaction.create({
@@ -148,7 +148,7 @@ describe("artists/{id}/supporters", () => {
     await prisma.userProfileTip.create({
       data: {
         userId: user.id,
-        profileId: artist.id,
+        profileId: profile.id,
         transactionId: transactionTip.id,
       },
     });
@@ -172,7 +172,7 @@ describe("artists/{id}/supporters", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/supporters`)
+      .get(`artists/${profile.id}/supporters`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);

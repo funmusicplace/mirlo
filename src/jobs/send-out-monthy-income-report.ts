@@ -69,15 +69,11 @@ const toEmailSaleRow = (
         if (!artistUserSubscription) {
           return chargeRest;
         }
-        const { artistSubscriptionTier, artistSubscriptionTierId, ...subRest } =
-          artistUserSubscription;
+        const { artistSubscriptionTier, ...subRest } = artistUserSubscription;
         return {
           ...chargeRest,
           profileUserSubscription: {
             ...subRest,
-            ...(artistSubscriptionTierId !== undefined
-              ? { profileSubscriptionTierId: artistSubscriptionTierId }
-              : {}),
             ...(artistSubscriptionTier !== undefined
               ? { profileSubscriptionTier: artistSubscriptionTier }
               : {}),
@@ -107,7 +103,7 @@ const sendOutMonthlyIncomeReport = async () => {
     startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1);
     const endOfLastMonth = new Date(startOfLastMonth);
     endOfLastMonth.setMonth(endOfLastMonth.getMonth() + 1);
-    const allArtists = await prisma.profile.findMany({
+    const allProfiles = await prisma.profile.findMany({
       where: { deletedAt: null },
       select: {
         id: true,
@@ -117,7 +113,7 @@ const sendOutMonthlyIncomeReport = async () => {
     });
 
     const sales = await findSales({
-      artistId: allArtists.map((artist) => artist.id),
+      profileId: allProfiles.map((profile) => profile.id),
       sinceDate: startOfLastMonth.toISOString(),
       untilDate: endOfLastMonth.toISOString(),
       orderBy: { datePurchased: "asc" },
@@ -176,7 +172,7 @@ const sendOutMonthlyIncomeReport = async () => {
       (subscription) => subscription.profileSubscriptionTier.profile.userId
     );
 
-    const mappedArtists = keyBy(allArtists, "id");
+    const profilesById = keyBy(allProfiles, "id");
     const clientUrl = (await getClient()).applicationUrl;
 
     const groupedSales = groupBy(sales, (a) => a.artist[0].userId);
@@ -184,10 +180,10 @@ const sendOutMonthlyIncomeReport = async () => {
       if (userSales.length === 0) {
         continue;
       }
-      const artist = userSales[0].artist;
+      const saleProfiles = userSales[0].artist;
       const totalIncome = userSales.reduce((sum, sale) => sum + sale.amount, 0);
 
-      const user = mappedArtists[Number(artist[0].id)]?.user;
+      const user = profilesById[Number(saleProfiles[0].id)]?.user;
       try {
         sendMail<MonthlyIncomeReportEmailType>({
           data: {

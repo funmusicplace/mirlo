@@ -7,7 +7,7 @@ import request from "supertest";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createPost,
   createUser,
 } from "../../../utils";
@@ -29,10 +29,10 @@ describe("manage/artists/{artistId}/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/posts`)
+        .get(`manage/artists/${profile.id}/posts`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -44,11 +44,11 @@ describe("manage/artists/{artistId}/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { title: "My post" });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { title: "My post" });
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/posts`)
+        .get(`manage/artists/${profile.id}/posts`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -60,13 +60,13 @@ describe("manage/artists/{artistId}/posts", () => {
 
     it("should return 404 when artist doesn't belong to user", async () => {
       const { accessToken } = await createUser({ email: "user@test.com" });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/posts`)
+        .get(`manage/artists/${profile.id}/posts`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -75,28 +75,28 @@ describe("manage/artists/{artistId}/posts", () => {
 
     it("should return 401 when not authenticated", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/posts`)
+        .get(`manage/artists/${profile.id}/posts`)
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 401);
     });
 
     it("admin should be able to GET posts for another artist", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
       const { accessToken: adminToken } = await createUser({
         email: "admin@test.com",
         isAdmin: true,
       });
-      const artist = await createArtist(artistUser.id);
-      await createPost(artist.id, { title: "Admin-visible post" });
+      const profile = await createProfile(profileOwner.id);
+      await createPost(profile.id, { title: "Admin-visible post" });
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/posts`)
+        .get(`manage/artists/${profile.id}/posts`)
         .set("Cookie", [`jwt=${adminToken}`])
         .set("Accept", "application/json");
 
@@ -111,10 +111,10 @@ describe("manage/artists/{artistId}/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/posts`)
+        .post(`manage/artists/${profile.id}/posts`)
         .send({ title: "My title", content: "Some content" })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -128,14 +128,14 @@ describe("manage/artists/{artistId}/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         subscriptionTiers: {
           create: { name: "a tier", isDefaultTier: true },
         },
       });
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/posts`)
+        .post(`manage/artists/${profile.id}/posts`)
         .send({ title: "My title", content: "Some content" })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -148,14 +148,14 @@ describe("manage/artists/{artistId}/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         subscriptionTiers: {
           create: { name: "a tier", isDefaultTier: true },
         },
       });
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/posts`)
+        .post(`manage/artists/${profile.id}/posts`)
         .send({
           title: "My title",
           content: "Some content",
@@ -172,10 +172,10 @@ describe("manage/artists/{artistId}/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/posts`)
+        .post(`manage/artists/${profile.id}/posts`)
         .send({ title: "" })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -186,13 +186,13 @@ describe("manage/artists/{artistId}/posts", () => {
 
     it("should return 404 when artist doesn't belong to user", async () => {
       const { accessToken } = await createUser({ email: "user@test.com" });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/posts`)
+        .post(`manage/artists/${profile.id}/posts`)
         .send({ title: "A title" })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -211,18 +211,18 @@ describe("manage/artists/{artistId}/posts", () => {
       const { user: otherUser } = await createUser({
         email: "other@test.com",
       });
-      const otherArtist = await createArtist(otherUser.id, {
+      const otherProfile = await createProfile(otherUser.id, {
         subscriptionTiers: {
           create: { name: "a tier", isDefaultTier: true },
         },
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/posts`)
+        .post(`manage/artists/${profile.id}/posts`)
         .send({
           title: "A title",
-          minimumSubscriptionTierId: otherArtist.subscriptionTiers[0].id,
+          minimumSubscriptionTierId: otherProfile.subscriptionTiers[0].id,
         })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -235,17 +235,17 @@ describe("manage/artists/{artistId}/posts", () => {
     });
 
     it("admin should be able to POST a post for another artist", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
       const { accessToken: adminToken } = await createUser({
         email: "admin@test.com",
         isAdmin: true,
       });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/posts`)
+        .post(`manage/artists/${profile.id}/posts`)
         .send({ title: "Admin post", content: "Written by admin" })
         .set("Cookie", [`jwt=${adminToken}`])
         .set("Accept", "application/json");

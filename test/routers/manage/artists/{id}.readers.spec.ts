@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import { clearTables, createArtist, createUser } from "../../../utils";
+import { clearTables, createProfile, createUser } from "../../../utils";
 import { requestApp } from "../../utils";
 
 describe("manage/artists/{artistId}/readers", () => {
@@ -30,7 +30,7 @@ describe("manage/artists/{artistId}/readers", () => {
         stripeAccountId: "acct_readers_test",
       });
       const { accessToken } = await createUser({ email: "other@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const artist = await createProfile(artistUser.id);
 
       const response = await requestApp
         .get(`manage/artists/${artist.id}/readers`)
@@ -43,7 +43,7 @@ describe("manage/artists/{artistId}/readers", () => {
       const { user, accessToken } = await createUser({
         email: "artist@test.com",
       });
-      const artist = await createArtist(user.id);
+      const artist = await createProfile(user.id);
 
       const response = await requestApp
         .get(`manage/artists/${artist.id}/readers`)
@@ -60,7 +60,7 @@ describe("manage/artists/{artistId}/readers", () => {
         email: "artist@test.com",
         stripeAccountId: "acct_readers_test",
       });
-      const artist = await createArtist(user.id);
+      const artist = await createProfile(user.id);
 
       const response = await requestApp
         .get(`manage/artists/${artist.id}/readers`)

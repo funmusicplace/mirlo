@@ -1,15 +1,15 @@
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 
-export const getUserSubscriptionForArtist = async (
+export const getUserSubscriptionForProfile = async (
   user: User | undefined,
-  artistId: number
+  profileId: number
 ) => {
   if (!user) return null;
   return prisma.profileUserSubscription.findFirst({
     where: {
       userId: user.id,
-      profileSubscriptionTier: { profileId: artistId },
+      profileSubscriptionTier: { profileId: profileId },
     },
     orderBy: { amount: "desc" },
     select: { amount: true, profileSubscriptionTierId: true },
@@ -23,11 +23,11 @@ export const canUserSeePostContent = (
     postSubscriptionTiers: { profileSubscriptionTierId: number }[];
   },
   context: {
-    isArtistOwner: boolean;
+    isProfileOwner: boolean;
     subscription: { amount: number; profileSubscriptionTierId: number } | null;
   }
 ): boolean => {
-  if (post.isPublic || context.isArtistOwner) return true;
+  if (post.isPublic || context.isProfileOwner) return true;
   if (!context.subscription) return false;
   return (
     (post.minimumSubscriptionTier?.minAmount ?? 0) <=

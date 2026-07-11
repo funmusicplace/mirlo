@@ -27,16 +27,16 @@ describe("ap/artists", () => {
     });
 
     it("should GET /{id} with as ActivityPub Actor", async () => {
-      const artistSlug = "test-artist";
+      const profileSlug = "test-artist";
       const user = await prisma.user.create({
         data: {
           email: "test@test.com",
         },
       });
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
-          urlSlug: artistSlug,
+          urlSlug: profileSlug,
           userId: user.id,
           enabled: true,
           activityPub: true,
@@ -44,7 +44,7 @@ describe("ap/artists", () => {
         },
       });
       const response = await requestApp
-        .get(`ap/artists/${artistSlug}`)
+        .get(`ap/artists/${profileSlug}`)
         .set("Accept", "application/activity+json");
 
       assert.equal(
@@ -55,9 +55,9 @@ describe("ap/artists", () => {
       assert.equal(response.status, 200);
       assert.equal(response.body.type, "Person");
       assert.equal(response.body.discoverable, true);
-      assert.equal(response.body.preferredUsername, artistSlug);
-      assert.equal(response.body.name, artist.name);
-      assert.equal(response.body.summary, artist.bio);
+      assert.equal(response.body.preferredUsername, profileSlug);
+      assert.equal(response.body.name, profile.name);
+      assert.equal(response.body.summary, profile.bio);
 
       assert(
         response.body.followers.includes("/v1/ap/artists/test-artist/followers")

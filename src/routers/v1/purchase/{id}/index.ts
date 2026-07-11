@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistEditableByUser,
+  profileEditableByUser,
   userAuthenticated,
   userLoggedInWithoutRedirect,
 } from "../../../../auth/passport";
@@ -38,11 +38,11 @@ export default function () {
       // Surface a name so the hosted checkout page can show who's being paid.
       let artistName: string | null = null;
       if (profileId) {
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: { id: Number(profileId) },
           select: { name: true },
         });
-        artistName = artist?.name ?? null;
+        artistName = profile?.name ?? null;
       }
 
       res.status(200).json({ result: { ...intent, artistName } });
@@ -148,14 +148,14 @@ export default function () {
       }
 
       const processor = getPaymentProcessor();
-      const { artistId, status } = await processor.getStatus({
+      const { profileId, status } = await processor.getStatus({
         id,
         accountId: stripeAccountId,
       });
 
-      // Only intents Mirlo initiated carry an artistId; anything else isn't
+      // Only intents Mirlo initiated carry an profileId; anything else isn't
       // ours to cancel.
-      if (!artistId) {
+      if (!profileId) {
         throw new AppError({
           httpCode: 404,
           description: "Purchase not found",
@@ -164,7 +164,7 @@ export default function () {
 
       // Cancelling is a merchant action, same as dispatching: otherwise anyone
       // could kill a legitimate sale mid-tap.
-      await artistEditableByUser(artistId, req.user as Express.User);
+      await profileEditableByUser(profileId, req.user as Express.User);
 
       if (status === "succeeded") {
         throw new AppError({

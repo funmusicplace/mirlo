@@ -20,7 +20,7 @@ describe("handleSubscription", () => {
   });
 
   it("should register a subscription in the database", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -29,18 +29,18 @@ describe("handleSubscription", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         name: "Tier",
       },
     });
@@ -69,7 +69,7 @@ describe("handleSubscription", () => {
   });
 
   it("should create a USER_SUBSCRIBED_TO_YOU notification with subscriptionId set", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -78,18 +78,18 @@ describe("handleSubscription", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         name: "Tier",
       },
     });
@@ -123,7 +123,7 @@ describe("handleSubscription", () => {
   });
 
   it("should undelete existing subscription when re-subscribing to the same tier", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -132,18 +132,18 @@ describe("handleSubscription", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const tier = await prisma.profileSubscriptionTier.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         name: "Tier",
       },
     });

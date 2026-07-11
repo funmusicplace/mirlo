@@ -5,13 +5,13 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  federatedArtistAtSomePoint,
-  federatedArtist,
-  artistOptedOutOrDeleted,
+  federatedProfileAtSomePoint,
+  federatedProfile,
+  profileOptedOutOrDeleted,
 } from "../../../../utils/artist";
 import {
-  serializeSingleArtistIntoCanimus,
-  serializeSingleDeletedArtistIntoCanimus,
+  serializeSingleProfileIntoCanimus,
+  serializeSingleDeletedProfileIntoCanimus,
 } from "../../../../utils/serialize/artist";
 import { serializeSingleDeletedTrackIntoCanimus } from "../../../../utils/serialize/track";
 import { serializeSingleDeletedTrackGroupIntoCanimus } from "../../../../utils/serialize/trackGroup";
@@ -40,7 +40,7 @@ export default function () {
 
       let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
         AND: [
-          { profile: federatedArtistAtSomePoint },
+          { profile: federatedProfileAtSomePoint },
           deleted as Prisma.TrackGroupWhereInput,
         ],
         deletedAt: {},
@@ -48,7 +48,7 @@ export default function () {
 
       let trackDeleted: Prisma.TrackWhereInput = {
         AND: [
-          { trackGroup: { profile: federatedArtistAtSomePoint } },
+          { trackGroup: { profile: federatedProfileAtSomePoint } },
           deleted as Prisma.TrackWhereInput,
         ],
         deletedAt: {},
@@ -91,13 +91,13 @@ export default function () {
           },
         };
 
-        federatedArtist.OR = [
+        federatedProfile.OR = [
           optInDateFilter,
           updatedOrCreatedFilter as Prisma.ProfileWhereInput,
           anyTrackGroupUpdatedOrCreated,
         ];
 
-        artistOptedOutOrDeleted.AND = [
+        profileOptedOutOrDeleted.AND = [
           {
             federatedStreamingOptOutDate: fromDateFilter,
           },
@@ -111,8 +111,8 @@ export default function () {
         createdAt: "desc",
       };
 
-      const artists = await prisma.profile.findMany({
-        where: federatedArtist,
+      const profiles = await prisma.profile.findMany({
+        where: federatedProfile,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
@@ -146,8 +146,8 @@ export default function () {
         },
       });
 
-      const deletedArtists = await prisma.profile.findMany({
-        where: artistOptedOutOrDeleted,
+      const deletedProfiles = await prisma.profile.findMany({
+        where: profileOptedOutOrDeleted,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
@@ -188,8 +188,8 @@ export default function () {
       let deletedEntities: any = [];
       deletedEntities = deletedEntities
         .concat(
-          deletedArtists.map((artist) =>
-            serializeSingleDeletedArtistIntoCanimus(artist)
+          deletedProfiles.map((profile) =>
+            serializeSingleDeletedProfileIntoCanimus(profile)
           )
         )
         .concat(
@@ -217,8 +217,8 @@ export default function () {
       res.json({
         type: "root",
         url: process.env.API_DOMAIN,
-        children: artists.map((artist) =>
-          serializeSingleArtistIntoCanimus(artist)
+        children: profiles.map((profile) =>
+          serializeSingleProfileIntoCanimus(profile)
         ),
         deleted: deletedEntities,
       });

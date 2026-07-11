@@ -28,7 +28,7 @@ describe("send-out-monthly-receipts", () => {
   it("should send out monthly receipt", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -37,11 +37,11 @@ describe("send-out-monthly-receipts", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -57,7 +57,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -77,7 +77,7 @@ describe("send-out-monthly-receipts", () => {
   it("should not send out monthly receipt if amount is 0", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -86,11 +86,11 @@ describe("send-out-monthly-receipts", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -106,7 +106,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 0,
       },
     });
@@ -119,7 +119,7 @@ describe("send-out-monthly-receipts", () => {
   it("should send out monthly receipt if some are greater than 0", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -128,11 +128,11 @@ describe("send-out-monthly-receipts", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -145,11 +145,11 @@ describe("send-out-monthly-receipts", () => {
       },
     });
 
-    const artist2 = await prisma.profile.create({
+    const profile2 = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -165,7 +165,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist2.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile2.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -173,7 +173,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 0,
       },
     });
@@ -188,7 +188,7 @@ describe("send-out-monthly-receipts", () => {
     assert.equal(locals.userSubscriptions[0].amount, 5);
     assert.equal(
       locals.userSubscriptions[0].profileSubscriptionTier.profileId,
-      artist2.id
+      profile2.id
     );
     assert.equal(locals.userSubscriptions.length, 1);
     assert.equal(locals.user.email, followerUser.email);

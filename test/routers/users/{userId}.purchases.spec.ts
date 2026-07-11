@@ -7,7 +7,7 @@ import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createTrackGroup,
   createUser,
@@ -32,9 +32,9 @@ describe("users/{userId}/purchases", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
-      const merch = await createMerch(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const merch = await createMerch(profile.id);
 
       const transaction = await prisma.userTransaction.create({
         data: {
@@ -98,7 +98,7 @@ describe("users/{userId}/purchases", () => {
       );
       assert.equal(
         response.body.results[1].merchPurchases[0].merch.artistId,
-        artist.id
+        profile.id
       );
       assert.equal(response.body.results[1].trackGroupPurchases.length, 0);
 
@@ -109,7 +109,7 @@ describe("users/{userId}/purchases", () => {
       );
       assert.equal(
         response.body.results[0].trackGroupPurchases[0].trackGroup.artistId,
-        artist.id
+        profile.id
       );
       assert.equal(response.body.results[0].merchPurchases.length, 0);
     });
@@ -120,8 +120,8 @@ describe("users/{userId}/purchases", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const transaction = await prisma.userTransaction.create({
         data: {
@@ -162,8 +162,8 @@ describe("users/{userId}/purchases", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         tracks: [
           { title: "Track 1", audio: { create: { uploadState: "SUCCESS" } } },
           {

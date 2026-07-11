@@ -6,7 +6,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -45,8 +45,8 @@ describe("tracks/{id}/purchase", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const track = await createTrack(trackGroup.id, { minPrice: 500 });
 
@@ -66,8 +66,8 @@ describe("tracks/{id}/purchase", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         minPrice: 0,
       });
       const track = await createTrack(trackGroup.id);
@@ -93,8 +93,8 @@ describe("tracks/{id}/purchase", () => {
         await createUser({
           email: "purchaser@purchaser.com",
         });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         minPrice: 0,
       });
       const track = await createTrack(trackGroup.id);
@@ -110,7 +110,7 @@ describe("tracks/{id}/purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.equal(
         response.body.redirectUrl,
-        `/${artist.urlSlug}/release/${trackGroup.urlSlug}/download?email=${purchaser.email}`
+        `/${profile.urlSlug}/release/${trackGroup.urlSlug}/download?email=${purchaser.email}`
       );
       const purchase = await prisma.userTrackPurchase.findFirst({
         where: {
@@ -131,8 +131,8 @@ describe("tracks/{id}/purchase", () => {
         email: "artist@artist.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         minPrice: 0,
       });
       const track = await createTrack(trackGroup.id);
@@ -175,8 +175,8 @@ describe("tracks/{id}/purchase", () => {
           email: "artist@artist.com",
           stripeAccountId: "aRandomWord",
         });
-        const artist = await createArtist(user.id);
-        const trackGroup = await createTrackGroup(artist.id);
+        const profile = await createProfile(user.id);
+        const trackGroup = await createTrackGroup(profile.id);
         const track = await createTrack(trackGroup.id, {
           stripeProductKey: "testProductKey",
         });
@@ -192,7 +192,7 @@ describe("tracks/{id}/purchase", () => {
 
         assert.equal(stubCreate.calledOnce, true);
         const args = stubCreate.getCall(0).args as any; // Something wrong with how types get generated for the stub
-        assert.equal(args[0]?.metadata?.profileId, artist.id);
+        assert.equal(args[0]?.metadata?.profileId, profile.id);
         assert.equal(args[0]?.metadata?.trackId, track.id);
         assert.equal(args[0]?.metadata?.stripeAccountId, user.stripeAccountId);
         assert.equal(args[0]?.line_items?.[0].quantity, 1);
@@ -220,7 +220,7 @@ describe("tracks/{id}/purchase", () => {
             return { default_currency: "usd" };
           });
 
-        const { user: artistUser } = await createUser({
+        const { user: profileOwner } = await createUser({
           email: "artist@artist.com",
           stripeAccountId: "aRandomWord",
         });
@@ -228,8 +228,8 @@ describe("tracks/{id}/purchase", () => {
           email: "label@label.com",
           stripeAccountId: "labelAccountId",
         });
-        const artist = await createArtist(artistUser.id);
-        const trackGroup = await createTrackGroup(artist.id, {
+        const profile = await createProfile(profileOwner.id);
+        const trackGroup = await createTrackGroup(profile.id, {
           paymentToUserId: labelUser.id,
         });
         const track = await createTrack(trackGroup.id, {
@@ -247,7 +247,7 @@ describe("tracks/{id}/purchase", () => {
 
         assert.equal(stubCreate.calledOnce, true);
         const args = stubCreate.getCall(0).args as any; // FIXME somethin wrong with how types get passed to the stub
-        assert.equal(args[0]?.metadata?.profileId, artist.id);
+        assert.equal(args[0]?.metadata?.profileId, profile.id);
         assert.equal(args[0]?.metadata?.trackId, track.id);
         assert.equal(
           args[0]?.metadata?.stripeAccountId,

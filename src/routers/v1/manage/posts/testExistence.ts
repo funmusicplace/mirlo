@@ -15,12 +15,12 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { urlSlug, artistId, forPostId } = req.query as unknown as Query;
+    const { urlSlug, artistId: profileId, forPostId } = req.query as unknown as Query;
     try {
       const post = await prisma.post.findFirst({
         where: {
           urlSlug: { equals: urlSlug, mode: "insensitive" },
-          profileId: Number(artistId),
+          profileId: Number(profileId),
           ...(forPostId ? { id: { not: Number(forPostId) } } : {}),
         },
       });

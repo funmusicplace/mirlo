@@ -3,10 +3,10 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { deleteArtist } from "../../../../../utils/artist";
+import { deleteProfile } from "../../../../../utils/artist";
 import { processSingleTrackGroup } from "../../../../../utils/serialize/trackGroup";
 
 type Params = {
@@ -15,17 +15,17 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
 
     try {
       let draftAlbum = await prisma.trackGroup.findFirst({
         where: {
           isHiddenTrackGroupForSongDrafts: true,
-          profileId: Number(artistId),
+          profileId: Number(profileId),
         },
         include: {
           tracks: {
@@ -41,7 +41,7 @@ export default function () {
           data: {
             isHiddenTrackGroupForSongDrafts: true,
             urlSlug: "hidden-draft-album",
-            profileId: Number(artistId),
+            profileId: Number(profileId),
           },
           include: {
             tracks: {
@@ -88,12 +88,12 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const user = req.user;
 
     try {
-      await deleteArtist(Number(user.id), Number(artistId));
+      await deleteProfile(Number(user.id), Number(profileId));
     } catch (e) {
       return next(e);
     }

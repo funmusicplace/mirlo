@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../../auth/passport";
 import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
@@ -19,9 +19,9 @@ type QueryParams = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, profileBelongsToLoggedInUser, POST],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

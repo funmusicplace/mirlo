@@ -10,13 +10,13 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { subscribeUserToArtist } from "../artist";
+import { subscribeUserToProfile } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
   getFeesFromPaymentIntent,
-  handleArtistGift,
-  handleArtistMerchPurchase,
+  handleProfileGift,
+  handleProfileMerchPurchase,
   handleCataloguePurchase,
   handleFundraiserPledge,
   handleFundraiserPledgePaymentFailure,
@@ -507,10 +507,10 @@ export const handleCheckoutSession = async (
     logger.info(`checkout.session: ${session.id} Processing session`);
     if (purchaseType === "tip") {
       logger.info(`checkout.session: ${session.id} handling tip`);
-      await handleArtistGift(Number(actualUserId), Number(profileId), session);
+      await handleProfileGift(Number(actualUserId), Number(profileId), session);
     } else if (purchaseType === "merch") {
       logger.info(`checkout.session: ${session.id} handling merch`);
-      await handleArtistMerchPurchase(
+      await handleProfileMerchPurchase(
         Number(actualUserId),
         session,
         stripeAccountId
@@ -590,7 +590,7 @@ export const handleSetupIntentSucceeded = async (
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
       });
-      await subscribeUserToArtist(fundraiser.trackGroups[0].profile, user);
+      await subscribeUserToProfile(fundraiser.trackGroups[0].profile, user);
     }
   }
 };
@@ -911,7 +911,7 @@ export const handleMerchPurchasesFromIntent = async (
     },
   });
 
-  let artist: Prisma.ProfileGetPayload<{ include: { user: true } }> | undefined;
+  let profile: Prisma.ProfileGetPayload<{ include: { user: true } }> | undefined;
 
   for (const item of merchItems) {
     const merch = await prisma.merch.findFirst({
@@ -924,8 +924,8 @@ export const handleMerchPurchasesFromIntent = async (
       continue;
     }
 
-    if (!artist && merch.profile) {
-      artist = merch.profile;
+    if (!profile && merch.profile) {
+      profile = merch.profile;
     }
 
     await prisma.merchPurchase.create({
@@ -945,9 +945,9 @@ export const handleMerchPurchasesFromIntent = async (
 
   const purchaser = await prisma.user.findFirst({ where: { id: userId } });
 
-  if (purchaser && artist) {
+  if (purchaser && profile) {
     await sendSaleEmails(
-      artist,
+      profile,
       purchaser,
       [transaction.id],
       paymentIntent.metadata?.message
@@ -992,7 +992,7 @@ export const completePurchaseFromIntent = async (
       newUser
     );
   } else if (purchaseType === "tip" && profileId) {
-    await handleArtistGift(
+    await handleProfileGift(
       Number(actualUserId),
       Number(profileId),
       sessionAdapter

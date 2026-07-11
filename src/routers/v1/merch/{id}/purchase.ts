@@ -2,12 +2,12 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { subscribeUserToArtist } from "../../../../utils/artist";
+import { subscribeUserToProfile } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { resolvePayee } from "../../../../utils/payments/payee";
 import { determinePrice } from "../../../../utils/purchasing";
 import { createStripeCheckoutSessionForMerchPurchase } from "../../../../utils/stripe/sessions";
-import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
+import { findUserDiscountPercentsForProfile } from "../../../../utils/user";
 
 type Params = {
   id: string;
@@ -33,7 +33,7 @@ export default function () {
       quantity?: number;
       merchOptionIds: string[];
       shippingDestinationId: string;
-      message?: string; // Optional message for the artist
+      message?: string; // Optional message for the profile
     };
     const loggedInUser = req.user;
 
@@ -99,7 +99,7 @@ export default function () {
 
       let discountPercent: number | undefined;
       if (loggedInUser) {
-        const discounts = await findUserDiscountPercentsForArtist(
+        const discounts = await findUserDiscountPercentsForProfile(
           loggedInUser.id,
           merch.profileId
         );
@@ -110,11 +110,10 @@ export default function () {
       }
 
       if (loggedInUser) {
-        await subscribeUserToArtist(merch?.profile, loggedInUser);
+        await subscribeUserToProfile(merch?.profile, loggedInUser);
       }
 
-      const stripeAccountId = resolvePayee({
-        artist: merch.profile,
+      const stripeAccountId = resolvePayee({ profile: merch.profile,
       }).stripeAccountId;
 
       const { priceNumber, isPriceZero } = determinePrice(

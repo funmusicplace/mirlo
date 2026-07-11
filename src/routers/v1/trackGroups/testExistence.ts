@@ -14,14 +14,14 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId, urlSlug } = req.query as unknown as Query;
+    const { artistId: profileId, urlSlug } = req.query as unknown as Query;
     try {
       let exists = false;
 
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           urlSlug: { equals: urlSlug, mode: "insensitive" },
-          profileId: Number(artistId),
+          profileId: Number(profileId),
         },
       });
       exists = !!trackGroup;

@@ -44,12 +44,12 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { artists } = req.body as BulkUploadRequest;
+    const { artists: profiles } = req.body as BulkUploadRequest;
     assertLoggedIn(req);
     const loggedInUser = req.user;
     const loggedInUserId = loggedInUser.id;
 
-    if (!Array.isArray(artists) || artists.length === 0) {
+    if (!Array.isArray(profiles) || profiles.length === 0) {
       return next(
         new AppError({
           httpCode: HttpCode.BAD_REQUEST,
@@ -67,27 +67,27 @@ export default function () {
 
     try {
       // Process each artist
-      for (const artistData of artists) {
+      for (const profileData of profiles) {
         try {
-          if (!artistData.name || typeof artistData.name !== "string") {
+          if (!profileData.name || typeof profileData.name !== "string") {
             result.partialErrors.push("Artist name is required");
             continue;
           }
 
           if (
-            !Array.isArray(artistData.trackGroups) ||
-            artistData.trackGroups.length === 0
+            !Array.isArray(profileData.trackGroups) ||
+            profileData.trackGroups.length === 0
           ) {
             result.partialErrors.push(
-              `Artist "${artistData.name}": No track groups provided`
+              `Artist "${profileData.name}": No track groups provided`
             );
             continue;
           }
 
-          const artistName = artistData.name;
+          const artistName = profileData.name;
 
           // Find or create the artist
-          let artist = await prisma.profile.findFirst({
+          let profile = await prisma.profile.findFirst({
             where: {
               name: artistName,
               OR: [
@@ -100,8 +100,8 @@ export default function () {
             },
           });
 
-          if (!artist) {
-            artist = await prisma.profile.create({
+          if (!profile) {
+            profile = await prisma.profile.create({
               data: {
                 name: artistName,
                 urlSlug: slug(artistName),
@@ -115,7 +115,7 @@ export default function () {
           }
 
           // Process all track groups for this artist
-          for (const trackGroup of artistData.trackGroups) {
+          for (const trackGroup of profileData.trackGroups) {
             try {
               // Generate URL slug for the track group
               const urlSlug = slug(trackGroup.title);
@@ -126,7 +126,7 @@ export default function () {
               let existingTrackGroup = await prisma.trackGroup.findUnique({
                 where: {
                   profileId_urlSlug: {
-                    profileId: artist.id,
+                    profileId: profile.id,
                     urlSlug: finalSlug,
                   },
                 },
@@ -138,7 +138,7 @@ export default function () {
                 existingTrackGroup = await prisma.trackGroup.findUnique({
                   where: {
                     profileId_urlSlug: {
-                      profileId: artist.id,
+                      profileId: profile.id,
                       urlSlug: finalSlug,
                     },
                   },
@@ -148,7 +148,7 @@ export default function () {
               // Determine if label should receive payments for this release
               let paymentToUserId: number | undefined = undefined;
               if (
-                artist?.artistLabels?.some(
+                profile?.artistLabels?.some(
                   (label: ArtistLabel) =>
                     label.labelUserId === loggedInUserId &&
                     label.canLabelAddReleases
@@ -161,7 +161,7 @@ export default function () {
               const createdTrackGroup = await prisma.trackGroup.create({
                 data: {
                   title: trackGroup.title,
-                  profile: { connect: { id: artist.id } },
+                  profile: { connect: { id: profile.id } },
                   urlSlug: finalSlug,
                   about: trackGroup.about,
                   releaseDate: trackGroup.releaseDate
@@ -196,9 +196,9 @@ export default function () {
                   // Create track artists
                   for (const trackArtist of track.artists ?? []) {
                     // Find or create the artist if artistName is provided
-                    let contributingArtist = undefined;
+                    let contributingProfile = undefined;
                     if (trackArtist.artistName) {
-                      contributingArtist = await prisma.profile.findFirst({
+                      contributingProfile = await prisma.profile.findFirst({
                         where: {
                           name: trackArtist.artistName,
                         },
@@ -209,7 +209,7 @@ export default function () {
                     await prisma.trackArtist.create({
                       data: {
                         trackId: createdTrack.id,
-                        artistId: contributingArtist?.id,
+                        artistId: contributingProfile?.id,
                         artistName: trackArtist.artistName,
                         role: trackArtist.role,
                         order: 0,
@@ -238,7 +238,7 @@ export default function () {
           }
         } catch (artistError) {
           result.partialErrors.push(
-            `Artist "${artistData.name}": ${
+            `Artist "${profileData.name}": ${
               artistError instanceof Error
                 ? artistError.message
                 : "Unknown error"

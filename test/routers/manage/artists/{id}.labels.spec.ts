@@ -10,7 +10,7 @@ import {
   sendMailQueueEvents,
 } from "../../../../src/queues/send-mail-queue";
 import labelsEndpoint from "../../../../src/routers/v1/manage/artists/{artistId}/labels/index";
-import { clearTables, createArtist, createUser } from "../../../utils";
+import { clearTables, createProfile, createUser } from "../../../utils";
 import { requestApp } from "../../utils";
 
 import prisma from "@mirlo/prisma";
@@ -36,23 +36,23 @@ describe("manage/artists/{artistId}/labels", () => {
   describe("Integration tests", () => {
     describe("GET", () => {
       it("should return labels for an artist", async () => {
-        const { user: artistUser, accessToken: artistAccessToken } =
+        const { user: profileOwner, accessToken: artistAccessToken } =
           await createUser({ email: "artist@test.com" });
         const { user: labelUser } = await createUser({
           email: "label@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
+        const profile = await createProfile(profileOwner.id);
 
         // Create label user's label profile
-        const labelProfile = await createArtist(labelUser.id, {
+        const labelProfile = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
         // Create label relationship
         await prisma.artistLabel.create({
           data: {
-            artistId: artist.id,
+            artistId: profile.id,
             labelUserId: labelUser.id,
             isLabelApproved: true,
             isArtistApproved: false,
@@ -60,7 +60,7 @@ describe("manage/artists/{artistId}/labels", () => {
         });
 
         const response = await requestApp
-          .get(`manage/artists/${artist.id}/labels`)
+          .get(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${artistAccessToken}`])
           .set("Accept", "application/json");
 
@@ -74,10 +74,10 @@ describe("manage/artists/{artistId}/labels", () => {
         const { user, accessToken } = await createUser({
           email: "artist@test.com",
         });
-        const artist = await createArtist(user.id);
+        const profile = await createProfile(user.id);
 
         const response = await requestApp
-          .get(`manage/artists/${artist.id}/labels`)
+          .get(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${accessToken}`])
           .set("Accept", "application/json");
 
@@ -90,17 +90,17 @@ describe("manage/artists/{artistId}/labels", () => {
       it("should allow a label to add an artist", async () => {
         const { user: labelUser, accessToken: labelAccessToken } =
           await createUser({ email: "label@test.com" });
-        const { user: artistUser } = await createUser({
+        const { user: profileOwner } = await createUser({
           email: "artist@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const profile = await createProfile(profileOwner.id);
+        const labelProfile = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
         const response = await requestApp
-          .post(`manage/artists/${artist.id}/labels`)
+          .post(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${labelAccessToken}`])
           .send({
             labelUserId: labelUser.id,
@@ -114,7 +114,7 @@ describe("manage/artists/{artistId}/labels", () => {
         // Verify the relationship was created
         const createdLabel = await prisma.artistLabel.findFirst({
           where: {
-            artistId: artist.id,
+            artistId: profile.id,
             labelUserId: labelUser.id,
           },
         });
@@ -128,16 +128,16 @@ describe("manage/artists/{artistId}/labels", () => {
         const { user: labelUser } = await createUser({
           email: "label@test.com",
         });
-        const { user: artistUser, accessToken: artistAccessToken } =
+        const { user: profileOwner, accessToken: artistAccessToken } =
           await createUser({ email: "artist@test.com" });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const profile = await createProfile(profileOwner.id);
+        const labelProfile = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
         const response = await requestApp
-          .post(`manage/artists/${artist.id}/labels`)
+          .post(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${artistAccessToken}`])
           .send({
             labelUserId: labelUser.id,
@@ -149,7 +149,7 @@ describe("manage/artists/{artistId}/labels", () => {
         // Verify the relationship was created with artist approval
         const createdLabel = await prisma.artistLabel.findFirst({
           where: {
-            artistId: artist.id,
+            artistId: profile.id,
             labelUserId: labelUser.id,
           },
         });
@@ -162,29 +162,29 @@ describe("manage/artists/{artistId}/labels", () => {
       it("should not create duplicate notification if already exists", async () => {
         const { user: labelUser, accessToken: labelAccessToken } =
           await createUser({ email: "label@test.com" });
-        const { user: artistUser } = await createUser({
+        const { user: profileOwner } = await createUser({
           email: "artist@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const profile = await createProfile(profileOwner.id);
+        const labelProfile = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
         // Create the notification first
         const existingNotification = await prisma.notification.create({
           data: {
-            userId: artistUser.id,
+            userId: profileOwner.id,
             notificationType: "LABEL_ADDED_ARTIST",
             relatedUserId: labelUser.id,
-            profileId: artist.id,
+            profileId: profile.id,
             content: "Existing notification",
           },
         });
 
         // Call the endpoint
         const response = await requestApp
-          .post(`manage/artists/${artist.id}/labels`)
+          .post(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${labelAccessToken}`])
           .send({
             labelUserId: labelUser.id,
@@ -197,10 +197,10 @@ describe("manage/artists/{artistId}/labels", () => {
         // Verify only one notification exists
         const notifications = await prisma.notification.findMany({
           where: {
-            userId: artistUser.id,
+            userId: profileOwner.id,
             notificationType: "LABEL_ADDED_ARTIST",
             relatedUserId: labelUser.id,
-            profileId: artist.id,
+            profileId: profile.id,
           },
         });
 
@@ -219,14 +219,14 @@ describe("manage/artists/{artistId}/labels", () => {
       it("should fail if labelUserId is missing", async () => {
         const { user: labelUser, accessToken: labelAccessToken } =
           await createUser({ email: "label@test.com" });
-        const { user: artistUser } = await createUser({
+        const { user: profileOwner } = await createUser({
           email: "artist@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
+        const profile = await createProfile(profileOwner.id);
 
         const response = await requestApp
-          .post(`manage/artists/${artist.id}/labels`)
+          .post(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${labelAccessToken}`])
           .send({
             isLabelApproved: true,
@@ -255,20 +255,20 @@ describe("manage/artists/{artistId}/labels", () => {
 
     describe("DELETE", () => {
       it("should delete a label relationship", async () => {
-        const { user: artistUser, accessToken: artistAccessToken } =
+        const { user: profileOwner, accessToken: artistAccessToken } =
           await createUser({ email: "artist@test.com" });
         const { user: labelUser } = await createUser({
           email: "label@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const profile = await createProfile(profileOwner.id);
+        const labelProfile = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
         await prisma.artistLabel.create({
           data: {
-            artistId: artist.id,
+            artistId: profile.id,
             labelUserId: labelUser.id,
             isLabelApproved: true,
             isArtistApproved: false,
@@ -276,7 +276,7 @@ describe("manage/artists/{artistId}/labels", () => {
         });
 
         const response = await requestApp
-          .delete(`manage/artists/${artist.id}/labels`)
+          .delete(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${artistAccessToken}`])
           .send({
             labelUserId: labelUser.id,
@@ -289,7 +289,7 @@ describe("manage/artists/{artistId}/labels", () => {
         // Verify relationship was deleted
         const deletedLabel = await prisma.artistLabel.findFirst({
           where: {
-            artistId: artist.id,
+            artistId: profile.id,
             labelUserId: labelUser.id,
           },
         });
@@ -298,13 +298,13 @@ describe("manage/artists/{artistId}/labels", () => {
       });
 
       it("should fail if labelUserId is missing", async () => {
-        const { user: artistUser, accessToken: artistAccessToken } =
+        const { user: profileOwner, accessToken: artistAccessToken } =
           await createUser({ email: "artist@test.com" });
 
-        const artist = await createArtist(artistUser.id);
+        const profile = await createProfile(profileOwner.id);
 
         const response = await requestApp
-          .delete(`manage/artists/${artist.id}/labels`)
+          .delete(`manage/artists/${profile.id}/labels`)
           .set("Cookie", [`jwt=${artistAccessToken}`])
           .send({})
           .set("Accept", "application/json");
@@ -321,12 +321,12 @@ describe("manage/artists/{artistId}/labels", () => {
       const { user: labelUser } = await createUser({
         email: "label@test.com",
       });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      const label = await createArtist(labelUser.id, {
+      const profile = await createProfile(profileOwner.id);
+      const label = await createProfile(labelUser.id, {
         name: "Label Name",
         isLabelProfile: true,
       });
@@ -334,7 +334,7 @@ describe("manage/artists/{artistId}/labels", () => {
       const operations = labelsEndpoint();
       const mockReq = {
         user: labelUser,
-        params: { artistId: artist.id.toString() },
+        params: { artistId: profile.id.toString() },
         body: {
           labelUserId: labelUser.id,
           isLabelApproved: true,
@@ -361,11 +361,11 @@ describe("manage/artists/{artistId}/labels", () => {
       const [queueName, emailData] = stub.getCall(0).args;
       assert.equal(queueName, "send-mail");
       assert.equal(emailData.template, "announce-label-invite");
-      assert.equal(emailData.message.to, artistUser.email);
-      assert.equal(emailData.locals.artist.id, artist.id);
+      assert.equal(emailData.message.to, profileOwner.email);
+      assert.equal(emailData.locals.artist.id, profile.id);
       assert.ok(emailData.locals.label, "Label profile should be included");
-      assert.equal(emailData.locals.user.id, artistUser.id);
-      assert.equal(emailData.locals.labelArtist.id, label.id);
+      assert.equal(emailData.locals.user.id, profileOwner.id);
+      assert.equal(emailData.locals.labelProfile.id, label.id);
     });
 
     it("should create notification alongside email queue", async () => {
@@ -374,17 +374,17 @@ describe("manage/artists/{artistId}/labels", () => {
       const { user: labelUser } = await createUser({
         email: "label@test.com",
       });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      await createArtist(labelUser.id, { isLabelProfile: true });
+      const profile = await createProfile(profileOwner.id);
+      await createProfile(labelUser.id, { isLabelProfile: true });
 
       const operations = labelsEndpoint();
       const mockReq = {
         user: labelUser,
-        params: { artistId: artist.id.toString() },
+        params: { artistId: profile.id.toString() },
         body: {
           labelUserId: labelUser.id,
           isLabelApproved: true,
@@ -403,10 +403,10 @@ describe("manage/artists/{artistId}/labels", () => {
       // Both notification and email should exist
       const notification = await prisma.notification.findFirst({
         where: {
-          userId: artistUser.id,
+          userId: profileOwner.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
       assert.ok(notification, "Notification should be created");
@@ -421,17 +421,17 @@ describe("manage/artists/{artistId}/labels", () => {
       const { user: labelUser } = await createUser({
         email: "label@test.com",
       });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      await createArtist(labelUser.id, { isLabelProfile: true });
+      const profile = await createProfile(profileOwner.id);
+      await createProfile(labelUser.id, { isLabelProfile: true });
 
       const operations = labelsEndpoint();
       const mockReq = {
         user: labelUser,
-        params: { artistId: artist.id.toString() },
+        params: { artistId: profile.id.toString() },
         body: {
           labelUserId: labelUser.id,
           isLabelApproved: true,
@@ -454,7 +454,7 @@ describe("manage/artists/{artistId}/labels", () => {
       // Label relationship and notification should still be created
       const createdLabel = await prisma.artistLabel.findFirst({
         where: {
-          artistId: artist.id,
+          artistId: profile.id,
           labelUserId: labelUser.id,
         },
       });
@@ -462,7 +462,7 @@ describe("manage/artists/{artistId}/labels", () => {
 
       const notification = await prisma.notification.findFirst({
         where: {
-          userId: artistUser.id,
+          userId: profileOwner.id,
           notificationType: "LABEL_ADDED_ARTIST",
         },
       });
@@ -475,20 +475,20 @@ describe("manage/artists/{artistId}/labels", () => {
       const { user: labelUser } = await createUser({
         email: "label@test.com",
       });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      await createArtist(labelUser.id, { isLabelProfile: true });
+      const profile = await createProfile(profileOwner.id);
+      await createProfile(labelUser.id, { isLabelProfile: true });
 
       // Create notification first
       const existingNotification = await prisma.notification.create({
         data: {
-          userId: artistUser.id,
+          userId: profileOwner.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          profileId: artist.id,
+          profileId: profile.id,
           content: "Existing notification",
         },
       });
@@ -496,7 +496,7 @@ describe("manage/artists/{artistId}/labels", () => {
       const operations = labelsEndpoint();
       const mockReq = {
         user: labelUser,
-        params: { artistId: artist.id.toString() },
+        params: { artistId: profile.id.toString() },
         body: {
           labelUserId: labelUser.id,
           isLabelApproved: true,
@@ -515,10 +515,10 @@ describe("manage/artists/{artistId}/labels", () => {
       // Should not create duplicate notification
       const notifications = await prisma.notification.findMany({
         where: {
-          userId: artistUser.id,
+          userId: profileOwner.id,
           notificationType: "LABEL_ADDED_ARTIST",
           relatedUserId: labelUser.id,
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
       assert.equal(
@@ -540,16 +540,16 @@ describe("manage/artists/{artistId}/labels", () => {
       const { user: labelUser } = await createUser({
         email: "label@test.com",
       });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       const operations = labelsEndpoint();
       const mockReq = {
         user: labelUser,
-        params: { artistId: artist.id.toString() },
+        params: { artistId: profile.id.toString() },
         body: {
           isLabelApproved: true,
         },

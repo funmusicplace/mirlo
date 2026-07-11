@@ -14,7 +14,7 @@ import { Response } from "express";
 
 import { logger } from "../logger";
 
-import { findArtistIdForURLSlug } from "./artist";
+import { findProfileIdForURLSlug } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
@@ -41,16 +41,16 @@ export const notifyFollowersOfNewAlbum = async (trackGroup: {
     data: { notifiedFollowersAt: new Date() },
   });
 
-  const artistFollowers = await prisma.profileUserSubscription.findMany({
+  const profileFollowers = await prisma.profileUserSubscription.findMany({
     where: {
       profileSubscriptionTier: { profileId: trackGroup.profileId },
     },
   });
 
-  if (artistFollowers.length === 0) return;
+  if (profileFollowers.length === 0) return;
 
   await prisma.notification.createMany({
-    data: artistFollowers.map((follower) => ({
+    data: profileFollowers.map((follower) => ({
       userId: follower.userId,
       trackGroupId: trackGroup.id,
       notificationType: trackGroup.isPreorder
@@ -200,32 +200,32 @@ export const deleteTrackGroup = async (
 
 export const findTrackGroupIdForSlug = async (
   trackGroupIdOrSlug: string,
-  artistId?: string
+  profileId?: string
 ) => {
   let foundtrackGroupId: number | undefined = Number(trackGroupIdOrSlug);
 
   if (
     Number.isNaN(foundtrackGroupId) ||
-    (Number.isFinite(+foundtrackGroupId) && artistId)
+    (Number.isFinite(+foundtrackGroupId) && profileId)
   ) {
-    if (!artistId) {
+    if (!profileId) {
       throw new Error(
         "Searching for a TrackGroup by slug requires an artistId"
       );
     }
-    const parsedArtistId = await findArtistIdForURLSlug(artistId);
+    const parsedProfileId = await findProfileIdForURLSlug(profileId);
 
-    if (parsedArtistId) {
+    if (parsedProfileId) {
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           urlSlug: { equals: trackGroupIdOrSlug, mode: "insensitive" },
-          profileId: parsedArtistId,
+          profileId: parsedProfileId,
         },
       });
       foundtrackGroupId = trackGroup ? trackGroup.id : undefined;
     } else {
       logger.info(
-        `findTrackGroupIdForSlug: returning undefined for trackGroupId: ${trackGroupIdOrSlug}, profileId: ${artistId}`
+        `findTrackGroupIdForSlug: returning undefined for trackGroupId: ${trackGroupIdOrSlug}, profileId: ${profileId}`
       );
       return undefined;
     }

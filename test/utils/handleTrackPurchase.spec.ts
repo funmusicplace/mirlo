@@ -35,7 +35,7 @@ describe("handleTrackPurchase", () => {
   it("should send out emails for track purchase", async () => {
     const stub = sinon.spy(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -44,16 +44,16 @@ describe("handleTrackPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "Our Custom Title",
     });
 
@@ -70,7 +70,7 @@ describe("handleTrackPurchase", () => {
     assert.equal(locals.transactions[0]?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(
       locals1.transactions[0].trackPurchases?.[0].track.id,
@@ -82,7 +82,7 @@ describe("handleTrackPurchase", () => {
   it("should send out emails for track group purchase without log-in", async () => {
     const stub = sinon.spy(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -91,16 +91,16 @@ describe("handleTrackPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "Our Custom Title",
     });
 
@@ -120,7 +120,7 @@ describe("handleTrackPurchase", () => {
     assert.equal(locals0.transactions[0]?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(
       locals1.transactions[0].trackPurchases?.[0].track.id,

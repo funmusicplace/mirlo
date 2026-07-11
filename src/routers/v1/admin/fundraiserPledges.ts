@@ -126,10 +126,10 @@ export default function () {
           fundraiser: {
             ...pledge.fundraiser,
             trackGroups: pledge.fundraiser.trackGroups.map((tg) => {
-              const { profileId, profile, ...tgRest } = tg;
+              const { profile, ...tgRest } = tg;
               return {
                 ...tgRest,
-                artistId: profileId ?? profile.id,
+                artistId: profile.id,
                 artist: profile,
               };
             }),

@@ -49,7 +49,7 @@ export const endPreorderForTrackGroup = async (
       trackGroup.publishedAt && trackGroup.publishedAt <= new Date();
 
     if (isPublished) {
-      const artistFollowers = await tx.profileUserSubscription.findMany({
+      const profileFollowers = await tx.profileUserSubscription.findMany({
         where: {
           profileSubscriptionTier: {
             profileId: trackGroup.profileId,
@@ -58,7 +58,7 @@ export const endPreorderForTrackGroup = async (
       });
 
       await tx.notification.createMany({
-        data: artistFollowers.map((follower) => ({
+        data: profileFollowers.map((follower) => ({
           userId: follower.userId,
           trackGroupId,
           notificationType: "NEW_ARTIST_ALBUM" as const,

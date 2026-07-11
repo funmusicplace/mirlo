@@ -5,7 +5,7 @@ import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import logger from "../../logger";
 import { AppError } from "../../utils/error";
-import { subscribeUserToArtist } from "../../utils/artist";
+import { subscribeUserToProfile } from "../../utils/artist";
 import { getSiteSettings } from "../../utils/settings";
 import { sendVerificationEmail } from "./sendVerificationEmail";
 
@@ -149,7 +149,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
             Number(settings.settings.instanceCustomization.profileId)
           )
         ) {
-          const artist = await prisma.profile.findFirst({
+          const profile = await prisma.profile.findFirst({
             where: {
               id:
                 Number(settings.settings.instanceCustomization.profileId) || -1,
@@ -159,8 +159,8 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
               subscriptionTiers: true,
             },
           });
-          if (artist) {
-            await subscribeUserToArtist(artist, result);
+          if (profile) {
+            await subscribeUserToProfile(profile, result);
           }
         }
       }

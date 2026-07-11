@@ -31,7 +31,7 @@ describe("artists/{id}/followers", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -41,7 +41,7 @@ describe("artists/{id}/followers", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/followers`)
+      .get(`artists/${profile.id}/followers`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);

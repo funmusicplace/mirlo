@@ -4,11 +4,11 @@ import { NextFunction, Request, Response } from "express";
 import { uniqBy } from "lodash";
 
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import logger from "../../../../../logger";
-import { findArtistIdForURLSlug } from "../../../../../utils/artist";
+import { findProfileIdForURLSlug } from "../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../utils/download";
 import { AppError } from "../../../../../utils/error";
 import { grantSubscriptionTierReleases } from "../../../../../utils/subscriptionTier";
@@ -50,15 +50,15 @@ const csvColumns = [
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    let { artistId }: { artistId?: string } = req.params;
+    let { artistId: profileId }: {  artistId?: string } = req.params;
 
     try {
-      const parsedId = await findArtistIdForURLSlug(artistId);
+      const parsedId = await findProfileIdForURLSlug(profileId);
 
       if (!parsedId) {
         throw new AppError({
@@ -79,7 +79,11 @@ export default function () {
           id: true,
           amount: true,
           user: true,
-          profileSubscriptionTier: true,
+          profileSubscriptionTier: {
+            include: {
+              profile: true,
+            },
+          },
           profileUserSubscriptionCharges: {
             select: {
               id: true,
@@ -155,7 +159,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    let { artistId }: { artistId?: string } = req.params;
+    let { artistId: profileId }: {  artistId?: string } = req.params;
 
     const { subscribers, artistSubscriptionTierId, profileSubscriptionTierId } =
       req.body as {
@@ -167,9 +171,9 @@ export default function () {
     const tierId = artistSubscriptionTierId ?? profileSubscriptionTierId;
 
     try {
-      const parsedArtistId = await findArtistIdForURLSlug(artistId);
+      const parsedProfileId = await findProfileIdForURLSlug(profileId);
 
-      if (!parsedArtistId) {
+      if (!parsedProfileId) {
         throw new AppError({
           httpCode: 400,
           description: "Invalid artist id",
@@ -182,14 +186,14 @@ export default function () {
         ? await prisma.profileSubscriptionTier.findFirst({
             where: {
               id: Number(tierId),
-              profileId: parsedArtistId,
+              profileId: parsedProfileId,
               deletedAt: null,
             },
           })
         : await prisma.profileSubscriptionTier.findFirst({
             where: {
               isDefaultTier: true,
-              profileId: parsedArtistId,
+              profileId: parsedProfileId,
             },
           });
 

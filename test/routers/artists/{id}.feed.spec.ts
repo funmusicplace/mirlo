@@ -9,7 +9,7 @@ import Parser from "rss-parser";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -38,7 +38,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -48,7 +48,7 @@ describe("artists/{id}/feed", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed`)
+      .get(`artists/${profile.id}/feed`)
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);
@@ -61,7 +61,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -75,14 +75,14 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        profileId: artist.id,
+        profileId: profile.id,
         isPublic: true,
         isDraft: false,
       },
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed`)
+      .get(`artists/${profile.id}/feed`)
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);
@@ -96,7 +96,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -110,7 +110,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        profileId: artist.id,
+        profileId: profile.id,
         isPublic: true,
         content: "# HI",
         isDraft: false,
@@ -118,7 +118,7 @@ describe("artists/{id}/feed", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed?format=rss`)
+      .get(`artists/${profile.id}/feed?format=rss`)
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);
@@ -127,12 +127,12 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`
     );
-    assert.equal(obj.title, `${artist.name} Feed`);
+    assert.equal(obj.title, `${profile.name} Feed`);
     assert.equal(obj.items.length, 1);
     assert(obj.items[0].content?.includes("<h2"));
-    assert.equal(obj.items[0].title, `${postTitle} by ${artist.name}`);
+    assert.equal(obj.items[0].title, `${postTitle} by ${profile.name}`);
   });
 
   it("should GET / a hidden post but it should have no content", async () => {
@@ -141,14 +141,14 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
 
     const postTitle = "Test post";
 
     await prisma.post.create({
       data: {
         title: postTitle,
-        profileId: artist.id,
+        profileId: profile.id,
         isPublic: false,
         content: "<p>hi</p><p>this is a guest post</p>",
         publishedAt: faker.date.past().toISOString(),
@@ -157,7 +157,7 @@ describe("artists/{id}/feed", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed`)
+      .get(`artists/${profile.id}/feed`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
@@ -169,7 +169,7 @@ describe("artists/{id}/feed", () => {
   });
 
   it("should GET / a hidden post if the user is subscribed at the minimum tier", async () => {
-    const artistUser = await prisma.user.create({
+    const profileOwner = await prisma.user.create({
       data: {
         email: "test@test.com",
       },
@@ -177,11 +177,11 @@ describe("artists/{id}/feed", () => {
     const { user: followerUser, accessToken } = await createUser({
       email: "follower@follower.com",
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -199,23 +199,23 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        profileId: artist.id,
+        profileId: profile.id,
         isPublic: false,
         isDraft: false,
-        minimumSubscriptionTierId: artist.subscriptionTiers[0].id,
+        minimumSubscriptionTierId: profile.subscriptionTiers[0].id,
       },
     });
 
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed`)
+      .get(`artists/${profile.id}/feed`)
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
@@ -225,7 +225,7 @@ describe("artists/{id}/feed", () => {
   });
 
   it("should GET / a hidden post if the user is subscribed above the minimum tier", async () => {
-    const artistUser = await prisma.user.create({
+    const profileOwner = await prisma.user.create({
       data: {
         email: "test@test.com",
       },
@@ -233,11 +233,11 @@ describe("artists/{id}/feed", () => {
     const { user: followerUser, accessToken } = await createUser({
       email: "follower@follower.com",
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           createMany: {
@@ -254,13 +254,13 @@ describe("artists/{id}/feed", () => {
     });
 
     const postTitle = "Test post";
-    const minTier = artist.subscriptionTiers[0];
-    const maxTier = artist.subscriptionTiers[1];
+    const minTier = profile.subscriptionTiers[0];
+    const maxTier = profile.subscriptionTiers[1];
 
     await prisma.post.create({
       data: {
         title: postTitle,
-        profileId: artist.id,
+        profileId: profile.id,
         isPublic: false,
         isDraft: false,
         minimumSubscriptionTierId: minTier.id,
@@ -276,7 +276,7 @@ describe("artists/{id}/feed", () => {
     });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed`)
+      .get(`artists/${profile.id}/feed`)
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
     assert.equal(response.statusCode, 200);
@@ -290,7 +290,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -299,10 +299,10 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id);
+    const trackGroup = await createTrackGroup(profile.id);
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed?format=rss`)
+      .get(`artists/${profile.id}/feed?format=rss`)
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);
@@ -311,12 +311,12 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`
     );
-    assert.equal(obj.title, `${artist.name} Feed`);
+    assert.equal(obj.title, `${profile.name} Feed`);
     assert.equal(obj.items.length, 1);
     assert(obj.items[0].content?.includes(""));
-    assert.equal(obj.items[0].title, `${trackGroup.title} by ${artist.name}`);
+    assert.equal(obj.items[0].title, `${trackGroup.title} by ${profile.name}`);
   });
 
   it("should GET / not display an album if it's not public", async () => {
@@ -325,7 +325,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -334,10 +334,10 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    await createTrackGroup(artist.id, { publishedAt: null });
+    await createTrackGroup(profile.id, { publishedAt: null });
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed?format=rss`)
+      .get(`artists/${profile.id}/feed?format=rss`)
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);
@@ -346,9 +346,9 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`
     );
-    assert.equal(obj.title, `${artist.name} Feed`);
+    assert.equal(obj.title, `${profile.name} Feed`);
     assert.equal(obj.items.length, 0);
   });
 
@@ -358,7 +358,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -372,7 +372,7 @@ describe("artists/{id}/feed", () => {
     await prisma.post.create({
       data: {
         title: postTitle,
-        profileId: artist.id,
+        profileId: profile.id,
         isPublic: true,
         isDraft: false,
         content: "# HI",
@@ -380,10 +380,10 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id);
+    const trackGroup = await createTrackGroup(profile.id);
 
     const response = await requestApp
-      .get(`artists/${artist.id}/feed?format=rss`)
+      .get(`artists/${profile.id}/feed?format=rss`)
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);
@@ -392,13 +392,13 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`
     );
 
-    assert.equal(obj.title, `${artist.name} Feed`);
+    assert.equal(obj.title, `${profile.name} Feed`);
     assert.equal(obj.items.length, 2);
     assert(obj.items[0].content?.includes(""));
-    assert.equal(obj.items[0].title, `${trackGroup.title} by ${artist.name}`);
-    assert.equal(obj.items[1].title, `${postTitle} by ${artist.name}`);
+    assert.equal(obj.items[0].title, `${trackGroup.title} by ${profile.name}`);
+    assert.equal(obj.items[1].title, `${postTitle} by ${profile.name}`);
   });
 });

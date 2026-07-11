@@ -18,7 +18,7 @@ describe("add-post-to-notifications", () => {
   });
 
   it("should add post to notifications", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -27,11 +27,11 @@ describe("add-post-to-notifications", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -47,12 +47,12 @@ describe("add-post-to-notifications", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    await createPost(artist.id, {
+    await createPost(profile.id, {
       title: "Our Custom Title",
       content: "# HI",
       isDraft: false,
@@ -67,7 +67,7 @@ describe("add-post-to-notifications", () => {
   });
 
   it("should not add a post to notifications if isDraft", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -76,11 +76,11 @@ describe("add-post-to-notifications", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -96,12 +96,12 @@ describe("add-post-to-notifications", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    await createPost(artist.id, {
+    await createPost(profile.id, {
       title: "Our Custom Title",
       content: "# HI",
       isDraft: true,
@@ -114,7 +114,7 @@ describe("add-post-to-notifications", () => {
   });
 
   it("should not add a post twice to notifications", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -123,11 +123,11 @@ describe("add-post-to-notifications", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -143,12 +143,12 @@ describe("add-post-to-notifications", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    await createPost(artist.id, {
+    await createPost(profile.id, {
       title: "Our Custom Title",
       content: "# HI",
       isDraft: false,

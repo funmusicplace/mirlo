@@ -15,7 +15,7 @@ import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 import {
   ArtistPurchaseNotificationEmailType,
-  handleArtistMerchPurchase,
+  handleProfileMerchPurchase,
   PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
 import Stripe from "stripe";
@@ -23,7 +23,7 @@ import stripe from "../../src/utils/stripe";
 
 const stripeAccountId = "hke";
 
-describe("handleArtistMerchPurchase", () => {
+describe("handleProfileMerchPurchase", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -43,7 +43,7 @@ describe("handleArtistMerchPurchase", () => {
       // @ts-ignore
       .returns({ metadata: {} });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -52,23 +52,23 @@ describe("handleArtistMerchPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const productKey = "productKey";
 
-    const merch = await createMerch(artist.id, {
+    const merch = await createMerch(profile.id, {
       title: "Our Custom Title",
       stripeProductKey: productKey,
     });
 
-    await handleArtistMerchPurchase(
+    await handleProfileMerchPurchase(
       purchaser.id,
       {
         line_items: {
@@ -88,7 +88,7 @@ describe("handleArtistMerchPurchase", () => {
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(locals1.transactions[0].merchPurchases?.[0].merchId, merch.id);
     assert.equal(locals1.transactions[0]?.amount, 0);
@@ -100,7 +100,7 @@ describe("handleArtistMerchPurchase", () => {
       // @ts-ignore
       .returns({ metadata: {} });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -109,24 +109,24 @@ describe("handleArtistMerchPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const productKey = "productKey";
 
-    const merch = await createMerch(artist.id, {
+    const merch = await createMerch(profile.id, {
       title: "Our Custom Title",
       stripeProductKey: productKey,
       quantityRemaining: 10,
     });
 
-    await handleArtistMerchPurchase(
+    await handleProfileMerchPurchase(
       purchaser.id,
       {
         metadata: {
@@ -147,7 +147,7 @@ describe("handleArtistMerchPurchase", () => {
   });
 
   it("should reduce quantity from merchOptions.quantityRemaining", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -156,18 +156,18 @@ describe("handleArtistMerchPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const productKey = "productKey";
 
-    const merch = await createMerch(artist.id, {
+    const merch = await createMerch(profile.id, {
       title: "Our Custom Title",
       stripeProductKey: productKey,
     });
@@ -201,7 +201,7 @@ describe("handleArtistMerchPurchase", () => {
       },
     });
 
-    await handleArtistMerchPurchase(
+    await handleProfileMerchPurchase(
       purchaser.id,
       {
         metadata: {
@@ -256,7 +256,7 @@ describe("handleArtistMerchPurchase", () => {
       // @ts-ignore
       .returns({ metadata: {} });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -265,23 +265,23 @@ describe("handleArtistMerchPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const productKey = "productKey";
 
-    const merch = await createMerch(artist.id, {
+    const merch = await createMerch(profile.id, {
       title: "Our Custom Title",
       stripeProductKey: productKey,
     });
 
-    await handleArtistMerchPurchase(
+    await handleProfileMerchPurchase(
       purchaser.id,
       {
         payment_intent: "pi_123",
@@ -311,7 +311,7 @@ describe("handleArtistMerchPurchase", () => {
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(locals1.transactions[0].merchPurchases?.[0].merchId, merch.id);
     assert.equal(locals1.transactions[0].amount, 2000);
@@ -323,7 +323,7 @@ describe("handleArtistMerchPurchase", () => {
       // @ts-ignore
       .returns({ metadata: {} });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -332,28 +332,28 @@ describe("handleArtistMerchPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "trackgroup tittle",
     });
 
     const productKey = "productKey";
 
-    const merch = await createMerch(artist.id, {
+    const merch = await createMerch(profile.id, {
       title: "Our Custom Title",
       stripeProductKey: productKey,
       includePurchaseTrackGroupId: trackGroup.id,
     });
 
-    await handleArtistMerchPurchase(
+    await handleProfileMerchPurchase(
       purchaser.id,
       {
         line_items: {
@@ -381,7 +381,7 @@ describe("handleArtistMerchPurchase", () => {
       // @ts-ignore
       .returns({ metadata: {} });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -390,16 +390,16 @@ describe("handleArtistMerchPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "trackgroup tittle",
     });
 
@@ -409,13 +409,13 @@ describe("handleArtistMerchPurchase", () => {
 
     const productKey = "productKey";
 
-    const merch = await createMerch(artist.id, {
+    const merch = await createMerch(profile.id, {
       title: "Our Custom Title",
       stripeProductKey: productKey,
       includePurchaseTrackGroupId: trackGroup.id,
     });
 
-    await handleArtistMerchPurchase(
+    await handleProfileMerchPurchase(
       purchaser.id,
       {
         line_items: {
@@ -441,7 +441,7 @@ describe("handleArtistMerchPurchase", () => {
   it("should handle options", async () => {
     const stub = sinon.spy(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -450,18 +450,18 @@ describe("handleArtistMerchPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
     const productKey = "productKey";
 
-    const merch = await createMerch(artist.id, {
+    const merch = await createMerch(profile.id, {
       title: "Our Custom Title",
       stripeProductKey: productKey,
     });
@@ -510,7 +510,7 @@ describe("handleArtistMerchPurchase", () => {
       },
     });
 
-    await handleArtistMerchPurchase(
+    await handleProfileMerchPurchase(
       purchaser.id,
       {
         payment_intent: "pi_123",
@@ -545,7 +545,7 @@ describe("handleArtistMerchPurchase", () => {
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(locals1.transactions[0].merchPurchases?.[0].merchId, merch.id);
     assert.equal(locals1.transactions[0].amount, 2000);

@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser as artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { listArtistReaders } from "../../../../../utils/payments/readers";
+import { listProfileReaders } from "../../../../../utils/payments/readers";
 
 export default function () {
   const operations = {
@@ -15,7 +15,7 @@ export default function () {
     const { artistId } = req.params;
 
     try {
-      const results = await listArtistReaders(Number(artistId));
+      const results = await listProfileReaders(Number(artistId));
       res.status(200).json({ results });
     } catch (e) {
       next(e);

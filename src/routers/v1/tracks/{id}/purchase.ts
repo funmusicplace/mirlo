@@ -2,12 +2,12 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { subscribeUserToArtist } from "../../../../utils/artist";
+import { subscribeUserToProfile } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { handleTrackPurchase } from "../../../../utils/handleFinishedTransactions";
 import { resolvePayee } from "../../../../utils/payments/payee";
 import { createStripeCheckoutSessionForTrackPurchase } from "../../../../utils/stripe/sessions";
-import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
+import { findUserDiscountPercentsForProfile } from "../../../../utils/user";
 
 type Params = {
   id: string;
@@ -23,7 +23,7 @@ export default function () {
     let { price, email, message } = req.body as unknown as {
       price?: string; // In cents
       email?: string;
-      message?: string; // Optional message to the artist
+      message?: string; // Optional message to the profile
     };
     const loggedInUser = req.user;
 
@@ -67,12 +67,12 @@ export default function () {
         });
       }
       if (loggedInUser) {
-        await subscribeUserToArtist(track.trackGroup?.profile, loggedInUser);
+        await subscribeUserToProfile(track.trackGroup?.profile, loggedInUser);
       }
 
       let discountPercent: number | undefined;
       if (loggedInUser) {
-        const discounts = await findUserDiscountPercentsForArtist(
+        const discounts = await findUserDiscountPercentsForProfile(
           loggedInUser.id,
           track.trackGroup.profileId
         );
@@ -82,8 +82,7 @@ export default function () {
         }, 0);
       }
 
-      const stripeAccountId = resolvePayee({
-        artist: track.trackGroup.profile,
+      const stripeAccountId = resolvePayee({ profile: track.trackGroup.profile,
         releasePaymentToUser: track.trackGroup.paymentToUser,
       }).stripeAccountId;
 

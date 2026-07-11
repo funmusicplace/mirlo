@@ -3,15 +3,15 @@ import prisma from "@mirlo/prisma";
 import { getPaymentProcessor, TerminalReader } from "./PaymentProcessor";
 
 /**
- * Terminal readers registered on the artist's connected payment-processor
- * account. Resolving artist → account happens here so callers (routers) never
+ * Terminal readers registered on the profile's connected payment-processor
+ * account. Resolving profile → account happens here so callers (routers) never
  * touch processor-specific fields like `stripeAccountId`.
  */
-export const listArtistReaders = async (
-  artistId: number
+export const listProfileReaders = async (
+  profileId: number
 ): Promise<TerminalReader[]> => {
-  const artist = await prisma.profile.findFirst({
-    where: { id: artistId },
+  const profile = await prisma.profile.findFirst({
+    where: { id: profileId },
     include: {
       user: { select: { stripeAccountId: true } },
       paymentToUser: { select: { stripeAccountId: true } },
@@ -19,7 +19,7 @@ export const listArtistReaders = async (
   });
 
   const accountId =
-    artist?.paymentToUser?.stripeAccountId ?? artist?.user.stripeAccountId;
+    profile?.paymentToUser?.stripeAccountId ?? profile?.user.stripeAccountId;
 
   // No payment processor connected — nothing to list, but not an error: the
   // POS page shows its own "no connected account" warning.

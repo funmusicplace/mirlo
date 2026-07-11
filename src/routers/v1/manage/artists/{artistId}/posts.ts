@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
@@ -11,12 +11,12 @@ import { serializePost } from "../../../../../utils/serialize/post";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params;
+    const { artistId: profileId } = req.params;
     const {
       skip = 0,
       take = 10,
@@ -31,7 +31,7 @@ export default function () {
 
     try {
       const where = {
-        profileId: Number(artistId),
+        profileId: Number(profileId),
         ...(isDraft !== undefined ? { isDraft: isDraft === "true" } : {}),
         ...(isScheduled === "true"
           ? { publishedAt: { gt: new Date() } }
@@ -63,7 +63,7 @@ export default function () {
   }
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params;
+    const { artistId: profileId } = req.params;
     const {
       title,
       content,
@@ -83,17 +83,17 @@ export default function () {
     assertLoggedIn(req);
 
     try {
-      const artist = await prisma.profile.findFirst({
-        where: { id: Number(artistId) },
+      const profile = await prisma.profile.findFirst({
+        where: { id: Number(profileId) },
         select: { id: true },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
       const mostRecentPost = await prisma.post.findFirst({
-        where: { profileId: Number(artistId), deletedAt: null },
+        where: { profileId: Number(profileId), deletedAt: null },
         orderBy: { createdAt: "desc" },
         select: { minimumSubscriptionTierId: true, shouldSendEmail: true },
       });
@@ -106,11 +106,11 @@ export default function () {
       let validTier;
       if (resolvedTierId) {
         validTier = await prisma.profileSubscriptionTier.findFirst({
-          where: { profileId: Number(artistId), id: resolvedTierId },
+          where: { profileId: Number(profileId), id: resolvedTierId },
         });
       } else {
         validTier = await prisma.profileSubscriptionTier.findFirst({
-          where: { profileId: Number(artistId), isDefaultTier: true },
+          where: { profileId: Number(profileId), isDefaultTier: true },
         });
         if (!validTier) {
           await prisma.profileSubscriptionTier.create({
@@ -119,11 +119,11 @@ export default function () {
               description: "follow an artist",
               minAmount: 0,
               isDefaultTier: true,
-              profileId: artist.id,
+              profileId: profile.id,
             },
           });
           validTier = await prisma.profileSubscriptionTier.findFirst({
-            where: { profileId: Number(artistId), isDefaultTier: true },
+            where: { profileId: Number(profileId), isDefaultTier: true },
           });
         }
       }
@@ -136,7 +136,7 @@ export default function () {
             isPublic,
             publishedAt,
             shouldSendEmail: resolvedShouldSendEmail,
-            profile: { connect: { id: Number(artistId) } },
+            profile: { connect: { id: Number(profileId) } },
             minimumSubscriptionTier: { connect: { id: validTier.id } },
           },
         });

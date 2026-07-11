@@ -3,12 +3,12 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
-  canUserCreateArtists,
+  canUserCreateProfiles as canUserCreateArtists,
   userAuthenticated,
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleProfile } from "../../../../utils/serialize/artist";
 import { getSiteSettings } from "../../../../utils/settings";
 
 const forbiddenNames = [
@@ -56,7 +56,7 @@ export default function () {
       const where = {
         userId: Number(loggedInUser.id),
       };
-      const artists = await prisma.profile.findMany({
+      const profiles = await prisma.profile.findMany({
         where,
         select: {
           id: true,
@@ -67,8 +67,8 @@ export default function () {
         },
       });
       res.json({
-        results: artists.map((artist) =>
-          processSingleArtist(artist as any, Number(loggedInUser.id))
+        results: profiles.map((profile) =>
+          processSingleProfile(profile as any, Number(loggedInUser.id))
         ),
       });
     } catch (e) {

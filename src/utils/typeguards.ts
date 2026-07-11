@@ -78,7 +78,7 @@ export function isPost(entity: unknown): entity is Post {
   return (entity as Post).content !== undefined;
 }
 
-export function isArtist(entity: unknown): entity is Profile {
+export function isProfile(entity: unknown): entity is Profile {
   if (!entity) {
     return false;
   }

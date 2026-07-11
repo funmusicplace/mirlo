@@ -6,7 +6,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -28,20 +28,20 @@ describe("users/{userId}/artists", () => {
         email: "owner@test.com",
       });
 
-      const ownArtist = await createArtist(loggedInUser.id, {
+      const ownProfile = await createProfile(loggedInUser.id, {
         name: "Owner Artist",
       });
-      await createTrackGroup(ownArtist.id, {
+      await createTrackGroup(ownProfile.id, {
         title: "Owner Album",
       });
 
       const { user: otherUser } = await createUser({
         email: "other@test.com",
       });
-      const otherArtist = await createArtist(otherUser.id, {
+      const otherProfile = await createProfile(otherUser.id, {
         name: "Other Artist",
       });
-      await createTrackGroup(otherArtist.id, {
+      await createTrackGroup(otherProfile.id, {
         title: "Other Album",
       });
 

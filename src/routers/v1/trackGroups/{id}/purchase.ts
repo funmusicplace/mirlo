@@ -2,13 +2,13 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { subscribeUserToArtist } from "../../../../utils/artist";
+import { subscribeUserToProfile } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
 import { resolvePayee } from "../../../../utils/payments/payee";
 import { determinePrice } from "../../../../utils/purchasing";
 import { createStripeCheckoutSessionForPurchase } from "../../../../utils/stripe/sessions";
-import { findUserDiscountPercentsForArtist } from "../../../../utils/user";
+import { findUserDiscountPercentsForProfile } from "../../../../utils/user";
 
 type Params = {
   id: string;
@@ -24,7 +24,7 @@ export default function () {
     let { price, email, message } = req.body as unknown as {
       price?: string; // In cents
       email?: string;
-      message?: string; // Optional message for the artist
+      message?: string; // Optional message for the profile
     };
     const loggedInUser = req.user;
 
@@ -64,12 +64,12 @@ export default function () {
       }
 
       if (loggedInUser) {
-        await subscribeUserToArtist(trackGroup?.profile, loggedInUser);
+        await subscribeUserToProfile(trackGroup?.profile, loggedInUser);
       }
 
       let discountPercent: number | undefined;
       if (loggedInUser) {
-        const discounts = await findUserDiscountPercentsForArtist(
+        const discounts = await findUserDiscountPercentsForProfile(
           loggedInUser.id,
           trackGroup.profileId
         );
@@ -79,8 +79,7 @@ export default function () {
         }, 0);
       }
 
-      const stripeAccountId = resolvePayee({
-        artist: trackGroup.profile,
+      const stripeAccountId = resolvePayee({ profile: trackGroup.profile,
         releasePaymentToUser: trackGroup.paymentToUser,
       }).stripeAccountId;
 

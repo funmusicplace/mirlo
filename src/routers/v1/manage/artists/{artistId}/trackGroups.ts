@@ -3,29 +3,29 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  profileBelongsToLoggedInUser,
+  canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import {
-  getPlatformFeeForArtist,
-  whereForAllArtistsThisLabelCanAddReleasesFor,
+  getPlatformFeeForProfile,
+  whereForAllProfilesThisLabelCanAddReleasesFor,
 } from "../../../../../utils/artist";
 import processor from "../../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
     POST: [
       userAuthenticated,
-      artistBelongsToLoggedInUser,
-      canUserCreateArtists,
+      profileBelongsToLoggedInUser,
+      canUserCreateProfiles,
       POST,
     ],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params;
+    const { artistId: profileId } = req.params;
     const { includeLabelReleases } = req.query;
     assertLoggedIn(req);
     const loggedInUser = req.user;
@@ -39,14 +39,14 @@ export default function () {
             ? {
                 OR: [
                   {
-                    profile: whereForAllArtistsThisLabelCanAddReleasesFor(
+                    profile: whereForAllProfilesThisLabelCanAddReleasesFor(
                       loggedInUser.id
                     ),
                   },
                   { paymentToUserId: loggedInUser.id },
                 ],
               }
-            : { profileId: Number(artistId) }),
+            : { profileId: Number(profileId) }),
         },
         orderBy: {
           releaseDate: "desc",
@@ -121,7 +121,7 @@ export default function () {
       suggestedPrice,
       urlSlug,
     } = req.body;
-    const artistId = Number(req.params.artistId);
+    const profileId = Number(req.params.artistId);
     assertLoggedIn(req);
     const user = req.user;
 
@@ -134,7 +134,7 @@ export default function () {
     try {
       const existingSlug = await prisma.trackGroup.findFirst({
         where: {
-          profileId: Number(artistId),
+          profileId: Number(profileId),
           urlSlug,
         },
       });
@@ -145,16 +145,16 @@ export default function () {
         });
       }
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
         },
         include: {
           artistLabels: true,
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         return res.status(404).json({
           error: "Artist not found",
         });
@@ -163,7 +163,7 @@ export default function () {
       let paymentToUserId: number | undefined = undefined;
 
       if (
-        artist?.artistLabels?.some(
+        profile?.artistLabels?.some(
           (label) => label.labelUserId === user.id && label.canLabelAddReleases
         )
       ) {
@@ -176,14 +176,14 @@ export default function () {
           about,
           credits,
           type,
-          profile: { connect: { id: artistId } },
+          profile: { connect: { id: profileId } },
           publishedAt: publishedAt ? new Date(publishedAt) : undefined,
           minPrice,
           suggestedPrice,
           paymentToUser: paymentToUserId
             ? { connect: { id: paymentToUserId } }
             : undefined,
-          platformPercent: await getPlatformFeeForArtist(artist.id),
+          platformPercent: await getPlatformFeeForProfile(profile.id),
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,
           urlSlug,

@@ -36,7 +36,7 @@ export default defineConfig({
           return pkg.createUser(data);
         },
         createArtist: async (data: { userId: number; name: string }) => {
-          return pkg.createArtist(data.userId, data);
+          return pkg.createProfile(data.userId, data);
         },
         createArtistLabel: async (data: {
           artistId: number;
@@ -150,7 +150,11 @@ export default defineConfig({
           relatedUserId?: number;
           artistId?: number;
         }) => {
-          return createNotification(query);
+          const { artistId, ...rest } = query;
+          return createNotification({
+            ...rest,
+            profileId: artistId!,
+          });
         },
         createMerch: async (query: {
           artistId: number;

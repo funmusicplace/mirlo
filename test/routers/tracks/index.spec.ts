@@ -6,7 +6,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -34,8 +34,8 @@ describe("trackGroups", () => {
 
     it("should GET / with one trackGroup", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
@@ -47,8 +47,8 @@ describe("trackGroups", () => {
 
     it("should GET / not get an unpublished", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, { publishedAt: null });
+      const profile = await createProfile(user.id);
+      await createTrackGroup(profile.id, { publishedAt: null });
       const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
@@ -59,17 +59,17 @@ describe("trackGroups", () => {
 
     it("should GET / ordered by release date", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const mostRecent = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const mostRecent = await createTrackGroup(profile.id, {
         title: "most recent",
         releaseDate: "2024-11-28T12:52:08.206Z",
       });
-      const middle = await createTrackGroup(artist.id, {
+      const middle = await createTrackGroup(profile.id, {
         title: "middle",
         urlSlug: "a-second-album",
         releaseDate: "2023-11-28T12:52:08.206Z",
       });
-      const oldest = await createTrackGroup(artist.id, {
+      const oldest = await createTrackGroup(profile.id, {
         title: "oldest",
         urlSlug: "a-oldest-album",
         releaseDate: "2022-11-28T12:52:08.206Z",
@@ -88,15 +88,15 @@ describe("trackGroups", () => {
 
     it("should limit to one by artist on distinctArtists", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      await createTrackGroup(profile.id, {
         title: "most recent",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "middle",
         urlSlug: "a-second-album",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "oldest",
         urlSlug: "a-oldest-album",
       });
@@ -113,15 +113,15 @@ describe("trackGroups", () => {
 
     it("should exclude trackgroups that don't match the string", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      await createTrackGroup(profile.id, {
         title: "most recent",
       });
-      const tg = await createTrackGroup(artist.id, {
+      const tg = await createTrackGroup(profile.id, {
         title: "middle",
         urlSlug: "a-second-album",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "oldest",
         urlSlug: "a-oldest-album",
       });
@@ -139,19 +139,19 @@ describe("trackGroups", () => {
 
     it("should only return albums filtered by profileId", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tg = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
         title: "most recent",
       });
 
-      const artist2 = await createArtist(user.id, { urlSlug: "asdfasdf" });
-      await createTrackGroup(artist2.id, {
+      const profile2 = await createProfile(user.id, { urlSlug: "asdfasdf" });
+      await createTrackGroup(profile2.id, {
         title: "most recent",
       });
 
       const response = await requestApp
         .get("trackGroups")
-        .query(`profileId=${artist.id}`)
+        .query(`profileId=${profile.id}`)
         .set("Accept", "application/json");
 
       assert.equal(response.body.results.length, 1);

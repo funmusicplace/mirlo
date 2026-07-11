@@ -2,22 +2,22 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import {
   userAuthenticated,
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
 } from "../../../../../../auth/passport";
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     try {
-      const { artistId: artistIdParam, locationTagId } = req.params;
-      const artistId = parseInt(artistIdParam, 10);
+      const { artistId: profileIdParam, locationTagId } = req.params;
+      const profileId = parseInt(profileIdParam, 10);
       const locTagId = parseInt(locationTagId, 10);
 
       await prisma.profileLocationTag.deleteMany({
-        where: { profileId: artistId, locationTagId: locTagId },
+        where: { profileId: profileId, locationTagId: locTagId },
       });
 
       res.json({ success: true });

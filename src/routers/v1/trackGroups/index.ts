@@ -59,8 +59,8 @@ export default function () {
         });
       }
 
-      if (artistId) {
-        where.profileId = Number(artistId);
+      if (profileId) {
+        where.profileId = Number(profileId);
       }
 
       if (locationSlug && typeof locationSlug === "string") {

@@ -7,9 +7,9 @@ import prisma from "@mirlo/prisma";
 
 import { singleInclude } from "../utils/artist";
 
-export async function fetchArtistMetadata(artistSlug: string): Promise<any> {
+export async function fetchProfileMetadata(profileSlug: string): Promise<any> {
   return await prisma.profile.findFirst({
-    where: { urlSlug: artistSlug },
+    where: { urlSlug: profileSlug },
     // singleInclude is deeply nested enough to hit TypeScript's recursive type
     // depth limit ("Excessive stack depth comparing types"). The `as any` cast
     // is the standard workaround — it doesn't affect runtime behaviour.
@@ -18,14 +18,14 @@ export async function fetchArtistMetadata(artistSlug: string): Promise<any> {
 }
 
 export async function fetchAlbumMetadata(
-  artistSlug: string,
+  profileSlug: string,
   albumSlug: string
 ) {
   return await prisma.trackGroup.findFirst({
     where: {
       urlSlug: albumSlug,
       deletedAt: null,
-      profile: { urlSlug: artistSlug },
+      profile: { urlSlug: profileSlug },
     },
     include: {
       profile: true,
@@ -40,26 +40,26 @@ export async function fetchAlbumMetadata(
 }
 
 export async function fetchTrackMetadata(
-  artistSlug: string,
+  profileSlug: string,
   albumSlug: string,
   trackId: number
 ) {
-  const album = await fetchAlbumMetadata(artistSlug, albumSlug);
+  const album = await fetchAlbumMetadata(profileSlug, albumSlug);
   if (!album) return null;
 
   return album.tracks.find((t) => t.id === trackId);
 }
 
 export async function fetchPostMetadata(
-  artistSlug: string,
+  profileSlug: string,
   postLookup: { id: number } | { slug: string }
 ) {
   const where =
     "id" in postLookup
-      ? { id: postLookup.id, profile: { urlSlug: artistSlug } }
+      ? { id: postLookup.id, profile: { urlSlug: profileSlug } }
       : {
           urlSlug: { equals: postLookup.slug, mode: "insensitive" as const },
-          profile: { urlSlug: artistSlug },
+          profile: { urlSlug: profileSlug },
         };
 
   return await prisma.post.findFirst({
@@ -73,18 +73,18 @@ export async function fetchPostMetadata(
 }
 
 export async function fetchMerchMetadata(
-  artistSlug: string,
+  profileSlug: string,
   merchLookup: { id: string } | { slug: string }
 ) {
   const where =
     "id" in merchLookup
       ? {
           id: merchLookup.id,
-          profile: { urlSlug: artistSlug },
+          profile: { urlSlug: profileSlug },
         }
       : {
           urlSlug: { equals: merchLookup.slug, mode: "insensitive" as const },
-          profile: { urlSlug: artistSlug },
+          profile: { urlSlug: profileSlug },
         };
 
   return await prisma.merch.findFirst({

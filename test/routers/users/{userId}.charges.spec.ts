@@ -5,7 +5,7 @@ dotenv.config();
 import prisma from "@mirlo/prisma";
 
 import { describe, it } from "mocha";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 import { requestApp } from "../utils";
 
@@ -25,10 +25,10 @@ describe("users/{userId}/charges", () => {
       });
 
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           name: "Tier",
         },
       });

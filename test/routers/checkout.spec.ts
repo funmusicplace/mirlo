@@ -6,7 +6,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../utils";
@@ -56,8 +56,8 @@ describe("checkout", () => {
           email: "artist@artist.com",
           stripeAccountId: "aRandomWord",
         });
-        const artist = await createArtist(user.id);
-        const trackGroup = await createTrackGroup(artist.id, {
+        const profile = await createProfile(user.id);
+        const trackGroup = await createTrackGroup(profile.id, {
           stripeProductKey: "testProductKey",
         });
 
@@ -66,7 +66,7 @@ describe("checkout", () => {
           .resolves({
             metadata: {
               clientId: `${client.id}`,
-              profileId: `${artist.id}`,
+              profileId: `${profile.id}`,
               trackGroupId: `${trackGroup.id}`,
               purchaseType: "trackGroup",
             },
@@ -103,7 +103,7 @@ describe("checkout", () => {
         assert.equal(mockRedirect.calledOnce, true);
         assert.equal(
           mockRedirect.getCall(0).args[0],
-          `${client.applicationUrl}/${artist.urlSlug}/checkout-complete?purchaseType=trackGroup&trackGroupId=${trackGroup.id}`
+          `${client.applicationUrl}/${profile.urlSlug}/checkout-complete?purchaseType=trackGroup&trackGroupId=${trackGroup.id}`
         );
       });
     });

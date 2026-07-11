@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createTrackPlay,
@@ -34,8 +34,8 @@ describe("most played trackGroups", () => {
 
   it("should GET /mostPlayed with 1 trackGroup", async () => {
     const { user } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id);
 
     await createTrackPlay(track.id);
@@ -51,8 +51,8 @@ describe("most played trackGroups", () => {
 
   it("should GET /mostPlayed not get without tracks", async () => {
     const { user } = await createUser({ email: "test@testcom" });
-    const artist = await createArtist(user.id);
-    await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    await createTrackGroup(profile.id, {
       tracks: [],
     });
     const response = await requestApp
@@ -65,8 +65,8 @@ describe("most played trackGroups", () => {
 
   it("should GET /mostPlayed not get an unpublished", async () => {
     const { user } = await createUser({ email: "test@testcom" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, { publishedAt: null });
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id, { publishedAt: null });
     const track = await createTrack(trackGroup.id);
     await createTrackPlay(track.id);
     const response = await requestApp
@@ -80,18 +80,18 @@ describe("most played trackGroups", () => {
   it("should GET /mostPlayed in descending order of number total plays across all tracks", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
-    const artist1 = await createArtist(user1.id);
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+    const profile1 = await createProfile(user1.id);
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist-2" });
 
-    const mostPlayed = await createTrackGroup(artist1.id, {
+    const mostPlayed = await createTrackGroup(profile1.id, {
       title: "most-played",
       urlSlug: "most-played",
     });
-    const middlePlayed = await createTrackGroup(artist2.id, {
+    const middlePlayed = await createTrackGroup(profile2.id, {
       title: "middle played",
       urlSlug: "middle-played",
     });
-    const leastPlayed = await createTrackGroup(artist1.id, {
+    const leastPlayed = await createTrackGroup(profile1.id, {
       title: "third played",
       urlSlug: "third-played",
     });
@@ -131,18 +131,18 @@ describe("most played trackGroups", () => {
   it("should GET /mostPlayed queried number in descending order of number total plays across all tracks", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
-    const artist1 = await createArtist(user1.id);
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+    const profile1 = await createProfile(user1.id);
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist-2" });
 
-    const mostPlayed = await createTrackGroup(artist1.id, {
+    const mostPlayed = await createTrackGroup(profile1.id, {
       title: "most-played",
       urlSlug: "most-played",
     });
-    const middlePlayed = await createTrackGroup(artist2.id, {
+    const middlePlayed = await createTrackGroup(profile2.id, {
       title: "middle played",
       urlSlug: "middle-played",
     });
-    const leastPlayed = await createTrackGroup(artist1.id, {
+    const leastPlayed = await createTrackGroup(profile1.id, {
       title: "third played",
       urlSlug: "third-played",
     });

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../../auth/passport";
 import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
@@ -23,9 +23,9 @@ const normalizeDiscountPercent = (value: unknown): number | undefined => {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -34,9 +34,9 @@ export default function () {
     const user = req.user;
 
     try {
-      let artistUser: { id: number } | undefined | null = user;
+      let profileOwner: { id: number } | undefined | null = user;
       if (user.isAdmin) {
-        artistUser = await prisma.user.findFirst({
+        profileOwner = await prisma.user.findFirst({
           where: {
             profiles: {
               some: {
@@ -56,7 +56,7 @@ export default function () {
 
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(artistUser?.id)
+        Number(profileOwner?.id)
       );
 
       if (!subscriptionTier) {
@@ -109,7 +109,7 @@ export default function () {
         Number(user.id)
       );
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: { id: subscriptionTier?.profileId },
         select: { defaultPlatformFee: true },
       });
@@ -131,7 +131,7 @@ export default function () {
           collectAddress: req.body.collectAddress ?? false,
           platformPercent:
             Number(req.body.platformPercent) ??
-            artist?.defaultPlatformFee ??
+            profile?.defaultPlatformFee ??
             (await getSiteSettings()).platformPercent,
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,

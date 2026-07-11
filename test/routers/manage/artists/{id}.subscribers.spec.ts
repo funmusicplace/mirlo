@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTier,
   createUser,
 } from "../../../utils";
@@ -25,10 +25,10 @@ describe("manage/artists/{artistId}/subscribers", () => {
   describe("GET", () => {
     it("should get json", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/subscribers`)
+        .get(`manage/artists/${profile.id}/subscribers`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 200);
@@ -37,16 +37,16 @@ describe("manage/artists/{artistId}/subscribers", () => {
 
     it("should get csv", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       await prisma.profileAvatar.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/subscribers?format=csv`)
+        .get(`manage/artists/${profile.id}/subscribers?format=csv`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 200);
@@ -58,12 +58,12 @@ describe("manage/artists/{artistId}/subscribers", () => {
   describe("POST", () => {
     it("should upload new subscriptions", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, { isDefaultTier: true });
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${profile.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -97,12 +97,12 @@ describe("manage/artists/{artistId}/subscribers", () => {
 
     it("should handle a double subscription", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, { isDefaultTier: true });
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${profile.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -142,11 +142,11 @@ describe("manage/artists/{artistId}/subscribers", () => {
 
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const { user: subscriber } = await createUser({ email: subscriberEmail });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, { isDefaultTier: true });
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${profile.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -186,8 +186,8 @@ describe("manage/artists/{artistId}/subscribers", () => {
 
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const { user: subscriber } = await createUser({ email: subscriberEmail });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, { isDefaultTier: true });
 
       await prisma.profileUserSubscription.create({
         data: {
@@ -198,7 +198,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       });
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${profile.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -225,11 +225,11 @@ describe("manage/artists/{artistId}/subscribers", () => {
         email: "rando@rando.com",
       });
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${profile.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -249,12 +249,12 @@ describe("manage/artists/{artistId}/subscribers", () => {
         isAdmin: true,
       });
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, { isDefaultTier: true });
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${profile.id}/subscribers`)
         .send({
           subscribers: [
             {

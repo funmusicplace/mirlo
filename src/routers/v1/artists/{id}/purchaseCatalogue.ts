@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { subscribeUserToArtist } from "../../../../utils/artist";
+import { subscribeUserToProfile } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { resolvePayee } from "../../../../utils/payments/payee";
 import { determinePrice } from "../../../../utils/purchasing";
@@ -18,7 +18,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     let { price, email, message } = req.body as unknown as {
       price?: string; // In cents
       email?: string;
@@ -37,9 +37,9 @@ export default function () {
         email = user?.email;
       }
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
         },
         include: {
           user: true,
@@ -49,22 +49,22 @@ export default function () {
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({
           httpCode: 404,
-          description: `Artist with ID ${artistId} not found`,
+          description: `Artist with ID ${profileId} not found`,
         });
       }
 
       if (loggedInUser) {
-        await subscribeUserToArtist(artist, loggedInUser);
+        await subscribeUserToProfile(profile, loggedInUser);
       }
 
-      const stripeAccountId = resolvePayee({ artist }).stripeAccountId;
+      const stripeAccountId = resolvePayee({ profile }).stripeAccountId;
 
       const { isPriceZero, priceNumber } = determinePrice(
         price,
-        artist.purchaseEntireCatalogMinPrice
+        profile.purchaseEntireCatalogMinPrice
       );
 
       if (!stripeAccountId && !isPriceZero) {
@@ -87,7 +87,7 @@ export default function () {
           email,
           priceNumber,
           message,
-          artist,
+          profile,
           stripeAccountId,
         });
         res.status(200).json({

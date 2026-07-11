@@ -26,11 +26,11 @@ export default function () {
       }
 
       await prisma.$transaction(
-        artistIds.map((artistId, idx) =>
+        artistIds.map((profileId, idx) =>
           prisma.artistLabel.updateMany({
             where: {
               labelUserId: user.id,
-              artistId: Number(artistId),
+              artistId: Number(profileId),
             },
             data: { orderIndex: idx + 1 },
           })

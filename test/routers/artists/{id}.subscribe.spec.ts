@@ -8,13 +8,13 @@ import sinon from "sinon";
 
 import { getPaymentProcessor } from "../../../src/utils/payments/PaymentProcessor";
 import { stripe } from "../../../src/utils/stripe";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 import prisma from "@mirlo/prisma";
 
 let createTestData = async (stripeAccountId: string | null = "23") => {
-  const { user: artistUser, accessToken: artistAccessToken } = await createUser(
+  const { user: profileOwner, accessToken: artistAccessToken } = await createUser(
     {
       email: "artist@example.com",
       stripeAccountId: stripeAccountId,
@@ -26,9 +26,9 @@ let createTestData = async (stripeAccountId: string | null = "23") => {
       email: "follower@example.com",
     });
 
-  const artist = await createArtist(artistUser.id, {
+  const profile = await createProfile(profileOwner.id, {
     name: "Test artist",
-    userId: artistUser.id,
+    userId: profileOwner.id,
     enabled: true,
     subscriptionTiers: {
       create: [
@@ -39,8 +39,8 @@ let createTestData = async (stripeAccountId: string | null = "23") => {
   });
 
   return {
-    artist,
-    artistUser,
+    profile,
+    profileOwner,
     artistAccessToken,
     followerUser,
     followerAccessToken,
@@ -75,12 +75,12 @@ describe("artists/{id}/subscribe", () => {
     });
 
     it("should return 400 when artist hasn't set up Stripe", async () => {
-      const { artistUser, artist, followerUser } = await createTestData(null);
+      const { profileOwner, profile, followerUser } = await createTestData(null);
 
       const response = await requestApp
-        .post(`artists/${artistUser.id}/subscribe`)
+        .post(`artists/${profileOwner.id}/subscribe`)
         .send({
-          tierId: artist.subscriptionTiers![0].id,
+          tierId: profile.subscriptionTiers![0].id,
           email: followerUser.email,
           amount: 42,
         })
@@ -90,12 +90,12 @@ describe("artists/{id}/subscribe", () => {
     });
 
     it("returns a hosted Stripe checkout sessionUrl by default for external callers", async () => {
-      const { artistUser, artist, followerUser } = await createTestData();
+      const { profileOwner, profile, followerUser } = await createTestData();
 
       const response = await requestApp
-        .post(`artists/${artistUser.id}/subscribe`)
+        .post(`artists/${profileOwner.id}/subscribe`)
         .send({
-          tierId: artist.subscriptionTiers![0].id,
+          tierId: profile.subscriptionTiers![0].id,
           email: followerUser.email,
           amount: 42,
         })
@@ -119,12 +119,12 @@ describe("artists/{id}/subscribe", () => {
     });
 
     it("returns an embedded clientSecret when the caller opts in (#1168)", async () => {
-      const { artistUser, artist, followerUser } = await createTestData();
+      const { profileOwner, profile, followerUser } = await createTestData();
 
       const response = await requestApp
-        .post(`artists/${artistUser.id}/subscribe`)
+        .post(`artists/${profileOwner.id}/subscribe`)
         .send({
-          tierId: artist.subscriptionTiers![0].id,
+          tierId: profile.subscriptionTiers![0].id,
           email: followerUser.email,
           amount: 42,
           embedded: true,
@@ -152,18 +152,18 @@ describe("artists/{id}/subscribe", () => {
     });
 
     it("should remove user from old subscription tier", async () => {
-      const { artistUser, artist, followerUser, followerAccessToken } =
+      const { profileOwner, profile, followerUser, followerAccessToken } =
         await createTestData();
       await prisma.profileUserSubscription.create({
         data: {
-          profileSubscriptionTierId: artist.subscriptionTiers![0].id,
+          profileSubscriptionTierId: profile.subscriptionTiers![0].id,
           userId: followerUser.id,
           amount: 3,
         },
       });
-      const newTierId = artist.subscriptionTiers![1].id;
+      const newTierId = profile.subscriptionTiers![1].id;
       await requestApp
-        .post(`artists/${artistUser.id}/subscribe`)
+        .post(`artists/${profileOwner.id}/subscribe`)
         .send({
           tierId: newTierId,
           email: followerUser.email,
@@ -184,10 +184,10 @@ describe("artists/{id}/subscribe", () => {
 
   describe("DELETE", () => {
     it("should return 404 when the user has no subscription", async () => {
-      const { artist, followerAccessToken } = await createTestData();
+      const { profile, followerAccessToken } = await createTestData();
 
       const response = await requestApp
-        .delete(`artists/${artist.id}/subscribe`)
+        .delete(`artists/${profile.id}/subscribe`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${followerAccessToken}`]);
 
@@ -195,9 +195,9 @@ describe("artists/{id}/subscribe", () => {
     });
 
     it("keeps a paid subscription active until period end rather than removing it", async () => {
-      const { artist, followerUser, followerAccessToken } =
+      const { profile, followerUser, followerAccessToken } =
         await createTestData();
-      const paidTier = artist.subscriptionTiers![1]; // Tier 2, minAmount 4
+      const paidTier = profile.subscriptionTiers![1]; // Tier 2, minAmount 4
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
@@ -209,7 +209,7 @@ describe("artists/{id}/subscribe", () => {
       });
 
       const response = await requestApp
-        .delete(`artists/${artist.id}/subscribe`)
+        .delete(`artists/${profile.id}/subscribe`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${followerAccessToken}`]);
 
@@ -228,9 +228,9 @@ describe("artists/{id}/subscribe", () => {
     });
 
     it("removes a free subscription immediately", async () => {
-      const { artist, followerUser, followerAccessToken } =
+      const { profile, followerUser, followerAccessToken } =
         await createTestData();
-      const freeTier = artist.subscriptionTiers![0]; // default tier, no Stripe key
+      const freeTier = profile.subscriptionTiers![0]; // default tier, no Stripe key
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
@@ -241,7 +241,7 @@ describe("artists/{id}/subscribe", () => {
       });
 
       const response = await requestApp
-        .delete(`artists/${artist.id}/subscribe`)
+        .delete(`artists/${profile.id}/subscribe`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${followerAccessToken}`]);
 

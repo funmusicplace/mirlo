@@ -3,31 +3,31 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  profileBelongsToLoggedInUser,
+  canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { getPlatformFeeForArtist } from "../../../../../utils/artist";
+import { getPlatformFeeForProfile } from "../../../../../utils/artist";
 import { processSingleMerch } from "../../../../../utils/merch";
 import { getUserCountry } from "../../../../../utils/user";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
     POST: [
       userAuthenticated,
-      artistBelongsToLoggedInUser,
-      canUserCreateArtists,
+      profileBelongsToLoggedInUser,
+      canUserCreateProfiles,
       POST,
     ],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params;
+    const { artistId: profileId } = req.params;
     try {
       const results = await prisma.merch.findMany({
         where: {
-          profileId: Number(artistId),
+          profileId: Number(profileId),
           deletedAt: null,
         },
         orderBy: [
@@ -78,7 +78,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const artistId = Number(req.params.artistId);
+    const profileId = Number(req.params.artistId);
     const { title, description } = req.body;
     assertLoggedIn(req);
     const user = req.user;
@@ -88,10 +88,10 @@ export default function () {
         data: {
           title,
           description: description ?? "",
-          profile: { connect: { id: artistId } },
+          profile: { connect: { id: profileId } },
           minPrice: 0,
           isPublic: false,
-          platformPercent: await getPlatformFeeForArtist(artistId),
+          platformPercent: await getPlatformFeeForProfile(profileId),
         },
       });
 

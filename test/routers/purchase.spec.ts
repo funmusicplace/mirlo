@@ -16,7 +16,7 @@ import * as stripeUtils from "../../src/utils/stripe";
 import * as terminalUtils from "../../src/utils/stripe/terminal";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createMerch,
   createTier,
@@ -65,12 +65,12 @@ describe("purchase", () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id);
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id);
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             { type: "subscription", tierId: tier.id },
             { type: "tip", amount: 500 },
@@ -85,15 +85,15 @@ describe("purchase", () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, {
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, {
         minAmount: 500,
         defaultAmount: 1000,
       });
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "subscription", tierId: tier.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -103,7 +103,7 @@ describe("purchase", () => {
 
     it("should return 401 when a readerId is supplied without being logged in", async () => {
       const { user } = await createUser({ email: "artist@test.com" });
-      const artist = await createArtist(user.id);
+      const artist = await createProfile(user.id);
       const tier = await createTier(artist.id, { minAmount: 500 });
       const response = await requestApp
         .post("purchase")
@@ -121,7 +121,7 @@ describe("purchase", () => {
         email: "artist@test.com",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const artist = await createProfile(artistUser.id);
       const tier = await createTier(artist.id, { minAmount: 500 });
       const response = await requestApp
         .post("purchase")
@@ -139,11 +139,11 @@ describe("purchase", () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           readerId: "tmr_test",
           items: [{ type: "subscription", tierId: 99999 }],
         })
@@ -156,11 +156,11 @@ describe("purchase", () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "tip", amount: 0 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -169,23 +169,23 @@ describe("purchase", () => {
     });
 
     it("should return 404 when trackGroup does not belong to the given artist", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
       const { user: otherUser } = await createUser({ email: "other@test.com" });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const otherArtist = await createArtist(otherUser.id, {
+      const profile = await createProfile(profileOwner.id);
+      const otherProfile = await createProfile(otherUser.id, {
         urlSlug: "other-artist",
       });
-      const tgFromOther = await createTrackGroup(otherArtist.id, {
+      const tgFromOther = await createTrackGroup(otherProfile.id, {
         minPrice: 1000,
       });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tgFromOther.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -194,19 +194,19 @@ describe("purchase", () => {
     });
 
     it("should return 200 with redirectUrl for a free trackGroup when user is logged in", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
       const { user: buyer, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 0 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -223,18 +223,18 @@ describe("purchase", () => {
     });
 
     it("should return 200 with clientSecret for a paid online trackGroup purchase", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_tg_online",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -245,18 +245,18 @@ describe("purchase", () => {
     });
 
     it("should return 200 with a hosted redirectUrl when hosted is true", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_tg_hosted",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
         })
@@ -276,18 +276,18 @@ describe("purchase", () => {
     });
 
     it("should reject a successUrl whose origin is not allowed", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_tg_badurl",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
           successUrl: "https://evil.example.com/thanks",
@@ -299,20 +299,20 @@ describe("purchase", () => {
     });
 
     it("should accept a successUrl on Mirlo's own origin", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_tg_goodurl",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
       // getClient() seeds the "frontend" client at http://localhost:8080 in test.
       const client = await getClient();
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
           successUrl: `${client.applicationUrl}/thanks`,
@@ -325,17 +325,17 @@ describe("purchase", () => {
     });
 
     it("should return 200 with clientSecret for an online tip", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_tip_test",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "tip", amount: 500 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -348,13 +348,13 @@ describe("purchase", () => {
     });
 
     it("should return 200 with clientSecret for an online merch purchase", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_merch_test",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const merch = await createMerch(artist.id, {
+      const profile = await createProfile(profileOwner.id);
+      const merch = await createMerch(profile.id, {
         isPublic: true,
         minPrice: 800,
       });
@@ -362,7 +362,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "merch", id: merch.id, quantity: 1 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -397,13 +397,13 @@ describe("purchase", () => {
         .metadata as Record<string, string>;
 
     it("should return paymentIntentId for a terminal trackGroup purchase", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_tg_terminal",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
         id: "acct_tg_terminal",
@@ -420,7 +420,7 @@ describe("purchase", () => {
 
       const result = await initiatePayment({
         readerId: "tmr_test",
-        profileId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -439,18 +439,18 @@ describe("purchase", () => {
     });
 
     it("tags a single online trackGroup purchase with purchaseType 'trackGroup' and its trackGroupId", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_tg",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const createStub = stubStripeForOnline();
 
       const result = await initiatePayment({
-        profileId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -471,17 +471,17 @@ describe("purchase", () => {
       // Regression guard: a Set built over item *objects* never collapsed to a
       // single unique type, so a trackGroup cart wrongly defaulted to "merch"
       // (and shipped without a trackGroupId), so the webhook never recorded it.
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_multi_tg",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg1 = await createTrackGroup(artist.id, {
+      const profile = await createProfile(profileOwner.id);
+      const tg1 = await createTrackGroup(profile.id, {
         title: "First album",
         minPrice: 1000,
       });
-      const tg2 = await createTrackGroup(artist.id, {
+      const tg2 = await createTrackGroup(profile.id, {
         title: "Second album",
         minPrice: 500,
       });
@@ -489,7 +489,7 @@ describe("purchase", () => {
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        profileId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg1.id), quantity: 1, amount: 1000 },
           { type: "trackGroup", id: String(tg2.id), quantity: 1, amount: 500 },
@@ -505,17 +505,17 @@ describe("purchase", () => {
     });
 
     it("tags a single online tip as purchaseType 'tip' and omits trackGroupId", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_tip",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        profileId: artist.id,
+        profileId: profile.id,
         items: [{ type: "tip", quantity: 1, amount: 500 }],
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -527,18 +527,18 @@ describe("purchase", () => {
     });
 
     it("falls back to purchaseType 'merch' for mixed item types and omits trackGroupId", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_mixed",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        profileId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
           { type: "tip", quantity: 1, amount: 500 },
@@ -556,13 +556,13 @@ describe("purchase", () => {
     });
 
     it("charges the summed amount on the artist's connected account and echoes the cart in metadata", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_sum",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const createStub = stubStripeForOnline("eur");
 
@@ -577,7 +577,7 @@ describe("purchase", () => {
       ];
 
       const result = await initiatePayment({
-        profileId: artist.id,
+        profileId: profile.id,
         items,
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -594,7 +594,7 @@ describe("purchase", () => {
       assert.equal(metadata.items, JSON.stringify(items));
       assert.equal(metadata.userEmail, buyer.email);
       assert.equal(metadata.userId, String(buyer.id));
-      assert.equal(metadata.artistId, String(artist.id));
+      assert.equal(metadata.artistId, String(profile.id));
 
       assert.ok("clientSecret" in result);
       assert.equal(
@@ -610,13 +610,13 @@ describe("purchase", () => {
 
   describe("initiateSubscription (direct)", () => {
     it("should return setupIntentId for a terminal subscription", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_terminal",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, {
+      const profile = await createProfile(profileOwner.id);
+      const tier = await createTier(profile.id, {
         minAmount: 500,
         defaultAmount: 1000,
       });
@@ -635,7 +635,7 @@ describe("purchase", () => {
 
       const result = await initiateSubscription({
         readerId: "tmr_test",
-        profileId: artist.id,
+        profileId: profile.id,
         tierId: tier.id,
         amount: 1000,
         userEmail: buyer.email,
@@ -821,7 +821,7 @@ describe("purchase", () => {
         stripeAccountId: "acct_orphan",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const artist = await createProfile(artistUser.id);
       const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
 
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
@@ -846,7 +846,7 @@ describe("purchase", () => {
       await assert.rejects(
         initiatePayment({
           readerId: "tmr_test",
-          artistId: artist.id,
+          profileId: artist.id,
           items: [
             {
               type: "trackGroup",

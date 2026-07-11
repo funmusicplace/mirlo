@@ -162,11 +162,11 @@ const addTrackArtistRoleTags = (
   );
 
   const coAuthors = sortedArtists
-    .filter((artist) => artist.isCoAuthor)
-    .map((artist) => artist.artistName)
+    .filter((profile) => profile.isCoAuthor)
+    .map((profile) => profile.artistName)
     .filter(Boolean);
   const allArtistNames = sortedArtists
-    .map((artist) => artist.artistName)
+    .map((profile) => profile.artistName)
     .filter(Boolean);
 
   const artistField =
@@ -178,20 +178,20 @@ const addTrackArtistRoleTags = (
   addMetadataTag(processor, "artist", artistField);
 
   const roleEntries = sortedArtists
-    .filter((artist) => artist.artistName)
-    .map((artist) => {
-      const role = artist.role?.trim();
-      return role ? `${artist.artistName} (${role})` : artist.artistName;
+    .filter((profile) => profile.artistName)
+    .map((profile) => {
+      const role = profile.role?.trim();
+      return role ? `${profile.artistName} (${role})` : profile.artistName;
     });
 
   addMetadataTag(processor, "performer", roleEntries.join(", "));
 
   const composers = sortedArtists
-    .filter((artist) => {
-      const role = artist.role?.toLowerCase() ?? "";
+    .filter((profile) => {
+      const role = profile.role?.toLowerCase() ?? "";
       return role.includes("composer") || role.includes("writer");
     })
-    .map((artist) => artist.artistName)
+    .map((profile) => profile.artistName)
     .filter(Boolean);
   if (composers.length > 0) {
     addMetadataTag(processor, "composer", composers.join(", "));
@@ -201,7 +201,7 @@ const addTrackArtistRoleTags = (
 export const convertAudioToFormat = (
   content: {
     track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
-    artist: Profile;
+    profile: Profile;
     trackGroup: {
       title: string | null;
       coverLocation?: string;
@@ -267,7 +267,7 @@ export const convertAudioToFormat = (
     processor,
     content.track,
     content.trackGroup.title,
-    content.artist.name,
+    content.profile.name,
     {
       releaseDate: content.trackGroup.releaseDate,
       totalTracks: content.trackGroup.totalTracks,
@@ -276,7 +276,7 @@ export const convertAudioToFormat = (
   addTrackArtistRoleTags(
     processor,
     content.track.trackArtists ?? [],
-    content.artist.name
+    content.profile.name
   );
 
   if (content.track.metadata) {

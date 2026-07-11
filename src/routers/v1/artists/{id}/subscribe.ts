@@ -40,7 +40,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     let { tierId, email, amount, embedded, name } = req.body;
 
     const loggedInUser = req.user;
@@ -63,7 +63,7 @@ export default function () {
                   userId: userId,
                 },
               },
-              profileId: Number(artistId),
+              profileId: Number(profileId),
             },
           },
           include: {
@@ -77,10 +77,10 @@ export default function () {
 
         if (oldTier) {
           logger.info(
-            `Deleting old subscriptions for ${artistId}, old tier: ${oldTier.id}`
+            `Deleting old subscriptions for ${profileId}, old tier: ${oldTier.id}`
           );
           await deleteStripeSubscriptions({
-            profileSubscriptionTier: { profileId: Number(artistId) },
+            profileSubscriptionTier: { profileId: Number(profileId) },
             userId,
           });
           await prisma.profileUserSubscription.updateMany({
@@ -92,7 +92,7 @@ export default function () {
           });
           await prisma.profileUserSubscription.deleteMany({
             where: {
-              profileSubscriptionTier: { profileId: Number(artistId) },
+              profileSubscriptionTier: { profileId: Number(profileId) },
               userId,
             },
           });
@@ -107,8 +107,7 @@ export default function () {
           description: "Tier not found",
         });
       }
-      const stripeAccountId = resolvePayee({
-        artist: newTier.profile,
+      const stripeAccountId = resolvePayee({ profile: newTier.profile,
       }).stripeAccountId;
 
       if (!stripeAccountId) {
@@ -180,14 +179,14 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
 
     try {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
-          profileSubscriptionTier: { profileId: Number(artistId) },
+          profileSubscriptionTier: { profileId: Number(profileId) },
           userId: loggedInUser.id,
         },
         include: {
