@@ -7,7 +7,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -37,8 +37,8 @@ describe("most played tracks", () => {
     const { user } = await createUser({
       email: "artist@artist.com",
     });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id, {
       title: "test track",
       description: "This is a test description",
@@ -61,13 +61,13 @@ describe("most played tracks", () => {
       email: "artist2@artist.com",
     });
 
-    const artist = await createArtist(user.id, { urlSlug: "artist1" });
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist2" });
+    const profile = await createProfile(user.id, { urlSlug: "artist1" });
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist2" });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       urlSlug: "trackGroup1",
     });
-    const trackGroup2 = await createTrackGroup(artist2.id, {
+    const trackGroup2 = await createTrackGroup(profile2.id, {
       urlSlug: "trackGroup2",
     });
 
@@ -113,13 +113,13 @@ describe("most played tracks", () => {
       email: "artist2@artist.com",
     });
 
-    const artist = await createArtist(user.id, { urlSlug: "artist1" });
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist2" });
+    const profile = await createProfile(user.id, { urlSlug: "artist1" });
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist2" });
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       urlSlug: "trackGroup1",
     });
-    const trackGroup2 = await createTrackGroup(artist2.id, {
+    const trackGroup2 = await createTrackGroup(profile2.id, {
       urlSlug: "trackGroup2",
     });
 

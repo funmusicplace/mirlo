@@ -9,20 +9,20 @@ import prisma from "@mirlo/prisma";
 import { triggerTrackGroupPublishNotifications } from "../../src/jobs/trigger-trackgroup-publish-notifications";
 import { clearTables, createTrackGroup, createUser } from "../utils";
 
-const setupArtistWithFollower = async (overrides?: {
+const setupProfileWithFollower = async (overrides?: {
   artistEnabled?: boolean;
 }) => {
-  const { user: artistUser } = await createUser({ email: "artist@artist.com" });
+  const { user: profileOwner } = await createUser({ email: "artist@artist.com" });
   const { user: followerUser } = await createUser({
     email: "follower@follower.com",
     emailConfirmationToken: null,
   });
 
-  const artist = await prisma.profile.create({
+  const profile = await prisma.profile.create({
     data: {
       name: "Test artist",
       urlSlug: "test-artist",
-      userId: artistUser.id,
+      userId: profileOwner.id,
       enabled: overrides?.artistEnabled ?? true,
       subscriptionTiers: { create: { name: "a tier" } },
     },
@@ -32,12 +32,12 @@ const setupArtistWithFollower = async (overrides?: {
   await prisma.profileUserSubscription.create({
     data: {
       userId: followerUser.id,
-      profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+      profileSubscriptionTierId: profile.subscriptionTiers[0].id,
       amount: 5,
     },
   });
 
-  return { artist, followerUser };
+  return { profile, followerUser };
 };
 
 describe("trigger-trackgroup-publish-notifications", () => {
@@ -50,10 +50,10 @@ describe("trigger-trackgroup-publish-notifications", () => {
   });
 
   it("notifies followers when a public scheduled trackGroup's publishedAt has passed", async () => {
-    const { artist, followerUser } = await setupArtistWithFollower();
+    const { profile, followerUser } = await setupProfileWithFollower();
 
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: oneMinuteAgo,
       releaseDate: null,
       isPublic: true,
@@ -73,9 +73,9 @@ describe("trigger-trackgroup-publish-notifications", () => {
   });
 
   it("is idempotent: a second run does not create duplicate notifications", async () => {
-    const { artist, followerUser } = await setupArtistWithFollower();
+    const { profile, followerUser } = await setupProfileWithFollower();
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: new Date(Date.now() - 60 * 1000),
       isPublic: true,
     });
@@ -90,10 +90,10 @@ describe("trigger-trackgroup-publish-notifications", () => {
   });
 
   it("skips trackGroups whose publishedAt is in the future", async () => {
-    const { artist, followerUser } = await setupArtistWithFollower();
+    const { profile, followerUser } = await setupProfileWithFollower();
 
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: tomorrow,
       isPublic: true,
     });
@@ -110,9 +110,9 @@ describe("trigger-trackgroup-publish-notifications", () => {
   });
 
   it("skips private scheduled trackGroups (notification waits for the public flip)", async () => {
-    const { artist, followerUser } = await setupArtistWithFollower();
+    const { profile, followerUser } = await setupProfileWithFollower();
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: new Date(Date.now() - 60 * 1000),
       isPublic: false,
     });
@@ -129,9 +129,9 @@ describe("trigger-trackgroup-publish-notifications", () => {
   });
 
   it("skips trackGroups with no publishedAt", async () => {
-    const { artist, followerUser } = await setupArtistWithFollower();
+    const { profile, followerUser } = await setupProfileWithFollower();
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: null,
       isPublic: true,
     });
@@ -145,10 +145,10 @@ describe("trigger-trackgroup-publish-notifications", () => {
   });
 
   it("preserves existing releaseDate instead of overwriting with publishedAt", async () => {
-    const { artist } = await setupArtistWithFollower();
+    const { profile } = await setupProfileWithFollower();
 
     const releaseDate = new Date("2020-01-01");
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: new Date(Date.now() - 60 * 1000),
       releaseDate,
       isPublic: true,

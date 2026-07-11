@@ -53,12 +53,12 @@ export const processSingleTrackGroup = (
   options?: { loggedInUserId?: number }
 ): Record<string, unknown> => {
   const { _count, profileId, profile, ...rest } = tg;
-  const { apPrivateKey: _, ...artistPublic } = profile ?? {};
+  const { apPrivateKey: _, ...profilePublic } = profile ?? {};
   const currency =
     tg.paymentToUser?.currency ?? profile?.user?.currency ?? "usd";
   const artist = profile
     ? {
-        ...artistPublic,
+        ...profilePublic,
         avatar: profile.avatar
           ? addSizesToImage(finalArtistAvatarBucket, profile.avatar)
           : undefined,
@@ -102,11 +102,11 @@ export const processSingleTrackGroup = (
 
 export const serializeSingleTrackGroupIntoCanimus = (
   trackGroup: LocalTrackGroup,
-  artistUrl: string,
+  profileUrl: string,
   artistName: string,
   canBePurchased: boolean
 ) => {
-  const releaseUrl = `${artistUrl}/release/${trackGroup.urlSlug}`;
+  const releaseUrl = `${profileUrl}/release/${trackGroup.urlSlug}`;
   const coverString = trackGroup.cover?.url.find((u) => u.includes("x600"));
   let links;
   if (canBePurchased) {
@@ -150,9 +150,9 @@ export const serializeSingleTrackGroupIntoCanimus = (
 
 export const serializeSingleDeletedTrackGroupIntoCanimus = (
   trackGroup: LocalTrackGroup,
-  artistUrl: string
+  profileUrl: string
 ) => {
-  const releaseUrl = join(artistUrl, "release", trackGroup.urlSlug);
+  const releaseUrl = join(profileUrl, "release", trackGroup.urlSlug);
   return {
     type: "album",
     name: trackGroup.title,

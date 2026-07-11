@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
   createUserTrackGroupPurchase,
@@ -38,13 +38,13 @@ describe("trackGroups/{id}", () => {
       const { user } = await createUser({
         email: "artist-private-url@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         isPublic: false,
       });
 
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
@@ -56,8 +56,8 @@ describe("trackGroups/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         tracks: [
           {
             title: "Track 1",
@@ -72,7 +72,7 @@ describe("trackGroups/{id}", () => {
       });
 
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -85,8 +85,8 @@ describe("trackGroups/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
@@ -95,7 +95,7 @@ describe("trackGroups/{id}", () => {
       await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
 
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -108,8 +108,8 @@ describe("trackGroups/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const tracks = await prisma.track.findMany({
         where: { trackGroupId: trackGroup.id },
@@ -122,7 +122,7 @@ describe("trackGroups/{id}", () => {
       await createUserTrackPurchase(purchaser.id, tracks[0].id);
 
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -135,8 +135,8 @@ describe("trackGroups/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         tracks: [
           {
             title: "Track 1",
@@ -164,7 +164,7 @@ describe("trackGroups/{id}", () => {
       await createUserTrackPurchase(purchaser.id, previewTrack.id);
 
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -182,8 +182,8 @@ describe("trackGroups/{id}", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .post(`trackGroups/${trackGroup.id}/wishlist`)
@@ -207,8 +207,8 @@ describe("trackGroups/{id}", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .post(`trackGroups/${trackGroup.id}/wishlist`)
@@ -256,8 +256,8 @@ describe("trackGroups/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         minPrice: 10,
       });
       const { accessToken } = await createUser({
@@ -279,8 +279,8 @@ describe("trackGroups/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         minPrice: 0,
       });
       const { accessToken } = await createUser({

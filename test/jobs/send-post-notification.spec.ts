@@ -39,7 +39,7 @@ describe("send-post-notification", () => {
       deletedAt?: Date | null;
     } = {}
   ) {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@test.com",
       emailConfirmationToken: null,
     });
@@ -55,11 +55,11 @@ describe("send-post-notification", () => {
       }),
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test Artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: { create: { name: "Fan tier" } },
       },
@@ -69,12 +69,12 @@ describe("send-post-notification", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: subscriber.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    return { artist, subscriber };
+    return { profile, subscriber };
   }
 
   async function createPublishedPost(
@@ -100,8 +100,8 @@ describe("send-post-notification", () => {
   // ── Basic behaviour ────────────────────────────────────────────────────────
 
   it("queues an email for each confirmed subscriber", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id);
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id);
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -112,8 +112,8 @@ describe("send-post-notification", () => {
   });
 
   it("creates a NEW_ARTIST_POST notification in the DB", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id);
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id);
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -124,8 +124,8 @@ describe("send-post-notification", () => {
   });
 
   it("marks the post as hasAnnounceEmailBeenSent after processing", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id);
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id);
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -136,8 +136,8 @@ describe("send-post-notification", () => {
   // ── Claim / idempotency (the triple-send regression) ──────────────────────
 
   it("only sends emails once when called twice sequentially for the same post", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id);
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id);
 
     // Simulates two BullMQ jobs created for the same post (e.g. cron fired
     // twice before hasAnnounceEmailBeenSent was set, or 3-attempt retry loop).
@@ -152,8 +152,8 @@ describe("send-post-notification", () => {
   });
 
   it("skips immediately when post is already marked as sent", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id, {
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id, {
       hasAnnounceEmailBeenSent: true,
     });
 
@@ -163,8 +163,8 @@ describe("send-post-notification", () => {
   });
 
   it("uses a stable jobId per notification to support BullMQ deduplication", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id);
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id);
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -179,8 +179,8 @@ describe("send-post-notification", () => {
   // ── Skip conditions ────────────────────────────────────────────────────────
 
   it("skips draft posts", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id, { isDraft: true });
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id, { isDraft: true });
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -190,8 +190,8 @@ describe("send-post-notification", () => {
   });
 
   it("skips email queueing for posts with shouldSendEmail: false", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id, {
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id, {
       shouldSendEmail: false,
     });
 
@@ -204,9 +204,9 @@ describe("send-post-notification", () => {
   // the post in their "Artists you follow" feed via an in-app notification.
   // See #2071.
   it("still creates in-app notifications when shouldSendEmail: false", async () => {
-    const { artist, subscriber } =
+    const { profile, subscriber } =
       await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id, {
+    const post = await createPublishedPost(profile.id, {
       shouldSendEmail: false,
     });
 
@@ -224,8 +224,8 @@ describe("send-post-notification", () => {
   });
 
   it("marks shouldSendEmail: false posts as processed so the cron doesn't re-queue them", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id, {
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id, {
       shouldSendEmail: false,
     });
 
@@ -236,8 +236,8 @@ describe("send-post-notification", () => {
   });
 
   it("skips posts with empty content", async () => {
-    const { artist } = await createArtistWithSubscriber("sub@test.com");
-    const post = await createPublishedPost(artist.id, { content: "   " });
+    const { profile } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(profile.id, { content: "   " });
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -252,13 +252,13 @@ describe("send-post-notification", () => {
   // ── Subscriber filtering ───────────────────────────────────────────────────
 
   it("does not email unconfirmed subscribers (emailConfirmationToken set)", async () => {
-    const { artist } = await createArtistWithSubscriber(
+    const { profile } = await createArtistWithSubscriber(
       "unconfirmed@test.com",
       {
         emailConfirmationToken: UNCONFIRMED,
       }
     );
-    const post = await createPublishedPost(artist.id);
+    const post = await createPublishedPost(profile.id);
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -266,10 +266,10 @@ describe("send-post-notification", () => {
   });
 
   it("does not email deleted subscribers", async () => {
-    const { artist } = await createArtistWithSubscriber("deleted@test.com", {
+    const { profile } = await createArtistWithSubscriber("deleted@test.com", {
       deletedAt: new Date(),
     });
-    const post = await createPublishedPost(artist.id);
+    const post = await createPublishedPost(profile.id);
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -277,7 +277,7 @@ describe("send-post-notification", () => {
   });
 
   it("deduplicates subscribers who appear in multiple tiers", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist2@test.com",
       emailConfirmationToken: null,
     });
@@ -286,11 +286,11 @@ describe("send-post-notification", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Multi Tier Artist",
         urlSlug: "multi-tier-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: [{ name: "Tier A" }, { name: "Tier B" }],
@@ -300,7 +300,7 @@ describe("send-post-notification", () => {
     });
 
     // Subscribe the same user to both tiers
-    for (const tier of artist.subscriptionTiers) {
+    for (const tier of profile.subscriptionTiers) {
       await prisma.profileUserSubscription.create({
         data: {
           userId: subscriber.id,
@@ -310,7 +310,7 @@ describe("send-post-notification", () => {
       });
     }
 
-    const post = await createPublishedPost(artist.id);
+    const post = await createPublishedPost(profile.id);
 
     await sendPostNotification({ data: { postId: post.id } });
 
@@ -321,7 +321,7 @@ describe("send-post-notification", () => {
   // ── Local mention notifications ────────────────────────────────────────────
 
   it("creates MENTION_IN_POST notification for a mentioned local artist", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "poster@test.com",
       emailConfirmationToken: null,
     });
@@ -334,7 +334,7 @@ describe("send-post-notification", () => {
       data: {
         name: "Posting Artist",
         urlSlug: "posting-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });

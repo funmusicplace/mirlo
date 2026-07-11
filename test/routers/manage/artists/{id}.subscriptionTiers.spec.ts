@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTier,
   createUser,
 } from "../../../utils";
@@ -37,9 +37,9 @@ describe("manage/artists/{artistId}/subscriptionTiers", () => {
 
       const title = faker.lorem.words(2);
 
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/subscriptionTiers`)
+        .post(`manage/artists/${profile.id}/subscriptionTiers`)
         .send({
           name: title,
           description: "description",
@@ -74,10 +74,10 @@ describe("manage/artists/{artistId}/subscriptionTiers/{tierId}", () => {
 
       const title = faker.lorem.words(2);
 
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id);
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id);
       const response = await requestApp
-        .put(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}`)
+        .put(`manage/artists/${profile.id}/subscriptionTiers/${tier.id}`)
         .send({
           allowVariable: true,
         })

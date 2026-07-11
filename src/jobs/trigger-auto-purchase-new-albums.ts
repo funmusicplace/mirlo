@@ -28,7 +28,7 @@ export async function triggerAutoPurchaseNewAlbums() {
   );
 
   for (const album of recentAlbums) {
-    const artistSubscribers = await prisma.profileUserSubscription.findMany({
+    const profileSubscribers = await prisma.profileUserSubscription.findMany({
       where: {
         amount: {
           gte: 0,
@@ -46,10 +46,10 @@ export async function triggerAutoPurchaseNewAlbums() {
     });
 
     logger.info(
-      `triggerAutoPurchaseNewAlbums: album ${album.id}: found ${artistSubscribers.length} subscribers`
+      `triggerAutoPurchaseNewAlbums: album ${album.id}: found ${profileSubscribers.length} subscribers`
     );
 
-    for (const subscriber of artistSubscribers) {
+    for (const subscriber of profileSubscribers) {
       logger.info(
         `triggerAutoPurchaseNewAlbums: queueing album ${album.id} for subscription ${subscriber.id}`
       );

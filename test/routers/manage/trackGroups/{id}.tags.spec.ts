@@ -7,7 +7,7 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -29,9 +29,9 @@ describe("manage/trackGroups/{trackGroupId}/tags", () => {
   describe("PUT", () => {
     it("should set tags on a trackGroup", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const tagArray = ["a tag", "zanother tag"];
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 
@@ -65,9 +65,9 @@ describe("manage/trackGroups/{trackGroupId}/tags", () => {
 
     it("should assume tags with commas in them are separate tags", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 
@@ -113,9 +113,9 @@ describe("manage/trackGroups/{trackGroupId}/tags", () => {
 
     it("should update tags on a trackGroup if existing tags", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const tagArray = ["a tag", "zanother tag"];
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
 

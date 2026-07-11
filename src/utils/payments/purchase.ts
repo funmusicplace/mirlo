@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { uniq } from "lodash";
 
-import { sendSubscriptionCancellationEmail } from "../artist";
+import { sendProfileSubscriptionCancellationEmail } from "../artist";
 import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
 import { getCurrency } from "../stripe/sessions";
@@ -20,38 +20,38 @@ export type ResolvedItem = {
 
 // Fetches the artist and resolves the connected Stripe account + currency used
 // for all payment operations. Shared by initiatePayment and initiateSubscription.
-const resolveArtistPaymentContext = async (
-  artistId: number,
+const resolveProfilePaymentContext = async (
+  profileId: number,
   stripeAccountIdOverride?: string
 ) => {
-  const artist = await prisma.profile.findFirst({
-    where: { id: artistId, enabled: true },
+  const profile = await prisma.profile.findFirst({
+    where: { id: profileId, enabled: true },
     include: {
       user: { select: { stripeAccountId: true, email: true } },
       paymentToUser: { select: { stripeAccountId: true } },
     },
   });
 
-  if (!artist) {
-    throw new Error(`Artist ${artistId} not found`);
+  if (!profile) {
+    throw new Error(`Profile ${profileId} not found`);
   }
 
   const stripeAccountId =
-    stripeAccountIdOverride ?? resolvePayee({ artist }).stripeAccountId;
+    stripeAccountIdOverride ?? resolvePayee({ profile }).stripeAccountId;
 
   if (!stripeAccountId) {
-    throw new Error("Artist is not set up with a payment processor");
+    throw new Error("Profile is not set up with a payment processor");
   }
 
-  const currency = await getCurrency(artistId, stripeAccountId);
+  const currency = await getCurrency(profileId, stripeAccountId);
 
-  return { artist, stripeAccountId, currency };
+  return { profile, stripeAccountId, currency };
 };
 
 // Initiates a payment against the artist's connected account.
 export const initiatePayment = async ({
   readerId,
-  artistId,
+  profileId,
   items,
   userEmail,
   userId,
@@ -60,7 +60,7 @@ export const initiatePayment = async ({
   stripeAccountId: stripeAccountIdOverride,
 }: {
   readerId?: string;
-  artistId: number;
+  profileId: number;
   items: ResolvedItem[];
   userEmail: string;
   userId?: string;
@@ -78,16 +78,16 @@ export const initiatePayment = async ({
       paymentIntentId: string;
     }
 > => {
-  const { artist, stripeAccountId, currency } =
-    await resolveArtistPaymentContext(artistId, stripeAccountIdOverride);
+  const { profile, stripeAccountId, currency } =
+    await resolveProfilePaymentContext(profileId, stripeAccountIdOverride);
 
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
 
   const applicationFeeAmount = await calculateAppFee(
     totalAmount,
     currency,
-    artist.properties
-      ? (artist.properties as { defaultPlatformFee?: number })
+    profile.properties
+      ? (profile.properties as { defaultPlatformFee?: number })
           .defaultPlatformFee
       : undefined
   );
@@ -98,7 +98,8 @@ export const initiatePayment = async ({
   const metadata: Record<string, string> = {
     purchaseType,
     stripeAccountId,
-    artistId: String(artistId),
+    artistId: String(profileId),
+    profileId: String(profileId),
     userEmail,
     ...(userId && { userId }),
     ...(clientId !== undefined && { clientId: String(clientId) }),
@@ -138,14 +139,14 @@ export const initiatePayment = async ({
 
 export const initiateSubscription = async ({
   readerId,
-  artistId,
+  profileId,
   tierId,
   amount,
   userEmail,
   userId,
 }: {
   readerId: string;
-  artistId: number;
+  profileId: number;
   tierId: number;
   /** Optional override; falls back to the tier's default/min amount. */
   amount?: number;
@@ -155,7 +156,7 @@ export const initiateSubscription = async ({
   // Validate the tier first so a missing tier returns 404 even when the artist
   // has not finished setting up a payment processor (which throws below).
   const tier = await prisma.profileSubscriptionTier.findFirst({
-    where: { id: tierId, profileId: artistId, deletedAt: null },
+    where: { id: tierId, profileId, deletedAt: null },
     select: { id: true, minAmount: true, defaultAmount: true },
   });
   if (!tier) {
@@ -174,12 +175,12 @@ export const initiateSubscription = async ({
   }
 
   const { stripeAccountId, currency } =
-    await resolveArtistPaymentContext(artistId);
+    await resolveProfilePaymentContext(profileId);
 
   return getPaymentProcessor().createTerminalSubscriptionSetup({
     readerId,
     tierId,
-    artistId,
+    profileId,
     accountId: stripeAccountId,
     amount: resolvedAmount,
     currency,
@@ -203,21 +204,21 @@ export const cancelUserSubscription = async (
   subscription: CancellableSubscription,
   userEmail: string
 ) => {
-  const artistId = subscription.profileSubscriptionTier.profileId;
+  const profileId = subscription.profileSubscriptionTier.profileId;
 
   // Cancellation only needs the connected account — not the currency that
-  // resolveArtistPaymentContext also fetches from Stripe — so resolve the
+  // resolveProfilePaymentContext also fetches from Stripe — so resolve the
   // artist + account directly here. We don't filter on `enabled` so a
   // subscription to a since-disabled artist can still be cancelled.
-  const artist = await prisma.profile.findFirst({
-    where: { id: artistId},
+  const profile = await prisma.profile.findFirst({
+    where: { id: profileId },
     include: {
       user: { select: { stripeAccountId: true } },
       paymentToUser: { select: { stripeAccountId: true } },
     },
   });
   const stripeAccountId =
-    artist?.paymentToUser?.stripeAccountId ?? artist?.user.stripeAccountId;
+    profile?.paymentToUser?.stripeAccountId ?? profile?.user.stripeAccountId;
 
   if (subscription.stripeSubscriptionKey) {
     if (stripeAccountId) {
@@ -241,10 +242,10 @@ export const cancelUserSubscription = async (
     });
   }
 
-  if (artist) {
-    await sendSubscriptionCancellationEmail(
+  if (profile) {
+    await sendProfileSubscriptionCancellationEmail(
       userEmail,
-      artist,
+      profile,
       subscription.stripeSubscriptionKey ? subscription.nextBillingDate : null
     );
   }

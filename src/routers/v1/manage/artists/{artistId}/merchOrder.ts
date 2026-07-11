@@ -2,13 +2,13 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
+    PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

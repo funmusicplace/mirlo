@@ -5,7 +5,7 @@ import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { AppError } from "../../../utils/error";
 import {
   canUserSeePostContent,
-  getUserSubscriptionForArtist,
+  getUserSubscriptionForProfile,
 } from "../../../utils/postAccess";
 import { serializePost } from "../../../utils/serialize/post";
 
@@ -16,19 +16,19 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
-    const { artistId }: { artistId?: string } = req.query;
+    const { artistId: profileId }: {  artistId?: string } = req.query;
     const user = req.user;
 
     try {
       let postForURLSlug;
-      if (artistId) {
+      if (profileId) {
         postForURLSlug = await prisma.post.findFirst({
           where: {
             AND: [
               { urlSlug: { equals: id, mode: "insensitive" } },
               {
                 profile: {
-                  urlSlug: artistId,
+                  urlSlug: profileId,
                 },
               },
             ],
@@ -115,12 +115,12 @@ export default function () {
           description: "Post not found",
         });
       }
-      const isArtistOwner = !!(user && post.profile?.userId === user.id);
+      const isProfileOwner = !!(user && post.profile?.userId === user.id);
       const subscription = post.profileId
-        ? await getUserSubscriptionForArtist(user, post.profileId)
+        ? await getUserSubscriptionForProfile(user, post.profileId)
         : null;
       const canSeeContent = canUserSeePostContent(post, {
-        isArtistOwner,
+        isProfileOwner,
         subscription,
       });
 

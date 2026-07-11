@@ -5,7 +5,7 @@ dotenv.config();
 import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import request from "supertest";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
@@ -24,7 +24,7 @@ describe("GET /v1/labels/{id}", () => {
       email: "off-label@example.com",
       isLabelAccount: false,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Disabled Label",
       isLabelProfile: true,
       urlSlug: "disabled-label",
@@ -42,23 +42,23 @@ describe("GET /v1/labels/{id}", () => {
       email: "label-roster@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Label With Deleted Member",
       isLabelProfile: true,
     });
 
-    const { user: liveArtistUser } = await createUser({
+    const { user: liveProfileUser } = await createUser({
       email: "live-artist@example.com",
     });
-    const liveArtist = await createArtist(liveArtistUser.id, {
+    const liveProfile = await createProfile(liveProfileUser.id, {
       name: "Live Artist",
       urlSlug: "live-artist",
     });
 
-    const { user: deletedArtistUser } = await createUser({
+    const { user: deletedProfileUser } = await createUser({
       email: "deleted-artist@example.com",
     });
-    const deletedArtist = await createArtist(deletedArtistUser.id, {
+    const deletedProfile = await createProfile(deletedProfileUser.id, {
       name: "Deleted Artist",
       urlSlug: "deleted-artist",
     });
@@ -67,13 +67,13 @@ describe("GET /v1/labels/{id}", () => {
       data: [
         {
           labelUserId: labelUser.id,
-          artistId: liveArtist.id,
+          artistId: liveProfile.id,
           isLabelApproved: true,
           isArtistApproved: true,
         },
         {
           labelUserId: labelUser.id,
-          artistId: deletedArtist.id,
+          artistId: deletedProfile.id,
           isLabelApproved: true,
           isArtistApproved: true,
         },
@@ -81,7 +81,7 @@ describe("GET /v1/labels/{id}", () => {
     });
 
     await prisma.profile.update({
-      where: { id: deletedArtist.id },
+      where: { id: deletedProfile.id },
       data: { deletedAt: new Date() },
     });
 
@@ -92,7 +92,7 @@ describe("GET /v1/labels/{id}", () => {
     assert.equal(response.status, 200);
     const artistLabels = response.body.result.artistLabels ?? [];
     assert.equal(artistLabels.length, 1);
-    assert.equal(artistLabels[0].artistId, liveArtist.id);
-    assert.equal(artistLabels[0].artist.id, liveArtist.id);
+    assert.equal(artistLabels[0].artistId, liveProfile.id);
+    assert.equal(artistLabels[0].artist.id, liveProfile.id);
   });
 });

@@ -4,7 +4,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -39,8 +39,8 @@ describe("trackGroups/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const response = await requestApp
         .get(`trackGroups/${trackGroup.id}/download`)
         .set("Accept", "application/json");
@@ -52,8 +52,8 @@ describe("trackGroups/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await createBucketIfNotExists(finalAudioBucket);
 
       const { user: purchaser } = await createUser({
@@ -89,9 +89,9 @@ describe("trackGroups/{id}/download", () => {
       const { user } = await createUser({
         email: "preorder-artist@artist.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const futureRelease = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: futureRelease,
       });
 
@@ -128,8 +128,8 @@ describe("trackGroups/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",

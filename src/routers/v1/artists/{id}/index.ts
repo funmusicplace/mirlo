@@ -4,11 +4,11 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import {
   checkIsUserSubscriber,
-  findArtistIdForURLSlug,
+  findProfileIdForURLSlug,
   singleInclude,
-  whereForAllArtistsThisLabelCanEdit,
+  whereForAllProfilesThisLabelCanEdit,
 } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleProfile } from "../../../../utils/serialize/artist";
 
 export default function () {
   const operations = {
@@ -26,7 +26,7 @@ export default function () {
       return res.status(400).json({ error: "Invalid artist ID" });
     }
     try {
-      const parsedId = await findArtistIdForURLSlug(id);
+      const parsedId = await findProfileIdForURLSlug(id);
       let isUserSubscriber = false;
       if (parsedId) {
         const canManage =
@@ -35,12 +35,12 @@ export default function () {
             where: {
               id: parsedId,
               enabled: true,
-              ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
+              ...whereForAllProfilesThisLabelCanEdit(loggedInUser.id),
             },
             select: { id: true },
           })) !== null;
 
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: {
             id: parsedId,
             enabled: true,
@@ -51,15 +51,15 @@ export default function () {
           }) as any,
         });
 
-        if (!artist) {
+        if (!profile) {
           return res.status(404).json({ error: "Artist not found" });
         }
 
         isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);
 
         return res.json({
-          result: processSingleArtist(
-            artist as any,
+          result: processSingleProfile(
+            profile as any,
             loggedInUser?.id,
             isUserSubscriber
           ),

@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -26,8 +26,8 @@ describe("manage/trackGroups/{trackGroupId}/codes", () => {
   describe("POST", () => {
     it("should upload new subscriptions", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const response = await requestApp
         .post(`manage/trackGroups/${trackGroup.id}/codes`)

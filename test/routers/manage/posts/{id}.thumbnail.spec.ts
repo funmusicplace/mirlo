@@ -4,7 +4,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createPost,
   createUser,
 } from "../../../utils";
@@ -26,8 +26,8 @@ describe("manage/posts/{postId}/featuredImage", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
       const image = await prisma.postImage.create({
         data: {
           postId: post.id,

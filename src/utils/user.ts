@@ -3,16 +3,16 @@ import { User } from "@mirlo/prisma/client";
 
 import logger from "../logger";
 
-import { deleteArtist, deleteStripeSubscriptions } from "./artist";
+import { deleteProfile, deleteStripeSubscriptions } from "./artist";
 import countries from "./country-codes-currencies";
 
 export const deleteUser = async (userId: number) => {
-  const userArtists = await prisma.profile.findMany({
+  const userProfiles = await prisma.profile.findMany({
     where: { userId: Number(userId) },
   });
 
   await Promise.all(
-    userArtists.map((artist) => deleteArtist(Number(userId), artist.id))
+    userProfiles.map((profile) => deleteProfile(Number(userId), profile.id))
   );
 
   await deleteStripeSubscriptions({ userId });
@@ -106,16 +106,16 @@ export const findOrCreateUserBasedOnEmail = async (
   return { userId, newUser, user };
 };
 
-export const findUserDiscountPercentsForArtist = async (
+export const findUserDiscountPercentsForProfile = async (
   userId: number,
-  artistId: number
+  profileId: number
 ) => {
   const activeSubscriptions = await prisma.profileUserSubscription.findMany({
     where: {
       userId,
       deletedAt: null,
       profileSubscriptionTier: {
-        profileId: artistId,
+        profileId: profileId,
       },
     },
     select: {

@@ -8,7 +8,7 @@ import { describe, it } from "mocha";
 import { getClient } from "../../../src/utils/getClient";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createPost,
@@ -60,12 +60,12 @@ describe("oembed", () => {
     describe("Album oEmbed", () => {
       it("should return oEmbed data for an album", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const trackGroup = await createTrackGroup(artist.id);
+        const profile = await createProfile(user.user.id);
+        const trackGroup = await createTrackGroup(profile.id);
         await createTrack(trackGroup.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/release/${trackGroup.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -77,12 +77,12 @@ describe("oembed", () => {
         assert.equal(response.body.height, 315);
         assert.equal(
           response.body.title,
-          `${trackGroup.title} by ${artist.name}`
+          `${trackGroup.title} by ${profile.name}`
         );
-        assert.equal(response.body.author_name, artist.name);
+        assert.equal(response.body.author_name, profile.name);
         assert.equal(
           response.body.author_url,
-          `${applicationUrl}/${artist.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}`
         );
         assert(response.body.html.includes("iframe"));
         assert(response.body.html.includes(trackGroup.id.toString()));
@@ -91,8 +91,8 @@ describe("oembed", () => {
 
       it("should include thumbnail for album with cover", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const trackGroup = await createTrackGroup(artist.id, {
+        const profile = await createProfile(user.user.id);
+        const trackGroup = await createTrackGroup(profile.id, {
           cover: {
             create: {
               url: ["https://example.com/cover.jpgx600"],
@@ -101,7 +101,7 @@ describe("oembed", () => {
         });
         await createTrack(trackGroup.id);
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/release/${trackGroup.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -117,12 +117,12 @@ describe("oembed", () => {
     describe("Track oEmbed", () => {
       it("should return oEmbed data for a track", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const trackGroup = await createTrackGroup(artist.id);
+        const profile = await createProfile(user.user.id);
+        const trackGroup = await createTrackGroup(profile.id);
         const track = await createTrack(trackGroup.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/release/${trackGroup.urlSlug}/tracks/${track.id}`
+          `${applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}/tracks/${track.id}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -132,11 +132,11 @@ describe("oembed", () => {
         assert.equal(response.body.type, "rich");
         assert.equal(response.body.width, 560);
         assert.equal(response.body.height, 315);
-        assert.equal(response.body.title, `${track.title} by ${artist.name}`);
-        assert.equal(response.body.author_name, artist.name);
+        assert.equal(response.body.title, `${track.title} by ${profile.name}`);
+        assert.equal(response.body.author_name, profile.name);
         assert.equal(
           response.body.author_url,
-          `${applicationUrl}/${artist.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}`
         );
         assert(response.body.html.includes("iframe"));
         assert(response.body.html.includes(`track/${track.id}`));
@@ -145,8 +145,8 @@ describe("oembed", () => {
 
       it("should include thumbnail for track", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const trackGroup = await createTrackGroup(artist.id, {
+        const profile = await createProfile(user.user.id);
+        const trackGroup = await createTrackGroup(profile.id, {
           cover: {
             create: {
               url: ["https://example.com/cover.jpgx600"],
@@ -156,7 +156,7 @@ describe("oembed", () => {
         const track = await createTrack(trackGroup.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/release/${trackGroup.urlSlug}/tracks/${track.id}`
+          `${applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}/tracks/${track.id}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -172,11 +172,11 @@ describe("oembed", () => {
     describe("Post oEmbed", () => {
       it("should return oEmbed data for a post by ID", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const post = await createPost(artist.id);
+        const profile = await createProfile(user.user.id);
+        const post = await createPost(profile.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/posts/${post.id}`
+          `${applicationUrl}/${profile.urlSlug}/posts/${post.id}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -187,10 +187,10 @@ describe("oembed", () => {
         assert.equal(response.body.width, 400);
         assert.equal(response.body.height, 300);
         assert.equal(response.body.title, post.title);
-        assert.equal(response.body.author_name, artist.name);
+        assert.equal(response.body.author_name, profile.name);
         assert.equal(
           response.body.author_url,
-          `${applicationUrl}/${artist.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}`
         );
         assert(response.body.html.includes(`/posts/${post.id}`));
         assert.equal(response.body.cache_age, 86400);
@@ -198,11 +198,11 @@ describe("oembed", () => {
 
       it("should return oEmbed data for a post by slug", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const post = await createPost(artist.id);
+        const profile = await createProfile(user.user.id);
+        const post = await createPost(profile.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/posts/${post.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}/posts/${post.urlSlug}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -217,11 +217,11 @@ describe("oembed", () => {
     describe("Merch oEmbed", () => {
       it("should return oEmbed data for merch by ID", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const merch = await createMerch(artist.id);
+        const profile = await createProfile(user.user.id);
+        const merch = await createMerch(profile.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/merch/${merch.id}`
+          `${applicationUrl}/${profile.urlSlug}/merch/${merch.id}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -232,10 +232,10 @@ describe("oembed", () => {
         assert.equal(response.body.width, 400);
         assert.equal(response.body.height, 300);
         assert.equal(response.body.title, merch.title);
-        assert.equal(response.body.author_name, artist.name);
+        assert.equal(response.body.author_name, profile.name);
         assert.equal(
           response.body.author_url,
-          `${applicationUrl}/${artist.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}`
         );
         assert(response.body.html.includes(`/merch/${merch.id}`));
         assert.equal(response.body.cache_age, 86400);
@@ -243,11 +243,11 @@ describe("oembed", () => {
 
       it("should return oEmbed data for merch by slug", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const merch = await createMerch(artist.id);
+        const profile = await createProfile(user.user.id);
+        const merch = await createMerch(profile.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/merch/${merch.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}/merch/${merch.urlSlug}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -260,8 +260,8 @@ describe("oembed", () => {
 
       it("should include thumbnail for merch", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const merch = await createMerch(artist.id);
+        const profile = await createProfile(user.user.id);
+        const merch = await createMerch(profile.id);
 
         await prisma.merchImage.create({
           data: {
@@ -271,7 +271,7 @@ describe("oembed", () => {
         });
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/merch/${merch.id}`
+          `${applicationUrl}/${profile.urlSlug}/merch/${merch.id}`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -287,9 +287,9 @@ describe("oembed", () => {
     describe("Artist oEmbed", () => {
       it("should return oEmbed data for an artist", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
-        const url = encodeURIComponent(`${applicationUrl}/${artist.urlSlug}`);
+        const url = encodeURIComponent(`${applicationUrl}/${profile.urlSlug}`);
         const response = await requestApp
           .get(`oembed/?url=${url}`)
           .set("Accept", "application/json");
@@ -298,27 +298,27 @@ describe("oembed", () => {
         assert.equal(response.body.type, "link");
         assert.equal(response.body.width, 400);
         assert.equal(response.body.height, 300);
-        assert.equal(response.body.title, artist.name);
-        assert.equal(response.body.author_name, artist.name);
+        assert.equal(response.body.title, profile.name);
+        assert.equal(response.body.author_name, profile.name);
         assert.equal(
           response.body.author_url,
-          `${applicationUrl}/${artist.urlSlug}`
+          `${applicationUrl}/${profile.urlSlug}`
         );
         assert.equal(response.body.cache_age, 86400);
       });
 
       it("should include thumbnail for artist", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
         await prisma.profileAvatar.create({
           data: {
-            profileId: artist.id,
+            profileId: profile.id,
             url: ["https://example.com/avatar.jpgx600"],
           },
         });
 
-        const url = encodeURIComponent(`${applicationUrl}/${artist.urlSlug}`);
+        const url = encodeURIComponent(`${applicationUrl}/${profile.urlSlug}`);
         const response = await requestApp
           .get(`oembed/?url=${url}`)
           .set("Accept", "application/json");
@@ -333,10 +333,10 @@ describe("oembed", () => {
     describe("Error cases", () => {
       it("should return 404 for non-existent album", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/non-existent`
+          `${applicationUrl}/${profile.urlSlug}/non-existent`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -348,11 +348,11 @@ describe("oembed", () => {
 
       it("should return 404 for non-existent track", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
-        const trackGroup = await createTrackGroup(artist.id);
+        const profile = await createProfile(user.user.id);
+        const trackGroup = await createTrackGroup(profile.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/${trackGroup.urlSlug}/99999`
+          `${applicationUrl}/${profile.urlSlug}/${trackGroup.urlSlug}/99999`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -374,10 +374,10 @@ describe("oembed", () => {
 
       it("should return 404 for non-existent post", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/posts/99999`
+          `${applicationUrl}/${profile.urlSlug}/posts/99999`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -389,10 +389,10 @@ describe("oembed", () => {
 
       it("should return 404 for non-existent merch", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
         const url = encodeURIComponent(
-          `${applicationUrl}/${artist.urlSlug}/merch/00000000-0000-0000-0000-000000000000`
+          `${applicationUrl}/${profile.urlSlug}/merch/00000000-0000-0000-0000-000000000000`
         );
         const response = await requestApp
           .get(`oembed/?url=${url}`)
@@ -418,9 +418,9 @@ describe("oembed", () => {
     describe("Query parameters", () => {
       it("should accept maxwidth parameter", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
-        const url = encodeURIComponent(`${applicationUrl}/${artist.urlSlug}`);
+        const url = encodeURIComponent(`${applicationUrl}/${profile.urlSlug}`);
         const response = await requestApp
           .get(`oembed/?url=${url}&maxwidth=600`)
           .set("Accept", "application/json");
@@ -430,9 +430,9 @@ describe("oembed", () => {
 
       it("should default format to json", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
-        const url = encodeURIComponent(`${applicationUrl}/${artist.urlSlug}`);
+        const url = encodeURIComponent(`${applicationUrl}/${profile.urlSlug}`);
         const response = await requestApp
           .get(`oembed/?url=${url}`)
           .set("Accept", "application/json");
@@ -443,9 +443,9 @@ describe("oembed", () => {
 
       it("should accept format=json explicitly", async () => {
         const user = await createUser({ email: "test@test.com" });
-        const artist = await createArtist(user.user.id);
+        const profile = await createProfile(user.user.id);
 
-        const url = encodeURIComponent(`${applicationUrl}/${artist.urlSlug}`);
+        const url = encodeURIComponent(`${applicationUrl}/${profile.urlSlug}`);
         const response = await requestApp
           .get(`oembed/?url=${url}&format=json`)
           .set("Accept", "application/json");

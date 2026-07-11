@@ -143,12 +143,12 @@ export default function () {
         existingSlug ||
         generateSlug(title ?? post?.title ?? "");
 
-      const effectiveArtistId = post?.profileId;
+      const effectiveProfileId = post?.profileId;
 
-      if (effectiveSlug && effectiveArtistId) {
+      if (effectiveSlug && effectiveProfileId) {
         const conflict = await prisma.post.findFirst({
           where: {
-            profileId: effectiveArtistId,
+            profileId: effectiveProfileId,
             urlSlug: { equals: effectiveSlug, mode: "insensitive" },
             id: { not: Number(postId) },
           },

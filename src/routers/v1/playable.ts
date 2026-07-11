@@ -62,13 +62,13 @@ export default function () {
           const hasPurchasedTrackGroup =
             track.trackGroup.userTrackGroupPurchases &&
             track.trackGroup.userTrackGroupPurchases.length > 0;
-          const isArtistOwner =
+          const isProfileOwner =
             track.trackGroup.profile.userId === loggedInUser?.id;
 
           return (
             hasPurchasedTrack ||
             hasPurchasedTrackGroup ||
-            isArtistOwner ||
+            isProfileOwner ||
             track.isPreview
           );
         }

@@ -8,7 +8,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createUser,
 } from "../../../utils";
@@ -52,13 +52,13 @@ describe("manage/artists/{artistId}/merchOrder", () => {
       email: "test@test.com",
     });
 
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
 
-    const merch1 = await createMerch(artist.id, { title: "Merch 1" });
-    const merch2 = await createMerch(artist.id, { title: "Merch 2" });
+    const merch1 = await createMerch(profile.id, { title: "Merch 1" });
+    const merch2 = await createMerch(profile.id, { title: "Merch 2" });
 
     const response = await request(baseURL)
-      .put(`manage/artists/${artist.id}/merchOrder`)
+      .put(`manage/artists/${profile.id}/merchOrder`)
       .send({ merchIds: [merch2.id, merch1.id] })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");

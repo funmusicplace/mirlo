@@ -5,7 +5,7 @@ import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -33,8 +33,8 @@ describe("register trackPlays", () => {
     const { user } = await createUser({
       email: "artist@artist.com",
     });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id, {
       title: "test track",
       description: "This is a test description",
@@ -51,8 +51,8 @@ describe("register trackPlays", () => {
     const { user, accessToken } = await createUser({
       email: "artist@artist.com",
     });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id, {
       title: "test track",
       description: "This is a test description",
@@ -68,11 +68,11 @@ describe("register trackPlays", () => {
 
   describe("playLimit response (#1760)", () => {
     it("returns playLimit: null when artist has no maxFreePlays", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist-no-limit@example.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(profileOwner.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id, {
         title: "no-limit track",
         isPreview: true,
@@ -91,16 +91,16 @@ describe("register trackPlays", () => {
     });
 
     it("returns remaining plays for a limited preview track", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist-limited@example.com",
       });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
       // Set the artist's free-play cap.
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { maxFreePlays: 3 },
       });
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id, {
         title: "limited track",
         isPreview: true,
@@ -136,15 +136,15 @@ describe("register trackPlays", () => {
     });
 
     it("returns playLimit: null when the listener already owns the album", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist-owned@example.com",
       });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { maxFreePlays: 3 },
       });
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id, {
         title: "owned track",
         isPreview: true,

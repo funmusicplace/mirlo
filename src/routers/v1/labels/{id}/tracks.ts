@@ -4,7 +4,7 @@ import prisma from "@mirlo/prisma";
 import { findUserIdForURLSlug } from "../../../../utils/user";
 import {
   addSizesToImage,
-  findArtistIdForURLSlug,
+  findProfileIdForURLSlug,
 } from "../../../../utils/artist";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
@@ -17,11 +17,11 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const profileId = await findProfileIdForURLSlug(id);
 
       const labelProfile = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: profileId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },

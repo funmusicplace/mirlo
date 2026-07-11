@@ -2,23 +2,23 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import {
   userAuthenticated,
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     try {
-      const { artistId: artistIdParam } = req.params;
-      const artistId = parseInt(artistIdParam, 10);
+      const { artistId: profileIdParam } = req.params;
+      const profileId = parseInt(profileIdParam, 10);
 
       const locationTags = await prisma.profileLocationTag.findMany({
-        where: { profileId: artistId },
+        where: { profileId: profileId },
         include: { locationTag: true },
       });
 
@@ -56,9 +56,9 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     try {
-      const { artistId: artistIdParam } = req.params;
+      const { artistId: profileIdParam } = req.params;
       const { locationTagId } = req.body;
-      const artistId = parseInt(artistIdParam, 10);
+      const profileId = parseInt(profileIdParam, 10);
 
       if (!locationTagId) {
         throw new AppError({
@@ -80,8 +80,8 @@ export default function () {
 
       // Create or ignore if already exists
       const result = await prisma.profileLocationTag.upsert({
-        where: { profileId_locationTagId: { profileId: artistId, locationTagId } },
-        create: { profileId: artistId, locationTagId },
+        where: { profileId_locationTagId: { profileId: profileId, locationTagId } },
+        create: { profileId: profileId, locationTagId },
         update: {},
         include: { locationTag: true },
       });

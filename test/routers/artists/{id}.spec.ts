@@ -7,7 +7,7 @@ import { describe, it } from "mocha";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -24,29 +24,29 @@ describe("artists", () => {
 
   describe("/{id}", () => {
     it("should GET /{id} with artist slug", async () => {
-      const artistSlug = "test-artist";
+      const profileSlug = "test-artist";
       const user = await prisma.user.create({
         data: {
           email: "test@test.com",
         },
       });
-      const artist = await prisma.profile.create({
+      const profile = await prisma.profile.create({
         data: {
           name: "Test artist",
-          urlSlug: artistSlug,
+          urlSlug: profileSlug,
           userId: user.id,
           enabled: true,
         },
       });
       const response = await requestApp
-        .get(`artists/${artistSlug}`)
+        .get(`artists/${profileSlug}`)
         .set("Accept", "application/json");
 
-      assert.equal(response.body.result.id, artist.id);
+      assert.equal(response.body.result.id, profile.id);
     });
 
     it("should GET /{id} with wrong artist slug", async () => {
-      const artistSlug = "test-artist";
+      const profileSlug = "test-artist";
       const user = await prisma.user.create({
         data: {
           email: "test@test.com",
@@ -61,7 +61,7 @@ describe("artists", () => {
         },
       });
       const response = await requestApp
-        .get(`artists/${artistSlug}`)
+        .get(`artists/${profileSlug}`)
         .set("Accept", "application/json");
 
       assert.equal(response.status, 404);
@@ -72,14 +72,14 @@ describe("artists", () => {
         email: "eur@test.com",
         currency: "eur",
       });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "Euro Artist",
         urlSlug: "euro-artist",
       });
-      await createTrackGroup(artist.id, { title: "Euro Album" });
+      await createTrackGroup(profile.id, { title: "Euro Album" });
 
       const response = await requestApp
-        .get(`artists/${artist.urlSlug}`)
+        .get(`artists/${profile.urlSlug}`)
         .set("Accept", "application/json");
 
       assert.equal(response.status, 200);
@@ -89,11 +89,11 @@ describe("artists", () => {
 
     it("should return trackGroup tracks ordered by 'order' asc", async () => {
       const { user } = await createUser({ email: "ordered@test.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "Ordered Artist",
         urlSlug: "ordered-artist",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "Ordered Album",
         urlSlug: "ordered-album",
         tracks: [
@@ -104,7 +104,7 @@ describe("artists", () => {
       });
 
       const response = await requestApp
-        .get(`artists/${artist.urlSlug}`)
+        .get(`artists/${profile.urlSlug}`)
         .set("Accept", "application/json");
 
       assert.equal(response.status, 200);
@@ -118,7 +118,7 @@ describe("artists", () => {
         email: "label@test.com",
         isLabelAccount: true,
       });
-      const label = await createArtist(labelUser.id, {
+      const label = await createProfile(labelUser.id, {
         name: "Empty Label",
         urlSlug: "empty-label",
         isLabelProfile: true,
@@ -137,21 +137,21 @@ describe("artists", () => {
         email: "label2@test.com",
         isLabelAccount: true,
       });
-      const label = await createArtist(labelUser.id, {
+      const label = await createProfile(labelUser.id, {
         name: "Stocked Label",
         urlSlug: "stocked-label",
         isLabelProfile: true,
       });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "rosterartist@test.com",
       });
-      const rosterArtist = await createArtist(artistUser.id, {
+      const rosterProfile = await createProfile(profileOwner.id, {
         name: "Roster Artist",
         urlSlug: "roster-artist",
       });
       await prisma.artistLabel.create({
         data: {
-          artistId: rosterArtist.id,
+          artistId: rosterProfile.id,
           labelUserId: labelUser.id,
           isLabelApproved: true,
           isArtistApproved: true,
@@ -171,28 +171,28 @@ describe("artists", () => {
         email: "label3@test.com",
         isLabelAccount: true,
       });
-      const label = await createArtist(labelUser.id, {
+      const label = await createProfile(labelUser.id, {
         name: "Label With Deleted Member",
         urlSlug: "label-with-deleted",
         isLabelProfile: true,
       });
-      const { user: deletedArtistUser } = await createUser({
+      const { user: deletedProfileUser } = await createUser({
         email: "deletedrosterartist@test.com",
       });
-      const deletedArtist = await createArtist(deletedArtistUser.id, {
+      const deletedProfile = await createProfile(deletedProfileUser.id, {
         name: "Deleted Roster Artist",
         urlSlug: "deleted-roster-artist",
       });
       await prisma.artistLabel.create({
         data: {
-          artistId: deletedArtist.id,
+          artistId: deletedProfile.id,
           labelUserId: labelUser.id,
           isLabelApproved: true,
           isArtistApproved: true,
         },
       });
       await prisma.profile.update({
-        where: { id: deletedArtist.id },
+        where: { id: deletedProfile.id },
         data: { deletedAt: new Date() },
       });
 
@@ -209,15 +209,15 @@ describe("artists", () => {
         email: "label4@test.com",
         isLabelAccount: true,
       });
-      const label = await createArtist(labelUser.id, {
+      const label = await createProfile(labelUser.id, {
         name: "Pending Label",
         urlSlug: "pending-label",
         isLabelProfile: true,
       });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "pendingrosterartist@test.com",
       });
-      const pendingArtist = await createArtist(artistUser.id, {
+      const pendingArtist = await createProfile(profileOwner.id, {
         name: "Pending Roster Artist",
         urlSlug: "pending-roster-artist",
       });

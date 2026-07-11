@@ -5,7 +5,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import { clearTables, createArtist, createPost, createUser } from "../../utils";
+import { clearTables, createProfile, createPost, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("posts/{id}", () => {
@@ -30,8 +30,8 @@ describe("posts/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { isDraft: false });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { isDraft: false });
 
       const response = await requestApp
         .get(`posts/${post.id}`)
@@ -45,8 +45,8 @@ describe("posts/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
 
       const response = await requestApp
         .get(`posts/${post.id}`)
@@ -60,8 +60,8 @@ describe("posts/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, {
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, {
         content: testContent,
         isDraft: false,
       });
@@ -78,8 +78,8 @@ describe("posts/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, {
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, {
         isDraft: false,
         isPublic: false,
         content: testContent,

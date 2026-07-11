@@ -18,7 +18,7 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
 
-    const artists = await prisma.profile.findMany({
+    const profiles = await prisma.profile.findMany({
       where: {
         userId: Number(userId),
         deletedAt: null,
@@ -37,7 +37,7 @@ export default function () {
       },
     });
 
-    res.json({ results: artists });
+    res.json({ results: profiles });
   }
 
   GET.apiDoc = {

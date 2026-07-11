@@ -10,7 +10,7 @@ import sinon from "sinon";
 import { federation } from "../../src/activityPub/federation";
 import { parseMentionsFromContent } from "../../src/activityPub/utils";
 import sendPostToActivityPubFollowers from "../../src/jobs/send-post-to-activitypub-followers";
-import { clearTables, createArtist, createPost, createUser } from "../utils";
+import { clearTables, createProfile, createPost, createUser } from "../utils";
 
 describe("send-post-to-activitypub-followers", () => {
   let fetchStub: sinon.SinonStub;
@@ -32,15 +32,15 @@ describe("send-post-to-activitypub-followers", () => {
   });
 
   it("should mark notifications as read after sending to followers", async () => {
-    const { user: artistUser } = await createUser({ email: "artist@test.com" });
+    const { user: profileOwner } = await createUser({ email: "artist@test.com" });
 
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Test Artist",
       urlSlug: "test-artist",
       activityPub: true,
     });
 
-    const post = await createPost(artist.id, {
+    const post = await createPost(profile.id, {
       title: "Test Post",
       content: "This is a test post",
       isDraft: false,
@@ -73,14 +73,14 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         actor: "https://mastodon.example/users/follower1",
       },
     });
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         actor: "https://pixelfed.example/users/follower2",
       },
     });
@@ -99,17 +99,17 @@ describe("send-post-to-activitypub-followers", () => {
   });
 
   it("should not process notifications with deliveryMethod EMAIL only", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist3@test.com",
     });
 
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Test Artist 3",
       urlSlug: "test-artist-3",
       activityPub: true,
     });
 
-    const post = await createPost(artist.id, {
+    const post = await createPost(profile.id, {
       title: "Email Only Post",
       content: "This notification is email only",
       isDraft: false,
@@ -131,7 +131,7 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         actor: "https://example.com/user",
       },
     });
@@ -146,17 +146,17 @@ describe("send-post-to-activitypub-followers", () => {
   });
 
   it("should not process posts for artists with ActivityPub disabled", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist4@test.com",
     });
 
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Test Artist 4",
       urlSlug: "test-artist-4",
       activityPub: false,
     });
 
-    const post = await createPost(artist.id, {
+    const post = await createPost(profile.id, {
       title: "No ActivityPub",
       content: "Artist has AP disabled",
       isDraft: false,
@@ -177,17 +177,17 @@ describe("send-post-to-activitypub-followers", () => {
   });
 
   it("should not re-process posts already marked as sent", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist5@test.com",
     });
 
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Test Artist 5",
       urlSlug: "test-artist-5",
       activityPub: true,
     });
 
-    await createPost(artist.id, {
+    await createPost(profile.id, {
       title: "Already Sent",
       content: "This post was already sent via ActivityPub",
       isDraft: false,
@@ -198,7 +198,7 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         actor: "https://mastodon.example/users/follower",
       },
     });
@@ -210,17 +210,17 @@ describe("send-post-to-activitypub-followers", () => {
   });
 
   it("should mark notification as read even if delivery fails", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist6@test.com",
     });
 
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Test Artist 6",
       urlSlug: "test-artist-6",
       activityPub: true,
     });
 
-    const post = await createPost(artist.id, {
+    const post = await createPost(profile.id, {
       title: "Error Test",
       content: "Testing error handling",
       isDraft: false,
@@ -242,7 +242,7 @@ describe("send-post-to-activitypub-followers", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         actor: "https://error.example/users/follower",
         inboxUrl: "https://error.example/users/follower/inbox",
       },
@@ -360,11 +360,11 @@ describe("send-post-to-activitypub-followers", () => {
 
   describe("post activity with mentions", () => {
     it("should attempt to deliver to mentioned actors not already in followers", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist-mention@test.com",
       });
 
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         name: "Test Artist",
         urlSlug: "test-artist-mention",
         activityPub: true,
@@ -374,7 +374,7 @@ describe("send-post-to-activitypub-followers", () => {
       const mentionedInboxUrl =
         "https://mastodon.example/users/mentioned/inbox";
 
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         title: "Post with Mention",
         content: `Check this out: <a href="${mentionedActorUrl}" data-mention-actor="${mentionedActorUrl}">@mentioned</a>`,
         isDraft: false,
@@ -397,7 +397,7 @@ describe("send-post-to-activitypub-followers", () => {
       // Add a follower (different from the mentioned actor) so the post isn't skipped
       await prisma.activityPubProfileFollowers.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           actor: "https://other.example/users/follower",
         },
       });
@@ -431,11 +431,11 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     it("should mark notification as read even when mention delivery fails", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist-err@test.com",
       });
 
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         name: "Test Artist",
         urlSlug: "test-artist-err",
         activityPub: true,
@@ -443,7 +443,7 @@ describe("send-post-to-activitypub-followers", () => {
 
       const mentionedActorUrl = "https://error.example/users/mentioned";
 
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         title: "Post with Broken Mention",
         content: `Hello <a href="${mentionedActorUrl}" data-mention-actor="${mentionedActorUrl}">@mentioned</a>`,
         isDraft: false,
@@ -465,7 +465,7 @@ describe("send-post-to-activitypub-followers", () => {
 
       await prisma.activityPubProfileFollowers.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
           actor: "https://other.example/users/follower",
           inboxUrl: "https://other.example/users/follower/inbox",
         },
@@ -497,11 +497,11 @@ describe("send-post-to-activitypub-followers", () => {
     });
 
     it("should deliver to mentioned actors even when artist has no followers", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist-mention-only@test.com",
       });
 
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         name: "Test Artist",
         urlSlug: "test-artist-mention-only",
         activityPub: true,
@@ -511,7 +511,7 @@ describe("send-post-to-activitypub-followers", () => {
       const mentionedInboxUrl =
         "https://mastodon.example/users/mentioned-only/inbox";
 
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         title: "Post with Mention and No Followers",
         content: `Check this out: <a href="${mentionedActorUrl}" data-mention-actor="${mentionedActorUrl}">@mentioned-only</a>`,
         isDraft: false,

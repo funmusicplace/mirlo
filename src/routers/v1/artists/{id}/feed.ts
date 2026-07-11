@@ -8,10 +8,10 @@ import {
 import { Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import {
   canUserSeePostContent,
-  getUserSubscriptionForArtist,
+  getUserSubscriptionForProfile,
 } from "../../../../utils/postAccess";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
 import { serializePost } from "../../../../utils/serialize/post";
@@ -20,13 +20,13 @@ import { isTrackGroup } from "../../../../utils/typeguards";
 
 export const getPostsVisibleToUser = async (
   user: User | undefined,
-  artist: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
+  profile: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
   take: number = 20,
   skip: number = 0
 ) => {
   const where: Prisma.PostWhereInput = {
     publishedAt: { lte: new Date() },
-    profileId: Number(artist.id),
+    profileId: Number(profile.id),
     isDraft: false,
     deletedAt: null,
   };
@@ -48,24 +48,24 @@ export const getPostsVisibleToUser = async (
     prisma.post.count({ where }),
   ]);
 
-  const isArtistOwner = !!(user && user.id === artist.userId);
-  const subscription = await getUserSubscriptionForArtist(user, artist.id);
+  const isProfileOwner = !!(user && user.id === profile.userId);
+  const subscription = await getUserSubscriptionForProfile(user, profile.id);
 
   const processedPosts = posts.map((post) =>
     serializePost(
       post,
       undefined,
       undefined,
-      canUserSeePostContent(post, { isArtistOwner, subscription })
+      canUserSeePostContent(post, { isProfileOwner, subscription })
     )
   );
 
   return { posts: processedPosts, total };
 };
 
-export const getAlbumsVisibleToUser = async (artist: Profile) => {
+export const getAlbumsVisibleToUser = async (profile: Profile) => {
   const albums = await prisma.trackGroup.findMany({
-    where: { ...whereForPublishedTrackGroups(), profileId: artist.id },
+    where: { ...whereForPublishedTrackGroups(), profileId: profile.id },
     include: { profile: { omit: { apPrivateKey: true } } },
     orderBy: {
       releaseDate: "desc",
@@ -74,19 +74,19 @@ export const getAlbumsVisibleToUser = async (artist: Profile) => {
   return albums;
 };
 
-export const buildFeedForArtist = async (
+export const buildFeedForProfile = async (
   user: User | undefined,
-  artist: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
+  profile: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
   take: number = 10000,
   skip: number = 0
 ) => {
   const { posts, total } = await getPostsVisibleToUser(
     user,
-    artist,
+    profile,
     take,
     skip
   );
-  const albums = await getAlbumsVisibleToUser(artist);
+  const albums = await getAlbumsVisibleToUser(profile);
 
   return {
     results: [...posts, ...albums].sort((a, b) => {
@@ -111,27 +111,27 @@ export default function () {
     const user = req.user;
 
     try {
-      const parsedId = await findArtistIdForURLSlug(id);
-      let artist;
+      const parsedId = await findProfileIdForURLSlug(id);
+      let profile;
       if (parsedId) {
-        artist = await prisma.profile.findFirst({
+        profile = await prisma.profile.findFirst({
           where: { id: Number(parsedId) },
           include: { subscriptionTiers: true },
         });
       }
 
-      if (!artist) {
+      if (!profile) {
         return res.status(404).json({ error: "Artist not found" });
       }
 
       if (format === "rss") {
-        const { results: zipped } = await buildFeedForArtist(user, artist);
+        const { results: zipped } = await buildFeedForProfile(user, profile);
         const feed = await turnItemsIntoRSS(
           {
-            name: artist.name,
-            description: artist.bio,
-            apiEndpoint: `artists/${artist.urlSlug}/feed`,
-            clientUrl: artist.urlSlug,
+            name: profile.name,
+            description: profile.bio,
+            apiEndpoint: `artists/${profile.urlSlug}/feed`,
+            clientUrl: profile.urlSlug,
           },
           zipped as Parameters<typeof turnItemsIntoRSS>[1]
         );
@@ -141,9 +141,9 @@ export default function () {
         const takeNum = take ? Number(take) : 20;
         const skipNum = skip ? Number(skip) : 0;
 
-        const { results: zipped, total } = await buildFeedForArtist(
+        const { results: zipped, total } = await buildFeedForProfile(
           user,
-          artist,
+          profile,
           takeNum,
           skipNum
         );

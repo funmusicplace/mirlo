@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { singleInclude } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleProfile } from "../../../../utils/serialize/artist";
 
 type Params = {
   artistId: string;
@@ -37,7 +37,7 @@ export default function () {
         results: artists.map((row) => ({
           ...row,
           labelId: row.labelUserId,
-          artist: processSingleArtist(row.artist),
+          artist: processSingleProfile(row.artist),
         })),
       });
     } catch (e) {

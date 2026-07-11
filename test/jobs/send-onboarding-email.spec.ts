@@ -40,7 +40,7 @@ describe("send-onboarding-email", () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 2);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       receivePlatformEmails: true,
       emailConfirmationToken: null,
@@ -51,7 +51,7 @@ describe("send-onboarding-email", () => {
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
@@ -59,7 +59,7 @@ describe("send-onboarding-email", () => {
     await sendOnboardingEmail();
 
     const refreshedUser = await prisma.user.findUnique({
-      where: { id: artistUser.id },
+      where: { id: profileOwner.id },
     });
     assert.equal(refreshedUser?.onboardingEmailsSent.length, 1);
     assert.equal(refreshedUser?.onboardingEmailsSent[0], "payment-processor");
@@ -75,7 +75,7 @@ describe("send-onboarding-email", () => {
     const stub = sinon.stub(sendMailQueue, "add");
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 2);
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       receivePlatformEmails: true,
       emailConfirmationToken: null,
@@ -89,7 +89,7 @@ describe("send-onboarding-email", () => {
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
@@ -97,7 +97,7 @@ describe("send-onboarding-email", () => {
     await sendOnboardingEmail();
 
     const refreshedUser = await prisma.user.findUnique({
-      where: { id: artistUser.id },
+      where: { id: profileOwner.id },
     });
     assert.equal(refreshedUser?.onboardingEmailsSent.length, 0);
     assert.equal(stub.calledOnce, false);
@@ -108,7 +108,7 @@ describe("send-onboarding-email", () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 2);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       receivePlatformEmails: true,
       emailConfirmationToken: null,
@@ -123,7 +123,7 @@ describe("send-onboarding-email", () => {
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
@@ -131,7 +131,7 @@ describe("send-onboarding-email", () => {
     await sendOnboardingEmail();
 
     const refreshedUser = await prisma.user.findUnique({
-      where: { id: artistUser.id },
+      where: { id: profileOwner.id },
     });
     assert.equal(refreshedUser?.onboardingEmailsSent.length, 1);
     assert.equal(refreshedUser?.onboardingEmailsSent[0], "payment-processor");
@@ -144,7 +144,7 @@ describe("send-onboarding-email", () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 2);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       receivePlatformEmails: true,
       emailConfirmationToken: null,
@@ -160,7 +160,7 @@ describe("send-onboarding-email", () => {
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
@@ -168,7 +168,7 @@ describe("send-onboarding-email", () => {
     await sendOnboardingEmail();
 
     const refreshedUser = await prisma.user.findUnique({
-      where: { id: artistUser.id },
+      where: { id: profileOwner.id },
     });
     assert.equal(refreshedUser?.onboardingEmailsSent.length, 1);
     assert.equal(refreshedUser?.onboardingEmailsSent[0], "payment-processor");
@@ -183,7 +183,7 @@ describe("send-onboarding-email", () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 2);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       receivePlatformEmails: true,
       emailConfirmationToken: null,
@@ -195,7 +195,7 @@ describe("send-onboarding-email", () => {
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
@@ -212,7 +212,7 @@ describe("send-onboarding-email", () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 15);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       receivePlatformEmails: true,
       emailConfirmationToken: null,
@@ -223,7 +223,7 @@ describe("send-onboarding-email", () => {
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
@@ -240,7 +240,7 @@ describe("send-onboarding-email", () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 15);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       receivePlatformEmails: false,
       emailConfirmationToken: null,
@@ -251,7 +251,7 @@ describe("send-onboarding-email", () => {
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });

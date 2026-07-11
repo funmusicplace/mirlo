@@ -6,7 +6,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { processSingleProfile } from "../../../../utils/serialize/artist";
 
 export default function () {
   const operations = {
@@ -37,7 +37,7 @@ export default function () {
         where.user.email = { contains: email, mode: "insensitive" };
       }
       const itemCount = await prisma.profile.count({ where });
-      const artists = await prisma.profile.findMany({
+      const profiles = await prisma.profile.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
@@ -51,7 +51,7 @@ export default function () {
         },
       });
       res.json({
-        results: artists.map((artist) => processSingleArtist(artist)),
+        results: profiles.map((profile) => processSingleProfile(profile)),
         total: itemCount,
       });
     } catch (e) {

@@ -64,7 +64,7 @@ export default function () {
         if (!featuredArtistIds?.length) {
           return res.status(200).json({ result: [] });
         }
-        const artists = await prisma.profile.findMany({
+        const profiles = await prisma.profile.findMany({
           where: { id: { in: featuredArtistIds }, deletedAt: null },
           include: {
             avatar: { where: { deletedAt: null } },
@@ -72,12 +72,12 @@ export default function () {
           },
         });
         return res.status(200).json({
-          result: artists.map((a) => ({
-            ...a,
-            avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
+          result: profiles.map((p) => ({
+            ...p,
+            avatar: addSizesToImage(finalArtistAvatarBucket, p.avatar),
             background: addSizesToImage(
               finalArtistBackgroundBucket,
-              a.background
+              p.background
             ),
           })),
         });
@@ -88,12 +88,12 @@ export default function () {
           Number(settings.settings.instanceCustomization.profileId)
         )
       ) {
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: {
             id: Number(settings.settings.instanceCustomization?.profileId),
           },
         });
-        return res.status(200).json({ result: artist });
+        return res.status(200).json({ result: profile });
       } else if (setting === "terms") {
         if (!settings.terms) {
           throw new AppError({ httpCode: 404, description: "No terms found" });

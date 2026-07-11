@@ -2,7 +2,7 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it, beforeEach } from "mocha";
-import { clearTables, createTrack, createTrackGroup, createUser, createArtist } from "../../../utils";
+import { clearTables, createTrack, createTrackGroup, createUser, createProfile } from "../../../utils";
 import { requestApp } from "../../utils";
 
 describe("PUT /manage/tracks/{id}", () => {
@@ -14,8 +14,8 @@ describe("PUT /manage/tracks/{id}", () => {
     const { user, accessToken } = await createUser({
       email: "artist@artist.com",
     });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id, {
       title: "test track",
       description: "test description",
@@ -35,8 +35,8 @@ describe("PUT /manage/tracks/{id}", () => {
     const { user, accessToken } = await createUser({
       email: "artist@artist.com",
     });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id, {
       title: "test track",
     });

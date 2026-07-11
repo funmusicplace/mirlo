@@ -3,8 +3,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import {
-  findArtistIdForURLSlug,
-  whereForAllArtistsThisLabelCanEdit,
+  findProfileIdForURLSlug,
+  whereForAllProfilesThisLabelCanEdit,
 } from "../../../../utils/artist";
 import { processSingleTrackGroup } from "../../../../utils/serialize/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
@@ -20,10 +20,10 @@ export default function () {
     const loggedInUser = req.user;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const profileId = await findProfileIdForURLSlug(id);
       const labelProfile = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: profileId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },
@@ -38,9 +38,9 @@ export default function () {
         !!loggedInUser &&
         (await prisma.profile.findFirst({
           where: {
-            id: artistId,
+            id: profileId,
             enabled: true,
-            ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
+            ...whereForAllProfilesThisLabelCanEdit(loggedInUser.id),
           },
           select: { id: true },
         })) !== null;
@@ -56,7 +56,7 @@ export default function () {
           ...where,
           OR: [
             { paymentToUserId: labelProfile?.userId },
-            { profileId: artistId },
+            { profileId: profileId },
           ],
         },
         include: {

@@ -43,7 +43,7 @@ export default function () {
         datePurchased: string;
         userId: number;
       }[] = await findSales({
-        artistId: [trackGroup.profile.id],
+        profileId: [trackGroup.profile.id],
         sinceDate: sinceDate as string,
         filters: { trackGroupIds: [Number(id)] },
       });

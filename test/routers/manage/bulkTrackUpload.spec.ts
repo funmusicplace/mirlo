@@ -5,7 +5,7 @@ dotenv.config();
 import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import request from "supertest";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
@@ -165,7 +165,7 @@ describe("manage/bulkTrackUpload", () => {
       assert(track.trackArtists.some((ta) => ta.role === "featured_artist"));
       assert.equal(track.isrc, "ISRC123456");
 
-      const collaboratorArtists = await prisma.artist.findMany({
+      const collaboratorArtists = await prisma.profile.findMany({
         where: {
           name: {
             in: ["Composer Name", "Producer Name", "Featured Artist"],
@@ -182,7 +182,7 @@ describe("manage/bulkTrackUpload", () => {
         isAdmin: true,
       });
 
-      const existingArtist = await createArtist(user.id, {
+      const existingProfile = await createProfile(user.id, {
         name: "Existing Artist",
       });
 
@@ -228,7 +228,7 @@ describe("manage/bulkTrackUpload", () => {
 
       assert(track);
       assert.equal(track.trackArtists.length, 1);
-      assert.equal(track.trackArtists[0].artistId, existingArtist.id);
+      assert.equal(track.trackArtists[0].artistId, existingProfile.id);
     });
 
     it("should create multiple artists and track groups", async () => {
@@ -491,15 +491,15 @@ describe("manage/bulkTrackUpload", () => {
       assert.equal(response.body.result.trackGroupsCreated, 1);
       assert.equal(response.body.result.tracksCreated, 1);
 
-      const createdArtist = await prisma.profile.findFirst({
+      const createdProfile = await prisma.profile.findFirst({
         where: {
           userId: user.id,
           name: "My Band",
         },
       });
 
-      assert(createdArtist);
-      assert.equal(createdArtist.userId, user.id);
+      assert(createdProfile);
+      assert.equal(createdProfile.userId, user.id);
     });
 
     it("should preserve catalogNumber and about fields in track groups", async () => {
@@ -561,12 +561,12 @@ describe("manage/bulkTrackUpload", () => {
     it("should set paymentToUserId when label creates track groups via bulk upload", async () => {
       const { user: labelUser, accessToken: labelAccessToken } =
         await createUser({ email: "label@example.com" });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@example.com",
       });
       const artistName = "Label Featured Artist";
 
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         name: artistName,
         paymentToUserId: labelUser.id,
       });
@@ -575,7 +575,7 @@ describe("manage/bulkTrackUpload", () => {
       await prisma.artistLabel.create({
         data: {
           labelUserId: labelUser.id,
-          artistId: artist.id,
+          artistId: profile.id,
           canLabelAddReleases: true,
           canLabelManageArtist: true,
           isLabelApproved: true,
@@ -585,7 +585,7 @@ describe("manage/bulkTrackUpload", () => {
 
       const labels = await prisma.profile.findMany({
         where: {
-          id: artist.id,
+          id: profile.id,
         },
         include: {
           artistLabels: true,
@@ -637,11 +637,11 @@ describe("manage/bulkTrackUpload", () => {
     it("should NOT set paymentToUserId when label lacks canLabelAddReleases permission", async () => {
       const { user: labelUser, accessToken: labelAccessToken } =
         await createUser({ email: "restrictedlabel@example.com" });
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist2@example.com",
       });
 
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         name: "Restricted Artist",
       });
 
@@ -649,7 +649,7 @@ describe("manage/bulkTrackUpload", () => {
       await prisma.artistLabel.create({
         data: {
           labelUserId: labelUser.id,
-          artistId: artist.id,
+          artistId: profile.id,
           canLabelAddReleases: false,
           canLabelManageArtist: true,
           isLabelApproved: true,

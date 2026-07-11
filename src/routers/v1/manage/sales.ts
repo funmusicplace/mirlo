@@ -66,7 +66,7 @@ export default function () {
       }
 
       const results = await findSales({
-        artistId: profileIds.map((a) => Number(a)),
+        profileId: profileIds.map((a) => Number(a)),
         sinceDate,
         untilDate,
         filters: trackGroupIds

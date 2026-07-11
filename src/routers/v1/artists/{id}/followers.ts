@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -12,10 +12,10 @@ export default function () {
     let { id }: { id?: string } = req.params;
 
     try {
-      const parsedId = await findArtistIdForURLSlug(id);
-      let artist;
+      const parsedId = await findProfileIdForURLSlug(id);
+      let profile;
       if (parsedId) {
-        artist = await prisma.profile.findFirst({
+        profile = await prisma.profile.findFirst({
           where: {
             id: Number(parsedId),
           },
@@ -25,7 +25,7 @@ export default function () {
         });
       }
 
-      if (!artist) {
+      if (!profile) {
         return res.status(404).json({
           error: "Artist not found",
         });

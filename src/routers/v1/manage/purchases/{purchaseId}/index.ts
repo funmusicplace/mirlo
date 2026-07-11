@@ -32,10 +32,10 @@ export default function () {
       });
 
       if (updatedCount) {
-        const artist = await prisma.merchPurchase.findFirst({
+        const merchPurchase = await prisma.merchPurchase.findFirst({
           where: { id: purchaseId },
         });
-        res.json({ result: artist });
+        res.json({ result: merchPurchase });
       } else {
         res.json({
           error: "An unknown error occurred",

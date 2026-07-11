@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  confirmArtistIdExists,
-  subscribeUserToArtist,
+  confirmProfileIdExists,
+  subscribeUserToProfile,
 } from "../../../../utils/artist";
 import { getClient } from "../../../../utils/getClient";
 import { getSiteSettings } from "../../../../utils/settings";
@@ -14,11 +14,11 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [confirmArtistIdExists, GET],
+    GET: [confirmProfileIdExists, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
 
     const { email, token } = req.query as unknown as {
       email?: string;
@@ -27,9 +27,9 @@ export default function () {
 
     try {
       const { applicationUrl } = await getClient();
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
         },
         include: {
           user: true,
@@ -40,7 +40,7 @@ export default function () {
       const confirmation =
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
-            profileId: Number(artistId),
+            profileId: Number(profileId),
             email,
             token,
             tokenExpiration: { gte: new Date() },
@@ -69,15 +69,15 @@ export default function () {
         }
 
         const settings = await getSiteSettings();
-        const instanceArtistId = Number(
+        const instanceProfileId = Number(
           settings.settings?.instanceCustomization?.profileId
         );
 
         if (
           user &&
-          artist &&
-          instanceArtistId &&
-          artist.id === instanceArtistId &&
+          profile &&
+          instanceProfileId &&
+          profile.id === instanceProfileId &&
           !user.receiveMailingList
         ) {
           user = await prisma.user.update({
@@ -86,8 +86,8 @@ export default function () {
           });
         }
 
-        if (artist) {
-          await subscribeUserToArtist(artist, user, confirmation.message);
+        if (profile) {
+          await subscribeUserToProfile(profile, user, confirmation.message);
           await prisma.profileUserSubscriptionConfirmation.delete({
             where: {
               id: confirmation.id,
@@ -96,7 +96,7 @@ export default function () {
 
           res.redirect(
             applicationUrl +
-              `/${artist.urlSlug}/checkout-complete?purchaseType=follow`
+              `/${profile.urlSlug}/checkout-complete?purchaseType=follow`
           );
         }
       }

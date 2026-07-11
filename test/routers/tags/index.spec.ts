@@ -6,7 +6,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -49,9 +49,9 @@ describe("tags", () => {
 
     it("should GET / with tag count", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
-      const tg2 = await createTrackGroup(artist.id, { urlSlug: "tg2" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const tg2 = await createTrackGroup(profile.id, { urlSlug: "tg2" });
       const tag = await prisma.tag.create({ data: { tag: "test-tag" } });
       await prisma.trackGroupTag.create({
         data: { tagId: tag.id, trackGroupId: trackGroup.id },

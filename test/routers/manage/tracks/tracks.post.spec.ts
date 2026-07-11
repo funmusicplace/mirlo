@@ -7,7 +7,7 @@ import request from "supertest";
 import prisma from "@mirlo/prisma";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -26,8 +26,8 @@ describe("manage/tracks POST", () => {
 
   it("should inherit defaultIsPreview=true from track group when isPreview not specified", async () => {
     const { user, accessToken } = await createUser({ email: "test@testcom" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id, {
       tracks: [],
     });
 
@@ -43,14 +43,14 @@ describe("manage/tracks POST", () => {
 
   it("should inherit defaultIsPreview=false from track group when isPreview not specified", async () => {
     const { user, accessToken } = await createUser({ email: "test@testcom" });
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
 
     // Create track group with defaultIsPreview=false
     const trackGroup = await prisma.trackGroup.create({
       data: {
         title: "Test TrackGroup",
         urlSlug: "test-trackgroup",
-        profileId: artist.id,
+        profileId: profile.id,
         publishedAt: new Date(),
         isGettable: true,
         defaultIsPreview: false,
@@ -70,13 +70,13 @@ describe("manage/tracks POST", () => {
 
   it("should use explicit isPreview value over track group default", async () => {
     const { user, accessToken } = await createUser({ email: "test@testcom" });
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
 
     const trackGroup = await prisma.trackGroup.create({
       data: {
         title: "Test TrackGroup",
         urlSlug: "test-trackgroup",
-        profileId: artist.id,
+        profileId: profile.id,
         publishedAt: new Date(),
         isGettable: true,
         defaultIsPreview: false,

@@ -29,7 +29,7 @@ describe(".well-known/webfinger", () => {
       email: "test@test.com",
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -42,18 +42,18 @@ describe(".well-known/webfinger", () => {
     const response = await requestApp
       .get(".well-known/webfinger")
       .query({
-        resource: `acct:${artist.urlSlug}@${webfingerDomain}`,
+        resource: `acct:${profile.urlSlug}@${webfingerDomain}`,
       })
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
     assert.equal(
       response.body.subject,
-      `acct:${artist.urlSlug}@${webfingerDomain}`
+      `acct:${profile.urlSlug}@${webfingerDomain}`
     );
     assert.equal(response.body.aliases?.length, 1);
     assert(
-      response.body.aliases[0].endsWith(`/v1/ap/artists/${artist.urlSlug}`)
+      response.body.aliases[0].endsWith(`/v1/ap/artists/${profile.urlSlug}`)
     );
 
     const selfLink = response.body.links?.find(
@@ -61,7 +61,7 @@ describe(".well-known/webfinger", () => {
     );
     assert(selfLink);
     assert.equal(selfLink.type, "application/activity+json");
-    assert(selfLink.href.endsWith(`/v1/ap/artists/${artist.urlSlug}`));
+    assert(selfLink.href.endsWith(`/v1/ap/artists/${profile.urlSlug}`));
   });
 
   it("should return 404 when artist is not ActivityPub enabled", async () => {
@@ -69,7 +69,7 @@ describe(".well-known/webfinger", () => {
       email: "test@test.com",
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -82,7 +82,7 @@ describe(".well-known/webfinger", () => {
     const response = await requestApp
       .get(".well-known/webfinger")
       .query({
-        resource: `acct:${artist.urlSlug}@${webfingerDomain}`,
+        resource: `acct:${profile.urlSlug}@${webfingerDomain}`,
       })
       .set("Accept", "application/json");
 

@@ -7,7 +7,7 @@ import { describe, it, beforeEach } from "mocha";
 import {
   clearTables,
   createUser,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUserTrackGroupPurchase,
   createUserTrackPurchase,
@@ -58,8 +58,8 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       // Create a purchase
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
@@ -82,7 +82,7 @@ describe("manage/sales", () => {
       assert.equal(sale.amount, 2000);
       assert.equal(sale.currency, "usd");
       assert(sale.artist);
-      assert.equal(sale.artist[0].id, artist.id);
+      assert.equal(sale.artist[0].id, profile.id);
     });
 
     it("should return sales for track purchases", async () => {
@@ -93,8 +93,8 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id);
 
       await createUserTrackPurchase(buyer.user.id, track.id, {
@@ -121,11 +121,11 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist1 = await createArtist(user.id, { name: "Artist 1" });
-      const artist2 = await createArtist(user.id, { name: "Artist 2" });
+      const profile1 = await createProfile(user.id, { name: "Artist 1" });
+      const profile2 = await createProfile(user.id, { name: "Artist 2" });
 
-      const trackGroup1 = await createTrackGroup(artist1.id);
-      const trackGroup2 = await createTrackGroup(artist2.id);
+      const trackGroup1 = await createTrackGroup(profile1.id);
+      const trackGroup2 = await createTrackGroup(profile2.id);
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup1.id, {
         amount: 1000,
@@ -136,7 +136,7 @@ describe("manage/sales", () => {
 
       // Filter by artist1
       const response = await requestApp
-        .get(`manage/sales?artistIds=${artist1.id}`)
+        .get(`manage/sales?artistIds=${profile1.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -144,7 +144,7 @@ describe("manage/sales", () => {
       assert.equal(response.body.results.length, 1);
       assert.equal(response.body.total, 1);
       assert.equal(response.body.totalAmount, 1000);
-      assert.equal(response.body.results[0].artist[0].id, artist1.id);
+      assert.equal(response.body.results[0].artist[0].id, profile1.id);
     });
 
     it("should handle CSV format export", async () => {
@@ -155,8 +155,8 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 2000,
@@ -186,8 +186,8 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 2000,
@@ -227,8 +227,8 @@ describe("manage/sales", () => {
         email: "buyer5@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       // Create multiple purchases
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
@@ -280,8 +280,8 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 2000,
@@ -305,8 +305,8 @@ describe("manage/sales", () => {
         email: "buyer@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 2000,
@@ -326,13 +326,13 @@ describe("manage/sales", () => {
 
     it("should include sales routed to the user as the release payee (e.g. a label)", async () => {
       const label = await createUser({ email: "label@test.com" });
-      const artistOwner = await createUser({ email: "artist@test.com" });
+      const profileOwnerUser = await createUser({ email: "artist@test.com" });
       const buyer = await createUser({ email: "buyer@test.com" });
 
       // The release belongs to the artist's own account, but its payments are
       // routed to the label via paymentToUser.
-      const artist = await createArtist(artistOwner.user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(profileOwnerUser.user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         paymentToUserId: label.user.id,
       });
 
@@ -352,22 +352,22 @@ describe("manage/sales", () => {
       assert.equal(labelResponse.body.results[0].amount, 600);
 
       // ...and the owning artist still sees it too.
-      const artistResponse = await requestApp
+      const profileResponse = await requestApp
         .get("manage/sales")
-        .set("Cookie", [`jwt=${artistOwner.accessToken}`])
+        .set("Cookie", [`jwt=${profileOwnerUser.accessToken}`])
         .set("Accept", "application/json");
 
-      assert.equal(artistResponse.body.results.length, 1);
+      assert.equal(profileResponse.body.results.length, 1);
     });
 
     it("should not show a user sales for releases not routed to them", async () => {
       const label = await createUser({ email: "label@test.com" });
-      const artistOwner = await createUser({ email: "artist@test.com" });
+      const profileOwnerUser = await createUser({ email: "artist@test.com" });
       const buyer = await createUser({ email: "buyer@test.com" });
 
-      const artist = await createArtist(artistOwner.user.id);
+      const profile = await createProfile(profileOwnerUser.user.id);
       // No paymentToUser: the money goes to the artist, not the label.
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
         amount: 600,

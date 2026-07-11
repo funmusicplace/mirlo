@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -31,8 +31,8 @@ describe("manage/trackGroups/{trackGroupId}/cover", () => {
   describe("DELETE", () => {
     it("should DELETE with one trackGroup", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await createBucketIfNotExists(finalCoversBucket);
 
       const response = await requestApp

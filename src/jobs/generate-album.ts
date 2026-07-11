@@ -65,7 +65,7 @@ const downloadTracks = async ({
   tempFolder,
   format,
   trackGroup,
-  artist,
+  profile,
 }: {
   tracks: (Track & { audio?: TrackAudio; trackArtists: TrackArtist[] })[];
   trackGroup: {
@@ -78,7 +78,7 @@ const downloadTracks = async ({
   job: Job;
   tempFolder: string;
   format: Format;
-  artist: Profile;
+  profile: Profile;
 }) => {
   let i = 0;
 
@@ -130,7 +130,7 @@ const downloadTracks = async ({
         convertAudioToFormat(
           {
             track,
-            artist,
+            profile,
             trackGroup,
           },
           createReadStream(tempTrackPath),
@@ -325,7 +325,7 @@ const downloadAndZipTracks = async ({
   tracks,
   trackGroup,
   job,
-  artist,
+  profile,
   destinationBucket,
 }: {
   formatString: string;
@@ -338,7 +338,7 @@ const downloadAndZipTracks = async ({
     releaseDate?: Date | null;
   };
   job: Job;
-  artist: Profile;
+  profile: Profile;
   destinationBucket: DestinationBucket;
 }) => {
   try {
@@ -375,7 +375,7 @@ const downloadAndZipTracks = async ({
         releaseDate: trackGroup.releaseDate,
         totalTracks: tracks.filter((t) => !t.deletedAt).length,
       },
-      artist,
+      profile,
     });
 
     logger.info(`Downloaded tracks ${tempFolder}`);
@@ -428,11 +428,11 @@ export default async (job: Job) => {
   }
 
   try {
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: { id: trackGroup.profileId },
     });
 
-    if (!artist) {
+    if (!profile) {
       throw "Couldn't find artist, weird";
     }
 
@@ -442,7 +442,7 @@ export default async (job: Job) => {
       tracks,
       trackGroup,
       job,
-      artist,
+      profile,
       destinationBucket,
     });
   } catch (e) {

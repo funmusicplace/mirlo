@@ -8,7 +8,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../utils";
@@ -31,12 +31,12 @@ function containsPrivateKey(value: unknown): boolean {
 }
 
 async function artistWithPrivateKey(userId: number) {
-  const artist = await createArtist(userId);
+  const profile = await createProfile(userId);
   await prisma.profile.update({
-    where: { id: artist.id },
+    where: { id: profile.id },
     data: { apPrivateKey: FAKE_PRIVATE_KEY },
   });
-  return artist;
+  return profile;
 }
 
 describe("apPrivateKey never leaks in API responses", () => {
@@ -50,8 +50,8 @@ describe("apPrivateKey never leaks in API responses", () => {
 
   it("GET /artists — public listing", async () => {
     const { user } = await createUser({ email: "artist@test.com" });
-    const artist = await artistWithPrivateKey(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await artistWithPrivateKey(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     await prisma.track.create({
       data: { trackGroupId: trackGroup.id, order: 1 },
     });
@@ -69,10 +69,10 @@ describe("apPrivateKey never leaks in API responses", () => {
 
   it("GET /artists/:slug — single artist", async () => {
     const { user } = await createUser({ email: "artist@test.com" });
-    const artist = await artistWithPrivateKey(user.id);
+    const profile = await artistWithPrivateKey(user.id);
 
     const response = await requestApp
-      .get(`artists/${artist.urlSlug}`)
+      .get(`artists/${profile.urlSlug}`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
@@ -84,11 +84,11 @@ describe("apPrivateKey never leaks in API responses", () => {
 
   it("GET /trackGroups/:id — nested artist in trackgroup", async () => {
     const { user } = await createUser({ email: "artist@test.com" });
-    const artist = await artistWithPrivateKey(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await artistWithPrivateKey(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
 
     const response = await requestApp
-      .get(`trackGroups/${trackGroup.urlSlug}?artistId=${artist.urlSlug}`)
+      .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
@@ -104,11 +104,11 @@ describe("apPrivateKey never leaks in API responses", () => {
       isAdmin: true,
     });
     const { user: buyerUser } = await createUser({ email: "buyer@test.com" });
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@test.com",
     });
-    const artist = await artistWithPrivateKey(artistUser.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await artistWithPrivateKey(profileOwner.id);
+    const trackGroup = await createTrackGroup(profile.id);
 
     const transaction = await prisma.userTransaction.create({
       data: {
@@ -143,15 +143,15 @@ describe("apPrivateKey never leaks in API responses", () => {
     const { user, accessToken } = await createUser({
       email: "listener@test.com",
     });
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@test.com",
     });
-    const artist = await artistWithPrivateKey(artistUser.id);
+    const profile = await artistWithPrivateKey(profileOwner.id);
 
     await prisma.notification.create({
       data: {
         userId: user.id,
-        profileId: artist.id,
+        profileId: profile.id,
         notificationType: "NEW_ARTIST_POST",
       },
     });

@@ -38,7 +38,7 @@ describe("auto-purchase-new-albums", () => {
     const stub = sinon.stub(sendMailQueue.sendMailQueue, "add");
     stub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -47,11 +47,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -68,12 +68,12 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });
@@ -92,14 +92,14 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals0 = data0.locals as AutomaticallyReceivedAlbumEmailType;
     assert.equal(locals0.trackGroup.id, tg.id);
-    assert.equal(locals0.profile.id, artist.id);
+    assert.equal(locals0.profile.id, profile.id);
   });
 
   it("should not send the e-mail twice", async () => {
     const stub = sinon.stub(sendMailQueue.sendMailQueue, "add");
     stub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -108,11 +108,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -129,12 +129,12 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });
@@ -161,7 +161,7 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals0 = data0.locals as AutomaticallyReceivedAlbumEmailType;
     assert.equal(locals0.trackGroup.id, tg.id);
-    assert.equal(locals0.profile.id, artist.id);
+    assert.equal(locals0.profile.id, profile.id);
   });
 
   it("should skip if album does not exist", async () => {
@@ -173,7 +173,7 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -188,7 +188,7 @@ describe("auto-purchase-new-albums", () => {
         profileSubscriptionTierId: (
           await prisma.profileSubscriptionTier.create({
             data: {
-              profileId: artist.id,
+              profileId: profile.id,
               name: "tier",
               autoPurchaseAlbums: true,
             },
@@ -214,20 +214,20 @@ describe("auto-purchase-new-albums", () => {
     const stub = sinon.stub(sendMailQueue.sendMailQueue, "add");
     stub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });
@@ -248,7 +248,7 @@ describe("auto-purchase-new-albums", () => {
     const stub = sinon.stub(sendMailQueue.sendMailQueue, "add");
     stub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -257,11 +257,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -278,12 +278,12 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });
@@ -313,7 +313,7 @@ describe("auto-purchase-new-albums", () => {
     const stub = sinon.stub(sendMailQueue.sendMailQueue, "add");
     stub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -327,11 +327,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -348,7 +348,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription1 = await prisma.profileUserSubscription.create({
       data: {
         userId: follower1.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -356,12 +356,12 @@ describe("auto-purchase-new-albums", () => {
     const subscription2 = await prisma.profileUserSubscription.create({
       data: {
         userId: follower2.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });
@@ -405,7 +405,7 @@ describe("auto-purchase-new-albums", () => {
     const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
     addStub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -414,11 +414,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -435,13 +435,13 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
     // Album released in last hour
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });
@@ -460,7 +460,7 @@ describe("auto-purchase-new-albums", () => {
     const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
     addStub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -469,11 +469,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -490,13 +490,13 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
     // Album released in last hour
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });
@@ -512,7 +512,7 @@ describe("auto-purchase-new-albums", () => {
     const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
     addStub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -521,11 +521,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -542,7 +542,7 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -550,7 +550,7 @@ describe("auto-purchase-new-albums", () => {
     const twoYearsAgo = new Date();
     twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
 
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: twoYearsAgo,
       publishedAt: new Date(),
     });
@@ -567,7 +567,7 @@ describe("auto-purchase-new-albums", () => {
     const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
     addStub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -576,11 +576,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -597,7 +597,7 @@ describe("auto-purchase-new-albums", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -605,7 +605,7 @@ describe("auto-purchase-new-albums", () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: tomorrow,
     });
@@ -619,7 +619,7 @@ describe("auto-purchase-new-albums", () => {
     const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
     addStub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -628,11 +628,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -649,12 +649,12 @@ describe("auto-purchase-new-albums", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
 
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: null,
     });
@@ -668,7 +668,7 @@ describe("auto-purchase-new-albums", () => {
     const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
     addStub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -677,11 +677,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -698,7 +698,7 @@ describe("auto-purchase-new-albums", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -706,7 +706,7 @@ describe("auto-purchase-new-albums", () => {
     const twoHoursAgo = new Date();
     twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
 
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: twoHoursAgo,
     });
@@ -720,7 +720,7 @@ describe("auto-purchase-new-albums", () => {
     const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
     addStub.resolves(undefined);
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -729,11 +729,11 @@ describe("auto-purchase-new-albums", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -750,14 +750,14 @@ describe("auto-purchase-new-albums", () => {
     const subscription = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
         deletedAt: new Date(), // Deleted
       },
     });
 
     // Album released in last hour
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       releaseDate: new Date(),
       publishedAt: new Date(),
     });

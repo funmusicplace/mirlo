@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import busboy from "connect-busboy";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../auth/passport";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { processUserBanner } from "../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
-import { deleteArtistBackground } from "../../../../utils/artist";
+import { deleteProfileBackground } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { busboyOptions } from "../../../../utils/images";
 
@@ -20,7 +20,7 @@ type Params = {
 export default function () {
   const operations = {
     PUT: [userAuthenticated, busboy(busboyOptions), PUT],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -72,22 +72,22 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
           userId: loggedInUser.id,
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
-      await deleteArtistBackground(artist.id);
+      await deleteProfileBackground(profile.id);
 
       res.json({ message: "Success" });
     } catch (error) {
@@ -107,7 +107,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Updated Artist",
+        description: "Updated Profile",
         schema: {
           type: "object",
         },

@@ -18,7 +18,7 @@ export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
     url,
     imageUrl,
     artistName,
-    artistUrl,
+    profileUrl,
     releaseDate,
     trackCount = 0,
     tracks = [],
@@ -46,7 +46,7 @@ export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
     "byArtist": {
       "@type": "MusicGroup",
       "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
+      "url": "${profileUrl || ""}"
     },
     "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}",
     "numberOfTracks": ${trackCount},
@@ -62,7 +62,7 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
     url,
     imageUrl,
     artistName,
-    artistUrl,
+    profileUrl,
     releaseDate,
     duration,
   } = metadata;
@@ -80,7 +80,7 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
     "byArtist": {
       "@type": "MusicGroup",
       "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
+      "url": "${profileUrl || ""}"
     },
     "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
   }`;
@@ -88,14 +88,14 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
 
 // Build MusicGroup schema for artist profiles
 export const buildMusicGroupSchema = (metadata: PageMetadata): string => {
-  const { title, description, url, imageUrl, artistUrl } = metadata;
+  const { title, description, url, imageUrl, profileUrl } = metadata;
 
   return `{
     "@context": "https://schema.org",
     "@type": "MusicGroup",
     "name": "${escapeJsonString(title)}",
     "description": "${escapeJsonString(description)}",
-    "url": "${artistUrl || url}",
+    "url": "${profileUrl || url}",
     "image": "${imageUrl || ""}"
   }`;
 };

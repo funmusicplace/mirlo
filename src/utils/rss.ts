@@ -3,21 +3,21 @@ import RSS from "rss";
 
 import { getClient } from "./getClient";
 import { markdownAsHtml } from "./post";
-import { isArtist, isPost, isTrack, isTrackGroup } from "./typeguards";
+import { isProfile, isPost, isTrack, isTrackGroup } from "./typeguards";
 
-type FeedArtistRef = { name: string; urlSlug: string; id: number } | null;
+type FeedProfileRef = { name: string; urlSlug: string; id: number } | null;
 
 type FeedTrackGroup = TrackGroup & {
-  artist?: FeedArtistRef;
-  profile?: FeedArtistRef;
+  artist?: FeedProfileRef;
+  profile?: FeedProfileRef;
 };
 
 type FeedTrack = Track & {
   trackGroup: FeedTrackGroup | null;
 };
 
-const feedArtist = (
-  item: { artist?: FeedArtistRef; profile?: FeedArtistRef } | null | undefined
+const feedProfile = (
+  item: { artist?: FeedProfileRef; profile?: FeedProfileRef } | null | undefined
 ) => (item?.artist !== undefined ? item.artist : item?.profile);
 
 export const turnItemsIntoRSS = async (
@@ -31,8 +31,8 @@ export const turnItemsIntoRSS = async (
     | FeedTrackGroup
     | FeedTrack
     | (Post & {
-        artist?: FeedArtistRef;
-        profile?: FeedArtistRef;
+        artist?: FeedProfileRef;
+        profile?: FeedProfileRef;
       })
     | Profile
   )[]
@@ -50,8 +50,8 @@ export const turnItemsIntoRSS = async (
   for (const p of zipped) {
     if (isTrack(p)) {
       const tg = p.trackGroup;
-      const tgArtist = feedArtist(tg);
-      const artistName = tgArtist?.name ?? "an artist";
+      const tgProfile = feedProfile(tg);
+      const artistName = tgProfile?.name ?? "an artist";
       feed.item({
         title: p.title
           ? `${p.title} by ${artistName}`
@@ -62,33 +62,33 @@ export const turnItemsIntoRSS = async (
             ? `A track from "${tg.title}" by ${artistName}.`
             : `A track by ${artistName}.`),
         url:
-          tg && tgArtist
-            ? `${client?.applicationUrl}/${tgArtist.urlSlug}/release/${tg.urlSlug}/tracks/${p.id}`
+          tg && tgProfile
+            ? `${client?.applicationUrl}/${tgProfile.urlSlug}/release/${tg.urlSlug}/tracks/${p.id}`
             : `${client?.applicationUrl}/`,
         date: p.createdAt,
       });
     } else if (isTrackGroup(p)) {
-      const artist = feedArtist(p);
+      const profile = feedProfile(p);
       feed.item({
         title: p.title
-          ? `${p.title} by ${artist?.name}`
-          : `A release by ${artist?.name}`,
+          ? `${p.title} by ${profile?.name}`
+          : `A release by ${profile?.name}`,
         description:
-          p.about ?? `<h2>An release by artist ${artist?.name}.</h2>`,
-        url: `${client?.applicationUrl}/${artist?.urlSlug}/release/${p.urlSlug}`,
+          p.about ?? `<h2>An release by artist ${profile?.name}.</h2>`,
+        url: `${client?.applicationUrl}/${profile?.urlSlug}/release/${p.urlSlug}`,
         date: p.releaseDate ?? p.createdAt,
       });
     } else if (isPost(p)) {
-      const artist = feedArtist(p);
+      const profile = feedProfile(p);
       feed.item({
         title: p.title
-          ? `${p.title} by ${artist?.name}`
-          : `A post by ${artist?.name}`,
+          ? `${p.title} by ${profile?.name}`
+          : `A post by ${profile?.name}`,
         description: markdownAsHtml(p.content),
-        url: `${client?.applicationUrl}/${artist?.urlSlug}/posts/${p.id}`,
+        url: `${client?.applicationUrl}/${profile?.urlSlug}/posts/${p.id}`,
         date: p.publishedAt,
       });
-    } else if (isArtist(p)) {
+    } else if (isProfile(p)) {
       feed.item({
         title: p.name,
         description: p.bio ?? `An artist on Mirlo`,

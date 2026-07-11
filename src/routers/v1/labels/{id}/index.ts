@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../utils/serialize/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
+import { processSingleProfile } from "../../../../utils/serialize/artist";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -15,11 +15,11 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const profileId = await findProfileIdForURLSlug(id);
 
       const labelProfile = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: profileId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },
@@ -84,9 +84,9 @@ export default function () {
           ...label,
           artistLabels: label?.artistLabels.map((al) => ({
             ...al,
-            artist: processSingleArtist(al.artist),
+            artist: processSingleProfile(al.artist),
           })),
-          profile: labelProfile && processSingleArtist(labelProfile),
+          profile: labelProfile && processSingleProfile(labelProfile),
         },
       });
     } catch (e) {

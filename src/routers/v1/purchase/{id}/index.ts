@@ -33,11 +33,11 @@ export default function () {
       // Surface a name so the hosted checkout page can show who's being paid.
       let artistName: string | null = null;
       if (profileId) {
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: { id: Number(profileId) },
           select: { name: true },
         });
-        artistName = artist?.name ?? null;
+        artistName = profile?.name ?? null;
       }
 
       res.status(200).json({ result: { ...intent, artistName } });

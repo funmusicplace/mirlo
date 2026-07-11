@@ -15,7 +15,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
-    const { artistId } = req.query as unknown as { artistId?: string };
+    const { artistId: profileId } = req.query as unknown as { artistId?: string };
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
@@ -24,9 +24,9 @@ export default function () {
           userId: Number(userId),
           profileSubscriptionTier: { isDefaultTier: false },
         };
-        if (artistId) {
+        if (profileId) {
           where.profileSubscriptionTier = {
-            profileId: Number(artistId),
+            profileId: Number(profileId),
             isDefaultTier: false,
             deletedAt: null,
           };
@@ -34,7 +34,11 @@ export default function () {
         const subsciptions = await prisma.profileUserSubscription.findMany({
           where,
           include: {
-            profileSubscriptionTier: true,
+            profileSubscriptionTier: {
+              include: {
+                profile: true,
+              },
+            },
           },
         });
         res.json({

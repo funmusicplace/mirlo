@@ -7,7 +7,7 @@ export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,
   userId: number
 ): Promise<ProfileSubscriptionTier | null> => {
-  const artists = await prisma.profile.findMany({
+  const profiles = await prisma.profile.findMany({
     where: {
       userId,
     },
@@ -15,7 +15,7 @@ export const doesSubscriptionTierBelongToUser = async (
 
   const subscription = await prisma.profileSubscriptionTier.findFirst({
     where: {
-      profileId: { in: artists.map((a) => a.id) },
+      profileId: { in: profiles.map((p) => p.id) },
       id: subscriptionId,
     },
     include: {
@@ -180,7 +180,7 @@ export const doesTrackBelongToUser = async (trackId: number, user: User) => {
  * How many free plays remain for `user` (or `ip`, when anonymous) on a given
  * track. Returns `null` for cases where the limit doesn't apply: the track
  * isn't a preview, the artist hasn't set `maxFreePlays`, the user owns the
- * track/album, or the user is the artist. Otherwise returns
+ * track/album, or the user is the profile. Otherwise returns
  * `{ remaining, max, exceeded }` so the client can surface a soft warning
  * before the listener actually hits the limit (#1760).
  */

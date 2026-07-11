@@ -4,9 +4,9 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import {
-  confirmArtistIdExists,
-  createSubscriptionConfirmation,
-  subscribeUserToArtist,
+  confirmProfileIdExists,
+  createProfileSubscriptionConfirmation,
+  subscribeUserToProfile,
 } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { getSiteSettings } from "../../../../utils/settings";
@@ -19,11 +19,11 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [confirmArtistIdExists, userLoggedInWithoutRedirect, POST],
+    POST: [confirmProfileIdExists, userLoggedInWithoutRedirect, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const loggedInuser = req.user;
 
     const { email, message, cfTurnstile } = req.body ?? {};
@@ -47,9 +47,9 @@ export default function () {
         });
       }
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
         },
         include: {
           user: true,
@@ -57,7 +57,7 @@ export default function () {
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({
           httpCode: 404,
           description: "Artist not found",
@@ -65,12 +65,12 @@ export default function () {
       }
 
       const settings = await getSiteSettings();
-      const instanceArtistId = Number(
+      const instanceProfileId = Number(
         settings.settings?.instanceCustomization?.profileId
       );
-      const isInstanceArtist =
-        instanceArtistId !== undefined && instanceArtistId !== null
-          ? artist.id === instanceArtistId
+      const isInstanceProfile =
+        instanceProfileId !== undefined && instanceProfileId !== null
+          ? profile.id === instanceProfileId
           : false;
 
       const userSelect = {
@@ -110,7 +110,7 @@ export default function () {
           });
         }
 
-        if (isInstanceArtist && !user.receiveMailingList) {
+        if (isInstanceProfile && !user.receiveMailingList) {
           user = await prisma.user.update({
             where: { id: user.id },
             data: { receiveMailingList: true },
@@ -118,8 +118,8 @@ export default function () {
           });
         }
 
-        const results = await subscribeUserToArtist(
-          artist,
+        const results = await subscribeUserToProfile(
+          profile,
           { id: user.id },
           message
         );
@@ -153,7 +153,7 @@ export default function () {
         });
       }
 
-      await createSubscriptionConfirmation(normalisedEmail, artist);
+      await createProfileSubscriptionConfirmation(normalisedEmail, profile);
       res.status(200).json({
         message: "Success",
       });

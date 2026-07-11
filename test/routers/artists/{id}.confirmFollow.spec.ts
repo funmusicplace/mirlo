@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 import { requestApp } from "../utils";
 
@@ -35,7 +35,7 @@ describe("artists/{id}/confirmFollow", () => {
     });
 
     it("should confirm a user and add them to the artist followers", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
       });
 
@@ -45,21 +45,21 @@ describe("artists/{id}/confirmFollow", () => {
         email: followerEmail,
       });
 
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         name: "Test artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       });
       const confirmation =
         await prisma.profileUserSubscriptionConfirmation.create({
           data: {
             email: followerEmail,
-            profileId: artist.id,
+            profileId: profile.id,
           },
         });
 
       const response = await requestApp
-        .get(`artists/${artist.id}/confirmFollow`)
+        .get(`artists/${profile.id}/confirmFollow`)
         .send({
           token: confirmation.token,
           email: followerEmail,
@@ -67,14 +67,14 @@ describe("artists/{id}/confirmFollow", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 302);
-      const redirectTo = `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
+      const redirectTo = `http://localhost:8080/${profile.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            profileId: artist.id,
+            profileId: profile.id,
           },
         });
 
@@ -87,7 +87,7 @@ describe("artists/{id}/confirmFollow", () => {
           },
           profileSubscriptionTier: {
             isDefaultTier: true,
-            profileId: artist.id,
+            profileId: profile.id,
           },
         },
       });
@@ -95,27 +95,27 @@ describe("artists/{id}/confirmFollow", () => {
     });
 
     it("should create a user and if they didn't already exist in the database", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
       });
 
       const followerEmail = "follower@follower.com";
 
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(profileOwner.id, {
         name: "Test artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       });
       const confirmation =
         await prisma.profileUserSubscriptionConfirmation.create({
           data: {
             email: followerEmail,
-            profileId: artist.id,
+            profileId: profile.id,
           },
         });
 
       const response = await requestApp
-        .get(`artists/${artist.id}/confirmFollow`)
+        .get(`artists/${profile.id}/confirmFollow`)
         .send({
           token: confirmation.token,
           email: followerEmail,
@@ -123,14 +123,14 @@ describe("artists/{id}/confirmFollow", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 302);
-      const redirectTo = `http://localhost:8080/${artist.urlSlug}/checkout-complete?purchaseType=follow`;
+      const redirectTo = `http://localhost:8080/${profile.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            profileId: artist.id,
+            profileId: profile.id,
           },
         });
 
@@ -143,7 +143,7 @@ describe("artists/{id}/confirmFollow", () => {
           },
           profileSubscriptionTier: {
             isDefaultTier: true,
-            profileId: artist.id,
+            profileId: profile.id,
           },
         },
       });

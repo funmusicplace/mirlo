@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { subscribeUserToArtist } from "../../../utils/artist";
+import { subscribeUserToProfile } from "../../../utils/artist";
 import { buildCheckoutRedirectUrl, originOf } from "../../../utils/clientUrl";
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
@@ -13,7 +13,7 @@ import {
   type ResolvedItem,
 } from "../../../utils/payments/purchase";
 import { determinePrice } from "../../../utils/purchasing";
-import { findUserDiscountPercentsForArtist } from "../../../utils/user";
+import { findUserDiscountPercentsForProfile } from "../../../utils/user";
 
 type PurchaseItem =
   | { type: "trackGroup"; id: number; price?: string; message?: string }
@@ -81,14 +81,14 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { readerId, artistId: artistIdBody, items, email, hosted, successUrl } =
+    const { readerId, artistId: profileIdBody, items, email, hosted, successUrl } =
       req.body as PostBody;
-    const artistId = Number(artistIdBody);
+    const profileId = Number(profileIdBody);
     const loggedInUser = req.user;
     const clientId = req.client?.id;
 
     try {
-      if (!artistId || !items?.length) {
+      if (!profileId || !items?.length) {
         throw new AppError({
           httpCode: 400,
           description: "artistId and items are required",
@@ -130,7 +130,7 @@ export default function () {
 
         const { setupIntentId } = await initiateSubscription({
           readerId,
-          profileId: artistId,
+          profileId: profileId,
           tierId: subItem.tierId,
           amount: subItem.amount,
           userEmail: loggedInUser?.email ?? email ?? "",
@@ -146,7 +146,7 @@ export default function () {
       for (const item of items) {
         if (item.type === "trackGroup") {
           const tg = await prisma.trackGroup.findFirst({
-            where: { id: item.id, profile: { id: artistId } },
+            where: { id: item.id, profile: { id: profileId } },
             include: {
               paymentToUser: { select: { stripeAccountId: true } },
               profile: {
@@ -172,12 +172,12 @@ export default function () {
             undefined;
 
           if (loggedInUser) {
-            await subscribeUserToArtist(tg.profile, loggedInUser);
+            await subscribeUserToProfile(tg.profile, loggedInUser);
           }
 
           let discountPercent = 0;
           if (loggedInUser) {
-            const discounts = await findUserDiscountPercentsForArtist(
+            const discounts = await findUserDiscountPercentsForProfile(
               loggedInUser.id,
               tg.profileId
             );
@@ -217,7 +217,7 @@ export default function () {
           const merch = await prisma.merch.findFirst({
             where: {
               id: item.id,
-              profileId: artistId,
+              profileId: profileId,
               isPublic: true,
               deletedAt: null,
             },
@@ -262,7 +262,7 @@ export default function () {
 
       const result = await initiatePayment({
         readerId,
-        profileId: artistId,
+        profileId: profileId,
         items: resolvedItems,
         userEmail: loggedInUser?.email ?? email ?? "",
         userId: loggedInUser ? String(loggedInUser.id) : undefined,

@@ -9,7 +9,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
 } from "../../utils";
@@ -39,9 +39,9 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createTrack(trackGroup.id);
 
@@ -59,9 +59,9 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         cover: { create: undefined },
       });
 
@@ -81,9 +81,9 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createTrack(trackGroup.id);
 
@@ -99,7 +99,7 @@ describe("artists", () => {
       );
       assert.equal(obj.title, "All Mirlo Artists Feed");
       assert.equal(obj.items.length, 1);
-      assert.equal(obj.items[0].title, `${artist.name}`);
+      assert.equal(obj.items[0].title, `${profile.name}`);
     });
   });
 
@@ -117,15 +117,15 @@ describe("artists", () => {
       });
 
       // Create a regular artist with a published track group
-      const artist = await createArtist(user1.id, {
+      const profile = await createProfile(user1.id, {
         name: "Regular Artist",
         isLabelProfile: false,
       });
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await createTrack(trackGroup.id);
 
       // Create a label with a published track group
-      const label = await createArtist(user2.id, {
+      const label = await createProfile(user2.id, {
         name: "My Label",
         isLabelProfile: true,
       });
@@ -156,15 +156,15 @@ describe("artists", () => {
       });
 
       // Create a regular artist with a published track group
-      const artist = await createArtist(user1.id, {
+      const profile = await createProfile(user1.id, {
         name: "Regular Artist",
         isLabelProfile: false,
       });
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await createTrack(trackGroup.id);
 
       // Create a label with a published track group
-      const label = await createArtist(user2.id, {
+      const label = await createProfile(user2.id, {
         name: "My Label",
         isLabelProfile: true,
       });
@@ -194,15 +194,15 @@ describe("artists", () => {
       });
 
       // Create a regular artist with a published track group
-      const artist = await createArtist(user1.id, {
+      const profile = await createProfile(user1.id, {
         name: "Regular Artist",
         isLabelProfile: false,
       });
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await createTrack(trackGroup.id);
 
       // Create a label with a published track group
-      const label = await createArtist(user2.id, {
+      const label = await createProfile(user2.id, {
         name: "My Label",
         isLabelProfile: true,
       });
@@ -234,7 +234,7 @@ describe("artists", () => {
       });
 
       // Create a label with a published track group
-      const activeLabel = await createArtist(user1.id, {
+      const activeLabel = await createProfile(user1.id, {
         name: "Active Label",
         isLabelProfile: true,
       });
@@ -242,7 +242,7 @@ describe("artists", () => {
       await createTrack(activeTrackGroup.id);
 
       // Create a label WITHOUT any published track groups
-      await createArtist(user2.id, {
+      await createProfile(user2.id, {
         name: "Empty Label",
         isLabelProfile: true,
       });
@@ -269,17 +269,17 @@ describe("artists", () => {
       });
 
       // Create a regular artist WITHOUT published track groups
-      await createArtist(user1.id, {
+      await createProfile(user1.id, {
         name: "Artist Without Tracks",
         isLabelProfile: false,
       });
 
       // Create a regular artist WITH published track groups
-      const artist2 = await createArtist(user2.id, {
+      const profile2 = await createProfile(user2.id, {
         name: "Artist With Tracks",
         isLabelProfile: false,
       });
-      const trackGroup2 = await createTrackGroup(artist2.id);
+      const trackGroup2 = await createTrackGroup(profile2.id);
       await createTrack(trackGroup2.id);
 
       const response = await request(baseURL)
@@ -312,21 +312,21 @@ describe("artists", () => {
       });
 
       // Create multiple labels with published track groups
-      const label1 = await createArtist(user1.id, {
+      const label1 = await createProfile(user1.id, {
         name: "Label One",
         isLabelProfile: true,
       });
       const tg1 = await createTrackGroup(label1.id);
       await createTrack(tg1.id);
 
-      const label2 = await createArtist(user2.id, {
+      const label2 = await createProfile(user2.id, {
         name: "Label Two",
         isLabelProfile: true,
       });
       const tg2 = await createTrackGroup(label2.id);
       await createTrack(tg2.id);
 
-      const label3 = await createArtist(user3.id, {
+      const label3 = await createProfile(user3.id, {
         name: "Label Three",
         isLabelProfile: true,
       });
@@ -356,13 +356,13 @@ describe("artists", () => {
       });
 
       // Create the label (label profile)
-      const label = await createArtist(labelUser.id, {
+      const label = await createProfile(labelUser.id, {
         name: "My Label",
         isLabelProfile: true,
       });
 
       // Create a signed artist under the label
-      const signedArtist = await createArtist(signedArtistUser.id, {
+      const signedArtist = await createProfile(signedArtistUser.id, {
         name: "Signed Artist",
       });
 
@@ -399,11 +399,11 @@ describe("artists", () => {
         data: { email: "off-label@test.com", isLabelAccount: false },
       });
 
-      const activeLabel = await createArtist(activeLabelUser.id, {
+      const activeLabel = await createProfile(activeLabelUser.id, {
         name: "Active Label",
         isLabelProfile: true,
       });
-      const turnedOffLabel = await createArtist(turnedOffLabelUser.id, {
+      const turnedOffLabel = await createProfile(turnedOffLabelUser.id, {
         name: "Turned-off Label",
         isLabelProfile: true,
         urlSlug: "turned-off-label",
@@ -441,13 +441,13 @@ describe("artists", () => {
       });
 
       // Create the label
-      const label = await createArtist(labelUser.id, {
+      const label = await createProfile(labelUser.id, {
         name: "Empty Label",
         isLabelProfile: true,
       });
 
       // Create a signed artist under the label
-      const signedArtist = await createArtist(signedArtistUser.id, {
+      const signedArtist = await createProfile(signedArtistUser.id, {
         name: "Signed Artist",
         isLabelProfile: false,
       });

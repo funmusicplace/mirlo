@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { processSingleArtist } from "../../../../utils/artist";
+import { processSingleProfile } from "../../../../utils/artist";
 
 type Params = {
   userId: string;
@@ -59,7 +59,7 @@ export default function () {
             artistSubscriptionTier: {
               ...tierRest,
               artistId: profileId,
-              artist: processSingleArtist(profile),
+              artist: processSingleProfile(profile),
             },
           },
         };

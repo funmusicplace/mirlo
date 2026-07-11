@@ -16,7 +16,7 @@ export default function () {
   };
 
   /**
-   * Resolve a fediverse "remote follow" redirect for an artist.
+   * Resolve a fediverse "remote follow" redirect for an profile.
    *
    * Takes the follower's own handle (?handle=@you@server), looks up their
    * home server's OStatus subscribe template via WebFinger, and fills it in
@@ -24,7 +24,7 @@ export default function () {
    * the returned URL, landing the user on their own server's follow screen.
    */
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const { handle } = req.query;
 
     try {
@@ -50,15 +50,15 @@ export default function () {
 
       const server = cleaned.slice(atIndex + 1);
 
-      const artist = await prisma.profile.findFirst({
-        where: { id: Number(artistId), enabled: true },
+      const profile = await prisma.profile.findFirst({
+        where: { id: Number(profileId), enabled: true },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({ httpCode: 404, description: "Artist not found" });
       }
 
-      if (!artist.activityPub) {
+      if (!profile.activityPub) {
         throw new AppError({
           httpCode: 400,
           description: "This artist is not available on the fediverse",
@@ -94,10 +94,10 @@ export default function () {
         });
       }
 
-      const artistHandle = `${artist.urlSlug}@${root}`;
+      const profileHandle = `${profile.urlSlug}@${root}`;
       const redirectUrl = subscribeLink.template.replace(
         "{uri}",
-        encodeURIComponent(artistHandle)
+        encodeURIComponent(profileHandle)
       );
 
       return res.json({ result: { redirectUrl } });

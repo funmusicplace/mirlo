@@ -5,7 +5,7 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -28,10 +28,10 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       // Create a trackGroup with a fundraiser
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -86,9 +86,9 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -142,9 +142,9 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -172,9 +172,9 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -217,9 +217,9 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
 
     it("should require authentication", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -248,8 +248,8 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
         email: "other@test.com",
       });
 
-      const artist = await createArtist(owner.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(owner.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -275,9 +275,9 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -347,13 +347,13 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const trackGroup1 = await createTrackGroup(artist.id, {
+      const trackGroup1 = await createTrackGroup(profile.id, {
         title: "album 1",
         urlSlug: "album-1",
       });
-      const trackGroup2 = await createTrackGroup(artist.id);
+      const trackGroup2 = await createTrackGroup(profile.id);
 
       const fundraiser1 = await prisma.fundraiser.create({
         data: {

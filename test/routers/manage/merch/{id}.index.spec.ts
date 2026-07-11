@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createTrackGroup,
   createUser,
@@ -27,9 +27,9 @@ describe("manage/merch/{merchId}", () => {
   describe("GET", () => {
     it("should get a merch item", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
-      const merch = await createMerch(artist.id, {});
+      const merch = await createMerch(profile.id, {});
 
       const response = await requestApp
         .get(`manage/merch/${merch.id}`)
@@ -43,9 +43,9 @@ describe("manage/merch/{merchId}", () => {
   describe("PUT", () => {
     it("should allow linking a track group that belongs to the merch's artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
-      const merch = await createMerch(artist.id, {});
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const merch = await createMerch(profile.id, {});
 
       const response = await requestApp
         .put(`manage/merch/${merch.id}`)
@@ -62,20 +62,20 @@ describe("manage/merch/{merchId}", () => {
 
     it("should allow linking a label release (paymentToUserId matches logged-in user)", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const labelArtist = await createArtist(user.id);
+      const labelProfile = await createProfile(user.id);
 
       // A roster artist owned by a different user
       const { user: rosterUser } = await createUser({
         email: "roster@testcom",
       });
-      const rosterArtist = await createArtist(rosterUser.id);
+      const rosterProfile = await createProfile(rosterUser.id);
 
       // Label release: belongs to the roster artist but payment goes to the label user
-      const labelRelease = await createTrackGroup(rosterArtist.id, {
+      const labelRelease = await createTrackGroup(rosterProfile.id, {
         paymentToUserId: user.id,
       });
 
-      const merch = await createMerch(labelArtist.id, {});
+      const merch = await createMerch(labelProfile.id, {});
 
       const response = await requestApp
         .put(`manage/merch/${merch.id}`)
@@ -92,8 +92,8 @@ describe("manage/merch/{merchId}", () => {
 
     it("should allow updating platformPercent", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const merch = await createMerch(artist.id, {});
+      const profile = await createProfile(user.id);
+      const merch = await createMerch(profile.id, {});
 
       const response = await requestApp
         .put(`manage/merch/${merch.id}`)
@@ -107,15 +107,15 @@ describe("manage/merch/{merchId}", () => {
 
     it("should reject linking a track group that does not belong to the user", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const merch = await createMerch(artist.id, {});
+      const profile = await createProfile(user.id);
+      const merch = await createMerch(profile.id, {});
 
       // A track group owned by a completely different user
       const { user: otherUser } = await createUser({
         email: "other@testcom",
       });
-      const otherArtist = await createArtist(otherUser.id);
-      const unrelatedTrackGroup = await createTrackGroup(otherArtist.id);
+      const otherProfile = await createProfile(otherUser.id);
+      const unrelatedTrackGroup = await createTrackGroup(otherProfile.id);
 
       const response = await requestApp
         .put(`manage/merch/${merch.id}`)
@@ -130,8 +130,8 @@ describe("manage/merch/{merchId}", () => {
       const { user, accessToken } = await createUser({
         email: "external-merch@example.com",
       });
-      const artist = await createArtist(user.id);
-      const merch = await createMerch(artist.id, {});
+      const profile = await createProfile(user.id);
+      const merch = await createMerch(profile.id, {});
 
       const externalUrl = "https://artistshop.example.com/vinyl";
       const response = await requestApp

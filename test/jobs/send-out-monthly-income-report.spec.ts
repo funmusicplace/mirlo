@@ -7,7 +7,7 @@ import * as sendMail from "../../src/jobs/send-mail";
 import sendOutMonthlyIncomeReport, {
   MonthlyIncomeReportEmailType,
 } from "../../src/jobs/send-out-monthy-income-report";
-import { clearTables, createArtist, createUser } from "../utils";
+import { clearTables, createProfile, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
 
@@ -37,7 +37,7 @@ describe("send-out-monthly-income-report", () => {
   it("should send an income report to an artist who has sales", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -46,11 +46,11 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -66,7 +66,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -109,7 +109,7 @@ describe("send-out-monthly-income-report", () => {
   it("should send an income report to an artist who has gained a tip", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -118,11 +118,11 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
       include: {
@@ -137,7 +137,7 @@ describe("send-out-monthly-income-report", () => {
           refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
-        profileId: artist.id,
+        profileId: profile.id,
       },
     });
 
@@ -170,7 +170,7 @@ describe("send-out-monthly-income-report", () => {
   it("should not send an e-mail if sale is from two months ago", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -179,11 +179,11 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -199,7 +199,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -234,7 +234,7 @@ describe("send-out-monthly-income-report", () => {
   it("should not include sales from this current month", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -243,11 +243,11 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -263,7 +263,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -298,7 +298,7 @@ describe("send-out-monthly-income-report", () => {
   it("should not send an income report to an artist who's not had any sales", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -307,11 +307,11 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -327,7 +327,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -340,11 +340,11 @@ describe("send-out-monthly-income-report", () => {
   it("should send an income report to different artists for different sales", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
-    const { user: artistUser2 } = await createUser({
+    const { user: profileUser2 } = await createUser({
       email: "artist2@artist.com",
     });
 
@@ -353,11 +353,11 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -370,11 +370,11 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const artist2 = await prisma.profile.create({
+    const profile2 = await prisma.profile.create({
       data: {
         name: "Test artist 2",
         urlSlug: "test-artist-2",
-        userId: artistUser2.id,
+        userId: profileUser2.id,
         enabled: true,
         subscriptionTiers: {
           create: {
@@ -390,7 +390,7 @@ describe("send-out-monthly-income-report", () => {
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -424,7 +424,7 @@ describe("send-out-monthly-income-report", () => {
           refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
-        profileId: artist2.id,
+        profileId: profile2.id,
       },
     });
 
@@ -451,7 +451,7 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.totalIncome, 5);
     assert.equal(locals.userSales[0].amount, 5);
     assert.equal(locals.userSales[0].saleType, "transaction");
-    assert.equal(locals.userSales[0].profile[0]?.id, artist.id);
+    assert.equal(locals.userSales[0].profile[0]?.id, profile.id);
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "announce-monthly-income-report");
@@ -461,13 +461,13 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals2.totalIncome, 7);
     assert.equal(locals2.userSales[0].amount, 7);
     assert.equal(locals2.userSales[0].saleType, "transaction");
-    assert.equal(locals2.userSales[0].profile[0]?.id, artist2.id);
+    assert.equal(locals2.userSales[0].profile[0]?.id, profile2.id);
   });
 
   it("should include buyer details and last month's cancellations, excluding tier switches", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -488,14 +488,14 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       subscriptionTiers: { create: { name: "a tier" } },
     });
 
     const aus = await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -525,7 +525,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: leaverUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 700,
         deletedAt: lastMonthDate,
         deleteReason: "USER_CANCELLED",
@@ -536,7 +536,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: switcherUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 300,
         deletedAt: lastMonthDate,
         deleteReason: "TIER_SWITCHED",
@@ -564,7 +564,7 @@ describe("send-out-monthly-income-report", () => {
   it("should send an income report for multiple artists if a user has more than one artist sales", async () => {
     const stub = sinon.stub(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
       name: "Gia",
     });
@@ -574,20 +574,20 @@ describe("send-out-monthly-income-report", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    const artist2 = await prisma.profile.create({
+    const profile2 = await prisma.profile.create({
       data: {
         name: "Test artist 2",
         urlSlug: "test-artist-2",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
@@ -606,7 +606,7 @@ describe("send-out-monthly-income-report", () => {
       data: {
         datePurchased: tip1date,
         userId: followerUser.id,
-        profileId: artist.id,
+        profileId: profile.id,
       },
     });
 
@@ -614,7 +614,7 @@ describe("send-out-monthly-income-report", () => {
       data: {
         datePurchased: tip2date,
         userId: followerUser.id,
-        profileId: artist2.id,
+        profileId: profile2.id,
       },
     });
 
@@ -653,10 +653,10 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.user.name, "Gia");
     assert.equal(locals.totalIncome, 10);
     assert.equal(locals.userSales[0].amount, 7);
-    assert.equal(locals.userSales[0].profile[0].id, artist.id);
+    assert.equal(locals.userSales[0].profile[0].id, profile.id);
     assert.equal(locals.userSales[0].saleType, "transaction");
     assert.equal(locals.userSales[1].amount, 3);
-    assert.equal(locals.userSales[1].profile[0].id, artist2.id);
+    assert.equal(locals.userSales[1].profile[0].id, profile2.id);
     assert.equal(locals.userSales[1].saleType, "transaction");
     assert.equal(locals.userSales[0].title, "Tip");
     assert.equal(locals.userSales[1].title, "Tip");

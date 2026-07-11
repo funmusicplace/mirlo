@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   userAuthenticated,
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
 import { downloadCSVFile } from "../../../../../utils/download";
 import { getClient } from "../../../../../utils/getClient";
@@ -46,18 +46,18 @@ const csvColumns = [
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
     const { group } = req.query as unknown as { group: string };
 
     try {
       const { applicationUrl } = await getClient();
       const where: Prisma.TrackGroupDownloadCodesWhereInput = {
         trackGroup: {
-          profileId: Number(artistId),
+          profileId: Number(profileId),
           deletedAt: null,
         },
       };
@@ -66,7 +66,7 @@ export default function () {
         where.group = group;
       }
 
-      const artistCodes = await prisma.trackGroupDownloadCodes.findMany({
+      const profileCodes = await prisma.trackGroupDownloadCodes.findMany({
         where,
         include: {
           trackGroup: {
@@ -82,7 +82,7 @@ export default function () {
           res,
           "codes.csv",
           csvColumns,
-          artistCodes.map((c) => ({
+          profileCodes.map((c) => ({
             ...c,
             url: `${applicationUrl}/${c.trackGroup.profile.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
           }))
@@ -90,7 +90,7 @@ export default function () {
       }
 
       res.json({
-        results: artistCodes.map((c) => ({
+        results: profileCodes.map((c) => ({
           ...c,
           url: `${applicationUrl}/${c.trackGroup.profile.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
         })),

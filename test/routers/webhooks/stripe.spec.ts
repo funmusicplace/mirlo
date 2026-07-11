@@ -16,7 +16,7 @@ import { handleInvoicePaid } from "../../../src/utils/stripe";
 import * as subscriptionModule from "../../../src/utils/subscription";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
   createTier,
@@ -44,14 +44,14 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const { user } = await createUser({
         email: "subscriber@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       // Create a subscription tier
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
           name: "Premium",
           minAmount: 1000,
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
 
@@ -172,8 +172,8 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const { user } = await createUser({
         email: "pledger@test.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       // Create a fundraiser
       const fundraiser = await prisma.fundraiser.create({
@@ -293,7 +293,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
 
   describe("invoice.paid webhook for subscription", () => {
     it("should grant user access to subscription tier releases when invoice is paid", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -302,20 +302,20 @@ describe("Stripe Webhooks - Failed Payments", () => {
         emailConfirmationToken: null,
       });
 
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       // Create subscription tier with releases using utility function
-      const tier = await createTier(artist.id, {
+      const tier = await createTier(profile.id, {
         name: "Premium Tier",
       });
 
       // Create multiple releases for the artist using utility function
-      const release1 = await createTrackGroup(artist.id, {
+      const release1 = await createTrackGroup(profile.id, {
         title: "Album 1",
         urlSlug: "album-1",
       });
 
-      const release2 = await createTrackGroup(artist.id, {
+      const release2 = await createTrackGroup(profile.id, {
         title: "Album 2",
         urlSlug: "album-2",
       });
@@ -461,15 +461,15 @@ describe("Stripe Webhooks - Failed Payments", () => {
         "Receipt should go to subscriber"
       );
 
-      const artistNotificationCall = sendMailStub.getCall(1).args[1];
+      const profileNotificationCall = sendMailStub.getCall(1).args[1];
       assert.equal(
-        artistNotificationCall.template,
+        profileNotificationCall.template,
         "artist-new-subscriber-announce",
         "Second email should be artist notification"
       );
       assert.equal(
-        artistNotificationCall.message.to,
-        artistUser.email,
+        profileNotificationCall.message.to,
+        profileOwner.email,
         "Artist notification should go to artist"
       );
 
@@ -481,7 +481,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
 
@@ -493,10 +493,10 @@ describe("Stripe Webhooks - Failed Payments", () => {
       sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
         current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30 days from now
       } as any);
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       // Create subscription tier WITHOUT releases using utility function
-      const tier = await createTier(artist.id, {
+      const tier = await createTier(profile.id, {
         name: "Basic Tier",
       });
 
@@ -575,9 +575,9 @@ describe("Stripe Webhooks - Failed Payments", () => {
         "First email should be subscription receipt"
       );
 
-      const artistNotificationCall = sendMailStub.getCall(1).args[1];
+      const profileNotificationCall = sendMailStub.getCall(1).args[1];
       assert.equal(
-        artistNotificationCall.template,
+        profileNotificationCall.template,
         "artist-new-subscriber-announce",
         "Second email should be artist notification"
       );
@@ -588,14 +588,14 @@ describe("Stripe Webhooks - Failed Payments", () => {
 
   describe("customer.subscription.deleted webhook", () => {
     it("sets deletedAt and preserves the cancellation reason when a cancelled subscription's period ends", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
       const { user: subscriber } = await createUser({
         email: "subscriber@subscriber.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { name: "Premium" });
+      const profile = await createProfile(profileOwner.id);
+      const tier = await createTier(profile.id, { name: "Premium" });
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
@@ -627,14 +627,14 @@ describe("Stripe Webhooks - Failed Payments", () => {
     });
 
     it("records PAYMENT_FAILURE when Stripe ends the subscription after exhausting retries", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
       const { user: subscriber } = await createUser({
         email: "subscriber@subscriber.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { name: "Premium" });
+      const profile = await createProfile(profileOwner.id);
+      const tier = await createTier(profile.id, { name: "Premium" });
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
@@ -659,14 +659,14 @@ describe("Stripe Webhooks - Failed Payments", () => {
     });
 
     it("does not touch an already-deleted subscription", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@artist.com",
       });
       const { user: subscriber } = await createUser({
         email: "subscriber@subscriber.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { name: "Premium" });
+      const profile = await createProfile(profileOwner.id);
+      const tier = await createTier(profile.id, { name: "Premium" });
 
       const alreadyDeletedAt = new Date("2020-01-01T00:00:00.000Z");
       const subscription = await prisma.profileUserSubscription.create({
@@ -713,12 +713,12 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const { user } = await createUser({
         email: "webhook@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const tier = await prisma.profileSubscriptionTier.create({
         data: {
           name: "Basic",
           minAmount: 500,
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
 
@@ -873,8 +873,8 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const { user } = await createUser({
         email: "pledger@test.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
@@ -978,8 +978,8 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const { user } = await createUser({
         email: "pledger@test.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const fundraiser = await prisma.fundraiser.create({
         data: {

@@ -15,7 +15,7 @@ export default function () {
     const user = req.user;
     const { take, skip } = req.query;
     try {
-      const artistVisibility: Prisma.PostWhereInput = {
+      const profileVisibility: Prisma.PostWhereInput = {
         OR: [
           { profileId: null },
           { profile: { enabled: true, deletedAt: null } },
@@ -26,14 +26,14 @@ export default function () {
         publishedAt: { lte: new Date() },
         isPublic: true,
         isDraft: false,
-        ...artistVisibility,
+        ...profileVisibility,
       };
       if (user) {
         where = {
           publishedAt: { lte: new Date() },
           isDraft: false,
           AND: [
-            artistVisibility,
+            profileVisibility,
             {
               OR: [
                 {

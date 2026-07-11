@@ -126,11 +126,11 @@ export const createUser = async (data: Prisma.UserCreateArgs["data"]) => {
   };
 };
 
-export const createArtist = async (
+export const createProfile = async (
   userId: number,
   data?: Partial<Prisma.ProfileCreateArgs["data"]>
 ) => {
-  const artist = await prisma.profile.create({
+  const profile = await prisma.profile.create({
     data: {
       name: data?.name ?? "Test artist",
       urlSlug: data?.urlSlug || (data?.name ? slug(data?.name) : "test-artist"),
@@ -149,7 +149,7 @@ export const createArtist = async (
       subscriptionTiers: true,
     },
   });
-  return artist;
+  return profile;
 };
 
 export const createArtistLabel = async (data: {
@@ -473,13 +473,13 @@ export const createNotification = async (data: {
   notificationType: string;
   trackGroupId?: number;
   relatedUserId?: number;
-  artistId: number;
+  profileId: number;
 }) => {
-  const { artistId, ...rest } = data;
+  const { profileId, ...rest } = data;
   return prisma.notification.create({
     data: {
       ...rest,
-      profileId: artistId,
+      profileId: profileId,
     } as Prisma.NotificationCreateArgs["data"],
   });
 };
@@ -532,7 +532,7 @@ export const seedTrackAudio = async (trackId: number, extension = "wav") => {
 };
 
 export default {
-  createArtist,
+  createProfile,
   createArtistLabel,
   createPost,
   createTier,

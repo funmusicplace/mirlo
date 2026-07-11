@@ -6,7 +6,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -35,8 +35,8 @@ describe("playable", () => {
 
     it("should return id of a playable track", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tg = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
         title: "most recent",
       });
 
@@ -57,8 +57,8 @@ describe("playable", () => {
 
     it("should return id of a playable track if owned artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tg = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
         title: "most recent",
       });
 
@@ -80,8 +80,8 @@ describe("playable", () => {
 
     it("should not return id of a non-preview track if not purchased by user", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tg = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
         title: "most recent",
       });
 
@@ -106,8 +106,8 @@ describe("playable", () => {
 
     it("should return id of a non-preview track if trackgroup purchased by user", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tg = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
         title: "most recent",
       });
 
@@ -140,8 +140,8 @@ describe("playable", () => {
 
     it("should return id of a non-preview track if track purchased by user", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tg = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
         title: "most recent",
       });
 
@@ -174,8 +174,8 @@ describe("playable", () => {
 
     it("should only return id of a non-preview track if track purchased by user", async () => {
       const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      const tg = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
         title: "most recent",
       });
 

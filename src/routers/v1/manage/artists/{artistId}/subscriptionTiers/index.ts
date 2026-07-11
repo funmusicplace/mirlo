@@ -3,13 +3,13 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  profileBelongsToLoggedInUser,
+  canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import {
   addSizesToImage,
-  getPlatformFeeForArtist,
+  getPlatformFeeForProfile,
 } from "../../../../../../utils/artist";
 import { finalImageBucket } from "../../../../../../utils/minio";
 
@@ -22,26 +22,26 @@ export default function () {
   const operations = {
     GET: [
       userAuthenticated,
-      canUserCreateArtists,
-      artistBelongsToLoggedInUser,
+      canUserCreateProfiles,
+      profileBelongsToLoggedInUser,
       GET,
     ],
     POST: [
       userAuthenticated,
-      canUserCreateArtists,
-      artistBelongsToLoggedInUser,
+      canUserCreateProfiles,
+      profileBelongsToLoggedInUser,
       POST,
     ],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
     const { includeDefault } = req.query as { includeDefault?: boolean };
 
     try {
       const subscriptions = await prisma.profileSubscriptionTier.findMany({
         where: {
-          profileId: Number(artistId),
+          profileId: Number(profileId),
           ...(includeDefault ? {} : { isDefaultTier: false }),
         },
         orderBy: {
@@ -79,7 +79,7 @@ export default function () {
   }
 
   async function POST(req: Request, res: Response) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const user = req.user;
 
@@ -101,14 +101,14 @@ export default function () {
       const subscription = await prisma.profileSubscriptionTier.create({
         data: {
           name,
-          profileId: Number(artistId),
+          profileId: Number(profileId),
           description,
           minAmount,
           collectAddress,
           maxAmount,
           interval,
           autoPurchaseAlbums,
-          platformPercent: await getPlatformFeeForArtist(artistId),
+          platformPercent: await getPlatformFeeForProfile(profileId),
           allowVariable,
           defaultAmount,
           digitalDiscountPercent,

@@ -4,7 +4,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -45,8 +45,8 @@ describe("tracks/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const response = await requestApp
         .get(`tracks/${trackGroup.id}/download`)
         .set("Accept", "application/json");
@@ -76,8 +76,8 @@ describe("tracks/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id);
 
       await createBucketIfNotExists(finalAudioBucket);
@@ -115,8 +115,8 @@ describe("tracks/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id);
       await createBucketIfNotExists(trackFormatBucket);
       const passthrough = await generateMockArchive();
@@ -152,8 +152,8 @@ describe("tracks/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id);
 
       await createBucketIfNotExists(finalAudioBucket);
@@ -187,8 +187,8 @@ describe("tracks/{id}/download", () => {
 
     it("should GET / success for isPreview track when user has purchased the album", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         tracks: [],
       });
@@ -214,8 +214,8 @@ describe("tracks/{id}/download", () => {
 
     it("should GET / 404 for non-preview track when user only has album purchase", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         tracks: [],
       });
@@ -238,8 +238,8 @@ describe("tracks/{id}/download", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
       });
       const track = await createTrack(trackGroup.id);

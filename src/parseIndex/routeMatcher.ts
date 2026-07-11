@@ -35,7 +35,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       isFinite(Number(segments[4]))
         ? {
             type: "track",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             albumSlug: segments[2],
             trackId: Number(segments[4]),
           }
@@ -45,7 +45,7 @@ const routePatterns: Array<RoutePattern<any>> = [
   {
     pattern: (segments) =>
       segments.length === 3 && segments[1] === "release"
-        ? { type: "album", artistSlug: segments[0], albumSlug: segments[2] }
+        ? { type: "album", profileSlug: segments[0], albumSlug: segments[2] }
         : null,
   },
   // /artistSlug/posts/postId (by ID)
@@ -56,7 +56,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       isFinite(Number(segments[2]))
         ? {
             type: "post",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             postId: Number(segments[2]),
           }
         : null,
@@ -67,7 +67,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       segments.length === 3 && segments[1] === "posts"
         ? {
             type: "post",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             postSlug: segments[2],
           }
         : null,
@@ -76,7 +76,7 @@ const routePatterns: Array<RoutePattern<any>> = [
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "posts"
-        ? { type: "posts-index", artistSlug: segments[0] }
+        ? { type: "posts-index", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug/merch/merchId (by UUID or slug)
@@ -85,7 +85,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       segments.length === 3 && segments[1] === "merch"
         ? {
             type: "merch",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             merchId: segments[2],
           }
         : null,
@@ -94,28 +94,28 @@ const routePatterns: Array<RoutePattern<any>> = [
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "merch"
-        ? { type: "merch-index", artistSlug: segments[0] }
+        ? { type: "merch-index", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug/support
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "support"
-        ? { type: "support", artistSlug: segments[0] }
+        ? { type: "support", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug/releases
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "releases"
-        ? { type: "artist-releases", artistSlug: segments[0] }
+        ? { type: "artist-releases", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug - artist profile
   {
     pattern: (segments) =>
       segments.length === 1
-        ? { type: "artist", artistSlug: segments[0] }
+        ? { type: "artist", profileSlug: segments[0] }
         : null,
   },
   // /widget/track/:id

@@ -99,7 +99,7 @@ export const manageSubscriptionReceipt = async ({
     });
   if (profileUserSubscription) {
     const tier = profileUserSubscription.profileSubscriptionTier;
-    const artistProfile =
+    const profileForEmail =
       tier.profile ??
       (await prisma.profile.findFirstOrThrow({
         where: { id: tier.profileId },
@@ -162,7 +162,7 @@ export const manageSubscriptionReceipt = async ({
         locals: {
           isNewSubscription,
           interval: tier.interval,
-          artist: artistProfile,
+          artist: profileForEmail,
           profileUserSubscription,
           host: process.env.API_DOMAIN,
           client: client.applicationUrl,
@@ -174,13 +174,13 @@ export const manageSubscriptionReceipt = async ({
       // combining subscription emails into the monthly income report; new
       // subscribers are always announced.
       const payee = resolvePayee({
-        artist: artistProfile,
+        profile: profileForEmail,
       });
 
-      const shouldNotifyArtist =
+      const shouldNotifyProfile =
         isNewSubscription || !payee.combineSubscriptionEmails;
 
-      if (shouldNotifyArtist) {
+      if (shouldNotifyProfile) {
         await sendMailQueue.add("send-mail", {
           template: "artist-new-subscriber-announce",
           message: {
@@ -190,7 +190,7 @@ export const manageSubscriptionReceipt = async ({
           locals: {
             isNewSubscription,
             interval: tier.interval,
-            artist: artistProfile,
+            artist: profileForEmail,
             profileUserSubscription: {
               id: profileUserSubscription.id,
               amount: profileUserSubscription.amount,
@@ -223,10 +223,10 @@ export const manageSubscriptionReceipt = async ({
           to: profileUserSubscription.user.email,
         },
         locals: {
-          artist: artistProfile,
+          artist: profileForEmail,
           email: encodeURIComponent(profileUserSubscription.user.email),
           host: process.env.API_DOMAIN,
-          cardChargeContext: `your subscription to "${artistProfile.name}'s ${tier.name}" tier`,
+          cardChargeContext: `your subscription to "${profileForEmail.name}'s ${tier.name}" tier`,
           currency: transaction.currency,
           pledgedAmountFormatted: profileUserSubscription.amount / 100,
           client: client.applicationUrl,

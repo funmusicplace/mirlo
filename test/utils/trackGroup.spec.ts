@@ -8,7 +8,7 @@ import {
 } from "../../src/utils/trackGroup";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../utils";
@@ -24,8 +24,8 @@ describe("findTrackGroupIdForSlug", () => {
 
   it("should find a trackgroup by id", async () => {
     const { user } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id, {
       urlSlug: "test-slug",
     });
 
@@ -36,14 +36,14 @@ describe("findTrackGroupIdForSlug", () => {
 
   it("should find a trackgroup by slug", async () => {
     const { user } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id, {
       urlSlug: "test-slug",
     });
 
     const id = await findTrackGroupIdForSlug(
       trackGroup.urlSlug,
-      `${artist.id}`
+      `${profile.id}`
     );
 
     assert.equal(id, trackGroup.id);
@@ -51,8 +51,8 @@ describe("findTrackGroupIdForSlug", () => {
 
   it("should complain about missing profileId", async () => {
     const { user } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id, {
       urlSlug: "test-slug",
     });
     let id;
@@ -69,13 +69,13 @@ describe("findTrackGroupIdForSlug", () => {
 
   it("should handle a urlSlug that is a number if an profileId is defined", async () => {
     const { user } = await createUser({ email: "test@test.com" });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id, {
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id, {
       urlSlug: "2121",
     });
     const id = await findTrackGroupIdForSlug(
       trackGroup.urlSlug,
-      `${artist.id}`
+      `${profile.id}`
     );
 
     assert.equal(id, trackGroup.id);
@@ -91,19 +91,19 @@ describe("finalizeTrackGroupPublication", () => {
     }
   });
 
-  const setupArtistWithFollower = async () => {
-    const { user: artistUser } = await createUser({
+  const setupProfileWithFollower = async () => {
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
     const { user: followerUser } = await createUser({
       email: "follower@follower.com",
       emailConfirmationToken: null,
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
         subscriptionTiers: { create: { name: "a tier" } },
       },
@@ -112,16 +112,16 @@ describe("finalizeTrackGroupPublication", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: profile.subscriptionTiers[0].id,
         amount: 5,
       },
     });
-    return { artist, followerUser };
+    return { profile, followerUser };
   };
 
   it("sets publishedAt and backfills releaseDate to publishedAt when releaseDate is null (publish-now path)", async () => {
-    const { artist } = await setupArtistWithFollower();
-    const tg = await createTrackGroup(artist.id, {
+    const { profile } = await setupProfileWithFollower();
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: null,
       releaseDate: null,
       isPublic: true,
@@ -135,9 +135,9 @@ describe("finalizeTrackGroupPublication", () => {
   });
 
   it("preserves an existing releaseDate when set", async () => {
-    const { artist } = await setupArtistWithFollower();
+    const { profile } = await setupProfileWithFollower();
     const releaseDate = new Date("2020-06-01");
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: null,
       releaseDate,
       isPublic: true,
@@ -151,8 +151,8 @@ describe("finalizeTrackGroupPublication", () => {
   });
 
   it("notifies followers exactly once even when called twice", async () => {
-    const { artist, followerUser } = await setupArtistWithFollower();
-    const tg = await createTrackGroup(artist.id, {
+    const { profile, followerUser } = await setupProfileWithFollower();
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: null,
       isPublic: true,
     });
@@ -171,8 +171,8 @@ describe("finalizeTrackGroupPublication", () => {
   });
 
   it("does not notify followers when the trackgroup is private", async () => {
-    const { artist, followerUser } = await setupArtistWithFollower();
-    const tg = await createTrackGroup(artist.id, {
+    const { profile, followerUser } = await setupProfileWithFollower();
+    const tg = await createTrackGroup(profile.id, {
       publishedAt: null,
       isPublic: false,
     });
@@ -186,9 +186,9 @@ describe("finalizeTrackGroupPublication", () => {
   });
 
   it("skips the prisma write when publishedAt and releaseDate are already correct", async () => {
-    const { artist } = await setupArtistWithFollower();
+    const { profile } = await setupProfileWithFollower();
     const publishedAt = new Date(Date.now() - 60 * 1000);
-    const tg = await createTrackGroup(artist.id, {
+    const tg = await createTrackGroup(profile.id, {
       publishedAt,
       releaseDate: publishedAt,
       isPublic: false,

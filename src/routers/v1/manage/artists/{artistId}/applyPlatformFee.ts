@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
@@ -12,26 +12,26 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    POST: [userAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
 
     try {
-      const artist = await prisma.profile.findFirst({
-        where: { id: Number(artistId) },
+      const profile = await prisma.profile.findFirst({
+        where: { id: Number(profileId) },
         select: { id: true, defaultPlatformFee: true },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({
           httpCode: 404,
           description: "Artist not found",
         });
       }
 
-      const platformPercent = artist.defaultPlatformFee;
+      const platformPercent = profile.defaultPlatformFee;
 
       if (platformPercent == null) {
         throw new AppError({
@@ -44,19 +44,19 @@ export default function () {
       const [trackGroups, merch, subscriptionTiers, tipTiers] =
         await prisma.$transaction([
           prisma.trackGroup.updateMany({
-            where: { profileId: artist.id },
+            where: { profileId: profile.id },
             data: { platformPercent },
           }),
           prisma.merch.updateMany({
-            where: { profileId: artist.id },
+            where: { profileId: profile.id },
             data: { platformPercent },
           }),
           prisma.profileSubscriptionTier.updateMany({
-            where: { profileId: artist.id },
+            where: { profileId: profile.id },
             data: { platformPercent },
           }),
           prisma.profileTipTier.updateMany({
-            where: { profileId: artist.id },
+            where: { profileId: profile.id },
             data: { platformPercent },
           }),
         ]);

@@ -7,7 +7,7 @@ import {
   merchBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { whereForAllArtistsThisLabelCanEdit } from "../../../../../utils/artist";
+import { whereForAllProfilesThisLabelCanEdit } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
@@ -95,7 +95,7 @@ export default function () {
             OR: [
               { profileId: merch?.profileId },
               { paymentToUserId: user.id },
-              { profile: whereForAllArtistsThisLabelCanEdit(user.id) },
+              { profile: whereForAllProfilesThisLabelCanEdit(user.id) },
             ],
           },
         });

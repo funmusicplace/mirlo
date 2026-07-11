@@ -15,7 +15,7 @@ import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 
-import { subscribeUserToArtist } from "./artist";
+import { subscribeUserToProfile } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { getClient } from "./getClient";
 import { resolvePayee } from "./payments/payee";
@@ -305,8 +305,7 @@ export const handleTrackGroupPurchase = async (
         },
       });
 
-      const payee = resolvePayee({
-        artist: trackGroup.profile,
+      const payee = resolvePayee({ profile: trackGroup.profile,
         releasePaymentToUser: trackGroup.paymentToUser,
       });
 
@@ -349,23 +348,23 @@ export const handleTrackGroupPurchase = async (
 
 export const handleCataloguePurchase = async (
   userId: number,
-  artistId: number,
+  profileId: number,
   session?: Stripe.Checkout.Session
 ) => {
   try {
     const { applicationUrl } = await getClient();
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: {
-        id: artistId,
+        id: profileId,
       },
       include: {
         user: true,
       },
     });
-    const artistTrackGroups = await prisma.trackGroup.findMany({
+    const profileTrackGroups = await prisma.trackGroup.findMany({
       where: {
-        profileId: artistId,
-        OR: [{ paymentToUserId: null }, { paymentToUserId: artist?.userId }],
+        profileId: profileId,
+        OR: [{ paymentToUserId: null }, { paymentToUserId: profile?.userId }],
         releaseDate: {
           lte: new Date(),
         },
@@ -380,12 +379,12 @@ export const handleCataloguePurchase = async (
     });
 
     const amountPaidPerTrackGroup =
-      (session?.amount_total ?? 0) / artistTrackGroups.length;
+      (session?.amount_total ?? 0) / profileTrackGroups.length;
 
     const { applicationFee, paymentProcessorFee } =
       await getApplicationFee(session);
     const appFeePerTrackGroup =
-      (applicationFee ?? 0) / artistTrackGroups.length;
+      (applicationFee ?? 0) / profileTrackGroups.length;
 
     const pricePaid = session?.amount_total ?? 0;
     const currencyPaid = session?.currency ?? "usd";
@@ -406,7 +405,7 @@ export const handleCataloguePurchase = async (
     });
 
     await Promise.all(
-      artistTrackGroups.map(async (trackGroup) => {
+      profileTrackGroups.map(async (trackGroup) => {
         await registerPurchase({
           userId: Number(userId),
           trackGroupId: Number(trackGroup.id),
@@ -426,7 +425,7 @@ export const handleCataloguePurchase = async (
       },
     });
 
-    if (user && artist && artistTrackGroups.length > 0) {
+    if (user && profile && profileTrackGroups.length > 0) {
       await sendMail({
         data: {
           template: "catalogue-receipt",
@@ -434,8 +433,8 @@ export const handleCataloguePurchase = async (
             to: user.email,
           },
           locals: {
-            artist,
-            trackGroups: artistTrackGroups,
+            profile,
+            trackGroups: profileTrackGroups,
             email: user.email,
             client: applicationUrl,
             host: process.env.API_DOMAIN,
@@ -448,10 +447,10 @@ export const handleCataloguePurchase = async (
         data: {
           template: "catalogue-purchase-artist-notification",
           message: {
-            to: artist.user.email,
+            to: profile.user.email,
           },
           locals: {
-            artist,
+            artist: profile,
             pricePaid,
             currencyPaid: session?.currency ?? "usd",
             platformCut:
@@ -463,7 +462,7 @@ export const handleCataloguePurchase = async (
     }
   } catch (e) {
     logger.error(
-      `Error creating catalogue purchase for profileId ${artistId}, userId ${userId}, session ${session?.id}:`,
+      `Error creating catalogue purchase for profileId ${profileId}, userId ${userId}, session ${session?.id}:`,
       e
     );
   }
@@ -729,9 +728,9 @@ export const sendSaleEmails = async (
   }
 };
 
-export const handleArtistGift = async (
+export const handleProfileGift = async (
   userId: number,
-  artistId: number,
+  profileId: number,
   session?: Stripe.Checkout.Session
 ) => {
   try {
@@ -753,7 +752,7 @@ export const handleArtistGift = async (
     const createdTip = await prisma.userProfileTip.create({
       data: {
         userId,
-        profileId: artistId,
+        profileId,
         message: session?.metadata?.message ?? null,
         transactionId: transaction.id,
       },
@@ -775,7 +774,7 @@ export const handleArtistGift = async (
     });
 
     if (tip) {
-      subscribeUserToArtist(tip.profile, user);
+      subscribeUserToProfile(tip.profile, user);
     }
 
     if (user && tip) {
@@ -789,7 +788,7 @@ export const handleArtistGift = async (
   }
 };
 
-export const handleArtistMerchPurchase = async (
+export const handleProfileMerchPurchase = async (
   userId: number,
   session: Stripe.Checkout.Session,
   stripeAccount: string
@@ -863,7 +862,7 @@ export const handleArtistMerchPurchase = async (
               );
 
               logger.info(
-                `handleArtistMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}, options: ${options.map((o) => o.id).join(", ")}`
+                `handleProfileMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}, options: ${options.map((o) => o.id).join(", ")}`
               );
 
               const { applicationFee, paymentProcessorFee } =

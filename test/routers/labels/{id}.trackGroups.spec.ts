@@ -7,7 +7,7 @@ import prisma from "@mirlo/prisma";
 import request from "supertest";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -29,20 +29,20 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "label@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "My Record Label",
       isLabelProfile: true,
     });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@example.com",
     });
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Featured Artist",
     });
 
     // Create album with label as payment recipient (should appear)
-    const labelOwnedAlbum = await createTrackGroup(artist.id, {
+    const labelOwnedAlbum = await createTrackGroup(profile.id, {
       title: "Label Released Album",
       publishedAt: new Date(),
     });
@@ -52,7 +52,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
     });
 
     // Create album without label payment (should NOT appear)
-    const artistOwnedAlbum = await createTrackGroup(artist.id, {
+    const profileOwnedAlbum = await createTrackGroup(profile.id, {
       title: "Artist Original Album",
       publishedAt: new Date(),
       urlSlug: "artist-original-album",
@@ -81,13 +81,13 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "label2@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Label as Artist",
       isLabelProfile: true,
     });
 
     // Create album directly by the label artist
-    const labelArtistAlbum = await createTrackGroup(label.id, {
+    const labelProfileAlbum = await createTrackGroup(label.id, {
       title: "Label's Own Release",
       publishedAt: new Date(),
     });
@@ -110,15 +110,15 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "label3@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Managing Label",
       isLabelProfile: true,
     });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist2@example.com",
     });
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Managed Artist",
     });
 
@@ -126,7 +126,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
     await prisma.artistLabel.create({
       data: {
         labelUserId: labelUser.id,
-        artistId: artist.id,
+        artistId: profile.id,
         canLabelManageArtist: true,
         canLabelAddReleases: true,
         isLabelApproved: true,
@@ -135,13 +135,13 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
     });
 
     // Artist creates their own album
-    const artistAlbum = await createTrackGroup(artist.id, {
+    const profileAlbum = await createTrackGroup(profile.id, {
       title: "Artist Personal Album",
       publishedAt: new Date(),
     });
 
     // Label creates an album for the artist
-    const labelCreatedAlbum = await createTrackGroup(artist.id, {
+    const labelCreatedAlbum = await createTrackGroup(profile.id, {
       title: "Label Created Album",
       publishedAt: new Date(),
       urlSlug: "label-created-album",
@@ -174,20 +174,20 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "label4@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Draft Label",
       isLabelProfile: true,
     });
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist3@example.com",
     });
-    const artist = await createArtist(artistUser.id, {
+    const profile = await createProfile(profileOwner.id, {
       name: "Draft Artist",
     });
 
     // Create unpublished album
-    const unpublishedAlbum = await createTrackGroup(artist.id, {
+    const unpublishedAlbum = await createTrackGroup(profile.id, {
       title: "Unpublished Album",
       publishedAt: null,
     });
@@ -197,7 +197,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
     });
 
     // Create published album
-    const publishedAlbum = await createTrackGroup(artist.id, {
+    const publishedAlbum = await createTrackGroup(profile.id, {
       title: "Published Album",
       publishedAt: new Date(),
       urlSlug: "published-album",
@@ -225,27 +225,27 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       email: "label5@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Filtering Label",
       isLabelProfile: true,
     });
 
-    const { user: artistUser1 } = await createUser({
+    const { user: profileUser1 } = await createUser({
       email: "artist4@example.com",
     });
-    const artist1 = await createArtist(artistUser1.id, {
+    const profile1 = await createProfile(profileUser1.id, {
       name: "First Artist",
     });
 
-    const { user: artistUser2 } = await createUser({
+    const { user: profileUser2 } = await createUser({
       email: "artist5@example.com",
     });
-    const artist2 = await createArtist(artistUser2.id, {
+    const profile2 = await createProfile(profileUser2.id, {
       name: "Second Artist",
     });
 
     // Create albums for both artists
-    const album1 = await createTrackGroup(artist1.id, {
+    const album1 = await createTrackGroup(profile1.id, {
       title: "First Artist Album",
       publishedAt: new Date(),
     });
@@ -254,7 +254,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
       data: { paymentToUserId: labelUser.id },
     });
 
-    const album2 = await createTrackGroup(artist2.id, {
+    const album2 = await createTrackGroup(profile2.id, {
       title: "Second Artist Album",
       publishedAt: new Date(),
       urlSlug: "second-artist-album",
@@ -274,7 +274,7 @@ describe("GET /v1/labels/{id}/trackGroups", () => {
     // Get albums excluding first artist
     const filteredResponse = await requestApp
       .get(`labels/${label.urlSlug}/trackGroups`)
-      .query({ excludeArtistId: artist1.id })
+      .query({ excludeArtistId: profile1.id })
       .set("Accept", "application/json");
 
     assert.equal(filteredResponse.body.results.length, 1);

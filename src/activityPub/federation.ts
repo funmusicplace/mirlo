@@ -33,8 +33,8 @@ import {
   root,
 } from "../activityPub/utils";
 import logger from "../logger";
-import { buildFeedForArtist } from "../routers/v1/artists/{id}/feed";
-import { findArtistIdForURLSlug } from "../utils/artist";
+import { buildFeedForProfile } from "../routers/v1/artists/{id}/feed";
+import { findProfileIdForURLSlug } from "../utils/artist";
 import { getClient } from "../utils/getClient";
 import { generateFullStaticImageUrl } from "../utils/images";
 import {
@@ -43,25 +43,24 @@ import {
 } from "../utils/minio";
 import { isPost, isTrackGroup } from "../utils/typeguards";
 
-export async function ensureArtistHasApKeys(urlSlug: string) {
-  const artist = await prisma.profile.findFirst({ where: { urlSlug } });
-  if (!artist) throw new Error(`Artist not found: ${urlSlug}`);
+async function ensureProfileHasApKeys(urlSlug: string) {
+  const profile = await prisma.profile.findFirst({ where: { urlSlug } });
+  if (!profile) throw new Error(`Artist not found: ${urlSlug}`);
 
-  if (!artist.apPublicKey || !artist.apPrivateKey) {
+  if (!profile.apPublicKey || !profile.apPrivateKey) {
     const { publicKey, privateKey } =
       await generateCryptoKeyPair("RSASSA-PKCS1-v1_5");
     const publicJwk = JSON.stringify(await exportJwk(publicKey));
     const privateJwk = JSON.stringify(await exportJwk(privateKey));
 
     await prisma.profile.update({
-      where: { id: artist.id },
+      where: { id: profile.id },
       data: { apPublicKey: publicJwk, apPrivateKey: privateJwk },
     });
 
-    return { ...artist, apPublicKey: publicJwk, apPrivateKey: privateJwk };
+    return { ...profile, apPublicKey: publicJwk, apPrivateKey: privateJwk };
   }
-
-  return artist;
+  return profile;
 }
 
 export const federation = createFederation<void>({
@@ -74,22 +73,22 @@ federation
   .setActorDispatcher(
     "/v1/ap/artists/{identifier}",
     async (ctx, identifier) => {
-      const parsedId = await findArtistIdForURLSlug(identifier);
+      const parsedId = await findProfileIdForURLSlug(identifier);
       if (!parsedId) return null;
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: { id: parsedId, enabled: true, activityPub: true },
         include: { avatar: true, background: true },
       });
 
-      if (!artist) return null;
+      if (!profile) return null;
 
       const client = await getClient();
-      const artistWithKeys = await ensureArtistHasApKeys(identifier);
+      const profileWithKeys = await ensureProfileHasApKeys(identifier);
       let publicKeyObj: CryptographicKey | undefined;
-      if (artistWithKeys.apPublicKey) {
+      if (profileWithKeys.apPublicKey) {
         const pubKey = await importJwk(
-          JSON.parse(artistWithKeys.apPublicKey),
+          JSON.parse(profileWithKeys.apPublicKey),
           "public"
         );
         const actorUri = ctx.getActorUri(identifier);
@@ -103,31 +102,31 @@ federation
       return new Person({
         id: ctx.getActorUri(identifier),
         preferredUsername: identifier,
-        name: artist.name,
-        summary: artist.bio ?? undefined,
+        name: profile.name,
+        summary: profile.bio ?? undefined,
         discoverable: true,
         inbox: ctx.getInboxUri(identifier),
         outbox: ctx.getOutboxUri(identifier),
         followers: ctx.getFollowersUri(identifier),
         url: new URL(`${client.applicationUrl}/${identifier}`),
         publicKey: publicKeyObj,
-        icon: artist.avatar
+        icon: profile.avatar
           ? new Image({
               mediaType: "image/webp",
               url: new URL(
                 generateFullStaticImageUrl(
-                  artist.avatar.url[0],
+                  profile.avatar.url[0],
                   finalArtistAvatarBucket
                 )
               ),
             })
           : undefined,
-        image: artist.background
+        image: profile.background
           ? new Image({
               mediaType: "image/webp",
               url: new URL(
                 generateFullStaticImageUrl(
-                  artist.background.url[0],
+                  profile.background.url[0],
                   finalArtistBackgroundBucket
                 )
               ),
@@ -137,22 +136,22 @@ federation
     }
   )
   .setKeyPairsDispatcher(async (_ctx, identifier) => {
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return [];
 
-    let artist;
+    let profile;
     try {
-      artist = await ensureArtistHasApKeys(identifier);
+      profile = await ensureProfileHasApKeys(identifier);
     } catch (e) {
-      logger.warn(`ensureArtistHasApKeys failed for ${identifier}: ${e}`);
+      logger.warn(`ensureProfileHasApKeys failed for ${identifier}: ${e}`);
       return [];
     }
 
-    if (!artist.apPublicKey || !artist.apPrivateKey) return [];
+    if (!profile.apPublicKey || !profile.apPrivateKey) return [];
 
-    const publicKey = await importJwk(JSON.parse(artist.apPublicKey), "public");
+    const publicKey = await importJwk(JSON.parse(profile.apPublicKey), "public");
     const privateKey = await importJwk(
-      JSON.parse(artist.apPrivateKey),
+      JSON.parse(profile.apPrivateKey),
       "private"
     );
 
@@ -163,17 +162,17 @@ federation
   .setOutboxDispatcher(
     "/v1/ap/artists/{identifier}/outbox",
     async (ctx, identifier) => {
-      const parsedId = await findArtistIdForURLSlug(identifier);
+      const parsedId = await findProfileIdForURLSlug(identifier);
       if (!parsedId) return null;
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: { id: parsedId, activityPub: true },
         include: {
           subscriptionTiers: true,
         },
       });
-      if (!artist) return null;
-      const { results: zipped } = await buildFeedForArtist(undefined, artist);
+      if (!profile) return null;
+      const { results: zipped } = await buildFeedForProfile(undefined, profile);
       const client = await getClient();
       const followersUri = ctx.getFollowersUri(identifier);
       const creates = zipped.map((item) => {
@@ -217,16 +216,16 @@ federation
     }
   )
   .setCounter(async (_ctx, identifier) => {
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return 0n;
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: { id: parsedId, activityPub: true },
       include: {
         subscriptionTiers: true,
       },
     });
-    if (!artist) return 0n;
-    const { total } = await buildFeedForArtist(undefined, artist);
+    if (!profile) return 0n;
+    const { total } = await buildFeedForProfile(undefined, profile);
     return BigInt(total);
   });
 
@@ -270,7 +269,7 @@ federation.setObjectDispatcher(
   Article,
   "/v1/ap/artists/{identifier}/posts/{postId}",
   async (ctx, { identifier, postId }) => {
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return null;
 
     const post = await findAPPostById(Number(postId));
@@ -291,7 +290,7 @@ federation.setObjectDispatcher(
   Audio,
   "/v1/ap/artists/{identifier}/releases/{releaseId}",
   async (ctx, { identifier, releaseId }) => {
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return null;
 
     const trackGroup = await findAPReleaseById(Number(releaseId));
@@ -310,13 +309,13 @@ federation.setObjectDispatcher(
   Create,
   "/v1/ap/artists/{identifier}/activities/{activityId}",
   async (ctx, { identifier, activityId }) => {
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return null;
 
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: { id: parsedId, activityPub: true },
     });
-    if (!artist) return null;
+    if (!profile) return null;
 
     const dashIndex = activityId.indexOf("-");
     if (dashIndex === -1) return null;
@@ -360,13 +359,13 @@ federation
   .setFollowersDispatcher(
     "/v1/ap/artists/{identifier}/followers",
     async (_ctx, identifier) => {
-      const parsedId = await findArtistIdForURLSlug(identifier);
+      const parsedId = await findProfileIdForURLSlug(identifier);
       if (!parsedId) return null;
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: { id: parsedId, activityPub: true },
       });
-      if (!artist) return null;
+      if (!profile) return null;
 
       const followers = await prisma.activityPubProfileFollowers.findMany({
         where: { profileId: parsedId },
@@ -383,12 +382,12 @@ federation
     }
   )
   .setCounter(async (_ctx, identifier) => {
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return 0n;
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: { id: parsedId, activityPub: true },
     });
-    if (!artist) return 0n;
+    if (!profile) return 0n;
     const count = await prisma.activityPubProfileFollowers.count({
       where: { profileId: parsedId },
     });
@@ -401,24 +400,24 @@ federation
     const identifier = ctx.recipient;
     if (!identifier || !follow.actorId) return;
 
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return;
 
-    const artist = await prisma.profile.findFirst({ where: { id: parsedId } });
-    if (!artist) return;
+    const profile = await prisma.profile.findFirst({ where: { id: parsedId } });
+    if (!profile) return;
 
     const actorHref = follow.actorId.href;
 
     await prisma.activityPubProfileFollowers.upsert({
-      where: { actor_profileId: { profileId: artist.id, actor: actorHref } },
-      create: { profileId: artist.id, actor: actorHref, inboxUrl: null },
+      where: { actor_profileId: { profileId: profile.id, actor: actorHref } },
+      create: { profileId: profile.id, actor: actorHref, inboxUrl: null },
       update: {},
     });
 
     await prisma.notification.create({
       data: {
         notificationType: "AP_FOLLOW",
-        userId: artist.userId,
+        userId: profile.userId,
         metadata: { ap: { actor: actorHref } },
       },
     });
@@ -429,7 +428,7 @@ federation
         if (!followerActor?.inboxId) return;
 
         await prisma.activityPubProfileFollowers.updateMany({
-          where: { profileId: artist.id, actor: actorHref },
+          where: { profileId: profile.id, actor: actorHref },
           data: { inboxUrl: followerActor.inboxId.href },
         });
 
@@ -462,7 +461,7 @@ federation
     const object = await undo.getObject(ctx);
     if (!(object instanceof Follow)) return;
 
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId || !undo.actorId) return;
 
     await prisma.activityPubProfileFollowers.deleteMany({
@@ -475,7 +474,7 @@ federation
     const identifier = ctx.recipient;
     if (!identifier || !del.actorId) return;
 
-    const parsedId = await findArtistIdForURLSlug(identifier);
+    const parsedId = await findProfileIdForURLSlug(identifier);
     if (!parsedId) return;
 
     await prisma.activityPubProfileFollowers.deleteMany({

@@ -32,37 +32,37 @@ import {
   trackGroupPublishedObject,
   whereForPublishedTrackGroups,
 } from "./trackGroup";
-export { processSingleArtist } from "./serialize/artist";
+export { processSingleProfile } from "./serialize/artist";
 
 type Params = {
   id: string;
 };
 
-export const confirmArtistIdExists = async (
+export const confirmProfileIdExists = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { id: artistId } = req.params as unknown as Params;
+  const { id: profileId } = req.params as unknown as Params;
 
-  if (!artistId || Number.isNaN(artistId)) {
+  if (!profileId || Number.isNaN(profileId)) {
     const error = new AppError({
-      name: "Artist ID must be valid number",
+      name: "Profile ID must be valid number",
       httpCode: 400,
-      description: "Artist ID must be valid number",
+      description: "Profile ID must be valid number",
     });
     return next(error);
   }
   try {
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: {
-        id: Number(artistId),
+        id: Number(profileId),
       },
       select: {
         id: true,
       },
     });
-    if (!artist) {
+    if (!profile) {
       const error = new AppError({
         name: "Artist not found",
         httpCode: 404,
@@ -78,11 +78,11 @@ export const confirmArtistIdExists = async (
 
 export const checkIsUserSubscriber = async (
   user?: User,
-  artistId?: number | null
+  profileId?: number | null
 ) => {
   let userSubscriber = false;
 
-  if (!artistId) {
+  if (!profileId) {
     return true;
   }
 
@@ -91,7 +91,7 @@ export const checkIsUserSubscriber = async (
       where: {
         userId: user.id,
         profileSubscriptionTier: {
-          profileId: artistId,
+          profileId,
         },
       },
     });
@@ -101,27 +101,27 @@ export const checkIsUserSubscriber = async (
   return userSubscriber;
 };
 
-export const getPlatformFeeForArtist = async (
-  artistId: number | string | null
+export const getPlatformFeeForProfile = async (
+  profileId: number | string | null
 ): Promise<number> => {
   const settings = await getSiteSettings();
-  if (!artistId) {
+  if (!profileId) {
     return settings.platformPercent;
   }
 
-  const artist = await prisma.profile.findFirst({
+  const profile = await prisma.profile.findFirst({
     where: {
-      id: Number(artistId),
+      id: Number(profileId),
     },
     select: {
       defaultPlatformFee: true,
     },
   });
 
-  return artist?.defaultPlatformFee ?? settings.platformPercent;
+  return profile?.defaultPlatformFee ?? settings.platformPercent;
 };
 
-export const whereForAllArtistsThisLabelCanEdit = (
+export const whereForAllProfilesThisLabelCanEdit = (
   userId: number
 ): Prisma.ProfileWhereInput => ({
   OR: [
@@ -137,7 +137,7 @@ export const whereForAllArtistsThisLabelCanEdit = (
   ],
 });
 
-export const whereForAllArtistsThisLabelCanAddReleasesFor = (
+export const whereForAllProfilesThisLabelCanAddReleasesFor = (
   userId: number
 ): Prisma.ProfileWhereInput => ({
   OR: [
@@ -153,40 +153,40 @@ export const whereForAllArtistsThisLabelCanAddReleasesFor = (
   ],
 });
 
-export const artistDeleted: Prisma.ProfileWhereInput = {
+export const profileDeleted: Prisma.ProfileWhereInput = {
   deletedAt: { not: null },
 };
 
-export const federatedArtist: Prisma.ProfileWhereInput = {
+export const federatedProfile: Prisma.ProfileWhereInput = {
   federatedStreaming: true,
 };
 
-export const federatedArtistAtSomePoint: Prisma.ProfileWhereInput = {
+export const federatedProfileAtSomePoint: Prisma.ProfileWhereInput = {
   federatedStreamingOptInDate: { not: null },
 };
 
-export const artistNoLongerFederated: Prisma.ProfileWhereInput = {
-  AND: [federatedArtistAtSomePoint, { NOT: federatedArtist }],
+export const profileNoLongerFederated: Prisma.ProfileWhereInput = {
+  AND: [federatedProfileAtSomePoint, { NOT: federatedProfile }],
 };
 
-// Artists who opted in at some point but were deleted
-export const artistFederatedButDeleted: Prisma.ProfileWhereInput = {
-  AND: [federatedArtistAtSomePoint, artistDeleted],
+// Profiles who opted in at some point but were deleted
+export const profileFederatedButDeleted: Prisma.ProfileWhereInput = {
+  AND: [federatedProfileAtSomePoint, profileDeleted],
 };
 
-export const artistOptedOutOrDeleted: Prisma.ProfileWhereInput = {
-  OR: [artistNoLongerFederated, artistFederatedButDeleted],
+export const profileOptedOutOrDeleted: Prisma.ProfileWhereInput = {
+  OR: [profileNoLongerFederated, profileFederatedButDeleted],
   deletedAt: {}, // this is to avoid the middleware filtering out softDeleted -> /mirlo/prisma/prisma.ts
 };
 
-export const findArtistIdForURLSlug = async (id: string | number) => {
+export const findProfileIdForURLSlug = async (id: string | number) => {
   if (typeof id !== "number" && Number.isNaN(Number(id))) {
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: {
         urlSlug: { equals: id, mode: "insensitive" },
       },
     });
-    id = `${artist?.id ?? id}`;
+    id = `${profile?.id ?? id}`;
   }
   if (Number.isNaN(Number(id))) {
     return undefined;
@@ -194,9 +194,9 @@ export const findArtistIdForURLSlug = async (id: string | number) => {
   return Number(id);
 };
 
-export const createSubscriptionConfirmation = async (
+export const createProfileSubscriptionConfirmation = async (
   email: string,
-  artist: Profile,
+  profile: Profile,
   message?: string
 ) => {
   try {
@@ -205,7 +205,7 @@ export const createSubscriptionConfirmation = async (
         data: {
           message,
           email: email,
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
 
@@ -216,7 +216,7 @@ export const createSubscriptionConfirmation = async (
           to: email,
         },
         locals: {
-          artist,
+          artist: profile,
           email,
           token: subscriptionConfirmation.token,
           host: process.env.API_DOMAIN,
@@ -235,8 +235,8 @@ export const createSubscriptionConfirmation = async (
   }
 };
 
-export const subscribeUserToArtist = async (
-  artist: {
+export const subscribeUserToProfile = async (
+  profile: {
     user: User;
     userId: number;
     subscriptionTiers: ProfileSubscriptionTier[];
@@ -245,7 +245,7 @@ export const subscribeUserToArtist = async (
   user?: { id: number } | null,
   message?: string | null
 ) => {
-  let defaultTier = artist.subscriptionTiers.find(
+  let defaultTier = profile.subscriptionTiers.find(
     (tier) => tier.isDefaultTier
   );
 
@@ -256,7 +256,7 @@ export const subscribeUserToArtist = async (
         description: "follow an artist",
         minAmount: 0,
         isDefaultTier: true,
-        profileId: artist.id,
+        profileId: profile.id,
       },
     });
   }
@@ -267,7 +267,7 @@ export const subscribeUserToArtist = async (
         userId: user.id,
         message,
         profileSubscriptionTier: {
-          profileId: artist.id,
+          profileId: profile.id,
         },
       },
     });
@@ -292,8 +292,8 @@ export const subscribeUserToArtist = async (
     await prisma.notification.create({
       data: {
         notificationType: "USER_FOLLOWED_YOU",
-        userId: artist.userId,
-        profileId: artist.id,
+        userId: profile.userId,
+        profileId: profile.id,
         relatedUserId: user.id,
       },
     });
@@ -303,7 +303,7 @@ export const subscribeUserToArtist = async (
     where: {
       userId: user?.id,
       profileSubscriptionTier: {
-        profileId: artist.id,
+        profileId: profile.id,
       },
     },
   });
@@ -311,19 +311,19 @@ export const subscribeUserToArtist = async (
   return subscriptions;
 };
 
-export const deleteArtist = async (userId: number, artistId: number) => {
+export const deleteProfile = async (userId: number, profileId: number) => {
   await prisma.profile.update({
     where: {
-      id: artistId,
+      id: profileId,
       userId,
     },
     data: {
-      urlSlug: `deleted-${artistId}`,
+      urlSlug: `deleted-${profileId}`,
     },
   });
   await prisma.profile.deleteMany({
     where: {
-      id: artistId,
+      id: profileId,
       userId,
     },
   });
@@ -334,29 +334,29 @@ export const deleteArtist = async (userId: number, artistId: number) => {
   // https://github.com/funmusicplace/mirlo/issues/19
   await prisma.post.deleteMany({
     where: {
-      profileId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
   await deleteStripeSubscriptions({
-    profileSubscriptionTier: { profileId: Number(artistId) },
+    profileSubscriptionTier: { profileId: Number(profileId) },
   });
 
   await prisma.profileSubscriptionTier.deleteMany({
     where: {
-      profileId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
   await prisma.profileUserSubscription.deleteMany({
     where: {
-      profileSubscriptionTier: { profileId: Number(artistId) },
+      profileSubscriptionTier: { profileId: Number(profileId) },
     },
   });
 
   const merch = await prisma.merch.findMany({
     where: {
-      profileId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
@@ -364,7 +364,7 @@ export const deleteArtist = async (userId: number, artistId: number) => {
 
   const trackGroups = await prisma.trackGroup.findMany({
     where: {
-      profileId: Number(artistId),
+      profileId: Number(profileId),
     },
   });
 
@@ -372,22 +372,22 @@ export const deleteArtist = async (userId: number, artistId: number) => {
 
   await prisma.artistLabel.deleteMany({
     where: {
-      artistId: Number(artistId),
+      artistId: Number(profileId),
     },
   });
 };
 
-export const deleteArtistAvatar = async (artistId: number) => {
+export const deleteProfileAvatar = async (profileId: number) => {
   const avatar = await prisma.profileAvatar.findFirst({
     where: {
-      profileId: artistId,
+      profileId,
     },
   });
 
   if (avatar) {
     await prisma.profileAvatar.delete({
       where: {
-        profileId: artistId,
+        profileId,
       },
     });
 
@@ -421,17 +421,17 @@ export const deleteUserAvatar = async (userId: number) => {
   }
 };
 
-export const deleteArtistBackground = async (artistId: number) => {
+export const deleteProfileBackground = async (profileId: number) => {
   const background = await prisma.profileBackground.findFirst({
     where: {
-      profileId: artistId,
+      profileId,
     },
   });
 
   if (background) {
     await prisma.profileBackground.delete({
       where: {
-        profileId: artistId,
+        profileId,
       },
     });
 
@@ -455,7 +455,7 @@ export const deleteStripeSubscriptions = async (
   await Promise.all(
     stripeSubscriptions.map(async (sub) => {
       if (sub.stripeSubscriptionKey) {
-        const artistUser = await prisma.user.findFirst({
+        const profileOwner = await prisma.user.findFirst({
           where: {
             profiles: {
               some: {
@@ -465,9 +465,9 @@ export const deleteStripeSubscriptions = async (
           },
         });
         try {
-          if (artistUser?.stripeAccountId) {
+          if (profileOwner?.stripeAccountId) {
             await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
-              stripeAccount: artistUser?.stripeAccountId,
+              stripeAccount: profileOwner?.stripeAccountId,
             });
           } else {
             await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
@@ -486,9 +486,9 @@ export const deleteStripeSubscriptions = async (
 // For a paid subscription, `endsAt` is when access remains active until (the
 // end of the period they already paid for); for a free/follow tier it is null
 // and the cancellation is effective immediately.
-export const sendSubscriptionCancellationEmail = async (
+export const sendProfileSubscriptionCancellationEmail = async (
   email: string,
-  artist: Profile,
+  profile: Profile,
   endsAt: Date | null
 ) => {
   return sendMail({
@@ -498,7 +498,7 @@ export const sendSubscriptionCancellationEmail = async (
         to: email,
       },
       locals: {
-        artist,
+        artist: profile,
         email,
         endsAt: endsAt ? endsAt.toISOString() : null,
         host: process.env.API_DOMAIN,

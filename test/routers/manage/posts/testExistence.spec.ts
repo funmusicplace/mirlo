@@ -7,7 +7,7 @@ import request from "supertest";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createPost,
   createUser,
 } from "../../../utils";
@@ -29,12 +29,12 @@ describe("manage/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { urlSlug: "my-post" });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { urlSlug: "my-post" });
 
       const response = await requestApp
         .get(
-          `manage/posts/testExistence?urlSlug=${post.urlSlug}&artistId=${artist.id}`
+          `manage/posts/testExistence?urlSlug=${post.urlSlug}&artistId=${profile.id}`
         )
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
@@ -47,12 +47,12 @@ describe("manage/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      await createPost(artist.id, { urlSlug: "existing-post" });
+      const profile = await createProfile(user.id);
+      await createPost(profile.id, { urlSlug: "existing-post" });
 
       const response = await requestApp
         .get(
-          `manage/posts/testExistence?urlSlug=nonexistent-slug&artistId=${artist.id}`
+          `manage/posts/testExistence?urlSlug=nonexistent-slug&artistId=${profile.id}`
         )
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
@@ -65,12 +65,12 @@ describe("manage/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { urlSlug: "my-post" });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { urlSlug: "my-post" });
 
       const response = await requestApp
         .get(
-          `manage/posts/testExistence?urlSlug=${post.urlSlug}&artistId=${artist.id}&forPostId=${post.id}`
+          `manage/posts/testExistence?urlSlug=${post.urlSlug}&artistId=${profile.id}&forPostId=${post.id}`
         )
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
@@ -83,14 +83,14 @@ describe("manage/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
-      const post1 = await createPost(artist.id, { urlSlug: "shared-slug" });
-      const post2 = await createPost(artist.id, { urlSlug: "other-post" });
+      const profile = await createProfile(user.id);
+      const post1 = await createPost(profile.id, { urlSlug: "shared-slug" });
+      const post2 = await createPost(profile.id, { urlSlug: "other-post" });
 
       // post2 is checking if "shared-slug" is taken, excluding itself (post2)
       const response = await requestApp
         .get(
-          `manage/posts/testExistence?urlSlug=${post1.urlSlug}&artistId=${artist.id}&forPostId=${post2.id}`
+          `manage/posts/testExistence?urlSlug=${post1.urlSlug}&artistId=${profile.id}&forPostId=${post2.id}`
         )
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
@@ -103,14 +103,14 @@ describe("manage/posts", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist1 = await createArtist(user.id, { urlSlug: "artist-one" });
+      const profile1 = await createProfile(user.id, { urlSlug: "artist-one" });
       const { user: user2 } = await createUser({ email: "other@test.com" });
-      const artist2 = await createArtist(user2.id, { urlSlug: "artist-two" });
-      await createPost(artist2.id, { urlSlug: "shared-slug" });
+      const profile2 = await createProfile(user2.id, { urlSlug: "artist-two" });
+      await createPost(profile2.id, { urlSlug: "shared-slug" });
 
       const response = await requestApp
         .get(
-          `manage/posts/testExistence?urlSlug=shared-slug&artistId=${artist1.id}`
+          `manage/posts/testExistence?urlSlug=shared-slug&artistId=${profile1.id}`
         )
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
@@ -121,11 +121,11 @@ describe("manage/posts", () => {
 
     it("should return 401 when not authenticated", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
-      await createPost(artist.id, { urlSlug: "my-post" });
+      const profile = await createProfile(user.id);
+      await createPost(profile.id, { urlSlug: "my-post" });
 
       const response = await requestApp
-        .get(`manage/posts/testExistence?urlSlug=my-post&artistId=${artist.id}`)
+        .get(`manage/posts/testExistence?urlSlug=my-post&artistId=${profile.id}`)
         .set("Accept", "application/json");
 
       assert.equal(response.status, 401);

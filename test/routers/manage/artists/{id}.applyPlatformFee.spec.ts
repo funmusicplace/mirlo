@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createTier,
   createTrackGroup,
@@ -27,22 +27,22 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
   describe("POST", () => {
     it("should cascade the artist's defaultPlatformFee to all entities", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { defaultPlatformFee: 15 },
       });
 
-      const trackGroup = await createTrackGroup(artist.id);
-      const merch = await createMerch(artist.id, {});
-      const tier = await createTier(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const merch = await createMerch(profile.id, {});
+      const tier = await createTier(profile.id);
       const tipTier = await prisma.profileTipTier.create({
-        data: { name: "tips", profileId: artist.id, minAmount: 100 },
+        data: { name: "tips", profileId: profile.id, minAmount: 100 },
       });
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/applyPlatformFee`)
+        .post(`manage/artists/${profile.id}/applyPlatformFee`)
         .send({})
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -71,19 +71,19 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
 
     it("should not update entities belonging to other artists", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { defaultPlatformFee: 15 },
       });
 
-      const otherArtist = await createArtist(user.id, {
+      const otherProfile = await createProfile(user.id, {
         urlSlug: "other-artist",
       });
-      const otherMerch = await createMerch(otherArtist.id, {});
+      const otherMerch = await createMerch(otherProfile.id, {});
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/applyPlatformFee`)
+        .post(`manage/artists/${profile.id}/applyPlatformFee`)
         .send({})
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -100,14 +100,14 @@ describe("manage/artists/{artistId}/applyPlatformFee", () => {
 
     it("should reject a request from an unauthorized user", async () => {
       const { user } = await createUser({ email: "owner@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const { accessToken: otherAccessToken } = await createUser({
         email: "stranger@testcom",
       });
 
       const response = await requestApp
-        .post(`manage/artists/${artist.id}/applyPlatformFee`)
+        .post(`manage/artists/${profile.id}/applyPlatformFee`)
         .send({})
         .set("Cookie", [`jwt=${otherAccessToken}`])
         .set("Accept", "application/json");

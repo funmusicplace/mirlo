@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
-  canUserCreateArtists,
+  canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
@@ -45,7 +45,7 @@ const forbiddenNames = [
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    POST: [userAuthenticated, canUserCreateArtists, POST],
+    POST: [userAuthenticated, canUserCreateProfiles, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -55,7 +55,7 @@ export default function () {
       const where = {
         userId: Number(loggedInUser.id),
       };
-      const artists = await prisma.profile.findMany({
+      const profiles = await prisma.profile.findMany({
         where,
         include: {
           trackGroups: {
@@ -65,7 +65,7 @@ export default function () {
           },
         },
       });
-      res.json({ results: artists });
+      res.json({ results: profiles });
     } catch (e) {
       next(e);
     }

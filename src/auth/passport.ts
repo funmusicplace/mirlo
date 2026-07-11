@@ -6,9 +6,9 @@ import passportJWT, { JwtFromRequestFunction } from "passport-jwt";
 
 import logger from "../logger";
 import {
-  findArtistIdForURLSlug,
-  whereForAllArtistsThisLabelCanAddReleasesFor,
-  whereForAllArtistsThisLabelCanEdit,
+  findProfileIdForURLSlug,
+  whereForAllProfilesThisLabelCanAddReleasesFor,
+  whereForAllProfilesThisLabelCanEdit,
 } from "../utils/artist";
 import { AppError } from "../utils/error";
 import {
@@ -140,7 +140,7 @@ export const userHasPermission = (role: "admin" | "owner") => {
   };
 };
 
-export const canUserCreateArtists = async (
+export const canUserCreateProfiles = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -182,18 +182,18 @@ export const canUserCreateArtists = async (
   }
 };
 
-export const artistEditableByUser = async (
-  artistId: string | number,
+export const profileEditableByUser = async (
+  profileId: string | number,
   user: Express.User
 ) => {
   try {
-    if (!artistId) {
+    if (!profileId) {
       throw new AppError({
         description: "Artist ID is required",
         httpCode: 400,
       });
     }
-    const castArtistId = await findArtistIdForURLSlug(artistId);
+    const castProfileId = await findProfileIdForURLSlug(profileId);
     const loggedInUser = user;
 
     if (!loggedInUser) {
@@ -206,14 +206,14 @@ export const artistEditableByUser = async (
         return true;
       }
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
-          id: Number(castArtistId),
+          ...whereForAllProfilesThisLabelCanEdit(loggedInUser.id),
+          id: Number(castProfileId),
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({
           description:
             "Artist not found or user does not have permission to edit",
@@ -227,21 +227,21 @@ export const artistEditableByUser = async (
   }
 };
 
-export const artistBelongsToLoggedInUser = async (
+export const profileBelongsToLoggedInUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { artistId } = req.params as unknown as {
+  const { artistId: profileId } = req.params as unknown as {
     artistId: string;
   };
 
-  const artistEditableByUserResult = await artistEditableByUser(
-    artistId,
+  const profileEditableByUserResult = await profileEditableByUser(
+    profileId,
     req.user as Express.User
   );
 
-  if (artistEditableByUserResult) {
+  if (profileEditableByUserResult) {
     return next();
   } else {
     throw new AppError({
@@ -457,7 +457,7 @@ export const trackBelongsToLoggedInUser = async (
       const track = await prisma.track.findFirst({
         where: {
           trackGroup: {
-            profile: whereForAllArtistsThisLabelCanAddReleasesFor(
+            profile: whereForAllProfilesThisLabelCanAddReleasesFor(
               loggedInUser.id
             ),
           },

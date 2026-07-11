@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../../../../../logger";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";

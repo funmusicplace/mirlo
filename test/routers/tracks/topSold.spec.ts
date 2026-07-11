@@ -7,7 +7,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -41,8 +41,8 @@ describe("top sold tracks", () => {
     const { user: buyer } = await createUser({
       email: "buyer@test.com",
     });
-    const artist = await createArtist(user.id);
-    const trackGroup = await createTrackGroup(artist.id);
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id, {
       title: "test track",
       description: "This is a test description",
@@ -62,8 +62,8 @@ describe("top sold tracks", () => {
   it("should GET /topSold in descending order of number of purchases", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
-    const artist1 = await createArtist(user1.id);
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+    const profile1 = await createProfile(user1.id);
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist-2" });
 
     const { user: buyer1 } = await createUser({ email: "test2@test.com" });
     const { user: buyer2 } = await createUser({ email: "test3@test.com" });
@@ -79,12 +79,12 @@ describe("top sold tracks", () => {
       4: buyer5,
     };
 
-    const trackGroup1 = await createTrackGroup(artist1.id, {
+    const trackGroup1 = await createTrackGroup(profile1.id, {
       title: "most purchased",
       urlSlug: "most-purchased",
     });
 
-    const trackGroup2 = await createTrackGroup(artist2.id, {
+    const trackGroup2 = await createTrackGroup(profile2.id, {
       title: "least purchased",
       urlSlug: "least-purchased",
     });
@@ -137,8 +137,8 @@ describe("top sold tracks", () => {
   it("should GET /topSold the queried number of top sold purchases in descending order", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
-    const artist1 = await createArtist(user1.id);
-    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+    const profile1 = await createProfile(user1.id);
+    const profile2 = await createProfile(user2.id, { urlSlug: "artist-2" });
 
     const { user: buyer1 } = await createUser({ email: "test2@test.com" });
     const { user: buyer2 } = await createUser({ email: "test3@test.com" });
@@ -153,12 +153,12 @@ describe("top sold tracks", () => {
       3: buyer4,
     };
 
-    const trackGroup1 = await createTrackGroup(artist1.id, {
+    const trackGroup1 = await createTrackGroup(profile1.id, {
       title: "most purchased",
       urlSlug: "most-purchased",
     });
 
-    const trackGroup2 = await createTrackGroup(artist2.id, {
+    const trackGroup2 = await createTrackGroup(profile2.id, {
       title: "least purchased",
       urlSlug: "least-purchased",
     });

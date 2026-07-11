@@ -3,10 +3,10 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import { clearTables, createArtist, createUser } from "../../../utils";
+import { clearTables, createProfile, createUser } from "../../../utils";
 import {
   createBucketIfNotExists,
-  finalProfileAvatarBucket,
+  finalArtistAvatarBucket,
 } from "../../../../src/utils/minio";
 
 import { requestApp } from "../../utils";
@@ -23,10 +23,10 @@ describe("manage/artists/{artistId}", () => {
   describe("GET", () => {
     it("should return artist for logged in user if owned", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}`)
+        .get(`manage/artists/${profile.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -38,9 +38,9 @@ describe("manage/artists/{artistId}", () => {
       const { accessToken: otherAccessToken } = await createUser({
         email: "otherUser@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const response = await requestApp
-        .get(`manage/artists/${artist.id}`)
+        .get(`manage/artists/${profile.id}`)
         .set("Cookie", [`jwt=${otherAccessToken}`])
         .set("Accept", "application/json");
 
@@ -53,10 +53,10 @@ describe("manage/artists/{artistId}", () => {
         email: "admin@admin.com",
         isAdmin: true,
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await requestApp
-        .get(`manage/artists/${artist.id}`)
+        .get(`manage/artists/${profile.id}`)
         .set("Cookie", [`jwt=${adminAccessToken}`])
         .set("Accept", "application/json");
 
@@ -69,11 +69,11 @@ describe("manage/artists/{artistId}", () => {
       const { user, accessToken } = await createUser({
         email: "test@testcom",
       });
-      const artist = await createArtist(user.id);
-      await createBucketIfNotExists(finalProfileAvatarBucket);
+      const profile = await createProfile(user.id);
+      await createBucketIfNotExists(finalArtistAvatarBucket);
 
       const response = await requestApp
-        .delete(`manage/artists/${artist.id}`)
+        .delete(`manage/artists/${profile.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 

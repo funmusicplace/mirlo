@@ -10,11 +10,11 @@ import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 import {
   ArtistPurchaseNotificationEmailType,
-  handleArtistGift,
+  handleProfileGift,
   PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
 
-describe("handleArtistGift", () => {
+describe("handleProfileGift", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -30,7 +30,7 @@ describe("handleArtistGift", () => {
   it("should send out emails for artist gift", async () => {
     const stub = sinon.spy(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -39,19 +39,19 @@ describe("handleArtistGift", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    await handleArtistGift(purchaser.id, artist.id);
+    await handleProfileGift(purchaser.id, profile.id);
 
     const tip = await prisma.userProfileTip.findFirst({
-      where: { userId: purchaser.id, profileId: artist.id },
+      where: { userId: purchaser.id, profileId: profile.id },
     });
 
     assert.equal(stub.calledTwice, true);
@@ -64,7 +64,7 @@ describe("handleArtistGift", () => {
     assert.equal(locals.transactions[0].amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(locals1.transactions[0].userId, tip?.userId);
     assert.equal(locals1.transactions[0].tips?.[0].profile.id, tip?.profileId);
@@ -72,7 +72,7 @@ describe("handleArtistGift", () => {
   });
 
   it("should add the user to the artist's subscribers at the follow tier", async () => {
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -81,22 +81,22 @@ describe("handleArtistGift", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
 
-    await handleArtistGift(purchaser.id, artist.id);
+    await handleProfileGift(purchaser.id, profile.id);
 
     const subscription = await prisma.profileUserSubscription.findFirst({
       where: {
         userId: purchaser.id,
         profileSubscriptionTier: {
-          profileId: artist.id,
+          profileId: profile.id,
         },
       },
       include: {
@@ -106,7 +106,7 @@ describe("handleArtistGift", () => {
 
     assert.ok(subscription, "Subscription should exist");
     assert.equal(subscription?.userId, purchaser.id);
-    assert.equal(subscription?.profileSubscriptionTier.profileId, artist.id);
+    assert.equal(subscription?.profileSubscriptionTier.profileId, profile.id);
     assert.equal(subscription?.profileSubscriptionTier.isDefaultTier, true);
     assert.equal(subscription?.profileSubscriptionTier.name, "follow");
   });

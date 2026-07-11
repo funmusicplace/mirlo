@@ -14,7 +14,7 @@ import {
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
   createTrack,
@@ -35,11 +35,11 @@ describe("analyzePathAndGenerateHTML", () => {
   describe("determineType", () => {
     it("should set og:type to 'music.album' for album releases", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "test-artist",
         urlSlug: "test-artist",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "Test Album",
         urlSlug: "test-album",
       });
@@ -52,11 +52,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should set og:type to 'music.song' for individual tracks", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "test-artist",
         urlSlug: "test-artist",
       });
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         title: "Test Album",
         urlSlug: "test-album",
       });
@@ -129,7 +129,7 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist profile route with artist name", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -143,7 +143,7 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/releases route with correct title", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -157,7 +157,7 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/posts route listing all posts", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -173,11 +173,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/posts/{slug} route with post slug lookup", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         title: "My Post Title",
         urlSlug: "my-post-slug",
       });
@@ -191,7 +191,7 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/merch route listing merch", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -206,11 +206,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/merch/{slug} route with merch title and image", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const merch = await createMerch(artist.id, { title: "Cool T-Shirt" });
+      const merch = await createMerch(profile.id, { title: "Cool T-Shirt" });
 
       const $ = cheerio.load("<html></html>");
       await analyzePathAndGenerateHTML(
@@ -227,7 +227,7 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/support route", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -243,11 +243,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/release/{slug} route with album title", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -264,11 +264,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/release/{slug}/tracks/{id} route with track details", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -328,11 +328,11 @@ describe("analyzePathAndGenerateHTML", () => {
       // "rauðvik" arrives as "rau%C3%B0vik" and must be decoded before the
       // urlSlug lookup
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "rauðvik",
         urlSlug: "rauðvik",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -361,7 +361,7 @@ describe("analyzePathAndGenerateHTML", () => {
   describe("route handling", () => {
     it("should handle artist/posts route listing all posts", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -378,11 +378,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/posts/{slug} route with post slug lookup", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         title: "My Post Title",
         urlSlug: "my-post-slug",
       });
@@ -396,7 +396,7 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/merch route listing merch", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -411,11 +411,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/merch/{slug} route with merch title and image", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const merch = await createMerch(artist.id, { title: "Cool T-Shirt" });
+      const merch = await createMerch(profile.id, { title: "Cool T-Shirt" });
 
       const $ = cheerio.load("<html></html>");
       await analyzePathAndGenerateHTML(
@@ -432,11 +432,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/release/{slug} route with album title and release date", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -453,11 +453,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should handle artist/release/{slug}/tracks/{id} route with track details", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -563,7 +563,7 @@ describe("analyzePathAndGenerateHTML", () => {
   describe("hydration script injection", () => {
     it("should inject __MIRLO_ARTIST__ script on artist profile page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
@@ -588,11 +588,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should inject __MIRLO_TRACKGROUP__ script on album page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -620,11 +620,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should inject __MIRLO_ARTIST__ alongside __MIRLO_TRACKGROUP__ on album page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      await createTrackGroup(artist.id, {
+      await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -644,11 +644,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should inject __MIRLO_TRACK__ script on track page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const trackGroup = await createTrackGroup(artist.id, {
+      const trackGroup = await createTrackGroup(profile.id, {
         title: "My Album",
         urlSlug: "test-album",
       });
@@ -676,11 +676,11 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should inject __MIRLO_POST__ script on published post page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         title: "My Post",
         urlSlug: "my-post",
         isDraft: false,
@@ -705,7 +705,7 @@ describe("analyzePathAndGenerateHTML", () => {
 
     it("should not inject __MIRLO_POST__ on artist posts index page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "My Artist",
         urlSlug: "test-artist",
       });

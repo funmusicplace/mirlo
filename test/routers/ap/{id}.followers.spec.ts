@@ -23,7 +23,7 @@ describe("ActivityPub followers endpoint", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -34,14 +34,14 @@ describe("ActivityPub followers endpoint", () => {
     });
 
     const response = await requestApp
-      .get(`ap/artists/${artist.urlSlug}/followers`)
+      .get(`ap/artists/${profile.urlSlug}/followers`)
       .set("Accept", "application/activity+json");
 
     assert(response.statusCode === 200);
     assert.equal(response.body.type, "OrderedCollection");
     assert.equal(response.body.totalItems, 0);
     assert(
-      response.body.id.includes(`v1/ap/artists/${artist.urlSlug}/followers`)
+      response.body.id.includes(`v1/ap/artists/${profile.urlSlug}/followers`)
     );
     // Fedify returns items inline (no cursor pagination), so orderedItems is
     // at the top level rather than inside a first.orderedItems page.
@@ -58,7 +58,7 @@ describe("ActivityPub followers endpoint", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
@@ -70,14 +70,14 @@ describe("ActivityPub followers endpoint", () => {
 
     await prisma.activityPubProfileFollowers.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         actor: "https://mastodon.social/users/testfollower",
         inboxUrl: "https://mastodon.social/users/testfollower/inbox",
       },
     });
 
     const response = await requestApp
-      .get(`ap/artists/${artist.urlSlug}/followers`)
+      .get(`ap/artists/${profile.urlSlug}/followers`)
       .set("Accept", "application/activity+json");
 
     assert(response.statusCode === 200);

@@ -14,7 +14,7 @@ import { parseOutIframes } from "./parse-out-iframes";
  * Parses post HTML content for local artist mentions and returns their userIds.
  * Mentions are inserted as links with href pointing to /v1/artists/{urlSlug}.
  */
-async function findMentionedLocalArtistUserIds(
+async function findMentionedLocalProfileUserIds(
   content: string
 ): Promise<number[]> {
   const $ = cheerio.load(content);
@@ -31,12 +31,12 @@ async function findMentionedLocalArtistUserIds(
 
   if (urlSlugs.length === 0) return [];
 
-  const artists = await prisma.profile.findMany({
+  const profiles = await prisma.profile.findMany({
     where: { urlSlug: { in: urlSlugs }, deletedAt: null },
     select: { userId: true },
   });
 
-  return artists.map((a) => a.userId);
+  return profiles.map((p) => p.userId);
 }
 
 /**
@@ -235,12 +235,12 @@ export default async function sendPostNotification(job: {
     }
 
     // Create in-app notifications for mentioned local artists
-    const mentionedArtistUserIds = await findMentionedLocalArtistUserIds(
+    const mentionedProfileUserIds = await findMentionedLocalProfileUserIds(
       post.content || ""
     );
-    if (mentionedArtistUserIds.length > 0) {
+    if (mentionedProfileUserIds.length > 0) {
       await prisma.notification.createMany({
-        data: mentionedArtistUserIds.map((userId) => ({
+        data: mentionedProfileUserIds.map((userId) => ({
           postId,
           userId,
           notificationType: "MENTION_IN_POST" as const,
@@ -249,7 +249,7 @@ export default async function sendPostNotification(job: {
         skipDuplicates: true,
       });
       logger.info(
-        `sendPostNotification: created ${mentionedArtistUserIds.length} mention notification(s) for post ${postId}`
+        `sendPostNotification: created ${mentionedProfileUserIds.length} mention notification(s) for post ${postId}`
       );
     }
 

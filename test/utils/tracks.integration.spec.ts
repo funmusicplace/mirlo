@@ -54,14 +54,14 @@ const createTrack = (
 
 const convertAudio = async ({
   track,
-  artist,
+  profile,
   trackGroup,
   inputFile,
   outputBasename,
   format = { format: "mp3", audioCodec: "libmp3lame" },
 }: {
   track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
-  artist: Profile;
+  profile: Profile;
   trackGroup: { title: string | null; coverLocation?: string };
   inputFile: string;
   outputBasename: string;
@@ -79,7 +79,7 @@ const convertAudio = async ({
         convertAudioToFormat(
           {
             track,
-            artist,
+            profile,
             trackGroup,
           },
           stream,
@@ -171,7 +171,7 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
           order: 1,
         }),
       ]),
-      artist: { name: "Album Artist" } as Profile,
+      profile: { name: "Album Artist" } as Profile,
       trackGroup: {
         title: "Integration Album",
         coverLocation: coverPng,
@@ -219,7 +219,7 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
       track: createTrack("audio-integration-flac", [
         createTrackArtist({ artistName: "Lead Artist", role: "Vocal" }),
       ]),
-      artist: { name: "Album Artist" } as Profile,
+      profile: { name: "Album Artist" } as Profile,
       trackGroup: {
         title: "Integration Album",
       },

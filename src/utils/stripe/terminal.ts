@@ -106,7 +106,7 @@ export const processSetupIntentOnReader = async ({
 export const createAndDispatchTerminalSetupIntent = async ({
   readerId,
   tierId,
-  profileId: artistId,
+  profileId: profileId,
   stripeAccountId,
   amount,
   currency,
@@ -128,7 +128,7 @@ export const createAndDispatchTerminalSetupIntent = async ({
       usage: "off_session",
       metadata: {
         tierId: String(tierId),
-        profileId: String(artistId),
+        profileId: String(profileId),
         stripeAccountId,
         amount: String(amount),
         currency,
