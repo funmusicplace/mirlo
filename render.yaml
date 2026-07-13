@@ -80,18 +80,20 @@ services:
   # Runs against a separate `umami` database inside the existing blackbrd
   # Postgres instance. Umami is itself a Prisma app, so it must NOT share
   # Mirlo's database — both would write to the same _prisma_migrations table.
-  # Blueprints don't support string interpolation, so the dockerCommand
-  # rewrites the blackbrd connection string to point at /umami at startup.
+  # umami/entrypoint.sh does the DATABASE_URL rewrite to point at /umami;
+  # blueprints don't support string interpolation in env var values, and
+  # Render's dockerCommand field doesn't reliably preserve shell quoting for
+  # && chains (it fails with "not found" on the whole command string), so
+  # that logic lives in the Dockerfile instead — matches the pattern in the
+  # root Dockerfile's own CMD.
   # One-time setup:
   #   1. psql <blackbrd external connection string>
   #   2. CREATE DATABASE umami;
   # Default login is admin / umami — change it immediately after first deploy.
   - type: web
     name: umami
-    runtime: image
-    image:
-      url: ghcr.io/umami-software/umami:postgresql-latest
-    dockerCommand: sh -c 'export DATABASE_URL="${BASE_DATABASE_URL%/*}/umami" && npm run start-docker'
+    env: docker
+    dockerfilePath: ./umami/Dockerfile
     plan: starter
     region: oregon
     autoDeploy: false
