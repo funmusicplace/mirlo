@@ -1,12 +1,16 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { userLoggedInWithoutRedirect } from "../../../auth/passport";
+import {
+  artistEditableByUser,
+  userLoggedInWithoutRedirect,
+} from "../../../auth/passport";
 import { subscribeUserToArtist } from "../../../utils/artist";
 import { buildCheckoutRedirectUrl, originOf } from "../../../utils/clientUrl";
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
 import { handleTrackGroupPurchase } from "../../../utils/handleFinishedTransactions";
+import { resolvePayee } from "../../../utils/payments/payee";
 import {
   initiatePayment,
   initiateSubscription,
@@ -94,6 +98,22 @@ export default function () {
         });
       }
 
+      // Dispatching to a physical reader is a merchant action, not a buyer
+      // action: anyone who knows a reader id could otherwise hijack the
+      // artist's terminal (push their own charges/subscription sign-ups onto
+      // it, or grief it with junk prompts). Client API keys don't help here —
+      // the frontend's key ships in the public JS bundle.
+      if (readerId) {
+        if (!loggedInUser) {
+          throw new AppError({
+            httpCode: 401,
+            description:
+              "Dispatching to a terminal reader requires authentication",
+          });
+        }
+        await artistEditableByUser(artistId, loggedInUser);
+      }
+
       const mirloClient = successUrl || hosted ? await getClient() : null;
 
       if (successUrl && mirloClient) {
@@ -165,10 +185,10 @@ export default function () {
           }
 
           resolvedStripeAccountId =
-            tg.paymentToUser?.stripeAccountId ??
-            tg.artist.paymentToUser?.stripeAccountId ??
-            tg.artist.user.stripeAccountId ??
-            undefined;
+            resolvePayee({
+              artist: tg.artist,
+              releasePaymentToUser: tg.paymentToUser,
+            }).stripeAccountId ?? undefined;
 
           if (loggedInUser) {
             await subscribeUserToArtist(tg.artist, loggedInUser);
@@ -295,7 +315,8 @@ export default function () {
     summary: "Initiate a purchase",
     description:
       "Unified purchase endpoint for all item types and channels. " +
-      "Provide `readerId` to dispatch to a Stripe Terminal reader (in-person); " +
+      "Provide `readerId` to dispatch to a Stripe Terminal reader (in-person) — " +
+      "this requires a logged-in user with edit rights on the artist; " +
       "omit it for an online PaymentIntent that the frontend completes with Stripe.js. " +
       "Returns `paymentIntentId` (terminal — poll GET /v1/purchase/:id), " +
       "`setupIntentId` (terminal subscription — poll GET /v1/purchase/:id), " +
@@ -328,6 +349,9 @@ export default function () {
         },
       },
       400: { description: "Missing or invalid parameters" },
+      401: {
+        description: "A readerId was supplied without an authenticated user",
+      },
       404: { description: "Artist, item, or subscription tier not found" },
       default: {
         description: "An error occurred",

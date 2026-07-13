@@ -8,9 +8,12 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "components/common/Button";
 import { InputEl } from "components/common/Input";
+import { SelectEl } from "components/common/Select";
+import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import {
   queryManagedArtist,
   queryManagedArtistMerch,
+  queryManagedArtistReaders,
   queryManagedArtistSubscriptionTiers,
   queryManagedArtistTrackGroups,
   queryUserStripeStatus,
@@ -18,8 +21,6 @@ import {
 import React from "react";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-
-import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 
 const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 
@@ -125,6 +126,9 @@ const Index: React.FC = () => {
   const { data: tiers } = useQuery(
     queryManagedArtistSubscriptionTiers({ artistId: numericArtistId })
   );
+  const { data: readers } = useQuery(
+    queryManagedArtistReaders({ artistId: numericArtistId })
+  );
 
   const paymentUserId = artist?.paymentToUserId ?? artist?.userId;
   const { data: stripeStatus } = useQuery(queryUserStripeStatus(paymentUserId));
@@ -138,6 +142,10 @@ const Index: React.FC = () => {
     clientSecret: string;
   } | null>(null);
   const [isCharging, setIsCharging] = React.useState(false);
+  const [pendingIntentId, setPendingIntentId] = React.useState<string | null>(
+    null
+  );
+  const [isCanceling, setIsCanceling] = React.useState(false);
 
   const pollIntent = React.useCallback(
     async (intentId: string) => {
@@ -148,19 +156,43 @@ const Index: React.FC = () => {
         );
         setMessage(`Reader status: ${result.status}`);
         if (result.status === "succeeded" || result.status === "canceled") {
+          setPendingIntentId(null);
           return;
         }
         await sleep(1500);
       }
-      setMessage("Timed out waiting for the reader to complete.");
+      // Leave pendingIntentId set: the intent is still live on the reader, so
+      // the cancel button must stay available after we stop polling.
+      setMessage(
+        "Timed out waiting for the reader to complete. You can still cancel the payment."
+      );
     },
     [stripeAccountId]
   );
+
+  const cancelPending = async () => {
+    if (!pendingIntentId || !stripeAccountId) return;
+    setIsCanceling(true);
+    try {
+      const params = new URLSearchParams({ stripeAccountId });
+      if (readerId.trim()) params.set("readerId", readerId.trim());
+      const { result } = await api.delete<{
+        result: { id: string; status: string };
+      }>(`purchase/${pendingIntentId}?${params}`);
+      setMessage(`Payment ${result.status}.`);
+      setPendingIntentId(null);
+    } catch (e) {
+      setMessage(`Error canceling: ${(e as Error).message}`);
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   const charge = async (item: PurchaseItem, label: string) => {
     setActiveLabel(label);
     setMessage(null);
     setOnlineCheckout(null);
+    setPendingIntentId(null);
     setIsCharging(true);
     try {
       const response = await api.post<
@@ -186,6 +218,7 @@ const Index: React.FC = () => {
       } else if (response.paymentIntentId || response.setupIntentId) {
         const intentId = (response.paymentIntentId ??
           response.setupIntentId) as string;
+        setPendingIntentId(intentId);
         setMessage(`Dispatched to reader (${intentId}). Polling…`);
         await pollIntent(intentId);
       } else {
@@ -208,22 +241,41 @@ const Index: React.FC = () => {
     <ManageSectionWrapper>
       <h2 className="text-xl font-bold mb-1">Point of sale</h2>
       <p className="text-sm mb-4">
-        Charges a single item through <code>POST /v1/purchase</code>. Enter a
-        Stripe Terminal reader id for in-person card-present payments; leave it
-        blank to complete an online payment with the Payment Element.
+        Charges a single item through <code>POST /v1/purchase</code>. Pick a
+        Stripe Terminal reader for in-person card-present payments; leave it
+        unset to complete an online payment with the Payment Element.
       </p>
 
       <div className="flex flex-col gap-2 mb-6 max-w-md">
         <label className="text-sm font-bold" htmlFor="pos-reader">
-          Reader id (optional)
+          Card reader (optional)
         </label>
-        <InputEl
-          id="pos-reader"
-          name="readerId"
-          placeholder="tmr_..."
-          value={readerId}
-          onChange={(e) => setReaderId(e.target.value)}
-        />
+        {(readers?.results?.length ?? 0) > 0 ? (
+          <SelectEl
+            id="pos-reader"
+            name="readerId"
+            value={readerId}
+            onChange={(e) => setReaderId(e.target.value)}
+          >
+            <option value="">No reader — online payment</option>
+            {readers?.results.map((reader) => (
+              <option key={reader.id} value={reader.id}>
+                {reader.label ?? reader.id} ({reader.deviceType},{" "}
+                {reader.status ?? "unknown"})
+              </option>
+            ))}
+          </SelectEl>
+        ) : (
+          // No readers registered on the connected account (or none listable):
+          // fall back to manual entry.
+          <InputEl
+            id="pos-reader"
+            name="readerId"
+            placeholder="tmr_..."
+            value={readerId}
+            onChange={(e) => setReaderId(e.target.value)}
+          />
+        )}
         <label className="text-sm font-bold" htmlFor="pos-email">
           Buyer email (optional)
         </label>
@@ -245,6 +297,19 @@ const Index: React.FC = () => {
         <div className="mb-4 p-3 rounded bg-gray-100 text-sm">
           {activeLabel && <strong>{activeLabel}: </strong>}
           {message}
+        </div>
+      )}
+
+      {pendingIntentId && (
+        <div className="mb-4">
+          <Button
+            size="compact"
+            variant="outlined"
+            onClick={cancelPending}
+            isLoading={isCanceling}
+          >
+            Cancel payment
+          </Button>
         </div>
       )}
 

@@ -121,6 +121,28 @@ export function queryManagedArtistMerch(opts: { artistId?: number }) {
   });
 }
 
+export type TerminalReader = {
+  id: string;
+  label: string | null;
+  deviceType: string;
+  status: string | null;
+};
+
+const fetchManagedArtistReaders: QueryFunction<
+  { results: TerminalReader[] },
+  ["fetchManagedArtistReaders", { artistId?: number }]
+> = ({ queryKey: [_, { artistId }], signal }) => {
+  return api.get(`v1/manage/artists/${artistId}/readers`, { signal });
+};
+
+export function queryManagedArtistReaders(opts: { artistId?: number }) {
+  return queryOptions({
+    queryKey: ["fetchManagedArtistReaders", opts],
+    queryFn: fetchManagedArtistReaders,
+    enabled: !!opts.artistId,
+  });
+}
+
 const fetchManagedArtistSubscriptionTiers: QueryFunction<
   { results: ArtistSubscriptionTier[] },
   [

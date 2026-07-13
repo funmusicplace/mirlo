@@ -72,7 +72,28 @@ export interface PaymentProcessor {
     accountId: string;
     atPeriodEnd: boolean;
   }): Promise<void>;
+
+  /**
+   * Cancel a pending charge/authorisation. When `readerId` is supplied, also
+   * clears the reader's screen if it is still working on this intent (a
+   * customer walked away, wrong item, etc.).
+   */
+  cancel(args: {
+    id: string;
+    accountId: string;
+    readerId?: string;
+  }): Promise<{ id: string; status: string }>;
+
+  /** Physical card readers registered on the connected account. */
+  listReaders(args: { accountId: string }): Promise<TerminalReader[]>;
 }
+
+export type TerminalReader = {
+  id: string;
+  label: string | null;
+  deviceType: string;
+  status: string | null;
+};
 
 /**
  * Status of a pending charge/authorisation, plus the bits the hosted checkout
