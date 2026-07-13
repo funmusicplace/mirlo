@@ -8,6 +8,7 @@ import {
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
+import { processSingleArtist } from "../../../../utils/serialize/artist";
 import { getSiteSettings } from "../../../../utils/settings";
 
 const forbiddenNames = [
@@ -57,15 +58,19 @@ export default function () {
       };
       const artists = await prisma.artist.findMany({
         where,
-        include: {
-          trackGroups: {
-            select: {
-              title: true,
-            },
-          },
+        select: {
+          id: true,
+          name: true,
+          urlSlug: true,
+          isLabelProfile: true,
+          avatar: true,
         },
       });
-      res.json({ results: artists });
+      res.json({
+        results: artists.map((artist) =>
+          processSingleArtist(artist as any, Number(loggedInUser.id))
+        ),
+      });
     } catch (e) {
       next(e);
     }

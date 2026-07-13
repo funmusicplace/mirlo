@@ -1,3 +1,4 @@
+import { ManagedArtist } from "queries/artists";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaTimes } from "react-icons/fa";
@@ -6,12 +7,12 @@ import { useFilterableList } from "utils/useFilterableList";
 import { InputEl } from "./Input";
 
 interface ArtistFilterProps {
-  artists: Artist[];
+  artists: ManagedArtist[];
   selectedArtistId: number | null;
   onChange: (artistId: number | null) => void;
 }
 
-const getArtistSearchText = (a: Artist) => a.name;
+const getArtistSearchText = (a: ManagedArtist) => a.name;
 
 const ArtistFilter: React.FC<ArtistFilterProps> = ({
   artists,

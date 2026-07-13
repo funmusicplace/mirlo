@@ -53,8 +53,13 @@ export function queryArtist(opts: {
   });
 }
 
+export type ManagedArtist = Pick<
+  Artist,
+  "id" | "name" | "urlSlug" | "isLabelProfile" | "avatar"
+>;
+
 const fetchManagedArtists: QueryFunction<
-  { results: Artist[] },
+  { results: ManagedArtist[] },
   ["fetchManagedArtists", {}, ...any]
 > = ({ queryKey: [_], signal }) => {
   return api.get(`v1/manage/artists`, { signal });
