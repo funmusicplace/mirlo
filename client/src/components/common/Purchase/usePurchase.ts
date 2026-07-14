@@ -6,6 +6,7 @@ import useErrorHandler from "services/useErrorHandler";
 /** A single item in a purchase cart. Mirrors `POST /v1/purchase`'s `items`. */
 export type PurchaseItem =
   | { type: "trackGroup"; id: number; price?: string; message?: string }
+  | { type: "track"; id: number; price?: string; message?: string }
   | { type: "merch"; id: string; quantity?: number; message?: string }
   | { type: "tip"; amount: number; message?: string };
 

@@ -9,7 +9,10 @@ import { subscribeUserToArtist } from "../../../utils/artist";
 import { buildCheckoutRedirectUrl, originOf } from "../../../utils/clientUrl";
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
-import { handleTrackGroupPurchase } from "../../../utils/handleFinishedTransactions";
+import {
+  handleTrackGroupPurchase,
+  handleTrackPurchase,
+} from "../../../utils/handleFinishedTransactions";
 import { resolvePayee } from "../../../utils/payments/payee";
 import {
   initiatePayment,
@@ -21,6 +24,7 @@ import { findUserDiscountPercentsForArtist } from "../../../utils/user";
 
 type PurchaseItem =
   | { type: "trackGroup"; id: number; price?: string; message?: string }
+  | { type: "track"; id: number; price?: string; message?: string }
   | { type: "merch"; id: string; quantity?: number; message?: string }
   | { type: "tip"; amount: number; message?: string }
   | { type: "subscription"; tierId: number; amount?: number };
@@ -44,6 +48,97 @@ type PostBody = {
    * page when omitted.
    */
   successUrl?: string;
+};
+
+// trackGroup and track purchases resolve identically (payee, follow-on-buy,
+// user discount, free-vs-paid) — only the Prisma fetch and free-purchase
+// handler differ per type, so callers do those and hand the shared shape in.
+type DigitalReleaseArtist = Parameters<typeof subscribeUserToArtist>[0] &
+  Parameters<typeof resolvePayee>[0]["artist"] & { urlSlug: string | null };
+
+const resolveDigitalPurchaseItem = async <T extends "trackGroup" | "track">({
+  type,
+  id,
+  loggedInUser,
+  readerId,
+  price,
+  message,
+  minPrice,
+  artist,
+  paymentToUser,
+  releaseUrlSlug,
+  releaseId,
+  handleFreePurchase,
+}: {
+  type: T;
+  id: number;
+  loggedInUser?: Express.User;
+  readerId?: string;
+  price?: string;
+  message?: string;
+  minPrice: number | null;
+  artist: DigitalReleaseArtist;
+  paymentToUser?: { stripeAccountId: string | null } | null;
+  /** The release (trackGroup) the download link points at — same for both a trackGroup and one of its tracks. */
+  releaseUrlSlug: string | null;
+  releaseId: number;
+  handleFreePurchase: () => Promise<unknown>;
+}): Promise<
+  | { kind: "free"; redirectUrl: string }
+  | { kind: "paid"; stripeAccountId?: string; item: ResolvedItem }
+> => {
+  const payee = resolvePayee({
+    artist,
+    releasePaymentToUser: paymentToUser,
+  }) as {
+    stripeAccountId: string | null;
+  };
+  const stripeAccountId = payee.stripeAccountId ?? undefined;
+
+  if (loggedInUser) {
+    await subscribeUserToArtist(artist, loggedInUser);
+  }
+
+  let discountPercent = 0;
+  if (loggedInUser) {
+    const discounts = await findUserDiscountPercentsForArtist(
+      loggedInUser.id,
+      artist.id
+    );
+    discountPercent = discounts.reduce(
+      (max, d) => Math.max(max, d.digitalDiscountPercent ?? 0),
+      0
+    );
+  }
+
+  const { isPriceZero, priceNumber } = determinePrice(price, minPrice);
+
+  // Free online purchase — handle immediately, no PaymentIntent needed
+  if (isPriceZero && !readerId && loggedInUser) {
+    await handleFreePurchase();
+    return {
+      kind: "free",
+      redirectUrl: `/${artist.urlSlug ?? artist.id}/release/${
+        releaseUrlSlug ?? releaseId
+      }/download?email=${loggedInUser.email}`,
+    };
+  }
+
+  const discountedAmount = discountPercent
+    ? Math.round(priceNumber * (1 - discountPercent / 100))
+    : priceNumber;
+
+  return {
+    kind: "paid",
+    stripeAccountId,
+    item: {
+      type,
+      id: String(id),
+      quantity: 1,
+      amount: discountedAmount,
+      message,
+    },
+  };
 };
 
 /**
@@ -184,54 +279,73 @@ export default function () {
             });
           }
 
-          resolvedStripeAccountId =
-            resolvePayee({
-              artist: tg.artist,
-              releasePaymentToUser: tg.paymentToUser,
-            }).stripeAccountId ?? undefined;
+          const result = await resolveDigitalPurchaseItem({
+            type: "trackGroup",
+            id: tg.id,
+            loggedInUser,
+            readerId,
+            price: item.price,
+            message: item.message,
+            minPrice: tg.minPrice,
+            artist: tg.artist,
+            paymentToUser: tg.paymentToUser,
+            releaseUrlSlug: tg.urlSlug,
+            releaseId: tg.id,
+            handleFreePurchase: () =>
+              handleTrackGroupPurchase(loggedInUser!.id, tg.id),
+          });
 
-          if (loggedInUser) {
-            await subscribeUserToArtist(tg.artist, loggedInUser);
+          if (result.kind === "free") {
+            return res.status(200).json({ redirectUrl: result.redirectUrl });
           }
-
-          let discountPercent = 0;
-          if (loggedInUser) {
-            const discounts = await findUserDiscountPercentsForArtist(
-              loggedInUser.id,
-              tg.artistId
-            );
-            discountPercent = discounts.reduce(
-              (max, d) => Math.max(max, d.digitalDiscountPercent ?? 0),
-              0
-            );
-          }
-
-          const { isPriceZero, priceNumber } = determinePrice(
-            item.price,
-            tg.minPrice
-          );
-
-          // Free online purchase — handle immediately, no PaymentIntent needed
-          if (isPriceZero && !readerId && loggedInUser) {
-            await handleTrackGroupPurchase(loggedInUser.id, tg.id);
-            return res.status(200).json({
-              redirectUrl: `/${tg.artist.urlSlug ?? tg.artist.id}/release/${
-                tg.urlSlug ?? tg.id
-              }/download?email=${loggedInUser.email}`,
+          resolvedStripeAccountId = result.stripeAccountId;
+          resolvedItems.push(result.item);
+        } else if (item.type === "track") {
+          const track = await prisma.track.findFirst({
+            where: { id: item.id, trackGroup: { artistId } },
+            include: {
+              trackGroup: {
+                include: {
+                  artist: {
+                    include: {
+                      user: true,
+                      paymentToUser: true,
+                      subscriptionTiers: true,
+                    },
+                  },
+                  paymentToUser: { select: { stripeAccountId: true } },
+                },
+              },
+            },
+          });
+          if (!track) {
+            throw new AppError({
+              httpCode: 404,
+              description: `Track ${item.id} not found`,
             });
           }
 
-          const discountedAmount = discountPercent
-            ? Math.round(priceNumber * (1 - discountPercent / 100))
-            : priceNumber;
-
-          resolvedItems.push({
-            type: "trackGroup",
-            id: String(item.id),
-            quantity: 1,
-            amount: discountedAmount,
+          const result = await resolveDigitalPurchaseItem({
+            type: "track",
+            id: track.id,
+            loggedInUser,
+            readerId,
+            price: item.price,
             message: item.message,
+            minPrice: track.minPrice,
+            artist: track.trackGroup.artist,
+            paymentToUser: track.trackGroup.paymentToUser,
+            releaseUrlSlug: track.trackGroup.urlSlug,
+            releaseId: track.trackGroup.id,
+            handleFreePurchase: () =>
+              handleTrackPurchase(loggedInUser!.id, track.id),
           });
+
+          if (result.kind === "free") {
+            return res.status(200).json({ redirectUrl: result.redirectUrl });
+          }
+          resolvedStripeAccountId = result.stripeAccountId;
+          resolvedItems.push(result.item);
         } else if (item.type === "merch") {
           const merch = await prisma.merch.findFirst({
             where: {
