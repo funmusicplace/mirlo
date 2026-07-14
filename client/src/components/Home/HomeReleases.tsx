@@ -1,20 +1,21 @@
-import { SplashTitle } from "components/Home/Splash";
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import { Button, ButtonAnchor, ButtonLink } from "components/common/Button";
+import ReleaseCard from "components/common/ReleaseCard";
+import { SectionHeader } from "components/common/SectionHeader";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
+import WidthContainer from "components/common/WidthContainer";
+import HomeFeaturedArtists from "components/Home/HomeFeaturedArtists";
+import { SplashTitle } from "components/Home/Splash";
+import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 import { queryTrackGroups } from "queries";
+import { queryTopSoldTrackGroups } from "queries";
 import { queryTags } from "queries/tags";
 import { useTranslation } from "react-i18next";
 import { FaRedoAlt, FaChevronRight, FaRss } from "react-icons/fa";
+
 import { bp } from "../../constants";
-import { Button, ButtonAnchor, ButtonLink } from "components/common/Button";
-import WidthContainer from "components/common/WidthContainer";
-import { SectionHeader } from "components/common/SectionHeader";
-import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
-import styled from "@emotion/styled";
-import { useQuery } from "@tanstack/react-query";
-import ReleaseCard from "components/common/ReleaseCard";
-import { queryTopSoldTrackGroups } from "queries";
-import HomeFeaturedArtists from "components/Home/HomeFeaturedArtists";
 
 const futureReleasesPageSize = 6;
 
@@ -139,7 +140,7 @@ const HomeReleases = () => {
                 aria-label={t("rssFeed")}
                 title={t("rssFeed")}
                 target="_blank"
-                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups&released=released&format=rss`}
+                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?released=released&format=rss`}
                 rel="noreferrer"
                 onlyIcon
                 smallIcon
