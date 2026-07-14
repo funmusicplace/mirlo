@@ -212,6 +212,20 @@ We are actively changing our code to accomodate other payout providers like PayP
 
 Check [Stripe's supported countries](https://stripe.com/global) and [Stripe's payout countries](https://stripe.com/en-us/world). A lot of countries are supported, but some have restrictions based on business type or currency.
 
+### Troubleshooting Stripe
+
+Stripe will often require proof that you are really selling things before it will release payouts. Depending on how much of a risk factor Stripe (opaquely) assesses you to be, it may ask for:
+
+- Proof of address
+- A website URL for what you're selling (e.g. your album's Mirlo page)
+- Details on where else you sell your work
+- A government-issued ID
+- Other documentation, at Stripe's discretion
+
+You can see exactly what Stripe is asking for by logging into your [Stripe Dashboard](https://dashboard.stripe.com) — it will list any outstanding requirements. In most cases we've encountered, responding to these requests directly in the Stripe dashboard resolves a payout block.
+
+Some countries, including the Netherlands, require you to register as a business in order to use Stripe. That requirement comes from Stripe (or local regulation) and is outside of Mirlo's control.
+
 ## Related Documentation
 
 - [Mirlo FAQ](./faq.md) - General questions about the platform
