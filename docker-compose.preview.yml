@@ -1,0 +1,113 @@
+# Isolated, full-stack preview environment for one branch / PR.
+#
+# Each preview is brought up under its own Compose project name, which namespaces
+# the containers, network, and volumes automatically — so many previews coexist on
+# one host without collisions:
+#
+#   PREVIEW_SUBDOMAIN=pr-123 docker compose \
+#     -p pr-123 --env-file preview/.env.preview -f docker-compose.preview.yml up -d --build
+#
+# Use preview/up.sh / preview/down.sh rather than calling this directly.
+# See docs/hosting/preview-environments.md.
+#
+# NOTE: no `container_name:` and no host `ports:` — that is what lets multiple
+# previews run side by side. The reverse proxy (preview/) reaches the api over the
+# shared external `caddy-net` via a per-preview network alias.
+
+services:
+  pgsql:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-nomads}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+    restart: unless-stopped
+
+  redis:
+    image: redis
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
+      ]
+    volumes:
+      - redisdata:/data
+    networks: [internal]
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    command: server --console-address ":9001" /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - miniodata:/data
+    networks: [internal]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    env_file: preview/.env.preview
+    environment:
+      NODE_ENV: production
+      # Per-preview public URL, used for links (emails, media, api-docs).
+      API_DOMAIN: https://${PREVIEW_SUBDOMAIN}.preview.mirlo.space
+      STATIC_MEDIA_HOST: https://${PREVIEW_SUBDOMAIN}.preview.mirlo.space
+    depends_on:
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    networks:
+      internal: {}
+      caddy-net:
+        aliases:
+          - ${PREVIEW_SUBDOMAIN}
+    restart: unless-stopped
+
+  background:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: background
+    env_file: preview/.env.preview
+    environment:
+      NODE_ENV: production
+    depends_on:
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    networks: [internal]
+    restart: unless-stopped
+
+networks:
+  internal: {}
+  # Shared with the reverse proxy; created once on the host:
+  #   docker network create caddy-net
+  caddy-net:
+    external: true
+
+volumes:
+  pgdata: {}
+  redisdata: {}
+  miniodata: {}

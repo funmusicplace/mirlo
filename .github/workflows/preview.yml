@@ -1,0 +1,66 @@
+name: Preview environment
+
+# Full-stack per-PR previews on the self-hosted preview box.
+# See docs/hosting/preview-environments.md.
+#
+# Requires repo secrets: PREVIEW_SSH_HOST, PREVIEW_SSH_USER, PREVIEW_SSH_KEY.
+# The box must have a checkout at /opt/mirlo, the caddy proxy running, and
+# preview/.env.preview in place.
+
+on:
+  pull_request:
+    types: [labeled, synchronize, closed]
+
+concurrency:
+  # One deploy at a time per PR; a newer push supersedes an in-flight one.
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # SECURITY: only same-repo branches, never forks — a preview builds and runs
+    # the PR's code on our box. Gated behind the `preview` label so it's opt-in.
+    if: >
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'preview')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy preview
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PREVIEW_SSH_HOST }}
+          username: ${{ secrets.PREVIEW_SSH_USER }}
+          key: ${{ secrets.PREVIEW_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            N=${{ github.event.pull_request.number }}
+            REF=${{ github.event.pull_request.head.ref }}
+            cd /opt/mirlo
+            git fetch origin "+refs/pull/$N/head:refs/heads/pr-$N"
+            # Isolated working copy per PR so concurrent builds don't clobber.
+            git worktree remove --force "worktrees/pr-$N" 2>/dev/null || true
+            git worktree add --force "worktrees/pr-$N" "pr-$N"
+            cd "worktrees/pr-$N"
+            ln -sf /opt/mirlo/preview/.env.preview preview/.env.preview
+            ./preview/up.sh "pr-$N"
+
+  teardown:
+    if: >
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tear down preview
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PREVIEW_SSH_HOST }}
+          username: ${{ secrets.PREVIEW_SSH_USER }}
+          key: ${{ secrets.PREVIEW_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            N=${{ github.event.pull_request.number }}
+            cd /opt/mirlo
+            ./preview/down.sh "pr-$N" || true
+            git worktree remove --force "worktrees/pr-$N" 2>/dev/null || true
+            git branch -D "pr-$N" 2>/dev/null || true

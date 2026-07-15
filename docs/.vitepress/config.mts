@@ -68,6 +68,12 @@ export default defineConfig({
       {
         text: "Hosting Mirlo",
         link: "/hosting",
+        items: [
+          {
+            text: "Preview environments",
+            link: "/hosting/preview-environments",
+          },
+        ],
       },
       {
         text: "For Mirlo Maintainers",
