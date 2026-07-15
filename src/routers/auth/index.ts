@@ -40,10 +40,13 @@ router.post(`/password-reset/initiate`, passwordResetInitiate);
 
 router.post(`/password-reset/set-password`, passwordResetSetPassword);
 
+const isDev = process.env.NODE_ENV === "development";
+
 const loginLimiter = rateLimit({
   windowMs: 60 * 1000,
   limit: 10,
   standardHeaders: true,
+  skip: () => isDev || process.env.NODE_ENV === "test",
 });
 
 router.post("/login", loginLimiter, login, async (req, res, next) => {
