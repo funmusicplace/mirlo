@@ -124,6 +124,8 @@ S3_ENDPOINT=
 
 # Optional: Stripe Integration
 STRIPE_KEY=your-stripe-key
+STRIPE_WEBHOOK_SIGNING_SECRET=
+STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET=
 
 ```
 
@@ -134,6 +136,41 @@ values in at build time:
 VITE_API_DOMAIN=https://yourdomain.com
 VITE_CLIENT_DOMAIN=https://yourdomain.com
 ```
+
+### 3.5. Register Stripe Webhooks
+
+If you're using Stripe, Mirlo needs two webhook endpoints registered against
+**your platform's Stripe account** (not per connected artist account — this is
+a one-time setup for the whole instance). There's currently no way to do this
+from Mirlo itself, so it has to be done by hand in the
+[Stripe Dashboard](https://dashboard.stripe.com/webhooks) under **Developers →
+Webhooks**, once your domain is live:
+
+1. **`https://yourdomain.com/v1/webhooks/stripe`** — the platform-account
+   endpoint. Listen for at least:
+   - `checkout.session.completed`
+2. **`https://yourdomain.com/v1/webhooks/stripe/connect`** — the connected-
+   accounts endpoint (this is the important one; it's what keeps
+   subscriptions, purchases and payouts in sync). When creating it, set
+   "Listen to events on Connected accounts" and select at least:
+   - `checkout.session.completed`
+   - `setup_intent.succeeded`
+   - `invoice.paid`
+   - `invoice.payment_failed`
+   - `payment_intent.succeeded`
+   - `payment_intent.payment_failed`
+   - `customer.subscription.deleted`
+   - `account.updated`
+   - `terminal.reader.action_succeeded`
+   - `terminal.reader.action_failed`
+
+After creating each endpoint, Stripe reveals a **signing secret** (starts with
+`whsec_`) — copy it into `.env` as `STRIPE_WEBHOOK_SIGNING_SECRET` (for the
+first endpoint) and `STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET` (for the second),
+then recreate the api container so it picks up the change (`docker compose up
+-d`).
+
+> Note: We will hopefully automate this in the future but you do need to do this if you want to receive Stripe payments.
 
 ### 4. Build and Start Services
 
