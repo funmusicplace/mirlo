@@ -40,7 +40,13 @@ router.post(`/password-reset/initiate`, passwordResetInitiate);
 
 router.post(`/password-reset/set-password`, passwordResetSetPassword);
 
-router.post("/login", login, async (req, res, next) => {
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+});
+
+router.post("/login", loginLimiter, login, async (req, res, next) => {
   let user;
   try {
     if (res.locals.user) {
