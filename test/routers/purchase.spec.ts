@@ -17,6 +17,7 @@ import * as terminalUtils from "../../src/utils/stripe/terminal";
 import {
   clearTables,
   createArtist,
+  createTrack,
   createTrackGroup,
   createMerch,
   createTier,
@@ -242,6 +243,109 @@ describe("purchase", () => {
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
+    });
+
+    it("should return 404 when track does not belong to the given artist", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const { user: otherUser } = await createUser({ email: "other@test.com" });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const otherArtist = await createArtist(otherUser.id, {
+        urlSlug: "other-artist-2",
+      });
+      const tgFromOther = await createTrackGroup(otherArtist.id, {
+        minPrice: 1000,
+      });
+      const trackFromOther = await createTrack(tgFromOther.id, {
+        minPrice: 1000,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "track", id: trackFromOther.id }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("should return 200 with redirectUrl for a free track when user is logged in", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const track = await createTrack(tg.id, { minPrice: 0 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "track", id: track.id }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.redirectUrl, "should return a redirectUrl");
+      assert.ok(response.body.redirectUrl.includes("download"));
+
+      const purchase = await prisma.userTrackPurchase.findFirst({
+        where: { userId: buyer.id, trackId: track.id },
+      });
+      assert.ok(purchase, "purchase record should be created in DB");
+    });
+
+    it("should return 200 with clientSecret for a paid online track purchase", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_track_online",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const track = await createTrack(tg.id, { minPrice: 500 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "track", id: track.id, price: "500" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.clientSecret);
+    });
+
+    it("should return 400 when the price offered is below a track's minPrice", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_track_min",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const track = await createTrack(tg.id, { minPrice: 500 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "track", id: track.id, price: "100" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
     });
 
     it("should return 200 with a hosted redirectUrl when hosted is true", async () => {
@@ -502,6 +606,40 @@ describe("purchase", () => {
       assert.equal(metadata.purchaseType, "trackGroup");
       // trackGroupId points at the first trackGroup in the cart.
       assert.equal(metadata.trackGroupId, String(tg1.id));
+    });
+
+    it("tags a single online track purchase with purchaseType 'track' and its trackId", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_track",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const track = await createTrack(tg.id, { minPrice: 500 });
+
+      const createStub = stubStripeForOnline();
+
+      const result = await initiatePayment({
+        artistId: artist.id,
+        items: [
+          { type: "track", id: String(track.id), quantity: 1, amount: 500 },
+        ],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+      });
+
+      assert.ok(
+        "clientSecret" in result,
+        "an online purchase returns a secret"
+      );
+      const metadata = metadataOf(createStub);
+      assert.equal(metadata.purchaseType, "track");
+      assert.equal(metadata.trackId, String(track.id));
+      assert.ok(
+        !("trackGroupId" in metadata),
+        "a single-track purchase carries no trackGroupId"
+      );
     });
 
     it("tags a single online tip as purchaseType 'tip' and omits trackGroupId", async () => {

@@ -142,7 +142,7 @@ const apiDoc = {
             properties: {
               type: {
                 type: "string",
-                enum: ["trackGroup", "merch", "tip", "subscription"],
+                enum: ["trackGroup", "track", "merch", "tip", "subscription"],
               },
               id: {
                 type: ["number", "string"],
