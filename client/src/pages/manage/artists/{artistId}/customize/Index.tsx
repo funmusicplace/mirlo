@@ -2,10 +2,19 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import FeatureFlag from "components/common/FeatureFlag";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import ArtistSlugInput from "components/common/SlugInput";
 import { Toggle } from "components/common/Toggle";
+import DeleteArtist from "components/ManageArtist/DeleteArtist";
+import ArtistFormColors from "components/ManageArtist/ManageArtistDetails/ArtistFormColors";
+import CustomNamesForTabs from "components/ManageArtist/ManageArtistDetails/CustomNamesForTabs";
+import LabelConfirmation from "components/ManageArtist/ManageArtistDetails/LabelConfirmation";
+import LayoutSettings from "components/ManageArtist/ManageArtistDetails/LayoutSettings";
+import ThankYouMessageEditors from "components/ManageArtist/ManageArtistDetails/ThankYouMessageEditors";
+import PaymentSlider from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/PaymentSlider";
+import SavingInput from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/SavingInput";
+import UploadArtistImage from "components/ManageArtist/UploadArtistImage";
 import { merge } from "lodash";
 import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
@@ -18,17 +27,6 @@ import { useSnackbar } from "state/SnackbarContext";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 import { bp } from "../../../../../constants";
-import ArtistSlugInput from "components/common/SlugInput";
-import DeleteArtist from "components/ManageArtist/DeleteArtist";
-import PaymentSlider from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/PaymentSlider";
-import SavingInput from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/SavingInput";
-import UploadArtistImage from "components/ManageArtist/UploadArtistImage";
-
-import ArtistFormColors from "components/ManageArtist/ManageArtistDetails/ArtistFormColors";
-import CustomNamesForTabs from "components/ManageArtist/ManageArtistDetails/CustomNamesForTabs";
-import LabelConfirmation from "components/ManageArtist/ManageArtistDetails/LabelConfirmation";
-import LayoutSettings from "components/ManageArtist/ManageArtistDetails/LayoutSettings";
-import ThankYouMessageEditors from "components/ManageArtist/ManageArtistDetails/ThankYouMessageEditors";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -388,24 +386,19 @@ export const Index: React.FC = () => {
                   {t("makeSearchable")}
                 </small>
               </FormComponent>
-              <FeatureFlag flag="federatedStreaming">
-                <FormComponent>
-                  <Toggle
-                    ariaDescribedBy="hint-enable-federated-streaming"
-                    label={t("enableFederatedStreaming")}
-                    toggled={federatedStreaming}
-                    onClick={() => {
-                      methods.setValue(
-                        "federatedStreaming",
-                        !federatedStreaming
-                      );
-                    }}
-                  />
-                  <small id="hint-enable-federated-streaming">
-                    {t("makeStreamable")}
-                  </small>
-                </FormComponent>
-              </FeatureFlag>
+              <FormComponent>
+                <Toggle
+                  ariaDescribedBy="hint-enable-federated-streaming"
+                  label={t("enableFederatedStreaming")}
+                  toggled={federatedStreaming}
+                  onClick={() => {
+                    methods.setValue("federatedStreaming", !federatedStreaming);
+                  }}
+                />
+                <small id="hint-enable-federated-streaming">
+                  {t("makeStreamable")}
+                </small>
+              </FormComponent>
               <FormComponent>
                 <Toggle
                   ariaDescribedBy="hint-allow-direct-messages"

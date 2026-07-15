@@ -35,12 +35,11 @@ type SupportTier = {
   user: User;
   createdAt: string;
   amount: number;
+  deleteReason?: string | null;
   artistSubscriptionTier: ArtistSubscriptionTier;
   artistUserSubscriptionCharges?: {
     id: string;
     transactionId?: string;
-    // Charges are returned newest-first. The transaction carries the actual
-    // fees Stripe and Mirlo took for that charge (in cents).
     transaction?: {
       platformCut: number | null;
       stripeCut: number | null;
@@ -239,6 +238,17 @@ const Index = () => {
                         `}
                       >
                         {t("free")}
+                      </Pill>
+                    )}
+                    {r.deleteReason && (
+                      <Pill
+                        variant="warning"
+                        title={t("cancellingExplanation")}
+                        className={css`
+                          margin-left: 0.5rem;
+                        `}
+                      >
+                        {t("cancelling")}
                       </Pill>
                     )}
                   </td>

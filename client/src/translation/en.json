@@ -1442,6 +1442,8 @@
     "tier": "Tier",
     "amount": "Amount",
     "free": "Free",
+    "cancelling": "Cancelling",
+    "cancellingExplanation": "This supporter has cancelled — they'll keep access until the end of their current paid period, then be removed from this list.",
     "noSupportersYet": "No supporters yet, share your profile with others to grow your community."
   },
   "share": {
