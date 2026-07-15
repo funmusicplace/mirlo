@@ -56,7 +56,7 @@ describe("home page", () => {
 
     cy.intercept("GET", "/v1/trackGroups/topSold*", (req) => {
       expect(req.query).to.include({
-        take: "6",
+        take: "12",
         datePurchased: "pastMonth",
       });
 

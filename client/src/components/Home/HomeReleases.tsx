@@ -17,7 +17,7 @@ import { FaRedoAlt, FaChevronRight, FaRss } from "react-icons/fa";
 
 import { bp } from "../../constants";
 
-const futureReleasesPageSize = 6;
+const futureReleasesPageSize = 12;
 
 const PopularReleasesSection = styled.div`
   padding: 4rem 0;
