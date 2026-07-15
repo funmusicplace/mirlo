@@ -78,6 +78,7 @@ export default function () {
         select: {
           id: true,
           amount: true,
+          deleteReason: true,
           user: true,
           artistSubscriptionTier: true,
           artistUserSubscriptionCharges: {
