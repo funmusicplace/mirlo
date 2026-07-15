@@ -11,7 +11,7 @@ import { resolvePayee } from "./payee";
 import { getPaymentProcessor } from "./PaymentProcessor";
 
 export type ResolvedItem = {
-  type: "trackGroup" | "merch" | "tip";
+  type: "trackGroup" | "track" | "merch" | "tip";
   id?: string;
   quantity: number;
   amount: number;
@@ -105,6 +105,7 @@ export const initiatePayment = async ({
     ...(successUrl && { successUrl }),
     ...(purchaseType === "trackGroup" &&
       items[0]?.id && { trackGroupId: items[0].id }),
+    ...(purchaseType === "track" && items[0]?.id && { trackId: items[0].id }),
     items: JSON.stringify(items),
   };
 

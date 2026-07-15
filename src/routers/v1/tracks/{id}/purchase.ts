@@ -146,6 +146,9 @@ export default function () {
 
   POST.apiDoc = {
     summary: "Purchase a Track",
+    deprecated: true,
+    description:
+      'Deprecated — use POST /v1/purchase with items: [{ type: "track", id }] instead.',
     parameters: [
       {
         in: "path",

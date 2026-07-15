@@ -78,17 +78,17 @@ const BuyTrackGroup: React.FC<{
   const isPledgeMode =
     !!trackGroup.fundraiser?.isAllOrNothing &&
     (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
-  // DEPRECATED — Flow A (per-resource Checkout Session + EmbeddedStripeForm).
-  // Track purchases (plan Phase 4) and fundraiser pledges (Phase 5) are not yet
-  // resolved by `POST /v1/purchase`, so they stay on the deprecated
-  // `tracks/:id/purchase` / `trackGroups/:id/purchase` endpoints. Remove this
-  // branch once both are migrated onto usePurchase/PurchaseModal — album
-  // (trackGroup) purchases already are.
-  const usesLegacyFlow = !!track || isPledgeMode;
+  // DEPRECATED — Remove this branch once pledges are migrated onto
+  // usePurchase/PurchaseModal — album and track purchases already are.
+  const usesLegacyFlow = isPledgeMode;
 
-  const checkoutCompletePath = `${getArtistUrl(
-    trackGroup.artist
-  )}/checkout-complete?purchaseType=trackGroup&trackGroupId=${trackGroup.id}`;
+  const checkoutCompletePath = (() => {
+    const params = new URLSearchParams();
+    params.set("purchaseType", track ? "track" : "trackGroup");
+    params.set("trackGroupId", trackGroup.id.toString());
+    if (track) params.set("trackId", track.id.toString());
+    return `${getArtistUrl(trackGroup.artist)}/checkout-complete?${params.toString()}`;
+  })();
 
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
@@ -140,15 +140,13 @@ const BuyTrackGroup: React.FC<{
           return;
         }
 
-        // Album (trackGroup) → unified POST /v1/purchase. The modal/return-url
-        // handles completion; the post-payment full-page redirect resets the
-        // player, covering what onPurchaseComplete did inline (#1630).
+        // Album (trackGroup) or single track → unified POST /v1/purchase.
         await startPurchase({
           artistId: trackGroup.artistId ?? trackGroup.artist.id,
           items: [
             {
-              type: "trackGroup",
-              id: trackGroup.id,
+              type: track ? "track" : "trackGroup",
+              id: track ? track.id : trackGroup.id,
               // determinePrice expects the chosen price in cents.
               price: data.chosenPrice
                 ? String(Number(data.chosenPrice) * 100)

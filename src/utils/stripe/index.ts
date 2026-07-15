@@ -964,7 +964,8 @@ export const completePurchaseFromIntent = async (
   const metadata = (intent.metadata ?? {}) as unknown as SessionMetaData & {
     items?: string;
   };
-  const { purchaseType, userId, userEmail, trackGroupId, artistId } = metadata;
+  const { purchaseType, userId, userEmail, trackGroupId, trackId, artistId } =
+    metadata;
 
   // Adapt the PaymentIntent into the shape the existing handlers expect. All
   // handlers use optional chaining so missing session fields fall back to
@@ -988,6 +989,12 @@ export const completePurchaseFromIntent = async (
       Number(trackGroupId),
       sessionAdapter,
       newUser
+    );
+  } else if (purchaseType === "track" && trackId) {
+    await handleTrackPurchase(
+      Number(actualUserId),
+      Number(trackId),
+      sessionAdapter
     );
   } else if (purchaseType === "tip" && artistId) {
     await handleArtistGift(
