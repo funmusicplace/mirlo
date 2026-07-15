@@ -88,6 +88,14 @@ const errorHandler = (
         err.description
       );
     }
+    log.info(
+      "AppError",
+      req.path,
+      req.method,
+      err.httpCode,
+      err.name,
+      err.description
+    );
     return res.status(err.httpCode).json({
       error: err.message,
     });

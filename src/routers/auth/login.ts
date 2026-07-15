@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import bcrypt from "bcryptjs";
+import { NextFunction, Request, Response } from "express";
+
 import { AppError } from "../../utils/error";
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
