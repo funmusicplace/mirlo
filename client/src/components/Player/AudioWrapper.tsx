@@ -152,7 +152,6 @@ export const AudioWrapper: React.FC<{
               playerRef.current.pause();
             }
           } else {
-            playerRef.current.setAttribute("muted", "");
             playerRef.current.playsInline = true;
             playerRef.current.play().catch(() => {
               dispatch({ type: "setPlaying", playing: false });
