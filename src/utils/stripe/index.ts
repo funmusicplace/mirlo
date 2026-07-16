@@ -15,6 +15,7 @@ import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
   getFeesFromPaymentIntent,
+  getPlatformCurrencyValueFromIntent,
   handleArtistGift,
   handleArtistMerchPurchase,
   handleCataloguePurchase,
@@ -24,7 +25,9 @@ import {
   handleSubscription,
   handleTrackGroupPurchase,
   handleTrackPurchase,
+  PlatformCurrencyValue,
   sendSaleEmails,
+  withPlatformCurrency,
 } from "../handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "../images";
 import { finalCoversBucket, finalMerchImageBucket } from "../minio";
@@ -878,7 +881,8 @@ export const handleMerchPurchasesFromIntent = async (
   userId: number,
   items: MerchPurchaseItem[],
   paymentIntent: Stripe.PaymentIntent,
-  stripeAccountId: string
+  stripeAccountId: string,
+  platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   const merchItems = items.filter((item) => item.type === "merch");
   if (merchItems.length === 0) return;
@@ -905,6 +909,7 @@ export const handleMerchPurchasesFromIntent = async (
       platformCut: applicationFee,
       stripeCut: stripeFee,
       stripeId: paymentIntent.id,
+      ...withPlatformCurrency(platformCurrencyValue),
       paymentStatus: "COMPLETED",
     },
   });
@@ -983,31 +988,42 @@ export const completePurchaseFromIntent = async (
     userId
   );
 
+  // Freeze the transaction's value in the platform's currency (never throws;
+  // falls back to nulls). Checkout Session path doesn't record this.
+  const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
+    intent,
+    accountId
+  );
+
   if (purchaseType === "trackGroup" && trackGroupId) {
     await handleTrackGroupPurchase(
       Number(actualUserId),
       Number(trackGroupId),
       sessionAdapter,
-      newUser
+      newUser,
+      platformCurrencyValue
     );
   } else if (purchaseType === "track" && trackId) {
     await handleTrackPurchase(
       Number(actualUserId),
       Number(trackId),
-      sessionAdapter
+      sessionAdapter,
+      platformCurrencyValue
     );
   } else if (purchaseType === "tip" && artistId) {
     await handleArtistGift(
       Number(actualUserId),
       Number(artistId),
-      sessionAdapter
+      sessionAdapter,
+      platformCurrencyValue
     );
   } else if (purchaseType === "merch" && metadata.items) {
     await handleMerchPurchasesFromIntent(
       Number(actualUserId),
       JSON.parse(metadata.items),
       intent,
-      accountId
+      accountId,
+      platformCurrencyValue
     );
   }
 };

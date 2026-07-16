@@ -18,6 +18,10 @@ import { findArtistIdForURLSlug } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
+import {
+  PlatformCurrencyValue,
+  withPlatformCurrency,
+} from "./handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "./images";
 import { streamOriginalAudio, removeCoverImages } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
@@ -524,6 +528,7 @@ export const registerTrackPurchase = async ({
   message,
   platformCut = null,
   discountPercent,
+  platformCurrencyValue,
 }: {
   userId: number;
   pricePaid: number;
@@ -533,6 +538,7 @@ export const registerTrackPurchase = async ({
   trackId: number;
   platformCut?: number | null;
   discountPercent?: number;
+  platformCurrencyValue?: PlatformCurrencyValue;
 }) => {
   const token = randomUUID();
 
@@ -554,6 +560,7 @@ export const registerTrackPurchase = async ({
           stripeId: paymentProcessorKey,
           platformCut: platformCut,
           discountPercent: discountPercent,
+          ...withPlatformCurrency(platformCurrencyValue),
           paymentStatus: "COMPLETED",
         },
       });
@@ -580,6 +587,7 @@ export const registerTrackPurchase = async ({
         currency: currencyPaid,
         stripeId: paymentProcessorKey,
         platformCut: platformCut,
+        ...withPlatformCurrency(platformCurrencyValue),
         paymentStatus: "COMPLETED",
       },
     });
