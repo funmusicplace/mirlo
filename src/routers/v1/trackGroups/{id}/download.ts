@@ -7,12 +7,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
 import { AppError } from "../../../../utils/error";
-import {
-  getPresignedDownloadUrl,
-  getReadStream,
-  statFile,
-  trackGroupFormatBucket,
-} from "../../../../utils/minio";
+import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
 import {
   FormatOptions,
   basicTrackGroupInclude,
@@ -89,27 +84,8 @@ export default function () {
         `trackGroupId: ${trackGroupId} Found a trackgroup, preparing download`
       );
 
-      const zipName = `${trackGroup.id}/${format}.zip`;
-
-      try {
-        logger.info("checking if trackgroup already zipped");
-        const { backblazeStat, minioStat } = await statFile(
-          trackGroupFormatBucket,
-          zipName
-        );
-        if (!backblazeStat && !minioStat) {
-          logger.info("trackGroup doesn't exist yet, start generating it");
-          const jobId = await startGeneratingZip(
-            trackGroup,
-            trackGroup.tracks,
-            format
-          );
-          return res.json({
-            message: "We've started generating the album",
-            result: { jobId },
-          });
-        }
-      } catch (e) {
+      logger.info("checking if trackgroup already zipped");
+      if (!(await zipExists("trackGroup", trackGroup.id, format))) {
         logger.info("trackGroup doesn't exist yet, start generating it");
         const jobId = await startGeneratingZip(
           trackGroup,
@@ -130,9 +106,10 @@ export default function () {
         // the zip bytes don't flow through this server (egress costs). Falls
         // back to piping the file when presigning isn't available (e.g. local
         // MinIO without a browser-reachable endpoint).
-        const presignedUrl = await getPresignedDownloadUrl(
-          trackGroupFormatBucket,
-          zipName,
+        const presignedUrl = await presignZip(
+          "trackGroup",
+          trackGroup.id,
+          format,
           {
             downloadFilename: `${asciiTitle}.zip`,
             contentType: "application/zip",
@@ -158,7 +135,7 @@ export default function () {
           contentDisposition(`${asciiTitle}.zip`, { type: "attachment" })
         );
 
-        const stream = await getReadStream(trackGroupFormatBucket, zipName);
+        const stream = await streamZip("trackGroup", trackGroup.id, format);
 
         if (stream) {
           await prisma.trackGroupDownload.create({
@@ -171,7 +148,7 @@ export default function () {
         } else {
           throw new AppError({
             httpCode: 500,
-            description: `Remote file not found for ${trackGroupFormatBucket}/${zipName}`,
+            description: `Remote file not found for trackgroup zip ${trackGroup.id}/${format}`,
           });
         }
       } catch (e) {

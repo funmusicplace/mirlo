@@ -4,12 +4,9 @@ import { Job } from "bullmq";
 import ffmpeg from "fluent-ffmpeg";
 
 import {
-  createBucketIfNotExists,
-  finalAudioBucket,
-  getFile,
-  incomingAudioBucket,
-  removeObjectFromStorage,
-  uploadWrapper,
+  downloadIncomingAudio,
+  uploadAudioHlsFile,
+  removeIncomingAudio,
 } from "../utils/minio";
 
 import { logger } from "./queue-worker";
@@ -26,7 +23,6 @@ export default async (job: Job) => {
       `upload-audio: checking if folder exists, if not creating it ${destinationFolder}`
     );
 
-    await createBucketIfNotExists(finalAudioBucket, logger);
     try {
       await fsPromises.stat(destinationFolder);
     } catch (e) {
@@ -37,7 +33,7 @@ export default async (job: Job) => {
     logger.info(`upload-audio: getting file and storing it at ${originalPath}`);
     // FIXME: can this be converted to a stream.
     // It looks like ffmpeg has issues with streams
-    await getFile(incomingAudioBucket, audioId, originalPath);
+    await downloadIncomingAudio(audioId, originalPath);
     logger.info(`upload-audio: got file and put it at ${originalPath}`);
 
     // Capture the original file size
@@ -98,14 +94,14 @@ export default async (job: Job) => {
       const uploadStream = await createReadStream(
         `${destinationFolder}/${file}`
       );
-      await uploadWrapper(finalAudioBucket, `${audioId}/${file}`, uploadStream);
+      await uploadAudioHlsFile(audioId, file, uploadStream);
     }
 
     profiler.done({ message: "Done converting to audio" });
 
     logger.info(`audioId ${audioId}: Done processing streams`);
 
-    await removeObjectFromStorage(incomingAudioBucket, audioId);
+    await removeIncomingAudio(audioId);
     logger.info(`audioId ${audioId}: Cleaned up incoming bucket`);
     await fsPromises.rm(destinationFolder, { recursive: true });
     logger.info(`Cleaned up ${destinationFolder}`);

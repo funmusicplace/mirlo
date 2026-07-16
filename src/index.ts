@@ -25,6 +25,11 @@ import auth from "./routers/auth";
 import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
 import { setCdnUrl } from "./utils/images";
+import {
+  setBucketConfig,
+  BucketConfig,
+  ensureAllBucketsExist,
+} from "./utils/minio";
 import { sanitizeHeadersForLogs } from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
 import { refreshStripeClient } from "./utils/stripe";
@@ -114,7 +119,10 @@ if (!isDev) {
 
 app.use(express.static("public", { maxAge: "1y", immutable: true }));
 
-app.use("/images/:bucket/:filename", serveStatic);
+// Note: only the bucket is a route param — in consolidated bucket mode the
+// object key contains slashes (e.g. trackgroup-covers/<id>-x600.webp), so
+// serveStatic reads the rest of the path itself.
+app.use("/images/:bucket", serveStatic);
 
 app.use("/admin/queues", async (req, res) => {
   const settings = await getSiteSettings();
@@ -283,6 +291,11 @@ app.listen(process.env.PORT, async () => {
   const settings = await getSiteSettings();
   setCdnUrl(settings.cdnUrl ?? undefined);
   await refreshStripeClient();
+  setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+  ensureAllBucketsExist().catch((e) => {
+    logger.error("Failed to eagerly create storage buckets on boot");
+    logger.error(e);
+  });
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`);
 });

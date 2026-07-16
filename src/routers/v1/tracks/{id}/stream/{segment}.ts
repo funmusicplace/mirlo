@@ -2,11 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
-import {
-  finalAudioBucket,
-  getBufferBasedOnStat,
-  statFile,
-} from "../../../../../utils/minio";
+import { getAudioSegmentBufferIfExists } from "../../../../../utils/minio";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
 
 export const fetchFile = async (
@@ -14,25 +10,17 @@ export const fetchFile = async (
   filename: string,
   segment: string
 ) => {
-  const alias = `${filename}/${segment}`;
-
-  const { backblazeStat, minioStat } = await statFile(finalAudioBucket, alias);
-  if (!backblazeStat && !minioStat) {
-    res.send();
-  }
   try {
-    const buffer = await getBufferBasedOnStat(
-      finalAudioBucket,
-      alias,
-      backblazeStat
-    );
-
+    const buffer = await getAudioSegmentBufferIfExists(filename, segment);
+    if (buffer === undefined) {
+      res.send();
+      return;
+    }
     res.end(buffer, "binary");
   } catch (e) {
     console.error("error", e);
     res.status(400);
     res.send();
-    return;
   }
 };
 

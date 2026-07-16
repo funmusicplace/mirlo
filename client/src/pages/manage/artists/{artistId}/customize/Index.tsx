@@ -92,6 +92,12 @@ const generateDefaults = (existing?: Artist) => {
     maxFreePlays: existing?.maxFreePlays,
     properties: merge(
       {
+        colors: {
+          button: "#be3455",
+          buttonText: "#ffffff",
+          background: "#ffffff",
+          text: "#000000",
+        },
         titles: {
           releases: "Releases",
           merch: "Merch",

@@ -8,12 +8,15 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   PutObjectCommand,
+  PutBucketPolicyCommand,
+  PutBucketCorsCommand,
   HeadObjectCommand,
   HeadObjectCommandOutput,
   ListObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 import contentDisposition from "content-disposition";
 import { Client, BucketItem } from "minio";
 import * as Minio from "minio";
@@ -21,43 +24,131 @@ import { Logger } from "winston";
 
 import logger from "../logger";
 
-const s3UniquePrefix = "";
+// Backend-agnostic object storage helpers: MinIO in development, any
+// S3-compatible provider (Backblaze B2 in production) via the AWS SDK.
+// The filename is historical — nothing here is MinIO-specific from the
+// caller's point of view. Bucket layout is documented in
+// docs/hosting/object-storage.md.
 
-export const incomingArtistBackgroundBucket =
-  s3UniquePrefix + "incoming-artist-banners";
-export const finalArtistBackgroundBucket = s3UniquePrefix + "artist-banners";
+export const incomingArtistBackgroundBucket = "incoming-artist-banners";
+export const finalArtistBackgroundBucket = "artist-banners";
 
-export const incomingArtistAvatarBucket =
-  s3UniquePrefix + "incoming-artist-avatars";
-export const finalArtistAvatarBucket = s3UniquePrefix + "artist-avatars";
+export const incomingArtistAvatarBucket = "incoming-artist-avatars";
+export const finalArtistAvatarBucket = "artist-avatars";
 
-export const incomingUserAvatarBucket =
-  s3UniquePrefix + "incoming-user-avatars";
-export const finalUserAvatarBucket = s3UniquePrefix + "mirlo-user-avatars";
+export const incomingUserAvatarBucket = "incoming-user-avatars";
+export const finalUserAvatarBucket = "mirlo-user-avatars";
 
-export const incomingUserBannerBucket =
-  s3UniquePrefix + "incoming-user-banners";
-export const finalUserBannerBucket = s3UniquePrefix + "mirlo-user-banners";
+export const incomingUserBannerBucket = "incoming-user-banners";
+export const finalUserBannerBucket = "mirlo-user-banners";
 
-export const incomingCoversBucket = s3UniquePrefix + "incoming-covers";
-export const finalCoversBucket = s3UniquePrefix + "trackgroup-covers";
+export const incomingCoversBucket = "incoming-covers";
+export const finalCoversBucket = "trackgroup-covers";
 
-export const incomingMerchImageBucket =
-  s3UniquePrefix + "incoming-merch-images";
-export const finalMerchImageBucket = s3UniquePrefix + "merch-images";
+export const incomingMerchImageBucket = "incoming-merch-images";
+export const finalMerchImageBucket = "merch-images";
 
-export const finalPostImageBucket = s3UniquePrefix + "post-images";
+export const finalPostImageBucket = "post-images";
 
-export const incomingAudioBucket = s3UniquePrefix + "incoming-track-audio";
-export const finalAudioBucket = s3UniquePrefix + "track-audio";
+export const incomingAudioBucket = "incoming-track-audio";
+export const finalAudioBucket = "track-audio";
 
-export const trackGroupFormatBucket = s3UniquePrefix + "trackgroup-format";
-export const trackFormatBucket = s3UniquePrefix + "track-format";
+export const trackGroupFormatBucket = "trackgroup-format";
+export const trackFormatBucket = "track-format";
 
-export const downloadableContentBucket =
-  s3UniquePrefix + "mirlo-downloadable-content";
-export const incomingImageBucket = s3UniquePrefix + "incoming-mirlo-images";
-export const finalImageBucket = s3UniquePrefix + "mirlo-images";
+export const downloadableContentBucket = "mirlo-downloadable-content";
+export const incomingImageBucket = "incoming-mirlo-images";
+export const finalImageBucket = "mirlo-images";
+
+// Consolidated bucket config (Phase 1 self-hosting support).
+// null = legacy mode: use per-type bucket constants above (for existing installs).
+// Set = consolidated mode: 3 buckets with path prefixes (for new installs).
+export type BucketConfig = { prefix: string };
+
+// Per-image-type routing table.
+// incoming: legacy bucket for uploads before optimization; final: legacy bucket after.
+// prefix: path prefix within mirlo-images in consolidated mode (= final bucket name, or
+//         undefined for the generic "image" type which sits at the bucket root).
+// queue: whether to add a BullMQ optimize-image job after upload.
+const imageTypeBuckets = {
+  artistAvatar: {
+    incoming: incomingArtistAvatarBucket,
+    final: finalArtistAvatarBucket,
+    prefix: finalArtistAvatarBucket as string | undefined,
+    queue: true,
+  },
+  artistBackground: {
+    incoming: incomingArtistBackgroundBucket,
+    final: finalArtistBackgroundBucket,
+    prefix: finalArtistBackgroundBucket as string | undefined,
+    queue: true,
+  },
+  userAvatar: {
+    incoming: incomingArtistAvatarBucket,
+    final: finalUserAvatarBucket,
+    prefix: finalUserAvatarBucket as string | undefined,
+    queue: true,
+  },
+  userBanner: {
+    incoming: incomingUserBannerBucket,
+    final: finalUserBannerBucket,
+    prefix: finalUserBannerBucket as string | undefined,
+    queue: true,
+  },
+  trackGroupCover: {
+    incoming: incomingCoversBucket,
+    final: finalCoversBucket,
+    prefix: finalCoversBucket as string | undefined,
+    queue: true,
+  },
+  merch: {
+    incoming: incomingMerchImageBucket,
+    final: finalMerchImageBucket,
+    prefix: finalMerchImageBucket as string | undefined,
+    queue: true,
+  },
+  postImage: {
+    incoming: finalPostImageBucket,
+    final: finalPostImageBucket,
+    prefix: finalPostImageBucket as string | undefined,
+    queue: false,
+  },
+  image: {
+    incoming: incomingImageBucket,
+    final: finalImageBucket,
+    prefix: undefined as string | undefined,
+    queue: true,
+  },
+};
+export type ImageType = keyof typeof imageTypeBuckets;
+
+let _bucketConfig: BucketConfig | null = null;
+const _ensuredBuckets = new Set<string>();
+
+export const setBucketConfig = (config: BucketConfig | null) => {
+  _bucketConfig = config;
+  _ensuredBuckets.clear();
+};
+
+const ensureBucketCached = async (bucket: string, makePublic?: boolean) => {
+  if (!_ensuredBuckets.has(bucket)) {
+    await createBucketIfNotExists(bucket, logger, { makePublic });
+    _ensuredBuckets.add(bucket);
+  }
+};
+
+const isConsolidatedMode = (): boolean => _bucketConfig !== null;
+
+export const getImagesBucket = (legacyFallback: string): string =>
+  _bucketConfig ? `${_bucketConfig.prefix}mirlo-images` : legacyFallback;
+
+export const getAudioBucket = (
+  legacyFallback: string = finalAudioBucket
+): string =>
+  _bucketConfig ? `${_bucketConfig.prefix}mirlo-audio` : legacyFallback;
+
+export const getDownloadsBucket = (legacyFallback: string): string =>
+  _bucketConfig ? `${_bucketConfig.prefix}mirlo-downloads` : legacyFallback;
 
 const {
   MINIO_HOST = "",
@@ -67,10 +158,12 @@ const {
   MINIO_ROOT_PASSWORD = "",
   S3_ACCESS_KEY_ID = "",
   S3_SECRET_ACCESS_KEY = "",
-  S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
+  S3_ENDPOINT: RAW_S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
   S3_REGION = "us-east-005",
   MINIO_API_PORT = 9000,
 } = process.env;
+
+export const S3_ENDPOINT = RAW_S3_ENDPOINT;
 
 // Storage backend selection. Set STORAGE_BACKEND=minio|s3|backblaze to choose
 // explicitly; when unset, the backend is inferred from what's configured —
@@ -127,8 +220,10 @@ export const minioPublicClient =
 
 // To test backblaze locally, set S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY
 // (the backend auto-switches), or force it with STORAGE_BACKEND=s3.
-// FIXME: this should / could be set in the database as part
-// of the site settings.
+// Storage credentials live in .env rather than the Settings table
+// deliberately — the S3Client below is constructed once at module load,
+// before any DB read could happen, and .env is also what install.sh already
+// prompts for.
 
 // Instantiate a second minio client for backblaze
 export const backblazeClient =
@@ -140,27 +235,115 @@ export const backblazeClient =
           accessKeyId: S3_ACCESS_KEY_ID,
           secretAccessKey: S3_SECRET_ACCESS_KEY,
         },
+        // Path-style (endpoint/bucket/key) rather than virtual-hosted-style
+        // (bucket.endpoint/key). Virtual-hosted style depends on the provider
+        // having wildcard DNS/TLS for arbitrary bucket-name subdomains, which
+        // isn't reliable on every S3-compatible provider and has caused
+        // requests to hang indefinitely on newly-created buckets.
+        forcePathStyle: true,
         responseChecksumValidation: "WHEN_REQUIRED",
         requestChecksumCalculation: "WHEN_REQUIRED",
         maxAttempts: 4,
+        // Without explicit timeouts, a stalled connection (no response, no
+        // error) hangs forever — maxAttempts only retries attempts that
+        // actually fail, so a silent stall never gets retried at all.
+        requestHandler: new NodeHttpHandler({
+          connectionTimeout: 10_000,
+          requestTimeout: 30_000,
+        }),
       })
     : undefined;
 
-const createB2BucketIfNotExists = async (bucket: string) => {
+// Buckets holding processed images are fetched directly by browsers (see
+// docs/hosting/object-storage.md) and so need public read access. Providers
+// like Hetzner Object Storage/Backblaze B2 create buckets private by default,
+// so we apply this ourselves rather than relying on manual console setup.
+const publicReadPolicy = (bucket: string) =>
+  JSON.stringify({
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Sid: "PublicReadGetObject",
+        Effect: "Allow",
+        Principal: "*",
+        Action: "s3:GetObject",
+        Resource: `arn:aws:s3:::${bucket}/*`,
+      },
+    ],
+  });
+
+// The browser PUTs directly to a presigned URL for track audio uploads (and
+// GETs directly for some flows), which is a cross-origin request from the
+// site's own domain to the storage provider's domain. Providers create
+// buckets with no CORS configuration by default, so that PUT never reaches
+// storage — the browser blocks it at the preflight stage. AllowedOrigins is
+// left as "*" since the presigned signature (not CORS) is what actually
+// authorizes the request; CORS here only unblocks the browser's JS access.
+const corsConfiguration = () => ({
+  CORSRules: [
+    {
+      AllowedOrigins: ["*"],
+      AllowedMethods: ["GET", "PUT", "POST", "HEAD"],
+      AllowedHeaders: ["*"],
+      ExposeHeaders: ["ETag"],
+      MaxAgeSeconds: 3000,
+    },
+  ],
+});
+
+const applyCorsPolicyS3 = async (bucket: string) => {
+  if (!backblazeClient) return;
+  try {
+    await backblazeClient.send(
+      new PutBucketCorsCommand({
+        Bucket: bucket,
+        CORSConfiguration: corsConfiguration(),
+      })
+    );
+    logger.info(`backblaze: set CORS policy on bucket: ${bucket}`);
+  } catch (e) {
+    logger.error(`backblaze: failed to set CORS policy on bucket ${bucket}`);
+    logger.error(e);
+  }
+};
+
+const applyPublicReadPolicyS3 = async (bucket: string) => {
+  if (!backblazeClient) return;
+  try {
+    await backblazeClient.send(
+      new PutBucketPolicyCommand({
+        Bucket: bucket,
+        Policy: publicReadPolicy(bucket),
+      })
+    );
+    logger.info(`backblaze: set public-read policy on bucket: ${bucket}`);
+  } catch (e) {
+    logger.error(
+      `backblaze: failed to set public-read policy on bucket ${bucket} — ` +
+        `it may need to be made public manually via your provider's console`
+    );
+    logger.error(e);
+  }
+};
+
+const createB2BucketIfNotExists = async (
+  bucket: string,
+  makePublic?: boolean
+) => {
   if (!backblazeClient) {
     throw new Error("Backblaze client is not initialized");
   }
-  logger.info(`backblaze: checking if a bucket exists: ${bucket}`);
-  let exists;
   try {
-    exists = await backblazeClient.send(
-      new HeadBucketCommand({ Bucket: bucket })
-    );
+    await backblazeClient.send(new HeadBucketCommand({ Bucket: bucket }));
   } catch (e) {
-    logger.info(`backblaze: failed to check, creating bucket: ${bucket}`);
+    logger.info(`backblaze: bucket ${bucket} doesn't exist yet, creating it`);
     await backblazeClient.send(new CreateBucketCommand({ Bucket: bucket }));
-    logger.info(`backblaze: created bucket: ${bucket}`);
   }
+
+  if (makePublic) {
+    await applyPublicReadPolicyS3(bucket);
+  }
+  await applyCorsPolicyS3(bucket);
 
   return true;
 };
@@ -224,15 +407,48 @@ export const statFile = async (bucket: string, filename: string) => {
   };
 };
 
+export interface FileMeta {
+  contentType?: string;
+  contentLength?: number;
+  lastModified?: Date;
+  etag?: string;
+}
+
+const normalizeStatToMeta = (stat: {
+  backblazeStat?: HeadObjectCommandOutput;
+  minioStat?: Awaited<ReturnType<Client["statObject"]>>;
+}): FileMeta | null => {
+  if (stat.backblazeStat) {
+    return {
+      contentType: stat.backblazeStat.ContentType,
+      contentLength: stat.backblazeStat.ContentLength,
+      lastModified: stat.backblazeStat.LastModified,
+      etag: stat.backblazeStat.ETag,
+    };
+  }
+  if (stat.minioStat) {
+    return {
+      contentType: stat.minioStat.metaData?.["content-type"] as
+        | string
+        | undefined,
+      contentLength: stat.minioStat.size,
+      lastModified: stat.minioStat.lastModified,
+      etag: stat.minioStat.etag,
+    };
+  }
+  return null;
+};
+
 export const createBucketIfNotExists = async (
   bucket: string,
-  logger?: Logger
+  logger?: Logger,
+  options?: { makePublic?: boolean }
 ) => {
   let exists;
   logger?.info(`${backendStorage}: checking if a bucket exists in: ${bucket}`);
 
   if (backendStorage === "backblaze") {
-    await createB2BucketIfNotExists(bucket);
+    await createB2BucketIfNotExists(bucket, options?.makePublic);
   } else if (backendStorage === "minio" && minioClient) {
     try {
       exists = await minioClient.bucketExists(bucket);
@@ -248,6 +464,18 @@ export const createBucketIfNotExists = async (
       logger?.info(`minio: does not exist, creating bucket: ${bucket}`);
       await minioClient.makeBucket(bucket);
       logger?.info(`minio: created bucket: ${bucket}`);
+    }
+
+    if (options?.makePublic) {
+      try {
+        await minioClient.setBucketPolicy(bucket, publicReadPolicy(bucket));
+        logger?.info(`minio: set public-read policy on bucket: ${bucket}`);
+      } catch (e) {
+        logger?.error(
+          `minio: failed to set public-read policy on bucket ${bucket}`
+        );
+        logger?.error(e);
+      }
     }
   }
 
@@ -670,4 +898,296 @@ export const removeObjectsFromBucket = async (
       minioObojects.map((o) => o.name!)
     );
   }
+};
+
+// ─── Domain storage operations ────────────────────────────────────────────────
+// All bucket selection and key construction lives here.
+// Call sites express intent; this layer handles the routing.
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+
+const audioIncomingKey = (audioId: string) =>
+  isConsolidatedMode() ? `incoming/${audioId}` : audioId;
+
+export const uploadIncomingAudio = async (
+  audioId: string,
+  stream: Readable
+) => {
+  const bucket = getAudioBucket(incomingAudioBucket);
+  await ensureBucketCached(bucket);
+  return uploadWrapper(bucket, audioIncomingKey(audioId), stream);
+};
+
+export const downloadIncomingAudio = (audioId: string, destPath: string) =>
+  getFile(
+    getAudioBucket(incomingAudioBucket),
+    audioIncomingKey(audioId),
+    destPath
+  );
+
+export const getAudioUploadUrl = (audioId: string) =>
+  getPresignedUploadUrl(
+    getAudioBucket(incomingAudioBucket),
+    audioIncomingKey(audioId)
+  );
+
+export const removeIncomingAudio = (audioId: string) =>
+  removeObjectFromStorage(
+    getAudioBucket(incomingAudioBucket),
+    audioIncomingKey(audioId)
+  );
+
+export const downloadOriginalAudio = (
+  audioId: string,
+  ext: string,
+  destPath: string
+) => getFile(getAudioBucket(), `${audioId}/original.${ext}`, destPath);
+
+export const streamOriginalAudio = (audioId: string, ext: string) =>
+  getReadStream(getAudioBucket(), `${audioId}/original.${ext}`);
+
+export const statAudioSegment = (audioId: string, segment: string) =>
+  statFile(getAudioBucket(), `${audioId}/${segment}`);
+
+export const getAudioSegmentBuffer = (
+  audioId: string,
+  segment: string,
+  stat?: HeadObjectCommandOutput
+) => getBufferBasedOnStat(getAudioBucket(), `${audioId}/${segment}`, stat);
+
+export const getAudioSegmentBufferIfExists = async (
+  audioId: string,
+  segment: string
+): Promise<Buffer | undefined> => {
+  const stat = await statAudioSegment(audioId, segment);
+  if (!stat.backblazeStat && !stat.minioStat) return undefined;
+  const { buffer } = await getBufferFromStorage(
+    getAudioBucket(),
+    `${audioId}/${segment}`
+  );
+  return buffer as Buffer | undefined;
+};
+
+export const uploadAudioHlsFile = async (
+  audioId: string,
+  filename: string,
+  stream: Readable
+) => {
+  const bucket = getAudioBucket();
+  await ensureBucketCached(bucket);
+  return uploadWrapper(bucket, `${audioId}/${filename}`, stream);
+};
+
+export const removeAudioFiles = (audioId: string) =>
+  removeObjectsFromBucket(getAudioBucket(), audioId);
+
+// ── Images ────────────────────────────────────────────────────────────────────
+
+export const getImageFinalBucket = (imageType: ImageType): string =>
+  imageTypeBuckets[imageType].final;
+
+export const imageTypeUsesQueue = (imageType: ImageType): boolean =>
+  imageTypeBuckets[imageType].queue;
+
+export const uploadIncomingImageByType = async (
+  imageType: ImageType,
+  fileName: string,
+  stream: Readable,
+  options?: { contentType?: string }
+) => {
+  const { incoming, prefix } = imageTypeBuckets[imageType];
+  const bucket = getImagesBucket(incoming);
+  await ensureBucketCached(bucket, true);
+  const key =
+    isConsolidatedMode() && prefix
+      ? `incoming/${prefix}/${fileName}`
+      : fileName;
+  return uploadWrapper(bucket, key, stream, options);
+};
+
+export const downloadIncomingImageByType = (
+  imageType: ImageType,
+  imageId: string
+) => {
+  const { incoming, prefix } = imageTypeBuckets[imageType];
+  return getBufferFromStorage(
+    getImagesBucket(incoming),
+    isConsolidatedMode() && prefix ? `incoming/${prefix}/${imageId}` : imageId
+  );
+};
+
+export const uploadOptimizedImageByType = async (
+  imageType: ImageType,
+  fileName: string,
+  buffer: Buffer,
+  options?: { contentType?: string; cacheControl?: string }
+) => {
+  const { final, prefix } = imageTypeBuckets[imageType];
+  const bucket = getImagesBucket(final);
+  await ensureBucketCached(bucket, true);
+  const key =
+    isConsolidatedMode() && prefix ? `${prefix}/${fileName}` : fileName;
+  return uploadWrapper(bucket, key, buffer, options);
+};
+
+export const removeIncomingImageByType = (
+  imageType: ImageType,
+  imageId: string
+) => {
+  const { incoming, prefix } = imageTypeBuckets[imageType];
+  return removeObjectFromStorage(
+    getImagesBucket(incoming),
+    isConsolidatedMode() && prefix ? `incoming/${prefix}/${imageId}` : imageId
+  );
+};
+
+export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>
+  getBufferFromStorage(
+    getImagesBucket(finalCoversBucket),
+    `${isConsolidatedMode() ? `${finalCoversBucket}/` : ""}${coverId}-x1500.${ext}`
+  );
+
+export const removeCoverImages = (coverId: string) =>
+  removeObjectsFromBucket(
+    getImagesBucket(finalCoversBucket),
+    isConsolidatedMode() ? `${finalCoversBucket}/${coverId}` : coverId
+  );
+
+// ── Downloadable content ──────────────────────────────────────────────────────
+
+const contentKey = (id: string) =>
+  isConsolidatedMode() ? `content/${id}` : id;
+
+export const getDownloadableContentUploadUrl = (id: string) =>
+  getPresignedUploadUrl(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id)
+  );
+
+export const statDownloadableContent = (id: string) =>
+  statFile(getDownloadsBucket(downloadableContentBucket), contentKey(id));
+
+export const getDownloadableContentMeta = async (
+  id: string
+): Promise<FileMeta | null> => {
+  const stat = await statDownloadableContent(id);
+  return normalizeStatToMeta(stat);
+};
+
+export const getDownloadableContentBufferFromStat = (
+  id: string,
+  stat?: HeadObjectCommandOutput
+) =>
+  getBufferBasedOnStat(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id),
+    stat
+  );
+
+export const getDownloadableContentBuffer = (id: string) =>
+  getBufferFromStorage(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id)
+  );
+
+export const removeDownloadableContent = (id: string) =>
+  removeObjectsFromBucket(
+    getDownloadsBucket(downloadableContentBucket),
+    contentKey(id)
+  );
+
+// ── Zips ──────────────────────────────────────────────────────────────────────
+
+const zipBucket = (type: "track" | "trackGroup") =>
+  type === "track"
+    ? getDownloadsBucket(trackFormatBucket)
+    : getDownloadsBucket(trackGroupFormatBucket);
+
+const zipKey = (type: "track" | "trackGroup", id: number, format: string) =>
+  `${isConsolidatedMode() ? `${type === "track" ? "track" : "trackgroup"}/` : ""}${id}/${format}.zip`;
+
+export const statZip = (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string
+) => statFile(zipBucket(type), zipKey(type, id, format));
+
+export const zipExists = async (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string
+): Promise<boolean> => {
+  const { backblazeStat, minioStat } = await statZip(type, id, format);
+  return !!(backblazeStat || minioStat);
+};
+
+export const streamZip = (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string
+) => getReadStream(zipBucket(type), zipKey(type, id, format));
+
+export const presignZip = (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string,
+  options?: Parameters<typeof getPresignedDownloadUrl>[2]
+) =>
+  getPresignedDownloadUrl(zipBucket(type), zipKey(type, id, format), options);
+
+export const uploadZip = async (
+  type: "track" | "trackGroup",
+  id: number,
+  format: string,
+  stream: Readable
+) => {
+  const bucket = zipBucket(type);
+  await ensureBucketCached(bucket);
+  return uploadWrapper(bucket, zipKey(type, id, format), stream);
+};
+
+// ── Eager bucket creation ────────────────────────────────────────────────────
+// S3-compatible providers (Ceph-backed ones especially) can take a few
+// seconds to make a just-created bucket writable/reachable. Rather than let
+// that surface as a confusing failure on someone's first upload of a given
+// media type, create every bucket this instance will ever need right after
+// boot, so the delay happens once during startup instead of mid-upload.
+export const ensureAllBucketsExist = async () => {
+  const imageBuckets = new Set<string>();
+  Object.values(imageTypeBuckets).forEach(({ incoming, final }) => {
+    imageBuckets.add(getImagesBucket(incoming));
+    imageBuckets.add(getImagesBucket(final));
+  });
+
+  const audioBuckets = new Set([
+    getAudioBucket(incomingAudioBucket),
+    getAudioBucket(finalAudioBucket),
+  ]);
+
+  const downloadBuckets = new Set([
+    getDownloadsBucket(downloadableContentBucket),
+    getDownloadsBucket(trackFormatBucket),
+    getDownloadsBucket(trackGroupFormatBucket),
+  ]);
+
+  await Promise.all([
+    ...Array.from(imageBuckets).map((b) =>
+      ensureBucketCached(b, true).catch((e) => {
+        logger.error(`Failed to eagerly create image bucket ${b}`);
+        logger.error(e);
+      })
+    ),
+    ...Array.from(audioBuckets).map((b) =>
+      ensureBucketCached(b).catch((e) => {
+        logger.error(`Failed to eagerly create audio bucket ${b}`);
+        logger.error(e);
+      })
+    ),
+    ...Array.from(downloadBuckets).map((b) =>
+      ensureBucketCached(b).catch((e) => {
+        logger.error(`Failed to eagerly create downloads bucket ${b}`);
+        logger.error(e);
+      })
+    ),
+  ]);
 };

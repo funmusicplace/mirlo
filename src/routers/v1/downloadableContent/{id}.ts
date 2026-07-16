@@ -1,13 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../auth/passport";
-import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../auth/passport";
 import { AppError } from "../../../utils/error";
 import {
-  downloadableContentBucket,
-  getBufferBasedOnStat,
-  statFile,
+  getDownloadableContentMeta,
+  getDownloadableContentBuffer,
 } from "../../../utils/minio";
 
 type Params = {
@@ -44,13 +43,9 @@ export default function () {
           description: "You do not have access to this content",
         });
       }
+      const meta = await getDownloadableContentMeta(contentId);
 
-      const { backblazeStat } = await statFile(
-        downloadableContentBucket,
-        contentId
-      );
-
-      if (!backblazeStat) {
+      if (!meta) {
         throw new AppError({
           httpCode: 404,
           description: "Content not found",
@@ -59,21 +54,17 @@ export default function () {
 
       res.setHeader(
         "Content-Type",
-        backblazeStat?.ContentType || "application/octet-stream"
+        meta.contentType || "application/octet-stream"
       );
-      res.setHeader("Content-Length", backblazeStat?.ContentLength || 0);
+      res.setHeader("Content-Length", meta.contentLength || 0);
       res.setHeader(
         "Last-Modified",
-        backblazeStat?.LastModified?.toUTCString() || new Date().toUTCString()
+        meta.lastModified?.toUTCString() || new Date().toUTCString()
       );
-      res.setHeader("ETag", `"${backblazeStat.ETag}"`);
+      res.setHeader("ETag", `"${meta.etag}"`);
 
       try {
-        const buffer = await getBufferBasedOnStat(
-          downloadableContentBucket,
-          contentId,
-          backblazeStat
-        );
+        const { buffer } = await getDownloadableContentBuffer(contentId);
 
         res.end(buffer, "binary");
 

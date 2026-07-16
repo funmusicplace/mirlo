@@ -5,12 +5,7 @@ import filenamify from "filenamify";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { AppError } from "../../../../utils/error";
-import {
-  getPresignedDownloadUrl,
-  getReadStream,
-  statFile,
-  trackFormatBucket,
-} from "../../../../utils/minio";
+import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
 import {
   FormatOptions,
   basicTrackGroupInclude,
@@ -86,22 +81,9 @@ export default function () {
 
       logger.info(`trackId: ${trackId} Found a track, preparing download`);
 
-      const zipName = `${track.id}/${format}.zip`;
-
-      try {
-        logger.info("checking if track already zipped");
-        const { backblazeStat, minioStat } = await statFile(
-          trackFormatBucket,
-          zipName
-        );
-        if (!backblazeStat && !minioStat) {
-          logger.info("Track not zipped");
-          throw new AppError({
-            httpCode: 400,
-            description: "Need to generate track folder first",
-          });
-        }
-      } catch (e) {
+      logger.info("checking if track already zipped");
+      if (!(await zipExists("track", track.id, format))) {
+        logger.info("Track not zipped");
         throw new AppError({
           httpCode: 400,
           description: "Need to generate track folder first",
@@ -119,14 +101,10 @@ export default function () {
         // the zip bytes don't flow through this server (egress costs). Falls
         // back to piping the file when presigning isn't available (e.g. local
         // MinIO without a browser-reachable endpoint).
-        const presignedUrl = await getPresignedDownloadUrl(
-          trackFormatBucket,
-          zipName,
-          {
-            downloadFilename: `${title}.zip`,
-            contentType: "application/zip",
-          }
-        );
+        const presignedUrl = await presignZip("track", track.id, format, {
+          downloadFilename: `${title}.zip`,
+          contentType: "application/zip",
+        });
 
         if (presignedUrl) {
           logger.info(
@@ -139,14 +117,14 @@ export default function () {
         res.attachment(`${title}.zip`);
         res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
 
-        const stream = await getReadStream(trackFormatBucket, zipName);
+        const stream = await streamZip("track", track.id, format);
 
         if (stream) {
           stream.pipe(res);
         } else {
           throw new AppError({
             httpCode: 500,
-            description: `Remote file not found for ${trackFormatBucket}/${zipName}`,
+            description: `Remote file not found for track zip ${track.id}/${format}`,
           });
         }
       } catch (e) {

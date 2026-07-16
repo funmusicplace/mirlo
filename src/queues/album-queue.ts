@@ -1,8 +1,8 @@
+import { Track, TrackAudio, TrackGroup } from "@mirlo/prisma/client";
 import { Queue, QueueEvents } from "bullmq";
+
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
-import { Track, TrackAudio, TrackGroup } from "@mirlo/prisma/client";
-import { trackFormatBucket, trackGroupFormatBucket } from "../utils/minio";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -66,9 +66,7 @@ export const startGeneratingZip = async (
   trackGroup: TrackGroup & { tracks: Track[] },
   tracks: (Track & { audio: TrackAudio | null })[],
   format: string,
-  destinationBucket:
-    | typeof trackFormatBucket
-    | typeof trackGroupFormatBucket = trackGroupFormatBucket
+  destinationType: "track" | "trackGroup" = "trackGroup"
 ) => {
   const jobKey = `${trackGroup.id}-${format}`;
 
@@ -99,7 +97,7 @@ export const startGeneratingZip = async (
       trackGroup,
       tracks,
       format,
-      destinationBucket,
+      destinationType,
     },
     { deduplication: { id: jobKey, ttl: 5000 } }
   );

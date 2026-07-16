@@ -12,6 +12,12 @@ We've looked at other payment platforms like PayPal and Wise, but currently the 
 
 :::
 
+::: details Can I use Mirlo without setting up Stripe?
+
+Yes! If you want your music to be freely available on Mirlo you can upload it and share it. You can choose to let people download it or just let them play it from the site.
+
+:::
+
 ## Product
 
 ::: details How much does Mirlo cost?

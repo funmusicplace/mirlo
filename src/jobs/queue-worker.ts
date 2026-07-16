@@ -3,24 +3,31 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import yargs from "yargs";
 import { Job, Worker } from "bullmq";
 import winston from "winston";
-import uploadAudioJob from "./upload-audio";
-import verifyAudioJob from "./verify-audio";
+import yargs from "yargs";
+
+import { REDIS_CONFIG } from "../config/redis";
+import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
+import {
+  setBucketConfig,
+  BucketConfig,
+  ensureAllBucketsExist,
+} from "../utils/minio";
+import { getSiteSettings } from "../utils/settings";
+
+import cleanUpOldFilesJob from "./clean-up-old-files";
 import generateAlbumJob from "./generate-album";
 import optimizeImage from "./optimize-image";
-import cleanUpOldFilesJob from "./clean-up-old-files";
-import sendPostNotification from "./send-post-notification";
-import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
-
 import sendMail from "./send-mail";
+import sendPostNotification from "./send-post-notification";
 
 import "../queues/send-mail-queue";
 import "../queues/send-post-notification-queue";
 import "../queues/auto-purchase-new-albums-queue";
 
-import { REDIS_CONFIG } from "../config/redis";
+import uploadAudioJob from "./upload-audio";
+import verifyAudioJob from "./verify-audio";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -43,6 +50,18 @@ const workerOptions = {
   connection: REDIS_CONFIG,
 };
 
+// The bucket config lives in the Settings table and can be changed at runtime
+// through the admin UI. The API process refreshes its own in-memory copy when
+// settings are saved, but this is a separate process — without re-reading
+// before each job, a prefix change after startup makes workers read/write
+// different buckets than the API uploaded to.
+const withFreshBucketConfig =
+  (processor: (job: Job) => Promise<any>) => async (job: Job) => {
+    const settings = await getSiteSettings();
+    setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+    return processor(job);
+  };
+
 /**
  * Factory function to create a worker with standard event logging
  */
@@ -53,7 +72,11 @@ function createWorkerWithLogging(
   startupMessage: string,
   includeActiveEvent = false
 ): Worker {
-  const worker = new Worker(queueName, processor, options);
+  const worker = new Worker(
+    queueName,
+    withFreshBucketConfig(processor),
+    options
+  );
   logger.info(startupMessage);
 
   if (includeActiveEvent) {
@@ -86,8 +109,14 @@ function createWorkerWithLogging(
   return worker;
 }
 
-yargs // eslint-disable-line
-  .command("run", "starts file processing queue", (argv: any) => {
+yargs
+  .command("run", "starts file processing queue", async (argv: any) => {
+    const settings = await getSiteSettings();
+    setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+    ensureAllBucketsExist().catch((e) => {
+      logger.error("Failed to eagerly create storage buckets on boot");
+      logger.error(e);
+    });
     logger.info("STARTING WORKER QUEUE");
     audioQueue();
     // audioDurationQueue();
