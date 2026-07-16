@@ -171,6 +171,8 @@ const routes = [
   "admin/chargePledges",
   "admin/fundraiserPledges",
   "admin/stats",
+  "admin/clients",
+  "admin/clients/{id}",
   "oembed",
   "flag",
   "sm/canimus.json",

@@ -7,9 +7,8 @@ import App from "./App";
 import ErrorPage from "./components/ErrorPage";
 
 async function markdownPage(source: string) {
-  const { PageMarkdownWrapper } = await import(
-    "components/common/PageMarkdownWrapper"
-  );
+  const { PageMarkdownWrapper } =
+    await import("components/common/PageMarkdownWrapper");
   const { default: MarkdownContent } =
     await import("components/common/MarkdownContent");
   const { default: WidthContainer } =
@@ -83,8 +82,7 @@ const routes: RouteObject[] = [
       {
         path: "checkout",
         async lazy() {
-          const { default: Component } =
-            await import("pages/checkout/Index");
+          const { default: Component } = await import("pages/checkout/Index");
           return { Component };
         },
       },
@@ -123,7 +121,8 @@ const routes: RouteObject[] = [
       {
         path: "post/:postId",
         async lazy() {
-          const { default: Component } = await import("pages/post/{postId}/Index");
+          const { default: Component } =
+            await import("pages/post/{postId}/Index");
           return { Component };
         },
       },
@@ -207,8 +206,7 @@ const routes: RouteObject[] = [
           {
             path: "sales",
             async lazy() {
-              const { default: Component } =
-                await import("pages/sales/Index");
+              const { default: Component } = await import("pages/sales/Index");
               return { Component };
             },
           },
@@ -324,8 +322,7 @@ const routes: RouteObject[] = [
           {
             path: "",
             async lazy() {
-              const { default: Component } =
-                await import("pages/manage/Index");
+              const { default: Component } = await import("pages/manage/Index");
               return { Component };
             },
           },
@@ -696,6 +693,14 @@ const routes: RouteObject[] = [
             },
           },
           {
+            path: "clients",
+            async lazy() {
+              const { default: Component } =
+                await import("pages/admin/clients/Index");
+              return { Component };
+            },
+          },
+          {
             path: "send-emails",
             async lazy() {
               const { default: Component } =
@@ -949,9 +954,7 @@ const routes: RouteObject[] = [
             path: "release/:trackGroupId/tracks/:trackId/download",
             async lazy() {
               const { default: Component } =
-                await import(
-                  "pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/download/Index"
-                );
+                await import("pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/download/Index");
               return { Component };
             },
           },
@@ -959,9 +962,7 @@ const routes: RouteObject[] = [
             path: "release/:trackGroupId/tracks/:trackId",
             async lazy() {
               const { default: Component } =
-                await import(
-                  "pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/Index"
-                );
+                await import("pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/Index");
               return { Component };
             },
           },

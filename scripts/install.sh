@@ -242,6 +242,19 @@ docker compose exec -T \
   api yarn setup:admin
 
 # ---------------------------------------------------------------------------
+# 4b. Client record
+# ---------------------------------------------------------------------------
+
+# Without this, the frontend can't sign users up: it sends its own domain as
+# the "client" and the API 400s with "This client does not exist" if there's
+# no matching row in the Client table.
+step "Registering this instance's client"
+
+docker compose exec -T \
+  -e MIRLO_DOMAIN="$MIRLO_DOMAIN" \
+  api yarn setup:client
+
+# ---------------------------------------------------------------------------
 # 5. Frontend build
 # ---------------------------------------------------------------------------
 

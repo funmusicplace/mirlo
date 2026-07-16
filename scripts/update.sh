@@ -35,5 +35,11 @@ done
 
 docker compose exec -T -e NODE_OPTIONS=--max-old-space-size=3072 api yarn client:build
 
+# Idempotent: ensures a Client row exists for this instance's domain (older
+# installs predating this step won't have one, which breaks signup with
+# "This client does not exist").
+MIRLO_DOMAIN=$(grep -E "^API_DOMAIN=" .env | head -1 | cut -d= -f2- | tr -d "'\"")
+docker compose exec -T -e MIRLO_DOMAIN="$MIRLO_DOMAIN" api yarn setup:client
+
 echo ""
 echo "✓ Update complete and API healthy."

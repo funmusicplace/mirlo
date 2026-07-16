@@ -65,7 +65,7 @@ export const apiKeyCheck = async (
       const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
       if (typeof apiHeader === "string" && apiHeader) {
         const clients = await prisma.client.findMany({
-          where: { key: apiHeader },
+          where: { key: apiHeader, deletedAt: null },
         });
         if (clients.length === 1) {
           req.client = clients[0];

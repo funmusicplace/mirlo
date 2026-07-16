@@ -1,8 +1,7 @@
+import SectionNav from "components/common/SectionNav";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
-
-import SectionNav from "components/common/SectionNav";
 
 const Layout: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
@@ -36,6 +35,9 @@ const Layout: React.FC = () => {
         </li>
         <li>
           <NavLink to="tasks/fundraising">{t("tasks")}</NavLink>
+        </li>
+        <li>
+          <NavLink to="clients">{t("clients")}</NavLink>
         </li>
       </SectionNav>
       <Outlet />
