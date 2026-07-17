@@ -664,6 +664,14 @@ model UserTransaction {
   currency                      String
   platformCut                   Int? // in cents
   stripeCut                     Int? // in cents
+  // Reporting fields. `amount`/`currency` above are presentment values (artist's
+  // currency); these freeze the value in the platform's settlement currency at
+  // charge time, since Stripe never settles the full charge to the platform and
+  // offers no historical FX lookup later. Sum `platformCurrencyAmount` for
+  // aggregates; `exchangeRate` is provenance to re-derive/audit.
+  platformCurrencyAmount        Int? // `amount` converted to platformCurrency, in cents
+  platformCurrency              String? // platform account's settlement currency at charge time
+  exchangeRate                  Decimal? // presentment -> platformCurrency rate Stripe applied
   stripeId                      String?
   shippingFeeAmount             Int? // in cents
   trackGroupPurchases           UserTrackGroupPurchase[]

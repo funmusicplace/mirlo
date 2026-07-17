@@ -71,6 +71,88 @@ export const getFeesFromPaymentIntent = async (
   };
 };
 
+// A transaction's value in the PLATFORM's settlement currency (see the schema
+// comment on UserTransaction for why we freeze it at charge time). This is the
+// processor-agnostic contract: fields map 1:1 to the UserTransaction columns, so
+// a future processor just supplies its own populator returning this same shape.
+export type PlatformCurrencyValue = {
+  platformCurrencyAmount: number | null; // `amount` converted to platformCurrency, in cents
+  platformCurrency: string | null;
+  exchangeRate: number | null;
+};
+
+// Used when no platform-currency value is known (Checkout Session, free
+// purchases, or a failed FX lookup). Spread into create data to set all columns.
+export const EMPTY_PLATFORM_CURRENCY_VALUE: PlatformCurrencyValue = {
+  platformCurrencyAmount: null,
+  platformCurrency: null,
+  exchangeRate: null,
+};
+
+// Shorthand for the `...(x ?? EMPTY_PLATFORM_CURRENCY_VALUE)` spread repeated at
+// every UserTransaction.create() call site.
+export const withPlatformCurrency = (value?: PlatformCurrencyValue) =>
+  value ?? EMPTY_PLATFORM_CURRENCY_VALUE;
+
+// Reuses the presentment->platform exchange_rate that Stripe applied to the
+// application fee (the only part of the charge that lands on the platform) and
+// applies it to the full amount. Returns nulls when there's no application fee
+// (e.g. shouldSkipPlatformFee's MX/BR / 0% paths) — those rows drop out of
+// platform-currency aggregates. PaymentIntent flows only (online + terminal).
+// Never throws: errors fall back to nulls (logged) so they can't block the
+// purchase, letting callers use the result without a try/catch.
+export const getPlatformCurrencyValueFromIntent = async (
+  paymentIntent: Stripe.PaymentIntent,
+  stripeAccount: string
+): Promise<PlatformCurrencyValue> => {
+  try {
+    const chargeId =
+      typeof paymentIntent.latest_charge === "string"
+        ? paymentIntent.latest_charge
+        : (paymentIntent.latest_charge?.id ?? "");
+    if (!chargeId) return EMPTY_PLATFORM_CURRENCY_VALUE;
+
+    // Charge is on the connected account; its application_fee id lives on the platform.
+    const charge = await stripe.charges.retrieve(
+      chargeId,
+      {},
+      { stripeAccount }
+    );
+    const applicationFeeId =
+      typeof charge.application_fee === "string"
+        ? charge.application_fee
+        : (charge.application_fee?.id ?? "");
+    if (!applicationFeeId) return EMPTY_PLATFORM_CURRENCY_VALUE;
+
+    // No { stripeAccount }: application fees live on the platform account.
+    const applicationFee = await stripe.applicationFees.retrieve(
+      applicationFeeId,
+      { expand: ["balance_transaction"] }
+    );
+
+    const balanceTransaction = applicationFee.balance_transaction;
+    if (!balanceTransaction || typeof balanceTransaction === "string") {
+      // Not yet settled — record nothing rather than a wrong figure.
+      return EMPTY_PLATFORM_CURRENCY_VALUE;
+    }
+
+    // exchange_rate is null when presentment currency == platform currency (rate 1).
+    const exchangeRate = balanceTransaction.exchange_rate ?? 1;
+    const amount = paymentIntent.amount_received ?? paymentIntent.amount ?? 0;
+
+    return {
+      platformCurrencyAmount: Math.round(amount * exchangeRate),
+      platformCurrency: balanceTransaction.currency,
+      exchangeRate,
+    };
+  } catch (e) {
+    logger.warn(
+      `getPlatformCurrencyValueFromIntent: could not determine platform currency value for ${paymentIntent.id}: ${e}`
+    );
+    return EMPTY_PLATFORM_CURRENCY_VALUE;
+  }
+};
+
 const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
   try {
     const paymentIntentId =
@@ -199,7 +281,8 @@ export const handleTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
   session?: Stripe.Checkout.Session,
-  newUser?: boolean
+  newUser?: boolean,
+  platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   try {
     const { applicationUrl } = await getClient();
@@ -218,6 +301,7 @@ export const handleTrackGroupPurchase = async (
         platformCut: applicationFee ?? null,
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
+        ...withPlatformCurrency(platformCurrencyValue),
         paymentStatus: "COMPLETED",
         discountPercent: session?.metadata?.discountPercent
           ? Number(session.metadata.discountPercent)
@@ -472,7 +556,8 @@ export const handleCataloguePurchase = async (
 export const handleTrackPurchase = async (
   userId: number,
   trackId: number,
-  session?: Stripe.Checkout.Session
+  session?: Stripe.Checkout.Session,
+  platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   try {
     const { applicationFee } = await getApplicationFee(session);
@@ -487,6 +572,7 @@ export const handleTrackPurchase = async (
       discountPercent: session?.metadata?.discountPercent
         ? Number(session.metadata.discountPercent)
         : undefined,
+      platformCurrencyValue,
     });
 
     const user = await prisma.user.findFirst({
@@ -733,7 +819,8 @@ export const sendSaleEmails = async (
 export const handleArtistGift = async (
   userId: number,
   artistId: number,
-  session?: Stripe.Checkout.Session
+  session?: Stripe.Checkout.Session,
+  platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   try {
     const { applicationFee, paymentProcessorFee } =
@@ -747,6 +834,7 @@ export const handleArtistGift = async (
         platformCut: applicationFee ?? null,
         stripeCut: paymentProcessorFee ?? null,
         stripeId: session?.id ?? "",
+        ...withPlatformCurrency(platformCurrencyValue),
         paymentStatus: "COMPLETED",
       },
     });
