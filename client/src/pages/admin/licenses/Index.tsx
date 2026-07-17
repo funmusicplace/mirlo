@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-
 import LicenseForm from "components/common/LicenseForm";
 import Modal from "components/common/Modal";
 import Table from "components/common/Table";
@@ -56,7 +55,7 @@ export const Index: React.FC = () => {
         open={openModal}
         onClose={() => {
           setOpenModal(false);
-          navigate("/admin/track-groups");
+          navigate("/admin/content/track-groups");
         }}
       >
         <Outlet />

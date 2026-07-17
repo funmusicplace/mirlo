@@ -56,7 +56,8 @@ export const Index: React.FC = () => {
       <h3>Purchases</h3>
       <p className="mb-4">
         To add purchases for users, use the dollar-sign button on a release in
-        the <Link to="/admin/track-groups">TrackGroups admin page</Link>.
+        the <Link to="/admin/content/track-groups">TrackGroups admin page</Link>
+        .
       </p>
       <Filters />
 

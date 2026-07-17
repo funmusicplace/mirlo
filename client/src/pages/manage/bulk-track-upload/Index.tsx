@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { css } from "@emotion/css";
 import Button, { ButtonAnchor } from "components/common/Button";
 import CSVUploadStep, {
@@ -6,6 +5,7 @@ import CSVUploadStep, {
   ParsedRow,
 } from "components/ManageArtist/TrackUpload/CSVUploadStep";
 import TrackGroupPreview from "components/ManageArtist/TrackUpload/TrackGroupPreview";
+import React, { useState } from "react";
 
 function Index() {
   const [step, setStep] = useState<"upload" | "preview" | "complete">("upload");
@@ -88,7 +88,7 @@ function Index() {
             >
               Upload Another File
             </Button>
-            <ButtonAnchor href="/admin/track-groups" variant="outlined">
+            <ButtonAnchor href="/admin/content/track-groups" variant="outlined">
               View Albums
             </ButtonAnchor>
           </div>

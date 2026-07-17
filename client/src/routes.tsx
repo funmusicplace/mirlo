@@ -596,85 +596,93 @@ const routes: RouteObject[] = [
             },
           },
           {
-            path: "users",
+            path: "content",
             async lazy() {
               const { default: Component } =
-                await import("pages/admin/users/Layout");
+                await import("pages/admin/content/Index");
               return { Component };
             },
             children: [
               {
-                path: "",
+                path: "users",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/users/Index");
+                    await import("pages/admin/users/Layout");
+                  return { Component };
+                },
+                children: [
+                  {
+                    path: "",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/users/Index");
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: "invites",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/users/invites/Index");
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: ":id",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/users/{id}/Index");
+                      return { Component };
+                    },
+                  },
+                ],
+              },
+              {
+                path: "artists",
+                children: [
+                  {
+                    path: "",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/artists/Index");
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: ":id",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/artists/{id}/Index");
+                      return { Component };
+                    },
+                  },
+                ],
+              },
+              {
+                path: "track-groups/:id",
+                async lazy() {
+                  const { default: Component } =
+                    await import("pages/admin/track-groups/{id}/Index");
                   return { Component };
                 },
               },
               {
-                path: "invites",
+                path: "track-groups",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/users/invites/Index");
+                    await import("pages/admin/track-groups/Index");
                   return { Component };
                 },
               },
               {
-                path: ":id",
+                path: "tracks",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/users/{id}/Index");
+                    await import("pages/admin/tracks/Index");
                   return { Component };
                 },
               },
             ],
-          },
-
-          {
-            path: "artists",
-            children: [
-              {
-                path: "",
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/admin/artists/Index");
-                  return { Component };
-                },
-              },
-              {
-                path: ":id",
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/admin/artists/{id}/Index");
-                  return { Component };
-                },
-              },
-            ],
-          },
-          {
-            path: "track-groups/:id",
-            async lazy() {
-              const { default: Component } =
-                await import("pages/admin/track-groups/{id}/Index");
-              return { Component };
-            },
-          },
-          {
-            path: "track-groups",
-            async lazy() {
-              const { default: Component } =
-                await import("pages/admin/track-groups/Index");
-              return { Component };
-            },
-          },
-
-          {
-            path: "tracks",
-            async lazy() {
-              const { default: Component } =
-                await import("pages/admin/tracks/Index");
-              return { Component };
-            },
           },
           {
             path: "licenses",

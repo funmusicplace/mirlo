@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import useAdminFilters from "components/Admin/useAdminFilters";
 import Button, { ButtonLink } from "components/common/Button";
 import Modal from "components/common/Modal";
 import Table from "components/common/Table";
@@ -16,8 +17,6 @@ import {
 import api from "services/api";
 import { getTrackUrl } from "utils/artist";
 import usePagination from "utils/usePagination";
-
-import useAdminFilters from "components/Admin/useAdminFilters";
 
 const pageSize = 100;
 
@@ -59,7 +58,7 @@ export const Index: React.FC = () => {
 
   const onClickQueue = React.useCallback(
     (id: number) => {
-      navigate(`/admin/tracks/${id}`);
+      navigate(`/admin/content/tracks/${id}`);
     },
     [navigate]
   );
@@ -68,7 +67,9 @@ export const Index: React.FC = () => {
     <WidthContainer variant="big" justify="center" className="grow p-4">
       <div className="flex justify-between align-center">
         <h3>Tracks</h3>
-        <ButtonLink to="/manage/bulk-track-upload">{t("bulkTrackUpload")}</ButtonLink>
+        <ButtonLink to="/manage/bulk-track-upload">
+          {t("bulkTrackUpload")}
+        </ButtonLink>
       </div>
       <Filters />
       {results.length > 0 && (
@@ -137,7 +138,7 @@ export const Index: React.FC = () => {
         open={openModal}
         onClose={() => {
           setOpenModal(false);
-          navigate("/admin/tracks");
+          navigate("/admin/content/tracks");
           // refresh();
         }}
       >

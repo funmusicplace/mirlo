@@ -92,20 +92,20 @@ const ManageArtistButtons: React.FC = () => {
   if (user?.isAdmin) {
     adminItems.push({
       key: "adminEditUser",
-      to: `/admin/users/${artist.userId}`,
+      to: `/admin/content/users/${artist.userId}`,
       icon: <RiAdminLine />,
       label: t("adminEditUser"),
     });
     adminItems.push({
       key: "adminEditArtist",
-      to: `/admin/artists/${artist.id}`,
+      to: `/admin/content/artists/${artist.id}`,
       icon: <RiAdminLine />,
       label: t("adminEditArtist"),
     });
     if (isAlbumPage && trackGroup) {
       adminItems.push({
         key: "adminEditRelease",
-        to: `/admin/track-groups/${trackGroup.id}`,
+        to: `/admin/content/track-groups/${trackGroup.id}`,
         icon: <RiAdminLine />,
         label: t("adminEditRelease"),
       });

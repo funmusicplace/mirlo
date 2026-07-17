@@ -16,16 +16,7 @@ const Layout: React.FC = () => {
           <NavLink to="settings">{t("settings")}</NavLink>
         </li>
         <li>
-          <NavLink to="users">{t("users")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="artists">{t("artists")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="track-groups">{t("trackgroups")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="tracks">{t("tracks")}</NavLink>
+          <NavLink to="content">{t("content")}</NavLink>
         </li>
         <li>
           <NavLink to="transactions">{t("transactions")}</NavLink>

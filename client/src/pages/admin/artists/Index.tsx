@@ -1,3 +1,4 @@
+import useAdminFilters from "components/Admin/useAdminFilters";
 import Table from "components/common/Table";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
@@ -5,8 +6,6 @@ import { FaCheck } from "react-icons/fa";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
-
-import useAdminFilters from "components/Admin/useAdminFilters";
 
 interface AdminArtist extends Artist {
   user: User;
@@ -76,7 +75,7 @@ export const Index: React.FC = () => {
                 <td>{artist.user.stripeAccountId ? <FaCheck /> : ""}</td>
                 <td>{artist.createdAt}</td>
                 <td>
-                  <Link to={`/admin/artists/${artist.id}`}>Manage</Link>
+                  <Link to={`/admin/content/artists/${artist.id}`}>Manage</Link>
                 </td>
               </tr>
             ))}
