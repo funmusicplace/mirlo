@@ -58,7 +58,7 @@ interface SettingsFromAPI {
       webhookConnectSigningSecret?: string;
     };
     emailProvider?: {
-      provider?: "sendgrid" | "mailgun";
+      provider?: "sendgrid" | "mailgun" | "postmark";
       fromEmail?: string;
       sendgrid?: {
         apiKey?: string;
@@ -93,6 +93,7 @@ const Index = () => {
   const { reset, register, handleSubmit, watch } = useForm<FormSettings>();
   const stripeKeyConfigured = watch("stripe.keyConfigured");
   const useConsolidatedBuckets = watch("useConsolidatedBuckets");
+  const emailProviderSelected = watch("emailProvider.provider");
   const { data: initialFeaturedArtists } = useQuery(queryFeaturedArtists());
   const [featuredArtistsOverride, setFeaturedArtistsOverride] = React.useState<
     Artist[] | undefined
@@ -384,70 +385,82 @@ const Index = () => {
             </td>
           </tr>
           {/* SendGrid Settings */}
-          <tr>
-            <td colSpan={2}>
-              <h4>SendGrid Settings</h4>
-            </td>
-          </tr>
-          <tr>
-            <td>API Key</td>
-            <td>
-              <InputEl
-                {...register("emailProvider.sendgrid.apiKey")}
-                type="password"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
+          {emailProviderSelected === "sendgrid" && (
+            <>
+              <tr>
+                <td colSpan={2}>
+                  <h4>SendGrid Settings</h4>
+                </td>
+              </tr>
+              <tr>
+                <td>API Key</td>
+                <td>
+                  <InputEl
+                    {...register("emailProvider.sendgrid.apiKey")}
+                    type="password"
+                    className={css`
+                      text-align: right;
+                    `}
+                  />
+                </td>
+              </tr>
+            </>
+          )}
           {/* Mailgun Settings */}
-          <tr>
-            <td colSpan={2}>
-              <h4>Mailgun Settings</h4>
-            </td>
-          </tr>
-          <tr>
-            <td>API Key</td>
-            <td>
-              <InputEl
-                {...register("emailProvider.mailgun.apiKey")}
-                type="password"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Domain</td>
-            <td>
-              <InputEl
-                {...register("emailProvider.mailgun.domain")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
+          {emailProviderSelected === "mailgun" && (
+            <>
+              <tr>
+                <td colSpan={2}>
+                  <h4>Mailgun Settings</h4>
+                </td>
+              </tr>
+              <tr>
+                <td>API Key</td>
+                <td>
+                  <InputEl
+                    {...register("emailProvider.mailgun.apiKey")}
+                    type="password"
+                    className={css`
+                      text-align: right;
+                    `}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Domain</td>
+                <td>
+                  <InputEl
+                    {...register("emailProvider.mailgun.domain")}
+                    className={css`
+                      text-align: right;
+                    `}
+                  />
+                </td>
+              </tr>
+            </>
+          )}
           {/* Postmark Settings */}
-          <tr>
-            <td colSpan={2}>
-              <h4>Postmark Settings</h4>
-            </td>
-          </tr>
-          <tr>
-            <td>API Key</td>
-            <td>
-              <InputEl
-                {...register("emailProvider.postmark.apiKey")}
-                // type="password"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
+          {emailProviderSelected === "postmark" && (
+            <>
+              <tr>
+                <td colSpan={2}>
+                  <h4>Postmark Settings</h4>
+                </td>
+              </tr>
+              <tr>
+                <td>API Key</td>
+                <td>
+                  <InputEl
+                    {...register("emailProvider.postmark.apiKey")}
+                    // type="password"
+                    className={css`
+                      text-align: right;
+                    `}
+                  />
+                </td>
+              </tr>
+            </>
+          )}
           <tr>
             <td colSpan={2}>
               <h3>Storage</h3>
