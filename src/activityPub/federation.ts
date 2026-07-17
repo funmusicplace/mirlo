@@ -159,10 +159,12 @@ federation
     return [{ publicKey, privateKey }];
   });
 
+const OUTBOX_PAGE_SIZE = 20;
+
 federation
   .setOutboxDispatcher(
     "/v1/ap/artists/{identifier}/outbox",
-    async (ctx, identifier) => {
+    async (ctx, identifier, cursor) => {
       const parsedId = await findArtistIdForURLSlug(identifier);
       if (!parsedId) return null;
 
@@ -174,9 +176,19 @@ federation
       });
       if (!artist) return null;
       const { results: zipped } = await buildFeedForArtist(undefined, artist);
+
+      const skip = cursor ? Number(cursor) : 0;
+      const page = zipped.slice(skip, skip + OUTBOX_PAGE_SIZE);
+      const nextCursor =
+        skip + OUTBOX_PAGE_SIZE < zipped.length
+          ? String(skip + OUTBOX_PAGE_SIZE)
+          : null;
+      const prevCursor =
+        skip > 0 ? String(Math.max(0, skip - OUTBOX_PAGE_SIZE)) : null;
+
       const client = await getClient();
       const followersUri = ctx.getFollowersUri(identifier);
-      const creates = zipped.map((item) => {
+      const creates = page.map((item) => {
         if (isPost(item)) {
           return buildPostCreateActivity(
             ctx,
@@ -213,9 +225,12 @@ federation
       });
       return {
         items: creates,
+        nextCursor,
+        prevCursor,
       };
     }
   )
+  .setFirstCursor(async () => "0")
   .setCounter(async (_ctx, identifier) => {
     const parsedId = await findArtistIdForURLSlug(identifier);
     if (!parsedId) return 0n;
