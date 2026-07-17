@@ -7,9 +7,8 @@ import App from "./App";
 import ErrorPage from "./components/ErrorPage";
 
 async function markdownPage(source: string) {
-  const { PageMarkdownWrapper } = await import(
-    "components/common/PageMarkdownWrapper"
-  );
+  const { PageMarkdownWrapper } =
+    await import("components/common/PageMarkdownWrapper");
   const { default: MarkdownContent } =
     await import("components/common/MarkdownContent");
   const { default: WidthContainer } =
@@ -83,8 +82,7 @@ const routes: RouteObject[] = [
       {
         path: "checkout",
         async lazy() {
-          const { default: Component } =
-            await import("pages/checkout/Index");
+          const { default: Component } = await import("pages/checkout/Index");
           return { Component };
         },
       },
@@ -123,7 +121,8 @@ const routes: RouteObject[] = [
       {
         path: "post/:postId",
         async lazy() {
-          const { default: Component } = await import("pages/post/{postId}/Index");
+          const { default: Component } =
+            await import("pages/post/{postId}/Index");
           return { Component };
         },
       },
@@ -207,8 +206,7 @@ const routes: RouteObject[] = [
           {
             path: "sales",
             async lazy() {
-              const { default: Component } =
-                await import("pages/sales/Index");
+              const { default: Component } = await import("pages/sales/Index");
               return { Component };
             },
           },
@@ -324,8 +322,7 @@ const routes: RouteObject[] = [
           {
             path: "",
             async lazy() {
-              const { default: Component } =
-                await import("pages/manage/Index");
+              const { default: Component } = await import("pages/manage/Index");
               return { Component };
             },
           },
@@ -599,85 +596,93 @@ const routes: RouteObject[] = [
             },
           },
           {
-            path: "users",
+            path: "content",
             async lazy() {
               const { default: Component } =
-                await import("pages/admin/users/Layout");
+                await import("pages/admin/content/Index");
               return { Component };
             },
             children: [
               {
-                path: "",
+                path: "users",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/users/Index");
+                    await import("pages/admin/users/Layout");
+                  return { Component };
+                },
+                children: [
+                  {
+                    path: "",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/users/Index");
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: "invites",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/users/invites/Index");
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: ":id",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/users/{id}/Index");
+                      return { Component };
+                    },
+                  },
+                ],
+              },
+              {
+                path: "artists",
+                children: [
+                  {
+                    path: "",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/artists/Index");
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: ":id",
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/admin/artists/{id}/Index");
+                      return { Component };
+                    },
+                  },
+                ],
+              },
+              {
+                path: "track-groups/:id",
+                async lazy() {
+                  const { default: Component } =
+                    await import("pages/admin/track-groups/{id}/Index");
                   return { Component };
                 },
               },
               {
-                path: "invites",
+                path: "track-groups",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/users/invites/Index");
+                    await import("pages/admin/track-groups/Index");
                   return { Component };
                 },
               },
               {
-                path: ":id",
+                path: "tracks",
                 async lazy() {
                   const { default: Component } =
-                    await import("pages/admin/users/{id}/Index");
+                    await import("pages/admin/tracks/Index");
                   return { Component };
                 },
               },
             ],
-          },
-
-          {
-            path: "artists",
-            children: [
-              {
-                path: "",
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/admin/artists/Index");
-                  return { Component };
-                },
-              },
-              {
-                path: ":id",
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/admin/artists/{id}/Index");
-                  return { Component };
-                },
-              },
-            ],
-          },
-          {
-            path: "track-groups/:id",
-            async lazy() {
-              const { default: Component } =
-                await import("pages/admin/track-groups/{id}/Index");
-              return { Component };
-            },
-          },
-          {
-            path: "track-groups",
-            async lazy() {
-              const { default: Component } =
-                await import("pages/admin/track-groups/Index");
-              return { Component };
-            },
-          },
-
-          {
-            path: "tracks",
-            async lazy() {
-              const { default: Component } =
-                await import("pages/admin/tracks/Index");
-              return { Component };
-            },
           },
           {
             path: "licenses",
@@ -692,6 +697,14 @@ const routes: RouteObject[] = [
             async lazy() {
               const { default: Component } =
                 await import("pages/admin/settings/Index");
+              return { Component };
+            },
+          },
+          {
+            path: "clients",
+            async lazy() {
+              const { default: Component } =
+                await import("pages/admin/clients/Index");
               return { Component };
             },
           },
@@ -949,9 +962,7 @@ const routes: RouteObject[] = [
             path: "release/:trackGroupId/tracks/:trackId/download",
             async lazy() {
               const { default: Component } =
-                await import(
-                  "pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/download/Index"
-                );
+                await import("pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/download/Index");
               return { Component };
             },
           },
@@ -959,9 +970,7 @@ const routes: RouteObject[] = [
             path: "release/:trackGroupId/tracks/:trackId",
             async lazy() {
               const { default: Component } =
-                await import(
-                  "pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/Index"
-                );
+                await import("pages/{artistId}/release/{trackGroupId}/tracks/{trackId}/Index");
               return { Component };
             },
           },

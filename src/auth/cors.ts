@@ -28,7 +28,9 @@ export const corsMiddleware = async (
     if (!isHealthCheck && !isTest) {
       const now = Date.now();
       if (now > cacheExpiry) {
-        cachedClients = await prisma.client.findMany();
+        cachedClients = await prisma.client.findMany({
+          where: { deletedAt: null },
+        });
         cacheExpiry = now + CACHE_TTL_MS;
       }
       clients = cachedClients;

@@ -56,7 +56,7 @@ const Index = () => {
     ) {
       await api.delete(`admin/users/${id}`);
       snackbar(`User ${user?.email} deleted`, { type: "success" });
-      navigate("/admin/users");
+      navigate("/admin/content/users");
     }
   }, [id, user?.email]);
 
@@ -95,7 +95,7 @@ const Index = () => {
                 }
               `}
             >
-              <Link to="/admin/users">
+              <Link to="/admin/content/users">
                 <FaArrowCircleLeft />
               </Link>
               User "{user.email}"

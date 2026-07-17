@@ -469,7 +469,6 @@ export const createBucketIfNotExists = async (
     if (options?.makePublic) {
       try {
         await minioClient.setBucketPolicy(bucket, publicReadPolicy(bucket));
-        logger?.info(`minio: set public-read policy on bucket: ${bucket}`);
       } catch (e) {
         logger?.error(
           `minio: failed to set public-read policy on bucket ${bucket}`

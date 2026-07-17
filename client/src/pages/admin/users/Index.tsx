@@ -1,15 +1,12 @@
 import { css } from "@emotion/css";
-import Button, { ButtonLink } from "components/common/Button";
+import useAdminFilters from "components/Admin/useAdminFilters";
+import { ButtonLink } from "components/common/Button";
 import Table from "components/common/Table";
-import TextArea from "components/common/TextArea";
 import React from "react";
-import { FaCheck, FaEdit } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
-import useAdminFilters from "components/Admin/useAdminFilters";
-import FormComponent from "components/common/FormComponent";
-import { SelectEl } from "components/common/Select";
 
 const pageSize = 100;
 
@@ -88,7 +85,7 @@ export const Index: React.FC = () => {
                   <ButtonLink
                     size="compact"
                     startIcon={<FaEdit />}
-                    to={`/admin/users/${user.id}`}
+                    to={`/admin/content/users/${user.id}`}
                   />
                 </td>
               </tr>

@@ -1,16 +1,16 @@
 import Button from "components/common/Button";
+import Modal from "components/common/Modal";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
+import TextArea from "components/common/TextArea";
 import { Toggle } from "components/common/Toggle";
-import Modal from "components/common/Modal";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaArrowCircleLeft } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { useTranslation } from "react-i18next";
 import { getArtistManageUrl } from "utils/artist";
-import TextArea from "components/common/TextArea";
 
 const Index = () => {
   const { id } = useParams();
@@ -39,7 +39,7 @@ const Index = () => {
       snackbar(t("artistDeleteSuccess", { name: artist?.name }), {
         type: "success",
       });
-      navigate("/admin/artists");
+      navigate("/admin/content/artists");
     }
   }, [id, artist?.name, t]);
 
@@ -104,7 +104,7 @@ const Index = () => {
         <SpaceBetweenDiv>
           <div className="flex justify-between">
             <h2 className="flex items-center">
-              <Link to="/admin/users" className="mr-1">
+              <Link to="/admin/content/users" className="mr-1">
                 <FaArrowCircleLeft />
               </Link>
               Artist "{artist.name}"
