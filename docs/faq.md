@@ -221,6 +221,10 @@ You can limit the amount of times a listener can listen to the entire song thoug
 
 :::
 
+::: details Does Mirlo support stats about listens and plays?
+
+Currently we don't make a dashboard available to track stats on plays of your music. This is sort of by design and we're contemplating how we'll do this going forward. We're not an anti-stats household but we're a "which stats when and where" household. If you have ideas about this please give us a shout at [hi@mirlo.space](mailto:hi@mirlo.space).
+
 ## Technical details
 
 ::: details Are you open source?
