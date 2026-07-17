@@ -88,6 +88,8 @@ model User {
   pendingEmail                        String?
   pendingEmailToken                   String?                          @db.Uuid
   pendingEmailExpiration              DateTime?
+  failedLoginAttempts                 Int                              @default(0)
+  lockedUntil                         DateTime?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ProfileUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
