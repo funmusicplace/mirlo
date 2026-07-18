@@ -109,16 +109,16 @@ By default Mirlo uses Stripe as its payment processor.
 To test webhooks, you'll have to run this:
 
 ```sh
-stripe listen --forward-to localhost:3000/v1/webhooks/stripe
+stripe listen --forward-connect-to localhost:3000/v1/webhooks/stripe/connect
 ```
 
-This will forward all stripe webhooks to your localhost:3000, and send them to the checkout/webhook URL. It'll also spit out a `STRIPE_WEBHOOK_SIGNING_SECRET`. You'll need to set that in the .env file.
+All of Mirlo's payment activity happens on connected Stripe accounts, so it's the Connect webhook events that matter. This forwards them to your localhost:3000. It'll also spit out a signing secret — set it as `STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET` in the .env file.
 
-Then to trigger a specific workflow:
+Then to trigger a specific workflow (note that `stripe trigger` fires events on your platform account by default — pass `--stripe-account` with a connected account id so the event reaches the Connect endpoint):
 
 ```sh
 # this is what's needed to store a subscription
-stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2
+stripe trigger checkout.session.completed --stripe-account acct_yourconnectedaccount --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2
 ```
 
 You'll also want fake Stripe data. You can find [the details on that here](https://stripe.com/docs/connect/testing).
