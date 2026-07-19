@@ -43,3 +43,19 @@ docker compose exec -T -e MIRLO_DOMAIN="$MIRLO_DOMAIN" api yarn setup:client
 
 echo ""
 echo "✓ Update complete and API healthy."
+
+# Installs predating NODE_ENV in generated .envs ran in development mode.
+# Warn rather than change a running instance's environment out from under it.
+case "$MIRLO_DOMAIN" in
+  https://*)
+    if ! grep -qE "^NODE_ENV=production" .env; then
+      echo ""
+      echo "⚠️  .env doesn't set NODE_ENV=production. Public https instances"
+      echo "   should run in production mode — it enables secure auth cookies."
+      echo "   Note: in production mode, emails are dropped (not caught by"
+      echo "   MailHog) until an email provider is configured in the admin"
+      echo "   settings. To switch:"
+      echo "   echo 'NODE_ENV=production' >> .env && docker compose up -d"
+    fi
+    ;;
+esac

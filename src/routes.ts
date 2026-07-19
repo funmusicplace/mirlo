@@ -149,7 +149,6 @@ const routes = [
   "activityPub/webfinger",
   "checkout",
   "checkout/status",
-  "webhooks/stripe",
   "webhooks/stripe/connect",
   "jobs",
   "admin/tasks",

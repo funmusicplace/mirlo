@@ -70,6 +70,22 @@ export default defineConfig({
         link: "/hosting",
         items: [
           {
+            text: "Step-by-step installation",
+            link: "/hosting/manual-install",
+          },
+          {
+            text: "Hetzner deployment",
+            link: "/hosting/hetzner",
+          },
+          {
+            text: "Maintenance and updates",
+            link: "/hosting/maintenance",
+          },
+          {
+            text: "Troubleshooting",
+            link: "/hosting/troubleshooting",
+          },
+          {
             text: "Object storage & buckets",
             link: "/hosting/object-storage",
           },

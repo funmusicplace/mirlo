@@ -51,6 +51,15 @@ esac
 # Strip any trailing slash
 MIRLO_DOMAIN=${MIRLO_DOMAIN%/}
 
+# Public https instances run in production mode (secure + strict auth
+# cookies). Plain-http domains (including local dev) stay in development
+# mode, because secure cookies are never sent over http and would break
+# login entirely.
+case "$MIRLO_DOMAIN" in
+  https://*) NODE_ENV_VALUE=production ;;
+  *) NODE_ENV_VALUE=development ;;
+esac
+
 generate_secret() {
   openssl rand -hex 24
 }
@@ -70,6 +79,7 @@ MINIO_ROOT_PASSWORD=$(generate_secret)
 DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgsql:5432/${POSTGRES_USER}?schema=public"
 
 sed -E \
+  -e "s|^NODE_ENV=.*|NODE_ENV=${NODE_ENV_VALUE}|" \
   -e "s|^JWT_SECRET=.*|JWT_SECRET=${JWT_SECRET}|" \
   -e "s|^REFRESH_TOKEN_SECRET=.*|REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}|" \
   -e "s|^API_DOMAIN=.*|API_DOMAIN=${MIRLO_DOMAIN}|" \
@@ -112,6 +122,7 @@ echo ""
 echo "✓ Setup complete!"
 echo ""
 echo "  Instance URL:      ${MIRLO_DOMAIN}"
+echo "  Environment:       NODE_ENV=${NODE_ENV_VALUE}"
 echo "  Postgres user:     ${POSTGRES_USER}"
 echo "  Generated secrets: JWT, refresh token, Postgres, Redis, MinIO"
 echo ""
