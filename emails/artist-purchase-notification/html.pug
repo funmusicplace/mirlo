@@ -10,9 +10,9 @@ mixin purchaseRow(title, sku, transaction, url)
         | #{title}
     td #{sku}
     td.num #{(transaction.amount / 100).toFixed(2)}
-    td.num #{transaction.platformFee / 100 ? (transaction.platformFee / 100).toFixed(2) : ''}
+    td.num #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : ''}
     td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
-    td.num #{(((transaction.amount || 0) - (transaction.platformFee || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
+    td.num #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
 
 block content
   p New purchases on your Mirlo store!
