@@ -5,7 +5,7 @@ mixin purchaseRow(title, transaction)
     td #{transaction.userFriendlyId || '---'}
     td #{title}
     td.num #{(transaction.amount / 100).toFixed(2)}
-    td.num #{transaction.platformFee / 100 ? (transaction.platformFee / 100).toFixed(2) : ''}
+    td.num #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : ''}
     td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
 
 block content

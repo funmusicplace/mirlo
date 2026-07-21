@@ -148,6 +148,17 @@ const Index = () => {
 
   const totalSupporters = monthlySupporters.length + annualSupporters.length;
 
+  // Only show the interval-specific stat boxes when the artist actually has a
+  // tier with that interval (or a supporter still on one, e.g. from a deleted
+  // tier) — an artist with no annual tiers shouldn't see an annual stat box.
+  const tierIntervals = (artist?.subscriptionTiers ?? [])
+    .filter((tier) => !tier.isDefaultTier)
+    .map((tier) => tier.interval);
+  const hasMonthly =
+    tierIntervals.includes("MONTH") || monthlySupporters.length > 0;
+  const hasAnnual =
+    tierIntervals.includes("YEAR") || annualSupporters.length > 0;
+
   return (
     <ManageSectionWrapper>
       <div className="flex flex-col gap-5">
@@ -160,56 +171,62 @@ const Index = () => {
           </DropdownMenu>
         </div>
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 mb-4">
-          <StatCard
-            label={t("totalComingInMonthly")}
-            value={moneyDisplay({ amount: amountMonthly / 100, currency })}
-            subtext={
-              monthlyDeductions.total > 0 && (
-                <>
-                  <div>
-                    {t("lessPlatformFee", {
-                      amount: moneyDisplay({
-                        amount: monthlyDeductions.platformFee,
-                        currency,
-                      }),
-                    })}
-                  </div>
-                  <div>
-                    {t(
-                      monthlyDeductions.isEstimated
-                        ? "lessStripeFeeEstimated"
-                        : "lessStripeFee",
-                      {
+          {hasMonthly && (
+            <StatCard
+              label={t("totalComingInMonthly")}
+              value={moneyDisplay({ amount: amountMonthly / 100, currency })}
+              subtext={
+                monthlyDeductions.total > 0 && (
+                  <>
+                    <div>
+                      {t("lessPlatformFee", {
                         amount: moneyDisplay({
-                          amount: monthlyDeductions.stripeFee,
+                          amount: monthlyDeductions.platformFee,
                           currency,
                         }),
-                      }
-                    )}
-                  </div>
-                  <div className="font-semibold">
-                    {t("netMonthly", {
-                      amount: moneyDisplay({
-                        amount: amountMonthly / 100 - monthlyDeductions.total,
-                        currency,
-                      }),
-                    })}
-                  </div>
-                </>
-              )
-            }
-          />
-          <StatCard
-            label={t("totalComingInAnnually")}
-            value={moneyDisplay({ amount: amountAnnual / 100, currency })}
-          />
-          <StatCard
-            label={t("totalProjectedAnnual")}
-            value={moneyDisplay({
-              amount: (amountAnnual + amountMonthly * 12) / 100,
-              currency,
-            })}
-          />
+                      })}
+                    </div>
+                    <div>
+                      {t(
+                        monthlyDeductions.isEstimated
+                          ? "lessStripeFeeEstimated"
+                          : "lessStripeFee",
+                        {
+                          amount: moneyDisplay({
+                            amount: monthlyDeductions.stripeFee,
+                            currency,
+                          }),
+                        }
+                      )}
+                    </div>
+                    <div className="font-semibold">
+                      {t("netMonthly", {
+                        amount: moneyDisplay({
+                          amount: amountMonthly / 100 - monthlyDeductions.total,
+                          currency,
+                        }),
+                      })}
+                    </div>
+                  </>
+                )
+              }
+            />
+          )}
+          {hasAnnual && (
+            <StatCard
+              label={t("totalComingInAnnually")}
+              value={moneyDisplay({ amount: amountAnnual / 100, currency })}
+            />
+          )}
+          {hasMonthly && (
+            <StatCard
+              label={t("totalProjectedAnnual")}
+              value={moneyDisplay({
+                amount: (amountAnnual + amountMonthly * 12) / 100,
+                currency,
+              })}
+            />
+          )}
           <StatCard label={t("supporters")} value={totalSupporters} />
         </div>
         <SupporterTable>
