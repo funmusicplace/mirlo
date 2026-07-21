@@ -11,13 +11,15 @@ import sharp from "sharp";
 import generateSlug from "../../src/utils/generateSlug";
 import prisma from "../prisma";
 
-const FINAL_COVERS_BUCKET = "trackgroup-covers";
-const COVER_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
+// Fresh installs use the consolidated 3-bucket layout (see docs/hosting/object-storage.md).
+const IMAGES_BUCKET = "mirlo-images";
+const AUDIO_BUCKET = "mirlo-audio";
+const COVER_PREFIX = "trackgroup-covers";
+const AVATAR_PREFIX = "artist-avatars";
 
-const FINAL_AVATAR_BUCKET = "artist-avatars";
+const COVER_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
 const AVATAR_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
 
-const FINAL_AUDIO_BUCKET = "track-audio";
 const NOISE_TYPES = ["white", "pink", "brown"] as const;
 const NOISE_DURATION_SECS = 20;
 const TRACKS_PER_ALBUM = 3;
@@ -50,11 +52,7 @@ function createMinioClient(): Minio.Client | null {
 }
 
 async function ensureBuckets(minioClient: Minio.Client) {
-  for (const bucket of [
-    FINAL_COVERS_BUCKET,
-    FINAL_AVATAR_BUCKET,
-    FINAL_AUDIO_BUCKET,
-  ]) {
+  for (const bucket of [IMAGES_BUCKET, AUDIO_BUCKET]) {
     const exists = await minioClient.bucketExists(bucket);
     if (!exists) await minioClient.makeBucket(bucket);
   }
@@ -98,7 +96,7 @@ function generateGlitchNoiseBuffer(width: number, height: number): Buffer {
 
 async function generateAndUploadImage(
   minioClient: Minio.Client,
-  bucket: string,
+  prefix: string,
   sizes: number[]
 ): Promise<{ id: string; urls: string[] }> {
   const id = randomUUID();
@@ -111,7 +109,11 @@ async function generateAndUploadImage(
     .webp({ quality: 80 })
     .toBuffer();
 
-  await minioClient.putObject(bucket, `${id}-original.webp`, baseWebp);
+  await minioClient.putObject(
+    IMAGES_BUCKET,
+    `${prefix}/${id}-original.webp`,
+    baseWebp
+  );
 
   const sizeUrls = await Promise.all(
     sizes.map(async (size) => {
@@ -119,7 +121,11 @@ async function generateAndUploadImage(
         .resize(size, size, { fit: "inside", withoutEnlargement: true })
         .webp({ quality: 80 })
         .toBuffer();
-      await minioClient.putObject(bucket, `${id}-x${size}.webp`, resized);
+      await minioClient.putObject(
+        IMAGES_BUCKET,
+        `${prefix}/${id}-x${size}.webp`,
+        resized
+      );
       return `${id}-x${size}`;
     })
   );
@@ -169,11 +175,7 @@ async function generateAndUploadAudio(
     await Promise.all(
       files.map(async (file) => {
         const buffer = await fsPromises.readFile(path.join(tmpDir, file));
-        await minioClient.putObject(
-          FINAL_AUDIO_BUCKET,
-          `${audioId}/${file}`,
-          buffer
-        );
+        await minioClient.putObject(AUDIO_BUCKET, `${audioId}/${file}`, buffer);
       })
     );
 
@@ -251,7 +253,7 @@ export async function seedPublishedTrackGroups() {
       try {
         const { id, urls } = await generateAndUploadImage(
           minioClient,
-          FINAL_AVATAR_BUCKET,
+          AVATAR_PREFIX,
           AVATAR_SIZES
         );
         await prisma.profileAvatar.create({
@@ -332,7 +334,7 @@ export async function seedPublishedTrackGroups() {
           try {
             const { id: coverId, urls } = await generateAndUploadImage(
               minioClient,
-              FINAL_COVERS_BUCKET,
+              COVER_PREFIX,
               COVER_SIZES
             );
             await prisma.trackGroupCover.create({
