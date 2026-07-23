@@ -176,7 +176,7 @@ const Header = () => {
 
   return (
     <HeaderWrapper
-      className="mi-site-header"
+      className="[--mi-header-chrome-color:var(--mi-button-color)] [[data-mi-high-contrast]_&]:bg-(--mi-background-color)! [[data-mi-high-contrast]_&]:[background-image:none]! [[data-mi-high-contrast]_&]:shadow-[0_1px_5px_rgba(0,0,0,0.1)]! [[data-mi-high-contrast]_&]:[--mi-header-chrome-color:var(--mi-text-color)] max-md:[[data-mi-high-contrast]_&]:top-0! max-md:[[data-mi-high-contrast]_&]:aspect-auto! max-md:[[data-mi-high-contrast]_&]:w-full! max-md:[[data-mi-high-contrast]_&]:min-h-auto!"
       data-artist-header={artistId ? "" : undefined}
       transparent={transparent}
       hasBackground={!!artistBackground}
@@ -200,7 +200,7 @@ const Header = () => {
               to={getArtistUrl(instanceArtist) + "/support"}
               collapsible
               startIcon={<FaHandHoldingHeart />}
-              className="block no-underline text-center hover:underline! text-(--mi-background-color)! [&_svg]:fill-(--mi-background-color)! bg-(--mi-text-color)! max-md:text-(--mi-font-size-xsmall)!"
+              className="max-md:text-(--mi-font-size-xsmall)! bg-(--mi-black)! text-(--mi-white)! [&_svg]:fill-(--mi-white)! hover:not-disabled:bg-(--mi-black)! hover:not-disabled:text-(--mi-white)! hover:not-disabled:brightness-95 hover:not-disabled:saturate-30 [[data-mi-high-contrast]_&]:bg-(--mi-button-color)! [[data-mi-high-contrast]_&]:text-(--mi-button-text-color)! [[data-mi-high-contrast]_&]:[&_svg]:fill-(--mi-button-text-color)! [[data-mi-high-contrast]_&]:hover:not-disabled:bg-(--mi-button-color)! [[data-mi-high-contrast]_&]:hover:not-disabled:text-(--mi-button-text-color)! [[data-mi-high-contrast]_&]:hover:not-disabled:brightness-95 [[data-mi-high-contrast]_&]:hover:not-disabled:saturate-30"
             >
               {t("donateNow", { keyPrefix: "kickstarter" })}
             </ButtonLink>
@@ -215,7 +215,7 @@ const Header = () => {
                 location.pathname + location.search
               )}`}
               variant="transparent"
-              className={`mi-header-chrome-button ${menuButtonOverride}`}
+              className={menuButtonOverride}
             />
           )}
           {isLoggedIn && (
@@ -241,7 +241,7 @@ const Header = () => {
                 </svg>
               }
               variant="transparent"
-              className={`mi-header-chrome-button ${menuButtonOverride}`}
+              className={menuButtonOverride}
               title={t("menu", { keyPrefix: "headerMenu" })}
             />
           )}

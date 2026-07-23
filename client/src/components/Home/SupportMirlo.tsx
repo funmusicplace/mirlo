@@ -1,12 +1,9 @@
-import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ButtonLink } from "components/common/Button";
 import { useInstanceSettings } from "queries/instanceSettings";
 import { queryInstanceArtist } from "queries/settings";
 import { useTranslation } from "react-i18next";
 import { getArtistUrl } from "utils/artist";
-
-import { bp } from "../../constants";
 
 import {
   SplashButtonWrapper,
@@ -25,47 +22,10 @@ const SupportMirlo = () => {
   }
 
   return (
-    <div
-      className={`mi-support-mirlo-section ${css`
-        width: 100%;
-        background-color: var(--mi-button-color) !important;
-        color: var(--mi-button-text-color);
-
-        @media screen and (max-width: ${bp.medium}px) {
-          margin: 0;
-        }
-      `}`}
-    >
-      <SplashWrapper
-        className={css`
-          padding: 4rem 0;
-          min-height: auto !important;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding: 0;
-            min-height: calc(100vh - 60px) !important;
-            flex-direction: column-reverse;
-          }
-        `}
-      >
-        <TextWrapper
-          className={css`
-            @media screen and (max-width: ${bp.medium}px) {
-              padding-top: 0;
-            }
-
-            @media screen and (max-width: ${bp.small}px) {
-              padding: var(--mi-side-paddings-normal);
-            }
-          `}
-        >
-          <div
-            className={css`
-              display: flex;
-              flex-direction: column;
-              gap: 24px;
-            `}
-          >
+    <div className="w-full bg-(--mi-button-color)! text-(--mi-white) max-md:m-0 [[data-mi-high-contrast]_&]:bg-(--mi-button-color)! [[data-mi-high-contrast]_&]:text-(--mi-button-text-color)">
+      <SplashWrapper className="py-16 min-h-auto! max-md:p-0 max-md:min-h-[calc(100vh-60px)]! max-md:flex-col-reverse">
+        <TextWrapper className="max-md:pt-0 max-sm:p-(--mi-side-paddings-normal)">
+          <div className="flex flex-col gap-6">
             <SplashTitle as="h2">{t("sustainedBy")}</SplashTitle>
             <SplashButtonWrapper>
               <ButtonLink
@@ -76,46 +36,14 @@ const SupportMirlo = () => {
                 }
                 size="big"
                 rounded
-                className={`mi-support-mirlo-button ${css`
-                  display: block;
-                  border-radius: 9999px !important;
-                  text-decoration: none;
-                  text-align: center;
-
-                  background-color: var(--mi-text-color) !important;
-                  color: var(--mi-background-color) !important;
-
-                  &:hover {
-                    text-decoration: underline;
-                  }
-
-                  @media (prefers-color-scheme: dark) {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
-                  }
-                `}`}
+                className="block no-underline text-center bg-(--mi-black)! text-(--mi-white)! hover:underline [@media(prefers-color-scheme:dark)]:bg-(--mi-white)! [@media(prefers-color-scheme:dark)]:text-(--mi-black)! [[data-mi-high-contrast]_&]:bg-(--mi-button-text-color)! [[data-mi-high-contrast]_&]:text-(--mi-button-color)! [[data-mi-high-contrast]_&]:[&_svg]:fill-(--mi-button-color)!"
               >
                 {t("supportTeam")}
               </ButtonLink>
             </SplashButtonWrapper>
           </div>
         </TextWrapper>
-        <div
-          className={css`
-            display: block;
-            background-image: url("/static/images/flock.svg");
-            background-size: contain;
-            background-repeat: no-repeat;
-            width: 90%;
-            height: 30vh;
-
-            @media (min-width: 768px) {
-              width: 370px;
-              height: 285px;
-              margin-right: 60px;
-            }
-          `}
-        />
+        <div className="block w-[90%] h-[30vh] bg-[url('/static/images/flock.svg')] bg-contain bg-no-repeat md:w-[370px] md:h-[285px] md:mr-[60px] [[data-mi-high-contrast=light]_&]:invert" />
       </SplashWrapper>
     </div>
   );

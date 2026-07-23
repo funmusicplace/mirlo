@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import { playerVolumeHoverClass } from "components/Player/playerButtonClasses";
 import { useTranslation } from "react-i18next";
 import { FaVolumeMute } from "react-icons/fa";
 import { FaVolumeHigh } from "react-icons/fa6";

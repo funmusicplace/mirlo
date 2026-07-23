@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { playerControlHoverWrapperClass } from "components/Player/playerButtonClasses";
 import { useGlobalStateContext } from "state/GlobalState";
 
 import PauseButton from "./PauseButton";
@@ -10,7 +11,15 @@ export const PlayControlButton: React.FC<{
   onPlay?: () => Promise<void>;
   disabled?: boolean;
   onArtistPage?: boolean;
-}> = ({ onPlay, isPlaying, playerButton, disabled, onArtistPage }) => {
+  className?: string;
+}> = ({
+  onPlay,
+  isPlaying,
+  playerButton,
+  disabled,
+  onArtistPage,
+  className,
+}) => {
   const {
     state: { playing },
   } = useGlobalStateContext();
@@ -19,19 +28,25 @@ export const PlayControlButton: React.FC<{
 
   return (
     <div
-      className={css`
-        button {
-          ${playerButton ? "height: 2.5rem; width: 2.5rem;" : ""}
-          display: flex;
-          align-content: center;
-          align-items: center;
-          justify-content: center;
+      className={[
+        playerButton ? playerControlHoverWrapperClass : undefined,
+        className,
+        css`
+          button {
+            ${playerButton ? "height: 2.5rem; width: 2.5rem;" : ""}
+            display: flex;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
 
-          span {
-            ${playerButton ? "font-size: 1.1rem !important; " : ""}
+            span {
+              ${playerButton ? "font-size: 1.1rem !important; " : ""}
+            }
           }
-        }
-      `}
+        `,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       {!localIsPlaying && (
         <PlayButton

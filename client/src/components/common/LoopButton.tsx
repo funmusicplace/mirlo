@@ -1,5 +1,8 @@
-import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import {
+  playerControlHoverClass,
+  playerToggleActiveHoverClass,
+} from "components/Player/playerButtonClasses";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { RxLoop } from "react-icons/rx";
@@ -63,19 +66,14 @@ export const LoopButton: React.FC = () => {
             {looping === "loopTrack" && <LoopingIndicator>1</LoopingIndicator>}
           </>
         }
-        className={`${looping ? "mi-player-toggle-active" : ""} ${css`
-          margin-left: 0.25rem;
-          position: relative;
-          svg {
-            color: ${looping
-              ? "var(--mi-button-text-color) !important"
-              : "inherit"};
-          }
-          ${looping
-            ? `color: var(--mi-button-text-color) !important;
-             `
-            : ""}
-        `}`}
+        className={[
+          "ml-1 relative",
+          looping ? playerToggleActiveHoverClass : playerControlHoverClass,
+          looping &&
+            "text-(--mi-button-text-color)! [&_svg]:text-(--mi-button-text-color)!",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       />
       <span aria-live="polite" className="sr-only">
         {stateLabel}

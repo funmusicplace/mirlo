@@ -25,6 +25,7 @@ import { AudioWrapper } from "./AudioWrapper";
 import PlayerActions from "./PlayerActions";
 import PlayingTrackDetails from "./PlayingTrackDetails";
 import { PlayLimit, PlayLimitText } from "./PlayLimitNotice";
+import { playerControlHoverClass } from "./playerButtonClasses";
 import useCurrentTrackHook from "./useCurrentTrackHook";
 import { VolumeControl } from "./VolumeControl";
 
@@ -93,44 +94,11 @@ const Player = () => {
       aria-label={t("audioPlayer")}
       data-mount-id={mountId}
       data-tone={tone}
-      className={`mi-player-root ${css`
-        --mi-fixed-bg-color: var(--mi-off-white);
-        --mi-fixed-fg-color: var(--mi-black);
-
-        &[data-tone="dark"] {
-          --mi-fixed-bg-color: var(--mi-black);
-          --mi-fixed-fg-color: var(--mi-off-white);
-        }
-      `}`}
+      className="[--mi-fixed-bg-color:var(--mi-off-white)] [--mi-fixed-fg-color:var(--mi-black)] data-[tone=dark]:[--mi-fixed-bg-color:var(--mi-black)] data-[tone=dark]:[--mi-fixed-fg-color:var(--mi-off-white)] [[data-mi-high-contrast=dark]_&]:[--mi-fixed-bg-color:#000000] [[data-mi-high-contrast=dark]_&]:[--mi-fixed-fg-color:#ffffff] [[data-mi-high-contrast=light]_&]:[--mi-fixed-bg-color:#ffffff] [[data-mi-high-contrast=light]_&]:[--mi-fixed-fg-color:#000000]"
     >
       <PlayerActions />
       <div
-        className={cx(
-          "web-scrobbler-player",
-          css`
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: fixed;
-            width: 100%;
-            z-index: 12;
-            bottom: 0;
-            filter: drop-shadow(
-              0 0 0.1rem
-                color-mix(in srgb, var(--mi-fixed-fg-color) 30%, transparent)
-            );
-
-            background-color: var(--mi-darken-x-background-color);
-
-            --player-link: var(--mi-fixed-fg-color);
-            --player-icon: currentColor;
-            --player-control-border: none;
-
-            @media (max-width: ${bp.small}px) {
-              flex-direction: column;
-            }
-          `
-        )}
+        className="web-scrobbler-player flex flex-col justify-between fixed w-full z-12 bottom-0 bg-(--mi-darken-x-background-color) drop-shadow-[0_0_0.1rem_color-mix(in_srgb,var(--mi-fixed-fg-color)_30%,transparent)] [--player-link:var(--mi-fixed-fg-color)] [--player-icon:currentColor] [--player-control-border:none] max-sm:flex-col [[data-mi-high-contrast]_&]:[--mi-button-color:var(--mi-fixed-fg-color)] [[data-mi-high-contrast]_&]:[--mi-button-text-color:var(--mi-fixed-bg-color)] [[data-mi-high-contrast]_&]:bg-(--mi-fixed-bg-color)"
       >
         <div aria-live="polite" aria-atomic="true" className="sr-only">
           {currentTrack.title
@@ -262,7 +230,7 @@ const Player = () => {
                     }
                   `}
                 >
-                  <PrevButton />
+                  <PrevButton className={playerControlHoverClass} />
                 </div>
                 <PlayControlButton playerButton />
                 <div
@@ -272,7 +240,7 @@ const Player = () => {
                     }
                   `}
                 >
-                  <NextButton />
+                  <NextButton className={playerControlHoverClass} />
                 </div>
                 <div
                   className={css`

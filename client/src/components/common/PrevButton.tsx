@@ -4,7 +4,10 @@ import { useGlobalStateContext } from "state/GlobalState";
 
 import Button from "./Button";
 
-export const PrevButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
+export const PrevButton: React.FC<{
+  compact?: boolean;
+  className?: string;
+}> = ({ compact, className }) => {
   const { dispatch } = useGlobalStateContext();
 
   const onClickPrev = React.useCallback(() => {
@@ -16,7 +19,9 @@ export const PrevButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
       startIcon={<MdSkipPrevious size={compact ? undefined : 22} />}
       variant="transparent"
       onlyIcon={compact}
-      className={compact ? "!h-6 !w-6 !p-1" : undefined}
+      className={[compact ? "!h-6 !w-6 !p-1" : undefined, className]
+        .filter(Boolean)
+        .join(" ")}
       aria-label="Play previous track"
       onClick={onClickPrev}
     />

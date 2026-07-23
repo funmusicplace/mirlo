@@ -370,6 +370,7 @@ function PlayableCover({
           className={cx(
             "overlay-actions absolute bottom-0 z-2 flex w-full justify-end",
             "[&_button]:!bg-black/80 [&_button]:!text-white [&_button_svg]:!fill-white [&_button:hover:not(:disabled)]:!bg-black/60",
+            "[[data-mi-high-contrast]_&]:[&_button]:!bg-black [[data-mi-high-contrast]_&]:[&_button]:!opacity-100 [[data-mi-high-contrast]_&]:[&_button]:!border-white [[data-mi-high-contrast]_&]:[&_button]:!border-solid [[data-mi-high-contrast]_&]:[&_button]:!border [[data-mi-high-contrast]_&]:[&_button:hover:not(:disabled)]:!bg-black [[data-mi-high-contrast]_&]:[&_button:hover:not(:disabled)]:!opacity-100 [[data-mi-high-contrast]_&]:[&_button:hover:not(:disabled)]:!border-white",
             overlayActionsClass
           )}
         >
@@ -386,9 +387,9 @@ function PlayableCover({
           to={goToUrl}
           aria-hidden="true"
           tabIndex={-1}
-          className="go-to-link absolute inset-0 z-1 block bg-transparent no-underline focus-visible:outline-auto hover:[&_.go-to-faux]:!bg-black/60"
+          className="go-to-link absolute inset-0 z-1 block bg-transparent no-underline focus-visible:outline-auto hover:[&_.go-to-faux]:!bg-black/60 [[data-mi-high-contrast]_&]:hover:[&_.go-to-faux]:!bg-black"
         >
-          <span className="go-to-faux pointer-events-none absolute top-1/2 left-1/2 min-w-1/2 -translate-x-1/2 -translate-y-1/2 rounded-(--mi-border-radius) bg-black p-2 text-center uppercase whitespace-nowrap text-white">
+          <span className="go-to-faux pointer-events-none absolute top-1/2 left-1/2 min-w-1/2 -translate-x-1/2 -translate-y-1/2 rounded-(--mi-border-radius) bg-black p-2 text-center uppercase whitespace-nowrap text-white [[data-mi-high-contrast]_&]:!bg-black [[data-mi-high-contrast]_&]:!opacity-100 [[data-mi-high-contrast]_&]:!border [[data-mi-high-contrast]_&]:!border-solid [[data-mi-high-contrast]_&]:!border-white">
             {goToLabel}
           </span>
           {/* Some screenreaders spell out all caps text (even via CSS) instead of treating it as words, so we provide a non-uppercase version */}

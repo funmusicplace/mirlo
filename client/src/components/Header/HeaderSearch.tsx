@@ -342,7 +342,7 @@ const HeaderSearch: React.FC = () => {
         variant="transparent"
         onClick={() => setOpen(true)}
         startIcon={<FaSearch size={20} />}
-        className={`mi-header-chrome-button ${css`
+        className={css`
           color: var(--mi-header-chrome-color, var(--mi-button-color)) !important;
           font-weight: normal !important;
           svg {
@@ -364,7 +364,7 @@ const HeaderSearch: React.FC = () => {
               margin: 0 !important;
             }
           }
-        `}`}
+        `}
       >
         {isHome && (
           <span

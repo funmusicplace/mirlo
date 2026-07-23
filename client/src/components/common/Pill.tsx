@@ -74,12 +74,15 @@ const StyledPill = styled.span<{
 
 type PillProps = React.ComponentProps<typeof StyledPill>;
 
+const tintHighContrastClass =
+  "[[data-mi-high-contrast]_&]:bg-(--mi-chip-background-color)! [[data-mi-high-contrast]_&]:text-(--mi-chip-text-color)! [[data-mi-high-contrast]_&]:border! [[data-mi-high-contrast]_&]:border-(--mi-chip-border-color)! [[data-mi-high-contrast]_&]:[&_button]:text-(--mi-chip-text-color)! [[data-mi-high-contrast]_&]:[&_button]:bg-transparent! [[data-mi-high-contrast]_&]:[&_button]:border [[data-mi-high-contrast]_&]:[&_button]:border-dashed [[data-mi-high-contrast]_&]:[&_button]:border-(--mi-chip-text-color)! [[data-mi-high-contrast]_&]:[&_button_svg]:fill-(--mi-chip-text-color)! [[data-mi-high-contrast]_&]:[&_button:hover:not(:disabled)]:text-(--mi-chip-text-color)! [[data-mi-high-contrast]_&]:[&_button:hover:not(:disabled)]:bg-(--mi-button-tint-x-color)! [[data-mi-high-contrast]_&]:[&_button:hover:not(:disabled)]:border-(--mi-chip-text-color)! [[data-mi-high-contrast]_&]:[&_button:hover:not(:disabled)_svg]:fill-(--mi-chip-text-color)!";
+
 const Pill = React.forwardRef<HTMLSpanElement, PillProps>(
   ({ variant, className, ...props }, ref) => (
     <StyledPill
       ref={ref}
       variant={variant}
-      className={[variant === "tint" && "mi-pill-tint", className]
+      className={[variant === "tint" && tintHighContrastClass, className]
         .filter(Boolean)
         .join(" ")}
       {...props}

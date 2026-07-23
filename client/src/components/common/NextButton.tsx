@@ -5,7 +5,10 @@ import { useGlobalStateContext } from "state/GlobalState";
 
 import Button from "./Button";
 
-export const NextButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
+export const NextButton: React.FC<{
+  compact?: boolean;
+  className?: string;
+}> = ({ compact, className }) => {
   const { t } = useTranslation("translation", { keyPrefix: "player" });
   const {
     // state: { shuffle },
@@ -21,7 +24,9 @@ export const NextButton: React.FC<{ compact?: boolean }> = ({ compact }) => {
       startIcon={<MdSkipNext size={compact ? undefined : 22} />}
       variant="transparent"
       onlyIcon={compact}
-      className={compact ? "!h-6 !w-6 !p-1" : undefined}
+      className={[compact ? "!h-6 !w-6 !p-1" : undefined, className]
+        .filter(Boolean)
+        .join(" ")}
       aria-label={t("nextTrack")}
       onClick={onClickNext}
     />

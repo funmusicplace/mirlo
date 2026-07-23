@@ -4,7 +4,7 @@ const MenuLink: React.FC<LinkProps> = (props) => {
   const { children, ...otherProps } = props;
   return (
     <Link
-      className="rounded-[3px] text-(--mi-text-color)! block p-[.5em] no-underline! wrap-anywhere active:bg-(--mi-text-color) active:text-(--mi-background-color)! active:underline! focus-visible:bg-(--mi-text-color) focus-visible:text-(--mi-background-color)! focus-visible:underline! hover:bg-(--mi-text-color) hover:text-(--mi-background-color)! hover:underline!"
+      className="rounded-[3px] block p-[.5em] wrap-anywhere text-(--mi-black)! no-underline! hover:bg-(--mi-black)! hover:text-(--mi-white)! hover:underline! focus-visible:bg-(--mi-black)! focus-visible:text-(--mi-white)! focus-visible:underline! active:bg-(--mi-black)! active:text-(--mi-white)! active:underline! [[data-mi-high-contrast]_&]:text-(--mi-text-color)! [[data-mi-high-contrast]_&]:hover:bg-(--mi-button-color)! [[data-mi-high-contrast]_&]:hover:text-(--mi-button-text-color)! [[data-mi-high-contrast]_&]:focus-visible:bg-(--mi-button-color)! [[data-mi-high-contrast]_&]:focus-visible:text-(--mi-button-text-color)! [[data-mi-high-contrast]_&]:active:bg-(--mi-button-color)! [[data-mi-high-contrast]_&]:active:text-(--mi-button-text-color)!"
       {...otherProps}
     >
       {children}
