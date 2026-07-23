@@ -16,6 +16,10 @@ export type ResolvedItem = {
   quantity: number;
   amount: number;
   message?: string;
+  /** merch only — selected MerchOption ids (size/colour/etc.), if any. */
+  optionIds?: string[];
+  /** merch only — chosen shipping destination, when the item ships physically. */
+  shippingDestinationId?: string;
 };
 
 // Fetches the artist and resolves the connected Stripe account + currency used

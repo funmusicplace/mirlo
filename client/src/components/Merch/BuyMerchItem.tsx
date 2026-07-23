@@ -5,8 +5,9 @@ import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { moneyDisplay } from "components/common/Money";
+import PurchaseElements from "components/common/Purchase/PurchaseElements";
+import { usePurchase } from "components/common/Purchase/usePurchase";
 import { SelectEl } from "components/common/Select";
-import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import TextArea from "components/common/TextArea";
 import PaymentInputElement from "components/TrackGroup/PaymentInputElement";
 import { flatten } from "lodash";
@@ -16,8 +17,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
+import { buildCheckoutCompletePath } from "utils/artist";
 
 import { bp } from "../../constants";
 
@@ -40,8 +40,6 @@ const BuyMerchItem: React.FC<{
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
-  const snackbar = useSnackbar();
-  const [isLoadingStripe, setIsLoadingStripe] = React.useState(false);
 
   const paymentUserId = artist.paymentToUserId ?? artist.userId;
   const { data: stripeAccountStatus } = useQuery(
@@ -66,82 +64,66 @@ const BuyMerchItem: React.FC<{
   const shippingDestination = methods.watch("shippingDestinationId");
   const merchOptionIds = methods.watch("merchOptionIds");
   const navigate = useNavigate();
-  const [clientSecret, setClientSecret] = React.useState<string | null>(null);
-  const [onComplete, setOnComplete] = React.useState<(() => void) | undefined>(
-    undefined
-  );
+  const { checkout, isLoading: isLoadingStripe, startPurchase } = usePurchase();
+
+  const checkoutCompletePath = buildCheckoutCompletePath(artist, {
+    purchaseType: "merch",
+    merchId: merch.id,
+  });
 
   const onSubmit = React.useCallback(
     async (data: BuyMerchFormData) => {
-      try {
-        if (merch) {
-          const options = flatten(
-            merch.optionTypes?.map((ot) =>
-              ot.options.find((o) => data.merchOptionIds.includes(o.id))
-            )
-          );
+      if (!merch) {
+        return;
+      }
+      const options = flatten(
+        merch.optionTypes?.map((ot) =>
+          ot.options.find((o) => data.merchOptionIds.includes(o.id))
+        )
+      );
 
-          if (
-            options &&
-            options.find(
-              (o) =>
-                o &&
-                o.quantityRemaining !== undefined &&
-                o.quantityRemaining !== null &&
-                o.quantityRemaining < data.quantity
-            )
-          ) {
-            setError("merchOptionIds", {
-              type: "manual",
-              message: t("notEnoughInStockQuantity") ?? "",
-            });
-            return;
-          }
-          if (data.quantity < 1 || data.quantity > merch.quantityRemaining) {
-            setError("quantity", {
-              type: "manual",
-              message: t("notEnoughInStockCategory") ?? "",
-            });
-            return;
-          }
-          setIsLoadingStripe(true);
-          const response = await api.post<
-            {},
-            { redirectUrl: string; clientSecret: string }
-          >(`merch/${merch.id}/purchase`, {
-            price: data.chosenPrice
-              ? Number(data.chosenPrice) * 100
-              : undefined,
+      if (
+        options &&
+        options.find(
+          (o) =>
+            o &&
+            o.quantityRemaining !== undefined &&
+            o.quantityRemaining !== null &&
+            o.quantityRemaining < data.quantity
+        )
+      ) {
+        setError("merchOptionIds", {
+          type: "manual",
+          message: t("notEnoughInStockQuantity") ?? "",
+        });
+        return;
+      }
+      if (data.quantity < 1 || data.quantity > merch.quantityRemaining) {
+        setError("quantity", {
+          type: "manual",
+          message: t("notEnoughInStockCategory") ?? "",
+        });
+        return;
+      }
+
+      await startPurchase({
+        artistId: artist.id,
+        items: [
+          {
+            type: "merch",
+            id: merch.id,
             quantity: data.quantity,
+            price: data.chosenPrice
+              ? String(Number(data.chosenPrice) * 100)
+              : undefined,
             merchOptionIds: data.merchOptionIds,
             shippingDestinationId: data.shippingDestinationId,
             message: data.message,
-          });
-          if (response.clientSecret) {
-            const artistSlug = artist.urlSlug ?? artist.id;
-            const params = new URLSearchParams();
-            params.set("purchaseType", "merch");
-            params.set("merchId", merch.id);
-            setOnComplete(
-              () => () =>
-                navigate(
-                  `/${artistSlug}/checkout-complete?${params.toString()}`
-                )
-            );
-            setClientSecret(response.clientSecret);
-          } else {
-            window.location.assign(response.redirectUrl);
-          }
-          setIsLoadingStripe(false);
-        }
-      } catch (e) {
-        setIsLoadingStripe(false);
-        snackbar(t("errorOccurred"), {
-          type: "warning",
-        });
-      }
+          },
+        ],
+      });
     },
-    [setIsLoadingStripe, merch?.id]
+    [merch, artist.id, startPurchase, setError, t]
   );
 
   if (!stripeAccountStatus?.chargesEnabled || merch.quantityRemaining === 0) {
@@ -176,13 +158,19 @@ const BuyMerchItem: React.FC<{
     ? amountAvailable < Number(quantity)
     : false;
 
-  if (clientSecret && stripeAccountStatus?.stripeAccountId) {
+  if (checkout) {
     return (
-      <EmbeddedStripeForm
-        clientSecret={clientSecret}
-        stripeAccountId={stripeAccountStatus.stripeAccountId}
-        onComplete={onComplete}
-      />
+      <div className="p-4">
+        <PurchaseElements
+          clientSecret={checkout.clientSecret}
+          stripeAccountId={checkout.stripeAccountId}
+          returnUrl={`${window.location.origin}${checkoutCompletePath}`}
+          onSuccess={() => navigate(checkoutCompletePath)}
+          buttonLabel={t("completePayment") ?? ""}
+          requiresShipping={checkout.requiresShipping}
+          allowedCountries={checkout.allowedCountries}
+        />
+      </div>
     );
   }
 
@@ -215,6 +203,7 @@ const BuyMerchItem: React.FC<{
               {...methods.register("quantity", {
                 min: 1,
                 max: merch.quantityRemaining,
+                valueAsNumber: true,
               })}
               id="quantity"
               type="number"

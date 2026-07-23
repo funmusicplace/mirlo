@@ -4,9 +4,9 @@ import Stripe from "stripe";
 
 import { logger } from "../../logger";
 import { getPlatformFeeForArtist } from "../artist";
-import countryCodesCurrencies from "../country-codes-currencies";
 import { AppError } from "../error";
 import { generateFullStaticImageUrl } from "../images";
+import { calculateMerchShippingCost } from "../merch";
 import { finalArtistAvatarBucket } from "../minio";
 import {
   calculateAppFee,
@@ -383,97 +383,31 @@ export const createStripeCheckoutSessionForPurchase = async ({
   return session;
 };
 
-const stripeBannedDestinations =
-  "AS, CX, CC, CU, HM, IR, KP, MH, FM, NF, MP, PW, SD, SY, UM, VI".split(", ");
-
-const SCHENGEN_COUNTRY_CODES = [
-  "AT",
-  "BE",
-  "BG",
-  "CZ",
-  "DE",
-  "EE",
-  "ES",
-  "FI",
-  "GR",
-  "HR",
-  "HU",
-  "IT",
-  "LT",
-  "LU",
-  "LV",
-  "MT",
-  "NL",
-  "PL",
-  "PT",
-  "RO",
-  "SE",
-  "SI",
-  "SK",
-];
-
+// Cost/country-list math lives once in ../merch (shared with POST /v1/purchase)
+// — this just adapts it to Stripe's shipping_rate_data shape.
 const determineShipping = (
   shippingDestinations: MerchShippingDestination[],
   shippingDestinationId: string,
   currency: string,
   quantity: number = 0
 ) => {
-  const isShippingToSchengen = SCHENGEN_COUNTRY_CODES.includes(
-    shippingDestinationId.toUpperCase()
-  );
-
-  const euCosts = shippingDestinations.find(
-    (s) => s.destinationCountry === "EU"
-  );
-
-  const destination = isShippingToSchengen
-    ? { ...euCosts, destinationCountry: shippingDestinationId }
-    : shippingDestinations.find((s) => s.id === shippingDestinationId);
-
-  if (!destination) {
-    throw new AppError({
-      httpCode: 400,
-      description:
-        "Supplied destination isn't a valid destination for the seller",
-    });
-  }
-
-  let possibleDestinations = [destination.destinationCountry];
-
-  if (
-    destination.destinationCountry === "" ||
-    destination.destinationCountry === null
-  ) {
-    const specificShippingCosts = shippingDestinations.filter(
-      (d) => d.destinationCountry !== ""
+  const { costCents, allowedCountries, destinationCountry } =
+    calculateMerchShippingCost(
+      shippingDestinations,
+      shippingDestinationId,
+      quantity
     );
-
-    possibleDestinations = countryCodesCurrencies
-      .map((country) => {
-        const inSpecific = specificShippingCosts.find(
-          (d) => d.destinationCountry === country.countryCode
-        );
-        const banned = stripeBannedDestinations.includes(country.countryCode);
-        if (banned || inSpecific) return null;
-        return country.countryCode;
-      })
-      .filter((country) => !!country);
-  }
-
-  const destinationCost =
-    (destination.costUnit ?? 0) +
-    (quantity > 1 ? (quantity - 1) * (destination?.costExtraUnit ?? 0) : 0);
 
   return {
     shipping_rate_data: {
-      display_name: `Shipping to ${!!destination.destinationCountry ? destination.destinationCountry : "Everywhere"}`,
+      display_name: `Shipping to ${destinationCountry ? destinationCountry : "Everywhere"}`,
       fixed_amount: {
         currency,
-        amount: castToFixed(destinationCost),
+        amount: castToFixed(costCents),
       },
       type: "fixed_amount" as "fixed_amount",
     },
-    destinationCodes: possibleDestinations,
+    destinationCodes: allowedCountries,
   };
 };
 

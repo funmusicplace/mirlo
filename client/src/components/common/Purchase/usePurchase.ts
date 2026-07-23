@@ -7,16 +7,36 @@ import useErrorHandler from "services/useErrorHandler";
 export type PurchaseItem =
   | { type: "trackGroup"; id: number; price?: string; message?: string }
   | { type: "track"; id: number; price?: string; message?: string }
-  | { type: "merch"; id: string; quantity?: number; message?: string }
+  | {
+      type: "merch";
+      id: string;
+      quantity?: number;
+      price?: string;
+      merchOptionIds?: string[];
+      shippingDestinationId?: string;
+      message?: string;
+    }
   | { type: "tip"; amount: number; message?: string };
 
 type PurchaseResponse = {
   clientSecret?: string;
   stripeAccountId?: string;
   redirectUrl?: string;
+  /**
+   * Set when the cart contains a physical item. `allowedCountries` is the
+   * server-resolved set of countries this item can ship to, accounting for
+   * EU/Schengen grouping and banned countries.
+   */
+  requiresShipping?: boolean;
+  allowedCountries?: string[];
 };
 
-export type Checkout = { clientSecret: string; stripeAccountId: string };
+export type Checkout = {
+  clientSecret: string;
+  stripeAccountId: string;
+  requiresShipping?: boolean;
+  allowedCountries?: string[];
+};
 
 /**
  * Drives the unified purchase flow. `startPurchase` POSTs to `/v1/purchase` and
@@ -51,6 +71,8 @@ export const usePurchase = () => {
           setCheckout({
             clientSecret: response.clientSecret,
             stripeAccountId: response.stripeAccountId,
+            requiresShipping: response.requiresShipping,
+            allowedCountries: response.allowedCountries,
           });
           return;
         }
