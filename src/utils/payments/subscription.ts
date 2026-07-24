@@ -105,7 +105,12 @@ export const initiateOnlineSubscription = async ({
   /** Self-chosen display name, captured when the buyer has no account name yet. */
   userName?: string;
 }): Promise<
-  { success: true } | { clientSecret: string | null; stripeAccountId: string }
+  | { success: true }
+  | {
+      clientSecret: string | null;
+      stripeAccountId: string;
+      setupIntentId: string;
+    }
 > => {
   const { tier, resolvedAmount } = await resolveTierAndAmount(
     artistId,
@@ -163,7 +168,7 @@ export const initiateOnlineSubscription = async ({
     return { success: true };
   }
 
-  const { clientSecret } =
+  const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
       tierId,
       artistId,
@@ -178,7 +183,7 @@ export const initiateOnlineSubscription = async ({
         : undefined,
     });
 
-  return { clientSecret, stripeAccountId };
+  return { clientSecret, stripeAccountId, setupIntentId };
 };
 
 type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
