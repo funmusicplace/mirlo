@@ -3,6 +3,7 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { getClient } from "../utils/getClient";
+import { serializeUser } from "../serializers/user";
 
 const sendOnboardingEmail = async () => {
   const date = new Date();
@@ -18,7 +19,7 @@ const sendOnboardingEmail = async () => {
       },
     },
     include: {
-      artists: true,
+      profiles: true,
     },
   });
 
@@ -48,7 +49,7 @@ const sendOnboardingEmail = async () => {
           }
 
           if (
-            user.artists.length > 0 &&
+            user.profiles.length > 0 &&
             user.stripeAccountId === null &&
             !user.onboardingEmailsSent.includes("payment-processor")
           ) {
@@ -58,7 +59,7 @@ const sendOnboardingEmail = async () => {
                 to: user.email,
               },
               locals: {
-                user,
+                user: serializeUser(user),
                 content: `<p>Hi ${user.name || user.email},</p>
                 <p>We noticed that you have created an artist profile on our platform but haven't set up a payment processor yet. To start receiving payments for your music, please set up your payment processor as soon as possible.</p>
                 <p>If you have any questions or need assistance, feel free to reach out to us at hi@mirlo.space.</p>`,

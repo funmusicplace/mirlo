@@ -2,9 +2,8 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import processor, {
-  whereForPublishedTrackGroups,
-} from "../../../utils/trackGroup";
+import { processSingleTrackGroup } from "../../../serializers/trackGroup";
+import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -47,7 +46,7 @@ export default function () {
       const fullTrackGroups = await prisma.trackGroup.findMany({
         where: { id: { in: mostPlayedIds } },
         include: {
-          artist: {
+          profile: {
             select: {
               name: true,
               urlSlug: true,
@@ -70,7 +69,7 @@ export default function () {
 
       res.json({
         results: sortedMostPlayedTrackGroups.map((tg) => ({
-          ...processor.single(tg),
+          ...processSingleTrackGroup(tg),
           totalPlaysCount: idPlayCountMap.get(tg.id),
         })),
       });

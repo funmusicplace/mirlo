@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
-import { processSingleTrack } from "../../../../utils/serialize/track";
+import { processSingleTrack } from "../../../../serializers/track";
 
 export default function () {
   const operations = {
@@ -22,7 +22,7 @@ export default function () {
               _count: {
                 select: { tracks: true },
               },
-              artist: {
+              profile: {
                 include: {
                   avatar: true,
                 },

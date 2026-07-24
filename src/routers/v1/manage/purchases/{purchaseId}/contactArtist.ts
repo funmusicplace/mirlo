@@ -5,6 +5,8 @@ import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
 import sendMail from "../../../../../jobs/send-mail";
 import { getClient } from "../../../../../utils/getClient";
+import { omitApPrivateKey } from "../../../../../serializers/utils";
+import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
 
 export default function () {
   const operations = {
@@ -30,7 +32,7 @@ export default function () {
       // User is authorized to contact the artist
       const artist = await prisma.profile.findFirst({
         where: {
-          id: purchase.merch.artistId,
+          id: purchase.merch.profileId,
         },
         select: {
           id: true,
@@ -52,8 +54,8 @@ export default function () {
               to: artist.user.email,
             },
             locals: {
-              purchase,
-              artist,
+              purchase: serializeMerchPurchase(purchase),
+              artist: omitApPrivateKey(artist),
               message,
               host: process.env.API_DOMAIN,
               client: (await getClient()).applicationUrl,

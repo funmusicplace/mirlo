@@ -13,6 +13,7 @@ import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
+import { processSingleArtist } from "../../../../../../serializers/artist";
 
 const sendArtistNotificationOfLabel = async (
   artist: Profile,
@@ -24,7 +25,7 @@ const sendArtistNotificationOfLabel = async (
       userId: artist.userId,
       notificationType: "LABEL_ADDED_ARTIST",
       relatedUserId: labelUser.id,
-      artistId: artist.id,
+      profileId: artist.id,
     },
   });
   if (!existingNotification) {
@@ -46,7 +47,7 @@ const sendArtistNotificationOfLabel = async (
           you can ignore this message.
           </p>
         `,
-        artistId: artist.id,
+        profileId: artist.id,
         relatedUserId: labelUser.id,
       },
     });
@@ -72,12 +73,11 @@ const sendArtistNotificationOfLabel = async (
           to: artistUser.email,
         },
         locals: {
-          artist,
+          artist: processSingleArtist(artist),
           user: artistUser,
           email: encodeURIComponent(artistUser.email),
           host: process.env.API_DOMAIN,
-          label: labelProfile,
-          labelArtist: labelProfile,
+          label: labelProfile ? processSingleArtist(labelProfile) : null,
           client: client.applicationUrl,
         },
       });
@@ -99,7 +99,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { artistId } = req.params as unknown as { artistId: string };
+    const { artistId } = req.params as { artistId: string };
 
     try {
       const artistLabels = await prisma.artistLabel.findMany({

@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import sendMail from "../../../../jobs/send-mail";
 import { getClient } from "../../../../utils/getClient";
+import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 
 export default function () {
   const operations = {
@@ -21,7 +22,7 @@ export default function () {
           id: Number(trackGroupId),
         },
         include: {
-          artist: true,
+          profile: true,
         },
       });
 
@@ -36,7 +37,7 @@ export default function () {
             to: email,
           },
           locals: {
-            trackGroup,
+            trackGroup: processSingleTrackGroup(trackGroup),
             client: (await getClient()).applicationUrl,
           },
         },

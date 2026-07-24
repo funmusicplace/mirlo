@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
+import { serializeTrackGroupPurchase } from "../../../../serializers/trackGroup";
 import { registerPurchase } from "../../../../utils/trackGroup";
 import { findOrCreateUserBasedOnEmail } from "../../../../utils/user";
 
@@ -24,7 +25,7 @@ export default function () {
           id: Number(trackGroupId),
         },
         include: {
-          artist: true,
+          profile: true,
           tracks: {
             include: {
               audio: true,
@@ -76,7 +77,9 @@ export default function () {
           currencyPaid: "usd",
           paymentProcessorKey: null,
         });
-        return res.status(200).json(purchase);
+        return res
+          .status(200)
+          .json(purchase ? serializeTrackGroupPurchase(purchase) : purchase);
       } else {
         res.status(400).json({
           error: "Need to be either logged in or supply email address",

@@ -39,7 +39,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              profile: true,
             },
           },
           audio: true,

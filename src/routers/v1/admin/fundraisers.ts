@@ -1,6 +1,8 @@
-import { Request, Response, NextFunction } from "express";
 import prisma from "@mirlo/prisma";
+import { Request, Response, NextFunction } from "express";
+
 import { userHasPermission } from "../../../auth/passport";
+import { serializeFundraiser } from "../../../serializers/fundraiser";
 
 export default function () {
   const operations = {
@@ -19,7 +21,7 @@ export default function () {
             select: {
               id: true,
               title: true,
-              artist: {
+              profile: {
                 select: {
                   id: true,
                   name: true,
@@ -35,7 +37,9 @@ export default function () {
       });
 
       res.json({
-        result: fundraisers,
+        result: fundraisers.map((fundraiser) =>
+          serializeFundraiser(fundraiser)
+        ),
       });
     } catch (error) {
       next(error);
@@ -68,7 +72,7 @@ export default function () {
                     properties: {
                       id: { type: "integer" },
                       title: { type: "string" },
-                      artist: {
+                      profile: {
                         type: "object",
                         properties: {
                           id: { type: "integer" },

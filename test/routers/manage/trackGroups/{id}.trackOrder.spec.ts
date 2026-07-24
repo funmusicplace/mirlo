@@ -49,7 +49,7 @@ describe("manage/trackGroups/{id}/trackOrder", () => {
 
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        artistId: artist.id,
+        profileId: artist.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),

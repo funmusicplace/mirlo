@@ -1,9 +1,11 @@
+import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import prisma from "@mirlo/prisma";
+import { serializeUser } from "../../../../serializers/user";
 
 export default function () {
   const operations = {
@@ -27,7 +29,7 @@ export default function () {
         id: Number(userId),
       },
       select: {
-        artists: true,
+        profiles: true,
         email: true,
         name: true,
         stripeAccountId: true,
@@ -35,7 +37,7 @@ export default function () {
         isAdmin: true,
       },
     });
-    res.json({ result: user });
+    res.json({ result: user ? serializeUser(user) : user });
   }
   return operations;
 }

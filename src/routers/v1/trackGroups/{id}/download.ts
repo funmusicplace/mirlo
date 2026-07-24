@@ -99,7 +99,7 @@ export default function () {
       }
 
       try {
-        const originalTitle = `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`;
+        const originalTitle = `${trackGroup.profile.name} - ${trackGroup.title ?? "album"}`;
         const asciiTitle = filenamify(originalTitle);
 
         // Prefer handing the browser a short-lived presigned storage URL so

@@ -39,7 +39,7 @@ export const doesPostBelongToUser = async (
       const post = await prisma.post.findFirst({
         where: {
           id: Number(postId),
-          artist: {
+          profile: {
             userId: Number(loggedInUser.id),
           },
           deletedAt: null,

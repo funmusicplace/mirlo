@@ -3,14 +3,8 @@ import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
-import { addSizesToImage } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
-import { generateFullStaticImageUrl } from "../../../../../utils/images";
-import {
-  finalCoversBucket,
-  finalArtistAvatarBucket,
-  finalPostImageBucket,
-} from "../../../../../utils/minio";
+import { serializeNotification } from "../../../../../serializers/notification";
 
 type Params = {
   userId: string;
@@ -45,16 +39,16 @@ export default function () {
         include: {
           post: {
             include: {
-              artist: {
+              profile: {
                 include: { avatar: true },
               },
               featuredImage: true,
             },
           },
-          artist: { omit: { apPrivateKey: true } },
+          profile: { omit: { apPrivateKey: true } },
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 omit: { apPrivateKey: true },
                 include: { user: { select: { currency: true } } },
               },
@@ -71,8 +65,8 @@ export default function () {
           },
           subscription: {
             include: {
-              artistSubscriptionTier: {
-                include: { artist: { omit: { apPrivateKey: true } } },
+              profileSubscriptionTier: {
+                include: { profile: { omit: { apPrivateKey: true } } },
               },
             },
           },
@@ -81,7 +75,7 @@ export default function () {
               id: true,
               name: true,
               email: true,
-              artists: {
+              profiles: {
                 include: { avatar: true },
               },
             },
@@ -114,56 +108,10 @@ export default function () {
         purchases.map((p) => [`${p.userId}_${p.trackGroupId}`, p])
       );
 
-      const processed = notifications.map((n) => ({
-        ...n,
-        trackGroup: n.trackGroup
-          ? {
-              ...n.trackGroup,
-              currency: n.trackGroup.artist?.user?.currency ?? "usd",
-              cover: addSizesToImage(finalCoversBucket, n.trackGroup.cover),
-              purchase: n.relatedUserId
-                ? (purchaseMap.get(`${n.relatedUserId}_${n.trackGroupId}`) ??
-                  null)
-                : null,
-            }
-          : null,
-        post: n.post
-          ? {
-              ...n.post,
-              artist: n.post.artist
-                ? {
-                    ...n.post.artist,
-                    avatar: addSizesToImage(
-                      finalArtistAvatarBucket,
-                      n.post.artist.avatar
-                    ),
-                  }
-                : null,
-              featuredImage: n.post.featuredImage
-                ? {
-                    ...n.post.featuredImage,
-                    src: generateFullStaticImageUrl(
-                      n.post.featuredImage.id,
-                      finalPostImageBucket,
-                      n.post.featuredImage.extension
-                    ),
-                  }
-                : null,
-            }
-          : null,
-        relatedUser: n.relatedUser
-          ? {
-              ...n.relatedUser,
-              artists: n.relatedUser.artists.map((a) => ({
-                ...a,
-                avatar: addSizesToImage(finalArtistAvatarBucket, a.avatar),
-              })),
-            }
-          : null,
-      }));
-
       res.json({
-        results: processed,
+        results: notifications.map((n) =>
+          serializeNotification(n, purchaseMap)
+        ),
         total: await prisma.notification.count({ where }),
       });
     } else {

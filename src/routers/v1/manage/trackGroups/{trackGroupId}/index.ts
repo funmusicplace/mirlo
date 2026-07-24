@@ -7,14 +7,13 @@ import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
-import processor, {
-  trackGroupSingleInclude,
-} from "../../../../../utils/trackGroup";
 import {
   deleteTrackGroup,
   finalizeTrackGroupPublication,
+  trackGroupSingleInclude,
 } from "../../../../../utils/trackGroup";
 
 type Params = {
@@ -30,7 +29,7 @@ const findNewSlug = async (
   const verifySlug = await prisma.trackGroup.findFirst({
     where: {
       urlSlug: `${slug}`,
-      artistId: artistId,
+      profileId: artistId,
     },
   });
   if (verifySlug) {
@@ -84,7 +83,7 @@ export default function () {
       }
 
       return res.status(200).json({
-        result: processor.single(trackGroup, {
+        result: processSingleTrackGroup(trackGroup, {
           loggedInUserId: loggedInUser.id,
         }),
       });
@@ -167,7 +166,7 @@ export default function () {
           generateSlug(newValues.urlSlug) || newValues.urlSlug;
         const slugConflict = await prisma.trackGroup.findFirst({
           where: {
-            artistId: existingTrackGroup.artistId,
+            profileId: existingTrackGroup.profileId,
             urlSlug: newValues.urlSlug,
             id: { not: Number(trackGroupId) },
             deletedAt: null,
@@ -208,7 +207,7 @@ export default function () {
         if (slug === "") {
           slug = "blank";
         }
-        const newSlug = await findNewSlug(slug, 0, trackGroup.artistId);
+        const newSlug = await findNewSlug(slug, 0, trackGroup.profileId);
         await prisma.trackGroup.update({
           where: { id: trackGroup.id },
           data: {
@@ -220,7 +219,13 @@ export default function () {
         });
       }
 
-      res.json({ result: trackGroup });
+      res.json({
+        result: trackGroup
+          ? processSingleTrackGroup(trackGroup, {
+              loggedInUserId: req.user?.id,
+            })
+          : trackGroup,
+      });
     } catch (error) {
       next(error);
     }

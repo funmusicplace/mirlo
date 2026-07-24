@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { processSingleArtist } from "../../../../utils/artist";
+import { serializeProfileUserSubscriptionCharge } from "../../../../serializers/profileUserSubscription";
 
 type Params = {
   userId: string;
@@ -22,17 +23,17 @@ export default function () {
     if (Number(userId) === Number(loggedInUser.id)) {
       const charges = await prisma.profileUserSubscriptionCharge.findMany({
         where: {
-          artistUserSubscription: {
+          profileUserSubscription: {
             userId: Number(userId),
           },
         },
         include: {
           transaction: true,
-          artistUserSubscription: {
+          profileUserSubscription: {
             include: {
-              artistSubscriptionTier: {
+              profileSubscriptionTier: {
                 include: {
-                  artist: {
+                  profile: {
                     include: {
                       avatar: { where: { deletedAt: null } },
                     },
@@ -43,18 +44,26 @@ export default function () {
           },
         },
       });
-      const results = charges.map((c) => ({
-        ...c,
-        artistUserSubscription: {
-          ...c.artistUserSubscription,
-          artistSubscriptionTier: {
-            ...c.artistUserSubscription.artistSubscriptionTier,
-            artist: processSingleArtist(
-              c.artistUserSubscription.artistSubscriptionTier.artist
-            ),
-          },
-        },
-      }));
+      const results = charges.map((c) => {
+        const remapped = serializeProfileUserSubscriptionCharge(c);
+        const profile =
+          c.profileUserSubscription?.profileSubscriptionTier?.profile;
+        const sub = remapped.artistUserSubscription;
+        const tier = sub?.artistSubscriptionTier;
+        if (profile && sub && tier) {
+          return {
+            ...remapped,
+            artistUserSubscription: {
+              ...sub,
+              artistSubscriptionTier: {
+                ...tier,
+                artist: processSingleArtist(profile),
+              },
+            },
+          };
+        }
+        return remapped;
+      });
       res.json({
         results,
       });

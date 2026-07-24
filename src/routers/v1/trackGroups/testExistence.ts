@@ -5,9 +5,7 @@ import { userAuthenticated } from "../../../auth/passport";
 
 type Query = {
   urlSlug?: string;
-  artistId?: number;
-  email?: string;
-  forArtistId?: string;
+  artistId?: string;
 };
 
 export default function () {
@@ -16,15 +14,14 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId, urlSlug, email, forArtistId } =
-      req.query as unknown as Query;
+    const { artistId, urlSlug } = req.query as unknown as Query;
     try {
       let exists = false;
 
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           urlSlug: { equals: urlSlug, mode: "insensitive" },
-          artistId: Number(artistId),
+          profileId: Number(artistId),
         },
       });
       exists = !!trackGroup;

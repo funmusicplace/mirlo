@@ -6,6 +6,7 @@ import { userAuthenticated } from "../../../../auth/passport";
 import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
 import { getAudioUploadUrl } from "../../../../utils/minio";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
+import { processSingleTrack } from "../../../../serializers/track";
 
 export default function () {
   const operations = {
@@ -20,13 +21,13 @@ export default function () {
     const tracks = await prisma.track.findMany({
       where: {
         trackGroup: {
-          artist: {
+          profile: {
             userId: loggedInUser.id,
           },
         },
       },
     });
-    res.json(tracks);
+    res.json(tracks.map((tr) => processSingleTrack(tr)));
   }
 
   GET.apiDoc = {
@@ -140,7 +141,10 @@ export default function () {
         });
         uploadUrl = await getAudioUploadUrl(audio.id);
       }
-      res.json({ result: track, uploadUrl });
+      res.json({
+        result: track ? processSingleTrack(track) : track,
+        uploadUrl,
+      });
     } catch (e) {
       next(e);
     }

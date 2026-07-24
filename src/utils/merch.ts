@@ -1,9 +1,7 @@
 import prisma from "@mirlo/prisma";
-import { Merch, MerchImage } from "@mirlo/prisma/client";
 
 import logger from "../logger";
 
-import { addSizesToImage } from "./artist";
 import { deleteDownloadableContent } from "./content";
 import { finalMerchImageBucket, removeObjectsFromBucket } from "./minio";
 
@@ -61,32 +59,4 @@ export const deleteMerch = async (merchId: string) => {
       id: merchId,
     },
   });
-};
-
-export const processSingleMerch = (
-  merch: Merch & { images?: MerchImage[] } & {
-    artist?: { user?: { currency?: string | null } | null } | null;
-    downloadableContent?: {
-      downloadableContent: Record<string, unknown>;
-      downloadableContentId: string;
-    }[];
-  },
-  options?: { fallbackCurrency?: string }
-) => ({
-  ...merch,
-  currency: merch.artist?.user?.currency ?? options?.fallbackCurrency ?? "usd",
-  downloadableContent: merch.downloadableContent?.map((dc) => ({
-    ...dc,
-    downloadableContent: {
-      ...dc.downloadableContent,
-      downloadUrl:
-        process.env.API_DOMAIN +
-        `/v1/downloadableContent/${dc.downloadableContentId}`,
-    },
-  })),
-  images: merch.images?.map((t) => addSizesToImage(finalMerchImageBucket, t)),
-});
-
-export default {
-  single: processSingleMerch,
 };

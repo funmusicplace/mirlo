@@ -7,6 +7,7 @@ import { userAuthenticated } from "../../../../auth/passport";
 import sendMail from "../../../../jobs/send-mail";
 import { AppError } from "../../../../utils/error";
 import { getClient } from "../../../../utils/getClient";
+import { processSingleArtist } from "../../../../serializers/artist";
 
 type Params = { id: string };
 
@@ -71,7 +72,7 @@ export default function () {
       const recentCount = await prisma.notification.count({
         where: {
           notificationType: "ARTIST_CONTACT_MESSAGE",
-          artistId: artist.id,
+          profileId: artist.id,
           relatedUserId: sender.id,
           createdAt: { gte: new Date(Date.now() - CONTACT_RATE_WINDOW_MS) },
         },
@@ -89,7 +90,7 @@ export default function () {
           notificationType: "ARTIST_CONTACT_MESSAGE",
           userId: artist.user.id,
           relatedUserId: sender.id,
-          artistId: artist.id,
+          profileId: artist.id,
           content: trimmed,
         },
       });
@@ -103,7 +104,7 @@ export default function () {
             replyTo: sender.email,
           },
           locals: {
-            artist,
+            artist: processSingleArtist(artist),
             sender: { name: senderName, email: sender.email },
             message: trimmed,
             host: process.env.API_DOMAIN,

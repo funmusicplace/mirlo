@@ -14,25 +14,31 @@ import {
   TrackGroupCover,
 } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../artist";
-import { generateFullStaticImageUrl } from "../images";
-import { processSingleMerch } from "../merch";
+import { addSizesToImage } from "../utils/artist";
+import { generateFullStaticImageUrl } from "../utils/images";
 import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
-  finalCoversBucket,
-  finalImageBucket,
-} from "../minio";
-import { resolvePayee } from "../payments/payee";
+} from "../utils/minio";
+import { resolvePayee } from "../utils/payments/payee";
 
+import {
+  omitApPrivateKey,
+  renameProfileIdToArtistId,
+  Serialized,
+} from "./utils";
+import { LocalArtistLabel, serializeArtistLabel } from "./artistLabel";
+import { serializeMerch } from "./merch";
 import { serializePost } from "./post";
+import { serializeProfileSubscriptionTier } from "./profileSubscriptionTier";
 import {
   processSingleTrackGroup,
   serializeSingleTrackGroupIntoCanimus,
   LocalTrackGroup,
 } from "./trackGroup";
 
-interface LocalArtist extends Profile {
+export interface LocalArtist extends Profile {
+  artistLabels?: LocalArtistLabel[];
   posts?: Post[];
   background?: ProfileBackground | null;
   avatar?: ProfileAvatar | null;
@@ -62,14 +68,17 @@ interface LocalArtist extends Profile {
   } | null;
 }
 
-export const processSingleArtist = (
-  artist: LocalArtist,
+export const processSingleArtist = <T extends LocalArtist>(
+  artist: T,
   userId?: number,
   isUserSubscriber?: boolean
-) => {
-  const { apPrivateKey: _, ...artistPublic } = artist;
+): Serialized<T> => {
+  const { artistLabels, ...profileRest } = artist;
   return {
-    ...artistPublic,
+    ...omitApPrivateKey(profileRest),
+    artistLabels: artistLabels?.map((al) =>
+      serializeArtistLabel(al as LocalArtistLabel, userId, isUserSubscriber)
+    ),
     posts: artist?.posts?.map((p: Post) =>
       serializePost(
         p,
@@ -79,61 +88,63 @@ export const processSingleArtist = (
       )
     ),
     merch: artist?.merch?.map((m) =>
-      processSingleMerch(m, {
+      serializeMerch(m, {
         fallbackCurrency: artist?.user?.currency ?? undefined,
       })
     ),
-    background: addSizesToImage(
-      finalArtistBackgroundBucket,
-      artist?.background
+    background: renameProfileIdToArtistId(
+      addSizesToImage(finalArtistBackgroundBucket, artist?.background)
     ),
-    avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
+    avatar: renameProfileIdToArtistId(
+      addSizesToImage(finalArtistAvatarBucket, artist?.avatar)
+    ),
     trackGroups: artist?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
-        { ...tg, artist: { ...tg.artist, user: artist.user } },
+        { ...tg, profile: { ...tg.profile, user: artist.user } },
         { loggedInUserId: userId }
       )
     ),
-    subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
-      ...tier,
-      images: tier.images?.map((img) => ({
-        ...img,
-        image: addSizesToImage(finalImageBucket, img.image),
-      })),
-      releases: tier.releases?.map((rel) => ({
-        ...rel,
-        trackGroup: {
-          ...rel.trackGroup,
-          cover: addSizesToImage(finalCoversBucket, rel.trackGroup.cover),
-        },
-      })),
-    })),
+    subscriptionTiers: artist.subscriptionTiers?.map((tier) =>
+      serializeProfileSubscriptionTier(tier)
+    ),
     user: artist.user
       ? {
           ...artist.user,
           artistLabels: artist.user.artistLabels?.map((al) => {
-            const { apPrivateKey: _pk, ...alArtistPublic } = al.artist ?? {};
+            const { artist: labelProfile, ...rest } = al;
             return {
-              ...al,
-              artist: {
-                ...alArtistPublic,
-                avatar: addSizesToImage(
-                  finalArtistAvatarBucket,
-                  al.artist?.avatar
-                ),
-                background: addSizesToImage(
-                  finalArtistBackgroundBucket,
-                  al.artist?.background
-                ),
-                trackGroups: al.artist?.trackGroups?.map((tg) =>
-                  processSingleTrackGroup(tg, { loggedInUserId: userId })
-                ),
-              },
+              ...rest,
+              artist: labelProfile
+                ? {
+                    ...omitApPrivateKey(labelProfile),
+                    avatar: renameProfileIdToArtistId(
+                      addSizesToImage(
+                        finalArtistAvatarBucket,
+                        labelProfile.avatar
+                      )
+                    ),
+                    background: renameProfileIdToArtistId(
+                      addSizesToImage(
+                        finalArtistBackgroundBucket,
+                        labelProfile.background
+                      )
+                    ),
+                    trackGroups: labelProfile.trackGroups?.map((tg) =>
+                      processSingleTrackGroup(
+                        {
+                          ...tg,
+                          profile: labelProfile,
+                        } as Parameters<typeof processSingleTrackGroup>[0],
+                        { loggedInUserId: userId }
+                      )
+                    ),
+                  }
+                : undefined,
             };
           }),
         }
       : artist.user,
-  };
+  } as Serialized<T>;
 };
 
 export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {

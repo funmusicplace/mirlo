@@ -57,7 +57,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -106,7 +106,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 0,
       },
     });
@@ -165,7 +165,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist2.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist2.subscriptionTiers[0].id,
         amount: 5,
       },
     });
@@ -173,7 +173,7 @@ describe("send-out-monthly-receipts", () => {
     await prisma.profileUserSubscription.create({
       data: {
         userId: followerUser.id,
-        artistSubscriptionTierId: artist.subscriptionTiers[0].id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 0,
       },
     });

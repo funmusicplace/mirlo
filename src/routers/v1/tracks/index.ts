@@ -4,7 +4,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { userHasPermission } from "../../../auth/passport";
 import { turnItemsIntoRSS } from "../../../utils/rss";
-import { processSingleTrackGroup } from "../../../utils/serialize/trackGroup";
+import { processSingleTrack } from "../../../serializers/track";
+import { processSingleTrackGroup } from "../../../serializers/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -50,7 +51,7 @@ export default function () {
                   { title: { contains: token, mode: "insensitive" } },
                   {
                     trackGroup: {
-                      artist: {
+                      profile: {
                         name: { contains: token, mode: "insensitive" },
                       },
                     },
@@ -66,7 +67,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: {
+              profile: {
                 include: {
                   user: {
                     select: {
@@ -96,7 +97,9 @@ export default function () {
             description: "Mirlo's most recent tracks",
             clientUrl: "releases",
           },
-          tracks
+          tracks.map((tr) =>
+            processSingleTrack(tr, { loggedInUserId: req.user?.id })
+          ) as unknown as Parameters<typeof turnItemsIntoRSS>[1]
         );
         res.set("Content-Type", "application/rss+xml");
         return res.send(feed.xml());

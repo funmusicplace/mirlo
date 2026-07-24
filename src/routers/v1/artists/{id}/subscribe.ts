@@ -23,7 +23,7 @@ const findTierById = async (tierId: number) => {
       id: tierId,
     },
     include: {
-      artist: {
+      profile: {
         include: {
           user: true,
           paymentToUser: true,
@@ -63,11 +63,11 @@ export default function () {
                   userId: userId,
                 },
               },
-              artistId: Number(artistId),
+              profileId: Number(artistId),
             },
           },
           include: {
-            artist: {
+            profile: {
               include: {
                 user: true,
               },
@@ -80,19 +80,19 @@ export default function () {
             `Deleting old subscriptions for ${artistId}, old tier: ${oldTier.id}`
           );
           await deleteStripeSubscriptions({
-            artistSubscriptionTier: { artistId: Number(artistId) },
+            profileSubscriptionTier: { profileId: Number(artistId) },
             userId,
           });
           await prisma.profileUserSubscription.updateMany({
             where: {
               userId,
-              artistSubscriptionTierId: oldTier.id,
+              profileSubscriptionTierId: oldTier.id,
             },
             data: { deleteReason: "TIER_SWITCHED" },
           });
           await prisma.profileUserSubscription.deleteMany({
             where: {
-              artistSubscriptionTier: { artistId: Number(artistId) },
+              profileSubscriptionTier: { profileId: Number(artistId) },
               userId,
             },
           });
@@ -108,7 +108,7 @@ export default function () {
         });
       }
       const stripeAccountId = resolvePayee({
-        artist: newTier.artist,
+        artist: newTier.profile,
       }).stripeAccountId;
 
       if (!stripeAccountId) {
@@ -123,7 +123,7 @@ export default function () {
         loggedInUser,
         email,
         stripeAccountId,
-        artistId: newTier.artistId,
+        artistId: newTier.profileId,
         tier: newTier,
         amount,
         userName: name,
@@ -187,11 +187,11 @@ export default function () {
     try {
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: {
-          artistSubscriptionTier: { artistId: Number(artistId) },
+          profileSubscriptionTier: { profileId: Number(artistId) },
           userId: loggedInUser.id,
         },
         include: {
-          artistSubscriptionTier: true,
+          profileSubscriptionTier: true,
         },
       });
       if (!subscription) {

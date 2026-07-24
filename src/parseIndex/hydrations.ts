@@ -1,8 +1,9 @@
 import * as cheerio from "cheerio";
 
-import { processSingleArtist } from "../utils/serialize/artist";
-import { processSingleTrack } from "../utils/serialize/track";
-import { processSingleTrackGroup } from "../utils/serialize/trackGroup";
+import { processSingleArtist } from "../serializers/artist";
+import { serializePost } from "../serializers/post";
+import { processSingleTrack } from "../serializers/track";
+import { processSingleTrackGroup } from "../serializers/trackGroup";
 
 export type HydrationData = {
   scriptId: string;
@@ -77,14 +78,23 @@ export const registerTrackGroupHydration = (
 };
 
 /**
- * Helper to register post hydration
+ * Helper to register post hydration. Callers should pass the same
+ * purchase / visibility args as `/v1/posts/{id}` (via postAccess helpers).
  */
 export const registerPostHydration = (
   hydrations: HydrationData[],
-  post: any
+  post: Parameters<typeof serializePost>[0],
+  userTrackGroupPurchases?: Parameters<typeof serializePost>[1],
+  userTrackPurchases?: Parameters<typeof serializePost>[2],
+  canSeeContent?: Parameters<typeof serializePost>[3]
 ) => {
-  registerHydration(hydrations, "__MIRLO_POST__", post.urlSlug, {
-    post: post,
+  registerHydration(hydrations, "__MIRLO_POST__", post.urlSlug ?? post.id, {
+    post: serializePost(
+      post,
+      userTrackGroupPurchases,
+      userTrackPurchases,
+      canSeeContent
+    ),
   });
 };
 

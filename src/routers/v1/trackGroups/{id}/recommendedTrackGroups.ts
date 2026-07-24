@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { processSingleTrackGroup } from "../../../../utils/serialize/trackGroup";
+import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 
 type Params = {
   id: number;
@@ -33,7 +33,7 @@ export default function () {
         include: {
           recommendedTrackGroup: {
             include: {
-              artist: {
+              profile: {
                 select: {
                   id: true,
                   name: true,

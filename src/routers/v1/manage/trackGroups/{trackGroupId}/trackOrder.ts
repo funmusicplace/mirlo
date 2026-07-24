@@ -1,11 +1,13 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 type Params = {
   trackGroupId: number;
@@ -54,7 +56,11 @@ export default function () {
         },
       });
 
-      res.json({ result: updatedTrackGroup });
+      res.json({
+        result: updatedTrackGroup
+          ? processSingleTrackGroup(updatedTrackGroup)
+          : updatedTrackGroup,
+      });
     } catch (error) {
       next(error);
     }

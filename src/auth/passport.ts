@@ -345,7 +345,7 @@ export const contentBelongsToLoggedInUser = async (
           trackGroups: {
             where: {
               trackGroup: {
-                artist: {
+                profile: {
                   userId: loggedInUser.id,
                 },
               },
@@ -354,7 +354,7 @@ export const contentBelongsToLoggedInUser = async (
           merch: {
             where: {
               merch: {
-                artist: {
+                profile: {
                   userId: loggedInUser.id,
                 },
               },
@@ -457,7 +457,7 @@ export const trackBelongsToLoggedInUser = async (
       const track = await prisma.track.findFirst({
         where: {
           trackGroup: {
-            artist: whereForAllArtistsThisLabelCanAddReleasesFor(
+            profile: whereForAllArtistsThisLabelCanAddReleasesFor(
               loggedInUser.id
             ),
           },

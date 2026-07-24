@@ -1,7 +1,9 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { sendMailQueue } from "../../../queues/send-mail-queue";
+import { serializeUser } from "../../../serializers/user";
 
 export default function () {
   const operations = {
@@ -19,10 +21,10 @@ export default function () {
             receivePlatformEmails: true,
           },
           include: {
-            artists: true,
+            profiles: true,
           },
         });
-        sendToUsers = users.filter((u) => u.artists.length > 0);
+        sendToUsers = users.filter((u) => u.profiles.length > 0);
       } else if (sendToOption === "emails") {
         const emails = sendTo.replace(/\s+/, "").split(",");
         sendToUsers = await prisma.user.findMany({
@@ -45,7 +47,7 @@ export default function () {
             },
             locals: {
               email: user.email,
-              user,
+              user: serializeUser(user),
               content,
             },
           });

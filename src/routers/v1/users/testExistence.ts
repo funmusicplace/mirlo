@@ -2,13 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../auth/passport";
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
-import { Prisma } from "@mirlo/prisma/client";
 
 type Query = {
   urlSlug?: string;
-  artistId?: number;
   email?: string;
-  forArtistId?: string;
 };
 
 export default function () {

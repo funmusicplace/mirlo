@@ -21,7 +21,9 @@ export default function () {
           user: true,
           fundraiser: {
             include: {
-              trackGroups: { include: { artist: { include: { user: true } } } },
+              trackGroups: {
+                include: { profile: { include: { user: true } } },
+              },
             },
           },
         },

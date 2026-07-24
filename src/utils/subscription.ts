@@ -6,11 +6,12 @@ import { sendMailQueue } from "../queues/send-mail-queue";
 
 import { getClient } from "./getClient";
 import { resolvePayee } from "./payments/payee";
+import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { grantSubscriptionTierReleases } from "./subscriptionTier";
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "MONTH" | "YEAR";
-  artist: Profile;
+  artist: Omit<Profile, "apPrivateKey">;
   host: string;
   isNewSubscription: boolean;
   client: string;
@@ -18,12 +19,17 @@ export type ArtistSubscriptionReceiptEmailType = {
     id: number;
     createdAt: Date;
     updatedAt: Date;
+    amount: number;
+    artistSubscriptionTierId: number;
+    artistSubscriptionTier: {
+      name: string;
+    };
   };
 };
 
 export type ArtistNewSubscriberAnnounceEmailType = {
   interval: "MONTH" | "YEAR";
-  artist: Profile;
+  artist: Omit<Profile, "apPrivateKey">;
   isNewSubscription: boolean;
   artistUserSubscription: {
     artistSubscriptionTierId: number;
@@ -77,17 +83,17 @@ export const manageSubscriptionReceipt = async ({
   billingReason: null | string;
 }) => {
   const isNewSubscription = billingReason === "subscription_create";
-  const artistUserSubscription = await prisma.profileUserSubscription.findFirst(
-    {
+  const profileUserSubscription =
+    await prisma.profileUserSubscription.findFirst({
       where: {
         stripeSubscriptionKey: processorSubscriptionReferenceId,
         deletedAt: null,
       },
       include: {
         user: true,
-        artistSubscriptionTier: {
+        profileSubscriptionTier: {
           include: {
-            artist: {
+            profile: {
               include: {
                 user: true,
                 paymentToUser: true,
@@ -96,12 +102,11 @@ export const manageSubscriptionReceipt = async ({
           },
         },
       },
-    }
-  );
-  if (artistUserSubscription) {
+    });
+  if (profileUserSubscription) {
     const transaction = await prisma.userTransaction.create({
       data: {
-        userId: artistUserSubscription.userId,
+        userId: profileUserSubscription.userId,
         amount: amountPaid,
         currency,
         platformCut,
@@ -112,7 +117,7 @@ export const manageSubscriptionReceipt = async ({
     });
     const created = await prisma.profileUserSubscriptionCharge.create({
       data: {
-        artistUserSubscriptionId: artistUserSubscription.id,
+        profileUserSubscriptionId: profileUserSubscription.id,
         transactionId: transaction.id,
       },
     });
@@ -123,14 +128,14 @@ export const manageSubscriptionReceipt = async ({
     // Update next billing date if provided
     if (status === "COMPLETED" && nextBillingDate) {
       await prisma.profileUserSubscription.update({
-        where: { id: artistUserSubscription.id },
+        where: { id: profileUserSubscription.id },
         data: { nextBillingDate },
       });
 
       if (isNewSubscription) {
         const grantedCount = await grantSubscriptionTierReleases({
-          userId: artistUserSubscription.userId,
-          tierId: artistUserSubscription.artistSubscriptionTierId,
+          userId: profileUserSubscription.userId,
+          tierId: profileUserSubscription.profileSubscriptionTierId,
           userTransactionId: transaction.id,
         });
         if (grantedCount > 0) {
@@ -146,17 +151,31 @@ export const manageSubscriptionReceipt = async ({
     );
 
     const client = await getClient();
+    const serializedSubscription = serializeProfileUserSubscription(
+      profileUserSubscription
+    );
+    const serializedTier = serializedSubscription.artistSubscriptionTier;
+    const artistUserSubscriptionForEmail = {
+      id: serializedSubscription.id,
+      createdAt: serializedSubscription.createdAt,
+      updatedAt: serializedSubscription.updatedAt,
+      amount: serializedSubscription.amount,
+      artistSubscriptionTierId: serializedSubscription.artistSubscriptionTierId,
+      artistSubscriptionTier: {
+        name: serializedTier.name,
+      },
+    };
     if (status === "COMPLETED") {
       await sendMailQueue.add("send-mail", {
         template: "artist-subscription-receipt",
         message: {
-          to: artistUserSubscription.user.email,
+          to: profileUserSubscription.user.email,
         },
         locals: {
           isNewSubscription,
-          interval: artistUserSubscription.artistSubscriptionTier.interval,
-          artist: artistUserSubscription.artistSubscriptionTier.artist,
-          artistUserSubscription,
+          interval: serializedTier.interval,
+          artist: serializedTier.artist,
+          artistUserSubscription: artistUserSubscriptionForEmail,
           host: process.env.API_DOMAIN,
           client: client.applicationUrl,
         } as ArtistSubscriptionReceiptEmailType,
@@ -167,7 +186,7 @@ export const manageSubscriptionReceipt = async ({
       // combining subscription emails into the monthly income report; new
       // subscribers are always announced.
       const payee = resolvePayee({
-        artist: artistUserSubscription.artistSubscriptionTier.artist,
+        artist: profileUserSubscription.profileSubscriptionTier.profile,
       });
 
       const shouldNotifyArtist =
@@ -182,20 +201,20 @@ export const manageSubscriptionReceipt = async ({
           },
           locals: {
             isNewSubscription,
-            interval: artistUserSubscription.artistSubscriptionTier.interval,
-            artist: artistUserSubscription.artistSubscriptionTier.artist,
+            interval: serializedTier.interval,
+            artist: serializedTier.artist,
             artistUserSubscription: {
-              id: artistUserSubscription.id,
-              amount: artistUserSubscription.amount,
+              id: serializedSubscription.id,
+              amount: serializedSubscription.amount,
               artistSubscriptionTierId:
-                artistUserSubscription.artistSubscriptionTierId,
+                serializedSubscription.artistSubscriptionTierId,
               artistSubscriptionTier: {
-                name: artistUserSubscription.artistSubscriptionTier.name,
+                name: serializedTier.name,
               },
             },
             user: {
-              name: artistUserSubscription.user.name || "A supporter",
-              email: artistUserSubscription.user.email,
+              name: profileUserSubscription.user.name || "A supporter",
+              email: profileUserSubscription.user.email,
             },
             transaction: {
               amount: transaction.amount,
@@ -203,7 +222,7 @@ export const manageSubscriptionReceipt = async ({
               platformCut: transaction.platformCut ?? 0,
               stripeCut: transaction.stripeCut ?? 0,
             },
-            email: artistUserSubscription.user.email,
+            email: profileUserSubscription.user.email,
             host: process.env.API_DOMAIN,
             client: client.applicationUrl,
           } as ArtistNewSubscriberAnnounceEmailType,
@@ -213,15 +232,15 @@ export const manageSubscriptionReceipt = async ({
       await sendMailQueue.add("send-mail", {
         template: "charge-failure",
         message: {
-          to: artistUserSubscription.user.email,
+          to: profileUserSubscription.user.email,
         },
         locals: {
-          artist: artistUserSubscription.artistSubscriptionTier.artist,
-          email: encodeURIComponent(artistUserSubscription.user.email),
+          artist: serializedTier.artist,
+          email: encodeURIComponent(profileUserSubscription.user.email),
           host: process.env.API_DOMAIN,
-          cardChargeContext: `your subscription to "${artistUserSubscription.artistSubscriptionTier.artist.name}'s ${artistUserSubscription.artistSubscriptionTier.name}" tier`,
+          cardChargeContext: `your subscription to "${serializedTier.artist.name}'s ${serializedTier.name}" tier`,
           currency: transaction.currency,
-          pledgedAmountFormatted: artistUserSubscription.amount / 100,
+          pledgedAmountFormatted: profileUserSubscription.amount / 100,
           client: client.applicationUrl,
           urlParams,
         },

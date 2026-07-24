@@ -5,8 +5,6 @@ import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { AppError } from "../../../../utils/error";
 
 type Query = {
-  urlSlug?: string;
-  artistId?: number;
   email?: string;
 };
 

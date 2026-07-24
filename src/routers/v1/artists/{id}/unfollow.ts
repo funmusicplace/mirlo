@@ -45,8 +45,8 @@ export default function () {
         if (artist) {
           await prisma.profileUserSubscription.deleteMany({
             where: {
-              artistSubscriptionTier: {
-                artistId: artist.id,
+              profileSubscriptionTier: {
+                profileId: artist.id,
                 isDefaultTier: true,
               },
               userId: userIdToRemove,

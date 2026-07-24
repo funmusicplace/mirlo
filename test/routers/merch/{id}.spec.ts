@@ -29,7 +29,7 @@ describe("GET /v1/merch/{id}", () => {
   it("returns the trackGroup's own artist on includePurchaseTrackGroup (#2008)", async () => {
     // A label-as-artist sells merch that bundles a release owned by a roster
     // artist. The client builds the album link from the merch response and
-    // would 404 if it had to fall back to `merch.artist` (the label) — so the
+    // would 404 if it had to fall back to `merch.profile` (the label) — so the
     // payload needs to expose the trackGroup's actual artist.
     const { user: labelUser } = await createUser({
       email: "label@example.com",

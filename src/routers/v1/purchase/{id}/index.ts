@@ -164,7 +164,7 @@ export default function () {
 
       // Cancelling is a merchant action, same as dispatching: otherwise anyone
       // could kill a legitimate sale mid-tap.
-      await artistEditableByUser(artistId, req.user as Express.User);
+      await artistEditableByUser(Number(artistId), req.user as Express.User);
 
       if (status === "succeeded") {
         throw new AppError({

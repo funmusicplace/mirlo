@@ -39,7 +39,7 @@ declare global {
       instanceCustomization?: {
         title?: string;
         supportEmail?: string;
-        artistId?: string;
+        profileId?: string;
         purchaseEmail?: string;
         showHeroOnHome?: boolean;
         colors?: {

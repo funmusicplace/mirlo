@@ -5,6 +5,7 @@ import {
   merchPurchaseBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
 
 type Params = {
   purchaseId: string;
@@ -89,7 +90,10 @@ export default function () {
         },
         include: {
           merch: {
-            include: { images: true, artist: { omit: { apPrivateKey: true } } },
+            include: {
+              images: true,
+              profile: { omit: { apPrivateKey: true } },
+            },
           },
           user: true,
         },
@@ -101,7 +105,7 @@ export default function () {
         });
       } else {
         return res.json({
-          result: purchase,
+          result: serializeMerchPurchase(purchase),
         });
       }
     } catch (e) {
