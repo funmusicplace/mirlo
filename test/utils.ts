@@ -169,6 +169,7 @@ export const createTier = async (
       artistId: artistId,
       isDefaultTier: data?.isDefaultTier,
       collectAddress: data?.collectAddress,
+      platformPercent: data?.platformPercent,
     },
   });
   return tier;

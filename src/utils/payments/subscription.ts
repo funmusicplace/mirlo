@@ -147,9 +147,17 @@ export const initiateOnlineSubscription = async ({
       currency,
     });
 
+    const platformPercent = tier.platformPercent ?? 7;
     await prisma.profileUserSubscription.update({
       where: { id: existingSubscription.id },
-      data: { artistSubscriptionTierId: tier.id, amount: resolvedAmount },
+      data: {
+        artistSubscriptionTierId: tier.id,
+        amount: resolvedAmount,
+        // Keep in step with the new tier's fee — mirrors the
+        // application_fee_percent update in updateSubscriptionTier, since the
+        // next invoice bills at this percentage going forward.
+        platformCut: Math.round((resolvedAmount * platformPercent) / 100),
+      },
     });
 
     return { success: true };

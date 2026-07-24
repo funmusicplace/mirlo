@@ -944,6 +944,7 @@ describe("purchase", () => {
       const newTier = await createTier(artist.id, {
         minAmount: 1000,
         collectAddress: false,
+        platformPercent: 12,
       });
 
       const existing = await prisma.profileUserSubscription.create({
@@ -951,6 +952,7 @@ describe("purchase", () => {
           artistSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
+          platformCut: 35,
           stripeSubscriptionKey: "sub_existing_123",
         },
       });
@@ -975,6 +977,11 @@ describe("purchase", () => {
       assert.deepEqual(result, { success: true });
       assert.equal(updateStub.calledOnce, true);
       assert.equal(updateStub.getCall(0).args[1]?.proration_behavior, "none");
+      assert.equal(
+        updateStub.getCall(0).args[1]?.application_fee_percent,
+        12,
+        "the new tier's platform fee percentage should be applied to the repriced subscription"
+      );
 
       const after = await prisma.profileUserSubscription.findFirst({
         where: { id: existing.id },
@@ -982,6 +989,11 @@ describe("purchase", () => {
       assert.ok(after, "the same subscription row should still exist");
       assert.equal(after?.artistSubscriptionTierId, newTier.id);
       assert.equal(after?.amount, 1000);
+      assert.equal(
+        after?.platformCut,
+        120,
+        "platformCut should be recalculated from the new tier's fee percentage, not left at the old tier's"
+      );
       assert.equal(
         after?.stripeSubscriptionKey,
         "sub_existing_123",
