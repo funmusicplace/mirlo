@@ -77,25 +77,22 @@ const errorHandler = (
   const log = req.logger || logger;
 
   if (err instanceof AppError) {
+    const context = getSafeRequestContext(req);
     if (err.httpCode >= 500) {
       console.error(err);
-      log.error(
-        "Found instance of unhandled AppError",
-        req.path,
-        req.method,
-        err.httpCode,
-        err.name,
-        err.description
-      );
+      log.error("Found instance of unhandled AppError", {
+        httpCode: err.httpCode,
+        name: err.name,
+        description: err.description,
+        ...context,
+      });
     }
-    log.info(
-      "AppError",
-      req.path,
-      req.method,
-      err.httpCode,
-      err.name,
-      err.description
-    );
+    log.info("AppError", {
+      httpCode: err.httpCode,
+      name: err.name,
+      description: err.description,
+      ...context,
+    });
     return res.status(err.httpCode).json({
       error: err.message,
     });

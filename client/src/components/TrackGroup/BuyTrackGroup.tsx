@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { getArtistUrl } from "utils/artist";
+import { buildCheckoutCompletePath } from "utils/artist";
 
 import AddToCollection from "./AddToCollection";
 import PaymentInputElement from "./PaymentInputElement";
@@ -82,13 +82,11 @@ const BuyTrackGroup: React.FC<{
   // usePurchase/PurchaseModal — album and track purchases already are.
   const usesLegacyFlow = isPledgeMode;
 
-  const checkoutCompletePath = (() => {
-    const params = new URLSearchParams();
-    params.set("purchaseType", track ? "track" : "trackGroup");
-    params.set("trackGroupId", trackGroup.id.toString());
-    if (track) params.set("trackId", track.id.toString());
-    return `${getArtistUrl(trackGroup.artist)}/checkout-complete?${params.toString()}`;
-  })();
+  const checkoutCompletePath = buildCheckoutCompletePath(trackGroup.artist, {
+    purchaseType: track ? "track" : "trackGroup",
+    trackGroupId: trackGroup.id.toString(),
+    ...(track && { trackId: track.id.toString() }),
+  });
 
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {

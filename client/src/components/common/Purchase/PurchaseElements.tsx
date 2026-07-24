@@ -20,7 +20,17 @@ const PurchaseElements: React.FC<{
   returnUrl: string;
   buttonLabel: string;
   onSuccess?: () => void;
-}> = ({ clientSecret, stripeAccountId, returnUrl, buttonLabel, onSuccess }) => {
+  requiresShipping?: boolean;
+  allowedCountries?: string[];
+}> = ({
+  clientSecret,
+  stripeAccountId,
+  returnUrl,
+  buttonLabel,
+  onSuccess,
+  requiresShipping,
+  allowedCountries,
+}) => {
   // Load Stripe.js once per connected account. Passing the promise straight to
   // <Elements> means the instance is created once, not re-created each render.
   const stripePromise = React.useMemo(
@@ -41,6 +51,8 @@ const PurchaseElements: React.FC<{
         returnUrl={returnUrl}
         onSuccess={onSuccess}
         buttonLabel={buttonLabel}
+        requiresShipping={requiresShipping}
+        allowedCountries={allowedCountries}
       />
     </Elements>
   );

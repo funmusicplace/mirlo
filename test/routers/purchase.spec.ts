@@ -20,6 +20,7 @@ import {
   createTrack,
   createTrackGroup,
   createMerch,
+  createMerchShippingDestination,
   createTier,
   createUser,
 } from "../utils";
@@ -461,6 +462,7 @@ describe("purchase", () => {
       const merch = await createMerch(artist.id, {
         isPublic: true,
         minPrice: 800,
+        quantityRemaining: 10,
       });
 
       const response = await requestApp
@@ -474,6 +476,143 @@ describe("purchase", () => {
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
+    });
+
+    it("should return 200 with clientSecret for a merch purchase with options and a shipping destination", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_merch_options_test",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const merch = await createMerch(artist.id, {
+        isPublic: true,
+        minPrice: 800,
+        quantityRemaining: 10,
+      });
+      const optionType = await prisma.merchOptionType.create({
+        data: { merchId: merch.id, optionName: "size" },
+      });
+      const option = await prisma.merchOption.create({
+        data: {
+          merchOptionTypeId: optionType.id,
+          name: "large",
+          quantityRemaining: 5,
+          additionalPrice: 200,
+        },
+      });
+      const destination = await createMerchShippingDestination({
+        merchId: merch.id,
+        destinationCountry: "US",
+        costUnit: 500,
+        costExtraUnit: 100,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [
+            {
+              type: "merch",
+              id: merch.id,
+              quantity: 2,
+              merchOptionIds: [option.id],
+              shippingDestinationId: destination.id,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.clientSecret);
+    });
+
+    it("should return 400 for a merch option id that doesn't belong to the item", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_merch_bad_option",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const merch = await createMerch(artist.id, {
+        isPublic: true,
+        minPrice: 800,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [
+            {
+              type: "merch",
+              id: merch.id,
+              quantity: 1,
+              merchOptionIds: ["not-a-real-option"],
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 400 when the requested merch quantity exceeds stock", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_merch_oos",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const merch = await createMerch(artist.id, {
+        isPublic: true,
+        minPrice: 800,
+        quantityRemaining: 1,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "merch", id: merch.id, quantity: 2 }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 400 when a physically-shipped merch item has no shippingDestinationId", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_merch_no_dest",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const merch = await createMerch(artist.id, {
+        isPublic: true,
+        minPrice: 800,
+      });
+      await createMerchShippingDestination({
+        merchId: merch.id,
+        destinationCountry: "US",
+        costUnit: 500,
+        costExtraUnit: 100,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "merch", id: merch.id, quantity: 1 }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
     });
   });
 

@@ -13,6 +13,12 @@ import {
   handleTrackGroupPurchase,
   handleTrackPurchase,
 } from "../../../utils/handleFinishedTransactions";
+import {
+  calculateMerchShippingCost,
+  checkMerchStock,
+  type MerchWithOptionsAndShipping,
+  resolveMerchOptionIds,
+} from "../../../utils/merch";
 import { resolvePayee } from "../../../utils/payments/payee";
 import {
   initiatePayment,
@@ -25,7 +31,15 @@ import { findUserDiscountPercentsForArtist } from "../../../utils/user";
 type PurchaseItem =
   | { type: "trackGroup"; id: number; price?: string; message?: string }
   | { type: "track"; id: number; price?: string; message?: string }
-  | { type: "merch"; id: string; quantity?: number; message?: string }
+  | {
+      type: "merch";
+      id: string;
+      quantity?: number;
+      price?: string;
+      merchOptionIds?: string[];
+      shippingDestinationId?: string;
+      message?: string;
+    }
   | { type: "tip"; amount: number; message?: string }
   | { type: "subscription"; tierId: number; amount?: number };
 
@@ -138,6 +152,69 @@ const resolveDigitalPurchaseItem = async <T extends "trackGroup" | "track">({
       amount: discountedAmount,
       message,
     },
+  };
+};
+
+/**
+ * Resolves a merch cart item — options, stock, buyer price, shipping cost —
+ * the merch counterpart to resolveDigitalPurchaseItem above for trackGroup/track.
+ * Also surfaces `requiresShipping`/`allowedCountries` for the frontend's
+ * address collector.
+ */
+const resolveMerchPurchaseItem = (
+  merch: MerchWithOptionsAndShipping,
+  item: Extract<PurchaseItem, { type: "merch" }>
+): {
+  item: ResolvedItem;
+  requiresShipping: boolean;
+  allowedCountries: string[];
+} => {
+  const qty = item.quantity ?? 1;
+  if (qty < 1) {
+    throw new AppError({
+      httpCode: 400,
+      description: "quantity must be at least 1",
+    });
+  }
+
+  const { options, additionalPricePerUnit } = resolveMerchOptionIds(
+    merch,
+    item.merchOptionIds
+  );
+  checkMerchStock(merch, options, qty);
+
+  const { priceNumber } = determinePrice(item.price, merch.minPrice);
+
+  const requiresShipping = merch.shippingDestinations.length > 0;
+  let shippingCostCents = 0;
+  let allowedCountries: string[] = [];
+  if (requiresShipping) {
+    if (!item.shippingDestinationId) {
+      throw new AppError({
+        httpCode: 400,
+        description: "shippingDestinationId is required for this merch item",
+      });
+    }
+    ({ costCents: shippingCostCents, allowedCountries } =
+      calculateMerchShippingCost(
+        merch.shippingDestinations,
+        item.shippingDestinationId,
+        qty
+      ));
+  }
+
+  return {
+    item: {
+      type: "merch",
+      id: merch.id,
+      quantity: qty,
+      amount: (priceNumber + additionalPricePerUnit) * qty + shippingCostCents,
+      message: item.message,
+      optionIds: options.map((o) => o.id),
+      shippingDestinationId: item.shippingDestinationId,
+    },
+    requiresShipping,
+    allowedCountries,
   };
 };
 
@@ -256,6 +333,8 @@ export default function () {
 
       const resolvedItems: ResolvedItem[] = [];
       let resolvedStripeAccountId: string | undefined;
+      let requiresShipping = false;
+      let allowedCountries: string[] | undefined;
 
       for (const item of items) {
         if (item.type === "trackGroup") {
@@ -347,28 +426,32 @@ export default function () {
           resolvedStripeAccountId = result.stripeAccountId;
           resolvedItems.push(result.item);
         } else if (item.type === "merch") {
-          const merch = await prisma.merch.findFirst({
-            where: {
-              id: item.id,
-              artistId,
-              isPublic: true,
-              deletedAt: null,
-            },
-            select: { id: true, minPrice: true },
-          });
+          const merch: MerchWithOptionsAndShipping | null =
+            await prisma.merch.findFirst({
+              where: {
+                id: item.id,
+                artistId,
+                isPublic: true,
+                deletedAt: null,
+              },
+              include: {
+                optionTypes: { include: { options: true } },
+                shippingDestinations: true,
+              },
+            });
           if (!merch) {
             throw new AppError({
               httpCode: 404,
               description: `Merch ${item.id} not found`,
             });
           }
-          const qty = item.quantity ?? 1;
-          resolvedItems.push({
-            type: "merch",
-            id: merch.id,
-            quantity: qty,
-            amount: (merch.minPrice ?? 0) * qty,
-          });
+
+          const resolved = resolveMerchPurchaseItem(merch, item);
+          resolvedItems.push(resolved.item);
+          requiresShipping = requiresShipping || resolved.requiresShipping;
+          if (resolved.requiresShipping) {
+            allowedCountries = resolved.allowedCountries;
+          }
         } else if (item.type === "tip") {
           if (!item.amount || item.amount <= 0) {
             throw new AppError({
@@ -417,6 +500,15 @@ export default function () {
           })
         );
         return res.status(200).json({ redirectUrl });
+      }
+
+      // Physical merch needs a mailing address collected in the Payment
+      // Element step, restricted to the countries this item can actually
+      // ship to.
+      if ("clientSecret" in result && requiresShipping) {
+        return res
+          .status(200)
+          .json({ ...result, requiresShipping, allowedCountries });
       }
 
       res.status(200).json(result);

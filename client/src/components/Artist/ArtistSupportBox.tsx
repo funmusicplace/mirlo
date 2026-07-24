@@ -101,7 +101,10 @@ const ArtistSupportBox: React.FC<{
     return <LoadingBlocks rows={2} />;
   }
 
-  if (!subscriptionTier.minAmount || subscriptionTier.minAmount === 0) {
+  if (
+    (!subscriptionTier.minAmount || subscriptionTier.minAmount === 0) &&
+    !subscriptionTier.allowVariable
+  ) {
     return null;
   }
 

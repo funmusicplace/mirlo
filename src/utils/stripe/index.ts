@@ -30,6 +30,7 @@ import {
   withPlatformCurrency,
 } from "../handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "../images";
+import { decrementMerchStock } from "../merch";
 import { finalCoversBucket, finalMerchImageBucket } from "../minio";
 import { calculateAppFee } from "../processingPayments";
 import { manageSubscriptionReceipt } from "../subscription";
@@ -872,6 +873,7 @@ type MerchPurchaseItem = {
   id: string;
   quantity?: number;
   amount: number;
+  optionIds?: string[];
 };
 
 // Records merch purchases from a captured/succeeded PaymentIntent. Works for
@@ -931,15 +933,28 @@ export const handleMerchPurchasesFromIntent = async (
       artist = merch.artist;
     }
 
+    const quantity = item.quantity ?? 1;
+
     await prisma.merchPurchase.create({
       data: {
         userId,
         merchId: merch.id,
         transactionId: transaction.id,
         fulfillmentStatus: "NO_PROGRESS",
-        quantity: item.quantity ?? 1,
+        quantity,
+        ...(item.optionIds?.length && {
+          options: { connect: item.optionIds.map((id) => ({ id })) },
+        }),
+        ...(paymentIntent.shipping && {
+          shippingAddress: {
+            name: paymentIntent.shipping.name,
+            address: paymentIntent.shipping.address,
+          },
+        }),
       },
     });
+
+    await decrementMerchStock(merch.id, item.optionIds ?? [], quantity);
 
     logger.info(
       `handleMerchPurchasesFromIntent: created purchase for merch ${merch.id}, userId ${userId}`

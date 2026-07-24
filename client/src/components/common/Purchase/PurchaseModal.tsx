@@ -31,6 +31,8 @@ const PurchaseModal: React.FC<{
   onSuccess?: () => void;
   title: string;
   buttonLabel: string;
+  requiresShipping?: boolean;
+  allowedCountries?: string[];
 }> = ({
   open,
   onClose,
@@ -40,6 +42,8 @@ const PurchaseModal: React.FC<{
   onSuccess,
   title,
   buttonLabel,
+  requiresShipping,
+  allowedCountries,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
@@ -52,6 +56,8 @@ const PurchaseModal: React.FC<{
           returnUrl={returnUrl}
           onSuccess={onSuccess}
           buttonLabel={buttonLabel}
+          requiresShipping={requiresShipping}
+          allowedCountries={allowedCountries}
         />
       ) : (
         <div className="p-4">
