@@ -54,6 +54,26 @@ describe("canimus", () => {
       assert.equal(response.body.deleted.length, 0);
     });
 
+    it("should GET / do not return labels as artists", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id, {
+        name: "test-artist",
+        urlSlug: "test-artist",
+        federatedStreaming: true,
+        federatedStreamingOptInDate: new Date(Date.now()),
+        isLabelProfile: true,
+      });
+      const trackGroup = await createTrackGroup(artist.id);
+      await createTrack(trackGroup.id);
+      const response = await request(baseURL)
+        .get("sm/canimus.json")
+        .set("Accept", "application/json");
+      assert.equal(response.body.children.length, 0);
+      assert.equal(response.body.deleted.length, 0);
+    });
+
     it("should GET / with no artist federated and 2 artist deleted", async () => {
       const { user } = await createUser({
         email: "test@testcom",

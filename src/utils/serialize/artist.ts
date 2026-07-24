@@ -164,6 +164,7 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
     type: "artist",
     name: artist.name,
     url: artistUrl,
+    uid: String(artist.id),
     images: {
       cover: avatarString
         ? {

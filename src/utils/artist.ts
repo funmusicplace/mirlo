@@ -155,14 +155,17 @@ export const whereForAllArtistsThisLabelCanAddReleasesFor = (
 
 export const artistDeleted: Prisma.ProfileWhereInput = {
   deletedAt: { not: null },
+  isLabelProfile: false,
 };
 
 export const federatedArtist: Prisma.ProfileWhereInput = {
   federatedStreaming: true,
+  isLabelProfile: false,
 };
 
 export const federatedArtistAtSomePoint: Prisma.ProfileWhereInput = {
   federatedStreamingOptInDate: { not: null },
+  isLabelProfile: false,
 };
 
 export const artistNoLongerFederated: Prisma.ProfileWhereInput = {
