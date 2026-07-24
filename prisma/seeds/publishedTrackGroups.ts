@@ -40,7 +40,7 @@ const {
   MINIO_API_PORT = "9000",
 } = process.env;
 
-function createMinioClient(): Minio.Client | null {
+export function createMinioClient(): Minio.Client | null {
   if (!MINIO_HOST) return null;
   return new Minio.Client({
     endPoint: MINIO_HOST,
@@ -51,7 +51,7 @@ function createMinioClient(): Minio.Client | null {
   });
 }
 
-async function ensureBuckets(minioClient: Minio.Client) {
+export async function ensureBuckets(minioClient: Minio.Client) {
   for (const bucket of [IMAGES_BUCKET, AUDIO_BUCKET]) {
     const exists = await minioClient.bucketExists(bucket);
     if (!exists) await minioClient.makeBucket(bucket);
@@ -94,7 +94,7 @@ function generateGlitchNoiseBuffer(width: number, height: number): Buffer {
   return buf;
 }
 
-async function generateAndUploadImage(
+export async function generateAndUploadImage(
   minioClient: Minio.Client,
   prefix: string,
   sizes: number[]

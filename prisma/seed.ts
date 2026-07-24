@@ -4,6 +4,7 @@ import { PrismaClient } from "./__generated__";
 import { artists } from "./seeds/artists";
 import { clients } from "./seeds/clients";
 import { fundraisers } from "./seeds/fundraisers";
+import { seedMerch } from "./seeds/merch";
 import { seedPosts } from "./seeds/posts";
 import { seedPublishedTrackGroups } from "./seeds/publishedTrackGroups";
 import { seedLocationTags } from "./seeds/seedLocationTags";
@@ -121,6 +122,7 @@ async function main() {
   await seedLocationTags();
   await seedPosts();
   await seedPublishedTrackGroups();
+  await seedMerch();
 
   console.log(`Seeding finished.`);
 }
