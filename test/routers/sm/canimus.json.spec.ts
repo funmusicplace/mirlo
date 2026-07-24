@@ -28,8 +28,8 @@ export const createFederatedArtistWithMusic = async (
     federatedStreamingOptInDate: new Date(Date.now()),
     ...data,
   });
+  // the default track group includes one test track
   const trackGroup = await createTrackGroup(artist.id);
-  await createTrack(trackGroup.id);
   return artist;
 };
 
@@ -55,13 +55,54 @@ describe("canimus", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist = await createFederatedArtistWithMusic(user.id);
+      await createFederatedArtistWithMusic(user.id);
+
       const response = await request(baseURL)
         .get("sm/canimus.json")
         .set("Accept", "application/json");
-      assert.equal(response.body.children.length, 1);
-      assert.equal(response.body.children[0].children.length, 1);
+
+      const artists = response.body.children;
+      const albums = artists[0].children;
+      const tracks = albums[0].children;
+      assert.equal(artists.length, 1);
+      assert.equal(albums.length, 1);
+      assert.equal(tracks.length, 1);
+      assert.equal(tracks[0].media.length, 1);
       assert.equal(response.body.deleted.length, 0);
+    });
+
+    it("should GET / for tracks that are 'buy only', do not include media in the feed", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id, {
+        name: "buy-only-artist",
+        urlSlug: "buy-only-artist",
+        federatedStreaming: true,
+        federatedStreamingOptInDate: new Date(Date.now()),
+      });
+      const trackGroup = await createTrackGroup(artist.id, { tracks: [] });
+      await createTrack(trackGroup.id, {
+        title: "money for something",
+        audio: {
+          create: {
+            uploadState: "SUCCESS",
+          },
+        },
+        isPreview: false,
+      });
+
+      const response = await request(baseURL)
+        .get("sm/canimus.json")
+        .set("Accept", "application/json");
+
+      const artists = response.body.children;
+      const albums = artists[0].children;
+      const tracks = albums[0].children;
+      assert.equal(artists.length, 1);
+      assert.equal(albums.length, 1);
+      assert.equal(tracks.length, 1);
+      assert.equal(tracks[0].media, null);
     });
 
     it("should GET / with no artist federated and 2 artist deleted", async () => {

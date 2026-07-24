@@ -65,12 +65,14 @@ export const serializeSingleTrackIntoCanimus = (
     duration: track.audio?.duration ?? metadata?.format?.duration,
     track: track.order,
     updated_date: track.updatedAt?.toISOString().split("T")[0],
-    media: [
-      {
-        src: mediaUrl,
-        type: "audio/x-mpegurl",
-      },
-    ],
+    media: track.isPreview
+      ? [
+          {
+            src: mediaUrl,
+            type: "audio/x-mpegurl",
+          },
+        ]
+      : null,
   };
 };
 

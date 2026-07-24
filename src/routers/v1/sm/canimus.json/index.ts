@@ -113,7 +113,6 @@ export default function () {
 
       const validTracks: Prisma.TrackWhereInput = {
         deletedAt: null,
-        isPreview: true,
         audio: {
           uploadState: "SUCCESS",
         },
