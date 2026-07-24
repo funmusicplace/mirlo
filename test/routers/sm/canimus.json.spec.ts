@@ -1,6 +1,7 @@
 import assert from "node:assert";
 
 import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
@@ -15,6 +16,22 @@ import {
 } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
+
+export const createFederatedArtistWithMusic = async (
+  userId: number,
+  data?: Partial<Prisma.ProfileCreateArgs["data"]>
+) => {
+  const artist = await createArtist(userId, {
+    name: "test-artist",
+    urlSlug: "test-artist",
+    federatedStreaming: true,
+    federatedStreamingOptInDate: new Date(Date.now()),
+    ...data,
+  });
+  const trackGroup = await createTrackGroup(artist.id);
+  await createTrack(trackGroup.id);
+  return artist;
+};
 
 describe("canimus", () => {
   beforeEach(async () => {
@@ -38,14 +55,7 @@ describe("canimus", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist = await createArtist(user.id, {
-        name: "test-artist",
-        urlSlug: "test-artist",
-        federatedStreaming: true,
-        federatedStreamingOptInDate: new Date(Date.now()),
-      });
-      const trackGroup = await createTrackGroup(artist.id);
-      await createTrack(trackGroup.id);
+      const artist = await createFederatedArtistWithMusic(user.id);
       const response = await request(baseURL)
         .get("sm/canimus.json")
         .set("Accept", "application/json");
@@ -58,15 +68,11 @@ describe("canimus", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist = await createArtist(user.id, {
-        name: "test-artist",
-        urlSlug: "test-artist",
-        federatedStreaming: true,
-        federatedStreamingOptInDate: new Date(Date.now()),
+      const artist = await createFederatedArtistWithMusic(user.id, {
         isLabelProfile: true,
+        name: "test-label",
+        urlSlug: "test-label",
       });
-      const trackGroup = await createTrackGroup(artist.id);
-      await createTrack(trackGroup.id);
       const response = await request(baseURL)
         .get("sm/canimus.json")
         .set("Accept", "application/json");
@@ -103,7 +109,7 @@ describe("canimus", () => {
       assert.equal(response.body.deleted.length, 2);
     });
 
-    it("should GET / with 1 artist federated and 1 track and trackgroup deleted", async () => {
+    it("should GET / with 1 artist federated but no music", async () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
@@ -114,6 +120,23 @@ describe("canimus", () => {
         federatedStreamingOptInDate: new Date(Date.now()),
       });
 
+      const response = await request(baseURL)
+        .get("sm/canimus.json")
+        .set("Accept", "application/json");
+      assert.equal(response.body.children.length, 0);
+      assert.equal(response.body.deleted.length, 0);
+    });
+
+    it("should GET / with 1 artist federated and 1 track and trackgroup deleted", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id, {
+        name: "test-artist",
+        urlSlug: "test-artist",
+        federatedStreaming: true,
+        federatedStreamingOptInDate: new Date(Date.now()),
+      });
       const trackGroup = await createTrackGroup(artist.id);
       await prisma.trackGroup.update({
         where: { id: trackGroup.id },
@@ -123,7 +146,7 @@ describe("canimus", () => {
       const response = await request(baseURL)
         .get("sm/canimus.json")
         .set("Accept", "application/json");
-      assert.equal(response.body.children.length, 1);
+      assert.equal(response.body.children.length, 0);
       assert.equal(response.body.deleted.length, 1);
     });
 
@@ -132,12 +155,7 @@ describe("canimus", () => {
         email: "test@testcom",
       });
       const dateNow = new Date(Date.now());
-      await createArtist(user.id, {
-        name: "test-artist",
-        urlSlug: "test-artist",
-        federatedStreaming: true,
-        federatedStreamingOptInDate: new Date(Date.now() - 1000000),
-      });
+      await createFederatedArtistWithMusic(user.id);
       const artist = await createArtist(user.id, {
         name: "test-artist",
         urlSlug: "test-artist",

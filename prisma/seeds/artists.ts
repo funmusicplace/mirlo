@@ -16,6 +16,8 @@ export const artists: Prisma.ProfileCreateInput[] = [
         linkType: "Website",
       },
     ],
+    federatedStreaming: true,
+    federatedStreamingOptInDate: new Date("2026-07-12T08:00:00Z"),
   },
   {
     name: "Robin",

@@ -111,23 +111,47 @@ export default function () {
         createdAt: "desc",
       };
 
+      const validTracks: Prisma.TrackWhereInput = {
+        deletedAt: null,
+        isPreview: true,
+        audio: {
+          uploadState: "SUCCESS",
+        },
+      };
+
+      const validTrackGroups: Prisma.TrackGroupWhereInput =
+        whereForPublishedTrackGroups();
+
       const artists = await prisma.profile.findMany({
-        where: federatedArtist,
+        where: {
+          ...federatedArtist,
+          // only if they have some trackGroup
+          trackGroups: {
+            some: {
+              ...validTrackGroups,
+              // only if they have some track
+              tracks: {
+                some: validTracks,
+              },
+            },
+          },
+        },
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
         include: {
           trackGroups: {
-            where: whereForPublishedTrackGroups(),
+            where: {
+              ...validTrackGroups,
+              // only if they have some track
+              tracks: {
+                some: validTracks,
+              },
+            },
             include: {
               cover: true,
               tracks: {
-                where: {
-                  deletedAt: null,
-                  audio: {
-                    uploadState: "SUCCESS",
-                  },
-                },
+                where: validTracks,
                 include: {
                   audio: { select: { duration: true } },
                 },
