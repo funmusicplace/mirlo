@@ -105,7 +105,12 @@ export const initiateOnlineSubscription = async ({
   /** Self-chosen display name, captured when the buyer has no account name yet. */
   userName?: string;
 }): Promise<
-  { success: true } | { clientSecret: string | null; stripeAccountId: string }
+  | { success: true }
+  | {
+      clientSecret: string | null;
+      stripeAccountId: string;
+      setupIntentId: string;
+    }
 > => {
   const { tier, resolvedAmount } = await resolveTierAndAmount(
     artistId,
@@ -147,15 +152,23 @@ export const initiateOnlineSubscription = async ({
       currency,
     });
 
+    const platformPercent = tier.platformPercent ?? 7;
     await prisma.profileUserSubscription.update({
       where: { id: existingSubscription.id },
-      data: { artistSubscriptionTierId: tier.id, amount: resolvedAmount },
+      data: {
+        artistSubscriptionTierId: tier.id,
+        amount: resolvedAmount,
+        // Keep in step with the new tier's fee — mirrors the
+        // application_fee_percent update in updateSubscriptionTier, since the
+        // next invoice bills at this percentage going forward.
+        platformCut: Math.round((resolvedAmount * platformPercent) / 100),
+      },
     });
 
     return { success: true };
   }
 
-  const { clientSecret } =
+  const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
       tierId,
       artistId,
@@ -170,7 +183,7 @@ export const initiateOnlineSubscription = async ({
         : undefined,
     });
 
-  return { clientSecret, stripeAccountId };
+  return { clientSecret, stripeAccountId, setupIntentId };
 };
 
 type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{

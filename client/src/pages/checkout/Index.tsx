@@ -17,21 +17,23 @@ const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
  * Mirlo-hosted checkout page. External API consumers send a buyer here (via the
  * `redirectUrl` returned by `POST /v1/purchase` with `hosted: true`) so they can
  * complete payment without building their own Stripe UI. It fetches the
- * PaymentIntent's clientSecret + return target from the API and renders the
- * shared Payment Element full-page. On success Stripe redirects to the
- * server-supplied `successUrl` (or Mirlo's home as a fallback).
+ * intent's clientSecret + return target from the API — a PaymentIntent for a
+ * one-time purchase, or a SetupIntent for a subscription sign-up/switch — and
+ * renders the shared Payment/Setup Element full-page. On success Stripe
+ * redirects to the server-supplied `successUrl` (or Mirlo's home as a
+ * fallback).
  */
 function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "hostedCheckout" });
   const [searchParams] = useSearchParams();
-  const paymentIntentId = searchParams.get("paymentIntentId") ?? "";
+  const intentId = searchParams.get("intentId") ?? "";
   const stripeAccountId = searchParams.get("stripeAccountId") ?? "";
 
   const {
     data: intent,
     isLoading,
     isError,
-  } = useQuery(queryPurchaseIntent({ paymentIntentId, stripeAccountId }));
+  } = useQuery(queryPurchaseIntent({ intentId, stripeAccountId }));
 
   // Load Stripe.js once per connected account (created once, not per render).
   const stripePromise = React.useMemo(
@@ -42,7 +44,7 @@ function Index() {
     [stripeAccountId]
   );
 
-  if (!paymentIntentId || !stripeAccountId) {
+  if (!intentId || !stripeAccountId) {
     return (
       <WidthWrapper variant="small" className="mt-8">
         <Box>{t("missingParameters")}</Box>
@@ -77,6 +79,10 @@ function Index() {
   }
 
   const returnUrl = intent.successUrl ?? window.location.origin;
+  // SetupIntent client secrets are always `seti_`-prefixed (see
+  // PurchaseElements.tsx) — a subscription sign-up/switch confirms with
+  // `confirmSetup`, not `confirmPayment`.
+  const isSetup = intent.clientSecret.startsWith("seti_");
 
   const total =
     intent.amount != null
@@ -108,7 +114,11 @@ function Index() {
         stripe={stripePromise}
         options={{ clientSecret: intent.clientSecret }}
       >
-        <PurchasePaymentForm returnUrl={returnUrl} buttonLabel={t("payNow")} />
+        <PurchasePaymentForm
+          returnUrl={returnUrl}
+          buttonLabel={t("payNow")}
+          isSetup={isSetup}
+        />
       </Elements>
     </WidthWrapper>
   );

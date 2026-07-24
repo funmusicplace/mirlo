@@ -94,11 +94,12 @@ describe("purchase", () => {
       const artist = await createArtist(artistUser.id);
       const tier = await createTier(artist.id, { minAmount: 500 });
 
-      sinon.stub(stripeUtils.stripe.setupIntents, "create").resolves({
-        id: "seti_online_new",
-        client_secret: "seti_online_new_secret",
-      } as unknown as Stripe.Response<Stripe.SetupIntent>);
-
+      // Note: this request goes over HTTP to the separate api-test server
+      // process (see `requestApp`/API_DOMAIN in test/routers/utils.ts), so a
+      // sinon stub set up here — in the test process — would never be seen by
+      // it; the call for real reaches the stripe-mock service instead. Assert
+      // on the shape of a SetupIntent secret rather than a specific stubbed
+      // value.
       const response = await requestApp
         .post("purchase")
         .send({
@@ -109,7 +110,97 @@ describe("purchase", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.clientSecret, "seti_online_new_secret");
+      assert.ok(
+        response.body.clientSecret?.startsWith("seti_"),
+        "clientSecret should be a SetupIntent secret"
+      );
+    });
+
+    it("should return a hosted redirectUrl (not a raw clientSecret) for a first-time online subscription when hosted is true", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_hosted",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+
+      sinon.stub(stripeUtils.stripe.setupIntents, "create").resolves({
+        id: "seti_hosted_new",
+        client_secret: "seti_hosted_new_secret",
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "subscription", tierId: tier.id }],
+          hosted: true,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.redirectUrl, "should return a redirectUrl");
+      assert.ok(response.body.redirectUrl.includes("/checkout"));
+      assert.ok(response.body.redirectUrl.includes("intentId="));
+      assert.ok(response.body.redirectUrl.includes("stripeAccountId="));
+      assert.ok(
+        !response.body.clientSecret,
+        "should not leak clientSecret in hosted mode"
+      );
+    });
+
+    it("should return success:true (not a hosted redirectUrl) when a tier switch is repriced in place, even with hosted: true", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_hosted_switch",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      const oldTier = await createTier(artist.id, { minAmount: 500 });
+      const newTier = await createTier(artist.id, {
+        minAmount: 1000,
+        collectAddress: false,
+      });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_hosted_switch_existing",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        items: { data: [{ id: "si_existing_item" }] },
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_new_tier",
+      } as unknown as Stripe.Response<Stripe.Product>);
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "subscription", tierId: newTier.id }],
+          hosted: true,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.success, true);
+      assert.ok(
+        !response.body.redirectUrl,
+        "there's no payment step left to send the buyer through, so no redirectUrl is needed"
+      );
     });
 
     it("should return 401 when a readerId is supplied without being logged in", async () => {
@@ -381,7 +472,7 @@ describe("purchase", () => {
       // Hosted mode returns a redirect to Mirlo's pay page, not a raw secret.
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
       assert.ok(response.body.redirectUrl.includes("/checkout"));
-      assert.ok(response.body.redirectUrl.includes("paymentIntentId="));
+      assert.ok(response.body.redirectUrl.includes("intentId="));
       assert.ok(response.body.redirectUrl.includes("stripeAccountId="));
       assert.ok(
         !response.body.clientSecret,
@@ -944,6 +1035,7 @@ describe("purchase", () => {
       const newTier = await createTier(artist.id, {
         minAmount: 1000,
         collectAddress: false,
+        platformPercent: 12,
       });
 
       const existing = await prisma.profileUserSubscription.create({
@@ -951,6 +1043,7 @@ describe("purchase", () => {
           artistSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
+          platformCut: 35,
           stripeSubscriptionKey: "sub_existing_123",
         },
       });
@@ -975,6 +1068,11 @@ describe("purchase", () => {
       assert.deepEqual(result, { success: true });
       assert.equal(updateStub.calledOnce, true);
       assert.equal(updateStub.getCall(0).args[1]?.proration_behavior, "none");
+      assert.equal(
+        updateStub.getCall(0).args[1]?.application_fee_percent,
+        12,
+        "the new tier's platform fee percentage should be applied to the repriced subscription"
+      );
 
       const after = await prisma.profileUserSubscription.findFirst({
         where: { id: existing.id },
@@ -982,6 +1080,11 @@ describe("purchase", () => {
       assert.ok(after, "the same subscription row should still exist");
       assert.equal(after?.artistSubscriptionTierId, newTier.id);
       assert.equal(after?.amount, 1000);
+      assert.equal(
+        after?.platformCut,
+        120,
+        "platformCut should be recalculated from the new tier's fee percentage, not left at the old tier's"
+      );
       assert.equal(
         after?.stripeSubscriptionKey,
         "sub_existing_123",

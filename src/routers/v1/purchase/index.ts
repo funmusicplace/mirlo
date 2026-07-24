@@ -341,6 +341,23 @@ export default function () {
           userName: subItem.userName,
         });
 
+        // Hosted checkout: same handoff as the one-time-payment path below —
+        // hand external integrators a single redirect to Mirlo's own pay page
+        // instead of a clientSecret they'd have to drive Stripe.js with
+        // themselves. Doesn't apply to `{ success: true }` (an in-place tier
+        // switch): there's no payment step left to redirect the buyer through.
+        if (hosted && mirloClient && "clientSecret" in result) {
+          const redirectUrl = buildCheckoutRedirectUrl(
+            mirloClient.applicationUrl,
+            "checkout",
+            new URLSearchParams({
+              intentId: result.setupIntentId,
+              stripeAccountId: result.stripeAccountId,
+            })
+          );
+          return res.status(200).json({ redirectUrl });
+        }
+
         return res.status(200).json(result);
       }
 
@@ -508,7 +525,7 @@ export default function () {
           mirloClient.applicationUrl,
           "checkout",
           new URLSearchParams({
-            paymentIntentId: result.paymentIntentId,
+            intentId: result.paymentIntentId,
             stripeAccountId: result.stripeAccountId,
           })
         );
