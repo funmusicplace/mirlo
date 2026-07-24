@@ -2,9 +2,9 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import Box from "components/common/Box";
 import MarkdownContent from "components/common/MarkdownContent";
-import Modal from "components/common/Modal";
 import PlatformPercent from "components/common/PlatformPercent";
-import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
+import PurchaseModal from "components/common/Purchase/PurchaseModal";
+import { usePurchase } from "components/common/Purchase/usePurchase";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -13,7 +13,10 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { getArtistManageTiersUrl, getArtistUrl } from "utils/artist";
+import {
+  buildCheckoutCompletePath,
+  getArtistManageTiersUrl,
+} from "utils/artist";
 
 import Money from "../common/Money";
 
@@ -38,52 +41,39 @@ const ArtistSupportBox: React.FC<{
 
   const secondaryColor = "var(--mi-button-text-color)";
 
-  const [isCheckingForSubscription, setIsCheckingForSubscription] =
-    React.useState(false);
-
   const errorHandler = useErrorHandler();
 
   const navigate = useNavigate();
-  const [checkout, setCheckout] = React.useState<{
-    clientSecret: string;
-    stripeAccountId: string;
-  } | null>(null);
+  const {
+    checkout,
+    isLoading: isCheckingForSubscription,
+    startPurchase,
+    reset,
+  } = usePurchase();
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
-    try {
-      setIsCheckingForSubscription(true);
-
-      const response = await api.post<
-        { tierId: number; embedded: boolean },
-        { clientSecret: string; stripeAccountId: string }
-      >(`artists/${tier.artistId}/subscribe`, {
-        tierId: tier.id,
-        embedded: true,
+    const result = await startPurchase({
+      artistId: tier.artistId,
+      items: [{ type: "subscription", tierId: tier.id }],
+    });
+    refresh();
+    refreshLoggedInUser();
+    if (result?.success) {
+      snackbar(t("subscriptionTierChanged", { tierName: tier.name }), {
+        type: "success",
       });
-      if (response.clientSecret) {
-        setCheckout({
-          clientSecret: response.clientSecret,
-          stripeAccountId: response.stripeAccountId,
-        });
-      }
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      setIsCheckingForSubscription(false);
-      refresh();
-      refreshLoggedInUser();
     }
   };
 
-  const handleEmbeddedComplete = React.useCallback(() => {
+  const handlePurchaseComplete = React.useCallback(() => {
     if (!artist) return;
-    const params = new URLSearchParams();
-    params.set("purchaseType", "subscription");
     refreshLoggedInUser();
     refresh();
-    setCheckout(null);
-    navigate(`${getArtistUrl(artist)}/checkout-complete?${params.toString()}`);
-  }, [artist, navigate, refresh, refreshLoggedInUser]);
+    reset();
+    navigate(
+      buildCheckoutCompletePath(artist, { purchaseType: "subscription" })
+    );
+  }, [artist, navigate, refresh, refreshLoggedInUser, reset]);
 
   const cancelSubscription = async () => {
     try {
@@ -325,20 +315,21 @@ const ArtistSupportBox: React.FC<{
           </ul>
         </>
       )}
-      <Modal
-        size="small"
+      <PurchaseModal
         open={!!checkout}
-        onClose={() => setCheckout(null)}
+        onClose={reset}
+        clientSecret={checkout?.clientSecret}
+        stripeAccountId={checkout?.stripeAccountId}
+        returnUrl={`${window.location.origin}${buildCheckoutCompletePath(
+          artist,
+          {
+            purchaseType: "subscription",
+          }
+        )}`}
+        onSuccess={handlePurchaseComplete}
         title={t("support") ?? ""}
-      >
-        {checkout && (
-          <EmbeddedStripeForm
-            clientSecret={checkout.clientSecret}
-            stripeAccountId={checkout.stripeAccountId}
-            onComplete={handleEmbeddedComplete}
-          />
-        )}
-      </Modal>
+        buttonLabel={t("letsSupport") ?? ""}
+      />
     </div>
   );
 };

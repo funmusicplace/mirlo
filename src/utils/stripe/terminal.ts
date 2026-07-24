@@ -1,13 +1,13 @@
-import prisma from "@mirlo/prisma";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { registerSubscription } from "../subscriptionTier";
 import { findOrCreateUserBasedOnEmail } from "../user";
 
-import { getCurrency } from "./sessions";
-
-import { completePurchaseFromIntent, stripe } from "./index";
+import {
+  completePurchaseFromIntent,
+  finalizeSubscriptionSetup,
+  stripe,
+} from "./index";
 
 export const createTerminalPaymentIntent = async ({
   totalAmount,
@@ -315,6 +315,7 @@ const handleTerminalSetupIntentSucceeded = async (
     userId?: string;
     userEmail?: string;
     amount: string;
+    currency: string;
   };
 
   const { userId: actualUserId, user } = await findOrCreateUserBasedOnEmail(
@@ -341,97 +342,13 @@ const handleTerminalSetupIntentSucceeded = async (
     return;
   }
 
-  const tier = await prisma.profileSubscriptionTier.findFirst({
-    where: { id: Number(metadata.tierId), deletedAt: null },
-    include: { artist: { select: { id: true } } },
-  });
-
-  if (!tier) {
-    logger.error(
-      `handleTerminalSetupIntentSucceeded: tier ${metadata.tierId} not found`
-    );
-    return;
-  }
-
-  const amount = Number(metadata.amount);
-  const currency = await getCurrency(tier.artist.id, stripeAccountId);
-
-  // Get or create a Stripe customer on the connected account for recurring billing
-  let customerId: string;
-  const existingCustomers = await stripe.customers.list(
-    { email: user?.email ?? "" },
-    { stripeAccount: stripeAccountId }
-  );
-
-  if (existingCustomers.data.length > 0) {
-    customerId = existingCustomers.data[0].id;
-  } else {
-    const customer = await stripe.customers.create(
-      { email: user?.email ?? "" },
-      { stripeAccount: stripeAccountId }
-    );
-    customerId = customer.id;
-  }
-
-  await stripe.paymentMethods.attach(
+  await finalizeSubscriptionSetup({
+    stripeAccountId,
     paymentMethodId,
-    { customer: customerId },
-    { stripeAccount: stripeAccountId }
-  );
-
-  const platformPercent = tier.platformPercent ?? 7;
-
-  // Ensure a Stripe product exists for this tier so price_data.product can be set.
-  let productKey = tier.stripeProductKey;
-  if (!productKey) {
-    const product = await stripe.products.create(
-      { name: tier.name, metadata: { tierId: String(tier.id) } },
-      { stripeAccount: stripeAccountId }
-    );
-    productKey = product.id;
-    await prisma.profileSubscriptionTier.update({
-      where: { id: tier.id },
-      data: { stripeProductKey: productKey },
-    });
-  }
-
-  const subscription = await stripe.subscriptions.create(
-    {
-      customer: customerId,
-      items: [
-        {
-          price_data: {
-            currency,
-            product: productKey,
-            unit_amount: amount,
-            recurring: {
-              interval: tier.interval === "YEAR" ? "year" : "month",
-            },
-          },
-        },
-      ],
-      default_payment_method: paymentMethodId,
-      application_fee_percent: platformPercent,
-      metadata: {
-        tierId: String(tier.id),
-        userId: String(actualUserId),
-        stripeAccountId,
-        purchaseType: "subscription",
-      },
-    },
-    { stripeAccount: stripeAccountId }
-  );
-
-  await registerSubscription({
+    tierId: Number(metadata.tierId),
+    amount: Number(metadata.amount),
+    currency: metadata.currency,
     userId: Number(actualUserId),
-    tierId: tier.id,
-    amount,
-    paymentProcessorKey: subscription.id,
-    platformCut: Math.round((amount * platformPercent) / 100),
-    shippingAddress: null,
+    userEmail: user?.email,
   });
-
-  logger.info(
-    `handleTerminalSetupIntentSucceeded: created subscription ${subscription.id} for user ${actualUserId}, tier ${tier.id}`
-  );
 };

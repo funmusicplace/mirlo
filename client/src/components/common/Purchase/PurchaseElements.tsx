@@ -53,6 +53,10 @@ const PurchaseElements: React.FC<{
         buttonLabel={buttonLabel}
         requiresShipping={requiresShipping}
         allowedCountries={allowedCountries}
+        // SetupIntent client secrets are always `seti_`-prefixed — deriving
+        // this here (the one place that actually has the clientSecret) beats
+        // threading a caller-computed `isSetup` flag through every component.
+        isSetup={clientSecret.startsWith("seti_")}
       />
     </Elements>
   );

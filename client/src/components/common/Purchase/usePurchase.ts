@@ -16,7 +16,14 @@ export type PurchaseItem =
       shippingDestinationId?: string;
       message?: string;
     }
-  | { type: "tip"; amount: number; message?: string };
+  | { type: "tip"; amount: number; message?: string }
+  | {
+      type: "subscription";
+      tierId: number;
+      amount?: number;
+      /** Self-chosen display name, captured when the buyer has no account name yet. */
+      userName?: string;
+    };
 
 type PurchaseResponse = {
   clientSecret?: string;
@@ -29,6 +36,11 @@ type PurchaseResponse = {
    */
   requiresShipping?: boolean;
   allowedCountries?: string[];
+  /**
+   * A subscription tier switch that was applied to the existing Stripe
+   * subscription in place — no clientSecret, no further payment step.
+   */
+  success?: boolean;
 };
 
 export type Checkout = {
@@ -55,7 +67,7 @@ export const usePurchase = () => {
       artistId: number;
       items: PurchaseItem[];
       email?: string;
-    }) => {
+    }): Promise<{ success: true } | undefined> => {
       try {
         setIsLoading(true);
         const response = await api.post<typeof args, PurchaseResponse>(
@@ -66,6 +78,9 @@ export const usePurchase = () => {
         if (response.redirectUrl) {
           navigate(response.redirectUrl);
           return;
+        }
+        if (response.success) {
+          return { success: true };
         }
         if (response.clientSecret && response.stripeAccountId) {
           setCheckout({

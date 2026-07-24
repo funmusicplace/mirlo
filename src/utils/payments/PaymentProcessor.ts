@@ -1,13 +1,17 @@
 // Provider-neutral payment interface. Today there is exactly one implementation
-// (Stripe), but every Flow B call site (the unified `POST /v1/purchase` path and
+// (Stripe), but every unified-flow call site (the `POST /v1/purchase` path and
 // the status poll) goes through this interface rather than the Stripe SDK
 // directly. Swapping processors means implementing this interface once and
 // changing `getPaymentProcessor` — no call-site touches `Stripe`.
 //
-// Scope: Flow B only (raw PaymentIntent / SetupIntent). Flow A (Checkout
-// Sessions in src/utils/stripe/sessions.ts) is intentionally NOT modelled here —
-// it is being retired by the simplify-purchasing migration, so wrapping it would
-// be throwaway work.
+// Scope: the unified flow only — raw PaymentIntents/SetupIntents, plus the
+// recurring-subscription lifecycle built on top of them (creation and
+// in-place repricing). The legacy Checkout Session flow (still live in
+// src/utils/stripe/sessions.ts for a few unmigrated item types) is
+// intentionally NOT modelled here — it is being retired by the
+// simplify-purchasing migration, so wrapping it would be throwaway work.
+
+import { Prisma } from "@mirlo/prisma/client";
 
 /** Args for an immediate one-time charge (online or terminal). */
 export type CreatePaymentArgs = {
@@ -28,6 +32,17 @@ export type CreateSubscriptionSetupArgs = {
   currency: string;
   userEmail: string;
   userId?: string;
+  /** Self-chosen display name, captured when the buyer has no account name yet. */
+  userName?: string;
+};
+
+/** Args for reprising an existing recurring subscription in place. */
+export type UpdateSubscriptionTierArgs = {
+  subscriptionKey: string;
+  accountId: string;
+  tier: Prisma.ProfileSubscriptionTierGetPayload<{ include: { artist: true } }>;
+  amount: number;
+  currency: string;
 };
 
 export interface PaymentProcessor {
@@ -54,6 +69,25 @@ export interface PaymentProcessor {
   createTerminalSubscriptionSetup(
     args: CreateSubscriptionSetupArgs & { readerId: string }
   ): Promise<{ setupIntentId: string }>;
+
+  /**
+   * Create a subscription payment-method authorisation for the buyer to
+   * confirm online (no reader dispatch). `oldTierId`, when present, is
+   * carried in the SetupIntent's metadata so the tier being switched away
+   * from is only cancelled once this new subscription is confirmed active —
+   * never before.
+   */
+  createOnlineSubscriptionSetup(
+    args: CreateSubscriptionSetupArgs & { oldTierId?: number }
+  ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
+
+  /**
+   * Reprice an existing recurring subscription in place — no new SetupIntent,
+   * no card re-entry. `proration_behavior: "none"` (enforced by the
+   * implementation) means the new amount applies to the *next* invoice, not
+   * an immediate charge.
+   */
+  updateSubscriptionTier(args: UpdateSubscriptionTierArgs): Promise<void>;
 
   /** Current status of a pending charge/authorisation, by intent id. */
   getStatus(args: {
