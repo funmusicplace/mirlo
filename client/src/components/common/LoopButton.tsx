@@ -63,17 +63,17 @@ export const LoopButton: React.FC = () => {
             {looping === "loopTrack" && <LoopingIndicator>1</LoopingIndicator>}
           </>
         }
-        className={css`
+        className={`${looping ? "mi-player-toggle-active" : ""} ${css`
           margin-left: 0.25rem;
           position: relative;
           svg {
-            color: ${looping ? "white !important" : "inherit"};
+            color: ${looping ? "var(--mi-button-text-color) !important" : "inherit"};
           }
           ${looping
-            ? `color: var(--mi-button-color) !important;
+            ? `color: var(--mi-button-text-color) !important;
              `
             : ""}
-        `}
+        `}`}
       />
       <span aria-live="polite" className="sr-only">
         {stateLabel}

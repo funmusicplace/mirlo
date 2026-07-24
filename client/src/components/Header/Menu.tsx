@@ -54,7 +54,7 @@ const Menu = forwardRef<
   return (
     <dialog
       aria-label={t("menu")}
-      className="inset-s-0 sm:inset-s-auto sm:inset-e-0 max-w-[100vw] max-h-full w-screen sm:w-[300px] h-full backdrop:bg-[rgba(0,0,0,.5)]"
+      className="inset-s-0 sm:inset-s-auto sm:inset-e-0 max-w-[100vw] max-h-full w-screen sm:w-[300px] h-full backdrop:bg-[rgba(0,0,0,.5)] bg-(--mi-background-color) text-(--mi-text-color)"
       closedby="any"
       data-nosnippet
       id={dialogId}
@@ -75,7 +75,7 @@ const Menu = forwardRef<
         <Button
           aria-label={t("close", { keyPrefix: "common" })}
           autoFocus
-          className="self-end border-none bg-transparent! text-black! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-black!"
+          className="self-end border-none bg-transparent! text-(--mi-text-color)! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-(--mi-text-color)!"
           // @ts-ignore React doesn't support Invoker Commands API
           command="close"
           commandfor={dialogId}

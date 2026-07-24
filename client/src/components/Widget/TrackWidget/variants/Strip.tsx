@@ -1,6 +1,7 @@
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
+import { useWidgetArtistColors } from "hooks/useResolvedArtistColors";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
@@ -28,6 +29,8 @@ const Strip = () => {
     embeddedInMirlo,
   } = useTrackWidgetData();
 
+  const artistColors = useWidgetArtistColors(artist?.properties?.colors);
+
   if (isLoading) {
     return <LoadingBlocks />;
   }
@@ -42,7 +45,7 @@ const Strip = () => {
 
   return (
     <WidgetWrapper
-      artistColors={artist?.properties?.colors}
+      artistColors={artistColors}
       embeddedInMirlo={embeddedInMirlo}
       className="h-screen [&_a]:no-underline!"
     >
