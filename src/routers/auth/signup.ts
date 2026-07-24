@@ -1,13 +1,13 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { hashPassword } from "./utils";
-import { sendMail } from "../../jobs/send-mail";
-import { Job } from "bullmq";
+import { NextFunction, Request, Response } from "express";
+
 import logger from "../../logger";
-import { AppError } from "../../utils/error";
 import { subscribeUserToArtist } from "../../utils/artist";
+import { AppError } from "../../utils/error";
 import { getSiteSettings } from "../../utils/settings";
+
 import { sendVerificationEmail } from "./sendVerificationEmail";
+import { hashPassword } from "./utils";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   let {

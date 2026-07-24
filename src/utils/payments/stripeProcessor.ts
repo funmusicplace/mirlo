@@ -5,7 +5,10 @@
 // terminal webhook path and other callers that still use them directly are
 // untouched by this scaffolding step.
 
-import stripe, { createOnlinePaymentIntent } from "../stripe";
+import stripe, {
+  createOnlinePaymentIntent,
+  createSubscriptionStripeProduct,
+} from "../stripe";
 import { getIntentStatus } from "../stripe/status";
 import {
   createTerminalPaymentIntent,
@@ -20,6 +23,7 @@ import {
   PaymentProcessor,
   CreatePaymentArgs,
   CreateSubscriptionSetupArgs,
+  UpdateSubscriptionTierArgs,
   PaymentStatusResult,
   TerminalReader,
 } from "./PaymentProcessor";
@@ -97,6 +101,87 @@ export class StripePaymentProcessor implements PaymentProcessor {
       userEmail,
       userId,
     });
+  }
+
+  async createOnlineSubscriptionSetup({
+    tierId,
+    artistId,
+    accountId,
+    amount,
+    currency,
+    userEmail,
+    userId,
+    userName,
+    oldTierId,
+  }: CreateSubscriptionSetupArgs & {
+    oldTierId?: number;
+  }): Promise<{ setupIntentId: string; clientSecret: string | null }> {
+    const setupIntent = await stripe.setupIntents.create(
+      {
+        payment_method_types: ["card"],
+        usage: "off_session",
+        metadata: {
+          tierId: String(tierId),
+          artistId: String(artistId),
+          stripeAccountId: accountId,
+          amount: String(amount),
+          currency,
+          userEmail,
+          ...(userId && { userId }),
+          ...(userName?.trim() && { userName: userName.trim() }),
+          ...(oldTierId !== undefined && { oldTierId: String(oldTierId) }),
+        },
+      },
+      { stripeAccount: accountId }
+    );
+
+    return {
+      setupIntentId: setupIntent.id,
+      clientSecret: setupIntent.client_secret,
+    };
+  }
+
+  async updateSubscriptionTier({
+    subscriptionKey,
+    accountId,
+    tier,
+    amount,
+    currency,
+  }: UpdateSubscriptionTierArgs): Promise<void> {
+    // Independent Stripe calls: the product lookup and the subscription
+    // retrieve (only needed for its existing item id) don't depend on each
+    // other.
+    const [productKey, subscription] = await Promise.all([
+      createSubscriptionStripeProduct(tier, accountId),
+      stripe.subscriptions.retrieve(subscriptionKey, {
+        stripeAccount: accountId,
+      }),
+    ]);
+    const itemId = subscription.items.data[0].id;
+
+    await stripe.subscriptions.update(
+      subscriptionKey,
+      {
+        items: [
+          {
+            id: itemId,
+            price_data: {
+              currency,
+              product: productKey,
+              unit_amount: amount,
+              recurring: {
+                interval: tier.interval === "YEAR" ? "year" : "month",
+              },
+            },
+          },
+        ],
+        // The new amount applies to the next invoice, not an immediate
+        // charge — "increasing the monthly fee the next time they subscribe."
+        proration_behavior: "none",
+        cancel_at_period_end: false,
+      },
+      { stripeAccount: accountId }
+    );
   }
 
   async getStatus({

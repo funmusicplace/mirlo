@@ -10,7 +10,7 @@ import logger from "../../../../logger";
 import { deleteStripeSubscriptions } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { resolvePayee } from "../../../../utils/payments/payee";
-import { cancelUserSubscription } from "../../../../utils/payments/purchase";
+import { cancelUserSubscription } from "../../../../utils/payments/subscription";
 import { createCheckoutSessionForSubscription } from "../../../../utils/stripe/sessions";
 
 type Params = {
@@ -145,6 +145,10 @@ export default function () {
 
   POST.apiDoc = {
     summary: "Subscribes a user to an artist",
+    description:
+      "Deprecated: superseded by POST /v1/purchase with " +
+      '`{ items: [{ type: "subscription", tierId, amount }] }`.',
+    deprecated: true,
     parameters: [
       {
         in: "path",

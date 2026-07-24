@@ -41,12 +41,15 @@ const PurchasePaymentForm: React.FC<{
   requiresShipping?: boolean;
   /** Country codes the artist actually ships to, for the AddressElement's picker. */
   allowedCountries?: string[];
+  /** The clientSecret is a SetupIntent's (subscription sign-up) rather than a PaymentIntent's — confirm with `confirmSetup`, not `confirmPayment`. */
+  isSetup?: boolean;
 }> = ({
   returnUrl,
   buttonLabel,
   onSuccess,
   requiresShipping,
   allowedCountries,
+  isSetup,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -87,26 +90,37 @@ const PurchasePaymentForm: React.FC<{
     }
 
     const shipping = await resolveShipping();
+    // confirmSetup/confirmPayment have distinct Stripe SDK types (a
+    // SetupIntent has no `shipping`), so the call itself can't be unified —
+    // only the params shared between both branches are, here.
+    const confirmParams = { return_url: returnUrl, shipping };
 
     if (onSuccess) {
       // Async completion: only redirect if the payment method requires it.
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: { return_url: returnUrl, shipping },
-        redirect: "if_required",
-      });
+      const result = isSetup
+        ? await stripe.confirmSetup({
+            elements,
+            confirmParams: { return_url: returnUrl },
+            redirect: "if_required",
+          })
+        : await stripe.confirmPayment({
+            elements,
+            confirmParams,
+            redirect: "if_required",
+          });
 
-      if (error) {
-        console.error(error);
-        handler(error.message);
+      if (result.error) {
+        console.error(result.error);
+        handler(result.error.message);
         setIsLoading(false);
         return;
       }
 
+      const intent =
+        "paymentIntent" in result ? result.paymentIntent : result.setupIntent;
       if (
-        paymentIntent &&
-        (paymentIntent.status === "succeeded" ||
-          paymentIntent.status === "processing")
+        intent &&
+        (intent.status === "succeeded" || intent.status === "processing")
       ) {
         // Hand control back to the caller, which navigates within the SPA.
         // Leave isLoading set — the view is about to change.
@@ -120,13 +134,15 @@ const PurchasePaymentForm: React.FC<{
       return;
     }
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: returnUrl,
-        shipping,
-      },
-    });
+    const { error } = isSetup
+      ? await stripe.confirmSetup({
+          elements,
+          confirmParams: { return_url: returnUrl },
+        })
+      : await stripe.confirmPayment({
+          elements,
+          confirmParams,
+        });
 
     // We only reach this point if there's an immediate error (e.g. incomplete
     // details). Otherwise the customer is redirected to `return_url`.

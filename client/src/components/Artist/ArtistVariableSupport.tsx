@@ -4,17 +4,16 @@ import { InputEl } from "components/common/Input";
 import MarkdownContent from "components/common/MarkdownContent";
 import Modal from "components/common/Modal";
 import { getCurrencySymbol } from "components/common/Money";
-import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
+import PurchaseModal from "components/common/Purchase/PurchaseModal";
+import { usePurchase } from "components/common/Purchase/usePurchase";
 import { isEmpty } from "lodash";
 import { queryArtist } from "queries";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "services/api";
-import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistUrl } from "utils/artist";
+import { buildCheckoutCompletePath } from "utils/artist";
 
 import { ArtistButton } from "./ArtistButtons";
 import IncludedReleases from "./IncludedReleases";
@@ -28,6 +27,7 @@ const ArtistVariableSupport: React.FC<{
     defaultValues: {
       amount: tier.minAmount ? tier.minAmount / 100 : 0,
       name: "",
+      email: "",
     },
   });
   const { user, refreshLoggedInUser } = useAuthContext();
@@ -35,63 +35,57 @@ const ArtistVariableSupport: React.FC<{
   // name so the artist sees who's supporting them — shown explicitly rather
   // than scraped from Stripe's billing details.
   const needsName = !user?.name;
+  // The Payment/Setup Element (unlike Stripe's old hosted Checkout) doesn't
+  // collect an email itself, so a logged-out buyer needs their own field.
+  const needsEmail = !user;
   // Open the pre-checkout modal whenever there's something to collect (a
-  // variable amount and/or a name); otherwise subscribe straight through.
-  const needsModal = tier.allowVariable || needsName;
+  // variable amount, name, and/or email); otherwise subscribe straight through.
+  const needsModal = tier.allowVariable || needsName || needsEmail;
   const [open, setOpen] = React.useState(false);
-  const [isCheckingForSubscription, setIsCheckingForSubscription] =
-    React.useState(false);
   const { artistId } = useParams();
   const { data: artist, refetch: refresh } = useQuery(
     queryArtist({ artistSlug: artistId })
   );
-  const errorHandler = useErrorHandler();
   const supportButtonText =
     artist?.properties?.titles?.supportButton?.trim() || t("support");
 
   const navigate = useNavigate();
-  const [checkout, setCheckout] = React.useState<{
-    clientSecret: string;
-    stripeAccountId: string;
-  } | null>(null);
+  const {
+    checkout,
+    isLoading: isCheckingForSubscription,
+    startPurchase,
+    reset,
+  } = usePurchase();
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
-    try {
-      setIsCheckingForSubscription(true);
-      const response = await api.post<
-        { tierId: number; amount?: number; embedded: boolean; name?: string },
-        { clientSecret: string; stripeAccountId: string }
-      >(`artists/${tier.artistId}/subscribe`, {
-        tierId: tier.id,
-        amount: tier.allowVariable ? getValues("amount") * 100 : tier.minAmount,
-        embedded: true,
-        ...(needsName && { name: getValues("name") }),
-      });
-      if (response.clientSecret) {
-        setOpen(false);
-        setCheckout({
-          clientSecret: response.clientSecret,
-          stripeAccountId: response.stripeAccountId,
-        });
-      }
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      setIsCheckingForSubscription(false);
-      refresh();
-      refreshLoggedInUser();
-    }
+    await startPurchase({
+      artistId: tier.artistId,
+      items: [
+        {
+          type: "subscription",
+          tierId: tier.id,
+          amount: tier.allowVariable
+            ? getValues("amount") * 100
+            : (tier.minAmount ?? undefined),
+          ...(needsName && { userName: getValues("name") }),
+        },
+      ],
+      ...(needsEmail && { email: getValues("email") }),
+    });
+    setOpen(false);
+    refresh();
+    refreshLoggedInUser();
   };
 
-  const handleEmbeddedComplete = React.useCallback(() => {
+  const handlePurchaseComplete = React.useCallback(() => {
     if (!artist) return;
-    const params = new URLSearchParams();
-    params.set("purchaseType", "subscription");
     refreshLoggedInUser();
     refresh();
-    setCheckout(null);
-    navigate(`${getArtistUrl(artist)}/checkout-complete?${params.toString()}`);
-  }, [artist, navigate, refresh, refreshLoggedInUser]);
+    reset();
+    navigate(
+      buildCheckoutCompletePath(artist, { purchaseType: "subscription" })
+    );
+  }, [artist, navigate, refresh, refreshLoggedInUser, reset]);
 
   return (
     <>
@@ -142,6 +136,15 @@ const ArtistVariableSupport: React.FC<{
               </div>
             </>
           )}
+          {needsEmail && (
+            <label className="flex flex-col gap-1">
+              <span>{t("yourEmailLabel")}</span>
+              <InputEl
+                type="email"
+                {...register("email", { required: true })}
+              />
+            </label>
+          )}
           {needsName && (
             <label className="flex flex-col gap-1">
               <span>{t("yourNameLabel", { artistName: artist?.name })}</span>
@@ -178,20 +181,22 @@ const ArtistVariableSupport: React.FC<{
           <IncludedReleases tier={tier} />
         </form>
       </Modal>
-      <Modal
-        size="small"
+      <PurchaseModal
         open={!!checkout}
-        onClose={() => setCheckout(null)}
+        onClose={reset}
+        clientSecret={checkout?.clientSecret}
+        stripeAccountId={checkout?.stripeAccountId}
+        returnUrl={
+          artist
+            ? `${window.location.origin}${buildCheckoutCompletePath(artist, {
+                purchaseType: "subscription",
+              })}`
+            : window.location.origin
+        }
+        onSuccess={handlePurchaseComplete}
         title={t("support") ?? ""}
-      >
-        {checkout && (
-          <EmbeddedStripeForm
-            clientSecret={checkout.clientSecret}
-            stripeAccountId={checkout.stripeAccountId}
-            onComplete={handleEmbeddedComplete}
-          />
-        )}
-      </Modal>
+        buttonLabel={t("letsSupport") ?? ""}
+      />
     </>
   );
 };

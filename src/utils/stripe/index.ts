@@ -10,7 +10,7 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { subscribeUserToArtist } from "../artist";
+import { deleteStripeSubscriptions, subscribeUserToArtist } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
@@ -34,6 +34,7 @@ import { decrementMerchStock } from "../merch";
 import { finalCoversBucket, finalMerchImageBucket } from "../minio";
 import { calculateAppFee } from "../processingPayments";
 import { manageSubscriptionReceipt } from "../subscription";
+import { registerSubscription } from "../subscriptionTier";
 import { createOrUpdatePledge } from "../trackGroup";
 import { findOrCreateUserBasedOnEmail, updateCurrencies } from "../user";
 
@@ -552,18 +553,24 @@ export const handleSetupIntentSucceeded = async (
     stripeAccount: setupIntent.metadata?.stripeAccountId,
   });
 
-  const fundraiserId = setupIntent.metadata?.fundraiserId;
-
-  const { userId, userEmail } = setupIntent.metadata as unknown as {
+  const metadata = setupIntent.metadata as unknown as {
+    fundraiserId?: string;
     userId: string;
     userEmail: string;
+    userName?: string;
+    tierId?: string;
+    amount: string;
+    currency: string;
+    stripeAccountId: string;
+    oldTierId?: string;
   };
+  const { fundraiserId, userId, userEmail, userName } = metadata;
 
   let {
     userId: actualUserId,
     user,
     newUser,
-  } = await findOrCreateUserBasedOnEmail(userEmail, userId);
+  } = await findOrCreateUserBasedOnEmail(userEmail, userId, userName);
 
   if (fundraiserId) {
     const fundraiser = await prisma.fundraiser.findUnique({
@@ -594,7 +601,146 @@ export const handleSetupIntentSucceeded = async (
       });
       await subscribeUserToArtist(fundraiser.trackGroups[0].artist, user);
     }
+  } else if (metadata.tierId) {
+    const { tierId, amount, currency, stripeAccountId, oldTierId } = metadata;
+
+    const paymentMethodId =
+      typeof intent.payment_method === "string"
+        ? intent.payment_method
+        : intent.payment_method?.id;
+
+    if (!paymentMethodId) {
+      logger.error(
+        `handleSetupIntentSucceeded: no payment_method on setup intent ${intent.id}`
+      );
+      return;
+    }
+
+    await finalizeSubscriptionSetup({
+      stripeAccountId,
+      paymentMethodId,
+      tierId: Number(tierId),
+      amount: Number(amount),
+      currency,
+      userId: Number(actualUserId),
+      userEmail,
+      oldTierId: oldTierId ? Number(oldTierId) : undefined,
+    });
   }
+};
+
+/**
+ * Creates a Stripe Customer (or reuses one), attaches the given payment
+ * method, creates the recurring Stripe Subscription for a tier, and registers
+ * it in the DB. Shared by the online (`setup_intent.succeeded`) and terminal
+ * (`terminal.reader.action_succeeded`) subscription paths — the only
+ * difference between them is how the payment method id was obtained (a
+ * card-present setup generates a reusable card via `latest_attempt`; an
+ * online setup intent already has `payment_method` set directly).
+ *
+ * When `oldTierId` is present (a tier switch that needed a fresh SetupIntent
+ * rather than the in-place-repricing fast path), the old subscription is only
+ * cancelled here — after the new one is confirmed active — never before.
+ */
+export const finalizeSubscriptionSetup = async ({
+  stripeAccountId,
+  paymentMethodId,
+  tierId,
+  amount,
+  currency,
+  userId,
+  userEmail,
+  oldTierId,
+}: {
+  stripeAccountId: string;
+  paymentMethodId: string;
+  tierId: number;
+  amount: number;
+  currency: string;
+  userId: number;
+  userEmail?: string;
+  oldTierId?: number;
+}) => {
+  // Independent lookups: which tier, and which Stripe customer, don't depend
+  // on each other.
+  const [tier, customer] = await Promise.all([
+    prisma.profileSubscriptionTier.findFirst({
+      where: { id: tierId, deletedAt: null },
+      include: { artist: true },
+    }),
+    findOrCreateStripeCustomer(stripeAccountId, userId, userEmail),
+  ]);
+
+  if (!tier) {
+    logger.error(`finalizeSubscriptionSetup: tier ${tierId} not found`);
+    return;
+  }
+
+  const platformPercent = tier.platformPercent ?? 7;
+
+  // Also independent: attaching the payment method to the customer and
+  // ensuring the tier's Stripe product exists don't depend on each other.
+  const [, productKey] = await Promise.all([
+    stripe.paymentMethods.attach(
+      paymentMethodId,
+      { customer: customer.id },
+      { stripeAccount: stripeAccountId }
+    ),
+    createSubscriptionStripeProduct(tier, stripeAccountId),
+  ]);
+
+  const subscription = await stripe.subscriptions.create(
+    {
+      customer: customer.id,
+      items: [
+        {
+          price_data: {
+            currency,
+            product: productKey,
+            unit_amount: amount,
+            recurring: {
+              interval: tier.interval === "YEAR" ? "year" : "month",
+            },
+          },
+        },
+      ],
+      default_payment_method: paymentMethodId,
+      application_fee_percent: platformPercent,
+      metadata: {
+        tierId: String(tier.id),
+        userId: String(userId),
+        stripeAccountId,
+        purchaseType: "subscription",
+      },
+    },
+    { stripeAccount: stripeAccountId }
+  );
+
+  await registerSubscription({
+    userId,
+    tierId: tier.id,
+    amount,
+    paymentProcessorKey: subscription.id,
+    platformCut: Math.round((amount * platformPercent) / 100),
+    shippingAddress: null,
+  });
+
+  if (oldTierId && oldTierId !== tier.id) {
+    // Scoped to the specific old tier, never the broader artist+user pair —
+    // the subscription just created above for the new tier belongs to that
+    // same artist and user, and must not be swept up here.
+    await deleteStripeSubscriptions({
+      artistSubscriptionTierId: oldTierId,
+      userId,
+    });
+    await prisma.profileUserSubscription.deleteMany({
+      where: { userId, artistSubscriptionTierId: oldTierId },
+    });
+  }
+
+  logger.info(
+    `finalizeSubscriptionSetup: created subscription ${subscription.id} for user ${userId}, tier ${tier.id}`
+  );
 };
 
 export const chargePledgePayments = async (

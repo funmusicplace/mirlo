@@ -163,10 +163,12 @@ export const createTier = async (
   const tier = await prisma.profileSubscriptionTier.create({
     data: {
       minAmount: data?.minAmount,
+      defaultAmount: data?.defaultAmount,
       allowVariable: data?.allowVariable,
       name: data?.name ?? "Test title",
       artistId: artistId,
       isDefaultTier: data?.isDefaultTier,
+      collectAddress: data?.collectAddress,
     },
   });
   return tier;

@@ -22,9 +22,12 @@ import {
 import { resolvePayee } from "../../../utils/payments/payee";
 import {
   initiatePayment,
-  initiateSubscription,
   type ResolvedItem,
 } from "../../../utils/payments/purchase";
+import {
+  initiateOnlineSubscription,
+  initiateSubscription,
+} from "../../../utils/payments/subscription";
 import { determinePrice } from "../../../utils/purchasing";
 import { findUserDiscountPercentsForArtist } from "../../../utils/user";
 
@@ -41,7 +44,13 @@ type PurchaseItem =
       message?: string;
     }
   | { type: "tip"; amount: number; message?: string }
-  | { type: "subscription"; tierId: number; amount?: number };
+  | {
+      type: "subscription";
+      tierId: number;
+      amount?: number;
+      /** Self-chosen display name, captured when the buyer has no account name yet. */
+      userName?: string;
+    };
 
 type PostBody = {
   readerId?: string;
@@ -305,30 +314,34 @@ export default function () {
       }
 
       if (hasSubscription) {
-        if (!readerId) {
-          throw new AppError({
-            httpCode: 400,
-            description:
-              "Online subscriptions not yet supported via this endpoint",
+        const subItem = items[0] as Extract<
+          PurchaseItem,
+          { type: "subscription" }
+        >;
+
+        if (readerId) {
+          const { setupIntentId } = await initiateSubscription({
+            readerId,
+            artistId,
+            tierId: subItem.tierId,
+            amount: subItem.amount,
+            userEmail: loggedInUser?.email ?? email ?? "",
+            userId: loggedInUser ? String(loggedInUser.id) : undefined,
           });
+
+          return res.status(200).json({ setupIntentId });
         }
 
-        const subItem = items[0] as {
-          type: "subscription";
-          tierId: number;
-          amount?: number;
-        };
-
-        const { setupIntentId } = await initiateSubscription({
-          readerId,
+        const result = await initiateOnlineSubscription({
           artistId,
           tierId: subItem.tierId,
           amount: subItem.amount,
           userEmail: loggedInUser?.email ?? email ?? "",
-          userId: loggedInUser ? String(loggedInUser.id) : undefined,
+          userId: loggedInUser?.id,
+          userName: subItem.userName,
         });
 
-        return res.status(200).json({ setupIntentId });
+        return res.status(200).json(result);
       }
 
       const resolvedItems: ResolvedItem[] = [];
@@ -526,8 +539,11 @@ export default function () {
       "omit it for an online PaymentIntent that the frontend completes with Stripe.js. " +
       "Returns `paymentIntentId` (terminal — poll GET /v1/purchase/:id), " +
       "`setupIntentId` (terminal subscription — poll GET /v1/purchase/:id), " +
-      "`clientSecret` + `stripeAccountId` (online paid — load Stripe.js for that " +
-      "connected account and pass the secret to the Payment Element), " +
+      "`clientSecret` + `stripeAccountId` (online paid, or an online subscription " +
+      "sign-up/switch that needs a new payment method — load Stripe.js for that " +
+      "connected account and pass the secret to the Payment/Setup Element), " +
+      "`success: true` (an online subscription tier switch that was applied to the " +
+      "existing Stripe subscription in place — no further action needed), " +
       "or `redirectUrl` (online free trackGroup). " +
       "Pass `hosted: true` to receive a `redirectUrl` to Mirlo's hosted checkout " +
       "page for an online paid purchase instead of a `clientSecret` — intended " +
@@ -551,6 +567,7 @@ export default function () {
             clientSecret: { type: "string" },
             stripeAccountId: { type: "string" },
             redirectUrl: { type: "string" },
+            success: { type: "boolean" },
           },
         },
       },
