@@ -1178,6 +1178,122 @@ describe("purchase", () => {
       );
       assert.equal(oldSubscription?.deleteReason, null);
     });
+
+    it("reprices in place when switching between two collectAddress tiers and an address is already on file", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_3",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const oldTier = await createTier(artist.id, {
+        minAmount: 500,
+        collectAddress: true,
+      });
+      const newTier = await createTier(artist.id, {
+        minAmount: 1000,
+        collectAddress: true,
+        platformPercent: 12,
+      });
+
+      const shippingAddress = {
+        name: "Buyer Name",
+        address: { line1: "123 Main St", country: "US" },
+      };
+      await prisma.profileUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          platformCut: 35,
+          stripeSubscriptionKey: "sub_existing_addr",
+          shippingAddress,
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        items: { data: [{ id: "si_existing_item" }] },
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+      const setupIntentStub = sinon.stub(
+        stripeUtils.stripe.setupIntents,
+        "create"
+      );
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_new_tier_addr",
+      } as unknown as Stripe.Response<Stripe.Product>);
+
+      const result = await initiateOnlineSubscription({
+        artistId: artist.id,
+        tierId: newTier.id,
+        userEmail: buyer.email,
+        userId: buyer.id,
+      });
+
+      assert.deepEqual(result, { success: true });
+      assert.equal(
+        updateStub.calledOnce,
+        true,
+        "should reprice in place instead of creating a fresh SetupIntent"
+      );
+      assert.equal(
+        setupIntentStub.called,
+        false,
+        "no new SetupIntent should be created when we already have the address on file"
+      );
+
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, artistSubscriptionTierId: newTier.id },
+      });
+      assert.deepEqual(
+        after?.shippingAddress,
+        shippingAddress,
+        "the existing address is carried over untouched"
+      );
+    });
+
+    it("carries the old subscription key in the fresh SetupIntent's metadata so it can be cancelled once confirmed", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_4",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const oldTier = await createTier(artist.id, { minAmount: 500 });
+      const newTier = await createTier(artist.id, {
+        minAmount: 1000,
+        collectAddress: true,
+      });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_existing_789",
+        },
+      });
+
+      const setupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_switch_2",
+          client_secret: "seti_switch_2_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await initiateOnlineSubscription({
+        artistId: artist.id,
+        tierId: newTier.id,
+        userEmail: buyer.email,
+        userId: buyer.id,
+      });
+
+      assert.equal(setupIntentStub.calledOnce, true);
+      const metadata = (setupIntentStub.getCall(0).args[0] as any)?.metadata;
+      assert.equal(metadata?.oldStripeSubscriptionKey, "sub_existing_789");
+    });
   });
 
   describe("finalizeSubscriptionSetup (direct)", () => {
@@ -1228,6 +1344,7 @@ describe("purchase", () => {
         userId: buyer.id,
         userEmail: buyer.email,
         oldTierId: oldTier.id,
+        oldStripeSubscriptionKey: "sub_old_789",
       });
 
       const newSubscription = await prisma.profileUserSubscription.findFirst({
@@ -1301,6 +1418,78 @@ describe("purchase", () => {
       });
       assert.ok(subscription, "the subscription should be registered");
       assert.deepEqual(subscription?.shippingAddress, shippingAddress);
+    });
+
+    it("cancels the previous Stripe subscription even when re-authorising the same tier", async () => {
+      // Regression test: re-collecting an address for a tier the buyer is
+      // already on (isTierSwitch is false, so oldTierId is never set) used to
+      // leave the old Stripe subscription running forever, since the cleanup
+      // only ever queried by tier id — which, for a same-tier switch, matches
+      // the row this same call just upserted with the *new* key.
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_finalize_same_tier",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, {
+        minAmount: 500,
+        collectAddress: true,
+      });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: tier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_same_tier_old",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_same_tier",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_same_tier",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
+        id: "sub_same_tier_new",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const cancelStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "cancel")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await finalizeSubscriptionSetup({
+        stripeAccountId: "acct_sub_finalize_same_tier",
+        paymentMethodId: "pm_test",
+        tierId: tier.id,
+        amount: 500,
+        currency: "usd",
+        userId: buyer.id,
+        userEmail: buyer.email,
+        oldStripeSubscriptionKey: "sub_same_tier_old",
+      });
+
+      assert.equal(
+        cancelStub.calledOnceWith("sub_same_tier_old"),
+        true,
+        "the old subscription should be cancelled by its own id, not swept up by a tier-based query"
+      );
+
+      const subscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, artistSubscriptionTierId: tier.id },
+      });
+      assert.equal(
+        subscription?.stripeSubscriptionKey,
+        "sub_same_tier_new",
+        "the row now points at the new subscription"
+      );
     });
   });
 

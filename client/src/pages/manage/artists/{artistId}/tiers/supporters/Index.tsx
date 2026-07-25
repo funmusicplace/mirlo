@@ -10,6 +10,7 @@ import Table from "components/common/Table";
 import ArtistSubscriberDataDownload from "components/ManageArtist/ArtistSubscriberDataDownload";
 import ArtistSubscriberUploadData from "components/ManageArtist/ArtistSubscriberUploadData";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { sumBy } from "lodash";
 import { ArtistSection } from "pages/{artistId}/Index";
 import { queryManageArtistSubscribers } from "queries";
@@ -36,6 +37,7 @@ type SupportTier = {
   createdAt: string;
   amount: number;
   deleteReason?: string | null;
+  nextBillingDate?: string;
   artistSubscriptionTier: ArtistSubscriptionTier;
   artistUserSubscriptionCharges?: {
     id: string;
@@ -104,7 +106,7 @@ const sumDeductions = (supporters: SupportTier[]) => {
 const Index = () => {
   const { data: artist } = useArtistQuery();
   const artistId = artist?.id;
-  const { t } = useTranslation("translation", {
+  const { t, i18n } = useTranslation("translation", {
     keyPrefix: "artistSupporters",
   });
   const { data: subscribersData, refetch } = useQuery(
@@ -273,6 +275,16 @@ const Index = () => {
                     {r.artistSubscriptionTier.interval === "MONTH"
                       ? t("monthly")
                       : t("yearly")}
+                    {r.nextBillingDate ? (
+                      <>
+                        <br />
+                        <small>
+                          ({formatDate({ date: r.nextBillingDate, i18n })}){" "}
+                        </small>
+                      </>
+                    ) : (
+                      ""
+                    )}
                   </td>
                   <td>
                     <Money

@@ -79,7 +79,13 @@ export default function () {
           id: true,
           amount: true,
           deleteReason: true,
-          user: true,
+          user: {
+            select: {
+              email: true,
+              name: true,
+            },
+          },
+          nextBillingDate: true,
           artistSubscriptionTier: true,
           artistUserSubscriptionCharges: {
             select: {
@@ -95,6 +101,9 @@ export default function () {
             },
             orderBy: { createdAt: "desc" },
           },
+        },
+        orderBy: {
+          nextBillingDate: "desc",
         },
       });
 

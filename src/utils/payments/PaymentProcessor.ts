@@ -75,10 +75,15 @@ export interface PaymentProcessor {
    * confirm online (no reader dispatch). `oldTierId`, when present, is
    * carried in the SetupIntent's metadata so the tier being switched away
    * from is only cancelled once this new subscription is confirmed active —
-   * never before.
+   * never before. `oldStripeSubscriptionKey`, when present, is the Stripe
+   * subscription this new one supersedes (same tier or not) — cancelled the
+   * same way, once the new one is confirmed.
    */
   createOnlineSubscriptionSetup(
-    args: CreateSubscriptionSetupArgs & { oldTierId?: number }
+    args: CreateSubscriptionSetupArgs & {
+      oldTierId?: number;
+      oldStripeSubscriptionKey?: string;
+    }
   ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
 
   /**
