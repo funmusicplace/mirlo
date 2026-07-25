@@ -11,6 +11,8 @@ import {
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 
+import { findUserByEmail } from "./{id}";
+
 export default function () {
   const operations = {
     GET: [userAuthenticated, userHasPermission("admin"), GET],
@@ -55,19 +57,7 @@ export default function () {
         });
       }
 
-      let userId: number | undefined;
-      if (userEmail) {
-        const user = await prisma.user.findUnique({
-          where: { email: userEmail },
-        });
-        if (!user) {
-          throw new AppError({
-            httpCode: 404,
-            description: `No user found with email ${userEmail}`,
-          });
-        }
-        userId = user.id;
-      }
+      const userId = await findUserByEmail(userEmail);
 
       const client = await prisma.client.create({
         data: {
