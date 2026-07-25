@@ -10,7 +10,7 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { deleteStripeSubscriptions, subscribeUserToArtist } from "../artist";
+import { subscribeUserToArtist } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
@@ -563,6 +563,8 @@ export const handleSetupIntentSucceeded = async (
     currency: string;
     stripeAccountId: string;
     oldTierId?: string;
+    /** The Stripe subscription this new one supersedes, if any — cancelled directly once the new one is confirmed. */
+    oldStripeSubscriptionKey?: string;
     /** JSON-stringified `{ name?, address }`, set via `PUT /v1/purchase/:id` before confirmation — see attachSetupIntentShippingAddress. */
     shippingAddress?: string;
   };
@@ -604,7 +606,14 @@ export const handleSetupIntentSucceeded = async (
       await subscribeUserToArtist(fundraiser.trackGroups[0].artist, user);
     }
   } else if (metadata.tierId) {
-    const { tierId, amount, currency, stripeAccountId, oldTierId } = metadata;
+    const {
+      tierId,
+      amount,
+      currency,
+      stripeAccountId,
+      oldTierId,
+      oldStripeSubscriptionKey,
+    } = metadata;
 
     const paymentMethodId =
       typeof intent.payment_method === "string"
@@ -642,6 +651,7 @@ export const handleSetupIntentSucceeded = async (
       userId: Number(actualUserId),
       userEmail,
       oldTierId: oldTierId ? Number(oldTierId) : undefined,
+      oldStripeSubscriptionKey,
       shippingAddress,
     });
   }
@@ -681,9 +691,10 @@ export const attachSetupIntentShippingAddress = async ({
  * card-present setup generates a reusable card via `latest_attempt`; an
  * online setup intent already has `payment_method` set directly).
  *
- * When `oldTierId` is present (a tier switch that needed a fresh SetupIntent
- * rather than the in-place-repricing fast path), the old subscription is only
- * cancelled here — after the new one is confirmed active — never before.
+ * When `oldStripeSubscriptionKey` is present (a fresh SetupIntent was needed
+ * instead of the in-place-repricing fast path — whether switching tiers or
+ * re-authorising the same one), the subscription it names is only cancelled
+ * here — after the new one is confirmed active — never before.
  */
 export const finalizeSubscriptionSetup = async ({
   stripeAccountId,
@@ -694,6 +705,7 @@ export const finalizeSubscriptionSetup = async ({
   userId,
   userEmail,
   oldTierId,
+  oldStripeSubscriptionKey,
   shippingAddress = null,
 }: {
   stripeAccountId: string;
@@ -704,6 +716,8 @@ export const finalizeSubscriptionSetup = async ({
   userId: number;
   userEmail?: string;
   oldTierId?: number;
+  /** The Stripe subscription this new one supersedes, if any (same tier or a different one). */
+  oldStripeSubscriptionKey?: string;
   /** Collected via the tier's AddressElement when `tier.collectAddress` is set — see attachSetupIntentShippingAddress. */
   shippingAddress?: { name?: string; address: Record<string, unknown> } | null;
 }) => {
@@ -771,14 +785,29 @@ export const finalizeSubscriptionSetup = async ({
     shippingAddress,
   });
 
+  // Cancel the specific old subscription this one supersedes, by id — never
+  // by re-querying on tier, since a same-tier re-authorisation (e.g.
+  // re-collecting a `collectAddress` tier's address) would otherwise match
+  // the row `registerSubscription` just upserted above with the *new* key.
+  if (
+    oldStripeSubscriptionKey &&
+    oldStripeSubscriptionKey !== subscription.id
+  ) {
+    try {
+      await stripe.subscriptions.cancel(oldStripeSubscriptionKey, {
+        stripeAccount: stripeAccountId,
+      });
+    } catch (e) {
+      logger.error(
+        `finalizeSubscriptionSetup: failed to cancel old subscription ${oldStripeSubscriptionKey}`,
+        e
+      );
+    }
+  }
+
   if (oldTierId && oldTierId !== tier.id) {
-    // Scoped to the specific old tier, never the broader artist+user pair —
-    // the subscription just created above for the new tier belongs to that
-    // same artist and user, and must not be swept up here.
-    await deleteStripeSubscriptions({
-      artistSubscriptionTierId: oldTierId,
-      userId,
-    });
+    // Different tier: its DB row is separate from the one just upserted
+    // above for the new tier, so it needs its own cleanup.
     await prisma.profileUserSubscription.deleteMany({
       where: { userId, artistSubscriptionTierId: oldTierId },
     });

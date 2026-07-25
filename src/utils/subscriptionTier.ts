@@ -32,6 +32,7 @@ export const registerSubscription = async ({
       userId: Number(userId),
       amount,
       deletedAt: null, // Undelete
+      deleteReason: null, // Clear any stale reason from a prior cancellation of this same tier row
       platformCut,
       stripeSubscriptionKey: paymentProcessorKey, // FIXME: should this be session id? Maybe subscriptionId?
       shippingAddress,

@@ -148,15 +148,16 @@ export const initiateOnlineSubscription = async ({
     !!existingSubscription &&
     existingSubscription.artistSubscriptionTierId !== tier.id;
 
-  // Fast path: already paying for a tier on this artist, and the new tier
-  // doesn't need a shipping address collected — reprice the existing Stripe
-  // subscription in place instead of sending the buyer through Checkout
-  // again. Nothing is cancelled; the same subscription just bills the new
-  // amount next cycle.
+  // Fast path: already paying for a tier on this artist, and either the new
+  // tier doesn't need a shipping address collected, or it does but we
+  // already have one on file for this subscription (e.g. switching between
+  // two `collectAddress` tiers) — reprice the existing Stripe subscription in
+  // place instead of sending the buyer through Checkout again. Nothing is
+  // cancelled; the same subscription just bills the new amount next cycle.
   if (
     isTierSwitch &&
     existingSubscription.stripeSubscriptionKey &&
-    !tier.collectAddress
+    (!tier.collectAddress || existingSubscription.shippingAddress)
   ) {
     await getPaymentProcessor().updateSubscriptionTier({
       subscriptionKey: existingSubscription.stripeSubscriptionKey,
@@ -182,6 +183,14 @@ export const initiateOnlineSubscription = async ({
     return { success: true };
   }
 
+  // We're past the fast path, so any existing paid subscription (whether on
+  // this same tier — e.g. re-collecting an address we don't have yet — or a
+  // different one) is about to be superseded by a brand-new Stripe
+  // subscription below. Capture its key now so the old one can be cancelled
+  // once the new one is confirmed, instead of being left to bill forever.
+  const oldStripeSubscriptionKey =
+    existingSubscription?.stripeSubscriptionKey ?? undefined;
+
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
       tierId,
@@ -195,6 +204,7 @@ export const initiateOnlineSubscription = async ({
       oldTierId: isTierSwitch
         ? existingSubscription.artistSubscriptionTierId
         : undefined,
+      oldStripeSubscriptionKey,
     });
 
   return {

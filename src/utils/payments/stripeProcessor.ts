@@ -113,12 +113,14 @@ export class StripePaymentProcessor implements PaymentProcessor {
     userId,
     userName,
     oldTierId,
+    oldStripeSubscriptionKey,
   }: CreateSubscriptionSetupArgs & {
     oldTierId?: number;
+    oldStripeSubscriptionKey?: string;
   }): Promise<{ setupIntentId: string; clientSecret: string | null }> {
     const setupIntent = await stripe.setupIntents.create(
       {
-        payment_method_types: ["card"],
+        automatic_payment_methods: { enabled: true },
         usage: "off_session",
         metadata: {
           tierId: String(tierId),
@@ -130,6 +132,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
           ...(userId && { userId }),
           ...(userName?.trim() && { userName: userName.trim() }),
           ...(oldTierId !== undefined && { oldTierId: String(oldTierId) }),
+          ...(oldStripeSubscriptionKey && { oldStripeSubscriptionKey }),
         },
       },
       { stripeAccount: accountId }
