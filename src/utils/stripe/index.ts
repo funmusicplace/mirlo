@@ -1068,24 +1068,62 @@ export const handleSubscriptionDeleted = async (
 
   // Honour any reason we recorded at cancellation time; only override it when
   // Stripe tells us the subscription died because billing ultimately failed.
-  const deleteReason =
-    subscription.cancellation_details?.reason === "payment_failed"
-      ? "PAYMENT_FAILURE"
-      : undefined;
+  const isPaymentFailure =
+    subscription.cancellation_details?.reason === "payment_failed";
+  const deleteReason = isPaymentFailure ? "PAYMENT_FAILURE" : undefined;
 
-  const result = await prisma.profileUserSubscription.updateMany({
+  const rows = await prisma.profileUserSubscription.findMany({
     where: {
       stripeSubscriptionKey: subscription.id,
       deletedAt: null,
     },
-    data: {
-      deletedAt: new Date(),
-      ...(deleteReason ? { deleteReason } : {}),
-    },
+    include: { artistSubscriptionTier: true },
   });
 
+  for (const row of rows) {
+    // User chose "stop payments but keep following": rather than removing
+    // access, drop them onto the artist's free tier so they keep getting
+    // posts/emails with no further billing. Doesn't apply to payment
+    // failures — those aren't a user opting to keep following.
+    if (row.keepFollowingOnCancel && !isPaymentFailure) {
+      const defaultTier = await prisma.profileSubscriptionTier.findFirst({
+        where: {
+          artistId: row.artistSubscriptionTier.artistId,
+          isDefaultTier: true,
+          deletedAt: null,
+        },
+      });
+
+      if (defaultTier) {
+        await prisma.profileUserSubscription.update({
+          where: { id: row.id },
+          data: {
+            artistSubscriptionTierId: defaultTier.id,
+            amount: 0,
+            platformCut: null,
+            stripeSubscriptionKey: null,
+            nextBillingDate: null,
+            keepFollowingOnCancel: false,
+          },
+        });
+        logger.info(
+          `customer.subscription.deleted: ${subscription.id} downgraded subscription ${row.id} to the free tier instead of deleting`
+        );
+        continue;
+      }
+    }
+
+    await prisma.profileUserSubscription.update({
+      where: { id: row.id },
+      data: {
+        deletedAt: new Date(),
+        ...(deleteReason ? { deleteReason } : {}),
+      },
+    });
+  }
+
   logger.info(
-    `customer.subscription.deleted: ${subscription.id} marked ${result.count} subscription(s) deleted`
+    `customer.subscription.deleted: ${subscription.id} processed ${rows.length} subscription(s)`
   );
 };
 

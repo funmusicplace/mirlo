@@ -187,6 +187,7 @@ export default function () {
     const { id: artistId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
+    const keepFollowing = Boolean(req.body?.keepFollowing);
 
     try {
       const subscription = await prisma.profileUserSubscription.findFirst({
@@ -208,13 +209,54 @@ export default function () {
       // Cancels at period end for paid subscriptions (billing stops, access
       // remains until the paid period ends) or immediately for free tiers,
       // and emails the user a confirmation. See cancelUserSubscription.
-      await cancelUserSubscription(subscription, loggedInUser.email);
+      await cancelUserSubscription(
+        subscription,
+        loggedInUser.email,
+        keepFollowing
+      );
 
       res.status(200).json({ message: "success" });
     } catch (e) {
       next(e);
     }
   }
+
+  DELETE.apiDoc = {
+    summary: "Cancels a user's subscription to an artist",
+    parameters: [
+      {
+        in: "path",
+        name: "id",
+        required: true,
+        type: "number",
+      },
+      {
+        in: "body",
+        name: "cancel",
+        schema: {
+          type: "object",
+          properties: {
+            keepFollowing: {
+              type: "boolean",
+              description:
+                "If true, once the paid period ends the user is downgraded to the artist's free tier instead of removed, so they keep following without further billing.",
+            },
+          },
+        },
+      },
+    ],
+    responses: {
+      200: {
+        description: "Cancelled the subscription",
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
+  };
 
   return operations;
 }

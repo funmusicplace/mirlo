@@ -256,10 +256,19 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
       });
     },
 
-    delete: async <R>(endpoint: string): Promise<R> => {
+    delete: async <R, T = unknown>(endpoint: string, data?: T): Promise<R> => {
       return apiRequest<R>(endpoint, {
         method: "DELETE",
         credentials: "include",
+        ...(data !== undefined
+          ? {
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            }
+          : {}),
       });
     },
 

@@ -21,6 +21,7 @@ const ArtistManageSubscription: React.FC<{
   reload: () => Promise<void>;
 }> = ({ userSubscriptionTier, reload, userSubscription }) => {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
+  const [isConfirmingCancel, setIsConfirmingCancel] = React.useState(false);
   const [isCancelling, setIsCancelling] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { refreshLoggedInUser } = useAuthContext();
@@ -29,27 +30,33 @@ const ArtistManageSubscription: React.FC<{
 
   const isCancelled = isSubscriptionCancelled(userSubscription);
 
-  const cancelSubscription = React.useCallback(async () => {
-    try {
-      setIsCancelling(true);
-      await api.delete(`artists/${userSubscriptionTier.artistId}/subscribe`);
-      snackbar(t("subscriptionCancelled"), { type: "success" });
-      setIsEditOpen(false);
-      refreshLoggedInUser();
-      await reload();
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      setIsCancelling(false);
-    }
-  }, [
-    reload,
-    refreshLoggedInUser,
-    snackbar,
-    t,
-    errorHandler,
-    userSubscriptionTier.artistId,
-  ]);
+  const cancelSubscription = React.useCallback(
+    async (keepFollowing: boolean) => {
+      try {
+        setIsCancelling(true);
+        await api.delete(`artists/${userSubscriptionTier.artistId}/subscribe`, {
+          keepFollowing,
+        });
+        snackbar(t("subscriptionCancelled"), { type: "success" });
+        setIsConfirmingCancel(false);
+        setIsEditOpen(false);
+        refreshLoggedInUser();
+        await reload();
+      } catch (e) {
+        errorHandler(e);
+      } finally {
+        setIsCancelling(false);
+      }
+    },
+    [
+      reload,
+      refreshLoggedInUser,
+      snackbar,
+      t,
+      errorHandler,
+      userSubscriptionTier.artistId,
+    ]
+  );
 
   return (
     <Box
@@ -76,18 +83,55 @@ const ArtistManageSubscription: React.FC<{
 
       <Modal
         open={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
+        onClose={() => {
+          setIsEditOpen(false);
+          setIsConfirmingCancel(false);
+        }}
         title={t("manageSubscription")}
         size="small"
       >
-        <Button
-          size="compact"
-          buttonRole="warning"
-          isLoading={isCancelling}
-          onClick={cancelSubscription}
-        >
-          {t("cancelSubscription")}
-        </Button>
+        {!isConfirmingCancel && (
+          <Button
+            size="compact"
+            buttonRole="warning"
+            onClick={() => setIsConfirmingCancel(true)}
+          >
+            {t("cancelSubscription")}
+          </Button>
+        )}
+        {isConfirmingCancel && (
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+              gap: 0.75rem;
+            `}
+          >
+            <p>{t("cancelSubscriptionConfirm")}</p>
+            <Button
+              size="compact"
+              buttonRole="warning"
+              isLoading={isCancelling}
+              onClick={() => cancelSubscription(false)}
+            >
+              {t("unsubscribeEntirely")}
+            </Button>
+            <Button
+              size="compact"
+              isLoading={isCancelling}
+              onClick={() => cancelSubscription(true)}
+            >
+              {t("stopPaymentsKeepFollowing")}
+            </Button>
+            <Button
+              size="compact"
+              onClick={() => setIsConfirmingCancel(false)}
+              disabled={isCancelling}
+            >
+              {t("nevermind")}
+            </Button>
+          </div>
+        )}
       </Modal>
     </Box>
   );

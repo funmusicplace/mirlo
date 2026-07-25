@@ -1,7 +1,7 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../utils/error";
 
 type Params = {
@@ -43,6 +43,10 @@ export default function () {
         });
 
         if (artist) {
+          // Free follows (the default tier) have no payment behind them, so
+          // "unfollow" removes them outright. Paid subscriptions keep billing
+          // and access untouched — this endpoint only turns off the emails,
+          // since that's all a "stop receiving emails" link should do.
           await prisma.profileUserSubscription.deleteMany({
             where: {
               artistSubscriptionTier: {
@@ -51,6 +55,16 @@ export default function () {
               },
               userId: userIdToRemove,
             },
+          });
+          await prisma.profileUserSubscription.updateMany({
+            where: {
+              artistSubscriptionTier: {
+                artistId: artist.id,
+                isDefaultTier: false,
+              },
+              userId: userIdToRemove,
+            },
+            data: { receiveEmail: false },
           });
 
           res.status(200).json({

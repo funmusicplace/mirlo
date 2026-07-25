@@ -1,6 +1,6 @@
 import prisma from "@mirlo/prisma";
 import * as cheerio from "cheerio";
-import { flatten, uniqBy } from "lodash";
+import { flatten, groupBy } from "lodash";
 
 import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
@@ -67,7 +67,8 @@ export default async function sendPostNotification(job: {
               include: {
                 userSubscriptions: {
                   where: { deletedAt: null },
-                  include: {
+                  select: {
+                    receiveEmail: true,
                     user: {
                       select: {
                         id: true,
@@ -117,17 +118,27 @@ export default async function sendPostNotification(job: {
       return;
     }
 
-    // Collect all unique subscribers (filtering out deleted/unconfirmed users)
+    // Collect all unique subscribers (filtering out deleted/unconfirmed users).
+    // A user can hold more than one subscription to the same artist (e.g. a
+    // free follow alongside a paid tier), so OR their receiveEmail flags
+    // together rather than taking whichever subscription happened first.
     const flatSubscriptions = flatten(
       (post.artist?.subscriptionTiers ?? []).map((st) =>
         st.userSubscriptions
-          .map((us) => us.user)
           .filter(
-            (u) => u.deletedAt === null && u.emailConfirmationToken === null
+            (us) =>
+              us.user.deletedAt === null &&
+              us.user.emailConfirmationToken === null
           )
+          .map((us) => ({ ...us.user, receiveEmail: us.receiveEmail }))
       )
     );
-    const uniqueSubscribers = uniqBy(flatSubscriptions, "id");
+    const uniqueSubscribers = Object.values(
+      groupBy(flatSubscriptions, "id")
+    ).map((subs) => ({
+      ...subs[0],
+      receiveEmail: subs.some((s) => s.receiveEmail),
+    }));
 
     logger.info(
       `sendPostNotification: found ${uniqueSubscribers.length} subscribers for post ${postId}`
@@ -136,16 +147,18 @@ export default async function sendPostNotification(job: {
     // Pick the deliveryMethod that reflects which deliveries we will actually
     // perform for this post. shouldSendEmail=false still creates an in-app
     // notification so subscribers see the post in their "Artists you follow"
-    // feed, just without the email side-effect (#2071).
+    // feed, just without the email side-effect (#2071). Subscribers who
+    // opted out of email (receiveEmail=false) get the same treatment.
     const wantsEmail = post.shouldSendEmail;
     const wantsActivityPub = !!post.artist?.activityPub;
-    const deliveryMethod = wantsEmail
-      ? wantsActivityPub
-        ? ("BOTH" as const)
-        : ("EMAIL" as const)
-      : wantsActivityPub
-        ? ("ACTIVITYPUB" as const)
-        : ("IN_APP" as const);
+    const deliveryMethodFor = (subscriberWantsEmail: boolean) =>
+      wantsEmail && subscriberWantsEmail
+        ? wantsActivityPub
+          ? ("BOTH" as const)
+          : ("EMAIL" as const)
+        : wantsActivityPub
+          ? ("ACTIVITYPUB" as const)
+          : ("IN_APP" as const);
 
     // Create notifications in the DB
     const createdNotifications = await prisma.notification.createMany({
@@ -153,13 +166,13 @@ export default async function sendPostNotification(job: {
         postId,
         userId: subscriber.id,
         notificationType: "NEW_ARTIST_POST" as const,
-        deliveryMethod,
+        deliveryMethod: deliveryMethodFor(subscriber.receiveEmail),
       })),
       skipDuplicates: true,
     });
 
     logger.info(
-      `sendPostNotification: created ${createdNotifications.count} new notifications for post ${postId} (deliveryMethod=${deliveryMethod})`
+      `sendPostNotification: created ${createdNotifications.count} new notification(s) for post ${postId}`
     );
 
     if (wantsEmail) {
