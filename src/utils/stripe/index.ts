@@ -563,6 +563,8 @@ export const handleSetupIntentSucceeded = async (
     currency: string;
     stripeAccountId: string;
     oldTierId?: string;
+    /** JSON-stringified `{ name?, address }`, set via `PUT /v1/purchase/:id` before confirmation — see attachSetupIntentShippingAddress. */
+    shippingAddress?: string;
   };
   const { fundraiserId, userId, userEmail, userName } = metadata;
 
@@ -616,6 +618,21 @@ export const handleSetupIntentSucceeded = async (
       return;
     }
 
+    let shippingAddress: {
+      name?: string;
+      address: Record<string, unknown>;
+    } | null = null;
+    if (metadata.shippingAddress) {
+      try {
+        shippingAddress = JSON.parse(metadata.shippingAddress);
+      } catch (e) {
+        logger.error(
+          `handleSetupIntentSucceeded: could not parse shippingAddress metadata on ${intent.id}`,
+          e
+        );
+      }
+    }
+
     await finalizeSubscriptionSetup({
       stripeAccountId,
       paymentMethodId,
@@ -625,8 +642,34 @@ export const handleSetupIntentSucceeded = async (
       userId: Number(actualUserId),
       userEmail,
       oldTierId: oldTierId ? Number(oldTierId) : undefined,
+      shippingAddress,
     });
   }
+};
+
+/**
+ * Attaches the buyer's shipping address to a not-yet-confirmed subscription
+ * SetupIntent's metadata, so `handleSetupIntentSucceeded` can read it back
+ * once the SetupIntent succeeds and pass it to `finalizeSubscriptionSetup`.
+ * SetupIntents (unlike PaymentIntents) have no native `shipping` field —
+ * confirmSetup can't carry it the way confirmPayment does — so this is the
+ * mechanism for a `collectAddress` tier's address to survive to registration.
+ * Called from `PUT /v1/purchase/:id`, before the frontend calls confirmSetup.
+ */
+export const attachSetupIntentShippingAddress = async ({
+  setupIntentId,
+  stripeAccountId,
+  shippingAddress,
+}: {
+  setupIntentId: string;
+  stripeAccountId: string;
+  shippingAddress: { name?: string; address: Record<string, unknown> };
+}) => {
+  await stripe.setupIntents.update(
+    setupIntentId,
+    { metadata: { shippingAddress: JSON.stringify(shippingAddress) } },
+    { stripeAccount: stripeAccountId }
+  );
 };
 
 /**
@@ -651,6 +694,7 @@ export const finalizeSubscriptionSetup = async ({
   userId,
   userEmail,
   oldTierId,
+  shippingAddress = null,
 }: {
   stripeAccountId: string;
   paymentMethodId: string;
@@ -660,6 +704,8 @@ export const finalizeSubscriptionSetup = async ({
   userId: number;
   userEmail?: string;
   oldTierId?: number;
+  /** Collected via the tier's AddressElement when `tier.collectAddress` is set — see attachSetupIntentShippingAddress. */
+  shippingAddress?: { name?: string; address: Record<string, unknown> } | null;
 }) => {
   // Independent lookups: which tier, and which Stripe customer, don't depend
   // on each other.
@@ -722,7 +768,7 @@ export const finalizeSubscriptionSetup = async ({
     amount,
     paymentProcessorKey: subscription.id,
     platformCut: Math.round((amount * platformPercent) / 100),
-    shippingAddress: null,
+    shippingAddress,
   });
 
   if (oldTierId && oldTierId !== tier.id) {

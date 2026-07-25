@@ -320,6 +320,8 @@ const ArtistSupportBox: React.FC<{
         onClose={reset}
         clientSecret={checkout?.clientSecret}
         stripeAccountId={checkout?.stripeAccountId}
+        requiresShipping={checkout?.requiresShipping}
+        allowedCountries={checkout?.allowedCountries}
         returnUrl={`${window.location.origin}${buildCheckoutCompletePath(
           artist,
           {

@@ -186,6 +186,8 @@ const ArtistVariableSupport: React.FC<{
         onClose={reset}
         clientSecret={checkout?.clientSecret}
         stripeAccountId={checkout?.stripeAccountId}
+        requiresShipping={checkout?.requiresShipping}
+        allowedCountries={checkout?.allowedCountries}
         returnUrl={
           artist
             ? `${window.location.origin}${buildCheckoutCompletePath(artist, {

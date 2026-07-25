@@ -13,6 +13,17 @@ import { AppError } from "../error";
 import { getPaymentProcessor } from "./PaymentProcessor";
 import { resolveArtistPaymentContext } from "./purchase";
 
+// Countries a `collectAddress` tier's AddressElement offers — shared with the
+// legacy Checkout Session flow (src/utils/stripe/sessions.ts) so both paths
+// present the same picker.
+export const SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES = [
+  "US",
+  "GB",
+  "CA",
+  "AU",
+  "NZ",
+];
+
 // Shared by the terminal and online paths below. Validates the tier first so
 // a missing tier 404s even when the artist hasn't finished setting up a
 // payment processor (resolveArtistPaymentContext, called after this).
@@ -110,6 +121,9 @@ export const initiateOnlineSubscription = async ({
       clientSecret: string | null;
       stripeAccountId: string;
       setupIntentId: string;
+      /** The tier needs a shipping address — the frontend renders an AddressElement and PUTs it to /v1/purchase/:id before confirming. */
+      requiresShipping: boolean;
+      allowedCountries?: string[];
     }
 > => {
   const { tier, resolvedAmount } = await resolveTierAndAmount(
@@ -183,7 +197,15 @@ export const initiateOnlineSubscription = async ({
         : undefined,
     });
 
-  return { clientSecret, stripeAccountId, setupIntentId };
+  return {
+    clientSecret,
+    stripeAccountId,
+    setupIntentId,
+    requiresShipping: !!tier.collectAddress,
+    allowedCountries: tier.collectAddress
+      ? SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES
+      : undefined,
+  };
 };
 
 type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
