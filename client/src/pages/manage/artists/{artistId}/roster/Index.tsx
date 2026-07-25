@@ -4,13 +4,12 @@ import ArtistSquare from "components/Artist/ArtistSquare";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import SectionActionStrip from "components/common/SectionActionStrip";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-
-import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 
 const Index: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });

@@ -19,6 +19,8 @@ import StripeStatus from "components/common/stripe/StripeStatusAndButton";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
+import AddArtistToRoster from "components/Profile/ManageLabel/AddArtistToRoster";
+import ProfileSection from "components/Profile/ProfileSection";
 import { queryLabelArtists, queryManagedArtists } from "queries";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -29,10 +31,6 @@ import { Link } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistManageUrl, getArtistUrl } from "utils/artist";
-
-import ProfileSection from "components/Profile/ProfileSection";
-
-import AddArtistToRoster from "components/Profile/ManageLabel/AddArtistToRoster";
 
 type Relationship = {
   artist: {

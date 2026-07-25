@@ -184,7 +184,7 @@ const Index = () => {
               <tr>
                 <td>email confirmed?</td>
                 <td>
-                  {user.emailConfirmationToken ? <FaTimes /> : <FaCheck />}
+                  {user.hasPendingEmailConfirmation ? <FaTimes /> : <FaCheck />}
                 </td>
               </tr>
               <tr>

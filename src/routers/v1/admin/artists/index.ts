@@ -44,7 +44,12 @@ export default function () {
         include: {
           avatar: true,
           background: true,
-          user: true,
+          user: {
+            select: {
+              email: true,
+              stripeAccountId: true,
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",

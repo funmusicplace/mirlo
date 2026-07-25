@@ -1,12 +1,12 @@
-import { Prisma } from "@mirlo/prisma/client";
-
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
+import { NextFunction, Request, Response } from "express";
+import { uniqBy } from "lodash";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { uniqBy } from "lodash";
 
 export default function () {
   const operations = {
@@ -73,7 +73,6 @@ export default function () {
           artists: true,
           isLabelAccount: true,
           featureFlags: true,
-          emailConfirmationToken: true,
           currency: true,
           stripeAccountId: true,
           receiveMailingList: true,
