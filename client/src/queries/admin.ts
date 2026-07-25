@@ -33,12 +33,16 @@ export const useFundraiserPledgesQuery = (
   });
 };
 
+export type AdminClientStatus = "pending" | "approved" | "revoked";
+
 export interface AdminClient {
   id: number;
   applicationName: string;
   applicationUrl: string;
   allowedCorsOrigins: string[];
   key: string | null;
+  status: AdminClientStatus;
+  user: { id: number; email: string } | null;
   createdAt: string;
 }
 
@@ -53,6 +57,7 @@ async function createAdminClient(data: {
   applicationName: string;
   applicationUrl: string;
   allowedCorsOrigins: string[];
+  userEmail?: string;
 }) {
   return api.post<typeof data, { result: AdminClient }>("admin/clients", data);
 }
@@ -78,6 +83,28 @@ export const useRotateAdminClientKeyMutation = () => {
   const client = useQueryClient();
   return useMutation({
     mutationFn: rotateAdminClientKey,
+    async onSuccess() {
+      await client.invalidateQueries({ queryKey: [QUERY_KEY_ADMIN_CLIENTS] });
+    },
+  });
+};
+
+async function updateAdminClient(opts: {
+  clientId: number;
+  status?: AdminClientStatus;
+  userEmail?: string | null;
+}) {
+  const { clientId, ...data } = opts;
+  return api.put<typeof data, { result: AdminClient }>(
+    `admin/clients/${clientId}`,
+    data
+  );
+}
+
+export const useUpdateAdminClientMutation = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateAdminClient,
     async onSuccess() {
       await client.invalidateQueries({ queryKey: [QUERY_KEY_ADMIN_CLIENTS] });
     },

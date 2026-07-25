@@ -29,7 +29,7 @@ export const corsMiddleware = async (
       const now = Date.now();
       if (now > cacheExpiry) {
         cachedClients = await prisma.client.findMany({
-          where: { deletedAt: null },
+          where: { deletedAt: null, status: "approved" },
         });
         cacheExpiry = now + CACHE_TTL_MS;
       }

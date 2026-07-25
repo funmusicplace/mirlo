@@ -28,6 +28,7 @@ export default function () {
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: { createdAt: "desc" },
+        include: { user: { select: { id: true, email: true } } },
       });
       res.json({
         results: clients,
@@ -39,11 +40,12 @@ export default function () {
   }
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { applicationName, applicationUrl, allowedCorsOrigins } =
+    const { applicationName, applicationUrl, allowedCorsOrigins, userEmail } =
       req.body as {
         applicationName: string;
         applicationUrl: string;
         allowedCorsOrigins?: string[];
+        userEmail?: string;
       };
     try {
       if (!applicationName || !applicationUrl) {
@@ -53,13 +55,29 @@ export default function () {
         });
       }
 
+      let userId: number | undefined;
+      if (userEmail) {
+        const user = await prisma.user.findUnique({
+          where: { email: userEmail },
+        });
+        if (!user) {
+          throw new AppError({
+            httpCode: 404,
+            description: `No user found with email ${userEmail}`,
+          });
+        }
+        userId = user.id;
+      }
+
       const client = await prisma.client.create({
         data: {
           applicationName,
           applicationUrl,
           allowedCorsOrigins: allowedCorsOrigins ?? [],
           key: randomBytes(24).toString("hex"),
+          userId,
         },
+        include: { user: { select: { id: true, email: true } } },
       });
 
       invalidateClientCache();

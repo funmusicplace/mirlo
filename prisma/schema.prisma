@@ -35,15 +35,24 @@ model Settings {
   defconLevel                  Int?    @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
 }
 
+enum ClientStatus {
+  pending
+  approved
+  revoked
+}
+
 model Client {
-  id                 Int         @id @default(autoincrement())
+  id                 Int          @id @default(autoincrement())
   applicationName    String
   applicationUrl     String
   allowedCorsOrigins String[]
   secret             String?
   key                String?
-  updatedAt          DateTime    @default(now()) @updatedAt
-  createdAt          DateTime    @default(now())
+  status             ClientStatus @default(approved)
+  userId             Int?
+  user               User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  updatedAt          DateTime     @default(now()) @updatedAt
+  createdAt          DateTime     @default(now())
   deletedAt          DateTime?
   trackPlays         TrackPlay[]
 }
@@ -113,6 +122,7 @@ model User {
   invitesUsed                         Invite[]                         @relation("usedBy")
   transactions                        UserTransaction[]
   trackGroupDownloads                 TrackGroupDownload[]
+  clients                             Client[]
 }
 
 model Invite {
@@ -495,6 +505,8 @@ model ProfileUserSubscription {
   shippingAddress               Json?
   renewalReminderSentAt         DateTime? // When renewal reminder was last sent
   nextBillingDate               DateTime? // When Stripe will charge next (from invoice)
+  receiveEmail                  Boolean                         @default(true) // Whether the user still wants post-notification emails; toggled off via the email "stop receiving emails" link
+  keepFollowingOnCancel         Boolean                         @default(false) // If true, when this paid subscription's Stripe subscription ends, convert to the artist's default (free) tier instead of deleting
 
   @@unique([userId, artistSubscriptionTierId])
 }
