@@ -13,6 +13,17 @@ import { AppError } from "../error";
 import { getPaymentProcessor } from "./PaymentProcessor";
 import { resolveArtistPaymentContext } from "./purchase";
 
+// Countries a `collectAddress` tier's AddressElement offers — shared with the
+// legacy Checkout Session flow (src/utils/stripe/sessions.ts) so both paths
+// present the same picker.
+export const SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES = [
+  "US",
+  "GB",
+  "CA",
+  "AU",
+  "NZ",
+];
+
 // Shared by the terminal and online paths below. Validates the tier first so
 // a missing tier 404s even when the artist hasn't finished setting up a
 // payment processor (resolveArtistPaymentContext, called after this).
@@ -105,7 +116,15 @@ export const initiateOnlineSubscription = async ({
   /** Self-chosen display name, captured when the buyer has no account name yet. */
   userName?: string;
 }): Promise<
-  { success: true } | { clientSecret: string | null; stripeAccountId: string }
+  | { success: true }
+  | {
+      clientSecret: string | null;
+      stripeAccountId: string;
+      setupIntentId: string;
+      /** The tier needs a shipping address — the frontend renders an AddressElement and PUTs it to /v1/purchase/:id before confirming. */
+      requiresShipping: boolean;
+      allowedCountries?: string[];
+    }
 > => {
   const { tier, resolvedAmount } = await resolveTierAndAmount(
     artistId,
@@ -147,15 +166,23 @@ export const initiateOnlineSubscription = async ({
       currency,
     });
 
+    const platformPercent = tier.platformPercent ?? 7;
     await prisma.profileUserSubscription.update({
       where: { id: existingSubscription.id },
-      data: { artistSubscriptionTierId: tier.id, amount: resolvedAmount },
+      data: {
+        artistSubscriptionTierId: tier.id,
+        amount: resolvedAmount,
+        // Keep in step with the new tier's fee — mirrors the
+        // application_fee_percent update in updateSubscriptionTier, since the
+        // next invoice bills at this percentage going forward.
+        platformCut: Math.round((resolvedAmount * platformPercent) / 100),
+      },
     });
 
     return { success: true };
   }
 
-  const { clientSecret } =
+  const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
       tierId,
       artistId,
@@ -170,7 +197,15 @@ export const initiateOnlineSubscription = async ({
         : undefined,
     });
 
-  return { clientSecret, stripeAccountId };
+  return {
+    clientSecret,
+    stripeAccountId,
+    setupIntentId,
+    requiresShipping: !!tier.collectAddress,
+    allowedCountries: tier.collectAddress
+      ? SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES
+      : undefined,
+  };
 };
 
 type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{

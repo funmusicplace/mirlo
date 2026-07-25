@@ -31,4 +31,4 @@ jobs:
         run: |
           TRANSIFEX_TOKEN=$TRANSIFEX_TOKEN
           TRANSIFEX_SECRET=$TRANSIFEX_SECRET 
-          npx txjs-cli push src/translation/en.json --parser=i18next
+          npx txjs-cli push src/translation/en.json --parser=i18next --purge

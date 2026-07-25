@@ -94,10 +94,43 @@ describe("purchase", () => {
       const artist = await createArtist(artistUser.id);
       const tier = await createTier(artist.id, { minAmount: 500 });
 
-      sinon.stub(stripeUtils.stripe.setupIntents, "create").resolves({
-        id: "seti_online_new",
-        client_secret: "seti_online_new_secret",
-      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+      // Note: this request goes over HTTP to the separate api-test server
+      // process (see `requestApp`/API_DOMAIN in test/routers/utils.ts), so a
+      // sinon stub set up here — in the test process — would never be seen by
+      // it; the call for real reaches the stripe-mock service instead. Assert
+      // on the shape of a SetupIntent secret rather than a specific stubbed
+      // value.
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "subscription", tierId: tier.id }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(
+        response.body.clientSecret?.startsWith("seti_"),
+        "clientSecret should be a SetupIntent secret"
+      );
+      assert.ok(
+        !response.body.requiresShipping,
+        "a tier without collectAddress should not ask the frontend for an address"
+      );
+    });
+
+    it("should return requiresShipping + allowedCountries for a collectAddress tier's first-time subscription", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_address",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, {
+        minAmount: 500,
+        collectAddress: true,
+      });
 
       const response = await requestApp
         .post("purchase")
@@ -109,7 +142,103 @@ describe("purchase", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.clientSecret, "seti_online_new_secret");
+      assert.ok(
+        response.body.clientSecret?.startsWith("seti_"),
+        "clientSecret should be a SetupIntent secret"
+      );
+      assert.equal(response.body.requiresShipping, true);
+      assert.ok(
+        Array.isArray(response.body.allowedCountries) &&
+          response.body.allowedCountries.length > 0,
+        "should include a non-empty allowedCountries list"
+      );
+    });
+
+    it("should return a hosted redirectUrl (not a raw clientSecret) for a first-time online subscription when hosted is true", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_hosted",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+
+      sinon.stub(stripeUtils.stripe.setupIntents, "create").resolves({
+        id: "seti_hosted_new",
+        client_secret: "seti_hosted_new_secret",
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "subscription", tierId: tier.id }],
+          hosted: true,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.redirectUrl, "should return a redirectUrl");
+      assert.ok(response.body.redirectUrl.includes("/checkout"));
+      assert.ok(response.body.redirectUrl.includes("intentId="));
+      assert.ok(response.body.redirectUrl.includes("stripeAccountId="));
+      assert.ok(
+        !response.body.clientSecret,
+        "should not leak clientSecret in hosted mode"
+      );
+    });
+
+    it("should return success:true (not a hosted redirectUrl) when a tier switch is repriced in place, even with hosted: true", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_hosted_switch",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      const oldTier = await createTier(artist.id, { minAmount: 500 });
+      const newTier = await createTier(artist.id, {
+        minAmount: 1000,
+        collectAddress: false,
+      });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_hosted_switch_existing",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        items: { data: [{ id: "si_existing_item" }] },
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_new_tier",
+      } as unknown as Stripe.Response<Stripe.Product>);
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "subscription", tierId: newTier.id }],
+          hosted: true,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.success, true);
+      assert.ok(
+        !response.body.redirectUrl,
+        "there's no payment step left to send the buyer through, so no redirectUrl is needed"
+      );
     });
 
     it("should return 401 when a readerId is supplied without being logged in", async () => {
@@ -381,7 +510,7 @@ describe("purchase", () => {
       // Hosted mode returns a redirect to Mirlo's pay page, not a raw secret.
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
       assert.ok(response.body.redirectUrl.includes("/checkout"));
-      assert.ok(response.body.redirectUrl.includes("paymentIntentId="));
+      assert.ok(response.body.redirectUrl.includes("intentId="));
       assert.ok(response.body.redirectUrl.includes("stripeAccountId="));
       assert.ok(
         !response.body.clientSecret,
@@ -944,6 +1073,7 @@ describe("purchase", () => {
       const newTier = await createTier(artist.id, {
         minAmount: 1000,
         collectAddress: false,
+        platformPercent: 12,
       });
 
       const existing = await prisma.profileUserSubscription.create({
@@ -951,6 +1081,7 @@ describe("purchase", () => {
           artistSubscriptionTierId: oldTier.id,
           userId: buyer.id,
           amount: 500,
+          platformCut: 35,
           stripeSubscriptionKey: "sub_existing_123",
         },
       });
@@ -975,6 +1106,11 @@ describe("purchase", () => {
       assert.deepEqual(result, { success: true });
       assert.equal(updateStub.calledOnce, true);
       assert.equal(updateStub.getCall(0).args[1]?.proration_behavior, "none");
+      assert.equal(
+        updateStub.getCall(0).args[1]?.application_fee_percent,
+        12,
+        "the new tier's platform fee percentage should be applied to the repriced subscription"
+      );
 
       const after = await prisma.profileUserSubscription.findFirst({
         where: { id: existing.id },
@@ -982,6 +1118,11 @@ describe("purchase", () => {
       assert.ok(after, "the same subscription row should still exist");
       assert.equal(after?.artistSubscriptionTierId, newTier.id);
       assert.equal(after?.amount, 1000);
+      assert.equal(
+        after?.platformCut,
+        120,
+        "platformCut should be recalculated from the new tier's fee percentage, not left at the old tier's"
+      );
       assert.equal(
         after?.stripeSubscriptionKey,
         "sub_existing_123",
@@ -1110,6 +1251,57 @@ describe("purchase", () => {
         "the old tier's subscription row should be gone after the switch is confirmed"
       );
     });
+
+    it("persists a shippingAddress when the tier collects one", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_finalize_address",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, {
+        minAmount: 500,
+        collectAddress: true,
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_address",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_address_tier",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
+        id: "sub_address_123",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+
+      const shippingAddress = {
+        name: "Buyer Name",
+        address: { line1: "123 Main St", city: "Anytown", country: "US" },
+      };
+
+      await finalizeSubscriptionSetup({
+        stripeAccountId: "acct_sub_finalize_address",
+        paymentMethodId: "pm_test",
+        tierId: tier.id,
+        amount: 500,
+        currency: "usd",
+        userId: buyer.id,
+        userEmail: buyer.email,
+        shippingAddress,
+      });
+
+      const subscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, artistSubscriptionTierId: tier.id },
+      });
+      assert.ok(subscription, "the subscription should be registered");
+      assert.deepEqual(subscription?.shippingAddress, shippingAddress);
+    });
   });
 
   describe("handleSetupIntentSucceeded (direct) — first-time subscription sign-up", () => {
@@ -1178,6 +1370,73 @@ describe("purchase", () => {
       assert.ok(subscription, "the subscription should be registered");
       assert.equal(subscription?.stripeSubscriptionKey, "sub_anon_new");
     });
+
+    it("parses the JSON-stringified shippingAddress metadata and persists it on the subscription", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_anon_address",
+      });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, {
+        minAmount: 500,
+        collectAddress: true,
+      });
+
+      const shippingAddress = {
+        name: "Shipping Buyer",
+        address: { line1: "456 Oak Ave", city: "Someplace", country: "GB" },
+      };
+      const metadata = {
+        tierId: String(tier.id),
+        amount: "500",
+        currency: "usd",
+        stripeAccountId: "acct_sub_anon_address",
+        userEmail: "anon-shipping@test.com",
+        shippingAddress: JSON.stringify(shippingAddress),
+      };
+
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_anon_address",
+        payment_method: "pm_anon_address",
+        metadata,
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+      sinon
+        .stub(stripeUtils.stripe.customers, "list")
+        .resolves({ data: [] } as unknown as Stripe.Response<
+          Stripe.ApiList<Stripe.Customer>
+        >);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_anon_address",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_anon_address",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
+        id: "sub_anon_address",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await stripeUtils.handleSetupIntentSucceeded({
+        id: "seti_anon_address",
+        metadata,
+      } as unknown as Stripe.SetupIntent);
+
+      const newUser = await prisma.user.findFirst({
+        where: { email: "anon-shipping@test.com" },
+      });
+      assert.ok(
+        newUser,
+        "a new user should be created for the anonymous buyer"
+      );
+
+      const subscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: newUser?.id, artistSubscriptionTierId: tier.id },
+      });
+      assert.ok(subscription, "the subscription should be registered");
+      assert.deepEqual(subscription?.shippingAddress, shippingAddress);
+    });
   });
 
   describe("GET /v1/purchase/:id", () => {
@@ -1221,6 +1480,55 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.result.id, "should return a result id");
       assert.ok(response.body.result.status, "should return a result status");
+    });
+  });
+
+  describe("PUT /v1/purchase/:id — attach a subscription's shipping address", () => {
+    it("should return 400 when stripeAccountId query param is missing", async () => {
+      const response = await requestApp
+        .put("purchase/seti_shipping_test")
+        .send({ shippingAddress: { address: { country: "US" } } })
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 400 for a non-SetupIntent id", async () => {
+      const response = await requestApp
+        .put("purchase/pi_shipping_test")
+        .query({ stripeAccountId: "acct_test" })
+        .send({ shippingAddress: { address: { country: "US" } } })
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 400 when shippingAddress is missing", async () => {
+      const response = await requestApp
+        .put("purchase/seti_shipping_test")
+        .query({ stripeAccountId: "acct_test" })
+        .send({})
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 200 when the shipping address is attached to a SetupIntent", async () => {
+      const response = await requestApp
+        .put("purchase/seti_shipping_test")
+        .query({ stripeAccountId: "acct_test" })
+        .send({
+          shippingAddress: {
+            name: "Buyer Name",
+            address: {
+              line1: "123 Main St",
+              city: "Anytown",
+              state: "CA",
+              postal_code: "12345",
+              country: "US",
+            },
+          },
+        })
+        .set("Accept", "application/json");
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.id, "seti_shipping_test");
     });
   });
 

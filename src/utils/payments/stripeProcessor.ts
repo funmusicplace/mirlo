@@ -179,6 +179,10 @@ export class StripePaymentProcessor implements PaymentProcessor {
         // charge — "increasing the monthly fee the next time they subscribe."
         proration_behavior: "none",
         cancel_at_period_end: false,
+        // Tiers can carry different platform fees (see applyPlatformFee.ts),
+        // so a tier switch must re-pin the fee to the new tier's — otherwise
+        // Stripe keeps charging the old tier's percentage indefinitely.
+        application_fee_percent: tier.platformPercent ?? 7,
       },
       { stripeAccount: accountId }
     );

@@ -57,6 +57,8 @@ const PurchaseElements: React.FC<{
         // this here (the one place that actually has the clientSecret) beats
         // threading a caller-computed `isSetup` flag through every component.
         isSetup={clientSecret.startsWith("seti_")}
+        clientSecret={clientSecret}
+        stripeAccountId={stripeAccountId}
       />
     </Elements>
   );

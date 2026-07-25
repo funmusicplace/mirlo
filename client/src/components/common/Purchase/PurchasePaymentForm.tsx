@@ -13,6 +13,7 @@ import {
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 
 import { Button } from "../Button";
@@ -43,6 +44,9 @@ const PurchasePaymentForm: React.FC<{
   allowedCountries?: string[];
   /** The clientSecret is a SetupIntent's (subscription sign-up) rather than a PaymentIntent's — confirm with `confirmSetup`, not `confirmPayment`. */
   isSetup?: boolean;
+  /** Needed (alongside stripeAccountId) only when isSetup && requiresShipping, to PUT the collected address onto the SetupIntent before confirming — SetupIntents have no native `shipping` field, unlike PaymentIntents. */
+  clientSecret?: string;
+  stripeAccountId?: string;
 }> = ({
   returnUrl,
   buttonLabel,
@@ -50,6 +54,8 @@ const PurchasePaymentForm: React.FC<{
   requiresShipping,
   allowedCountries,
   isSetup,
+  clientSecret,
+  stripeAccountId,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -94,6 +100,29 @@ const PurchasePaymentForm: React.FC<{
     // SetupIntent has no `shipping`), so the call itself can't be unified —
     // only the params shared between both branches are, here.
     const confirmParams = { return_url: returnUrl, shipping };
+
+    // A SetupIntent has no native `shipping` field for confirmSetup to carry
+    // (unlike confirmPayment above), so a `collectAddress` tier's address is
+    // saved via a separate call first — read back from the SetupIntent's
+    // metadata once it succeeds (see attachSetupIntentShippingAddress).
+    if (isSetup && requiresShipping && shipping) {
+      if (!clientSecret || !stripeAccountId) {
+        handler(new Error("Missing clientSecret/stripeAccountId for shipping"));
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const setupIntentId = clientSecret.split("_secret_")[0];
+        await api.put(
+          `purchase/${setupIntentId}?stripeAccountId=${encodeURIComponent(stripeAccountId)}`,
+          { shippingAddress: shipping }
+        );
+      } catch (e) {
+        handler(e);
+        setIsLoading(false);
+        return;
+      }
+    }
 
     if (onSuccess) {
       // Async completion: only redirect if the payment method requires it.

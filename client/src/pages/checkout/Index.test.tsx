@@ -22,8 +22,18 @@ vi.mock("@stripe/react-stripe-js", () => ({
 }));
 
 vi.mock("components/common/Purchase/PurchasePaymentForm", () => ({
-  default: ({ returnUrl }: { returnUrl: string }) => (
-    <div data-testid="payment-form" data-return-url={returnUrl} />
+  default: ({
+    returnUrl,
+    isSetup,
+  }: {
+    returnUrl: string;
+    isSetup?: boolean;
+  }) => (
+    <div
+      data-testid="payment-form"
+      data-return-url={returnUrl}
+      data-is-setup={String(!!isSetup)}
+    />
   ),
 }));
 
@@ -61,7 +71,7 @@ function renderAt(path: string) {
   );
 }
 
-const PATH = "/checkout?paymentIntentId=pi_1&stripeAccountId=acct_1";
+const PATH = "/checkout?intentId=pi_1&stripeAccountId=acct_1";
 
 describe("Checkout", () => {
   beforeEach(() => {
@@ -92,8 +102,34 @@ describe("Checkout", () => {
       "data-return-url",
       "https://wp-site.com/thanks"
     );
+    expect(screen.getByTestId("payment-form")).toHaveAttribute(
+      "data-is-setup",
+      "false"
+    );
     // Buyer sees who they're paying and how much (the t() mock returns the key).
     expect(screen.getByText("payingArtistAmount")).toBeInTheDocument();
+  });
+
+  test("passes isSetup to the payment form for a subscription's SetupIntent", async () => {
+    mockIntentFetch({
+      id: "seti_1",
+      status: "requires_payment_method",
+      clientSecret: "seti_1_secret_abc",
+      successUrl: "https://wp-site.com/thanks",
+      amount: null,
+      currency: null,
+      artistName: "Test Artist",
+    });
+
+    renderAt("/checkout?intentId=seti_1&stripeAccountId=acct_1");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("payment-form")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("payment-form")).toHaveAttribute(
+      "data-is-setup",
+      "true"
+    );
   });
 
   test("bounces to successUrl when the intent already succeeded", async () => {

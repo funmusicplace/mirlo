@@ -8,10 +8,12 @@ import {
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { getPaymentProcessor } from "../../../../utils/payments/PaymentProcessor";
+import { attachSetupIntentShippingAddress } from "../../../../utils/stripe";
 
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
+    PUT: [userLoggedInWithoutRedirect, PUT],
     DELETE: [userAuthenticated, DELETE],
   };
 
@@ -122,6 +124,109 @@ export default function () {
         },
       },
       400: { description: "Missing parameters" },
+      default: {
+        description: "An error occurred",
+        schema: { additionalProperties: true },
+      },
+    },
+  };
+
+  /**
+   * Persists the buyer's shipping address onto a not-yet-confirmed
+   * subscription SetupIntent, ahead of the frontend calling Stripe's
+   * confirmSetup. SetupIntents have no native `shipping` field (unlike
+   * PaymentIntents, which carry it straight through confirmPayment), so this
+   * is the mechanism for a `collectAddress` tier's address to survive to
+   * `finalizeSubscriptionSetup` once `setup_intent.succeeded` fires.
+   */
+  async function PUT(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    const { stripeAccountId } = req.query as { stripeAccountId?: string };
+    const { shippingAddress } = req.body as {
+      shippingAddress?: { name?: string; address: Record<string, unknown> };
+    };
+
+    try {
+      if (!id) {
+        throw new AppError({ httpCode: 400, description: "id is required" });
+      }
+      if (!stripeAccountId) {
+        throw new AppError({
+          httpCode: 400,
+          description: "stripeAccountId query param is required",
+        });
+      }
+      if (!id.startsWith("seti_")) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Only a SetupIntent (seti_*) accepts a shipping address",
+        });
+      }
+      if (!shippingAddress?.address) {
+        throw new AppError({
+          httpCode: 400,
+          description: "shippingAddress is required",
+        });
+      }
+
+      await attachSetupIntentShippingAddress({
+        setupIntentId: id,
+        stripeAccountId,
+        shippingAddress,
+      });
+
+      res.status(200).json({ result: { id } });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  PUT.apiDoc = {
+    summary: "Attach a shipping address to a pending subscription SetupIntent",
+    description:
+      "SetupIntents have no native `shipping` field the way PaymentIntents " +
+      "do, so a `collectAddress` subscription tier's AddressElement value is " +
+      "saved here — before the frontend calls Stripe's confirmSetup — so it " +
+      "can be read back from the SetupIntent's metadata once " +
+      "`setup_intent.succeeded` fires and the subscription is registered.",
+    parameters: [
+      {
+        in: "path",
+        name: "id",
+        required: true,
+        type: "string",
+        description: "SetupIntent ID (seti_*)",
+      },
+      {
+        in: "query",
+        name: "stripeAccountId",
+        required: true,
+        type: "string",
+        description: "Artist's connected Stripe account ID",
+      },
+      {
+        in: "body",
+        name: "body",
+        required: true,
+        schema: {
+          type: "object",
+          required: ["shippingAddress"],
+          properties: {
+            shippingAddress: {
+              type: "object",
+              required: ["address"],
+              properties: {
+                name: { type: "string" },
+                address: { type: "object" },
+              },
+            },
+          },
+        },
+      },
+    ],
+    responses: {
+      200: { description: "Shipping address attached" },
+      400: { description: "Missing or invalid parameters" },
       default: {
         description: "An error occurred",
         schema: { additionalProperties: true },
