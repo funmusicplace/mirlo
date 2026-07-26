@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import CopyButton from "components/common/CopyButton";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { Select } from "components/common/Select";
@@ -175,7 +176,16 @@ const Index: React.FC = () => {
                     }))}
                   />
                 </td>
-                <td>{client.key ? `${client.key.slice(0, 8)}…` : ""}</td>
+                <td>
+                  {client.key ? `${client.key.slice(0, 8)}…` : ""}
+                  {client.key && (
+                    <CopyButton
+                      text={client.key}
+                      successMessage={t("copiedKey") ?? undefined}
+                      title={t("copyKey") ?? ""}
+                    />
+                  )}
+                </td>
                 <td>
                   <Button onClick={() => onRotateKey(client)}>
                     {t("rotateKey")}
