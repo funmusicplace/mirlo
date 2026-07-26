@@ -7,6 +7,7 @@ import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -29,6 +30,22 @@ const EmailVerification: React.FC<{
   const [email, setEmail] = React.useState(user?.email);
   const queryClient = useQueryClient();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+  const errorHandler = useErrorHandler();
+
+  const verificationErrorOverrides = React.useMemo(
+    () => [
+      { status: 429, message: t("verificationTooManyRequests") },
+      {
+        body: "Invalid verification code",
+        message: t("verificationInvalidCode"),
+      },
+      {
+        body: "This verification code has expired. Please request a new one.",
+        message: t("verificationCodeExpired"),
+      },
+    ],
+    [t]
+  );
 
   const verifyEmail = React.useCallback(async () => {
     try {
@@ -37,12 +54,18 @@ const EmailVerification: React.FC<{
       snackbar(t("emailVerificationSent"), { type: "success" });
       setWaitingForVerification(true);
     } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
+      errorHandler(e, { overrides: verificationErrorOverrides });
     } finally {
       setIsloading(false);
     }
-  }, [email, snackbar, t]);
+  }, [
+    email,
+    contextSubject,
+    snackbar,
+    t,
+    errorHandler,
+    verificationErrorOverrides,
+  ]);
 
   const verifyCode = React.useCallback(async () => {
     try {
@@ -65,12 +88,20 @@ const EmailVerification: React.FC<{
         }
       }
     } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
+      errorHandler(e, { overrides: verificationErrorOverrides });
     } finally {
       setIsloading(false);
     }
-  }, [code, email, snackbar, t, queryClient, setVerifiedEmail]);
+  }, [
+    code,
+    email,
+    snackbar,
+    t,
+    queryClient,
+    setVerifiedEmail,
+    errorHandler,
+    verificationErrorOverrides,
+  ]);
 
   if (emailVerified) {
     return null;

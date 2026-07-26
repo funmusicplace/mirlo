@@ -44,7 +44,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
 
   logger.info(`auth/verifyEmail: verifying email ${email}`);
   if (!email) {
-    next(
+    return next(
       new AppError({
         httpCode: 400,
         description: "Email must be supplied",
@@ -62,15 +62,27 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
         where: {
           email,
           token: code,
-          tokenExpiration: {
-            gte: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-          },
         },
       });
       if (!verification) {
+        logger.warn(
+          `auth/verifyEmail: no matching verification code found for email ${email}`
+        );
         throw new AppError({
           httpCode: 400,
           description: "Invalid verification code",
+        });
+      } else if (
+        verification.tokenExpiration &&
+        verification.tokenExpiration < new Date()
+      ) {
+        logger.warn(
+          `auth/verifyEmail: expired verification code used for email ${email} (expired ${verification.tokenExpiration.toISOString()})`
+        );
+        throw new AppError({
+          httpCode: 400,
+          description:
+            "This verification code has expired. Please request a new one.",
         });
       } else {
         await prisma.emailVerification.delete({
@@ -105,35 +117,46 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
       }
     } else {
       // If no code is provided, we send a verification email to the provided email
-      await prisma.emailVerification.deleteMany({
-        where: {
-          email,
-        },
-      });
       const generatedCode = generate(6, 2, " ");
-      await prisma.emailVerification.create({
-        data: {
+      await prisma.emailVerification.upsert({
+        where: { email },
+        create: {
           email,
           token: generatedCode.replace(/ /g, ""),
+        },
+        update: {
+          token: generatedCode.replace(/ /g, ""),
+          tokenExpiration: new Date(Date.now() + 6 * 60 * 60 * 1000),
         },
       });
       const client = await getClient();
       logger.info(`auth/verifyEmail: sending verification email ${email}`);
 
-      await sendMail({
-        data: {
-          template: "verify-email",
-          message: {
-            to: email,
+      try {
+        await sendMail({
+          data: {
+            template: "verify-email",
+            message: {
+              to: email,
+            },
+            locals: {
+              host: process.env.API_DOMAIN,
+              client: client.id,
+              code: generatedCode,
+              contextSubject: req.body.contextSubject,
+            },
           },
-          locals: {
-            host: process.env.API_DOMAIN,
-            client: client.id,
-            code: generatedCode,
-            contextSubject: req.body.contextSubject,
-          },
-        },
-      } as Job);
+        } as Job);
+      } catch (e) {
+        logger.error(
+          `auth/verifyEmail: failed to send verification email to ${email}: ${e}`
+        );
+        throw new AppError({
+          httpCode: 500,
+          description:
+            "We couldn't send the verification email. Please try again in a moment.",
+        });
+      }
       return res.json({ message: "Success! Verification email sent." });
     }
   } catch (e) {

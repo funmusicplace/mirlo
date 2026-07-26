@@ -183,7 +183,9 @@ const errorHandler = (
   } else if (res.statusCode === 429) {
     return res.json({ error: "Too many requests" });
   } else {
-    return res.status(err.status ?? 500).json({ error: err.errors });
+    return res
+      .status(err.status ?? 500)
+      .json({ error: err.errors ?? err.message ?? "Something went wrong" });
   }
 };
 
