@@ -369,7 +369,7 @@ interface UserFromAdmin {
   createdAt: string;
   stripeAccountId?: string;
   currency: string;
-  emailConfirmationToken: string;
+  hasPendingEmailConfirmation: boolean;
   isAdmin: boolean;
   receiveMailingList: boolean;
   isLabelAccount: boolean;

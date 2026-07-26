@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { Select } from "components/common/Select";
 import Table from "components/common/Table";
 import WidthContainer from "components/common/WidthContainer";
 import {
@@ -9,7 +10,9 @@ import {
   useCreateAdminClientMutation,
   useDeleteAdminClientMutation,
   useRotateAdminClientKeyMutation,
+  useUpdateAdminClientMutation,
   AdminClient,
+  AdminClientStatus,
 } from "queries/admin";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -20,7 +23,10 @@ interface ClientForm {
   applicationName: string;
   applicationUrl: string;
   allowedCorsOrigins: string;
+  userEmail: string;
 }
+
+const CLIENT_STATUSES: AdminClientStatus[] = ["pending", "approved", "revoked"];
 
 const Index: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
@@ -33,6 +39,7 @@ const Index: React.FC = () => {
   const { mutateAsync: createClient } = useCreateAdminClientMutation();
   const { mutateAsync: rotateKey } = useRotateAdminClientKeyMutation();
   const { mutateAsync: deleteClient } = useDeleteAdminClientMutation();
+  const { mutateAsync: updateClient } = useUpdateAdminClientMutation();
 
   const onCreate = React.useCallback(
     async (formData: ClientForm) => {
@@ -43,11 +50,13 @@ const Index: React.FC = () => {
           allowedCorsOrigins: formData.allowedCorsOrigins
             ? formData.allowedCorsOrigins.split(",").map((o) => o.trim())
             : [],
+          userEmail: formData.userEmail || undefined,
         });
         reset({
           applicationName: "",
           applicationUrl: "",
           allowedCorsOrigins: "",
+          userEmail: "",
         });
         snackbar(`${t("clientCreatedKeyWarning")} ${result.key}`, {
           type: "success",
@@ -58,6 +67,18 @@ const Index: React.FC = () => {
       }
     },
     [createClient, reset, snackbar, t]
+  );
+
+  const onChangeStatus = React.useCallback(
+    async (client: AdminClient, status: AdminClientStatus) => {
+      try {
+        await updateClient({ clientId: client.id, status });
+      } catch (e) {
+        console.error(e);
+        snackbar("Oops something went wrong", { type: "warning" });
+      }
+    },
+    [updateClient, snackbar]
   );
 
   const onRotateKey = React.useCallback(
@@ -108,6 +129,10 @@ const Index: React.FC = () => {
           <label>{t("allowedCorsOrigins")}</label>
           <InputEl {...register("allowedCorsOrigins")} />
         </FormComponent>
+        <FormComponent>
+          <label>{t("clientUserEmail")}</label>
+          <InputEl type="email" {...register("userEmail")} />
+        </FormComponent>
         <Button type="submit">{t("createClient")}</Button>
       </form>
 
@@ -122,6 +147,8 @@ const Index: React.FC = () => {
               <th>{t("applicationName")}</th>
               <th>{t("applicationUrl")}</th>
               <th>{t("allowedCorsOrigins")}</th>
+              <th>{t("clientUserEmail")}</th>
+              <th>{t("clientStatus")}</th>
               <th>{t("key")}</th>
               <th />
             </tr>
@@ -132,6 +159,22 @@ const Index: React.FC = () => {
                 <td>{client.applicationName}</td>
                 <td>{client.applicationUrl}</td>
                 <td>{client.allowedCorsOrigins.join(", ")}</td>
+                <td>{client.user?.email ?? ""}</td>
+                <td>
+                  <Select
+                    value={client.status}
+                    onChange={(e) =>
+                      onChangeStatus(
+                        client,
+                        e.target.value as AdminClientStatus
+                      )
+                    }
+                    options={CLIENT_STATUSES.map((status) => ({
+                      label: status,
+                      value: status,
+                    }))}
+                  />
+                </td>
                 <td>{client.key ? `${client.key.slice(0, 8)}…` : ""}</td>
                 <td>
                   <Button onClick={() => onRotateKey(client)}>

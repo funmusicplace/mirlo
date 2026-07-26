@@ -246,4 +246,74 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
       "expected an ALBUMARTIST vorbis comment"
     );
   });
+
+  // Regression test for #1864: MusicBrainz identifiers parsed from an
+  // uploaded file (stored on Track.metadata.common) were being silently
+  // dropped by `-map_metadata -1` when generating downloads.
+  it("round-trips MusicBrainz identifiers into mp3 TXXX frames", async () => {
+    tempDir = await fsPromises.mkdtemp(
+      path.join(os.tmpdir(), "mirlo-track-test-")
+    );
+
+    const inputWav = path.join(tempDir, "input.wav");
+    const outputBase = path.join(tempDir, "output");
+    const outputMp3 = `${outputBase}.mp3`;
+
+    await fsPromises.writeFile(inputWav, createSilentWavBuffer());
+
+    const track = createTrack("audio-integration-mb", [
+      createTrackArtist({ artistName: "Lead Artist", role: "Vocal" }),
+    ]);
+    track.metadata = {
+      common: {
+        ...(track.metadata as { common?: Record<string, unknown> }).common,
+        musicbrainz_recordingid: "fcc79b5b-14b9-4f85-bd3e-5f732b368da2",
+        musicbrainz_trackid: "60d14e28-cf15-3911-bfe1-6e4517c099fd",
+        musicbrainz_albumid: "02632710-b5c1-4133-8b8e-58e450a29e94",
+        musicbrainz_artistid: "b0d6a97a-9e91-47cb-8e21-2583e02e3b7a",
+        musicbrainz_albumartistid: "89ad4ac3-39f7-470e-963a-56509c546377",
+        musicbrainz_releasegroupid: "f1f397ac-77f5-330f-b99c-1e835b3afeff",
+      },
+    };
+
+    await convertAudio({
+      track,
+      artist: { name: "Album Artist" } as Profile,
+      trackGroup: { title: "Integration Album" },
+      inputFile: inputWav,
+      outputBasename: outputBase,
+    });
+
+    const parsed = await parseFile(outputMp3);
+
+    assert.equal(
+      parsed.common.musicbrainz_recordingid,
+      undefined,
+      "recordingid isn't a real TXXX mapping (it's UFID); the round-tripped " +
+        "value lives under 'MusicBrainz Track Id' instead"
+    );
+    assert.equal(
+      parsed.common.musicbrainz_trackid,
+      "60d14e28-cf15-3911-bfe1-6e4517c099fd"
+    );
+    assert.equal(
+      parsed.common.musicbrainz_albumid,
+      "02632710-b5c1-4133-8b8e-58e450a29e94"
+    );
+    assert.deepEqual(parsed.common.musicbrainz_artistid, [
+      "b0d6a97a-9e91-47cb-8e21-2583e02e3b7a",
+    ]);
+    assert.deepEqual(parsed.common.musicbrainz_albumartistid, [
+      "89ad4ac3-39f7-470e-963a-56509c546377",
+    ]);
+    assert.equal(
+      parsed.common.musicbrainz_releasegroupid,
+      "f1f397ac-77f5-330f-b99c-1e835b3afeff"
+    );
+    assert.ok(
+      hasNativeTag(parsed.native, "TXXX:MusicBrainz Recording Id") ||
+        hasNativeTag(parsed.native, "TXXX:MusicBrainz Track Id"),
+      "expected the recording id to be written under one of its known TXXX names"
+    );
+  });
 });

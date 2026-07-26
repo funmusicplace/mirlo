@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import Box from "components/common/Box";
 import MarkdownContent from "components/common/MarkdownContent";
+import Modal from "components/common/Modal";
 import PlatformPercent from "components/common/PlatformPercent";
 import PurchaseModal from "components/common/Purchase/PurchaseModal";
 import { usePurchase } from "components/common/Purchase/usePurchase";
@@ -75,15 +76,19 @@ const ArtistSupportBox: React.FC<{
     );
   }, [artist, navigate, refresh, refreshLoggedInUser, reset]);
 
-  const cancelSubscription = async () => {
+  const [isConfirmingCancel, setIsConfirmingCancel] = React.useState(false);
+
+  const cancelSubscription = async (keepFollowing: boolean) => {
     try {
-      await api.delete(`artists/${subscriptionTier.artistId}/subscribe`);
+      await api.delete(`artists/${subscriptionTier.artistId}/subscribe`, {
+        keepFollowing,
+      });
       snackbar(t("subscriptionCancelled"), { type: "success" });
+      setIsConfirmingCancel(false);
       refresh();
       refreshLoggedInUser();
     } catch (e) {
       errorHandler(e);
-    } finally {
     }
   };
 
@@ -230,7 +235,7 @@ const ArtistSupportBox: React.FC<{
             )}
             {user && isSubscribedToTier && !isCancelled && (
               <ArtistButton
-                onClick={() => cancelSubscription()}
+                onClick={() => setIsConfirmingCancel(true)}
                 variant="outlined"
               >
                 {t("cancelSubscription")}
@@ -246,7 +251,7 @@ const ArtistSupportBox: React.FC<{
               <Box variant="warning" className="text-sm text-center">
                 {t("subscriptionPaymentFailed")}
                 <ArtistButton
-                  onClick={() => cancelSubscription()}
+                  onClick={() => setIsConfirmingCancel(true)}
                   variant="outlined"
                 >
                   {t("cancelSubscription")}
@@ -332,6 +337,27 @@ const ArtistSupportBox: React.FC<{
         title={t("support") ?? ""}
         buttonLabel={t("letsSupport") ?? ""}
       />
+      <Modal
+        open={isConfirmingCancel}
+        onClose={() => setIsConfirmingCancel(false)}
+        size="small"
+      >
+        <div className="flex flex-col gap-3">
+          <p>{t("cancelSubscriptionConfirm")}</p>
+          <ArtistButton
+            variant="outlined"
+            onClick={() => cancelSubscription(false)}
+          >
+            {t("unsubscribeEntirely")}
+          </ArtistButton>
+          <ArtistButton onClick={() => cancelSubscription(true)}>
+            {t("stopPaymentsKeepFollowing")}
+          </ArtistButton>
+          <ArtistButton onClick={() => setIsConfirmingCancel(false)}>
+            {t("nevermind")}
+          </ArtistButton>
+        </div>
+      </Modal>
     </div>
   );
 };

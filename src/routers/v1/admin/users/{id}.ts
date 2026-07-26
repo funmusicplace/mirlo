@@ -1,7 +1,6 @@
-import { User } from "@mirlo/prisma/client";
-
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import {
   userAuthenticated,
   userHasPermission,
@@ -66,19 +65,25 @@ export default function () {
           updatedAt: true,
           id: true,
           canCreateArtists: true,
-          emailConfirmationToken: true,
           userAvatar: true,
           artists: true,
           isLabelAccount: true,
           isAdmin: true,
           featureFlags: true,
           stripeAccountId: true,
+          emailConfirmationToken: true,
         },
       });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json({ result: user });
+      const { emailConfirmationToken, ...userWithoutToken } = user;
+      res.json({
+        result: {
+          ...userWithoutToken,
+          hasPendingEmailConfirmation: !!emailConfirmationToken,
+        },
+      });
     } catch (e) {
       next(e);
     }

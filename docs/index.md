@@ -25,7 +25,7 @@ hero:
 #     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
 
-Mirlo provides a user-friendly space to help artists sell digital music, receive financial support, manage mailing lists, and share with their supporters.
+Mirlo provides a user-friendly space to help artists sell physical and digital music, merch, receive regular financial support, manage mailing lists, and share with their supporters.
 
 ## Our mission
 

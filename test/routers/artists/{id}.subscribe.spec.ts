@@ -227,6 +227,35 @@ describe("artists/{id}/subscribe", () => {
       assert.equal(after?.stripeSubscriptionKey, "sub_paid_123");
     });
 
+    it("records keepFollowingOnCancel when the user opts to stop payments but keep following", async () => {
+      const { artist, followerUser, followerAccessToken } =
+        await createTestData();
+      const paidTier = artist.subscriptionTiers![1]; // Tier 2, minAmount 4
+
+      const subscription = await prisma.profileUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: paidTier.id,
+          userId: followerUser.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_paid_keep_following",
+        },
+      });
+
+      const response = await requestApp
+        .delete(`artists/${artist.id}/subscribe`)
+        .send({ keepFollowing: true })
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${followerAccessToken}`]);
+
+      assert.equal(response.status, 200);
+
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { id: subscription.id },
+      });
+      assert.equal(after?.keepFollowingOnCancel, true);
+      assert.equal(after?.deleteReason, "USER_CANCELLED");
+    });
+
     it("removes a free subscription immediately", async () => {
       const { artist, followerUser, followerAccessToken } =
         await createTestData();

@@ -11,6 +11,8 @@ import {
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 
+import { findUserByEmail } from "./{id}";
+
 export default function () {
   const operations = {
     GET: [userAuthenticated, userHasPermission("admin"), GET],
@@ -28,6 +30,7 @@ export default function () {
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: { createdAt: "desc" },
+        include: { user: { select: { id: true, email: true } } },
       });
       res.json({
         results: clients,
@@ -39,11 +42,12 @@ export default function () {
   }
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { applicationName, applicationUrl, allowedCorsOrigins } =
+    const { applicationName, applicationUrl, allowedCorsOrigins, userEmail } =
       req.body as {
         applicationName: string;
         applicationUrl: string;
         allowedCorsOrigins?: string[];
+        userEmail?: string;
       };
     try {
       if (!applicationName || !applicationUrl) {
@@ -53,13 +57,17 @@ export default function () {
         });
       }
 
+      const userId = await findUserByEmail(userEmail);
+
       const client = await prisma.client.create({
         data: {
           applicationName,
           applicationUrl,
           allowedCorsOrigins: allowedCorsOrigins ?? [],
           key: randomBytes(24).toString("hex"),
+          userId,
         },
+        include: { user: { select: { id: true, email: true } } },
       });
 
       invalidateClientCache();

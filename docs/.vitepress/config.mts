@@ -112,4 +112,33 @@ export default defineConfig({
       { icon: "github", link: "https://github.com/funmusicplace/mirlo" },
     ],
   },
+  locales: {
+    root: {
+      label: "English",
+      lang: "en",
+    },
+    fr: {
+      label: "Français",
+      lang: "fr",
+      title: "Mirlo",
+      description:
+        "Documentation de la plateforme open source de vente de musique et de mécénat.",
+      themeConfig: {
+        nav: [
+          { text: "Accueil", link: "/fr/" },
+          { text: "FAQ", link: "/faq" },
+          { text: "Fonctionnalités", link: "/features" },
+        ],
+        sidebar: [
+          {
+            text: "Fonctionnalités",
+            link: "/features",
+          },
+          { text: "FAQ", link: "/faq" },
+        ],
+      },
+      // dir: 'rtl' // uncomment for right-to-left languages. also see https://vitepress.dev/guide/i18n#rtl-support-experimental
+    },
+    // insert other locales above
+  },
 });

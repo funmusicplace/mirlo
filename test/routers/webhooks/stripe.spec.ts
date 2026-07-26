@@ -698,6 +698,80 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.equal(after.deleteReason, "USER_CANCELLED");
     });
 
+    it("downgrades to the free tier instead of deleting when keepFollowingOnCancel is set", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      const freeTier = await createTier(artist.id, {
+        name: "Follow",
+        isDefaultTier: true,
+      });
+      const paidTier = await createTier(artist.id, { name: "Premium" });
+
+      const subscription = await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_keep_following_123",
+          userId: subscriber.id,
+          artistSubscriptionTierId: paidTier.id,
+          amount: 500,
+          deleteReason: "USER_CANCELLED",
+          keepFollowingOnCancel: true,
+        },
+      });
+
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_keep_following_123",
+        object: "subscription",
+        cancellation_details: { reason: "cancellation_requested" },
+      } as unknown as Stripe.Subscription);
+
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { id: subscription.id },
+      });
+      assert.ok(after, "subscription should still be active, not deleted");
+      assert.equal(after?.artistSubscriptionTierId, freeTier.id);
+      assert.equal(after?.stripeSubscriptionKey, null);
+      assert.equal(after?.keepFollowingOnCancel, false);
+    });
+
+    it("still deletes on payment failure even when keepFollowingOnCancel is set", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+      });
+      const artist = await createArtist(artistUser.id);
+      await createTier(artist.id, { name: "Follow", isDefaultTier: true });
+      const paidTier = await createTier(artist.id, { name: "Premium" });
+
+      const subscription = await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_keep_following_but_failed",
+          userId: subscriber.id,
+          artistSubscriptionTierId: paidTier.id,
+          amount: 500,
+          keepFollowingOnCancel: true,
+        },
+      });
+
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_keep_following_but_failed",
+        object: "subscription",
+        cancellation_details: { reason: "payment_failed" },
+      } as unknown as Stripe.Subscription);
+
+      const [after] = await prisma.$queryRaw<
+        { deletedAt: Date | null; deleteReason: string | null }[]
+      >`SELECT "deletedAt", "deleteReason" FROM "ProfileUserSubscription" WHERE id = ${subscription.id}`;
+      assert.ok(after.deletedAt);
+      assert.equal(after.deleteReason, "PAYMENT_FAILURE");
+    });
+
     it("handles an unknown subscription key without throwing", async () => {
       // No matching row exists; the handler should simply no-op
       await stripeUtils.handleSubscriptionDeleted({

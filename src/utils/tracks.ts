@@ -150,6 +150,44 @@ const addTrackMetadataTags = (
     .filter(Boolean)
     .join("\n");
   addMetadataTag(processor, "comment", comments);
+
+  // Round-trip MusicBrainz identifiers as TXXX frames so they survive the
+  // `-map_metadata -1` wipe. ffmpeg can't emit a proper UFID frame via
+  // -metadata, so the recording id is written under both names taggers use
+  // for it (see #1864).
+  addMetadataTag(
+    processor,
+    "MusicBrainz Recording Id",
+    common.musicbrainz_recordingid
+  );
+  addMetadataTag(
+    processor,
+    "MusicBrainz Track Id",
+    common.musicbrainz_recordingid
+  );
+  addMetadataTag(
+    processor,
+    "MusicBrainz Release Track Id",
+    common.musicbrainz_trackid
+  );
+  addMetadataTag(processor, "MusicBrainz Album Id", common.musicbrainz_albumid);
+  addMetadataTag(
+    processor,
+    "MusicBrainz Artist Id",
+    common.musicbrainz_artistid
+  );
+  addMetadataTag(
+    processor,
+    "MusicBrainz Album Artist Id",
+    common.musicbrainz_albumartistid
+  );
+  addMetadataTag(
+    processor,
+    "MusicBrainz Release Group Id",
+    common.musicbrainz_releasegroupid
+  );
+  addMetadataTag(processor, "MusicBrainz Work Id", common.musicbrainz_workid);
+  addMetadataTag(processor, "MusicBrainz Disc Id", common.musicbrainz_discid);
 };
 
 const addTrackArtistRoleTags = (

@@ -65,7 +65,7 @@ export const apiKeyCheck = async (
       const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
       if (typeof apiHeader === "string" && apiHeader) {
         const clients = await prisma.client.findMany({
-          where: { key: apiHeader, deletedAt: null },
+          where: { key: apiHeader, deletedAt: null, status: "approved" },
         });
         if (clients.length === 1) {
           req.client = clients[0];
@@ -84,7 +84,7 @@ export const apiKeyCheck = async (
 
     log.info(`apiKeyCheck: Looking for client with API key: ${apiHeader}`);
     const clients = await prisma.client.findMany({
-      where: { key: apiHeader },
+      where: { key: apiHeader, deletedAt: null },
     });
     log.info(
       `apiKeyCheck: Found ${clients.length} clients with that API key: ${clients
@@ -92,7 +92,7 @@ export const apiKeyCheck = async (
         .join(", ")}`
     );
 
-    if (clients.length !== 1) {
+    if (clients.length !== 1 || clients[0].status !== "approved") {
       throw new AppError({
         httpCode: 401,
         description: "Invalid API key",

@@ -50,3 +50,46 @@ Then they will upload the JSON file to Transifex (see the README for instruction
 At that point the translations become available for translators to translate in Transifex.
 
 If you want to discuss or edit English language strings with that please edit the JSON file in the repo directly!
+
+## Translating the documentation site (docs.mirlo.space)
+
+Unlike the main Mirlo app, this documentation site is **not** wired up to Transifex — VitePress content is plain Markdown, not JSON strings, so translations here are done directly via pull request.
+
+### How it's structured
+
+VitePress's [i18n routing](https://vitepress.dev/guide/i18n) works off of top-level locale directories. English lives directly under `docs/` (the "root" locale), and every other language gets its own directory named with its [locale code](https://vitepress.dev/guide/i18n#configuring-vitepress-for-i18n), e.g. `docs/fr/` for French. Each locale directory should mirror the structure of the English docs it's translating, so `docs/faq.md` becomes `docs/fr/faq.md`, `docs/how-tos/label-accounts.md` becomes `docs/fr/how-tos/label-accounts.md`, and so on.
+
+You don't have to translate every page at once — a locale can start with just an `index.md` and grow from there. Pages that don't have a translated version yet will simply fall back to linking to the English page.
+
+### Adding a new language
+
+1. Create a directory under `docs/` named after the locale code (e.g. `docs/es/` for Spanish).
+2. Add an `index.md` in that directory, translating `docs/index.md`'s homepage content.
+3. Register the locale in `docs/.vitepress/config.mts` under the top-level `locales` key:
+
+   ```ts
+   locales: {
+     root: {
+       label: "English",
+       lang: "en",
+     },
+     fr: {
+       label: "Français",
+       lang: "fr",
+       title: "Mirlo",
+       description: "...", // translated site description
+       themeConfig: {
+         nav: [...], // translated nav, optional
+         sidebar: [...], // translated sidebar, optional
+       },
+     },
+     // add your new locale here
+   },
+   ```
+
+   The `label`/`lang` keys are required — they drive the language switcher in the site header. `title`, `description`, and a locale-specific `themeConfig` (nav, sidebar, etc.) are optional and only needed once you have translated content for them to point to.
+
+4. Translate additional pages by creating the matching file under your locale directory (same relative path as the English original), and link to them from your locale's `themeConfig.nav`/`sidebar` as they become available.
+5. Run `yarn docs:dev` locally to preview, and `yarn docs:build` to confirm the site builds before opening a PR.
+
+If you'd like to help translate the docs site into a language that doesn't have a directory yet, feel free to open a PR following the steps above, or reach out to us first on Discord or at hi@mirlo.space if you'd like guidance.

@@ -231,7 +231,8 @@ type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
 // immediately.
 export const cancelUserSubscription = async (
   subscription: CancellableSubscription,
-  userEmail: string
+  userEmail: string,
+  keepFollowing: boolean = false
 ) => {
   const artistId = subscription.artistSubscriptionTier.artistId;
 
@@ -260,9 +261,14 @@ export const cancelUserSubscription = async (
 
     // Keep the row until the processor's webhook flips `deletedAt` at period
     // end; record the reason now so the UI can show a "cancelled" state.
+    // keepFollowing tells that webhook to downgrade to the free tier instead
+    // of deleting, so the user keeps following without further billing.
     await prisma.profileUserSubscription.update({
       where: { id: subscription.id },
-      data: { deleteReason: "USER_CANCELLED" },
+      data: {
+        deleteReason: "USER_CANCELLED",
+        keepFollowingOnCancel: keepFollowing,
+      },
     });
   } else {
     // Free/follow tier: no paid period to honour, so remove it outright.
