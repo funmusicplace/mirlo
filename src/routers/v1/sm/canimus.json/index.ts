@@ -118,21 +118,20 @@ export default function () {
         },
       };
 
-      const validTrackGroups: Prisma.TrackGroupWhereInput =
-        whereForPublishedTrackGroups();
+      const validTrackGroups: Prisma.TrackGroupWhereInput = {
+        ...whereForPublishedTrackGroups(),
+        // only if they have some track
+        tracks: {
+          some: validTracks,
+        },
+      };
 
       const artists = await prisma.profile.findMany({
         where: {
           ...federatedArtist,
           // only if they have some trackGroup
           trackGroups: {
-            some: {
-              ...validTrackGroups,
-              // only if they have some track
-              tracks: {
-                some: validTracks,
-              },
-            },
+            some: validTrackGroups,
           },
         },
         skip: skipQuery ? Number(skipQuery) : undefined,
@@ -140,13 +139,7 @@ export default function () {
         orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
         include: {
           trackGroups: {
-            where: {
-              ...validTrackGroups,
-              // only if they have some track
-              tracks: {
-                some: validTracks,
-              },
-            },
+            where: validTrackGroups,
             include: {
               cover: true,
               tracks: {
