@@ -37,7 +37,6 @@ interface SettingsFromAPI {
   bucketNames?: { prefix: string } | null;
   settings: {
     platformPercent: number;
-    instanceArtistId: number;
     instanceCustomization?: {
       colors?: {
         button?: string;

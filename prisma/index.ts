@@ -50,6 +50,8 @@ declare global {
           body?: string;
         };
       };
+      featuredArtistIds?: number[];
+      cloudflareTurnstileSecret?: string;
     };
     type Properties = {
       colors?: {

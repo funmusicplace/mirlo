@@ -54,7 +54,6 @@ function makeSettings(overrides: object = {}) {
       defconLevel: 0,
       settings: {
         platformPercent: 10,
-        instanceArtistId: 1,
         instanceCustomization: {
           colors: {
             button: "#be3455",

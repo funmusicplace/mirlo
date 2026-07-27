@@ -102,10 +102,7 @@ const assertPreservedKeys = (
   label: string,
   options?: { omit?: string[] }
 ) => {
-  const omit = new Set([
-    ...DEFAULT_OMITTED_FIELDS,
-    ...(options?.omit ?? []),
-  ]);
+  const omit = new Set([...DEFAULT_OMITTED_FIELDS, ...(options?.omit ?? [])]);
   const missing: string[] = [];
 
   const walk = (inVal: unknown, outVal: unknown, path: string) => {
@@ -132,7 +129,9 @@ const assertPreservedKeys = (
       const childPath = path ? `${path}.${outKey}` : outKey;
       if (!(outKey in outVal)) {
         missing.push(
-          outKey === key ? childPath : `${path ? `${path}.` : ""}${key} → ${outKey}`
+          outKey === key
+            ? childPath
+            : `${path ? `${path}.` : ""}${key} → ${outKey}`
         );
         continue;
       }
