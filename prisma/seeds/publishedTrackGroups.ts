@@ -25,6 +25,11 @@ const NOISE_DURATION_SECS = 20;
 const TRACKS_PER_ALBUM = 3;
 const ALBUMS_PER_ARTIST = 5;
 
+type NoiseType = (typeof NOISE_TYPES)[number];
+
+/** ffmpeg once per noise type; uploads reuse files from disk to avoid OOM. */
+const noiseFileCache = new Map<NoiseType, string>();
+
 const ARTIST_SLUGS = [
   "blackbird",
   "robin",
@@ -100,13 +105,15 @@ export async function generateAndUploadImage(
   sizes: number[]
 ): Promise<{ id: string; urls: string[] }> {
   const id = randomUUID();
-  const baseSize = 1500;
+  // Seed covers don't need full 1500px; smaller base cuts sharp peak memory hard.
+  const baseSize = 600;
+  const seedSizes = sizes.filter((s) => s <= baseSize);
 
   const rawBuf = generateGlitchNoiseBuffer(baseSize, baseSize);
   const baseWebp = await sharp(rawBuf, {
     raw: { width: baseSize, height: baseSize, channels: 3 },
   })
-    .webp({ quality: 80 })
+    .webp({ quality: 70 })
     .toBuffer();
 
   await minioClient.putObject(
@@ -115,39 +122,39 @@ export async function generateAndUploadImage(
     baseWebp
   );
 
-  const sizeUrls = await Promise.all(
-    sizes.map(async (size) => {
-      const resized = await sharp(baseWebp)
-        .resize(size, size, { fit: "inside", withoutEnlargement: true })
-        .webp({ quality: 80 })
-        .toBuffer();
-      await minioClient.putObject(
-        IMAGES_BUCKET,
-        `${prefix}/${id}-x${size}.webp`,
-        resized
-      );
-      return `${id}-x${size}`;
-    })
-  );
+  // Sequential resizes — parallel sharp pipelines spike memory enough to
+  // get the seed process SIGKILL'd under Docker/cgroup limits.
+  const sizeUrls: string[] = [];
+  for (const size of seedSizes) {
+    const resized = await sharp(baseWebp)
+      .resize(size, size, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 70 })
+      .toBuffer();
+    await minioClient.putObject(
+      IMAGES_BUCKET,
+      `${prefix}/${id}-x${size}.webp`,
+      resized
+    );
+    sizeUrls.push(`${id}-x${size}`);
+  }
 
   return { id, urls: [`${id}-original`, ...sizeUrls] };
 }
 
 // ─── Audio ───────────────────────────────────────────────────────────────────
 
-async function generateAndUploadAudio(
-  minioClient: Minio.Client,
-  noiseType: (typeof NOISE_TYPES)[number]
-): Promise<{ audioId: string; duration: number } | null> {
-  const audioId = randomUUID();
-  const tmpDir = path.join(os.tmpdir(), `mirlo-seed-${audioId}`);
+async function ensureNoiseFiles(noiseType: NoiseType): Promise<string | null> {
+  const cached = noiseFileCache.get(noiseType);
+  if (cached) return cached;
 
+  const tmpDir = path.join(os.tmpdir(), `mirlo-seed-noise-${noiseType}`);
   try {
+    await fsPromises.rm(tmpDir, { recursive: true, force: true });
     await fsPromises.mkdir(tmpDir, { recursive: true });
 
     await new Promise<void>((resolve, reject) => {
       ffmpeg()
-        .input(`anoisesrc=d=${NOISE_DURATION_SECS}:c=${noiseType}:r=48000`)
+        .input(`anoisesrc=d=${NOISE_DURATION_SECS}:c=${noiseType}:r=44100`)
         .inputFormat("lavfi")
         .noVideo()
         .outputOptions([
@@ -163,22 +170,40 @@ async function generateAndUploadAudio(
           "hls",
         ])
         .audioChannels(2)
-        .audioBitrate("320k")
-        .audioFrequency(48000)
+        .audioBitrate("128k")
+        .audioFrequency(44100)
         .audioCodec("libmp3lame")
         .on("end", () => resolve())
         .on("error", (err: Error) => reject(err))
         .save(path.join(tmpDir, "playlist.m3u8"));
     });
 
-    const files = await fsPromises.readdir(tmpDir);
-    await Promise.all(
-      files.map(async (file) => {
-        const buffer = await fsPromises.readFile(path.join(tmpDir, file));
-        await minioClient.putObject(AUDIO_BUCKET, `${audioId}/${file}`, buffer);
-      })
+    noiseFileCache.set(noiseType, tmpDir);
+    return tmpDir;
+  } catch (err) {
+    await fsPromises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+    console.warn(
+      `  ⚠ Audio generation failed (${noiseType} noise):`,
+      err instanceof Error ? err.message : err
     );
+    return null;
+  }
+}
 
+async function uploadCachedAudio(
+  minioClient: Minio.Client,
+  noiseType: NoiseType
+): Promise<{ audioId: string; duration: number } | null> {
+  const tmpDir = await ensureNoiseFiles(noiseType);
+  if (!tmpDir) return null;
+
+  const audioId = randomUUID();
+  try {
+    const files = await fsPromises.readdir(tmpDir);
+    for (const file of files) {
+      const buffer = await fsPromises.readFile(path.join(tmpDir, file));
+      await minioClient.putObject(AUDIO_BUCKET, `${audioId}/${file}`, buffer);
+    }
     return { audioId, duration: NOISE_DURATION_SECS };
   } catch (err) {
     console.warn(
@@ -186,11 +211,14 @@ async function generateAndUploadAudio(
       err instanceof Error ? err.message : err
     );
     return null;
-  } finally {
-    await fsPromises
-      .rm(tmpDir, { recursive: true, force: true })
-      .catch(() => {});
   }
+}
+
+async function cleanupNoiseFileCache() {
+  for (const tmpDir of noiseFileCache.values()) {
+    await fsPromises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  }
+  noiseFileCache.clear();
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -240,6 +268,16 @@ export async function seedPublishedTrackGroups() {
     return;
   }
 
+  try {
+    await seedPublishedTrackGroupsInner(artists);
+  } finally {
+    await cleanupNoiseFileCache();
+  }
+}
+
+async function seedPublishedTrackGroupsInner(
+  artists: { id: number; name: string }[]
+) {
   const minioClient = createMinioClient();
   if (!minioClient) {
     console.log("MINIO_HOST not set — covers and audio will be skipped");
@@ -372,7 +410,7 @@ export async function seedPublishedTrackGroups() {
           });
 
           if (minioClient) {
-            const audio = await generateAndUploadAudio(minioClient, noiseType);
+            const audio = await uploadCachedAudio(minioClient, noiseType);
             if (audio) {
               await prisma.trackAudio.create({
                 data: {
