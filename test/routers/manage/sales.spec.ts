@@ -381,5 +381,28 @@ describe("manage/sales", () => {
       assert.equal(labelResponse.statusCode, 200);
       assert.equal(labelResponse.body.results.length, 0);
     });
+
+    it("should not return another artist's sales via artistIds", async () => {
+      const owner = await createUser({ email: "owner@test.com" });
+      const attacker = await createUser({ email: "attacker@test.com" });
+      const buyer = await createUser({ email: "buyer@test.com" });
+
+      const artist = await createArtist(owner.user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      await createUserTrackGroupPurchase(buyer.user.id, trackGroup.id, {
+        amount: 2500,
+      });
+
+      const response = await requestApp
+        .get(`manage/sales?artistIds=${artist.id}`)
+        .set("Cookie", [`jwt=${attacker.accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 0);
+      assert.equal(response.body.total, 0);
+      assert.equal(response.body.totalAmount, 0);
+    });
   });
 });

@@ -138,6 +138,47 @@ export const whereForAllArtistsThisLabelCanEdit = (
   ],
 });
 
+/**
+ * Artist IDs for manage purchases/sales scoping.
+ *
+ * - No `requestedArtistIds`: owned artists only (`userId`) — matches historical
+ *   default list behavior.
+ * - With `requestedArtistIds`: intersect with artists the user owns or can
+ *   manage as a label (never expands to artists they cannot manage).
+ */
+export const resolveManagedArtistIds = async (
+  userId: number,
+  requestedArtistIds?: string | string[] | number[]
+): Promise<number[]> => {
+  let requested: number[] | undefined;
+  if (requestedArtistIds !== undefined) {
+    const raw =
+      typeof requestedArtistIds === "string"
+        ? requestedArtistIds.split(",")
+        : requestedArtistIds;
+    requested = raw.map((a) => Number(a)).filter((n) => Number.isFinite(n));
+  }
+
+  const managed = await prisma.profile.findMany({
+    where: {
+      ...(requested !== undefined
+        ? whereForAllArtistsThisLabelCanEdit(userId)
+        : { userId }),
+      ...(requested !== undefined ? { id: { in: requested } } : {}),
+    },
+    select: { id: true },
+  });
+
+  return managed.map((a) => a.id);
+};
+
+/** Buyer fields safe to return on manage purchase/fulfillment endpoints. */
+export const buyerUserSelect = {
+  id: true,
+  name: true,
+  email: true,
+} as const;
+
 export const whereForAllArtistsThisLabelCanAddReleasesFor = (
   userId: number
 ): Prisma.ProfileWhereInput => ({

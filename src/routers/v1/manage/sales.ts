@@ -1,8 +1,8 @@
-import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../auth/passport";
+import { resolveManagedArtistIds } from "../../../utils/artist";
 import { getDateRange } from "../../../utils/dateRange";
 import { downloadCSVFile } from "../../../utils/download";
 import { findSales } from "../artists/{id}/supporters";
@@ -35,20 +35,12 @@ export default function () {
       // When the caller hasn't narrowed to a specific artist, "my sales" means
       // sales of artists I own AND sales routed to me as a release's payee
       // (e.g. a label). When they filter to a specific artist, show only that
-      // artist's sales.
+      // artist's sales — and only if they own or can manage that artist.
       const usingDefaultScope = !artistIds;
-      if (!artistIds) {
-        artistIds = (
-          await prisma.profile.findMany({
-            where: {
-              userId: user.id,
-            },
-          })
-        ).map((a) => a.id);
-      } else if (typeof artistIds === "string") {
-        // If artistIds is a string, split it into an array
-        artistIds = artistIds.split(",");
-      }
+      const managedArtistIds = await resolveManagedArtistIds(
+        user.id,
+        artistIds
+      );
 
       if (typeof trackGroupIds === "string") {
         // If trackGroupIds is a string, split it into an array
@@ -65,7 +57,7 @@ export default function () {
       }
 
       const results = await findSales({
-        artistId: artistIds.map((a) => Number(a)),
+        artistId: managedArtistIds,
         sinceDate,
         untilDate,
         filters: trackGroupIds

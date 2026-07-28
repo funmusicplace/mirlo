@@ -6,6 +6,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
+import { buyerUserSelect } from "../../../../../utils/artist";
 
 type Params = {
   purchaseId: string;
@@ -95,7 +96,7 @@ export default function () {
               profile: { omit: { apPrivateKey: true } },
             },
           },
-          user: true,
+          user: { select: buyerUserSelect },
         },
       });
 
