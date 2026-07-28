@@ -3,13 +3,14 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
+import { Prisma } from "@mirlo/prisma/client";
+import {
+  buyerUserSelect,
+  resolveManagedArtistIds,
+} from "../../../../utils/artist";
 import { getDateRange } from "../../../../utils/dateRange";
 import { downloadCSVFile } from "../../../../utils/download";
 import { serializeMerchPurchase } from "../../../../serializers/merchPurchase";
-
-type Params = {
-  merchId: string;
-};
 
 export default function () {
   const operations = {
@@ -31,21 +32,11 @@ export default function () {
       datePurchased?: string;
     };
 
-    let profileIds: string | string[] | number[] | undefined = artistIds;
-
     try {
-      if (!profileIds) {
-        profileIds = (
-          await prisma.profile.findMany({
-            where: {
-              userId: user.id,
-            },
-          })
-        ).map((a) => a.id);
-      } else if (typeof profileIds === "string") {
-        // If profileIds is a string, split it into an array
-        profileIds = profileIds.split(",");
-      }
+      const managedArtistIds = await resolveManagedArtistIds(
+        user.id,
+        artistIds
+      );
 
       let sinceDate: string | undefined;
       let untilDate: string | undefined;
@@ -56,8 +47,8 @@ export default function () {
         untilDate = dateRange.lt;
       }
 
-      const whereClause: any = {
-        merch: { profile: { id: { in: profileIds.map((a) => Number(a)) } } },
+      const whereClause: Prisma.MerchPurchaseWhereInput = {
+        merch: { profile: { id: { in: managedArtistIds } } },
       };
 
       if (sinceDate && untilDate) {
@@ -85,7 +76,7 @@ export default function () {
             },
           },
           transaction: true,
-          user: true,
+          user: { select: buyerUserSelect },
         },
         orderBy: {
           createdAt: "desc",
