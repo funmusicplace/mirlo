@@ -308,6 +308,16 @@ processor Stripe first.
 
 :::
 
+## Interoperability
+
+::: How do I connect my Mirlo profile to FairPlayer for federated streaming?
+
+ If you head over to your profile settings (bottom left corner) and scroll down the page until you reach the section under "Default platform cut", you should see three toggle buttons. Toggle the middle button for "Enable federated streaming" and your Mirlo catalogue will then appear in FairPlayer! Kindly note: this usually takes an hour to appear in FairPlayer or so though occasionally, it has taken up to 24 hours when other maintenance is occurring.
+
+ ::: Do you have plans to work with other services?
+
+ Yes, we are collaborating with other devs in order to create a better experience for listeners and musicians. For instance, we are looking into a scenario where an artist catalogue uploaded to one service will appear in the others' search, to bring together more of the independent ecosystem. However, we do rely on the goodwill of our community to realise these ambitions. If you are able to, you can support us [here](https://mirlo.space/team/connect).
+
 ## Other questions
 
 ::: details Have you heard /project x/?
