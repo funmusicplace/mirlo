@@ -44,13 +44,11 @@ ALTER INDEX "ProfileBackground_artistId_key" RENAME TO "ProfileBackground_profil
 ALTER INDEX "ProfileLocationTag_artistId_locationTagId_key" RENAME TO "ProfileLocationTag_profileId_locationTagId_key";
 ALTER INDEX "ProfileUserSubscription_userId_artistSubscriptionTierId_key" RENAME TO "ProfileUserSubscription_userId_profileSubscriptionTierId_key";
 ALTER INDEX "ProfileUserSubscriptionConfirmation_email_artistId_key" RENAME TO "ProfileUserSubscriptionConfirmation_email_profileId_key";
--- Some environments never had TrackGroup_artistId_urlSlug_key (or it was
--- dropped outside migrations). Rename when present; otherwise create.
+-- Some environments lack this unique index (e.g. duplicate (artistId, urlSlug)
+-- rows). Only rename when present; do not CREATE — that can fail with 23505.
 DO $$
 BEGIN
   IF to_regclass('"TrackGroup_artistId_urlSlug_key"') IS NOT NULL THEN
     ALTER INDEX "TrackGroup_artistId_urlSlug_key" RENAME TO "TrackGroup_profileId_urlSlug_key";
-  ELSIF to_regclass('"TrackGroup_profileId_urlSlug_key"') IS NULL THEN
-    CREATE UNIQUE INDEX "TrackGroup_profileId_urlSlug_key" ON "TrackGroup"("profileId", "urlSlug");
   END IF;
 END $$;
