@@ -318,7 +318,7 @@ processor Stripe first.
 
  ::: Do you have plans to work with other services?
 
- Yes, we are collaborating with other devs in order to create a better experience for listeners and musicians. For instance, we are looking into a scenario where an artist catalogue uploaded to one service will appear in the others' search, to bring together more of the independent ecosystem. However, we do rely on the goodwill of our community to realise these ambitions. If you are able to, you can support us [here](https://mirlo.space/team/connect).
+ Yes, we are collaborating with other devs (including [FairPlayer](https://fairplayer.org/about-us/)) in order to create a better experience for listeners and musicians. For instance, we are looking into a scenario where an artist catalogue uploaded to one service will appear in the others' search, to bring together more of the independent ecosystem. However, we do rely on the goodwill of our community to realise these ambitions. If you are able to, you can support us [here](https://mirlo.space/team/connect).
 
 ## Other questions
 
