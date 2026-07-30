@@ -225,6 +225,26 @@ You can limit the amount of times a listener can listen to the entire song thoug
 
 Currently we don't make a dashboard available to track stats on plays of your music. This is sort of by design and we're contemplating how we'll do this going forward. We're not an anti-stats household but we're a "which stats when and where" household. If you have ideas about this please give us a shout at [hi@mirlo.space](mailto:hi@mirlo.space).
 
+## The Social Web
+
+::: details How do I make my music available for social/federated streaming?
+
+Simply go to your artist profile, click "Profile settings" in the bottom left, and toggle "Enable federated streaming."
+
+:::
+
+::: details How do I make my artist profile visible on the Social Web / Fediverse
+
+Simply go to your artist profile, click "Profile settings" in the bottom left, and toggle "Enable the Social Web."
+
+:::
+
+::: details If I toggle Social Web features for my label, will it be enabled for all my label's artists?
+
+No, each artist profile has to have social web features enabled individually. We might streamline this in the future if there's demand and we have capacity.
+
+:::
+
 ## Technical details
 
 ::: details Are you open source?
