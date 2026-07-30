@@ -84,7 +84,9 @@ const PurchaseAlbumModal: React.FC<{
           ? "font-size: 0.65rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important;"
           : isLongLabel
             ? "font-size: 0.875rem !important; padding-left: 1rem !important; padding-right: 1rem !important;"
-            : "padding-left: 2rem !important; padding-right: 2rem !important;"}
+            : compact
+              ? "padding-left: 0.5rem !important; padding-right: 0.5rem !important;"
+              : "padding-left: 2rem !important; padding-right: 2rem !important;"}
 
         @media screen and (max-width: ${bp.medium}px) {
           width: 100%;
