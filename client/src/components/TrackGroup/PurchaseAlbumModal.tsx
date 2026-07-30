@@ -88,18 +88,29 @@ const PurchaseAlbumModal: React.FC<{
               ? "padding-left: 0.5rem !important; padding-right: 0.5rem !important;"
               : "padding-left: 2rem !important; padding-right: 2rem !important;"}
 
-        @media screen and (max-width: ${bp.medium}px) {
-          width: 100%;
-
+        ${compact
+          ? `
           .children {
-            white-space: normal;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
             overflow: hidden;
-            line-height: 1.1;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
           }
-        }
+        `
+          : `
+          @media screen and (max-width: ${bp.medium}px) {
+            width: 100%;
+
+            .children {
+              white-space: normal;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              line-height: 1.1;
+            }
+          }
+        `}
       `}
     >
       {t(preOrderOrBuyText)}
