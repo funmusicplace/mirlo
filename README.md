@@ -82,7 +82,9 @@ docker exec -it blackbird-api yarn ts-node src/jobs/queue-worker.ts run
 
 > NOTE: this is done automatically by the `blackbird-background` container in docker.
 
-> NOTE: In local development you can see the worker queue at /admin/queues on the server
+> NOTE: In local development you can see the worker queue at `/admin/queues`
+> on the API server when logged in as an admin. In production, also enable the
+> "show queue dashboard" admin setting.
 
 ### Running migrations
 
