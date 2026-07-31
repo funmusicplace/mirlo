@@ -15,7 +15,11 @@ import { isValidActivityPubEndpoint } from "./activityPub/utils";
 import apiApp from "./api";
 import "./auth/passport";
 import { corsMiddleware } from "./auth/cors";
-import { userLoggedInWithoutRedirect } from "./auth/passport";
+import {
+  userAuthenticated,
+  userHasPermission,
+  userLoggedInWithoutRedirect,
+} from "./auth/passport";
 import logger from "./logger";
 import parseIndex from "./parseIndex";
 import { imageQueue } from "./queues/processImages";
@@ -37,6 +41,17 @@ import wellKnown from "./wellKnown";
 
 const { createBullBoard } = require("@bull-board/api");
 const { BullMQAdapter } = require("@bull-board/api/bullMQAdapter");
+
+const queueDashboardAdapter = new ExpressAdapter();
+queueDashboardAdapter.setBasePath("/admin/queues");
+createBullBoard({
+  queues: [
+    new BullMQAdapter(imageQueue),
+    new BullMQAdapter(audioQueue),
+    new BullMQAdapter(sendMailQueue),
+  ],
+  serverAdapter: queueDashboardAdapter,
+});
 
 dotenv.config();
 
@@ -124,26 +139,23 @@ app.use(express.static("public", { maxAge: "1y", immutable: true }));
 // serveStatic reads the rest of the path itself.
 app.use("/images/:bucket", serveStatic);
 
-app.use("/admin/queues", async (req, res) => {
-  const settings = await getSiteSettings();
-  if (isDev || settings.showQueueDashboard) {
-    const serverAdapter = new ExpressAdapter();
-    createBullBoard({
-      queues: [
-        new BullMQAdapter(imageQueue),
-        new BullMQAdapter(audioQueue),
-        new BullMQAdapter(sendMailQueue),
-      ],
-      serverAdapter: serverAdapter,
-    });
-    serverAdapter.setBasePath("/admin/queues");
-    await serverAdapter.getRouter()(req, res);
-  } else {
-    res.status(404);
-  }
-});
-
-// Setting up a bull worker dashboard
+// Bull Board can mutate queues (retry/clean/pause). Require an admin session
+// in addition to the showQueueDashboard setting so enabling the board is not
+// a public unauthenticated surface.
+app.use(
+  "/admin/queues",
+  userAuthenticated,
+  userHasPermission("admin"),
+  async (req, res, next) => {
+    const settings = await getSiteSettings();
+    if (!(isDev || settings.showQueueDashboard)) {
+      res.status(404).end();
+      return;
+    }
+    next();
+  },
+  queueDashboardAdapter.getRouter()
+);
 
 app.use(wellKnown);
 
