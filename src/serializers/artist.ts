@@ -68,7 +68,7 @@ export interface LocalArtist extends Profile {
   } | null;
 }
 
-export const processSingleArtist = <T extends LocalArtist>(
+export const processSingleProfile = <T extends LocalArtist>(
   artist: T,
   userId?: number,
   isUserSubscriber?: boolean
@@ -159,7 +159,7 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
   }));
   const artistSupportsPayment = Boolean(
     resolvePayee({
-      artist: { user: artist.user, paymentToUser: artist.paymentToUser },
+      profile: { user: artist.user, paymentToUser: artist.paymentToUser },
     })?.stripeAccountId
   );
   if (artistSupportsPayment) {
@@ -215,3 +215,9 @@ export const serializeSingleDeletedArtistIntoCanimus = (
   };
   return deletedArtist;
 };
+
+/**
+ * Artist-named alias kept so callers can migrate to the profile naming a
+ * domain at a time. Removed once nothing imports it.
+ */
+export const processSingleArtist = processSingleProfile;
