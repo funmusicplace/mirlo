@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import { processSingleTrack } from "../../../../serializers/track";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
@@ -15,11 +15,11 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const labelProfileId = await findProfileIdForURLSlug(id);
 
       const labelProfile = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: labelProfileId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },

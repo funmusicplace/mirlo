@@ -260,8 +260,8 @@ export const processUserBanner = (ctx: APIContext) => {
   };
 };
 
-export const processArtistAvatar = (ctx: APIContext) => {
-  return async (artistId: number) => {
+export const processProfileAvatar = (ctx: APIContext) => {
+  return async (profileId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
       "artistAvatar",
@@ -272,14 +272,14 @@ export const processArtistAvatar = (ctx: APIContext) => {
         return prisma.profileAvatar.upsert({
           create: {
             originalFilename: fileInfo.filename,
-            profileId: artistId,
+            profileId: profileId,
           },
           update: {
             originalFilename: fileInfo.filename,
             deletedAt: null,
           },
           where: {
-            profileId: artistId,
+            profileId: profileId,
           },
         });
       }
@@ -287,8 +287,8 @@ export const processArtistAvatar = (ctx: APIContext) => {
   };
 };
 
-export const processArtistBackground = (ctx: APIContext) => {
-  return async (artistId: number) => {
+export const processProfileBackground = (ctx: APIContext) => {
+  return async (profileId: number) => {
     return uploadAndSendToImageQueue(
       ctx,
       "artistBackground",
@@ -298,14 +298,14 @@ export const processArtistBackground = (ctx: APIContext) => {
         return prisma.profileBackground.upsert({
           create: {
             originalFilename: fileInfo.filename,
-            profileId: artistId,
+            profileId: profileId,
           },
           update: {
             originalFilename: fileInfo.filename,
             deletedAt: null,
           },
           where: {
-            profileId: artistId,
+            profileId: profileId,
           },
         });
       }

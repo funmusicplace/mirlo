@@ -2,7 +2,7 @@ import assert from "node:assert";
 
 import { describe, it } from "mocha";
 
-import { processSingleArtist } from "../src/serializers/artist";
+import { processSingleProfile } from "../src/serializers/artist";
 import {
   renameProfileIdToArtistId,
   omitApPrivateKey,
@@ -538,7 +538,7 @@ describe("outbound serializers", () => {
     });
   });
 
-  describe("processSingleArtist", () => {
+  describe("processSingleProfile", () => {
     it("deeply serializes labels, posts, merch, trackGroups and tiers", () => {
       const input = {
         ...artistFixture(4),
@@ -578,8 +578,8 @@ describe("outbound serializers", () => {
           },
         ] as never,
       };
-      const artist = processSingleArtist(
-        input as unknown as Parameters<typeof processSingleArtist>[0],
+      const artist = processSingleProfile(
+        input as unknown as Parameters<typeof processSingleProfile>[0],
         100
       );
 
@@ -588,8 +588,8 @@ describe("outbound serializers", () => {
       const labelUser = labels[0].labelUser as Record<string, unknown>;
       assert.equal("profiles" in labelUser, false);
       assert.equal((labelUser.artists as unknown[]).length, 1);
-      assertPreservedKeys(input, artist, "processSingleArtist");
-      assertNoLeaks(artist, "processSingleArtist");
+      assertPreservedKeys(input, artist, "processSingleProfile");
+      assertNoLeaks(artist, "processSingleProfile");
     });
   });
 

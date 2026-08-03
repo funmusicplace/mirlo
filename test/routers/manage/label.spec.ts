@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it, beforeEach } from "mocha";
 
 import prisma from "@mirlo/prisma";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("manage/label", () => {
@@ -23,18 +23,18 @@ describe("manage/label", () => {
         email: "manage-label@example.com",
       });
 
-      const { user: liveArtistUser } = await createUser({
+      const { user: liveProfileUser } = await createUser({
         email: "live-roster-artist@example.com",
       });
-      const liveArtist = await createArtist(liveArtistUser.id, {
+      const liveProfile = await createProfile(liveProfileUser.id, {
         name: "Live Roster Artist",
         urlSlug: "live-roster-artist",
       });
 
-      const { user: deletedArtistUser } = await createUser({
+      const { user: deletedProfileUser } = await createUser({
         email: "deleted-roster-artist@example.com",
       });
-      const deletedArtist = await createArtist(deletedArtistUser.id, {
+      const deletedProfile = await createProfile(deletedProfileUser.id, {
         name: "Deleted Roster Artist",
         urlSlug: "deleted-roster-artist",
       });
@@ -43,13 +43,13 @@ describe("manage/label", () => {
         data: [
           {
             labelUserId: labelUser.id,
-            artistId: liveArtist.id,
+            artistId: liveProfile.id,
             isLabelApproved: true,
             isArtistApproved: true,
           },
           {
             labelUserId: labelUser.id,
-            artistId: deletedArtist.id,
+            artistId: deletedProfile.id,
             isLabelApproved: true,
             isArtistApproved: true,
           },
@@ -57,7 +57,7 @@ describe("manage/label", () => {
       });
 
       await prisma.profile.update({
-        where: { id: deletedArtist.id },
+        where: { id: deletedProfile.id },
         data: { deletedAt: new Date() },
       });
 
@@ -71,7 +71,7 @@ describe("manage/label", () => {
         (r: { artist: { id: number } }) => r.artist.id
       );
       assert.equal(ids.length, 1);
-      assert.equal(ids[0], liveArtist.id);
+      assert.equal(ids[0], liveProfile.id);
     });
 
     it("returns roster artists in orderIndex order, NULLs last", async () => {
@@ -82,15 +82,15 @@ describe("manage/label", () => {
       const { user: aUser } = await createUser({
         email: "a-artist@example.com",
       });
-      const a = await createArtist(aUser.id, { name: "A", urlSlug: "a" });
+      const a = await createProfile(aUser.id, { name: "A", urlSlug: "a" });
       const { user: bUser } = await createUser({
         email: "b-artist@example.com",
       });
-      const b = await createArtist(bUser.id, { name: "B", urlSlug: "b" });
+      const b = await createProfile(bUser.id, { name: "B", urlSlug: "b" });
       const { user: cUser } = await createUser({
         email: "c-artist@example.com",
       });
-      const c = await createArtist(cUser.id, { name: "C", urlSlug: "c" });
+      const c = await createProfile(cUser.id, { name: "C", urlSlug: "c" });
 
       // c is ordered first, a is second, b is unordered (orderIndex null)
       await prisma.artistLabel.createMany({
@@ -140,14 +140,14 @@ describe("manage/label", () => {
       const { user: aUser } = await createUser({
         email: "reorder-a@example.com",
       });
-      const a = await createArtist(aUser.id, {
+      const a = await createProfile(aUser.id, {
         name: "Reorder A",
         urlSlug: "reorder-a",
       });
       const { user: bUser } = await createUser({
         email: "reorder-b@example.com",
       });
-      const b = await createArtist(bUser.id, {
+      const b = await createProfile(bUser.id, {
         name: "Reorder B",
         urlSlug: "reorder-b",
       });
@@ -195,10 +195,10 @@ describe("manage/label", () => {
         email: "other-label@example.com",
       });
 
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "shared-artist@example.com",
       });
-      const sharedArtist = await createArtist(artistUser.id, {
+      const sharedProfile = await createProfile(profileOwner.id, {
         name: "Shared",
         urlSlug: "shared",
       });
@@ -206,7 +206,7 @@ describe("manage/label", () => {
       await prisma.artistLabel.create({
         data: {
           labelUserId: otherLabelUser.id,
-          artistId: sharedArtist.id,
+          artistId: sharedProfile.id,
           isLabelApproved: true,
           isArtistApproved: true,
           orderIndex: 7,
@@ -215,14 +215,14 @@ describe("manage/label", () => {
 
       const response = await requestApp
         .put("manage/label/artistOrder")
-        .send({ artistIds: [sharedArtist.id] })
+        .send({ artistIds: [sharedProfile.id] })
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
       assert.equal(response.status, 200);
 
       const otherLabelRow = await prisma.artistLabel.findFirst({
-        where: { labelUserId: otherLabelUser.id, artistId: sharedArtist.id },
+        where: { labelUserId: otherLabelUser.id, artistId: sharedProfile.id },
       });
       assert.equal(otherLabelRow?.orderIndex, 7);
     });

@@ -10,7 +10,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createSiteSettings,
   createUser,
 } from "./utils";
@@ -267,7 +267,7 @@ describe("settings JSON behavioral readers/writers", () => {
 
   it("reads and resolves instanceArtist via the canonical instanceCustomization.artistId key", async () => {
     const { user } = await createUser({ email: "artist@example.com" });
-    const artist = await createArtist(user.id, {
+    const artist = await createProfile(user.id, {
       name: "Instance Artist",
       urlSlug: "instance-artist",
     });
@@ -300,7 +300,7 @@ describe("settings JSON behavioral readers/writers", () => {
       isAdmin: true,
     });
     const { user } = await createUser({ email: "artist@example.com" });
-    const artist = await createArtist(user.id, {
+    const artist = await createProfile(user.id, {
       name: "Instance Artist",
       urlSlug: "instance-artist",
     });

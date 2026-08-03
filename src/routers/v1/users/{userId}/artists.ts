@@ -5,7 +5,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { processSingleArtist } from "../../../../serializers/artist";
+import { processSingleProfile } from "../../../../serializers/artist";
 
 type Params = {
   userId: string;
@@ -19,7 +19,7 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
 
-    const artists = await prisma.profile.findMany({
+    const profiles = await prisma.profile.findMany({
       where: {
         userId: Number(userId),
         deletedAt: null,
@@ -39,8 +39,8 @@ export default function () {
     });
 
     res.json({
-      results: artists.map((a) =>
-        processSingleArtist(a as Parameters<typeof processSingleArtist>[0])
+      results: profiles.map((a) =>
+        processSingleProfile(a as Parameters<typeof processSingleProfile>[0])
       ),
     });
   }

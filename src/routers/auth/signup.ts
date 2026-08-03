@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import logger from "../../logger";
-import { subscribeUserToArtist } from "../../utils/artist";
+import { subscribeUserToProfile } from "../../utils/artist";
 import { AppError } from "../../utils/error";
 import { getSiteSettings } from "../../utils/settings";
 
@@ -149,7 +149,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
             Number(settings.settings.instanceCustomization.artistId)
           )
         ) {
-          const artist = await prisma.profile.findFirst({
+          const profile = await prisma.profile.findFirst({
             where: {
               id:
                 Number(settings.settings.instanceCustomization.artistId) || -1,
@@ -159,8 +159,8 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
               subscriptionTiers: true,
             },
           });
-          if (artist) {
-            await subscribeUserToArtist(artist, result);
+          if (profile) {
+            await subscribeUserToProfile(profile, result);
           }
         }
       }

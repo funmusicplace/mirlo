@@ -12,12 +12,12 @@ export default function () {
   async function PUT(req: Request, res: Response, next: NextFunction) {
     assertLoggedIn(req);
     const user = req.user;
-    const { artistIds } = req.body as { artistIds?: unknown };
+    const { artistIds: artistProfileIds } = req.body as { artistIds?: unknown };
 
     try {
       if (
-        !Array.isArray(artistIds) ||
-        artistIds.some((id) => !Number.isFinite(Number(id)))
+        !Array.isArray(artistProfileIds) ||
+        artistProfileIds.some((id) => !Number.isFinite(Number(id)))
       ) {
         res
           .status(400)
@@ -26,11 +26,11 @@ export default function () {
       }
 
       await prisma.$transaction(
-        artistIds.map((artistId, idx) =>
+        artistProfileIds.map((artistProfileId, idx) =>
           prisma.artistLabel.updateMany({
             where: {
               labelUserId: user.id,
-              artistId: Number(artistId),
+              artistId: Number(artistProfileId),
             },
             data: { orderIndex: idx + 1 },
           })

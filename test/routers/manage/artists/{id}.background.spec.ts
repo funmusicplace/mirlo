@@ -3,7 +3,7 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import { clearTables, createArtist, createUser } from "../../../utils";
+import { clearTables, createProfile, createUser } from "../../../utils";
 import prisma from "@mirlo/prisma";
 import {
   createBucketIfNotExists,
@@ -24,22 +24,22 @@ describe("manage/artists/{artistId}/background", () => {
   describe("DELETE", () => {
     it("should DELETE with one artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       await createBucketIfNotExists(finalArtistBackgroundBucket);
 
       await prisma.profileBackground.create({
         data: {
-          profileId: artist.id,
+          profileId: profile.id,
         },
       });
 
       const response = await requestApp
-        .delete(`manage/artists/${artist.id}/background`)
+        .delete(`manage/artists/${profile.id}/background`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
       const foundOld = await prisma.profileBackground.findFirst({
-        where: { profileId: artist.id },
+        where: { profileId: profile.id },
       });
 
       assert.equal(response.statusCode, 200);

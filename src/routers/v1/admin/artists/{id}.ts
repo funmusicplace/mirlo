@@ -4,7 +4,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { deleteArtist } from "../../../../utils/artist";
+import { deleteProfile } from "../../../../utils/artist";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
 
 export default function () {
@@ -20,7 +20,7 @@ export default function () {
       disableReason?: string;
     };
     try {
-      const artist = await prisma.profile.findUnique({
+      const profile = await prisma.profile.findUnique({
         where: { id: Number(req.params.id) },
         include: {
           user: {
@@ -32,7 +32,7 @@ export default function () {
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         return res.status(404).json({ message: "Artist not found" });
       }
 
@@ -55,11 +55,11 @@ export default function () {
         await sendMailQueue.add("send-mail", {
           template: "artist-disabled-notification",
           message: {
-            to: artist.user.email,
+            to: profile.user.email,
           },
           locals: {
-            artistName: artist.name,
-            userName: artist.user.name,
+            artistName: profile.name,
+            userName: profile.user.name,
             reason: `<p>${reasonHtml}</p>`,
             supportEmail: "support@mirlo.space",
           },
@@ -77,7 +77,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
-      const artist = await prisma.profile.findUnique({
+      const profile = await prisma.profile.findUnique({
         where: { id: Number(id) },
         select: {
           name: true,
@@ -93,10 +93,10 @@ export default function () {
           },
         },
       });
-      if (!artist) {
+      if (!profile) {
         return res.status(404).json({ message: "Artist not found" });
       }
-      res.json({ result: artist });
+      res.json({ result: profile });
     } catch (e) {
       next(e);
     }
@@ -105,17 +105,17 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: { id: Number(id) },
         select: {
           id: true,
           userId: true,
         },
       });
-      if (!artist) {
+      if (!profile) {
         return res.status(404).json({ message: "Artist not found" });
       }
-      await deleteArtist(artist.userId, Number(id));
+      await deleteProfile(profile.userId, Number(id));
     } catch (e) {
       res.status(400);
       next();

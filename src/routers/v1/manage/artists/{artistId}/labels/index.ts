@@ -4,8 +4,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  profileBelongsToLoggedInUser,
+  canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { sendMailQueue } from "../../../../../../queues/send-mail-queue";
@@ -13,25 +13,25 @@ import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
-import { processSingleArtist } from "../../../../../../serializers/artist";
+import { processSingleProfile } from "../../../../../../serializers/artist";
 
-const sendArtistNotificationOfLabel = async (
-  artist: Profile,
+const sendProfileNotificationOfLabel = async (
+  artistProfile: Profile,
   labelUser: User
 ) => {
   const client = await getClient();
   const existingNotification = await prisma.notification.findFirst({
     where: {
-      userId: artist.userId,
+      userId: artistProfile.userId,
       notificationType: "LABEL_ADDED_ARTIST",
       relatedUserId: labelUser.id,
-      profileId: artist.id,
+      profileId: artistProfile.id,
     },
   });
   if (!existingNotification) {
     await prisma.notification.create({
       data: {
-        userId: artist.userId,
+        userId: artistProfile.userId,
         notificationType: "LABEL_ADDED_ARTIST",
         content: `
           <p>
@@ -39,7 +39,7 @@ const sendArtistNotificationOfLabel = async (
             has invited you to join their roster.
           </p>
           <p>To accept their invitation, 
-            <a href="${client.applicationUrl}/manage/artists/${artist.id}/customize#labels">
+            <a href="${client.applicationUrl}/manage/artists/${artistProfile.id}/customize#labels">
             manage your artist account on Mirlo</a>.
           </p>
           <p>
@@ -47,7 +47,7 @@ const sendArtistNotificationOfLabel = async (
           you can ignore this message.
           </p>
         `,
-        profileId: artist.id,
+        profileId: artistProfile.id,
         relatedUserId: labelUser.id,
       },
     });
@@ -55,11 +55,11 @@ const sendArtistNotificationOfLabel = async (
 
   // Queue email immediately to artist
   try {
-    const artistUser = await prisma.user.findUnique({
-      where: { id: artist.userId },
+    const profileOwner = await prisma.user.findUnique({
+      where: { id: artistProfile.userId },
     });
 
-    if (artistUser?.email) {
+    if (profileOwner?.email) {
       const labelProfile = await prisma.profile.findFirst({
         where: {
           userId: labelUser.id,
@@ -70,21 +70,21 @@ const sendArtistNotificationOfLabel = async (
       await sendMailQueue.add("send-mail", {
         template: "announce-label-invite",
         message: {
-          to: artistUser.email,
+          to: profileOwner.email,
         },
         locals: {
-          artist: processSingleArtist(artist),
-          user: artistUser,
-          email: encodeURIComponent(artistUser.email),
+          artist: processSingleProfile(artistProfile),
+          user: profileOwner,
+          email: encodeURIComponent(profileOwner.email),
           host: process.env.API_DOMAIN,
-          label: labelProfile ? processSingleArtist(labelProfile) : null,
+          label: labelProfile ? processSingleProfile(labelProfile) : null,
           client: client.applicationUrl,
         },
       });
     }
   } catch (error) {
     console.error(
-      `Failed to queue label invite email for artist ${artist.id}`,
+      `Failed to queue label invite email for artist ${artistProfile.id}`,
       error
     );
     // Don't fail if email queuing fails
@@ -93,18 +93,18 @@ const sendArtistNotificationOfLabel = async (
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, canUserCreateArtists, POST],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, canUserCreateProfiles, POST],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function GET(req: Request, res: Response) {
-    const { artistId } = req.params as { artistId: string };
+    const { artistId: artistProfileId } = req.params as { artistId: string };
 
     try {
       const artistLabels = await prisma.artistLabel.findMany({
         where: {
-          artistId: Number(artistId),
+          artistId: Number(artistProfileId),
         },
         include: {
           labelUser: {
@@ -156,7 +156,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    let { artistId }: { artistId?: string } = req.params;
+    let { artistId: artistProfileId }: { artistId?: string } = req.params;
     const { labelUserId, isLabelApproved } = req.body as {
       labelUserId?: number;
       isLabelApproved?: boolean;
@@ -170,13 +170,13 @@ export default function () {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
-      const artist = await prisma.profile.findFirst({
+      const artistProfile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(artistProfileId),
           deletedAt: null,
         },
       });
-      if (!artist) {
+      if (!artistProfile) {
         throw new AppError({
           httpCode: 404,
           description: "Artist not found",
@@ -199,24 +199,24 @@ export default function () {
 
       const data: Prisma.ArtistLabelCreateArgs["data"] = {
         labelUserId,
-        artistId: Number(artistId),
+        artistId: Number(artistProfileId),
       };
 
-      const isLabelAddingArtist = loggedInUser.id === labelUserId;
-      const isArtistAddingLabel = loggedInUser.id === artist.userId;
+      const isLabelAddingProfile = loggedInUser.id === labelUserId;
+      const isProfileAddingLabel = loggedInUser.id === artistProfile.userId;
 
-      if (!isLabelAddingArtist && !isArtistAddingLabel) {
+      if (!isLabelAddingProfile && !isProfileAddingLabel) {
         throw new AppError({
           httpCode: 401,
           description: "You are not allowed to add this label",
         });
       }
 
-      if (isLabelAddingArtist) {
+      if (isLabelAddingProfile) {
         data.isLabelApproved = isLabelApproved;
       }
 
-      if (isArtistAddingLabel) {
+      if (isProfileAddingLabel) {
         data.isArtistApproved = true;
       }
 
@@ -225,7 +225,7 @@ export default function () {
         where: {
           labelUserId_artistId: {
             labelUserId,
-            artistId: Number(artistId),
+            artistId: Number(artistProfileId),
           },
         },
       });
@@ -236,7 +236,7 @@ export default function () {
         where: {
           labelUserId_artistId: {
             labelUserId,
-            artistId: Number(artistId),
+            artistId: Number(artistProfileId),
           },
         },
         create: data,
@@ -245,13 +245,13 @@ export default function () {
 
       const labels = await prisma.artistLabel.findMany({
         where: {
-          artistId: Number(artistId),
+          artistId: Number(artistProfileId),
         },
       });
 
       // Only send notification on new relationship creation
-      if (isLabelAddingArtist && isNewRelationship) {
-        await sendArtistNotificationOfLabel(artist, loggedInUser);
+      if (isLabelAddingProfile && isNewRelationship) {
+        await sendProfileNotificationOfLabel(artistProfile, loggedInUser);
       }
       res.json({
         results: labels,
@@ -285,7 +285,7 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    let { artistId }: { artistId?: string } = req.params;
+    let { artistId: artistProfileId }: { artistId?: string } = req.params;
     const { labelUserId } = req.body as { labelUserId?: number };
 
     try {
@@ -296,13 +296,13 @@ export default function () {
       await prisma.artistLabel.deleteMany({
         where: {
           labelUserId,
-          artistId: Number(artistId),
+          artistId: Number(artistProfileId),
         },
       });
 
       const labels = await prisma.artistLabel.findMany({
         where: {
-          artistId: Number(artistId),
+          artistId: Number(artistProfileId),
         },
       });
       res.json({

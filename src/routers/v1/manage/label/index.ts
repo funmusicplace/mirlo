@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { singleInclude } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../serializers/artist";
+import { processSingleProfile } from "../../../../serializers/artist";
 
 type Params = {
   artistId: string;
@@ -20,7 +20,7 @@ export default function () {
     const user = req.user;
 
     try {
-      const artists = await prisma.artistLabel.findMany({
+      const profiles = await prisma.artistLabel.findMany({
         where: {
           labelUserId: user.id,
           artist: { deletedAt: null },
@@ -34,11 +34,10 @@ export default function () {
       });
 
       return res.json({
-        results: artists.map((artist) => ({
-          ...artist,
-
-          artist: processSingleArtist(artist.artist),
-          labelId: artist.labelUserId,
+        results: profiles.map((row) => ({
+          ...row,
+          artist: processSingleProfile(row.artist),
+          labelId: row.labelUserId,
         })),
       });
     } catch (e) {

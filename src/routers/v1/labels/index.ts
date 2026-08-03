@@ -3,7 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { turnItemsIntoRSS } from "../../../utils/rss";
-import { processSingleArtist } from "../../../serializers/artist";
+import { processSingleProfile } from "../../../serializers/artist";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -53,7 +53,7 @@ export default function () {
         }
       }
 
-      const artists = await prisma.profile.findMany({
+      const profiles = await prisma.profile.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
@@ -91,15 +91,15 @@ export default function () {
             apiEndpoint: "trackGroups",
             clientUrl: "/releases",
           },
-          artists.map((artist) =>
-            processSingleArtist(artist)
+          profiles.map((profile) =>
+            processSingleProfile(profile)
           ) as unknown as Parameters<typeof turnItemsIntoRSS>[1]
         );
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());
       } else {
         res.json({
-          results: artists.map((artist) => processSingleArtist(artist)),
+          results: profiles.map((profile) => processSingleProfile(profile)),
           total: count,
         });
       }

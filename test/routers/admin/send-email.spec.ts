@@ -5,7 +5,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 import {
   sendMailQueue,
   sendMailQueueEvents,
@@ -77,10 +77,10 @@ describe("admin/send-email", () => {
           email: "admin@isAdmin.com",
           isAdmin: true,
         });
-        const { user: artistUser } = await createUser({
+        const { user: profileOwner } = await createUser({
           email: "artist@artist.com",
         });
-        await createArtist(artistUser.id);
+        await createProfile(profileOwner.id);
 
         await sendMailAdminEndpoint().POST[2](
           { body: { sendToOption: "allArtists" } } as Request,
@@ -93,14 +93,14 @@ describe("admin/send-email", () => {
         assert.equal(args[0], "send-mail");
         const data = args[1];
         assert.equal(data.template, "admin-announcement");
-        assert.equal(data.message.to, artistUser.email);
-        assert.equal(data.locals.user.id, artistUser.id);
+        assert.equal(data.message.to, profileOwner.email);
+        assert.equal(data.locals.user.id, profileOwner.id);
       });
 
       it("should POST not send email to users without artists", async () => {
         const stub = sinon.stub(sendMailQueue, "add");
 
-        const { user: artistUser } = await createUser({
+        const { user: profileOwner } = await createUser({
           email: "artist@artist.com",
           isAdmin: true,
         });
@@ -109,7 +109,7 @@ describe("admin/send-email", () => {
           email: "purchasesr@purchaser.com",
         });
 
-        await createArtist(artistUser.id);
+        await createProfile(profileOwner.id);
 
         await sendMailAdminEndpoint().POST[2](
           { body: { sendToOption: "allArtists" } } as Request,
@@ -122,14 +122,14 @@ describe("admin/send-email", () => {
         assert.equal(args[0], "send-mail");
         const data = args[1];
         assert.equal(data.template, "admin-announcement");
-        assert.equal(data.message.to, artistUser.email);
-        assert.equal(data.locals.user.id, artistUser.id);
+        assert.equal(data.message.to, profileOwner.email);
+        assert.equal(data.locals.user.id, profileOwner.id);
       });
 
       it("should POST and send to an email address", async () => {
         const stub = sinon.stub(sendMailQueue, "add");
 
-        const { user: artistUser } = await createUser({
+        const { user: profileOwner } = await createUser({
           email: "user@user.com",
         });
 
@@ -146,8 +146,8 @@ describe("admin/send-email", () => {
         assert.equal(args[0], "send-mail");
         const data = args[1];
         assert.equal(data.template, "admin-announcement");
-        assert.equal(data.message.to, artistUser.email);
-        assert.equal(data.locals.user.id, artistUser.id);
+        assert.equal(data.message.to, profileOwner.email);
+        assert.equal(data.locals.user.id, profileOwner.id);
       });
     });
   });

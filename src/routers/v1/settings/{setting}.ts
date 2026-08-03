@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../../../utils/error";
-import { processSingleArtist } from "../../../serializers/artist";
+import { processSingleProfile } from "../../../serializers/artist";
 import { getSiteSettings } from "../../../utils/settings";
 
 export default function () {
@@ -60,7 +60,7 @@ export default function () {
         if (!featuredArtistIds?.length) {
           return res.status(200).json({ result: [] });
         }
-        const artists = await prisma.profile.findMany({
+        const profiles = await prisma.profile.findMany({
           where: { id: { in: featuredArtistIds }, deletedAt: null },
           include: {
             avatar: { where: { deletedAt: null } },
@@ -68,7 +68,7 @@ export default function () {
           },
         });
         return res.status(200).json({
-          result: artists.map((a) => processSingleArtist(a)),
+          result: profiles.map((a) => processSingleProfile(a)),
         });
       } else if (
         setting === "instanceArtist" &&
@@ -77,13 +77,13 @@ export default function () {
           Number(settings.settings.instanceCustomization.artistId)
         )
       ) {
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: {
             id: Number(settings.settings.instanceCustomization?.artistId),
           },
         });
         return res.status(200).json({
-          result: artist ? processSingleArtist(artist) : artist,
+          result: profile ? processSingleProfile(profile) : profile,
         });
       } else if (setting === "terms") {
         if (!settings.terms) {
