@@ -310,16 +310,27 @@ processor Stripe first.
 
 ## Interoperability and the social web
 
-::: How do I connect my Mirlo profile to FairPlayer for federated streaming?
+::: details How do I connect my Mirlo profile to FairPlayer for federated streaming?
 
  If you head over to your profile settings (bottom left corner) and scroll down the page until you reach the section under "Default platform cut", you should see three toggle buttons. Toggle the middle button for "Enable federated streaming", press save, and your Mirlo catalogue will then appear in FairPlayer! Kindly note: this usually takes an hour to appear in FairPlayer or so though occasionally, it has taken up to 24 hours when other maintenance is occurring. You also do not need a FairPlayer account to get started.
 
  Additionally, we should mention that this is a discoverability option and FairPlayer has nothing in common with corporate streaming. Think of it as more of a search bar and listening outpost for musicians using Faircamp and Mirlo!
 
- ::: Do you have plans to work with other services?
+ ::: details Do you have plans to work with other services?
 
  Yes, we are collaborating with other devs (including [FairPlayer](https://fairplayer.org/about-us/)) in order to create a better experience for listeners and musicians. For instance, we are looking into a scenario where an artist catalogue uploaded to one service will appear in the others' search, to bring together more of the independent ecosystem. However, we do rely on the goodwill of our community to realise these ambitions. If you are able to, you can support us [here](https://mirlo.space/team/connect).
 
+::: details How do I make my artist profile visible on the Social Web / Fediverse
+
+Simply go to your artist profile, click "Profile settings" in the bottom left, and toggle "Enable the Social Web," and then press save.
+
+:::
+
+::: details If I toggle Social Web features for my label, will it be enabled for all my label's artists?
+
+No, each artist profile has to have social web features enabled individually. We might streamline this in the future if there's demand and we have capacity.
+
+:::
 ## Other questions
 
 ::: details Have you heard /project x/?
