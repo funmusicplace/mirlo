@@ -308,7 +308,7 @@ processor Stripe first.
 
 :::
 
-## Interoperability
+## Interoperability and the social web
 
 ::: How do I connect my Mirlo profile to FairPlayer for federated streaming?
 
