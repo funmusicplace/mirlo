@@ -460,13 +460,15 @@ export const getUserByEmail = async (email: string) => {
 export const createSubscription = async (
   userId: number,
   tierId: number,
-  amount: number = 500
+  amount: number = 500,
+  data?: Partial<Prisma.ProfileUserSubscriptionUncheckedCreateInput>
 ) => {
   return prisma.profileUserSubscription.create({
     data: {
       userId,
       profileSubscriptionTierId: tierId,
       amount,
+      ...data,
     },
   });
 };

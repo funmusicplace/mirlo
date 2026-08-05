@@ -140,8 +140,15 @@ export default defineConfig({
           userId: number;
           tierId: number;
           amount?: number;
+          deleteReason?: Prisma.ProfileUserSubscriptionCreateInput["deleteReason"];
+          nextBillingDate?: string;
         }) => {
-          return createSubscription(query.userId, query.tierId, query.amount);
+          return createSubscription(query.userId, query.tierId, query.amount, {
+            deleteReason: query.deleteReason,
+            nextBillingDate: query.nextBillingDate
+              ? new Date(query.nextBillingDate)
+              : undefined,
+          });
         },
         createNotification: async (query: {
           userId: number;

@@ -117,6 +117,49 @@ describe("ArtistVariableSupport", () => {
     expect(startPurchase).not.toHaveBeenCalled();
   });
 
+  test("submits a whole-number amount (in cents) for an allowVariable tier", async () => {
+    authState.user = { id: 5, name: "Buyer", email: "buyer@example.com" };
+    const tier = { ...baseTier, allowVariable: true, minAmount: null };
+    renderComponent(tier);
+
+    fireEvent.click(screen.getByText("support"));
+
+    const amountInput = screen.getByRole("spinbutton");
+    fireEvent.change(amountInput, { target: { value: "12.5" } });
+
+    const form = amountInput.closest("form");
+    if (!form) throw new Error("form not found");
+    fireEvent.submit(form);
+
+    await waitFor(() => expect(startPurchase).toHaveBeenCalled());
+
+    expect(startPurchase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [{ type: "subscription", tierId: tier.id, amount: 1250 }],
+      })
+    );
+  });
+
+  test("blocks submission and never calls startPurchase when the amount is cleared", async () => {
+    authState.user = { id: 5, name: "Buyer", email: "buyer@example.com" };
+    const tier = { ...baseTier, allowVariable: true, minAmount: 500 };
+    renderComponent(tier);
+
+    fireEvent.click(screen.getByText("support"));
+
+    const amountInput = screen.getByRole("spinbutton");
+    fireEvent.change(amountInput, { target: { value: "" } });
+
+    const form = amountInput.closest("form");
+    if (!form) throw new Error("form not found");
+    fireEvent.submit(form);
+
+    await waitFor(() =>
+      expect(screen.getByText("mustBeAtLeast")).toBeInTheDocument()
+    );
+    expect(startPurchase).not.toHaveBeenCalled();
+  });
+
   test("collects an email for a logged-out buyer and submits it with the purchase", async () => {
     renderComponent(baseTier);
 

@@ -177,6 +177,10 @@ export const initiateOnlineSubscription = async ({
         // application_fee_percent update in updateSubscriptionTier, since the
         // next invoice bills at this percentage going forward.
         platformCut: Math.round((resolvedAmount * platformPercent) / 100),
+        // Reactivating a cancelled-but-not-yet-expired subscription: Stripe's
+        // cancel_at_period_end was just cleared above, so the DB shouldn't
+        // still call this "cancelled" (see issue with resubscribing).
+        deleteReason: null,
       },
     });
 
@@ -216,6 +220,38 @@ export const initiateOnlineSubscription = async ({
       ? SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES
       : undefined,
   };
+};
+
+/**
+ * Starts a payment-method update for an existing paid subscription — a
+ * SetupIntent scoped to the subscription's own Stripe customer, so the buyer
+ * re-enters a card without cancelling and re-subscribing. Confirmation
+ * updates the *same* subscription's `default_payment_method`; nothing else
+ * about it changes (see `handleSubscriptionPaymentMethodUpdateSucceeded`).
+ */
+export const initiateSubscriptionPaymentMethodUpdate = async (
+  subscription: Prisma.ProfileUserSubscriptionGetPayload<{
+    include: { profileSubscriptionTier: true };
+  }>
+): Promise<{ clientSecret: string | null; stripeAccountId: string }> => {
+  if (!subscription.stripeSubscriptionKey) {
+    throw new AppError({
+      httpCode: 400,
+      description: "This subscription has no payment method to update",
+    });
+  }
+
+  const { stripeAccountId } = await resolveArtistPaymentContext(
+    subscription.profileSubscriptionTier.profileId
+  );
+
+  const { clientSecret } =
+    await getPaymentProcessor().createSubscriptionPaymentMethodSetup({
+      subscriptionKey: subscription.stripeSubscriptionKey,
+      accountId: stripeAccountId,
+    });
+
+  return { clientSecret, stripeAccountId };
 };
 
 type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{

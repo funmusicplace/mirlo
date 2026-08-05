@@ -139,6 +139,28 @@ describe("ArtistSupportBox", () => {
     expect(screen.getByText("support")).toBeInTheDocument();
   });
 
+  test("shows both the cancelled notice and a way to resubscribe for a cancelled subscription", () => {
+    const tier = { ...baseTier, minAmount: 500, allowVariable: false };
+    authState.user = {
+      id: 20,
+      artistUserSubscriptions: [
+        {
+          id: 99,
+          artistSubscriptionTier: tier,
+          deleteReason: "USER_CANCELLED",
+          nextBillingDate: "2026-09-01",
+        },
+      ],
+    };
+
+    renderComponent(tier);
+
+    expect(
+      screen.getByText("subscriptionCancelledActiveUntil")
+    ).toBeInTheDocument();
+    expect(screen.getByText("support")).toBeInTheDocument();
+  });
+
   describe("switching tiers via the unified purchase endpoint", () => {
     const otherTier = { ...baseTier, id: 2, name: "Other tier" };
 

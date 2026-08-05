@@ -191,6 +191,40 @@ export class StripePaymentProcessor implements PaymentProcessor {
     );
   }
 
+  async createSubscriptionPaymentMethodSetup({
+    subscriptionKey,
+    accountId,
+  }: {
+    subscriptionKey: string;
+    accountId: string;
+  }): Promise<{ setupIntentId: string; clientSecret: string | null }> {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionKey, {
+      stripeAccount: accountId,
+    });
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer.id;
+
+    const setupIntent = await stripe.setupIntents.create(
+      {
+        customer: customerId,
+        automatic_payment_methods: { enabled: true },
+        usage: "off_session",
+        metadata: {
+          subscriptionKey,
+          stripeAccountId: accountId,
+        },
+      },
+      { stripeAccount: accountId }
+    );
+
+    return {
+      setupIntentId: setupIntent.id,
+      clientSecret: setupIntent.client_secret,
+    };
+  }
+
   async getStatus({
     id,
     accountId,
