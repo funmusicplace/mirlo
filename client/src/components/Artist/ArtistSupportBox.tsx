@@ -52,6 +52,34 @@ const ArtistSupportBox: React.FC<{
     reset,
   } = usePurchase();
 
+  const [paymentMethodCheckout, setPaymentMethodCheckout] = React.useState<{
+    clientSecret: string;
+    stripeAccountId: string;
+  } | null>(null);
+  const [isStartingPaymentMethodUpdate, setIsStartingPaymentMethodUpdate] =
+    React.useState(false);
+
+  const startPaymentMethodUpdate = async (subscriptionId: number) => {
+    try {
+      setIsStartingPaymentMethodUpdate(true);
+      const { result } = await api.put<
+        undefined,
+        { result: { clientSecret: string; stripeAccountId: string } }
+      >(`manage/subscriptions/${subscriptionId}`, undefined);
+      setPaymentMethodCheckout(result);
+    } catch (e) {
+      errorHandler(e);
+    } finally {
+      setIsStartingPaymentMethodUpdate(false);
+    }
+  };
+
+  const handlePaymentMethodUpdateComplete = React.useCallback(() => {
+    setPaymentMethodCheckout(null);
+    snackbar(t("paymentMethodUpdated"), { type: "success" });
+    refresh();
+  }, [refresh, snackbar, t]);
+
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     const result = await startPurchase({
       artistId: tier.artistId,
@@ -220,7 +248,7 @@ const ArtistSupportBox: React.FC<{
           `
         }
       >
-        {!isSubscribedToTier && !isSubscribedToArtist && (
+        {((!isSubscribedToTier && !isSubscribedToArtist) || isCancelled) && (
           <ArtistVariableSupport tier={subscriptionTier} />
         )}
         {(isSubscribedToTier || isSubscribedToArtist) && (
@@ -231,6 +259,18 @@ const ArtistSupportBox: React.FC<{
                 isLoading={isCheckingForSubscription}
               >
                 {t("chooseThisSubscription")}
+              </ArtistButton>
+            )}
+            {user && isSubscribedToTier && !isCancelled && (
+              <ArtistButton
+                onClick={() =>
+                  currentSubscription &&
+                  startPaymentMethodUpdate(currentSubscription.id)
+                }
+                variant="outlined"
+                isLoading={isStartingPaymentMethodUpdate}
+              >
+                {t("changePaymentMethod")}
               </ArtistButton>
             )}
             {user && isSubscribedToTier && !isCancelled && (
@@ -336,6 +376,16 @@ const ArtistSupportBox: React.FC<{
         onSuccess={handlePurchaseComplete}
         title={t("support") ?? ""}
         buttonLabel={t("letsSupport") ?? ""}
+      />
+      <PurchaseModal
+        open={!!paymentMethodCheckout}
+        onClose={() => setPaymentMethodCheckout(null)}
+        clientSecret={paymentMethodCheckout?.clientSecret}
+        stripeAccountId={paymentMethodCheckout?.stripeAccountId}
+        returnUrl={window.location.href}
+        onSuccess={handlePaymentMethodUpdateComplete}
+        title={t("changePaymentMethodTitle") ?? ""}
+        buttonLabel={t("updatePaymentMethodButton") ?? ""}
       />
       <Modal
         open={isConfirmingCancel}

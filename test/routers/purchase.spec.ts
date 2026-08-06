@@ -12,6 +12,7 @@ import { initiatePayment } from "../../src/utils/payments/purchase";
 import {
   initiateOnlineSubscription,
   initiateSubscription,
+  initiateSubscriptionPaymentMethodUpdate,
 } from "../../src/utils/payments/subscription";
 import * as stripeUtils from "../../src/utils/stripe";
 import { finalizeSubscriptionSetup } from "../../src/utils/stripe";
@@ -1130,6 +1131,60 @@ describe("purchase", () => {
       );
     });
 
+    it("clears deleteReason when a cancelled-but-not-yet-expired subscription is repriced in place onto a new tier", async () => {
+      // isTierSwitch (and so the reprice-in-place fast path) requires the
+      // new tierId to differ from the existing row's — resubscribing to the
+      // *same* cancelled tier instead takes the slow SetupIntent path, whose
+      // deleteReason clearing is covered separately by registerSubscription.
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_resubscribe",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const oldTier = await createTier(artist.id, { minAmount: 500 });
+      const newTier = await createTier(artist.id, { minAmount: 1000 });
+
+      const existing = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_cancelled_123",
+          deleteReason: "USER_CANCELLED",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        items: { data: [{ id: "si_existing_item" }] },
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_tier",
+      } as unknown as Stripe.Response<Stripe.Product>);
+
+      const result = await initiateOnlineSubscription({
+        artistId: artist.id,
+        tierId: newTier.id,
+        userEmail: buyer.email,
+        userId: buyer.id,
+      });
+
+      assert.deepEqual(result, { success: true });
+
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { id: existing.id },
+      });
+      assert.equal(after?.profileSubscriptionTierId, newTier.id);
+      assert.equal(
+        after?.deleteReason,
+        null,
+        "resubscribing in place should clear the prior cancellation, not leave it showing as cancelled"
+      );
+    });
+
     it("does not cancel the old subscription up front when a fresh SetupIntent is needed", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
@@ -1489,6 +1544,144 @@ describe("purchase", () => {
         subscription?.stripeSubscriptionKey,
         "sub_same_tier_new",
         "the row now points at the new subscription"
+      );
+    });
+  });
+
+  describe("initiateSubscriptionPaymentMethodUpdate (direct)", () => {
+    it("throws when the subscription has no stripeSubscriptionKey", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pm_update_free",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { minAmount: 0 });
+
+      const subscription = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: tier.id,
+          userId: buyer.id,
+          amount: 0,
+        },
+        include: { profileSubscriptionTier: true },
+      });
+
+      await assert.rejects(
+        () => initiateSubscriptionPaymentMethodUpdate(subscription),
+        /no payment method to update/
+      );
+    });
+
+    it("creates a SetupIntent scoped to the subscription's existing customer", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pm_update",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+
+      const subscription = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: tier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_pm_update_existing",
+        },
+        include: { profileSubscriptionTier: true },
+      });
+
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        customer: "cus_pm_update",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const setupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_pm_update",
+          client_secret: "seti_pm_update_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      const result =
+        await initiateSubscriptionPaymentMethodUpdate(subscription);
+
+      assert.equal(result.clientSecret, "seti_pm_update_secret");
+      assert.equal(result.stripeAccountId, "acct_pm_update");
+      assert.equal(setupIntentStub.calledOnce, true);
+      const [args] = setupIntentStub.getCall(0).args;
+      assert.equal((args as any).customer, "cus_pm_update");
+      assert.equal(
+        (args as any).metadata?.subscriptionKey,
+        "sub_pm_update_existing"
+      );
+    });
+  });
+
+  describe("handleSubscriptionPaymentMethodUpdateSucceeded (direct)", () => {
+    it("updates the subscription's default_payment_method", async () => {
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await stripeUtils.handleSubscriptionPaymentMethodUpdateSucceeded(
+        {
+          id: "seti_direct",
+          payment_method: "pm_direct",
+        } as unknown as Stripe.SetupIntent,
+        "sub_direct_target",
+        "acct_direct"
+      );
+
+      assert.equal(updateStub.calledOnce, true);
+      assert.equal(updateStub.getCall(0).args[0], "sub_direct_target");
+      assert.equal(
+        (updateStub.getCall(0).args[1] as any)?.default_payment_method,
+        "pm_direct"
+      );
+      assert.equal(
+        (updateStub.getCall(0).args[2] as any)?.stripeAccount,
+        "acct_direct"
+      );
+    });
+
+    it("does nothing when the SetupIntent has no payment_method", async () => {
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await stripeUtils.handleSubscriptionPaymentMethodUpdateSucceeded(
+        { id: "seti_no_pm" } as unknown as Stripe.SetupIntent,
+        "sub_direct_target",
+        "acct_direct"
+      );
+
+      assert.equal(updateStub.called, false);
+    });
+  });
+
+  describe("handleSetupIntentSucceeded (direct) — payment-method-update routing", () => {
+    it("routes to handleSubscriptionPaymentMethodUpdateSucceeded and does not touch users/subscriptions creation", async () => {
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_pm_route",
+        payment_method: "pm_route",
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await stripeUtils.handleSetupIntentSucceeded({
+        id: "seti_pm_route",
+        metadata: {
+          subscriptionKey: "sub_pm_route",
+          stripeAccountId: "acct_pm_route",
+        },
+      } as unknown as Stripe.SetupIntent);
+
+      assert.equal(updateStub.calledOnce, true);
+      assert.equal(updateStub.getCall(0).args[0], "sub_pm_route");
+      assert.equal(
+        (updateStub.getCall(0).args[1] as any)?.default_payment_method,
+        "pm_route"
       );
     });
   });

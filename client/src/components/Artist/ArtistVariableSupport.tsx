@@ -65,7 +65,7 @@ const ArtistVariableSupport: React.FC<{
           type: "subscription",
           tierId: tier.id,
           amount: tier.allowVariable
-            ? getValues("amount") * 100
+            ? Math.round((getValues("amount") || 0) * 100)
             : (tier.minAmount ?? undefined),
           ...(needsName && { userName: getValues("name") }),
         },
@@ -120,9 +120,13 @@ const ArtistVariableSupport: React.FC<{
                   {getCurrencySymbol(artist?.user?.currency ?? "usd")}
                 </span>
                 <InputEl
+                  type="number"
+                  step="0.01"
+                  inputMode="decimal"
                   {...register("amount", {
                     min: tier.minAmount ? tier.minAmount / 100 : undefined,
                     required: true,
+                    valueAsNumber: true,
                   })}
                 />
                 <span className="whitespace-nowrap">

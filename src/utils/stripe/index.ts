@@ -556,6 +556,8 @@ export const handleSetupIntentSucceeded = async (
   });
 
   const metadata = setupIntent.metadata as unknown as {
+    /** Set only on a payment-method-update SetupIntent (see createSubscriptionPaymentMethodSetup) — presence alone routes to that branch, same as fundraiserId/tierId below. */
+    subscriptionKey?: string;
     fundraiserId?: string;
     userId: string;
     userEmail: string;
@@ -570,6 +572,16 @@ export const handleSetupIntentSucceeded = async (
     /** JSON-stringified `{ name?, address }`, set via `PUT /v1/purchase/:id` before confirmation — see attachSetupIntentShippingAddress. */
     shippingAddress?: string;
   };
+
+  if (metadata.subscriptionKey) {
+    await handleSubscriptionPaymentMethodUpdateSucceeded(
+      intent,
+      metadata.subscriptionKey,
+      metadata.stripeAccountId
+    );
+    return;
+  }
+
   const { fundraiserId, userId, userEmail, userName } = metadata;
 
   let {
@@ -681,6 +693,42 @@ export const attachSetupIntentShippingAddress = async ({
     setupIntentId,
     { metadata: { shippingAddress: JSON.stringify(shippingAddress) } },
     { stripeAccount: stripeAccountId }
+  );
+};
+
+/**
+ * Applies a confirmed payment-method-update SetupIntent to the subscription
+ * it was created for — the SetupIntent's `customer` was set at creation
+ * (`createSubscriptionPaymentMethodSetup`), so Stripe already attached the
+ * resulting payment method to that customer; this only needs to point the
+ * subscription's `default_payment_method` at it. Nothing else about the
+ * subscription (tier, amount, DB row) changes.
+ */
+export const handleSubscriptionPaymentMethodUpdateSucceeded = async (
+  intent: Stripe.SetupIntent,
+  subscriptionKey: string,
+  stripeAccountId: string
+) => {
+  const paymentMethodId =
+    typeof intent.payment_method === "string"
+      ? intent.payment_method
+      : intent.payment_method?.id;
+
+  if (!paymentMethodId) {
+    logger.error(
+      `handleSubscriptionPaymentMethodUpdateSucceeded: no payment_method on setup intent ${intent.id}`
+    );
+    return;
+  }
+
+  await stripe.subscriptions.update(
+    subscriptionKey,
+    { default_payment_method: paymentMethodId },
+    { stripeAccount: stripeAccountId }
+  );
+
+  logger.info(
+    `handleSubscriptionPaymentMethodUpdateSucceeded: updated default payment method for subscription ${subscriptionKey}`
   );
 };
 

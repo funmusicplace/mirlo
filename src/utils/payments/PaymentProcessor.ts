@@ -96,6 +96,18 @@ export interface PaymentProcessor {
    */
   updateSubscriptionTier(args: UpdateSubscriptionTierArgs): Promise<void>;
 
+  /**
+   * Create a SetupIntent to collect a new payment method for an *existing*
+   * recurring subscription — no new subscription, no product/price lookup,
+   * no DB row change. On confirmation, the resulting payment method becomes
+   * the subscription's `default_payment_method` (see
+   * `handleSubscriptionPaymentMethodUpdateSucceeded`).
+   */
+  createSubscriptionPaymentMethodSetup(args: {
+    subscriptionKey: string;
+    accountId: string;
+  }): Promise<{ setupIntentId: string; clientSecret: string | null }>;
+
   /** Current status of a pending charge/authorisation, by intent id. */
   getStatus(args: {
     id: string;
