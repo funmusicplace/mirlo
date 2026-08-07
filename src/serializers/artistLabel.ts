@@ -28,10 +28,9 @@ export const serializeArtistLabel = (
     >[0][];
     [key: string]: unknown;
   };
-  // Lazy require avoids a circular import with artist.ts (processSingleArtist
+  // Lazy require avoids a circular import with artist.ts (serializeProfile
   // calls serializeArtistLabel).
-  const { processSingleArtist } =
-    require("./artist") as typeof import("./artist");
+  const { serializeProfile } = require("./artist") as typeof import("./artist");
   return {
     ...rest,
     artistId,
@@ -40,7 +39,7 @@ export const serializeArtistLabel = (
       ? {
           ...labelUserRest,
           artists: profiles?.map((labelProfile) =>
-            processSingleArtist(labelProfile, userId, isUserSubscriber)
+            serializeProfile(labelProfile, userId, isUserSubscriber)
           ),
           ...(profileUserSubscriptions !== undefined
             ? {
