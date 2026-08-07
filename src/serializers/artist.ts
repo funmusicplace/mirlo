@@ -37,7 +37,7 @@ import {
   LocalTrackGroup,
 } from "./trackGroup";
 
-export interface LocalArtist extends Profile {
+export interface LocalProfile extends Profile {
   artistLabels?: LocalArtistLabel[];
   posts?: Post[];
   background?: ProfileBackground | null;
@@ -68,49 +68,48 @@ export interface LocalArtist extends Profile {
   } | null;
 }
 
-export const processSingleArtist = <T extends LocalArtist>(
-  artist: T,
+export const serializeProfile = <T extends LocalProfile>(
+  profile: T,
   userId?: number,
   isUserSubscriber?: boolean
 ): Serialized<T> => {
-  const { artistLabels, ...profileRest } = artist;
   return {
-    ...omitApPrivateKey(profileRest),
-    artistLabels: artistLabels?.map((al) =>
+    ...omitApPrivateKey(profile),
+    artistLabels: profile.artistLabels?.map((al) =>
       serializeArtistLabel(al as LocalArtistLabel, userId, isUserSubscriber)
     ),
-    posts: artist?.posts?.map((p: Post) =>
+    posts: profile?.posts?.map((p: Post) =>
       serializePost(
         p,
         undefined,
         undefined,
-        isUserSubscriber || artist.userId === userId
+        isUserSubscriber || profile.userId === userId
       )
     ),
-    merch: artist?.merch?.map((m) =>
+    merch: profile?.merch?.map((m) =>
       serializeMerch(m, {
-        fallbackCurrency: artist?.user?.currency ?? undefined,
+        fallbackCurrency: profile?.user?.currency ?? undefined,
       })
     ),
     background: renameProfileIdToArtistId(
-      addSizesToImage(finalArtistBackgroundBucket, artist?.background)
+      addSizesToImage(finalArtistBackgroundBucket, profile?.background)
     ),
     avatar: renameProfileIdToArtistId(
-      addSizesToImage(finalArtistAvatarBucket, artist?.avatar)
+      addSizesToImage(finalArtistAvatarBucket, profile?.avatar)
     ),
-    trackGroups: artist?.trackGroups?.map((tg) =>
+    trackGroups: profile?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
-        { ...tg, profile: { ...tg.profile, user: artist.user } },
+        { ...tg, profile: { ...tg.profile, user: profile.user } },
         { loggedInUserId: userId }
       )
     ),
-    subscriptionTiers: artist.subscriptionTiers?.map((tier) =>
+    subscriptionTiers: profile.subscriptionTiers?.map((tier) =>
       serializeProfileSubscriptionTier(tier)
     ),
-    user: artist.user
+    user: profile.user
       ? {
-          ...artist.user,
-          artistLabels: artist.user.artistLabels?.map((al) => {
+          ...profile.user,
+          artistLabels: profile.user.artistLabels?.map((al) => {
             const { artist: labelProfile, ...rest } = al;
             return {
               ...rest,
@@ -143,11 +142,11 @@ export const processSingleArtist = <T extends LocalArtist>(
             };
           }),
         }
-      : artist.user,
+      : profile.user,
   } as Serialized<T>;
 };
 
-export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
+export const serializeSingleArtistIntoCanimus = (artist: LocalProfile) => {
   const artistUrl = new URL(artist.urlSlug, String(process.env.API_DOMAIN))
     .href;
   const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
@@ -159,7 +158,7 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
   }));
   const artistSupportsPayment = Boolean(
     resolvePayee({
-      artist: { user: artist.user, paymentToUser: artist.paymentToUser },
+      profile: { user: artist.user, paymentToUser: artist.paymentToUser },
     })?.stripeAccountId
   );
   if (artistSupportsPayment) {
@@ -205,7 +204,7 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalArtist) => {
 };
 
 export const serializeSingleDeletedArtistIntoCanimus = (
-  artist: LocalArtist
+  artist: LocalProfile
 ) => {
   const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
   const deletedArtist = {
@@ -215,3 +214,9 @@ export const serializeSingleDeletedArtistIntoCanimus = (
   };
   return deletedArtist;
 };
+
+/**
+ * Artist-named alias kept so callers can migrate to the profile naming a
+ * domain at a time. Removed once nothing imports it.
+ */
+export const processSingleArtist = serializeProfile;
