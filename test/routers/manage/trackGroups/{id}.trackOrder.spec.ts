@@ -4,7 +4,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "@mirlo/prisma";
-import { clearTables, createArtist, createUser } from "../../../utils";
+import { clearTables, createProfile, createUser } from "../../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
@@ -45,11 +45,11 @@ describe("manage/trackGroups/{id}/trackOrder", () => {
       email: "test@test.com",
     });
 
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
 
     const trackGroup = await prisma.trackGroup.create({
       data: {
-        profileId: artist.id,
+        profileId: profile.id,
         urlSlug: "test-album",
         title: "Test album",
         publishedAt: new Date(),

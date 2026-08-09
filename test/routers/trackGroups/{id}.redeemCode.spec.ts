@@ -4,7 +4,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -34,8 +34,8 @@ describe("trackGroups/{id}/redeemCode", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const response = await requestApp
         .post(`trackGroups/${trackGroup.id}/redeemCode`)
         .send({})
@@ -49,8 +49,8 @@ describe("trackGroups/{id}/redeemCode", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       await createUser({
         email: "purchaser@artist.com",
@@ -87,8 +87,8 @@ describe("trackGroups/{id}/redeemCode", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const { user: purchaser } = await createUser({
         email: "purchaser@artist.com",
@@ -143,8 +143,8 @@ describe("trackGroups/{id}/redeemCode", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
@@ -185,8 +185,8 @@ describe("trackGroups/{id}/redeemCode", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",

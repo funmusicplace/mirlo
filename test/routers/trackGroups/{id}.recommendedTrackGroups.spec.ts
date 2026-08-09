@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -25,15 +25,15 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
   describe("GET", () => {
     it("should GET recommended track groups for a published album", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
-      const mainTrackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
       });
-      const recommendedTrackGroup1 = await createTrackGroup(artist.id, {
+      const recommendedTrackGroup1 = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         urlSlug: "recommended-album-1",
       });
-      const recommendedTrackGroup2 = await createTrackGroup(artist.id, {
+      const recommendedTrackGroup2 = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         urlSlug: "recommended-album-2",
       });
@@ -73,8 +73,8 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
 
     it("should return empty array when no recommendations exist", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
       });
 
@@ -97,11 +97,11 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
 
     it("should include artist and cover data in recommendations", async () => {
       const { user } = await createUser({ email: "test@test.com" });
-      const artist = await createArtist(user.id);
-      const mainTrackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
       });
-      const recommendedTrackGroup = await createTrackGroup(artist.id, {
+      const recommendedTrackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         title: "Recommended Album",
         urlSlug: "recommended-album",
@@ -124,7 +124,7 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
       const rec = response.body.results[0];
       assert.equal(rec.title, "Recommended Album");
       assert(rec.artist);
-      assert.equal(rec.artist.name, artist.name);
+      assert.equal(rec.artist.name, profile.name);
     });
   });
 });

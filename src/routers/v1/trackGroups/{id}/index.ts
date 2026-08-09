@@ -17,7 +17,7 @@ export default function () {
     let { id }: { id?: string } = req.params;
     const loggedInUser = req.user;
 
-    const { artistId }: { artistId?: string } = req.query as {
+    const { artistId: profileId }: { artistId?: string } = req.query as {
       artistId?: string;
     };
     if (!id) {
@@ -25,7 +25,7 @@ export default function () {
     }
 
     try {
-      const actualId = await findTrackGroupIdForSlug(id, artistId);
+      const actualId = await findTrackGroupIdForSlug(id, profileId);
       let trackGroup;
 
       if (actualId && typeof actualId === "number") {

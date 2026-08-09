@@ -6,7 +6,7 @@ import { beforeEach, describe, it } from "mocha";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -28,8 +28,8 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
       });
 
@@ -51,8 +51,8 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist-no-cover@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
       });
 
@@ -78,8 +78,8 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist-goal@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
         tracks: [],
         fundraisingGoal: 1000,
@@ -103,8 +103,8 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist-processing-tracks@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
       });
 
@@ -135,13 +135,13 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist-public@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { profileId: artist.id, name: "Tier" },
+        data: { profileId: profile.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-public@example.com",
@@ -173,14 +173,14 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist-private@example.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
         isPublic: false,
       });
 
       const tier = await prisma.profileSubscriptionTier.create({
-        data: { profileId: artist.id, name: "Tier" },
+        data: { profileId: profile.id, name: "Tier" },
       });
       const { user: follower } = await createUser({
         email: "follower-private@example.com",

@@ -202,16 +202,16 @@ export const findOrCreateUserBasedOnEmail = async (
   return { userId, newUser, user };
 };
 
-export const findUserDiscountPercentsForArtist = async (
+export const findUserDiscountPercentsForProfile = async (
   userId: number,
-  artistId: number
+  profileId: number
 ) => {
   const activeSubscriptions = await prisma.profileUserSubscription.findMany({
     where: {
       userId,
       deletedAt: null,
       profileSubscriptionTier: {
-        profileId: artistId,
+        profileId: profileId,
       },
     },
     select: {
@@ -231,6 +231,10 @@ export const findUserDiscountPercentsForArtist = async (
       subscription.profileSubscriptionTier.merchDiscountPercent ?? 0,
   }));
 };
+
+/** @deprecated alias while commerce migrates */
+export const findUserDiscountPercentsForArtist =
+  findUserDiscountPercentsForProfile;
 
 export const updateCurrencies = async (userId: number, currency: string) => {
   await prisma.user.update({
