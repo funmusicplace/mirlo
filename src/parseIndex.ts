@@ -50,10 +50,8 @@ import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
 } from "./utils/postAccess";
-import {
-  USER_PROFILE_SELECT,
-  serializeUserProfile,
-} from "./serializers/userProfile";
+import { serializeUser } from "./serializers/user";
+import { userSelect } from "./utils/user";
 import { getSiteSettings } from "./utils/settings";
 import { whereForPublishedTrackGroups } from "./utils/trackGroup";
 
@@ -854,11 +852,11 @@ export const analyzePathAndGenerateHTML = async (
     if (req?.user) {
       const user = await prisma.user.findFirst({
         where: { email: (req.user as { email: string }).email },
-        select: USER_PROFILE_SELECT,
+        select: userSelect,
       });
       if (user) {
         appendHydrationScript($, "__MIRLO_AUTH__", user.id, {
-          user: serializeUserProfile(user),
+          user: serializeUser(user),
         });
       }
     }

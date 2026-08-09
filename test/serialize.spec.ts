@@ -21,7 +21,6 @@ import { processSingleTrack } from "../src/serializers/track";
 import { processSingleTrackGroup } from "../src/serializers/trackGroup";
 import { serializeUserTransaction } from "../src/serializers/userTransaction";
 import { serializeUser } from "../src/serializers/user";
-import { serializeUserProfile } from "../src/serializers/userProfile";
 import {
   serializeProfileUserSubscription,
   serializeProfileUserSubscriptionCharge,
@@ -213,6 +212,47 @@ describe("outbound serializers", () => {
     it("leaves users without profiles unchanged", () => {
       const user = serializeUser({ id: 2, email: "a@b.co" });
       assert.equal("artists" in user, false);
+    });
+
+    it("deeply serializes artists, favorites and subscriptions when present", () => {
+      const input = {
+        id: 2,
+        email: "a@b.co",
+        profiles: [artistFixture(4)],
+        userAvatar: null,
+        userBanner: null,
+        trackFavorites: [
+          {
+            trackId: 1,
+            track: {
+              id: 1,
+              trackGroup: {
+                id: 7,
+                profileId: 4,
+                profile: artistFixture(4),
+                cover: null,
+              },
+            },
+          },
+        ],
+        profileUserSubscriptions: [
+          {
+            id: 3,
+            profileSubscriptionTierId: 5,
+            profileSubscriptionTier: {
+              id: 5,
+              profileId: 4,
+              profile: { ...artistFixture(4), avatar: null },
+            },
+          },
+        ],
+      };
+      const user = serializeUser(input);
+
+      assert.equal("profiles" in user, false);
+      assert.equal((user.artists as unknown[]).length, 1);
+      assertPreservedKeys(input, user, "serializeUser");
+      assertNoLeaks(user, "serializeUser");
     });
   });
 
@@ -758,51 +798,6 @@ describe("outbound serializers", () => {
       assert.equal("artistId" in tip, false);
       assert.ok(tip.artist);
       assertNoLeaks(result, "serializeUserTransaction email shape");
-    });
-  });
-
-  describe("serializeUserProfile", () => {
-    it("deeply serializes artists, favorites and subscriptions", () => {
-      const input = {
-        id: 2,
-        email: "a@b.co",
-        profiles: [artistFixture(4)],
-        userAvatar: null,
-        userBanner: null,
-        trackFavorites: [
-          {
-            trackId: 1,
-            track: {
-              id: 1,
-              trackGroup: {
-                id: 7,
-                profileId: 4,
-                profile: artistFixture(4),
-                cover: null,
-              },
-            },
-          },
-        ],
-        profileUserSubscriptions: [
-          {
-            id: 3,
-            profileSubscriptionTierId: 5,
-            profileSubscriptionTier: {
-              id: 5,
-              profileId: 4,
-              profile: { ...artistFixture(4), avatar: null },
-            },
-          },
-        ],
-      };
-      const user = serializeUserProfile(
-        input as unknown as Parameters<typeof serializeUserProfile>[0]
-      );
-
-      assert.equal("profiles" in user, false);
-      assert.equal((user.artists as unknown[]).length, 1);
-      assertPreservedKeys(input, user, "serializeUserProfile");
-      assertNoLeaks(user, "serializeUserProfile");
     });
   });
 });

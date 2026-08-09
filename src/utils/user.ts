@@ -1,10 +1,106 @@
 import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 
 import logger from "../logger";
 
 import { deleteArtist, deleteStripeSubscriptions } from "./artist";
 import countries from "./country-codes-currencies";
+
+/** Select used for /auth/profile and SSR hydration of the logged-in user. */
+export const userSelect = {
+  email: true,
+  accountingEmail: true,
+  id: true,
+  name: true,
+  profiles: true,
+  isAdmin: true,
+  currency: true,
+  language: true,
+  wishlist: true,
+  urlSlug: true,
+  featureFlags: true,
+  properties: true,
+  isLabelAccount: true,
+  combineSubscriptionEmails: true,
+  canCreateArtists: true,
+  trackFavorites: {
+    include: {
+      track: {
+        include: {
+          trackGroup: {
+            include: {
+              profile: true,
+              cover: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  merchPurchase: true,
+  userTrackGroupPurchases: {
+    select: {
+      trackGroupId: true,
+    },
+  },
+  pledges: {
+    where: {
+      cancelledAt: null,
+    },
+    select: {
+      amount: true,
+      fundraiserId: true,
+    },
+  },
+  userTrackPurchases: {
+    select: {
+      trackId: true,
+    },
+  },
+  userAvatar: true,
+  userBanner: true,
+  profileUserSubscriptions: {
+    where: {
+      deletedAt: null,
+    },
+    select: {
+      profileSubscriptionTier: {
+        include: {
+          profile: {
+            include: {
+              avatar: true,
+              user: { select: { currency: true } },
+            },
+          },
+        },
+      },
+      id: true,
+      userId: true,
+      amount: true,
+      deleteReason: true,
+      nextBillingDate: true,
+      profileSubscriptionTierId: true,
+      profileUserSubscriptionCharges: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 1,
+        select: {
+          id: true,
+          transaction: {
+            select: {
+              paymentStatus: true,
+            },
+          },
+        },
+      },
+    },
+  },
+} as const satisfies Prisma.UserSelect;
+
+export type UserSelectPayload = Prisma.UserGetPayload<{
+  select: typeof userSelect;
+}>;
 
 export const deleteUser = async (userId: number) => {
   const userArtists = await prisma.profile.findMany({
