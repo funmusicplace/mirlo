@@ -10,7 +10,7 @@ import {
   sendMailQueueEvents,
 } from "../../../../src/queues/send-mail-queue";
 import labelsEndpoint from "../../../../src/routers/v1/manage/artists/{artistId}/labels/index";
-import { clearTables, createArtist, createUser } from "../../../utils";
+import { clearTables, createProfile, createUser } from "../../../utils";
 import { requestApp } from "../../utils";
 
 import prisma from "@mirlo/prisma";
@@ -42,10 +42,10 @@ describe("manage/artists/{artistId}/labels", () => {
           email: "label@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
+        const artist = await createProfile(artistUser.id);
 
         // Create label user's label profile
-        const labelProfile = await createArtist(labelUser.id, {
+        const label = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
@@ -74,7 +74,7 @@ describe("manage/artists/{artistId}/labels", () => {
         const { user, accessToken } = await createUser({
           email: "artist@test.com",
         });
-        const artist = await createArtist(user.id);
+        const artist = await createProfile(user.id);
 
         const response = await requestApp
           .get(`manage/artists/${artist.id}/labels`)
@@ -94,8 +94,8 @@ describe("manage/artists/{artistId}/labels", () => {
           email: "artist@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const artist = await createProfile(artistUser.id);
+        const label = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
@@ -131,8 +131,8 @@ describe("manage/artists/{artistId}/labels", () => {
         const { user: artistUser, accessToken: artistAccessToken } =
           await createUser({ email: "artist@test.com" });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const artist = await createProfile(artistUser.id);
+        const label = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
@@ -166,8 +166,8 @@ describe("manage/artists/{artistId}/labels", () => {
           email: "artist@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const artist = await createProfile(artistUser.id);
+        const label = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
@@ -223,7 +223,7 @@ describe("manage/artists/{artistId}/labels", () => {
           email: "artist@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
+        const artist = await createProfile(artistUser.id);
 
         const response = await requestApp
           .post(`manage/artists/${artist.id}/labels`)
@@ -261,8 +261,8 @@ describe("manage/artists/{artistId}/labels", () => {
           email: "label@test.com",
         });
 
-        const artist = await createArtist(artistUser.id);
-        const labelProfile = await createArtist(labelUser.id, {
+        const artist = await createProfile(artistUser.id);
+        const label = await createProfile(labelUser.id, {
           isLabelProfile: true,
         });
 
@@ -301,7 +301,7 @@ describe("manage/artists/{artistId}/labels", () => {
         const { user: artistUser, accessToken: artistAccessToken } =
           await createUser({ email: "artist@test.com" });
 
-        const artist = await createArtist(artistUser.id);
+        const artist = await createProfile(artistUser.id);
 
         const response = await requestApp
           .delete(`manage/artists/${artist.id}/labels`)
@@ -325,8 +325,8 @@ describe("manage/artists/{artistId}/labels", () => {
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      const label = await createArtist(labelUser.id, {
+      const artist = await createProfile(artistUser.id);
+      const label = await createProfile(labelUser.id, {
         name: "Label Name",
         isLabelProfile: true,
       });
@@ -378,8 +378,10 @@ describe("manage/artists/{artistId}/labels", () => {
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      await createArtist(labelUser.id, { isLabelProfile: true });
+      const artist = await createProfile(artistUser.id);
+      await createProfile(labelUser.id, {
+        isLabelProfile: true,
+      });
 
       const operations = labelsEndpoint();
       const mockReq = {
@@ -425,8 +427,10 @@ describe("manage/artists/{artistId}/labels", () => {
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      await createArtist(labelUser.id, { isLabelProfile: true });
+      const artist = await createProfile(artistUser.id);
+      await createProfile(labelUser.id, {
+        isLabelProfile: true,
+      });
 
       const operations = labelsEndpoint();
       const mockReq = {
@@ -479,8 +483,10 @@ describe("manage/artists/{artistId}/labels", () => {
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
-      await createArtist(labelUser.id, { isLabelProfile: true });
+      const artist = await createProfile(artistUser.id);
+      await createProfile(labelUser.id, {
+        isLabelProfile: true,
+      });
 
       // Create notification first
       const existingNotification = await prisma.notification.create({
@@ -544,7 +550,7 @@ describe("manage/artists/{artistId}/labels", () => {
         email: "artist@test.com",
       });
 
-      const artist = await createArtist(artistUser.id);
+      const artist = await createProfile(artistUser.id);
 
       const operations = labelsEndpoint();
       const mockReq = {

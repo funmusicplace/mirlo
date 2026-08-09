@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { listArtistReaders } from "../../../../../utils/payments/readers";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
