@@ -36,9 +36,9 @@ export const VolumeControl: React.FC<{
       <Button
         startIcon={volume === 0 ? <FaVolumeMute /> : <FaVolumeHigh />}
         variant="link"
-        className={css`
+        className={`mi-player-volume-button ${css`
           font-size: 1.25rem !important;
-        `}
+        `}`}
         aria-label={t("muteVolume")}
         title={t("muteVolume")}
         onClick={() => {

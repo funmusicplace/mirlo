@@ -156,7 +156,7 @@ const Index = () => {
 
         <div
           id="activity-column"
-          className="md:shrink-0 md:w-1/3 w-full min-w-0 rounded-xl bg-(--mi-darken-background-color) p-4"
+          className="md:shrink-0 md:w-1/3 w-full min-w-0 rounded-xl border border-(--mi-tint-x-color) bg-(--mi-tint-color) p-4"
         >
           <NotificationColumn
             title={t("timelineActivity")}

@@ -176,9 +176,13 @@ type ProfileChangeBody = {
   userId: number;
   password?: string;
   newEmail?: string;
+  name?: string;
   language: string;
   isLabelAccount: boolean;
   combineSubscriptionEmails?: boolean;
+  accountingEmail?: string;
+  urlSlug?: string;
+  properties?: LoggedInUser["properties"];
 };
 
 async function updateProfile(body: ProfileChangeBody) {

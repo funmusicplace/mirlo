@@ -1,6 +1,7 @@
 import NextButton from "components/common/NextButton";
 import PrevButton from "components/common/PrevButton";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
+import { useWidgetArtistColors } from "hooks/useResolvedArtistColors";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,6 +35,8 @@ const Card = () => {
     playableTracks,
   } = useTrackGroupWidgetData();
 
+  const artistColors = useWidgetArtistColors(artist?.properties?.colors);
+
   const [hasRoomForTracklist, setHasRoomForTracklist] = React.useState(true);
 
   React.useEffect(() => {
@@ -61,7 +64,7 @@ const Card = () => {
   }
 
   const bgColor =
-    artist?.properties?.colors?.background ?? "var(--mi-background-color)";
+    artistColors?.background ?? "var(--mi-background-color)";
 
   const titleContent = (
     <TrackGroupTitleContent
@@ -73,7 +76,7 @@ const Card = () => {
 
   return (
     <WidgetWrapper
-      artistColors={artist?.properties?.colors}
+      artistColors={artistColors}
       embeddedInMirlo={embeddedInMirlo}
       className="h-screen w-screen relative [&_a]:no-underline!"
     >

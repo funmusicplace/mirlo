@@ -33,19 +33,10 @@ export interface Sizable {
 const CustomButton = styled.button<Sizable>(
   {},
   ({ buttonRole, size, ...props }) => {
-    const bodyStyles = window.getComputedStyle(document.body);
-    // buttonRole "primary" maps to the artist accent (--mi-button-color in the
-    // new scheme; --mi-button-color in legacy), other roles keep their
-    // explicit Mirlo system var. Contrast color for filled buttons follows
-    // the same convention as ArtistButton: --mi-button-text-color.
     const cssColorVariable =
       buttonRole && buttonRole !== "primary"
         ? `--mi-${buttonRole}-color`
         : `--mi-button-color`;
-    const primaryColor = bodyStyles.getPropertyValue(cssColorVariable);
-    const secondaryColor = bodyStyles.getPropertyValue(
-      `--mi-button-text-color`
-    );
     const isOnlyIcon = props.onlyIcon
       ? `
       padding: ${size === "tiny" ? "0" : ".5rem"};
@@ -115,7 +106,7 @@ const CustomButton = styled.button<Sizable>(
       switch (props.variant) {
         case "link":
           return `
-          color: ${primaryColor};
+          color: var(${cssColorVariable});
           font-size: inherit;
           padding: 0 !important;
           background-color: transparent !important;
@@ -123,7 +114,7 @@ const CustomButton = styled.button<Sizable>(
           line-height: inherit;
 
           svg {
-            fill: ${primaryColor};
+            fill: var(${cssColorVariable});
           }
 
           &:hover:not(:disabled) {
@@ -133,27 +124,27 @@ const CustomButton = styled.button<Sizable>(
         case "outlined":
         case "dashed":
           return `
-          color: ${primaryColor};
+          color: var(${cssColorVariable});
           background-color: transparent;
-          border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${primaryColor};
+          border: 1px ${props.variant === "outlined" ? "solid" : props.variant} var(${cssColorVariable});
           font-weight: ${props.bold === false ? "normal" : "bold"};
 
           svg {
-            fill: ${primaryColor};
+            fill: var(${cssColorVariable});
           }
 
           &:hover:not(:disabled) {
-            color: ${primaryColor};
-            background-color: ${secondaryColor};
+            color: var(${cssColorVariable});
+            background-color: var(--mi-button-text-color);
 
             svg {
-              fill: ${primaryColor};
+              fill: var(${cssColorVariable});
             }
           }
 
           &[disabled] {
-            color: #ddd;
-            border-color: #ddd;
+            color: var(--mi-secondary-text-color);
+            border-color: var(--mi-secondary-text-color);
           }
         `;
         case "pill":
@@ -183,34 +174,34 @@ const CustomButton = styled.button<Sizable>(
         `;
         case "transparent":
           return `
-          color: ${primaryColor};
+          color: var(${cssColorVariable});
           background-color: transparent;
           font-weight: ${props.bold === false ? "normal" : "bold"};
 
           svg {
-            fill: ${primaryColor};
+            fill: var(${cssColorVariable});
           }
 
           &:hover:not(:disabled) {
-            color: ${primaryColor};
-            background-color: ${secondaryColor};
+            color: var(${cssColorVariable});
+            background-color: var(--mi-button-text-color);
 
             svg {
-              fill: ${primaryColor};
+              fill: var(${cssColorVariable});
             }
           }
 
           &[disabled] {
-            color: #ddd;
-            border-color: #ddd;
+            color: var(--mi-secondary-text-color);
+            border-color: var(--mi-secondary-text-color);
           }`;
         default:
           return `
-          background-color: ${primaryColor};
-          color: ${secondaryColor};
+          background-color: var(${cssColorVariable});
+          color: var(--mi-button-text-color);
 
           svg {
-            fill: ${secondaryColor};
+            fill: var(--mi-button-text-color);
           }
 
           &:hover:not(:disabled) {

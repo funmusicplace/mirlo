@@ -13,6 +13,7 @@ import "./i18n";
 
 import routes from "routes";
 import { AuthContextProvider } from "state/AuthContext";
+import HighContrastProvider from "components/HighContrastProvider";
 import { SnackBarContextProvider } from "state/SnackbarContext";
 import { UploadContextProvider } from "state/UploadContext";
 import { ConfirmContextProvider } from "utils/useConfirm";
@@ -35,16 +36,18 @@ root.render(
   <React.StrictMode>
     <QueryClientWrapper>
       <AuthContextProvider>
-        <GlobalStateProvider>
-          <ConfirmContextProvider>
-            <ConfirmDialog />
-            <SnackBarContextProvider>
-              <UploadContextProvider>
-                <RouterProvider router={router} />
-              </UploadContextProvider>
-            </SnackBarContextProvider>
-          </ConfirmContextProvider>
-        </GlobalStateProvider>
+        <HighContrastProvider>
+          <GlobalStateProvider>
+            <ConfirmContextProvider>
+              <ConfirmDialog />
+              <SnackBarContextProvider>
+                <UploadContextProvider>
+                  <RouterProvider router={router} />
+                </UploadContextProvider>
+              </SnackBarContextProvider>
+            </ConfirmContextProvider>
+          </GlobalStateProvider>
+        </HighContrastProvider>
       </AuthContextProvider>
     </QueryClientWrapper>
   </React.StrictMode>
