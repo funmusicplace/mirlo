@@ -9,7 +9,7 @@ import { MIRLO_API_KEY_HEADER } from "../../../src/auth/apiKey";
 import socialMusic from "../../../src/utils/socialMusic";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createClient,
   createTrack,
   createTrackGroup,
@@ -35,8 +35,8 @@ describe("tracks/{id}/stream/external/", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       track = await createTrack(trackGroup.id, {
         title: "test track",
         description: "This is a test description",

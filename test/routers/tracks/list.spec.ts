@@ -6,7 +6,7 @@ import { beforeEach, describe, it } from "mocha";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -23,11 +23,11 @@ describe("GET /v1/tracks", () => {
 
   it("returns RSS XML when format=rss is requested (#1099)", async () => {
     const { user } = await createUser({ email: "rss-tracks@example.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "RSS Artist",
       urlSlug: "rss-artist",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "RSS Album",
       urlSlug: "rss-album",
       tracks: [
@@ -59,11 +59,11 @@ describe("GET /v1/tracks", () => {
 
   it("still returns JSON by default (no format=rss)", async () => {
     const { user } = await createUser({ email: "json-tracks@example.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "JSON Artist",
       urlSlug: "json-artist",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "JSON Album",
       urlSlug: "json-album",
       tracks: [
@@ -86,11 +86,11 @@ describe("GET /v1/tracks", () => {
 
   it("q matches against the track title", async () => {
     const { user } = await createUser({ email: "q-title@example.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Robin",
       urlSlug: "robin",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "The Bird Album",
       urlSlug: "the-bird-album",
       tracks: [
@@ -117,11 +117,11 @@ describe("GET /v1/tracks", () => {
 
   it("q matches against the artist name", async () => {
     const { user } = await createUser({ email: "q-artist@example.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Blackbird",
       urlSlug: "blackbird",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "Migration",
       urlSlug: "migration",
       tracks: [
@@ -132,11 +132,11 @@ describe("GET /v1/tracks", () => {
       ],
     });
     const otherUser = await createUser({ email: "q-other@example.com" });
-    const otherArtist = await createArtist(otherUser.user.id, {
+    const otherProfile = await createProfile(otherUser.user.id, {
       name: "Crow",
       urlSlug: "crow",
     });
-    await createTrackGroup(otherArtist.id, {
+    await createTrackGroup(otherProfile.id, {
       title: "Stars",
       urlSlug: "stars",
       tracks: [
@@ -159,11 +159,11 @@ describe("GET /v1/tracks", () => {
 
   it("q matches across multiple tokens (artist + title)", async () => {
     const { user } = await createUser({ email: "q-multi@example.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Blackbird",
       urlSlug: "blackbird-multi",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "Migration",
       urlSlug: "migration-multi",
       tracks: [
@@ -190,11 +190,11 @@ describe("GET /v1/tracks", () => {
 
   it("q is case insensitive", async () => {
     const { user } = await createUser({ email: "q-case@example.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Robin",
       urlSlug: "robin-case",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "The Bird Album",
       urlSlug: "the-bird-album-case",
       tracks: [
@@ -217,11 +217,11 @@ describe("GET /v1/tracks", () => {
 
   it("q excludes tracks from unpublished trackGroups", async () => {
     const { user } = await createUser({ email: "q-unpub@example.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Crow",
       urlSlug: "crow-unpub",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "Hidden Album",
       urlSlug: "hidden-album",
       publishedAt: null,
@@ -246,11 +246,11 @@ describe("GET /v1/tracks", () => {
     const { user } = await createUser({
       email: "draft-tracks@example.com",
     });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "Draft Artist",
       urlSlug: "draft-artist",
     });
-    await createTrackGroup(artist.id, {
+    await createTrackGroup(profile.id, {
       title: "Draft Album",
       urlSlug: "draft-album",
       publishedAt: null,
