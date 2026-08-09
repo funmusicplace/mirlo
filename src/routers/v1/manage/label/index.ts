@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { singleInclude } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../serializers/artist";
+import { serializeProfile } from "../../../../serializers/artist";
 
 type Params = {
   artistId: string;
@@ -36,8 +36,7 @@ export default function () {
       return res.json({
         results: artists.map((artist) => ({
           ...artist,
-
-          artist: processSingleArtist(artist.artist),
+          artist: serializeProfile(artist.artist),
           labelId: artist.labelUserId,
         })),
       });

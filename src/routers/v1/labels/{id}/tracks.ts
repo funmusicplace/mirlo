@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import { processSingleTrack } from "../../../../serializers/track";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
@@ -15,18 +15,18 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const labelId = await findProfileIdForURLSlug(id);
 
-      const labelProfile = await prisma.profile.findFirst({
+      const label = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: labelId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },
         },
       });
 
-      if (!labelProfile) {
+      if (!label) {
         return res.status(404).json({ error: "Label not found" });
       }
 
@@ -35,7 +35,7 @@ export default function () {
           deletedAt: null,
           artistLabels: {
             some: {
-              labelUserId: labelProfile?.userId,
+              labelUserId: label?.userId,
               isLabelApproved: true,
               isArtistApproved: true,
             },
@@ -48,7 +48,7 @@ export default function () {
           trackGroup: {
             profileId: {
               in: [
-                ...(labelProfile ? [labelProfile.id] : []),
+                ...(label ? [label.id] : []),
                 ...(labelArtists || []).map((a) => a.id),
               ],
             },

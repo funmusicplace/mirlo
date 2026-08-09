@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { processSingleArtist } from "../../../../serializers/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
+import { serializeProfile } from "../../../../serializers/artist";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -15,11 +15,11 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const artistId = await findArtistIdForURLSlug(id);
+      const labelId = await findProfileIdForURLSlug(id);
 
-      const labelProfile = await prisma.profile.findFirst({
+      const label = await prisma.profile.findFirst({
         where: {
-          id: artistId,
+          id: labelId,
           isLabelProfile: true,
           deletedAt: null,
           user: { isLabelAccount: true, deletedAt: null },
@@ -30,12 +30,12 @@ export default function () {
         },
       });
 
-      if (!labelProfile) {
+      if (!label) {
         return res.status(404).json({ error: "Label not found" });
       }
 
-      const label = await prisma.user.findUnique({
-        where: { id: labelProfile?.userId, isLabelAccount: true },
+      const labelUser = await prisma.user.findUnique({
+        where: { id: label?.userId, isLabelAccount: true },
         select: {
           name: true,
           id: true,
@@ -81,12 +81,12 @@ export default function () {
       });
       res.json({
         result: {
-          ...label,
-          artistLabels: label?.artistLabels.map((al) => ({
+          ...labelUser,
+          artistLabels: labelUser?.artistLabels.map((al) => ({
             ...al,
-            artist: processSingleArtist(al.artist),
+            artist: serializeProfile(al.artist),
           })),
-          profile: labelProfile && processSingleArtist(labelProfile),
+          profile: label && serializeProfile(label),
         },
       });
     } catch (e) {

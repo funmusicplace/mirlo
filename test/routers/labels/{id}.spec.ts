@@ -5,7 +5,7 @@ dotenv.config();
 import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import request from "supertest";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
@@ -24,7 +24,7 @@ describe("GET /v1/labels/{id}", () => {
       email: "off-label@example.com",
       isLabelAccount: false,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Disabled Label",
       isLabelProfile: true,
       urlSlug: "disabled-label",
@@ -42,7 +42,7 @@ describe("GET /v1/labels/{id}", () => {
       email: "label-roster@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Label With Deleted Member",
       isLabelProfile: true,
     });
@@ -50,7 +50,7 @@ describe("GET /v1/labels/{id}", () => {
     const { user: liveArtistUser } = await createUser({
       email: "live-artist@example.com",
     });
-    const liveArtist = await createArtist(liveArtistUser.id, {
+    const liveArtist = await createProfile(liveArtistUser.id, {
       name: "Live Artist",
       urlSlug: "live-artist",
     });
@@ -58,7 +58,7 @@ describe("GET /v1/labels/{id}", () => {
     const { user: deletedArtistUser } = await createUser({
       email: "deleted-artist@example.com",
     });
-    const deletedArtist = await createArtist(deletedArtistUser.id, {
+    const deletedArtist = await createProfile(deletedArtistUser.id, {
       name: "Deleted Artist",
       urlSlug: "deleted-artist",
     });
