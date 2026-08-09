@@ -4,12 +4,12 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { logger } from "../../../../../../logger";
 import { uploadAndSendToImageQueue } from "../../../../../../queues/processImages";
-import { deleteArtistAvatar } from "../../../../../../utils/artist";
+import { deleteProfileAvatar } from "../../../../../../utils/artist";
 import { busboyOptions } from "../../../../../../utils/images";
 
 type Params = {
@@ -21,15 +21,15 @@ export default function () {
   const operations = {
     PUT: [
       userAuthenticated,
-      artistBelongsToLoggedInUser,
+      profileBelongsToLoggedInUser,
       busboy(busboyOptions),
       PUT,
     ],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
 
     try {
       const { jobId, imageId } = await uploadAndSendToImageQueue(
@@ -111,25 +111,25 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const { artistId: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
           userId: loggedInUser.id,
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         res.status(400).json({
           error: "artist must belong to user",
         });
         return next();
       }
 
-      await deleteArtistAvatar(artist.id);
+      await deleteProfileAvatar(profile.id);
 
       res.json({ message: "Success" });
     } catch (error) {

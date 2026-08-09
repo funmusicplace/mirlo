@@ -4,8 +4,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  profileBelongsToLoggedInUser,
+  canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { sendMailQueue } from "../../../../../../queues/send-mail-queue";
@@ -13,7 +13,7 @@ import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
-import { processSingleArtist } from "../../../../../../serializers/artist";
+import { serializeProfile } from "../../../../../../serializers/artist";
 
 const sendArtistNotificationOfLabel = async (
   artist: Profile,
@@ -60,7 +60,7 @@ const sendArtistNotificationOfLabel = async (
     });
 
     if (artistUser?.email) {
-      const labelProfile = await prisma.profile.findFirst({
+      const label = await prisma.profile.findFirst({
         where: {
           userId: labelUser.id,
           isLabelProfile: true,
@@ -73,11 +73,11 @@ const sendArtistNotificationOfLabel = async (
           to: artistUser.email,
         },
         locals: {
-          artist: processSingleArtist(artist),
+          artist: serializeProfile(artist),
           user: artistUser,
           email: encodeURIComponent(artistUser.email),
           host: process.env.API_DOMAIN,
-          label: labelProfile ? processSingleArtist(labelProfile) : null,
+          label: label ? serializeProfile(label) : null,
           client: client.applicationUrl,
         },
       });
@@ -93,9 +93,9 @@ const sendArtistNotificationOfLabel = async (
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, canUserCreateArtists, POST],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, canUserCreateProfiles, POST],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function GET(req: Request, res: Response) {

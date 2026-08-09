@@ -2,15 +2,15 @@ import { NextFunction, Request, Response } from "express";
 
 import prisma from "@mirlo/prisma";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
-    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
+    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
   };
   async function PUT(req: Request, res: Response, next: NextFunction) {
     let { artistId, labelUserId }: { artistId?: string; labelUserId?: string } =
