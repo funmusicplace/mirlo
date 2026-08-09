@@ -11,12 +11,12 @@ import Stripe from "stripe";
 import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
-import { processSingleArtist } from "../serializers/artist";
+import { serializeProfile } from "../serializers/artist";
 import { serializeFundraiserPledge } from "../serializers/fundraiser";
 import { processSingleTrackGroup } from "../serializers/trackGroup";
 import { serializeUserTransaction } from "../serializers/userTransaction";
 
-import { subscribeUserToArtist } from "./artist";
+import { subscribeUserToProfile } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { findCataloguePurchasableTrackGroups } from "./catalogue";
 import { getClient } from "./getClient";
@@ -418,7 +418,7 @@ export const handleTrackGroupPurchase = async (
       });
 
       const payee = resolvePayee({
-        artist: trackGroup.profile,
+        profile: trackGroup.profile,
         releasePaymentToUser: trackGroup.paymentToUser,
       });
 
@@ -466,30 +466,30 @@ export const handleTrackGroupPurchase = async (
 
 export const handleCataloguePurchase = async (
   userId: number,
-  artistId: number,
+  profileId: number,
   session?: Stripe.Checkout.Session
 ) => {
   try {
     const { applicationUrl } = await getClient();
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: {
-        id: artistId,
+        id: profileId,
       },
       include: {
         user: true,
       },
     });
-    const artistTrackGroups = artist
-      ? await findCataloguePurchasableTrackGroups(artist)
+    const profileTrackGroups = profile
+      ? await findCataloguePurchasableTrackGroups(profile)
       : [];
 
     const amountPaidPerTrackGroup =
-      (session?.amount_total ?? 0) / artistTrackGroups.length;
+      (session?.amount_total ?? 0) / profileTrackGroups.length;
 
     const { applicationFee, paymentProcessorFee } =
       await getApplicationFee(session);
     const appFeePerTrackGroup =
-      (applicationFee ?? 0) / artistTrackGroups.length;
+      (applicationFee ?? 0) / profileTrackGroups.length;
 
     const pricePaid = session?.amount_total ?? 0;
     const currencyPaid = session?.currency ?? "usd";
@@ -510,7 +510,7 @@ export const handleCataloguePurchase = async (
     });
 
     await Promise.all(
-      artistTrackGroups.map(async (trackGroup) => {
+      profileTrackGroups.map(async (trackGroup) => {
         await registerPurchase({
           userId: Number(userId),
           trackGroupId: Number(trackGroup.id),
@@ -530,8 +530,8 @@ export const handleCataloguePurchase = async (
       },
     });
 
-    if (user && artist && artistTrackGroups.length > 0) {
-      const serializedArtist = processSingleArtist(artist);
+    if (user && profile && profileTrackGroups.length > 0) {
+      const serializedProfile = serializeProfile(profile);
       await sendMail({
         data: {
           template: "catalogue-receipt",
@@ -539,8 +539,8 @@ export const handleCataloguePurchase = async (
             to: user.email,
           },
           locals: {
-            artist: serializedArtist,
-            trackGroups: artistTrackGroups.map((tg) =>
+            artist: serializedProfile,
+            trackGroups: profileTrackGroups.map((tg) =>
               processSingleTrackGroup(tg)
             ),
             email: user.email,
@@ -559,10 +559,10 @@ export const handleCataloguePurchase = async (
         data: {
           template: "catalogue-purchase-artist-notification",
           message: {
-            to: artist.user.email,
+            to: profile.user.email,
           },
           locals: {
-            artist: serializedArtist,
+            artist: serializedProfile,
             pricePaid,
             currencyPaid: session?.currency ?? "usd",
             platformCut: (catalogueAppFee ?? 0) / 100,
@@ -573,7 +573,7 @@ export const handleCataloguePurchase = async (
     }
   } catch (e) {
     logger.error(
-      `Error creating catalogue purchase for profileId ${artistId}, userId ${userId}, session ${session?.id}:`,
+      `Error creating catalogue purchase for profileId ${profileId}, userId ${userId}, session ${session?.id}:`,
       e
     );
   }
@@ -808,7 +808,7 @@ export const sendSaleEmails = async (
           emailShape: true,
         }) as unknown as PurchaseTransaction
     );
-    const serializedArtist = processSingleArtist(
+    const serializedProfile = serializeProfile(
       artist
     ) as unknown as PurchaseReceiptEmailType["artist"];
 
@@ -819,7 +819,7 @@ export const sendSaleEmails = async (
           to: purchaser.email,
         },
         locals: {
-          artist: serializedArtist,
+          artist: serializedProfile,
           transactions: serializedTransactions,
           email: purchaser.email,
           client: applicationUrl,
@@ -858,9 +858,9 @@ export const sendSaleEmails = async (
   }
 };
 
-export const handleArtistGift = async (
+export const handleProfileGift = async (
   userId: number,
-  artistId: number,
+  profileId: number,
   session?: Stripe.Checkout.Session,
   platformCurrencyValue?: PlatformCurrencyValue
 ) => {
@@ -884,7 +884,7 @@ export const handleArtistGift = async (
     const createdTip = await prisma.userProfileTip.create({
       data: {
         userId,
-        profileId: artistId,
+        profileId,
         message: session?.metadata?.message ?? null,
         transactionId: transaction.id,
       },
@@ -906,7 +906,7 @@ export const handleArtistGift = async (
     });
 
     if (tip) {
-      subscribeUserToArtist(tip.profile, user);
+      subscribeUserToProfile(tip.profile, user);
     }
 
     if (user && tip) {

@@ -17,45 +17,45 @@ export type ResolvedItem = {
   optionIds?: string[];
   /** merch only — chosen shipping destination, when the item ships physically. */
   shippingDestinationId?: string;
-  /** The resource's own platformPercent override (trackGroup/merch), if set — falls back to the artist's defaultPlatformFee, then the site default. */
+  /** The resource's own platformPercent override (trackGroup/merch), if set — falls back to the profile's defaultPlatformFee, then the site default. */
   platformPercent?: number | null;
 };
 
-// Fetches the artist and resolves the connected Stripe account + currency used
+// Fetches the profile and resolves the connected Stripe account + currency used
 // for all payment operations. Shared by initiatePayment and the subscription
 // lifecycle functions in ./subscription.ts.
-export const resolveArtistPaymentContext = async (
-  artistId: number,
+export const resolveProfilePaymentContext = async (
+  profileId: number,
   stripeAccountIdOverride?: string
 ) => {
-  const artist = await prisma.profile.findFirst({
-    where: { id: artistId, enabled: true },
+  const profile = await prisma.profile.findFirst({
+    where: { id: profileId, enabled: true },
     include: {
       user: { select: { stripeAccountId: true, email: true } },
       paymentToUser: { select: { stripeAccountId: true } },
     },
   });
 
-  if (!artist) {
-    throw new Error(`Artist ${artistId} not found`);
+  if (!profile) {
+    throw new Error(`Artist ${profileId} not found`);
   }
 
   const stripeAccountId =
-    stripeAccountIdOverride ?? resolvePayee({ artist }).stripeAccountId;
+    stripeAccountIdOverride ?? resolvePayee({ profile }).stripeAccountId;
 
   if (!stripeAccountId) {
     throw new Error("Artist is not set up with a payment processor");
   }
 
-  const currency = await getCurrency(artistId, stripeAccountId);
+  const currency = await getCurrency(profileId, stripeAccountId);
 
-  return { artist, stripeAccountId, currency };
+  return { profile, stripeAccountId, currency };
 };
 
-// Initiates a payment against the artist's connected account.
+// Initiates a payment against the profile's connected account.
 export const initiatePayment = async ({
   readerId,
-  artistId,
+  profileId,
   items,
   userEmail,
   userId,
@@ -66,7 +66,7 @@ export const initiatePayment = async ({
   allowedCountries,
 }: {
   readerId?: string;
-  artistId: number;
+  profileId: number;
   items: ResolvedItem[];
   userEmail: string;
   userId?: string;
@@ -74,7 +74,7 @@ export const initiatePayment = async ({
   clientId?: number;
   /** Where the hosted checkout page returns the buyer after payment (validated upstream). */
   successUrl?: string;
-  /** Pre-resolved account ID — use when the item (e.g. trackGroup) has its own paymentToUser that takes precedence over the artist's. */
+  /** Pre-resolved account ID — use when the item (e.g. trackGroup) has its own paymentToUser that takes precedence over the profile's. */
   stripeAccountId?: string;
   /** Physical merch in the cart — persisted onto the PaymentIntent's metadata so the hosted checkout page can recover it via getStatus after a redirect. */
   requiresShipping?: boolean;
@@ -87,20 +87,20 @@ export const initiatePayment = async ({
       paymentIntentId: string;
     }
 > => {
-  const { artist, stripeAccountId, currency } =
-    await resolveArtistPaymentContext(artistId, stripeAccountIdOverride);
+  const { profile, stripeAccountId, currency } =
+    await resolveProfilePaymentContext(profileId, stripeAccountIdOverride);
 
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
 
   // Each item's own platformPercent (trackGroup/merch) takes precedence,
-  // falling back to the artist's defaultPlatformFee, then the site default
+  // falling back to the profile's defaultPlatformFee, then the site default
   // (that last fallback happens inside calculateAppFee).
   let applicationFeeAmount = 0;
   for (const item of items) {
     applicationFeeAmount += await calculateAppFee(
       item.amount,
       currency,
-      item.platformPercent ?? artist.defaultPlatformFee
+      item.platformPercent ?? profile.defaultPlatformFee
     );
   }
 
@@ -110,7 +110,7 @@ export const initiatePayment = async ({
   const metadata: Record<string, string> = {
     purchaseType,
     stripeAccountId,
-    artistId: String(artistId),
+    artistId: String(profileId),
     userEmail,
     ...(userId && { userId }),
     ...(clientId !== undefined && { clientId: String(clientId) }),

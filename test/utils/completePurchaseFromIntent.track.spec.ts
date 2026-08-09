@@ -11,7 +11,7 @@ import * as sendMail from "../../src/jobs/send-mail";
 import { completePurchaseFromIntent } from "../../src/utils/stripe";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -43,8 +43,8 @@ describe("completePurchaseFromIntent - track routing", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+    const profile = await createProfile(artistUser.id);
+    const tg = await createTrackGroup(profile.id, { minPrice: 0 });
     const track = await createTrack(tg.id, { minPrice: 500 });
 
     const intent = {
@@ -54,7 +54,7 @@ describe("completePurchaseFromIntent - track routing", () => {
       metadata: {
         purchaseType: "track",
         trackId: String(track.id),
-        artistId: String(artist.id),
+        artistId: String(profile.id),
         userId: String(buyer.id),
         userEmail: buyer.email,
       },
@@ -75,7 +75,7 @@ describe("completePurchaseFromIntent - track routing", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
+    const profile = await createProfile(artistUser.id);
 
     const intent = {
       id: "pi_track_missing_id",
@@ -83,7 +83,7 @@ describe("completePurchaseFromIntent - track routing", () => {
       currency: "usd",
       metadata: {
         purchaseType: "track",
-        artistId: String(artist.id),
+        artistId: String(profile.id),
         userId: String(buyer.id),
         userEmail: buyer.email,
       },

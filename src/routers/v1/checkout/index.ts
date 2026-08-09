@@ -26,17 +26,17 @@ export default function () {
     try {
       if (canceled) {
         const clientId = parseNumericQueryParam(req.query.clientId);
-        const artistId = parseNumericQueryParam(req.query.artistId);
+        const profileId = parseNumericQueryParam(req.query.artistId);
 
         const client = clientId
           ? await prisma.client.findUnique({ where: { id: clientId } })
           : null;
-        const artist = artistId
-          ? await prisma.profile.findUnique({ where: { id: artistId } })
+        const profile = profileId
+          ? await prisma.profile.findUnique({ where: { id: profileId } })
           : null;
 
-        const checkoutPath = artist?.urlSlug
-          ? `${artist.urlSlug}/checkout-error`
+        const checkoutPath = profile?.urlSlug
+          ? `${profile.urlSlug}/checkout-error`
           : "checkout-error";
 
         const reasonParam =
@@ -87,7 +87,7 @@ export default function () {
           const client = await prisma.client.findUnique({
             where: { id: +clientId },
           });
-          const artist = await prisma.profile.findUnique({
+          const profile = await prisma.profile.findUnique({
             where: { id: +artistId },
           });
 
@@ -100,11 +100,11 @@ export default function () {
           merchId && searchParams.set("merchId", merchId);
           tipId && searchParams.set("tipId", tipId);
 
-          if (artist?.urlSlug) {
+          if (profile?.urlSlug) {
             res.redirect(
               buildCheckoutRedirectUrl(
                 client?.applicationUrl ?? null,
-                `${artist.urlSlug}/checkout-complete`,
+                `${profile.urlSlug}/checkout-complete`,
                 searchParams
               )
             );
