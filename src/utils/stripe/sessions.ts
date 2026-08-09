@@ -3,19 +3,19 @@ import prisma from "@mirlo/prisma";
 import stripe from ".";
 
 export const getCurrency = async (
-  artistId: number,
+  profileId: number,
   stripeAccountId: string
 ): Promise<string> => {
-  const artist = await prisma.profile.findUnique({
+  const profile = await prisma.profile.findUnique({
     where: {
-      id: artistId,
+      id: profileId,
     },
     select: { paymentToUserId: true, userId: true },
   });
-  if (artist) {
+  if (profile) {
     const user = await prisma.user.findFirst({
       where: {
-        id: artist.paymentToUserId ?? artist.userId,
+        id: profile.paymentToUserId ?? profile.userId,
       },
     });
     if (user?.currency) {

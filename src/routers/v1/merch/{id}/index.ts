@@ -13,7 +13,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
-    const { artistId }: { artistId?: string } = req.query;
+    const { artistId: profileId }: { artistId?: string } = req.query;
     const loggedInUser = req.user;
 
     if (!id) {
@@ -22,14 +22,14 @@ export default function () {
 
     try {
       let merchForURLSlug;
-      if (artistId) {
+      if (profileId) {
         merchForURLSlug = await prisma.merch.findFirst({
           where: {
             AND: [
               { urlSlug: { equals: id, mode: "insensitive" } },
               {
                 profile: {
-                  urlSlug: artistId,
+                  urlSlug: profileId,
                 },
               },
             ],

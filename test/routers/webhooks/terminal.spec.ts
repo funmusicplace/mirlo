@@ -15,7 +15,7 @@ import {
 } from "../../../src/utils/stripe/terminal";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createTier,
   createTrackGroup,
@@ -46,12 +46,12 @@ describe("terminal.reader webhooks", () => {
 
   describe("handleTerminalReaderActionSucceeded — process_payment_intent", () => {
     it("should capture the payment intent and complete a trackGroup purchase", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id);
+      const profile = await createProfile(profileOwner.id);
+      const tg = await createTrackGroup(profile.id);
 
       sinon.stub(stripeUtils.stripe.paymentIntents, "capture").resolves({
         id: "pi_tg_capture",
@@ -63,7 +63,7 @@ describe("terminal.reader webhooks", () => {
           stripeAccountId: "acct_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
-          artistId: String(artist.id),
+          artistId: String(profile.id),
           items: JSON.stringify([
             {
               type: "trackGroup",
@@ -101,11 +101,11 @@ describe("terminal.reader webhooks", () => {
     });
 
     it("should capture the payment intent and complete a tip", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(profileOwner.id);
 
       sinon.stub(stripeUtils.stripe.paymentIntents, "capture").resolves({
         id: "pi_tip_capture",
@@ -113,7 +113,7 @@ describe("terminal.reader webhooks", () => {
         currency: "usd",
         metadata: {
           purchaseType: "tip",
-          artistId: String(artist.id),
+          artistId: String(profile.id),
           stripeAccountId: "acct_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
@@ -188,13 +188,13 @@ describe("terminal.reader webhooks", () => {
     });
 
     it("should create a single transaction with all merch purchases attached for a multi-item cart", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const merchA = await createMerch(artist.id, { title: "Shirt" });
-      const merchB = await createMerch(artist.id, { title: "Mug" });
+      const profile = await createProfile(profileOwner.id);
+      const merchA = await createMerch(profile.id, { title: "Shirt" });
+      const merchB = await createMerch(profile.id, { title: "Mug" });
 
       const items = [
         { type: "merch", id: merchA.id, quantity: 1, amount: 500 },
@@ -211,7 +211,7 @@ describe("terminal.reader webhooks", () => {
           stripeAccountId: "acct_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
-          artistId: String(artist.id),
+          artistId: String(profile.id),
           items: JSON.stringify(items),
         },
         status: "succeeded",
@@ -259,13 +259,13 @@ describe("terminal.reader webhooks", () => {
 
   describe("handleTerminalReaderActionSucceeded — process_setup_intent (subscription)", () => {
     it("should create a Stripe subscription and record it in DB after a terminal setup intent succeeds", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_test",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(profileOwner.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
 
       sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
         id: "seti_sub_test",

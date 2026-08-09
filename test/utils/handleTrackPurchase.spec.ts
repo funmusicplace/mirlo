@@ -16,6 +16,7 @@ import {
 } from "../../src/utils/handleFinishedTransactions";
 import {
   clearTables,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -38,7 +39,7 @@ describe("handleTrackPurchase", () => {
   it("should send out emails for track purchase", async () => {
     const stub = sinon.spy(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -47,16 +48,9 @@ describe("handleTrackPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
-      data: {
-        name: "Test artist",
-        urlSlug: "test-artist",
-        userId: artistUser.id,
-        enabled: true,
-      },
-    });
+    const profile = await createProfile(profileOwner.id);
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "Our Custom Title",
     });
 
@@ -73,7 +67,7 @@ describe("handleTrackPurchase", () => {
     assert.equal(locals.transactions[0]?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(
       locals1.transactions[0].trackPurchases?.[0].track.id,
@@ -85,7 +79,7 @@ describe("handleTrackPurchase", () => {
   it("should send out emails for track group purchase without log-in", async () => {
     const stub = sinon.spy(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
 
@@ -94,16 +88,9 @@ describe("handleTrackPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
-      data: {
-        name: "Test artist",
-        urlSlug: "test-artist",
-        userId: artistUser.id,
-        enabled: true,
-      },
-    });
+    const profile = await createProfile(profileOwner.id);
 
-    const trackGroup = await createTrackGroup(artist.id, {
+    const trackGroup = await createTrackGroup(profile.id, {
       title: "Our Custom Title",
     });
 
@@ -123,7 +110,7 @@ describe("handleTrackPurchase", () => {
     assert.equal(locals0.transactions[0]?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-purchase-notification");
-    assert.equal(data1.message.to, artistUser.email);
+    assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(
       locals1.transactions[0].trackPurchases?.[0].track.id,
@@ -135,7 +122,7 @@ describe("handleTrackPurchase", () => {
   it("sends the artist notification to the release's paymentToUser, cc'ing their accounting email", async () => {
     const stub = sinon.spy(sendMail, "default");
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
     const { user: label } = await createUser({
@@ -147,15 +134,15 @@ describe("handleTrackPurchase", () => {
       emailConfirmationToken: null,
     });
 
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
-    const trackGroup = await createTrackGroup(artist.id);
+    const trackGroup = await createTrackGroup(profile.id);
     await prisma.trackGroup.update({
       where: { id: trackGroup.id },
       data: { paymentToUserId: label.id },
@@ -177,21 +164,21 @@ describe("handleTrackPurchase", () => {
   it("records the processing fee on the transaction", async () => {
     sinon.stub(sendMail, "default").resolves();
 
-    const { user: artistUser } = await createUser({
+    const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
     });
     const { user: purchaser } = await createUser({
       email: "follower@follower.com",
     });
-    const artist = await prisma.profile.create({
+    const profile = await prisma.profile.create({
       data: {
         name: "Test artist",
         urlSlug: "test-artist",
-        userId: artistUser.id,
+        userId: profileOwner.id,
         enabled: true,
       },
     });
-    const trackGroup = await createTrackGroup(artist.id);
+    const trackGroup = await createTrackGroup(profile.id);
     const track = await createTrack(trackGroup.id);
 
     await handleTrackPurchase(

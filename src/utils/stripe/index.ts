@@ -10,11 +10,11 @@ import { uniq } from "lodash";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { subscribeUserToArtist } from "../artist";
+import { subscribeUserToProfile } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
-  handleArtistGift,
+  handleProfileGift,
   handleCataloguePurchase,
   handleFundraiserPledge,
   handleFundraiserPledgePaymentFailure,
@@ -402,7 +402,7 @@ export const handleCheckoutSession = async (
       stripeAccountId,
       purchaseType,
       trackId,
-      artistId,
+      artistId: profileId,
     } = metadata;
     let { userId, userEmail } = metadata;
     const { userName } = metadata;
@@ -430,7 +430,7 @@ export const handleCheckoutSession = async (
     const payment = await completedPaymentFromSession(session);
     if (purchaseType === "tip") {
       logger.info(`checkout.session: ${session.id} handling tip`);
-      await handleArtistGift(Number(actualUserId), Number(artistId), payment);
+      await handleProfileGift(Number(actualUserId), Number(profileId), payment);
     } else if (purchaseType === "subscription") {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(
@@ -454,7 +454,7 @@ export const handleCheckoutSession = async (
       logger.info(`checkout.session: ${session.id} handleCataloguePurchase`);
       await handleCataloguePurchase(
         Number(actualUserId),
-        Number(artistId),
+        Number(profileId),
         payment
       );
     }
@@ -559,7 +559,7 @@ export const handleSetupIntentSucceeded = async (
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
       });
-      await subscribeUserToArtist(fundraiser.trackGroups[0].profile, user);
+      await subscribeUserToProfile(fundraiser.trackGroups[0].profile, user);
     }
   } else if (metadata.tierId) {
     const {

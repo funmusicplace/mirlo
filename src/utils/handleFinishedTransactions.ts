@@ -11,12 +11,12 @@ import { Job } from "bullmq";
 import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
-import { processSingleArtist } from "../serializers/artist";
+import { serializeProfile } from "../serializers/artist";
 import { serializeFundraiserPledge } from "../serializers/fundraiser";
 import { processSingleTrackGroup } from "../serializers/trackGroup";
 import { serializeUserTransaction } from "../serializers/userTransaction";
 
-import { subscribeUserToArtist } from "./artist";
+import { subscribeUserToProfile } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { findCataloguePurchasableTrackGroups } from "./catalogue";
 import { getClient } from "./getClient";
@@ -327,7 +327,7 @@ export const sendPurchaseReceipt = async (
         to: purchaser.email,
       },
       locals: {
-        artist: processSingleArtist(
+        artist: serializeProfile(
           artist
         ) as unknown as PurchaseReceiptEmailType["artist"],
         transactions: transactions.map(
@@ -534,13 +534,13 @@ const attachTrack = async (
 };
 
 const attachTip = async (
-  artistId: number,
+  profileId: number,
   { userId, user, transaction, message }: AttachContext
 ): Promise<AttachResult> => {
   const tip = await prisma.userProfileTip.create({
     data: {
       userId,
-      profileId: artistId,
+      profileId,
       message: message ?? null,
       transactionId: transaction.id,
     },
@@ -551,7 +551,7 @@ const attachTip = async (
     },
   });
 
-  subscribeUserToArtist(tip.profile, user);
+  subscribeUserToProfile(tip.profile, user);
 
   return {
     sale: { artist: tip.profile },
@@ -631,23 +631,23 @@ const attachMerch = async (
 };
 
 const attachCatalogue = async (
-  artistId: number,
+  profileId: number,
   item: ResolvedItem,
   { userId, user, transaction, message }: AttachContext
 ): Promise<AttachResult> => {
-  const artist = await prisma.profile.findFirst({
-    where: { id: artistId },
+  const profile = await prisma.profile.findFirst({
+    where: { id: profileId },
     include: { user: true, paymentToUser: true },
   });
-  if (!artist) return {};
+  if (!profile) return {};
 
-  const artistTrackGroups = await findCataloguePurchasableTrackGroups(artist);
-  const amountPaidPerTrackGroup = item.amount / artistTrackGroups.length;
+  const profileTrackGroups = await findCataloguePurchasableTrackGroups(profile);
+  const amountPaidPerTrackGroup = item.amount / profileTrackGroups.length;
   const appFeePerTrackGroup =
-    (transaction.platformCut ?? 0) / artistTrackGroups.length;
+    (transaction.platformCut ?? 0) / profileTrackGroups.length;
 
   const purchases = await Promise.all(
-    artistTrackGroups.map((trackGroup) =>
+    profileTrackGroups.map((trackGroup) =>
       registerPurchase({
         userId,
         trackGroupId: Number(trackGroup.id),
@@ -670,9 +670,9 @@ const attachCatalogue = async (
       .map((purchase) => [purchase.trackGroupId, purchase.singleDownloadToken])
   );
 
-  if (user && artistTrackGroups.length > 0) {
+  if (user && profileTrackGroups.length > 0) {
     const { applicationUrl } = await getClient();
-    const serializedArtist = processSingleArtist(artist);
+    const serializedProfile = serializeProfile(profile);
     await sendMail({
       data: {
         template: "catalogue-receipt",
@@ -680,15 +680,15 @@ const attachCatalogue = async (
           to: user.email,
         },
         locals: {
-          artist: serializedArtist,
-          trackGroups: artistTrackGroups.map((tg) => ({
+          artist: serializedProfile,
+          trackGroups: profileTrackGroups.map((tg) => ({
             ...processSingleTrackGroup(tg),
             token: downloadTokensByTrackGroupId.get(tg.id),
           })),
           email: user.email,
           client: applicationUrl,
           host: process.env.API_DOMAIN,
-          hasSubscriptionTiers: await hasSubscriptionTiers(artist.id),
+          hasSubscriptionTiers: await hasSubscriptionTiers(profile.id),
         },
       },
     } as Job);
@@ -697,7 +697,7 @@ const attachCatalogue = async (
       item.amount,
       transaction.currency
     );
-    const payee = resolvePayee({ artist });
+    const payee = resolvePayee({ profile });
     await sendMail({
       data: {
         template: "catalogue-purchase-artist-notification",
@@ -706,7 +706,7 @@ const attachCatalogue = async (
           cc: payee.accountingEmail,
         },
         locals: {
-          artist: serializedArtist,
+          artist: serializedProfile,
           pricePaid: item.amount,
           currencyPaid: transaction.currency,
           platformCut: (catalogueAppFee ?? 0) / 100,
@@ -716,14 +716,14 @@ const attachCatalogue = async (
     } as Job);
   }
 
-  return { sale: { artist } };
+  return { sale: { artist: profile } };
 };
 
 export const completePurchase = async (
   userId: number,
   items: ResolvedItem[],
   payment?: CompletedPayment,
-  { newUser = false, artistId }: { newUser?: boolean; artistId?: number } = {}
+  { newUser = false, profileId }: { newUser?: boolean; profileId?: number } = {}
 ) => {
   if (items.length === 0) {
     logger.error(
@@ -734,7 +734,7 @@ export const completePurchase = async (
 
   const transaction = await recordCompletedTransaction(userId, payment);
   const user = await prisma.user.findFirst({ where: { id: userId } });
-  const resolvedArtistId = artistId ?? Number(payment?.metadata.artistId);
+  const resolvedProfileId = profileId ?? Number(payment?.metadata.artistId);
 
   let sale: SaleContext | undefined;
   let genericReceipt = false;
@@ -756,11 +756,11 @@ export const completePurchase = async (
       } else if (item.type === "track") {
         result = await attachTrack(item, context);
       } else if (item.type === "tip") {
-        result = await attachTip(resolvedArtistId, context);
+        result = await attachTip(resolvedProfileId, context);
       } else if (item.type === "merch") {
         result = await attachMerch(item, context);
       } else if (item.type === "catalogue") {
-        result = await attachCatalogue(resolvedArtistId, item, context);
+        result = await attachCatalogue(resolvedProfileId, item, context);
       }
       sale ??= result.sale;
       genericReceipt ||= !!result.genericReceipt;
@@ -830,25 +830,25 @@ export const handleTrackPurchase = (
   payment?: CompletedPayment
 ) => completePurchase(userId, singleItem("track", trackId, payment), payment);
 
-export const handleArtistGift = (
+export const handleProfileGift = (
   userId: number,
-  artistId: number,
+  profileId: number,
   payment?: CompletedPayment
 ) =>
   completePurchase(userId, singleItem("tip", undefined, payment), payment, {
-    artistId,
+    profileId,
   });
 
 export const handleCataloguePurchase = (
   userId: number,
-  artistId: number,
+  profileId: number,
   payment?: CompletedPayment
 ) =>
   completePurchase(
     userId,
     singleItem("catalogue", undefined, payment),
     payment,
-    { artistId }
+    { profileId }
   );
 
 export type ArtistSubscriptionReceiptEmailType = {

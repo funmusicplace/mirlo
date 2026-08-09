@@ -8,7 +8,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createMerchShippingDestination,
   createTrackGroup,
@@ -29,8 +29,8 @@ describe("GET /v1/merch/{id}", () => {
 
   it("should GET / 404 when the artist is disabled", async () => {
     const { user } = await createUser({ email: "artist@artist.com" });
-    const artist = await createArtist(user.id, { enabled: false });
-    const merch = await createMerch(artist.id, {
+    const profile = await createProfile(user.id, { enabled: false });
+    const merch = await createMerch(profile.id, {
       title: "Tote bag",
       isPublic: true,
     });
@@ -45,8 +45,8 @@ describe("GET /v1/merch/{id}", () => {
 
   it("should GET / 200 for an admin when the artist is disabled", async () => {
     const { user } = await createUser({ email: "artist@artist.com" });
-    const artist = await createArtist(user.id, { enabled: false });
-    const merch = await createMerch(artist.id, {
+    const profile = await createProfile(user.id, { enabled: false });
+    const merch = await createMerch(profile.id, {
       title: "Tote bag",
       isPublic: true,
     });
@@ -74,7 +74,7 @@ describe("GET /v1/merch/{id}", () => {
       email: "label@example.com",
       isLabelAccount: true,
     });
-    const label = await createArtist(labelUser.id, {
+    const label = await createProfile(labelUser.id, {
       name: "Timeless Records",
       urlSlug: "timeless-records",
       isLabelProfile: true,
@@ -83,13 +83,13 @@ describe("GET /v1/merch/{id}", () => {
     const { user: rosterUser } = await createUser({
       email: "roster@example.com",
     });
-    const rosterArtist = await createArtist(rosterUser.id, {
+    const artist = await createProfile(rosterUser.id, {
       name: "Roster Artist",
       urlSlug: "roster-artist",
     });
 
     // Album lives under the roster artist…
-    const album = await createTrackGroup(rosterArtist.id, {
+    const album = await createTrackGroup(artist.id, {
       title: "Roster Album",
       urlSlug: "roster-album",
     });
@@ -122,7 +122,7 @@ describe("GET /v1/merch/{id}", () => {
     assert.equal(response.body.result.artist?.urlSlug, label.urlSlug);
     assert.equal(
       response.body.result.includePurchaseTrackGroup?.artist?.urlSlug,
-      rosterArtist.urlSlug,
+      artist.urlSlug,
       "trackGroup carries its own artist so the album link points to /roster-artist/release/roster-album, not /timeless-records/release/..."
     );
   });

@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistEditableByUser,
+  profileEditableByUser,
   userAuthenticated,
   userLoggedInWithoutRedirect,
 } from "../../../../auth/passport";
@@ -33,18 +33,18 @@ export default function () {
         });
       }
 
-      const { artistId, ...intent } = await getPaymentProcessor().getStatus({
+      const { profileId, ...intent } = await getPaymentProcessor().getStatus({
         id,
         accountId: stripeAccountId,
       });
 
       let artistName: string | null = null;
-      if (artistId) {
-        const artist = await prisma.profile.findFirst({
-          where: { id: Number(artistId) },
+      if (profileId) {
+        const profile = await prisma.profile.findFirst({
+          where: { id: Number(profileId) },
           select: { name: true },
         });
-        artistName = artist?.name ?? null;
+        artistName = profile?.name ?? null;
       }
 
       res.status(200).json({ result: { ...intent, artistName } });
@@ -283,19 +283,19 @@ export default function () {
       }
 
       const processor = getPaymentProcessor();
-      const { artistId, status } = await processor.getStatus({
+      const { profileId, status } = await processor.getStatus({
         id,
         accountId: stripeAccountId,
       });
 
-      if (!artistId) {
+      if (!profileId) {
         throw new AppError({
           httpCode: 404,
           description: "Purchase not found",
         });
       }
 
-      await artistEditableByUser(Number(artistId), req.user as Express.User);
+      await profileEditableByUser(Number(profileId), req.user as Express.User);
 
       if (status === "succeeded") {
         throw new AppError({
