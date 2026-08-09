@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistEditableByUser,
+  profileEditableByUser,
   userAuthenticated,
   userLoggedInWithoutRedirect,
 } from "../../../../auth/passport";
@@ -40,11 +40,11 @@ export default function () {
 
       let artistName: string | null = null;
       if (artistId) {
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: { id: Number(artistId) },
           select: { name: true },
         });
-        artistName = artist?.name ?? null;
+        artistName = profile?.name ?? null;
       }
 
       res.status(200).json({ result: { ...intent, artistName } });
@@ -295,7 +295,7 @@ export default function () {
         });
       }
 
-      await artistEditableByUser(Number(artistId), req.user as Express.User);
+      await profileEditableByUser(Number(artistId), req.user as Express.User);
 
       if (status === "succeeded") {
         throw new AppError({

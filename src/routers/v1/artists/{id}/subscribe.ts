@@ -123,7 +123,7 @@ export default function () {
         loggedInUser,
         email,
         stripeAccountId,
-        artistId: newTier.profileId,
+        profileId: newTier.profileId,
         tier: newTier,
         amount,
         userName: name,

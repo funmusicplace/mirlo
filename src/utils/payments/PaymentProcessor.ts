@@ -11,7 +11,7 @@ export type CreatePaymentArgs = {
 
 export type CreateSubscriptionSetupArgs = {
   tierId: number;
-  artistId: number;
+  profileId: number;
   accountId: string;
   amount: number;
   currency: string;
