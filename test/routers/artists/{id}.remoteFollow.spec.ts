@@ -9,7 +9,7 @@ import sinon from "sinon";
 
 import { root } from "../../../src/activityPub/utils";
 import remoteFollow from "../../../src/routers/v1/artists/{id}/remoteFollow";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 const getHandler = () => remoteFollow().GET[0];
 
@@ -51,20 +51,17 @@ describe("artists/{id}/remoteFollow", () => {
       mockNext as unknown as Parameters<ReturnType<typeof getHandler>>[2]
     );
 
-  const createApArtist = async () => {
+  const createApProfile = async () => {
     const { user } = await createUser({ email: "artist@artist.com" });
-    return createArtist(user.id, {
-      name: "Test artist",
-      urlSlug: "test-artist",
-      enabled: true,
+    return createProfile(user.id, {
       activityPub: true,
     });
   };
 
   it("should error when handle is missing", async () => {
-    const artist = await createApArtist();
+    const profile = await createApProfile();
 
-    await callHandler({ id: `${artist.id}` }, {});
+    await callHandler({ id: `${profile.id}` }, {});
 
     const error = mockNext.getCall(0).args[0];
     assert.equal(error.httpCode, 400);
@@ -72,9 +69,9 @@ describe("artists/{id}/remoteFollow", () => {
   });
 
   it("should error when handle is not in user@server format", async () => {
-    const artist = await createApArtist();
+    const profile = await createApProfile();
 
-    await callHandler({ id: `${artist.id}` }, { handle: "notahandle" });
+    await callHandler({ id: `${profile.id}` }, { handle: "notahandle" });
 
     const error = mockNext.getCall(0).args[0];
     assert.equal(error.httpCode, 400);
@@ -91,15 +88,13 @@ describe("artists/{id}/remoteFollow", () => {
 
   it("should error when the artist is not on the fediverse", async () => {
     const { user } = await createUser({ email: "artist@artist.com" });
-    const artist = await createArtist(user.id, {
+    const profile = await createProfile(user.id, {
       name: "No AP artist",
       urlSlug: "no-ap",
-      enabled: true,
-      activityPub: false,
     });
 
     await callHandler(
-      { id: `${artist.id}` },
+      { id: `${profile.id}` },
       { handle: "@me@mastodon.social" }
     );
 
@@ -109,14 +104,14 @@ describe("artists/{id}/remoteFollow", () => {
   });
 
   it("should error when the follower's server has no remote-follow template", async () => {
-    const artist = await createApArtist();
+    const profile = await createApProfile();
     fetchStub.resolves({
       ok: true,
       json: async () => ({ links: [{ rel: "self", href: "https://x" }] }),
     } as unknown as Response);
 
     await callHandler(
-      { id: `${artist.id}` },
+      { id: `${profile.id}` },
       { handle: "@me@mastodon.social" }
     );
 
@@ -125,11 +120,11 @@ describe("artists/{id}/remoteFollow", () => {
   });
 
   it("should 404 when the follower can't be found on their server", async () => {
-    const artist = await createApArtist();
+    const profile = await createApProfile();
     fetchStub.resolves({ ok: false } as unknown as Response);
 
     await callHandler(
-      { id: `${artist.id}` },
+      { id: `${profile.id}` },
       { handle: "@me@mastodon.social" }
     );
 
@@ -138,7 +133,7 @@ describe("artists/{id}/remoteFollow", () => {
   });
 
   it("should resolve the remote-follow redirect for the artist", async () => {
-    const artist = await createApArtist();
+    const profile = await createApProfile();
     fetchStub.resolves({
       ok: true,
       json: async () => ({
@@ -147,7 +142,7 @@ describe("artists/{id}/remoteFollow", () => {
     } as unknown as Response);
 
     await callHandler(
-      { id: `${artist.id}` },
+      { id: `${profile.id}` },
       { handle: "@me@mastodon.social" }
     );
 
@@ -160,7 +155,7 @@ describe("artists/{id}/remoteFollow", () => {
       "https://mastodon.social/.well-known/webfinger?resource=acct:me@mastodon.social"
     );
 
-    const expectedUri = encodeURIComponent(`${artist.urlSlug}@${root}`);
+    const expectedUri = encodeURIComponent(`${profile.urlSlug}@${root}`);
     const { result } = jsonStub.getCall(0).args[0];
     assert.equal(
       result.redirectUrl,

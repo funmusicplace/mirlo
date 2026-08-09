@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import { serializeUserTransaction } from "../../../../serializers/userTransaction";
 
 const constructDateFilter = (
@@ -21,7 +21,7 @@ const constructDateFilter = (
 };
 
 const queryUserTransactions = (
-  artistId: number[],
+  profileId: number[],
   sinceDate?: string,
   untilDate?: string,
   trackGroupIds?: number[],
@@ -39,7 +39,7 @@ const queryUserTransactions = (
         some: {
           trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
           trackGroup: {
-            profileId: { in: artistId },
+            profileId: { in: profileId },
           },
         },
       },
@@ -48,7 +48,7 @@ const queryUserTransactions = (
       merchPurchases: {
         some: {
           merch: {
-            profileId: { in: artistId },
+            profileId: { in: profileId },
           },
         },
       },
@@ -57,7 +57,7 @@ const queryUserTransactions = (
       trackPurchases: {
         some: {
           track: {
-            trackGroup: { profileId: { in: artistId } },
+            trackGroup: { profileId: { in: profileId } },
           },
         },
       },
@@ -66,7 +66,7 @@ const queryUserTransactions = (
       tips: {
         some: {
           profileId: {
-            in: artistId,
+            in: profileId,
           },
         },
       },
@@ -76,7 +76,7 @@ const queryUserTransactions = (
         some: {
           profileUserSubscription: {
             profileSubscriptionTier: {
-              profileId: { in: artistId },
+              profileId: { in: profileId },
             },
           },
         },
@@ -230,6 +230,7 @@ const generateTitle = (
 };
 
 export const findSales = async ({
+  profileId,
   artistId,
   sinceDate,
   untilDate,
@@ -237,7 +238,9 @@ export const findSales = async ({
   orderBy,
   paymentToUserId,
 }: {
-  artistId: number[];
+  profileId?: number[];
+  /** @deprecated use profileId; kept for callers outside this slice */
+  artistId?: number[];
   sinceDate?: string;
   untilDate?: string;
   filters?: {
@@ -248,6 +251,10 @@ export const findSales = async ({
   // queryUserTransactions).
   paymentToUserId?: number;
 }) => {
+  profileId = profileId ?? artistId;
+  if (!profileId) {
+    throw new Error("profileId or artistId is required");
+  }
   if (sinceDate) {
     const date = new Date(sinceDate);
     if (isNaN(date.getTime())) {
@@ -265,7 +272,7 @@ export const findSales = async ({
   let userTransactions: Awaited<ReturnType<typeof queryUserTransactions>> = [];
   if (!filters) {
     userTransactions = await queryUserTransactions(
-      artistId,
+      profileId,
       sinceDate,
       untilDate,
       undefined,
@@ -273,7 +280,7 @@ export const findSales = async ({
     );
   } else if (filters.trackGroupIds) {
     userTransactions = await queryUserTransactions(
-      artistId,
+      profileId,
       sinceDate,
       untilDate,
       filters.trackGroupIds,
@@ -339,10 +346,10 @@ export default function () {
     };
 
     try {
-      const parsedId = await findArtistIdForURLSlug(id);
-      let artist;
+      const parsedId = await findProfileIdForURLSlug(id);
+      let profile;
       if (parsedId) {
-        artist = await prisma.profile.findFirst({
+        profile = await prisma.profile.findFirst({
           where: {
             id: Number(parsedId),
           },
@@ -352,7 +359,7 @@ export default function () {
         });
       }
 
-      if (!artist) {
+      if (!profile) {
         return res.status(404).json({
           error: "Artist not found",
         });
@@ -364,7 +371,7 @@ export default function () {
       }
 
       const results = await findSales({
-        artistId: [Number(parsedId)],
+        profileId: [Number(parsedId)],
         sinceDate: sinceDate as string,
         filters: trackGroupIds
           ? {

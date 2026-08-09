@@ -7,7 +7,7 @@ import { userAuthenticated } from "../../../../auth/passport";
 import sendMail from "../../../../jobs/send-mail";
 import { AppError } from "../../../../utils/error";
 import { getClient } from "../../../../utils/getClient";
-import { processSingleArtist } from "../../../../serializers/artist";
+import { serializeProfile } from "../../../../serializers/artist";
 
 type Params = { id: string };
 
@@ -21,7 +21,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const { message } = req.body as { message?: string };
     const sender = req.user as User;
 
@@ -40,9 +40,9 @@ export default function () {
         });
       }
 
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(profileId),
           enabled: true,
           deletedAt: null,
         },
@@ -51,18 +51,18 @@ export default function () {
         },
       });
 
-      if (!artist) {
+      if (!profile) {
         throw new AppError({ httpCode: 404, description: "Artist not found" });
       }
 
-      if (artist.user.id === sender.id) {
+      if (profile.user.id === sender.id) {
         throw new AppError({
           httpCode: 400,
           description: "You can't contact yourself",
         });
       }
 
-      if (!artist.allowDirectMessages) {
+      if (!profile.allowDirectMessages) {
         throw new AppError({
           httpCode: 403,
           description: "This artist is not accepting direct messages",
@@ -72,7 +72,7 @@ export default function () {
       const recentCount = await prisma.notification.count({
         where: {
           notificationType: "ARTIST_CONTACT_MESSAGE",
-          profileId: artist.id,
+          profileId: profile.id,
           relatedUserId: sender.id,
           createdAt: { gte: new Date(Date.now() - CONTACT_RATE_WINDOW_MS) },
         },
@@ -88,9 +88,9 @@ export default function () {
       await prisma.notification.create({
         data: {
           notificationType: "ARTIST_CONTACT_MESSAGE",
-          userId: artist.user.id,
+          userId: profile.user.id,
           relatedUserId: sender.id,
-          profileId: artist.id,
+          profileId: profile.id,
           content: trimmed,
         },
       });
@@ -100,11 +100,11 @@ export default function () {
         data: {
           template: "artist-contact-message",
           message: {
-            to: artist.user.email,
+            to: profile.user.email,
             replyTo: sender.email,
           },
           locals: {
-            artist: processSingleArtist(artist),
+            artist: serializeProfile(profile),
             sender: { name: senderName, email: sender.email },
             message: trimmed,
             host: process.env.API_DOMAIN,

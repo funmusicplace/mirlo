@@ -1,15 +1,15 @@
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 
-export const getUserSubscriptionForArtist = async (
+export const getUserSubscriptionForProfile = async (
   user: User | undefined,
-  artistId: number
+  profileId: number
 ) => {
   if (!user) return null;
   return prisma.profileUserSubscription.findFirst({
     where: {
       userId: user.id,
-      profileSubscriptionTier: { profileId: artistId },
+      profileSubscriptionTier: { profileId },
     },
     orderBy: { amount: "desc" },
     select: { amount: true, profileSubscriptionTierId: true },
@@ -27,11 +27,11 @@ type PostAccessFields = {
 export const canUserSeePostContent = (
   post: PostAccessFields,
   context: {
-    isArtistOwner: boolean;
+    isProfileOwner: boolean;
     subscription: { amount: number; profileSubscriptionTierId: number } | null;
   }
 ): boolean => {
-  if (post.isPublic || context.isArtistOwner) return true;
+  if (post.isPublic || context.isProfileOwner) return true;
   if (!context.subscription) return false;
   return (
     (post.minimumSubscriptionTier?.minAmount ?? 0) <=
@@ -49,11 +49,11 @@ export const getCanUserSeePostContent = async (
   user: User | undefined,
   post: PostAccessFields
 ): Promise<boolean> => {
-  const isArtistOwner = !!(user && post.profile?.userId === user.id);
+  const isProfileOwner = !!(user && post.profile?.userId === user.id);
   const subscription = post.profileId
-    ? await getUserSubscriptionForArtist(user, post.profileId)
+    ? await getUserSubscriptionForProfile(user, post.profileId)
     : null;
-  return canUserSeePostContent(post, { isArtistOwner, subscription });
+  return canUserSeePostContent(post, { isProfileOwner, subscription });
 };
 
 type PostTracksForPurchases = {

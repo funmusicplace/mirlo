@@ -14,7 +14,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: artistId } = req.params as unknown as Params;
+    const { id: profileId } = req.params as unknown as Params;
     const user = req.user;
     const { email } = req.body ?? {};
 
@@ -33,16 +33,16 @@ export default function () {
       }
 
       if (userIdToRemove) {
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: {
-            id: Number(artistId),
+            id: Number(profileId),
           },
           include: {
             subscriptionTiers: true,
           },
         });
 
-        if (artist) {
+        if (profile) {
           // Free follows (the default tier) have no payment behind them, so
           // "unfollow" removes them outright. Paid subscriptions keep billing
           // and access untouched — this endpoint only turns off the emails,
@@ -50,7 +50,7 @@ export default function () {
           await prisma.profileUserSubscription.deleteMany({
             where: {
               profileSubscriptionTier: {
-                profileId: artist.id,
+                profileId: profile.id,
                 isDefaultTier: true,
               },
               userId: userIdToRemove,
@@ -59,7 +59,7 @@ export default function () {
           await prisma.profileUserSubscription.updateMany({
             where: {
               profileSubscriptionTier: {
-                profileId: artist.id,
+                profileId: profile.id,
                 isDefaultTier: false,
               },
               userId: userIdToRemove,

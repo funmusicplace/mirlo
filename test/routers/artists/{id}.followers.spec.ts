@@ -5,7 +5,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import { clearTables } from "../../utils";
+import { clearTables, createProfile } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("artists/{id}/followers", () => {
@@ -31,17 +31,10 @@ describe("artists/{id}/followers", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.profile.create({
-      data: {
-        name: "Test artist",
-        urlSlug: "test-artist",
-        userId: user.id,
-        enabled: true,
-      },
-    });
+    const profile = await createProfile(user.id);
 
     const response = await requestApp
-      .get(`artists/${artist.id}/followers`)
+      .get(`artists/${profile.id}/followers`)
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
