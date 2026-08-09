@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("artists/{id]/unfollow", () => {
@@ -36,20 +36,16 @@ describe("artists/{id]/unfollow", () => {
     });
 
     it("should unfollow an artist", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
       });
 
       const { user: followerUser, accessToken } = await createUser({
         email: "follower@follower.com",
       });
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+      const profile = await createProfile(profileOwner.id);
       const response = await requestApp
-        .post(`artists/${artist.id}/unfollow`)
+        .post(`artists/${profile.id}/unfollow`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
@@ -59,7 +55,7 @@ describe("artists/{id]/unfollow", () => {
         where: {
           userId: followerUser.id,
           profileSubscriptionTier: {
-            profileId: artist.id,
+            profileId: profile.id,
           },
         },
       });
@@ -75,10 +71,7 @@ describe("artists/{id]/unfollow", () => {
       const { user: followerUser, accessToken } = await createUser({
         email: "follower@follower.com",
       });
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
+      const artist = await createProfile(artistUser.id, {
         subscriptionTiers: {
           create: [
             { name: "Follow", isDefaultTier: true },
@@ -113,24 +106,21 @@ describe("artists/{id]/unfollow", () => {
     });
 
     it("should unfollow an artist with just an email address", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
       });
 
       const { user: followerUser } = await createUser({
         email: "follower@follower.com",
       });
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
+      const profile = await createProfile(profileOwner.id, {
         subscriptionTiers: { create: { name: "a tier", isDefaultTier: true } },
       });
 
-      assert(artist.subscriptionTiers.length > 0);
+      assert(profile.subscriptionTiers.length > 0);
 
       const response = await requestApp
-        .post(`artists/${artist.id}/unfollow`)
+        .post(`artists/${profile.id}/unfollow`)
         .send({
           email: followerUser.email,
         })

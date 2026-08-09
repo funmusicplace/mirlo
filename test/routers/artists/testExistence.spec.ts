@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
@@ -21,10 +21,10 @@ describe("artists", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await request(baseURL)
-        .get(`artists/testExistence?urlSlug=${artist.urlSlug}`)
+        .get(`artists/testExistence?urlSlug=${profile.urlSlug}`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
@@ -36,7 +36,7 @@ describe("artists", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await request(baseURL)
         .get(`artists/testExistence?urlSlug=random-slug`)
@@ -51,11 +51,11 @@ describe("artists", () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
 
       const response = await request(baseURL)
         .get(
-          `artists/testExistence?urlSlug=${artist.urlSlug}&forArtistId=${artist.id}`
+          `artists/testExistence?urlSlug=${profile.urlSlug}&forArtistId=${profile.id}`
         )
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);

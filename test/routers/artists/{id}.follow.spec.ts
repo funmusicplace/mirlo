@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 
 import { requestApp } from "../utils";
 
@@ -36,7 +36,7 @@ describe("artists/{id]/follow", () => {
     });
 
     it("should follow an artist", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
         emailConfirmationToken: null,
       });
@@ -45,13 +45,9 @@ describe("artists/{id]/follow", () => {
         email: "follower@follower.com",
         emailConfirmationToken: null,
       });
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+      const profile = await createProfile(profileOwner.id);
       const response = await requestApp
-        .post(`artists/${artist.id}/follow`)
+        .post(`artists/${profile.id}/follow`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
@@ -62,7 +58,7 @@ describe("artists/{id]/follow", () => {
         where: {
           userId: followerUser.id,
           profileSubscriptionTier: {
-            profileId: artist.id,
+            profileId: profile.id,
           },
         },
       });
@@ -71,7 +67,7 @@ describe("artists/{id]/follow", () => {
     });
 
     it("should create a follow confirmation when not logged in", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
         emailConfirmationToken: null,
       });
@@ -80,13 +76,9 @@ describe("artists/{id]/follow", () => {
         email: "follower@follower.com",
         emailConfirmationToken: null,
       });
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+      const profile = await createProfile(profileOwner.id);
       const response = await requestApp
-        .post(`artists/${artist.id}/follow`)
+        .post(`artists/${profile.id}/follow`)
         .send({
           email: "follower@follower.com",
         })
@@ -98,7 +90,7 @@ describe("artists/{id]/follow", () => {
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            profileId: artist.id,
+            profileId: profile.id,
           },
         });
 
@@ -106,18 +98,14 @@ describe("artists/{id]/follow", () => {
     });
 
     it("should create a follow confirmation when not logged in and user doesn't exist", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
         emailConfirmationToken: null,
       });
 
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+      const profile = await createProfile(profileOwner.id);
       const response = await requestApp
-        .post(`artists/${artist.id}/follow`)
+        .post(`artists/${profile.id}/follow`)
         .send({
           email: "follower@follower.com",
         })
@@ -129,7 +117,7 @@ describe("artists/{id]/follow", () => {
         await prisma.profileUserSubscriptionConfirmation.findFirst({
           where: {
             email: "follower@follower.com",
-            profileId: artist.id,
+            profileId: profile.id,
           },
         });
 
@@ -137,7 +125,7 @@ describe("artists/{id]/follow", () => {
     });
 
     it("should reject logged in users without a verified email", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
         emailConfirmationToken: null,
       });
@@ -147,14 +135,10 @@ describe("artists/{id]/follow", () => {
         emailConfirmationToken: randomUUID(),
       });
 
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+      const profile = await createProfile(profileOwner.id);
 
       const response = await requestApp
-        .post(`artists/${artist.id}/follow`)
+        .post(`artists/${profile.id}/follow`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
@@ -166,7 +150,7 @@ describe("artists/{id]/follow", () => {
     });
 
     it("should reject anonymous follow requests for unverified users", async () => {
-      const { user: artistUser } = await createUser({
+      const { user: profileOwner } = await createUser({
         email: "test@test.com",
         emailConfirmationToken: null,
       });
@@ -176,14 +160,10 @@ describe("artists/{id]/follow", () => {
         emailConfirmationToken: randomUUID(),
       });
 
-      const artist = await createArtist(artistUser.id, {
-        name: "Test artist",
-        userId: artistUser.id,
-        enabled: true,
-      });
+      const profile = await createProfile(profileOwner.id);
 
       const response = await requestApp
-        .post(`artists/${artist.id}/follow`)
+        .post(`artists/${profile.id}/follow`)
         .send({
           email: "follower@follower.com",
         })

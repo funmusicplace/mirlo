@@ -14,19 +14,20 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { urlSlug, forArtistId } = req.query as unknown as Query;
+    const { urlSlug, forArtistId: forProfileId } =
+      req.query as unknown as Query;
     try {
       let exists = false;
       if (urlSlug) {
-        const artist = await prisma.profile.findFirst({
+        const profile = await prisma.profile.findFirst({
           where: {
             AND: {
               urlSlug: { equals: urlSlug, mode: "insensitive" },
-              ...(forArtistId ? { id: { not: Number(forArtistId) } } : {}),
+              ...(forProfileId ? { id: { not: Number(forProfileId) } } : {}),
             },
           },
         });
-        exists = !!artist;
+        exists = !!profile;
       } else {
         throw new AppError({
           httpCode: 400,
