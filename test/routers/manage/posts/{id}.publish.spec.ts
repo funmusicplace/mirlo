@@ -5,7 +5,7 @@ import { describe, it, afterEach } from "mocha";
 import sinon from "sinon";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createPost,
   createUser,
 } from "../../../utils";
@@ -50,8 +50,8 @@ describe("manage/posts/{id}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
       assert.equal(post.isDraft, true);
 
       await requestApp
@@ -70,9 +70,9 @@ describe("manage/posts/{id}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       // Create post as published
-      const post = await createPost(artist.id, { isDraft: false });
+      const post = await createPost(profile.id, { isDraft: false });
       assert.equal(post.isDraft, false);
 
       // Manually add a pending notification job to the queue (simulating a previously published post)
@@ -122,8 +122,8 @@ describe("manage/posts/{id}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { shouldSendEmail: false });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { shouldSendEmail: false });
       assert.equal(post.isDraft, true);
       assert.equal(post.shouldSendEmail, false);
 
@@ -152,8 +152,8 @@ describe("manage/posts/{id}/publish", () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { content: "" });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { content: "" });
       assert.equal(post.isDraft, true);
       assert.equal(post.content, "");
 

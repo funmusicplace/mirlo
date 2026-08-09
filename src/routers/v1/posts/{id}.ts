@@ -16,19 +16,19 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
-    const { artistId }: { artistId?: string } = req.query;
+    const { artistId: profileId }: { artistId?: string } = req.query;
     const user = req.user;
 
     try {
       let postForURLSlug;
-      if (artistId) {
+      if (profileId) {
         postForURLSlug = await prisma.post.findFirst({
           where: {
             AND: [
               { urlSlug: { equals: id, mode: "insensitive" } },
               {
                 profile: {
-                  urlSlug: artistId,
+                  urlSlug: profileId,
                 },
               },
             ],
