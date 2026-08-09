@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -26,8 +26,8 @@ describe("tracks/{id}/testOwns", () => {
   describe("GET", () => {
     it("should return exists=true when user has a direct track purchase", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         tracks: [],
       });
@@ -50,8 +50,8 @@ describe("tracks/{id}/testOwns", () => {
 
     it("should return exists=true for isPreview track when user has purchased the album", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         tracks: [],
       });
@@ -72,8 +72,8 @@ describe("tracks/{id}/testOwns", () => {
 
     it("should return exists=false for non-preview track when user only has album purchase", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
         tracks: [],
       });

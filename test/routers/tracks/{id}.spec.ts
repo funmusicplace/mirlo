@@ -4,7 +4,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrackGroup,
   createUser,
   createTrack,
@@ -36,8 +36,8 @@ describe("tracks/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id, {
         title: "test track",
         description: "This is a test description",
@@ -58,8 +58,8 @@ describe("tracks/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const track = await createTrack(trackGroup.id, {
         title: "test track",
       });
@@ -76,8 +76,8 @@ describe("tracks/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         tracks: [
           {
             title: "Track 1",
@@ -107,8 +107,8 @@ describe("tracks/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
         tracks: [
           {
             title: "Track 1",
@@ -140,8 +140,8 @@ describe("tracks/{id}", () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
       const tracks = await prisma.track.findMany({
         where: { trackGroupId: trackGroup.id },
       });
