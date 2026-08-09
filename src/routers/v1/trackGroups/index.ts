@@ -24,15 +24,15 @@ export default function () {
       take = format === "rss" ? 50 : 10,
       orderBy,
       tag,
-      artistId,
+      artistId: profileId,
       license,
       title,
       locationSlug,
-      artistName,
+      artistName: profileName,
       isReleased,
       q,
     } = req.query;
-    const distinctArtists = req.query.distinctArtists === "true";
+    const distinctProfiles = req.query.distinctArtists === "true";
     const loggedInUser = req.user;
 
     try {
@@ -60,8 +60,8 @@ export default function () {
         });
       }
 
-      if (artistId) {
-        where.profileId = Number(artistId);
+      if (profileId) {
+        where.profileId = Number(profileId);
       }
 
       if (locationSlug && typeof locationSlug === "string") {
@@ -77,11 +77,11 @@ export default function () {
         };
       }
 
-      if (artistName && typeof artistName === "string") {
+      if (profileName && typeof profileName === "string") {
         if (!where.profile) {
           where.profile = {};
         }
-        where.profile.name = { contains: artistName, mode: "insensitive" };
+        where.profile.name = { contains: profileName, mode: "insensitive" };
       }
 
       if (license && license !== "" && license !== "all") {
@@ -155,7 +155,7 @@ export default function () {
       // Note that the distinct query does not support a count
       // https://github.com/prisma/prisma/issues/4228. Though we
       // could probably write a custom query (ditto to random)
-      if (!distinctArtists) {
+      if (!distinctProfiles) {
         itemCount = await prisma.trackGroup.count({
           where,
         });
@@ -217,7 +217,7 @@ export default function () {
 
       const trackGroups = await prisma.trackGroup.findMany({
         where,
-        ...(distinctArtists ? { distinct: "profileId" } : {}),
+        ...(distinctProfiles ? { distinct: "profileId" } : {}),
         orderBy: where.id ? undefined : orderByClause,
         skip: skip && !where.id ? Number(skip) : undefined,
         take: take && !where.id ? Number(take) : undefined,

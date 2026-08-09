@@ -15,7 +15,7 @@ import {
 } from "../../../src/utils/minio";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createTrackGroup,
   createUser,
@@ -40,7 +40,7 @@ describe("trackGroups/{id}: generate-album job + download route", () => {
     this.timeout(30_000);
 
     const { user } = await createUser({ email: "artist@artist.com" });
-    const artist = await createArtist(user.id);
+    const artist = await createProfile(user.id);
     const tg = await createTrackGroup(artist.id, { tracks: [] });
     const tgWithCover = await prisma.trackGroup.findFirstOrThrow({
       where: { id: tg.id },
@@ -83,7 +83,7 @@ describe("trackGroups/{id}: generate-album job + download route", () => {
     this.timeout(30_000);
 
     const { user } = await createUser({ email: "artist@artist.com" });
-    const artist = await createArtist(user.id);
+    const artist = await createProfile(user.id);
     const tg = await createTrackGroup(artist.id, { tracks: [] });
     const tgWithCover = await prisma.trackGroup.findFirstOrThrow({
       where: { id: tg.id },
@@ -126,7 +126,7 @@ describe("trackGroups/{id}: generate-album job + download route", () => {
     this.timeout(30_000);
 
     const { user } = await createUser({ email: "artist@artist.com" });
-    const artist = await createArtist(user.id);
+    const artist = await createProfile(user.id);
     const tg = await createTrackGroup(artist.id, { tracks: [] });
     const tgWithCover = await prisma.trackGroup.findFirstOrThrow({
       where: { id: tg.id },
