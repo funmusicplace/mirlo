@@ -4,15 +4,15 @@ import { singleInclude, whereForVisibleProfile } from "../utils/artist";
 import { merchImagesInclude } from "../utils/merch";
 import { postImagesForContent } from "../utils/postContent";
 
-export async function fetchArtistMetadata(artistSlug: string): Promise<any> {
+export async function fetchProfileMetadata(profileSlug: string): Promise<any> {
   return await prisma.profile.findFirst({
-    where: { urlSlug: artistSlug, ...whereForVisibleProfile() },
+    where: { urlSlug: profileSlug, ...whereForVisibleProfile() },
     include: singleInclude({ includeDefaultTier: true }) as any,
   });
 }
 
 export async function fetchAlbumMetadata(
-  artistSlug: string,
+  profileSlug: string,
   albumSlug: string
 ) {
   return await prisma.trackGroup.findFirst({
@@ -20,7 +20,7 @@ export async function fetchAlbumMetadata(
       urlSlug: albumSlug,
       deletedAt: null,
       adminEnabled: true,
-      profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
+      profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
     },
     include: {
       profile: true,
@@ -35,29 +35,29 @@ export async function fetchAlbumMetadata(
 }
 
 export async function fetchTrackMetadata(
-  artistSlug: string,
+  profileSlug: string,
   albumSlug: string,
   trackId: number
 ) {
-  const album = await fetchAlbumMetadata(artistSlug, albumSlug);
+  const album = await fetchAlbumMetadata(profileSlug, albumSlug);
   if (!album) return null;
 
   return album.tracks.find((t) => t.id === trackId);
 }
 
 export async function fetchPostMetadata(
-  artistSlug: string,
+  profileSlug: string,
   postLookup: { id: number } | { slug: string }
 ) {
   const where =
     "id" in postLookup
       ? {
           id: postLookup.id,
-          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
+          profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
         }
       : {
           urlSlug: { equals: postLookup.slug, mode: "insensitive" as const },
-          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
+          profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
         };
 
   return await prisma.post.findFirst({
@@ -72,10 +72,10 @@ export async function fetchPostMetadata(
 }
 
 export async function fetchSubscriptionTierMetadata(
-  artistSlug: string,
+  profileSlug: string,
   tierId: string
 ) {
-  const profile = { urlSlug: artistSlug, ...whereForVisibleProfile() };
+  const profile = { urlSlug: profileSlug, ...whereForVisibleProfile() };
   const numericId = Number(tierId);
 
   return await prisma.profileSubscriptionTier.findFirst({
@@ -98,18 +98,18 @@ export async function fetchSubscriptionTierMetadata(
 }
 
 export async function fetchMerchMetadata(
-  artistSlug: string,
+  profileSlug: string,
   merchLookup: { id: string } | { slug: string }
 ) {
   const where =
     "id" in merchLookup
       ? {
           id: merchLookup.id,
-          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
+          profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
         }
       : {
           urlSlug: { equals: merchLookup.slug, mode: "insensitive" as const },
-          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
+          profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
         };
 
   return await prisma.merch.findFirst({

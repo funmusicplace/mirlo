@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import logger from "../../../logger";
 import {
-  fetchArtistMetadata,
+  fetchProfileMetadata,
   fetchAlbumMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
@@ -84,14 +84,11 @@ export default function () {
         });
       }
 
-      const routeType = routeParams.type as string;
-
-      if (routeType === "album") {
+      if (routeParams.type === "album") {
         // Album detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
-        const albumSlug = routeParams.albumSlug as string | undefined;
-        if (artistSlug && albumSlug) {
-          const album = await fetchAlbumMetadata(artistSlug, albumSlug);
+        const { profileSlug, albumSlug } = routeParams;
+        if (profileSlug && albumSlug) {
+          const album = await fetchAlbumMetadata(profileSlug, albumSlug);
           if (album) {
             const coverUrl = storedImageVariantUrl(album.cover, 600);
             const releaseDate =
@@ -111,13 +108,11 @@ export default function () {
             };
           }
         }
-      } else if (routeType === "track") {
+      } else if (routeParams.type === "track") {
         // Track detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
-        const albumSlug = routeParams.albumSlug as string | undefined;
-        const trackId = routeParams.trackId as number | undefined;
-        if (artistSlug && albumSlug && trackId) {
-          const album = await fetchAlbumMetadata(artistSlug, albumSlug);
+        const { profileSlug, albumSlug, trackId } = routeParams;
+        if (profileSlug && albumSlug && trackId) {
+          const album = await fetchAlbumMetadata(profileSlug, albumSlug);
           if (album) {
             const track = album.tracks.find((t) => t.id === trackId);
             if (track) {
@@ -138,17 +133,15 @@ export default function () {
             }
           }
         }
-      } else if (routeType === "post") {
+      } else if (routeParams.type === "post") {
         // Post detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
-        const postId = routeParams.postId as number | undefined;
-        const postSlug = routeParams.postSlug as string | undefined;
+        const { profileSlug, postId, postSlug } = routeParams;
 
-        if (artistSlug) {
+        if (profileSlug) {
           const post = postId
-            ? await fetchPostMetadata(artistSlug, { id: postId })
+            ? await fetchPostMetadata(profileSlug, { id: postId })
             : postSlug
-              ? await fetchPostMetadata(artistSlug, { slug: postSlug })
+              ? await fetchPostMetadata(profileSlug, { slug: postSlug })
               : null;
 
           if (post) {
@@ -172,19 +165,18 @@ export default function () {
             };
           }
         }
-      } else if (routeType === "merch") {
+      } else if (routeParams.type === "merch") {
         // Merch detail
-        const artistSlug = routeParams.artistSlug as string | undefined;
-        const merchId = routeParams.merchId as string | undefined;
+        const { profileSlug, merchId } = routeParams;
 
-        if (artistSlug && merchId) {
+        if (profileSlug && merchId) {
           // Try to fetch by ID first, then by slug if it fails
           let merch = null;
           try {
-            merch = await fetchMerchMetadata(artistSlug, { id: merchId });
+            merch = await fetchMerchMetadata(profileSlug, { id: merchId });
           } catch {
             // ID format invalid (not a UUID), try by slug
-            merch = await fetchMerchMetadata(artistSlug, { slug: merchId });
+            merch = await fetchMerchMetadata(profileSlug, { slug: merchId });
           }
 
           if (merch) {
@@ -205,21 +197,21 @@ export default function () {
             };
           }
         }
-      } else if (routeType === "artist") {
+      } else if (routeParams.type === "profile") {
         // Artist profile
-        const artistSlug = routeParams.artistSlug as string | undefined;
-        if (artistSlug) {
-          const artist = await fetchArtistMetadata(artistSlug);
-          if (artist) {
-            const avatarUrl = storedImageVariantUrl(artist.avatar, 600);
-            const artistName = artist.name || (await getFallbackAuthorName());
+        const { profileSlug } = routeParams;
+        if (profileSlug) {
+          const profile = await fetchProfileMetadata(profileSlug);
+          if (profile) {
+            const avatarUrl = storedImageVariantUrl(profile.avatar, 600);
+            const profileName = profile.name || (await getFallbackAuthorName());
             oembedData = {
               type: "link",
               width: 400,
               height: 300,
-              title: artistName,
-              author_name: artistName,
-              author_url: `${client.applicationUrl}/${artist.urlSlug}`,
+              title: profileName,
+              author_name: profileName,
+              author_url: `${client.applicationUrl}/${profile.urlSlug}`,
               thumbnail_url: avatarUrl,
               thumbnail_width: 300,
               thumbnail_height: 300,

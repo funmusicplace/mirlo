@@ -10,10 +10,9 @@ export const findActivityPubAlternate = async (
   pathname: string
 ): Promise<string | null> => {
   const route = matchRoute(splitPathIntoSegments(pathname));
-  if (!route) return null;
+  if (!route || !("profileSlug" in route)) return null;
 
-  const artistSlug = route.artistSlug as string | undefined;
-  if (!artistSlug) return null;
+  const artistSlug = route.profileSlug;
 
   const profileWhere = {
     urlSlug: artistSlug,
@@ -22,7 +21,7 @@ export const findActivityPubAlternate = async (
   };
 
   switch (route.type) {
-    case "artist": {
+    case "profile": {
       const artist = await prisma.profile.findFirst({
         where: profileWhere,
         select: { urlSlug: true },

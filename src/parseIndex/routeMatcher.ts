@@ -1,9 +1,38 @@
-export type RouteParams = Record<string, string | number | undefined>;
+export type MatchedRoute =
+  | { type: "releases" }
+  | { type: "auth"; pageType: "login" | "signup" }
+  | {
+      type: "track";
+      profileSlug: string;
+      albumSlug: string;
+      trackId: number;
+    }
+  | { type: "album"; profileSlug: string; albumSlug: string }
+  | {
+      type: "post";
+      profileSlug: string;
+      postId: number;
+      postSlug?: undefined;
+    }
+  | {
+      type: "post";
+      profileSlug: string;
+      postSlug: string;
+      postId?: undefined;
+    }
+  | { type: "posts-index"; profileSlug: string }
+  | { type: "merch"; profileSlug: string; merchId: string }
+  | { type: "merch-index"; profileSlug: string }
+  | { type: "support"; profileSlug: string; tierId?: string }
+  | { type: "profile-releases"; profileSlug: string }
+  | { type: "profile"; profileSlug: string }
+  | { type: "widget-track"; trackId: number }
+  | { type: "widget-trackgroup"; trackGroupId: number };
 
 /**
  * Route pattern and parser
  */
-export type RoutePattern<T extends RouteParams = RouteParams> = {
+export type RoutePattern<T extends MatchedRoute = MatchedRoute> = {
   pattern: (segments: string[]) => T | null;
 };
 
@@ -11,7 +40,7 @@ export type RoutePattern<T extends RouteParams = RouteParams> = {
  * Route patterns with type-safe parameter extraction.
  * Patterns are tried in order until one matches.
  */
-const routePatterns: Array<RoutePattern<any>> = [
+const routePatterns: Array<RoutePattern> = [
   // /releases - latest releases page
   {
     pattern: (segments) =>
@@ -35,7 +64,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       isFinite(Number(segments[4]))
         ? {
             type: "track",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             albumSlug: segments[2],
             trackId: Number(segments[4]),
           }
@@ -45,7 +74,7 @@ const routePatterns: Array<RoutePattern<any>> = [
   {
     pattern: (segments) =>
       segments.length === 3 && segments[1] === "release"
-        ? { type: "album", artistSlug: segments[0], albumSlug: segments[2] }
+        ? { type: "album", profileSlug: segments[0], albumSlug: segments[2] }
         : null,
   },
   // /artistSlug/posts/postId (by ID)
@@ -56,7 +85,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       isFinite(Number(segments[2]))
         ? {
             type: "post",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             postId: Number(segments[2]),
           }
         : null,
@@ -67,7 +96,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       segments.length === 3 && segments[1] === "posts"
         ? {
             type: "post",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             postSlug: segments[2],
           }
         : null,
@@ -76,7 +105,7 @@ const routePatterns: Array<RoutePattern<any>> = [
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "posts"
-        ? { type: "posts-index", artistSlug: segments[0] }
+        ? { type: "posts-index", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug/merch/merchId (by UUID or slug)
@@ -85,7 +114,7 @@ const routePatterns: Array<RoutePattern<any>> = [
       segments.length === 3 && segments[1] === "merch"
         ? {
             type: "merch",
-            artistSlug: segments[0],
+            profileSlug: segments[0],
             merchId: segments[2],
           }
         : null,
@@ -94,35 +123,35 @@ const routePatterns: Array<RoutePattern<any>> = [
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "merch"
-        ? { type: "merch-index", artistSlug: segments[0] }
+        ? { type: "merch-index", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug/support/tierId (by id or slug)
   {
     pattern: (segments) =>
       segments.length === 3 && segments[1] === "support"
-        ? { type: "support", artistSlug: segments[0], tierId: segments[2] }
+        ? { type: "support", profileSlug: segments[0], tierId: segments[2] }
         : null,
   },
   // /artistSlug/support
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "support"
-        ? { type: "support", artistSlug: segments[0] }
+        ? { type: "support", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug/releases
   {
     pattern: (segments) =>
       segments.length === 2 && segments[1] === "releases"
-        ? { type: "artist-releases", artistSlug: segments[0] }
+        ? { type: "profile-releases", profileSlug: segments[0] }
         : null,
   },
   // /artistSlug - artist profile
   {
     pattern: (segments) =>
       segments.length === 1
-        ? { type: "artist", artistSlug: segments[0] }
+        ? { type: "profile", profileSlug: segments[0] }
         : null,
   },
   // /widget/track/:id
@@ -170,7 +199,7 @@ export const splitPathIntoSegments = (pathname: string): string[] =>
 /**
  * Match a pathname against route patterns and extract typed parameters
  */
-export const matchRoute = (segments: string[]): RouteParams | null => {
+export const matchRoute = (segments: string[]): MatchedRoute | null => {
   for (const routePattern of routePatterns) {
     const params = routePattern.pattern(segments);
     if (params !== null) {

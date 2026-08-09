@@ -12,8 +12,8 @@ export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
     description,
     url,
     imageUrl,
-    artistName,
-    artistUrl,
+    profileName,
+    profileUrl,
     releaseDate,
     trackCount = 0,
     tracks = [],
@@ -28,8 +28,8 @@ export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
     image: imageUrl || "",
     byArtist: {
       "@type": "MusicGroup",
-      name: artistName || "",
-      url: artistUrl || "",
+      name: profileName || "",
+      url: profileUrl || "",
     },
     datePublished: datePublished(releaseDate),
     numberOfTracks: trackCount,
@@ -50,8 +50,8 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
     description,
     url,
     imageUrl,
-    artistName,
-    artistUrl,
+    profileName,
+    profileUrl,
     releaseDate,
     duration,
   } = metadata;
@@ -66,8 +66,8 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
     ...(duration && { duration: `PT${duration}S` }),
     byArtist: {
       "@type": "MusicGroup",
-      name: artistName || "",
-      url: artistUrl || "",
+      name: profileName || "",
+      url: profileUrl || "",
     },
     datePublished: datePublished(releaseDate),
   });
@@ -75,21 +75,21 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
 
 // Build MusicGroup schema for artist profiles
 export const buildMusicGroupSchema = (metadata: PageMetadata): string => {
-  const { title, description, url, imageUrl, artistUrl } = metadata;
+  const { title, description, url, imageUrl, profileUrl } = metadata;
 
   return serializeForScript({
     "@context": "https://schema.org",
     "@type": "MusicGroup",
     name: title,
     description,
-    url: artistUrl || url,
+    url: profileUrl || url,
     image: imageUrl || "",
   });
 };
 
 // Build BlogPosting schema for posts and general articles
 export const buildArticleSchema = (metadata: PageMetadata): string => {
-  const { title, description, url, imageUrl, artistName, releaseDate } =
+  const { title, description, url, imageUrl, profileName, releaseDate } =
     metadata;
 
   return serializeForScript({
@@ -101,7 +101,7 @@ export const buildArticleSchema = (metadata: PageMetadata): string => {
     image: imageUrl || "",
     author: {
       "@type": "Person",
-      name: artistName || "Mirlo Artist",
+      name: profileName || "Mirlo Artist",
     },
     datePublished: datePublished(releaseDate),
   });
