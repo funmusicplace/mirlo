@@ -5,7 +5,7 @@ dotenv.config();
 import { describe, it, beforeEach } from "mocha";
 
 import prisma from "@mirlo/prisma";
-import { clearTables, createArtist, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("manage/label", () => {
@@ -26,7 +26,7 @@ describe("manage/label", () => {
       const { user: liveArtistUser } = await createUser({
         email: "live-roster-artist@example.com",
       });
-      const liveArtist = await createArtist(liveArtistUser.id, {
+      const liveArtist = await createProfile(liveArtistUser.id, {
         name: "Live Roster Artist",
         urlSlug: "live-roster-artist",
       });
@@ -34,7 +34,7 @@ describe("manage/label", () => {
       const { user: deletedArtistUser } = await createUser({
         email: "deleted-roster-artist@example.com",
       });
-      const deletedArtist = await createArtist(deletedArtistUser.id, {
+      const deletedArtist = await createProfile(deletedArtistUser.id, {
         name: "Deleted Roster Artist",
         urlSlug: "deleted-roster-artist",
       });
@@ -82,15 +82,15 @@ describe("manage/label", () => {
       const { user: aUser } = await createUser({
         email: "a-artist@example.com",
       });
-      const a = await createArtist(aUser.id, { name: "A", urlSlug: "a" });
+      const a = await createProfile(aUser.id, { name: "A", urlSlug: "a" });
       const { user: bUser } = await createUser({
         email: "b-artist@example.com",
       });
-      const b = await createArtist(bUser.id, { name: "B", urlSlug: "b" });
+      const b = await createProfile(bUser.id, { name: "B", urlSlug: "b" });
       const { user: cUser } = await createUser({
         email: "c-artist@example.com",
       });
-      const c = await createArtist(cUser.id, { name: "C", urlSlug: "c" });
+      const c = await createProfile(cUser.id, { name: "C", urlSlug: "c" });
 
       // c is ordered first, a is second, b is unordered (orderIndex null)
       await prisma.artistLabel.createMany({
@@ -140,14 +140,14 @@ describe("manage/label", () => {
       const { user: aUser } = await createUser({
         email: "reorder-a@example.com",
       });
-      const a = await createArtist(aUser.id, {
+      const a = await createProfile(aUser.id, {
         name: "Reorder A",
         urlSlug: "reorder-a",
       });
       const { user: bUser } = await createUser({
         email: "reorder-b@example.com",
       });
-      const b = await createArtist(bUser.id, {
+      const b = await createProfile(bUser.id, {
         name: "Reorder B",
         urlSlug: "reorder-b",
       });
@@ -198,7 +198,7 @@ describe("manage/label", () => {
       const { user: artistUser } = await createUser({
         email: "shared-artist@example.com",
       });
-      const sharedArtist = await createArtist(artistUser.id, {
+      const sharedArtist = await createProfile(artistUser.id, {
         name: "Shared",
         urlSlug: "shared",
       });
