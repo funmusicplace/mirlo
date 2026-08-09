@@ -8,7 +8,7 @@ import { Request } from "express";
 
 import { findActivityPubAlternate } from "./activityPub/pageAlternate";
 import {
-  registerArtistHydration,
+  registerProfileHydration,
   registerPostHydration,
   registerTrackGroupHydration,
   registerTrackHydration,
@@ -16,7 +16,7 @@ import {
   HydrationData,
 } from "./parseIndex/hydrations";
 import {
-  fetchArtistMetadata,
+  fetchProfileMetadata,
   fetchAlbumMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
@@ -45,6 +45,7 @@ import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import { merchImageUrl } from "./utils/merch";
 import { coversPrefix, rootImagePrefix, postImagePrefix } from "./utils/minio";
+import { serializeProfile } from "./serializers/artist";
 import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
@@ -90,8 +91,8 @@ export type PageMetadata = {
   twitterPlayer?: PlayerEmbed;
   rss?: string;
   color?: string;
-  artistName?: string;
-  artistUrl?: string;
+  profileName?: string;
+  profileUrl?: string;
   releaseDate?: string;
   duration?: number;
   trackCount?: number;
@@ -126,7 +127,7 @@ const buildOpenGraphTags = (
     isAlbum,
     ogVideo,
     twitterPlayer,
-    artistName,
+    profileName,
     schemas = [],
   } = metadata;
 
@@ -142,7 +143,7 @@ const buildOpenGraphTags = (
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta name="description" content="${metaDescription}">
-    <meta property="og:site_name" content="${artistName || instanceName}">
+    <meta property="og:site_name" content="${profileName || instanceName}">
     <meta property="og:url" content="${url}">
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
@@ -197,40 +198,40 @@ const handleReleasesPage: RouteHandler<{}> = async ({
   });
 };
 
-type ArtistParams = { artistSlug: string };
-const handleArtistProfile: RouteHandler<ArtistParams> = async ({
+type ProfileParams = { profileSlug: string };
+const handleProfilePage: RouteHandler<ProfileParams> = async ({
   $,
   client,
   instanceName,
   avatarUrl,
-  params: { artistSlug },
+  params: { profileSlug },
   hydrations,
 }) => {
-  const artist = await fetchArtistMetadata(artistSlug);
-  if (!artist) return;
+  const profile = await fetchProfileMetadata(profileSlug);
+  if (!profile) return;
 
-  const artistUrl = `${client.applicationUrl}/${artist.urlSlug}`;
+  const profileUrl = `${client.applicationUrl}/${profile.urlSlug}`;
   const schema = buildMusicGroupSchema({
-    title: artist.name ?? `A ${instanceName} Artist`,
-    description: artist.bio ?? `An artist on ${instanceName}`,
-    url: artistUrl,
+    title: profile.name ?? `A ${instanceName} Artist`,
+    description: profile.bio ?? `An artist on ${instanceName}`,
+    url: profileUrl,
     imageUrl: avatarUrl,
-    artistUrl: artistUrl,
+    profileUrl: profileUrl,
   });
 
-  registerArtistHydration(hydrations, artist);
+  registerProfileHydration(hydrations, profile);
 
   buildOpenGraphTags($, instanceName, {
-    title: artist.name ?? `A ${instanceName} Artist`,
-    description: artist.bio ?? `An artist on ${instanceName}`,
-    url: artistUrl,
+    title: profile.name ?? `A ${instanceName} Artist`,
+    description: profile.bio ?? `An artist on ${instanceName}`,
+    url: profileUrl,
     imageUrl: avatarUrl,
-    artistName: artist.name,
+    profileName: profile.name,
     schemas: [schema],
   });
 };
 
-type PostParams = { artistSlug: string; postId?: number; postSlug?: string };
+type PostParams = { profileSlug: string; postId?: number; postSlug?: string };
 const handlePost: RouteHandler<PostParams> = async ({
   $,
   client,
@@ -238,27 +239,27 @@ const handlePost: RouteHandler<PostParams> = async ({
   avatarUrl,
   req,
   hydrations,
-  params: { artistSlug, postId, postSlug },
+  params: { profileSlug, postId, postSlug },
 }) => {
-  const artist = await fetchArtistMetadata(artistSlug);
-  if (!artist) return;
+  const profile = await fetchProfileMetadata(profileSlug);
+  if (!profile) return;
 
-  registerArtistHydration(hydrations, artist);
+  registerProfileHydration(hydrations, profile);
 
-  const artistName = artist.name ?? `A ${instanceName} Artist`;
-  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+  const profileName = profile.name ?? `A ${instanceName} Artist`;
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`;
 
   // Try to find specific post
   const post = postId
-    ? await fetchPostMetadata(artistSlug, { id: postId })
+    ? await fetchPostMetadata(profileSlug, { id: postId })
     : postSlug
-      ? await fetchPostMetadata(artistSlug, { slug: postSlug })
+      ? await fetchPostMetadata(profileSlug, { slug: postSlug })
       : null;
 
   if (post) {
     const hasTracks = post.tracks.length > 0;
     const postUrl = `${client.applicationUrl}/${post.profile?.urlSlug}/posts/${post.id}`;
-    const postDescription = `A post by ${artistName}`;
+    const postDescription = `A post by ${profileName}`;
     const postCreatedDate = post.createdAt
       ? post.createdAt.toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0];
@@ -274,7 +275,7 @@ const handlePost: RouteHandler<PostParams> = async ({
             post.featuredImage.extension
           )
         : avatarUrl,
-      artistName: artistName,
+      profileName,
       releaseDate: postCreatedDate,
     });
 
@@ -304,7 +305,7 @@ const handlePost: RouteHandler<PostParams> = async ({
             height: 315,
           }
         : undefined,
-      artistName: artistName,
+      profileName,
       releaseDate: postCreatedDate,
       schemas: [schema],
     });
@@ -343,54 +344,54 @@ const handlePost: RouteHandler<PostParams> = async ({
   } else {
     // Index of all posts
     buildOpenGraphTags($, instanceName, {
-      title: artistName,
+      title: profileName,
       rss,
-      description: `All posts by ${artistName} on ${instanceName}`,
-      url: `${client.applicationUrl}/${artist?.urlSlug}/posts`,
+      description: `All posts by ${profileName} on ${instanceName}`,
+      url: `${client.applicationUrl}/${profile?.urlSlug}/posts`,
       imageUrl: avatarUrl,
     });
   }
 };
 
-type MerchParams = { artistSlug: string; merchId?: string };
+type MerchParams = { profileSlug: string; merchId?: string };
 const handleMerch: RouteHandler<MerchParams> = async ({
   $,
   client,
   instanceName,
   avatarUrl,
-  params: { artistSlug, merchId },
+  params: { profileSlug, merchId },
   hydrations,
 }) => {
-  const artist = await fetchArtistMetadata(artistSlug);
-  if (!artist) return;
+  const profile = await fetchProfileMetadata(profileSlug);
+  if (!profile) return;
 
-  registerArtistHydration(hydrations, artist);
+  registerProfileHydration(hydrations, profile);
 
-  const artistName = artist.name ?? `A ${instanceName} Artist`;
-  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+  const profileName = profile.name ?? `A ${instanceName} Artist`;
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`;
 
   // Try to find specific merch - first try as ID, then as slug
   let merch = null;
   if (merchId) {
     try {
-      merch = await fetchMerchMetadata(artistSlug, { id: merchId });
+      merch = await fetchMerchMetadata(profileSlug, { id: merchId });
     } catch {
       // ID format invalid (not a UUID), try as slug
-      merch = await fetchMerchMetadata(artistSlug, { slug: merchId });
+      merch = await fetchMerchMetadata(profileSlug, { slug: merchId });
     }
   }
 
   if (merch) {
     const coverUrl = merchImageUrl(merch.images?.[0], 600);
     const merchUrl = `${client.applicationUrl}/${merch.profile?.urlSlug}/merch/${merch.id}`;
-    const merchDescription = `Merch by ${artistName}`;
+    const merchDescription = `Merch by ${profileName}`;
 
     const schema = buildArticleSchema({
       title: merch.title,
       description: merchDescription,
       url: merchUrl,
       imageUrl: coverUrl ?? avatarUrl,
-      artistName: artistName,
+      profileName,
     });
 
     buildOpenGraphTags($, instanceName, {
@@ -399,15 +400,15 @@ const handleMerch: RouteHandler<MerchParams> = async ({
       url: merchUrl,
       imageUrl: coverUrl ?? avatarUrl,
       rss,
-      artistName: artistName,
+      profileName,
       schemas: [schema],
     });
   } else {
     // Index of all merch
     buildOpenGraphTags($, instanceName, {
-      title: `${artistName} merch`,
-      description: `All merch by ${artistName} on ${instanceName}`,
-      url: `${client.applicationUrl}/${artist?.urlSlug}/merch`,
+      title: `${profileName} merch`,
+      description: `All merch by ${profileName} on ${instanceName}`,
+      url: `${client.applicationUrl}/${profile?.urlSlug}/merch`,
       imageUrl: avatarUrl,
       rss,
     });
@@ -415,7 +416,7 @@ const handleMerch: RouteHandler<MerchParams> = async ({
 };
 
 type AlbumParams = {
-  artistSlug: string;
+  profileSlug: string;
   albumSlug?: string;
   trackId?: number;
 };
@@ -423,7 +424,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
   $,
   client,
   instanceName,
-  params: { artistSlug, albumSlug, trackId },
+  params: { profileSlug, albumSlug, trackId },
   hydrations,
 }) => {
   if (!albumSlug) {
@@ -431,13 +432,13 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     return;
   }
 
-  const tg = await fetchAlbumMetadata(artistSlug, albumSlug);
+  const tg = await fetchAlbumMetadata(profileSlug, albumSlug);
   if (!tg) return;
 
-  const artist = await fetchArtistMetadata(artistSlug);
-  if (!artist) return;
+  const profile = await fetchProfileMetadata(profileSlug);
+  if (!profile) return;
 
-  registerArtistHydration(hydrations, artist);
+  registerProfileHydration(hydrations, profile);
   registerTrackGroupHydration(hydrations, tg);
 
   // Check if it's a specific track
@@ -458,8 +459,8 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       imageUrl: coverString
         ? generateFullStaticImageUrl(coverString, coversPrefix)
         : undefined,
-      artistName: tg.profile.name,
-      artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
+      profileName: tg.profile.name,
+      profileUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
       duration: track.audio?.duration || undefined,
     });
@@ -482,7 +483,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         width: 560,
         height: 315,
       },
-      artistName: tg.profile.name,
+      profileName: tg.profile.name,
       releaseDate: releaseDate,
       schemas: [schema],
     });
@@ -511,8 +512,8 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       imageUrl: coverString
         ? generateFullStaticImageUrl(coverString, coversPrefix)
         : undefined,
-      artistName: tg.profile.name,
-      artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
+      profileName: tg.profile.name,
+      profileUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
       trackCount: tg.tracks.length,
       tracks: tracksList,
@@ -536,34 +537,34 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         width: 560,
         height: 315,
       },
-      artistName: tg.profile.name,
+      profileName: tg.profile.name,
       releaseDate: releaseDate,
       schemas: [schema],
     });
   }
 };
 
-type SupportParams = { artistSlug: string; tierId?: string };
+type SupportParams = { profileSlug: string; tierId?: string };
 const handleSupport: RouteHandler<SupportParams> = async ({
   $,
   client,
   instanceName,
   avatarUrl,
-  params: { artistSlug, tierId },
+  params: { profileSlug, tierId },
   hydrations,
 }) => {
-  const artist = await fetchArtistMetadata(artistSlug);
-  if (!artist) return;
+  const profile = await fetchProfileMetadata(profileSlug);
+  if (!profile) return;
 
-  registerArtistHydration(hydrations, artist);
+  registerProfileHydration(hydrations, profile);
 
-  const artistName = artist.name ?? `A ${instanceName} Artist`;
-  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
-  const supportUrl = `${client.applicationUrl}/${artist.urlSlug}/support`;
-  const supportDescription = `Support ${artistName} on ${instanceName}`;
+  const profileName = profile.name ?? `A ${instanceName} Artist`;
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`;
+  const supportUrl = `${client.applicationUrl}/${profile.urlSlug}/support`;
+  const supportDescription = `Support ${profileName} on ${instanceName}`;
 
   const tier = tierId
-    ? await fetchSubscriptionTierMetadata(artistSlug, tierId)
+    ? await fetchSubscriptionTierMetadata(profileSlug, tierId)
     : null;
 
   if (tier) {
@@ -582,7 +583,7 @@ const handleSupport: RouteHandler<SupportParams> = async ({
       description: tierDescription,
       url: tierUrl,
       imageUrl,
-      artistName,
+      profileName,
       releaseDate: tier.createdAt.toISOString().split("T")[0],
     });
 
@@ -592,14 +593,14 @@ const handleSupport: RouteHandler<SupportParams> = async ({
       url: tierUrl,
       imageUrl,
       rss,
-      artistName,
+      profileName,
       schemas: [schema],
     });
     return;
   }
 
   buildOpenGraphTags($, instanceName, {
-    title: artistName,
+    title: profileName,
     description: supportDescription,
     url: supportUrl,
     imageUrl: avatarUrl,
@@ -607,27 +608,27 @@ const handleSupport: RouteHandler<SupportParams> = async ({
   });
 };
 
-type ArtistReleasesParams = { artistSlug: string };
-const handleArtistReleases: RouteHandler<ArtistReleasesParams> = async ({
+type ProfileReleasesParams = { profileSlug: string };
+const handleProfileReleases: RouteHandler<ProfileReleasesParams> = async ({
   $,
   client,
   instanceName,
   avatarUrl,
-  params: { artistSlug },
+  params: { profileSlug },
   hydrations,
 }) => {
-  const artist = await fetchArtistMetadata(artistSlug);
-  if (!artist) return;
+  const profile = await fetchProfileMetadata(profileSlug);
+  if (!profile) return;
 
-  registerArtistHydration(hydrations, artist);
+  registerProfileHydration(hydrations, profile);
 
-  const artistName = artist.name ?? `A ${instanceName} Artist`;
-  const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+  const profileName = profile.name ?? `A ${instanceName} Artist`;
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`;
 
   buildOpenGraphTags($, instanceName, {
-    title: `${artistName} releases`,
-    description: `All releases by ${artistName} on ${instanceName}`,
-    url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+    title: `${profileName} releases`,
+    description: `All releases by ${profileName} on ${instanceName}`,
+    url: `${client.applicationUrl}/${profile?.urlSlug}/releases`,
     imageUrl: avatarUrl,
     rss,
   });
@@ -683,7 +684,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   });
   if (!track) return;
 
-  const artist = await prisma.profile.findFirst({
+  const profile = await prisma.profile.findFirst({
     where: { id: track.trackGroup.profileId },
     include: {
       avatar: { where: { deletedAt: null } },
@@ -693,8 +694,8 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
 
   registerTrackHydration(hydrations, track);
 
-  if (artist) {
-    registerArtistHydration(hydrations, artist);
+  if (profile) {
+    registerProfileHydration(hydrations, profile);
   }
 };
 
@@ -724,7 +725,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   });
   if (!trackGroup) return;
 
-  const artist = await prisma.profile.findFirst({
+  const profile = await prisma.profile.findFirst({
     where: { id: trackGroup.profileId },
     include: {
       avatar: { where: { deletedAt: null } },
@@ -733,9 +734,9 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   });
   registerTrackGroupHydration(hydrations, trackGroup);
 
-  if (artist) {
-    appendHydrationScript($, "__MIRLO_ARTIST__", artist.id, {
-      artist: processSingleArtist(artist),
+  if (profile) {
+    appendHydrationScript($, "__MIRLO_ARTIST__", profile.id, {
+      artist: serializeProfile(profile),
     });
   }
 };
@@ -762,7 +763,7 @@ const dispatchRoute = async (
       await handleAlbum({
         ...contextWithHydrations,
         params: {
-          artistSlug: routeParams.artistSlug,
+          profileSlug: routeParams.profileSlug,
           albumSlug: routeParams.albumSlug,
           trackId: routeParams.trackId,
         },
@@ -772,7 +773,7 @@ const dispatchRoute = async (
       await handleAlbum({
         ...contextWithHydrations,
         params: {
-          artistSlug: routeParams.artistSlug,
+          profileSlug: routeParams.profileSlug,
           albumSlug: routeParams.albumSlug,
         },
       });
@@ -781,7 +782,7 @@ const dispatchRoute = async (
       await handlePost({
         ...contextWithHydrations,
         params: {
-          artistSlug: routeParams.artistSlug,
+          profileSlug: routeParams.profileSlug,
           postId: routeParams.postId,
           postSlug: routeParams.postSlug,
         },
@@ -790,14 +791,14 @@ const dispatchRoute = async (
     case "posts-index":
       await handlePost({
         ...contextWithHydrations,
-        params: { artistSlug: routeParams.artistSlug },
+        params: { profileSlug: routeParams.profileSlug },
       });
       break;
     case "merch":
       await handleMerch({
         ...contextWithHydrations,
         params: {
-          artistSlug: routeParams.artistSlug,
+          profileSlug: routeParams.profileSlug,
           merchId: routeParams.merchId,
         },
       });
@@ -805,28 +806,28 @@ const dispatchRoute = async (
     case "merch-index":
       await handleMerch({
         ...contextWithHydrations,
-        params: { artistSlug: routeParams.artistSlug },
+        params: { profileSlug: routeParams.profileSlug },
       });
       break;
     case "support":
       await handleSupport({
         ...contextWithHydrations,
         params: {
-          artistSlug: routeParams.artistSlug,
+          profileSlug: routeParams.profileSlug,
           tierId: routeParams.tierId,
         },
       });
       break;
     case "artist-releases":
-      await handleArtistReleases({
+      await handleProfileReleases({
         ...contextWithHydrations,
-        params: { artistSlug: routeParams.artistSlug },
+        params: { profileSlug: routeParams.profileSlug },
       });
       break;
     case "artist":
-      await handleArtistProfile({
+      await handleProfilePage({
         ...contextWithHydrations,
-        params: { artistSlug: routeParams.artistSlug },
+        params: { profileSlug: routeParams.profileSlug },
       });
       break;
     case "widget-track":
@@ -883,7 +884,7 @@ export const analyzePathAndGenerateHTML = async (
 
     // Try to fetch avatar if artist exists
     let avatarUrl: string | undefined;
-    const artist = await prisma.profile.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: { urlSlug: segments[0], ...whereForVisibleProfile() },
       include: {
         avatar: true,
@@ -896,8 +897,8 @@ export const analyzePathAndGenerateHTML = async (
         },
       },
     });
-    if (artist) {
-      avatarUrl = resolveProfileImageUrl(artist);
+    if (profile) {
+      avatarUrl = resolveProfileImageUrl(profile);
     }
 
     // Match against route patterns using shared matcher

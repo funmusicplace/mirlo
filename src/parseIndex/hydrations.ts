@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 
-import { processSingleArtist } from "../serializers/artist";
+import { serializeProfile } from "../serializers/artist";
 import { serializePost } from "../serializers/post";
 import { processSingleTrack } from "../serializers/track";
 import { processSingleTrackGroup } from "../serializers/trackGroup";
@@ -108,11 +108,11 @@ export const registerPostHydration = (
 /**
  * Helper to register artist hydration
  */
-export const registerArtistHydration = (
+export const registerProfileHydration = (
   hydrations: HydrationData[],
-  artist: any
+  profile: any
 ) => {
-  registerHydration(hydrations, "__MIRLO_ARTIST__", artist.urlSlug, {
-    artist: processSingleArtist(artist),
+  registerHydration(hydrations, "__MIRLO_ARTIST__", profile.urlSlug, {
+    artist: serializeProfile(profile),
   });
 };
