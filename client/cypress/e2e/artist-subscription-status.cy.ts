@@ -96,13 +96,15 @@ describe("artist support page subscription status", () => {
     }).as("stripeStatus");
   });
 
-  it("shows the active subscription's tier and no cancelled notice", () => {
+  it("shows the active subscription's tier, no cancelled notice, and still shows the tier picker to switch tiers", () => {
     cy.login({ email: activeUserEmail, password: activeUserPassword });
     cy.visit(`/${artistSlug}/support`);
     cy.wait("@stripeStatus");
 
     cy.contains(tierName);
     cy.contains("cancelled").should("not.exist");
+    cy.contains("button", "Change payment method");
+    cy.contains("button", "Cancel subscription");
   });
 
   it("shows both the cancelled notice and a way to resubscribe", () => {

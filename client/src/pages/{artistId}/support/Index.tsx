@@ -4,7 +4,6 @@ import ArtistManageSubscription from "components/Artist/ArtistManageSubscription
 import { ArtistOutletContext } from "components/Artist/artistOutletContext";
 import ArtistSupportBox from "components/Artist/ArtistSupportBox";
 import ScrollButton from "components/Artist/ScrollButton";
-import { isSubscriptionCancelled } from "components/Artist/SubscriptionCancelledNotice";
 import Box from "components/common/Box";
 import TipArtist from "components/common/TipArtist";
 import { queryUserStripeStatus } from "queries";
@@ -113,26 +112,21 @@ const Index: React.FC = () => {
     return <Box />;
   }
 
-  // A cancelled-but-not-yet-expired subscription still has a row here, but
-  // it shouldn't lock the page onto the manage-subscription view — the
-  // buyer needs to see the tier picker to resubscribe (see issue with
-  // resubscribing after cancelling).
-  if (userSubscriptionTier && !isSubscriptionCancelled(userSubscription)) {
-    return (
-      <ArtistManageSubscription
-        userSubscription={userSubscription}
-        reload={checkForSubscription}
-        userSubscriptionTier={userSubscriptionTier}
-      />
-    );
-  }
-
   const paidTierCount = getPaidTierCount(artist);
   const onlyOneTier = paidTierCount === 1;
   const moreThanThreeTiers = paidTierCount > 3;
 
   return (
     <>
+      {userSubscriptionTier && (
+        <div className="mb-3">
+          <ArtistManageSubscription
+            userSubscription={userSubscription}
+            reload={checkForSubscription}
+            userSubscriptionTier={userSubscriptionTier}
+          />
+        </div>
+      )}
       {paidTierCount === 0 && !artist.properties?.showTipOnSupportPage && (
         <Box
           className={css`
