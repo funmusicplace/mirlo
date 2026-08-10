@@ -6,9 +6,16 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
 
+import {
+  resolveDigitalPurchaseItem,
+  resolveMerchPurchaseItem,
+} from "../../src/routers/v1/purchase";
 import { getClient } from "../../src/utils/getClient";
 import { getPaymentProcessor } from "../../src/utils/payments/PaymentProcessor";
-import { initiatePayment } from "../../src/utils/payments/purchase";
+import {
+  initiatePayment,
+  type ResolvedItem,
+} from "../../src/utils/payments/purchase";
 import {
   initiateOnlineSubscription,
   initiateSubscription,
@@ -1022,6 +1029,244 @@ describe("purchase", () => {
         "pi_online_test"
       );
     });
+
+    describe("platform fee inheritance (album -> artist -> platform)", () => {
+      it("charges the full amount as the application fee for a trackGroup set to 100% platform", async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+          stripeAccountId: "acct_fee_100",
+        });
+        const { user: buyer } = await createUser({ email: "buyer@test.com" });
+        const artist = await createArtist(artistUser.id, {
+          defaultPlatformFee: 10,
+        });
+        const tg = await createTrackGroup(artist.id, {
+          minPrice: 1000,
+          platformPercent: 100,
+        });
+
+        const createStub = stubStripeForOnline();
+
+        await initiatePayment({
+          artistId: artist.id,
+          items: [
+            {
+              type: "trackGroup",
+              id: String(tg.id),
+              quantity: 1,
+              amount: 1000,
+              platformPercent: tg.platformPercent,
+            },
+          ],
+          userEmail: buyer.email,
+          userId: String(buyer.id),
+        });
+
+        const params = createStub.firstCall
+          .args[0] as Stripe.PaymentIntentCreateParams;
+        assert.equal(
+          params.application_fee_amount,
+          1000,
+          "a trackGroup with platformPercent 100 should send the entire charge to the platform"
+        );
+      });
+
+      it("falls back to the artist's defaultPlatformFee when the trackGroup has no platformPercent override", async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+          stripeAccountId: "acct_fee_artist_fallback",
+        });
+        const { user: buyer } = await createUser({ email: "buyer@test.com" });
+        const artist = await createArtist(artistUser.id, {
+          defaultPlatformFee: 20,
+        });
+        const tg = await createTrackGroup(artist.id, {
+          minPrice: 1000,
+          platformPercent: null,
+        });
+
+        const createStub = stubStripeForOnline();
+
+        await initiatePayment({
+          artistId: artist.id,
+          items: [
+            {
+              type: "trackGroup",
+              id: String(tg.id),
+              quantity: 1,
+              amount: 1000,
+              platformPercent: tg.platformPercent,
+            },
+          ],
+          userEmail: buyer.email,
+          userId: String(buyer.id),
+        });
+
+        const params = createStub.firstCall
+          .args[0] as Stripe.PaymentIntentCreateParams;
+        assert.equal(
+          params.application_fee_amount,
+          200,
+          "should inherit the artist's 20% defaultPlatformFee when the album has no override"
+        );
+      });
+
+      it("prefers the trackGroup's own platformPercent over the artist's defaultPlatformFee", async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+          stripeAccountId: "acct_fee_album_override",
+        });
+        const { user: buyer } = await createUser({ email: "buyer@test.com" });
+        const artist = await createArtist(artistUser.id, {
+          defaultPlatformFee: 50,
+        });
+        const tg = await createTrackGroup(artist.id, {
+          minPrice: 1000,
+          platformPercent: 15,
+        });
+
+        const createStub = stubStripeForOnline();
+
+        await initiatePayment({
+          artistId: artist.id,
+          items: [
+            {
+              type: "trackGroup",
+              id: String(tg.id),
+              quantity: 1,
+              amount: 1000,
+              platformPercent: tg.platformPercent,
+            },
+          ],
+          userEmail: buyer.email,
+          userId: String(buyer.id),
+        });
+
+        const params = createStub.firstCall
+          .args[0] as Stripe.PaymentIntentCreateParams;
+        assert.equal(
+          params.application_fee_amount,
+          150,
+          "the album's own 15% override should win over the artist's 50% default"
+        );
+      });
+
+      it("falls back to the site default platformPercent when neither the trackGroup nor the artist set one", async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+          stripeAccountId: "acct_fee_site_default",
+        });
+        const { user: buyer } = await createUser({ email: "buyer@test.com" });
+        const artist = await createArtist(artistUser.id, {
+          defaultPlatformFee: null,
+        });
+        const tg = await createTrackGroup(artist.id, {
+          minPrice: 1000,
+          platformPercent: null,
+        });
+
+        const createStub = stubStripeForOnline();
+
+        await initiatePayment({
+          artistId: artist.id,
+          items: [
+            {
+              type: "trackGroup",
+              id: String(tg.id),
+              quantity: 1,
+              amount: 1000,
+              platformPercent: tg.platformPercent,
+            },
+          ],
+          userEmail: buyer.email,
+          userId: String(buyer.id),
+        });
+
+        const params = createStub.firstCall
+          .args[0] as Stripe.PaymentIntentCreateParams;
+        assert.equal(
+          params.application_fee_amount,
+          100,
+          "should fall back to the site-wide 10% default (seeded in getSiteSettings)"
+        );
+      });
+
+      it("resolveDigitalPurchaseItem (router) carries the trackGroup's platformPercent onto the ResolvedItem", async () => {
+        // Regression test for the actual reported bug: this function builds
+        // the ResolvedItem that initiatePayment charges from, and it used to
+        // drop the trackGroup's platformPercent entirely — only price/minPrice
+        // ever reached it — so a 100%-platform album silently fell back to
+        // the site default by the time a fee was calculated.
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+        });
+        const artist = await createArtist(artistUser.id, {
+          defaultPlatformFee: 10,
+        });
+        const tg = await createTrackGroup(artist.id, {
+          minPrice: 1000,
+          platformPercent: 100,
+        });
+        const fullArtist = await prisma.profile.findFirstOrThrow({
+          where: { id: artist.id },
+          include: { user: true, paymentToUser: true, subscriptionTiers: true },
+        });
+
+        const result = await resolveDigitalPurchaseItem({
+          type: "trackGroup",
+          id: tg.id,
+          price: "1000",
+          minPrice: tg.minPrice,
+          platformPercent: tg.platformPercent,
+          artist: fullArtist,
+          paymentToUser: null,
+          releaseUrlSlug: tg.urlSlug,
+          releaseId: tg.id,
+          handleFreePurchase: async () => {},
+        });
+
+        assert.equal(result.kind, "paid");
+        assert.equal(
+          (result as { item: ResolvedItem }).item.platformPercent,
+          100,
+          "the album's 100% platformPercent override must reach the ResolvedItem"
+        );
+      });
+
+      it("resolveMerchPurchaseItem carries the merch item's own platformPercent onto the ResolvedItem", async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+        });
+        const artist = await createArtist(artistUser.id, {
+          defaultPlatformFee: 10,
+        });
+        const merch = await createMerch(artist.id, {
+          isPublic: true,
+          minPrice: 800,
+          quantityRemaining: 10,
+          platformPercent: 100,
+        });
+        const fullMerch = await prisma.merch.findFirstOrThrow({
+          where: { id: merch.id },
+          include: {
+            optionTypes: { include: { options: true } },
+            shippingDestinations: true,
+          },
+        });
+
+        const { item } = resolveMerchPurchaseItem(fullMerch, {
+          type: "merch",
+          id: merch.id,
+          quantity: 1,
+        });
+
+        assert.equal(
+          item.platformPercent,
+          100,
+          "merch's own platformPercent override must reach the ResolvedItem"
+        );
+      });
+    });
   });
 
   describe("initiateSubscription (direct)", () => {
@@ -1129,6 +1374,64 @@ describe("purchase", () => {
         "sub_existing_123",
         "the underlying Stripe subscription is repriced, not replaced"
       );
+    });
+
+    it("falls back to the artist's defaultPlatformFee when repricing to a tier with no platformPercent override", async () => {
+      // Regression test: the repriced fee used to be `tier.platformPercent ?? 7`
+      // — a hardcoded fallback that skipped the artist's defaultPlatformFee
+      // entirely and didn't even match the real site default (10, not 7).
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_fee_fallback",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id, {
+        defaultPlatformFee: 25,
+      });
+      const oldTier = await createTier(artist.id, { minAmount: 500 });
+      const newTier = await createTier(artist.id, {
+        minAmount: 1000,
+        collectAddress: false,
+        platformPercent: null,
+      });
+
+      const existing = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          platformCut: 35,
+          stripeSubscriptionKey: "sub_existing_fee_fallback",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        items: { data: [{ id: "si_existing_item" }] },
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_new_tier_fallback",
+      } as unknown as Stripe.Response<Stripe.Product>);
+
+      await initiateOnlineSubscription({
+        artistId: artist.id,
+        tierId: newTier.id,
+        userEmail: buyer.email,
+        userId: buyer.id,
+      });
+
+      assert.equal(
+        updateStub.getCall(0).args[1]?.application_fee_percent,
+        25,
+        "should inherit the artist's 25% defaultPlatformFee when the tier has no override"
+      );
+
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { id: existing.id },
+      });
+      assert.equal(after?.platformCut, 250);
     });
 
     it("clears deleteReason when a cancelled-but-not-yet-expired subscription is repriced in place onto a new tier", async () => {
@@ -1422,6 +1725,63 @@ describe("purchase", () => {
         null,
         "the old tier's subscription row should be gone after the switch is confirmed"
       );
+    });
+
+    it("falls back to the artist's defaultPlatformFee when the tier has no platformPercent override", async () => {
+      // Regression test: this used to be `tier.platformPercent ?? 7`, which
+      // never consulted the artist's defaultPlatformFee and hardcoded 7
+      // instead of the real site default (10).
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_finalize_fee_fallback",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id, {
+        defaultPlatformFee: 30,
+      });
+      const tier = await createTier(artist.id, {
+        minAmount: 1000,
+        platformPercent: null,
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_fee_fallback",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_fee_fallback",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      const createStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "create")
+        .resolves({
+          id: "sub_fee_fallback",
+        } as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await finalizeSubscriptionSetup({
+        stripeAccountId: "acct_sub_finalize_fee_fallback",
+        paymentMethodId: "pm_test",
+        tierId: tier.id,
+        amount: 1000,
+        currency: "usd",
+        userId: buyer.id,
+        userEmail: buyer.email,
+      });
+
+      assert.equal(
+        createStub.getCall(0).args[0]?.application_fee_percent,
+        30,
+        "should inherit the artist's 30% defaultPlatformFee when the tier has no override"
+      );
+
+      const subscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, profileSubscriptionTierId: tier.id },
+      });
+      assert.equal(subscription?.platformCut, 300);
     });
 
     it("persists a shippingAddress when the tier collects one", async () => {

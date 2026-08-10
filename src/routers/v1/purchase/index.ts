@@ -79,7 +79,9 @@ type PostBody = {
 type DigitalReleaseArtist = Parameters<typeof subscribeUserToArtist>[0] &
   Parameters<typeof resolvePayee>[0]["artist"] & { urlSlug: string | null };
 
-const resolveDigitalPurchaseItem = async <T extends "trackGroup" | "track">({
+export const resolveDigitalPurchaseItem = async <
+  T extends "trackGroup" | "track",
+>({
   type,
   id,
   loggedInUser,
@@ -87,6 +89,7 @@ const resolveDigitalPurchaseItem = async <T extends "trackGroup" | "track">({
   price,
   message,
   minPrice,
+  platformPercent,
   artist,
   paymentToUser,
   releaseUrlSlug,
@@ -100,6 +103,8 @@ const resolveDigitalPurchaseItem = async <T extends "trackGroup" | "track">({
   price?: string;
   message?: string;
   minPrice: number | null;
+  /** The trackGroup's own platformPercent override, if set. */
+  platformPercent?: number | null;
   artist: DigitalReleaseArtist;
   paymentToUser?: { stripeAccountId: string | null } | null;
   /** The release (trackGroup) the download link points at — same for both a trackGroup and one of its tracks. */
@@ -160,6 +165,7 @@ const resolveDigitalPurchaseItem = async <T extends "trackGroup" | "track">({
       quantity: 1,
       amount: discountedAmount,
       message,
+      platformPercent,
     },
   };
 };
@@ -170,7 +176,7 @@ const resolveDigitalPurchaseItem = async <T extends "trackGroup" | "track">({
  * Also surfaces `requiresShipping`/`allowedCountries` for the frontend's
  * address collector.
  */
-const resolveMerchPurchaseItem = (
+export const resolveMerchPurchaseItem = (
   merch: MerchWithOptionsAndShipping,
   item: Extract<PurchaseItem, { type: "merch" }>
 ): {
@@ -221,6 +227,7 @@ const resolveMerchPurchaseItem = (
       message: item.message,
       optionIds: options.map((o) => o.id),
       shippingDestinationId: item.shippingDestinationId,
+      platformPercent: merch.platformPercent,
     },
     requiresShipping,
     allowedCountries,
@@ -396,6 +403,7 @@ export default function () {
             price: item.price,
             message: item.message,
             minPrice: tg.minPrice,
+            platformPercent: tg.platformPercent,
             artist: tg.profile,
             paymentToUser: tg.paymentToUser,
             releaseUrlSlug: tg.urlSlug,
@@ -442,6 +450,7 @@ export default function () {
             price: item.price,
             message: item.message,
             minPrice: track.minPrice,
+            platformPercent: track.trackGroup.platformPercent,
             artist: track.trackGroup.profile,
             paymentToUser: track.trackGroup.paymentToUser,
             releaseUrlSlug: track.trackGroup.urlSlug,

@@ -14,16 +14,16 @@ import Stripe from "stripe";
 import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { processSingleArtist } from "../serializers/artist";
+import { serializeFundraiserPledge } from "../serializers/fundraiser";
+import { processSingleTrackGroup } from "../serializers/trackGroup";
+import { serializeUserTransaction } from "../serializers/userTransaction";
 
 import { subscribeUserToArtist } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { getClient } from "./getClient";
 import { resolvePayee } from "./payments/payee";
 import { calculateAppFee } from "./processingPayments";
-import { processSingleArtist } from "../serializers/artist";
-import { serializeFundraiserPledge } from "../serializers/fundraiser";
-import { processSingleTrackGroup } from "../serializers/trackGroup";
-import { serializeUserTransaction } from "../serializers/userTransaction";
 import stripe, { OPTION_JOINER } from "./stripe";
 import { registerSubscription } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
@@ -1116,7 +1116,9 @@ export const handleArtistMerchPurchase = async (
 
               const platformCut = await calculateAppFee(
                 refreshedMerchPurchase.transaction.amount,
-                refreshedMerchPurchase.transaction.currency
+                refreshedMerchPurchase.transaction.currency,
+                refreshedMerchPurchase.merch.platformPercent ??
+                  refreshedMerchPurchase.merch.profile.defaultPlatformFee
               );
 
               return {

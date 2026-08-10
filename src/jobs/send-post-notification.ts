@@ -4,9 +4,9 @@ import { flatten, groupBy } from "lodash";
 
 import logger from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { serializePost } from "../serializers/post";
 import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
-import { serializePost } from "../serializers/post";
 
 import { parseOutIframes } from "./parse-out-iframes";
 
@@ -60,6 +60,12 @@ export default async function sendPostNotification(job: {
             extension: true,
           },
         },
+        minimumSubscriptionTier: {
+          select: { minAmount: true },
+        },
+        postSubscriptionTiers: {
+          select: { profileSubscriptionTierId: true },
+        },
         profile: {
           include: {
             subscriptionTiers: {
@@ -69,6 +75,8 @@ export default async function sendPostNotification(job: {
                   where: { deletedAt: null },
                   select: {
                     receiveEmail: true,
+                    amount: true,
+                    profileSubscriptionTierId: true,
                     user: {
                       select: {
                         id: true,
@@ -118,17 +126,24 @@ export default async function sendPostNotification(job: {
       return;
     }
 
-    // Collect all unique subscribers (filtering out deleted/unconfirmed users).
+    // Collect all unique subscribers (filtering out deleted/unconfirmed users,
+    // and those below the post's minimum subscription tier, if any).
     // A user can hold more than one subscription to the same artist (e.g. a
     // free follow alongside a paid tier), so OR their receiveEmail flags
     // together rather than taking whichever subscription happened first.
+    const minimumAmount = post.minimumSubscriptionTier?.minAmount ?? 0;
+    const allowedTierIds = new Set(
+      post.postSubscriptionTiers.map((t) => t.profileSubscriptionTierId)
+    );
     const flatSubscriptions = flatten(
       (post.profile?.subscriptionTiers ?? []).map((st) =>
         st.userSubscriptions
           .filter(
             (us) =>
               us.user.deletedAt === null &&
-              us.user.emailConfirmationToken === null
+              us.user.emailConfirmationToken === null &&
+              (us.amount >= minimumAmount ||
+                allowedTierIds.has(us.profileSubscriptionTierId))
           )
           .map((us) => ({ ...us.user, receiveEmail: us.receiveEmail }))
       )

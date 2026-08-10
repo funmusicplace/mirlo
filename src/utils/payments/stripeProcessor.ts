@@ -5,6 +5,7 @@
 // terminal webhook path and other callers that still use them directly are
 // untouched by this scaffolding step.
 
+import { calculatePlatformPercent } from "../processingPayments";
 import stripe, {
   createOnlinePaymentIntent,
   createSubscriptionStripeProduct,
@@ -185,7 +186,10 @@ export class StripePaymentProcessor implements PaymentProcessor {
         // Tiers can carry different platform fees (see applyPlatformFee.ts),
         // so a tier switch must re-pin the fee to the new tier's — otherwise
         // Stripe keeps charging the old tier's percentage indefinitely.
-        application_fee_percent: tier.platformPercent ?? 7,
+        application_fee_percent: await calculatePlatformPercent(
+          currency || "usd",
+          tier.platformPercent ?? tier.profile.defaultPlatformFee
+        ),
       },
       { stripeAccount: accountId }
     );
