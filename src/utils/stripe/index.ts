@@ -32,7 +32,10 @@ import {
 import { generateFullStaticImageUrl } from "../images";
 import { decrementMerchStock } from "../merch";
 import { finalCoversBucket, finalMerchImageBucket } from "../minio";
-import { calculateAppFee } from "../processingPayments";
+import {
+  calculateAppFee,
+  calculatePlatformPercent,
+} from "../processingPayments";
 import { manageSubscriptionReceipt } from "../subscription";
 import { registerSubscription } from "../subscriptionTier";
 import { createOrUpdatePledge } from "../trackGroup";
@@ -786,7 +789,10 @@ export const finalizeSubscriptionSetup = async ({
     return;
   }
 
-  const platformPercent = tier.platformPercent ?? 7;
+  const platformPercent = await calculatePlatformPercent(
+    currency || "usd",
+    tier.platformPercent ?? tier.profile.defaultPlatformFee
+  );
 
   // Also independent: attaching the payment method to the customer and
   // ensuring the tier's Stripe product exists don't depend on each other.

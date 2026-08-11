@@ -9,6 +9,7 @@ import { Prisma } from "@mirlo/prisma/client";
 
 import { sendSubscriptionCancellationEmail } from "../artist";
 import { AppError } from "../error";
+import { calculatePlatformPercent } from "../processingPayments";
 
 import { getPaymentProcessor } from "./PaymentProcessor";
 import { resolveArtistPaymentContext } from "./purchase";
@@ -167,7 +168,10 @@ export const initiateOnlineSubscription = async ({
       currency,
     });
 
-    const platformPercent = tier.platformPercent ?? 7;
+    const platformPercent = await calculatePlatformPercent(
+      currency || "usd",
+      tier.platformPercent ?? tier.profile.defaultPlatformFee
+    );
     await prisma.profileUserSubscription.update({
       where: { id: existingSubscription.id },
       data: {

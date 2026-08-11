@@ -144,6 +144,7 @@ export const createArtist = async (
       federatedStreaming: data?.federatedStreaming ?? false,
       federatedStreamingOptInDate: data?.federatedStreamingOptInDate ?? null,
       federatedStreamingOptOutDate: data?.federatedStreamingOptOutDate ?? null,
+      defaultPlatformFee: data?.defaultPlatformFee,
     },
     include: {
       subscriptionTiers: true,
@@ -241,6 +242,7 @@ export const createTrackGroup = async (
         data?.releaseDate === null ? null : (data?.releaseDate ?? new Date()),
       isPreorder: data?.isPreorder ?? false,
       hideFromSearch: data?.hideFromSearch ?? false,
+      platformPercent: data?.platformPercent,
       ...(data?.isPublic !== undefined && { isPublic: data.isPublic }),
       ...(data?.isHiddenTrackGroupForSongDrafts !== undefined && {
         isHiddenTrackGroupForSongDrafts: data.isHiddenTrackGroupForSongDrafts,
@@ -284,6 +286,7 @@ export const createMerch = async (
       title: data?.title ?? "Test trackGroup",
       profileId: profileId,
       urlSlug: slug(data?.title ?? "test-merch"),
+      platformPercent: data?.platformPercent,
     },
   });
 

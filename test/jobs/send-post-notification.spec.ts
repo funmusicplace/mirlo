@@ -318,6 +318,118 @@ describe("send-post-notification", () => {
     assert.strictEqual(mailQueueStub.callCount, 1);
   });
 
+  // ── Minimum subscription tier gating ───────────────────────────────────────
+
+  async function createArtistWithTiers() {
+    const { user: artistUser } = await createUser({
+      email: "tiered-artist@test.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Tiered Artist",
+        urlSlug: "tiered-artist",
+        userId: artistUser.id,
+        enabled: true,
+        subscriptionTiers: {
+          create: [
+            { name: "Free", minAmount: 0, isDefaultTier: true },
+            { name: "Paid", minAmount: 500 },
+          ],
+        },
+      },
+      include: { subscriptionTiers: true },
+    });
+
+    const freeTier = artist.subscriptionTiers.find((t) => t.minAmount === 0)!;
+    const paidTier = artist.subscriptionTiers.find((t) => t.minAmount === 500)!;
+
+    return { artist, freeTier, paidTier };
+  }
+
+  async function subscribeUser(email: string, tierId: number, amount: number) {
+    const { user } = await createUser({ email, emailConfirmationToken: null });
+    await prisma.profileUserSubscription.create({
+      data: { userId: user.id, profileSubscriptionTierId: tierId, amount },
+    });
+    return user;
+  }
+
+  it("does not email free/default-tier followers when a minimum tier is set", async () => {
+    const { artist, freeTier, paidTier } = await createArtistWithTiers();
+    await subscribeUser("free-follower@test.com", freeTier.id, 0);
+    await subscribeUser("paid-subscriber@test.com", paidTier.id, 500);
+
+    const post = await createPublishedPost(artist.id, {
+      minimumSubscriptionTierId: paidTier.id,
+    });
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    assert.strictEqual(mailQueueStub.callCount, 1);
+    const [, jobData] = mailQueueStub.firstCall.args;
+    assert.strictEqual(jobData.message.to, "paid-subscriber@test.com");
+  });
+
+  it("emails subscribers whose paid amount meets the minimum tier", async () => {
+    const { artist, paidTier } = await createArtistWithTiers();
+    await subscribeUser("paid-subscriber@test.com", paidTier.id, 500);
+
+    const post = await createPublishedPost(artist.id, {
+      minimumSubscriptionTierId: paidTier.id,
+    });
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    assert.strictEqual(mailQueueStub.callCount, 1);
+  });
+
+  it("does not email subscribers below the minimum tier amount", async () => {
+    const { artist, paidTier } = await createArtistWithTiers();
+    // Subscribed to the paid tier, but paying below its minAmount (e.g. a
+    // variable-amount tier where they picked a lower price).
+    await subscribeUser("underpaid@test.com", paidTier.id, 100);
+
+    const post = await createPublishedPost(artist.id, {
+      minimumSubscriptionTierId: paidTier.id,
+    });
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    assert.strictEqual(mailQueueStub.callCount, 0);
+  });
+
+  it("emails subscribers explicitly granted via postSubscriptionTiers even below the minimum tier", async () => {
+    const { artist, freeTier, paidTier } = await createArtistWithTiers();
+    await subscribeUser("free-follower@test.com", freeTier.id, 0);
+
+    const post = await createPublishedPost(artist.id, {
+      minimumSubscriptionTierId: paidTier.id,
+      postSubscriptionTiers: {
+        create: [{ profileSubscriptionTierId: freeTier.id }],
+      },
+    });
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    assert.strictEqual(mailQueueStub.callCount, 1);
+    const [, jobData] = mailQueueStub.firstCall.args;
+    assert.strictEqual(jobData.message.to, "free-follower@test.com");
+  });
+
+  it("emails all followers when no minimum tier is set", async () => {
+    const { artist, freeTier, paidTier } = await createArtistWithTiers();
+    await subscribeUser("free-follower@test.com", freeTier.id, 0);
+    await subscribeUser("paid-subscriber@test.com", paidTier.id, 500);
+
+    const post = await createPublishedPost(artist.id);
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    assert.strictEqual(mailQueueStub.callCount, 2);
+  });
+
   // ── Local mention notifications ────────────────────────────────────────────
 
   it("creates MENTION_IN_POST notification for a mentioned local artist", async () => {

@@ -17,6 +17,8 @@ export type ResolvedItem = {
   optionIds?: string[];
   /** merch only — chosen shipping destination, when the item ships physically. */
   shippingDestinationId?: string;
+  /** The resource's own platformPercent override (trackGroup/merch), if set — falls back to the artist's defaultPlatformFee, then the site default. */
+  platformPercent?: number | null;
 };
 
 // Fetches the artist and resolves the connected Stripe account + currency used
@@ -85,14 +87,17 @@ export const initiatePayment = async ({
 
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
 
-  const applicationFeeAmount = await calculateAppFee(
-    totalAmount,
-    currency,
-    artist.properties
-      ? (artist.properties as { defaultPlatformFee?: number })
-          .defaultPlatformFee
-      : undefined
-  );
+  // Each item's own platformPercent (trackGroup/merch) takes precedence,
+  // falling back to the artist's defaultPlatformFee, then the site default
+  // (that last fallback happens inside calculateAppFee).
+  let applicationFeeAmount = 0;
+  for (const item of items) {
+    applicationFeeAmount += await calculateAppFee(
+      item.amount,
+      currency,
+      item.platformPercent ?? artist.defaultPlatformFee
+    );
+  }
 
   const purchaseTypes = uniq(items.map((i) => i.type));
   const purchaseType = purchaseTypes.length === 1 ? purchaseTypes[0] : "merch";

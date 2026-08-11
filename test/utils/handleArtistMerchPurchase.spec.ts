@@ -1,25 +1,26 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it } from "mocha";
 
-import {
-  clearTables,
-  createMerch,
-  createTrackGroup,
-  createUser,
-} from "../utils";
+import assert from "assert";
 
 import prisma from "@mirlo/prisma";
-import assert from "assert";
+import { describe, it } from "mocha";
 import sinon from "sinon";
+import Stripe from "stripe";
+
 import * as sendMail from "../../src/jobs/send-mail";
 import {
   ArtistPurchaseNotificationEmailType,
   handleArtistMerchPurchase,
   PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
-import Stripe from "stripe";
 import stripe from "../../src/utils/stripe";
+import {
+  clearTables,
+  createMerch,
+  createTrackGroup,
+  createUser,
+} from "../utils";
 
 const stripeAccountId = "hke";
 
@@ -315,6 +316,74 @@ describe("handleArtistMerchPurchase", () => {
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
     assert.equal(locals1.transactions[0].merchPurchases?.[0].merchId, merch.id);
     assert.equal(locals1.transactions[0].amount, 2000);
+  });
+
+  it("computes platformCut from the merch item's own platformPercent on its return value, not the site default", async () => {
+    // Regression test for the estimated platformCut/artistCut that
+    // handleArtistMerchPurchase computes and returns per purchase: it used to
+    // call calculateAppFee with no percent argument at all, ignoring both the
+    // merch's own platformPercent and the artist's defaultPlatformFee, and
+    // always landing on the site-wide default. Note this is a distinct value
+    // from the emailed transaction.platformCut, which instead mirrors the fee
+    // Stripe actually reports on the PaymentIntent (recorded at transaction
+    // creation, independent of this estimate).
+    sinon.stub(sendMail, "default").resolves();
+    sinon
+      .stub(stripe.products, "retrieve")
+      // @ts-ignore
+      .returns({ metadata: {} });
+
+    const { user: artistUser } = await createUser({
+      email: "artist-100@artist.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower-100@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist-100",
+        userId: artistUser.id,
+        enabled: true,
+        defaultPlatformFee: 10,
+      },
+    });
+
+    const productKey = "productKey100";
+
+    const merch = await createMerch(artist.id, {
+      title: "100% platform merch",
+      stripeProductKey: productKey,
+      platformPercent: 100,
+    });
+
+    const purchases = await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        payment_intent: "pi_124",
+        metadata: {
+          stripeAccountId: stripeAccountId,
+        },
+        line_items: {
+          data: [
+            {
+              price: { product: productKey },
+              amount_total: 2000,
+            } as Stripe.LineItem,
+          ],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as unknown as Stripe.Checkout.Session,
+      stripeAccountId
+    );
+
+    assert.equal(
+      (purchases as unknown as { platformCut: number }[])[0]?.platformCut,
+      2000,
+      "a merch item set to 100% platform should show the entire amount as platformCut"
+    );
   });
 
   it("should add a related trackgroup to the users' collection", async () => {
