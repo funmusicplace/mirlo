@@ -397,6 +397,16 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.equal(transaction.amount, 1000, "Amount should be 1000");
       assert.equal(transaction.userId, subscriber.id, "User ID should match");
       assert.equal(
+        transaction.platformCut,
+        200,
+        "platformCut should come from the invoice's own application_fee_amount"
+      );
+      assert.equal(
+        transaction.stripeCut,
+        30,
+        "stripeCut should be resolved via getFeeDetailsFromInvoice -> getFeesFromPaymentIntent from the already-expanded balance_transaction.fee_details"
+      );
+      assert.equal(
         transaction.profileUserSubscriptionCharges.length,
         1,
         "Should have one subscription charge"

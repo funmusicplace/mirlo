@@ -52,7 +52,6 @@ const routes = [
   "downloadableContent/{id}",
   "images/{id}",
   "merch/{id}",
-  "merch/{id}/purchase",
   "posts",
   "posts/{id}",
   "licenses",

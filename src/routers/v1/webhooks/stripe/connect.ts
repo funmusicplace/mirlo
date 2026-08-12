@@ -49,7 +49,7 @@ export default function () {
           const session = event.data.object;
           logger.info(`stripe-connect: checkout status is ${session.status}.`);
 
-          handleCheckoutSession(session);
+          await handleCheckoutSession(session);
           break;
         case "setup_intent.succeeded":
           // To trigger this event type use
@@ -59,28 +59,28 @@ export default function () {
             `stripe-connect: setup intent status is ${setupIntent.status}.`
           );
 
-          handleSetupIntentSucceeded(setupIntent);
+          await handleSetupIntentSucceeded(setupIntent);
           break;
         case "invoice.paid":
           const invoice = event.data.object;
 
-          handleInvoicePaid(invoice, event.account);
+          await handleInvoicePaid(invoice, event.account);
           break;
         case "invoice.payment_failed":
           const failedInvoice = event.data.object;
 
-          handleInvoicePaymentFailed(failedInvoice, event.account);
+          await handleInvoicePaymentFailed(failedInvoice, event.account);
           break;
 
         case "payment_intent.succeeded":
           const paymentIntent = event.data.object;
-          handlePaymentIntentSucceeded(paymentIntent, event.account);
+          await handlePaymentIntentSucceeded(paymentIntent, event.account);
           break;
 
         case "payment_intent.payment_failed":
           const failedPaymentIntent = event.data.object;
 
-          handlePaymentIntentFailed(failedPaymentIntent, event.account);
+          await handlePaymentIntentFailed(failedPaymentIntent, event.account);
           break;
         case "customer.subscription.deleted":
           // Fires when a subscription actually ends — at the close of a paid
@@ -93,19 +93,19 @@ export default function () {
         case "account.updated":
           const accountUpdate = event.data.object;
 
-          handleAccountUpdate(accountUpdate);
+          await handleAccountUpdate(accountUpdate);
           break;
         case "terminal.reader.action_succeeded":
           // To test: stripe trigger terminal.reader.action_succeeded
           const succeededReader = event.data.object;
-          handleTerminalReaderActionSucceeded(
+          await handleTerminalReaderActionSucceeded(
             succeededReader,
             event.account ?? ""
           );
           break;
         case "terminal.reader.action_failed":
           const failedReader = event.data.object;
-          handleTerminalReaderActionFailed(failedReader);
+          await handleTerminalReaderActionFailed(failedReader);
           break;
         default:
           // Unexpected event type

@@ -34,6 +34,8 @@ export type CreateSubscriptionSetupArgs = {
   userId?: string;
   /** Self-chosen display name, captured when the buyer has no account name yet. */
   userName?: string;
+  /** Where the hosted checkout page sends the buyer after payment, if one was supplied at initiation. */
+  successUrl?: string;
 };
 
 /** Args for reprising an existing recurring subscription in place. */
@@ -85,6 +87,9 @@ export interface PaymentProcessor {
     args: CreateSubscriptionSetupArgs & {
       oldTierId?: number;
       oldStripeSubscriptionKey?: string;
+      /** The tier needs a shipping address — persisted onto the SetupIntent's metadata so a redirect-away-and-back (hosted checkout) can still recover it via getStatus. */
+      requiresShipping?: boolean;
+      allowedCountries?: string[];
     }
   ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
 
@@ -161,6 +166,11 @@ export type PaymentStatusResult = {
   amount: number | null;
   currency: string | null;
   artistId: string | null;
+  /** Physical merch, or a `collectAddress` subscription tier — the hosted checkout page needs to render an AddressElement. */
+  requiresShipping: boolean;
+  allowedCountries: string[] | null;
+  /** The buyer's email, if already known (a logged-in purchase, or one initiated with an email). Null when the hosted checkout page still needs to collect one. */
+  userEmail: string | null;
 };
 
 import { StripePaymentProcessor } from "./stripeProcessor";

@@ -11,6 +11,11 @@ export type PurchaseIntent = {
   amount: number | null;
   currency: string | null;
   artistName: string | null;
+  /** Physical merch, or a collectAddress subscription tier — render an AddressElement before confirming. */
+  requiresShipping: boolean;
+  allowedCountries: string[] | null;
+  /** The buyer's email, if already known. Null when the checkout page still needs to collect one (e.g. an external caller initiated this without a logged-in user or an email). */
+  userEmail: string | null;
 };
 
 const fetchPurchaseIntent: QueryFunction<

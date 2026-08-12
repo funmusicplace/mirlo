@@ -1,13 +1,11 @@
 import prisma from "@mirlo/prisma";
 import {
   Profile,
-  MerchOption,
   TrackGroup,
   User,
   FundraiserPledge,
   Fundraiser,
 } from "@mirlo/prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Job } from "bullmq";
 import Stripe from "stripe";
 
@@ -24,7 +22,7 @@ import { sendBasecampAMessage } from "./basecamp";
 import { getClient } from "./getClient";
 import { resolvePayee } from "./payments/payee";
 import { calculateAppFee } from "./processingPayments";
-import stripe, { OPTION_JOINER } from "./stripe";
+import stripe from "./stripe";
 import { registerSubscription } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 
@@ -44,30 +42,48 @@ const getPaymentIntent = async (
 
 // Reads the platform application fee and the Stripe processing fee for a
 // (settled) PaymentIntent from its latest charge's balance transaction. Callers
-// keep their own error policy — this throws if Stripe can't be reached.
+// keep their own error policy — this throws if Stripe can't be reached. This is
+// the single place that walks a balance transaction's fee_details for the
+// Stripe processing fee — getApplicationFee (session-based) and
+// getFeeDetailsFromInvoice (invoice-based, in stripe/index.ts) both resolve
+// down to a PaymentIntent and delegate here rather than re-deriving it.
 export const getFeesFromPaymentIntent = async (
   paymentIntent: Stripe.PaymentIntent,
   stripeAccount: string
 ): Promise<{ applicationFee: number; paymentProcessorFee: number }> => {
-  const chargeId =
-    typeof paymentIntent.latest_charge === "string"
-      ? paymentIntent.latest_charge
-      : (paymentIntent.latest_charge?.id ?? "");
+  let balanceTransaction: Stripe.BalanceTransaction | undefined;
 
-  let paymentProcessorFee = 0;
-  if (chargeId) {
-    const charge = await stripe.charges.retrieve(
-      chargeId,
-      { expand: ["balance_transaction"] },
-      { stripeAccount }
-    );
-    const balanceTransaction = charge.balance_transaction as
-      | Stripe.BalanceTransaction
-      | undefined;
-    paymentProcessorFee =
-      balanceTransaction?.fee_details.find((fee) => fee.type === "stripe_fee")
-        ?.amount ?? 0;
+  if (
+    paymentIntent.latest_charge &&
+    typeof paymentIntent.latest_charge !== "string" &&
+    paymentIntent.latest_charge.balance_transaction &&
+    typeof paymentIntent.latest_charge.balance_transaction !== "string"
+  ) {
+    // Caller already expanded latest_charge.balance_transaction on their own
+    // retrieve (e.g. getFeeDetailsFromInvoice) — reuse it instead of another
+    // round-trip to Stripe.
+    balanceTransaction = paymentIntent.latest_charge.balance_transaction;
+  } else {
+    const chargeId =
+      typeof paymentIntent.latest_charge === "string"
+        ? paymentIntent.latest_charge
+        : (paymentIntent.latest_charge?.id ?? "");
+
+    if (chargeId) {
+      const charge = await stripe.charges.retrieve(
+        chargeId,
+        { expand: ["balance_transaction"] },
+        { stripeAccount }
+      );
+      balanceTransaction = charge.balance_transaction as
+        | Stripe.BalanceTransaction
+        | undefined;
+    }
   }
+
+  const paymentProcessorFee =
+    balanceTransaction?.fee_details.find((fee) => fee.type === "stripe_fee")
+      ?.amount ?? 0;
 
   return {
     applicationFee: paymentIntent.application_fee_amount ?? 0,
@@ -558,6 +574,10 @@ export const handleCataloguePurchase = async (
       } as Job);
 
       const pricePaid = session?.amount_total ?? 0;
+      const catalogueAppFee = await calculateAppFee(
+        pricePaid,
+        session?.currency ?? "usd"
+      );
       await sendMail({
         data: {
           template: "catalogue-purchase-artist-notification",
@@ -568,8 +588,7 @@ export const handleCataloguePurchase = async (
             artist: serializedArtist,
             pricePaid,
             currencyPaid: session?.currency ?? "usd",
-            platformCut:
-              calculateAppFee(pricePaid, session?.currency ?? "usd") ?? 0 / 100,
+            platformCut: (catalogueAppFee ?? 0) / 100,
             email: user.email,
           },
         },
@@ -920,240 +939,6 @@ export const handleArtistGift = async (
     return tip;
   } catch (e) {
     logger.error(`Error creating tip: ${e}`);
-    throw e;
-  }
-};
-
-export const handleArtistMerchPurchase = async (
-  userId: number,
-  session: Stripe.Checkout.Session,
-  stripeAccount: string
-) => {
-  try {
-    const purchases = (
-      await Promise.all(
-        session?.line_items?.data.map(async (item) => {
-          const stripeProduct = item.price?.product;
-          let merchProduct;
-          let stripeProductId =
-            typeof stripeProduct === "string"
-              ? stripeProduct
-              : stripeProduct?.id;
-
-          // Use the product of this line item to find the
-          // relevant item in our database. For merch this
-          // can be either product directly, or something defined
-          // by the merch options. We create a product for each possible
-          // combiunation of merch option
-          if (stripeProductId) {
-            const product = await stripe.products.retrieve(
-              stripeProductId,
-              undefined,
-              { stripeAccount }
-            );
-
-            if (product.metadata.merchOptionIds) {
-              const optionIds =
-                product.metadata.merchOptionIds.split(OPTION_JOINER);
-              merchProduct = await prisma.merch.findFirst({
-                where: {
-                  optionTypes: {
-                    some: { options: { some: { id: { in: optionIds } } } },
-                  },
-                },
-                include: {
-                  optionTypes: {
-                    include: { options: true },
-                  },
-                },
-              });
-            } else {
-              merchProduct = await prisma.merch.findFirst({
-                where: {
-                  stripeProductKey: product.id,
-                },
-                include: {
-                  optionTypes: {
-                    include: { options: true },
-                  },
-                },
-              });
-            }
-
-            if (merchProduct) {
-              const optionIds =
-                product.metadata?.merchOptionIds?.split(OPTION_JOINER);
-
-              const options: MerchOption[] = [];
-              const optionsToReduceQuantity: MerchOption[] = [];
-              merchProduct.optionTypes.forEach((ot) =>
-                ot.options.forEach((o) => {
-                  if (optionIds?.includes(o.id)) {
-                    options.push(o);
-                    if (o.quantityRemaining) {
-                      optionsToReduceQuantity.push(o);
-                    }
-                  }
-                })
-              );
-
-              logger.info(
-                `handleArtistMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}, options: ${options.map((o) => o.id).join(", ")}`
-              );
-
-              const { applicationFee, paymentProcessorFee } =
-                await getApplicationFee(session);
-
-              const transaction = await prisma.userTransaction.create({
-                data: {
-                  userId,
-                  amount: item.amount_total ?? 0,
-                  currency: item.currency ?? "usd",
-                  platformCut: applicationFee ?? null,
-                  stripeCut: paymentProcessorFee ?? null,
-                  stripeId: session?.id ?? "",
-                  shippingFeeAmount: session.shipping_cost?.amount_total ?? 0,
-                  paymentStatus: "COMPLETED",
-                  discountPercent: session?.metadata?.discountPercent
-                    ? Number(session.metadata.discountPercent)
-                    : undefined,
-                },
-              });
-
-              const createdMerchPurchase = await prisma.merchPurchase.create({
-                data: {
-                  userId,
-                  merchId: merchProduct.id,
-                  fulfillmentStatus: "NO_PROGRESS",
-                  message: session?.metadata?.message ?? null,
-                  shippingAddress: {
-                    ...session?.shipping_details?.address,
-                    name: session?.shipping_details?.name,
-                    phone: session?.shipping_details?.phone,
-                  },
-                  billingAddress: session?.customer_details?.address,
-                  quantity: item.quantity ?? 1,
-                  transactionId: transaction.id,
-                  options: {
-                    connect: options.map((o) => ({
-                      id: o.id,
-                    })),
-                  },
-                },
-              });
-
-              if (merchProduct.includePurchaseTrackGroupId) {
-                try {
-                  await prisma.userTrackGroupPurchase.create({
-                    data: {
-                      trackGroupId: merchProduct.includePurchaseTrackGroupId,
-                      userId: createdMerchPurchase.userId,
-                      proGratis: true,
-                    },
-                  });
-                } catch (e: any) {
-                  if (
-                    e instanceof PrismaClientKnownRequestError ||
-                    e.name === "PrismaClientKnownRequestError"
-                  ) {
-                    if (e.code !== "P2002") {
-                      throw e;
-                    }
-                  }
-                }
-              }
-
-              const merch = await prisma.merch.findFirst({
-                where: { id: createdMerchPurchase.merchId },
-              });
-
-              if (
-                optionsToReduceQuantity.length === 0 &&
-                merch?.quantityRemaining
-              ) {
-                await prisma.merch.update({
-                  where: {
-                    id: createdMerchPurchase.merchId,
-                  },
-                  data: {
-                    quantityRemaining:
-                      merch.quantityRemaining - createdMerchPurchase.quantity,
-                  },
-                });
-              } else if (optionsToReduceQuantity.length > 0) {
-                await Promise.all(
-                  optionsToReduceQuantity.map((option) => {
-                    return prisma.merchOption.update({
-                      where: {
-                        id: option.id,
-                      },
-                      data: {
-                        quantityRemaining:
-                          (option.quantityRemaining ?? 0) -
-                          createdMerchPurchase.quantity,
-                      },
-                    });
-                  })
-                );
-              }
-              const refreshedMerchPurchase =
-                await prisma.merchPurchase.findFirst({
-                  where: {
-                    id: createdMerchPurchase.id,
-                  },
-                  include: {
-                    merch: {
-                      include: { profile: { include: { user: true } } },
-                    },
-                    options: true,
-                    transaction: true,
-                  },
-                });
-
-              if (!refreshedMerchPurchase?.transaction) {
-                return null;
-              }
-
-              const platformCut = await calculateAppFee(
-                refreshedMerchPurchase.transaction.amount,
-                refreshedMerchPurchase.transaction.currency,
-                refreshedMerchPurchase.merch.platformPercent ??
-                  refreshedMerchPurchase.merch.profile.defaultPlatformFee
-              );
-
-              return {
-                ...refreshedMerchPurchase,
-                artistCut:
-                  (refreshedMerchPurchase?.transaction.amount ?? 0) -
-                  platformCut,
-                platformCut,
-              };
-            }
-          }
-        }) ?? []
-      )
-    ).filter((o) => !!o);
-
-    const purchaser = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (purchaser && purchases.length > 0 && purchases?.[0]?.merch?.profile) {
-      await sendSaleEmails(
-        purchases[0].merch.profile,
-        purchaser,
-        (purchases
-          .map((p) => p?.transaction?.id)
-          .filter((id) => !!id) as string[]) ?? [],
-        session?.metadata?.message
-      );
-    }
-
-    return purchases;
-  } catch (e) {
-    logger.error(`Error creating merch purchase: ${e}`);
     throw e;
   }
 };

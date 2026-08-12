@@ -5,15 +5,14 @@ import MarkdownContent from "components/common/MarkdownContent";
 import Modal from "components/common/Modal";
 import { getCurrencySymbol } from "components/common/Money";
 import PurchaseModal from "components/common/Purchase/PurchaseModal";
-import { usePurchase } from "components/common/Purchase/usePurchase";
+import { useSubscriptionCheckout } from "components/common/Purchase/useSubscriptionCheckout";
 import { isEmpty } from "lodash";
 import { queryArtist } from "queries";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { buildCheckoutCompletePath } from "utils/artist";
 
 import { ArtistButton } from "./ArtistButtons";
 import IncludedReleases from "./IncludedReleases";
@@ -49,13 +48,14 @@ const ArtistVariableSupport: React.FC<{
   const supportButtonText =
     artist?.properties?.titles?.supportButton?.trim() || t("support");
 
-  const navigate = useNavigate();
   const {
     checkout,
     isLoading: isCheckingForSubscription,
     startPurchase,
     reset,
-  } = usePurchase();
+    handlePurchaseComplete,
+    returnUrl,
+  } = useSubscriptionCheckout({ artist, refresh });
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     await startPurchase({
@@ -76,16 +76,6 @@ const ArtistVariableSupport: React.FC<{
     refresh();
     refreshLoggedInUser();
   };
-
-  const handlePurchaseComplete = React.useCallback(() => {
-    if (!artist) return;
-    refreshLoggedInUser();
-    refresh();
-    reset();
-    navigate(
-      buildCheckoutCompletePath(artist, { purchaseType: "subscription" })
-    );
-  }, [artist, navigate, refresh, refreshLoggedInUser, reset]);
 
   return (
     <>
@@ -192,13 +182,7 @@ const ArtistVariableSupport: React.FC<{
         stripeAccountId={checkout?.stripeAccountId}
         requiresShipping={checkout?.requiresShipping}
         allowedCountries={checkout?.allowedCountries}
-        returnUrl={
-          artist
-            ? `${window.location.origin}${buildCheckoutCompletePath(artist, {
-                purchaseType: "subscription",
-              })}`
-            : window.location.origin
-        }
+        returnUrl={returnUrl}
         onSuccess={handlePurchaseComplete}
         title={t("support") ?? ""}
         buttonLabel={t("letsSupport") ?? ""}

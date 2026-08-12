@@ -107,6 +107,7 @@ export const initiateOnlineSubscription = async ({
   userEmail,
   userId,
   userName,
+  successUrl,
 }: {
   artistId: number;
   tierId: number;
@@ -116,6 +117,8 @@ export const initiateOnlineSubscription = async ({
   userId?: number;
   /** Self-chosen display name, captured when the buyer has no account name yet. */
   userName?: string;
+  /** Where the hosted checkout page returns the buyer after payment (validated upstream). */
+  successUrl?: string;
 }): Promise<
   | { success: true }
   | {
@@ -199,6 +202,11 @@ export const initiateOnlineSubscription = async ({
   const oldStripeSubscriptionKey =
     existingSubscription?.stripeSubscriptionKey ?? undefined;
 
+  const requiresShipping = !!tier.collectAddress;
+  const allowedCountries = tier.collectAddress
+    ? SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES
+    : undefined;
+
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
       tierId,
@@ -209,20 +217,21 @@ export const initiateOnlineSubscription = async ({
       userEmail,
       userId: userId ? String(userId) : undefined,
       userName,
+      successUrl,
       oldTierId: isTierSwitch
         ? existingSubscription.profileSubscriptionTierId
         : undefined,
       oldStripeSubscriptionKey,
+      requiresShipping,
+      allowedCountries,
     });
 
   return {
     clientSecret,
     stripeAccountId,
     setupIntentId,
-    requiresShipping: !!tier.collectAddress,
-    allowedCountries: tier.collectAddress
-      ? SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES
-      : undefined,
+    requiresShipping,
+    allowedCountries,
   };
 };
 

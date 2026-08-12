@@ -6,6 +6,7 @@ import {
   Fundraiser,
   TrackGroup,
 } from "@mirlo/prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 import Stripe from "stripe";
 
@@ -17,7 +18,6 @@ import {
   getFeesFromPaymentIntent,
   getPlatformCurrencyValueFromIntent,
   handleArtistGift,
-  handleArtistMerchPurchase,
   handleCataloguePurchase,
   handleFundraiserPledge,
   handleFundraiserPledgePaymentFailure,
@@ -168,6 +168,45 @@ const checkForProductKey = async (
   return productKey;
 };
 
+// Shared find-or-create core for the four createXStripeProduct functions
+// below: checkForProductKey (unchanged), then — if nothing was found — create
+// the Stripe Product and hand its id to persistProductKey. Each entity type
+// differs only in its create params and how (or whether) it persists the
+// resulting key, so those are the only things callers provide.
+const createOrReuseStripeProduct = async ({
+  existingProductKey,
+  stripeAccountId,
+  searchOptions,
+  buildCreateParams,
+  persistProductKey,
+}: {
+  existingProductKey: string | null;
+  stripeAccountId: string;
+  /** Only merch products are looked up by an option-combination search — see checkForProductKey. */
+  searchOptions?: { merchOptionIds?: string[] };
+  buildCreateParams: () => Promise<Stripe.ProductCreateParams>;
+  /** Omit to skip persisting — merch with options doesn't store a single stripeProductKey on the row (see createMerchStripeProduct). */
+  persistProductKey?: (productKey: string) => Promise<unknown>;
+}): Promise<string> => {
+  let productKey = await checkForProductKey(
+    existingProductKey,
+    stripeAccountId,
+    searchOptions
+  );
+
+  if (!productKey) {
+    const product = await stripe.products.create(await buildCreateParams(), {
+      stripeAccount: stripeAccountId,
+    });
+    if (persistProductKey) {
+      await persistProductKey(product.id);
+    }
+    productKey = product.id;
+  }
+
+  return productKey;
+};
+
 /**
  * For Merch we don't store the stripeProductKey on the merch unless there are no options
  * @param merch
@@ -182,61 +221,45 @@ export const createMerchStripeProduct = async (
   stripeAccountId: string,
   options?: { merchOptionIds?: string[] }
 ) => {
-  let productKey = await checkForProductKey(
-    merch.stripeProductKey,
-    stripeAccountId,
-    options
-  );
-  const about = await buildProductDescription(
-    merch.title,
-    merch.profile.name,
-    merch.description,
-    options
-  );
-  if (!productKey) {
-    const product = await stripe.products.create(
-      {
-        name: `${merch.title} by ${merch.profile.name}`,
-        description: about,
-        tax_code: "txcd_99999999",
-        metadata: {
-          merchOptionIds: options?.merchOptionIds
-            ? options?.merchOptionIds.join(OPTION_JOINER)
-            : null,
-        },
-        images:
-          merch.images?.length > 0
-            ? [
-                generateFullStaticImageUrl(
-                  merch.images?.[0]?.url[4],
-                  finalMerchImageBucket
-                ),
-              ]
-            : [],
-      },
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
-    // do not set a product key if there are options
-    if (
-      !options ||
-      !options.merchOptionIds ||
-      options.merchOptionIds.length === 0
-    ) {
-      await prisma.merch.update({
-        where: {
-          id: merch.id,
-        },
-        data: {
-          stripeProductKey: product.id,
-        },
-      });
-    }
-    productKey = product.id;
-  }
+  const hasOptions = !!options?.merchOptionIds?.length;
 
-  return productKey;
+  return createOrReuseStripeProduct({
+    existingProductKey: merch.stripeProductKey,
+    stripeAccountId,
+    searchOptions: options,
+    buildCreateParams: async () => ({
+      name: `${merch.title} by ${merch.profile.name}`,
+      description: await buildProductDescription(
+        merch.title,
+        merch.profile.name,
+        merch.description,
+        options
+      ),
+      tax_code: "txcd_99999999",
+      metadata: {
+        merchOptionIds: options?.merchOptionIds
+          ? options?.merchOptionIds.join(OPTION_JOINER)
+          : null,
+      },
+      images:
+        merch.images?.length > 0
+          ? [
+              generateFullStaticImageUrl(
+                merch.images?.[0]?.url[4],
+                finalMerchImageBucket
+              ),
+            ]
+          : [],
+    }),
+    // do not set a product key if there are options
+    persistProductKey: hasOptions
+      ? undefined
+      : (productKey) =>
+          prisma.merch.update({
+            where: { id: merch.id },
+            data: { stripeProductKey: productKey },
+          }),
+  });
 };
 
 export const findOrCreateStripeCustomer = async (
@@ -255,16 +278,22 @@ export const findOrCreateStripeCustomer = async (
     searchEmail = user?.email ?? email;
   }
 
-  const existingCustomer = await stripe.customers.list(
-    {
-      email: searchEmail,
-    },
-    {
-      stripeAccount: stripeAccountId,
-    }
-  );
+  // Stripe's customers.list ignores a missing/blank `email` filter and just
+  // returns the connected account's customers unfiltered (most recent first)
+  // — that would hand back some unrelated buyer's Customer object here rather
+  // than "no match", so a real customer never gets attached to it.
+  const existingCustomer = searchEmail
+    ? await stripe.customers.list(
+        {
+          email: searchEmail,
+        },
+        {
+          stripeAccount: stripeAccountId,
+        }
+      )
+    : null;
 
-  if (existingCustomer.data.length > 0) {
+  if (existingCustomer && existingCustomer.data.length > 0) {
     return existingCustomer.data[0];
   }
   const customer = await stripe.customers.create(
@@ -288,47 +317,32 @@ export const createTrackGroupStripeProduct = async (
   }>,
   stripeAccountId: string
 ) => {
-  let productKey = await checkForProductKey(
-    trackGroup.stripeProductKey,
-    stripeAccountId
-  );
-
-  if (!productKey) {
-    const about = await buildProductDescription(
-      trackGroup.title,
-      trackGroup.profile.name,
-      trackGroup.about
-    );
-    const product = await stripe.products.create(
-      {
-        name: `${trackGroup.title} by ${trackGroup.profile.name}`,
-        description: about,
-        tax_code: "txcd_10401100",
-        images: trackGroup.cover
-          ? [
-              generateFullStaticImageUrl(
-                trackGroup.cover?.url[4],
-                finalCoversBucket
-              ),
-            ]
-          : [],
-      },
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
-    await prisma.trackGroup.update({
-      where: {
-        id: trackGroup.id,
-      },
-      data: {
-        stripeProductKey: product.id,
-      },
-    });
-    productKey = product.id;
-  }
-
-  return productKey;
+  return createOrReuseStripeProduct({
+    existingProductKey: trackGroup.stripeProductKey,
+    stripeAccountId,
+    buildCreateParams: async () => ({
+      name: `${trackGroup.title} by ${trackGroup.profile.name}`,
+      description: await buildProductDescription(
+        trackGroup.title,
+        trackGroup.profile.name,
+        trackGroup.about
+      ),
+      tax_code: "txcd_10401100",
+      images: trackGroup.cover
+        ? [
+            generateFullStaticImageUrl(
+              trackGroup.cover?.url[4],
+              finalCoversBucket
+            ),
+          ]
+        : [],
+    }),
+    persistProductKey: (productKey) =>
+      prisma.trackGroup.update({
+        where: { id: trackGroup.id },
+        data: { stripeProductKey: productKey },
+      }),
+  });
 };
 
 export const createTrackStripeProduct = async (
@@ -340,53 +354,37 @@ export const createTrackStripeProduct = async (
   }>,
   stripeAccountId: string
 ) => {
-  let productKey = await checkForProductKey(
-    track.stripeProductKey,
-    stripeAccountId
-  );
+  const trackArtist =
+    track.trackArtists?.length > 0
+      ? track.trackArtists.map((a) => a.artistName).join(", ")
+      : track.trackGroup.profile.name;
 
-  if (!productKey) {
-    const trackArtist =
-      track.trackArtists?.length > 0
-        ? track.trackArtists.map((a) => a.artistName).join(", ")
-        : track.trackGroup.profile.name;
-
-    const about = await buildProductDescription(
-      track.title,
-      trackArtist,
-      track.description
-    );
-
-    const product = await stripe.products.create(
-      {
-        name: `${track.title} by ${trackArtist}`,
-        description: about,
-        tax_code: "txcd_10401100",
-        images: track.trackGroup.cover
-          ? [
-              generateFullStaticImageUrl(
-                track.trackGroup.cover?.url[4],
-                finalCoversBucket
-              ),
-            ]
-          : [],
-      },
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
-    await prisma.track.update({
-      where: {
-        id: track.id,
-      },
-      data: {
-        stripeProductKey: product.id,
-      },
-    });
-    productKey = product.id;
-  }
-
-  return productKey;
+  return createOrReuseStripeProduct({
+    existingProductKey: track.stripeProductKey,
+    stripeAccountId,
+    buildCreateParams: async () => ({
+      name: `${track.title} by ${trackArtist}`,
+      description: await buildProductDescription(
+        track.title,
+        trackArtist,
+        track.description
+      ),
+      tax_code: "txcd_10401100",
+      images: track.trackGroup.cover
+        ? [
+            generateFullStaticImageUrl(
+              track.trackGroup.cover?.url[4],
+              finalCoversBucket
+            ),
+          ]
+        : [],
+    }),
+    persistProductKey: (productKey) =>
+      prisma.track.update({
+        where: { id: track.id },
+        data: { stripeProductKey: productKey },
+      }),
+  });
 };
 
 export const createSubscriptionStripeProduct = async (
@@ -395,32 +393,19 @@ export const createSubscriptionStripeProduct = async (
   }>,
   stripeAccountId: string
 ) => {
-  let productKey = await checkForProductKey(
-    tier.stripeProductKey,
-    stripeAccountId
-  );
-
-  if (!productKey) {
-    const product = await stripe.products.create(
-      {
-        name: `Supporting ${tier.profile.name} at ${tier.name}`,
-        description: tier.description || "Thank you for your support!",
-      },
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
-    await prisma.profileSubscriptionTier.update({
-      where: {
-        id: Number(tier.id),
-      },
-      data: {
-        stripeProductKey: product.id,
-      },
-    });
-    productKey = product.id;
-  }
-  return productKey;
+  return createOrReuseStripeProduct({
+    existingProductKey: tier.stripeProductKey,
+    stripeAccountId,
+    buildCreateParams: async () => ({
+      name: `Supporting ${tier.profile.name} at ${tier.name}`,
+      description: tier.description || "Thank you for your support!",
+    }),
+    persistProductKey: (productKey) =>
+      prisma.profileSubscriptionTier.update({
+        where: { id: Number(tier.id) },
+        data: { stripeProductKey: productKey },
+      }),
+  });
 };
 
 export const verifyStripeSignature = async (
@@ -516,13 +501,6 @@ export const handleCheckoutSession = async (
     if (purchaseType === "tip") {
       logger.info(`checkout.session: ${session.id} handling tip`);
       await handleArtistGift(Number(actualUserId), Number(artistId), session);
-    } else if (purchaseType === "merch") {
-      logger.info(`checkout.session: ${session.id} handling merch`);
-      await handleArtistMerchPurchase(
-        Number(actualUserId),
-        session,
-        stripeAccountId
-      );
     } else if (purchaseType === "subscription") {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);
@@ -697,6 +675,49 @@ export const attachSetupIntentShippingAddress = async ({
     { metadata: { shippingAddress: JSON.stringify(shippingAddress) } },
     { stripeAccount: stripeAccountId }
   );
+};
+
+/**
+ * Attaches the buyer's identity to a not-yet-confirmed PaymentIntent/SetupIntent
+ * before the frontend confirms it — for a hosted-checkout purchase that was
+ * initiated without a known user (an external caller that didn't collect an
+ * email up front). `handleSetupIntentSucceeded`/`completePurchaseFromIntent`
+ * read `userId`/`userEmail` back off the intent's metadata once it succeeds,
+ * so without this step the resulting purchase/subscription has no buyer to
+ * register against. Called from `PUT /v1/purchase/:id`, before the frontend
+ * calls confirmPayment/confirmSetup. Stripe merges metadata updates, so this
+ * never clobbers the other keys (tierId, artistId, …) set at creation.
+ */
+export const attachIntentIdentity = async ({
+  id,
+  stripeAccountId,
+  userId,
+  userEmail,
+}: {
+  id: string;
+  stripeAccountId: string;
+  /** Set when the buyer is logged in to Mirlo — takes precedence over any email the caller typed in. */
+  userId?: number;
+  userEmail: string;
+}) => {
+  const metadata: Record<string, string> = {
+    userEmail,
+    ...(userId !== undefined && { userId: String(userId) }),
+  };
+
+  if (id.startsWith("seti_")) {
+    await stripe.setupIntents.update(
+      id,
+      { metadata },
+      { stripeAccount: stripeAccountId }
+    );
+  } else {
+    await stripe.paymentIntents.update(
+      id,
+      { metadata },
+      { stripeAccount: stripeAccountId }
+    );
+  }
 };
 
 /**
@@ -993,22 +1014,21 @@ const getFeeDetailsFromInvoice = async (
 ) => {
   const paymentIntent = invoice.payment_intent;
 
+  // Expanding latest_charge.balance_transaction here means
+  // getFeesFromPaymentIntent reuses it directly instead of a second Stripe
+  // round-trip to fetch the charge.
   const intent = await stripe.paymentIntents.retrieve(
     paymentIntent as string,
     {
-      expand: ["latest_charge.balance_transaction.fee_details"],
+      expand: ["latest_charge.balance_transaction"],
     },
     { stripeAccount: accountId }
   );
-  const feeDetails =
-    intent.latest_charge &&
-    typeof intent.latest_charge !== "string" &&
-    intent.latest_charge.balance_transaction &&
-    typeof intent.latest_charge.balance_transaction !== "string"
-      ? intent.latest_charge.balance_transaction?.fee_details
-      : undefined;
-  const stripeFee = feeDetails?.find((fd) => fd.type === "stripe_fee");
-  return { stripeFee, intent };
+  const { paymentProcessorFee } = await getFeesFromPaymentIntent(
+    intent,
+    accountId
+  );
+  return { paymentProcessorFee, intent };
 };
 
 export const handleInvoicePaid = async (
@@ -1018,7 +1038,10 @@ export const handleInvoicePaid = async (
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
   if (typeof subscription === "string") {
-    const { stripeFee } = await getFeeDetailsFromInvoice(invoice, accountId);
+    const { paymentProcessorFee } = await getFeeDetailsFromInvoice(
+      invoice,
+      accountId
+    );
 
     // Fetch subscription to get next billing date
     let nextBillingDate: Date | undefined;
@@ -1038,15 +1061,13 @@ export const handleInvoicePaid = async (
       );
     }
 
-    invoice.billing_reason === "subscription_create";
-
     await manageSubscriptionReceipt({
       processorPaymentReferenceId: invoice.id,
       processorSubscriptionReferenceId: subscription,
       amountPaid: invoice.amount_paid,
       currency: invoice.currency,
       platformCut: invoice.application_fee_amount || 0,
-      paymentProcessorFee: stripeFee?.amount || 0,
+      paymentProcessorFee,
       billingReason: invoice.billing_reason,
       status: "COMPLETED",
       nextBillingDate,
@@ -1070,7 +1091,7 @@ export const handleInvoicePaymentFailed = async (
     metadata.userId &&
     Number.isFinite(+metadata.userId)
   ) {
-    const { intent, stripeFee } = await getFeeDetailsFromInvoice(
+    const { intent, paymentProcessorFee } = await getFeeDetailsFromInvoice(
       invoice,
       accountId
     );
@@ -1085,7 +1106,7 @@ export const handleInvoicePaymentFailed = async (
       currency: invoice.currency,
       billingReason: invoice.billing_reason,
       platformCut: invoice.application_fee_amount || 0,
-      paymentProcessorFee: stripeFee?.amount || 0,
+      paymentProcessorFee,
     });
   }
 };
@@ -1268,6 +1289,33 @@ export const handleMerchPurchasesFromIntent = async (
         }),
       },
     });
+
+    // Some merch items bundle a free album with the purchase. Swallow a
+    // unique-constraint race (P2002) the same way the legacy Checkout Session
+    // path does — a buyer who already owns the bonus album (e.g. bought it
+    // directly, or bought two of this merch item) shouldn't fail the purchase.
+    if (merch.includePurchaseTrackGroupId) {
+      try {
+        await prisma.userTrackGroupPurchase.create({
+          data: {
+            trackGroupId: merch.includePurchaseTrackGroupId,
+            userId,
+            proGratis: true,
+          },
+        });
+      } catch (e: any) {
+        if (
+          e instanceof PrismaClientKnownRequestError ||
+          e?.name === "PrismaClientKnownRequestError"
+        ) {
+          if (e.code !== "P2002") {
+            throw e;
+          }
+        } else {
+          throw e;
+        }
+      }
+    }
 
     await decrementMerchStock(merch.id, item.optionIds ?? [], quantity);
 

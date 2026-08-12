@@ -312,6 +312,19 @@ export default function () {
         );
       }
 
+      // A guest purchase must be attributable to a real email — otherwise
+      // there's no one to register the resulting purchase/subscription
+      // against. The hosted checkout page gets a pass here: it collects a
+      // missing email itself (from the buyer directly, or the logged-in
+      // user's own email) before confirming payment — see PUT /v1/purchase/:id.
+      if (!readerId && !loggedInUser && !email && !hosted) {
+        throw new AppError({
+          httpCode: 400,
+          description:
+            "email is required for a purchase without a logged-in user",
+        });
+      }
+
       const hasSubscription = items.some((i) => i.type === "subscription");
       if (hasSubscription && items.length > 1) {
         throw new AppError({
@@ -346,6 +359,7 @@ export default function () {
           userEmail: loggedInUser?.email ?? email ?? "",
           userId: loggedInUser?.id,
           userName: subItem.userName,
+          successUrl,
         });
 
         // Hosted checkout: same handoff as the one-time-payment path below —
@@ -524,6 +538,8 @@ export default function () {
         clientId,
         successUrl,
         stripeAccountId: resolvedStripeAccountId,
+        requiresShipping,
+        allowedCountries,
       });
 
       // Hosted checkout: hand external integrators a single redirect to Mirlo's

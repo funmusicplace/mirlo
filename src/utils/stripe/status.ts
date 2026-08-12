@@ -17,6 +17,9 @@ export const getIntentStatus = async ({
   amount: number | null;
   currency: string | null;
   artistId: string | null;
+  requiresShipping: boolean;
+  allowedCountries: string[] | null;
+  userEmail: string | null;
 }> => {
   if (id.startsWith("seti_")) {
     const si = await stripe.setupIntents.retrieve(
@@ -33,6 +36,11 @@ export const getIntentStatus = async ({
       amount: null,
       currency: null,
       artistId: si.metadata?.artistId ?? null,
+      requiresShipping: si.metadata?.requiresShipping === "true",
+      allowedCountries: si.metadata?.allowedCountries?.length
+        ? si.metadata.allowedCountries.split(",")
+        : null,
+      userEmail: si.metadata?.userEmail || null,
     };
   }
   const pi = await stripe.paymentIntents.retrieve(
@@ -48,5 +56,10 @@ export const getIntentStatus = async ({
     amount: pi.amount,
     currency: pi.currency,
     artistId: pi.metadata?.artistId ?? null,
+    requiresShipping: pi.metadata?.requiresShipping === "true",
+    allowedCountries: pi.metadata?.allowedCountries?.length
+      ? pi.metadata.allowedCountries.split(",")
+      : null,
+    userEmail: pi.metadata?.userEmail || null,
   };
 };

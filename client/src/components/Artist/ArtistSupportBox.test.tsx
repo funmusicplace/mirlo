@@ -41,22 +41,56 @@ vi.mock("state/SnackbarContext", () => ({
   useSnackbar: () => snackbar,
 }));
 
+// The tier-switch flow (useSubscriptionCheckout) and the payment-method-update
+// flow (its own direct usePurchase call) are two independent hook instances in
+// the component — mocked separately here so a checkout in one flow's state
+// doesn't leak into the other's <PurchaseModal>, matching how they behave in
+// the real component.
 const startPurchase = vi.fn();
-const purchaseState: {
+const subscriptionCheckoutReset = vi.fn();
+const subscriptionCheckoutState: {
+  checkout: null | { clientSecret: string; stripeAccountId: string };
+} = { checkout: null };
+vi.mock("components/common/Purchase/useSubscriptionCheckout", () => ({
+  useSubscriptionCheckout: () => ({
+    checkout: subscriptionCheckoutState.checkout,
+    isLoading: false,
+    startPurchase,
+    reset: subscriptionCheckoutReset,
+    handlePurchaseComplete: vi.fn(),
+    returnUrl: "http://localhost/return",
+  }),
+}));
+
+const openPaymentMethodCheckout = vi.fn();
+const paymentMethodCheckoutReset = vi.fn();
+const paymentMethodCheckoutState: {
   checkout: null | { clientSecret: string; stripeAccountId: string };
 } = { checkout: null };
 vi.mock("components/common/Purchase/usePurchase", () => ({
   usePurchase: () => ({
-    checkout: purchaseState.checkout,
+    checkout: paymentMethodCheckoutState.checkout,
     isLoading: false,
-    startPurchase,
-    reset: vi.fn(),
+    startPurchase: vi.fn(),
+    openCheckout: (next: { clientSecret: string; stripeAccountId: string }) => {
+      openPaymentMethodCheckout(next);
+      paymentMethodCheckoutState.checkout = next;
+    },
+    reset: paymentMethodCheckoutReset,
   }),
 }));
 
 vi.mock("components/common/Purchase/PurchaseModal", () => ({
   default: (props: any) =>
     props.open ? <div data-testid="purchase-modal" /> : null,
+}));
+
+const apiPut = vi.fn();
+vi.mock("services/api", () => ({
+  default: {
+    put: (...args: any[]) => apiPut(...args),
+    delete: vi.fn(),
+  },
 }));
 
 import ArtistSupportBox from "./ArtistSupportBox";
@@ -96,7 +130,8 @@ describe("ArtistSupportBox", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authState.user = null;
-    purchaseState.checkout = null;
+    subscriptionCheckoutState.checkout = null;
+    paymentMethodCheckoutState.checkout = null;
   });
 
   test("renders the variable-amount support button for a no-minimum allowVariable tier", () => {
@@ -192,12 +227,71 @@ describe("ArtistSupportBox", () => {
     });
 
     test("renders the PurchaseModal once usePurchase reports a checkout in progress", async () => {
-      purchaseState.checkout = {
+      subscriptionCheckoutState.checkout = {
         clientSecret: "seti_secret",
         stripeAccountId: "acct_1",
       };
 
       renderComponent({ ...baseTier, minAmount: 500, allowVariable: false });
+
+      expect(await screen.findByTestId("purchase-modal")).toBeInTheDocument();
+    });
+  });
+
+  describe("updating the payment method via the reused usePurchase hook", () => {
+    const tier = { ...baseTier, minAmount: 500, allowVariable: false };
+
+    beforeEach(() => {
+      authState.user = {
+        id: 20,
+        artistUserSubscriptions: [
+          {
+            id: 55,
+            artistSubscriptionTier: tier,
+          },
+        ],
+      };
+    });
+
+    test("PUTs to manage/subscriptions/:id and opens the shared checkout with the result", async () => {
+      apiPut.mockResolvedValue({
+        result: { clientSecret: "seti_pm_secret", stripeAccountId: "acct_2" },
+      });
+
+      renderComponent(tier);
+
+      fireEvent.click(screen.getByText("changePaymentMethod"));
+
+      await vi.waitFor(() =>
+        expect(openPaymentMethodCheckout).toHaveBeenCalled()
+      );
+
+      expect(apiPut).toHaveBeenCalledWith("manage/subscriptions/55", undefined);
+      expect(openPaymentMethodCheckout).toHaveBeenCalledWith({
+        clientSecret: "seti_pm_secret",
+        stripeAccountId: "acct_2",
+      });
+    });
+
+    test("surfaces the error and never opens a checkout when the PUT fails", async () => {
+      apiPut.mockRejectedValue(new Error("network error"));
+
+      renderComponent(tier);
+
+      fireEvent.click(screen.getByText("changePaymentMethod"));
+
+      await vi.waitFor(() => expect(snackbar).toHaveBeenCalled());
+
+      expect(openPaymentMethodCheckout).not.toHaveBeenCalled();
+    });
+
+    test("renders a second, independent PurchaseModal once the payment-method checkout is set", async () => {
+      paymentMethodCheckoutState.checkout = {
+        clientSecret: "seti_pm_secret",
+        stripeAccountId: "acct_2",
+      };
+
+      renderComponent(tier);
 
       expect(await screen.findByTestId("purchase-modal")).toBeInTheDocument();
     });
