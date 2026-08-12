@@ -6,18 +6,16 @@ import Modal from "components/common/Modal";
 import PlatformPercent from "components/common/PlatformPercent";
 import PurchaseModal from "components/common/Purchase/PurchaseModal";
 import { usePurchase } from "components/common/Purchase/usePurchase";
+import { useSubscriptionCheckout } from "components/common/Purchase/useSubscriptionCheckout";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import {
-  buildCheckoutCompletePath,
-  getArtistManageTiersUrl,
-} from "utils/artist";
+import { getArtistManageTiersUrl } from "utils/artist";
 
 import Money from "../common/Money";
 
@@ -44,18 +42,26 @@ const ArtistSupportBox: React.FC<{
 
   const errorHandler = useErrorHandler();
 
-  const navigate = useNavigate();
   const {
     checkout,
     isLoading: isCheckingForSubscription,
     startPurchase,
     reset,
-  } = usePurchase();
+    handlePurchaseComplete,
+    returnUrl,
+  } = useSubscriptionCheckout({ artist, refresh });
 
-  const [paymentMethodCheckout, setPaymentMethodCheckout] = React.useState<{
-    clientSecret: string;
-    stripeAccountId: string;
-  } | null>(null);
+  // A separate usePurchase instance for the payment-method-update flow: same
+  // checkout/<PurchaseModal> machinery as the tier-switch flow above, but its
+  // clientSecret comes from PUT manage/subscriptions/:id (not POST
+  // /v1/purchase), so it drives its own openCheckout call instead of
+  // startPurchase — hence its own loading flag around that fetch, rather than
+  // usePurchase's own isLoading (which only tracks startPurchase).
+  const {
+    checkout: paymentMethodCheckout,
+    openCheckout: openPaymentMethodCheckout,
+    reset: resetPaymentMethodCheckout,
+  } = usePurchase();
   const [isStartingPaymentMethodUpdate, setIsStartingPaymentMethodUpdate] =
     React.useState(false);
 
@@ -66,7 +72,7 @@ const ArtistSupportBox: React.FC<{
         undefined,
         { result: { clientSecret: string; stripeAccountId: string } }
       >(`manage/subscriptions/${subscriptionId}`, undefined);
-      setPaymentMethodCheckout(result);
+      openPaymentMethodCheckout(result);
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -75,10 +81,10 @@ const ArtistSupportBox: React.FC<{
   };
 
   const handlePaymentMethodUpdateComplete = React.useCallback(() => {
-    setPaymentMethodCheckout(null);
+    resetPaymentMethodCheckout();
     snackbar(t("paymentMethodUpdated"), { type: "success" });
     refresh();
-  }, [refresh, snackbar, t]);
+  }, [refresh, resetPaymentMethodCheckout, snackbar, t]);
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     const result = await startPurchase({
@@ -93,16 +99,6 @@ const ArtistSupportBox: React.FC<{
       });
     }
   };
-
-  const handlePurchaseComplete = React.useCallback(() => {
-    if (!artist) return;
-    refreshLoggedInUser();
-    refresh();
-    reset();
-    navigate(
-      buildCheckoutCompletePath(artist, { purchaseType: "subscription" })
-    );
-  }, [artist, navigate, refresh, refreshLoggedInUser, reset]);
 
   const [isConfirmingCancel, setIsConfirmingCancel] = React.useState(false);
 
@@ -367,19 +363,14 @@ const ArtistSupportBox: React.FC<{
         stripeAccountId={checkout?.stripeAccountId}
         requiresShipping={checkout?.requiresShipping}
         allowedCountries={checkout?.allowedCountries}
-        returnUrl={`${window.location.origin}${buildCheckoutCompletePath(
-          artist,
-          {
-            purchaseType: "subscription",
-          }
-        )}`}
+        returnUrl={returnUrl}
         onSuccess={handlePurchaseComplete}
         title={t("support") ?? ""}
         buttonLabel={t("letsSupport") ?? ""}
       />
       <PurchaseModal
         open={!!paymentMethodCheckout}
-        onClose={() => setPaymentMethodCheckout(null)}
+        onClose={resetPaymentMethodCheckout}
         clientSecret={paymentMethodCheckout?.clientSecret}
         stripeAccountId={paymentMethodCheckout?.stripeAccountId}
         returnUrl={window.location.href}

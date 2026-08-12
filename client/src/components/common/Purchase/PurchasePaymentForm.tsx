@@ -47,6 +47,13 @@ const PurchasePaymentForm: React.FC<{
   /** Needed (alongside stripeAccountId) only when isSetup && requiresShipping, to PUT the collected address onto the SetupIntent before confirming — SetupIntents have no native `shipping` field, unlike PaymentIntents. */
   clientSecret?: string;
   stripeAccountId?: string;
+  /**
+   * Awaited right before confirmPayment/confirmSetup — return `false` to
+   * abort the submission (the caller is expected to have already surfaced
+   * why, e.g. an invalid email). Used by the hosted checkout page to attach
+   * a collected email/logged-in user to the intent before it's confirmed.
+   */
+  beforeConfirm?: () => Promise<boolean>;
 }> = ({
   returnUrl,
   buttonLabel,
@@ -56,6 +63,7 @@ const PurchasePaymentForm: React.FC<{
   isSetup,
   clientSecret,
   stripeAccountId,
+  beforeConfirm,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -93,6 +101,14 @@ const PurchasePaymentForm: React.FC<{
       // Stripe.js hasn't loaded yet.
       setIsLoading(false);
       return;
+    }
+
+    if (beforeConfirm) {
+      const shouldContinue = await beforeConfirm();
+      if (!shouldContinue) {
+        setIsLoading(false);
+        return;
+      }
     }
 
     const shipping = await resolveShipping();

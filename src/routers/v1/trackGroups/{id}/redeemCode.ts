@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { AppError } from "../../../../utils/error";
 import { serializeTrackGroupPurchase } from "../../../../serializers/trackGroup";
+import { AppError } from "../../../../utils/error";
 import { registerPurchase } from "../../../../utils/trackGroup";
 import { findOrCreateUserBasedOnEmail } from "../../../../utils/user";
 
@@ -53,6 +53,12 @@ export default function () {
         throw new AppError({
           httpCode: 404,
           description: "Code not found or already used.",
+        });
+      }
+
+      if (!req.user?.id && !notLoggedInUserEmail) {
+        return res.status(400).json({
+          error: "Need to be either logged in or supply email address",
         });
       }
 

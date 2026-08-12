@@ -105,5 +105,14 @@ export const usePurchase = () => {
 
   const reset = React.useCallback(() => setCheckout(null), []);
 
-  return { checkout, isLoading, startPurchase, reset };
+  // Lets a caller who obtained a clientSecret from a different endpoint (e.g.
+  // the subscription payment-method-update PUT, which isn't a /v1/purchase
+  // cart) drive the same checkout state + <PurchaseModal> as startPurchase,
+  // instead of hand-rolling a parallel `{clientSecret, stripeAccountId}` state.
+  const openCheckout = React.useCallback(
+    (next: Checkout) => setCheckout(next),
+    []
+  );
+
+  return { checkout, isLoading, startPurchase, openCheckout, reset };
 };

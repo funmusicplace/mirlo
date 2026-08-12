@@ -23,6 +23,7 @@ import {
 } from "../../src/utils/payments/subscription";
 import * as stripeUtils from "../../src/utils/stripe";
 import { finalizeSubscriptionSetup } from "../../src/utils/stripe";
+import { getIntentStatus } from "../../src/utils/stripe/status";
 import * as terminalUtils from "../../src/utils/stripe/terminal";
 import {
   clearTables,
@@ -2222,6 +2223,82 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.result.id, "should return a result id");
       assert.ok(response.body.result.status, "should return a result status");
+    });
+  });
+
+  // requestApp hits the separate api-test server process, which talks to
+  // stripe-mock — a fixture-based fake that doesn't persist metadata from an
+  // earlier create call into a later, unrelated retrieve. So the hosted
+  // checkout page's "redirect away and poll back" round-trip (metadata set at
+  // creation → read back by getIntentStatus) is tested directly, in-process,
+  // the same way the other "(direct)" blocks stub Stripe.
+  describe("getIntentStatus (direct) — requiresShipping/allowedCountries", () => {
+    it("reads requiresShipping + allowedCountries back off a PaymentIntent's metadata (merch)", async () => {
+      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
+        id: "pi_merch_shipping",
+        status: "requires_payment_method",
+        client_secret: "pi_merch_shipping_secret_test",
+        amount: 1000,
+        currency: "usd",
+        metadata: {
+          artistId: "1",
+          requiresShipping: "true",
+          allowedCountries: "US,CA",
+        },
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+      const result = await getIntentStatus({
+        id: "pi_merch_shipping",
+        stripeAccountId: "acct_test",
+      });
+
+      assert.equal(result.requiresShipping, true);
+      assert.deepEqual(result.allowedCountries, ["US", "CA"]);
+    });
+
+    it("reads requiresShipping + allowedCountries back off a SetupIntent's metadata (collectAddress subscription)", async () => {
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_sub_shipping",
+        status: "requires_payment_method",
+        client_secret: "seti_sub_shipping_secret_test",
+        metadata: {
+          artistId: "1",
+          requiresShipping: "true",
+          allowedCountries: "US,GB,CA,AU,NZ",
+        },
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      const result = await getIntentStatus({
+        id: "seti_sub_shipping",
+        stripeAccountId: "acct_test",
+      });
+
+      assert.equal(result.requiresShipping, true);
+      assert.deepEqual(result.allowedCountries, ["US", "GB", "CA", "AU", "NZ"]);
+      assert.equal(
+        result.amount,
+        null,
+        "SetupIntents have no immediate charge"
+      );
+    });
+
+    it("defaults to no shipping requirement when metadata has none", async () => {
+      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
+        id: "pi_no_shipping",
+        status: "requires_payment_method",
+        client_secret: "pi_no_shipping_secret_test",
+        amount: 500,
+        currency: "usd",
+        metadata: { artistId: "1" },
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+      const result = await getIntentStatus({
+        id: "pi_no_shipping",
+        stripeAccountId: "acct_test",
+      });
+
+      assert.equal(result.requiresShipping, false);
+      assert.equal(result.allowedCountries, null);
     });
   });
 

@@ -167,6 +167,16 @@ export const findOrCreateUserBasedOnEmail = async (
   let user: User | undefined | null;
   const trimmedName = name?.trim() || undefined;
 
+  if (!userId && !userEmail) {
+    // Neither identifier resolved — callers (webhook handlers) go on to
+    // register a purchase against `Number(actualUserId)` (NaN) if this
+    // returns silently, which throws deep in a Prisma call well after the
+    // Stripe charge has already gone through. Fail loudly here instead.
+    throw new Error(
+      "findOrCreateUserBasedOnEmail: neither userId nor userEmail was provided"
+    );
+  }
+
   if (!userId && userEmail) {
     newUser = true; // If this is true the user wasn't logged in when making the purchase
     user = await prisma.user.findFirst({

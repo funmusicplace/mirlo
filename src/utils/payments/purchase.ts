@@ -62,6 +62,8 @@ export const initiatePayment = async ({
   clientId,
   successUrl,
   stripeAccountId: stripeAccountIdOverride,
+  requiresShipping,
+  allowedCountries,
 }: {
   readerId?: string;
   artistId: number;
@@ -74,6 +76,9 @@ export const initiatePayment = async ({
   successUrl?: string;
   /** Pre-resolved account ID — use when the item (e.g. trackGroup) has its own paymentToUser that takes precedence over the artist's. */
   stripeAccountId?: string;
+  /** Physical merch in the cart — persisted onto the PaymentIntent's metadata so the hosted checkout page can recover it via getStatus after a redirect. */
+  requiresShipping?: boolean;
+  allowedCountries?: string[];
 }): Promise<
   | { paymentIntentId: string }
   | {
@@ -113,6 +118,10 @@ export const initiatePayment = async ({
     ...(purchaseType === "trackGroup" &&
       items[0]?.id && { trackGroupId: items[0].id }),
     ...(purchaseType === "track" && items[0]?.id && { trackId: items[0].id }),
+    ...(requiresShipping && { requiresShipping: "true" }),
+    ...(allowedCountries?.length && {
+      allowedCountries: allowedCountries.join(","),
+    }),
     items: JSON.stringify(items),
   };
 

@@ -8,7 +8,12 @@ import {
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { getPaymentProcessor } from "../../../../utils/payments/PaymentProcessor";
-import { attachSetupIntentShippingAddress } from "../../../../utils/stripe";
+import {
+  attachIntentIdentity,
+  attachSetupIntentShippingAddress,
+} from "../../../../utils/stripe";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function () {
   const operations = {
@@ -118,6 +123,17 @@ export default function () {
                   description:
                     "Name of the artist being paid, for display on the checkout page.",
                 },
+                requiresShipping: {
+                  type: "boolean",
+                  description:
+                    "Physical merch, or a collectAddress subscription tier — the hosted checkout page should render an AddressElement before confirming.",
+                },
+                allowedCountries: {
+                  type: "array",
+                  items: { type: "string" },
+                  description:
+                    "Country codes the AddressElement's picker should offer, when requiresShipping is true.",
+                },
               },
             },
           },
@@ -132,19 +148,31 @@ export default function () {
   };
 
   /**
-   * Persists the buyer's shipping address onto a not-yet-confirmed
-   * subscription SetupIntent, ahead of the frontend calling Stripe's
-   * confirmSetup. SetupIntents have no native `shipping` field (unlike
+   * Persists the buyer's shipping address and/or identity (email, and the
+   * logged-in user if any) onto a not-yet-confirmed PaymentIntent/SetupIntent,
+   * ahead of the frontend calling Stripe's confirmPayment/confirmSetup.
+   *
+   * Shipping: SetupIntents have no native `shipping` field (unlike
    * PaymentIntents, which carry it straight through confirmPayment), so this
    * is the mechanism for a `collectAddress` tier's address to survive to
    * `finalizeSubscriptionSetup` once `setup_intent.succeeded` fires.
+   *
+   * Identity: a hosted-checkout purchase initiated without a known buyer (an
+   * external caller that didn't collect an email up front) has no user to
+   * register the eventual purchase/subscription against. The hosted checkout
+   * page collects an email itself in that case — or, if the buyer is logged
+   * in to Mirlo, uses their account instead of whatever the caller supplied —
+   * and PUTs it here so `handleSetupIntentSucceeded`/`completePurchaseFromIntent`
+   * can read it back off the intent's metadata once it succeeds.
    */
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     const { stripeAccountId } = req.query as { stripeAccountId?: string };
-    const { shippingAddress } = req.body as {
+    const { shippingAddress, email } = req.body as {
       shippingAddress?: { name?: string; address: Record<string, unknown> };
+      email?: string;
     };
+    const loggedInUser = req.user as Express.User | undefined;
 
     try {
       if (!id) {
@@ -156,24 +184,54 @@ export default function () {
           description: "stripeAccountId query param is required",
         });
       }
-      if (!id.startsWith("seti_")) {
+      if (!shippingAddress && !email && !loggedInUser) {
         throw new AppError({
           httpCode: 400,
-          description: "Only a SetupIntent (seti_*) accepts a shipping address",
-        });
-      }
-      if (!shippingAddress?.address) {
-        throw new AppError({
-          httpCode: 400,
-          description: "shippingAddress is required",
+          description: "shippingAddress or email is required",
         });
       }
 
-      await attachSetupIntentShippingAddress({
-        setupIntentId: id,
-        stripeAccountId,
-        shippingAddress,
-      });
+      if (shippingAddress) {
+        if (!id.startsWith("seti_")) {
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "Only a SetupIntent (seti_*) accepts a shipping address",
+          });
+        }
+        if (!shippingAddress.address) {
+          throw new AppError({
+            httpCode: 400,
+            description: "shippingAddress.address is required",
+          });
+        }
+
+        await attachSetupIntentShippingAddress({
+          setupIntentId: id,
+          stripeAccountId,
+          shippingAddress,
+        });
+      }
+
+      // A logged-in buyer always wins over whatever email the caller typed
+      // in (or was told to prefill) — this checkout is being completed by an
+      // authenticated Mirlo account, so the purchase belongs to it.
+      if (loggedInUser) {
+        await attachIntentIdentity({
+          id,
+          stripeAccountId,
+          userId: loggedInUser.id,
+          userEmail: loggedInUser.email,
+        });
+      } else if (email) {
+        if (!EMAIL_REGEX.test(email)) {
+          throw new AppError({
+            httpCode: 400,
+            description: "email is not a valid email address",
+          });
+        }
+        await attachIntentIdentity({ id, stripeAccountId, userEmail: email });
+      }
 
       res.status(200).json({ result: { id } });
     } catch (e) {
@@ -182,20 +240,24 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary: "Attach a shipping address to a pending subscription SetupIntent",
+    summary:
+      "Attach a shipping address and/or buyer identity to a pending purchase",
     description:
       "SetupIntents have no native `shipping` field the way PaymentIntents " +
       "do, so a `collectAddress` subscription tier's AddressElement value is " +
       "saved here — before the frontend calls Stripe's confirmSetup — so it " +
       "can be read back from the SetupIntent's metadata once " +
-      "`setup_intent.succeeded` fires and the subscription is registered.",
+      "`setup_intent.succeeded` fires and the subscription is registered. " +
+      "Also accepts `email`, for a hosted-checkout purchase that was " +
+      "initiated without a known buyer — or uses the logged-in user, if any, " +
+      "in preference to it.",
     parameters: [
       {
         in: "path",
         name: "id",
         required: true,
         type: "string",
-        description: "SetupIntent ID (seti_*)",
+        description: "PaymentIntent ID (pi_*) or SetupIntent ID (seti_*)",
       },
       {
         in: "query",
@@ -210,7 +272,6 @@ export default function () {
         required: true,
         schema: {
           type: "object",
-          required: ["shippingAddress"],
           properties: {
             shippingAddress: {
               type: "object",
@@ -220,12 +281,13 @@ export default function () {
                 address: { type: "object" },
               },
             },
+            email: { type: "string" },
           },
         },
       },
     ],
     responses: {
-      200: { description: "Shipping address attached" },
+      200: { description: "Shipping address and/or identity attached" },
       400: { description: "Missing or invalid parameters" },
       default: {
         description: "An error occurred",

@@ -1,12 +1,11 @@
 import prisma from "@mirlo/prisma";
-import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
 import { getPlatformFeeForArtist } from "../artist";
 import { AppError } from "../error";
 import { generateFullStaticImageUrl } from "../images";
-import { calculateMerchShippingCost } from "../merch";
 import { finalArtistAvatarBucket } from "../minio";
 import {
   calculateAppFee,
@@ -16,7 +15,6 @@ import {
 import { calculateDiscountedPrice } from "../purchasing";
 
 import stripe, {
-  createMerchStripeProduct,
   createSubscriptionStripeProduct,
   createTrackGroupStripeProduct,
   createTrackStripeProduct,
@@ -375,149 +373,6 @@ export const createStripeCheckoutSessionForPurchase = async ({
         discountAmount: discountAmount,
       },
       mode: "payment",
-      return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-    },
-    { stripeAccount: stripeAccountId }
-  );
-
-  return session;
-};
-
-// Cost/country-list math lives once in ../merch (shared with POST /v1/purchase)
-// — this just adapts it to Stripe's shipping_rate_data shape.
-const determineShipping = (
-  shippingDestinations: MerchShippingDestination[],
-  shippingDestinationId: string,
-  currency: string,
-  quantity: number = 0
-) => {
-  const { costCents, allowedCountries, destinationCountry } =
-    calculateMerchShippingCost(
-      shippingDestinations,
-      shippingDestinationId,
-      quantity
-    );
-
-  return {
-    shipping_rate_data: {
-      display_name: `Shipping to ${destinationCountry ? destinationCountry : "Everywhere"}`,
-      fixed_amount: {
-        currency,
-        amount: castToFixed(costCents),
-      },
-      type: "fixed_amount" as "fixed_amount",
-    },
-    destinationCodes: allowedCountries,
-  };
-};
-
-export const createStripeCheckoutSessionForMerchPurchase = async ({
-  loggedInUser,
-  email,
-  priceNumber,
-  merch,
-  message,
-  quantity,
-  options,
-  stripeAccountId,
-  shippingDestinationId,
-  discountPercent,
-}: {
-  loggedInUser?: User;
-  email?: string;
-  message?: string;
-  priceNumber: number;
-  quantity: number;
-  merch: Prisma.MerchGetPayload<{
-    include: { profile: true; images: true; shippingDestinations: true };
-  }>;
-  options: {
-    merchOptionIds: string[];
-  };
-  shippingDestinationId: string;
-  stripeAccountId: string;
-  discountPercent?: number | null;
-}) => {
-  const client = await prisma.client.findFirst({
-    where: {
-      applicationName: "frontend",
-    },
-  });
-
-  const productKey = await createMerchStripeProduct(
-    merch,
-    stripeAccountId,
-    options
-  );
-
-  if (!productKey) {
-    throw new AppError({
-      description: "Was not able to create a product for user",
-      httpCode: 500,
-    });
-  }
-
-  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency = await getCurrency(merch.profileId, stripeAccountId);
-
-  const destinations = determineShipping(
-    merch.shippingDestinations,
-    shippingDestinationId,
-    currency,
-    quantity
-  );
-
-  const {
-    lineItems,
-    discountedPriceNumber,
-    normalizedDiscountPercent,
-    discountAmount,
-  } = buildCheckoutLineItemsWithDiscount({
-    priceNumber,
-    currency,
-    productKey,
-    quantity,
-    discountPercent,
-  });
-
-  const suffix = merch.title.replace(/[^a-zA-Z]/g, "").substring(0, 20);
-
-  const session = await stripe.checkout.sessions.create(
-    {
-      billing_address_collection: "required",
-      shipping_address_collection: {
-        allowed_countries:
-          destinations.destinationCodes as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[],
-      },
-      shipping_options: [
-        { shipping_rate_data: destinations.shipping_rate_data },
-      ],
-      customer_email: loggedInUser?.email || email,
-      payment_intent_data: {
-        ...(!!suffix && { statement_descriptor_suffix: suffix }),
-        application_fee_amount: await calculateAppFee(
-          discountedPriceNumber,
-          currency,
-          merch.platformPercent,
-          stripeAccount.country
-        ),
-      },
-      line_items: lineItems,
-      metadata: {
-        clientId: client?.id ?? null,
-        merchId: merch.id,
-        purchaseType: "merch",
-        artistId: merch.profileId,
-        userId: loggedInUser?.id ?? null,
-        userEmail: email ?? null,
-        stripeAccountId,
-        message: message ?? null,
-        discountPercent: normalizedDiscountPercent,
-        discountAmount: discountAmount,
-      },
-      mode: "payment",
-      ui_mode: "embedded",
-      redirect_on_completion: "if_required",
       return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
     },
     { stripeAccount: stripeAccountId }

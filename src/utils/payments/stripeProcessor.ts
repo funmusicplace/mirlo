@@ -113,11 +113,16 @@ export class StripePaymentProcessor implements PaymentProcessor {
     userEmail,
     userId,
     userName,
+    successUrl,
     oldTierId,
     oldStripeSubscriptionKey,
+    requiresShipping,
+    allowedCountries,
   }: CreateSubscriptionSetupArgs & {
     oldTierId?: number;
     oldStripeSubscriptionKey?: string;
+    requiresShipping?: boolean;
+    allowedCountries?: string[];
   }): Promise<{ setupIntentId: string; clientSecret: string | null }> {
     const setupIntent = await stripe.setupIntents.create(
       {
@@ -132,8 +137,13 @@ export class StripePaymentProcessor implements PaymentProcessor {
           userEmail,
           ...(userId && { userId }),
           ...(userName?.trim() && { userName: userName.trim() }),
+          ...(successUrl && { successUrl }),
           ...(oldTierId !== undefined && { oldTierId: String(oldTierId) }),
           ...(oldStripeSubscriptionKey && { oldStripeSubscriptionKey }),
+          ...(requiresShipping && { requiresShipping: "true" }),
+          ...(allowedCountries?.length && {
+            allowedCountries: allowedCountries.join(","),
+          }),
         },
       },
       { stripeAccount: accountId }

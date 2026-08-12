@@ -668,7 +668,9 @@
     "preparingPayment": "Preparing payment…",
     "missingParameters": "This checkout link is missing required information. Please return to where you started and try again.",
     "couldNotLoad": "We couldn't load this checkout. The link may have expired — please start over.",
-    "alreadyComplete": "This purchase has already been completed."
+    "alreadyComplete": "This purchase has already been completed.",
+    "yourEmailLabel": "Your email",
+    "invalidEmail": "Please enter a valid email address."
   },
   "playableCover": {
     "untitled": "Untitled",
