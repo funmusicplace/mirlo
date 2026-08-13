@@ -23,6 +23,7 @@ import {
 import {
   PaymentProcessor,
   CreatePaymentArgs,
+  CreatePledgeSetupArgs,
   CreateSubscriptionSetupArgs,
   UpdateSubscriptionTierArgs,
   PaymentStatusResult,
@@ -144,6 +145,42 @@ export class StripePaymentProcessor implements PaymentProcessor {
           ...(allowedCountries?.length && {
             allowedCountries: allowedCountries.join(","),
           }),
+        },
+      },
+      { stripeAccount: accountId }
+    );
+
+    return {
+      setupIntentId: setupIntent.id,
+      clientSecret: setupIntent.client_secret,
+    };
+  }
+
+  async createOnlinePledgeSetup({
+    fundraiserId,
+    trackGroupId,
+    artistId,
+    accountId,
+    amount,
+    userEmail,
+    userId,
+    message,
+  }: CreatePledgeSetupArgs): Promise<{
+    setupIntentId: string;
+    clientSecret: string | null;
+  }> {
+    const setupIntent = await stripe.setupIntents.create(
+      {
+        automatic_payment_methods: { enabled: true },
+        metadata: {
+          fundraiserId: String(fundraiserId),
+          trackGroupId: String(trackGroupId),
+          artistId: String(artistId),
+          stripeAccountId: accountId,
+          userEmail,
+          paymentIntentAmount: String(amount),
+          ...(userId && { userId }),
+          ...(message && { message }),
         },
       },
       { stripeAccount: accountId }

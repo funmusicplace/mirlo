@@ -20,6 +20,7 @@ import {
   resolveMerchOptionIds,
 } from "../../../utils/merch";
 import { resolvePayee } from "../../../utils/payments/payee";
+import { initiateFundraiserPledge } from "../../../utils/payments/pledge";
 import {
   initiatePayment,
   type ResolvedItem,
@@ -50,6 +51,13 @@ type PurchaseItem =
       amount?: number;
       /** Self-chosen display name, captured when the buyer has no account name yet. */
       userName?: string;
+    }
+  | {
+      type: "fundraiserPledge";
+      fundraiserId: number;
+      trackGroupId: number;
+      price?: string;
+      message?: string;
     };
 
 type PostBody = {
@@ -368,6 +376,55 @@ export default function () {
         // themselves. Doesn't apply to `{ success: true }` (an in-place tier
         // switch): there's no payment step left to redirect the buyer through.
         if (hosted && mirloClient && "clientSecret" in result) {
+          const redirectUrl = buildCheckoutRedirectUrl(
+            mirloClient.applicationUrl,
+            "checkout",
+            new URLSearchParams({
+              intentId: result.setupIntentId,
+              stripeAccountId: result.stripeAccountId,
+            })
+          );
+          return res.status(200).json({ redirectUrl });
+        }
+
+        return res.status(200).json(result);
+      }
+
+      const hasFundraiserPledge = items.some(
+        (i) => i.type === "fundraiserPledge"
+      );
+      if (hasFundraiserPledge && items.length > 1) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Fundraiser pledge must be the only item in the cart",
+        });
+      }
+
+      if (hasFundraiserPledge) {
+        if (readerId) {
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "Fundraiser pledges are not supported on a terminal reader",
+          });
+        }
+
+        const pledgeItem = items[0] as Extract<
+          PurchaseItem,
+          { type: "fundraiserPledge" }
+        >;
+
+        const result = await initiateFundraiserPledge({
+          artistId,
+          fundraiserId: pledgeItem.fundraiserId,
+          trackGroupId: pledgeItem.trackGroupId,
+          price: pledgeItem.price,
+          message: pledgeItem.message,
+          userEmail: loggedInUser?.email ?? email ?? "",
+          userId: loggedInUser?.id,
+        });
+
+        if (hosted && mirloClient) {
           const redirectUrl = buildCheckoutRedirectUrl(
             mirloClient.applicationUrl,
             "checkout",

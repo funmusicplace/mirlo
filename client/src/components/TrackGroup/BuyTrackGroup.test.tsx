@@ -50,10 +50,6 @@ vi.mock("components/common/Purchase/PurchaseElements", () => ({
   default: () => <div data-testid="purchase-elements" />,
 }));
 
-vi.mock("components/common/stripe/EmbeddedStripe", () => ({
-  default: () => <div data-testid="embedded-stripe" />,
-}));
-
 import BuyTrackGroup from "./BuyTrackGroup";
 
 const baseArtist = {
@@ -138,5 +134,52 @@ describe("BuyTrackGroup", () => {
     renderComponent({});
 
     expect(await screen.findByTestId("purchase-elements")).toBeInTheDocument();
+  });
+
+  test("submitting an active all-or-nothing fundraiser's trackGroup pledges via the unified endpoint", async () => {
+    const pledgeTrackGroup = {
+      ...baseTrackGroup,
+      fundraiserId: 55,
+      fundraiser: { id: 55, isAllOrNothing: true, status: "ACTIVE" },
+    };
+    const { container } = renderComponent({ trackGroup: pledgeTrackGroup });
+
+    const consent = container.querySelector(
+      "#consentToStoreData"
+    ) as HTMLElement;
+    fireEvent.click(consent);
+    await submitForm(container);
+
+    expect(startPurchase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        artistId: 10,
+        items: [
+          expect.objectContaining({
+            type: "fundraiserPledge",
+            fundraiserId: 55,
+            trackGroupId: 100,
+          }),
+        ],
+      })
+    );
+  });
+
+  test("a fundraiser that is no longer ACTIVE purchases the trackGroup normally, not as a pledge", async () => {
+    const successfulFundraiserTrackGroup = {
+      ...baseTrackGroup,
+      fundraiserId: 55,
+      fundraiser: { id: 55, isAllOrNothing: true, status: "SUCCESSFUL" },
+    };
+    const { container } = renderComponent({
+      trackGroup: successfulFundraiserTrackGroup,
+    });
+    await submitForm(container);
+
+    expect(startPurchase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        artistId: 10,
+        items: [expect.objectContaining({ type: "trackGroup", id: 100 })],
+      })
+    );
   });
 });

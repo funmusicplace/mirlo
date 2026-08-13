@@ -164,6 +164,12 @@ export default function () {
    * in to Mirlo, uses their account instead of whatever the caller supplied —
    * and PUTs it here so `handleSetupIntentSucceeded`/`completePurchaseFromIntent`
    * can read it back off the intent's metadata once it succeeds.
+   *
+   * Neither `id` nor `stripeAccountId` prove the caller owns this purchase —
+   * both are plain query-string values on the hosted checkout link — so
+   * `attachIntentIdentity` refuses to reassign an intent that's already
+   * claimed by a different Mirlo account, to keep a leaked/shared link from
+   * letting a second visitor redirect who the purchase gets registered to.
    */
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
@@ -289,6 +295,10 @@ export default function () {
     responses: {
       200: { description: "Shipping address and/or identity attached" },
       400: { description: "Missing or invalid parameters" },
+      409: {
+        description:
+          "This purchase is already associated with a different buyer",
+      },
       default: {
         description: "An error occurred",
         schema: { additionalProperties: true },

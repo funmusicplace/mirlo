@@ -687,6 +687,19 @@ export const attachSetupIntentShippingAddress = async ({
  * register against. Called from `PUT /v1/purchase/:id`, before the frontend
  * calls confirmPayment/confirmSetup. Stripe merges metadata updates, so this
  * never clobbers the other keys (tierId, artistId, …) set at creation.
+ *
+ * `id` and `stripeAccountId` are both plain query-string values on the hosted
+ * checkout link, so anyone who obtains that link (forwarded, logged, cached)
+ * can call this — there's no ownership check tying the caller to the intent.
+ * Once a real Mirlo account (`userId`) has claimed the intent, refuse to
+ * reassign it to a different account: without this, a second visitor to a
+ * leaked link who happens to have their own Mirlo session could silently
+ * redirect who the eventual purchase/subscription is registered to, ahead of
+ * whoever actually pays. A bare `userEmail` supplied at creation (no `userId`
+ * yet) is intentionally still overridable — that's the documented "logged-in
+ * buyer wins over whatever email the caller typed in" case, e.g. a WordPress
+ * plugin passing a customer email before the buyer signs into their own
+ * Mirlo account to complete checkout.
  */
 export const attachIntentIdentity = async ({
   id,
@@ -700,12 +713,34 @@ export const attachIntentIdentity = async ({
   userId?: number;
   userEmail: string;
 }) => {
+  const isSetupIntent = id.startsWith("seti_");
+
+  const existing = isSetupIntent
+    ? await stripe.setupIntents.retrieve(
+        id,
+        {},
+        { stripeAccount: stripeAccountId }
+      )
+    : await stripe.paymentIntents.retrieve(
+        id,
+        {},
+        { stripeAccount: stripeAccountId }
+      );
+
+  const existingUserId = existing.metadata?.userId;
+  if (existingUserId && existingUserId !== String(userId)) {
+    throw new AppError({
+      httpCode: 409,
+      description: "This purchase is already associated with a different buyer",
+    });
+  }
+
   const metadata: Record<string, string> = {
     userEmail,
     ...(userId !== undefined && { userId: String(userId) }),
   };
 
-  if (id.startsWith("seti_")) {
+  if (isSetupIntent) {
     await stripe.setupIntents.update(
       id,
       { metadata },
@@ -808,6 +843,31 @@ export const finalizeSubscriptionSetup = async ({
   if (!tier) {
     logger.error(`finalizeSubscriptionSetup: tier ${tierId} not found`);
     return;
+  }
+
+  // The existing-subscription lookup in initiateOnlineSubscription only runs
+  // `if (userId)` — on the hosted checkout path the buyer can still be
+  // logged out at that point, with identity attached later via
+  // PUT /v1/purchase/:id (see the mirlo-payments skill). oldTierId is then
+  // never computed, so re-check here (userId is always known by now) before
+  // this falls through to leaving a stale duplicate row for the old tier.
+  if (!oldTierId) {
+    const existingSubscription = await prisma.profileUserSubscription.findFirst(
+      {
+        where: {
+          userId,
+          profileSubscriptionTierId: { not: tier.id },
+          profileSubscriptionTier: { profileId: tier.profileId },
+        },
+      }
+    );
+    if (existingSubscription) {
+      oldTierId = existingSubscription.profileSubscriptionTierId;
+      oldStripeSubscriptionKey =
+        oldStripeSubscriptionKey ??
+        existingSubscription.stripeSubscriptionKey ??
+        undefined;
+    }
   }
 
   const platformPercent = await calculatePlatformPercent(

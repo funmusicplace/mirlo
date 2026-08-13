@@ -23,6 +23,13 @@ export type PurchaseItem =
       amount?: number;
       /** Self-chosen display name, captured when the buyer has no account name yet. */
       userName?: string;
+    }
+  | {
+      type: "fundraiserPledge";
+      fundraiserId: number;
+      trackGroupId: number;
+      price?: string;
+      message?: string;
     };
 
 type PurchaseResponse = {

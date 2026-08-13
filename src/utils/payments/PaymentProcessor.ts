@@ -38,6 +38,19 @@ export type CreateSubscriptionSetupArgs = {
   successUrl?: string;
 };
 
+/** Args for a fundraiser pledge's payment-method authorisation (SetupIntent) — the pledge is only charged later, if/when the fundraiser's goal is met. */
+export type CreatePledgeSetupArgs = {
+  fundraiserId: number;
+  trackGroupId: number;
+  artistId: number;
+  accountId: string;
+  /** The pledged amount, in cents — charged later, not now. */
+  amount: number;
+  userEmail: string;
+  userId?: string;
+  message?: string;
+};
+
 /** Args for reprising an existing recurring subscription in place. */
 export type UpdateSubscriptionTierArgs = {
   subscriptionKey: string;
@@ -91,6 +104,17 @@ export interface PaymentProcessor {
       requiresShipping?: boolean;
       allowedCountries?: string[];
     }
+  ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
+
+  /**
+   * Create a payment-method authorisation for a fundraiser pledge — no
+   * immediate charge. The pledge itself is recorded when this SetupIntent
+   * succeeds (see `handleSetupIntentSucceeded`'s `fundraiserId` branch); the
+   * actual charge happens later, off this saved payment method, only if/when
+   * the fundraiser's all-or-nothing goal is met.
+   */
+  createOnlinePledgeSetup(
+    args: CreatePledgeSetupArgs
   ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
 
   /**
