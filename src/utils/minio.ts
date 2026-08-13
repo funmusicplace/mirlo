@@ -302,6 +302,15 @@ const applyCorsPolicyS3 = async (bucket: string) => {
     );
     logger.info(`backblaze: set CORS policy on bucket: ${bucket}`);
   } catch (e) {
+    // B2 rejects the S3-compatible CORS API on buckets that already have
+    // CORS configured via B2's native API/console — that's an existing,
+    // working config, not a failure, so it only warrants a warning.
+    if (e instanceof Error && e.message.includes("B2 Native CORS rules")) {
+      logger.warn(
+        `backblaze: bucket ${bucket} already has native B2 CORS rules; skipping S3 CORS update`
+      );
+      return;
+    }
     logger.error(`backblaze: failed to set CORS policy on bucket ${bucket}`);
     logger.error(e);
   }
