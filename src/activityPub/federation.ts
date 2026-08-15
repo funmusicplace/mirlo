@@ -62,9 +62,14 @@ export async function ensureArtistHasApKeys(urlSlug: string) {
   return artist;
 }
 
+export const kvStore = new RedisKvStore(redisClient);
+export const messageQueue = new RedisMessageQueue(() =>
+  redisClient.duplicate()
+);
+
 export const federation = createFederation<void>({
-  kv: new RedisKvStore(redisClient),
-  queue: new RedisMessageQueue(() => redisClient.duplicate()),
+  kv: kvStore,
+  queue: messageQueue,
   skipSignatureVerification: process.env.NODE_ENV === "test",
 });
 
