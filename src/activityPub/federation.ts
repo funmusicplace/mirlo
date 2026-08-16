@@ -1,10 +1,6 @@
 import crypto from "crypto";
 
-import {
-  createFederation,
-  InProcessMessageQueue,
-  MemoryKvStore,
-} from "@fedify/fedify";
+import { createFederation } from "@fedify/fedify";
 import {
   exportJwk,
   generateCryptoKeyPair,
@@ -23,6 +19,7 @@ import {
   Undo,
   Audio,
 } from "@fedify/fedify/vocab";
+import { RedisKvStore, RedisMessageQueue } from "@fedify/redis";
 import prisma from "@mirlo/prisma";
 
 import {
@@ -32,6 +29,7 @@ import {
   parseMentionsFromContent,
   root,
 } from "../activityPub/utils";
+import { redisClient } from "../config/redis";
 import logger from "../logger";
 import { buildFeedForArtist } from "../routers/v1/artists/{id}/feed";
 import { findArtistIdForURLSlug } from "../utils/artist";
@@ -64,9 +62,14 @@ export async function ensureArtistHasApKeys(urlSlug: string) {
   return artist;
 }
 
+export const kvStore = new RedisKvStore(redisClient);
+export const messageQueue = new RedisMessageQueue(() =>
+  redisClient.duplicate()
+);
+
 export const federation = createFederation<void>({
-  kv: new MemoryKvStore(),
-  queue: new InProcessMessageQueue(),
+  kv: kvStore,
+  queue: messageQueue,
   skipSignatureVerification: process.env.NODE_ENV === "test",
 });
 

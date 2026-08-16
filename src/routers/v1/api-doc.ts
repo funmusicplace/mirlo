@@ -142,7 +142,14 @@ const apiDoc = {
             properties: {
               type: {
                 type: "string",
-                enum: ["trackGroup", "track", "merch", "tip", "subscription"],
+                enum: [
+                  "trackGroup",
+                  "track",
+                  "merch",
+                  "tip",
+                  "subscription",
+                  "fundraiserPledge",
+                ],
               },
               id: {
                 type: ["number", "string"],
@@ -153,10 +160,19 @@ const apiDoc = {
                 type: "number",
                 description: "Subscription tier ID (subscription items only)",
               },
+              fundraiserId: {
+                type: "number",
+                description: "Fundraiser ID (fundraiserPledge items only)",
+              },
+              trackGroupId: {
+                type: "number",
+                description:
+                  "TrackGroup ID the fundraiser belongs to (fundraiserPledge items only)",
+              },
               price: {
                 type: "string",
                 description:
-                  "Price in cents — online trackGroup only; allows pay-what-you-want above the minimum",
+                  "Price in cents — online trackGroup/fundraiserPledge only; allows pay-what-you-want above the minimum",
               },
               quantity: {
                 type: "number",

@@ -60,9 +60,8 @@ export const downloadableContentBucket = "mirlo-downloadable-content";
 export const incomingImageBucket = "incoming-mirlo-images";
 export const finalImageBucket = "mirlo-images";
 
-// Consolidated bucket config (Phase 1 self-hosting support).
-// null = legacy mode: use per-type bucket constants above (for existing installs).
-// Set = consolidated mode: 3 buckets with path prefixes (for new installs).
+// null = legacy mode: use per-type bucket constants above (for https://mirlo.space instance) TODO here is to remove that.
+// Set = consolidated mode: 3 buckets with path prefixes.
 export type BucketConfig = { prefix: string };
 
 // Per-image-type routing table.
@@ -165,10 +164,13 @@ const {
 
 export const S3_ENDPOINT = RAW_S3_ENDPOINT;
 
-// Storage backend selection. Set STORAGE_BACKEND=minio|s3|backblaze to choose
-// explicitly; when unset, the backend is inferred from what's configured —
-// S3 credentials present means an S3-compatible service (Backblaze, Hetzner
-// Object Storage, etc.), otherwise MinIO. Exported for tests.
+/**
+ * Choose what backend storage to use. Inferred when things are configured, but
+ * can be overwritten by passed explict string.
+ * @param explicit
+ * @param hasS3Credentials
+ * @returns
+ */
 export const resolveBackendStorage = (
   explicit: string | undefined = process.env.STORAGE_BACKEND,
   hasS3Credentials: boolean = Boolean(S3_ACCESS_KEY_ID && S3_SECRET_ACCESS_KEY)
@@ -198,15 +200,6 @@ export const minioClient =
       })
     : undefined;
 
-// A browser-reachable MinIO client used only for presigning download URLs.
-// The primary minioClient is configured with a docker-internal hostname
-// (e.g. "minio:9000") that a browser cannot resolve, and the hostname is part
-// of a presigned URL's signature — rewriting it after signing would invalidate
-// the signature. So when MINIO_PUBLIC_HOST is set (e.g. "localhost", since
-// docker-compose maps the MinIO API port to the host), we sign against a
-// second client configured with that public endpoint. When it isn't set,
-// presigning against MinIO is unavailable and callers fall back to streaming
-// file bytes through the API.
 export const minioPublicClient =
   backendStorage === "minio" && MINIO_PUBLIC_HOST
     ? new Minio.Client({
@@ -217,13 +210,6 @@ export const minioPublicClient =
         secretKey: MINIO_ROOT_PASSWORD,
       })
     : undefined;
-
-// To test backblaze locally, set S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY
-// (the backend auto-switches), or force it with STORAGE_BACKEND=s3.
-// Storage credentials live in .env rather than the Settings table
-// deliberately — the S3Client below is constructed once at module load,
-// before any DB read could happen, and .env is also what install.sh already
-// prompts for.
 
 // Instantiate a second minio client for backblaze
 export const backblazeClient =
@@ -255,9 +241,7 @@ export const backblazeClient =
     : undefined;
 
 // Buckets holding processed images are fetched directly by browsers (see
-// docs/hosting/object-storage.md) and so need public read access. Providers
-// like Hetzner Object Storage/Backblaze B2 create buckets private by default,
-// so we apply this ourselves rather than relying on manual console setup.
+// docs/hosting/object-storage.md) and so need public read access.
 const publicReadPolicy = (bucket: string) =>
   JSON.stringify({
     Version: "2012-10-17",
@@ -273,12 +257,7 @@ const publicReadPolicy = (bucket: string) =>
   });
 
 // The browser PUTs directly to a presigned URL for track audio uploads (and
-// GETs directly for some flows), which is a cross-origin request from the
-// site's own domain to the storage provider's domain. Providers create
-// buckets with no CORS configuration by default, so that PUT never reaches
-// storage — the browser blocks it at the preflight stage. AllowedOrigins is
-// left as "*" since the presigned signature (not CORS) is what actually
-// authorizes the request; CORS here only unblocks the browser's JS access.
+// GETs directly for some flows), which is a cross-origin request.
 const corsConfiguration = () => ({
   CORSRules: [
     {
@@ -302,6 +281,12 @@ const applyCorsPolicyS3 = async (bucket: string) => {
     );
     logger.info(`backblaze: set CORS policy on bucket: ${bucket}`);
   } catch (e) {
+    if (e instanceof Error && e.message.includes("B2 Native CORS rules")) {
+      logger.warn(
+        `backblaze: bucket ${bucket} already has native B2 CORS rules; skipping S3 CORS update`
+      );
+      return;
+    }
     logger.error(`backblaze: failed to set CORS policy on bucket ${bucket}`);
     logger.error(e);
   }
@@ -523,10 +508,7 @@ export const getPresignedUploadUrl = async (
   bucket: string,
   fileName: string,
   expiresInSeconds = 3600,
-  // When provided, the upload is pinned to exactly this many bytes: the
-  // client must send a body of this size or the storage backend rejects the
-  // request. Note: only the Backblaze (S3) backend enforces this — the MinIO
-  // client used in development cannot sign content-length on a presigned PUT.
+  // When provided, the upload is pinned to exactly this many bytes. Note, minio doesn't enforce this.
   contentLength?: number
 ) => {
   await createBucketIfNotExists(bucket);
@@ -560,13 +542,6 @@ export const getPresignedUploadUrl = async (
   }
 };
 
-// Presign a short-lived GET URL against whichever storage backend actually
-// has the object, so downloads can go straight from the browser to storage
-// instead of being piped through the API (which burns server egress — see
-// the Render free-tier egress cap). Returns null when no presignable
-// endpoint is available — e.g. the object only exists in a MinIO instance
-// without a browser-reachable public host — in which case the caller should
-// fall back to streaming the bytes through the API itself.
 export const getPresignedDownloadUrl = async (
   bucket: string,
   filename: string,
@@ -1145,12 +1120,6 @@ export const uploadZip = async (
   return uploadWrapper(bucket, zipKey(type, id, format), stream);
 };
 
-// ── Eager bucket creation ────────────────────────────────────────────────────
-// S3-compatible providers (Ceph-backed ones especially) can take a few
-// seconds to make a just-created bucket writable/reachable. Rather than let
-// that surface as a confusing failure on someone's first upload of a given
-// media type, create every bucket this instance will ever need right after
-// boot, so the delay happens once during startup instead of mid-upload.
 export const ensureAllBucketsExist = async () => {
   const imageBuckets = new Set<string>();
   Object.values(imageTypeBuckets).forEach(({ incoming, final }) => {

@@ -20,14 +20,7 @@ const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Mirlo-hosted checkout page. External API consumers send a buyer here (via the
- * `redirectUrl` returned by `POST /v1/purchase` with `hosted: true`) so they can
- * complete payment without building their own Stripe UI. It fetches the
- * intent's clientSecret + return target from the API — a PaymentIntent for a
- * one-time purchase, or a SetupIntent for a subscription sign-up/switch — and
- * renders the shared Payment/Setup Element full-page. On success Stripe
- * redirects to the server-supplied `successUrl` (or Mirlo's home as a
- * fallback).
+ * The Mirlo-hosted checkout page. External API consumers send a buyer here.
  */
 function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "hostedCheckout" });
@@ -45,7 +38,6 @@ function Index() {
     isError,
   } = useQuery(queryPurchaseIntent({ intentId, stripeAccountId }));
 
-  // Load Stripe.js once per connected account (created once, not per render).
   const stripePromise = React.useMemo(
     () =>
       stripeAccountId && stripeKey
@@ -66,8 +58,6 @@ function Index() {
     return <FullPageLoadingSpinner />;
   }
 
-  // The buyer landed back here after already paying (e.g. a reload): bounce them
-  // onward, or confirm completion when there's nowhere to send them.
   if (intent?.status === "succeeded") {
     if (intent.successUrl) {
       window.location.assign(intent.successUrl);
@@ -89,15 +79,8 @@ function Index() {
   }
 
   const returnUrl = intent.successUrl ?? window.location.origin;
-  // SetupIntent client secrets are always `seti_`-prefixed (see
-  // PurchaseElements.tsx) — a subscription sign-up/switch confirms with
-  // `confirmSetup`, not `confirmPayment`.
   const isSetup = intent.clientSecret.startsWith("seti_");
 
-  // The Payment/Setup Element doesn't collect an email itself, so a buyer who
-  // isn't logged in — and whose email wasn't already known when this intent
-  // was created (e.g. an external caller that didn't collect one) — has to
-  // type one in here before the purchase can be attributed to anyone.
   const needsEmail = !user && !intent.userEmail;
 
   const total =
@@ -120,11 +103,6 @@ function Index() {
           ? t("payingAmount", { amount: total })
           : null;
 
-  // Runs right before Stripe confirms the payment/setup: attaches the buyer's
-  // identity to the intent so the webhook that fires on success has someone
-  // to register the purchase against. A logged-in user always wins over
-  // whatever the intent was initiated with; otherwise the email typed in
-  // above is required (and skipped entirely if the intent already has one).
   const beforeConfirm = async () => {
     if (!user) {
       if (needsEmail && !EMAIL_REGEX.test(email)) {

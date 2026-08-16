@@ -28,6 +28,7 @@ import * as terminalUtils from "../../src/utils/stripe/terminal";
 import {
   clearTables,
   createArtist,
+  createFundraiser,
   createTrack,
   createTrackGroup,
   createMerch,
@@ -755,6 +756,104 @@ describe("purchase", () => {
         .send({
           artistId: artist.id,
           items: [{ type: "merch", id: merch.id, quantity: 1 }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 200 with a SetupIntent clientSecret for a pledge to an active all-or-nothing fundraiser", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              trackGroupId: trackGroup.id,
+              price: "2000",
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(
+        response.body.clientSecret?.startsWith("seti_"),
+        "clientSecret should be a SetupIntent secret, not a charge"
+      );
+      assert.ok(response.body.stripeAccountId);
+    });
+
+    it("should return 400 for a pledge to a fundraiser that is no longer ACTIVE", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_done",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+        status: "SUCCESSFUL",
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              trackGroupId: trackGroup.id,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 400 when a fundraiser pledge is combined with other items", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_combo",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              trackGroupId: trackGroup.id,
+            },
+            { type: "tip", amount: 500 },
+          ],
         })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -1728,6 +1827,83 @@ describe("purchase", () => {
       );
     });
 
+    it("finds and cancels the old tier's subscription even when oldTierId wasn't supplied", async () => {
+      // Regression test: on the hosted checkout path, the buyer can still be
+      // logged out when initiateOnlineSubscription runs, so oldTierId is
+      // never computed there. Identity is only attached later (PUT
+      // /v1/purchase/:id) — by the time this runs userId is known, so it
+      // should still find and supersede the old tier's row instead of
+      // leaving a stale duplicate.
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_finalize_late_identity",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const oldTier = await createTier(artist.id, { minAmount: 500 });
+      const newTier = await createTier(artist.id, { minAmount: 1000 });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_old_late_789",
+          deleteReason: "USER_CANCELLED",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_late_identity",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_late_identity",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
+        id: "sub_new_late_999",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const cancelStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "cancel")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await finalizeSubscriptionSetup({
+        stripeAccountId: "acct_sub_finalize_late_identity",
+        paymentMethodId: "pm_test",
+        tierId: newTier.id,
+        amount: 1000,
+        currency: "usd",
+        userId: buyer.id,
+        userEmail: buyer.email,
+        // oldTierId / oldStripeSubscriptionKey intentionally omitted.
+      });
+
+      assert.equal(
+        cancelStub.calledOnceWith("sub_old_late_789"),
+        true,
+        "should discover and cancel the old Stripe subscription by looking it up via userId"
+      );
+
+      const oldSubscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, profileSubscriptionTierId: oldTier.id },
+      });
+      assert.equal(
+        oldSubscription,
+        null,
+        "the old tier's subscription row should be gone, not left as a stale duplicate"
+      );
+
+      const newSubscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, profileSubscriptionTierId: newTier.id },
+      });
+      assert.ok(newSubscription, "the new tier's subscription should exist");
+    });
+
     it("falls back to the artist's defaultPlatformFee when the tier has no platformPercent override", async () => {
       // Regression test: this used to be `tier.platformPercent ?? 7`, which
       // never consulted the artist's defaultPlatformFee and hardcoded 7
@@ -2299,6 +2475,101 @@ describe("purchase", () => {
 
       assert.equal(result.requiresShipping, false);
       assert.equal(result.allowedCountries, null);
+    });
+  });
+
+  // requestApp hits stripe-mock, which returns a fixed canned PaymentIntent/
+  // SetupIntent on every retrieve — it can't simulate "this intent already
+  // has userId X in its metadata from an earlier call" the way a real Stripe
+  // account would. So the ownership guard is tested directly, in-process,
+  // stubbing the retrieve the same way the other "(direct)" blocks do.
+  describe("attachIntentIdentity (direct) — buyer-identity ownership guard", () => {
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it("refuses to reassign a PaymentIntent already claimed by a different Mirlo account", async () => {
+      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
+        id: "pi_claimed",
+        metadata: { userId: "1" },
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+      const updateStub = sinon.stub(
+        stripeUtils.stripe.paymentIntents,
+        "update"
+      );
+
+      await assert.rejects(
+        stripeUtils.attachIntentIdentity({
+          id: "pi_claimed",
+          stripeAccountId: "acct_test",
+          userId: 2,
+          userEmail: "attacker@test.com",
+        }),
+        (e: any) => e.httpCode === 409
+      );
+      assert.ok(updateStub.notCalled, "should not write metadata once refused");
+    });
+
+    it("refuses to attach a bare email to a PaymentIntent already claimed by a Mirlo account", async () => {
+      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
+        id: "pi_claimed",
+        metadata: { userId: "1" },
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+      const updateStub = sinon.stub(
+        stripeUtils.stripe.paymentIntents,
+        "update"
+      );
+
+      await assert.rejects(
+        stripeUtils.attachIntentIdentity({
+          id: "pi_claimed",
+          stripeAccountId: "acct_test",
+          userEmail: "someone-else@test.com",
+        }),
+        (e: any) => e.httpCode === 409
+      );
+      assert.ok(updateStub.notCalled);
+    });
+
+    it("allows the same Mirlo account to re-attach its own identity (idempotent retry)", async () => {
+      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
+        id: "pi_claimed",
+        metadata: { userId: "1" },
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+      await stripeUtils.attachIntentIdentity({
+        id: "pi_claimed",
+        stripeAccountId: "acct_test",
+        userId: 1,
+        userEmail: "buyer@test.com",
+      });
+
+      assert.ok(updateStub.calledOnce);
+    });
+
+    it("allows a logged-in buyer to claim an intent that only has a placeholder email so far", async () => {
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_unclaimed",
+        metadata: { userEmail: "customer-from-external-caller@test.com" },
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await stripeUtils.attachIntentIdentity({
+        id: "seti_unclaimed",
+        stripeAccountId: "acct_test",
+        userId: 3,
+        userEmail: "buyer@test.com",
+      });
+
+      assert.ok(
+        updateStub.calledOnce,
+        "no userId claim yet — a logged-in buyer should be able to attach"
+      );
     });
   });
 

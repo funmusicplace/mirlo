@@ -57,9 +57,10 @@ if (process.env.NODE_ENV === "test") {
 
 let stripeClient = new Stripe(process.env.STRIPE_KEY ?? "", stripeConfig);
 
-// The runtime stripe key is held in the admin Settings row so self-hosters
-// can rotate it without redeploying (#1147). Falls back to STRIPE_KEY env so
-// existing deployments keep working before any admin saves a value
+/**
+ * If the user updates this through the Settings, we need to reload the client.
+ * @returns Stripe key
+ */
 export const refreshStripeClient = async (): Promise<string> => {
   try {
     const row = await prisma.settings.findFirst();
@@ -168,11 +169,6 @@ const checkForProductKey = async (
   return productKey;
 };
 
-// Shared find-or-create core for the four createXStripeProduct functions
-// below: checkForProductKey (unchanged), then — if nothing was found — create
-// the Stripe Product and hand its id to persistProductKey. Each entity type
-// differs only in its create params and how (or whether) it persists the
-// resulting key, so those are the only things callers provide.
 const createOrReuseStripeProduct = async ({
   existingProductKey,
   stripeAccountId,
@@ -182,10 +178,8 @@ const createOrReuseStripeProduct = async ({
 }: {
   existingProductKey: string | null;
   stripeAccountId: string;
-  /** Only merch products are looked up by an option-combination search — see checkForProductKey. */
   searchOptions?: { merchOptionIds?: string[] };
   buildCreateParams: () => Promise<Stripe.ProductCreateParams>;
-  /** Omit to skip persisting — merch with options doesn't store a single stripeProductKey on the row (see createMerchStripeProduct). */
   persistProductKey?: (productKey: string) => Promise<unknown>;
 }): Promise<string> => {
   let productKey = await checkForProductKey(
@@ -278,10 +272,6 @@ export const findOrCreateStripeCustomer = async (
     searchEmail = user?.email ?? email;
   }
 
-  // Stripe's customers.list ignores a missing/blank `email` filter and just
-  // returns the connected account's customers unfiltered (most recent first)
-  // — that would hand back some unrelated buyer's Customer object here rather
-  // than "no match", so a real customer never gets attached to it.
   const existingCustomer = searchEmail
     ? await stripe.customers.list(
         {
@@ -488,10 +478,6 @@ export const handleCheckoutSession = async (
       { stripeAccount: stripeAccountId }
     );
 
-    // If the user doesn't exist, we create one with an existing userEmail.
-    // `userName` is the buyer's self-chosen display name (subscriptions only);
-    // we deliberately do NOT fall back to Stripe's billing name — a blank field
-    // means the supporter chose not to share a display name.
     let { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
       userEmail,
       userId,
@@ -537,7 +523,6 @@ export const handleSetupIntentSucceeded = async (
   });
 
   const metadata = setupIntent.metadata as unknown as {
-    /** Set only on a payment-method-update SetupIntent (see createSubscriptionPaymentMethodSetup) — presence alone routes to that branch, same as fundraiserId/tierId below. */
     subscriptionKey?: string;
     fundraiserId?: string;
     userId: string;
@@ -548,10 +533,8 @@ export const handleSetupIntentSucceeded = async (
     currency: string;
     stripeAccountId: string;
     oldTierId?: string;
-    /** The Stripe subscription this new one supersedes, if any — cancelled directly once the new one is confirmed. */
     oldStripeSubscriptionKey?: string;
-    /** JSON-stringified `{ name?, address }`, set via `PUT /v1/purchase/:id` before confirmation — see attachSetupIntentShippingAddress. */
-    shippingAddress?: string;
+    shippingAddress?: string; // JSON
   };
 
   if (metadata.subscriptionKey) {
@@ -654,12 +637,6 @@ export const handleSetupIntentSucceeded = async (
 
 /**
  * Attaches the buyer's shipping address to a not-yet-confirmed subscription
- * SetupIntent's metadata, so `handleSetupIntentSucceeded` can read it back
- * once the SetupIntent succeeds and pass it to `finalizeSubscriptionSetup`.
- * SetupIntents (unlike PaymentIntents) have no native `shipping` field —
- * confirmSetup can't carry it the way confirmPayment does — so this is the
- * mechanism for a `collectAddress` tier's address to survive to registration.
- * Called from `PUT /v1/purchase/:id`, before the frontend calls confirmSetup.
  */
 export const attachSetupIntentShippingAddress = async ({
   setupIntentId,
@@ -678,15 +655,7 @@ export const attachSetupIntentShippingAddress = async ({
 };
 
 /**
- * Attaches the buyer's identity to a not-yet-confirmed PaymentIntent/SetupIntent
- * before the frontend confirms it — for a hosted-checkout purchase that was
- * initiated without a known user (an external caller that didn't collect an
- * email up front). `handleSetupIntentSucceeded`/`completePurchaseFromIntent`
- * read `userId`/`userEmail` back off the intent's metadata once it succeeds,
- * so without this step the resulting purchase/subscription has no buyer to
- * register against. Called from `PUT /v1/purchase/:id`, before the frontend
- * calls confirmPayment/confirmSetup. Stripe merges metadata updates, so this
- * never clobbers the other keys (tierId, artistId, …) set at creation.
+ * Attaches the user's identity to an intent.
  */
 export const attachIntentIdentity = async ({
   id,
@@ -696,16 +665,37 @@ export const attachIntentIdentity = async ({
 }: {
   id: string;
   stripeAccountId: string;
-  /** Set when the buyer is logged in to Mirlo — takes precedence over any email the caller typed in. */
   userId?: number;
   userEmail: string;
 }) => {
+  const isSetupIntent = id.startsWith("seti_");
+
+  const existing = isSetupIntent
+    ? await stripe.setupIntents.retrieve(
+        id,
+        {},
+        { stripeAccount: stripeAccountId }
+      )
+    : await stripe.paymentIntents.retrieve(
+        id,
+        {},
+        { stripeAccount: stripeAccountId }
+      );
+
+  const existingUserId = existing.metadata?.userId;
+  if (existingUserId && existingUserId !== String(userId)) {
+    throw new AppError({
+      httpCode: 409,
+      description: "This purchase is already associated with a different buyer",
+    });
+  }
+
   const metadata: Record<string, string> = {
     userEmail,
     ...(userId !== undefined && { userId: String(userId) }),
   };
 
-  if (id.startsWith("seti_")) {
+  if (isSetupIntent) {
     await stripe.setupIntents.update(
       id,
       { metadata },
@@ -721,12 +711,7 @@ export const attachIntentIdentity = async ({
 };
 
 /**
- * Applies a confirmed payment-method-update SetupIntent to the subscription
- * it was created for — the SetupIntent's `customer` was set at creation
- * (`createSubscriptionPaymentMethodSetup`), so Stripe already attached the
- * resulting payment method to that customer; this only needs to point the
- * subscription's `default_payment_method` at it. Nothing else about the
- * subscription (tier, amount, DB row) changes.
+ * Update the payment method of a subscription
  */
 export const handleSubscriptionPaymentMethodUpdateSucceeded = async (
   intent: Stripe.SetupIntent,
@@ -757,18 +742,7 @@ export const handleSubscriptionPaymentMethodUpdateSucceeded = async (
 };
 
 /**
- * Creates a Stripe Customer (or reuses one), attaches the given payment
- * method, creates the recurring Stripe Subscription for a tier, and registers
- * it in the DB. Shared by the online (`setup_intent.succeeded`) and terminal
- * (`terminal.reader.action_succeeded`) subscription paths — the only
- * difference between them is how the payment method id was obtained (a
- * card-present setup generates a reusable card via `latest_attempt`; an
- * online setup intent already has `payment_method` set directly).
- *
- * When `oldStripeSubscriptionKey` is present (a fresh SetupIntent was needed
- * instead of the in-place-repricing fast path — whether switching tiers or
- * re-authorising the same one), the subscription it names is only cancelled
- * here — after the new one is confirmed active — never before.
+ * Finalizes the subscription set up, whether made by a terminal or online.
  */
 export const finalizeSubscriptionSetup = async ({
   stripeAccountId,
@@ -790,13 +764,9 @@ export const finalizeSubscriptionSetup = async ({
   userId: number;
   userEmail?: string;
   oldTierId?: number;
-  /** The Stripe subscription this new one supersedes, if any (same tier or a different one). */
   oldStripeSubscriptionKey?: string;
-  /** Collected via the tier's AddressElement when `tier.collectAddress` is set — see attachSetupIntentShippingAddress. */
   shippingAddress?: { name?: string; address: Record<string, unknown> } | null;
 }) => {
-  // Independent lookups: which tier, and which Stripe customer, don't depend
-  // on each other.
   const [tier, customer] = await Promise.all([
     prisma.profileSubscriptionTier.findFirst({
       where: { id: tierId, deletedAt: null },
@@ -810,13 +780,30 @@ export const finalizeSubscriptionSetup = async ({
     return;
   }
 
+  if (!oldTierId) {
+    const existingSubscription = await prisma.profileUserSubscription.findFirst(
+      {
+        where: {
+          userId,
+          profileSubscriptionTierId: { not: tier.id },
+          profileSubscriptionTier: { profileId: tier.profileId },
+        },
+      }
+    );
+    if (existingSubscription) {
+      oldTierId = existingSubscription.profileSubscriptionTierId;
+      oldStripeSubscriptionKey =
+        oldStripeSubscriptionKey ??
+        existingSubscription.stripeSubscriptionKey ??
+        undefined;
+    }
+  }
+
   const platformPercent = await calculatePlatformPercent(
     currency || "usd",
     tier.platformPercent ?? tier.profile.defaultPlatformFee
   );
 
-  // Also independent: attaching the payment method to the customer and
-  // ensuring the tier's Stripe product exists don't depend on each other.
   const [, productKey] = await Promise.all([
     stripe.paymentMethods.attach(
       paymentMethodId,
@@ -862,10 +849,7 @@ export const finalizeSubscriptionSetup = async ({
     shippingAddress,
   });
 
-  // Cancel the specific old subscription this one supersedes, by id — never
-  // by re-querying on tier, since a same-tier re-authorisation (e.g.
-  // re-collecting a `collectAddress` tier's address) would otherwise match
-  // the row `registerSubscription` just upserted above with the *new* key.
+  // Cancel the specific old subscription.
   if (
     oldStripeSubscriptionKey &&
     oldStripeSubscriptionKey !== subscription.id
@@ -883,8 +867,6 @@ export const finalizeSubscriptionSetup = async ({
   }
 
   if (oldTierId && oldTierId !== tier.id) {
-    // Different tier: its DB row is separate from the one just upserted
-    // above for the new tier, so it needs its own cleanup.
     await prisma.profileUserSubscription.deleteMany({
       where: { userId, profileSubscriptionTierId: oldTierId },
     });
@@ -1014,9 +996,6 @@ const getFeeDetailsFromInvoice = async (
 ) => {
   const paymentIntent = invoice.payment_intent;
 
-  // Expanding latest_charge.balance_transaction here means
-  // getFeesFromPaymentIntent reuses it directly instead of a second Stripe
-  // round-trip to fetch the charge.
   const intent = await stripe.paymentIntents.retrieve(
     paymentIntent as string,
     {
@@ -1132,19 +1111,16 @@ export const handlePaymentIntentFailed = async (
   }
 };
 
-// Fires when Stripe ends a subscription — either because we scheduled it to
-// cancel at period end (user cancellation, see subscribe.ts) or because Stripe
-// exhausted its dunning retries after repeated payment failures. This is the
-// single place we set `deletedAt`, so access (gated on `deletedAt: null`)
-// continues through any paid-up period and is revoked exactly when Stripe
-// considers the subscription over.
+/**
+ * Fires when Stripe ends a subscription. either we scheduled it to
+ * cancel at period end (eg. a user cancelled it) or because Stripe
+ * gave up its retries after repeated payment failures.
+ */
 export const handleSubscriptionDeleted = async (
   subscription: Stripe.Subscription
 ) => {
   logger.info(`customer.subscription.deleted: ${subscription.id}`);
 
-  // Honour any reason we recorded at cancellation time; only override it when
-  // Stripe tells us the subscription died because billing ultimately failed.
   const isPaymentFailure =
     subscription.cancellation_details?.reason === "payment_failed";
   const deleteReason = isPaymentFailure ? "PAYMENT_FAILURE" : undefined;
@@ -1158,10 +1134,6 @@ export const handleSubscriptionDeleted = async (
   });
 
   for (const row of rows) {
-    // User chose "stop payments but keep following": rather than removing
-    // access, drop them onto the artist's free tier so they keep getting
-    // posts/emails with no further billing. Doesn't apply to payment
-    // failures — those aren't a user opting to keep following.
     if (row.keepFollowingOnCancel && !isPaymentFailure) {
       const defaultTier = await prisma.profileSubscriptionTier.findFirst({
         where: {
@@ -1212,9 +1184,6 @@ type MerchPurchaseItem = {
   optionIds?: string[];
 };
 
-// Records merch purchases from a captured/succeeded PaymentIntent. Works for
-// both terminal and online flows — it only reads from the PaymentIntent (fees,
-// charge, currency) and the `items` carried in metadata.
 export const handleMerchPurchasesFromIntent = async (
   userId: number,
   items: MerchPurchaseItem[],
@@ -1237,8 +1206,6 @@ export const handleMerchPurchasesFromIntent = async (
     );
   }
 
-  // One PaymentIntent is one payment, so it gets one transaction with the fees
-  // recorded once. Each merch line item is attached to it as its own purchase.
   const transaction = await prisma.userTransaction.create({
     data: {
       userId,
@@ -1290,10 +1257,6 @@ export const handleMerchPurchasesFromIntent = async (
       },
     });
 
-    // Some merch items bundle a free album with the purchase. Swallow a
-    // unique-constraint race (P2002) the same way the legacy Checkout Session
-    // path does — a buyer who already owns the bonus album (e.g. bought it
-    // directly, or bought two of this merch item) shouldn't fail the purchase.
     if (merch.includePurchaseTrackGroupId) {
       try {
         await prisma.userTrackGroupPurchase.create({
@@ -1336,10 +1299,6 @@ export const handleMerchPurchasesFromIntent = async (
   }
 };
 
-// Dispatches a succeeded/captured PaymentIntent to the right post-purchase
-// handler based on `purchaseType` metadata. Shared by the online
-// (handlePaymentIntentSucceeded) and terminal (handleTerminalReaderActionSucceeded)
-// flows so the routing lives in exactly one place.
 export const completePurchaseFromIntent = async (
   intent: Stripe.PaymentIntent,
   accountId: string
@@ -1350,9 +1309,6 @@ export const completePurchaseFromIntent = async (
   const { purchaseType, userId, userEmail, trackGroupId, trackId, artistId } =
     metadata;
 
-  // Adapt the PaymentIntent into the shape the existing handlers expect. All
-  // handlers use optional chaining so missing session fields fall back to
-  // sensible defaults.
   const sessionAdapter = {
     id: intent.id,
     amount_total: intent.amount_received,
@@ -1366,8 +1322,6 @@ export const completePurchaseFromIntent = async (
     userId
   );
 
-  // Freeze the transaction's value in the platform's currency (never throws;
-  // falls back to nulls). Checkout Session path doesn't record this.
   const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
     intent,
     accountId

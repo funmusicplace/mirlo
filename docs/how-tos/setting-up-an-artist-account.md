@@ -89,6 +89,10 @@ Once your basics are in place, consider exploring these features:
 - **Promo codes** - Generate promo codes to share music with press and friends
 - **Email List** - Collect emails from supporters to stay in touch
 
+## Deleting your artist account
+
+Decided you don't want your public profile anymore? You can go to your "Profile settings" and scroll to the bottom, where you'll see the "Permanently delete artist page" button. Click that and your account will be deleted.
+
 ## Need Help?
 
 If you have questions or run into issues:

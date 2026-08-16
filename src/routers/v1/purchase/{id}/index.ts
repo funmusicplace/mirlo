@@ -15,6 +15,8 @@ import {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// TODO: these endpoints are still fairly entangled with Stripe.
+
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -42,7 +44,6 @@ export default function () {
         accountId: stripeAccountId,
       });
 
-      // Surface a name so the hosted checkout page can show who's being paid.
       let artistName: string | null = null;
       if (artistId) {
         const artist = await prisma.profile.findFirst({
@@ -60,15 +61,15 @@ export default function () {
 
   GET.apiDoc = {
     summary: "Poll the status of a pending purchase",
-    description:
-      "Works for both PaymentIntent IDs (pi_*) from one-time terminal payments and SetupIntent IDs (seti_*) from terminal subscription sign-ups.",
+    description: "The id is the payment processor id.",
     parameters: [
       {
         in: "path",
         name: "id",
         required: true,
         type: "string",
-        description: "PaymentIntent ID (pi_*) or SetupIntent ID (seti_*)",
+        description:
+          "Stripe's PaymentIntent ID (pi_*) or SetupIntent ID (seti_*)",
       },
       {
         in: "query",
@@ -147,24 +148,6 @@ export default function () {
     },
   };
 
-  /**
-   * Persists the buyer's shipping address and/or identity (email, and the
-   * logged-in user if any) onto a not-yet-confirmed PaymentIntent/SetupIntent,
-   * ahead of the frontend calling Stripe's confirmPayment/confirmSetup.
-   *
-   * Shipping: SetupIntents have no native `shipping` field (unlike
-   * PaymentIntents, which carry it straight through confirmPayment), so this
-   * is the mechanism for a `collectAddress` tier's address to survive to
-   * `finalizeSubscriptionSetup` once `setup_intent.succeeded` fires.
-   *
-   * Identity: a hosted-checkout purchase initiated without a known buyer (an
-   * external caller that didn't collect an email up front) has no user to
-   * register the eventual purchase/subscription against. The hosted checkout
-   * page collects an email itself in that case — or, if the buyer is logged
-   * in to Mirlo, uses their account instead of whatever the caller supplied —
-   * and PUTs it here so `handleSetupIntentSucceeded`/`completePurchaseFromIntent`
-   * can read it back off the intent's metadata once it succeeds.
-   */
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     const { stripeAccountId } = req.query as { stripeAccountId?: string };
@@ -213,9 +196,6 @@ export default function () {
         });
       }
 
-      // A logged-in buyer always wins over whatever email the caller typed
-      // in (or was told to prefill) — this checkout is being completed by an
-      // authenticated Mirlo account, so the purchase belongs to it.
       if (loggedInUser) {
         await attachIntentIdentity({
           id,
@@ -240,17 +220,8 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary:
-      "Attach a shipping address and/or buyer identity to a pending purchase",
-    description:
-      "SetupIntents have no native `shipping` field the way PaymentIntents " +
-      "do, so a `collectAddress` subscription tier's AddressElement value is " +
-      "saved here — before the frontend calls Stripe's confirmSetup — so it " +
-      "can be read back from the SetupIntent's metadata once " +
-      "`setup_intent.succeeded` fires and the subscription is registered. " +
-      "Also accepts `email`, for a hosted-checkout purchase that was " +
-      "initiated without a known buyer — or uses the logged-in user, if any, " +
-      "in preference to it.",
+    summary: "Update a pending purchase",
+    description: "Primarily used to set a shipping address on it.",
     parameters: [
       {
         in: "path",
@@ -289,6 +260,10 @@ export default function () {
     responses: {
       200: { description: "Shipping address and/or identity attached" },
       400: { description: "Missing or invalid parameters" },
+      409: {
+        description:
+          "This purchase is already associated with a different buyer",
+      },
       default: {
         description: "An error occurred",
         schema: { additionalProperties: true },
@@ -320,8 +295,6 @@ export default function () {
         accountId: stripeAccountId,
       });
 
-      // Only intents Mirlo initiated carry an artistId; anything else isn't
-      // ours to cancel.
       if (!artistId) {
         throw new AppError({
           httpCode: 404,
@@ -329,8 +302,6 @@ export default function () {
         });
       }
 
-      // Cancelling is a merchant action, same as dispatching: otherwise anyone
-      // could kill a legitimate sale mid-tap.
       await artistEditableByUser(Number(artistId), req.user as Express.User);
 
       if (status === "succeeded") {
@@ -359,11 +330,7 @@ export default function () {
   DELETE.apiDoc = {
     summary: "Cancel a pending purchase",
     description:
-      "Cancels a pending PaymentIntent (pi_*) or SetupIntent (seti_*). " +
-      "Requires a logged-in user with edit rights on the artist the purchase " +
-      "was initiated for. Pass `readerId` to also clear the Stripe Terminal " +
-      "reader's screen if it is still processing this intent (e.g. the " +
-      "customer walked away before tapping).",
+      "Cancels a pending PaymentIntent (pi_*) or SetupIntent (seti_*). ",
     parameters: [
       {
         in: "path",
