@@ -12,8 +12,6 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: vi.fn() },
 }));
 
-// The Stripe account status is fetched via useQuery — bypass the network and
-// return a connected, chargeable account for every test in this file.
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {

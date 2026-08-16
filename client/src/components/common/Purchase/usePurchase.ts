@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 
-/** A single item in a purchase cart. Mirrors `POST /v1/purchase`'s `items`. */
+/** A single item in a purchase cart */
 export type PurchaseItem =
   | { type: "trackGroup"; id: number; price?: string; message?: string }
   | { type: "track"; id: number; price?: string; message?: string }
@@ -21,7 +21,6 @@ export type PurchaseItem =
       type: "subscription";
       tierId: number;
       amount?: number;
-      /** Self-chosen display name, captured when the buyer has no account name yet. */
       userName?: string;
     }
   | {
@@ -36,17 +35,8 @@ type PurchaseResponse = {
   clientSecret?: string;
   stripeAccountId?: string;
   redirectUrl?: string;
-  /**
-   * Set when the cart contains a physical item. `allowedCountries` is the
-   * server-resolved set of countries this item can ship to, accounting for
-   * EU/Schengen grouping and banned countries.
-   */
   requiresShipping?: boolean;
   allowedCountries?: string[];
-  /**
-   * A subscription tier switch that was applied to the existing Stripe
-   * subscription in place — no clientSecret, no further payment step.
-   */
   success?: boolean;
 };
 
@@ -57,12 +47,6 @@ export type Checkout = {
   allowedCountries?: string[];
 };
 
-/**
- * Drives the unified purchase flow. `startPurchase` POSTs to `/v1/purchase` and
- * either navigates (free trackGroup redirect) or exposes a `checkout` that a
- * `<PurchaseModal>` renders the Stripe Payment Element for. The POST runs on a
- * user action (not a mount effect), so there's no StrictMode/double-fire dance.
- */
 export const usePurchase = () => {
   const errorHandler = useErrorHandler();
   const navigate = useNavigate();
@@ -112,10 +96,6 @@ export const usePurchase = () => {
 
   const reset = React.useCallback(() => setCheckout(null), []);
 
-  // Lets a caller who obtained a clientSecret from a different endpoint (e.g.
-  // the subscription payment-method-update PUT, which isn't a /v1/purchase
-  // cart) drive the same checkout state + <PurchaseModal> as startPurchase,
-  // instead of hand-rolling a parallel `{clientSecret, stripeAccountId}` state.
   const openCheckout = React.useCallback(
     (next: Checkout) => setCheckout(next),
     []

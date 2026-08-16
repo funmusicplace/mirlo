@@ -101,7 +101,6 @@ const BuyTrackGroup: React.FC<{
                 type: "fundraiserPledge",
                 fundraiserId: trackGroup.fundraiserId,
                 trackGroupId: trackGroup.id,
-                // determinePrice expects the chosen price in cents.
                 price: data.chosenPrice
                   ? String(Number(data.chosenPrice) * 100)
                   : undefined,
@@ -113,14 +112,12 @@ const BuyTrackGroup: React.FC<{
           return;
         }
 
-        // Album (trackGroup) or single track → unified POST /v1/purchase.
         await startPurchase({
           artistId: trackGroup.artistId ?? trackGroup.artist.id,
           items: [
             {
               type: track ? "track" : "trackGroup",
               id: track ? track.id : trackGroup.id,
-              // determinePrice expects the chosen price in cents.
               price: data.chosenPrice
                 ? String(Number(data.chosenPrice) * 100)
                 : undefined,
@@ -145,9 +142,6 @@ const BuyTrackGroup: React.FC<{
       isFinite(+chosenPrice) && Number(chosenPrice) < minPrice / 100;
   }
   const isNegativePrice = isFinite(+chosenPrice) && Number(chosenPrice) < 0;
-
-  // The pledge flow only applies while the fundraiser is still ACTIVE (see
-  // #1681); `isPledgeMode` is computed up top.
 
   const purchaseText = isPledgeMode
     ? "addPaymentInformation"
@@ -192,8 +186,6 @@ const BuyTrackGroup: React.FC<{
     );
   }
 
-  // Unified album/track/pledge purchase: swap the buy form for the Payment/Setup Element in place,
-  // within the same modal the trigger already opened — no second dialog.
   if (checkout) {
     return (
       <div className={noPadding ? "" : "p-4"}>
@@ -202,9 +194,6 @@ const BuyTrackGroup: React.FC<{
           stripeAccountId={checkout.stripeAccountId}
           returnUrl={`${window.location.origin}${checkoutCompletePath}`}
           onSuccess={() => {
-            // Clear any play-limit / overplayed state keeping the player
-            // blocked (#1630), then navigate within the SPA — no reload, so
-            // playback during the purchase continues.
             onPurchaseComplete?.();
             navigate(checkoutCompletePath);
           }}

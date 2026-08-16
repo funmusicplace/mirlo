@@ -49,7 +49,6 @@ type PurchaseItem =
       type: "subscription";
       tierId: number;
       amount?: number;
-      /** Self-chosen display name, captured when the buyer has no account name yet. */
       userName?: string;
     }
   | {
@@ -65,25 +64,10 @@ type PostBody = {
   artistId: number;
   items: PurchaseItem[];
   email?: string;
-  /**
-   * When true, an online paid purchase returns a `redirectUrl` to Mirlo's
-   * hosted checkout page instead of a raw `clientSecret`. Lets external API
-   * consumers (e.g. a WordPress plugin) integrate with a single redirect,
-   * the way the deleted per-resource endpoints used to behave.
-   */
   hosted?: boolean;
-  /**
-   * Where the hosted checkout page sends the buyer after payment. Must share
-   * an origin with the calling client's registered application URL / allowed
-   * CORS origins (or Mirlo's own frontend). Defaults to Mirlo's post-purchase
-   * page when omitted.
-   */
   successUrl?: string;
 };
 
-// trackGroup and track purchases resolve identically (payee, follow-on-buy,
-// user discount, free-vs-paid) — only the Prisma fetch and free-purchase
-// handler differ per type, so callers do those and hand the shared shape in.
 type DigitalReleaseArtist = Parameters<typeof subscribeUserToArtist>[0] &
   Parameters<typeof resolvePayee>[0]["artist"] & { urlSlug: string | null };
 
@@ -111,11 +95,9 @@ export const resolveDigitalPurchaseItem = async <
   price?: string;
   message?: string;
   minPrice: number | null;
-  /** The trackGroup's own platformPercent override, if set. */
   platformPercent?: number | null;
   artist: DigitalReleaseArtist;
   paymentToUser?: { stripeAccountId: string | null } | null;
-  /** The release (trackGroup) the download link points at — same for both a trackGroup and one of its tracks. */
   releaseUrlSlug: string | null;
   releaseId: number;
   handleFreePurchase: () => Promise<unknown>;
@@ -149,7 +131,6 @@ export const resolveDigitalPurchaseItem = async <
 
   const { isPriceZero, priceNumber } = determinePrice(price, minPrice);
 
-  // Free online purchase — handle immediately, no PaymentIntent needed
   if (isPriceZero && !readerId && loggedInUser) {
     await handleFreePurchase();
     return {
@@ -178,12 +159,6 @@ export const resolveDigitalPurchaseItem = async <
   };
 };
 
-/**
- * Resolves a merch cart item — options, stock, buyer price, shipping cost —
- * the merch counterpart to resolveDigitalPurchaseItem above for trackGroup/track.
- * Also surfaces `requiresShipping`/`allowedCountries` for the frontend's
- * address collector.
- */
 export const resolveMerchPurchaseItem = (
   merch: MerchWithOptionsAndShipping,
   item: Extract<PurchaseItem, { type: "merch" }>
@@ -242,11 +217,6 @@ export const resolveMerchPurchaseItem = (
   };
 };
 
-/**
- * Guards the hosted checkout against being used as an open redirect: the
- * caller-supplied `successUrl` must share an origin with Mirlo's own frontend
- * or with the authenticated client's registered application/CORS origins.
- */
 const assertAllowedSuccessUrl = (
   successUrl: string,
   mirloApplicationUrl: string,
@@ -294,11 +264,6 @@ export default function () {
         });
       }
 
-      // Dispatching to a physical reader is a merchant action, not a buyer
-      // action: anyone who knows a reader id could otherwise hijack the
-      // artist's terminal (push their own charges/subscription sign-ups onto
-      // it, or grief it with junk prompts). Client API keys don't help here —
-      // the frontend's key ships in the public JS bundle.
       if (readerId) {
         if (!loggedInUser) {
           throw new AppError({
@@ -320,11 +285,6 @@ export default function () {
         );
       }
 
-      // A guest purchase must be attributable to a real email — otherwise
-      // there's no one to register the resulting purchase/subscription
-      // against. The hosted checkout page gets a pass here: it collects a
-      // missing email itself (from the buyer directly, or the logged-in
-      // user's own email) before confirming payment — see PUT /v1/purchase/:id.
       if (!readerId && !loggedInUser && !email && !hosted) {
         throw new AppError({
           httpCode: 400,
@@ -370,11 +330,6 @@ export default function () {
           successUrl,
         });
 
-        // Hosted checkout: same handoff as the one-time-payment path below —
-        // hand external integrators a single redirect to Mirlo's own pay page
-        // instead of a clientSecret they'd have to drive Stripe.js with
-        // themselves. Doesn't apply to `{ success: true }` (an in-place tier
-        // switch): there's no payment step left to redirect the buyer through.
         if (hosted && mirloClient && "clientSecret" in result) {
           const redirectUrl = buildCheckoutRedirectUrl(
             mirloClient.applicationUrl,
@@ -599,9 +554,6 @@ export default function () {
         allowedCountries,
       });
 
-      // Hosted checkout: hand external integrators a single redirect to Mirlo's
-      // own pay page (which loads the Payment Element) instead of a clientSecret
-      // they would have to drive Stripe.js with themselves.
       if (hosted && mirloClient && "clientSecret" in result) {
         const redirectUrl = buildCheckoutRedirectUrl(
           mirloClient.applicationUrl,
@@ -614,9 +566,6 @@ export default function () {
         return res.status(200).json({ redirectUrl });
       }
 
-      // Physical merch needs a mailing address collected in the Payment
-      // Element step, restricted to the countries this item can actually
-      // ship to.
       if ("clientSecret" in result && requiresShipping) {
         return res
           .status(200)
@@ -631,22 +580,7 @@ export default function () {
 
   POST.apiDoc = {
     summary: "Initiate a purchase",
-    description:
-      "Unified purchase endpoint for all item types and channels. " +
-      "Provide `readerId` to dispatch to a Stripe Terminal reader (in-person) — " +
-      "this requires a logged-in user with edit rights on the artist; " +
-      "omit it for an online PaymentIntent that the frontend completes with Stripe.js. " +
-      "Returns `paymentIntentId` (terminal — poll GET /v1/purchase/:id), " +
-      "`setupIntentId` (terminal subscription — poll GET /v1/purchase/:id), " +
-      "`clientSecret` + `stripeAccountId` (online paid, or an online subscription " +
-      "sign-up/switch that needs a new payment method — load Stripe.js for that " +
-      "connected account and pass the secret to the Payment/Setup Element), " +
-      "`success: true` (an online subscription tier switch that was applied to the " +
-      "existing Stripe subscription in place — no further action needed), " +
-      "or `redirectUrl` (online free trackGroup). " +
-      "Pass `hosted: true` to receive a `redirectUrl` to Mirlo's hosted checkout " +
-      "page for an online paid purchase instead of a `clientSecret` — intended " +
-      "for external API consumers that integrate with a single redirect.",
+    description: "Unified purchase endpoint for all item types and channels. ",
     parameters: [
       {
         in: "body",
