@@ -655,6 +655,11 @@ export const attachSetupIntentShippingAddress = async ({
 };
 
 /**
+ * PaymentIntent ids are prefixed `pi_`, SetupIntent ids `seti_`.
+ */
+export const isSetupIntentId = (id: string) => id.startsWith("seti_");
+
+/**
  * Attaches the user's identity to an intent.
  */
 export const attachIntentIdentity = async ({
@@ -668,7 +673,7 @@ export const attachIntentIdentity = async ({
   userId?: number;
   userEmail: string;
 }) => {
-  const isSetupIntent = id.startsWith("seti_");
+  const isSetupIntent = isSetupIntentId(id);
 
   const existing = isSetupIntent
     ? await stripe.setupIntents.retrieve(
@@ -785,9 +790,10 @@ export const finalizeSubscriptionSetup = async ({
       {
         where: {
           userId,
-          profileSubscriptionTierId: { not: tier.id },
+          deletedAt: null,
           profileSubscriptionTier: { profileId: tier.profileId },
         },
+        orderBy: { createdAt: "desc" },
       }
     );
     if (existingSubscription) {

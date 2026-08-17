@@ -7,6 +7,7 @@
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 
+import logger from "../../logger";
 import { sendSubscriptionCancellationEmail } from "../artist";
 import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
@@ -14,9 +15,6 @@ import { calculatePlatformPercent } from "../processingPayments";
 import { getPaymentProcessor } from "./PaymentProcessor";
 import { resolveArtistPaymentContext } from "./purchase";
 
-// Countries a `collectAddress` tier's AddressElement offers — shared with the
-// legacy Checkout Session flow (src/utils/stripe/sessions.ts) so both paths
-// present the same picker.
 export const SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES = [
   "US",
   "GB",
@@ -25,9 +23,6 @@ export const SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES = [
   "NZ",
 ];
 
-// Shared by the terminal and online paths below. Validates the tier first so
-// a missing tier 404s even when the artist hasn't finished setting up a
-// payment processor (resolveArtistPaymentContext, called after this).
 const resolveTierAndAmount = async (
   artistId: number,
   tierId: number,
@@ -66,7 +61,6 @@ export const initiateSubscription = async ({
   readerId: string;
   artistId: number;
   tierId: number;
-  /** Optional override; falls back to the tier's default/min amount. */
   amount?: number;
   userEmail: string;
   userId?: string;
@@ -92,14 +86,6 @@ export const initiateSubscription = async ({
   });
 };
 
-/**
- * Starts (or switches) an online subscription. A tier switch never cancels
- * the existing subscription up front — either it's repriced in place
- * (fast path, no card re-entry, existing subscription id kept as-is) or, when
- * that's not possible, the old tier is only cancelled once the new
- * SetupIntent is confirmed (see `finalizeSubscriptionSetup` in
- * `src/utils/stripe/index.ts`).
- */
 export const initiateOnlineSubscription = async ({
   artistId,
   tierId,
@@ -111,13 +97,10 @@ export const initiateOnlineSubscription = async ({
 }: {
   artistId: number;
   tierId: number;
-  /** Optional override; falls back to the tier's default/min amount. */
   amount?: number;
   userEmail: string;
   userId?: number;
-  /** Self-chosen display name, captured when the buyer has no account name yet. */
   userName?: string;
-  /** Where the hosted checkout page returns the buyer after payment (validated upstream). */
   successUrl?: string;
 }): Promise<
   | { success: true }
@@ -125,7 +108,6 @@ export const initiateOnlineSubscription = async ({
       clientSecret: string | null;
       stripeAccountId: string;
       setupIntentId: string;
-      /** The tier needs a shipping address — the frontend renders an AddressElement and PUTs it to /v1/purchase/:id before confirming. */
       requiresShipping: boolean;
       allowedCountries?: string[];
     }
@@ -136,8 +118,6 @@ export const initiateOnlineSubscription = async ({
     amount
   );
 
-  // Independent lookups — the account/currency and any existing subscription
-  // don't depend on each other, so resolve them concurrently.
   const [{ stripeAccountId, currency }, existingSubscription] =
     await Promise.all([
       resolveArtistPaymentContext(artistId),
@@ -152,12 +132,6 @@ export const initiateOnlineSubscription = async ({
     !!existingSubscription &&
     existingSubscription.profileSubscriptionTierId !== tier.id;
 
-  // Fast path: already paying for a tier on this artist, and either the new
-  // tier doesn't need a shipping address collected, or it does but we
-  // already have one on file for this subscription (e.g. switching between
-  // two `collectAddress` tiers) — reprice the existing Stripe subscription in
-  // place instead of sending the buyer through Checkout again. Nothing is
-  // cancelled; the same subscription just bills the new amount next cycle.
   if (
     isTierSwitch &&
     existingSubscription.stripeSubscriptionKey &&
@@ -180,13 +154,7 @@ export const initiateOnlineSubscription = async ({
       data: {
         profileSubscriptionTierId: tier.id,
         amount: resolvedAmount,
-        // Keep in step with the new tier's fee — mirrors the
-        // application_fee_percent update in updateSubscriptionTier, since the
-        // next invoice bills at this percentage going forward.
         platformCut: Math.round((resolvedAmount * platformPercent) / 100),
-        // Reactivating a cancelled-but-not-yet-expired subscription: Stripe's
-        // cancel_at_period_end was just cleared above, so the DB shouldn't
-        // still call this "cancelled" (see issue with resubscribing).
         deleteReason: null,
       },
     });
@@ -194,11 +162,6 @@ export const initiateOnlineSubscription = async ({
     return { success: true };
   }
 
-  // We're past the fast path, so any existing paid subscription (whether on
-  // this same tier — e.g. re-collecting an address we don't have yet — or a
-  // different one) is about to be superseded by a brand-new Stripe
-  // subscription below. Capture its key now so the old one can be cancelled
-  // once the new one is confirmed, instead of being left to bill forever.
   const oldStripeSubscriptionKey =
     existingSubscription?.stripeSubscriptionKey ?? undefined;
 
@@ -236,11 +199,7 @@ export const initiateOnlineSubscription = async ({
 };
 
 /**
- * Starts a payment-method update for an existing paid subscription — a
- * SetupIntent scoped to the subscription's own Stripe customer, so the buyer
- * re-enters a card without cancelling and re-subscribing. Confirmation
- * updates the *same* subscription's `default_payment_method`; nothing else
- * about it changes (see `handleSubscriptionPaymentMethodUpdateSucceeded`).
+ * Starts a payment-method update for an existing paid subscription
  */
 export const initiateSubscriptionPaymentMethodUpdate = async (
   subscription: Prisma.ProfileUserSubscriptionGetPayload<{
@@ -272,12 +231,6 @@ type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
 }>;
 
 // Cancels a user's subscription to an artist and emails them a confirmation.
-// Paid subscriptions (with a `stripeSubscriptionKey`) are cancelled at period
-// end: billing stops but the row is kept — access stays until the processor's
-// subscription-deleted webhook flips `deletedAt` when the paid period ends. We
-// record `deleteReason` now so the UI can show a "cancellation scheduled" state.
-// Free/follow tiers have no paid period to honour, so they are removed
-// immediately.
 export const cancelUserSubscription = async (
   subscription: CancellableSubscription,
   userEmail: string,
@@ -285,11 +238,7 @@ export const cancelUserSubscription = async (
 ) => {
   const artistId = subscription.profileSubscriptionTier.profileId;
 
-  // Cancellation only needs the connected account — not the currency that
-  // resolveArtistPaymentContext also fetches from Stripe — so resolve the
-  // artist + account directly here. We don't filter on `enabled` so a
-  // subscription to a since-disabled artist can still be cancelled.
-  const artist = await prisma.profile.findFirst({
+  const profile = await prisma.profile.findFirst({
     where: { id: artistId },
     include: {
       user: { select: { stripeAccountId: true } },
@@ -297,7 +246,7 @@ export const cancelUserSubscription = async (
     },
   });
   const stripeAccountId =
-    artist?.paymentToUser?.stripeAccountId ?? artist?.user.stripeAccountId;
+    profile?.paymentToUser?.stripeAccountId ?? profile?.user.stripeAccountId;
 
   if (subscription.stripeSubscriptionKey) {
     if (stripeAccountId) {
@@ -308,10 +257,9 @@ export const cancelUserSubscription = async (
       });
     }
 
-    // Keep the row until the processor's webhook flips `deletedAt` at period
-    // end; record the reason now so the UI can show a "cancelled" state.
-    // keepFollowing tells that webhook to downgrade to the free tier instead
-    // of deleting, so the user keeps following without further billing.
+    logger.info(
+      `Cancelling user ${subscription.userId} their subscription ${subscription.id} to profile ${artistId} (${profile?.name}).`
+    );
     await prisma.profileUserSubscription.update({
       where: { id: subscription.id },
       data: {
@@ -320,16 +268,16 @@ export const cancelUserSubscription = async (
       },
     });
   } else {
-    // Free/follow tier: no paid period to honour, so remove it outright.
+    // Free/follow tier
     await prisma.profileUserSubscription.deleteMany({
       where: { id: subscription.id },
     });
   }
 
-  if (artist) {
+  if (profile) {
     await sendSubscriptionCancellationEmail(
       userEmail,
-      artist,
+      profile,
       subscription.stripeSubscriptionKey ? subscription.nextBillingDate : null
     );
   }

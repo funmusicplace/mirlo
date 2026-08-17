@@ -12,6 +12,7 @@ import {
 } from "../../src/routers/v1/purchase";
 import { getClient } from "../../src/utils/getClient";
 import { getPaymentProcessor } from "../../src/utils/payments/PaymentProcessor";
+import { initiateFundraiserPledge } from "../../src/utils/payments/pledge";
 import {
   initiatePayment,
   type ResolvedItem,
@@ -104,12 +105,6 @@ describe("purchase", () => {
       const artist = await createArtist(artistUser.id);
       const tier = await createTier(artist.id, { minAmount: 500 });
 
-      // Note: this request goes over HTTP to the separate api-test server
-      // process (see `requestApp`/API_DOMAIN in test/routers/utils.ts), so a
-      // sinon stub set up here — in the test process — would never be seen by
-      // it; the call for real reaches the stripe-mock service instead. Assert
-      // on the shape of a SetupIntent secret rather than a specific stubbed
-      // value.
       const response = await requestApp
         .post("purchase")
         .send({
@@ -517,7 +512,6 @@ describe("purchase", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
-      // Hosted mode returns a redirect to Mirlo's pay page, not a raw secret.
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
       assert.ok(response.body.redirectUrl.includes("/checkout"));
       assert.ok(response.body.redirectUrl.includes("intentId="));
@@ -559,7 +553,6 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const artist = await createArtist(artistUser.id);
       const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
-      // getClient() seeds the "frontend" client at http://localhost:8080 in test.
       const client = await getClient();
 
       const response = await requestApp
@@ -596,7 +589,6 @@ describe("purchase", () => {
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
-      // The frontend needs the connected account id to load Stripe.js.
       assert.equal(response.body.stripeAccountId, "acct_tip_test");
     });
 
@@ -862,13 +854,115 @@ describe("purchase", () => {
     });
   });
 
+  // These call initiateFundraiserPledge directly (same process as the test)
+  // so sinon stubs on the Stripe SDK calls are visible, unlike the HTTP tests
+  // above which go through the separate api-test server process to stripe-mock.
+  describe("initiateFundraiserPledge (direct)", () => {
+    it("attaches a Stripe Customer to the pledge SetupIntent so it can be charged later", async () => {
+      // Regression test: the pledge SetupIntent used to be created with no
+      // `customer`, so once the fundraiser hit its goal, chargePledgePayments
+      // (which looks up the buyer's Customer by email, then that Customer's
+      // payment methods) found nothing to charge and silently no-opped.
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_customer",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      const createCustomerStub = sinon
+        .stub(stripeUtils.stripe.customers, "create")
+        .resolves({
+          id: "cus_pledge_test",
+        } as unknown as Stripe.Response<Stripe.Customer>);
+      const createSetupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_pledge_test",
+          client_secret: "seti_pledge_test_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await initiateFundraiserPledge({
+        artistId: artist.id,
+        fundraiserId: fundraiser.id,
+        trackGroupId: trackGroup.id,
+        price: "2000",
+        userEmail: buyer.email,
+        userId: buyer.id,
+      });
+
+      assert.ok(
+        createCustomerStub.calledOnce,
+        "should find or create a Stripe Customer for the buyer"
+      );
+
+      const setupIntentParams = createSetupIntentStub.firstCall
+        .args[0] as Stripe.SetupIntentCreateParams;
+      assert.equal(
+        setupIntentParams.customer,
+        "cus_pledge_test",
+        "the pledge SetupIntent must be attached to a Customer, or chargePledgePayments has no payment method to find later"
+      );
+    });
+
+    it("passes successUrl through to the pledge SetupIntent's metadata", async () => {
+      // Regression test: successUrl was accepted by POST /v1/purchase and
+      // passed through for subscriptions/trackGroups, but silently dropped
+      // for fundraiserPledge — a hosted checkout pledge had nowhere to
+      // redirect the buyer after the SetupIntent succeeded.
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_success_url",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_pledge_success_url",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      const createSetupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_pledge_success_url",
+          client_secret: "seti_pledge_success_url_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await initiateFundraiserPledge({
+        artistId: artist.id,
+        fundraiserId: fundraiser.id,
+        trackGroupId: trackGroup.id,
+        price: "2000",
+        userEmail: buyer.email,
+        userId: buyer.id,
+        successUrl: "https://example.com/thanks",
+      });
+
+      const setupIntentParams = createSetupIntentStub.firstCall
+        .args[0] as Stripe.SetupIntentCreateParams;
+      assert.equal(
+        setupIntentParams.metadata?.successUrl,
+        "https://example.com/thanks"
+      );
+    });
+  });
+
   // These tests call initiatePayment / initiateSubscription directly so sinon stubs
   // work (same process), without going through the HTTP API container.
   describe("initiatePayment (direct)", () => {
-    // Stubs the two Stripe calls initiatePayment makes for an *online* purchase:
-    // the connected-account currency lookup and the PaymentIntent creation.
-    // Returns the create stub so tests can assert on the params/metadata that
-    // initiatePayment hands to Stripe.
     const stubStripeForOnline = (currency = "usd") => {
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
         id: "acct_online",
@@ -957,9 +1051,6 @@ describe("purchase", () => {
     });
 
     it("keeps purchaseType 'trackGroup' for several trackGroup items (uniq collapses the type)", async () => {
-      // Regression guard: a Set built over item *objects* never collapsed to a
-      // single unique type, so a trackGroup cart wrongly defaulted to "merch"
-      // (and shipped without a trackGroupId), so the webhook never recorded it.
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_multi_tg",
@@ -1292,11 +1383,6 @@ describe("purchase", () => {
       });
 
       it("resolveDigitalPurchaseItem (router) carries the trackGroup's platformPercent onto the ResolvedItem", async () => {
-        // Regression test for the actual reported bug: this function builds
-        // the ResolvedItem that initiatePayment charges from, and it used to
-        // drop the trackGroup's platformPercent entirely — only price/minPrice
-        // ever reached it — so a 100%-platform album silently fell back to
-        // the site default by the time a fee was calculated.
         const { user: artistUser } = await createUser({
           email: "artist@test.com",
         });
@@ -1477,9 +1563,6 @@ describe("purchase", () => {
     });
 
     it("falls back to the artist's defaultPlatformFee when repricing to a tier with no platformPercent override", async () => {
-      // Regression test: the repriced fee used to be `tier.platformPercent ?? 7`
-      // — a hardcoded fallback that skipped the artist's defaultPlatformFee
-      // entirely and didn't even match the real site default (10, not 7).
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_switch_fee_fallback",
@@ -1535,10 +1618,6 @@ describe("purchase", () => {
     });
 
     it("clears deleteReason when a cancelled-but-not-yet-expired subscription is repriced in place onto a new tier", async () => {
-      // isTierSwitch (and so the reprice-in-place fast path) requires the
-      // new tierId to differ from the existing row's — resubscribing to the
-      // *same* cancelled tier instead takes the slow SetupIntent path, whose
-      // deleteReason clearing is covered separately by registerSubscription.
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_resubscribe",
@@ -1624,9 +1703,6 @@ describe("purchase", () => {
 
       assert.equal("clientSecret" in result, true);
 
-      // The bug fix: nothing about the old subscription changes just because
-      // a new SetupIntent was created — cancellation is deferred until the
-      // new subscription is actually confirmed (finalizeSubscriptionSetup).
       const oldSubscription = await prisma.profileUserSubscription.findFirst({
         where: { userId: buyer.id, profileSubscriptionTierId: oldTier.id },
       });
@@ -1828,12 +1904,6 @@ describe("purchase", () => {
     });
 
     it("finds and cancels the old tier's subscription even when oldTierId wasn't supplied", async () => {
-      // Regression test: on the hosted checkout path, the buyer can still be
-      // logged out when initiateOnlineSubscription runs, so oldTierId is
-      // never computed there. Identity is only attached later (PUT
-      // /v1/purchase/:id) — by the time this runs userId is known, so it
-      // should still find and supersede the old tier's row instead of
-      // leaving a stale duplicate.
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_finalize_late_identity",
@@ -1880,7 +1950,6 @@ describe("purchase", () => {
         currency: "usd",
         userId: buyer.id,
         userEmail: buyer.email,
-        // oldTierId / oldStripeSubscriptionKey intentionally omitted.
       });
 
       assert.equal(
@@ -1904,10 +1973,79 @@ describe("purchase", () => {
       assert.ok(newSubscription, "the new tier's subscription should exist");
     });
 
+    it("cancels the old Stripe subscription on a same-tier re-authorization even when oldTierId wasn't supplied", async () => {
+      // Regression test: the late-identity fallback lookup used to filter
+      // `profileSubscriptionTierId: { not: tier.id }`, excluding a match on
+      // the *same* tier. A buyer re-authorizing the same tier via a hosted/
+      // logged-out checkout (e.g. re-collecting a collectAddress tier's
+      // address, or retrying a failed card) would then never have their old
+      // Stripe subscription cancelled — leaving two active subscriptions and
+      // billing them twice per period.
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_finalize_same_tier",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: tier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_same_tier_old",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_same_tier",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_same_tier",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
+        id: "sub_same_tier_new",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const cancelStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "cancel")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await finalizeSubscriptionSetup({
+        stripeAccountId: "acct_sub_finalize_same_tier",
+        paymentMethodId: "pm_test",
+        tierId: tier.id,
+        amount: 500,
+        currency: "usd",
+        userId: buyer.id,
+        userEmail: buyer.email,
+        // oldTierId / oldStripeSubscriptionKey intentionally omitted, as on
+        // the hosted/logged-out path.
+      });
+
+      assert.equal(
+        cancelStub.calledOnceWith("sub_same_tier_old"),
+        true,
+        "should discover and cancel the old Stripe subscription even though it's for the same tier"
+      );
+
+      const subscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, profileSubscriptionTierId: tier.id },
+      });
+      assert.equal(
+        subscription?.stripeSubscriptionKey,
+        "sub_same_tier_new",
+        "the row should now point at the new Stripe subscription"
+      );
+    });
+
     it("falls back to the artist's defaultPlatformFee when the tier has no platformPercent override", async () => {
-      // Regression test: this used to be `tier.platformPercent ?? 7`, which
-      // never consulted the artist's defaultPlatformFee and hardcoded 7
-      // instead of the real site default (10).
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_finalize_fee_fallback",
@@ -2013,11 +2151,6 @@ describe("purchase", () => {
     });
 
     it("cancels the previous Stripe subscription even when re-authorising the same tier", async () => {
-      // Regression test: re-collecting an address for a tier the buyer is
-      // already on (isTierSwitch is false, so oldTierId is never set) used to
-      // leave the old Stripe subscription running forever, since the cleanup
-      // only ever queried by tier id — which, for a same-tier switch, matches
-      // the row this same call just upserted with the *new* key.
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_finalize_same_tier",
@@ -2380,7 +2513,6 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.result.id, "should return a result id");
       assert.ok(response.body.result.status, "should return a result status");
-      // The hosted checkout page reads the secret from here.
       assert.ok(
         "clientSecret" in response.body.result,
         "should include a clientSecret field"
@@ -2402,12 +2534,6 @@ describe("purchase", () => {
     });
   });
 
-  // requestApp hits the separate api-test server process, which talks to
-  // stripe-mock — a fixture-based fake that doesn't persist metadata from an
-  // earlier create call into a later, unrelated retrieve. So the hosted
-  // checkout page's "redirect away and poll back" round-trip (metadata set at
-  // creation → read back by getIntentStatus) is tested directly, in-process,
-  // the same way the other "(direct)" blocks stub Stripe.
   describe("getIntentStatus (direct) — requiresShipping/allowedCountries", () => {
     it("reads requiresShipping + allowedCountries back off a PaymentIntent's metadata (merch)", async () => {
       sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
@@ -2478,11 +2604,6 @@ describe("purchase", () => {
     });
   });
 
-  // requestApp hits stripe-mock, which returns a fixed canned PaymentIntent/
-  // SetupIntent on every retrieve — it can't simulate "this intent already
-  // has userId X in its metadata from an earlier call" the way a real Stripe
-  // account would. So the ownership guard is tested directly, in-process,
-  // stubbing the retrieve the same way the other "(direct)" blocks do.
   describe("attachIntentIdentity (direct) — buyer-identity ownership guard", () => {
     afterEach(() => {
       sinon.restore();
@@ -2653,8 +2774,6 @@ describe("purchase", () => {
     });
   });
 
-  // Direct-call tests for the cancellation plumbing, same pattern as
-  // "initiatePayment (direct)" above: sinon stubs only work in-process.
   describe("cancel purchase (direct)", () => {
     const readerProcessingIntent = (intentId: string) =>
       ({

@@ -1,14 +1,14 @@
-// Stripe implementation of the PaymentProcessor interface. This is a thin
-// adapter: it delegates to the existing Stripe primitives in src/utils/stripe/*
-// and maps their Stripe-shaped returns onto the neutral interface shape. Keeping
-// the SDK calls in src/utils/stripe/ (rather than moving them here) means the
-// terminal webhook path and other callers that still use them directly are
-// untouched by this scaffolding step.
-
+// Stripe implementation of the PaymentProcessor interface.
+import logger from "../../logger";
+import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
 import stripe, {
+  attachIntentIdentity,
+  attachSetupIntentShippingAddress,
   createOnlinePaymentIntent,
   createSubscriptionStripeProduct,
+  findOrCreateStripeCustomer,
+  isSetupIntentId,
 } from "../stripe";
 import { getIntentStatus } from "../stripe/status";
 import {
@@ -165,13 +165,22 @@ export class StripePaymentProcessor implements PaymentProcessor {
     userEmail,
     userId,
     message,
+    successUrl,
   }: CreatePledgeSetupArgs): Promise<{
     setupIntentId: string;
     clientSecret: string | null;
   }> {
+    const customer = await findOrCreateStripeCustomer(
+      accountId,
+      userId ? Number(userId) : undefined,
+      userEmail
+    );
+
     const setupIntent = await stripe.setupIntents.create(
       {
+        customer: customer.id,
         automatic_payment_methods: { enabled: true },
+        usage: "off_session",
         metadata: {
           fundraiserId: String(fundraiserId),
           trackGroupId: String(trackGroupId),
@@ -181,6 +190,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
           paymentIntentAmount: String(amount),
           ...(userId && { userId }),
           ...(message && { message }),
+          ...(successUrl && { successUrl }),
         },
       },
       { stripeAccount: accountId }
@@ -199,9 +209,6 @@ export class StripePaymentProcessor implements PaymentProcessor {
     amount,
     currency,
   }: UpdateSubscriptionTierArgs): Promise<void> {
-    // Independent Stripe calls: the product lookup and the subscription
-    // retrieve (only needed for its existing item id) don't depend on each
-    // other.
     const [productKey, subscription] = await Promise.all([
       createSubscriptionStripeProduct(tier, accountId),
       stripe.subscriptions.retrieve(subscriptionKey, {
@@ -226,13 +233,8 @@ export class StripePaymentProcessor implements PaymentProcessor {
             },
           },
         ],
-        // The new amount applies to the next invoice, not an immediate
-        // charge — "increasing the monthly fee the next time they subscribe."
         proration_behavior: "none",
         cancel_at_period_end: false,
-        // Tiers can carry different platform fees (see applyPlatformFee.ts),
-        // so a tier switch must re-pin the fee to the new tier's — otherwise
-        // Stripe keeps charging the old tier's percentage indefinitely.
         application_fee_percent: await calculatePlatformPercent(
           currency || "usd",
           tier.platformPercent ?? tier.profile.defaultPlatformFee
@@ -296,12 +298,18 @@ export class StripePaymentProcessor implements PaymentProcessor {
     atPeriodEnd: boolean;
   }): Promise<void> {
     if (atPeriodEnd) {
+      logger.info(
+        `Setting stripe subscription (${subscriptionKey}) to cancel at period end.`
+      );
       await stripe.subscriptions.update(
         subscriptionKey,
         { cancel_at_period_end: true },
         { stripeAccount: accountId }
       );
     } else {
+      logger.info(
+        `Setting stripe subscription (${subscriptionKey}) to cancel immediately.`
+      );
       await stripe.subscriptions.cancel(subscriptionKey, {
         stripeAccount: accountId,
       });
@@ -342,5 +350,47 @@ export class StripePaymentProcessor implements PaymentProcessor {
       deviceType: r.device_type,
       status: r.status ?? null,
     }));
+  }
+
+  async attachIdentity({
+    id,
+    accountId,
+    userId,
+    userEmail,
+  }: {
+    id: string;
+    accountId: string;
+    userId?: number;
+    userEmail: string;
+  }): Promise<void> {
+    await attachIntentIdentity({
+      id,
+      stripeAccountId: accountId,
+      userId,
+      userEmail,
+    });
+  }
+
+  async attachShippingAddress({
+    id,
+    accountId,
+    shippingAddress,
+  }: {
+    id: string;
+    accountId: string;
+    shippingAddress: { name?: string; address: Record<string, unknown> };
+  }): Promise<void> {
+    if (!isSetupIntentId(id)) {
+      throw new AppError({
+        httpCode: 400,
+        description: "Only a SetupIntent (seti_*) accepts a shipping address",
+      });
+    }
+
+    await attachSetupIntentShippingAddress({
+      setupIntentId: id,
+      stripeAccountId: accountId,
+      shippingAddress,
+    });
   }
 }

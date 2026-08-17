@@ -206,9 +206,6 @@ export default function () {
         });
       }
 
-      // Cancels at period end for paid subscriptions (billing stops, access
-      // remains until the paid period ends) or immediately for free tiers,
-      // and emails the user a confirmation. See cancelUserSubscription.
       await cancelUserSubscription(
         subscription,
         loggedInUser.email,
