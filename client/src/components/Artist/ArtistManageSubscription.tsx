@@ -36,6 +36,7 @@ const ArtistManageSubscription: React.FC<{
         setIsCancelling(true);
         await api.delete(`artists/${userSubscriptionTier.artistId}/subscribe`, {
           keepFollowing,
+          tierId: userSubscriptionTier.id,
         });
         snackbar(t("subscriptionCancelled"), { type: "success" });
         setIsConfirmingCancel(false);
@@ -55,6 +56,7 @@ const ArtistManageSubscription: React.FC<{
       t,
       errorHandler,
       userSubscriptionTier.artistId,
+      userSubscriptionTier.id,
     ]
   );
 

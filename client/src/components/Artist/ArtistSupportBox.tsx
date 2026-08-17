@@ -106,6 +106,7 @@ const ArtistSupportBox: React.FC<{
     try {
       await api.delete(`artists/${subscriptionTier.artistId}/subscribe`, {
         keepFollowing,
+        tierId: subscriptionTier.id,
       });
       snackbar(t("subscriptionCancelled"), { type: "success" });
       setIsConfirmingCancel(false);

@@ -1,5 +1,6 @@
 import assert from "node:assert";
 
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
@@ -39,8 +40,6 @@ import {
 } from "../utils";
 
 import { requestApp } from "./utils";
-
-import prisma from "@mirlo/prisma";
 
 describe("purchase", () => {
   beforeEach(async () => {
@@ -854,15 +853,8 @@ describe("purchase", () => {
     });
   });
 
-  // These call initiateFundraiserPledge directly (same process as the test)
-  // so sinon stubs on the Stripe SDK calls are visible, unlike the HTTP tests
-  // above which go through the separate api-test server process to stripe-mock.
   describe("initiateFundraiserPledge (direct)", () => {
     it("attaches a Stripe Customer to the pledge SetupIntent so it can be charged later", async () => {
-      // Regression test: the pledge SetupIntent used to be created with no
-      // `customer`, so once the fundraiser hit its goal, chargePledgePayments
-      // (which looks up the buyer's Customer by email, then that Customer's
-      // payment methods) found nothing to charge and silently no-opped.
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_pledge_customer",
@@ -913,10 +905,6 @@ describe("purchase", () => {
     });
 
     it("passes successUrl through to the pledge SetupIntent's metadata", async () => {
-      // Regression test: successUrl was accepted by POST /v1/purchase and
-      // passed through for subscriptions/trackGroups, but silently dropped
-      // for fundraiserPledge — a hosted checkout pledge had nowhere to
-      // redirect the buyer after the SetupIntent succeeded.
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_pledge_success_url",
@@ -960,8 +948,6 @@ describe("purchase", () => {
     });
   });
 
-  // These tests call initiatePayment / initiateSubscription directly so sinon stubs
-  // work (same process), without going through the HTTP API container.
   describe("initiatePayment (direct)", () => {
     const stubStripeForOnline = (currency = "usd") => {
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
@@ -1080,7 +1066,6 @@ describe("purchase", () => {
 
       const metadata = metadataOf(createStub);
       assert.equal(metadata.purchaseType, "trackGroup");
-      // trackGroupId points at the first trackGroup in the cart.
       assert.equal(metadata.trackGroupId, String(tg1.id));
     });
 
@@ -1974,13 +1959,6 @@ describe("purchase", () => {
     });
 
     it("cancels the old Stripe subscription on a same-tier re-authorization even when oldTierId wasn't supplied", async () => {
-      // Regression test: the late-identity fallback lookup used to filter
-      // `profileSubscriptionTierId: { not: tier.id }`, excluding a match on
-      // the *same* tier. A buyer re-authorizing the same tier via a hosted/
-      // logged-out checkout (e.g. re-collecting a collectAddress tier's
-      // address, or retrying a failed card) would then never have their old
-      // Stripe subscription cancelled — leaving two active subscriptions and
-      // billing them twice per period.
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_finalize_same_tier",
@@ -2025,8 +2003,6 @@ describe("purchase", () => {
         currency: "usd",
         userId: buyer.id,
         userEmail: buyer.email,
-        // oldTierId / oldStripeSubscriptionKey intentionally omitted, as on
-        // the hosted/logged-out path.
       });
 
       assert.equal(
@@ -2762,8 +2738,6 @@ describe("purchase", () => {
     });
 
     it("should return 404 for an intent that was not initiated by Mirlo", async () => {
-      // stripe-mock returns a canned PaymentIntent with empty metadata, i.e.
-      // no artistId — exactly what a foreign (non-Mirlo) intent looks like.
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const response = await requestApp
         .delete("purchase/pi_cancel_test")
