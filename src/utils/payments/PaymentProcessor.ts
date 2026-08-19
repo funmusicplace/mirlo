@@ -30,6 +30,7 @@ export type CreatePledgeSetupArgs = {
   userEmail: string;
   userId?: string;
   message?: string;
+  successUrl?: string;
 };
 
 export type UpdateSubscriptionTierArgs = {
@@ -59,7 +60,6 @@ export interface PaymentProcessor {
     args: CreateSubscriptionSetupArgs & {
       oldTierId?: number;
       oldStripeSubscriptionKey?: string;
-      /** The tier needs a shipping address — persisted onto the SetupIntent's metadata so a redirect-away-and-back (hosted checkout) can still recover it via getStatus. */
       requiresShipping?: boolean;
       allowedCountries?: string[];
     }
@@ -94,6 +94,19 @@ export interface PaymentProcessor {
   }): Promise<{ id: string; status: string }>;
 
   listReaders(args: { accountId: string }): Promise<TerminalReader[]>;
+
+  attachIdentity(args: {
+    id: string;
+    accountId: string;
+    userId?: number;
+    userEmail: string;
+  }): Promise<void>;
+
+  attachShippingAddress(args: {
+    id: string;
+    accountId: string;
+    shippingAddress: { name?: string; address: Record<string, unknown> };
+  }): Promise<void>;
 }
 
 export type TerminalReader = {

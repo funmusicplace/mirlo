@@ -8,14 +8,8 @@ import {
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { getPaymentProcessor } from "../../../../utils/payments/PaymentProcessor";
-import {
-  attachIntentIdentity,
-  attachSetupIntentShippingAddress,
-} from "../../../../utils/stripe";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// TODO: these endpoints are still fairly entangled with Stripe.
 
 export default function () {
   const operations = {
@@ -174,14 +168,9 @@ export default function () {
         });
       }
 
+      const processor = getPaymentProcessor();
+
       if (shippingAddress) {
-        if (!id.startsWith("seti_")) {
-          throw new AppError({
-            httpCode: 400,
-            description:
-              "Only a SetupIntent (seti_*) accepts a shipping address",
-          });
-        }
         if (!shippingAddress.address) {
           throw new AppError({
             httpCode: 400,
@@ -189,17 +178,17 @@ export default function () {
           });
         }
 
-        await attachSetupIntentShippingAddress({
-          setupIntentId: id,
-          stripeAccountId,
+        await processor.attachShippingAddress({
+          id,
+          accountId: stripeAccountId,
           shippingAddress,
         });
       }
 
       if (loggedInUser) {
-        await attachIntentIdentity({
+        await processor.attachIdentity({
           id,
-          stripeAccountId,
+          accountId: stripeAccountId,
           userId: loggedInUser.id,
           userEmail: loggedInUser.email,
         });
@@ -210,7 +199,11 @@ export default function () {
             description: "email is not a valid email address",
           });
         }
-        await attachIntentIdentity({ id, stripeAccountId, userEmail: email });
+        await processor.attachIdentity({
+          id,
+          accountId: stripeAccountId,
+          userEmail: email,
+        });
       }
 
       res.status(200).json({ result: { id } });

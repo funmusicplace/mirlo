@@ -273,12 +273,96 @@ describe("artists/{id}/subscribe", () => {
 
       assert.equal(response.status, 200);
 
-      // A free tier has no paid period to honour, so it is soft-deleted now
-      // and no longer appears as an active subscription.
       const after = await prisma.profileUserSubscription.findFirst({
         where: { id: subscription.id },
       });
       assert.equal(after, null, "free subscription should no longer be active");
+    });
+
+    it("cancels the paid subscription, not a free follow row, when tierId isn't specified", async () => {
+      const { profile, followerUser, followerAccessToken } =
+        await createTestData();
+      const freeTier = profile.subscriptionTiers![0]; // default tier, no Stripe key
+      const paidTier = profile.subscriptionTiers![1]; // Tier 2, minAmount 4
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: freeTier.id,
+          userId: followerUser.id,
+          amount: 0,
+        },
+      });
+      const paidSubscription = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: paidTier.id,
+          userId: followerUser.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_paid_ambiguous",
+        },
+      });
+
+      const response = await requestApp
+        .delete(`artists/${profile.id}/subscribe`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${followerAccessToken}`]);
+
+      assert.equal(response.status, 200);
+
+      const paidAfter = await prisma.profileUserSubscription.findFirst({
+        where: { id: paidSubscription.id },
+      });
+      assert.ok(
+        paidAfter,
+        "paid subscription should still be active until period end"
+      );
+      assert.equal(paidAfter?.deleteReason, "USER_CANCELLED");
+      assert.equal(paidAfter?.stripeSubscriptionKey, "sub_paid_ambiguous");
+    });
+
+    it("cancels the row matching an explicit tierId even when another subscription exists for the same artist", async () => {
+      const { profile, followerUser, followerAccessToken } =
+        await createTestData();
+      const freeTier = profile.subscriptionTiers![0]; // default tier, no Stripe key
+      const paidTier = profile.subscriptionTiers![1]; // Tier 2, minAmount 4
+
+      const freeSubscription = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: freeTier.id,
+          userId: followerUser.id,
+          amount: 0,
+        },
+      });
+      const paidSubscription = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: paidTier.id,
+          userId: followerUser.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_paid_explicit",
+        },
+      });
+
+      const response = await requestApp
+        .delete(`artists/${profile.id}/subscribe`)
+        .send({ tierId: freeTier.id })
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${followerAccessToken}`]);
+
+      assert.equal(response.status, 200);
+
+      const freeAfter = await prisma.profileUserSubscription.findFirst({
+        where: { id: freeSubscription.id },
+      });
+      assert.equal(
+        freeAfter,
+        null,
+        "free subscription targeted by tierId should be removed"
+      );
+
+      const paidAfter = await prisma.profileUserSubscription.findFirst({
+        where: { id: paidSubscription.id },
+      });
+      assert.ok(paidAfter, "paid subscription should be untouched");
+      assert.equal(paidAfter?.deleteReason, null);
     });
 
     it("the payment processor asks Stripe to cancel at period end on the connected account", async () => {

@@ -377,6 +377,7 @@ export default function () {
           message: pledgeItem.message,
           userEmail: loggedInUser?.email ?? email ?? "",
           userId: loggedInUser?.id,
+          successUrl,
         });
 
         if (hosted && mirloClient) {

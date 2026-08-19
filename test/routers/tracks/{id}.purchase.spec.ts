@@ -1,9 +1,14 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 import { Request, Response } from "express";
 
 dotenv.config();
 import { describe, it } from "mocha";
+import sinon from "sinon";
+
+import purchaseTrackEndpoint from "../../../src/routers/v1/tracks/{id}/purchase";
+import * as stripeUtils from "../../../src/utils/stripe";
 import {
   clearTables,
   createArtist,
@@ -11,12 +16,9 @@ import {
   createTrackGroup,
   createUser,
 } from "../../utils";
-import sinon from "sinon";
-
 import { requestApp } from "../utils";
+
 import prisma from "@mirlo/prisma";
-import purchaseTrackEndpoint from "../../../src/routers/v1/tracks/{id}/purchase";
-import * as stripeUtils from "../../../src/utils/stripe";
 
 describe("tracks/{id}/purchase", () => {
   beforeEach(async () => {

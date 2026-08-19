@@ -17,45 +17,74 @@ export const registerSubscription = async ({
   platformCut?: number | null;
   shippingAddress?: object | null;
 }) => {
-  const profileUserSubscription = await prisma.profileUserSubscription.upsert({
-    create: {
-      profileSubscriptionTierId: tierId,
-      userId: userId,
-      amount: amount,
-      deletedAt: null,
-      stripeSubscriptionKey: paymentProcessorKey,
-      platformCut,
-      shippingAddress,
-    },
-    update: {
-      profileSubscriptionTierId: Number(tierId),
-      userId: Number(userId),
-      amount,
-      deletedAt: null, // Undelete
-      deleteReason: null, // Clear any stale reason from a prior cancellation of this same tier row
-      platformCut,
-      stripeSubscriptionKey: paymentProcessorKey, // FIXME: should this be session id? Maybe subscriptionId?
-      shippingAddress,
-    },
-    where: {
-      userId_profileSubscriptionTierId: {
-        userId: Number(userId),
-        profileSubscriptionTierId: Number(tierId),
-      },
-    },
-    include: {
-      user: true,
-      profileSubscriptionTier: {
-        include: {
-          profile: {
-            include: {
-              user: true,
-            },
+  const tier = await prisma.profileSubscriptionTier.findFirst({
+    where: { id: Number(tierId) },
+    select: { profileId: true },
+  });
+
+  const existingFreeSubscription = tier
+    ? await prisma.profileUserSubscription.findFirst({
+        where: {
+          userId: Number(userId),
+          profileSubscriptionTierId: { not: Number(tierId) },
+          stripeSubscriptionKey: null,
+          profileSubscriptionTier: { profileId: tier.profileId },
+        },
+      })
+    : null;
+
+  const updateData = {
+    profileSubscriptionTierId: Number(tierId),
+    userId: Number(userId),
+    amount,
+    deletedAt: null,
+    deleteReason: null, // Clear any stale reason from a prior cancellation of this same tier row
+    platformCut,
+    stripeSubscriptionKey: paymentProcessorKey,
+    shippingAddress,
+  };
+
+  const includeArgs = {
+    user: true,
+    profileSubscriptionTier: {
+      include: {
+        profile: {
+          include: {
+            user: true,
           },
         },
       },
     },
-  });
+  };
+
+  let profileUserSubscription;
+  if (existingFreeSubscription) {
+    profileUserSubscription = await prisma.profileUserSubscription.update({
+      where: { id: existingFreeSubscription.id },
+      data: updateData,
+      include: includeArgs,
+    });
+  } else {
+    profileUserSubscription = await prisma.profileUserSubscription.upsert({
+      create: {
+        profileSubscriptionTierId: tierId,
+        userId: userId,
+        amount: amount,
+        deletedAt: null,
+        stripeSubscriptionKey: paymentProcessorKey,
+        platformCut,
+        shippingAddress,
+      },
+      update: updateData,
+      where: {
+        userId_profileSubscriptionTierId: {
+          userId: Number(userId),
+          profileSubscriptionTierId: Number(tierId),
+        },
+      },
+      include: includeArgs,
+    });
+  }
 
   await prisma.notification.create({
     data: {
@@ -72,12 +101,6 @@ export const registerSubscription = async ({
   return profileUserSubscription;
 };
 
-/**
- * Grants the logged-in user pro-grata access to all of a subscription tier's
- * releases (the albums attached to the tier). Idempotent: existing purchases
- * are left untouched. Used both when a subscription is paid for (Stripe) and
- * when an artist adds a subscriber for free.
- */
 export const grantSubscriptionTierReleases = async ({
   userId,
   tierId,

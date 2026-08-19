@@ -14,6 +14,7 @@ export const initiateFundraiserPledge = async ({
   message,
   userEmail,
   userId,
+  successUrl,
 }: {
   artistId: number;
   fundraiserId: number;
@@ -22,6 +23,7 @@ export const initiateFundraiserPledge = async ({
   message?: string;
   userEmail: string;
   userId?: number;
+  successUrl?: string;
 }): Promise<{
   clientSecret: string | null;
   stripeAccountId: string;
@@ -61,6 +63,7 @@ export const initiateFundraiserPledge = async ({
       userEmail,
       userId: userId ? String(userId) : undefined,
       message,
+      successUrl,
     });
 
   return { clientSecret, stripeAccountId, setupIntentId };

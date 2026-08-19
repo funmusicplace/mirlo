@@ -1,4 +1,4 @@
-import { stripe } from "./index";
+import { stripe, isSetupIntentId } from "./index";
 
 /*
  * Retrieves the status of a PaymentIntent (pi_*) or SetupIntent (seti_*).
@@ -21,7 +21,7 @@ export const getIntentStatus = async ({
   allowedCountries: string[] | null;
   userEmail: string | null;
 }> => {
-  if (id.startsWith("seti_")) {
+  if (isSetupIntentId(id)) {
     const si = await stripe.setupIntents.retrieve(
       id,
       {},
