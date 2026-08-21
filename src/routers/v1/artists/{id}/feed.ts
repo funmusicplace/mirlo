@@ -8,14 +8,14 @@ import {
 import { Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { serializePost } from "../../../../serializers/post";
+import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import {
   canUserSeePostContent,
   getUserSubscriptionForProfile,
 } from "../../../../utils/postAccess";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
-import { serializePost } from "../../../../serializers/post";
-import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 
@@ -64,6 +64,8 @@ export const getPostsVisibleToUser = async (
   return { posts: processedPosts, total };
 };
 
+const MAX_ALBUMS_IN_FEED = 100;
+
 export const getAlbumsVisibleToUser = async (profile: Profile) => {
   const albums = await prisma.trackGroup.findMany({
     where: { ...whereForPublishedTrackGroups(), profileId: profile.id },
@@ -71,23 +73,39 @@ export const getAlbumsVisibleToUser = async (profile: Profile) => {
     orderBy: {
       releaseDate: "desc",
     },
+    take: MAX_ALBUMS_IN_FEED,
   });
   return albums.map((album) => processSingleTrackGroup(album));
 };
 
+export const getAlbumsCountForProfile = async (profile: Profile) => {
+  return prisma.trackGroup.count({
+    where: { ...whereForPublishedTrackGroups(), profileId: profile.id },
+  });
+};
+
+const MAX_FEED_TAKE = 50;
+
 export const buildFeedForProfile = async (
   user: User | undefined,
   profile: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
-  take: number = 10000,
+  take: number = MAX_FEED_TAKE,
   skip: number = 0
 ) => {
-  const { posts, total } = await getPostsVisibleToUser(
+  const clampedTake = Math.min(
+    Math.max(Number.isFinite(take) ? take : MAX_FEED_TAKE, 1),
+    MAX_FEED_TAKE
+  );
+  const clampedSkip = Math.max(Number.isFinite(skip) ? skip : 0, 0);
+
+  const { posts, total: totalPosts } = await getPostsVisibleToUser(
     user,
     profile,
-    take,
-    skip
+    clampedTake,
+    clampedSkip
   );
   const albums = await getAlbumsVisibleToUser(profile);
+  const totalAlbums = await getAlbumsCountForProfile(profile);
 
   return {
     results: [...posts, ...albums].sort((a, b) => {
@@ -97,7 +115,7 @@ export const buildFeedForProfile = async (
         (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
       return dateA > dateB ? -1 : 1;
     }),
-    total: total + albums.length,
+    total: totalPosts + totalAlbums,
   };
 };
 
