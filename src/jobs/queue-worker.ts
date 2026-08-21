@@ -50,16 +50,32 @@ const workerOptions = {
   connection: REDIS_CONFIG,
 };
 
-// The bucket config lives in the Settings table and can be changed at runtime
-// through the admin UI. The API process refreshes its own in-memory copy when
-// settings are saved, but this is a separate process — without re-reading
-// before each job, a prefix change after startup makes workers read/write
-// different buckets than the API uploaded to.
+// change bucket config at runtime
 const withFreshBucketConfig =
   (processor: (job: Job) => Promise<any>) => async (job: Job) => {
     const settings = await getSiteSettings();
     setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
     return processor(job);
+  };
+
+const formatMb = (bytes: number) => `${Math.round(bytes / 1024 / 1024)}MB`;
+
+// Memory logging for queues.
+const withMemoryLogging =
+  (queueName: string, processor: (job: Job) => Promise<any>) =>
+  async (job: Job) => {
+    const before = process.memoryUsage();
+    logger.info(
+      `memory:${queueName}: jobId=${job.id} start rss=${formatMb(before.rss)} heapUsed=${formatMb(before.heapUsed)}`
+    );
+    try {
+      return await processor(job);
+    } finally {
+      const after = process.memoryUsage();
+      logger.info(
+        `memory:${queueName}: jobId=${job.id} end rss=${formatMb(after.rss)} heapUsed=${formatMb(after.heapUsed)} rssDelta=${formatMb(after.rss - before.rss)}`
+      );
+    }
   };
 
 /**
@@ -74,7 +90,7 @@ function createWorkerWithLogging(
 ): Worker {
   const worker = new Worker(
     queueName,
-    withFreshBucketConfig(processor),
+    withMemoryLogging(queueName, withFreshBucketConfig(processor)),
     options
   );
   logger.info(startupMessage);
