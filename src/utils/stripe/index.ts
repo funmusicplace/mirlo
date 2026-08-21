@@ -1384,6 +1384,26 @@ export const handlePaymentIntentSucceeded = async (
     return;
   }
 
+  if (intent.invoice) {
+    // handleInvoicePaid webhook already tackles this for subscriptions
+    logger.info(
+      `payment_intent.succeeded: ${intent.id} belongs to invoice ${intent.invoice}, already handled via invoice.paid`
+    );
+    return;
+  }
+
+  if (
+    purchaseType !== "trackGroup" &&
+    purchaseType !== "track" &&
+    purchaseType !== "tip" &&
+    purchaseType !== "merch"
+  ) {
+    logger.info(
+      `payment_intent.succeeded: ${intent.id} has no recognized one-time purchaseType (got "${purchaseType}"), skipping`
+    );
+    return;
+  }
+
   await completePurchaseFromIntent(intent, accountId);
 };
 

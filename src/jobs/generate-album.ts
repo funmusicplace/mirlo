@@ -241,22 +241,21 @@ const downloadTrackGroupContent = async ({
       );
       return;
     }
-    await Promise.all(
-      content.map(async (item) => {
-        logger.info(
-          `downloadTrackGroupContent: ${trackGroupId}: Fetching content ${item.id}`
-        );
-        const { buffer } = await getDownloadableContentBuffer(item.id);
+    // Do this sequentially to be nicer on our in-app memory.
+    for (const item of content) {
+      logger.info(
+        `downloadTrackGroupContent: ${trackGroupId}: Fetching content ${item.id}`
+      );
+      const { buffer } = await getDownloadableContentBuffer(item.id);
 
-        if (buffer) {
-          logger.info(
-            `downloadTrackGroupContent: ${trackGroupId} writing content to disk`
-          );
-          const tempPath = `${contentDestination}/${filenamify(item.originalFilename ?? item.id)}`;
-          await fsPromises.writeFile(tempPath, buffer);
-        }
-      })
-    );
+      if (buffer) {
+        logger.info(
+          `downloadTrackGroupContent: ${trackGroupId} writing content to disk`
+        );
+        const tempPath = `${contentDestination}/${filenamify(item.originalFilename ?? item.id)}`;
+        await fsPromises.writeFile(tempPath, buffer);
+      }
+    }
   } catch (e) {
     logger.error(
       `downloadTrackGroupContent: ${trackGroupId}: Error fetching content: ${e}`
