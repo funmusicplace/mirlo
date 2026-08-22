@@ -35,7 +35,16 @@ export const TrackTitleContent: React.FC<{
     ? "Drafts"
     : track.trackGroup.title || tTrackGroup("untitled");
 
-  const trackGroupLink = (
+  // WidgetLink always opens in a new tab, which is correct when this content is
+  // rendered inside an embeddable widget (or a widget preview). The persistent
+  // player, however, sets useTrackArtistLinks to indicate we're navigating inside
+  // the main Mirlo app itself, where the artist and track title links already stay
+  // in the current tab — so the album link should match instead of standing out.
+  const trackGroupLink = useTrackArtistLinks ? (
+    <Link to={getReleaseUrl(track.trackGroup.artist, track.trackGroup)}>
+      {trackGroupLabel}
+    </Link>
+  ) : (
     <WidgetLink
       to={getReleaseUrl(track.trackGroup.artist, track.trackGroup)}
       embeddedInMirlo={embeddedInMirlo}
