@@ -81,7 +81,7 @@ const UserBoughtYourAlbum: React.FC<{
           />
         </div>
         {notification.trackGroup.artist && (
-          <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
+          <div className="text-xs text-(--mi-secondary-text-color) mt-0.5">
             <span>{t("by")} </span>
             <Link to={getArtistUrl(notification.trackGroup.artist)}>
               {notification.trackGroup.artist.name}
@@ -104,7 +104,7 @@ const UserBoughtYourAlbum: React.FC<{
               })}
             </span>
           )}
-        <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
+        <div className="text-xs text-(--mi-secondary-text-color) mt-0.5">
           {formatRelativeTime({ date: notification.createdAt, i18n })}
         </div>
       </div>

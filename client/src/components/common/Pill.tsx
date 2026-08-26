@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
+import React from "react";
 
-const Pill = styled.span<{
+const StyledPill = styled.span<{
   isHoverable?: boolean;
   variant?: "warning" | "tint";
 }>`
@@ -58,5 +59,22 @@ const Pill = styled.span<{
   `
       : ``}
 `;
+
+type PillProps = React.ComponentProps<typeof StyledPill>;
+
+const Pill = React.forwardRef<HTMLSpanElement, PillProps>(
+  ({ variant, className, ...props }, ref) => (
+    <StyledPill
+      ref={ref}
+      variant={variant}
+      className={[variant === "tint" && "mi-pill-tint", className]
+        .filter(Boolean)
+        .join(" ")}
+      {...props}
+    />
+  )
+);
+
+Pill.displayName = "Pill";
 
 export default Pill;

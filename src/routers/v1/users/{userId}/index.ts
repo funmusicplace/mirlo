@@ -102,6 +102,13 @@ export default function () {
     }
 
     try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: Number(userId) },
+        select: { properties: true },
+      });
+      const existingProperties =
+        (dbUser?.properties as Record<string, unknown> | null) ?? {};
+
       let data: Prisma.UserUpdateInput = {
         name,
         currency,
@@ -110,7 +117,14 @@ export default function () {
         isLabelAccount,
         combineSubscriptionEmails,
         urlSlug,
-        properties,
+        ...(properties !== undefined
+          ? {
+              properties: {
+                ...existingProperties,
+                ...(properties as Record<string, unknown>),
+              },
+            }
+          : {}),
       };
 
       let pendingEmailSent = false;

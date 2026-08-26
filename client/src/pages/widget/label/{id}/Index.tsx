@@ -14,6 +14,7 @@ import { isEmbeddedInMirlo } from "utils/widgetContext";
 
 import { PlayButtonsWrapper } from "components/Widget/PlayButtonsWrapper";
 import { TgWidgetWrapper, TrackListWrapper, WidgetWrapper } from "components/Widget/utils";
+import { useWidgetArtistColors } from "hooks/useResolvedArtistColors";
 
 const Index = () => {
   const { t } = useTranslation("translation", {
@@ -29,6 +30,8 @@ const Index = () => {
   const [tracks, setTracks] = React.useState<Track[]>();
 
   const embeddedInMirlo = isEmbeddedInMirlo();
+
+  const artistColors = useWidgetArtistColors(label?.profile?.properties?.colors);
 
   React.useEffect(() => {
     const callback = async () => {
@@ -72,7 +75,7 @@ const Index = () => {
 
   return (
     <WidgetWrapper
-      artistColors={label?.profile?.properties?.colors}
+      artistColors={artistColors}
       embeddedInMirlo={embeddedInMirlo}
       className="h-screen [&_a]:no-underline!"
     >

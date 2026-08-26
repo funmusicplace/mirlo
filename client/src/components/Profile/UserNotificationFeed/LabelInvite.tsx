@@ -107,7 +107,7 @@ const LabelInvite: React.FC<{
           <span className="truncate min-w-0">{notification.artist?.name}</span>
           <FaChevronRight className="shrink-0 text-xs" />
         </Link>
-        <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
+        <div className="text-xs text-(--mi-secondary-text-color) mt-0.5">
           {formatRelativeTime({ date: notification.createdAt, i18n })}
         </div>
       </div>

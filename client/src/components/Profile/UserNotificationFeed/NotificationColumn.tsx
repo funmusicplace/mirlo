@@ -63,7 +63,7 @@ const NotificationColumn: React.FC<{
   return (
     <div className="flex-1 min-w-0">
       {compact ? (
-        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-(--mi-light-foreground-color) mb-3">
+        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-(--mi-text-color) mb-3">
           {title}
         </p>
       ) : (
@@ -89,7 +89,7 @@ const NotificationColumn: React.FC<{
         {results.map((notification, index) => (
           <React.Fragment key={notification.id}>
             {separatorIndex > 0 && index === separatorIndex && (
-              <li className="flex items-center gap-3 my-6 text-sm text-(--mi-light-foreground-color)">
+              <li className="flex items-center gap-3 my-6 text-sm text-(--mi-text-color)">
                 <div className="flex-1 h-px bg-(--mi-darken-x-background-color)" />
                 <span>{t("earlierNotifications")}</span>
                 <div className="flex-1 h-px bg-(--mi-darken-x-background-color)" />
@@ -102,7 +102,7 @@ const NotificationColumn: React.FC<{
           </React.Fragment>
         ))}
         {!isPending && results.length === 0 && (
-          <li className="text-sm text-(--mi-light-foreground-color) py-4">
+          <li className="text-sm text-(--mi-text-color) py-4">
             {t("noNotifications")}
           </li>
         )}
