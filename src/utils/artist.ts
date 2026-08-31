@@ -729,14 +729,38 @@ export const singleInclude = (queryOptions?: {
 
 export const addSizesToImage = (
   bucket: string,
-  image?: { url: string[] } | null
+  image?: { url: string[]; updatedAt?: Date | string } | null
 ) => {
-  return image
-    ? {
-        ...image,
-        sizes: image && convertURLArrayToSizes(image?.url, bucket),
-      }
-    : null;
+  if (!image) {
+    return null;
+  }
+
+  const sizes = convertURLArrayToSizes(image.url, bucket) as Record<
+    string,
+    string
+  >;
+
+  // Re-uploading an image reuses the same object key, so its URLs never change
+  // and browsers/the CDN keep serving the previous file. Stamping the record's
+  // updatedAt onto each size gives every upload a distinct URL, without
+  // touching storage or invalidating anything. See #2362 and #2377.
+  const version = image.updatedAt
+    ? new Date(image.updatedAt).getTime()
+    : undefined;
+
+  if (!version) {
+    return { ...image, sizes };
+  }
+
+  const versionedSizes = Object.keys(sizes).reduce<Record<string, string>>(
+    (aggr, size) => {
+      aggr[size] = `${sizes[size]}?${version}`;
+      return aggr;
+    },
+    {}
+  );
+
+  return { ...image, sizes: versionedSizes };
 };
 
 /**
