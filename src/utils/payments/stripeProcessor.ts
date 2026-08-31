@@ -84,7 +84,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
   async createTerminalSubscriptionSetup({
     readerId,
     tierId,
-    artistId,
+    profileId,
     accountId,
     amount,
     currency,
@@ -96,7 +96,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
     return createAndDispatchTerminalSetupIntent({
       readerId,
       tierId,
-      artistId,
+      profileId,
       stripeAccountId: accountId,
       amount,
       currency,
@@ -107,7 +107,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
 
   async createOnlineSubscriptionSetup({
     tierId,
-    artistId,
+    profileId,
     accountId,
     amount,
     currency,
@@ -131,7 +131,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
         usage: "off_session",
         metadata: {
           tierId: String(tierId),
-          artistId: String(artistId),
+          artistId: String(profileId),
           stripeAccountId: accountId,
           amount: String(amount),
           currency,

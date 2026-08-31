@@ -11,13 +11,13 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { subscribeUserToArtist } from "../artist";
+import { subscribeUserToProfile } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
   getFeesFromPaymentIntent,
   getPlatformCurrencyValueFromIntent,
-  handleArtistGift,
+  handleProfileGift,
   handleCataloguePurchase,
   handleFundraiserPledge,
   handleFundraiserPledgePaymentFailure,
@@ -459,7 +459,7 @@ export const handleCheckoutSession = async (
       stripeAccountId,
       purchaseType,
       trackId,
-      artistId,
+      artistId: profileId,
     } = metadata;
     let { userId, userEmail } = metadata;
     const { userName } = metadata;
@@ -486,7 +486,7 @@ export const handleCheckoutSession = async (
     logger.info(`checkout.session: ${session.id} Processing session`);
     if (purchaseType === "tip") {
       logger.info(`checkout.session: ${session.id} handling tip`);
-      await handleArtistGift(Number(actualUserId), Number(artistId), session);
+      await handleProfileGift(Number(actualUserId), Number(profileId), session);
     } else if (purchaseType === "subscription") {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);
@@ -505,7 +505,7 @@ export const handleCheckoutSession = async (
       logger.info(`checkout.session: ${session.id} handleCataloguePurchase`);
       await handleCataloguePurchase(
         Number(actualUserId),
-        Number(artistId),
+        Number(profileId),
         session
       );
     }
@@ -581,7 +581,7 @@ export const handleSetupIntentSucceeded = async (
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
       });
-      await subscribeUserToArtist(fundraiser.trackGroups[0].profile, user);
+      await subscribeUserToProfile(fundraiser.trackGroups[0].profile, user);
     }
   } else if (metadata.tierId) {
     const {
@@ -1225,7 +1225,9 @@ export const handleMerchPurchasesFromIntent = async (
     },
   });
 
-  let artist: Prisma.ProfileGetPayload<{ include: { user: true } }> | undefined;
+  let profile:
+    | Prisma.ProfileGetPayload<{ include: { user: true } }>
+    | undefined;
 
   for (const item of merchItems) {
     const merch = await prisma.merch.findFirst({
@@ -1238,8 +1240,8 @@ export const handleMerchPurchasesFromIntent = async (
       continue;
     }
 
-    if (!artist && merch.profile) {
-      artist = merch.profile;
+    if (!profile && merch.profile) {
+      profile = merch.profile;
     }
 
     const quantity = item.quantity ?? 1;
@@ -1295,9 +1297,9 @@ export const handleMerchPurchasesFromIntent = async (
 
   const purchaser = await prisma.user.findFirst({ where: { id: userId } });
 
-  if (purchaser && artist) {
+  if (purchaser && profile) {
     await sendSaleEmails(
-      artist,
+      profile,
       purchaser,
       [transaction.id],
       paymentIntent.metadata?.message
@@ -1312,8 +1314,14 @@ export const completePurchaseFromIntent = async (
   const metadata = (intent.metadata ?? {}) as unknown as SessionMetaData & {
     items?: string;
   };
-  const { purchaseType, userId, userEmail, trackGroupId, trackId, artistId } =
-    metadata;
+  const {
+    purchaseType,
+    userId,
+    userEmail,
+    trackGroupId,
+    trackId,
+    artistId: profileId,
+  } = metadata;
 
   const sessionAdapter = {
     id: intent.id,
@@ -1348,10 +1356,10 @@ export const completePurchaseFromIntent = async (
       sessionAdapter,
       platformCurrencyValue
     );
-  } else if (purchaseType === "tip" && artistId) {
-    await handleArtistGift(
+  } else if (purchaseType === "tip" && profileId) {
+    await handleProfileGift(
       Number(actualUserId),
-      Number(artistId),
+      Number(profileId),
       sessionAdapter,
       platformCurrencyValue
     );

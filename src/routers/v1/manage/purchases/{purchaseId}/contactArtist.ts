@@ -30,7 +30,7 @@ export default function () {
 
     if (purchase && purchase.userId === user?.id) {
       // User is authorized to contact the artist
-      const artist = await prisma.profile.findFirst({
+      const profile = await prisma.profile.findFirst({
         where: {
           id: purchase.merch.profileId,
         },
@@ -45,17 +45,17 @@ export default function () {
         },
       });
 
-      if (artist) {
+      if (profile) {
         // Send email to artist
         sendMail({
           data: {
             template: "artist-merch-contact-form",
             message: {
-              to: artist.user.email,
+              to: profile.user.email,
             },
             locals: {
               purchase: serializeMerchPurchase(purchase),
-              artist: omitApPrivateKey(artist),
+              artist: omitApPrivateKey(profile),
               message,
               host: process.env.API_DOMAIN,
               client: (await getClient()).applicationUrl,

@@ -3,7 +3,7 @@ import { Prisma, User } from "@mirlo/prisma/client";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { getPlatformFeeForArtist } from "../artist";
+import { getPlatformFeeForProfile } from "../artist";
 import { AppError } from "../error";
 import { generateFullStaticImageUrl } from "../images";
 import { finalArtistAvatarBucket } from "../minio";
@@ -23,11 +23,11 @@ import stripe, {
 const { API_DOMAIN } = process.env;
 
 const buildCheckoutCancelSearchParams = ({
-  artistId,
+  profileId,
   clientId,
   reason = "user_canceled",
 }: {
-  artistId: string | number;
+  profileId: string | number;
   clientId?: string | number | null;
   reason?: string;
 }) => {
@@ -40,7 +40,7 @@ const buildCheckoutCancelSearchParams = ({
     params.set("clientId", clientId.toString());
   }
 
-  params.set("artistId", artistId.toString());
+  params.set("artistId", profileId.toString());
 
   return params;
 };
@@ -177,7 +177,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
   loggedInUser,
   email,
   priceNumber,
-  artist,
+  profile,
   message,
   stripeAccountId,
 }: {
@@ -185,7 +185,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
   email?: string;
   priceNumber: number;
   message?: string;
-  artist: Prisma.ProfileGetPayload<{ include: { user: true; avatar: true } }>;
+  profile: Prisma.ProfileGetPayload<{ include: { user: true; avatar: true } }>;
   stripeAccountId: string;
 }) => {
   const client = await prisma.client.findFirst({
@@ -194,10 +194,10 @@ export const createStripeCheckoutSessionForCatalogue = async ({
     },
   });
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency = await getCurrency(artist.id, stripeAccountId);
+  const currency = await getCurrency(profile.id, stripeAccountId);
 
   const cancelUrlParams = buildCheckoutCancelSearchParams({
-    artistId: artist.id,
+    profileId: profile.id,
     clientId: client?.id,
   });
 
@@ -209,7 +209,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
         application_fee_amount: await calculateAppFee(
           priceNumber,
           currency,
-          await getPlatformFeeForArtist(artist.id),
+          await getPlatformFeeForProfile(profile.id),
           stripeAccount.country
         ),
       },
@@ -220,12 +220,12 @@ export const createStripeCheckoutSessionForCatalogue = async ({
             unit_amount: castToFixed(priceNumber),
             currency,
             product_data: {
-              name: `Entire digital catalogue of ${artist.name}`,
-              description: `You're purchasing ${artist.name}'s entire digital catalogue`,
-              images: artist.avatar
+              name: `Entire digital catalogue of ${profile.name}`,
+              description: `You're purchasing ${profile.name}'s entire digital catalogue`,
+              images: profile.avatar
                 ? [
                     generateFullStaticImageUrl(
-                      artist.avatar?.url[4],
+                      profile.avatar?.url[4],
                       finalArtistAvatarBucket
                     ),
                   ]
@@ -238,7 +238,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
       metadata: {
         clientId: client?.id ?? null,
         purchaseType: "artistCatalogue",
-        artistId: artist.id,
+        artistId: profile.id,
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
         stripeAccountId,
@@ -382,19 +382,19 @@ export const createStripeCheckoutSessionForPurchase = async ({
 };
 
 export const getCurrency = async (
-  artistId: number,
+  profileId: number,
   stripeAccountId: string
 ): Promise<string> => {
-  const artist = await prisma.profile.findUnique({
+  const profile = await prisma.profile.findUnique({
     where: {
-      id: artistId,
+      id: profileId,
     },
     select: { paymentToUserId: true, userId: true },
   });
-  if (artist) {
+  if (profile) {
     const user = await prisma.user.findFirst({
       where: {
-        id: artist.paymentToUserId ?? artist.userId,
+        id: profile.paymentToUserId ?? profile.userId,
       },
     });
     if (user?.currency) {
@@ -413,7 +413,7 @@ export const createCheckoutSessionForSubscription = async ({
   loggedInUser,
   email,
   stripeAccountId,
-  artistId,
+  profileId,
   tier,
   amount,
   userName,
@@ -422,7 +422,7 @@ export const createCheckoutSessionForSubscription = async ({
   loggedInUser?: User;
   email?: string;
   stripeAccountId: string;
-  artistId: number;
+  profileId: number;
   tier: Prisma.ProfileSubscriptionTierGetPayload<{
     include: { profile: true };
   }>;
@@ -450,7 +450,7 @@ export const createCheckoutSessionForSubscription = async ({
     });
   }
 
-  logger.info(`Created a new product for artist ${artistId}, ${productKey}`);
+  logger.info(`Created a new product for artist ${profileId}, ${productKey}`);
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   const currency = await getCurrency(tier.profileId, stripeAccountId);
@@ -461,7 +461,7 @@ export const createCheckoutSessionForSubscription = async ({
   );
 
   const cancelUrlParams = buildCheckoutCancelSearchParams({
-    artistId: artistId,
+    profileId,
     clientId: client?.id,
   });
   const returnUrl = `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`;
@@ -513,7 +513,7 @@ export const createCheckoutSessionForSubscription = async ({
       ],
       metadata: {
         clientId: client?.id ?? null,
-        artistId: artistId,
+        artistId: profileId,
         purchaseType: "subscription",
         subscribed: 1,
         tierId: tier.id,

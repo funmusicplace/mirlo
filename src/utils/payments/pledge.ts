@@ -4,10 +4,10 @@ import { AppError } from "../error";
 import { determinePrice } from "../purchasing";
 
 import { getPaymentProcessor } from "./PaymentProcessor";
-import { resolveArtistPaymentContext } from "./purchase";
+import { resolveProfilePaymentContext } from "./purchase";
 
 export const initiateFundraiserPledge = async ({
-  artistId,
+  profileId,
   fundraiserId,
   trackGroupId,
   price,
@@ -16,7 +16,7 @@ export const initiateFundraiserPledge = async ({
   userId,
   successUrl,
 }: {
-  artistId: number;
+  profileId: number;
   fundraiserId: number;
   trackGroupId: number;
   price?: string;
@@ -30,7 +30,7 @@ export const initiateFundraiserPledge = async ({
   setupIntentId: string;
 }> => {
   const trackGroup = await prisma.trackGroup.findFirst({
-    where: { id: trackGroupId, profileId: artistId, fundraiserId },
+    where: { id: trackGroupId, profileId, fundraiserId },
     include: { fundraiser: true },
   });
   if (!trackGroup) {
@@ -51,13 +51,13 @@ export const initiateFundraiserPledge = async ({
 
   const { priceNumber } = determinePrice(price, trackGroup.minPrice);
 
-  const { stripeAccountId } = await resolveArtistPaymentContext(artistId);
+  const { stripeAccountId } = await resolveProfilePaymentContext(profileId);
 
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlinePledgeSetup({
       fundraiserId,
       trackGroupId,
-      artistId,
+      artistId: profileId,
       accountId: stripeAccountId,
       amount: priceNumber,
       userEmail,
