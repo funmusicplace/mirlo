@@ -1,11 +1,13 @@
-import resendVerificationEmail from "../../src/routers/auth/resendVerificationEmail";
+import assert from "assert";
+import { randomUUID } from "crypto";
+
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
-import * as sendMail from "../../src/jobs/send-mail";
 import sinon from "sinon";
-import assert from "assert";
+
+import * as sendMail from "../../src/jobs/send-mail";
+import resendVerificationEmail from "../../src/routers/auth/resendVerificationEmail";
 import { clearTables, createUser } from "../utils";
-import { randomUUID } from "crypto";
 
 describe("auth/resendVerificationEmail", () => {
   let statusStub: sinon.SinonStub;
@@ -63,8 +65,8 @@ describe("auth/resendVerificationEmail", () => {
       jsonStub.calledWithMatch(
         sinon.match({
           message: "Success! Verification email sent.",
-          emailConfirmationExpiresAt: sinon.match((value) =>
-            typeof value === "string"
+          emailConfirmationExpiresAt: sinon.match(
+            (value) => typeof value === "string"
           ),
         })
       )
@@ -73,14 +75,12 @@ describe("auth/resendVerificationEmail", () => {
 
     const updatedUser = await prisma.user.findFirst({
       where: { id: user.id },
+      omit: { emailConfirmationToken: false },
     });
 
     assert(updatedUser);
     assert(updatedUser?.emailConfirmationToken);
-    assert.notStrictEqual(
-      updatedUser?.emailConfirmationToken,
-      "initial-token"
-    );
+    assert.notStrictEqual(updatedUser?.emailConfirmationToken, "initial-token");
     assert(
       (updatedUser?.emailConfirmationExpiration?.getTime() ?? 0) > Date.now()
     );
@@ -140,8 +140,6 @@ describe("auth/resendVerificationEmail", () => {
 
     assert(mockNext.notCalled);
     assert(statusStub.calledWith(400));
-    assert(
-      jsonStub.calledWithMatch({ error: "This client does not exist " })
-    );
+    assert(jsonStub.calledWithMatch({ error: "This client does not exist " }));
   });
 });

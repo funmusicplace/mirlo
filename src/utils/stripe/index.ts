@@ -1,7 +1,6 @@
-import prisma from "@mirlo/prisma";
+import prisma, { SafeUser, SECRET_USER_FIELDS } from "@mirlo/prisma";
 import {
   Prisma,
-  User,
   FundraiserPledge,
   Fundraiser,
   TrackGroup,
@@ -884,7 +883,7 @@ export const finalizeSubscriptionSetup = async ({
 };
 
 export const chargePledgePayments = async (
-  pledge: FundraiserPledge & { user: User } & {
+  pledge: FundraiserPledge & { user: SafeUser } & {
     fundraiser: Fundraiser & {
       trackGroups: (TrackGroup & {
         profile: { urlSlug: string; user: { stripeAccountId: string | null } };
@@ -1225,7 +1224,11 @@ export const handleMerchPurchasesFromIntent = async (
     },
   });
 
-  let artist: Prisma.ProfileGetPayload<{ include: { user: true } }> | undefined;
+  let artist:
+    | Prisma.ProfileGetPayload<{
+        include: { user: { omit: typeof SECRET_USER_FIELDS } };
+      }>
+    | undefined;
 
   for (const item of merchItems) {
     const merch = await prisma.merch.findFirst({

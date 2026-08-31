@@ -292,7 +292,12 @@ export const trackGroupSingleInclude = (options: {
         artistLabels: {
           include: {
             labelUser: {
-              include: {
+              select: {
+                id: true,
+                name: true,
+                urlSlug: true,
+                userAvatar: true,
+                ...(options.ownerId ? { email: true } : {}),
                 profiles: {
                   where: { isLabelProfile: true },
                   select: { name: true, urlSlug: true, id: true },

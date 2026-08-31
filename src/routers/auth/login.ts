@@ -20,6 +20,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       where: {
         email: email.toLowerCase(),
       },
+      omit: { password: false, emailConfirmationToken: false },
     });
 
     if (foundUser) {

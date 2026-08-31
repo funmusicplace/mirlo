@@ -38,7 +38,7 @@ const LabelConfirmation: React.FC = () => {
           };
         };
         name: string;
-        email: string;
+        email?: string;
       };
       isLabelApproved: boolean;
       isArtistApproved: boolean;

@@ -1,10 +1,11 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
-import { clearTables, createProfile, createUser } from "../../utils";
 
+import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("artists/{id}/confirmFollow", () => {
@@ -145,6 +146,7 @@ describe("artists/{id}/confirmFollow", () => {
         where: {
           email: followerEmail,
         },
+        omit: { emailConfirmationToken: false },
       });
 
       assert(user);

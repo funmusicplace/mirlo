@@ -1,4 +1,4 @@
-import prisma from "@mirlo/prisma";
+import prisma, { SafeUser } from "@mirlo/prisma";
 import { Prisma, User } from "@mirlo/prisma/client";
 
 import logger from "../logger";
@@ -164,7 +164,10 @@ export const findOrCreateUserBasedOnEmail = async (
   name?: string
 ) => {
   let newUser = false;
-  let user: User | undefined | null;
+  let user:
+    | (SafeUser & Pick<User, "emailConfirmationToken">)
+    | undefined
+    | null;
   const trimmedName = name?.trim() || undefined;
 
   if (!userId && !userEmail) {
@@ -183,6 +186,7 @@ export const findOrCreateUserBasedOnEmail = async (
       where: {
         email: userEmail,
       },
+      omit: { emailConfirmationToken: false },
     });
     if (!user) {
       logger.info(`Creating a new user for ${userEmail}`);
@@ -191,12 +195,14 @@ export const findOrCreateUserBasedOnEmail = async (
           email: userEmail,
           ...(trimmedName && { name: trimmedName }),
         },
+        omit: { emailConfirmationToken: false },
       });
     }
     userId = `${user?.id}`;
   } else if (userId) {
     user = await prisma.user.findFirst({
       where: { id: Number(userId) },
+      omit: { emailConfirmationToken: false },
     });
   }
 
@@ -206,6 +212,7 @@ export const findOrCreateUserBasedOnEmail = async (
     user = await prisma.user.update({
       where: { id: user.id },
       data: { name: trimmedName },
+      omit: { emailConfirmationToken: false },
     });
   }
 

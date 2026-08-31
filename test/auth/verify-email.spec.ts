@@ -1,8 +1,9 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
-import request from "supertest";
 import { beforeEach, describe, it } from "mocha";
+import request from "supertest";
 import prisma from "@mirlo/prisma";
 
 import { clearTables } from "../utils";
@@ -36,7 +37,10 @@ describe("auth/verify-email", () => {
     assert.equal(verifyResponse.status, 200);
     assert(verifyResponse.body.userId);
 
-    const user = await prisma.user.findFirstOrThrow({ where: { email } });
+    const user = await prisma.user.findFirstOrThrow({
+      where: { email },
+      omit: { emailConfirmationToken: false },
+    });
 
     assert.equal(user.emailConfirmationToken, null);
     assert.equal(user.emailConfirmationExpiration, null);

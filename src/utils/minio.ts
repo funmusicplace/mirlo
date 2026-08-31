@@ -303,11 +303,23 @@ const applyPublicReadPolicyS3 = async (bucket: string) => {
     );
     logger.info(`backblaze: set public-read policy on bucket: ${bucket}`);
   } catch (e) {
+    // B2 doesn't implement PutBucketPolicy so this isn't actionable and
+    // shouldn't be dumped in the error logs.
+
+    if (
+      e instanceof Error &&
+      e.message.includes("This API call is not supported")
+    ) {
+      logger.warn(
+        `backblaze: bucket ${bucket} policy API not supported; make sure it's set to public via your provider's console`
+      );
+      return;
+    }
     logger.error(
       `backblaze: failed to set public-read policy on bucket ${bucket} — ` +
         `it may need to be made public manually via your provider's console`
     );
-    logger.error(e);
+    logger.error(e instanceof Error ? e.message : e);
   }
 };
 
