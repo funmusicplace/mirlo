@@ -13,10 +13,10 @@ import {
 } from "../../../../auth/passport";
 import sendMail from "../../../../jobs/send-mail";
 import { logger } from "../../../../logger";
+import { serializeUser } from "../../../../serializers/user";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
 import { getClient } from "../../../../utils/getClient";
-import { serializeUser } from "../../../../serializers/user";
 import { deleteUser, updateCurrencies } from "../../../../utils/user";
 
 export default function () {
@@ -126,6 +126,7 @@ export default function () {
               email: user.email,
               emailConfirmationToken: null,
             },
+            omit: { password: false },
           });
           if (foundUser && password && password !== "") {
             const match = await bcrypt.compare(password, foundUser.password);

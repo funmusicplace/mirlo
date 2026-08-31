@@ -2,6 +2,21 @@ import { Prisma, PrismaClient } from "./__generated__";
 
 const ENABLE_LOGGING = false;
 
+// Fields on `User` that can't leave the server
+export const SECRET_USER_FIELDS = {
+  password: true,
+  refresh: true,
+  emailConfirmationToken: true,
+  passwordResetConfirmationToken: true,
+  userConfirmationCode: true,
+  pendingEmailToken: true,
+} as const;
+
+// A SafeUser is one that omits the secret fields
+export type SafeUser = Prisma.UserGetPayload<{
+  omit: typeof SECRET_USER_FIELDS;
+}>;
+
 // Create base client before extending it
 const baseClient = new PrismaClient({
   // The following controls logging of the database
@@ -15,6 +30,11 @@ const baseClient = new PrismaClient({
         ],
       }
     : {}),
+  // Secrets that can't leave the server by accident.  Queries that need one can
+  // opt back in, e.g. `omit: { password: false }`.
+  omit: {
+    user: SECRET_USER_FIELDS,
+  },
 });
 
 /**

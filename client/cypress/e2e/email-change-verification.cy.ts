@@ -140,7 +140,7 @@ describe("email change verification", () => {
               expect(updatedUser).to.exist;
               expect(updatedUser.email).to.equal(newEmail);
               expect(updatedUser.pendingEmail).to.be.null;
-              expect(updatedUser.pendingEmailToken).to.be.null;
+              expect(updatedUser.pendingEmailToken).to.be.undefined;
             });
           });
         });

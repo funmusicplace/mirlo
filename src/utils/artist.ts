@@ -1,4 +1,4 @@
-import prisma from "@mirlo/prisma";
+import prisma, { SafeUser } from "@mirlo/prisma";
 import {
   User,
   ProfileSubscriptionTier,
@@ -14,6 +14,7 @@ import { NextFunction, Request, Response } from "express";
 
 import sendMail from "../jobs/send-mail";
 import logger from "../logger";
+import { serializeProfile } from "../serializers/artist";
 
 import { AppError } from "./error";
 import { getClient } from "./getClient";
@@ -25,7 +26,6 @@ import {
   finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
-import { serializeProfile } from "../serializers/artist";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
 import {
@@ -279,7 +279,7 @@ export const createSubscriptionConfirmation = async (
 
 export const subscribeUserToProfile = async (
   profile: {
-    user: User;
+    user: SafeUser;
     userId: number;
     subscriptionTiers: ProfileSubscriptionTier[];
     id: number;
@@ -659,13 +659,14 @@ export const singleInclude = (queryOptions?: {
           select: {
             id: true,
             name: true,
-            email: true,
+            urlSlug: true,
+            userAvatar: true,
+            ...(includePrivate ? { email: true } : {}),
             profiles: {
               where: {
                 isLabelProfile: true,
               },
             },
-            stripeAccountId: true,
           },
         },
       },

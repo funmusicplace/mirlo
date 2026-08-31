@@ -243,9 +243,8 @@ interface ArtistLabel {
   labelUserId: number;
   labelUser: {
     name: string;
-    email: string;
+    email?: string;
     id: number;
-    stripeAccountId?: string;
     userAvatar?: { sizes: string[] };
     artists?: Artist[];
   };

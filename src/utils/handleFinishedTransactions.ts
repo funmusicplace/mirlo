@@ -1,8 +1,7 @@
-import prisma from "@mirlo/prisma";
+import prisma, { SafeUser } from "@mirlo/prisma";
 import {
   Profile,
   TrackGroup,
-  User,
   FundraiserPledge,
   Fundraiser,
 } from "@mirlo/prisma/client";
@@ -712,7 +711,7 @@ export type PurchaseReceiptEmailType = {
   client: string;
   host: string;
   artist: {
-    user: User;
+    user: SafeUser;
     properties?: { emails?: { purchase?: string } } | null;
   };
 };
@@ -729,10 +728,10 @@ export type ArtistPurchaseNotificationEmailType = {
 
 export const sendSaleEmails = async (
   artist: Profile & {
-    user: User;
+    user: SafeUser;
     properties?: { emails?: { purchase?: string } } | null;
   },
-  purchaser: User,
+  purchaser: SafeUser,
   transactionIds: string[],
   message?: string
 ) => {

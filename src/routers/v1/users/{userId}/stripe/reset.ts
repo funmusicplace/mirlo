@@ -1,7 +1,6 @@
+import prisma from "@mirlo/prisma";
 import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response } from "express";
-
-import prisma from "@mirlo/prisma";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
@@ -72,6 +71,7 @@ export default function () {
 
       const user = await prisma.user.findUnique({
         where: { id: Number(userId) },
+        omit: { password: false, userConfirmationCode: false },
       });
       if (!user) {
         throw new AppError({

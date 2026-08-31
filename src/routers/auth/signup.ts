@@ -65,6 +65,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       where: {
         email,
       },
+      omit: { password: false, emailConfirmationToken: false },
     });
     const client = await prisma.client.findFirst({
       where: {

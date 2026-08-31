@@ -42,6 +42,7 @@ describe("users/{userId}/stripe/resetCode", () => {
     assert.equal(response.statusCode, 200);
     const refreshed = await prisma.user.findUnique({
       where: { id: user.id },
+      omit: { userConfirmationCode: false },
     });
     assert.ok(
       refreshed?.userConfirmationCode &&
@@ -74,6 +75,7 @@ describe("users/{userId}/stripe/resetCode", () => {
     assert.equal(response.statusCode, 401);
     const refreshed = await prisma.user.findUnique({
       where: { id: victim.id },
+      omit: { userConfirmationCode: false },
     });
     assert.equal(refreshed?.userConfirmationCode, null);
   });
@@ -112,6 +114,7 @@ describe("users/{userId}/stripe/reset", () => {
 
     const refreshed = await prisma.user.findFirst({
       where: { id: user.id },
+      omit: { userConfirmationCode: false },
     });
     assert.equal(refreshed?.stripeAccountId, null);
     // Code consumed on success so it can't be reused
@@ -163,6 +166,7 @@ describe("users/{userId}/stripe/reset", () => {
     assert.equal(response.statusCode, 401);
     const refreshed = await prisma.user.findFirst({
       where: { id: user.id },
+      omit: { userConfirmationCode: false },
     });
     assert.equal(refreshed?.stripeAccountId, "acct_orphaned");
     // Stored code preserved so the user can retry with the right one
@@ -312,6 +316,7 @@ describe("users/{userId}/stripe/reset", () => {
 
     const refreshed = await prisma.user.findFirst({
       where: { id: user.id },
+      omit: { userConfirmationCode: false },
     });
     assert.equal(refreshed?.userConfirmationCode, null);
   });

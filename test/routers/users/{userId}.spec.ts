@@ -3,13 +3,13 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import prisma from "@mirlo/prisma";
-
 import { describe, it } from "mocha";
-import { clearTables, createUser } from "../../utils";
 
-import { requestApp } from "../utils";
-import { faker } from "@faker-js/faker";
 import { hashPassword } from "../../../src/routers/auth/utils";
+import { clearTables, createUser } from "../../utils";
+import { requestApp } from "../utils";
+
+import { faker } from "@faker-js/faker";
 
 describe("users/{userId}", () => {
   beforeEach(async () => {
@@ -123,6 +123,7 @@ describe("users/{userId}", () => {
         where: {
           id: user.id,
         },
+        omit: { pendingEmailToken: false },
       });
       // Original email should remain until confirmed
       assert.equal(refreshedUser?.email, "user@test.com");
@@ -160,6 +161,7 @@ describe("users/{userId}", () => {
       // Get the pending email token from database
       const userWithPending = await prisma.user.findFirst({
         where: { id: user.id },
+        omit: { pendingEmailToken: false },
       });
 
       assert(userWithPending?.pendingEmailToken);
@@ -180,6 +182,7 @@ describe("users/{userId}", () => {
       // Verify in database
       const finalUser = await prisma.user.findFirst({
         where: { id: user.id },
+        omit: { pendingEmailToken: false },
       });
       assert.equal(finalUser?.email, newEmail);
       assert.equal(finalUser?.pendingEmail, null);

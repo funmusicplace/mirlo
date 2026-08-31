@@ -1,4 +1,4 @@
-import prisma from "@mirlo/prisma";
+import prisma, { SECRET_USER_FIELDS } from "@mirlo/prisma";
 import { Prisma, User } from "@mirlo/prisma/client";
 import Stripe from "stripe";
 
@@ -185,7 +185,12 @@ export const createStripeCheckoutSessionForCatalogue = async ({
   email?: string;
   priceNumber: number;
   message?: string;
-  artist: Prisma.ProfileGetPayload<{ include: { user: true; avatar: true } }>;
+  artist: Prisma.ProfileGetPayload<{
+    include: {
+      user: { omit: typeof SECRET_USER_FIELDS };
+      avatar: true;
+    };
+  }>;
   stripeAccountId: string;
 }) => {
   const client = await prisma.client.findFirst({
