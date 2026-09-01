@@ -23,7 +23,6 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id, segment }: { id?: string; segment?: string } = req.params;
     const user = req.user;
-    // @ts-ignore - req.logger added by middleware
     const log = req.logger || logger;
 
     try {

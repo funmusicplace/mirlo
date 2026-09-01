@@ -34,7 +34,10 @@ import {
   BucketConfig,
   ensureAllBucketsExist,
 } from "./utils/minio";
-import { sanitizeHeadersForLogs } from "./utils/requestLogging";
+import {
+  attachRequestId,
+  sanitizeHeadersForLogs,
+} from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
 import { refreshStripeClient } from "./utils/stripe";
 import wellKnown from "./wellKnown";
@@ -67,6 +70,7 @@ app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
+app.use(attachRequestId);
 app.use(corsMiddleware);
 app.use(cookieParser());
 // @fedify/express's fromERequest builds the request URL using req.host, which

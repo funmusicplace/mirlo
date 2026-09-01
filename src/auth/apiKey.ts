@@ -29,7 +29,6 @@ export const apiKeyCheck = async (
   _res: Response,
   next: NextFunction
 ) => {
-  // @ts-ignore - req.logger added by middleware
   const log = req.logger || logger;
   try {
     const isSameSite =

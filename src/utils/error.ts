@@ -74,7 +74,6 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  // @ts-ignore - req.logger added by middleware
   const log = req.logger || logger;
 
   if (err instanceof AppError) {
@@ -117,12 +116,15 @@ const errorHandler = (
     });
   }
 
-  // Errors we should probably know about
-  log.error(
-    `ERROR: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`,
-    err,
-    err.stack ?? ""
-  );
+  const statusCode = err.status ?? err.statusCode;
+  const isClientError = typeof statusCode === "number" && statusCode < 500;
+  const errorMessage = `${isClientError ? "Bad request" : "ERROR"}: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`;
+
+  if (isClientError) {
+    log.warn(errorMessage, { statusCode, message: err.message });
+  } else {
+    log.error(errorMessage, err, err.stack ?? "");
+  }
 
   if (
     err instanceof PrismaClientValidationError ||
