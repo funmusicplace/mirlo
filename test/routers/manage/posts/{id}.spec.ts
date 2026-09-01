@@ -8,7 +8,7 @@ import request from "supertest";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createPost,
   createUser,
 } from "../../../utils";
@@ -35,8 +35,8 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(owner.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(owner.id);
+      const post = await createPost(profile.id);
       const response = await requestApp
         .put(`manage/posts/${post.id}`)
         .send({
@@ -59,8 +59,8 @@ describe("manage/posts/{postId}", () => {
         isAdmin: true,
       });
 
-      const artist = await createArtist(owner.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(owner.id);
+      const post = await createPost(profile.id);
       const response = await requestApp
         .put(`manage/posts/${post.id}`)
         .send({
@@ -78,8 +78,8 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
       const response = await requestApp
         .put(`manage/posts/${post.id}`)
         .send({
@@ -97,11 +97,11 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const post = await prisma.post.create({
         data: {
           title: "",
-          profileId: artist.id,
+          profileId: profile.id,
           isPublic: true,
           urlSlug: null,
           content: "The content",
@@ -129,11 +129,11 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const post = await prisma.post.create({
         data: {
           title: "",
-          profileId: artist.id,
+          profileId: profile.id,
           isPublic: true,
           urlSlug: null,
           content: "The content",
@@ -160,8 +160,8 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
       const response = await requestApp
         .put(`manage/posts/${post.id}`)
         .send({
@@ -182,7 +182,7 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         subscriptionTiers: {
           create: {
             name: "a tier",
@@ -190,17 +190,17 @@ describe("manage/posts/{postId}", () => {
         },
       });
 
-      const post = await createPost(artist.id);
+      const post = await createPost(profile.id);
       const response = await requestApp
         .put(`manage/posts/${post.id}`)
         .send({
-          minimumSubscriptionTierId: artist.subscriptionTiers[0].id,
+          minimumSubscriptionTierId: profile.subscriptionTiers[0].id,
         })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.deepEqual(
         response.body.result.minimumSubscriptionTierId,
-        artist.subscriptionTiers[0].id
+        profile.subscriptionTiers[0].id
       );
       assert.deepEqual(response.body.result.title, post.title);
       assert(response.statusCode === 200);
@@ -211,7 +211,7 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         subscriptionTiers: {
           create: {
             name: "a tier",
@@ -219,7 +219,7 @@ describe("manage/posts/{postId}", () => {
         },
       });
 
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         shouldSendEmail: true,
       });
       assert.equal(post.shouldSendEmail, true);
@@ -247,7 +247,7 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         subscriptionTiers: {
           create: {
             name: "a tier",
@@ -255,7 +255,7 @@ describe("manage/posts/{postId}", () => {
         },
       });
 
-      const post = await createPost(artist.id, {
+      const post = await createPost(profile.id, {
         shouldSendEmail: true,
       });
 
@@ -321,8 +321,8 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
       const response = await requestApp
         .delete(`manage/posts/${post.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
@@ -343,8 +343,8 @@ describe("manage/posts/{postId}", () => {
         email: "test@test.com",
       });
 
-      const artist = await createArtist(user.id);
-      const post = await createPost(artist.id);
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
 
       const image = await prisma.postImage.create({
         data: {
