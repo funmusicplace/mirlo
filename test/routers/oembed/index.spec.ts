@@ -57,6 +57,23 @@ describe("oembed", () => {
       );
     });
 
+    it("should handle the url parameter being sent more than once", async () => {
+      const user = await createUser({ email: "test@test.com" });
+      const artist = await createArtist(user.user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+      await createTrack(trackGroup.id);
+
+      const url = encodeURIComponent(
+        `${applicationUrl}/${artist.urlSlug}/release/${trackGroup.urlSlug}`
+      );
+      const response = await requestApp
+        .get(`oembed/?url=${url}&url=${url}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.type, "rich");
+    });
+
     describe("Album oEmbed", () => {
       it("should return oEmbed data for an album", async () => {
         const user = await createUser({ email: "test@test.com" });

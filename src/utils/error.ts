@@ -116,25 +116,16 @@ const errorHandler = (
     });
   }
 
-  const statusCode = err.status ?? err.statusCode;
-  const isClientError = typeof statusCode === "number" && statusCode < 500;
-  const errorMessage = `${isClientError ? "Bad request" : "ERROR"}: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`;
-
-  if (isClientError) {
-    log.warn(errorMessage, { statusCode, message: err.message });
-  } else {
-    log.error(errorMessage, err, err.stack ?? "");
-  }
-
   if (
     err instanceof PrismaClientValidationError ||
     err.name === "PrismaClientValidationError"
   ) {
     const messageStrings = err.message.split("\n");
+    const message = messageStrings[messageStrings.length - 1];
 
-    return res.status(400).json({
-      error: messageStrings[messageStrings.length - 1],
-    });
+    log.error(`PrismaClientValidationError: ${message}`);
+
+    return res.status(400).json({ error: message });
   } else if (
     err instanceof PrismaClientKnownRequestError ||
     err.name === "NotFoundError" ||
@@ -170,20 +161,30 @@ const errorHandler = (
       if (err.code === "P2025") {
         message = `Not found: ${err.message}`;
       }
-      log.error(
-        `PrismaClientKnownRequestError: ${message} - ${JSON.stringify({
-          cause: err.cause,
-          name: err.name,
-          code: err.code,
-          meta: err.meta,
-          stack: err.stack,
-        })}`
-      );
+      log.error(`PrismaClientKnownRequestError: ${message}`, {
+        cause: err.cause,
+        name: err.name,
+        code: err.code,
+        meta: err.meta,
+        stack: err.stack,
+      });
     }
     return res.status(400).json({
       error: message,
     });
-  } else if (res.statusCode === 429) {
+  }
+
+  const statusCode = err.status ?? err.statusCode;
+  const isClientError = typeof statusCode === "number" && statusCode < 500;
+  const errorMessage = `${isClientError ? "Bad request" : "ERROR"}: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`;
+
+  if (isClientError) {
+    log.warn(errorMessage, { statusCode, message: err.message });
+  } else {
+    log.error(errorMessage, err, err.stack ?? "");
+  }
+
+  if (res.statusCode === 429) {
     return res.json({ error: "Too many requests" });
   } else {
     return res.status(err.status ?? 500).json({ error: err.errors });
