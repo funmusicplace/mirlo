@@ -247,6 +247,11 @@ export default function () {
         });
       }
 
+      // Setting a cache-control header lets us serve this via Cloudflare
+      res.setHeader(
+        "Cache-Control",
+        "public, max-age=86400, stale-while-revalidate=604800"
+      );
       res.json(oembedData);
     } catch (error) {
       if (error instanceof AppError) {

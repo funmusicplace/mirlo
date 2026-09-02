@@ -1,4 +1,23 @@
+import { randomUUID } from "crypto";
 import { IncomingHttpHeaders } from "http";
+
+import { NextFunction, Request, Response } from "express";
+
+import logger from "../logger";
+
+const REQUEST_ID_HEADER = "X-Request-Id";
+
+// Assigns a per-request id
+export const attachRequestId = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const requestId = randomUUID();
+  res.setHeader(REQUEST_ID_HEADER, requestId);
+  req.logger = logger.child({ requestId });
+  next();
+};
 
 const SENSITIVE_HEADERS = new Set([
   "authorization",

@@ -19,7 +19,6 @@ export const corsMiddleware = async (
   ...args: [Request, Response, NextFunction]
 ) => {
   const [req, , next] = args;
-  // @ts-ignore - req.logger added by middleware
   const log = req.logger || logger;
   try {
     const isHealthCheck = req.path === "/health" && req.headers["health-check"];

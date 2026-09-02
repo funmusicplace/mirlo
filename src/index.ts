@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
+import { Request, Response, NextFunction } from "express-serve-static-core";
 import qs from "qs";
 import swaggerUi from "swagger-ui-express";
 
@@ -34,7 +35,10 @@ import {
   BucketConfig,
   ensureAllBucketsExist,
 } from "./utils/minio";
-import { sanitizeHeadersForLogs } from "./utils/requestLogging";
+import {
+  attachRequestId,
+  sanitizeHeadersForLogs,
+} from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
 import { refreshStripeClient } from "./utils/stripe";
 import wellKnown from "./wellKnown";
@@ -58,6 +62,15 @@ dotenv.config();
 const app = express();
 const isDev = process.env.NODE_ENV === "development";
 
+const formatMb = (bytes: number) => `${Math.round(bytes / 1024 / 1024)}MB`;
+
+setInterval(() => {
+  const mem = process.memoryUsage();
+  logger.info(
+    `memory:heartbeat: rss=${formatMb(mem.rss)} heapUsed=${formatMb(mem.heapUsed)} heapTotal=${formatMb(mem.heapTotal)} external=${formatMb(mem.external)}`
+  );
+}, 30_000).unref();
+
 app.set("query parser", (str: string) => qs.parse(str));
 // See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 2);
@@ -67,6 +80,7 @@ app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
+app.use(attachRequestId);
 app.use(corsMiddleware);
 app.use(cookieParser());
 // @fedify/express's fromERequest builds the request URL using req.host, which
@@ -215,81 +229,112 @@ const LOW_NOISE_PROBE_PATHS = new Set([
   "/.well-known/host-meta.json",
 ]);
 
+const isHtmlPageRequest = (reqPath: string): boolean =>
+  (reqPath.includes("index.html") || reqPath.startsWith("/")) &&
+  !(
+    reqPath.includes(".css") ||
+    reqPath.includes(".js") ||
+    reqPath.includes(".svg") ||
+    reqPath.includes(".png") ||
+    reqPath.includes(".jpg") ||
+    reqPath.includes(".ico") ||
+    reqPath.includes(".webp") ||
+    reqPath.includes(".md") ||
+    reqPath.includes(".pdf") ||
+    reqPath.includes(".woff") ||
+    reqPath.includes(".woff2") ||
+    reqPath.includes("robots.txt") ||
+    reqPath.startsWith("/static/") ||
+    reqPath.startsWith("/v1")
+  );
+
+const htmlRateLimiter = isDev
+  ? undefined
+  : rateLimit({
+      windowMs: 10 * 1000,
+      limit: 30,
+      standardHeaders: true,
+      legacyHeaders: false,
+      skip: (req) => Boolean(req.user),
+      handler: (_req, res) => {
+        res.status(429).send("Too many requests");
+      },
+    });
+
+const staticRateLimiter = (req: Request, res: Response, next: NextFunction) => {
+  if (!htmlRateLimiter || !isHtmlPageRequest(req.path)) {
+    return next();
+  }
+  return htmlRateLimiter(req, res, next);
+};
+
 // This has to be the last thing used so that other things don't get over-written
-app.use("/", userLoggedInWithoutRedirect, async (req, res, next) => {
-  if (!res.headersSent) {
-    if (req.path.startsWith("/v1")) {
-      res.sendStatus(404);
-    } else if (
-      (req.path.includes("index.html") || req.path.startsWith("/")) &&
-      !(
-        req.path.includes(".css") ||
-        req.path.includes(".js") ||
-        req.path.includes(".svg") ||
-        req.path.includes(".png") ||
-        req.path.includes(".jpg") ||
-        req.path.includes(".ico") ||
-        req.path.includes(".webp") ||
-        req.path.includes(".md") ||
-        req.path.includes(".pdf") ||
-        req.path.includes(".woff") ||
-        req.path.includes(".woff2") ||
-        req.path.includes("robots.txt") ||
-        req.path.startsWith("/static/")
-      )
-    ) {
-      // HTML pages must never be cached — they reference hashed asset filenames
-      res.setHeader("Cache-Control", "no-store");
-      const html = await parseIndex(req.path, req);
-      res.send(html);
-    } else {
-      // Vite hashes /assets/ filenames on every build — safe to cache permanently
-      // Other dist files (images, etc.) get 1 week with stale-while-revalidate
-      if (req.path.startsWith("/assets/")) {
-        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-      } else {
-        res.setHeader(
-          "Cache-Control",
-          "public, max-age=604800, stale-while-revalidate=604800"
+app.use(
+  "/",
+  userLoggedInWithoutRedirect,
+  staticRateLimiter,
+  async (req, res, next) => {
+    if (!res.headersSent) {
+      if (req.path.startsWith("/v1")) {
+        res.sendStatus(404);
+      } else if (isHtmlPageRequest(req.path)) {
+        // HTML pages must never be cached — they reference hashed asset filenames
+        res.setHeader("Cache-Control", "no-store");
+        const memBefore = process.memoryUsage();
+        const html = await parseIndex(req.path, req);
+        const memAfter = process.memoryUsage();
+        logger.info(
+          `memory:parseIndex: path=${req.path} rss=${formatMb(memAfter.rss)} heapUsed=${formatMb(memAfter.heapUsed)} rssDelta=${formatMb(memAfter.rss - memBefore.rss)}`
         );
+        res.send(html);
+      } else {
+        // Vite hashes /assets/ filenames on every build — safe to cache permanently
+        // Other dist files (images, etc.) get 1 week with stale-while-revalidate
+        if (req.path.startsWith("/assets/")) {
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        } else {
+          res.setHeader(
+            "Cache-Control",
+            "public, max-age=604800, stale-while-revalidate=604800"
+          );
+        }
+        const fileLocation = path.join(
+          __dirname,
+          "..",
+          "client",
+          "dist",
+          req.path
+        );
+
+        res.sendFile(fileLocation, (err) => {
+          if (!err) {
+            return;
+          }
+
+          const fileErr = err as NodeJS.ErrnoException & { status?: number };
+
+          if (fileErr.code === "ENOENT" || fileErr.status === 404) {
+            // Not finding a file during build is expected so shouldn't generate error noise.
+            if (req.path.startsWith("/assets/")) {
+              logger.info(`asset not found: ${req.path}`);
+            } else if (LOW_NOISE_PROBE_PATHS.has(req.path)) {
+              logger.info(`probe path not found: ${req.path}`);
+            }
+            if (!res.headersSent) {
+              // Override the Cache-Control set above — a missing file must never be
+              // cached, otherwise Cloudflare will serve the 404 for a year.
+              res.setHeader("Cache-Control", "no-store");
+              res.sendStatus(404);
+            }
+            return;
+          }
+
+          next(err);
+        });
       }
-      const fileLocation = path.join(
-        __dirname,
-        "..",
-        "client",
-        "dist",
-        req.path
-      );
-
-      res.sendFile(fileLocation, (err) => {
-        if (!err) {
-          return;
-        }
-
-        const fileErr = err as NodeJS.ErrnoException & { status?: number };
-
-        if (fileErr.code === "ENOENT" || fileErr.status === 404) {
-          // During deploys or browser cache mismatch, hashed asset paths can 404.
-          // Treat this as expected noise instead of an application error.
-          if (req.path.startsWith("/assets/")) {
-            logger.info(`asset not found: ${req.path}`);
-          } else if (LOW_NOISE_PROBE_PATHS.has(req.path)) {
-            logger.info(`probe path not found: ${req.path}`);
-          }
-          if (!res.headersSent) {
-            // Override the Cache-Control set above — a missing file must never be
-            // cached, otherwise Cloudflare will serve the 404 for a year.
-            res.setHeader("Cache-Control", "no-store");
-            res.sendStatus(404);
-          }
-          return;
-        }
-
-        next(err);
-      });
     }
   }
-});
+);
 
 app.use(errorHandler);
 
