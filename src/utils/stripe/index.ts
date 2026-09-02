@@ -944,7 +944,9 @@ export const chargePledgePayments = async (
             automatic_payment_methods: { enabled: true },
             customer: customerId,
             payment_method: paymentMethods.data[0]?.id,
-            return_url: `${client.applicationUrl}/${pledge.fundraiser.trackGroups[0].profile.urlSlug}/release/${pledge.fundraiser.trackGroups[0].urlSlug}`,
+            return_url: encodeURI(
+              `${client.applicationUrl}/${pledge.fundraiser.trackGroups[0].profile.urlSlug}/release/${pledge.fundraiser.trackGroups[0].urlSlug}`
+            ),
             off_session: true,
             confirm: true,
             application_fee_amount: await calculateAppFee(

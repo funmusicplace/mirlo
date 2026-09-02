@@ -8,7 +8,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistUrl } from "utils/artist";
+import { buildCheckoutCompletePath } from "utils/artist";
 
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
@@ -34,7 +34,9 @@ const TipArtistForm: React.FC<{
   const navigate = useNavigate();
   const { checkout, isLoading, startPurchase, reset } = usePurchase();
 
-  const tipCompletePath = `${getArtistUrl(artist)}/checkout-complete?purchaseType=tip`;
+  const tipCompletePath = buildCheckoutCompletePath(artist, {
+    purchaseType: "tip",
+  });
 
   const methods = useForm<{
     price: number;

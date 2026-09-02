@@ -48,7 +48,9 @@ export const buildCheckoutCompletePath = (
   artist: { urlSlug?: string; id?: number },
   params: Record<string, string>
 ) => {
-  return `${getArtistUrl(artist)}/checkout-complete?${new URLSearchParams(params).toString()}`;
+  return encodeURI(
+    `${getArtistUrl(artist)}/checkout-complete?${new URLSearchParams(params).toString()}`
+  );
 };
 
 export const getArtistManageUrl = (artistId: number) => {
