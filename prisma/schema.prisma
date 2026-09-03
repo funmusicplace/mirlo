@@ -323,7 +323,8 @@ model Profile {
   linksJson                           Json[]
   location                            String?
   allowPurchaseEntireCatalog          Boolean                               @default(false)
-  purchaseEntireCatalogMinPrice       Int                                   @default(0) // in cents  
+  purchaseEntireCatalogMinPrice       Int                                   @default(0) // in cents
+  purchaseEntireCatalogPercentage     Int? // 0-100; when set, the floor is this % of the summed minPrice
   maxFreePlays                        Int?
   merchStoreURL                       String?
   activityPub                         Boolean                               @default(false)

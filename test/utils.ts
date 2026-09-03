@@ -145,6 +145,9 @@ export const createProfile = async (
       federatedStreamingOptInDate: data?.federatedStreamingOptInDate ?? null,
       federatedStreamingOptOutDate: data?.federatedStreamingOptOutDate ?? null,
       defaultPlatformFee: data?.defaultPlatformFee,
+      allowPurchaseEntireCatalog: data?.allowPurchaseEntireCatalog,
+      purchaseEntireCatalogMinPrice: data?.purchaseEntireCatalogMinPrice,
+      purchaseEntireCatalogPercentage: data?.purchaseEntireCatalogPercentage,
     },
     include: {
       subscriptionTiers: true,

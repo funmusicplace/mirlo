@@ -7,6 +7,7 @@ import {
   profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { serializeProfile } from "../../../../../serializers/artist";
 import {
   deleteProfile,
   findProfileIdForURLSlug,
@@ -14,7 +15,6 @@ import {
 } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
-import { serializeProfile } from "../../../../../serializers/artist";
 
 type Params = {
   artistId: string;
@@ -40,6 +40,7 @@ export default function () {
       activityPub,
       federatedStreaming,
       purchaseEntireCatalogMinPrice,
+      purchaseEntireCatalogPercentage,
       defaultPlatformFee,
       tourDates,
       shortDescription,
@@ -50,6 +51,21 @@ export default function () {
     } = req.body;
     assertLoggedIn(req);
     const user = req.user;
+
+    if (
+      purchaseEntireCatalogPercentage !== undefined &&
+      purchaseEntireCatalogPercentage !== null &&
+      (purchaseEntireCatalogPercentage < 0 ||
+        purchaseEntireCatalogPercentage > 100)
+    ) {
+      return next(
+        new AppError({
+          httpCode: 400,
+          description:
+            "purchaseEntireCatalogPercentage must be between 0 and 100",
+        })
+      );
+    }
 
     try {
       const existingProfile = await prisma.profile.findFirst({
@@ -125,6 +141,7 @@ export default function () {
             federatedStreamingOptInDate,
             federatedStreamingOptOutDate,
             purchaseEntireCatalogMinPrice,
+            purchaseEntireCatalogPercentage,
             defaultPlatformFee,
             shortDescription,
             maxFreePlays,
