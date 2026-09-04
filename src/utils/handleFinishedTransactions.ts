@@ -18,6 +18,7 @@ import { serializeUserTransaction } from "../serializers/userTransaction";
 
 import { subscribeUserToArtist } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
+import { findCataloguePurchasableTrackGroups } from "./catalogue";
 import { getClient } from "./getClient";
 import { resolvePayee } from "./payments/payee";
 import { calculateAppFee } from "./processingPayments";
@@ -39,13 +40,6 @@ const getPaymentIntent = async (
   }
 };
 
-// Reads the platform application fee and the Stripe processing fee for a
-// (settled) PaymentIntent from its latest charge's balance transaction. Callers
-// keep their own error policy — this throws if Stripe can't be reached. This is
-// the single place that walks a balance transaction's fee_details for the
-// Stripe processing fee — getApplicationFee (session-based) and
-// getFeeDetailsFromInvoice (invoice-based, in stripe/index.ts) both resolve
-// down to a PaymentIntent and delegate here rather than re-deriving it.
 export const getFeesFromPaymentIntent = async (
   paymentIntent: Stripe.PaymentIntent,
   stripeAccount: string
@@ -58,9 +52,6 @@ export const getFeesFromPaymentIntent = async (
     paymentIntent.latest_charge.balance_transaction &&
     typeof paymentIntent.latest_charge.balance_transaction !== "string"
   ) {
-    // Caller already expanded latest_charge.balance_transaction on their own
-    // retrieve (e.g. getFeeDetailsFromInvoice) — reuse it instead of another
-    // round-trip to Stripe.
     balanceTransaction = paymentIntent.latest_charge.balance_transaction;
   } else {
     const chargeId =
@@ -488,22 +479,9 @@ export const handleCataloguePurchase = async (
         user: true,
       },
     });
-    const artistTrackGroups = await prisma.trackGroup.findMany({
-      where: {
-        profileId: artistId,
-        OR: [{ paymentToUserId: null }, { paymentToUserId: artist?.userId }],
-        releaseDate: {
-          lte: new Date(),
-        },
-        isHiddenTrackGroupForSongDrafts: false,
-        publishedAt: { lte: new Date() },
-        isGettable: true,
-        adminEnabled: true,
-      },
-      include: {
-        profile: true,
-      },
-    });
+    const artistTrackGroups = artist
+      ? await findCataloguePurchasableTrackGroups(artist)
+      : [];
 
     const amountPaidPerTrackGroup =
       (session?.amount_total ?? 0) / artistTrackGroups.length;

@@ -2,13 +2,13 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { serializeProfile } from "../../../../serializers/artist";
 import {
   checkIsUserSubscriber,
   findProfileIdForURLSlug,
   singleInclude,
   whereForAllProfilesThisLabelCanEdit,
 } from "../../../../utils/artist";
-import { serializeProfile } from "../../../../serializers/artist";
 
 export default function () {
   const operations = {

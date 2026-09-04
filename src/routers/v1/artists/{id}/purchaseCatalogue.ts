@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { subscribeUserToProfile } from "../../../../utils/artist";
+import { calculateCatalogueFloorPrice } from "../../../../utils/catalogue";
 import { AppError } from "../../../../utils/error";
 import { resolvePayee } from "../../../../utils/payments/payee";
 import { determinePrice } from "../../../../utils/purchasing";
@@ -14,7 +15,61 @@ type Params = {
 
 export default function () {
   const operations = {
+    GET: [GET],
     POST: [userLoggedInWithoutRedirect, POST],
+  };
+
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { id: profileId } = req.params as unknown as Params;
+    try {
+      const profile = await prisma.profile.findFirst({
+        where: {
+          id: Number(profileId),
+        },
+      });
+
+      if (!profile) {
+        throw new AppError({
+          httpCode: 404,
+          description: `Artist with ID ${profileId} not found`,
+        });
+      }
+
+      res.status(200).json({
+        result: {
+          price: profile.allowPurchaseEntireCatalog
+            ? await calculateCatalogueFloorPrice(profile)
+            : null,
+        },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  GET.apiDoc = {
+    summary:
+      "Get the current price to buy an artist's entire catalogue, recalculated live",
+    parameters: [
+      {
+        in: "path",
+        name: "id",
+        required: true,
+        type: "number",
+      },
+    ],
+    responses: {
+      200: {
+        description:
+          "The current price in cents, or null if the artist doesn't offer entire-catalogue purchases",
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
@@ -62,10 +117,8 @@ export default function () {
 
       const stripeAccountId = resolvePayee({ profile }).stripeAccountId;
 
-      const { isPriceZero, priceNumber } = determinePrice(
-        price,
-        profile.purchaseEntireCatalogMinPrice
-      );
+      const floorPrice = await calculateCatalogueFloorPrice(profile);
+      const { isPriceZero, priceNumber } = determinePrice(price, floorPrice);
 
       if (!stripeAccountId && !isPriceZero) {
         throw new AppError({
