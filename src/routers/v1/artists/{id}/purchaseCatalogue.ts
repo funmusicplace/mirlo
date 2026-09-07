@@ -140,7 +140,7 @@ export default function () {
           email,
           priceNumber,
           message,
-          artist: profile,
+          profile,
           stripeAccountId,
         });
         res.status(200).json({

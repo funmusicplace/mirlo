@@ -11,7 +11,7 @@ export type CreatePaymentArgs = {
 
 export type CreateSubscriptionSetupArgs = {
   tierId: number;
-  artistId: number;
+  profileId: number;
   accountId: string;
   amount: number;
   currency: string;
@@ -24,7 +24,7 @@ export type CreateSubscriptionSetupArgs = {
 export type CreatePledgeSetupArgs = {
   fundraiserId: number;
   trackGroupId: number;
-  artistId: number;
+  profileId: number;
   accountId: string;
   amount: number;
   userEmail: string;
@@ -123,7 +123,7 @@ export type PaymentStatusResult = {
   successUrl: string | null;
   amount: number | null;
   currency: string | null;
-  artistId: string | null;
+  profileId: string | null;
   requiresShipping: boolean;
   allowedCountries: string[] | null;
   userEmail: string | null;

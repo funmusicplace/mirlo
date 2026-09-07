@@ -16,7 +16,7 @@ import {
 import stripe, { handleMerchPurchasesFromIntent } from "../../src/utils/stripe";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createMerch,
   createTrackGroup,
   createUser,
@@ -52,8 +52,8 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const merch = await createMerch(artist.id, { quantityRemaining: 5 });
+    const profile = await createProfile(artistUser.id);
+    const merch = await createMerch(profile.id, { quantityRemaining: 5 });
 
     await handleMerchPurchasesFromIntent(
       buyer.id,
@@ -79,8 +79,8 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const merch = await createMerch(artist.id, { quantityRemaining: 5 });
+    const profile = await createProfile(artistUser.id);
+    const merch = await createMerch(profile.id, { quantityRemaining: 5 });
     const optionType = await prisma.merchOptionType.create({
       data: { merchId: merch.id, optionName: "size" },
     });
@@ -136,8 +136,8 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const merch = await createMerch(artist.id, {});
+    const profile = await createProfile(artistUser.id);
+    const merch = await createMerch(profile.id, {});
 
     await handleMerchPurchasesFromIntent(
       buyer.id,
@@ -175,9 +175,9 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const bonusTrackGroup = await createTrackGroup(artist.id);
-    const merch = await createMerch(artist.id, {
+    const profile = await createProfile(artistUser.id);
+    const bonusTrackGroup = await createTrackGroup(profile.id);
+    const merch = await createMerch(profile.id, {
       includePurchaseTrackGroupId: bonusTrackGroup.id,
     });
 
@@ -200,8 +200,8 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const merch = await createMerch(artist.id, {});
+    const profile = await createProfile(artistUser.id);
+    const merch = await createMerch(profile.id, {});
 
     await handleMerchPurchasesFromIntent(
       buyer.id,
@@ -221,9 +221,9 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const bonusTrackGroup = await createTrackGroup(artist.id);
-    const merch = await createMerch(artist.id, {
+    const profile = await createProfile(artistUser.id);
+    const bonusTrackGroup = await createTrackGroup(profile.id);
+    const merch = await createMerch(profile.id, {
       includePurchaseTrackGroupId: bonusTrackGroup.id,
     });
 
@@ -256,8 +256,8 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const merch = await createMerch(artist.id, {});
+    const profile = await createProfile(artistUser.id);
+    const merch = await createMerch(profile.id, {});
 
     await handleMerchPurchasesFromIntent(
       buyer.id,
@@ -296,8 +296,8 @@ describe("handleMerchPurchasesFromIntent", () => {
       email: "artist@test.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
-    const artist = await createArtist(artistUser.id);
-    const merch = await createMerch(artist.id, {});
+    const profile = await createProfile(artistUser.id);
+    const merch = await createMerch(profile.id, {});
 
     await handleMerchPurchasesFromIntent(
       buyer.id,
