@@ -74,8 +74,50 @@ export default function () {
         ORDER BY weeks.week_start ASC
       `;
 
-      const transactionAmountByWeek = await prisma.$queryRaw<
-        Array<{ week: string; currency: string; totalAmountCents: number }>
+      const usdRevenueByWeek = await prisma.$queryRaw<
+        Array<{
+          week: string;
+          purchasesUsdCents: number;
+          subscriptionsUsdCents: number;
+          purchasesConvertedUsdCents: number;
+          subscriptionsConvertedUsdCents: number;
+        }>
+      >`
+        WITH weeks AS (
+          SELECT GENERATE_SERIES(
+            DATE_TRUNC('week', NOW() - (${days} * INTERVAL '1 day')),
+            DATE_TRUNC('week', NOW()),
+            INTERVAL '1 week'
+          ) AS week_start
+        ),
+        tx AS (
+          SELECT
+            t."createdAt",
+            t.currency,
+            t.amount,
+            t."platformCurrencyAmount",
+            t."platformCurrency",
+            EXISTS (
+              SELECT 1 FROM "ProfileUserSubscriptionCharge" c
+              WHERE c."transactionId" = t.id
+            ) AS "isSubscription"
+          FROM "UserTransaction" t
+          WHERE t."createdAt" >= NOW() - (${days} * INTERVAL '1 day')
+        )
+        SELECT
+          TO_CHAR(weeks.week_start, 'YYYY-MM-DD') AS week,
+          COALESCE(SUM(CASE WHEN tx.currency = 'usd' AND NOT tx."isSubscription" THEN tx.amount END), 0)::double precision AS "purchasesUsdCents",
+          COALESCE(SUM(CASE WHEN tx.currency = 'usd' AND tx."isSubscription" THEN tx.amount END), 0)::double precision AS "subscriptionsUsdCents",
+          COALESCE(SUM(CASE WHEN tx.currency != 'usd' AND tx."platformCurrency" = 'usd' AND NOT tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "purchasesConvertedUsdCents",
+          COALESCE(SUM(CASE WHEN tx.currency != 'usd' AND tx."platformCurrency" = 'usd' AND tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "subscriptionsConvertedUsdCents"
+        FROM weeks
+        LEFT JOIN tx ON DATE_TRUNC('week', tx."createdAt") = weeks.week_start
+        GROUP BY weeks.week_start
+        ORDER BY weeks.week_start ASC
+      `;
+
+      const transactionCountByWeek = await prisma.$queryRaw<
+        Array<{ week: string; currency: string; count: number }>
       >`
         WITH weeks AS (
           SELECT GENERATE_SERIES(
@@ -92,7 +134,7 @@ export default function () {
         SELECT
           TO_CHAR(weeks.week_start, 'YYYY-MM-DD') AS week,
           currencies.currency AS currency,
-          COALESCE(SUM(t.amount), 0)::double precision AS "totalAmountCents"
+          COUNT(t.id)::int AS count
         FROM weeks
         CROSS JOIN currencies
         LEFT JOIN "UserTransaction" t
@@ -100,6 +142,40 @@ export default function () {
           AND t.currency = currencies.currency
         GROUP BY weeks.week_start, currencies.currency
         ORDER BY currencies.currency ASC, weeks.week_start ASC
+      `;
+
+      const platformRevenueByWeek = await prisma.$queryRaw<
+        Array<{
+          week: string;
+          platformCutUsdCents: number;
+          platformCutConvertedUsdCents: number;
+        }>
+      >`
+        WITH weeks AS (
+          SELECT GENERATE_SERIES(
+            DATE_TRUNC('week', NOW() - (${days} * INTERVAL '1 day')),
+            DATE_TRUNC('week', NOW()),
+            INTERVAL '1 week'
+          ) AS week_start
+        ),
+        tx AS (
+          SELECT
+            t."createdAt",
+            t.currency,
+            t."platformCut",
+            t."platformCurrency",
+            t."exchangeRate"
+          FROM "UserTransaction" t
+          WHERE t."createdAt" >= NOW() - (${days} * INTERVAL '1 day')
+        )
+        SELECT
+          TO_CHAR(weeks.week_start, 'YYYY-MM-DD') AS week,
+          COALESCE(SUM(CASE WHEN tx.currency = 'usd' THEN tx."platformCut" END), 0)::double precision AS "platformCutUsdCents",
+          COALESCE(SUM(CASE WHEN tx.currency != 'usd' AND tx."platformCurrency" = 'usd' THEN ROUND(tx."platformCut" * tx."exchangeRate") END), 0)::double precision AS "platformCutConvertedUsdCents"
+        FROM weeks
+        LEFT JOIN tx ON DATE_TRUNC('week', tx."createdAt") = weeks.week_start
+        GROUP BY weeks.week_start
+        ORDER BY weeks.week_start ASC
       `;
 
       const avgMonthlyPlays = await prisma.$queryRaw<
@@ -144,7 +220,9 @@ export default function () {
           userSignupsByWeek,
           artistSignupsByWeek,
           transactionsByWeek,
-          transactionAmountByWeek,
+          usdRevenueByWeek,
+          transactionCountByWeek,
+          platformRevenueByWeek,
           avgMonthlyPlays: avgMonthlyPlays[0]?.avgMonthlyPlays ?? 0,
           avgMonthlyActiveUsers:
             avgMonthlyActiveUsers[0]?.avgMonthlyActiveUsers ?? 0,
