@@ -35,7 +35,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       if (!subscriptionTier) {
@@ -111,7 +111,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       if (!subscriptionTier) {
@@ -233,7 +233,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       if (!subscriptionTier) {

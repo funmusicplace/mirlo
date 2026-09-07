@@ -4,15 +4,15 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
+import * as sendMailQueueModule from "../../../../src/queues/send-mail-queue";
 import {
   clearTables,
   createArtist,
   createTier,
   createUser,
 } from "../../../utils";
-import * as sendMailQueueModule from "../../../../src/queues/send-mail-queue";
-
 import { requestApp } from "../../utils";
+
 import { faker } from "@faker-js/faker";
 
 describe("manage/artists/{artistId}/subscriptionTiers", () => {
@@ -82,6 +82,29 @@ describe("manage/artists/{artistId}/subscriptionTiers/{tierId}", () => {
           allowVariable: true,
         })
         .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.result.allowVariable, true);
+      assert.equal(response.statusCode, 200);
+    });
+
+    it("should let an admin PUT details for a tier belonging to another user", async () => {
+      const { user } = await createUser({
+        email: "test@test.com",
+      });
+      const { accessToken: adminAccessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id);
+      const response = await requestApp
+        .put(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}`)
+        .send({
+          allowVariable: true,
+        })
+        .set("Cookie", [`jwt=${adminAccessToken}`])
         .set("Accept", "application/json");
 
       assert.equal(response.body.result.allowVariable, true);

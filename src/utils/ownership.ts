@@ -1,15 +1,33 @@
+import prisma from "@mirlo/prisma";
 import { ProfileSubscriptionTier, User } from "@mirlo/prisma/client";
 
-import prisma from "@mirlo/prisma";
 import { AppError } from "./error";
 
 export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,
-  userId: number
+  user: User
 ): Promise<ProfileSubscriptionTier | null> => {
+  if (user.isAdmin) {
+    return prisma.profileSubscriptionTier.findFirst({
+      where: {
+        id: subscriptionId,
+      },
+      include: {
+        images: {
+          include: { image: true },
+        },
+        releases: {
+          select: {
+            trackGroupId: true,
+          },
+        },
+      },
+    });
+  }
+
   const artists = await prisma.profile.findMany({
     where: {
-      userId,
+      userId: user.id,
     },
   });
 
