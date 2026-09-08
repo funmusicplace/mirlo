@@ -591,6 +591,122 @@ describe("purchase", () => {
       assert.equal(response.body.stripeAccountId, "acct_tip_test");
     });
 
+    it("should return 200 with clientSecret for a catalogue purchase at the floor price", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_catalogue_test",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id, {
+        purchaseEntireCatalogMinPrice: 1500,
+      });
+      await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "catalogue" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.clientSecret);
+      assert.equal(response.body.stripeAccountId, "acct_catalogue_test");
+    });
+
+    it("should let a buyer pay more than a catalogue's floor price", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_catalogue_more",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id, {
+        purchaseEntireCatalogMinPrice: 1500,
+      });
+      await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "catalogue", price: "3000" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.clientSecret);
+    });
+
+    it("should return 400 when a catalogue's floor price is 0", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_catalogue_zero",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "catalogue" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should subscribe a logged-in buyer to the artist on a catalogue purchase", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_catalogue_follow",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const artist = await createArtist(artistUser.id, {
+        purchaseEntireCatalogMinPrice: 1500,
+      });
+      await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "catalogue" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const subscription = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id },
+        include: { profileSubscriptionTier: true },
+      });
+      assert.ok(subscription, "buyer should be subscribed to the artist");
+      assert.equal(subscription?.profileSubscriptionTier.profileId, artist.id);
+    });
+
+    it("should return 404 when the artist does not exist for a catalogue purchase", async () => {
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: 999999,
+          items: [{ type: "catalogue" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
     it("should return 200 with clientSecret for an online merch purchase", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",

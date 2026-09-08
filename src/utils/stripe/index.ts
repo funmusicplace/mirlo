@@ -460,6 +460,7 @@ type SessionMetaData = {
     | "tip"
     | "track"
     | "artistCatalogue"
+    | "catalogue"
     | "fundraiserPledge";
 };
 
@@ -1384,6 +1385,13 @@ export const completePurchaseFromIntent = async (
       accountId,
       platformCurrencyValue
     );
+  } else if (purchaseType === "catalogue" && artistId) {
+    await handleCataloguePurchase(
+      Number(actualUserId),
+      Number(artistId),
+      sessionAdapter,
+      platformCurrencyValue
+    );
   }
 };
 
@@ -1417,7 +1425,8 @@ export const handlePaymentIntentSucceeded = async (
     purchaseType !== "trackGroup" &&
     purchaseType !== "track" &&
     purchaseType !== "tip" &&
-    purchaseType !== "merch"
+    purchaseType !== "merch" &&
+    purchaseType !== "catalogue"
   ) {
     logger.info(
       `payment_intent.succeeded: ${intent.id} has no recognized one-time purchaseType (got "${purchaseType}"), skipping`

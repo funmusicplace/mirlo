@@ -447,7 +447,8 @@ export const handleTrackGroupPurchase = async (
 export const handleCataloguePurchase = async (
   userId: number,
   artistId: number,
-  session?: Stripe.Checkout.Session
+  session?: Stripe.Checkout.Session,
+  platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   try {
     const { applicationUrl } = await getClient();
@@ -482,9 +483,10 @@ export const handleCataloguePurchase = async (
         userId: Number(userId),
         amount: pricePaid,
         currency: currencyPaid,
-        platformCut: paymentProcessorFee ?? null,
+        platformCut: applicationFee ?? null,
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
+        ...withPlatformCurrency(platformCurrencyValue),
         paymentStatus: "COMPLETED",
       },
     });

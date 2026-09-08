@@ -2,16 +2,23 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { InputEl } from "components/common/Input";
 import { moneyDisplay } from "components/common/Money";
+import PurchaseModal from "components/common/Purchase/PurchaseModal";
+import { usePurchase } from "components/common/Purchase/usePurchase";
 import { queryCataloguePrice } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import api from "services/api";
+import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
+import { buildCheckoutCompletePath } from "utils/artist";
 
 const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const [loadingStripe, setLoadingStripe] = React.useState(false);
+  const { user } = useAuthContext();
+  const navigate = useNavigate();
+  const { checkout, isLoading, startPurchase, reset } = usePurchase();
   const [isEnteringCustomAmount, setIsEnteringCustomAmount] =
     React.useState(false);
+  const [email, setEmail] = React.useState("");
   const { data } = useQuery(queryCataloguePrice({ artistId: artist.id }));
   const floorPrice = data?.price ?? 0;
   const [amount, setAmount] = React.useState((floorPrice / 100).toString());
@@ -20,21 +27,19 @@ const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
     setAmount((floorPrice / 100).toString());
   }, [floorPrice]);
 
+  const catalogueCompletePath = buildCheckoutCompletePath(artist, {
+    purchaseType: "catalogue",
+  });
+
   const purchaseCatalogue = React.useCallback(
     async (price: number) => {
-      try {
-        setLoadingStripe(true);
-        const response = await api.post<{}, { redirectUrl: string }>(
-          `artists/${artist.id}/purchaseCatalogue`,
-          { price }
-        );
-        window.location.assign(response.redirectUrl);
-      } catch (error) {
-        console.error("Error purchasing catalogue:", error);
-        setLoadingStripe(false);
-      }
+      await startPurchase({
+        artistId: artist.id,
+        items: [{ type: "catalogue", price: String(price) }],
+        email: user ? undefined : email,
+      });
     },
-    [artist]
+    [artist, user, email, startPurchase]
   );
 
   if (!artist.user || !floorPrice) {
@@ -45,11 +50,19 @@ const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <div className="flex flex-col items-center gap-2">
+      {!user && (
+        <InputEl
+          type="email"
+          placeholder={t("email") ?? ""}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      )}
       <ArtistButton
         size="big"
         wrap
         type="button"
-        isLoading={loadingStripe}
+        isLoading={isLoading}
         onClick={() => purchaseCatalogue(floorPrice)}
       >
         {t("purchaseEntireCatalogueAtLeast", {
@@ -77,7 +90,7 @@ const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
           <ArtistButton
             type="button"
             size="compact"
-            isLoading={loadingStripe}
+            isLoading={isLoading}
             onClick={() =>
               purchaseCatalogue(
                 Math.max(Math.round(Number(amount) * 100), floorPrice)
@@ -90,6 +103,18 @@ const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
           </ArtistButton>
         </div>
       )}
+      <PurchaseModal
+        open={!!checkout}
+        onClose={reset}
+        clientSecret={checkout?.clientSecret}
+        stripeAccountId={checkout?.stripeAccountId}
+        returnUrl={`${window.location.origin}${catalogueCompletePath}`}
+        onSuccess={() => navigate(catalogueCompletePath)}
+        title={t("purchaseEntireCatalogue", {
+          amount: moneyDisplay({ amount: Number(amount), currency }),
+        })}
+        buttonLabel={t("completePayment")}
+      />
     </div>
   );
 };

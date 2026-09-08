@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import Box from "components/common/Box";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ItemTransactionCard from "components/common/ItemTransactionCard";
@@ -15,8 +16,6 @@ import {
   getReleaseUrl,
   getTrackUrl,
 } from "utils/artist";
-
-import Box from "components/common/Box";
 
 function Index() {
   const { t } = useTranslation("translation", {
@@ -56,7 +55,12 @@ function Index() {
     return <FullPageLoadingSpinner />;
   }
 
-  const isSimpleMessage = purchaseType === "tip" || purchaseType === "follow";
+  const isSimpleMessage =
+    purchaseType === "tip" ||
+    purchaseType === "follow" ||
+    purchaseType === "catalogue";
+  const showViewInCollection =
+    purchaseType !== "tip" && purchaseType !== "follow";
   const headerMessage =
     purchaseType === "follow"
       ? t("successfullyFollowedArtist")
@@ -124,7 +128,7 @@ function Index() {
         )}
 
         <div className="flex flex-wrap gap-6 justify-center mt-4 text-sm">
-          {!isSimpleMessage && (
+          {showViewInCollection && (
             <Link to="/profile/collection">{t("viewInCollection")} →</Link>
           )}
           <Link to={getArtistUrl(artist)}>{t("backToArtist")}</Link>

@@ -17,6 +17,7 @@ export type PurchaseItem =
       message?: string;
     }
   | { type: "tip"; amount: number; message?: string }
+  | { type: "catalogue"; price?: string; message?: string }
   | {
       type: "subscription";
       tierId: number;
