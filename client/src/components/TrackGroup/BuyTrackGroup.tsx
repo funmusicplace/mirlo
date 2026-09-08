@@ -172,7 +172,7 @@ const BuyTrackGroup: React.FC<{
               {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
             </p>
           )}
-          <AddToCollection trackGroup={trackGroup} />{" "}
+          <AddToCollection trackGroup={trackGroup} track={track} />{" "}
           {user && <p className="mt-2">{t("addToCollectionDescription")}</p>}
         </div>
       );
@@ -318,7 +318,7 @@ const BuyTrackGroup: React.FC<{
                 {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
               </p>
             )}
-            <AddToCollection trackGroup={trackGroup} />{" "}
+            <AddToCollection trackGroup={trackGroup} track={track} />{" "}
             {user && <p className="mt-2">{t("addToCollectionDescription")}</p>}
           </div>
         )}

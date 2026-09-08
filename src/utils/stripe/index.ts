@@ -30,7 +30,7 @@ import {
 } from "../handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "../images";
 import { decrementMerchStock } from "../merch";
-import { finalCoversBucket, finalMerchImageBucket } from "../minio";
+import { finalMerchImageBucket } from "../minio";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -314,82 +314,6 @@ export const findOrCreateStripeCustomer = async (
   );
 
   return customer;
-};
-
-export const createTrackGroupStripeProduct = async (
-  trackGroup: Prisma.TrackGroupGetPayload<{
-    include: { profile: true; cover: true };
-  }>,
-  stripeAccountId: string
-) => {
-  return createOrReuseStripeProduct({
-    existingProductKey: trackGroup.stripeProductKey,
-    stripeAccountId,
-    buildCreateParams: async () => ({
-      name: `${trackGroup.title} by ${trackGroup.profile.name}`,
-      description: await buildProductDescription(
-        trackGroup.title,
-        trackGroup.profile.name,
-        trackGroup.about
-      ),
-      tax_code: "txcd_10401100",
-      images: trackGroup.cover
-        ? [
-            generateFullStaticImageUrl(
-              trackGroup.cover?.url[4],
-              finalCoversBucket
-            ),
-          ]
-        : [],
-    }),
-    persistProductKey: (productKey) =>
-      prisma.trackGroup.update({
-        where: { id: trackGroup.id },
-        data: { stripeProductKey: productKey },
-      }),
-  });
-};
-
-export const createTrackStripeProduct = async (
-  track: Prisma.TrackGetPayload<{
-    include: {
-      trackGroup: { include: { profile: true; cover: true } };
-      trackArtists: true;
-    };
-  }>,
-  stripeAccountId: string
-) => {
-  const trackArtist =
-    track.trackArtists?.length > 0
-      ? track.trackArtists.map((a) => a.artistName).join(", ")
-      : track.trackGroup.profile.name;
-
-  return createOrReuseStripeProduct({
-    existingProductKey: track.stripeProductKey,
-    stripeAccountId,
-    buildCreateParams: async () => ({
-      name: `${track.title} by ${trackArtist}`,
-      description: await buildProductDescription(
-        track.title,
-        trackArtist,
-        track.description
-      ),
-      tax_code: "txcd_10401100",
-      images: track.trackGroup.cover
-        ? [
-            generateFullStaticImageUrl(
-              track.trackGroup.cover?.url[4],
-              finalCoversBucket
-            ),
-          ]
-        : [],
-    }),
-    persistProductKey: (productKey) =>
-      prisma.track.update({
-        where: { id: track.id },
-        data: { stripeProductKey: productKey },
-      }),
-  });
 };
 
 export const createSubscriptionStripeProduct = async (

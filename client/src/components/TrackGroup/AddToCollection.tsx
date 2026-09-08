@@ -1,11 +1,11 @@
 import { css } from "@emotion/css";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { FixedButton } from "components/common/FixedButton";
+import { usePurchase } from "components/common/Purchase/usePurchase";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { IoAddSharp } from "react-icons/io5";
-import { Link, useNavigate } from "react-router-dom";
-import api from "services/api";
+import { Link } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -13,29 +13,33 @@ import { bp } from "../../constants";
 
 const AddToCollection: React.FC<{
   trackGroup: TrackGroup;
+  track?: Track;
   fixed?: boolean;
-}> = ({ trackGroup, fixed }) => {
+}> = ({ trackGroup, track, fixed }) => {
   const snackbar = useSnackbar();
-  const navigate = useNavigate();
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const isLoggedOut = !user;
+  const { isLoading, startPurchase } = usePurchase();
 
   const purchaseAlbum = React.useCallback(async () => {
     try {
-      const response = await api.post<{}, { redirectUrl: string }>(
-        `trackGroups/${trackGroup.id}/purchase`,
-        {
-          price: 0,
-        }
-      );
-      navigate(response.redirectUrl);
+      await startPurchase({
+        artistId: trackGroup.artistId ?? trackGroup.artist.id,
+        items: [
+          {
+            type: track ? "track" : "trackGroup",
+            id: track ? track.id : trackGroup.id,
+            price: "0",
+          },
+        ],
+      });
       snackbar(t("success"), { type: "success" });
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
     }
-  }, [navigate, snackbar, t, trackGroup.id]);
+  }, [snackbar, t, trackGroup, track, startPurchase]);
 
   return (
     <>
@@ -56,6 +60,7 @@ const AddToCollection: React.FC<{
           disabled={isLoggedOut}
           onClick={() => purchaseAlbum()}
           startIcon={<IoAddSharp />}
+          isLoading={isLoading}
         >
           {t("addToCollection")}
         </FixedButton>
@@ -64,6 +69,7 @@ const AddToCollection: React.FC<{
           variant="outlined"
           disabled={isLoggedOut}
           onClick={() => purchaseAlbum()}
+          isLoading={isLoading}
           className={css`
             font-size: 1rem !important;
 
