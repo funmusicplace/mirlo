@@ -1041,8 +1041,12 @@ export const handleInvoicePaid = async (
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
   if (typeof subscription === "string") {
-    const { paymentProcessorFee } = await getFeeDetailsFromInvoice(
+    const { paymentProcessorFee, intent } = await getFeeDetailsFromInvoice(
       invoice,
+      accountId
+    );
+    const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
+      intent,
       accountId
     );
 
@@ -1074,6 +1078,7 @@ export const handleInvoicePaid = async (
       billingReason: invoice.billing_reason,
       status: "COMPLETED",
       nextBillingDate,
+      platformCurrencyValue,
     });
   }
 };
