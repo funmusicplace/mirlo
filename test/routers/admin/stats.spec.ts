@@ -85,6 +85,9 @@ describe("admin/stats", () => {
       email: "artist@artist.com",
     });
     const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+    const { user: foreignBuyer } = await createUser({
+      email: "foreign-buyer@buyer.com",
+    });
     const artist = await createArtist(artistUser.id);
     const tier = await createTier(artist.id);
 
@@ -140,7 +143,7 @@ describe("admin/stats", () => {
     // Foreign-currency subscription charge, converted to USD
     const foreignSubTx = await prisma.userTransaction.create({
       data: {
-        userId: buyer.id,
+        userId: foreignBuyer.id,
         amount: 700,
         currency: "gbp",
         platformCurrency: "usd",
@@ -151,7 +154,7 @@ describe("admin/stats", () => {
     });
     const foreignSub = await prisma.profileUserSubscription.create({
       data: {
-        userId: buyer.id,
+        userId: foreignBuyer.id,
         profileSubscriptionTierId: tier.id,
         amount: 700,
       },
