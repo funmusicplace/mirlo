@@ -109,6 +109,8 @@ STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET=
 
 ```
 
+> **Note**: `STRIPE_KEY` You can also set the stripe key in the Admin settings once the instance is up. This is the preferred way of setting up Stripe in the app. that value lives in the database, takes precedence over `.env`, and is picked up immediately without restarting the API.
+
 If configuring manually, also create `client/.env` — the frontend bakes these
 values in at build time:
 

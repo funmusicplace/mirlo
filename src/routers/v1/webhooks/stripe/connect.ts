@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import logger from "../../../../logger";
 import {
+  getStripeWebhookConnectSigningSecret,
   handleAccountUpdate,
   handleCheckoutSession,
   handleInvoicePaid,
@@ -16,8 +17,6 @@ import {
   handleTerminalReaderActionSucceeded,
   handleTerminalReaderActionFailed,
 } from "../../../../utils/stripe/terminal";
-
-const { STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET } = process.env;
 
 // NOTE: if you are running Mirlo locally, the only way to get these
 // webhooks to be triggered is by running the stripe CLI. See the README
@@ -36,7 +35,7 @@ export default function () {
     const event = await verifyStripeSignature(
       req,
       res,
-      STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET
+      getStripeWebhookConnectSigningSecret()
     );
     logger.info(`stripe-connect: event for stripe account ${event.account}`);
 

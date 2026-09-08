@@ -106,7 +106,36 @@ The [step-by-step guide](./manual-install.md) is what `install.sh` automates
 you're not using Docker/Ubuntu and need to adapt the steps.
 
 > **Note**: for now you'll still need to do the Stripe set up steps described
-> in [Register Stripe Webhooks](#register-stripe-webhooks) below.
+> in [Set Up Stripe Connect](#set-up-stripe-connect) and
+> [Register Stripe Webhooks](#register-stripe-webhooks) below.
+
+## Set Up Stripe Connect
+
+Mirlo takes payments through [Stripe Connect](https://stripe.com/connect)
+rather than charging everything through one platform account. Each artist
+gets their own connected Stripe account, and purchases/subscriptions are
+charged directly against _that_ account (Mirlo takes an application fee on
+top). The main reason: with a connected account, tax reporting (1099s, VAT,
+etc.) is Stripe's and the artist's responsibility on their own account, not
+something the instance host has to handle on the artists' behalf.
+
+To enable this on a fresh Stripe account:
+
+1. In the [Stripe Dashboard](https://dashboard.stripe.com), go to
+   **Connect → Settings** and enable Connect for your platform account (if
+   it isn't already). Choose **Standard accounts** — that's the type Mirlo
+   creates (`src/routers/v1/users/{userId}/stripe/connect.ts`); it lets each
+   artist manage their own Stripe account directly, including their own tax
+   forms and payout schedule.
+2. Get your platform's **secret key** from **Developers → API keys** and set in Admin Settings.
+3. That's it for the host side — there's no manual per-artist setup. Once
+   Stripe is configured, each artist connects their own account from their
+   Mirlo dashboard, which redirects them through Stripe's own hosted
+   onboarding (`GET /v1/users/:userId/stripe/connect` →
+   `stripe.accountLinks.create`) and back again when done.
+
+Next, register the webhook endpoint that keeps Mirlo in sync with events on
+those connected accounts:
 
 ## Register Stripe Webhooks
 

@@ -54,26 +54,42 @@ if (process.env.NODE_ENV === "test") {
   };
 }
 
-let stripeClient = new Stripe(process.env.STRIPE_KEY ?? "", stripeConfig);
+const envStripeKey = () => process.env.STRIPE_KEY ?? "";
+const envWebhookConnectSigningSecret = () =>
+  process.env.STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET ?? "";
+
+let stripeClient = new Stripe(envStripeKey(), stripeConfig);
+let webhookConnectSigningSecret = envWebhookConnectSigningSecret();
+
+type StripeSettings = {
+  stripe?: { key?: string; webhookConnectSigningSecret?: string };
+} | null;
 
 /**
- * If the user updates this through the Settings, we need to reload the client.
- * @returns Stripe key
+ * Update the stripe key or signing secret after the user updates it.
  */
 export const refreshStripeClient = async (): Promise<string> => {
   try {
     const row = await prisma.settings.findFirst();
-    const dbKey = (row?.settings as { stripe?: { key?: string } } | null)
-      ?.stripe?.key;
+    const dbStripe = (row?.settings as StripeSettings)?.stripe;
     const apiKey =
-      dbKey && dbKey.trim() ? dbKey : (process.env.STRIPE_KEY ?? "");
+      dbStripe?.key && dbStripe.key.trim() ? dbStripe.key : envStripeKey();
+    webhookConnectSigningSecret =
+      dbStripe?.webhookConnectSigningSecret &&
+      dbStripe.webhookConnectSigningSecret.trim()
+        ? dbStripe.webhookConnectSigningSecret
+        : envWebhookConnectSigningSecret();
     stripeClient = new Stripe(apiKey, stripeConfig);
     return apiKey;
   } catch (e) {
     logger.error(`refreshStripeClient: failed to load key from settings`, e);
-    return process.env.STRIPE_KEY ?? "";
+    webhookConnectSigningSecret = envWebhookConnectSigningSecret();
+    return envStripeKey();
   }
 };
+
+export const getStripeWebhookConnectSigningSecret = () =>
+  webhookConnectSigningSecret;
 
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
