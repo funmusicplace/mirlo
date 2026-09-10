@@ -155,6 +155,15 @@ const Index: React.FC = () => {
                 </option>
               ))}
             </SelectEl>
+            <small>
+              <a
+                href="https://docs.mirlo.space/maintaining/translation#how-to-get-started"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("helpTranslate")}
+              </a>
+            </small>
           </FormComponent>
           <CanCreateArtists>
             <FormComponent>
