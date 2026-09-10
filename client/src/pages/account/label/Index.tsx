@@ -42,6 +42,7 @@ type Relationship = {
         [key: number]: string;
       };
     };
+    _count?: { trackGroups?: number };
   };
   isLabelApproved: boolean;
   isArtistApproved: boolean;
@@ -149,7 +150,9 @@ const RelationshipsTable: React.FC = () => {
 
   return (
     <>
-      <h3>{t("artistsOnYourRoster")}</h3>
+      <h3>
+        {t("artistsOnYourRoster", { count: orderedRelationships.length })}
+      </h3>
       <div className="my-8 space-y-1 divide-y-1 divide-(--mi-darken-background-color)">
         {orderedRelationships.length === 0 ? (
           <div className="text-center py-4 bg-(--mi-darken-background-color) rounded">
@@ -187,6 +190,11 @@ const RelationshipsTable: React.FC = () => {
                       <div className="flex-1">
                         <p className="font-semibold">
                           {relationship.artist.name}
+                        </p>
+                        <p className="text-sm opacity-70">
+                          {t("releaseCount", {
+                            count: relationship.artist._count?.trackGroups ?? 0,
+                          })}
                         </p>
                       </div>
                     </div>

@@ -4,6 +4,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
+import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import {
   queryManagedArtistMerch,
   queryManagedArtistTrackGroups,
@@ -16,8 +17,6 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { getManageReleaseUrl } from "utils/artist";
-
-import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 
 const centsToDollarString = (cents?: number | null) => {
   if (cents === undefined || cents === null) return "";
@@ -203,12 +202,12 @@ const Index: React.FC = () => {
       </p>
 
       <section className="flex flex-col gap-2 mt-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("releases")}</h2>
-          {!!releases.length && (
-            <small>{t("totalCount", { count: releases.length })}</small>
-          )}
-        </div>
+        <h2 className="text-lg font-semibold">
+          {t("headingWithCount", {
+            heading: t("releases"),
+            count: releases.length,
+          })}
+        </h2>
         {isLoadingReleases ? (
           <LoadingBlocks />
         ) : releases.length === 0 ? (
