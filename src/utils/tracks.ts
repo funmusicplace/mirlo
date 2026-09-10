@@ -190,9 +190,8 @@ const addTrackMetadataTags = (
   addMetadataTag(processor, "MusicBrainz Disc Id", common.musicbrainz_discid);
 };
 
-const addTrackArtistRoleTags = (
-  processor: ffmpeg.FfmpegCommand,
-  trackArtists: TrackArtist[],
+export const resolveTrackArtistName = (
+  trackArtists: Pick<TrackArtist, "artistName" | "isCoAuthor" | "order">[],
   fallbackArtistName: string
 ) => {
   const sortedArtists = [...(trackArtists ?? [])].sort(
@@ -207,13 +206,27 @@ const addTrackArtistRoleTags = (
     .map((artist) => artist.artistName)
     .filter(Boolean);
 
-  const artistField =
-    coAuthors.length > 0
-      ? coAuthors.join(", ")
-      : allArtistNames.length > 0
-        ? allArtistNames.join(", ")
-        : fallbackArtistName;
-  addMetadataTag(processor, "artist", artistField);
+  return coAuthors.length > 0
+    ? coAuthors.join(", ")
+    : allArtistNames.length > 0
+      ? allArtistNames.join(", ")
+      : fallbackArtistName;
+};
+
+const addTrackArtistRoleTags = (
+  processor: ffmpeg.FfmpegCommand,
+  trackArtists: TrackArtist[],
+  fallbackArtistName: string
+) => {
+  const sortedArtists = [...(trackArtists ?? [])].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0)
+  );
+
+  addMetadataTag(
+    processor,
+    "artist",
+    resolveTrackArtistName(trackArtists, fallbackArtistName)
+  );
 
   const roleEntries = sortedArtists
     .filter((artist) => artist.artistName)

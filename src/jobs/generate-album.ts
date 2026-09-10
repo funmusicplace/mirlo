@@ -20,7 +20,7 @@ import {
   getCoverBuffer,
   uploadZip,
 } from "../utils/minio";
-import { convertAudioToFormat } from "../utils/tracks";
+import { convertAudioToFormat, resolveTrackArtistName } from "../utils/tracks";
 
 import { logger } from "./queue-worker";
 
@@ -113,7 +113,15 @@ const downloadTracks = async ({
     );
 
     await new Promise((resolve, reject) => {
-      const trackFileName = `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`;
+      const trackArtistName = resolveTrackArtistName(
+        track.trackArtists ?? [],
+        artist.name
+      );
+      const namePrefix =
+        trackArtistName && trackArtistName !== artist.name
+          ? `${filenamify(trackArtistName)} - `
+          : "";
+      const trackFileName = `${tempFolder}/${track.order ?? i}-${namePrefix}${filenamify(track.title ?? "")}`;
 
       if (track.audio) {
         logger.info(
