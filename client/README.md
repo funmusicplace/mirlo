@@ -2,7 +2,7 @@
 
 ## Translation
 
-You'll need `REACT_APP_TRANSIFEX_TOKEN` set.
+You'll need `VITE_TRANSIFEX_TOKEN` set.
 
 Documentation here: https://developers.transifex.com/docs/i18next
 
