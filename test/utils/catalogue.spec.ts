@@ -46,6 +46,17 @@ describe("calculateCatalogueFloorPrice", () => {
     assert.equal(floor, 1500);
   });
 
+  it("defaults to the full summed minPrice when no discount is configured", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const artist = await createArtist(user.id);
+
+    await createTrackGroup(artist.id, { title: "Album One", minPrice: 1000 });
+    await createTrackGroup(artist.id, { title: "Album Two", minPrice: 2000 });
+
+    const floor = await calculateCatalogueFloorPrice(artist);
+    assert.equal(floor, 3000);
+  });
+
   it("excludes releases that aren't currently purchasable from the percentage total", async () => {
     const { user } = await createUser({ email: "artist@artist.com" });
     const artist = await createArtist(user.id, {

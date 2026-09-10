@@ -147,6 +147,7 @@ const apiDoc = {
                   "track",
                   "merch",
                   "tip",
+                  "catalogue",
                   "subscription",
                   "fundraiserPledge",
                 ],
@@ -172,7 +173,7 @@ const apiDoc = {
               price: {
                 type: "string",
                 description:
-                  "Price in cents — online trackGroup/fundraiserPledge only; allows pay-what-you-want above the minimum",
+                  "Price in cents — online trackGroup/fundraiserPledge/catalogue only; allows pay-what-you-want above the minimum",
               },
               quantity: {
                 type: "number",

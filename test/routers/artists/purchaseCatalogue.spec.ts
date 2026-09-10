@@ -40,7 +40,7 @@ describe("GET /v1/artists/{id}/purchaseCatalogue", () => {
     }
   });
 
-  it("returns null when the artist doesn't offer entire-catalogue purchases", async () => {
+  it("returns 0 when the artist has no purchasable releases or discount configured", async () => {
     const { user: artistUser } = await createUser({
       email: "artist@test.com",
     });
@@ -51,15 +51,27 @@ describe("GET /v1/artists/{id}/purchaseCatalogue", () => {
     );
 
     assert.equal(response.statusCode, 200);
-    assert.equal(response.body.result.price, null);
+    assert.equal(response.body.result.price, 0);
+  });
+
+  it("defaults to the summed minPrice of the catalogue when no discount is configured", async () => {
+    const { user: artistUser } = await createUser({
+      email: "artist@test.com",
+    });
+    const artist = await createArtist(artistUser.id);
+    await createTrackGroup(artist.id, { title: "Album One", minPrice: 1000 });
+    await createTrackGroup(artist.id, { title: "Album Two", minPrice: 2000 });
+
+    const response = await requestApp.get(
+      `artists/${artist.id}/purchaseCatalogue`
+    );
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.price, 3000);
   });
 
   it("returns the live percentage-based floor", async () => {
     const artist = await createArtistWithPercentageCatalogue();
-    await prisma.profile.update({
-      where: { id: artist.id },
-      data: { allowPurchaseEntireCatalog: true },
-    });
 
     const response = await requestApp.get(
       `artists/${artist.id}/purchaseCatalogue`
@@ -74,7 +86,6 @@ describe("GET /v1/artists/{id}/purchaseCatalogue", () => {
       email: "artist@test.com",
     });
     const artist = await createArtist(artistUser.id, {
-      allowPurchaseEntireCatalog: true,
       purchaseEntireCatalogMinPrice: 800,
     });
 

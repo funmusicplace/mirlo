@@ -1,22 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
+import Box from "components/common/Box";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
+import EmailVerification from "components/common/EmailVerification";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ItemTransactionCard from "components/common/ItemTransactionCard";
 import { WidthWrapper } from "components/common/WidthContainer";
 import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
 import RecommendedAlbums from "components/TrackGroup/RecommendedAlbums";
 import { queryArtist, queryMerch, queryTrackGroup } from "queries";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheck } from "react-icons/fa";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 import {
   getArtistUrl,
   getMerchUrl,
   getReleaseUrl,
   getTrackUrl,
 } from "utils/artist";
-
-import Box from "components/common/Box";
 
 function Index() {
   const { t } = useTranslation("translation", {
@@ -27,12 +29,15 @@ function Index() {
   });
 
   const { artistId } = useParams();
+  const { user } = useAuthContext();
 
   const [searchParams] = useSearchParams();
   const trackGroupId = searchParams.get("trackGroupId");
   const trackId = searchParams.get("trackId");
   const merchId = searchParams.get("merchId");
   const purchaseType = searchParams.get("purchaseType");
+  const buyerEmail = searchParams.get("email");
+  const [verifiedEmail, setVerifiedEmail] = React.useState<string | null>(null);
 
   const { data: trackGroup } = useQuery(
     queryTrackGroup({ albumSlug: trackGroupId })
@@ -56,7 +61,13 @@ function Index() {
     return <FullPageLoadingSpinner />;
   }
 
-  const isSimpleMessage = purchaseType === "tip" || purchaseType === "follow";
+  const isSimpleMessage =
+    purchaseType === "tip" ||
+    purchaseType === "follow" ||
+    purchaseType === "catalogue";
+  const hasSession = !!user || !!verifiedEmail;
+  const showViewInCollection =
+    hasSession && purchaseType !== "tip" && purchaseType !== "follow";
   const headerMessage =
     purchaseType === "follow"
       ? t("successfullyFollowedArtist")
@@ -107,7 +118,24 @@ function Index() {
         artistName={artist.name}
         artistUrl={getArtistUrl(artist)}
       >
-        {(purchaseType === "trackGroup" || purchaseType === "track") &&
+        {!hasSession && !isSimpleMessage && (
+          <div className="mt-4 w-full max-w-md flex flex-col gap-3">
+            <Box variant="info">
+              {buyerEmail
+                ? t("downloadLinkEmailedTo", { email: buyerEmail })
+                : t("downloadLinkEmailed")}
+            </Box>
+            <p className="text-sm">{t("orVerifyToDownloadHere")}</p>
+            <EmailVerification
+              setVerifiedEmail={setVerifiedEmail}
+              initialEmail={buyerEmail ?? undefined}
+              smallText="verifyToDownloadHint"
+            />
+          </div>
+        )}
+
+        {hasSession &&
+          (purchaseType === "trackGroup" || purchaseType === "track") &&
           trackGroup && (
             <div className="mt-4">
               <DownloadAlbumButton
@@ -117,14 +145,14 @@ function Index() {
             </div>
           )}
 
-        {purchaseType === "merch" && merch && (
+        {hasSession && purchaseType === "merch" && merch && (
           <div className="mt-4 w-full max-w-md">
             <MerchDownloadableContent merch={merch} artist={artist} />
           </div>
         )}
 
         <div className="flex flex-wrap gap-6 justify-center mt-4 text-sm">
-          {!isSimpleMessage && (
+          {showViewInCollection && (
             <Link to="/profile/collection">{t("viewInCollection")} →</Link>
           )}
           <Link to={getArtistUrl(artist)}>{t("backToArtist")}</Link>

@@ -6,6 +6,7 @@ import {
   userLoggedInWithoutRedirect,
 } from "../../../auth/passport";
 import { subscribeUserToArtist } from "../../../utils/artist";
+import { calculateCatalogueFloorPrice } from "../../../utils/catalogue";
 import { buildCheckoutRedirectUrl, originOf } from "../../../utils/clientUrl";
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
@@ -45,6 +46,7 @@ type PurchaseItem =
       message?: string;
     }
   | { type: "tip"; amount: number; message?: string }
+  | { type: "catalogue"; price?: string; message?: string }
   | {
       type: "subscription";
       tierId: number;
@@ -285,14 +287,6 @@ export default function () {
         );
       }
 
-      if (!readerId && !loggedInUser && !email && !hosted) {
-        throw new AppError({
-          httpCode: 400,
-          description:
-            "email is required for a purchase without a logged-in user",
-        });
-      }
-
       const hasSubscription = items.some((i) => i.type === "subscription");
       if (hasSubscription && items.length > 1) {
         throw new AppError({
@@ -531,6 +525,40 @@ export default function () {
             amount: item.amount,
             message: item.message,
           });
+        } else if (item.type === "catalogue") {
+          const artist = await prisma.profile.findFirst({
+            where: { id: artistId },
+            include: { user: true, subscriptionTiers: true },
+          });
+          if (!artist) {
+            throw new AppError({
+              httpCode: 404,
+              description: `Artist ${artistId} not found`,
+            });
+          }
+
+          if (loggedInUser) {
+            await subscribeUserToArtist(artist, loggedInUser);
+          }
+
+          const floorPrice = await calculateCatalogueFloorPrice(artist);
+          const { isPriceZero, priceNumber } = determinePrice(
+            item.price,
+            floorPrice
+          );
+          if (isPriceZero) {
+            throw new AppError({
+              httpCode: 400,
+              description: "You can't purchase a catalogue for free",
+            });
+          }
+
+          resolvedItems.push({
+            type: "catalogue",
+            quantity: 1,
+            amount: priceNumber,
+            message: item.message,
+          });
         }
       }
 
@@ -581,7 +609,10 @@ export default function () {
 
   POST.apiDoc = {
     summary: "Initiate a purchase",
-    description: "Unified purchase endpoint for all item types and channels. ",
+    description:
+      "Unified purchase endpoint for all item types and channels. " +
+      "The buyer's identity is optional here: pass `email` if you already " +
+      "know it, otherwise attach it before confirming via PUT /purchase/:id.",
     parameters: [
       {
         in: "body",

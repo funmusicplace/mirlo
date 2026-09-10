@@ -8,6 +8,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
 import api from "services/api";
@@ -16,10 +17,22 @@ interface StatsData {
   userSignupsByWeek: Array<{ week: string; count: number }>;
   artistSignupsByWeek: Array<{ week: string; count: number }>;
   transactionsByWeek: Array<{ week: string; count: number }>;
-  transactionAmountByWeek: Array<{
+  usdRevenueByWeek: Array<{
+    week: string;
+    purchasesUsdCents: number;
+    subscriptionsUsdCents: number;
+    purchasesConvertedUsdCents: number;
+    subscriptionsConvertedUsdCents: number;
+  }>;
+  transactionCountByWeek: Array<{
     week: string;
     currency: string;
-    totalAmountCents: number;
+    count: number;
+  }>;
+  platformRevenueByWeek: Array<{
+    week: string;
+    platformCutUsdCents: number;
+    platformCutConvertedUsdCents: number;
   }>;
   avgMonthlyPlays: number;
   avgMonthlyActiveUsers: number;
@@ -101,26 +114,40 @@ export const Index: React.FC = () => {
       weekLabel: formatWeekLabel(item.week),
     }));
 
-  const transactionAmountByCurrency = stats.transactionAmountByWeek.reduce<
-    Record<
-      string,
-      Array<{ week: string; totalAmount: number; weekLabel: string }>
-    >
+  const usdRevenueChartData = stats.usdRevenueByWeek.map((item) => ({
+    weekLabel: formatWeekLabel(item.week),
+    purchases: item.purchasesUsdCents / 100,
+    subscriptions: item.subscriptionsUsdCents / 100,
+    purchasesConverted: item.purchasesConvertedUsdCents / 100,
+    subscriptionsConverted: item.subscriptionsConvertedUsdCents / 100,
+  }));
+
+  const transactionCountByWeek = stats.transactionCountByWeek.reduce<
+    Record<string, Record<string, number | string>>
   >((result, item) => {
-    if (!result[item.currency]) {
-      result[item.currency] = [];
+    if (!result[item.week]) {
+      result[item.week] = {
+        week: item.week,
+        weekLabel: formatWeekLabel(item.week),
+      };
     }
-
-    result[item.currency].push({
-      week: item.week,
-      totalAmount: item.totalAmountCents / 100,
-      weekLabel: formatWeekLabel(item.week),
-    });
-
+    result[item.week][item.currency] = item.count;
     return result;
   }, {});
 
-  const transactionCurrencies = Object.keys(transactionAmountByCurrency).sort();
+  const transactionCountChartData = Object.values(transactionCountByWeek).sort(
+    (a, b) => (a.week as string).localeCompare(b.week as string)
+  );
+
+  const transactionCurrencies = Array.from(
+    new Set(stats.transactionCountByWeek.map((item) => item.currency))
+  ).sort();
+
+  const platformRevenueChartData = stats.platformRevenueByWeek.map((item) => ({
+    weekLabel: formatWeekLabel(item.week),
+    platformCut: item.platformCutUsdCents / 100,
+    platformCutConverted: item.platformCutConvertedUsdCents / 100,
+  }));
 
   return (
     <WidthContainer variant="big" justify="center" className="grow p-4">
@@ -190,29 +217,102 @@ export const Index: React.FC = () => {
           </ResponsiveContainer>
         </ChartContainer>
 
-        {transactionCurrencies.map((currency, index) => (
-          <ChartContainer
-            key={currency}
-            title={`Transaction Volume Per Week (${currency})`}
-          >
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={transactionAmountByCurrency[currency]}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="weekLabel" />
-                <YAxis
-                  tickFormatter={(value) =>
-                    moneyDisplay({ amount: Number(value), currency })
-                  }
-                />
-                <Tooltip
-                  formatter={(value) => [
-                    moneyDisplay({ amount: Number(value), currency }),
-                    "Volume",
-                  ]}
-                />
+        <ChartContainer title="USD Revenue Per Week">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={usdRevenueChartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="weekLabel" />
+              <YAxis
+                tickFormatter={(value) =>
+                  moneyDisplay({ amount: Number(value), currency: "usd" })
+                }
+              />
+              <Tooltip
+                formatter={(value) =>
+                  moneyDisplay({ amount: Number(value), currency: "usd" })
+                }
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="purchases"
+                name="Purchases"
+                stroke={transactionVolumeColors[0]}
+                dot={{ r: 4 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="subscriptions"
+                name="Subscriptions"
+                stroke={transactionVolumeColors[1]}
+                dot={{ r: 4 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="purchasesConverted"
+                name="Purchases (converted to USD)"
+                stroke={transactionVolumeColors[2]}
+                dot={{ r: 4 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="subscriptionsConverted"
+                name="Subscriptions (converted to USD)"
+                stroke={transactionVolumeColors[3]}
+                dot={{ r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+
+        <ChartContainer title="Platform Revenue Per Week">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={platformRevenueChartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="weekLabel" />
+              <YAxis
+                tickFormatter={(value) =>
+                  moneyDisplay({ amount: Number(value), currency: "usd" })
+                }
+              />
+              <Tooltip
+                formatter={(value) =>
+                  moneyDisplay({ amount: Number(value), currency: "usd" })
+                }
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="platformCut"
+                name="Platform cut (USD)"
+                stroke={transactionVolumeColors[0]}
+                dot={{ r: 4 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="platformCutConverted"
+                name="Platform cut (converted from foreign)"
+                stroke={transactionVolumeColors[2]}
+                dot={{ r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+
+        <ChartContainer title="Transaction Count Per Week by Currency">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={transactionCountChartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="weekLabel" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              {transactionCurrencies.map((currency, index) => (
                 <Line
+                  key={currency}
                   type="monotone"
-                  dataKey="totalAmount"
+                  dataKey={currency}
+                  name={currency.toUpperCase()}
                   stroke={
                     transactionVolumeColors[
                       index % transactionVolumeColors.length
@@ -220,10 +320,10 @@ export const Index: React.FC = () => {
                   }
                   dot={{ r: 4 }}
                 />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        ))}
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartContainer>
       </div>
     </WidthContainer>
   );

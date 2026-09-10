@@ -74,16 +74,11 @@ const TRUNCATE_TABLES_SQL = `
 `;
 
 export const clearTables = async () => {
-  // Single TRUNCATE replaces ~40 sequential DELETE statements that were
-  // running per test and occasionally exceeding mocha's hook timeout
-  // under CI load. CASCADE handles FK ordering so we don't have to.
-  // Retry with a lock timeout so we don't hang forever when the API
-  // container holds row-level locks during parallel HTTP traffic.
-  const maxAttempts = 5;
+  const maxAttempts = 3;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await prisma.$transaction([
-        prisma.$executeRawUnsafe(`SET LOCAL lock_timeout = '4000'`),
+        prisma.$executeRawUnsafe(`SET LOCAL lock_timeout = '2000'`),
         prisma.$executeRawUnsafe(TRUNCATE_TABLES_SQL),
       ]);
       return;
@@ -145,7 +140,6 @@ export const createProfile = async (
       federatedStreamingOptInDate: data?.federatedStreamingOptInDate ?? null,
       federatedStreamingOptOutDate: data?.federatedStreamingOptOutDate ?? null,
       defaultPlatformFee: data?.defaultPlatformFee,
-      allowPurchaseEntireCatalog: data?.allowPurchaseEntireCatalog,
       purchaseEntireCatalogMinPrice: data?.purchaseEntireCatalogMinPrice,
       purchaseEntireCatalogPercentage: data?.purchaseEntireCatalogPercentage,
     },

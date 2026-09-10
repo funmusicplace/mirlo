@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 
-import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import { serializeUserTransaction } from "../../../../serializers/userTransaction";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
 
 const constructDateFilter = (
   sinceDate?: string,

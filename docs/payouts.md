@@ -177,6 +177,8 @@ To accept payments on Mirlo, Stripe requires:
 
 Stripe verifies this information, which typically takes less than 1 business day.
 
+> **Netherlands:** Because Mirlo uses Stripe's "Standard" Connect accounts (artists get full access to their own Stripe Dashboard), Dutch artists can't onboard as an unregistered individual—Stripe requires a business registered with the Dutch Chamber of Commerce (KvK number) for any account with full Dashboard access. Registering as a sole proprietor ("eenmanszaak") with the KVK is enough and costs about €85. **Brazil** has a comparable requirement (an active CNPJ business registration number); most other countries let you sign up as an individual/sole proprietor with no separate business registration step.
+
 ## Troubleshooting & Common Questions
 
 ### Why isn't my payout appearing?

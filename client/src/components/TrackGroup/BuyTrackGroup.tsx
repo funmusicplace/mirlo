@@ -6,7 +6,7 @@ import EmailVerification from "components/common/EmailVerification";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Money, { moneyDisplay } from "components/common/Money";
-import PurchaseElements from "components/common/Purchase/PurchaseElements";
+import PurchaseStep from "components/common/Purchase/PurchaseStep";
 import { usePurchase } from "components/common/Purchase/usePurchase";
 import TextArea from "components/common/TextArea";
 import { queryUserStripeStatus } from "queries";
@@ -25,7 +25,6 @@ import { testOwnership } from "./utils";
 
 interface FormData {
   chosenPrice: string;
-  userEmail: string;
   message?: string;
   consentToStoreData: boolean;
 }
@@ -73,24 +72,26 @@ const BuyTrackGroup: React.FC<{
     !!trackGroup.fundraiser?.isAllOrNothing &&
     (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
 
-  const checkoutCompletePath = buildCheckoutCompletePath(trackGroup.artist, {
-    purchaseType: track ? "track" : "trackGroup",
-    trackGroupId: trackGroup.id.toString(),
-    ...(track && { trackId: track.id.toString() }),
-  });
+  const checkoutCompletePath = (buyerEmail?: string) =>
+    buildCheckoutCompletePath(trackGroup.artist, {
+      purchaseType: track ? "track" : "trackGroup",
+      trackGroupId: trackGroup.id.toString(),
+      ...(track && { trackId: track.id.toString() }),
+      ...(buyerEmail && { email: buyerEmail }),
+    });
 
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
       try {
         setStripeLoading(true);
-        const email = data.userEmail ?? verifiedEmail ?? "";
-        const alreadyOwns = await testOwnership(trackGroup.id, email);
-        const confirmed = alreadyOwns
-          ? window.confirm(t("albumExists") ?? "")
-          : true;
-
-        if (!confirmed) {
-          return;
+        if (user || verifiedEmail) {
+          const alreadyOwns = await testOwnership(
+            trackGroup.id,
+            verifiedEmail ?? ""
+          );
+          if (alreadyOwns && !window.confirm(t("albumExists") ?? "")) {
+            return;
+          }
         }
 
         if (isPledgeMode && trackGroup.fundraiserId) {
@@ -107,7 +108,7 @@ const BuyTrackGroup: React.FC<{
                 message: data.message,
               },
             ],
-            email: email || undefined,
+            email: verifiedEmail ?? undefined,
           });
           return;
         }
@@ -124,7 +125,6 @@ const BuyTrackGroup: React.FC<{
               message: data.message,
             },
           ],
-          email: email || undefined,
         });
       } catch (e) {
         snackbar(t("error"), { type: "warning" });
@@ -133,7 +133,16 @@ const BuyTrackGroup: React.FC<{
         setStripeLoading(false);
       }
     },
-    [snackbar, t, trackGroup, track, verifiedEmail, isPledgeMode, startPurchase]
+    [
+      snackbar,
+      t,
+      trackGroup,
+      track,
+      user,
+      verifiedEmail,
+      isPledgeMode,
+      startPurchase,
+    ]
   );
 
   let lessThanMin = false;
@@ -172,7 +181,7 @@ const BuyTrackGroup: React.FC<{
               {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
             </p>
           )}
-          <AddToCollection trackGroup={trackGroup} />{" "}
+          <AddToCollection trackGroup={trackGroup} track={track} />{" "}
           {user && <p className="mt-2">{t("addToCollectionDescription")}</p>}
         </div>
       );
@@ -186,144 +195,140 @@ const BuyTrackGroup: React.FC<{
     );
   }
 
-  if (checkout) {
-    return (
-      <div className={noPadding ? "" : "p-4"}>
-        <PurchaseElements
-          clientSecret={checkout.clientSecret}
-          stripeAccountId={checkout.stripeAccountId}
-          returnUrl={`${window.location.origin}${checkoutCompletePath}`}
-          onSuccess={() => {
-            onPurchaseComplete?.();
-            navigate(checkoutCompletePath);
-          }}
-          buttonLabel={t("completePayment")}
-        />
-      </div>
-    );
-  }
-
   return (
-    <FormProvider {...methods}>
-      <div className={noPadding ? "" : "p-4"}>
-        {isPledgeMode && (
-          <p
-            className={css`
-              margin-bottom: 1rem;
-            `}
-          >
-            {t("backThisProjectDescription")}
-          </p>
-        )}
-        {!!minPrice && minPrice > 0 && (
-          <p>
-            {t("price")} <Money amount={minPrice / 100} currency={currency} />,
-            or
-          </p>
-        )}
-        <form className="flex flex-col" onSubmit={handleSubmit(purchaseAlbum)}>
-          <FormComponent>
-            <PaymentInputElement
-              currency={currency}
-              platformPercent={trackGroup.platformPercent}
-              minPrice={minPrice}
-              artistName={trackGroup.artist?.name}
-              artistId={trackGroup.artistId}
-              isDigital
-            />
-          </FormComponent>
-
-          <FormComponent>
-            <label htmlFor="message">{t("leaveAComment")}</label>
-            <TextArea id="message" {...methods.register("message")} rows={2} />
-          </FormComponent>
-
-          {!user && (
-            <EmailVerification
-              setVerifiedEmail={setVerifiedEmail}
-              contextSubject={`${trackGroup.title}: ${trackGroup.artist?.name}`}
-            />
+    <div className={noPadding ? "" : "p-4"}>
+      <PurchaseStep
+        checkout={checkout}
+        returnUrl={`${window.location.origin}${checkoutCompletePath()}`}
+        onSuccess={(buyerEmail) => {
+          onPurchaseComplete?.();
+          navigate(checkoutCompletePath(buyerEmail));
+        }}
+        buttonLabel={t("completePayment")}
+      >
+        <FormProvider {...methods}>
+          {isPledgeMode && (
+            <p
+              className={css`
+                margin-bottom: 1rem;
+              `}
+            >
+              {t("backThisProjectDescription")}
+            </p>
           )}
+          {!!minPrice && minPrice > 0 && (
+            <p>
+              {t("price")} <Money amount={minPrice / 100} currency={currency} />
+              , or
+            </p>
+          )}
+          <form
+            className="flex flex-col"
+            onSubmit={handleSubmit(purchaseAlbum)}
+          >
+            <FormComponent>
+              <PaymentInputElement
+                currency={currency}
+                platformPercent={trackGroup.platformPercent}
+                minPrice={minPrice}
+                artistName={trackGroup.artist?.name}
+                artistId={trackGroup.artistId}
+                isDigital
+              />
+            </FormComponent>
 
-          {(user || verifiedEmail) && (
-            <>
-              {isPledgeMode && (
-                <FormComponent direction="row">
-                  <InputEl
-                    type="checkbox"
-                    id="consentToStoreData"
-                    {...methods.register("consentToStoreData")}
-                  />
-                  <label htmlFor="consentToStoreData">
-                    {t("consentToStoreData")}
-                  </label>
-                </FormComponent>
-              )}
-              <Button
-                size="big"
-                rounded
-                type="submit"
-                endIcon={<FaArrowRight />}
-                className="self-end"
-                isLoading={stripeLoading}
-                title={
-                  isDisabled
-                    ? user
-                      ? t("ensurePrice")
-                      : t("ensurePriceAndEmail")
-                    : ""
+            <FormComponent>
+              <label htmlFor="message">{t("leaveAComment")}</label>
+              <TextArea
+                id="message"
+                {...methods.register("message")}
+                rows={2}
+              />
+            </FormComponent>
+
+            {isPledgeMode && !user && (
+              <EmailVerification
+                setVerifiedEmail={setVerifiedEmail}
+                contextSubject={`${trackGroup.title}: ${trackGroup.artist?.name}`}
+              />
+            )}
+
+            {(!isPledgeMode || user || verifiedEmail) && (
+              <>
+                {isPledgeMode && (
+                  <FormComponent direction="row">
+                    <InputEl
+                      type="checkbox"
+                      id="consentToStoreData"
+                      {...methods.register("consentToStoreData")}
+                    />
+                    <label htmlFor="consentToStoreData">
+                      {t("consentToStoreData")}
+                    </label>
+                  </FormComponent>
+                )}
+                <Button
+                  size="big"
+                  rounded
+                  type="submit"
+                  endIcon={<FaArrowRight />}
+                  className="self-end"
+                  isLoading={stripeLoading}
+                  title={isDisabled ? t("ensurePrice") : ""}
+                  disabled={isDisabled}
+                >
+                  {t(purchaseText)}
+                </Button>
+              </>
+            )}
+
+            <div
+              className={css`
+                margin-top: 1rem;
+
+                small {
+                  display: block;
+                  margin-bottom: 0.5rem;
                 }
-                disabled={isDisabled}
-              >
-                {t(purchaseText)}
-              </Button>
+              `}
+            >
+              <small>{t("artistCheckoutPage")}</small>
+
+              <small>{t("downloadDisclaimer")}</small>
+            </div>
+          </form>
+          {!trackGroup.isPreorder && (
+            <>
+              {!!minPrice && lessThanMin && (
+                <strong>
+                  {t("lessThanMin", {
+                    minPrice: moneyDisplay({
+                      amount: minPrice / 100,
+                      currency: trackGroup.artist?.user?.currency ?? "usd",
+                    }),
+                    artistName: trackGroup.artist?.name,
+                  })}
+                </strong>
+              )}
             </>
           )}
-
-          <div
-            className={css`
-              margin-top: 1rem;
-
-              small {
-                display: block;
-                margin-bottom: 0.5rem;
-              }
-            `}
-          >
-            <small>{t("artistCheckoutPage")}</small>
-
-            <small>{t("downloadDisclaimer")}</small>
-          </div>
-        </form>
-        {!trackGroup.isPreorder && (
-          <>
-            {!!minPrice && lessThanMin && (
-              <strong>
-                {t("lessThanMin", {
-                  minPrice: moneyDisplay({
-                    amount: minPrice / 100,
-                    currency: trackGroup.artist?.user?.currency ?? "usd",
-                  }),
-                  artistName: trackGroup.artist?.name,
-                })}
-              </strong>
-            )}
-          </>
-        )}
-        <hr />
-        {(minPrice === 0 || minPrice === null) && (
-          <div className="mt-4">
-            {user && (
-              <p className="mb-2">
-                {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
-              </p>
-            )}
-            <AddToCollection trackGroup={trackGroup} />{" "}
-            {user && <p className="mt-2">{t("addToCollectionDescription")}</p>}
-          </div>
-        )}
-      </div>
-    </FormProvider>
+          <hr />
+          {(minPrice === 0 || minPrice === null) && (
+            <div className="mt-4">
+              {user && (
+                <p className="mb-2">
+                  {t("addAlbumToCollection", { title: trackGroup.title }) ?? ""}
+                </p>
+              )}
+              <AddToCollection trackGroup={trackGroup} track={track} />{" "}
+              {user && (
+                <p className="mt-2">{t("addToCollectionDescription")}</p>
+              )}
+            </div>
+          )}
+        </FormProvider>
+      </PurchaseStep>
+    </div>
   );
 };
 

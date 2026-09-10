@@ -8,7 +8,7 @@ import { resolvePayee } from "./payee";
 import { getPaymentProcessor } from "./PaymentProcessor";
 
 export type ResolvedItem = {
-  type: "trackGroup" | "track" | "merch" | "tip";
+  type: "trackGroup" | "track" | "merch" | "tip" | "catalogue";
   id?: string;
   quantity: number;
   amount: number;

@@ -35,7 +35,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       if (!subscriptionTier) {
@@ -111,7 +111,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       if (!subscriptionTier) {
@@ -152,24 +152,31 @@ export default function () {
         });
       }
 
-      const release = await prisma.subscriptionTierRelease.create({
-        data: {
-          tierId: Number(subscriptionTierId),
-          trackGroupId: Number(trackGroupId),
-        },
-        include: {
-          trackGroup: {
-            include: {
-              cover: true,
-              profile: true,
+      const release = await prisma.$transaction(async (tx) => {
+        const release = await tx.subscriptionTierRelease.create({
+          data: {
+            tierId: Number(subscriptionTierId),
+            trackGroupId: Number(trackGroupId),
+          },
+          include: {
+            trackGroup: {
+              include: {
+                cover: true,
+                profile: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      await grantReleaseToExistingSubscribers({
-        tierId: Number(subscriptionTierId),
-        trackGroupId: Number(trackGroupId),
+        await grantReleaseToExistingSubscribers(
+          {
+            tierId: Number(subscriptionTierId),
+            trackGroupId: Number(trackGroupId),
+          },
+          tx
+        );
+
+        return release;
       });
 
       res.status(201).json({
@@ -233,7 +240,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       if (!subscriptionTier) {

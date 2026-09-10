@@ -4,7 +4,7 @@ import { InputEl } from "components/common/Input";
 import MarkdownContent from "components/common/MarkdownContent";
 import Modal from "components/common/Modal";
 import { getCurrencySymbol } from "components/common/Money";
-import PurchaseModal from "components/common/Purchase/PurchaseModal";
+import PurchaseStep from "components/common/Purchase/PurchaseStep";
 import { useSubscriptionCheckout } from "components/common/Purchase/useSubscriptionCheckout";
 import { isEmpty } from "lodash";
 import { queryArtist } from "queries";
@@ -26,20 +26,11 @@ const ArtistVariableSupport: React.FC<{
     defaultValues: {
       amount: tier.minAmount ? tier.minAmount / 100 : 0,
       name: "",
-      email: "",
     },
   });
   const { user, refreshLoggedInUser } = useAuthContext();
-  // Offer logged-out buyers (and accounts without a name) an optional display
-  // name so the artist sees who's supporting them — shown explicitly rather
-  // than scraped from Stripe's billing details.
   const needsName = !user?.name;
-  // The Payment/Setup Element (unlike Stripe's old hosted Checkout) doesn't
-  // collect an email itself, so a logged-out buyer needs their own field.
-  const needsEmail = !user;
-  // Open the pre-checkout modal whenever there's something to collect (a
-  // variable amount, name, and/or email); otherwise subscribe straight through.
-  const needsModal = tier.allowVariable || needsName || needsEmail;
+  const needsModal = tier.allowVariable || needsName;
   const [open, setOpen] = React.useState(false);
   const { artistId } = useParams();
   const { data: artist, refetch: refresh } = useQuery(
@@ -70,11 +61,14 @@ const ArtistVariableSupport: React.FC<{
           ...(needsName && { userName: getValues("name") }),
         },
       ],
-      ...(needsEmail && { email: getValues("email") }),
     });
-    setOpen(false);
     refresh();
     refreshLoggedInUser();
+  };
+
+  const closeModal = () => {
+    setOpen(false);
+    reset();
   };
 
   return (
@@ -95,98 +89,90 @@ const ArtistVariableSupport: React.FC<{
       <Modal
         size="small"
         open={open}
-        onClose={() => setOpen(false)}
-        title={(tier.allowVariable ? t("howMuch") : t("letsSupport")) ?? ""}
+        onClose={closeModal}
+        title={
+          (checkout
+            ? t("support")
+            : tier.allowVariable
+              ? t("howMuch")
+              : t("letsSupport")) ?? ""
+        }
       >
-        <form
-          onSubmit={handleSubmit(() => subscribeToTier(tier))}
-          className="flex flex-col gap-3"
+        <PurchaseStep
+          checkout={checkout}
+          returnUrl={returnUrl}
+          onSuccess={handlePurchaseComplete}
+          buttonLabel={t("letsSupport") ?? ""}
         >
-          {tier.allowVariable && (
-            <>
-              <strong>{t("chooseAnAmount")}</strong>
-              <div className="flex items-center gap-2 ">
-                <span className="whitespace-nowrap">
-                  {getCurrencySymbol(artist?.user?.currency ?? "usd")}
-                </span>
-                <InputEl
-                  type="number"
-                  step="0.01"
-                  inputMode="decimal"
-                  {...register("amount", {
-                    min: tier.minAmount ? tier.minAmount / 100 : undefined,
-                    required: true,
-                    valueAsNumber: true,
-                  })}
-                />
-                <span className="whitespace-nowrap">
-                  {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
-                </span>
-                {!!tier.minAmount && formState.errors?.amount && (
-                  <small>
-                    {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
-                  </small>
-                )}
-              </div>
-            </>
-          )}
-          {needsEmail && (
-            <label className="flex flex-col gap-1">
-              <span>{t("yourEmailLabel")}</span>
-              <InputEl
-                type="email"
-                {...register("email", { required: true })}
-              />
-            </label>
-          )}
-          {needsName && (
-            <label className="flex flex-col gap-1">
-              <span>{t("yourNameLabel", { artistName: artist?.name })}</span>
-              <InputEl {...register("name")} />
-              <small>{t("yourNameHint")}</small>
-            </label>
-          )}
-          <ArtistButton
-            isLoading={isCheckingForSubscription}
-            disabled={isCheckingForSubscription || !isEmpty(formState.errors)}
-            size="big"
-            uppercase
-            rounded
-            type="submit"
-            className="w-full mt-2"
+          <form
+            onSubmit={handleSubmit(() => subscribeToTier(tier))}
+            className="flex flex-col gap-3"
           >
-            {t("letsSupport")}
-          </ArtistButton>
-          <div
-            className={css`
-              margin-top: 1rem;
+            {tier.allowVariable && (
+              <>
+                <strong>{t("chooseAnAmount")}</strong>
+                <div className="flex items-center gap-2 ">
+                  <span className="whitespace-nowrap">
+                    {getCurrencySymbol(artist?.user?.currency ?? "usd")}
+                  </span>
+                  <InputEl
+                    type="number"
+                    step="0.01"
+                    inputMode="decimal"
+                    {...register("amount", {
+                      min: tier.minAmount ? tier.minAmount / 100 : undefined,
+                      required: true,
+                      valueAsNumber: true,
+                    })}
+                  />
+                  <span className="whitespace-nowrap">
+                    {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
+                  </span>
+                  {!!tier.minAmount && formState.errors?.amount && (
+                    <small>
+                      {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
+                    </small>
+                  )}
+                </div>
+              </>
+            )}
+            {needsName && (
+              <label className="flex flex-col gap-1">
+                <span>{t("yourNameLabel", { artistName: artist?.name })}</span>
+                <InputEl {...register("name")} />
+                <small>{t("yourNameHint")}</small>
+              </label>
+            )}
+            <ArtistButton
+              isLoading={isCheckingForSubscription}
+              disabled={isCheckingForSubscription || !isEmpty(formState.errors)}
+              size="big"
+              uppercase
+              rounded
+              type="submit"
+              className="w-full mt-2"
+            >
+              {t("letsSupport")}
+            </ArtistButton>
+            <div
+              className={css`
+                margin-top: 1rem;
 
-              small {
-                display: block;
-                margin-bottom: 0.5rem;
-              }
-            `}
-          >
-            <small>{t("artistCheckoutPage")}</small>
-          </div>
-          <hr className="border-(--mi-darken-x-background-color)" />
-          <MarkdownContent content={tier.description ?? ""} />
-          <div className="w-full">{t("includesNewReleasesLong")}</div>
-          <IncludedReleases tier={tier} />
-        </form>
+                small {
+                  display: block;
+                  margin-bottom: 0.5rem;
+                }
+              `}
+            >
+              <small>{t("artistCheckoutPage")}</small>
+            </div>
+            <hr className="border-(--mi-darken-x-background-color)" />
+            <MarkdownContent content={tier.description ?? ""} />
+            <div className="w-full">{t("includesNewReleasesLong")}</div>
+            <IncludedReleases tier={tier} />
+          </form>
+        </PurchaseStep>
       </Modal>
-      <PurchaseModal
-        open={!!checkout}
-        onClose={reset}
-        clientSecret={checkout?.clientSecret}
-        stripeAccountId={checkout?.stripeAccountId}
-        requiresShipping={checkout?.requiresShipping}
-        allowedCountries={checkout?.allowedCountries}
-        returnUrl={returnUrl}
-        onSuccess={handlePurchaseComplete}
-        title={t("support") ?? ""}
-        buttonLabel={t("letsSupport") ?? ""}
-      />
     </>
   );
 };

@@ -15,9 +15,11 @@ const EmailVerification: React.FC<{
   setVerifiedEmail: (verifiedEmail: string) => void;
   smallText?: string;
   contextSubject?: string;
+  initialEmail?: string;
 }> = ({
   setVerifiedEmail,
   contextSubject,
+  initialEmail,
   smallText = "emailVerificationInfo",
 }) => {
   const snackbar = useSnackbar();
@@ -27,7 +29,7 @@ const EmailVerification: React.FC<{
   const [emailVerified, setEmailVerified] = React.useState(false);
   const [waitingForVerification, setWaitingForVerification] =
     React.useState(false);
-  const [email, setEmail] = React.useState(user?.email);
+  const [email, setEmail] = React.useState(user?.email ?? initialEmail);
   const queryClient = useQueryClient();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const errorHandler = useErrorHandler();

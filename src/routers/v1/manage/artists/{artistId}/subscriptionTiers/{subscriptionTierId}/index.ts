@@ -6,8 +6,8 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../../auth/passport";
-import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import { serializeProfileSubscriptionTier } from "../../../../../../../serializers/profileSubscriptionTier";
+import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import { getSiteSettings } from "../../../../../../../utils/settings";
 
 const normalizeDiscountPercent = (value: unknown): number | undefined => {
@@ -36,29 +36,9 @@ export default function () {
     const user = req.user;
 
     try {
-      let artistUser: { id: number } | undefined | null = user;
-      if (user.isAdmin) {
-        artistUser = await prisma.user.findFirst({
-          where: {
-            profiles: {
-              some: {
-                subscriptionTiers: {
-                  some: {
-                    id: Number(subscriptionTierId),
-                  },
-                },
-              },
-            },
-          },
-          select: {
-            id: true,
-          },
-        });
-      }
-
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(artistUser?.id)
+        user
       );
 
       return res.json({
@@ -102,7 +82,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       const artist = await prisma.profile.findFirst({
@@ -204,7 +184,7 @@ export default function () {
 
       const tier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(user.id)
+        user
       );
 
       if (!tier) {

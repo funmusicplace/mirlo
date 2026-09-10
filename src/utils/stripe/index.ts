@@ -30,7 +30,7 @@ import {
 } from "../handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "../images";
 import { decrementMerchStock } from "../merch";
-import { finalCoversBucket, finalMerchImageBucket } from "../minio";
+import { finalMerchImageBucket } from "../minio";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -54,26 +54,42 @@ if (process.env.NODE_ENV === "test") {
   };
 }
 
-let stripeClient = new Stripe(process.env.STRIPE_KEY ?? "", stripeConfig);
+const envStripeKey = () => process.env.STRIPE_KEY ?? "";
+const envWebhookConnectSigningSecret = () =>
+  process.env.STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET ?? "";
+
+let stripeClient = new Stripe(envStripeKey(), stripeConfig);
+let webhookConnectSigningSecret = envWebhookConnectSigningSecret();
+
+type StripeSettings = {
+  stripe?: { key?: string; webhookConnectSigningSecret?: string };
+} | null;
 
 /**
- * If the user updates this through the Settings, we need to reload the client.
- * @returns Stripe key
+ * Update the stripe key or signing secret after the user updates it.
  */
 export const refreshStripeClient = async (): Promise<string> => {
   try {
     const row = await prisma.settings.findFirst();
-    const dbKey = (row?.settings as { stripe?: { key?: string } } | null)
-      ?.stripe?.key;
+    const dbStripe = (row?.settings as StripeSettings)?.stripe;
     const apiKey =
-      dbKey && dbKey.trim() ? dbKey : (process.env.STRIPE_KEY ?? "");
+      dbStripe?.key && dbStripe.key.trim() ? dbStripe.key : envStripeKey();
+    webhookConnectSigningSecret =
+      dbStripe?.webhookConnectSigningSecret &&
+      dbStripe.webhookConnectSigningSecret.trim()
+        ? dbStripe.webhookConnectSigningSecret
+        : envWebhookConnectSigningSecret();
     stripeClient = new Stripe(apiKey, stripeConfig);
     return apiKey;
   } catch (e) {
     logger.error(`refreshStripeClient: failed to load key from settings`, e);
-    return process.env.STRIPE_KEY ?? "";
+    webhookConnectSigningSecret = envWebhookConnectSigningSecret();
+    return envStripeKey();
   }
 };
+
+export const getStripeWebhookConnectSigningSecret = () =>
+  webhookConnectSigningSecret;
 
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
@@ -300,82 +316,6 @@ export const findOrCreateStripeCustomer = async (
   return customer;
 };
 
-export const createTrackGroupStripeProduct = async (
-  trackGroup: Prisma.TrackGroupGetPayload<{
-    include: { profile: true; cover: true };
-  }>,
-  stripeAccountId: string
-) => {
-  return createOrReuseStripeProduct({
-    existingProductKey: trackGroup.stripeProductKey,
-    stripeAccountId,
-    buildCreateParams: async () => ({
-      name: `${trackGroup.title} by ${trackGroup.profile.name}`,
-      description: await buildProductDescription(
-        trackGroup.title,
-        trackGroup.profile.name,
-        trackGroup.about
-      ),
-      tax_code: "txcd_10401100",
-      images: trackGroup.cover
-        ? [
-            generateFullStaticImageUrl(
-              trackGroup.cover?.url[4],
-              finalCoversBucket
-            ),
-          ]
-        : [],
-    }),
-    persistProductKey: (productKey) =>
-      prisma.trackGroup.update({
-        where: { id: trackGroup.id },
-        data: { stripeProductKey: productKey },
-      }),
-  });
-};
-
-export const createTrackStripeProduct = async (
-  track: Prisma.TrackGetPayload<{
-    include: {
-      trackGroup: { include: { profile: true; cover: true } };
-      trackArtists: true;
-    };
-  }>,
-  stripeAccountId: string
-) => {
-  const trackArtist =
-    track.trackArtists?.length > 0
-      ? track.trackArtists.map((a) => a.artistName).join(", ")
-      : track.trackGroup.profile.name;
-
-  return createOrReuseStripeProduct({
-    existingProductKey: track.stripeProductKey,
-    stripeAccountId,
-    buildCreateParams: async () => ({
-      name: `${track.title} by ${trackArtist}`,
-      description: await buildProductDescription(
-        track.title,
-        trackArtist,
-        track.description
-      ),
-      tax_code: "txcd_10401100",
-      images: track.trackGroup.cover
-        ? [
-            generateFullStaticImageUrl(
-              track.trackGroup.cover?.url[4],
-              finalCoversBucket
-            ),
-          ]
-        : [],
-    }),
-    persistProductKey: (productKey) =>
-      prisma.track.update({
-        where: { id: track.id },
-        data: { stripeProductKey: productKey },
-      }),
-  });
-};
-
 export const createSubscriptionStripeProduct = async (
   tier: Prisma.ProfileSubscriptionTierGetPayload<{
     include: { profile: true };
@@ -444,6 +384,7 @@ type SessionMetaData = {
     | "tip"
     | "track"
     | "artistCatalogue"
+    | "catalogue"
     | "fundraiserPledge";
 };
 
@@ -513,6 +454,22 @@ export const handleCheckoutSession = async (
   }
 };
 
+const recoverEmailFromSetupIntent = async (
+  intent: Stripe.SetupIntent,
+  accountId: string
+): Promise<string> => {
+  const paymentMethod =
+    typeof intent.payment_method === "string"
+      ? await stripe.paymentMethods.retrieve(
+          intent.payment_method,
+          {},
+          { stripeAccount: accountId }
+        )
+      : intent.payment_method;
+
+  return paymentMethod?.billing_details?.email ?? "";
+};
+
 export const handleSetupIntentSucceeded = async (
   setupIntent: Stripe.SetupIntent
 ) => {
@@ -545,7 +502,20 @@ export const handleSetupIntentSucceeded = async (
     return;
   }
 
-  const { fundraiserId, userId, userEmail, userName } = metadata;
+  const { fundraiserId, userId, userName } = metadata;
+
+  let userEmail = metadata.userEmail ?? "";
+  if (!userEmail && !userId) {
+    userEmail = await recoverEmailFromSetupIntent(
+      intent,
+      metadata.stripeAccountId
+    );
+    if (userEmail) {
+      logger.warn(
+        `handleSetupIntentSucceeded: ${intent.id} carried no identity in its metadata; recovered the buyer's email from the payment method's billing details`
+      );
+    }
+  }
 
   let {
     userId: actualUserId,
@@ -1024,8 +994,12 @@ export const handleInvoicePaid = async (
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
   if (typeof subscription === "string") {
-    const { paymentProcessorFee } = await getFeeDetailsFromInvoice(
+    const { paymentProcessorFee, intent } = await getFeeDetailsFromInvoice(
       invoice,
+      accountId
+    );
+    const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
+      intent,
       accountId
     );
 
@@ -1057,6 +1031,7 @@ export const handleInvoicePaid = async (
       billingReason: invoice.billing_reason,
       status: "COMPLETED",
       nextBillingDate,
+      platformCurrencyValue,
     });
   }
 };
@@ -1310,6 +1285,32 @@ export const handleMerchPurchasesFromIntent = async (
   }
 };
 
+/**
+ * Last-resort buyer email, read back from what Stripe itself collected. Only
+ * used when an intent reaches us with no identity in its metadata at all: the
+ * charge has already gone through by then, so resolving nothing here would
+ * mean a real payment that Mirlo has no record of.
+ */
+const recoverEmailFromIntent = async (
+  intent: Stripe.PaymentIntent,
+  accountId: string
+): Promise<string> => {
+  if (intent.receipt_email) {
+    return intent.receipt_email;
+  }
+
+  const charge =
+    typeof intent.latest_charge === "string"
+      ? await stripe.charges.retrieve(
+          intent.latest_charge,
+          {},
+          { stripeAccount: accountId }
+        )
+      : intent.latest_charge;
+
+  return charge?.billing_details?.email ?? "";
+};
+
 export const completePurchaseFromIntent = async (
   intent: Stripe.PaymentIntent,
   accountId: string
@@ -1328,8 +1329,20 @@ export const completePurchaseFromIntent = async (
     payment_intent: intent.id,
   } as unknown as Stripe.Checkout.Session;
 
+  // The email normally lands in metadata — either supplied at initiation, or
+  // attached during the payment step via PUT /purchase/:id.
+  let resolvedEmail = userEmail ?? "";
+  if (!resolvedEmail && !userId) {
+    resolvedEmail = await recoverEmailFromIntent(intent, accountId);
+    if (resolvedEmail) {
+      logger.warn(
+        `completePurchaseFromIntent: ${intent.id} carried no identity in its metadata; recovered the buyer's email from Stripe's billing details`
+      );
+    }
+  }
+
   const { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
-    userEmail ?? "",
+    resolvedEmail,
     userId
   );
 
@@ -1368,6 +1381,13 @@ export const completePurchaseFromIntent = async (
       accountId,
       platformCurrencyValue
     );
+  } else if (purchaseType === "catalogue" && artistId) {
+    await handleCataloguePurchase(
+      Number(actualUserId),
+      Number(artistId),
+      sessionAdapter,
+      platformCurrencyValue
+    );
   }
 };
 
@@ -1401,7 +1421,8 @@ export const handlePaymentIntentSucceeded = async (
     purchaseType !== "trackGroup" &&
     purchaseType !== "track" &&
     purchaseType !== "tip" &&
-    purchaseType !== "merch"
+    purchaseType !== "merch" &&
+    purchaseType !== "catalogue"
   ) {
     logger.info(
       `payment_intent.succeeded: ${intent.id} has no recognized one-time purchaseType (got "${purchaseType}"), skipping`

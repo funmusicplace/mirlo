@@ -5,7 +5,7 @@ import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { moneyDisplay } from "components/common/Money";
-import PurchaseElements from "components/common/Purchase/PurchaseElements";
+import PurchaseStep from "components/common/Purchase/PurchaseStep";
 import { usePurchase } from "components/common/Purchase/usePurchase";
 import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
@@ -66,10 +66,12 @@ const BuyMerchItem: React.FC<{
   const navigate = useNavigate();
   const { checkout, isLoading: isLoadingStripe, startPurchase } = usePurchase();
 
-  const checkoutCompletePath = buildCheckoutCompletePath(artist, {
-    purchaseType: "merch",
-    merchId: merch.id,
-  });
+  const checkoutCompletePath = (buyerEmail?: string) =>
+    buildCheckoutCompletePath(artist, {
+      purchaseType: "merch",
+      merchId: merch.id,
+      ...(buyerEmail && { email: buyerEmail }),
+    });
 
   const onSubmit = React.useCallback(
     async (data: BuyMerchFormData) => {
@@ -158,203 +160,199 @@ const BuyMerchItem: React.FC<{
     ? amountAvailable < Number(quantity)
     : false;
 
-  if (checkout) {
-    return (
-      <div className="p-4">
-        <PurchaseElements
-          clientSecret={checkout.clientSecret}
-          stripeAccountId={checkout.stripeAccountId}
-          returnUrl={`${window.location.origin}${checkoutCompletePath}`}
-          onSuccess={() => navigate(checkoutCompletePath)}
-          buttonLabel={t("completePayment") ?? ""}
-          requiresShipping={checkout.requiresShipping}
-          allowedCountries={checkout.allowedCountries}
-        />
-      </div>
-    );
-  }
-
   return (
-    <FormProvider {...methods}>
-      <form
-        onSubmit={methods.handleSubmit(onSubmit)}
-        className={css`
-          padding: 1rem;
-          margin-top: -1rem;
-        `}
+    <div className="p-4">
+      <PurchaseStep
+        checkout={checkout}
+        returnUrl={`${window.location.origin}${checkoutCompletePath()}`}
+        onSuccess={(buyerEmail) => navigate(checkoutCompletePath(buyerEmail))}
+        buttonLabel={t("completePayment") ?? ""}
       >
-        <div
-          className={css`
-            @media screen and (min-width: ${bp.medium}px) {
-              display: flex;
-              flex-direction: row;
-            }
-
-            > div {
-              width: 49%;
-              margin-right: 1rem;
-              margin-bottom: 0.25rem;
-            }
-          `}
-        >
-          <FormComponent>
-            <label htmlFor="quantity">{t("howMany")}</label>
-            <InputEl
-              {...methods.register("quantity", {
-                min: 1,
-                max: merch.quantityRemaining,
-                valueAsNumber: true,
-              })}
-              id="quantity"
-              type="number"
-              min={1}
-              max={merch.quantityRemaining}
-            />
-            {formState.errors.quantity && (
-              <Box variant="warning" compact>
-                {formState.errors.quantity.message}
-              </Box>
-            )}
-            {exceedsAvailable && (
-              <Box variant="warning" compact>
-                {t("notEnoughInStockQuantity")}
-              </Box>
-            )}
-          </FormComponent>
-        </div>
-        <FormComponent>
-          <PaymentInputElement
-            currency={currency}
-            platformPercent={artist.defaultPlatformFee ?? 0}
-            artistName={artist.name}
-            minPrice={minPrice * 100}
-            artistId={artist.id}
-          />
-        </FormComponent>
-        <div
-          className={
-            "mt-2 pb-2 mb-2 " +
-            css`
-              @media screen and (min-width: ${bp.medium}px) {
-                display: flex;
-                flex-direction: row;
-              }
-
-              border-bottom: 1px solid var(--mi-tint-x-color);
-              > div {
-                width: 49%;
-                margin-right: 1rem;
-              }
-            `
-          }
-        >
-          {merch.optionTypes?.map((optionType, idx) => (
-            <FormComponent>
-              <label htmlFor={`merchOptionIds.${idx}`}>
-                {optionType.optionName}
-              </label>
-              <SelectEl
-                id={`merchOptionIds.${idx}`}
-                {...methods.register(`merchOptionIds.${idx}`)}
-                required
-              >
-                <option value="">{t("choose")}</option>
-
-                {optionType.options
-                  .sort((a, b) => {
-                    return a.additionalPrice < b.additionalPrice ? -1 : 1;
-                  })
-                  .map((o) => (
-                    <option
-                      key={o.name}
-                      value={o.id}
-                      disabled={
-                        o.quantityRemaining !== null
-                          ? o.quantityRemaining < quantity
-                          : false
-                      }
-                    >
-                      {o.additionalPrice
-                        ? t("option", {
-                            name: o.name,
-                            costUnit: moneyDisplay({
-                              amount: o.additionalPrice / 100,
-                              currency,
-                            }),
-                          })
-                        : o.name}
-                    </option>
-                  ))}
-              </SelectEl>
-              {formState.errors.merchOptionIds && (
-                <Box
-                  variant="warning"
-                  className={css`
-                    margin-top: 0.5rem;
-                  `}
-                  compact
-                >
-                  {formState.errors.merchOptionIds.message}
-                </Box>
-              )}
-            </FormComponent>
-          ))}
-        </div>
-        <BuyMerchItemDestinations merch={merch} />
-        <div
-          className={css`
-            border-bottom: 1px solid var(--mi-tint-x-color);
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-          `}
-        >
-          <p
+        <FormProvider {...methods}>
+          <form
+            onSubmit={methods.handleSubmit(onSubmit)}
             className={css`
-              margin: 1rem auto;
-              font-weight: bold;
+              margin-top: -1rem;
             `}
           >
-            {t("orderTotal", {
-              amount: moneyDisplay({
-                amount: price,
-                currency,
-              }),
-            })}
-          </p>
-          <IncludesDigitalDownload merch={merch} artist={artist} />
-        </div>
+            <div
+              className={css`
+                @media screen and (min-width: ${bp.medium}px) {
+                  display: flex;
+                  flex-direction: row;
+                }
 
-        <FormComponent>
-          <label htmlFor="comment">{t("leaveAComment")}</label>
-          <TextArea id="comment" {...methods.register("message")} rows={2} />
-        </FormComponent>
+                > div {
+                  width: 49%;
+                  margin-right: 1rem;
+                  margin-bottom: 0.25rem;
+                }
+              `}
+            >
+              <FormComponent>
+                <label htmlFor="quantity">{t("howMany")}</label>
+                <InputEl
+                  {...methods.register("quantity", {
+                    min: 1,
+                    max: merch.quantityRemaining,
+                    valueAsNumber: true,
+                  })}
+                  id="quantity"
+                  type="number"
+                  min={1}
+                  max={merch.quantityRemaining}
+                />
+                {formState.errors.quantity && (
+                  <Box variant="warning" compact>
+                    {formState.errors.quantity.message}
+                  </Box>
+                )}
+                {exceedsAvailable && (
+                  <Box variant="warning" compact>
+                    {t("notEnoughInStockQuantity")}
+                  </Box>
+                )}
+              </FormComponent>
+            </div>
+            <FormComponent>
+              <PaymentInputElement
+                currency={currency}
+                platformPercent={artist.defaultPlatformFee ?? 0}
+                artistName={artist.name}
+                minPrice={minPrice * 100}
+                artistId={artist.id}
+              />
+            </FormComponent>
+            <div
+              className={
+                "mt-2 pb-2 mb-2 " +
+                css`
+                  @media screen and (min-width: ${bp.medium}px) {
+                    display: flex;
+                    flex-direction: row;
+                  }
 
-        <div
-          className={css`
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 2rem;
-          `}
-        >
-          <Button
-            disabled={!methods.formState.isValid || exceedsAvailable}
-            isLoading={isLoadingStripe}
-            size="big"
-            rounded
-            endIcon={<FaChevronRight />}
-          >
-            {t("goToCheckOut")}
-          </Button>
-        </div>
-        <div
-          className={css`
-            margin-top: 1rem;
-          `}
-        >
-          <small>{t("artistCheckoutPage")}</small>
-        </div>
-      </form>
-    </FormProvider>
+                  border-bottom: 1px solid var(--mi-tint-x-color);
+                  > div {
+                    width: 49%;
+                    margin-right: 1rem;
+                  }
+                `
+              }
+            >
+              {merch.optionTypes?.map((optionType, idx) => (
+                <FormComponent>
+                  <label htmlFor={`merchOptionIds.${idx}`}>
+                    {optionType.optionName}
+                  </label>
+                  <SelectEl
+                    id={`merchOptionIds.${idx}`}
+                    {...methods.register(`merchOptionIds.${idx}`)}
+                    required
+                  >
+                    <option value="">{t("choose")}</option>
+
+                    {optionType.options
+                      .sort((a, b) => {
+                        return a.additionalPrice < b.additionalPrice ? -1 : 1;
+                      })
+                      .map((o) => (
+                        <option
+                          key={o.name}
+                          value={o.id}
+                          disabled={
+                            o.quantityRemaining !== null
+                              ? o.quantityRemaining < quantity
+                              : false
+                          }
+                        >
+                          {o.additionalPrice
+                            ? t("option", {
+                                name: o.name,
+                                costUnit: moneyDisplay({
+                                  amount: o.additionalPrice / 100,
+                                  currency,
+                                }),
+                              })
+                            : o.name}
+                        </option>
+                      ))}
+                  </SelectEl>
+                  {formState.errors.merchOptionIds && (
+                    <Box
+                      variant="warning"
+                      className={css`
+                        margin-top: 0.5rem;
+                      `}
+                      compact
+                    >
+                      {formState.errors.merchOptionIds.message}
+                    </Box>
+                  )}
+                </FormComponent>
+              ))}
+            </div>
+            <BuyMerchItemDestinations merch={merch} />
+            <div
+              className={css`
+                border-bottom: 1px solid var(--mi-tint-x-color);
+                padding-bottom: 1rem;
+                margin-bottom: 2rem;
+              `}
+            >
+              <p
+                className={css`
+                  margin: 1rem auto;
+                  font-weight: bold;
+                `}
+              >
+                {t("orderTotal", {
+                  amount: moneyDisplay({
+                    amount: price,
+                    currency,
+                  }),
+                })}
+              </p>
+              <IncludesDigitalDownload merch={merch} artist={artist} />
+            </div>
+
+            <FormComponent>
+              <label htmlFor="comment">{t("leaveAComment")}</label>
+              <TextArea
+                id="comment"
+                {...methods.register("message")}
+                rows={2}
+              />
+            </FormComponent>
+
+            <div
+              className={css`
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 2rem;
+              `}
+            >
+              <Button
+                disabled={!methods.formState.isValid || exceedsAvailable}
+                isLoading={isLoadingStripe}
+                size="big"
+                rounded
+                endIcon={<FaChevronRight />}
+              >
+                {t("goToCheckOut")}
+              </Button>
+            </div>
+            <div
+              className={css`
+                margin-top: 1rem;
+              `}
+            >
+              <small>{t("artistCheckoutPage")}</small>
+            </div>
+          </form>
+        </FormProvider>
+      </PurchaseStep>
+    </div>
   );
 };
 

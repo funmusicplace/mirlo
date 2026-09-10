@@ -26,10 +26,16 @@ export const calculateCatalogueFloorPrice = async (profile: {
   purchaseEntireCatalogMinPrice: number;
   purchaseEntireCatalogPercentage: number | null;
 }) => {
-  if (profile.purchaseEntireCatalogPercentage == null) {
-    return profile.purchaseEntireCatalogMinPrice;
-  }
   const trackGroups = await findCataloguePurchasableTrackGroups(profile);
   const total = trackGroups.reduce((sum, tg) => sum + (tg.minPrice ?? 0), 0);
-  return Math.round((profile.purchaseEntireCatalogPercentage / 100) * total);
+
+  if (profile.purchaseEntireCatalogPercentage != null) {
+    return Math.round((profile.purchaseEntireCatalogPercentage / 100) * total);
+  }
+
+  if (!profile.purchaseEntireCatalogMinPrice) {
+    return total;
+  }
+
+  return profile.purchaseEntireCatalogMinPrice;
 };

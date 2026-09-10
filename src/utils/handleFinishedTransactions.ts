@@ -148,7 +148,13 @@ export const getPlatformCurrencyValueFromIntent = async (
   }
 };
 
-const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
+const getApplicationFee = async (
+  session?: Stripe.Checkout.Session
+): Promise<{
+  applicationFee: number;
+  paymentProcessorFee: number;
+  platformCurrencyValue: PlatformCurrencyValue;
+}> => {
   try {
     const paymentIntentId =
       typeof session?.payment_intent === "string"
@@ -159,11 +165,19 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
 
     if (!paymentIntentId) {
       logger.warn("No payment intent ID found in session metadata");
-      return { applicationFee: 0, paymentProcessorFee: 0 };
+      return {
+        applicationFee: 0,
+        paymentProcessorFee: 0,
+        platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
+      };
     }
     if (!stripeAccount) {
       logger.warn("No stripe account found in session metadata");
-      return { applicationFee: 0, paymentProcessorFee: 0 };
+      return {
+        applicationFee: 0,
+        paymentProcessorFee: 0,
+        platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
+      };
     }
     const paymentIntent = await getPaymentIntent(
       paymentIntentId,
@@ -171,18 +185,26 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
     );
 
     const fees = await getFeesFromPaymentIntent(paymentIntent, stripeAccount);
+    const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
+      paymentIntent,
+      stripeAccount
+    );
 
     logger.info(
       `Application fee: ${fees.applicationFee}, Stripe fee: ${fees.paymentProcessorFee}`
     );
 
-    return fees;
+    return { ...fees, platformCurrencyValue };
   } catch (error) {
     logger.error(
       `Error retrieving application fee for session ${session?.id}, recording purchase without fee details:`,
       error
     );
-    return { applicationFee: 0, paymentProcessorFee: 0 };
+    return {
+      applicationFee: 0,
+      paymentProcessorFee: 0,
+      platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
+    };
   }
 };
 
@@ -291,8 +313,11 @@ export const handleTrackGroupPurchase = async (
 ) => {
   try {
     const { applicationUrl } = await getClient();
-    const { applicationFee, paymentProcessorFee } =
-      await getApplicationFee(session);
+    const {
+      applicationFee,
+      paymentProcessorFee,
+      platformCurrencyValue: feePlatformCurrencyValue,
+    } = await getApplicationFee(session);
     const amount = session?.amount_total ?? 0;
     const pricePaid = amount;
     const currencyPaid = session?.currency ?? "usd";
@@ -306,7 +331,9 @@ export const handleTrackGroupPurchase = async (
         platformCut: applicationFee ?? null,
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
-        ...withPlatformCurrency(platformCurrencyValue),
+        ...withPlatformCurrency(
+          platformCurrencyValue ?? feePlatformCurrencyValue
+        ),
         paymentStatus: "COMPLETED",
         discountPercent: session?.metadata?.discountPercent
           ? Number(session.metadata.discountPercent)
@@ -447,7 +474,8 @@ export const handleTrackGroupPurchase = async (
 export const handleCataloguePurchase = async (
   userId: number,
   artistId: number,
-  session?: Stripe.Checkout.Session
+  session?: Stripe.Checkout.Session,
+  platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   try {
     const { applicationUrl } = await getClient();
@@ -466,8 +494,11 @@ export const handleCataloguePurchase = async (
     const amountPaidPerTrackGroup =
       (session?.amount_total ?? 0) / artistTrackGroups.length;
 
-    const { applicationFee, paymentProcessorFee } =
-      await getApplicationFee(session);
+    const {
+      applicationFee,
+      paymentProcessorFee,
+      platformCurrencyValue: feePlatformCurrencyValue,
+    } = await getApplicationFee(session);
     const appFeePerTrackGroup =
       (applicationFee ?? 0) / artistTrackGroups.length;
 
@@ -482,9 +513,12 @@ export const handleCataloguePurchase = async (
         userId: Number(userId),
         amount: pricePaid,
         currency: currencyPaid,
-        platformCut: paymentProcessorFee ?? null,
+        platformCut: applicationFee ?? null,
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
+        ...withPlatformCurrency(
+          platformCurrencyValue ?? feePlatformCurrencyValue
+        ),
         paymentStatus: "COMPLETED",
       },
     });
@@ -566,7 +600,8 @@ export const handleTrackPurchase = async (
   platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   try {
-    const { applicationFee } = await getApplicationFee(session);
+    const { applicationFee, platformCurrencyValue: feePlatformCurrencyValue } =
+      await getApplicationFee(session);
     const purchase = await registerTrackPurchase({
       userId: Number(userId),
       trackId: Number(trackId),
@@ -578,7 +613,7 @@ export const handleTrackPurchase = async (
       discountPercent: session?.metadata?.discountPercent
         ? Number(session.metadata.discountPercent)
         : undefined,
-      platformCurrencyValue,
+      platformCurrencyValue: platformCurrencyValue ?? feePlatformCurrencyValue,
     });
 
     const user = await prisma.user.findFirst({
@@ -845,8 +880,11 @@ export const handleArtistGift = async (
   platformCurrencyValue?: PlatformCurrencyValue
 ) => {
   try {
-    const { applicationFee, paymentProcessorFee } =
-      await getApplicationFee(session);
+    const {
+      applicationFee,
+      paymentProcessorFee,
+      platformCurrencyValue: feePlatformCurrencyValue,
+    } = await getApplicationFee(session);
 
     const transaction = await prisma.userTransaction.create({
       data: {
@@ -856,7 +894,9 @@ export const handleArtistGift = async (
         platformCut: applicationFee ?? null,
         stripeCut: paymentProcessorFee ?? null,
         stripeId: session?.id ?? "",
-        ...withPlatformCurrency(platformCurrencyValue),
+        ...withPlatformCurrency(
+          platformCurrencyValue ?? feePlatformCurrencyValue
+        ),
         paymentStatus: "COMPLETED",
       },
     });

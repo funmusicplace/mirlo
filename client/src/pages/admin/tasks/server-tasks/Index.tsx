@@ -52,6 +52,7 @@ export const Index: React.FC = () => {
             <option value="initiateUserNotifications">
               initiateUserNotifications
             </option>
+            <option value="cleanUpDeletedUsers">cleanUpDeletedUsers</option>
           </SelectEl>
         </FormComponent>
         <FormComponent direction="row">

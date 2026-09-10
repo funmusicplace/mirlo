@@ -38,6 +38,10 @@ type SupportTier = {
   amount: number;
   deleteReason?: string | null;
   nextBillingDate?: string;
+  shippingAddress: {
+    name: string;
+    address: Object;
+  };
   artistSubscriptionTier: ArtistSubscriptionTier;
   artistUserSubscriptionCharges?: {
     id: string;
@@ -246,7 +250,7 @@ const Index = () => {
               .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
               .map((r) => (
                 <tr key={r.user.id}>
-                  <td>{r.user.name ?? "-"}</td>
+                  <td>{r.user.name ?? r.shippingAddress?.name ?? "-"}</td>
                   <td>{r.user.email}</td>
                   <td>
                     {r.artistSubscriptionTier.name}

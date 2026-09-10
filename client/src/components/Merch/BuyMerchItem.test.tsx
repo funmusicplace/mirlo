@@ -25,6 +25,11 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   };
 });
 
+const authState: { user: any } = { user: { id: 1, email: "buyer@test.com" } };
+vi.mock("state/AuthContext", () => ({
+  useAuthContext: () => ({ user: authState.user }),
+}));
+
 const startPurchase = vi.fn().mockResolvedValue(undefined);
 const purchaseState: {
   checkout: null | { clientSecret: string; stripeAccountId: string };
@@ -91,6 +96,7 @@ describe("BuyMerchItem", () => {
   beforeEach(() => {
     startPurchase.mockClear();
     purchaseState.checkout = null;
+    authState.user = { id: 1, email: "buyer@test.com" };
   });
 
   test("submitting purchases the merch item via the unified endpoint", async () => {
@@ -128,6 +134,17 @@ describe("BuyMerchItem", () => {
     renderComponent(baseMerch);
 
     expect(await screen.findByTestId("purchase-elements")).toBeInTheDocument();
+  });
+
+  test("a logged-out buyer is not asked for an email here", async () => {
+    authState.user = null;
+    const { container } = renderComponent(baseMerch);
+
+    expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
+
+    await submitForm(container);
+
+    expect(startPurchase.mock.calls[0][0]).not.toHaveProperty("email");
   });
 
   test("renders nothing when the artist isn't charge-enabled or the item is sold out", () => {

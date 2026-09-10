@@ -3,10 +3,14 @@ import { Profile } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
+import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 
 import { getClient } from "./getClient";
+import {
+  PlatformCurrencyValue,
+  withPlatformCurrency,
+} from "./handleFinishedTransactions";
 import { resolvePayee } from "./payments/payee";
-import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { grantSubscriptionTierReleases } from "./subscriptionTier";
 
 export type ArtistSubscriptionReceiptEmailType = {
@@ -70,6 +74,7 @@ export const manageSubscriptionReceipt = async ({
   urlParams,
   nextBillingDate,
   billingReason,
+  platformCurrencyValue,
 }: {
   processorPaymentReferenceId: string;
   processorSubscriptionReferenceId: string;
@@ -81,6 +86,7 @@ export const manageSubscriptionReceipt = async ({
   urlParams?: string;
   nextBillingDate?: Date;
   billingReason: null | string;
+  platformCurrencyValue?: PlatformCurrencyValue;
 }) => {
   const isNewSubscription = billingReason === "subscription_create";
   const profileUserSubscription =
@@ -112,6 +118,7 @@ export const manageSubscriptionReceipt = async ({
         platformCut,
         stripeId: processorPaymentReferenceId,
         stripeCut: paymentProcessorFee,
+        ...withPlatformCurrency(platformCurrencyValue),
         paymentStatus: status,
       },
     });
