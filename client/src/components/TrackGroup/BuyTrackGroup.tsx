@@ -231,6 +231,7 @@ const BuyTrackGroup: React.FC<{
                 currency={currency}
                 platformPercent={trackGroup.platformPercent}
                 minPrice={minPrice}
+                basePrice={initialChosenPriceCents}
                 artistName={trackGroup.artist?.name}
                 artistId={trackGroup.artistId}
                 isDigital

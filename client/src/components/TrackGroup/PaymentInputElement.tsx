@@ -20,6 +20,7 @@ const PaymentInputElement: React.FC<{
   minPrice?: number; // in cents
   artistName?: string;
   artistId?: number;
+  basePrice?: number;
 }> = ({
   currency,
   isDigital,
@@ -27,6 +28,7 @@ const PaymentInputElement: React.FC<{
   minPrice,
   artistName,
   artistId,
+  basePrice,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { register, setValue, watch } = useFormContext<FormData>();
@@ -112,6 +114,7 @@ const PaymentInputElement: React.FC<{
       <AddMoneyValueButtons
         addMoneyAmount={addMoneyAmount}
         currency={currency}
+        basePrice={basePrice ?? minPrice}
       />
       {isFinite(numericChosenPrice) &&
         numericChosenPrice > 0 &&
