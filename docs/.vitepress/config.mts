@@ -31,6 +31,7 @@ export default defineConfig({
         items: [
           { text: "For artists", link: "/features/for-artists" },
           { text: "For labels", link: "/features/for-labels" },
+          { text: "For listeners", link: "/features/for-listeners" },
         ],
       },
       { text: "FAQ", link: "/faq" },

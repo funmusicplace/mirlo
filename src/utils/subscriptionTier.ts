@@ -2,6 +2,17 @@ import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
 
+export const hasSubscriptionTiers = async (profileId: number) => {
+  const count = await prisma.profileSubscriptionTier.count({
+    where: {
+      profileId,
+      isDefaultTier: false,
+      deletedAt: null,
+    },
+  });
+  return count > 0;
+};
+
 export const registerSubscription = async ({
   tierId,
   userId,

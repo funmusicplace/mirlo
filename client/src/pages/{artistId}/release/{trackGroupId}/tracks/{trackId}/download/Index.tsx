@@ -1,22 +1,18 @@
 import { css } from "@emotion/css";
-
-import { Navigate, useParams, useSearchParams } from "react-router-dom";
-
-import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import { MetaCard } from "components/common/MetaCard";
-import { useArtistContext } from "state/ArtistContext";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-
-import { WidthWrapper } from "components/common/WidthContainer";
-
-import SmallTileDetails from "components/common/SmallTileDetails";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
+import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { MetaCard } from "components/common/MetaCard";
+import SmallTileDetails from "components/common/SmallTileDetails";
+import { WidthWrapper } from "components/common/WidthContainer";
+import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import api from "services/api";
-import { getArtistUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
+import { getArtistUrl, getTrackUrl } from "utils/artist";
 
 function Index() {
   const { t } = useTranslation("translation", {
@@ -41,8 +37,9 @@ function Index() {
         // We need to find the trackgroup id, not the slug
         const tgResponse = await api.get<Track>(`tracks/${trackId}`);
 
+        const ownsQuery = new URLSearchParams({ email: email ?? "" });
         const result = await api.get<{ exists: boolean }>(
-          `tracks/${trackId}/testOwns?email=${email ?? ""}`
+          `tracks/${trackId}/testOwns?${ownsQuery.toString()}`
         );
 
         if (result.result.exists) {
@@ -69,17 +66,24 @@ function Index() {
     return <FullPageLoadingSpinner />;
   } else if (artist && !isOwned && !isLoadingTrack) {
     return (
-      <Navigate
-        to={getTrackUrl(
-          artist,
-          {
-            urlSlug: trackGroupId,
-            id: Number(trackGroupId),
-          },
-          { id: Number(trackId) }
-        )}
-        replace
-      />
+      <WidthWrapper variant="small" className="pt-8 mb-12">
+        <div className="flex flex-col items-start gap-4">
+          <h1>{t("downloadLinkNotValid")}</h1>
+          <p>{t("downloadLinkNotValidHint")}</p>
+          <ArtistButtonLink
+            to={getTrackUrl(
+              artist,
+              {
+                urlSlug: trackGroupId,
+                id: Number(trackGroupId),
+              },
+              { id: Number(trackId) }
+            )}
+          >
+            {t("goToTrack")}
+          </ArtistButtonLink>
+        </div>
+      </WidthWrapper>
     );
   } else if (!track && !isLoadingTrack) {
     return <Navigate to={getArtistUrl(artist)} replace />;

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ItemTransactionCard from "components/common/ItemTransactionCard";
@@ -36,8 +37,9 @@ function Index() {
           `trackGroups/${trackGroupId}?artistId=${artistId}`
         );
 
+        const ownsQuery = new URLSearchParams({ email: email ?? "" });
         const result = await api.get<{ exists: boolean }>(
-          `trackGroups/${tgResponse.result.id}/testOwns?email=${email ?? ""}`
+          `trackGroups/${tgResponse.result.id}/testOwns?${ownsQuery.toString()}`
         );
 
         if (result.result.exists) {
@@ -64,13 +66,20 @@ function Index() {
     return <FullPageLoadingSpinner />;
   } else if (artist && !isOwned && !isLoadingTrackGroup) {
     return (
-      <Navigate
-        to={getReleaseUrl(artist, {
-          urlSlug: trackGroupId,
-          id: Number(trackGroupId),
-        })}
-        replace
-      />
+      <WidthWrapper className="pt-8 mb-12">
+        <div className="flex flex-col items-start gap-4">
+          <h1>{t("downloadLinkNotValid")}</h1>
+          <p>{t("downloadLinkNotValidHint")}</p>
+          <ArtistButtonLink
+            to={getReleaseUrl(artist, {
+              urlSlug: trackGroupId,
+              id: Number(trackGroupId),
+            })}
+          >
+            {t("goToRelease")}
+          </ArtistButtonLink>
+        </div>
+      </WidthWrapper>
     );
   } else if (!trackGroup && !isLoadingTrackGroup) {
     return <Navigate to={getArtistUrl(artist)} replace />;

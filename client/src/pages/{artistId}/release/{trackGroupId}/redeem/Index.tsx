@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import Box from "components/common/Box";
 import FormComponent from "components/common/FormComponent";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
@@ -24,7 +25,6 @@ import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
 import { bp } from "../../../../../constants";
-import Box from "components/common/Box";
 
 function Index() {
   const { t } = useTranslation("translation", {
@@ -57,10 +57,12 @@ function Index() {
             }
           );
 
+          const downloadQuery = new URLSearchParams({
+            token: result.singleDownloadToken ?? "",
+            email: result.user?.email ?? user?.email ?? email,
+          });
           navigate(
-            `${getReleaseUrl(artist, trackGroup)}/download?token=${
-              result.singleDownloadToken
-            }&email=${result.user?.email ?? user?.email ?? email}`
+            `${getReleaseUrl(artist, trackGroup)}/download?${downloadQuery.toString()}`
           );
         } catch (e) {
           snackbar(t("redeemCodeError"), { type: "warning" });

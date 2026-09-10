@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
+
 import {
   clearTables,
   createProfile,
@@ -65,6 +66,31 @@ describe("tracks/{id}/testOwns", () => {
       const response = await requestApp
         .get(`tracks/${track.id}/testOwns?email=${purchaser.email}`)
         .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.exists, true);
+    });
+
+    it("should return exists=true for the signed-in owner even when the query email is someone else's", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        publishedAt: new Date(),
+        tracks: [],
+      });
+      const track = await createTrack(trackGroup.id);
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await prisma.userTrackPurchase.create({
+        data: { userId: purchaser.id, trackId: track.id },
+      });
+
+      const response = await requestApp
+        .get(`tracks/${track.id}/testOwns?email=somebody-else@artist.com`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.exists, true);

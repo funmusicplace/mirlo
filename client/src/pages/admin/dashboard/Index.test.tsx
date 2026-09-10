@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import api from "services/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -14,6 +16,17 @@ vi.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
+  AreaChart: ({
+    children,
+    data,
+  }: {
+    children: React.ReactNode;
+    data: Array<unknown>;
+  }) => (
+    <div data-testid="area-chart" data-points={data.length}>
+      {children}
+    </div>
+  ),
   LineChart: ({
     children,
     data,
@@ -25,6 +38,11 @@ vi.mock("recharts", () => ({
       {children}
     </div>
   ),
+  Area: ({ dataKey, name }: { dataKey: string; name?: string }) => (
+    <div data-testid="area" data-key={dataKey}>
+      {name ?? dataKey}
+    </div>
+  ),
   Line: ({ dataKey, name }: { dataKey: string; name?: string }) => (
     <div data-testid="line" data-key={dataKey}>
       {name ?? dataKey}
@@ -33,51 +51,43 @@ vi.mock("recharts", () => ({
   XAxis: () => null,
   YAxis: () => null,
   CartesianGrid: () => null,
-  Tooltip: () => null,
+  Tooltip: ({ content }: { content?: React.ReactNode }) => <>{content}</>,
   Legend: () => null,
 }));
 
-import Index from "./Index";
+import Index, { StackedTooltip } from "./Index";
 
 function makeStats(overrides: Record<string, unknown> = {}) {
   return {
     result: {
-      userSignupsByWeek: [{ week: "2026-01-05", count: 3 }],
-      artistSignupsByWeek: [{ week: "2026-01-05", count: 1 }],
-      transactionsByWeek: [{ week: "2026-01-05", count: 4 }],
-      usdRevenueByWeek: [
+      granularity: "week",
+      userSignups: [{ date: "2026-01-05", count: 3 }],
+      artistSignups: [{ date: "2026-01-05", count: 1 }],
+      revenue: [
         {
-          week: "2026-01-05",
+          date: "2026-01-05",
           purchasesUsdCents: 1000,
           subscriptionsUsdCents: 500,
           purchasesConvertedUsdCents: 250,
           subscriptionsConvertedUsdCents: 0,
-        },
-        {
-          week: "2026-01-12",
-          purchasesUsdCents: 2000,
-          subscriptionsUsdCents: 700,
-          purchasesConvertedUsdCents: 300,
-          subscriptionsConvertedUsdCents: 100,
-        },
-      ],
-      transactionCountByWeek: [
-        { week: "2026-01-05", currency: "usd", count: 3 },
-        { week: "2026-01-05", currency: "eur", count: 1 },
-        { week: "2026-01-12", currency: "usd", count: 5 },
-        { week: "2026-01-12", currency: "eur", count: 2 },
-      ],
-      platformRevenueByWeek: [
-        {
-          week: "2026-01-05",
           platformCutUsdCents: 100,
           platformCutConvertedUsdCents: 20,
         },
         {
-          week: "2026-01-12",
+          date: "2026-01-12",
+          purchasesUsdCents: 2000,
+          subscriptionsUsdCents: 700,
+          purchasesConvertedUsdCents: 300,
+          subscriptionsConvertedUsdCents: 100,
           platformCutUsdCents: 200,
           platformCutConvertedUsdCents: 30,
         },
+      ],
+      transactionCounts: [
+        { date: "2026-01-05", currency: "usd", count: 3 },
+        { date: "2026-01-05", currency: "eur", count: 1 },
+        { date: "2026-01-12", currency: "usd", count: 5 },
+        { date: "2026-01-12", currency: "eur", count: 2 },
       ],
       avgMonthlyPlays: 42,
       avgMonthlyActiveUsers: 7,
@@ -87,6 +97,20 @@ function makeStats(overrides: Record<string, unknown> = {}) {
   };
 }
 
+const renderDashboard = () =>
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <Index />
+    </QueryClientProvider>
+  );
+
+const chartFor = (title: string) =>
+  screen.getByText(title).closest("div") as HTMLElement;
+
 describe("admin dashboard Index", () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset();
@@ -95,7 +119,7 @@ describe("admin dashboard Index", () => {
   test("shows a loading state before stats resolve", () => {
     vi.mocked(api.get).mockReturnValue(new Promise(() => {}));
 
-    render(<Index />);
+    renderDashboard();
 
     expect(screen.getByText("Loading dashboard...")).toBeInTheDocument();
   });
@@ -103,27 +127,70 @@ describe("admin dashboard Index", () => {
   test("shows an error message when the request fails", async () => {
     vi.mocked(api.get).mockRejectedValue(new Error("Network error"));
 
-    render(<Index />);
+    renderDashboard();
 
     await waitFor(() => {
       expect(screen.getByText("Error: Network error")).toBeInTheDocument();
     });
   });
 
-  test("fetches a year of stats on mount", async () => {
+  test("fetches a year of weekly stats on mount", async () => {
     vi.mocked(api.get).mockResolvedValue(makeStats() as any);
 
-    render(<Index />);
+    renderDashboard();
 
     await waitFor(() => {
-      expect(api.get).toHaveBeenCalledWith("admin/stats?days=365");
+      expect(api.get).toHaveBeenCalledWith(
+        "admin/stats?days=365&granularity=week"
+      );
     });
+  });
+
+  test("refetches monthly stats when the granularity is switched", async () => {
+    vi.mocked(api.get).mockImplementation(
+      async (endpoint: string) =>
+        makeStats(
+          endpoint.includes("granularity=month") ? { granularity: "month" } : {}
+        ) as any
+    );
+
+    renderDashboard();
+
+    await waitFor(() => screen.getByText("USD Revenue Per Week"));
+
+    await userEvent.selectOptions(screen.getByRole("combobox"), "month");
+
+    await waitFor(() => {
+      expect(api.get).toHaveBeenCalledWith(
+        "admin/stats?days=365&granularity=month"
+      );
+    });
+    await waitFor(() =>
+      expect(screen.getByText("USD Revenue Per Month")).toBeInTheDocument()
+    );
+  });
+
+  test("adds the hovered bands up into a total", () => {
+    render(
+      <StackedTooltip
+        active
+        label="Jan 5"
+        payload={[
+          { name: "Purchases", value: 10, color: "#2a78d6" },
+          { name: "Subscriptions", value: 5, color: "#eb6834" },
+        ]}
+        format={(value) => `$${value}`}
+      />
+    );
+
+    expect(screen.getByText("Total")).toBeInTheDocument();
+    expect(screen.getByText("$15")).toBeInTheDocument();
   });
 
   test("renders the KPI cards", async () => {
     vi.mocked(api.get).mockResolvedValue(makeStats() as any);
 
-    render(<Index />);
+    renderDashboard();
 
     await waitFor(() => screen.getByText("Monthly Plays"));
 
@@ -132,18 +199,17 @@ describe("admin dashboard Index", () => {
     expect(screen.getByText("5")).toBeInTheDocument();
   });
 
-  test("renders one USD Revenue line per purchase/subscription series", async () => {
+  test("stacks the USD Revenue purchase/subscription series", async () => {
     vi.mocked(api.get).mockResolvedValue(makeStats() as any);
 
-    render(<Index />);
+    renderDashboard();
 
     await waitFor(() => screen.getByText("USD Revenue Per Week"));
 
-    const chart = screen
-      .getByText("USD Revenue Per Week")
-      .closest("div") as HTMLElement;
-    const lines = within(chart).getAllByTestId("line");
-    expect(lines.map((line) => line.dataset.key)).toEqual([
+    const areas = within(chartFor("USD Revenue Per Week")).getAllByTestId(
+      "area"
+    );
+    expect(areas.map((area) => area.dataset.key)).toEqual([
       "purchases",
       "subscriptions",
       "purchasesConverted",
@@ -151,50 +217,45 @@ describe("admin dashboard Index", () => {
     ]);
   });
 
-  test("passes one data point per week to the USD Revenue chart", async () => {
+  test("passes one data point per bucket to the USD Revenue chart", async () => {
     vi.mocked(api.get).mockResolvedValue(makeStats() as any);
 
-    render(<Index />);
+    renderDashboard();
 
     await waitFor(() => screen.getByText("USD Revenue Per Week"));
 
-    const chart = screen
-      .getByText("USD Revenue Per Week")
-      .closest("div") as HTMLElement;
-    const lineChart = within(chart).getByTestId("line-chart");
-    expect(lineChart.dataset.points).toBe("2");
+    const chart = within(chartFor("USD Revenue Per Week")).getByTestId(
+      "area-chart"
+    );
+    expect(chart.dataset.points).toBe("2");
   });
 
-  test("renders a Platform Revenue chart with USD and converted lines", async () => {
+  test("stacks the Platform Revenue USD and converted series", async () => {
     vi.mocked(api.get).mockResolvedValue(makeStats() as any);
 
-    render(<Index />);
+    renderDashboard();
 
     await waitFor(() => screen.getByText("Platform Revenue Per Week"));
 
-    const chart = screen
-      .getByText("Platform Revenue Per Week")
-      .closest("div") as HTMLElement;
-    const lines = within(chart).getAllByTestId("line");
-    expect(lines.map((line) => line.dataset.key)).toEqual([
+    const areas = within(chartFor("Platform Revenue Per Week")).getAllByTestId(
+      "area"
+    );
+    expect(areas.map((area) => area.dataset.key)).toEqual([
       "platformCut",
       "platformCutConverted",
     ]);
   });
 
-  test("renders one transaction-count line per currency seen", async () => {
+  test("stacks one transaction series per currency seen", async () => {
     vi.mocked(api.get).mockResolvedValue(makeStats() as any);
 
-    render(<Index />);
+    renderDashboard();
 
-    await waitFor(() =>
-      screen.getByText("Transaction Count Per Week by Currency")
-    );
+    await waitFor(() => screen.getByText("Transactions Per Week by Currency"));
 
-    const chart = screen
-      .getByText("Transaction Count Per Week by Currency")
-      .closest("div") as HTMLElement;
-    const lines = within(chart).getAllByTestId("line");
-    expect(lines.map((line) => line.dataset.key)).toEqual(["eur", "usd"]);
+    const chart = chartFor("Transactions Per Week by Currency");
+    const areas = within(chart).getAllByTestId("area");
+    expect(areas.map((area) => area.dataset.key)).toEqual(["eur", "usd"]);
+    expect(within(chart).getByTestId("area-chart").dataset.points).toBe("2");
   });
 });

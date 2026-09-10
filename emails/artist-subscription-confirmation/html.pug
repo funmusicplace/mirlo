@@ -4,7 +4,7 @@ block content
     p Hi,
     p Someone used this email address to subscribe to #{artist.name} on Mirlo 
     p 
-      a(href!=`${host}/v1/artists/${artist.id}/confirmFollow?email=${email}&token=${token}`) Click here to confirm
+      a(href!=`${host}/v1/artists/${artist.id}/confirmFollow?email=${encodeURIComponent(email)}&token=${token}`) Click here to confirm
     p 
       | If this was not you, you can safely ignore this email. 
       | Please find contact information on 

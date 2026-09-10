@@ -1,4 +1,5 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
   p 
@@ -10,17 +11,14 @@ block content
     tr 
       td #{trackGroup.title}
       td 
-        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${email}`) download
+        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${encodeURIComponent(email)}`) download
 
-  p 
-  p 
-    | Consider supporting 
-    a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name}
-    | with a subscription.
+  p
+  +supportArtist(trackGroup.artist, client, hasSubscriptionTiers)
   p
     | If you want to have access to all your purchases for this e-mail address,
     | simply
-    a(href!=`${client}/password-reset?email=${email}`) set a password for it
+    a(href!=`${client}/password-reset?email=${encodeURIComponent(email)}`) set a password for it
     | .
   - const purchaseMessage = trackGroup.artist?.properties?.emails?.purchase
   if purchaseMessage

@@ -16,13 +16,16 @@ export default function () {
     const { id } = req.params;
     const { email } = req.query as unknown as Query;
     try {
-      const where = email ? { user: { email } } : { userId: req.user?.id };
+      const identities = [
+        ...(email ? [{ user: { email } }] : []),
+        ...(req.user ? [{ userId: req.user.id }] : []),
+      ];
 
       let exists = false;
-      if (email || req.user) {
+      if (identities.length > 0) {
         const purchase = await prisma.userTrackGroupPurchase.findFirst({
           where: {
-            ...where,
+            OR: identities,
             trackGroupId: Number(id),
           },
         });

@@ -44,4 +44,4 @@ block content
   p Your support keeps our community strong.
   hr
   p
-    | New to mirlo? If you want to have access to all your purchases for this e-mail address, simply #[a(href!=`${client}/password-reset?email=${email}`) set a password for it].
+    | New to mirlo? If you want to have access to all your purchases for this e-mail address, simply #[a(href!=`${client}/password-reset?email=${encodeURIComponent(email)}`) set a password for it].

@@ -1,4 +1,5 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
   p Woohoo!
@@ -20,12 +21,7 @@ block content
       tr
         td #{trackGroup.title}
         td
-          a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${email}`) download
+          a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${encodeURIComponent(email)}`) download
 
-  p
-    | Consider supporting
-    |
-    a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name}
-    |
-    | with a subscription or a purchase.
+  +supportArtist(trackGroup.artist, client, hasSubscriptionTiers)
   p Enjoy!
