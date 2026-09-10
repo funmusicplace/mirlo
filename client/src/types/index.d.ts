@@ -157,6 +157,7 @@ interface TrackGroup {
   isPublic: boolean;
   hasNotifiedFollowers?: boolean;
   totalTracks?: number;
+  deletedAt?: string | null;
 }
 
 interface Post {

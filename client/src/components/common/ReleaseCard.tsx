@@ -11,10 +11,14 @@ import { Link } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPublished } from "utils/artist";
 
+import ImageWithPlaceholder from "./ImageWithPlaceholder";
 import PlayableCover, {
   buildCoverImage,
   playableCoverCardRevealClass,
 } from "./PlayableCover";
+import Tooltip from "./Tooltip";
+
+const cardRootClass = "flex min-w-0 w-full flex-col list-none mb-4";
 
 /**
  * Grid card for a track group (album or single). Renders cover art with
@@ -70,10 +74,37 @@ function ReleaseCard({
   const Root = as ?? "li";
   const Heading = headingLevel;
 
+  if (trackGroup.deletedAt) {
+    return (
+      <Root className={cx(cardRootClass, "max-sm:text-(--mi-font-size-small)")}>
+        <Tooltip
+          hoverText={tPlay("deletedByArtist")}
+          underline={false}
+          className="w-full cursor-default!"
+        >
+          <div className="w-full min-w-0 grayscale opacity-60">
+            <ImageWithPlaceholder alt="" size={600} square />
+          </div>
+          <div className="min-w-0 w-full pt-2">
+            <Heading className="m-0! mb-0! pb-0! min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-normal leading-[1.375]! text-[calc(var(--mi-font-size-small)*var(--page-scale,1))]! text-(--mi-normal-foreground-color)">
+              {displayTitle}
+            </Heading>
+            {showArtist && (
+              <div className="min-w-0 mt-[0.2rem] overflow-hidden text-ellipsis whitespace-nowrap text-(--mi-normal-foreground-color) text-[calc(var(--mi-font-size-xsmall)*var(--page-scale,1))]">
+                {artistName}
+              </div>
+            )}
+          </div>
+        </Tooltip>
+      </Root>
+    );
+  }
+
   return (
     <Root
       className={cx(
-        "flex min-w-0 w-full flex-col list-none cursor-pointer mb-4",
+        cardRootClass,
+        "cursor-pointer",
         "max-sm:text-(--mi-font-size-small)",
         playableCoverCardRevealClass
       )}
