@@ -45,6 +45,7 @@ export default function () {
       const downloadCode = await prisma.trackGroupDownloadCodes.findFirst({
         where: {
           downloadCode: code,
+          trackGroupId: trackGroup.id,
           redeemedByUser: null,
         },
       });
