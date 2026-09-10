@@ -4,9 +4,10 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
+import { processSingleTrack } from "../../../../serializers/track";
+import { assertSupportedAudioExtension } from "../../../../utils/audioFormats";
 import { getAudioUploadUrl } from "../../../../utils/minio";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
-import { processSingleTrack } from "../../../../serializers/track";
 
 export default function () {
   const operations = {
@@ -72,6 +73,12 @@ export default function () {
       filename,
     } = req.body;
     try {
+      // Reject an unsupported format before creating anything, so a bad
+      // filename can't leave an orphan track behind. See #1403.
+      const fileExtension = filename
+        ? assertSupportedAudioExtension(filename)
+        : undefined;
+
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
       const trackGroup = await prisma.trackGroup.findFirst({
@@ -124,14 +131,14 @@ export default function () {
           create: {
             trackId: track.id,
             originalFilename: filename,
-            fileExtension: filename?.split(".").pop() ?? undefined,
+            fileExtension,
             url: buildTrackStreamURL(track.id),
             uploadState: "STARTED",
           },
           update: {
             trackId: track.id,
             originalFilename: filename,
-            fileExtension: filename?.split(".").pop() ?? undefined,
+            fileExtension,
             url: buildTrackStreamURL(track.id),
             uploadState: "STARTED",
           },
