@@ -22,13 +22,6 @@ import {
 
 const stripeAccountId = "acct_test";
 
-// createMerchStripeProduct/createSubscriptionStripeProduct both funnel through
-// the same shared createOrReuseStripeProduct core in stripe/index.ts —
-// checkForProductKey, then create-and-persist if nothing was found. These
-// tests exercise that shared reuse/recreate/persist behavior through each
-// entry point. (createTrackGroupStripeProduct/createTrackStripeProduct used
-// to share this core too, but were deleted with the legacy trackGroup/track
-// Checkout Session endpoints once /v1/purchase fully replaced them.)
 describe("createXStripeProduct", () => {
   beforeEach(async () => {
     try {

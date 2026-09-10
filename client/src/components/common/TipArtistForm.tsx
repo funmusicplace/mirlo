@@ -7,13 +7,12 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 import { buildCheckoutCompletePath } from "utils/artist";
 
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
-import PurchaseModal from "./Purchase/PurchaseModal";
+import PurchaseStep from "./Purchase/PurchaseStep";
 import { usePurchase } from "./Purchase/usePurchase";
 import TextArea from "./TextArea";
 
@@ -30,9 +29,8 @@ const TipArtistForm: React.FC<{
 }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
-  const { user } = useAuthContext();
   const navigate = useNavigate();
-  const { checkout, isLoading, startPurchase, reset } = usePurchase();
+  const { checkout, isLoading, startPurchase } = usePurchase();
 
   const tipCompletePath = buildCheckoutCompletePath(artist, {
     purchaseType: "tip",
@@ -40,7 +38,6 @@ const TipArtistForm: React.FC<{
 
   const methods = useForm<{
     price: number;
-    email: string;
     message?: string;
     priceButton: number | "other";
   }>({ defaultValues: {} });
@@ -65,7 +62,6 @@ const TipArtistForm: React.FC<{
           message: methods.getValues("message") || undefined,
         },
       ],
-      email: user ? undefined : methods.getValues("email"),
     });
   };
 
@@ -79,7 +75,12 @@ const TipArtistForm: React.FC<{
       {!artistDetails && <LoadingBlocks rows={1} />}
 
       {currency && artistDetails && (
-        <>
+        <PurchaseStep
+          checkout={checkout}
+          returnUrl={`${window.location.origin}${tipCompletePath}`}
+          onSuccess={() => navigate(tipCompletePath)}
+          buttonLabel={t("completePayment")}
+        >
           <FormProvider {...methods}>
             <ul className="flex flex-wrap justify-center gap-2">
               {defaultGifts.map((gift) => (
@@ -133,20 +134,6 @@ const TipArtistForm: React.FC<{
             )}
             {actualValue && (
               <>
-                {!user && (
-                  <FormComponent
-                    className={css`
-                      margin-bottom: 0.5rem !important;
-                    `}
-                  >
-                    {t("email")}
-                    <InputEl
-                      {...methods.register("email")}
-                      type="email"
-                      required
-                    />
-                  </FormComponent>
-                )}
                 <FormComponent
                   className={css`
                     margin-top: 1rem !important ;
@@ -181,18 +168,8 @@ const TipArtistForm: React.FC<{
               </>
             )}
           </FormProvider>
-        </>
+        </PurchaseStep>
       )}
-      <PurchaseModal
-        open={!!checkout}
-        onClose={reset}
-        clientSecret={checkout?.clientSecret}
-        stripeAccountId={checkout?.stripeAccountId}
-        returnUrl={`${window.location.origin}${tipCompletePath}`}
-        onSuccess={() => navigate(tipCompletePath)}
-        title={t("tipArtistByName", { artistName: artist.name }) ?? ""}
-        buttonLabel={t("completePayment")}
-      />
     </div>
   );
 };

@@ -454,6 +454,22 @@ export const handleCheckoutSession = async (
   }
 };
 
+const recoverEmailFromSetupIntent = async (
+  intent: Stripe.SetupIntent,
+  accountId: string
+): Promise<string> => {
+  const paymentMethod =
+    typeof intent.payment_method === "string"
+      ? await stripe.paymentMethods.retrieve(
+          intent.payment_method,
+          {},
+          { stripeAccount: accountId }
+        )
+      : intent.payment_method;
+
+  return paymentMethod?.billing_details?.email ?? "";
+};
+
 export const handleSetupIntentSucceeded = async (
   setupIntent: Stripe.SetupIntent
 ) => {
@@ -486,7 +502,20 @@ export const handleSetupIntentSucceeded = async (
     return;
   }
 
-  const { fundraiserId, userId, userEmail, userName } = metadata;
+  const { fundraiserId, userId, userName } = metadata;
+
+  let userEmail = metadata.userEmail ?? "";
+  if (!userEmail && !userId) {
+    userEmail = await recoverEmailFromSetupIntent(
+      intent,
+      metadata.stripeAccountId
+    );
+    if (userEmail) {
+      logger.warn(
+        `handleSetupIntentSucceeded: ${intent.id} carried no identity in its metadata; recovered the buyer's email from the payment method's billing details`
+      );
+    }
+  }
 
   let {
     userId: actualUserId,
@@ -1256,6 +1285,32 @@ export const handleMerchPurchasesFromIntent = async (
   }
 };
 
+/**
+ * Last-resort buyer email, read back from what Stripe itself collected. Only
+ * used when an intent reaches us with no identity in its metadata at all: the
+ * charge has already gone through by then, so resolving nothing here would
+ * mean a real payment that Mirlo has no record of.
+ */
+const recoverEmailFromIntent = async (
+  intent: Stripe.PaymentIntent,
+  accountId: string
+): Promise<string> => {
+  if (intent.receipt_email) {
+    return intent.receipt_email;
+  }
+
+  const charge =
+    typeof intent.latest_charge === "string"
+      ? await stripe.charges.retrieve(
+          intent.latest_charge,
+          {},
+          { stripeAccount: accountId }
+        )
+      : intent.latest_charge;
+
+  return charge?.billing_details?.email ?? "";
+};
+
 export const completePurchaseFromIntent = async (
   intent: Stripe.PaymentIntent,
   accountId: string
@@ -1274,8 +1329,20 @@ export const completePurchaseFromIntent = async (
     payment_intent: intent.id,
   } as unknown as Stripe.Checkout.Session;
 
+  // The email normally lands in metadata — either supplied at initiation, or
+  // attached during the payment step via PUT /purchase/:id.
+  let resolvedEmail = userEmail ?? "";
+  if (!resolvedEmail && !userId) {
+    resolvedEmail = await recoverEmailFromIntent(intent, accountId);
+    if (resolvedEmail) {
+      logger.warn(
+        `completePurchaseFromIntent: ${intent.id} carried no identity in its metadata; recovered the buyer's email from Stripe's billing details`
+      );
+    }
+  }
+
   const { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
-    userEmail ?? "",
+    resolvedEmail,
     userId
   );
 

@@ -15,45 +15,25 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
 
 import { Button } from "../Button";
+import FormComponent from "../FormComponent";
+import { InputEl } from "../Input";
 
-/**
- * Inner payment form, rendered inside an <Elements> provider that already holds
- * the PaymentIntent clientSecret. Collects the payment method and confirms the
- * payment. Shared by every purchase flow (tip, trackGroup, merch, …) via
- * PurchaseModal, and by the full-page HostedCheckout.
- *
- * Completion has two modes:
- * - `onSuccess` provided → confirm with `redirect: "if_required"`. Payment
- *   methods that don't need a redirect (most cards) resolve in JS and we call
- *   `onSuccess` so the caller can navigate within the SPA — the page is not
- *   reloaded, so anything playing in the global audio player keeps going.
- *   Methods that genuinely require a redirect (3DS, bank redirects) still bounce
- *   to `returnUrl`, as Stripe mandates.
- * - `onSuccess` omitted → confirm with the default full redirect to `returnUrl`
- *   (used by HostedCheckout / external integrators that have no SPA to return to).
- */
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const PurchasePaymentForm: React.FC<{
   returnUrl: string;
   buttonLabel: string;
-  onSuccess?: () => void;
-  /** Physical merch: collect a shipping address via Stripe's AddressElement. */
+  onSuccess?: (buyerEmail?: string) => void;
   requiresShipping?: boolean;
-  /** Country codes the artist actually ships to, for the AddressElement's picker. */
   allowedCountries?: string[];
-  /** The clientSecret is a SetupIntent's (subscription sign-up) rather than a PaymentIntent's — confirm with `confirmSetup`, not `confirmPayment`. */
   isSetup?: boolean;
-  /** Needed (alongside stripeAccountId) only when isSetup && requiresShipping, to PUT the collected address onto the SetupIntent before confirming — SetupIntents have no native `shipping` field, unlike PaymentIntents. */
   clientSecret?: string;
   stripeAccountId?: string;
-  /**
-   * Awaited right before confirmPayment/confirmSetup — return `false` to
-   * abort the submission (the caller is expected to have already surfaced
-   * why, e.g. an invalid email). Used by the hosted checkout page to attach
-   * a collected email/logged-in user to the intent before it's confirmed.
-   */
-  beforeConfirm?: () => Promise<boolean>;
+
+  buyerEmailKnown?: boolean;
 }> = ({
   returnUrl,
   buttonLabel,
@@ -63,17 +43,52 @@ const PurchasePaymentForm: React.FC<{
   isSetup,
   clientSecret,
   stripeAccountId,
-  beforeConfirm,
+  buyerEmailKnown,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
   const handler = useErrorHandler();
+  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [showButton, setShowButton] = React.useState(false);
   const [isFormComplete, setIsFormComplete] = React.useState(false);
   const [isAddressComplete, setIsAddressComplete] =
     React.useState(!requiresShipping);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [emailError, setEmailError] = React.useState(false);
+
+  const intentKnowsBuyer = buyerEmailKnown ?? !!user;
+  const needsEmail = !intentKnowsBuyer && !user;
+
+  const intentId = clientSecret?.split("_secret_")[0];
+
+  const attachIdentity = async (): Promise<boolean> => {
+    if (intentKnowsBuyer) {
+      return true;
+    }
+
+    if (needsEmail && !EMAIL_REGEX.test(email)) {
+      setEmailError(true);
+      return false;
+    }
+
+    if (!intentId || !stripeAccountId) {
+      handler(new Error("Missing clientSecret/stripeAccountId for the buyer"));
+      return false;
+    }
+
+    try {
+      await api.put(
+        `purchase/${intentId}?stripeAccountId=${encodeURIComponent(stripeAccountId)}`,
+        needsEmail ? { email } : {}
+      );
+      return true;
+    } catch (e) {
+      handler(e);
+      return false;
+    }
+  };
 
   const resolveShipping = async () => {
     if (!requiresShipping || !elements) {
@@ -103,34 +118,27 @@ const PurchasePaymentForm: React.FC<{
       return;
     }
 
-    if (beforeConfirm) {
-      const shouldContinue = await beforeConfirm();
-      if (!shouldContinue) {
-        setIsLoading(false);
-        return;
-      }
+    if (!(await attachIdentity())) {
+      setIsLoading(false);
+      return;
     }
 
     const shipping = await resolveShipping();
-    // confirmSetup/confirmPayment have distinct Stripe SDK types (a
-    // SetupIntent has no `shipping`), so the call itself can't be unified —
-    // only the params shared between both branches are, here.
-    const confirmParams = { return_url: returnUrl, shipping };
+    const confirmParams = {
+      return_url: returnUrl,
+      shipping,
+      ...(needsEmail && { receipt_email: email }),
+    };
 
-    // A SetupIntent has no native `shipping` field for confirmSetup to carry
-    // (unlike confirmPayment above), so a `collectAddress` tier's address is
-    // saved via a separate call first — read back from the SetupIntent's
-    // metadata once it succeeds (see attachSetupIntentShippingAddress).
     if (isSetup && requiresShipping && shipping) {
-      if (!clientSecret || !stripeAccountId) {
+      if (!intentId || !stripeAccountId) {
         handler(new Error("Missing clientSecret/stripeAccountId for shipping"));
         setIsLoading(false);
         return;
       }
       try {
-        const setupIntentId = clientSecret.split("_secret_")[0];
         await api.put(
-          `purchase/${setupIntentId}?stripeAccountId=${encodeURIComponent(stripeAccountId)}`,
+          `purchase/${intentId}?stripeAccountId=${encodeURIComponent(stripeAccountId)}`,
           { shippingAddress: shipping }
         );
       } catch (e) {
@@ -141,7 +149,6 @@ const PurchasePaymentForm: React.FC<{
     }
 
     if (onSuccess) {
-      // Async completion: only redirect if the payment method requires it.
       const result = isSetup
         ? await stripe.confirmSetup({
             elements,
@@ -167,14 +174,10 @@ const PurchasePaymentForm: React.FC<{
         intent &&
         (intent.status === "succeeded" || intent.status === "processing")
       ) {
-        // Hand control back to the caller, which navigates within the SPA.
-        // Leave isLoading set — the view is about to change.
-        onSuccess();
+        onSuccess(needsEmail ? email : undefined);
         return;
       }
 
-      // Resolved without an error or a terminal status (e.g. it kicked off a
-      // redirect, or needs another action). Nothing more to do here.
       setIsLoading(false);
       return;
     }
@@ -189,8 +192,6 @@ const PurchasePaymentForm: React.FC<{
           confirmParams,
         });
 
-    // We only reach this point if there's an immediate error (e.g. incomplete
-    // details). Otherwise the customer is redirected to `return_url`.
     if (error) {
       console.error(error);
       handler(error.message);
@@ -224,6 +225,27 @@ const PurchasePaymentForm: React.FC<{
       `}
     >
       {!showButton && <LoadingBlocks rows={1} />}
+      {needsEmail && (
+        <FormComponent>
+          <label htmlFor="purchase-buyer-email">{t("email")}</label>
+          <InputEl
+            id="purchase-buyer-email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setEmailError(false);
+            }}
+          />
+          {emailError && (
+            <small className="text-(--mi-warning-color)">
+              {t("invalidEmail")}
+            </small>
+          )}
+          <small>{t("emailReceiptHint")}</small>
+        </FormComponent>
+      )}
       {requiresShipping && (
         <AddressElement
           options={{
@@ -245,7 +267,11 @@ const PurchasePaymentForm: React.FC<{
           size="big"
           isLoading={isLoading}
           disabled={
-            !stripe || !elements || !isFormComplete || !isAddressComplete
+            !stripe ||
+            !elements ||
+            !isFormComplete ||
+            !isAddressComplete ||
+            (needsEmail && !email)
           }
           className={css`
             margin-top: 1rem;

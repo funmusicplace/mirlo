@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 
 type Query = {
   email?: string;
@@ -7,20 +9,20 @@ type Query = {
 
 export default function () {
   const operations = {
-    GET: [GET],
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response) {
     const { id } = req.params;
     const { email } = req.query as unknown as Query;
     try {
+      const where = email ? { user: { email } } : { userId: req.user?.id };
+
       let exists = false;
-      if (email) {
+      if (email || req.user) {
         const purchase = await prisma.userTrackGroupPurchase.findFirst({
           where: {
-            user: {
-              email,
-            },
+            ...where,
             trackGroupId: Number(id),
           },
         });

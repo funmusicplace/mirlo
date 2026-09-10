@@ -86,15 +86,13 @@ describe("PurchaseCatalogueButton", () => {
     });
   });
 
-  test("purchases at the floor price by default", async () => {
+  test("purchases at the floor price for a logged-in buyer", async () => {
     authState.user = { id: 5, email: "buyer@example.com" };
     mockCataloguePriceFetch(1500);
     renderButton();
 
     await userEvent.click(
-      await screen.findByRole("button", {
-        name: /purchaseEntireCatalogueAtLeast/,
-      })
+      await screen.findByRole("button", { name: /purchaseEntireCatalogue:/ })
     );
 
     await waitFor(() => expect(startPurchase).toHaveBeenCalled());
@@ -105,69 +103,20 @@ describe("PurchaseCatalogueButton", () => {
     });
   });
 
-  test("lets a buyer pay more than the floor", async () => {
-    authState.user = { id: 5, email: "buyer@example.com" };
+  test("a logged-out buyer takes the same one-click path, with no email asked for here", async () => {
     mockCataloguePriceFetch(1500);
     renderButton();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "payMore" })
-    );
-    const input = screen.getByRole("spinbutton");
-    await userEvent.clear(input);
-    await userEvent.type(input, "25");
-
-    await userEvent.click(
-      screen.getByRole("button", { name: /purchaseEntireCatalogue:/ })
+      await screen.findByRole("button", { name: /purchaseEntireCatalogue:/ })
     );
 
     await waitFor(() => expect(startPurchase).toHaveBeenCalled());
-    expect(startPurchase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: [{ type: "catalogue", price: "2500" }],
-      })
-    );
-  });
-
-  test("never submits less than the floor even if the input is edited below it", async () => {
-    authState.user = { id: 5, email: "buyer@example.com" };
-    mockCataloguePriceFetch(1500);
-    renderButton();
-
-    await userEvent.click(
-      await screen.findByRole("button", { name: "payMore" })
-    );
-    const input = screen.getByRole("spinbutton");
-    await userEvent.clear(input);
-    await userEvent.type(input, "1");
-
-    await userEvent.click(
-      screen.getByRole("button", { name: /purchaseEntireCatalogue:/ })
-    );
-
-    await waitFor(() => expect(startPurchase).toHaveBeenCalled());
-    expect(startPurchase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: [{ type: "catalogue", price: "1500" }],
-      })
-    );
-  });
-
-  test("collects and submits an email for a logged-out buyer", async () => {
-    mockCataloguePriceFetch(1500);
-    renderButton();
-
-    const emailInput = await screen.findByPlaceholderText("email");
-    await userEvent.type(emailInput, "anon@example.com");
-
-    await userEvent.click(
-      screen.getByRole("button", { name: /purchaseEntireCatalogueAtLeast/ })
-    );
-
-    await waitFor(() => expect(startPurchase).toHaveBeenCalled());
-    expect(startPurchase).toHaveBeenCalledWith(
-      expect.objectContaining({ email: "anon@example.com" })
-    );
+    expect(startPurchase).toHaveBeenCalledWith({
+      artistId: 1,
+      items: [{ type: "catalogue", price: "1500" }],
+    });
+    expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
   });
 
   test("renders the PurchaseModal once usePurchase reports a checkout in progress", async () => {

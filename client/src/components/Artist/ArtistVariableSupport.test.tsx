@@ -50,9 +50,13 @@ vi.mock("components/common/Purchase/usePurchase", () => ({
   }),
 }));
 
-vi.mock("components/common/Purchase/PurchaseModal", () => ({
+vi.mock("components/common/Purchase/PurchaseStep", () => ({
   default: (props: any) =>
-    props.open ? <div data-testid="purchase-modal" /> : null,
+    props.checkout ? (
+      <div data-testid="purchase-step-payment" />
+    ) : (
+      props.children
+    ),
 }));
 
 import ArtistVariableSupport from "./ArtistVariableSupport";
@@ -104,7 +108,9 @@ describe("ArtistVariableSupport", () => {
       artistId: baseTier.artistId,
       items: [{ type: "subscription", tierId: baseTier.id, amount: 500 }],
     });
-    expect(screen.queryByTestId("purchase-modal")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("purchase-step-payment")
+    ).not.toBeInTheDocument();
   });
 
   test("opens the amount modal for an allowVariable tier", () => {
@@ -160,38 +166,37 @@ describe("ArtistVariableSupport", () => {
     expect(startPurchase).not.toHaveBeenCalled();
   });
 
-  test("collects an email for a logged-out buyer and submits it with the purchase", async () => {
+  test("a logged-out buyer subscribes without being asked for an email here", async () => {
     renderComponent(baseTier);
 
     fireEvent.click(screen.getByText("support"));
 
-    const emailInput = screen.getByLabelText("yourEmailLabel");
-    fireEvent.change(emailInput, {
-      target: { value: "anon@example.com" },
-    });
+    expect(screen.queryByLabelText("yourEmailLabel")).not.toBeInTheDocument();
 
-    const form = emailInput.closest("form");
+    const nameInput = screen.getByLabelText(/yourNameLabel/);
+    const form = nameInput.closest("form");
     if (!form) throw new Error("form not found");
     fireEvent.submit(form);
 
     await waitFor(() => expect(startPurchase).toHaveBeenCalled());
 
     expect(startPurchase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        artistId: baseTier.artistId,
-        email: "anon@example.com",
-      })
+      expect.objectContaining({ artistId: baseTier.artistId })
     );
+    expect(startPurchase.mock.calls[0][0]).not.toHaveProperty("email");
   });
 
-  test("renders the PurchaseModal once usePurchase reports a checkout in progress", async () => {
+  test("swaps to the payment step in the same modal once checkout is in progress", async () => {
     purchaseState.checkout = {
       clientSecret: "seti_secret",
       stripeAccountId: "acct_1",
     };
 
     renderComponent(baseTier);
+    fireEvent.click(screen.getByText("support"));
 
-    expect(await screen.findByTestId("purchase-modal")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("purchase-step-payment")
+    ).toBeInTheDocument();
   });
 });

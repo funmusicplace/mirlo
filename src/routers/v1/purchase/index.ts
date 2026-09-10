@@ -287,14 +287,6 @@ export default function () {
         );
       }
 
-      if (!readerId && !loggedInUser && !email && !hosted) {
-        throw new AppError({
-          httpCode: 400,
-          description:
-            "email is required for a purchase without a logged-in user",
-        });
-      }
-
       const hasSubscription = items.some((i) => i.type === "subscription");
       if (hasSubscription && items.length > 1) {
         throw new AppError({
@@ -617,7 +609,10 @@ export default function () {
 
   POST.apiDoc = {
     summary: "Initiate a purchase",
-    description: "Unified purchase endpoint for all item types and channels. ",
+    description:
+      "Unified purchase endpoint for all item types and channels. " +
+      "The buyer's identity is optional here: pass `email` if you already " +
+      "know it, otherwise attach it before confirming via PUT /purchase/:id.",
     parameters: [
       {
         in: "body",

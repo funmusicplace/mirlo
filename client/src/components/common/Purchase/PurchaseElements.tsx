@@ -6,22 +6,16 @@ import PurchasePaymentForm from "./PurchasePaymentForm";
 
 const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 
-/**
- * Loads Stripe.js for the connected account and renders the Payment Element.
- * Container-agnostic: drop it into a page, or render it in place of a form.
- * Flows whose trigger already lives inside a modal (album, tip) render this
- * inline — swapping the buy form for the payment step within the *same* modal —
- * rather than opening a second dialog. `PurchaseModal` wraps it in a `<Modal>`
- * for any standalone buy-button that isn't already inside one.
- */
 const PurchaseElements: React.FC<{
   clientSecret: string;
   stripeAccountId: string;
   returnUrl: string;
   buttonLabel: string;
-  onSuccess?: () => void;
+  onSuccess?: (buyerEmail?: string) => void;
   requiresShipping?: boolean;
   allowedCountries?: string[];
+  /** See PurchasePaymentForm — only the hosted checkout page needs to set this. */
+  buyerEmailKnown?: boolean;
 }> = ({
   clientSecret,
   stripeAccountId,
@@ -30,9 +24,8 @@ const PurchaseElements: React.FC<{
   onSuccess,
   requiresShipping,
   allowedCountries,
+  buyerEmailKnown,
 }) => {
-  // Load Stripe.js once per connected account. Passing the promise straight to
-  // <Elements> means the instance is created once, not re-created each render.
   const stripePromise = React.useMemo(
     () =>
       stripeAccountId && stripeKey
@@ -53,9 +46,7 @@ const PurchaseElements: React.FC<{
         buttonLabel={buttonLabel}
         requiresShipping={requiresShipping}
         allowedCountries={allowedCountries}
-        // SetupIntent client secrets are always `seti_`-prefixed — deriving
-        // this here (the one place that actually has the clientSecret) beats
-        // threading a caller-computed `isSetup` flag through every component.
+        buyerEmailKnown={buyerEmailKnown}
         isSetup={clientSecret.startsWith("seti_")}
         clientSecret={clientSecret}
         stripeAccountId={stripeAccountId}

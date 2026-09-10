@@ -388,6 +388,27 @@ describe("purchase", () => {
       assert.ok(response.body.clientSecret);
     });
 
+    it("should return 200 for a logged-out purchase with no email", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_tg_guest",
+      });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.clientSecret);
+      assert.ok(response.body.stripeAccountId);
+    });
+
     it("should return 404 when track does not belong to the given artist", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
