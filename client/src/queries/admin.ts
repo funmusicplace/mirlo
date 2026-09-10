@@ -1,8 +1,61 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import api from "services/api";
 
 const QUERY_KEY_ADMIN_FUNDRAISER_PLEDGES = "admin-fundraiser-pledges";
 const QUERY_KEY_ADMIN_CLIENTS = "admin-clients";
+const QUERY_KEY_ADMIN_STATS = "admin-stats";
+
+/** Bucket size for the admin dashboard's time series. */
+export type StatsGranularity = "week" | "month";
+
+export interface StatsCountPoint {
+  date: string;
+  count: number;
+}
+
+export interface StatsRevenuePoint {
+  date: string;
+  purchasesUsdCents: number;
+  subscriptionsUsdCents: number;
+  purchasesConvertedUsdCents: number;
+  subscriptionsConvertedUsdCents: number;
+  platformCutUsdCents: number;
+  platformCutConvertedUsdCents: number;
+}
+
+export interface AdminStats {
+  granularity: StatsGranularity;
+  userSignups: StatsCountPoint[];
+  artistSignups: StatsCountPoint[];
+  revenue: StatsRevenuePoint[];
+  transactionCounts: Array<{ date: string; currency: string; count: number }>;
+  avgMonthlyPlays: number;
+  avgMonthlyActiveUsers: number;
+  avgMonthlyAlbumDownloads: number;
+}
+
+export const useAdminStatsQuery = (
+  granularity: StatsGranularity,
+  days: number
+) => {
+  return useQuery({
+    queryKey: [QUERY_KEY_ADMIN_STATS, granularity, days],
+    queryFn: async () => {
+      const { result } = await api.get<AdminStats>(
+        `admin/stats?days=${days}&granularity=${granularity}`
+      );
+      return result;
+    },
+    // Toggling week/month swaps the query key; keep the old charts on screen
+    // instead of blanking the page while the new ones load.
+    placeholderData: keepPreviousData,
+  });
+};
 
 export interface FundraiserPledgesFilters {
   pledgeStatus?: string;

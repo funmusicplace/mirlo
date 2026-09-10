@@ -24,6 +24,12 @@ const mondayOf = (date: Date) => {
   return d.toISOString().slice(0, 10);
 };
 
+const firstOfMonth = (date: Date) =>
+  `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(
+    2,
+    "0"
+  )}-01`;
+
 describe("admin/stats", () => {
   beforeEach(async () => {
     try {
@@ -65,18 +71,17 @@ describe("admin/stats", () => {
 
     assert.equal(response.statusCode, 200);
     const { result } = response.body;
-    assert(Array.isArray(result.userSignupsByWeek));
-    assert(Array.isArray(result.artistSignupsByWeek));
-    assert(Array.isArray(result.transactionsByWeek));
-    assert(Array.isArray(result.usdRevenueByWeek));
-    assert(Array.isArray(result.transactionCountByWeek));
-    assert(Array.isArray(result.platformRevenueByWeek));
+    assert.equal(result.granularity, "week");
+    assert(Array.isArray(result.userSignups));
+    assert(Array.isArray(result.artistSignups));
+    assert(Array.isArray(result.revenue));
+    assert(Array.isArray(result.transactionCounts));
     assert.equal(typeof result.avgMonthlyPlays, "number");
     assert.equal(typeof result.avgMonthlyActiveUsers, "number");
     assert.equal(typeof result.avgMonthlyAlbumDownloads, "number");
   });
 
-  it("should split usdRevenueByWeek into purchases/subscriptions, USD/converted", async () => {
+  it("should split revenue into purchases/subscriptions, USD/converted", async () => {
     const { accessToken } = await createUser({
       email: "admin@admin.com",
       isAdmin: true,
@@ -173,17 +178,17 @@ describe("admin/stats", () => {
 
     assert.equal(response.statusCode, 200);
 
-    const weekRow = response.body.result.usdRevenueByWeek.find(
-      (row: { week: string }) => row.week === week
+    const weekRow = response.body.result.revenue.find(
+      (row: { date: string }) => row.date === week
     );
-    assert(weekRow, `expected a usdRevenueByWeek row for week ${week}`);
+    assert(weekRow, `expected a revenue row for week ${week}`);
     assert.equal(weekRow.purchasesUsdCents, 1000);
     assert.equal(weekRow.subscriptionsUsdCents, 500);
     assert.equal(weekRow.purchasesConvertedUsdCents, 1800);
     assert.equal(weekRow.subscriptionsConvertedUsdCents, 850);
   });
 
-  it("should count transactionCountByWeek per currency", async () => {
+  it("should count transactionCounts per currency", async () => {
     const { accessToken } = await createUser({
       email: "admin@admin.com",
       isAdmin: true,
@@ -210,8 +215,8 @@ describe("admin/stats", () => {
 
     assert.equal(response.statusCode, 200);
 
-    const rows = response.body.result.transactionCountByWeek.filter(
-      (row: { week: string }) => row.week === week
+    const rows = response.body.result.transactionCounts.filter(
+      (row: { date: string }) => row.date === week
     );
     const usdRow = rows.find(
       (row: { currency: string }) => row.currency === "usd"
@@ -219,19 +224,13 @@ describe("admin/stats", () => {
     const eurRow = rows.find(
       (row: { currency: string }) => row.currency === "eur"
     );
-    assert(
-      usdRow,
-      `expected a usd transactionCountByWeek row for week ${week}`
-    );
-    assert(
-      eurRow,
-      `expected a eur transactionCountByWeek row for week ${week}`
-    );
+    assert(usdRow, `expected a usd transactionCounts row for week ${week}`);
+    assert(eurRow, `expected a eur transactionCounts row for week ${week}`);
     assert.equal(usdRow.count, 3);
     assert.equal(eurRow.count, 2);
   });
 
-  it("should split platformRevenueByWeek into USD and converted platform cuts", async () => {
+  it("should split revenue into USD and converted platform cuts", async () => {
     const { accessToken } = await createUser({
       email: "admin@admin.com",
       isAdmin: true,
@@ -276,11 +275,103 @@ describe("admin/stats", () => {
 
     assert.equal(response.statusCode, 200);
 
-    const weekRow = response.body.result.platformRevenueByWeek.find(
-      (row: { week: string }) => row.week === week
+    const weekRow = response.body.result.revenue.find(
+      (row: { date: string }) => row.date === week
     );
-    assert(weekRow, `expected a platformRevenueByWeek row for week ${week}`);
+    assert(weekRow, `expected a revenue row for week ${week}`);
     assert.equal(weekRow.platformCutUsdCents, 150);
     assert.equal(weekRow.platformCutConvertedUsdCents, 180);
+  });
+
+  it("should bucket by month when asked for monthly granularity", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+
+    const now = new Date();
+
+    await prisma.userTransaction.createMany({
+      data: [
+        { userId: buyer.id, amount: 1000, currency: "usd", createdAt: now },
+        { userId: buyer.id, amount: 500, currency: "usd", createdAt: now },
+      ],
+    });
+
+    const response = await requestApp
+      .get("admin/stats?granularity=month")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.granularity, "month");
+
+    // Every bucket is the 1st of a month.
+    response.body.result.revenue.forEach((row: { date: string }) => {
+      assert.ok(
+        row.date.endsWith("-01"),
+        `expected a month bucket, got ${row.date}`
+      );
+    });
+
+    const monthRow = response.body.result.revenue.find(
+      (row: { date: string }) => row.date === firstOfMonth(now)
+    );
+    assert(monthRow, `expected a revenue row for ${firstOfMonth(now)}`);
+    assert.equal(monthRow.purchasesUsdCents, 1500);
+  });
+
+  it("should leave FAILED transactions out of revenue and counts", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+
+    const now = new Date();
+    const week = mondayOf(now);
+
+    await prisma.userTransaction.createMany({
+      data: [
+        {
+          userId: buyer.id,
+          amount: 1000,
+          currency: "usd",
+          platformCut: 100,
+          paymentStatus: "COMPLETED",
+          createdAt: now,
+        },
+        {
+          userId: buyer.id,
+          amount: 9999,
+          currency: "usd",
+          platformCut: 999,
+          paymentStatus: "FAILED",
+          createdAt: now,
+        },
+      ],
+    });
+
+    const response = await requestApp
+      .get("admin/stats")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+
+    const weekRow = response.body.result.revenue.find(
+      (row: { date: string }) => row.date === week
+    );
+    assert(weekRow, `expected a revenue row for week ${week}`);
+    assert.equal(weekRow.purchasesUsdCents, 1000);
+    assert.equal(weekRow.platformCutUsdCents, 100);
+
+    const usdRow = response.body.result.transactionCounts.find(
+      (row: { date: string; currency: string }) =>
+        row.date === week && row.currency === "usd"
+    );
+    assert(usdRow, `expected a usd transactionCounts row for week ${week}`);
+    assert.equal(usdRow.count, 1);
   });
 });
