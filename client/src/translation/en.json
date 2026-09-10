@@ -1571,7 +1571,10 @@
     "isEnabled": "Is enabled?",
     "doesNotExist": "This release does not exist or it does not have a public presence.",
     "artistRecommends": "{{ artistName }} recommends",
-    "trackDoesntExist": "That track doesn't exist"
+    "trackDoesntExist": "That track doesn't exist",
+    "downloadLinkNotValid": "This download link isn't valid",
+    "downloadLinkNotValidHint": "It may have been replaced by a newer one, or the address it was sent to doesn't match this purchase. Check the most recent e-mail we sent you, or sign in to download from your collection.",
+    "goToRelease": "Go to the release"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",

@@ -6,8 +6,9 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import sendMail from "../../../../jobs/send-mail";
-import { getClient } from "../../../../utils/getClient";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import { getClient } from "../../../../utils/getClient";
+import { hasSubscriptionTiers } from "../../../../utils/subscriptionTier";
 
 export default function () {
   const operations = {
@@ -85,6 +86,9 @@ export default function () {
               host: process.env.API_DOMAIN,
               client: (await getClient()).applicationUrl,
               token: purchase.singleDownloadToken,
+              hasSubscriptionTiers: await hasSubscriptionTiers(
+                trackGroup.profileId
+              ),
             },
           },
         } as Job);

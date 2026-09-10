@@ -223,6 +223,97 @@ describe("trackGroups/{id}/download", () => {
       assert.equal(response.header["content-type"], "application/zip");
     });
 
+    it("honours a guest's tokenised link even when the browser is signed in as someone else", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      await createBucketIfNotExists(finalAudioBucket);
+
+      const { user: purchaser } = await createUser({
+        email: "guest-purchaser@artist.com",
+      });
+      const downloadToken = randomUUID();
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: purchaser.id,
+          trackGroupId: trackGroup.id,
+          singleDownloadToken: downloadToken,
+        },
+      });
+
+      const { accessToken: bystanderToken } = await createUser({
+        email: "bystander@artist.com",
+      });
+
+      const response = await requestApp
+        .get(
+          `trackGroups/${trackGroup.id}/download?token=${downloadToken}&email=${encodeURIComponent(purchaser.email)}`
+        )
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${bystanderToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      assert.notEqual(response.body.result.jobId, undefined);
+    });
+
+    it("falls back to the session when the tokenised link is stale", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      await createBucketIfNotExists(finalAudioBucket);
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: purchaser.id,
+          trackGroupId: trackGroup.id,
+          singleDownloadToken: randomUUID(),
+        },
+      });
+
+      const response = await requestApp
+        .get(
+          `trackGroups/${trackGroup.id}/download?token=a-stale-token&email=${encodeURIComponent(purchaser.email)}`
+        )
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      assert.notEqual(response.body.result.jobId, undefined);
+    });
+
+    it("reports why a tokenised link failed rather than a bare 404", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+
+      const { user: purchaser } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: purchaser.id,
+          trackGroupId: trackGroup.id,
+          singleDownloadToken: randomUUID(),
+        },
+      });
+
+      const response = await requestApp
+        .get(
+          `trackGroups/${trackGroup.id}/download?token=a-stale-token&email=${encodeURIComponent(purchaser.email)}`
+        )
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+      assert.ok(
+        typeof response.body.error === "string" &&
+          response.body.error.includes("Purchase doesn't exist"),
+        `should say the purchase/token didn't resolve, got: ${JSON.stringify(response.body.error)}`
+      );
+    });
+
     describe("consolidated mode", () => {
       let adminToken: string;
 

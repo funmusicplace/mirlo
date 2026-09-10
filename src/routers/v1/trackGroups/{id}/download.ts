@@ -35,7 +35,37 @@ export default function () {
     try {
       let trackGroup;
 
-      if (req.user) {
+      if (token && email) {
+        logger.info(
+          `trackGroupId: ${trackGroupId} being downloaded with a purchase token, ${email}, ${token}`
+        );
+        const tokenUser = await prisma.user.findFirst({
+          where: { email },
+        });
+
+        if (tokenUser) {
+          try {
+            trackGroup = await findPurchaseBasedOnTokenAndUpdate(
+              Number(trackGroupId),
+              token,
+              tokenUser.id
+            );
+          } catch (e) {
+            if (!req.user) {
+              throw e;
+            }
+            logger.info(
+              `trackGroupId: ${trackGroupId} purchase token didn't resolve for ${email}, falling back to the session`
+            );
+          }
+        } else if (!req.user) {
+          logger.info(
+            `trackGroupId: ${trackGroupId} no user found for ${email}`
+          );
+        }
+      }
+
+      if (!trackGroup && req.user) {
         const user = req.user;
 
         if (!user.isAdmin) {
@@ -55,21 +85,6 @@ export default function () {
             },
             ...basicTrackGroupInclude,
           });
-        }
-      } else {
-        logger.info(
-          `trackGroupId: ${trackGroupId} being downloaded by a non-logged in user, ${email}, ${token}`
-        );
-        const user = await prisma.user.findFirst({
-          where: { email },
-        });
-
-        if (user) {
-          trackGroup = await findPurchaseBasedOnTokenAndUpdate(
-            Number(trackGroupId),
-            token,
-            user?.id
-          );
         }
       }
 

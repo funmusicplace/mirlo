@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+import { uniq } from "lodash";
+
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 
 type Query = {
@@ -16,15 +18,12 @@ export default function () {
     const { email } = req.query as unknown as Query;
     const user = req.user;
     try {
-      let userEmail = email;
+      const emails = uniq([email, user?.email].filter((e): e is string => !!e));
       let exists = false;
-      if (!userEmail && user) {
-        userEmail = user.email;
-      }
-      if (userEmail) {
+      if (emails.length > 0) {
         const purchase = await prisma.userTrackPurchase.findFirst({
           where: {
-            user: { email: userEmail },
+            user: { email: { in: emails } },
             trackId: Number(id),
           },
         });
@@ -32,8 +31,6 @@ export default function () {
         if (purchase) {
           exists = true;
         } else {
-          // Also allow download if the track is isPreview and the user has
-          // purchased the containing track group
           const previewTrack = await prisma.track.findFirst({
             where: {
               id: Number(id),
@@ -41,7 +38,7 @@ export default function () {
               trackGroup: {
                 publishedAt: { lte: new Date() },
                 userTrackGroupPurchases: {
-                  some: { user: { email: userEmail } },
+                  some: { user: { email: { in: emails } } },
                 },
               },
             },

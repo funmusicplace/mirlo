@@ -23,7 +23,7 @@ import { getClient } from "./getClient";
 import { resolvePayee } from "./payments/payee";
 import { calculateAppFee } from "./processingPayments";
 import stripe from "./stripe";
-import { registerSubscription } from "./subscriptionTier";
+import { hasSubscriptionTiers, registerSubscription } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 
 const getPaymentIntent = async (
@@ -231,6 +231,7 @@ export type AlbumPurchaseEmailType = {
   email: string;
   client: string;
   host: string;
+  hasSubscriptionTiers?: boolean;
 };
 
 export const purchaseForAlbumPurchaseEmail = (purchase: {
@@ -397,6 +398,9 @@ export const handleTrackGroupPurchase = async (
             email: user.email,
             client: applicationUrl,
             host: process.env.API_DOMAIN,
+            hasSubscriptionTiers: await hasSubscriptionTiers(
+              trackGroup.profileId
+            ),
           },
         },
       } as Job);
@@ -560,6 +564,7 @@ export const handleCataloguePurchase = async (
             email: user.email,
             client: applicationUrl,
             host: process.env.API_DOMAIN,
+            hasSubscriptionTiers: await hasSubscriptionTiers(artist.id),
           },
         },
       } as Job);
