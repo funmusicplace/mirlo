@@ -1,12 +1,12 @@
 import prisma, { SafeUser } from "@mirlo/prisma";
 import { Prisma, User } from "@mirlo/prisma/client";
+import { v4 as uuid } from "uuid";
 
 import logger from "../logger";
 
 import { deleteArtist, deleteStripeSubscriptions } from "./artist";
 import countries from "./country-codes-currencies";
 
-/** Select used for /auth/profile and SSR hydration of the logged-in user. */
 export const userSelect = {
   email: true,
   accountingEmail: true,
@@ -102,6 +102,19 @@ export type UserSelectPayload = Prisma.UserGetPayload<{
   select: typeof userSelect;
 }>;
 
+const anonymiseDeletedUser = async (userId: number) => {
+  const scrambledEmail = `${uuid()}@deleted`;
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name: null,
+      email: scrambledEmail,
+      stripeCustomerId: null,
+      stripeAccountId: null,
+    },
+  });
+};
+
 export const deleteUser = async (userId: number) => {
   const userArtists = await prisma.profile.findMany({
     where: { userId: Number(userId) },
@@ -118,7 +131,23 @@ export const deleteUser = async (userId: number) => {
       userId: userId,
     },
   });
+
+  await anonymiseDeletedUser(userId);
   await prisma.user.delete({ where: { id: userId } });
+};
+
+export const cleanUpDeletedUsers = async () => {
+  const candidates = await prisma.user.findMany({
+    where: {
+      deletedAt: { not: null },
+    },
+  });
+
+  for (const candidate of candidates) {
+    if (!candidate.email.endsWith("@deleted")) {
+      await anonymiseDeletedUser(candidate.id);
+    }
+  }
 };
 
 export const findUserIdForURLSlug = async (id: string) => {
