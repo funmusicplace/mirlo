@@ -82,7 +82,7 @@ interface Track {
     trackId?: number;
     order: number;
   }[];
-  licenseId?: number;
+  licenseId?: number | null;
   license?: {
     short: string;
     name: string;
@@ -124,6 +124,8 @@ interface TrackGroup {
     goalAmount: number;
     isAllOrNothing: boolean;
     endDate: string;
+    name?: string;
+    description?: string | null;
     status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   } | null;
   paymentToUser?: {

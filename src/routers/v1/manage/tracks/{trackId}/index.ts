@@ -13,7 +13,7 @@ import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
 interface TrackBody {
   title: string;
   isPreview: boolean;
-  licenseId: number;
+  licenseId?: number | string | null;
   lyrics: string;
   isrc: string;
   minPrice: number;
@@ -63,6 +63,19 @@ export default function () {
         }
       }
 
+      let parsedLicenseId: number | null | undefined = undefined;
+      if (licenseId === null || licenseId === "") {
+        parsedLicenseId = null;
+      } else if (licenseId !== undefined) {
+        parsedLicenseId = Number(licenseId);
+        if (!Number.isInteger(parsedLicenseId) || parsedLicenseId <= 0) {
+          throw new AppError({
+            httpCode: 400,
+            description: "licenseId must be a valid license",
+          });
+        }
+      }
+
       await updateTrackArtists(Number(trackId), trackArtists);
 
       const newTrack = await prisma.track.update({
@@ -74,7 +87,7 @@ export default function () {
           isPreview,
           allowIndividualSale,
           minPrice,
-          licenseId: Number(licenseId),
+          licenseId: parsedLicenseId,
           description,
           allowMirloPromo,
         },
