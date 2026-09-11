@@ -1,4 +1,7 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import Button from "components/common/Button";
+import Modal from "components/common/Modal";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { pick } from "lodash";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -16,11 +19,13 @@ const PublishPostButton: React.FC<{
   onSaveSuccess?: () => void;
   getBodyContent: () => string;
 }> = ({ post, reload, onSaveSuccess, getBodyContent }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "postForm" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "postForm" });
   const snackbar = useSnackbar();
   const [isPublishing, setIsPublishing] = React.useState(false);
   const { ask } = useConfirm();
-  const { watch, handleSubmit } = useFormContext<PostFormData>();
+  const { watch, handleSubmit, setValue } = useFormContext<PostFormData>();
+  const [pendingPublish, setPendingPublish] =
+    React.useState<PostFormData | null>(null);
 
   const { reload: reloadImages } = useGetUserObjectById<PostImage>(
     `manage/posts/${post?.id}/images`,
@@ -34,7 +39,7 @@ const PublishPostButton: React.FC<{
   const existingId = post.id;
 
   const doPublish = React.useCallback(
-    async (data: PostFormData) => {
+    async (data: PostFormData, publishedAtOverride?: string) => {
       try {
         setIsPublishing(true);
 
@@ -56,7 +61,9 @@ const PublishPostButton: React.FC<{
         const picked = {
           ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
           content: bodyContent,
-          publishedAt: new Date(data.publishedAt + ":00").toISOString(),
+          publishedAt:
+            publishedAtOverride ??
+            new Date(data.publishedAt + ":00").toISOString(),
           minimumSubscriptionTierId:
             isFinite(+data.minimumTier) && +data.minimumTier !== 0
               ? Number(data.minimumTier)
@@ -104,15 +111,85 @@ const PublishPostButton: React.FC<{
       : t("publishPost")
     : t("returnToDraft");
 
+  const onPublishClick = handleSubmit(async (data: PostFormData) => {
+    const chosenDate = new Date(data.publishedAt + ":00");
+    if (post.isDraft && chosenDate < new Date()) {
+      setPendingPublish(data);
+      return;
+    }
+    await doPublish(data);
+  });
+
+  const publishKeepingDate = async () => {
+    const data = pendingPublish;
+    setPendingPublish(null);
+    if (data) {
+      await doPublish(data);
+    }
+  };
+
+  const publishWithTodaysDate = async () => {
+    const data = pendingPublish;
+    setPendingPublish(null);
+    if (data) {
+      const today = new Date();
+      setValue("publishedAt", today.toISOString().slice(0, 16));
+      await doPublish(data, today.toISOString());
+    }
+  };
+
   return (
-    <ArtistButton
-      disabled={!minimumTier || !publicationDate}
-      isLoading={isPublishing}
-      onClick={handleSubmit(doPublish)}
-      type="submit"
-    >
-      {publishText}
-    </ArtistButton>
+    <>
+      <ArtistButton
+        disabled={!minimumTier || !publicationDate}
+        isLoading={isPublishing}
+        onClick={onPublishClick}
+        type="submit"
+      >
+        {publishText}
+      </ArtistButton>
+      <Modal
+        open={!!pendingPublish}
+        onClose={() => setPendingPublish(null)}
+        title={t("publishDateInPastTitle")}
+      >
+        <div className="flex flex-col gap-4">
+          <p>
+            {t("publishDateInPastBody", {
+              date: pendingPublish
+                ? formatDate({
+                    date: new Date(
+                      pendingPublish.publishedAt + ":00"
+                    ).toISOString(),
+                    i18n,
+                  })
+                : "",
+            })}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={publishKeepingDate}>
+              {t("publishDateInPastKeep", {
+                date: pendingPublish
+                  ? formatDate({
+                      date: new Date(
+                        pendingPublish.publishedAt + ":00"
+                      ).toISOString(),
+                      i18n,
+                    })
+                  : "",
+              })}
+            </Button>
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={publishWithTodaysDate}
+            >
+              {t("publishDateInPastToday")}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 
