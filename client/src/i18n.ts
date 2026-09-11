@@ -28,9 +28,34 @@ export const finishedLanguages = [
   { short: "de", name: "Deutsch" },
 ];
 
-const defaultLanguage = finishedLanguages.find((lang) =>
+export const LANGUAGE_STORAGE_KEY = "mirlo-language";
+
+export const getStoredLanguage = () => {
+  try {
+    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return finishedLanguages.some((lang) => lang.short === stored)
+      ? (stored as string)
+      : undefined;
+  } catch {
+    // Private windows and blocked site data throw on access.
+    return undefined;
+  }
+};
+
+export const setStoredLanguage = (language: string) => {
+  try {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  } catch {
+    // Not being able to remember it is survivable; the change still applies
+    // for this page view.
+  }
+};
+
+const browserLanguage = finishedLanguages.find((lang) =>
   userLanguage.startsWith(lang.short)
 );
+
+const defaultLanguage = getStoredLanguage() ?? browserLanguage?.short;
 
 if (hasTransifex) {
   i18n.use(txBackend);
@@ -41,7 +66,7 @@ i18n
   .init({
     resources, // always bundle en.json as fallback if remote translations fail
     ...(hasTransifex ? { partialBundledLanguages: true } : {}),
-    lng: defaultLanguage?.short ?? "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
+    lng: defaultLanguage ?? "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
     // you can use the i18n.changeLanguage function to change the language manually: https://www.i18next.com/overview/api#changelanguage
     // if you're using a language detector, do not define the lng option
     fallbackLng: "en",

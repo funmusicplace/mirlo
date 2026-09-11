@@ -22,6 +22,7 @@ export const turnItemsIntoRSS = async (
     description?: string | null;
     apiEndpoint: string;
     clientUrl: string;
+    imageUrl?: string | null;
   },
   zipped: (
     | FeedTrackGroup
@@ -41,6 +42,7 @@ export const turnItemsIntoRSS = async (
     description: feedDetails.description ?? "",
     feed_url: `${process.env.API_DOMAIN}/v1/${feedDetails.apiEndpoint}?format=rss`,
     site_url: `${client?.applicationUrl}/${feedDetails.clientUrl}`,
+    ...(feedDetails.imageUrl ? { image_url: feedDetails.imageUrl } : {}),
   });
 
   for (const p of zipped) {

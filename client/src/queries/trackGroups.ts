@@ -225,6 +225,8 @@ async function saveAlbumForm(opts: {
       {
         goalAmount: toCentsOrNull(formData.goalAmount) ?? 0,
         isAllOrNothing: !!formData.isAllOrNothing,
+        name: formData.fundraiserName,
+        description: formData.fundraiserDescription,
       }
     );
   }

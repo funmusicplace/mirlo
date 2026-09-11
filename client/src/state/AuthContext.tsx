@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getStoredLanguage } from "i18n";
 import { queryAuthProfile, useAuthRefreshMutation } from "queries";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React, { useMemo } from "react";
@@ -26,6 +27,9 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
   const userLanguage = user?.language;
 
   React.useEffect(() => {
+    if (getStoredLanguage()) {
+      return;
+    }
     i18n.changeLanguage(userLanguage);
   }, [userLanguage]);
 

@@ -32,6 +32,12 @@ export type PostFormData = {
   urlSlug?: string;
 };
 
+export const toDateTimeLocalValue = (date: Date) => {
+  const local = new Date(date);
+  local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
+  return local.toISOString().slice(0, 16);
+};
+
 const PostForm: React.FC<{
   post: Post;
   reload: (postId?: number) => Promise<unknown>;
@@ -55,9 +61,9 @@ const PostForm: React.FC<{
     });
 
   const buildDefaultValues = React.useCallback((): Partial<PostFormData> => {
-    const dateBase = post ? new Date(post.publishedAt) : new Date();
-    dateBase.setMinutes(dateBase.getMinutes() - dateBase.getTimezoneOffset());
-    const publishedAtIso = dateBase.toISOString().slice(0, 16);
+    const publishedAtIso = toDateTimeLocalValue(
+      post ? new Date(post.publishedAt) : new Date()
+    );
 
     if (!post) {
       return {

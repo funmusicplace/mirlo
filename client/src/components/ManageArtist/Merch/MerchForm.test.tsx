@@ -31,10 +31,15 @@ vi.mock("queries/queryKeys", () => ({ QUERY_KEY_MERCH: "merch" }));
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
-  return { ...actual, useQueryClient: () => ({ invalidateQueries: vi.fn() }) };
+  return {
+    ...actual,
+    useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+    useQuery: () => ({
+      data: { results: [{ id: 1, name: "Cassette" }] },
+    }),
+  };
 });
 
-// Child components that make their own API calls / have deep dependencies.
 vi.mock("../ManageTrackGroup/AlbumFormComponents/PaymentSlider", () => ({
   default: () => null,
 }));

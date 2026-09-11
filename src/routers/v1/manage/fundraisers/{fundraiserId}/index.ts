@@ -6,8 +6,8 @@ import {
   fundraiserBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { AppError } from "../../../../../utils/error";
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   fundraiserId: string;
@@ -67,6 +67,7 @@ export default function () {
     try {
       const newValues = pick(data, [
         "name",
+        "description",
         "endDate",
         "goalAmount",
         "isAllOrNothing",

@@ -5,17 +5,22 @@ function strip(html: string) {
   return doc.body.textContent || "";
 }
 
+const SITE_NAME = "Mirlo";
+
 export const MetaCard: React.FC<{
   title: string;
   description: string;
   image?: string;
   player?: string;
 }> = ({ title, description, image, player }) => {
+  const pageTitle =
+    title && title !== SITE_NAME ? `${title} | ${SITE_NAME}` : SITE_NAME;
+
   return (
     <>
       {/* @ts-ignore */}
       <Helmet>
-        <title>{`${title}`}</title>
+        <title>{pageTitle}</title>
         <meta name="description" content={description} />
       </Helmet>
     </>

@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import MarkdownContent from "components/common/MarkdownContent";
@@ -9,6 +10,9 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import WidthContainer from "components/common/WidthContainer";
+import MerchButtonPopUp from "components/Merch/MerchButtonPopUp";
+import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
+import { ItemViewTitle } from "components/TrackGroup/ItemViewTitle";
 import {
   coverSizeMax,
   coverSizeMin,
@@ -23,11 +27,6 @@ import { useAuthContext } from "state/AuthContext";
 import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
 
 import { bp } from "../../../../constants";
-import Box from "components/common/Box";
-import { ItemViewTitle } from "components/TrackGroup/ItemViewTitle";
-
-import MerchButtonPopUp from "components/Merch/MerchButtonPopUp";
-import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
 
 function Index() {
   const { t } = useTranslation("translation", {
@@ -112,7 +111,14 @@ function Index() {
           `}
         >
           <SpaceBetweenDiv>
-            <ItemViewTitle title={merch.title} />
+            <div>
+              <ItemViewTitle title={merch.title} />
+              {merch.itemType && (
+                <p className="text-sm text-(--mi-secondary-text-color)">
+                  {merch.itemType.name}
+                </p>
+              )}
+            </div>
             {userIsOwner && (
               <ArtistButtonLink
                 size="compact"

@@ -14,6 +14,7 @@ import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 import { useFitTitle } from "utils/useFitTitle";
+import useRouteTitle from "utils/useRouteTitle";
 
 import { bp } from "../../constants";
 
@@ -169,6 +170,8 @@ const ArtistHeaderSection: React.FC<{
     [user, artist, updateArtist, snackbar]
   );
 
+  const routeTitle = useRouteTitle();
+
   if (!artist && isLoading) {
     return <LoadingBlocks rows={1} />;
   } else if (!artist) {
@@ -191,7 +194,7 @@ const ArtistHeaderSection: React.FC<{
       `}
     >
       <MetaCard
-        title={artist.name}
+        title={routeTitle ? `${artist.name}: ${routeTitle}` : artist.name}
         description={artist.bio}
         image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />

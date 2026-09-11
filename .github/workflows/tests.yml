@@ -41,7 +41,7 @@ jobs:
   api-unit:
     # Successful runs take ~7-8m (build ~4m + tests ~3-4m). 10m left almost no
     # headroom and was cancelling mid-suite under transient runner slowness.
-    timeout-minutes: 20
+    timeout-minutes: 30
     runs-on: ubuntu-latest
 
     steps:

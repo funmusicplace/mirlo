@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { finishedLanguages, setStoredLanguage } from "i18n";
 import { Trans, useTranslation } from "react-i18next";
 import { FaInstagram, FaMastodon } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
@@ -6,10 +7,16 @@ import { Link } from "react-router-dom";
 
 import { bp } from "../constants";
 
+import { SelectEl } from "./common/Select";
 import WidthContainer from "./common/WidthContainer";
 
 export const Footer = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "footer" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "footer" });
+
+  const onChangeLanguage = (language: string) => {
+    setStoredLanguage(language);
+    i18n.changeLanguage(language);
+  };
 
   return (
     <footer
@@ -73,6 +80,32 @@ export const Footer = () => {
               <a href="mailto:hi@mirlo.space">{t("contact")}</a>
             </li>
           </ul>
+          <div className="flex flex-wrap items-center justify-center gap-2 mbe-4">
+            <label htmlFor="footer-language">{t("language")}</label>
+            <SelectEl
+              id="footer-language"
+              className="w-auto!"
+              value={
+                finishedLanguages.find(
+                  (lang) => lang.short === i18n.resolvedLanguage
+                )?.short ?? "en"
+              }
+              onChange={(e) => onChangeLanguage(e.target.value)}
+            >
+              {finishedLanguages.map((lang) => (
+                <option key={lang.short} value={lang.short}>
+                  {lang.name}
+                </option>
+              ))}
+            </SelectEl>
+            <a
+              href="https://docs.mirlo.space/maintaining/translation#how-to-get-started"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("helpTranslate")}
+            </a>
+          </div>
           <ul className="flex justify-center gap-4 pb-1">
             <li>
               <a

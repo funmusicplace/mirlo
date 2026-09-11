@@ -82,7 +82,7 @@ interface Track {
     trackId?: number;
     order: number;
   }[];
-  licenseId?: number;
+  licenseId?: number | null;
   license?: {
     short: string;
     name: string;
@@ -124,6 +124,8 @@ interface TrackGroup {
     goalAmount: number;
     isAllOrNothing: boolean;
     endDate: string;
+    name?: string;
+    description?: string | null;
     status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   } | null;
   paymentToUser?: {
@@ -566,6 +568,13 @@ interface Merch {
   platformPercent?: number;
   externalUrl?: string | null;
   order?: number | null;
+  itemTypeId?: number | null;
+  itemType?: MerchItemType | null;
+}
+
+interface MerchItemType {
+  id: number;
+  name: string;
 }
 
 interface Fundraiser {

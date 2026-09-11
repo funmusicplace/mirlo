@@ -86,7 +86,7 @@ services:
 
   minio:
     container_name: blackbird-minio
-    image: minio/minio
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     networks: [api-network]
     ports:
       - "9000:9000" # API Port

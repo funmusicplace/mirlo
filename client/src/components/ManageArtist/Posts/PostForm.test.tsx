@@ -85,7 +85,7 @@ vi.mock("../../../services/api", () => ({
 
 vi.mock("./EditPostHeader", () => ({ default: () => null }));
 
-import PostForm from "./PostForm";
+import PostForm, { toDateTimeLocalValue } from "./PostForm";
 
 // ---- fixtures ---------------------------------------------------------------
 
@@ -110,7 +110,30 @@ function makePost(overrides: Partial<Post> = {}): Post {
   } as Post;
 }
 
-// ---- tests ------------------------------------------------------------------
+describe("toDateTimeLocalValue", () => {
+  const roundTrips = (date: Date) => {
+    const value = toDateTimeLocalValue(date);
+    const parsedBack = new Date(`${value}:00`);
+    const toTheMinute = new Date(date);
+    toTheMinute.setSeconds(0, 0);
+
+    return parsedBack.getTime() === toTheMinute.getTime();
+  };
+
+  test("survives a round trip through the input value", () => {
+    expect(roundTrips(new Date("2026-09-11T18:30:00Z"))).toBe(true);
+    expect(roundTrips(new Date("2026-01-15T03:05:00Z"))).toBe(true);
+    // Either side of a DST boundary in the northern hemisphere.
+    expect(roundTrips(new Date("2026-06-21T23:45:00Z"))).toBe(true);
+    expect(roundTrips(new Date("2026-12-21T00:15:00Z"))).toBe(true);
+  });
+
+  test("produces a value the input can accept", () => {
+    expect(toDateTimeLocalValue(new Date("2026-09-11T18:30:00Z"))).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
+    );
+  });
+});
 
 describe("PostForm", () => {
   describe("URL slug display", () => {

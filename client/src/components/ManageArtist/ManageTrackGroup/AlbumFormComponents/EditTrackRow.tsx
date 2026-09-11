@@ -33,7 +33,7 @@ export interface FormData {
   title: string;
   status: "preview" | "must-own";
   trackFile: FileList;
-  licenseId: number;
+  licenseId: number | null;
   isrc: string;
   lyrics: string;
   description: string;
@@ -126,9 +126,7 @@ const EditTrackRow: React.FC<{
           minPrice: formData.minPrice
             ? Number(formData.minPrice) * 100
             : undefined,
-          licenseId: formData.licenseId
-            ? Number(formData.licenseId)
-            : undefined,
+          licenseId: formData.licenseId ? Number(formData.licenseId) : null,
         };
 
         await api.put<Partial<Track>, { track: Track }>(

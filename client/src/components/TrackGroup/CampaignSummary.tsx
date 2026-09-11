@@ -102,6 +102,17 @@ function CampaignSummary({
             )}
           </div>
         )}
+
+        {trackGroup.fundraiser?.name && (
+          <h3 className="text-base md:text-lg font-bold mb-1">
+            {trackGroup.fundraiser.name}
+          </h3>
+        )}
+        {trackGroup.fundraiser?.description && (
+          <p className="mb-2 whitespace-pre-line">
+            {trackGroup.fundraiser.description}
+          </p>
+        )}
         <div
           className={css`
             display: flex;
