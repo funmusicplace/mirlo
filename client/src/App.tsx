@@ -13,13 +13,14 @@ import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 import Player from "components/Player";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import ScrollToTop from "components/ScrollToTop";
+import { isEmpty } from "lodash";
 import { useContext, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
 import { useGlobalPlayerSyncIntegration } from "utils/playerSync";
-import { isEmpty } from "lodash";
-import { useTranslation } from "react-i18next";
+import useRouteTitle from "utils/useRouteTitle";
 
 import Header from "./components/Header/Header";
 import { bp } from "./constants";
@@ -33,6 +34,7 @@ function App() {
   const [search, setSearch] = useSearchParams();
   const { user } = useAuthContext();
   const { currentTrack } = useCurrentTrackHook();
+  const routeTitle = useRouteTitle();
 
   const isWidget = location.pathname.includes("widget");
 
@@ -68,7 +70,7 @@ function App() {
     <>
       <ScrollToTop />
       <MetaCard
-        title="Mirlo"
+        title={routeTitle ?? "Mirlo"}
         description="A music distribution and patronage site"
         image="/default-meta-image.webp"
       />
