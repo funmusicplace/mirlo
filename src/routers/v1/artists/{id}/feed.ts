@@ -10,7 +10,10 @@ import { Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializePost } from "../../../../serializers/post";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
-import { findProfileIdForURLSlug } from "../../../../utils/artist";
+import {
+  findProfileIdForURLSlug,
+  resolveProfileImageUrl,
+} from "../../../../utils/artist";
 import {
   canUserSeePostContent,
   getUserSubscriptionForProfile,
@@ -135,7 +138,17 @@ export default function () {
       if (parsedId) {
         profile = await prisma.profile.findFirst({
           where: { id: Number(parsedId) },
-          include: { subscriptionTiers: true },
+          include: {
+            subscriptionTiers: true,
+            avatar: true,
+            background: true,
+            trackGroups: {
+              where: whereForPublishedTrackGroups(),
+              include: { cover: true },
+              take: 1,
+              orderBy: { orderIndex: "asc" },
+            },
+          },
         });
       }
 
@@ -151,6 +164,7 @@ export default function () {
             description: profile.bio,
             apiEndpoint: `artists/${profile.urlSlug}/feed`,
             clientUrl: profile.urlSlug,
+            imageUrl: resolveProfileImageUrl(profile),
           },
           zipped as unknown as Parameters<typeof turnItemsIntoRSS>[1]
         );
