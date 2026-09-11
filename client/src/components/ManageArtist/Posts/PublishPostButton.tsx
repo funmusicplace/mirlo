@@ -11,7 +11,26 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 
-import { PostFormData } from "./PostForm";
+import { PostFormData, toDateTimeLocalValue } from "./PostForm";
+export const shouldConfirmPublishDate = (
+  publishedAt: string,
+  now: Date = new Date()
+) => {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(publishedAt)) {
+    return false;
+  }
+
+  const chosen = new Date(publishedAt + ":00");
+
+  if (isNaN(chosen.getTime())) {
+    return false;
+  }
+
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+
+  return chosen < startOfToday;
+};
 
 const PublishPostButton: React.FC<{
   post: Post;
@@ -112,8 +131,7 @@ const PublishPostButton: React.FC<{
     : t("returnToDraft");
 
   const onPublishClick = handleSubmit(async (data: PostFormData) => {
-    const chosenDate = new Date(data.publishedAt + ":00");
-    if (post.isDraft && chosenDate < new Date()) {
+    if (post.isDraft && shouldConfirmPublishDate(data.publishedAt)) {
       setPendingPublish(data);
       return;
     }
@@ -133,7 +151,7 @@ const PublishPostButton: React.FC<{
     setPendingPublish(null);
     if (data) {
       const today = new Date();
-      setValue("publishedAt", today.toISOString().slice(0, 16));
+      setValue("publishedAt", toDateTimeLocalValue(today));
       await doPublish(data, today.toISOString());
     }
   };
