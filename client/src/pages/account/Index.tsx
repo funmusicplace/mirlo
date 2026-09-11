@@ -3,12 +3,10 @@ import CanCreateArtists from "components/CanCreateArtists";
 import Button, { ButtonLink } from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import { SelectEl } from "components/common/Select";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
 import CurrencySelect from "components/ManageArtist/CountrySelectForm";
 import ProfileSection from "components/Profile/ProfileSection";
-import { finishedLanguages } from "i18n";
 import { useProfileMutation } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -74,7 +72,6 @@ const Index: React.FC = () => {
           } else {
             const isEmailChange = user.email !== data.newEmail;
             await mutateAsync({ ...data, userId });
-            i18n.changeLanguage(data.language);
             snackbar(
               isEmailChange
                 ? i18n.t("verificationEmailSent")
@@ -146,25 +143,6 @@ const Index: React.FC = () => {
             <InputEl id="input-name" {...register("name")} />
           </FormComponent>
 
-          <FormComponent>
-            <label htmlFor="input-language">{t("language")}</label>
-            <SelectEl id="input-language" {...register("language")}>
-              {finishedLanguages.map((lang) => (
-                <option key={lang.short} value={lang.short}>
-                  {lang.name}
-                </option>
-              ))}
-            </SelectEl>
-            <small>
-              <a
-                href="https://docs.mirlo.space/maintaining/translation#how-to-get-started"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {t("helpTranslate")}
-              </a>
-            </small>
-          </FormComponent>
           <CanCreateArtists>
             <FormComponent>
               <Toggle
