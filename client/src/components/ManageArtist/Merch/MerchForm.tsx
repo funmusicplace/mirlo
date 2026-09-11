@@ -1,11 +1,13 @@
 import { css } from "@emotion/css";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
 import FormComponent from "components/common/FormComponent";
 import FormError from "components/common/FormError";
 import { InputEl } from "components/common/Input";
+import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
+import { queryMerchItemTypes } from "queries";
 import { QUERY_KEY_MERCH } from "queries/queryKeys";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -30,6 +32,7 @@ interface MerchFormData {
   catalogNumber: string;
   platformPercent: number;
   externalUrl?: string | null;
+  itemTypeId?: string;
 }
 
 const toCentsOrNull = (value: unknown) => {
@@ -43,6 +46,7 @@ const buildDefaultValues = (merch: Merch): MerchFormData =>
   ({
     ...merch,
     minPrice: `${merch?.minPrice !== undefined ? merch.minPrice / 100 : ""}`,
+    itemTypeId: merch?.itemTypeId ? `${merch.itemTypeId}` : "",
   }) as unknown as MerchFormData;
 
 const MerchForm: React.FC<{
@@ -58,6 +62,7 @@ const MerchForm: React.FC<{
   const client = useQueryClient();
 
   const methods = useForm<MerchFormData>();
+  const { data: merchItemTypes } = useQuery(queryMerchItemTypes());
   const {
     handleSubmit,
     register,
@@ -91,6 +96,7 @@ const MerchForm: React.FC<{
           catalogNumber: values.catalogNumber,
           externalUrl: values.externalUrl ?? null,
           platformPercent: values.platformPercent,
+          itemTypeId: values.itemTypeId ? Number(values.itemTypeId) : null,
         });
         reset(values);
         clearDraft();
@@ -176,6 +182,18 @@ const MerchForm: React.FC<{
             {...register("quantityRemaining", { min: 0 })}
           />
           <small id="hint-quantity">{t("quantityRemainingDescription")}</small>
+        </FormComponent>
+        <FormComponent>
+          <label htmlFor="input-merch-item-type">{t("itemType")}</label>
+          <SelectEl id="input-merch-item-type" {...register("itemTypeId")}>
+            <option value="">{t("selectAnItemType")}</option>
+            {merchItemTypes?.results.map((itemType) => (
+              <option key={itemType.id} value={itemType.id}>
+                {itemType.name}
+              </option>
+            ))}
+          </SelectEl>
+          <small id="hint-merch-item-type">{t("itemTypeDescription")}</small>
         </FormComponent>
         <FormComponent>
           <label htmlFor="input-catalog-number">{t("catalogNumber")}</label>

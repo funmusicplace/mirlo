@@ -46,17 +46,13 @@ export default function () {
         include: {
           profile: { include: { user: { select: { currency: true } } } },
           images: true,
+          itemType: true,
           shippingDestinations: true,
           downloadableContent: {
             include: { downloadableContent: true },
           },
           includePurchaseTrackGroup: {
             include: {
-              // Without the trackGroup's own artist the client falls back to
-              // `merch.profile` when building the album link — which 404s when a
-              // label attaches a roster artist's release to label-owned merch
-              // (the URL ends up `/{labelSlug}/release/{trackGroupSlug}` and the
-              // trackGroup actually lives under `{rosterArtistSlug}`). See #2008.
               profile: true,
               tracks: {
                 where: {

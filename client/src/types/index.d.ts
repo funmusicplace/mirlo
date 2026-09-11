@@ -568,6 +568,13 @@ interface Merch {
   platformPercent?: number;
   externalUrl?: string | null;
   order?: number | null;
+  itemTypeId?: number | null;
+  itemType?: MerchItemType | null;
+}
+
+interface MerchItemType {
+  id: number;
+  name: string;
 }
 
 interface Fundraiser {

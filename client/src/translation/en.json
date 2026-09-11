@@ -208,8 +208,6 @@
     "name": "Name:",
     "noPurchases": "You haven't bought anything on Mirlo yet.",
     "reimbursals": "Please reach out to the artist from whom you purchased the content if you have concerns or want a reimbursal.",
-    "language": "Language:",
-    "helpTranslate": "Don't see your language? Help us translate Mirlo.",
     "updateAccountButton": "Update account",
     "manageArtists": "Manage artists",
     "followedArtists": "Followed artists",
@@ -949,6 +947,9 @@
     "licenseAdded": "License added"
   },
   "manageMerch": {
+    "itemType": "Format",
+    "selectAnItemType": "Select a format",
+    "itemTypeDescription": "What kind of item this is, e.g. a cassette or a 12\" vinyl.",
     "untitledMerch": "Untitled merch",
     "reorder": "Drag to reorder",
     "saveDestinations": "Save destinations",
@@ -1397,6 +1398,8 @@
     "purchaseEmailLabel": "Purchase thank you message"
   },
   "footer": {
+    "language": "Language",
+    "helpTranslate": "Help translate Mirlo",
     "getInTouch": "If you'd like to get in touch with Mirlo, join <discord>our Discord</discord>, <email>email us</email>, or check out <github>our Github</github>.",
     "about": "About us",
     "documentation": "Documentation",
@@ -1662,6 +1665,10 @@
     "location": "Location"
   },
   "postForm": {
+    "publishDateInPastTitle": "This post has a publish date in the past",
+    "publishDateInPastBody": "This post is set to publish at {{ date }}, which has already passed. Publishing now will backdate it to that time.",
+    "publishDateInPastKeep": "Keep publish date as {{ date }}",
+    "publishDateInPastToday": "Set publish date to today",
     "imagesInPost": "Manage images in post",
     "publishedPost": "Published post!",
     "contentIsEmpty": "Content is empty, are you sure you want to post?",

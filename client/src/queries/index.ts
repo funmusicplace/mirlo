@@ -6,6 +6,7 @@ export * from "./trackGroups";
 export * from "./tracks";
 export * from "./users";
 export * from "./merch";
+export * from "./merchItemTypes";
 export * from "./labels";
 export * from "./tip";
 export * from "./purchase";

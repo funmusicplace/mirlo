@@ -37,6 +37,7 @@ export default function () {
           shippingDestinations: true,
           images: true,
           includePurchaseTrackGroup: true,
+          itemType: true,
           downloadableContent: {
             include: {
               downloadableContent: true,
@@ -77,6 +78,7 @@ export default function () {
         "catalogNumber",
         "platformPercent",
         "externalUrl",
+        "itemTypeId",
       ]);
       const merch = await prisma.merch.findFirst({
         where: {
@@ -125,6 +127,7 @@ export default function () {
         include: {
           profile: { include: { user: { select: { currency: true } } } },
           includePurchaseTrackGroup: true,
+          itemType: true,
         },
       });
 
