@@ -18,8 +18,8 @@ import {
   FaVideo,
   FaSpotify,
   FaDeezer,
+  FaEnvelope,
 } from "react-icons/fa6";
-import { FiMail } from "react-icons/fi";
 
 import Logo from "./Logo";
 
@@ -55,11 +55,6 @@ export function linkUrlHref(link: string, forDisplay?: boolean): string {
   }
 }
 
-/**
- * Parse a user-entered URL safely. Returns `null` if the input isn't a valid
- * absolute URL. Used by the host-based matchers below; they refuse to assign a
- * platform icon to URLs that aren't parseable. See #1153.
- */
 const parseLinkUrl = (urlString: string): URL | null => {
   try {
     return new URL(linkUrlHref(urlString));
@@ -68,12 +63,6 @@ const parseLinkUrl = (urlString: string): URL | null => {
   }
 };
 
-/**
- * Match against an exact hostname or any of its subdomains. e.g. matchesHost
- * "youtube.com" accepts `youtube.com`, `m.youtube.com`, `www.youtube.com` but
- * rejects `youtube.com.evil.example`, `notyoutube.com`, or any URL whose path
- * merely contains "youtube.com" as a substring.
- */
 const matchesHost =
   (...hosts: string[]) =>
   (parsed: URL): boolean => {
@@ -85,13 +74,7 @@ const matchesHost =
 
 /**
  * Mastodon is federated — any host can run an instance — so we can't pin
- * matching to a single domain. Conservative heuristic: hostname starts with
- * `mastodon.` (the convention used by the flagship instance and many smaller
- * ones). Custom-domain instances will surface the generic Website icon; the
- * artist can pick "Mastodon" manually from the link-type dropdown to override.
- *
- * The previous matcher used `url.includes("mastodon")` which false-matched
- * any URL containing the substring (e.g. `example.com/mastodon-fan`).
+ * matching to a single domain.
  */
 const matchesMastodon = (parsed: URL): boolean => {
   const h = parsed.hostname.toLowerCase();
@@ -104,9 +87,7 @@ const matchesMastodon = (parsed: URL): boolean => {
 
 const matchesPeerTube = (parsed: URL): boolean => {
   const h = parsed.hostname.toLowerCase();
-  // PeerTube is federated so we can only heuristically detect it. Match
-  // hostnames that start with `peertube.` (the conventional instance prefix);
-  // other instances will fall through to the generic Website icon.
+  // PeerTube is federated so we can only heuristically detect it.
   return h.startsWith("peertube.") || h.includes(".peertube.");
 };
 
@@ -135,16 +116,10 @@ const unknownSite: OutsideLink = {
 
 const emailSite: OutsideLink = {
   name: "Email",
-  icon: <FiMail />,
+  icon: <FaEnvelope />,
   matches: () => false,
 };
 
-/**
- * Recognized outside platforms. Order matters only for ambiguous matches; the
- * first entry whose `matches(url)` returns true wins. The Mastodon entry is
- * intentionally last among real platforms because its heuristic is the
- * loosest and we want explicit-domain platforms to take precedence.
- */
 export const outsideLinks: OutsideLink[] = [
   {
     name: "Twitter",
@@ -304,7 +279,7 @@ export function getWebsiteSite(): OutsideLink {
 
 const LinkIconDisplay: React.FC<{ url: string }> = ({ url }) => {
   if (isEmailLink(url)) {
-    return <FiMail />;
+    return <FaEnvelope />;
   }
   const parsed = parseLinkUrl(url);
   if (parsed) {

@@ -8,6 +8,8 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 
+import SetLicenseOfAllTracks from "../SetLicenseOfAllTracks";
+
 import SavingInput from "./SavingInput";
 
 interface BulkUpdateTracksProps {
@@ -78,18 +80,24 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
         </ToggleFormComponent>
       </FormProvider>
       {(trackGroup.tracks ?? []).length > 0 && (
-        <div className="flex flex-wrap gap-4 py-2">
-          <ArtistButton wrap onClick={() => handleSetAllTracksPreview(true)}>
-            {t("setAllTracksAsPreview")}
-          </ArtistButton>
-          <ArtistButton
-            wrap
-            variant="dashed"
-            onClick={() => handleSetAllTracksPreview(false)}
-          >
-            {t("setAllTracksAsMustOwn")}
-          </ArtistButton>
-        </div>
+        <>
+          <div className="flex flex-wrap gap-4 py-2">
+            <ArtistButton wrap onClick={() => handleSetAllTracksPreview(true)}>
+              {t("setAllTracksAsPreview")}
+            </ArtistButton>
+            <ArtistButton
+              wrap
+              variant="dashed"
+              onClick={() => handleSetAllTracksPreview(false)}
+            >
+              {t("setAllTracksAsMustOwn")}
+            </ArtistButton>
+          </div>
+          <SetLicenseOfAllTracks
+            tracks={trackGroup.tracks ?? []}
+            reload={reload}
+          />
+        </>
       )}
     </div>
   );

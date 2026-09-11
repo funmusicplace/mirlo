@@ -1,11 +1,12 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { Button } from "components/common/Button";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormError from "components/common/FormError";
-import Modal from "components/common/Modal";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import Modal from "components/common/Modal";
 import TextArea from "components/common/TextArea";
 import { TrackData } from "components/ManageArtist/utils";
 import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
@@ -19,7 +20,6 @@ import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
 import useJobStatusCheck from "utils/useJobStatusCheck";
-import { Button } from "components/common/Button";
 
 import SelectTrackPreview from "../../SelectTrackPreview";
 import TrackUploadingState from "../../TrackUploadingState";
@@ -301,12 +301,7 @@ const EditTrackRow: React.FC<{
         </td>
       </IndentedTR>
       <IndentedTR>
-        <td colSpan={2}>
-          <label htmlFor="allowIndividualSale">
-            {t("allowIndividualSale")}
-          </label>
-        </td>
-        <td colSpan={99}>
+        <td colSpan={101}>
           <FormCheckbox
             keyName="allowIndividualSale"
             description={t("allowSaleDescription")}
@@ -330,12 +325,7 @@ const EditTrackRow: React.FC<{
         </IndentedTR>
       )}
       <IndentedTR>
-        <td colSpan={2}>
-          <label htmlFor={`${track.id}-allowMirloPromo`}>
-            {t("allowMirloPromoLabel")}
-          </label>
-        </td>
-        <td colSpan={99}>
+        <td colSpan={101}>
           <FormCheckbox
             idPrefix={`${track.id}-`}
             keyName="allowMirloPromo"

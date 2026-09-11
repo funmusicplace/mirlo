@@ -4,6 +4,10 @@ import { Request, Response } from "express";
 
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
+import {
+  audioExtensionFromFilename,
+  unsupportedAudioFormatError,
+} from "../utils/audioFormats";
 import { uploadIncomingAudio } from "../utils/minio";
 
 import { verifyAudioQueue } from "./verify-audio-queue";
@@ -159,7 +163,18 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
 
     const jobId = await new Promise((resolve, reject) => {
       ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
-        const extension = fileInfo.filename.split(".").pop();
+        const extension = audioExtensionFromFilename(fileInfo.filename);
+
+        if (!extension) {
+          // Drain the stream so busboy doesn't stall waiting on a consumer,
+          // and reject before we record anything against the track. See #1403.
+          fileStream.resume();
+          logger.info(
+            `Rejected unsupported audio upload for trackId ${trackId}: ${fileInfo.filename}`
+          );
+          return reject(unsupportedAudioFormatError(fileInfo.filename));
+        }
+
         const audio = await prisma.trackAudio.upsert({
           create: {
             trackId,

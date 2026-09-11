@@ -1,9 +1,8 @@
 import { css } from "@emotion/css";
-import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-
 import { WidthWrapper } from "components/common/WidthContainer";
+import { useMemo } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 type MessageKey =
   | "generic"
@@ -68,7 +67,15 @@ function Index() {
       `}
     >
       <h1>{t("title")}</h1>
-      <p>{t(messageKey)}</p>
+      <p>
+        <Trans
+          t={t}
+          i18nKey={messageKey}
+          components={{
+            support: <a href="mailto:hi@mirlo.space"></a>,
+          }}
+        />
+      </p>
       <Link to={homePath}>{t("returnHome")}</Link>
     </WidthWrapper>
   );

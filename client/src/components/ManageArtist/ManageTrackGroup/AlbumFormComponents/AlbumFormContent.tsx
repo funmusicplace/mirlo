@@ -1,30 +1,26 @@
 import { css } from "@emotion/css";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { RestoredLabel } from "components/common/RestoredFields";
 import TextArea from "components/common/TextArea";
 import { FormSection } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
-import PublishButton from "components/ManageArtist/PublishButton";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
-import { FaEye } from "react-icons/fa";
 import { useUpload } from "state/UploadContext";
-import { getReleaseUrl, isTrackGroupPublished } from "utils/artist";
+import { isTrackGroupPublished } from "utils/artist";
 import { useMatchMedia } from "utils/useMatchMedia";
 import useShow from "utils/useShow";
 
 import { bp } from "../../../../constants";
 import UploadArtistImage from "../../UploadArtistImage";
-import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 
+import AlbumFormActions from "./AlbumFormActions";
 import FundraisingGoal from "./FundraisingGoal";
 import ManageTags from "./ManageTags";
 import PreOrderSection from "./PreOrderSection";
 import Pricing from "./Pricing";
-import SaveDraftBar from "./SaveDraftBar";
-import SchedulePublication from "./SchedulePublication";
 import VisibilityRadio from "./VisibilityRadio";
 
 const COVER_IMAGE_ALT_MAX_LENGTH = 250;
@@ -64,38 +60,14 @@ const AlbumFormContent: React.FC<{
       {/* TODO: replace the z-1001 with a shared z-index design.
           1001 is just one above AutoComplete (z-1000) so the tags dropdown
           doesn't render over the sticky save bar when it opens. */}
-      <div
-        className={`sticky z-[1001] flex flex-wrap items-start gap-2 bg-(--mi-background-color) py-4 mb-4 border-b border-(--mi-tint-x-color) transition-[top] duration-300 ${
+      <AlbumFormActions
+        existingObject={existingObject}
+        reload={reload}
+        onSaveSuccess={onSaveSuccess}
+        className={`sticky z-[1001] mb-4 border-b border-(--mi-tint-x-color) transition-[top] duration-300 ${
           headerShow === "down" ? "top-0" : "top-(--header-cover-sticky-height)"
         }`}
-      >
-        <SaveDraftBar
-          existingObject={existingObject}
-          onSaveSuccess={onSaveSuccess}
-        />
-        {!isTrackGroupPublished(existingObject) &&
-          (existingObject.tracks?.length > 0 || !!existingObject.fundraiser) &&
-          existingObject.artist && (
-            <ArtistButtonLink
-              to={getReleaseUrl(existingObject.artist, existingObject)}
-              startIcon={<FaEye />}
-              variant="dashed"
-            >
-              {t("previewRelease")}
-            </ArtistButtonLink>
-          )}
-        <div className="ml-auto flex flex-col items-end gap-1">
-          <PublishButton
-            trackGroup={existingObject}
-            reload={reload}
-            onSaveSuccess={onSaveSuccess}
-          />
-          <SchedulePublication
-            existingObject={existingObject}
-            reload={reload}
-          />
-        </div>
-      </div>
+      />
       <VisibilityRadio existingObject={existingObject} />
       <PreOrderSection
         existingObject={existingObject}
@@ -262,6 +234,12 @@ const AlbumFormContent: React.FC<{
           fundraiser={existingObject.fundraiser}
         />
       </FormSection>
+      <AlbumFormActions
+        existingObject={existingObject}
+        reload={reload}
+        onSaveSuccess={onSaveSuccess}
+        className="mt-2 border-t border-(--mi-tint-x-color)"
+      />
     </>
   );
 };

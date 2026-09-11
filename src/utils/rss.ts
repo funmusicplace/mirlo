@@ -51,11 +51,11 @@ export const turnItemsIntoRSS = async (
         title: p.title
           ? `${p.title} by ${artistName}`
           : `A track by ${artistName}`,
-        description:
-          p.description ??
-          (tg?.title
+        description: p.description
+          ? markdownAsHtml(p.description)
+          : tg?.title
             ? `A track from "${tg.title}" by ${artistName}.`
-            : `A track by ${artistName}.`),
+            : `A track by ${artistName}.`,
         url:
           tg && tg.artist
             ? `${client?.applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}/tracks/${p.id}`
@@ -68,8 +68,9 @@ export const turnItemsIntoRSS = async (
         title: tg.title
           ? `${tg.title} by ${tg.artist?.name}`
           : `A release by ${tg.artist?.name}`,
-        description:
-          tg.about ?? `<h2>An release by artist ${tg.artist?.name}.</h2>`,
+        description: tg.about
+          ? markdownAsHtml(tg.about)
+          : `<h2>An release by artist ${tg.artist?.name}.</h2>`,
         url: `${client?.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}`,
         date: tg.releaseDate ?? tg.createdAt,
       });
@@ -89,7 +90,7 @@ export const turnItemsIntoRSS = async (
     } else if (isArtist(p)) {
       feed.item({
         title: p.name,
-        description: p.bio ?? `An artist on Mirlo`,
+        description: p.bio ? markdownAsHtml(p.bio) : `An artist on Mirlo`,
         url: `${client?.applicationUrl}/${p.urlSlug}`,
         date: new Date(),
       });

@@ -76,12 +76,14 @@ export const Tooltip: React.FC<{
   underline?: boolean;
   compact?: boolean;
   position?: "below" | "right";
+  className?: string;
 }> = ({
   children,
   hoverText,
   underline = true,
   compact,
   position = "below",
+  className,
 }) => {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const [coords, setCoords] = React.useState<{
@@ -117,6 +119,7 @@ export const Tooltip: React.FC<{
     <TooltipWrapper
       ref={wrapperRef}
       underline={underline}
+      className={className}
       onMouseEnter={computeCoords}
       onMouseLeave={() => setCoords(null)}
     >

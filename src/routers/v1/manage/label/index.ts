@@ -3,8 +3,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { singleInclude } from "../../../../utils/artist";
 import { serializeProfile } from "../../../../serializers/artist";
+import { singleInclude } from "../../../../utils/artist";
 
 type Params = {
   artistId: string;
@@ -28,7 +28,15 @@ export default function () {
         orderBy: [{ orderIndex: { sort: "asc", nulls: "last" } }],
         include: {
           artist: {
-            include: singleInclude({ includePrivate: true }),
+            include: {
+              ...singleInclude({ includePrivate: true }),
+              // Roster rows show a release count per artist. Counting in the
+              // database beats counting the included trackGroups, which are
+              // filtered down to what's publicly visible. See #2265.
+              _count: {
+                select: { trackGroups: { where: { deletedAt: null } } },
+              },
+            },
           },
         } as any,
       });

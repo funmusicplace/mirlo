@@ -4,6 +4,15 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import ArtistFilter from "components/common/ArtistFilter";
 import SectionActionStrip from "components/common/SectionActionStrip";
 import Tooltip from "components/common/Tooltip";
+import ManageArtistAlbumRow, {
+  albumCellDivider,
+  albumRowSubgrid,
+  albumTableGrid,
+  albumTableGridWithArtist,
+} from "components/ManageArtist/ManageArtistAlbumRow";
+import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
+import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
+import SetEntireCataloguePrice from "components/ManageArtist/SetEntireCataloguePrice";
 import {
   queryArtist,
   queryManagedArtistTrackGroups,
@@ -15,16 +24,6 @@ import { FaTags } from "react-icons/fa";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
-
-import ManageArtistAlbumRow, {
-  albumCellDivider,
-  albumRowSubgrid,
-  albumTableGrid,
-  albumTableGridWithArtist,
-} from "components/ManageArtist/ManageArtistAlbumRow";
-import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
-import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
-import SetEntireCataloguePrice from "components/ManageArtist/SetEntireCataloguePrice";
 
 const ManageArtistAlbumsTable: React.FC<{
   releases: TrackGroup[];
@@ -118,10 +117,9 @@ const ReleasesSection: React.FC<{
   if (releases.length === 0 && !filter) return null;
   return (
     <div className="flex gap-2 flex-col">
-      <div className="flex justify-between items-center">
-        <h3>{title}</h3>{" "}
-        <small>{t("totalCount", { count: releases.length })}</small>
-      </div>
+      <h3>
+        {t("headingWithCount", { heading: title, count: releases.length })}
+      </h3>
       {description && (
         <p className="text-sm text-(--mi-secondary-text-color) mb-1">
           {description}

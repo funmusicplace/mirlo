@@ -124,10 +124,20 @@ export const headersAreForActivityPub = (
   return isActivityPubMimeType(accept);
 };
 
+const decodePathSafely = (path: string) => {
+  try {
+    return decodeURIComponent(path);
+  } catch {
+    return path;
+  }
+};
+
+const AP_ARTIST_PATH =
+  /^\/v1\/ap\/artists\/[\p{L}\p{N}\p{M}_-]+(?:\/(?:outbox|followers|following|inbox|activities|posts|releases)(?:\/[\p{L}\p{N}\p{M}_-]+)?)?$/u;
+
 export const isValidActivityPubEndpoint = (path: string) => {
   return (
-    /^\/v1\/ap\/artists\/[\w-]+(?:\/(?:outbox|followers|following|inbox|activities|posts|releases)(?:\/[\w-]+)?)?$/.test(
-      path
-    ) || /^\/.well-known\/(webfinger|nodeinfo)/.test(path)
+    AP_ARTIST_PATH.test(decodePathSafely(path)) ||
+    /^\/.well-known\/(webfinger|nodeinfo)/.test(path)
   );
 };
