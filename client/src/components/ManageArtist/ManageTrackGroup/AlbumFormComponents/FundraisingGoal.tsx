@@ -7,6 +7,8 @@ import {
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
+import TextArea from "components/common/TextArea";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import { queryManagedTrackGroup, queryTrackGroupSupporters } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -16,14 +18,14 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
-import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
-
 const FundraisingGoal: React.FC<{
   trackGroupId: number;
   fundraiser?: {
     id: number;
     goalAmount: number;
     isAllOrNothing: boolean;
+    name?: string;
+    description?: string | null;
     status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   } | null;
 }> = ({ trackGroupId, fundraiser }) => {
@@ -216,6 +218,17 @@ const FundraisingGoal: React.FC<{
           />
         </FormComponent> */}
         <FormComponent>
+          <label htmlFor="input-fundraiser-name">{t("fundraiserName")}</label>
+          <InputEl
+            id="input-fundraiser-name"
+            aria-describedby="description-fundraiser-name"
+            {...register("fundraiserName")}
+          />
+          <span className="text-sm" id="description-fundraiser-name">
+            {t("fundraiserNameDescription")}
+          </span>
+        </FormComponent>
+        <FormComponent>
           <label htmlFor="input-goal-amount">{t("goal")}</label>
           <div className="flex items-center gap-2">
             {user?.currency && (
@@ -236,6 +249,20 @@ const FundraisingGoal: React.FC<{
           </span>
         </FormComponent>
       </div>
+      <FormComponent>
+        <label htmlFor="input-fundraiser-description">
+          {t("fundraiserDescription")}
+        </label>
+        <TextArea
+          id="input-fundraiser-description"
+          rows={3}
+          aria-describedby="description-fundraiser-description"
+          {...register("fundraiserDescription")}
+        />
+        <span className="text-sm" id="description-fundraiser-description">
+          {t("fundraiserDescriptionDescription")}
+        </span>
+      </FormComponent>
       <FormComponent direction="row">
         <div>
           <InputEl

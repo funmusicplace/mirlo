@@ -1,12 +1,12 @@
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
 import { RestoredFieldsProvider } from "components/common/RestoredFields";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useFormPersist } from "utils/useFormPersist";
 
 import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
-import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 
 const buildDefaultValues = (trackGroup: TrackGroup): TrackGroupFormData => {
   const trackGroupIsGettable = trackGroup?.isGettable ?? false;
@@ -31,6 +31,8 @@ const buildDefaultValues = (trackGroup: TrackGroup): TrackGroupFormData => {
         : ""
     }`,
     isAllOrNothing: trackGroup?.fundraiser?.isAllOrNothing ?? false,
+    fundraiserName: trackGroup?.fundraiser?.name ?? "",
+    fundraiserDescription: trackGroup?.fundraiser?.description ?? "",
   } as unknown as TrackGroupFormData;
 };
 
