@@ -4,6 +4,7 @@ import filenamify from "filenamify";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
+import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
 import { AppError } from "../../../../utils/error";
 import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
 import {
@@ -24,7 +25,7 @@ export default function () {
     const {
       email,
       token,
-      format = "flac",
+      format: requestedFormat = "flac",
     } = req.query as {
       format?: FormatOptions;
       email: string;
@@ -32,6 +33,7 @@ export default function () {
     };
 
     try {
+      const format = assertSupportedDownloadFormat(requestedFormat);
       let track;
 
       if (token && email) {
