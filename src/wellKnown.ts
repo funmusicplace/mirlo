@@ -25,47 +25,34 @@ const assetLinks = [
   },
 ];
 
-// Top-level routes in client/src/routes.tsx that sit beside artist slugs, and
-// artist sub-pages the app has no screen for. Everything else under / opens the app.
-const webOnlyRoots = [
+// Artist pages share the site root with routes like /login, so the app claims
+// the whole site (Android's single-segment pattern does the same) and asks the
+// API whether a segment is an artist, showing anything else in an in-app
+// browser sheet. That sheet has its own cookie jar on iOS and no download UI,
+// so the paths excluded here are the ones a sheet would break: auth, account,
+// admin, checkout, and download/redeem/unsubscribe links from emails. Content
+// routes are deliberately absent; a new one needs nothing here.
+const sheetBreaksRoots = [
   "account",
   "admin",
-  "artists",
   "checkout",
   "checkout-error",
   "confirm-email-change",
   "email-confirmation",
   "fulfillment",
-  "label",
   "login",
   "manage",
-  "pages",
   "password-reset",
-  "post",
   "profile",
-  "releases",
   "sales",
-  "search",
   "signup",
-  "tags",
-  "widget",
 ];
-const webOnlyArtistPaths = [
+const sheetBreaksArtistPaths = [
   "checkout-complete",
   "checkout-error",
-  "connect",
-  "links",
-  "merch",
-  "merch/*",
-  "posts",
-  "posts/*",
   "release/*/download",
   "release/*/redeem",
   "release/*/tracks/*/download",
-  "releases",
-  "roster",
-  "support",
-  "tip",
   "unsubscribe",
 ];
 const appleAppSiteAssociation = {
@@ -74,11 +61,11 @@ const appleAppSiteAssociation = {
       {
         appIDs: ["VZCHHV7VNW.space.mirlo.mobile"],
         components: [
-          ...webOnlyRoots.flatMap((root) => [
+          ...sheetBreaksRoots.flatMap((root) => [
             { "/": `/${root}`, exclude: true },
             { "/": `/${root}/*`, exclude: true },
           ]),
-          ...webOnlyArtistPaths.map((path) => ({
+          ...sheetBreaksArtistPaths.map((path) => ({
             "/": `/*/${path}`,
             exclude: true,
           })),
