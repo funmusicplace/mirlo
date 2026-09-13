@@ -88,10 +88,10 @@ export default function () {
       }
 
       if (!track) {
-        res.status(404).json({
-          error: "No track found",
+        throw new AppError({
+          httpCode: 404,
+          description: "No track found",
         });
-        return next();
       }
 
       logger.info(`trackId: ${trackId} Found a track, preparing download`);
@@ -105,48 +105,41 @@ export default function () {
         });
       }
 
-      try {
-        const title = cleanHeaderValue(
-          filenamify(
-            `${track.trackGroup.profile.name} - ${track.title ?? "track"}`
-          )
+      const title = cleanHeaderValue(
+        filenamify(
+          `${track.trackGroup.profile.name} - ${track.title ?? "track"}`
+        )
+      );
+
+      // Prefer handing the browser a short-lived presigned storage URL so
+      // the zip bytes don't flow through this server (egress costs). Falls
+      // back to piping the file when presigning isn't available (e.g. local
+      // MinIO without a browser-reachable endpoint).
+      const presignedUrl = await presignZip("track", track.id, format, {
+        downloadFilename: `${title}.zip`,
+        contentType: "application/zip",
+      });
+
+      if (presignedUrl) {
+        logger.info(
+          `trackId: ${trackId} responding with presigned download URL`
         );
-
-        // Prefer handing the browser a short-lived presigned storage URL so
-        // the zip bytes don't flow through this server (egress costs). Falls
-        // back to piping the file when presigning isn't available (e.g. local
-        // MinIO without a browser-reachable endpoint).
-        const presignedUrl = await presignZip("track", track.id, format, {
-          downloadFilename: `${title}.zip`,
-          contentType: "application/zip",
-        });
-
-        if (presignedUrl) {
-          logger.info(
-            `trackId: ${trackId} responding with presigned download URL`
-          );
-          return res.json({ result: { url: presignedUrl } });
-        }
-
-        logger.info(`downloading ${title}.zip`);
-        res.attachment(`${title}.zip`);
-        res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
-
-        const stream = await streamZip("track", track.id, format);
-
-        if (stream) {
-          stream.pipe(res);
-        } else {
-          throw new AppError({
-            httpCode: 500,
-            description: `Remote file not found for track zip ${track.id}/${format}`,
-          });
-        }
-      } catch (e) {
-        next(e);
+        return res.json({ result: { url: presignedUrl } });
       }
 
-      return;
+      logger.info(`downloading ${title}.zip`);
+      res.attachment(`${title}.zip`);
+
+      const stream = await streamZip("track", track.id, format);
+
+      if (!stream) {
+        throw new AppError({
+          httpCode: 500,
+          description: `Remote file not found for track zip ${track.id}/${format}`,
+        });
+      }
+
+      stream.pipe(res);
     } catch (e) {
       next(e);
     }
