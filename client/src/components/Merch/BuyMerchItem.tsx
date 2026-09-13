@@ -78,9 +78,10 @@ const BuyMerchItem: React.FC<{
       if (!merch) {
         return;
       }
+      const merchOptionIds = (data.merchOptionIds ?? []).filter(Boolean);
       const options = flatten(
         merch.optionTypes?.map((ot) =>
-          ot.options.find((o) => data.merchOptionIds.includes(o.id))
+          ot.options.find((o) => merchOptionIds.includes(o.id))
         )
       );
 
@@ -118,7 +119,7 @@ const BuyMerchItem: React.FC<{
             price: data.chosenPrice
               ? String(Number(data.chosenPrice) * 100)
               : undefined,
-            merchOptionIds: data.merchOptionIds,
+            merchOptionIds,
             shippingDestinationId: data.shippingDestinationId,
             message: data.message,
           },
@@ -241,14 +242,16 @@ const BuyMerchItem: React.FC<{
               }
             >
               {merch.optionTypes?.map((optionType, idx) => (
-                <FormComponent>
+                <FormComponent key={optionType.id}>
                   <label htmlFor={`merchOptionIds.${idx}`}>
-                    {optionType.optionName}
+                    {optionType.required === false
+                      ? t("optionalOptionType", { name: optionType.optionName })
+                      : optionType.optionName}
                   </label>
                   <SelectEl
                     id={`merchOptionIds.${idx}`}
                     {...methods.register(`merchOptionIds.${idx}`)}
-                    required
+                    required={optionType.required !== false}
                   >
                     <option value="">{t("choose")}</option>
 

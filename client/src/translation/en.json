@@ -497,7 +497,8 @@
     "option": "{{ name }} ({{costUnit}})",
     "includesDownloadOf": "Includes a download of <albumLink>{{albumTitle}}</albumLink>",
     "destinationCost": "Cost to ship here: {{costUnit}} ({{costExtraUnit}} per extra item)",
-    "supportedShippingDestinations": "Choose the shipping destination that best matches you"
+    "supportedShippingDestinations": "Choose the shipping destination that best matches you",
+    "optionalOptionType": "{{name}} (optional)"
   },
   "label": {
     "artistsOnYourRoster": "Artists on your roster ({{ count }})",
@@ -1085,6 +1086,8 @@
     "notPublic": "Not published yet",
     "options": "Options (eg. 'large')",
     "optionType": "Merch category (eg. 'size')",
+    "categoryIsRequired": "Buyers have to choose one of these",
+    "categoryIsRequiredHint": "Uncheck this for a category that is a preference rather than required information, like a gift note.",
     "optionSubTypes": "Category options (eg. 'large')",
     "addNewOptionSubType": "Add new category option",
     "subtypeName": "Category option name",
@@ -1101,7 +1104,8 @@
     "relatedDownloadableContentInfo": "Purchasing this merch will also allow access to this content.",
     "trackGroupRelatedDownloadableContent": "Purchasing this release will also allow the download of this content.",
     "merchFulfillmentParagraph": "To manage orders for merch, check your fulfillment page",
-    "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
+    "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country",
+    "optionalCategoryName": "{{name}} (optional)"
   },
   "paymentSlider": {
     "howMuchGoesToMirlo": "How much goes to Mirlo?",
@@ -1320,7 +1324,14 @@
     "receivePaymentDescription": "You are seeing this because you are part of a label. This is the account that will receive payments for this release. If you are part of a label or collective, this will be the label or collective account. Go to your <artistPage>artist page</artistPage> to manage these relationships. If you leave this blank, payments will continue going to your personal account.",
     "labelReceivePaymentDescription": "You are a label who can manage releases for this artist. This is the account that will receive payments for this release. Go to your <labelPage>label page</labelPage> to manage these relationships. If you leave this blank, payments will go to the artist's personal account.",
     "thereWasAnError": "There was an error uploading this track.",
-    "downloadableContent": "Downloadable content"
+    "downloadableContent": "Downloadable content",
+    "moveReleaseToArtist": "Move this release to another artist",
+    "moveReleaseToArtistHint": "Moves the release, its tracks and its sales history to another artist on your account. Its web address will change.",
+    "chooseAnArtist": "Choose an artist",
+    "moveRelease": "Move release",
+    "confirmMoveRelease": "Move this release to {{artistName}}? Links to its current address will stop working.",
+    "releaseMoved": "Release moved",
+    "releaseMoveFailed": "We couldn't move that release"
   },
   "artistForm": {
     "allowDirectMessages": "Allow direct messages from listeners",
@@ -1399,7 +1410,13 @@
     "groupName": "What should we show as the group type? Label? Collective?",
     "label": "Label",
     "makeSearchable": "Do you want to make this artist searchable on the social web? This will enable the ActivityPub protocol for this artist.",
-    "makeStreamable": "Do you want to make this artist streamable on federated players like Fairplayer?"
+    "makeStreamable": "Do you want to make this artist streamable on federated players like Fairplayer?",
+    "artistPaymentReceiver": "Who receives payments for this artist?",
+    "artistPaymentReceiverHint": "Sends payments for every sale by this artist — releases, merch and tips — to one of your approved labels. A release with its own payment receiver still overrides this.",
+    "chooseALabel": "Choose a label",
+    "savePaymentReceiver": "Save",
+    "paymentReceiverUpdated": "Payment receiver updated",
+    "paymentReceiverUpdateFailed": "We couldn't update the payment receiver"
   },
   "manageSubscriptions": {
     "uploadSubscribers": "Upload subscriber e-mail addresses",
@@ -1815,12 +1832,13 @@
     "shouldSendEmail": "Send an email to your supporters when this post is published?",
     "shouldSendEmailContext": "If yes, an e-mail will be sent and they will get notified on the website, if not, they'll only get the notification.",
     "follow": "Everyone who pressed the \"Follow\" button on your profile",
-    "ifNotPublic": "Which of your subscription tiers should be the minimum tier to receive your posts?",
+    "ifNotPublic": "Which of your subscription tiers should receive this post?",
     "availableAt": "Available at {{url}},",
     "changeSlug": "click here to change the link.",
     "urlSlug": "Post URL slug",
     "slugTaken": "This URL is taken, try something else.",
-    "slugWarning": "Changes to this value will break existing links to this post."
+    "slugWarning": "Changes to this value will break existing links to this post.",
+    "tiersHint": "Leave all of them unchecked to send this post to every subscriber."
   },
   "errorPage": {
     "reactError": "React error ",

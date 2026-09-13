@@ -173,6 +173,7 @@ interface Post {
   artistId?: number;
   isContentHidden: boolean;
   minimumSubscriptionTierId?: number;
+  postSubscriptionTiers?: { profileSubscriptionTierId: number }[];
   featuredImageId?: string;
   featuredImage?: { src: string };
   isDraft: boolean;
@@ -540,6 +541,7 @@ interface MerchOption {
 interface MerchOptionType {
   optionName: string;
   id: string;
+  required?: boolean;
   options: MerchOption[];
 }
 
