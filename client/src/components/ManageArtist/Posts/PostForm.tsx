@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
+import { CheckBoxLabel } from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import { SelectEl } from "components/common/Select";
 import TextEditor from "components/common/TextEditor";
 import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
 import { queryManagedArtistSubscriptionTiers } from "queries";
@@ -27,9 +27,26 @@ export type PostFormData = {
   title: string;
   publishedAt: string;
   isPublic: boolean;
-  minimumTier: string;
+  subscriptionTierIds: string[];
   shouldSendEmail: boolean;
   urlSlug?: string;
+};
+
+export const tiersForLegacyMinimumTier = (
+  tiers: ArtistSubscriptionTier[],
+  minimumSubscriptionTierId?: number
+): string[] => {
+  const minimumTier = tiers.find(
+    (tier) => tier.id === minimumSubscriptionTierId
+  );
+
+  if (!minimumTier) {
+    return [];
+  }
+
+  return tiers
+    .filter((tier) => (tier.minAmount ?? 0) >= (minimumTier.minAmount ?? 0))
+    .map((tier) => `${tier.id}`);
 };
 
 export const toDateTimeLocalValue = (date: Date) => {
@@ -70,6 +87,7 @@ const PostForm: React.FC<{
         publishedAt: publishedAtIso,
         shouldSendEmail: true,
         isPublic: true,
+        subscriptionTierIds: [],
       };
     }
 
@@ -118,16 +136,20 @@ const PostForm: React.FC<{
   }, [formDraft, bodyDraft]);
 
   React.useEffect(() => {
-    if ((tiers?.results.length ?? 0) > 0) {
-      if (
-        post.minimumSubscriptionTierId &&
-        tiers?.results.find(
-          (tier) => tier.id === post.minimumSubscriptionTierId
-        )
-      ) {
-        methods.setValue("minimumTier", `${post.minimumSubscriptionTierId}`);
-      }
+    const allTiers = tiers?.results ?? [];
+
+    if (allTiers.length === 0) {
+      return;
     }
+
+    const addressedTiers = post.postSubscriptionTiers ?? [];
+
+    methods.setValue(
+      "subscriptionTierIds",
+      addressedTiers.length > 0
+        ? addressedTiers.map((t) => `${t.profileSubscriptionTierId}`)
+        : tiersForLegacyMinimumTier(allTiers, post.minimumSubscriptionTierId)
+    );
   }, [tiers]);
 
   const { register, watch } = methods;
@@ -252,23 +274,31 @@ const PostForm: React.FC<{
               margin-left: 1.75rem;
             `}
           >
-            <label
-              className={css`
-                display: block;
-                margin-bottom: 0.5rem;
-              `}
-              htmlFor="select-minimum-tier"
-            >
-              {t("ifNotPublic")}
-            </label>
-            <SelectEl id="select-minimum-tier" {...register("minimumTier")}>
-              <option value="">None</option>
+            <fieldset className="border-0 p-0 m-0">
+              <legend
+                className={css`
+                  display: block;
+                  margin-bottom: 0.5rem;
+                `}
+              >
+                {t("ifNotPublic")}
+              </legend>
               {tiers?.results.map((tier) => (
-                <option value={tier.id} key={tier.id}>
+                <CheckBoxLabel
+                  key={tier.id}
+                  htmlFor={`subscription-tier-${tier.id}`}
+                >
+                  <InputEl
+                    id={`subscription-tier-${tier.id}`}
+                    type="checkbox"
+                    value={tier.id}
+                    {...register("subscriptionTierIds")}
+                  />
                   {tier.name}
-                </option>
+                </CheckBoxLabel>
               ))}
-            </SelectEl>
+              <small className="block mt-1">{t("tiersHint")}</small>
+            </fieldset>
           </FormComponent>
         )}
 

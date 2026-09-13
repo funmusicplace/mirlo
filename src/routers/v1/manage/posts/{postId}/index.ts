@@ -4,10 +4,10 @@ import { uniq } from "lodash";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { doesPostBelongToUser } from "../../../../../utils/post";
-import { serializePost } from "../../../../../serializers/post";
 
 async function syncPostImages(
   postId: number,
@@ -121,6 +121,7 @@ export default function () {
         isPublic,
         publishedAt,
         minimumSubscriptionTierId,
+        postSubscriptionTierIds,
         shouldSendEmail,
         urlSlug,
       } = req.body;
@@ -181,13 +182,41 @@ export default function () {
         }
       }
 
+      const tierIds: number[] | undefined = Array.isArray(
+        postSubscriptionTierIds
+      )
+        ? uniq(postSubscriptionTierIds.map(Number)).filter((id) =>
+            Number.isFinite(id)
+          )
+        : undefined;
+
+      if (post?.profileId && tierIds && tierIds.length > 0) {
+        const validTiers = await prisma.profileSubscriptionTier.findMany({
+          where: {
+            profileId: post.profileId,
+            id: { in: tierIds },
+          },
+          select: { id: true },
+        });
+
+        if (validTiers.length !== tierIds.length) {
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "One of those subscription tiers isn't associated with the artist",
+          });
+        }
+      }
+
       const updatedPost = await prisma.post.update({
         data: {
           title,
           content,
           isPublic,
           publishedAt,
-          minimumSubscriptionTierId,
+          ...(tierIds
+            ? { minimumSubscriptionTierId: null }
+            : { minimumSubscriptionTierId }),
           shouldSendEmail,
           urlSlug: effectiveSlug,
         },
@@ -195,6 +224,22 @@ export default function () {
           id: Number(postId),
         },
       });
+
+      if (tierIds) {
+        await prisma.postSubscriptionTier.deleteMany({
+          where: {
+            postId: updatedPost.id,
+            profileSubscriptionTierId: { notIn: tierIds },
+          },
+        });
+        await prisma.postSubscriptionTier.createMany({
+          data: tierIds.map((profileSubscriptionTierId) => ({
+            postId: updatedPost.id,
+            profileSubscriptionTierId,
+          })),
+          skipDuplicates: true,
+        });
+      }
 
       if (content) {
         await syncPostImages(
@@ -216,6 +261,7 @@ export default function () {
             },
           },
           images: true,
+          postSubscriptionTiers: true,
         },
       });
       res.json({
@@ -282,6 +328,8 @@ export default function () {
               order: "asc",
             },
           },
+          // The edit form pre-checks the tiers a post is addressed to (#1253).
+          postSubscriptionTiers: true,
         },
       });
       res.json({

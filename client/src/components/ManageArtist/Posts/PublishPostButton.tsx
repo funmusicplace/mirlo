@@ -83,10 +83,9 @@ const PublishPostButton: React.FC<{
           publishedAt:
             publishedAtOverride ??
             new Date(data.publishedAt + ":00").toISOString(),
-          minimumSubscriptionTierId:
-            isFinite(+data.minimumTier) && +data.minimumTier !== 0
-              ? Number(data.minimumTier)
-              : undefined,
+          postSubscriptionTierIds: (data.subscriptionTierIds ?? [])
+            .map(Number)
+            .filter((id) => Number.isFinite(id) && id !== 0),
         };
         await api.put<Partial<Post>, { result: { id: number } }>(
           `manage/posts/${existingId}`,
@@ -119,7 +118,6 @@ const PublishPostButton: React.FC<{
     ]
   );
 
-  const minimumTier = watch("minimumTier");
   const publicationDate = watch("publishedAt");
 
   const isFuture = new Date() < new Date(post.publishedAt);
@@ -159,7 +157,7 @@ const PublishPostButton: React.FC<{
   return (
     <>
       <ArtistButton
-        disabled={!minimumTier || !publicationDate}
+        disabled={!publicationDate}
         isLoading={isPublishing}
         onClick={onPublishClick}
         type="submit"

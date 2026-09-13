@@ -126,15 +126,18 @@ export default async function sendPostNotification(job: {
       return;
     }
 
-    // Collect all unique subscribers (filtering out deleted/unconfirmed users,
-    // and those below the post's minimum subscription tier, if any).
-    // A user can hold more than one subscription to the same artist (e.g. a
-    // free follow alongside a paid tier), so OR their receiveEmail flags
-    // together rather than taking whichever subscription happened first.
     const minimumAmount = post.minimumSubscriptionTier?.minAmount ?? 0;
-    const allowedTierIds = new Set(
-      post.postSubscriptionTiers.map((t) => t.profileSubscriptionTierId)
+    const addressedTierIds = post.postSubscriptionTiers.map(
+      (t) => t.profileSubscriptionTierId
     );
+    const isSubscriptionAddressed = (us: {
+      amount: number;
+      profileSubscriptionTierId: number;
+    }) =>
+      addressedTierIds.length > 0
+        ? addressedTierIds.includes(us.profileSubscriptionTierId)
+        : us.amount >= minimumAmount;
+
     const flatSubscriptions = flatten(
       (post.profile?.subscriptionTiers ?? []).map((st) =>
         st.userSubscriptions
@@ -142,8 +145,7 @@ export default async function sendPostNotification(job: {
             (us) =>
               us.user.deletedAt === null &&
               us.user.emailConfirmationToken === null &&
-              (us.amount >= minimumAmount ||
-                allowedTierIds.has(us.profileSubscriptionTierId))
+              isSubscriptionAddressed(us)
           )
           .map((us) => ({ ...us.user, receiveEmail: us.receiveEmail }))
       )
