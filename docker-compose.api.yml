@@ -28,9 +28,12 @@ services:
       - NODE_ENV=${NODE_ENV:-development}
       - REDIS_HOST=${REDIS_HOST:-redis}
     depends_on:
-      - redis
-      - pgsql
-      - minio
+      redis:
+        condition: service_started
+      pgsql:
+        condition: service_started
+      garage-init:
+        condition: service_completed_successfully
     networks: [api-network]
     ports:
       - "${APP_HOST_PORT:-3000}:3000"
@@ -62,10 +65,14 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-development}
     depends_on:
-      - redis
-      - pgsql
-      - api
-      - minio
+      redis:
+        condition: service_started
+      pgsql:
+        condition: service_started
+      api:
+        condition: service_started
+      garage-init:
+        condition: service_completed_successfully
     restart: unless-stopped
     networks: [api-network]
     volumes:
@@ -84,17 +91,31 @@ services:
         - action: rebuild
           path: package.json
 
-  minio:
-    container_name: blackbird-minio
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+  garage:
+    container_name: blackbird-garage
+    image: dxflrs/garage:v2.1.0
     networks: [api-network]
     ports:
-      - "9000:9000" # API Port
-      - "9001:9001" # Web UI Port
+      - "9000:9000" # S3 API, the port LOCAL_S3_API_PORT expects
+      - "3903:3903" # Admin API (cluster status, keys, buckets)
     volumes:
-      - minio_storage:/data
+      - garage_storage:/var/lib/garage
+      - ./scripts/garage/garage.toml:/etc/garage.toml:ro
+
+  garage-init:
+    container_name: blackbird-garage-init
+    image: curlimages/curl:8.11.1
+    networks: [api-network]
+    depends_on:
+      - garage
     env_file: .env
-    command: server --console-address ":9001" /data
+    environment:
+      GARAGE_HOST: garage
+      GARAGE_ADMIN_TOKEN: c3f80a1d5b6e294738af05c1d9e6b47250fa38c9e1d4b70a635f9c28e04d7b16
+    volumes:
+      - ./scripts/garage/init.sh:/init.sh:ro
+    entrypoint: ["sh", "/init.sh"]
+    restart: "no"
 
   pgsql:
     container_name: blackbird-pgsql
@@ -127,4 +148,4 @@ networks:
     driver: bridge
 
 volumes:
-  minio_storage: {}
+  garage_storage: {}

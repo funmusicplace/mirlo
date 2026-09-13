@@ -139,19 +139,16 @@ export const UploadContextProvider: React.FC<{
       try {
         const response = await api.post<
           Partial<Track>,
-          { result: Track; uploadUrl: string }
+          { result: Track; uploadUrl: string | null }
         >(`manage/tracks`, packet);
 
         newTrack = response.result;
         setQueue((q) => produceNewStatus(q, firstTrack.t.title, 25));
 
-        if (response.uploadUrl && !response.uploadUrl.includes("minio:9000")) {
+        if (response.uploadUrl) {
           const result = await fetch(response.uploadUrl, {
             method: "PUT",
             body: firstTrack.t.file,
-            headers: {
-              Origin: "http://minio:9000",
-            },
           });
           if (result.ok) {
             await api.put(`manage/tracks/${newTrack.id}/process`, {

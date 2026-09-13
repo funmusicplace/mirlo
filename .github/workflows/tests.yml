@@ -64,6 +64,9 @@ jobs:
           echo "::group::Log output: blackbird-api-test"
           docker compose logs api-test
           echo "::endgroup::"
+          echo "::group::Log output: garage-init-test (object store provisioning)"
+          docker compose logs garage-init-test
+          echo "::endgroup::"
 
       - name: Stop containers
         if: always()
