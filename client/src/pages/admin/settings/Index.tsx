@@ -194,7 +194,6 @@ const Index = () => {
 
   return (
     <WidthContainer variant="big" justify="center" className="p-4">
-      <h3>Settings</h3>
       <form onSubmit={handleSubmit(updateSettings)}>
         <Table
           className={css`
@@ -477,12 +476,11 @@ const Index = () => {
           <tr>
             <td>
               Use consolidated bucket mode
-              <br />
-              <small>
-                Off keeps legacy mode (separate per-type buckets) — leave off
-                for existing installs unless you've migrated their data. On
-                switches to the consolidated 3-bucket layout: mirlo-audio,
-                mirlo-images, mirlo-downloads.
+              <small className="block max-w-md">
+                Off keeps legacy mode (separate per-type buckets): leave off for
+                existing installs unless you've migrated their data. On switches
+                to the consolidated 3-bucket layout: mirlo-audio, mirlo-images,
+                mirlo-downloads.
               </small>
             </td>
             <td>

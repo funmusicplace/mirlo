@@ -9,7 +9,7 @@ import { formatDate as formatDateForLocale } from "components/TrackGroup/Release
 import { queryTrustLevelNames } from "queries/settings";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
+import { FaArrowCircleLeft, FaCheck, FaTimes, FaTrash } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
@@ -23,6 +23,7 @@ const Index = () => {
   const [accountingEmail, setAccountingEmail] = React.useState<string>("");
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
   const snackbar = useSnackbar();
+  const emailStatusCellRef = React.useRef<HTMLTableCellElement>(null);
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const { data: trustLevelNames = DEFAULT_TRUST_LEVEL_NAMES } = useQuery(
@@ -39,7 +40,8 @@ const Index = () => {
 
   const onConfirmationEmailClick = React.useCallback(async () => {
     await api.post(`users/${id}/confirmEmail`, {});
-    callback();
+    await callback();
+    emailStatusCellRef.current?.focus();
   }, [callback, id]);
 
   const onLoginAsUserClick = React.useCallback(async () => {
@@ -97,6 +99,9 @@ const Index = () => {
               </Link>
               User "{user.email}"
             </h2>
+          </div>
+          <div>
+            <Button onClick={onLoginAsUserClick}>Log in as user</Button>
           </div>
         </SpaceBetweenDiv>
         <div>
@@ -216,8 +221,21 @@ const Index = () => {
               </tr>
               <tr>
                 <td>email confirmed?</td>
-                <td>
-                  {user.hasPendingEmailConfirmation ? <FaTimes /> : <FaCheck />}
+                <td ref={emailStatusCellRef} tabIndex={-1}>
+                  {user.hasPendingEmailConfirmation ? (
+                    <div className="flex items-center gap-2">
+                      <FaTimes />
+                      <Button
+                        variant="outlined"
+                        size="compact"
+                        onClick={onConfirmationEmailClick}
+                      >
+                        Confirm email
+                      </Button>
+                    </div>
+                  ) : (
+                    <FaCheck />
+                  )}
                 </td>
               </tr>
               <tr>
@@ -239,35 +257,35 @@ const Index = () => {
               <tr>
                 <td>Feature flags</td>
                 <td>
-                  <SelectEl
-                    multiple
-                    defaultValue={featureFlags}
-                    onChange={(e) => {
-                      const selectedOptions = Array.from(
-                        e.target.selectedOptions,
-                        (option) => option.value
-                      );
-                      setFeatureFlags(selectedOptions);
-                    }}
-                  >
-                    {["activityPub", "federatedStreaming"].map((flag) => (
-                      <option key={flag} value={flag}>
-                        {flag}
-                      </option>
-                    ))}
-                  </SelectEl>
-                </td>
-                <td>
-                  <Button
-                    onClick={async () => {
-                      await api.put(`admin/users/${id}`, {
-                        featureFlags: featureFlags,
-                      });
-                      callback();
-                    }}
-                  >
-                    Save
-                  </Button>
+                  <div className="flex flex-col items-start gap-2">
+                    <SelectEl
+                      multiple
+                      defaultValue={featureFlags}
+                      onChange={(e) => {
+                        const selectedOptions = Array.from(
+                          e.target.selectedOptions,
+                          (option) => option.value
+                        );
+                        setFeatureFlags(selectedOptions);
+                      }}
+                    >
+                      {["activityPub", "federatedStreaming"].map((flag) => (
+                        <option key={flag} value={flag}>
+                          {flag}
+                        </option>
+                      ))}
+                    </SelectEl>
+                    <Button
+                      onClick={async () => {
+                        await api.put(`admin/users/${id}`, {
+                          featureFlags: featureFlags,
+                        });
+                        callback();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -276,7 +294,7 @@ const Index = () => {
                     Stripe account ID
                   </label>
                 </td>
-                <td className="flex">
+                <td className="flex gap-2">
                   <InputEl
                     id="input-stripe-account-id"
                     onChange={(event) => setStripeAccountId(event.target.value)}
@@ -299,7 +317,7 @@ const Index = () => {
                     Transaction email
                   </label>
                 </td>
-                <td className="flex">
+                <td className="flex gap-2">
                   <InputEl
                     id="input-transaction-email"
                     onChange={(event) => setAccountingEmail(event.target.value)}
@@ -322,9 +340,20 @@ const Index = () => {
               </tr>
             </tbody>
           </Table>
-          <Button onClick={onConfirmationEmailClick}>Confirm user email</Button>
-          <Button onClick={onLoginAsUserClick}>Log in as user</Button>
-          <Button onClick={onDeleteClick}>Delete user</Button>
+          <section className="mt-8 flex flex-col items-start gap-2">
+            <h3>Delete user</h3>
+            <small>
+              This permanently deletes the user, their artists and everything
+              attached to them. It cannot be undone.
+            </small>
+            <Button
+              buttonRole="warning"
+              startIcon={<FaTrash />}
+              onClick={onDeleteClick}
+            >
+              Delete user
+            </Button>
+          </section>
         </div>
       </div>
     </>
