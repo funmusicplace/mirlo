@@ -44,6 +44,23 @@ const Index = () => {
     emailStatusCellRef.current?.focus();
   }, [callback, id]);
 
+  const onResendConfirmationEmailClick = React.useCallback(async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      await api.post("resend-verification-email", {
+        email: user.email,
+        client: import.meta.env.VITE_CLIENT_DOMAIN,
+      });
+      snackbar(`Confirmation email sent to ${user.email}`, {
+        type: "success",
+      });
+    } catch (e) {
+      snackbar("Could not send the confirmation email", { type: "warning" });
+    }
+  }, [snackbar, user]);
+
   const onLoginAsUserClick = React.useCallback(async () => {
     if (
       window.confirm(
@@ -228,9 +245,16 @@ const Index = () => {
                       <Button
                         variant="outlined"
                         size="compact"
+                        onClick={onResendConfirmationEmailClick}
+                      >
+                        Resend confirmation email
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="compact"
                         onClick={onConfirmationEmailClick}
                       >
-                        Confirm email
+                        Mark as confirmed
                       </Button>
                     </div>
                   ) : (
