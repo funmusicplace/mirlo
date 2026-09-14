@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
@@ -5,6 +6,7 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
 import { formatDate as formatDateForLocale } from "components/TrackGroup/ReleaseDate";
+import { queryTrustLevelNames } from "queries/settings";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
@@ -12,6 +14,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
+import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 const Index = () => {
   const { id } = useParams();
@@ -22,6 +25,9 @@ const Index = () => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { i18n } = useTranslation();
+  const { data: trustLevelNames = DEFAULT_TRUST_LEVEL_NAMES } = useQuery(
+    queryTrustLevelNames()
+  );
 
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);
@@ -113,8 +119,27 @@ const Index = () => {
                 <td>{formatDate(user.updatedAt)}</td>
               </tr>
               <tr>
-                <td>Trust level</td>
-                <td>{user.trustLevel}</td>
+                <td>
+                  <label htmlFor="input-trust-level">Trust level</label>
+                </td>
+                <td>
+                  <SelectEl
+                    id="input-trust-level"
+                    value={user.trustLevel}
+                    onChange={async (e) => {
+                      await api.put(`admin/users/${id}`, {
+                        trustLevel: Number(e.target.value),
+                      });
+                      callback();
+                    }}
+                  >
+                    {trustLevelNames.map((name, level) => (
+                      <option key={level} value={level}>
+                        {name}
+                      </option>
+                    ))}
+                  </SelectEl>
+                </td>
               </tr>
               <tr>
                 <td>artists</td>
