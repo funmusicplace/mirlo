@@ -49,6 +49,29 @@ export const tiersForLegacyMinimumTier = (
     .map((tier) => `${tier.id}`);
 };
 
+export const tiersForPost = (
+  post:
+    | Pick<Post, "postSubscriptionTiers" | "minimumSubscriptionTierId">
+    | undefined,
+  tiers: ArtistSubscriptionTier[]
+): string[] | undefined => {
+  const addressedTiers = post?.postSubscriptionTiers ?? [];
+
+  if (addressedTiers.length > 0) {
+    return addressedTiers.map((t) => `${t.profileSubscriptionTierId}`);
+  }
+
+  if (!post?.minimumSubscriptionTierId) {
+    return [];
+  }
+
+  if (tiers.length === 0) {
+    return undefined;
+  }
+
+  return tiersForLegacyMinimumTier(tiers, post.minimumSubscriptionTierId);
+};
+
 export const toDateTimeLocalValue = (date: Date) => {
   const local = new Date(date);
   local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
@@ -98,17 +121,15 @@ const PostForm: React.FC<{
       isPublic: postWithEmail.isPublic,
       shouldSendEmail: postWithEmail.shouldSendEmail,
       urlSlug: postWithEmail.urlSlug,
+      subscriptionTierIds: tiersForPost(post, tiers?.results ?? []),
     };
-  }, [post]);
+  }, [post, tiers]);
 
   const methods = useForm<PostFormData>({
     defaultValues: buildDefaultValues(),
     mode: "onBlur",
   });
 
-  // Body content uses its own hook + localStorage key because TextEditor only
-  // reads its value at mount, so any Controller-based draft restore via setValue
-  // is invisible. We aggregate both restores in the banner below.
   const formDraftKey = post?.id ? `postDraft-${post.id}` : null;
   const bodyDraftKey = post?.id ? `postBodyDraft-${post.id}` : null;
   const formDraft = useFormPersist(formDraftKey, methods);
@@ -142,14 +163,15 @@ const PostForm: React.FC<{
       return;
     }
 
-    const addressedTiers = post.postSubscriptionTiers ?? [];
+    if (methods.getValues("subscriptionTierIds") !== undefined) {
+      return;
+    }
 
-    methods.setValue(
-      "subscriptionTierIds",
-      addressedTiers.length > 0
-        ? addressedTiers.map((t) => `${t.profileSubscriptionTierId}`)
-        : tiersForLegacyMinimumTier(allTiers, post.minimumSubscriptionTierId)
-    );
+    const ids = tiersForPost(post, allTiers);
+
+    if (ids) {
+      methods.setValue("subscriptionTierIds", ids);
+    }
   }, [tiers]);
 
   const { register, watch } = methods;

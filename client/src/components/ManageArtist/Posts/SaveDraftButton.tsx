@@ -51,9 +51,11 @@ const SaveDraftButton: React.FC<{
             ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
             content: getBodyContent(),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
-            postSubscriptionTierIds: (data.subscriptionTierIds ?? [])
-              .map(Number)
-              .filter((id) => Number.isFinite(id) && id !== 0),
+            postSubscriptionTierIds: data.subscriptionTierIds
+              ? data.subscriptionTierIds
+                  .map(Number)
+                  .filter((id) => Number.isFinite(id) && id !== 0)
+              : undefined,
           };
           const response = await api.put<
             Partial<Post>,

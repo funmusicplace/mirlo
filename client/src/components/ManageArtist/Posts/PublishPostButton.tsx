@@ -83,9 +83,11 @@ const PublishPostButton: React.FC<{
           publishedAt:
             publishedAtOverride ??
             new Date(data.publishedAt + ":00").toISOString(),
-          postSubscriptionTierIds: (data.subscriptionTierIds ?? [])
-            .map(Number)
-            .filter((id) => Number.isFinite(id) && id !== 0),
+          postSubscriptionTierIds: data.subscriptionTierIds
+            ? data.subscriptionTierIds
+                .map(Number)
+                .filter((id) => Number.isFinite(id) && id !== 0)
+            : undefined,
         };
         await api.put<Partial<Post>, { result: { id: number } }>(
           `manage/posts/${existingId}`,

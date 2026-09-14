@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { tiersForLegacyMinimumTier } from "./PostForm";
+import { tiersForLegacyMinimumTier, tiersForPost } from "./PostForm";
 
-// Posts written before #1253 stored a single "minimum tier", which meant that
-// tier and anything costing at least as much. Opening one of those in the
-// multi-tier form has to tick exactly that set, or saving it would silently
-// narrow who can read it.
 const tier = (id: number, minAmount?: number) =>
   ({ id, minAmount, name: `tier-${id}` }) as ArtistSubscriptionTier;
 
@@ -36,5 +32,45 @@ describe("tiersForLegacyMinimumTier", () => {
       "2",
       "3",
     ]);
+  });
+});
+
+describe("tiersForPost", () => {
+  it("ticks the tiers the post already addresses", () => {
+    expect(
+      tiersForPost(
+        { postSubscriptionTiers: [{ profileSubscriptionTierId: 3 }] },
+        tiers
+      )
+    ).toEqual(["3"]);
+  });
+
+  it("ticks nothing for a public post with no tiers", () => {
+    expect(tiersForPost({}, tiers)).toEqual([]);
+    expect(tiersForPost(undefined, tiers)).toEqual([]);
+  });
+
+  it("expands a legacy minimum tier once the tier list is there", () => {
+    expect(tiersForPost({ minimumSubscriptionTierId: 2 }, tiers)).toEqual([
+      "2",
+      "3",
+    ]);
+  });
+
+  it("returns undefined for a legacy post before the tiers have loaded", () => {
+    // Sending [] here would wipe the post's tiers server side.
+    expect(tiersForPost({ minimumSubscriptionTierId: 2 }, [])).toBeUndefined();
+  });
+
+  it("doesn't need the tier list for a post that already has tiers", () => {
+    expect(
+      tiersForPost(
+        {
+          minimumSubscriptionTierId: 2,
+          postSubscriptionTiers: [{ profileSubscriptionTierId: 1 }],
+        },
+        []
+      )
+    ).toEqual(["1"]);
   });
 });

@@ -88,7 +88,7 @@ const ArtistVariableSupport: React.FC<{
       </ArtistButton>
       <Modal
         size="small"
-        open={open}
+        open={open || !!checkout}
         onClose={closeModal}
         title={
           (checkout
