@@ -255,6 +255,61 @@ describe("admin/settings", () => {
       assert.equal(row?.bucketNames, null);
     });
 
+    it("should save trust level names", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            trustLevelNames: ["Newcomer", "Member", "Regular", "Veteran"],
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+
+      const row = await prisma.settings.findFirst();
+      assert.deepEqual(row?.settings.trustLevelNames, [
+        "Newcomer",
+        "Member",
+        "Regular",
+        "Veteran",
+      ]);
+    });
+
+    it("should reject malformed trust level names", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        trustLevelNames: ["Newcomer"],
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            trustLevelNames: { 0: "Newcomer" },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+
+      const row = await prisma.settings.findFirst();
+      assert.deepEqual(row?.settings.trustLevelNames, ["Newcomer"]);
+    });
+
     it("should not update bucketNames when omitted from request", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

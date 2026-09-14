@@ -2,10 +2,12 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { AppError } from "../../../utils/error";
 import { setCdnUrl } from "../../../utils/images";
 import { setBucketConfig, BucketConfig } from "../../../utils/minio";
 import { getSiteSettings } from "../../../utils/settings";
 import { refreshStripeClient } from "../../../utils/stripe";
+import { isTrustLevelNames } from "../../../utils/trustLevel";
 
 export default function () {
   const operations = {
@@ -36,6 +38,15 @@ export default function () {
       bucketNames,
     } = req.body;
     try {
+      if (
+        settings?.trustLevelNames !== undefined &&
+        !isTrustLevelNames(settings.trustLevelNames)
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Invalid trust level names",
+        });
+      }
       let existingSettings = await prisma.settings.findFirst();
       if (!existingSettings) {
         existingSettings = await prisma.settings.create({

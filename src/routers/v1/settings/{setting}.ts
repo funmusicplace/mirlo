@@ -1,9 +1,10 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { AppError } from "../../../utils/error";
 import { processSingleArtist } from "../../../serializers/artist";
+import { AppError } from "../../../utils/error";
 import { getSiteSettings } from "../../../utils/settings";
+import { resolveTrustLevelNames } from "../../../utils/trustLevel";
 
 export default function () {
   const operations = {
@@ -29,6 +30,7 @@ export default function () {
         "instanceCustomization.purchaseEmail",
         "instanceCustomization.showHeroOnHome",
         "instanceCustomization.colors",
+        "trustLevelNames",
       ];
 
       if (!okaySettings.includes(setting)) {
@@ -46,6 +48,12 @@ export default function () {
                 key as keyof typeof settings.settings.instanceCustomization
               ]
             : undefined,
+        });
+      }
+
+      if (setting === "trustLevelNames") {
+        return res.status(200).json({
+          result: resolveTrustLevelNames(settings.settings?.trustLevelNames),
         });
       }
 

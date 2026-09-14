@@ -52,6 +52,7 @@ declare global {
       };
       featuredArtistIds?: number[];
       cloudflareTurnstileSecret?: string;
+      trustLevelNames?: string[];
     };
     type Properties = {
       colors?: {

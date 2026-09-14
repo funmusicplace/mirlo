@@ -20,6 +20,22 @@ export function querySetting(setting: string) {
   });
 }
 
+const fetchTrustLevelNames: QueryFunction<
+  string[],
+  ["fetchTrustLevelNames"]
+> = ({ signal }) => {
+  return api
+    .get<{ result: string[] }>(`v1/settings/trustLevelNames`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryTrustLevelNames() {
+  return queryOptions({
+    queryKey: ["fetchTrustLevelNames"],
+    queryFn: fetchTrustLevelNames,
+  });
+}
+
 const fetchFeaturedArtists: QueryFunction<
   Artist[],
   ["fetchFeaturedArtists"]
