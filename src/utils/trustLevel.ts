@@ -10,6 +10,12 @@ export const TRUST_LEVELS = {
 
 export type TrustLevel = (typeof TRUST_LEVELS)[keyof typeof TRUST_LEVELS];
 
+export type TrustSignal = Exclude<TrustLevelChangeReason, "ADMIN">;
+
+export const DEFAULT_TRUST_LEVEL_RULES: Record<TrustSignal, TrustLevel> = {
+  PAYMENT_ACCOUNT_VERIFIED: TRUST_LEVELS.VERIFIED,
+};
+
 export const DEFAULT_TRUST_LEVEL_NAMES = [
   "New",
   "Verified",
@@ -57,4 +63,16 @@ export const setUserTrustLevel = async (
       data: { userId, fromLevel, toLevel, reason, changedByUserId },
     });
   });
+};
+
+export const applyTrustSignal = async (userId: number, signal: TrustSignal) => {
+  const targetLevel = DEFAULT_TRUST_LEVEL_RULES[signal];
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { trustLevel: true },
+  });
+  if (!user || user.trustLevel >= targetLevel) {
+    return null;
+  }
+  return setUserTrustLevel(userId, targetLevel, signal);
 };

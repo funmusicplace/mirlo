@@ -6,7 +6,10 @@ import assert from "assert";
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
-import { setUserTrustLevel } from "../../src/utils/trustLevel";
+import {
+  applyTrustSignal,
+  setUserTrustLevel,
+} from "../../src/utils/trustLevel";
 import { clearTables, createUser } from "../utils";
 
 describe("trustLevel", () => {
@@ -16,6 +19,60 @@ describe("trustLevel", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  describe("applyTrustSignal", () => {
+    it("promotes a new user and records the change", async () => {
+      const { user } = await createUser({ email: "user@test.com" });
+
+      const change = await applyTrustSignal(
+        user.id,
+        "PAYMENT_ACCOUNT_VERIFIED"
+      );
+
+      const updated = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+      assert.equal(updated?.trustLevel, 1);
+      assert.equal(change?.fromLevel, 0);
+      assert.equal(change?.toLevel, 1);
+      assert.equal(change?.reason, "PAYMENT_ACCOUNT_VERIFIED");
+      assert.equal(change?.changedByUserId, null);
+    });
+
+    it("does nothing when the signal is received again", async () => {
+      const { user } = await createUser({ email: "user@test.com" });
+
+      await applyTrustSignal(user.id, "PAYMENT_ACCOUNT_VERIFIED");
+      const second = await applyTrustSignal(
+        user.id,
+        "PAYMENT_ACCOUNT_VERIFIED"
+      );
+
+      const changes = await prisma.userTrustLevelChange.findMany({
+        where: { userId: user.id },
+      });
+      assert.equal(second, null);
+      assert.equal(changes.length, 1);
+    });
+
+    it("never lowers a user who is already above the target level", async () => {
+      const { user } = await createUser({
+        email: "user@test.com",
+        trustLevel: 3,
+      });
+
+      const change = await applyTrustSignal(
+        user.id,
+        "PAYMENT_ACCOUNT_VERIFIED"
+      );
+
+      const updated = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+      assert.equal(change, null);
+      assert.equal(updated?.trustLevel, 3);
+    });
   });
 
   describe("setUserTrustLevel", () => {
