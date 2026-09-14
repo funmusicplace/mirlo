@@ -7,7 +7,7 @@ import {
 } from "../../../../auth/passport";
 import { serializeUser } from "../../../../serializers/user";
 import { AppError } from "../../../../utils/error";
-import { isTrustLevel } from "../../../../utils/trustLevel";
+import { isTrustLevel, setUserTrustLevel } from "../../../../utils/trustLevel";
 import { deleteUser } from "../../../../utils/user";
 
 export default function () {
@@ -58,9 +58,16 @@ export default function () {
           accountingEmail,
           disabledAt:
             disabled === undefined ? undefined : disabled ? new Date() : null,
-          trustLevel,
         },
       });
+      if (trustLevel !== undefined && req.user) {
+        await setUserTrustLevel(
+          Number(req.params.id),
+          trustLevel,
+          "ADMIN",
+          req.user.id
+        );
+      }
       res.json({
         message: "success",
       });

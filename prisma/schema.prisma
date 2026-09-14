@@ -123,6 +123,27 @@ model User {
   clients                             Client[]
   resolvedContentFlags                ContentFlag[]                    @relation("resolvedContentFlags")
   reportedContentFlags                ContentFlag[]                    @relation("reportedContentFlags")
+  trustLevelChanges                   UserTrustLevelChange[]           @relation("trustLevelChangeUser")
+  trustLevelChangesMade               UserTrustLevelChange[]           @relation("trustLevelChangeActor")
+}
+
+enum TrustLevelChangeReason {
+  ADMIN
+  PAYMENT_ACCOUNT_VERIFIED
+}
+
+model UserTrustLevelChange {
+  id              Int                    @id @default(autoincrement())
+  userId          Int
+  user            User                   @relation("trustLevelChangeUser", fields: [userId], references: [id], onDelete: Cascade)
+  fromLevel       Int
+  toLevel         Int
+  reason          TrustLevelChangeReason
+  changedByUserId Int?
+  changedBy       User?                  @relation("trustLevelChangeActor", fields: [changedByUserId], references: [id], onDelete: SetNull)
+  createdAt       DateTime               @default(now())
+
+  @@index([userId])
 }
 
 model Invite {

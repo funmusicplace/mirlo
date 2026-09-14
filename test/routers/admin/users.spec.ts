@@ -80,8 +80,8 @@ describe("admin/users/{id}", () => {
       assert.equal(response.statusCode, 401);
     });
 
-    it("should update the user trust level", async () => {
-      const { accessToken } = await createUser({
+    it("should update the user trust level and record the change", async () => {
+      const { user: admin, accessToken } = await createUser({
         email: "admin@test.com",
         isAdmin: true,
       });
@@ -99,6 +99,15 @@ describe("admin/users/{id}", () => {
         where: { id: user.id },
       });
       assert.equal(updated?.trustLevel, 3);
+
+      const changes = await prisma.userTrustLevelChange.findMany({
+        where: { userId: user.id },
+      });
+      assert.equal(changes.length, 1);
+      assert.equal(changes[0].fromLevel, 0);
+      assert.equal(changes[0].toLevel, 3);
+      assert.equal(changes[0].reason, "ADMIN");
+      assert.equal(changes[0].changedByUserId, admin.id);
     });
 
     it("should reject an unknown trust level", async () => {
