@@ -1,22 +1,19 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useTranslation } from "react-i18next";
-
-import api from "services/api";
-import useJobStatusCheck from "utils/useJobStatusCheck";
-import { useSnackbar } from "state/SnackbarContext";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import { InputEl } from "components/common/Input";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { AiFillDelete } from "react-icons/ai";
+import { useParams } from "react-router-dom";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+import { formatAcceptList } from "utils/uploadFormats";
+import useJobStatusCheck from "utils/useJobStatusCheck";
+
+import { bp } from "../../constants";
 
 import { Img, ReplaceSpan, Spinner, UploadPrompt } from "./UploadImage";
-import { bp } from "../../constants";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import { useAuthContext } from "state/AuthContext";
-import { formatAcceptList } from "utils/uploadFormats";
-import { useFormContext } from "react-hook-form";
 
 type ExistingImage = {
   sizes: { [key: number]: string };
@@ -82,14 +79,17 @@ const UploadGeneralImage: React.FC<{
     setIsSaving(true);
     try {
       await api.delete(`manage/artists/${artistId}/images/${localImageId}`);
+      setExistingImage(undefined);
+      setLocalImageId(undefined);
+      setValue("imageId", undefined);
+      afterSave?.();
     } catch (e) {
       snackbar("Something went wrong", { type: "warning" });
       console.error(e);
     } finally {
       setIsSaving(false);
-      resetWrapper();
     }
-  }, [resetWrapper, snackbar]);
+  }, [artistId, localImageId, afterSave, setValue, snackbar]);
 
   const callback = React.useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
