@@ -26,6 +26,7 @@ import {
   CreatePledgeSetupArgs,
   CreateSubscriptionSetupArgs,
   UpdateSubscriptionTierArgs,
+  PaymentAccountStatus,
   PaymentStatusResult,
   TerminalReader,
 } from "./PaymentProcessor";
@@ -350,6 +351,15 @@ export class StripePaymentProcessor implements PaymentProcessor {
       deviceType: r.device_type,
       status: r.status ?? null,
     }));
+  }
+
+  async *listAccountStatuses(): AsyncIterable<PaymentAccountStatus> {
+    for await (const account of stripe.accounts.list({ limit: 100 })) {
+      yield {
+        accountId: account.id,
+        canReceivePayments: !!account.charges_enabled,
+      };
+    }
   }
 
   async attachIdentity({

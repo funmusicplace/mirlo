@@ -22,10 +22,17 @@ export const Index: React.FC = () => {
   const onSave = React.useCallback(
     async (data: FormData) => {
       try {
-        await api.get(
-          `admin/tasks?jobName=${data.jobName}&jobParam=${data.jobParam}`
+        const response = await api.get<
+          Record<string, "Success" | { error?: string }>
+        >(`admin/tasks?jobName=${data.jobName}&jobParam=${data.jobParam}`);
+        const failure = Object.values(response.result).find(
+          (value) => typeof value === "object" && value.error
         );
-        snackbar("Success", { type: "success" });
+        if (failure && typeof failure === "object") {
+          snackbar(failure.error ?? "Task failed", { type: "warning" });
+        } else {
+          snackbar("Success", { type: "success" });
+        }
       } catch (e) {
         console.error(e);
       }
@@ -53,6 +60,9 @@ export const Index: React.FC = () => {
               initiateUserNotifications
             </option>
             <option value="cleanUpDeletedUsers">cleanUpDeletedUsers</option>
+            <option value="syncPaymentAccountStatuses">
+              syncPaymentAccountStatuses
+            </option>
           </SelectEl>
         </FormComponent>
         <FormComponent direction="row">
