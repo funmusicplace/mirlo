@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import TrustLevelHistoryModal from "components/Admin/TrustLevelHistoryModal";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
@@ -9,7 +10,13 @@ import { formatDate as formatDateForLocale } from "components/TrackGroup/Release
 import { queryTrustLevelNames } from "queries/settings";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaArrowCircleLeft, FaCheck, FaTimes, FaTrash } from "react-icons/fa";
+import {
+  FaArrowCircleLeft,
+  FaCheck,
+  FaHistory,
+  FaTimes,
+  FaTrash,
+} from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
@@ -22,8 +29,10 @@ const Index = () => {
   const [stripeAccountId, setStripeAccountId] = React.useState<string>("");
   const [accountingEmail, setAccountingEmail] = React.useState<string>("");
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
-  const snackbar = useSnackbar();
+  const [showTrustLevelHistory, setShowTrustLevelHistory] =
+    React.useState(false);
   const emailStatusCellRef = React.useRef<HTMLTableCellElement>(null);
+  const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const { data: trustLevelNames = DEFAULT_TRUST_LEVEL_NAMES } = useQuery(
@@ -145,22 +154,32 @@ const Index = () => {
                   <label htmlFor="input-trust-level">Trust level</label>
                 </td>
                 <td>
-                  <SelectEl
-                    id="input-trust-level"
-                    value={user.trustLevel}
-                    onChange={async (e) => {
-                      await api.put(`admin/users/${id}`, {
-                        trustLevel: Number(e.target.value),
-                      });
-                      callback();
-                    }}
-                  >
-                    {trustLevelNames.map((name, level) => (
-                      <option key={level} value={level}>
-                        {name}
-                      </option>
-                    ))}
-                  </SelectEl>
+                  <div className="flex items-center gap-2">
+                    <SelectEl
+                      id="input-trust-level"
+                      value={user.trustLevel}
+                      onChange={async (e) => {
+                        await api.put(`admin/users/${id}`, {
+                          trustLevel: Number(e.target.value),
+                        });
+                        callback();
+                      }}
+                    >
+                      {trustLevelNames.map((name, level) => (
+                        <option key={level} value={level}>
+                          {name}
+                        </option>
+                      ))}
+                    </SelectEl>
+                    <Button
+                      variant="outlined"
+                      size="compact"
+                      startIcon={<FaHistory />}
+                      onClick={() => setShowTrustLevelHistory(true)}
+                    >
+                      View history
+                    </Button>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -380,6 +399,12 @@ const Index = () => {
           </section>
         </div>
       </div>
+      <TrustLevelHistoryModal
+        open={showTrustLevelHistory}
+        onClose={() => setShowTrustLevelHistory(false)}
+        changes={user.trustLevelChanges}
+        trustLevelNames={trustLevelNames}
+      />
     </>
   );
 };
