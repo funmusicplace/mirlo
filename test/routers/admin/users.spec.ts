@@ -7,6 +7,7 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "@mirlo/prisma";
 
+import { setUserTrustLevel } from "../../../src/utils/trustLevel";
 import { clearTables, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
@@ -62,6 +63,28 @@ describe("admin/users/{id}", () => {
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.trustLevel, 2);
+    });
+
+    it("should return the trust level history", async () => {
+      const { user: admin, accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      const { user } = await createUser({ email: "user@test.com" });
+      await setUserTrustLevel(user.id, 2, "ADMIN", admin.id);
+
+      const response = await requestApp
+        .get(`admin/users/${user.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.trustLevelChanges.length, 1);
+      const [change] = response.body.result.trustLevelChanges;
+      assert.equal(change.fromLevel, 0);
+      assert.equal(change.toLevel, 2);
+      assert.equal(change.reason, "ADMIN");
+      assert.equal(change.changedBy.email, "admin@test.com");
     });
   });
 

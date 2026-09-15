@@ -94,6 +94,17 @@ export default function () {
           isAdmin: true,
           featureFlags: true,
           stripeAccountId: true,
+          trustLevelChanges: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              fromLevel: true,
+              toLevel: true,
+              reason: true,
+              createdAt: true,
+              changedBy: { select: { email: true } },
+            },
+          },
           emailConfirmationToken: true,
           disabledAt: true,
           trustLevel: true,
