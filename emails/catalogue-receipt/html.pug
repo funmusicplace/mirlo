@@ -15,7 +15,7 @@ block content
         tr
           td #{trackGroup.title}
           td
-            a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${encodeURIComponent(email)}`) download
+            a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${trackGroup.token}&email=${encodeURIComponent(email)}`) download
 
   +supportArtist(artist, client, hasSubscriptionTiers)
   p

@@ -13,6 +13,7 @@ export const findCataloguePurchasableTrackGroups = async (profile: {
       publishedAt: { lte: new Date() },
       isGettable: true,
       adminEnabled: true,
+      isPublic: true,
     },
     include: {
       profile: true,
