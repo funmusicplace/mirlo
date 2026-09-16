@@ -180,6 +180,119 @@ export const useDeleteAdminClientMutation = () => {
   });
 };
 
+export type AdminContentFlagSource = "USER_REPORT" | "SIGHTENGINE";
+
+export interface AdminContentFlag {
+  id: number;
+  createdAt: string;
+  source: AdminContentFlagSource;
+  reason: string | null;
+  description: string | null;
+  reporterEmail: string | null;
+  imageModel: string | null;
+  imageId: string | null;
+  score: number | null;
+  artistId: number | null;
+  artist: {
+    id: number;
+    name: string;
+    urlSlug: string;
+    enabled: boolean;
+  } | null;
+  trackGroupId: number | null;
+  trackGroup: {
+    id: number;
+    title: string | null;
+    urlSlug: string;
+    adminEnabled: boolean;
+    hideFromSearch: boolean;
+  } | null;
+  resolvedAt: string | null;
+  resolvedByUserId: number | null;
+  resolvedByUser: { id: number; name: string | null; email: string } | null;
+}
+
+export type AdminContentFlagsResolvedFilter = "unresolved" | "resolved" | "all";
+
+export const useAdminContentFlagsQuery = (
+  resolvedFilter: AdminContentFlagsResolvedFilter,
+  page: number,
+  pageSize: number
+) => {
+  return useQuery({
+    queryKey: [QUERY_KEY_ADMIN_CONTENT_FLAGS, resolvedFilter, page, pageSize],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (resolvedFilter !== "all") {
+        params.append("resolved", String(resolvedFilter === "resolved"));
+      }
+      params.append("skip", String(page * pageSize));
+      params.append("take", String(pageSize));
+      return api.getMany<AdminContentFlag>(`admin/contentFlags?${params}`);
+    },
+    placeholderData: keepPreviousData,
+  });
+};
+
+export const useAdminUnresolvedContentFlagsCountQuery = () => {
+  return useQuery({
+    queryKey: [QUERY_KEY_ADMIN_CONTENT_FLAGS, "unresolvedCount"],
+    queryFn: async () => {
+      const { result } = await api.get<number>(
+        "admin/contentFlags/unresolvedCount"
+      );
+      return result;
+    },
+  });
+};
+
+async function updateAdminContentFlag(opts: {
+  flagId: number;
+  resolved: boolean;
+}) {
+  const { flagId, ...data } = opts;
+  return api.put<typeof data, { result: AdminContentFlag }>(
+    `admin/contentFlags/${flagId}`,
+    data
+  );
+}
+
+export const useUpdateAdminContentFlagMutation = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateAdminContentFlag,
+    async onSuccess() {
+      await client.invalidateQueries({
+        queryKey: [QUERY_KEY_ADMIN_CONTENT_FLAGS],
+      });
+    },
+  });
+};
+
+async function updateAdminTrackGroup(opts: {
+  trackGroupId: number;
+  adminEnabled: boolean;
+  hideFromSearch: boolean;
+}) {
+  const { trackGroupId, ...data } = opts;
+  return api.put<typeof data, { message: string }>(
+    `admin/trackGroups/${trackGroupId}`,
+    data
+  );
+}
+
+export const useUpdateAdminTrackGroupMutation = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateAdminTrackGroup,
+    async onSuccess() {
+      await client.invalidateQueries({
+        queryKey: [QUERY_KEY_ADMIN_CONTENT_FLAGS],
+      });
+    },
+  });
+};
+
 export const useAdminArtistQuery = (artistId: string | undefined) => {
   return useQuery({
     queryKey: [QUERY_KEY_ADMIN_ARTIST, artistId],

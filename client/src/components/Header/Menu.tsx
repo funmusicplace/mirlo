@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import UnresolvedContentFlagsPill from "components/Admin/UnresolvedContentFlagsPill";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import CanCreateArtists from "components/CanCreateArtists";
 import Button from "components/common/Button";
@@ -194,11 +195,21 @@ const Menu = forwardRef<
               </MenuLink>
             </li>
             {isAdmin && (
-              <li>
-                <MenuLink onClick={onClose} to="/admin">
-                  {t("admin")}
-                </MenuLink>
-              </li>
+              <>
+                <li>
+                  <MenuLink onClick={onClose} to="/admin">
+                    {t("admin")}
+                  </MenuLink>
+                </li>
+                <li>
+                  <MenuLink onClick={onClose} to="/flagged-content">
+                    <span className="flex items-center gap-2">
+                      {t("flaggedContent")}
+                      <UnresolvedContentFlagsPill />
+                    </span>
+                  </MenuLink>
+                </li>
+              </>
             )}
             <li
               aria-hidden

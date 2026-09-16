@@ -544,6 +544,21 @@ const routes: RouteObject[] = [
         ],
       },
       {
+        path: "flagged-content",
+        handle: { title: "flaggedContent" },
+        async lazy() {
+          const { default: FlaggedContent } =
+            await import("pages/flagged-content/Index");
+          return {
+            Component: () => (
+              <AuthWrapper adminOnly>
+                <FlaggedContent />
+              </AuthWrapper>
+            ),
+          };
+        },
+      },
+      {
         path: "admin",
         async lazy() {
           const { default: Admin } = await import("pages/admin/Layout");
