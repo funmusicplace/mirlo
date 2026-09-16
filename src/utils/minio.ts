@@ -495,17 +495,6 @@ export const createBucketIfNotExists = async (
       logger?.info(`minio: created bucket: ${bucket}`);
     }
 
-    if (options?.makePublic) {
-      try {
-        await minioClient.setBucketPolicy(bucket, publicReadPolicy(bucket));
-      } catch (e) {
-        logger?.error(
-          `minio: failed to set public-read policy on bucket ${bucket}`
-        );
-        logger?.error(e);
-      }
-    }
-
     await applyCorsPolicyLocal(bucket, logger);
   }
 
@@ -1140,6 +1129,29 @@ export const uploadZip = async (
   return uploadWrapper(bucket, zipKey(type, id, format), stream);
 };
 
+const allLegacyBuckets = [
+  incomingArtistBackgroundBucket,
+  finalArtistBackgroundBucket,
+  incomingArtistAvatarBucket,
+  finalArtistAvatarBucket,
+  incomingUserAvatarBucket,
+  finalUserAvatarBucket,
+  incomingUserBannerBucket,
+  finalUserBannerBucket,
+  incomingCoversBucket,
+  finalCoversBucket,
+  incomingMerchImageBucket,
+  finalMerchImageBucket,
+  finalPostImageBucket,
+  incomingAudioBucket,
+  finalAudioBucket,
+  trackGroupFormatBucket,
+  trackFormatBucket,
+  downloadableContentBucket,
+  incomingImageBucket,
+  finalImageBucket,
+];
+
 export const ensureAllBucketsExist = async () => {
   const imageBuckets = new Set<string>();
   Object.values(imageTypeBuckets).forEach(({ incoming, final }) => {
@@ -1177,5 +1189,17 @@ export const ensureAllBucketsExist = async () => {
         logger.error(e);
       })
     ),
+    // Local only: also give the other layout's buckets a CORS policy, so a
+    // browser preflight can't land on a CORS-less bucket. Cheap and
+    // idempotent — ensureBucketCached short-circuits ones already done, and
+    // the names above overlap with the current layout's.
+    ...(backendStorage === "minio"
+      ? allLegacyBuckets.map((b) =>
+          ensureBucketCached(b).catch((e) => {
+            logger.error(`Failed to ensure CORS on local bucket ${b}`);
+            logger.error(e);
+          })
+        )
+      : []),
   ]);
 };

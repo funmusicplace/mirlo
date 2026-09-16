@@ -101,6 +101,8 @@ services:
     volumes:
       - garage_storage:/var/lib/garage
       - ./scripts/garage/garage.toml:/etc/garage.toml:ro
+    environment:
+      RUST_LOG: ${GARAGE_LOG_LEVEL:-garage=warn}
 
   garage-init:
     container_name: blackbird-garage-init
