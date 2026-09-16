@@ -72,7 +72,7 @@ export const turnItemsIntoRSS = async (
           : `A release by ${tg.artist?.name}`,
         description: tg.about
           ? markdownAsHtml(tg.about)
-          : `<h2>An release by artist ${tg.artist?.name}.</h2>`,
+          : `<h2>A release by artist ${tg.artist?.name}.</h2>`,
         url: `${client?.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}`,
         date: tg.releaseDate ?? tg.createdAt,
       });
