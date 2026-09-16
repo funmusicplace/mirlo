@@ -243,6 +243,9 @@ export default function () {
           tracks: {
             orderBy: { order: "asc" },
             where: { deletedAt: null },
+            omit: {
+              metadata: true,
+            },
             include: {
               ...(loggedInUser
                 ? {
@@ -255,6 +258,7 @@ export default function () {
             },
           },
           cover: true,
+          ...(format === "rss" ? { tags: { include: { tag: true } } } : {}),
         },
       });
 

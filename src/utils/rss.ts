@@ -10,6 +10,7 @@ type FeedArtistRef = { name: string; urlSlug: string; id: number } | null;
 type FeedTrackGroup = Omit<TrackGroup, "profileId"> & {
   artistId?: number;
   artist: FeedArtistRef;
+  tags?: string[];
 };
 
 type FeedTrack = Track & {
@@ -75,6 +76,7 @@ export const turnItemsIntoRSS = async (
           : `<h2>An release by artist ${tg.artist?.name}.</h2>`,
         url: `${client?.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}`,
         date: tg.releaseDate ?? tg.createdAt,
+        categories: tg.tags ?? [],
       });
     } else if (isPost(p)) {
       const post = p as Omit<Post, "profileId"> & {

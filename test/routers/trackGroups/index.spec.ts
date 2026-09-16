@@ -212,6 +212,37 @@ describe("trackGroups", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should not include a track's raw metadata blob in the list response", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        title: "An album",
+      });
+      const [track] = await prisma.track.findMany({
+        where: { trackGroupId: trackGroup.id },
+      });
+      await prisma.track.update({
+        where: { id: track.id },
+        data: {
+          metadata: {
+            common: { title: "An album" },
+            native: { ID3v2: [{ id: "APIC", value: { data: [1, 2, 3] } }] },
+          },
+        },
+      });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].tracks.length, 1);
+      assert.equal(response.body.results[0].tracks[0].metadata, undefined);
+      // The rest of the track is still there — this isn't a blanket strip.
+      assert.equal(response.body.results[0].tracks[0].title, "test track");
+    });
+
     it("should limit to one by artist on distinctArtists", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const profile = await createProfile(user.id);
@@ -504,6 +535,58 @@ describe("trackGroups", () => {
       assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 1);
       assert.equal(obj.items[0].title, `${tg.title} by ${profile.name}`);
+    });
+
+    it("should include the trackGroup's tags as RSS categories (#2269)", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const tg = await createTrackGroup(profile.id, {
+        publishedAt: new Date(),
+      });
+      const ambient = await prisma.tag.create({ data: { tag: "ambient" } });
+      const lofi = await prisma.tag.create({ data: { tag: "lofi" } });
+      await prisma.trackGroupTag.create({
+        data: { trackGroupId: tg.id, tagId: ambient.id },
+      });
+      await prisma.trackGroupTag.create({
+        data: { trackGroupId: tg.id, tagId: lofi.id },
+      });
+
+      const response = await requestApp
+        .get("trackGroups?format=rss")
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+
+      assert.equal(obj.items.length, 1);
+      assert.deepEqual([...(obj.items[0].categories ?? [])].sort(), [
+        "ambient",
+        "lofi",
+      ]);
+    });
+
+    it("should omit categories for a trackGroup with no tags", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      await createTrackGroup(profile.id, { publishedAt: new Date() });
+
+      const response = await requestApp
+        .get("trackGroups?format=rss")
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+
+      assert.equal(obj.items.length, 1);
+      assert.ok(
+        obj.items[0].categories === undefined ||
+          obj.items[0].categories.length === 0
+      );
     });
   });
 });
