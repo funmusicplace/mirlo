@@ -9,6 +9,8 @@ import api from "services/api";
 const QUERY_KEY_ADMIN_FUNDRAISER_PLEDGES = "admin-fundraiser-pledges";
 const QUERY_KEY_ADMIN_CLIENTS = "admin-clients";
 const QUERY_KEY_ADMIN_STATS = "admin-stats";
+const QUERY_KEY_ADMIN_ARTIST = "admin-artist";
+const QUERY_KEY_ADMIN_CONTENT_FLAGS = "admin-content-flags";
 
 /** Bucket size for the admin dashboard's time series. */
 export type StatsGranularity = "week" | "month";
@@ -174,6 +176,48 @@ export const useDeleteAdminClientMutation = () => {
     mutationFn: deleteAdminClient,
     async onSuccess() {
       await client.invalidateQueries({ queryKey: [QUERY_KEY_ADMIN_CLIENTS] });
+    },
+  });
+};
+
+export const useAdminArtistQuery = (artistId: string | undefined) => {
+  return useQuery({
+    queryKey: [QUERY_KEY_ADMIN_ARTIST, artistId],
+    queryFn: async () => {
+      const { result } = await api.get<ArtistFromAdmin>(
+        `admin/artists/${artistId}`
+      );
+      return result;
+    },
+    enabled: !!artistId,
+  });
+};
+
+async function updateAdminArtist(opts: {
+  artistId: number;
+  enabled: boolean;
+  disableReason?: string;
+}) {
+  const { artistId, ...data } = opts;
+  return api.put<typeof data, { message: string }>(
+    `admin/artists/${artistId}`,
+    data
+  );
+}
+
+export const useUpdateAdminArtistMutation = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateAdminArtist,
+    async onSuccess(_data, { artistId }) {
+      await Promise.all([
+        client.invalidateQueries({
+          queryKey: [QUERY_KEY_ADMIN_ARTIST, String(artistId)],
+        }),
+        client.invalidateQueries({
+          queryKey: [QUERY_KEY_ADMIN_CONTENT_FLAGS],
+        }),
+      ]);
     },
   });
 };
