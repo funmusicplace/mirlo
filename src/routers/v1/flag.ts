@@ -3,10 +3,10 @@ import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
 import sendMail from "../../jobs/send-mail";
+import { processSingleTrackGroup } from "../../serializers/trackGroup";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
-import { processSingleTrackGroup } from "../../serializers/trackGroup";
 
 export default function () {
   const operations = {
@@ -43,6 +43,17 @@ export default function () {
           }
         }
       }
+
+      await prisma.contentFlag.create({
+        data: {
+          source: "USER_REPORT",
+          reason,
+          description,
+          reporterEmail: email,
+          trackGroupId: trackGroup?.id,
+          profileId: trackGroup?.profileId,
+        },
+      });
 
       await sendMail({
         data: {

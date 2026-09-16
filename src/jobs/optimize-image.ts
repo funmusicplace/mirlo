@@ -5,6 +5,7 @@ import sharp from "sharp";
 import ico from "sharp-ico";
 
 import tempSharpConfig from "../config/sharp";
+import { findFlaggedImageOwner } from "../utils/contentFlag";
 import { generateFullStaticImageUrl } from "../utils/images";
 import {
   ImageType,
@@ -359,6 +360,16 @@ const optimizeImage = async (job: Job) => {
           request: { id: string };
         };
         if (result.nudity.sexual_display > 0.9) {
+          const owner = await findFlaggedImageOwner(model, destinationId);
+          await prisma.contentFlag.create({
+            data: {
+              source: "SIGHTENGINE",
+              imageModel: model,
+              imageId: destinationId,
+              score: result.nudity.sexual_display,
+              ...owner,
+            },
+          });
           logger.info("Sending an email report about SightEngine");
           await sendMail({
             data: {
