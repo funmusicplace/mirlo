@@ -13,6 +13,7 @@ import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import {
   findProfileIdForURLSlug,
   resolveProfileImageUrl,
+  whereForVisibleProfile,
 } from "../../../../utils/artist";
 import {
   canUserSeePostContent,
@@ -137,7 +138,10 @@ export default function () {
       let profile;
       if (parsedId) {
         profile = await prisma.profile.findFirst({
-          where: { id: Number(parsedId) },
+          where: {
+            id: Number(parsedId),
+            ...(user?.isAdmin ? {} : whereForVisibleProfile()),
+          },
           include: {
             subscriptionTiers: true,
             avatar: true,

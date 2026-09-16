@@ -38,7 +38,7 @@ import {
 import { processSingleArtist } from "./serializers/artist";
 import { postIncludeForUser } from "./serializers/post";
 import { serializeUser } from "./serializers/user";
-import { resolveProfileImageUrl } from "./utils/artist";
+import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
@@ -51,7 +51,10 @@ import {
   loadPurchasesForPostTracks,
 } from "./utils/postAccess";
 import { getSiteSettings } from "./utils/settings";
-import { whereForPublishedTrackGroups } from "./utils/trackGroup";
+import {
+  whereForPublishedTrackGroups,
+  whereForVisibleTrackGroup,
+} from "./utils/trackGroup";
 import { userSelect } from "./utils/user";
 
 type RouteParams = Record<string, string | number | undefined>;
@@ -306,6 +309,7 @@ const handlePost: RouteHandler<PostParams> = async ({
         id: post.id,
         publishedAt: { lte: new Date() },
         isDraft: false,
+        OR: [{ profileId: null }, { profile: whereForVisibleProfile() }],
       },
       include: postIncludeForUser(userId),
     });
@@ -612,7 +616,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   hydrations,
 }) => {
   const track = await prisma.track.findFirst({
-    where: { id: trackId },
+    where: { id: trackId, trackGroup: whereForVisibleTrackGroup() },
     include: {
       trackGroup: {
         include: {
@@ -648,7 +652,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   hydrations,
 }) => {
   const trackGroup = await prisma.trackGroup.findFirst({
-    where: { id: trackGroupId },
+    where: { id: trackGroupId, ...whereForVisibleTrackGroup() },
     include: {
       tracks: {
         where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
@@ -822,7 +826,7 @@ export const analyzePathAndGenerateHTML = async (
     // Try to fetch avatar if artist exists
     let avatarUrl: string | undefined;
     const artist = await prisma.profile.findFirst({
-      where: { urlSlug: segments[0] },
+      where: { urlSlug: segments[0], ...whereForVisibleProfile() },
       include: {
         avatar: true,
         background: true,

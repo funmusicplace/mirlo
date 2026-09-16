@@ -222,6 +222,11 @@ export const profileOptedOutOrDeleted: Prisma.ProfileWhereInput = {
   deletedAt: {}, // this is to avoid the middleware filtering out softDeleted -> /mirlo/prisma/prisma.ts
 };
 
+export const whereForVisibleProfile = (): Prisma.ProfileWhereInput => ({
+  enabled: true,
+  deletedAt: null,
+});
+
 export const findProfileIdForURLSlug = async (id: string | number) => {
   if (typeof id !== "number" && Number.isNaN(Number(id))) {
     const profile = await prisma.profile.findFirst({

@@ -14,7 +14,7 @@ import { Response } from "express";
 
 import { logger } from "../logger";
 
-import { findArtistIdForURLSlug } from "./artist";
+import { findArtistIdForURLSlug, whereForVisibleProfile } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
@@ -116,6 +116,12 @@ export const whereForPublishedTrackGroups = (opts?: {
     },
   };
 };
+
+export const whereForVisibleTrackGroup = (): Prisma.TrackGroupWhereInput => ({
+  adminEnabled: true,
+  deletedAt: null,
+  profile: whereForVisibleProfile(),
+});
 
 export const deleteTrackGroupCover = async (trackGroupId: number) => {
   const cover = await prisma.trackGroupCover.findFirst({

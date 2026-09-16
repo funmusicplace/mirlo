@@ -1,11 +1,12 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import { validate as uuidValidate } from "uuid";
 
-import prisma from "@mirlo/prisma";
-
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { fetchFile } from "./stream/{segment}";
 import { AppError } from "../../../../utils/error";
+import { whereForVisibleTrackGroup } from "../../../../utils/trackGroup";
+
+import { fetchFile } from "./stream/{segment}";
 
 export default function () {
   const operations = {
@@ -14,6 +15,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string; segment?: string } = req.params;
+    const loggedInUser = req.user;
 
     try {
       if (!id) {
@@ -30,8 +32,13 @@ export default function () {
         });
       }
 
-      const track = await prisma.trackAudio.findUnique({
-        where: { id },
+      const track = await prisma.trackAudio.findFirst({
+        where: {
+          id,
+          ...(loggedInUser?.isAdmin
+            ? {}
+            : { track: { trackGroup: whereForVisibleTrackGroup() } }),
+        },
         include: {
           track: true,
         },

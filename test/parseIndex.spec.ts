@@ -141,6 +141,47 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(ogTitle, "My Artist");
     });
 
+    it("should not describe or hydrate a disabled artist", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+        enabled: false,
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist", $);
+
+      assert.notEqual(
+        $('meta[property="og:title"]').attr("content"),
+        "My Artist"
+      );
+      assert.equal($("script#__MIRLO_ARTIST__").length, 0);
+    });
+
+    it("should not describe or hydrate a release whose artist is disabled", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+        enabled: false,
+      });
+      await createTrackGroup(artist.id, {
+        title: "Test Album",
+        urlSlug: "test-album",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/release/test-album", $);
+
+      assert.notEqual(
+        $('meta[property="og:title"]').attr("content"),
+        "Test Album"
+      );
+      assert.equal($("script#__MIRLO_ARTIST__").length, 0);
+      assert.equal($("script#__MIRLO_TRACKGROUP__").length, 0);
+    });
+
     it("should handle artist/releases route with correct title", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createArtist(user.id, {

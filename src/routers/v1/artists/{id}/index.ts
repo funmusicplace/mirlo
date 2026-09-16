@@ -8,6 +8,7 @@ import {
   findProfileIdForURLSlug,
   singleInclude,
   whereForAllProfilesThisLabelCanEdit,
+  whereForVisibleProfile,
 } from "../../../../utils/artist";
 
 export default function () {
@@ -43,7 +44,7 @@ export default function () {
         const profile = await prisma.profile.findFirst({
           where: {
             id: parsedId,
-            enabled: true,
+            ...(loggedInUser?.isAdmin ? {} : whereForVisibleProfile()),
           },
           include: singleInclude({
             includeDefaultTier,

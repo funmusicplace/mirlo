@@ -1,7 +1,9 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createProfile,
@@ -11,6 +13,7 @@ import {
   createUserTrackGroupPurchase,
   createUserTrackPurchase,
 } from "../../utils";
+
 import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../utils";
@@ -30,6 +33,55 @@ describe("tracks/{id}", () => {
         .get("tracks/1")
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET / 404 when the artist is disabled", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id, { enabled: false });
+      const trackGroup = await createTrackGroup(profile.id);
+      const track = await createTrack(trackGroup.id);
+
+      const response = await requestApp
+        .get(`tracks/${track.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET / 404 when the trackGroup is disabled by an admin", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const track = await createTrack(trackGroup.id);
+      await prisma.trackGroup.update({
+        where: { id: trackGroup.id },
+        data: { adminEnabled: false },
+      });
+
+      const response = await requestApp
+        .get(`tracks/${track.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET / 200 for an admin when the artist is disabled", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id, { enabled: false });
+      const trackGroup = await createTrackGroup(profile.id);
+      const track = await createTrack(trackGroup.id);
+      const { accessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .get(`tracks/${track.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.id, track.id);
     });
 
     it("should GET / 200 with description", async () => {

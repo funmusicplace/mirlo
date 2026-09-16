@@ -2,8 +2,9 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { AppError } from "../../../../utils/error";
 import { processSingleTrack } from "../../../../serializers/track";
+import { AppError } from "../../../../utils/error";
+import { whereForVisibleTrackGroup } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -15,7 +16,12 @@ export default function () {
     const loggedInUser = req.user;
     try {
       const track = await prisma.track.findFirst({
-        where: { id: Number(id) },
+        where: {
+          id: Number(id),
+          ...(loggedInUser?.isAdmin
+            ? {}
+            : { trackGroup: whereForVisibleTrackGroup() }),
+        },
         include: {
           trackGroup: {
             include: {

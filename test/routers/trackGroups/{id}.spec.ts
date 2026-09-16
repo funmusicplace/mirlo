@@ -34,6 +34,74 @@ describe("trackGroups/{id}", () => {
       assert.equal(response.statusCode, 404);
     });
 
+    it("should GET / 404 when the artist is disabled", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id, { enabled: false });
+      const trackGroup = await createTrackGroup(profile.id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET / 200 for an admin when the artist is disabled", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id, { enabled: false });
+      const trackGroup = await createTrackGroup(profile.id);
+      const { accessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.id, trackGroup.id);
+    });
+
+    it("should GET / 404 when the trackGroup is disabled by an admin", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      await prisma.trackGroup.update({
+        where: { id: trackGroup.id },
+        data: { adminEnabled: false },
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET / 200 for an admin when the trackGroup is disabled by an admin", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      await prisma.trackGroup.update({
+        where: { id: trackGroup.id },
+        data: { adminEnabled: false },
+      });
+      const { accessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.id, trackGroup.id);
+    });
+
     it("should GET / 200 for an private but published trackGroup (URL access)", async () => {
       const { user } = await createUser({
         email: "artist-private-url@artist.com",

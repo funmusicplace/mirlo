@@ -32,6 +32,33 @@ describe("artists/{id}/feed", () => {
     assert(response.statusCode === 404);
   });
 
+  it("should GET / 404 when the artist is disabled", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id, { enabled: false });
+
+    const response = await requestApp
+      .get(`artists/${profile.id}/feed`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 404);
+  });
+
+  it("should GET / 200 for an admin when the artist is disabled", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id, { enabled: false });
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+
+    const response = await requestApp
+      .get(`artists/${profile.id}/feed`)
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+  });
+
   it("should GET / empty result if artist has no posts", async () => {
     const user = await prisma.user.create({
       data: {
