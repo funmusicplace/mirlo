@@ -634,6 +634,11 @@ export const singleInclude = (queryOptions?: {
           },
         },
         releases: {
+          where: {
+            trackGroup: {
+              deletedAt: null,
+            },
+          },
           select: {
             trackGroup: {
               select: {
