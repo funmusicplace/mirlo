@@ -48,6 +48,9 @@ export default function () {
       const releases = await prisma.subscriptionTierRelease.findMany({
         where: {
           tierId: Number(subscriptionTierId),
+          trackGroup: {
+            deletedAt: null,
+          },
         },
         include: {
           trackGroup: {

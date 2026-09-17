@@ -1,10 +1,11 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
-import { clearTables, createProfile, createUser } from "../../utils";
 
+import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 describe("artists/{id}/contact", () => {
@@ -150,6 +151,48 @@ describe("artists/{id}/contact", () => {
           profileId: profile.id,
           content: "prior",
         })),
+      });
+
+      const response = await requestApp
+        .post(`artists/${profile.id}/contact`)
+        .send({ message: "one more" })
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.status, 429);
+    });
+
+    it("should 429 after reaching the site-wide daily rate limit across different artists", async () => {
+      const { accessToken, user: sender } = await createUser({
+        email: "sender@sender.com",
+      });
+
+      const priorProfiles = await Promise.all(
+        Array.from({ length: 10 }, async (_, i) => {
+          const { user: profileOwner } = await createUser({
+            email: `artist${i}@artist.com`,
+          });
+          return createProfile(profileOwner.id, {
+            allowDirectMessages: true,
+          });
+        })
+      );
+
+      await prisma.notification.createMany({
+        data: priorProfiles.map((profile) => ({
+          notificationType: "ARTIST_CONTACT_MESSAGE" as const,
+          userId: profile.userId,
+          relatedUserId: sender.id,
+          profileId: profile.id,
+          content: "prior",
+        })),
+      });
+
+      const { user: profileOwner } = await createUser({
+        email: "one-more-artist@artist.com",
+      });
+      const profile = await createProfile(profileOwner.id, {
+        allowDirectMessages: true,
       });
 
       const response = await requestApp

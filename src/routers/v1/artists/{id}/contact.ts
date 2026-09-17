@@ -5,13 +5,15 @@ import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated } from "../../../../auth/passport";
 import sendMail from "../../../../jobs/send-mail";
+import { serializeProfile } from "../../../../serializers/artist";
+import { checkCloudFlareTurnstile } from "../../../../utils/cloudflare";
 import { AppError } from "../../../../utils/error";
 import { getClient } from "../../../../utils/getClient";
-import { serializeProfile } from "../../../../serializers/artist";
 
 type Params = { id: string };
 
 const CONTACT_RATE_LIMIT = 2;
+const SITE_WIDE_CONTACT_RATE_LIMIT = 10;
 const CONTACT_RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const MAX_MESSAGE_LENGTH = 5000;
 
@@ -22,10 +24,21 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: profileId } = req.params as unknown as Params;
-    const { message } = req.body as { message?: string };
+    const { message, cfTurnstile } = req.body as {
+      message?: string;
+      cfTurnstile?: string;
+    };
+    const connectingIP = req.body["CF-Connecting-IP"];
     const sender = req.user as User;
 
     try {
+      await checkCloudFlareTurnstile({
+        token: cfTurnstile,
+        ip: connectingIP,
+        missingTokenMessage: "Sounds like a robot",
+        failureMessage: "Sounds like a robot",
+      });
+
       const trimmed = typeof message === "string" ? message.trim() : "";
       if (!trimmed) {
         throw new AppError({
@@ -37,6 +50,21 @@ export default function () {
         throw new AppError({
           httpCode: 400,
           description: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer`,
+        });
+      }
+
+      const siteWideRecentCount = await prisma.notification.count({
+        where: {
+          notificationType: "ARTIST_CONTACT_MESSAGE",
+          relatedUserId: sender.id,
+          createdAt: { gte: new Date(Date.now() - CONTACT_RATE_WINDOW_MS) },
+        },
+      });
+      if (siteWideRecentCount >= SITE_WIDE_CONTACT_RATE_LIMIT) {
+        throw new AppError({
+          httpCode: 429,
+          description:
+            "You've reached the daily limit for contacting artists. Try again later.",
         });
       }
 
@@ -131,7 +159,10 @@ export default function () {
         schema: {
           type: "object",
           required: ["message"],
-          properties: { message: { type: "string" } },
+          properties: {
+            message: { type: "string" },
+            cfTurnstile: { type: "string" },
+          },
         },
       },
     ],

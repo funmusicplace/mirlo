@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -30,6 +30,7 @@ const ContactArtist: React.FC<{
   const errorHandler = useErrorHandler();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const cfTurnstile = React.useRef<string | undefined>(undefined);
 
   const methods = useForm<FormData>({ defaultValues: { message: "" } });
 
@@ -44,7 +45,10 @@ const ContactArtist: React.FC<{
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
-      await api.post(`artists/${artist.id}/contact`, { message: data.message });
+      await api.post(`artists/${artist.id}/contact`, {
+        message: data.message,
+        cfTurnstile: cfTurnstile.current,
+      });
       snackbar(t("contactMessageSent"), { type: "success" });
       methods.reset();
       setIsOpen(false);
@@ -78,11 +82,7 @@ const ContactArtist: React.FC<{
       >
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
-            <p
-              className={css`
-                margin-bottom: 1rem;
-              `}
-            >
+            <p className="mb-4">
               {t("contactArtistDescription", { artistName: artist.name })}
             </p>
             <FormComponent>
@@ -98,6 +98,14 @@ const ContactArtist: React.FC<{
                 })}
               />
             </FormComponent>
+            <div className="flex justify-center mb-4">
+              <Turnstile
+                siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
+                onSuccess={(token) => {
+                  cfTurnstile.current = token;
+                }}
+              />
+            </div>
             <Button
               type="submit"
               isLoading={isSubmitting}

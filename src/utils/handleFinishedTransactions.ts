@@ -527,9 +527,9 @@ export const handleCataloguePurchase = async (
       },
     });
 
-    await Promise.all(
+    const purchases = await Promise.all(
       artistTrackGroups.map(async (trackGroup) => {
-        await registerPurchase({
+        return registerPurchase({
           userId: Number(userId),
           trackGroupId: Number(trackGroup.id),
           message: session?.metadata?.message ?? null,
@@ -540,6 +540,18 @@ export const handleCataloguePurchase = async (
           transactionId: transaction.id,
         });
       })
+    );
+
+    const downloadTokensByTrackGroupId = new Map(
+      purchases
+        .filter(
+          (purchase): purchase is NonNullable<typeof purchase> =>
+            purchase !== null
+        )
+        .map((purchase) => [
+          purchase.trackGroupId,
+          purchase.singleDownloadToken,
+        ])
     );
 
     const user = await prisma.user.findFirst({
@@ -558,9 +570,10 @@ export const handleCataloguePurchase = async (
           },
           locals: {
             artist: serializedArtist,
-            trackGroups: artistTrackGroups.map((tg) =>
-              processSingleTrackGroup(tg)
-            ),
+            trackGroups: artistTrackGroups.map((tg) => ({
+              ...processSingleTrackGroup(tg),
+              token: downloadTokensByTrackGroupId.get(tg.id),
+            })),
             email: user.email,
             client: applicationUrl,
             host: process.env.API_DOMAIN,
