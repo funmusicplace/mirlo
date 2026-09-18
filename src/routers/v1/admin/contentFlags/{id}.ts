@@ -64,6 +64,18 @@ export default function () {
         required: true,
         type: "string",
       },
+      {
+        in: "body",
+        name: "contentFlag",
+        required: true,
+        schema: {
+          type: "object",
+          required: ["resolved"],
+          properties: {
+            resolved: { type: "boolean" },
+          },
+        },
+      },
     ],
     responses: {
       200: {

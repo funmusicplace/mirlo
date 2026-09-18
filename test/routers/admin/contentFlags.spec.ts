@@ -173,6 +173,27 @@ describe("admin/contentFlags", () => {
       assert.equal(response.statusCode, 401);
     });
 
+    it("should return 400 when resolved is missing", async () => {
+      const { accessToken, adminUser } = await setupAdminAndFlaggedRelease();
+      const flag = await createContentFlag({
+        resolvedAt: new Date(),
+        resolvedByUserId: adminUser.id,
+      });
+
+      const response = await requestApp
+        .put(`admin/contentFlags/${flag.id}`)
+        .send({})
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+
+      const stored = await prisma.contentFlag.findUnique({
+        where: { id: flag.id },
+      });
+      assert.notEqual(stored?.resolvedAt, null);
+    });
+
     it("should return 404 for an unknown flag", async () => {
       const { accessToken } = await setupAdminAndFlaggedRelease();
 

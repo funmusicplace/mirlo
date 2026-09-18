@@ -10,6 +10,7 @@ import {
   clearTables,
   createArtist,
   createMerch,
+  createMerchShippingDestination,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -24,6 +25,44 @@ describe("GET /v1/merch/{id}", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  it("should GET / 404 when the artist is disabled", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const artist = await createArtist(user.id, { enabled: false });
+    const merch = await createMerch(artist.id, {
+      title: "Tote bag",
+      isPublic: true,
+    });
+    await createMerchShippingDestination({ merchId: merch.id });
+
+    const response = await requestApp
+      .get(`merch/${merch.id}`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 404);
+  });
+
+  it("should GET / 200 for an admin when the artist is disabled", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const artist = await createArtist(user.id, { enabled: false });
+    const merch = await createMerch(artist.id, {
+      title: "Tote bag",
+      isPublic: true,
+    });
+    await createMerchShippingDestination({ merchId: merch.id });
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+
+    const response = await requestApp
+      .get(`merch/${merch.id}`)
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.id, merch.id);
   });
 
   it("returns the trackGroup's own artist on includePurchaseTrackGroup (#2008)", async () => {

@@ -54,6 +54,54 @@ describe("flag", () => {
       assert.equal(flags[0].resolvedAt, null);
     });
 
+    it("should return 400 for a non numeric release id", async () => {
+      const response = await requestApp
+        .post("flag")
+        .send({
+          email: "reporter@test.com",
+          reason: "copyrightViolation",
+          description: "Not theirs",
+          trackGroupId: "not-a-number",
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      assert.equal((await prisma.contentFlag.findMany()).length, 0);
+    });
+
+    it("should return 400 without a release id", async () => {
+      const response = await requestApp
+        .post("flag")
+        .send({
+          email: "reporter@test.com",
+          reason: "copyrightViolation",
+          description: "Not theirs",
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      assert.equal((await prisma.contentFlag.findMany()).length, 0);
+    });
+
+    it("should return 400 for an unknown reason", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const response = await requestApp
+        .post("flag")
+        .send({
+          email: "reporter@test.com",
+          reason: "somethingElse",
+          description: "Not theirs",
+          trackGroupId: trackGroup.id,
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      assert.equal((await prisma.contentFlag.findMany()).length, 0);
+    });
+
     it("should return 400 for an unknown release", async () => {
       const response = await requestApp
         .post("flag")
