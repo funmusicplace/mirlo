@@ -120,6 +120,7 @@ model User {
   transactions                        UserTransaction[]
   trackGroupDownloads                 TrackGroupDownload[]
   clients                             Client[]
+  resolvedContentFlags                ContentFlag[]
 }
 
 model Invite {
@@ -344,6 +345,7 @@ model Profile {
   isLabelProfile                      Boolean                               @default(false)
   profileLocationTags                 ProfileLocationTag[]
   allowDirectMessages                 Boolean                               @default(false)
+  contentFlags                        ContentFlag[]
 }
 
 model ProfileAvatar {
@@ -789,9 +791,34 @@ model TrackGroup {
   recommendedByTrackGroups        RecommendedTrackGroup[]         @relation("recommendedByTrackGroups")
   subscriptionTierReleases        SubscriptionTierRelease[]
 
-  downloads TrackGroupDownload[]
+  downloads    TrackGroupDownload[]
+  contentFlags ContentFlag[]
 
   @@unique([profileId, urlSlug])
+}
+
+model ContentFlag {
+  id               Int               @id @default(autoincrement())
+  createdAt        DateTime          @default(now())
+  source           ContentFlagSource
+  reason           String?
+  description      String?
+  reporterEmail    String?
+  imageModel       String?
+  imageId          String?
+  score            Float?
+  profileId        Int?
+  profile          Profile?          @relation(fields: [profileId], references: [id])
+  trackGroupId     Int?
+  trackGroup       TrackGroup?       @relation(fields: [trackGroupId], references: [id])
+  resolvedAt       DateTime?
+  resolvedByUserId Int?
+  resolvedByUser   User?             @relation(fields: [resolvedByUserId], references: [id])
+}
+
+enum ContentFlagSource {
+  USER_REPORT
+  SIGHTENGINE
 }
 
 model TrackGroupDownload {

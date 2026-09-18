@@ -5,11 +5,11 @@
 
 import prisma from "@mirlo/prisma";
 
-import { singleInclude } from "../utils/artist";
+import { singleInclude, whereForVisibleProfile } from "../utils/artist";
 
 export async function fetchArtistMetadata(artistSlug: string): Promise<any> {
   return await prisma.profile.findFirst({
-    where: { urlSlug: artistSlug },
+    where: { urlSlug: artistSlug, ...whereForVisibleProfile() },
     // singleInclude is deeply nested enough to hit TypeScript's recursive type
     // depth limit ("Excessive stack depth comparing types"). The `as any` cast
     // is the standard workaround — it doesn't affect runtime behaviour.
@@ -25,7 +25,8 @@ export async function fetchAlbumMetadata(
     where: {
       urlSlug: albumSlug,
       deletedAt: null,
-      profile: { urlSlug: artistSlug },
+      adminEnabled: true,
+      profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
     },
     include: {
       profile: true,
@@ -56,10 +57,13 @@ export async function fetchPostMetadata(
 ) {
   const where =
     "id" in postLookup
-      ? { id: postLookup.id, profile: { urlSlug: artistSlug } }
+      ? {
+          id: postLookup.id,
+          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
+        }
       : {
           urlSlug: { equals: postLookup.slug, mode: "insensitive" as const },
-          profile: { urlSlug: artistSlug },
+          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
         };
 
   return await prisma.post.findFirst({
@@ -80,11 +84,11 @@ export async function fetchMerchMetadata(
     "id" in merchLookup
       ? {
           id: merchLookup.id,
-          profile: { urlSlug: artistSlug },
+          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
         }
       : {
           urlSlug: { equals: merchLookup.slug, mode: "insensitive" as const },
-          profile: { urlSlug: artistSlug },
+          profile: { urlSlug: artistSlug, ...whereForVisibleProfile() },
         };
 
   return await prisma.merch.findFirst({

@@ -3,10 +3,10 @@ import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
 import sendMail from "../../jobs/send-mail";
+import { processSingleTrackGroup } from "../../serializers/trackGroup";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
-import { processSingleTrackGroup } from "../../serializers/trackGroup";
 
 export default function () {
   const operations = {
@@ -26,23 +26,30 @@ export default function () {
         failureMessage: "Sounds like a robot",
       });
 
-      let trackGroup;
-      if (trackGroupId) {
-        if (!isNaN(Number(trackGroupId))) {
-          trackGroup = await prisma.trackGroup.findUnique({
-            where: { id: Number(trackGroupId) },
-            include: {
-              profile: true,
-            },
-          });
-          if (!trackGroup) {
-            throw new AppError({
-              httpCode: 400,
-              description: "Invalid track group",
-            });
-          }
-        }
+      const trackGroup = await prisma.trackGroup.findUnique({
+        where: { id: trackGroupId },
+        include: {
+          profile: true,
+        },
+      });
+
+      if (!trackGroup) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Invalid track group",
+        });
       }
+
+      await prisma.contentFlag.create({
+        data: {
+          source: "USER_REPORT",
+          reason,
+          description,
+          reporterEmail: email,
+          trackGroupId: trackGroup.id,
+          profileId: trackGroup.profileId,
+        },
+      });
 
       await sendMail({
         data: {
@@ -56,9 +63,7 @@ export default function () {
             reason,
             description,
             trackGroupId,
-            trackGroup: trackGroup
-              ? processSingleTrackGroup(trackGroup)
-              : trackGroup,
+            trackGroup: processSingleTrackGroup(trackGroup),
           },
         },
       } as Job);
@@ -69,6 +74,41 @@ export default function () {
       next(error);
     }
   }
+
+  POST.apiDoc = {
+    summary: "Reports a problem with a release",
+    parameters: [
+      {
+        in: "body",
+        name: "flag",
+        required: true,
+        schema: {
+          type: "object",
+          required: ["email", "reason", "description", "trackGroupId"],
+          properties: {
+            email: { type: "string" },
+            reason: {
+              type: "string",
+              enum: ["copyrightViolation", "inappropriateContent"],
+            },
+            description: { type: "string" },
+            trackGroupId: { type: "integer" },
+          },
+        },
+      },
+    ],
+    responses: {
+      200: {
+        description: "The report was stored",
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
+  };
 
   return operations;
 }

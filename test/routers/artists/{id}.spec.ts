@@ -41,6 +41,34 @@ describe("artists", () => {
       assert.equal(response.body.result.id, profile.id);
     });
 
+    it("should GET /{id} 404 when the artist is disabled", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id, { enabled: false });
+
+      const response = await requestApp
+        .get(`artists/${profile.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("should GET /{id} 200 for an admin when the artist is disabled", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id, { enabled: false });
+      const { accessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .get(`artists/${profile.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.id, profile.id);
+    });
+
     it("should GET /{id} with wrong artist slug", async () => {
       const profileSlug = "test-artist";
       const user = await prisma.user.create({

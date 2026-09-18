@@ -1,9 +1,12 @@
+import DisableArtistModal from "components/Admin/DisableArtistModal";
 import Button from "components/common/Button";
-import Modal from "components/common/Modal";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
-import TextArea from "components/common/TextArea";
 import { Toggle } from "components/common/Toggle";
+import {
+  useAdminArtistQuery,
+  useUpdateAdminArtistMutation,
+} from "queries/admin";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaArrowCircleLeft } from "react-icons/fa";
@@ -14,24 +17,12 @@ import { getArtistManageUrl } from "utils/artist";
 
 const Index = () => {
   const { id } = useParams();
-  const [artist, setArtist] = React.useState<ArtistFromAdmin>();
+  const { data: artist } = useAdminArtistQuery(id);
+  const { mutateAsync: updateArtist } = useUpdateAdminArtistMutation();
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const [showDisableModal, setShowDisableModal] = React.useState(false);
-  const [disableReason, setDisableReason] = React.useState("");
-  const [isSubmittingDisable, setIsSubmittingDisable] = React.useState(false);
-
-  const PREFILL_CONTENT_POLICY =
-    "Your artist account has been disabled due to a violation of our Content Policy regarding AI-generated content: http://mirlo.space/pages/content-policy" +
-    "\n\nThis determination was made after reviewing the artwork and/or music associated with your account. " +
-    "\n\nIf you believe this decision was made in error, you can contest it by emailing support@mirlo.space with evidence supporting your appeal." +
-    "\n\nWe recognize that for many in our community lean on AI tools because they don't have specific skills. We suggest joining our community or tagging us on socials, and we'll boost your post to connect you with people who might want to help.";
-
-  const callback = React.useCallback(async () => {
-    const response = await api.get<ArtistFromAdmin>(`admin/artists/${id}`);
-    setArtist(response.result);
-  }, [id]);
 
   const onDeleteClick = React.useCallback(async () => {
     if (window.confirm(t("deleteArtistConfirm", { name: artist?.name }))) {
@@ -46,53 +37,16 @@ const Index = () => {
   const handleDisableToggle = React.useCallback(
     async (checked: boolean) => {
       if (!checked) {
-        // Disabling the artist - show modal to get reason
-        setDisableReason("");
         setShowDisableModal(true);
-      } else {
-        // Enabling the artist - no confirmation needed
-        await api.put(`admin/artists/${id}`, {
-          enabled: checked,
-        });
-        callback();
-        snackbar(t("artistEnableSuccess", { name: artist?.name }), {
+      } else if (artist) {
+        await updateArtist({ artistId: artist.id, enabled: true });
+        snackbar(t("artistEnableSuccess", { name: artist.name }), {
           type: "success",
         });
       }
     },
-    [id, artist?.name, callback, snackbar, t]
+    [artist, snackbar, t, updateArtist]
   );
-
-  const handleSubmitDisable = React.useCallback(async () => {
-    if (!disableReason.trim()) {
-      snackbar(t("disableReasonRequired"), {
-        type: "warning",
-      });
-      return;
-    }
-
-    try {
-      setIsSubmittingDisable(true);
-      await api.put(`admin/artists/${id}`, {
-        enabled: false,
-        disableReason: disableReason.trim(),
-      });
-      setShowDisableModal(false);
-      setDisableReason("");
-      callback();
-      snackbar(t("artistDisableSuccess", { name: artist?.name }), {
-        type: "success",
-      });
-    } catch (error) {
-      snackbar(t("failedToDisableArtist"));
-    } finally {
-      setIsSubmittingDisable(false);
-    }
-  }, [id, disableReason, artist?.name, callback, snackbar, t]);
-
-  React.useEffect(() => {
-    callback();
-  }, [callback]);
 
   if (!artist) {
     return null;
@@ -143,53 +97,12 @@ const Index = () => {
         </div>
       </div>
 
-      <Modal
+      <DisableArtistModal
+        artistId={artist.id}
+        artistName={artist.name}
         open={showDisableModal}
         onClose={() => setShowDisableModal(false)}
-        title={t("disableArtistModal")}
-        size="small"
-      >
-        <div className="flex flex-col gap-4">
-          <p>{t("disableArtistDescription")}</p>
-
-          <TextArea
-            value={disableReason}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setDisableReason(e.target.value)
-            }
-            placeholder={t("disableReasonPlaceholder")}
-            rows={6}
-          />
-
-          <div className="flex flex-col gap-2">
-            <Button
-              onClick={() => setDisableReason(PREFILL_CONTENT_POLICY)}
-              type="button"
-            >
-              {t("prefillContentPolicy")}
-            </Button>
-          </div>
-
-          <div className="flex gap-2 justify-end">
-            <Button
-              onClick={() => setShowDisableModal(false)}
-              type="button"
-              disabled={isSubmittingDisable}
-            >
-              {t("cancelButton")}
-            </Button>
-            <Button
-              onClick={handleSubmitDisable}
-              type="button"
-              disabled={isSubmittingDisable || !disableReason.trim()}
-            >
-              {isSubmittingDisable
-                ? t("disablingArtist")
-                : t("disableArtistButton")}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      />
     </>
   );
 };

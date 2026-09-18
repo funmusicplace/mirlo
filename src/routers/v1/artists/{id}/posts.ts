@@ -1,10 +1,13 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findProfileIdForURLSlug } from "../../../../utils/artist";
-
+import {
+  findProfileIdForURLSlug,
+  whereForVisibleProfile,
+} from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+
 import { getPostsVisibleToUser } from "./feed";
 
 export default function () {
@@ -27,6 +30,7 @@ export default function () {
         profile = await prisma.profile.findFirst({
           where: {
             id: Number(parsedId),
+            ...(user?.isAdmin ? {} : whereForVisibleProfile()),
           },
           include: {
             subscriptionTiers: true,

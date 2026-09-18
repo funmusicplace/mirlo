@@ -87,6 +87,7 @@
     "adminLicenses": "Admin: licenses",
     "adminSettings": "Admin: settings",
     "adminClients": "Admin: API clients",
+    "flaggedContent": "Flagged content",
     "adminSendEmails": "Admin: send emails"
   },
   "signUp": {
@@ -218,6 +219,7 @@
     "signUp": "Sign up",
     "about": "About",
     "admin": "Admin",
+    "flaggedContent": "Flagged content",
     "manageLabel": "Manage label",
     "viewLabelPage": "View {{labelName}} page",
     "fulfillment": "Order fulfillment",
@@ -1594,6 +1596,37 @@
     "disableReasonRequired": "Please provide a reason for disabling this artist",
     "failedToDisableArtist": "Failed to disable artist",
     "artistEnabledDescription": "An artist who is enabled will have their music show up in search results. Their profile page will still be visible but only directly via URL."
+  },
+  "flaggedContent": {
+    "title": "Flagged content",
+    "filter": {
+      "label": "Status",
+      "unresolved": "Unresolved",
+      "resolved": "Resolved",
+      "all": "All"
+    },
+    "sourceUserReport": "Listener report",
+    "sourceSightEngine": "Image check",
+    "reportedBy": "Reported by {{email}}",
+    "readFullReport": "Read full report",
+    "imageScore": "{{model}} scored {{score}}",
+    "noFlags": "No flagged content.",
+    "columnDate": "Date",
+    "columnDetails": "Details",
+    "columnContent": "Content",
+    "columnRelease": "Release status",
+    "columnArtist": "Artist status",
+    "columnActions": "Actions",
+    "status": {
+      "visible": "Visible",
+      "hiddenFromSearch": "Hidden from search",
+      "disabled": "Disabled"
+    },
+    "resolveFlag": "Mark as resolved",
+    "unresolveFlag": "Reopen",
+    "resolvedBy": "Resolved by {{name}}",
+    "updateSuccess": "Updated",
+    "updateError": "Something went wrong while updating"
   },
   "trackDetails": {
     "track": "Track:",

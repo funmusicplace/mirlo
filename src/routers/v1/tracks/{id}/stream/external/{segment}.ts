@@ -11,6 +11,7 @@ import logger from "../../../../../../logger";
 import { AppError, HttpCode } from "../../../../../../utils/error";
 import { canUserListenToTrack } from "../../../../../../utils/ownership";
 import socialMusic from "../../../../../../utils/socialMusic";
+import { whereForVisibleTrackGroup } from "../../../../../../utils/trackGroup";
 import { fetchFile } from "../{segment}";
 
 const jwt_secret = process.env.JWT_SECRET ?? "secretkey";
@@ -26,8 +27,11 @@ export default function () {
     const log = req.logger || logger;
 
     try {
-      const track = await prisma.track.findUnique({
-        where: { id: Number(id) },
+      const track = await prisma.track.findFirst({
+        where: {
+          id: Number(id),
+          trackGroup: whereForVisibleTrackGroup(),
+        },
         include: {
           trackGroup: {
             include: {

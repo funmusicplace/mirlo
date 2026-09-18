@@ -1,12 +1,20 @@
 import styled from "@emotion/styled";
 import React from "react";
 
-export const SelectEl = styled.select`
+export const SelectEl = styled.select<{ variant?: "compact" }>`
   border: 1px solid var(--mi-tint-x-color);
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   max-width: 100%;
+  ${(props) =>
+    props.variant === "compact"
+      ? `
+    line-height: 1.2rem;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+  `
+      : ""}
   color: var(--mi-text-color);
   background-color: var(--mi-background-color);
   transition: 0.4s border-radius;

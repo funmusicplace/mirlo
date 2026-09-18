@@ -58,6 +58,22 @@ describe("tracks/{id}/stream/external/", () => {
       assert.equal(response.statusCode, 401);
     });
 
+    it("should GET playlist 404 if the artist is disabled", async () => {
+      const { user } = await createUser({ email: "disabled@artist.com" });
+      const profile = await createProfile(user.id, { enabled: false });
+      const trackGroup = await createTrackGroup(profile.id);
+      const disabledTrack = await createTrack(trackGroup.id, {
+        title: "disabled track",
+      });
+
+      const response = await requestApp
+        .get(playlistPath(disabledTrack.id))
+        .set(socialMusic.HEADER_USERID, "remoteuser")
+        .set(MIRLO_API_KEY_HEADER, apiKey);
+
+      assert.equal(response.statusCode, 404);
+    });
+
     it("should GET playlist 200 respond with file and token if authed", async () => {
       const response = await requestApp
         .get(playlistPath(track.id))

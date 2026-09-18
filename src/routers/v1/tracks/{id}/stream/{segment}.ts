@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import { getAudioSegmentBufferIfExists } from "../../../../../utils/minio";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
+import { whereForVisibleTrackGroup } from "../../../../../utils/trackGroup";
 
 export const fetchFile = async (
   res: Response,
@@ -34,8 +35,11 @@ export default function () {
     const user = req.user;
 
     try {
-      const track = await prisma.track.findUnique({
-        where: { id: Number(id) },
+      const track = await prisma.track.findFirst({
+        where: {
+          id: Number(id),
+          ...(user?.isAdmin ? {} : { trackGroup: whereForVisibleTrackGroup() }),
+        },
         include: {
           trackGroup: {
             include: {

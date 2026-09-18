@@ -6,6 +6,7 @@ import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import {
   findTrackGroupIdForSlug,
   trackGroupSingleInclude,
+  whereForVisibleTrackGroup,
 } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -32,6 +33,7 @@ export default function () {
         trackGroup = await prisma.trackGroup.findFirst({
           where: {
             id: actualId,
+            ...(loggedInUser?.isAdmin ? {} : whereForVisibleTrackGroup()),
           },
           include: {
             ...trackGroupSingleInclude({

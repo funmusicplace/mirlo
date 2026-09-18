@@ -2,12 +2,13 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
+import { postIncludeForUser, serializePost } from "../../../serializers/post";
+import { whereForVisibleProfile } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
 import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
 } from "../../../utils/postAccess";
-import { postIncludeForUser, serializePost } from "../../../serializers/post";
 
 export default function () {
   const operations = {
@@ -57,6 +58,14 @@ export default function () {
             lte: new Date(),
           },
           isDraft: false,
+          ...(user?.isAdmin
+            ? {}
+            : {
+                OR: [
+                  { profileId: null },
+                  { profile: whereForVisibleProfile() },
+                ],
+              }),
         },
         include: postIncludeForUser(user?.id),
       });

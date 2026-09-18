@@ -15,6 +15,7 @@ const TRUNCATE_TABLES_SQL = `
     "ArtistLabel",
     "ArtistTourDate",
     "Client",
+    "ContentFlag",
     "DownloadableContent",
     "EmailVerification",
     "Fundraiser",
@@ -468,6 +469,17 @@ export const createSubscription = async (
       userId,
       profileSubscriptionTierId: tierId,
       amount,
+      ...data,
+    },
+  });
+};
+
+export const createContentFlag = async (
+  data: Partial<Prisma.ContentFlagUncheckedCreateInput> = {}
+) => {
+  return prisma.contentFlag.create({
+    data: {
+      source: "USER_REPORT",
       ...data,
     },
   });
