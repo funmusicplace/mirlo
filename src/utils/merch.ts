@@ -112,20 +112,14 @@ export type MerchWithOptionsAndShipping = Merch & {
 /**
  * Validates the buyer's selected option ids against the merch's own option
  * types and returns the resolved options plus their total per-unit price
- * add-on. Throws 400 on any id that doesn't belong to this merch item.
- * Returns the full option objects, not just ids, since callers such as
- * `checkMerchStock` need the objects themselves.
+ * add-on.
  */
 export const resolveMerchOptionIds = (
   merch: MerchWithOptionsAndShipping,
   merchOptionIds?: string[]
 ): { options: MerchOption[]; additionalPricePerUnit: number } => {
-  if (!merchOptionIds || merchOptionIds.length === 0) {
-    return { options: [], additionalPricePerUnit: 0 };
-  }
-
   const allOptions = merch.optionTypes.flatMap((ot) => ot.options);
-  const options = merchOptionIds.map((id) => {
+  const options = (merchOptionIds ?? []).filter(Boolean).map((id) => {
     const option = allOptions.find((o) => o.id === id);
     if (!option) {
       throw new AppError({
@@ -135,6 +129,20 @@ export const resolveMerchOptionIds = (
     }
     return option;
   });
+
+  const unanswered = merch.optionTypes.find(
+    (ot) =>
+      ot.required &&
+      ot.options.length > 0 &&
+      !ot.options.some((o) => options.some((chosen) => chosen.id === o.id))
+  );
+
+  if (unanswered) {
+    throw new AppError({
+      httpCode: 400,
+      description: `You have to choose a ${unanswered.optionName} for this merch item`,
+    });
+  }
 
   return {
     options,

@@ -186,6 +186,20 @@ describe("ArtistVariableSupport", () => {
     expect(startPurchase.mock.calls[0][0]).not.toHaveProperty("email");
   });
 
+  test("shows the payment step for a fixed-price tier that skipped the modal", async () => {
+    authState.user = { id: 5, name: "Buyer", email: "buyer@example.com" };
+    purchaseState.checkout = {
+      clientSecret: "seti_secret",
+      stripeAccountId: "acct_1",
+    };
+
+    renderComponent(baseTier);
+
+    expect(
+      await screen.findByTestId("purchase-step-payment")
+    ).toBeInTheDocument();
+  });
+
   test("swaps to the payment step in the same modal once checkout is in progress", async () => {
     purchaseState.checkout = {
       clientSecret: "seti_secret",
@@ -193,7 +207,7 @@ describe("ArtistVariableSupport", () => {
     };
 
     renderComponent(baseTier);
-    fireEvent.click(screen.getByText("support"));
+    fireEvent.click(screen.getByRole("button", { name: "support" }));
 
     expect(
       await screen.findByTestId("purchase-step-payment")

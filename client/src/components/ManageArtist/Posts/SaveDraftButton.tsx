@@ -38,9 +38,6 @@ const SaveDraftButton: React.FC<{
 
   const { handleSubmit, watch } = methods;
 
-  const isPublic = watch("isPublic");
-  const minimumTier = watch("minimumTier");
-
   const existingId = post.id;
   const userId = user?.id;
 
@@ -54,10 +51,11 @@ const SaveDraftButton: React.FC<{
             ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
             content: getBodyContent(),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
-            minimumSubscriptionTierId:
-              isFinite(+data.minimumTier) && +data.minimumTier !== 0
-                ? Number(data.minimumTier)
-                : undefined,
+            postSubscriptionTierIds: data.subscriptionTierIds
+              ? data.subscriptionTierIds
+                  .map(Number)
+                  .filter((id) => Number.isFinite(id) && id !== 0)
+              : undefined,
           };
           const response = await api.put<
             Partial<Post>,
@@ -100,11 +98,7 @@ const SaveDraftButton: React.FC<{
         margin-right: 1rem;
       `}
       type="button"
-      disabled={
-        isSaving ||
-        (minimumTier === "" && !isPublic) ||
-        !methods.formState.isValid
-      }
+      disabled={isSaving || !methods.formState.isValid}
       isLoading={isSaving}
       onClick={handleSubmit(doSave)}
     >

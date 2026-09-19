@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
+import { CheckBoxLabel } from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import { SelectEl } from "components/common/Select";
 import TextEditor from "components/common/TextEditor";
 import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
 import { queryManagedArtistSubscriptionTiers } from "queries";
@@ -27,9 +27,49 @@ export type PostFormData = {
   title: string;
   publishedAt: string;
   isPublic: boolean;
-  minimumTier: string;
+  subscriptionTierIds: string[];
   shouldSendEmail: boolean;
   urlSlug?: string;
+};
+
+export const tiersForLegacyMinimumTier = (
+  tiers: ArtistSubscriptionTier[],
+  minimumSubscriptionTierId?: number
+): string[] => {
+  const minimumTier = tiers.find(
+    (tier) => tier.id === minimumSubscriptionTierId
+  );
+
+  if (!minimumTier) {
+    return [];
+  }
+
+  return tiers
+    .filter((tier) => (tier.minAmount ?? 0) >= (minimumTier.minAmount ?? 0))
+    .map((tier) => `${tier.id}`);
+};
+
+export const tiersForPost = (
+  post:
+    | Pick<Post, "postSubscriptionTiers" | "minimumSubscriptionTierId">
+    | undefined,
+  tiers: ArtistSubscriptionTier[]
+): string[] | undefined => {
+  const addressedTiers = post?.postSubscriptionTiers ?? [];
+
+  if (addressedTiers.length > 0) {
+    return addressedTiers.map((t) => `${t.profileSubscriptionTierId}`);
+  }
+
+  if (!post?.minimumSubscriptionTierId) {
+    return [];
+  }
+
+  if (tiers.length === 0) {
+    return undefined;
+  }
+
+  return tiersForLegacyMinimumTier(tiers, post.minimumSubscriptionTierId);
 };
 
 export const toDateTimeLocalValue = (date: Date) => {
@@ -70,6 +110,7 @@ const PostForm: React.FC<{
         publishedAt: publishedAtIso,
         shouldSendEmail: true,
         isPublic: true,
+        subscriptionTierIds: [],
       };
     }
 
@@ -80,17 +121,15 @@ const PostForm: React.FC<{
       isPublic: postWithEmail.isPublic,
       shouldSendEmail: postWithEmail.shouldSendEmail,
       urlSlug: postWithEmail.urlSlug,
+      subscriptionTierIds: tiersForPost(post, tiers?.results ?? []),
     };
-  }, [post]);
+  }, [post, tiers]);
 
   const methods = useForm<PostFormData>({
     defaultValues: buildDefaultValues(),
     mode: "onBlur",
   });
 
-  // Body content uses its own hook + localStorage key because TextEditor only
-  // reads its value at mount, so any Controller-based draft restore via setValue
-  // is invisible. We aggregate both restores in the banner below.
   const formDraftKey = post?.id ? `postDraft-${post.id}` : null;
   const bodyDraftKey = post?.id ? `postBodyDraft-${post.id}` : null;
   const formDraft = useFormPersist(formDraftKey, methods);
@@ -118,15 +157,20 @@ const PostForm: React.FC<{
   }, [formDraft, bodyDraft]);
 
   React.useEffect(() => {
-    if ((tiers?.results.length ?? 0) > 0) {
-      if (
-        post.minimumSubscriptionTierId &&
-        tiers?.results.find(
-          (tier) => tier.id === post.minimumSubscriptionTierId
-        )
-      ) {
-        methods.setValue("minimumTier", `${post.minimumSubscriptionTierId}`);
-      }
+    const allTiers = tiers?.results ?? [];
+
+    if (allTiers.length === 0) {
+      return;
+    }
+
+    if (methods.getValues("subscriptionTierIds") !== undefined) {
+      return;
+    }
+
+    const ids = tiersForPost(post, allTiers);
+
+    if (ids) {
+      methods.setValue("subscriptionTierIds", ids);
     }
   }, [tiers]);
 
@@ -252,23 +296,31 @@ const PostForm: React.FC<{
               margin-left: 1.75rem;
             `}
           >
-            <label
-              className={css`
-                display: block;
-                margin-bottom: 0.5rem;
-              `}
-              htmlFor="select-minimum-tier"
-            >
-              {t("ifNotPublic")}
-            </label>
-            <SelectEl id="select-minimum-tier" {...register("minimumTier")}>
-              <option value="">None</option>
+            <fieldset className="border-0 p-0 m-0">
+              <legend
+                className={css`
+                  display: block;
+                  margin-bottom: 0.5rem;
+                `}
+              >
+                {t("ifNotPublic")}
+              </legend>
               {tiers?.results.map((tier) => (
-                <option value={tier.id} key={tier.id}>
+                <CheckBoxLabel
+                  key={tier.id}
+                  htmlFor={`subscription-tier-${tier.id}`}
+                >
+                  <InputEl
+                    id={`subscription-tier-${tier.id}`}
+                    type="checkbox"
+                    value={tier.id}
+                    {...register("subscriptionTierIds")}
+                  />
                   {tier.name}
-                </option>
+                </CheckBoxLabel>
               ))}
-            </SelectEl>
+              <small className="block mt-1">{t("tiersHint")}</small>
+            </fieldset>
           </FormComponent>
         )}
 

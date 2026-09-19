@@ -1,12 +1,12 @@
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 
-export const getUserSubscriptionForProfile = async (
+export const getUserSubscriptionsForProfile = async (
   user: User | undefined,
   profileId: number
-) => {
-  if (!user) return null;
-  return prisma.profileUserSubscription.findFirst({
+): Promise<ProfileSubscription[]> => {
+  if (!user) return [];
+  return prisma.profileUserSubscription.findMany({
     where: {
       userId: user.id,
       profileSubscriptionTier: { profileId },
@@ -14,6 +14,11 @@ export const getUserSubscriptionForProfile = async (
     orderBy: { amount: "desc" },
     select: { amount: true, profileSubscriptionTierId: true },
   });
+};
+
+export type ProfileSubscription = {
+  amount: number;
+  profileSubscriptionTierId: number;
 };
 
 type PostAccessFields = {
@@ -28,19 +33,27 @@ export const canUserSeePostContent = (
   post: PostAccessFields,
   context: {
     isProfileOwner: boolean;
-    subscription: { amount: number; profileSubscriptionTierId: number } | null;
+    subscriptions: ProfileSubscription[];
   }
 ): boolean => {
   if (post.isPublic || context.isProfileOwner) return true;
-  if (!context.subscription) return false;
-  return (
-    (post.minimumSubscriptionTier?.minAmount ?? 0) <=
-      context.subscription.amount ||
-    (post.postSubscriptionTiers ?? []).some(
-      (t) =>
-        t.profileSubscriptionTierId ===
-        context.subscription!.profileSubscriptionTierId
-    )
+  if (context.subscriptions.length === 0) return false;
+
+  const addressedTiers = post.postSubscriptionTiers ?? [];
+
+  if (addressedTiers.length > 0) {
+    return context.subscriptions.some((subscription) =>
+      addressedTiers.some(
+        (tier) =>
+          tier.profileSubscriptionTierId ===
+          subscription.profileSubscriptionTierId
+      )
+    );
+  }
+
+  const minimumAmount = post.minimumSubscriptionTier?.minAmount ?? 0;
+  return context.subscriptions.some(
+    (subscription) => subscription.amount >= minimumAmount
   );
 };
 
@@ -50,10 +63,10 @@ export const getCanUserSeePostContent = async (
   post: PostAccessFields
 ): Promise<boolean> => {
   const isProfileOwner = !!(user && post.profile?.userId === user.id);
-  const subscription = post.profileId
-    ? await getUserSubscriptionForProfile(user, post.profileId)
-    : null;
-  return canUserSeePostContent(post, { isProfileOwner, subscription });
+  const subscriptions = post.profileId
+    ? await getUserSubscriptionsForProfile(user, post.profileId)
+    : [];
+  return canUserSeePostContent(post, { isProfileOwner, subscriptions });
 };
 
 type PostTracksForPurchases = {

@@ -52,3 +52,37 @@ export const assertSupportedAudioExtension = (filename?: string | null) => {
 
   return extension;
 };
+
+export const DOWNLOAD_FORMATS = [
+  "flac",
+  "wav",
+  "alac",
+  "opus",
+  "128.opus",
+  "320.mp3",
+  "256.mp3",
+  "128.mp3",
+] as const;
+
+export type FormatOptions = (typeof DOWNLOAD_FORMATS)[number];
+
+export const isSupportedDownloadFormat = (
+  format: unknown
+): format is FormatOptions =>
+  typeof format === "string" &&
+  (DOWNLOAD_FORMATS as readonly string[]).includes(format);
+
+export const assertSupportedDownloadFormat = (
+  format: unknown
+): FormatOptions => {
+  if (!isSupportedDownloadFormat(format)) {
+    throw new AppError({
+      httpCode: 400,
+      description: `"${format}" isn't a format we can generate. Please ask for one of: ${DOWNLOAD_FORMATS.join(
+        ", "
+      )}.`,
+    });
+  }
+
+  return format;
+};

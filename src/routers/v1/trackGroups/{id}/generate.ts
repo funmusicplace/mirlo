@@ -4,6 +4,8 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
+import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
+import { AppError } from "../../../../utils/error";
 import { zipExists } from "../../../../utils/minio";
 import {
   basicTrackGroupInclude,
@@ -17,44 +19,50 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: trackGroupId }: { id?: string } = req.params;
-    const { format = "flac" } = req.query as {
+    const { format: requestedFormat = "flac" } = req.query as {
       format?: FormatOptions;
     };
 
-    const trackGroup = await prisma.trackGroup.findFirst({
-      where: {
-        id: Number(trackGroupId),
-      },
-      ...basicTrackGroupInclude,
-    });
+    try {
+      const format = assertSupportedDownloadFormat(requestedFormat);
 
-    if (!trackGroup) {
-      res.status(404).json({
-        error: "No trackGroup found",
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          id: Number(trackGroupId),
+        },
+        ...basicTrackGroupInclude,
       });
-      return next();
-    }
 
-    logger.info(`trackGroupId: ${trackGroupId} Found a trackgroup`);
+      if (!trackGroup) {
+        throw new AppError({
+          httpCode: 404,
+          description: "No trackGroup found",
+        });
+      }
 
-    logger.info("checking if trackgroup is already zipped");
-    if (await zipExists("trackGroup", trackGroup.id, format)) {
-      logger.info("the trackgroup is already zipped");
+      logger.info(`trackGroupId: ${trackGroupId} Found a trackgroup`);
+
+      logger.info("checking if trackgroup is already zipped");
+      if (await zipExists("trackGroup", trackGroup.id, format)) {
+        logger.info("the trackgroup is already zipped");
+        return res.json({
+          message: "The album has already been generated",
+          result: true,
+        });
+      }
+      logger.info("trackGroup doesn't exist yet, start generating it");
+      const jobId = await startGeneratingZip(
+        trackGroup,
+        trackGroup.tracks,
+        format
+      );
       return res.json({
-        message: "The album has already been generated",
-        result: true,
+        message: "We've started generating the album",
+        result: { jobId },
       });
+    } catch (e) {
+      next(e);
     }
-    logger.info("trackGroup doesn't exist yet, start generating it");
-    const jobId = await startGeneratingZip(
-      trackGroup,
-      trackGroup.tracks,
-      format
-    );
-    return res.json({
-      message: "We've started generating the album",
-      result: { jobId },
-    });
   }
 
   GET.apiDoc = {

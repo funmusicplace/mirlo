@@ -1,4 +1,5 @@
 import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 
@@ -19,6 +20,48 @@ import {
 type Params = {
   trackGroupId: string;
   userId: string;
+};
+
+const resolveTargetProfileId = async (
+  requestedProfileId: unknown,
+  currentProfileId: number,
+  user: User
+): Promise<number> => {
+  if (requestedProfileId === undefined || requestedProfileId === null) {
+    return currentProfileId;
+  }
+
+  const profileId = Number(requestedProfileId);
+
+  if (!Number.isInteger(profileId)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "moveToArtistId has to be the id of one of your artists",
+    });
+  }
+
+  if (profileId === currentProfileId) {
+    return currentProfileId;
+  }
+
+  const destination = await prisma.profile.findFirst({
+    where: {
+      id: profileId,
+      deletedAt: null,
+      ...(user.isAdmin ? {} : { userId: user.id }),
+    },
+    select: { id: true },
+  });
+
+  if (!destination) {
+    throw new AppError({
+      httpCode: 400,
+      description:
+        "You can only move a release to another artist on your own account",
+    });
+  }
+
+  return destination.id;
 };
 
 const findNewSlug = async (
@@ -158,31 +201,58 @@ export default function () {
           description: "TrackGroup not found",
         });
       }
-      if (
-        newValues.urlSlug &&
-        newValues.urlSlug !== existingTrackGroup.urlSlug
-      ) {
+
+      assertLoggedIn(req);
+      const targetProfileId = await resolveTargetProfileId(
+        data.moveToArtistId,
+        existingTrackGroup.profileId,
+        req.user
+      );
+
+      const movingToNewProfile =
+        targetProfileId !== existingTrackGroup.profileId;
+
+      if (newValues.urlSlug) {
         newValues.urlSlug =
           generateSlug(newValues.urlSlug) || newValues.urlSlug;
+      }
+
+      const slugToCheck = newValues.urlSlug ?? existingTrackGroup.urlSlug;
+
+      if (
+        slugToCheck &&
+        (movingToNewProfile || slugToCheck !== existingTrackGroup.urlSlug)
+      ) {
+        newValues.urlSlug = slugToCheck;
         const slugConflict = await prisma.trackGroup.findFirst({
           where: {
-            profileId: existingTrackGroup.profileId,
-            urlSlug: newValues.urlSlug,
+            profileId: targetProfileId,
+            urlSlug: slugToCheck,
             id: { not: Number(trackGroupId) },
             deletedAt: null,
           },
         });
         if (slugConflict) {
-          throw new AppError({
-            httpCode: 400,
-            description: "Can't re-use URL for existing album",
-          });
+          if (!movingToNewProfile) {
+            throw new AppError({
+              httpCode: 400,
+              description: "Can't re-use URL for existing album",
+            });
+          }
+          newValues.urlSlug = await findNewSlug(
+            slugToCheck,
+            0,
+            targetProfileId
+          );
         }
       }
 
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId) },
-        data: newValues,
+        data: {
+          ...newValues,
+          ...(movingToNewProfile ? { profileId: targetProfileId } : {}),
+        },
       });
 
       let trackGroup = await prisma.trackGroup.findFirst({

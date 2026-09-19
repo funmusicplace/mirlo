@@ -322,6 +322,48 @@ describe("admin/stats", () => {
     assert.equal(monthRow.purchasesUsdCents, 1500);
   });
 
+  it("should fall back to the default when days is not a valid integer", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+
+    const response = await requestApp
+      .get("admin/stats?days=not-a-number")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.granularity, "week");
+  });
+
+  it("should respect a valid days value", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+
+    const now = new Date();
+    const week = mondayOf(now);
+
+    await prisma.userTransaction.create({
+      data: { userId: buyer.id, amount: 1000, currency: "usd", createdAt: now },
+    });
+
+    const response = await requestApp
+      .get("admin/stats?days=30")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    const weekRow = response.body.result.revenue.find(
+      (row: { date: string }) => row.date === week
+    );
+    assert(weekRow, `expected a revenue row for week ${week}`);
+    assert.equal(weekRow.purchasesUsdCents, 1000);
+  });
+
   it("should leave FAILED transactions out of revenue and counts", async () => {
     const { accessToken } = await createUser({
       email: "admin@admin.com",

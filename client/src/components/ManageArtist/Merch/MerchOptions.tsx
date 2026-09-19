@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import FormCheckbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { queryManagedMerch } from "queries";
@@ -70,6 +71,12 @@ const OptionType: React.FC<{
             <InputEl
               id={optionNameId}
               {...register(`optionTypes.${index}.optionName`)}
+            />
+            <FormCheckbox
+              idPrefix={`${idPrefix}-`}
+              keyName={`optionTypes.${index}.required`}
+              description={t("categoryIsRequired")}
+              hint={t("categoryIsRequiredHint") ?? undefined}
             />
           </FormComponent>
           <FormComponent
@@ -166,7 +173,11 @@ const OptionType: React.FC<{
       )}
       {!isEditing && (
         <>
-          <em>{optionType.optionName}</em>
+          <em>
+            {optionType.required === false
+              ? t("optionalCategoryName", { name: optionType.optionName })
+              : optionType.optionName}
+          </em>
           {optionType.options
             ?.map((o) =>
               o.additionalPrice ? `${o.name} (${o.additionalPrice})` : o.name
@@ -277,7 +288,7 @@ const MerchOptions: React.FC<{}> = () => {
               <ArtistButton
                 wrap
                 onClick={() => {
-                  append({ optionName: "" });
+                  append({ optionName: "", required: true });
                 }}
                 type="button"
                 size="compact"

@@ -11,6 +11,7 @@ import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
 import ManageSectionWrapper from "components/ManageArtist/ManageSectionWrapper";
 import AlbumPaymentReceiver from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTrackDefaults";
+import MoveReleaseToArtist from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/MoveReleaseToArtist";
 import RecommendedTrackGroups from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/RecommendedTrackGroups";
 import BulkTrackUpload from "components/ManageArtist/ManageTrackGroup/BulkTrackUpload";
 import ManageTrackTable from "components/ManageArtist/ManageTrackGroup/ManageTrackTable";
@@ -186,6 +187,9 @@ const Index: React.FC<{}> = () => {
       >
         {t("downloadCodes")}
       </ArtistButtonLink>
+      <FormSection>
+        <MoveReleaseToArtist trackGroup={trackGroup} artist={artist} />
+      </FormSection>
       <hr className="my-8 border-(--mi-tint-x-color)" />
       <ArtistButton
         startIcon={<FaTrash />}

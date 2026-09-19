@@ -6,6 +6,7 @@ import filenamify from "filenamify";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
+import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
 import { AppError } from "../../../../utils/error";
 import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
 import {
@@ -25,7 +26,7 @@ export default function () {
     const {
       email,
       token,
-      format = "flac",
+      format: requestedFormat = "flac",
     } = req.query as {
       format?: FormatOptions;
       email: string;
@@ -33,6 +34,7 @@ export default function () {
     };
 
     try {
+      const format = assertSupportedDownloadFormat(requestedFormat);
       let trackGroup;
 
       if (token && email) {
@@ -89,10 +91,10 @@ export default function () {
       }
 
       if (!trackGroup) {
-        res.status(404).json({
-          error: "No trackGroup found",
+        throw new AppError({
+          httpCode: 404,
+          description: "No trackGroup found",
         });
-        return next();
       }
 
       logger.info(
@@ -113,64 +115,58 @@ export default function () {
         });
       }
 
-      try {
-        const originalTitle = `${trackGroup.profile.name} - ${trackGroup.title ?? "album"}`;
-        const asciiTitle = filenamify(originalTitle);
+      const originalTitle = `${trackGroup.profile.name} - ${trackGroup.title ?? "album"}`;
+      const asciiTitle = filenamify(originalTitle);
 
-        // Prefer handing the browser a short-lived presigned storage URL so
-        // the zip bytes don't flow through this server (egress costs). Falls
-        // back to piping the file when presigning isn't available (e.g. local
-        // MinIO without a browser-reachable endpoint).
-        const presignedUrl = await presignZip(
-          "trackGroup",
-          trackGroup.id,
-          format,
-          {
-            downloadFilename: `${asciiTitle}.zip`,
-            contentType: "application/zip",
-          }
-        );
+      // Takes the id rather than closing over `trackGroup`, which is a `let`
+      // assigned down several branches and so loses its narrowing in a closure.
+      const recordDownload = (id: number) =>
+        prisma.trackGroupDownload.create({
+          data: {
+            trackGroupId: id,
+            userId: req.user?.id ?? null,
+          },
+        });
 
-        if (presignedUrl) {
-          logger.info(
-            `trackGroupId: ${trackGroupId} responding with presigned download URL`
-          );
-          await prisma.trackGroupDownload.create({
-            data: {
-              trackGroupId: trackGroup.id,
-              userId: req.user?.id ?? null,
-            },
-          });
-          return res.json({ result: { url: presignedUrl } });
+      // Prefer handing the browser a short-lived presigned storage URL so
+      // the zip bytes don't flow through this server (egress costs). Falls
+      // back to piping the file when presigning isn't available (e.g. local
+      // MinIO without a browser-reachable endpoint).
+      const presignedUrl = await presignZip(
+        "trackGroup",
+        trackGroup.id,
+        format,
+        {
+          downloadFilename: `${asciiTitle}.zip`,
+          contentType: "application/zip",
         }
+      );
 
-        res.setHeader("Content-Type", "application/zip");
-        res.setHeader(
-          "Content-Disposition",
-          contentDisposition(`${asciiTitle}.zip`, { type: "attachment" })
+      if (presignedUrl) {
+        logger.info(
+          `trackGroupId: ${trackGroupId} responding with presigned download URL`
         );
-
-        const stream = await streamZip("trackGroup", trackGroup.id, format);
-
-        if (stream) {
-          await prisma.trackGroupDownload.create({
-            data: {
-              trackGroupId: trackGroup.id,
-              userId: req.user?.id ?? null,
-            },
-          });
-          stream.pipe(res);
-        } else {
-          throw new AppError({
-            httpCode: 500,
-            description: `Remote file not found for trackgroup zip ${trackGroup.id}/${format}`,
-          });
-        }
-      } catch (e) {
-        next(e);
+        await recordDownload(trackGroup.id);
+        return res.json({ result: { url: presignedUrl } });
       }
 
-      return;
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader(
+        "Content-Disposition",
+        contentDisposition(`${asciiTitle}.zip`, { type: "attachment" })
+      );
+
+      const stream = await streamZip("trackGroup", trackGroup.id, format);
+
+      if (!stream) {
+        throw new AppError({
+          httpCode: 500,
+          description: `Remote file not found for trackgroup zip ${trackGroup.id}/${format}`,
+        });
+      }
+
+      await recordDownload(trackGroup.id);
+      stream.pipe(res);
     } catch (e) {
       next(e);
     }

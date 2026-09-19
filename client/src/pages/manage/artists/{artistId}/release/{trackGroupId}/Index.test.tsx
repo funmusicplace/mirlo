@@ -58,6 +58,12 @@ vi.mock(
   })
 );
 vi.mock(
+  "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/MoveReleaseToArtist",
+  () => ({
+    default: () => null,
+  })
+);
+vi.mock(
   "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/RecommendedTrackGroups",
   () => ({
     default: () => null,

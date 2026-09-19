@@ -1,5 +1,9 @@
+import { randomUUID } from "crypto";
 import assert from "node:assert";
+import { PassThrough } from "node:stream";
 
+import prisma from "@mirlo/prisma";
+import archiver from "archiver";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { afterEach, beforeEach, describe, it } from "mocha";
@@ -17,16 +21,7 @@ import {
   createTrackGroup,
   createUser,
 } from "../../utils";
-
-import prisma from "@mirlo/prisma";
-
-import { randomUUID } from "crypto";
-
 import { requestApp } from "../utils";
-
-import archiver from "archiver";
-
-import { PassThrough } from "node:stream";
 
 describe("trackGroups/{id}/download", () => {
   beforeEach(async () => {
@@ -201,7 +196,7 @@ describe("trackGroups/{id}/download", () => {
       const track = await createTrack(trackGroup.id);
 
       const passthrough = await generateMockArchive();
-      await uploadZip("trackGroup", trackGroup.id, "mp3-320", passthrough);
+      await uploadZip("trackGroup", trackGroup.id, "320.mp3", passthrough);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
@@ -215,7 +210,7 @@ describe("trackGroups/{id}/download", () => {
       });
 
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.id}/download?format=mp3-320`)
+        .get(`trackGroups/${trackGroup.id}/download?format=320.mp3`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
@@ -350,7 +345,7 @@ describe("trackGroups/{id}/download", () => {
         const track = await createTrack(trackGroup.id);
 
         const passthrough = await generateMockArchive();
-        await uploadZip("trackGroup", trackGroup.id, "mp3-320", passthrough);
+        await uploadZip("trackGroup", trackGroup.id, "320.mp3", passthrough);
 
         const { user: purchaser, accessToken } = await createUser({
           email: "purchaser@artist.com",
@@ -364,7 +359,7 @@ describe("trackGroups/{id}/download", () => {
         });
 
         const response = await requestApp
-          .get(`trackGroups/${trackGroup.id}/download?format=mp3-320`)
+          .get(`trackGroups/${trackGroup.id}/download?format=320.mp3`)
           .set("Accept", "application/json")
           .set("Cookie", [`jwt=${accessToken}`]);
 

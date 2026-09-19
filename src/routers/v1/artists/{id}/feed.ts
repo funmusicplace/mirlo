@@ -17,7 +17,7 @@ import {
 } from "../../../../utils/artist";
 import {
   canUserSeePostContent,
-  getUserSubscriptionForProfile,
+  getUserSubscriptionsForProfile,
 } from "../../../../utils/postAccess";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
@@ -54,14 +54,14 @@ export const getPostsVisibleToUser = async (
   ]);
 
   const isProfileOwner = !!(user && user.id === profile.userId);
-  const subscription = await getUserSubscriptionForProfile(user, profile.id);
+  const subscriptions = await getUserSubscriptionsForProfile(user, profile.id);
 
   const processedPosts = posts.map((post) =>
     serializePost(
       post,
       undefined,
       undefined,
-      canUserSeePostContent(post, { isProfileOwner, subscription })
+      canUserSeePostContent(post, { isProfileOwner, subscriptions })
     )
   );
 
