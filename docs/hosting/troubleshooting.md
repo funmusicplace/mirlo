@@ -62,15 +62,27 @@ restart` does not re-read `.env` — run `docker compose up -d` instead.
 
 ## File upload failures
 
-Check MinIO is running and has adequate storage:
+Check the object store is running and has adequate storage:
 
 ```bash
 # Docker
-docker compose ps minio
-docker compose exec minio mc admin info local
+docker compose ps garage garage-init
+docker exec blackbird-garage /garage status
+docker exec blackbird-garage /garage bucket list
 ```
 
 Or check wherever your storage buckets are.
+
+> **Every S3 call fails with `AuthorizationHeaderMalformed`:** the access key
+> and secret in `.env` aren't a pair Garage knows, or `s3_region` in
+> `scripts/garage/garage.toml` was changed away from `us-east-1`. Mirlo's
+> client signs for `us-east-1` because it sets no region explicitly, and
+> Garage rejects any signature whose scope doesn't match.
+
+> **Uploads fail right after a fresh `docker compose up`:** check that
+> `garage-init` exited 0 (`docker logs blackbird-garage-init`). Garage serves
+> nothing until a cluster layout is applied, and that container is what applies
+> it. It is safe to re-run: `docker compose up -d --force-recreate garage-init`.
 
 > **First upload to a newly-created bucket gets `403 AccessDenied` (S3-compatible
 > providers, e.g. Hetzner Object Storage on Ceph/RadosGW):** Mirlo auto-creates

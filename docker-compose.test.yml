@@ -23,14 +23,18 @@ services:
     networks: !reset [test-network]
     links:
       - redis-test:redis
-      - minio-test:minio
+      - garage-test:garage
       - pgsql-test:pgsql
     ports: !reset []
-    depends_on: !reset
-      - redis-test
-      - pgsql-test
-      - minio-test
-      - stripe-test
+    depends_on: !override
+      redis-test:
+        condition: service_started
+      pgsql-test:
+        condition: service_started
+      stripe-test:
+        condition: service_started
+      garage-init-test:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: test
       API_DOMAIN: http://api:3000
@@ -38,20 +42,33 @@ services:
       STRIPE_PORT: 12111
       STRIPE_PROTOCOL: http
       STRIPE_KEY: sk_test_123
-      # Keep download tests deterministic: never presign against MinIO in
-      # tests, even if the developer's .env sets MINIO_PUBLIC_HOST for dev.
-      MINIO_PUBLIC_HOST: ""
+      LOCAL_S3_PUBLIC_HOST: ""
     profiles: [test]
 
-  minio-test:
+  garage-test:
     extends:
       file: docker-compose.api.yml
-      service: minio
-    container_name: blackbird-minio-test
+      service: garage
+    container_name: blackbird-garage-test
     networks: !reset [test-network]
     ports: !reset []
-    volumes: !reset
-      - minio_storage-test:/data
+    volumes: !override
+      - garage_storage-test:/var/lib/garage
+      - ./scripts/garage/garage.toml:/etc/garage.toml:ro
+    profiles: [test]
+
+  garage-init-test:
+    extends:
+      file: docker-compose.api.yml
+      service: garage-init
+    container_name: blackbird-garage-init-test
+    networks: !reset [test-network]
+    links:
+      - garage-test:garage
+    depends_on: !override
+      - garage-test
+    environment:
+      GARAGE_HOST: garage
     profiles: [test]
 
   pgsql-test:
@@ -75,7 +92,7 @@ services:
     links:
       - redis-test:redis
       - api-test:api
-      - minio-test:minio
+      - garage-test:garage
       - pgsql-test:pgsql
       - stripe-test:stripe
     ports: !reset []
@@ -86,6 +103,7 @@ services:
       NODE_ENV: test
       CI: "${CI:-false}"
       API_DOMAIN: http://api:3000
+      LOCAL_S3_PUBLIC_HOST: ""
     command: yarn api:test
     restart: no
     profiles: [test]
@@ -100,4 +118,4 @@ networks:
     driver: bridge
 
 volumes:
-  minio_storage-test: {}
+  garage_storage-test: {}

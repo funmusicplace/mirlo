@@ -87,7 +87,7 @@ the domain you point it at.
 
 **7. Setup Hetzner Object Storage (S3-Compatible), optional**
 
-MinIO (bundled by default) is fine to start with. For production, Hetzner's
+The bundled Garage store is fine to start with. For production, Hetzner's
 Object Storage reduces costs. Mirlo creates its own buckets on first use
 (named `mirlo-audio`, `mirlo-images`, `mirlo-downloads`, or prefixed per your
 `bucketNames` setting — see
@@ -138,19 +138,25 @@ For higher performance, use a dedicated server with bare-metal installation:
 
 An external (cloud-level) firewall is not optional hardening here: Docker
 publishes ports by manipulating iptables directly, **bypassing `ufw`**, so
-MinIO (9000/9001), MailHog (1025/8025) and the API (3000) — plus PostgreSQL
+the object store (9000 S3 API, 3903 Garage admin API), MailHog (1025/8025)
+and the API (3000) — plus PostgreSQL
 (5432) and Redis (6379) if you're running the default `docker-compose.yml`
 instead of `docker-compose.prod.yml` — are reachable from the internet unless
 something outside the host blocks them. Verify from your own machine after attaching the firewall:
 
 ```bash
-nc -zv -w3 <server-ip> 9001   # should time out
+nc -zv -w3 <server-ip> 3903   # should time out
 nc -zv -w3 <server-ip> 8025   # should time out
 ```
 
 To use the blocked admin UIs, tunnel them over SSH instead of opening ports:
 
 ```bash
-ssh -L 9001:localhost:9001 root@<server-ip>   # MinIO console → http://localhost:9001
 ssh -L 8025:localhost:8025 root@<server-ip>   # MailHog → http://localhost:8025
+ssh -L 9000:localhost:9000 root@<server-ip>   # S3 API, for mc/rclone/aws-cli
 ```
+
+Garage has no web console. To look at stored objects, tunnel the S3 API as
+above and point an S3 client at it, or run the Garage CLI directly on the
+server with `docker exec blackbird-garage /garage bucket list` — see
+[docs/hosting/object-storage.md](object-storage.md#inspecting-storage-in-development).

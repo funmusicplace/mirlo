@@ -37,7 +37,7 @@ export const uploadDownloadableContentFile = async (
 ): Promise<void> => {
   const response = await api.post<
     unknown,
-    { result: DownloadableContent; uploadUrl: string }
+    { result: DownloadableContent; uploadUrl: string | null }
   >("manage/downloadableContent", {
     filename: file.name,
     mimeType: file.type,
@@ -45,18 +45,24 @@ export const uploadDownloadableContentFile = async (
     ...params,
   });
 
-  if (response?.uploadUrl) {
-    try {
-      await fetch(response.uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type },
-      });
-    } catch (e) {
-      await api.delete(`manage/downloadableContent/${response.result.id}`);
-      console.error("Error uploading to remote server", e);
-      throw e;
-    }
+  if (!response?.uploadUrl) {
+    await api.delete(`manage/downloadableContent/${response.result.id}`);
+    throw new Error(
+      "The server did not return an upload URL. In local development set " +
+        "LOCAL_S3_PUBLIC_HOST so the object store is reachable from the browser."
+    );
+  }
+
+  try {
+    await fetch(response.uploadUrl, {
+      method: "PUT",
+      body: file,
+      headers: { "Content-Type": file.type },
+    });
+  } catch (e) {
+    await api.delete(`manage/downloadableContent/${response.result.id}`);
+    console.error("Error uploading to remote server", e);
+    throw e;
   }
 };
 

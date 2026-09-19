@@ -39,20 +39,20 @@ const ARTIST_SLUGS = [
 ];
 
 const {
-  MINIO_HOST,
-  MINIO_ROOT_USER = "",
-  MINIO_ROOT_PASSWORD = "",
-  MINIO_API_PORT = "9000",
+  LOCAL_S3_HOST,
+  LOCAL_S3_USER = "",
+  LOCAL_S3_PASSWORD = "",
+  LOCAL_S3_API_PORT = "9000",
 } = process.env;
 
 export function createMinioClient(): Minio.Client | null {
-  if (!MINIO_HOST) return null;
+  if (!LOCAL_S3_HOST) return null;
   return new Minio.Client({
-    endPoint: MINIO_HOST,
-    port: +MINIO_API_PORT,
+    endPoint: LOCAL_S3_HOST,
+    port: +LOCAL_S3_API_PORT,
     useSSL: false,
-    accessKey: MINIO_ROOT_USER,
-    secretKey: MINIO_ROOT_PASSWORD,
+    accessKey: LOCAL_S3_USER,
+    secretKey: LOCAL_S3_PASSWORD,
   });
 }
 
@@ -181,7 +181,9 @@ async function ensureNoiseFiles(noiseType: NoiseType): Promise<string | null> {
     noiseFileCache.set(noiseType, tmpDir);
     return tmpDir;
   } catch (err) {
-    await fsPromises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+    await fsPromises
+      .rm(tmpDir, { recursive: true, force: true })
+      .catch(() => {});
     console.warn(
       `  ⚠ Audio generation failed (${noiseType} noise):`,
       err instanceof Error ? err.message : err
@@ -216,7 +218,9 @@ async function uploadCachedAudio(
 
 async function cleanupNoiseFileCache() {
   for (const tmpDir of noiseFileCache.values()) {
-    await fsPromises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+    await fsPromises
+      .rm(tmpDir, { recursive: true, force: true })
+      .catch(() => {});
   }
   noiseFileCache.clear();
 }
@@ -227,7 +231,11 @@ function pickGenres(count = 2): string[] {
   const genres = new Set<string>();
   // faker.music.genre() has a small pool; retries avoid duplicate tag rows
   // which violate TrackGroupTag's @@unique([trackGroupId, tagId]).
-  for (let attempt = 0; attempt < count * 10 && genres.size < count; attempt++) {
+  for (
+    let attempt = 0;
+    attempt < count * 10 && genres.size < count;
+    attempt++
+  ) {
     genres.add(faker.music.genre().toLowerCase().replace(/\s+/g, "-"));
   }
   return [...genres];
@@ -280,7 +288,7 @@ async function seedPublishedTrackGroupsInner(
 ) {
   const minioClient = createMinioClient();
   if (!minioClient) {
-    console.log("MINIO_HOST not set — covers and audio will be skipped");
+    console.log("LOCAL_S3_HOST not set — covers and audio will be skipped");
   } else {
     await ensureBuckets(minioClient);
 

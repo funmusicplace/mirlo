@@ -18,7 +18,7 @@ import {
 
 describe("clean-up-files", () => {
   let listObjectsV2Stub: sinon.SinonStub;
-  let removeObjectsStub: sinon.SinonStub;
+  let removeObjectStub: sinon.SinonStub;
 
   beforeEach(() => {
     listObjectsV2Stub = sinon
@@ -31,7 +31,7 @@ describe("clean-up-files", () => {
         });
         return emitter as any;
       });
-    removeObjectsStub = sinon.stub(minioClient!, "removeObjects").resolves();
+    removeObjectStub = sinon.stub(minioClient!, "removeObject").resolves();
   });
 
   afterEach(() => {

@@ -1,0 +1,39 @@
+# Garage configuration for the bundled development / CI object store.
+#
+# Garage replaces MinIO here: MinIO stopped publishing images to Docker Hub,
+# and its community build has been losing features. Production (mirlo.space)
+# runs on Backblaze B2 and is unaffected by this file.
+#
+# These credentials are local-only — the RPC and admin ports are never
+# published outside the compose network — so they're checked in deliberately,
+# the same way .env.example ships a throwaway database password. The S3
+# access key itself is NOT here: it comes from MINIO_ROOT_USER /
+# MINIO_ROOT_PASSWORD in .env, imported by scripts/garage/init.sh.
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "sqlite"
+
+# Single node, one copy of every object. Garage normally wants 3 replicas
+# across distinct zones; that only makes sense for a real cluster.
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+rpc_secret = "b6f3a1c04e2d8975de1a4c7f0b39e8d25c6a7f14b03e9d82a5c1f7604b8e3d29"
+
+[s3_api]
+# Must stay "us-east-1". src/utils/minio.ts constructs its client without an
+# explicit region, so the minio SDK signs every request for us-east-1; Garage
+# rejects a signature whose scope doesn't match this value, and the failure
+# surfaces as a confusing "AuthorizationHeaderMalformed" on *every* call.
+s3_region = "us-east-1"
+# Listen on 9000, not Garage's default 3900: MINIO_API_PORT is 9000 and the
+# API reaches this container in-network as minio:9000, where a compose port
+# mapping doesn't apply.
+api_bind_addr = "[::]:9000"
+root_domain = ".s3.garage.localhost"
+
+[admin]
+api_bind_addr = "[::]:3903"
+admin_token = "c3f80a1d5b6e294738af05c1d9e6b47250fa38c9e1d4b70a635f9c28e04d7b16"

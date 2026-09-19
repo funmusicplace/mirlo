@@ -10,7 +10,8 @@
 #   MIRLO_DOMAIN=https://mirlo.example.com bash scripts/generate-env.sh
 #
 # Optionally pass S3-compatible object storage credentials (Backblaze B2,
-# Hetzner Object Storage, etc.) to skip MinIO and use them instead:
+# Hetzner Object Storage, etc.) to skip the bundled Garage store and use them
+# instead:
 #   S3_ACCESS_KEY_ID=... S3_SECRET_ACCESS_KEY=... S3_REGION=... S3_ENDPOINT=... \
 #     bash scripts/generate-env.sh
 
@@ -22,7 +23,7 @@ echo ""
 echo "📝 Mirlo Environment Setup"
 echo ""
 
-# Never overwrite an existing .env: Postgres, Redis and MinIO bake their
+# Never overwrite an existing .env: Postgres, Redis and Garage bake their
 # credentials into their data volumes on first start, so regenerating
 # passwords after that locks the app out of its own services.
 if [ -f .env ]; then
@@ -71,8 +72,11 @@ REFRESH_TOKEN_SECRET=$(generate_secret)
 POSTGRES_USER=mirlo
 POSTGRES_PASSWORD=$(generate_secret)
 REDIS_PASSWORD=$(generate_secret)
-MINIO_ROOT_USER=mirlo
-MINIO_ROOT_PASSWORD=$(generate_secret)
+# Garage requires its S3 access keys in a fixed shape: "GK" + 24 hex chars
+# for the ID, and exactly 64 hex chars for the secret. generate_secret() emits
+# 48, so these two are generated separately rather than reusing it.
+LOCAL_S3_USER=GK$(openssl rand -hex 12)
+LOCAL_S3_PASSWORD=$(openssl rand -hex 32)
 
 # The postgres image names the database after POSTGRES_USER by default, and
 # DATABASE_URL is derived from the same values so they can never disagree.
@@ -88,8 +92,8 @@ sed -E \
   -e "s|^POSTGRES_USER=.*|POSTGRES_USER=${POSTGRES_USER}|" \
   -e "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${POSTGRES_PASSWORD}|" \
   -e "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=${REDIS_PASSWORD}|" \
-  -e "s|^MINIO_ROOT_USER=.*|MINIO_ROOT_USER=${MINIO_ROOT_USER}|" \
-  -e "s|^MINIO_ROOT_PASSWORD=.*|MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}|" \
+  -e "s|^LOCAL_S3_USER=.*|LOCAL_S3_USER=${LOCAL_S3_USER}|" \
+  -e "s|^LOCAL_S3_PASSWORD=.*|LOCAL_S3_PASSWORD=${LOCAL_S3_PASSWORD}|" \
   -e "s|^S3_ACCESS_KEY_ID=.*|S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}|" \
   -e "s|^S3_SECRET_ACCESS_KEY=.*|S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-}|" \
   -e "s|^S3_REGION=.*|S3_REGION=${S3_REGION:-}|" \
@@ -124,7 +128,7 @@ echo ""
 echo "  Instance URL:      ${MIRLO_DOMAIN}"
 echo "  Environment:       NODE_ENV=${NODE_ENV_VALUE}"
 echo "  Postgres user:     ${POSTGRES_USER}"
-echo "  Generated secrets: JWT, refresh token, Postgres, Redis, MinIO"
+echo "  Generated secrets: JWT, refresh token, Postgres, Redis, local S3"
 echo ""
 echo "  Keep .env private — it now contains all your credentials."
 echo "  Next steps: docker compose -f docker-compose.prod.yml up -d"

@@ -150,16 +150,16 @@ export const getDownloadsBucket = (legacyFallback: string): string =>
   _bucketConfig ? `${_bucketConfig.prefix}mirlo-downloads` : legacyFallback;
 
 const {
-  MINIO_HOST = "",
-  MINIO_PUBLIC_HOST = "",
-  MINIO_PUBLIC_PORT = "",
-  MINIO_ROOT_USER = "",
-  MINIO_ROOT_PASSWORD = "",
+  LOCAL_S3_HOST = "",
+  LOCAL_S3_PUBLIC_HOST = "",
+  LOCAL_S3_PUBLIC_PORT = "",
+  LOCAL_S3_USER = "",
+  LOCAL_S3_PASSWORD = "",
   S3_ACCESS_KEY_ID = "",
   S3_SECRET_ACCESS_KEY = "",
   S3_ENDPOINT: RAW_S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
   S3_REGION = "us-east-005",
-  MINIO_API_PORT = 9000,
+  LOCAL_S3_API_PORT = 9000,
 } = process.env;
 
 export const S3_ENDPOINT = RAW_S3_ENDPOINT;
@@ -190,24 +190,41 @@ export const backendStorage: "minio" | "backblaze" = resolveBackendStorage();
 
 // and access keys as shown below.
 export const minioClient =
-  backendStorage === "minio" && MINIO_HOST
+  backendStorage === "minio" && LOCAL_S3_HOST
     ? new Minio.Client({
-        endPoint: MINIO_HOST,
-        port: +MINIO_API_PORT,
+        endPoint: LOCAL_S3_HOST,
+        port: +LOCAL_S3_API_PORT,
         useSSL: false, // NODE_ENV !== "development",
-        accessKey: MINIO_ROOT_USER,
-        secretKey: MINIO_ROOT_PASSWORD,
+        accessKey: LOCAL_S3_USER,
+        secretKey: LOCAL_S3_PASSWORD,
       })
     : undefined;
 
-export const minioPublicClient =
-  backendStorage === "minio" && MINIO_PUBLIC_HOST
-    ? new Minio.Client({
-        endPoint: MINIO_PUBLIC_HOST,
-        port: +(MINIO_PUBLIC_PORT || MINIO_API_PORT),
-        useSSL: false,
-        accessKey: MINIO_ROOT_USER,
-        secretKey: MINIO_ROOT_PASSWORD,
+const localS3Config = {
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: LOCAL_S3_USER,
+    secretAccessKey: LOCAL_S3_PASSWORD,
+  },
+  forcePathStyle: true,
+  requestChecksumCalculation: "WHEN_REQUIRED" as const,
+};
+
+export const localS3Client =
+  backendStorage === "minio" && LOCAL_S3_HOST
+    ? new S3Client({
+        ...localS3Config,
+        endpoint: `http://${LOCAL_S3_HOST}:${LOCAL_S3_API_PORT}`,
+      })
+    : undefined;
+
+export const localS3PublicClient =
+  backendStorage === "minio" && LOCAL_S3_PUBLIC_HOST
+    ? new S3Client({
+        ...localS3Config,
+        endpoint: `http://${LOCAL_S3_PUBLIC_HOST}:${
+          LOCAL_S3_PUBLIC_PORT || LOCAL_S3_API_PORT
+        }`,
       })
     : undefined;
 
@@ -320,6 +337,21 @@ const applyPublicReadPolicyS3 = async (bucket: string) => {
         `it may need to be made public manually via your provider's console`
     );
     logger.error(e instanceof Error ? e.message : e);
+  }
+};
+
+const applyCorsPolicyLocal = async (bucket: string, logger?: Logger) => {
+  if (!localS3Client) return;
+  try {
+    await localS3Client.send(
+      new PutBucketCorsCommand({
+        Bucket: bucket,
+        CORSConfiguration: corsConfiguration(),
+      })
+    );
+  } catch (e) {
+    logger?.warn(`${backendStorage}: failed to set CORS on bucket ${bucket}`);
+    logger?.warn(e instanceof Error ? e.message : String(e));
   }
 };
 
@@ -463,16 +495,7 @@ export const createBucketIfNotExists = async (
       logger?.info(`minio: created bucket: ${bucket}`);
     }
 
-    if (options?.makePublic) {
-      try {
-        await minioClient.setBucketPolicy(bucket, publicReadPolicy(bucket));
-      } catch (e) {
-        logger?.error(
-          `minio: failed to set public-read policy on bucket ${bucket}`
-        );
-        logger?.error(e);
-      }
-    }
+    await applyCorsPolicyLocal(bucket, logger);
   }
 
   return true;
@@ -520,38 +543,34 @@ export const getPresignedUploadUrl = async (
   bucket: string,
   fileName: string,
   expiresInSeconds = 3600,
-  // When provided, the upload is pinned to exactly this many bytes. Note, minio doesn't enforce this.
+
   contentLength?: number
-) => {
+): Promise<string | null> => {
   await createBucketIfNotExists(bucket);
-  if (backendStorage === "backblaze") {
-    if (!backblazeClient) {
+
+  const client =
+    backendStorage === "backblaze" ? backblazeClient : localS3PublicClient;
+
+  if (!client) {
+    if (backendStorage === "backblaze") {
       throw new Error("Backblaze client is not initialized");
     }
-    const command = new PutObjectCommand({
-      Bucket: bucket,
-      Key: fileName,
-      ...(contentLength !== undefined ? { ContentLength: contentLength } : {}),
-    });
-
-    const url = await getSignedUrl(backblazeClient, command, {
-      expiresIn: expiresInSeconds,
-      // Force content-length into the signature so the size pin is enforced.
-      ...(contentLength !== undefined
-        ? { signableHeaders: new Set(["host", "content-length"]) }
-        : {}),
-    });
-    return url;
-  } else if (backendStorage === "minio" && minioClient) {
-    const url = await minioClient.presignedPutObject(
-      bucket,
-      fileName,
-      expiresInSeconds
-    );
-    return url;
-  } else {
-    throw new Error("No storage backend configured");
+    return null;
   }
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: fileName,
+    ...(contentLength !== undefined ? { ContentLength: contentLength } : {}),
+  });
+
+  return getSignedUrl(client, command, {
+    expiresIn: expiresInSeconds,
+    // Force content-length into the signature so the size pin is enforced.
+    ...(contentLength !== undefined
+      ? { signableHeaders: new Set(["host", "content-length"]) }
+      : {}),
+  });
 };
 
 export const getPresignedDownloadUrl = async (
@@ -566,47 +585,33 @@ export const getPresignedDownloadUrl = async (
   const expiresInSeconds = options?.expiresInSeconds ?? 60 * 15;
   const { backblazeStat, minioStat } = await statFile(bucket, filename);
 
-  if (backblazeStat && backblazeClient) {
-    const command = new GetObjectCommand({
-      Bucket: bucket,
-      Key: filename,
-      ...(options?.downloadFilename
-        ? {
-            ResponseContentDisposition: contentDisposition(
-              options.downloadFilename,
-              { type: "attachment" }
-            ),
-          }
-        : {}),
-      ...(options?.contentType
-        ? { ResponseContentType: options.contentType }
-        : {}),
-    });
-    return getSignedUrl(backblazeClient, command, {
-      expiresIn: expiresInSeconds,
-    });
+  const client = backblazeStat
+    ? backblazeClient
+    : minioStat
+      ? localS3PublicClient
+      : undefined;
+
+  if (!client) {
+    return null;
   }
 
-  if (minioStat && minioPublicClient) {
-    const respHeaders: Record<string, string> = {};
-    if (options?.downloadFilename) {
-      respHeaders["response-content-disposition"] = contentDisposition(
-        options.downloadFilename,
-        { type: "attachment" }
-      );
-    }
-    if (options?.contentType) {
-      respHeaders["response-content-type"] = options.contentType;
-    }
-    return minioPublicClient.presignedGetObject(
-      bucket,
-      filename,
-      expiresInSeconds,
-      respHeaders
-    );
-  }
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: filename,
+    ...(options?.downloadFilename
+      ? {
+          ResponseContentDisposition: contentDisposition(
+            options.downloadFilename,
+            { type: "attachment" }
+          ),
+        }
+      : {}),
+    ...(options?.contentType
+      ? { ResponseContentType: options.contentType }
+      : {}),
+  });
 
-  return null;
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 };
 
 export const uploadWrapper = async (
@@ -872,18 +877,10 @@ export const removeObjectsFromBucket = async (
   prefix: string
 ) => {
   const objects = await getObjectList(bucketName, prefix);
-  if (backendStorage === "backblaze") {
-    await Promise.all(
-      objects.map((o) => removeObjectFromStorage(bucketName, o.name!))
-    );
-  } else if (backendStorage === "minio" && minioClient) {
-    const minioObojects = await getObjectListFromMinio(bucketName, prefix);
 
-    await minioClient.removeObjects(
-      bucketName,
-      minioObojects.map((o) => o.name!)
-    );
-  }
+  await Promise.all(
+    objects.map((o) => removeObjectFromStorage(bucketName, o.name!))
+  );
 };
 
 // ─── Domain storage operations ────────────────────────────────────────────────
@@ -1132,6 +1129,29 @@ export const uploadZip = async (
   return uploadWrapper(bucket, zipKey(type, id, format), stream);
 };
 
+const allLegacyBuckets = [
+  incomingArtistBackgroundBucket,
+  finalArtistBackgroundBucket,
+  incomingArtistAvatarBucket,
+  finalArtistAvatarBucket,
+  incomingUserAvatarBucket,
+  finalUserAvatarBucket,
+  incomingUserBannerBucket,
+  finalUserBannerBucket,
+  incomingCoversBucket,
+  finalCoversBucket,
+  incomingMerchImageBucket,
+  finalMerchImageBucket,
+  finalPostImageBucket,
+  incomingAudioBucket,
+  finalAudioBucket,
+  trackGroupFormatBucket,
+  trackFormatBucket,
+  downloadableContentBucket,
+  incomingImageBucket,
+  finalImageBucket,
+];
+
 export const ensureAllBucketsExist = async () => {
   const imageBuckets = new Set<string>();
   Object.values(imageTypeBuckets).forEach(({ incoming, final }) => {
@@ -1169,5 +1189,17 @@ export const ensureAllBucketsExist = async () => {
         logger.error(e);
       })
     ),
+    // Local only: also give the other layout's buckets a CORS policy, so a
+    // browser preflight can't land on a CORS-less bucket. Cheap and
+    // idempotent — ensureBucketCached short-circuits ones already done, and
+    // the names above overlap with the current layout's.
+    ...(backendStorage === "minio"
+      ? allLegacyBuckets.map((b) =>
+          ensureBucketCached(b).catch((e) => {
+            logger.error(`Failed to ensure CORS on local bucket ${b}`);
+            logger.error(e);
+          })
+        )
+      : []),
   ]);
 };
