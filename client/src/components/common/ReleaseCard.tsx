@@ -169,9 +169,9 @@ function ReleaseCard({
         {trackGroup.isSubscriberExclusive && (
           <Pill
             variant="cover"
-            className="absolute bottom-2 left-2 z-5 pointer-events-none text-xs!"
+            className="absolute top-2 right-2 z-5 max-w-[calc(100%-1rem)] pointer-events-none text-xs! max-md:text-[0.65rem]! max-md:px-1.5"
           >
-            {t("subscriberExclusive")}
+            <span className="min-w-0 truncate">{t("subscriberExclusive")}</span>
           </Pill>
         )}
       </div>

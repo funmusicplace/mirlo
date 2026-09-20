@@ -2,13 +2,11 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import Pill from "components/common/Pill";
 import { coverSizeMax } from "pages/{artistId}/release/{trackGroupId}/Index";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
-import { getArtistTiersUrl } from "utils/artist";
+import { useParams } from "react-router-dom";
 
 import { between, bp } from "../../constants";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
@@ -98,14 +96,6 @@ const TrackGroupTitle: React.FC<{
   const subscribersOnlyListening =
     !!trackGroup.isIncludedInSubscription && playableTrackIds.length === 0;
 
-  const exclusivePill = (
-    <Link to={getArtistTiersUrl(artist)} className="no-underline shrink-0">
-      <Pill variant="tint" isHoverable>
-        {t("subscriberExclusive")}
-      </Pill>
-    </Link>
-  );
-
   return (
     <div
       className={css`
@@ -136,7 +126,7 @@ const TrackGroupTitle: React.FC<{
       <div
         className={css`
           min-width: 0;
-          flex: 0 1 auto;
+          flex: 1;
         `}
       >
         <div className="flex flex-wrap items-baseline gap-x-2">
@@ -171,14 +161,6 @@ const TrackGroupTitle: React.FC<{
           showFromAlbum={title !== trackGroup.title}
         />
       </div>
-      {(trackGroup.isSubscriberExclusive || subscribersOnlyListening) && (
-        <>
-          <span aria-hidden="true" className="shrink-0 mx-1 opacity-70">
-            ·
-          </span>
-          {exclusivePill}
-        </>
-      )}
     </div>
   );
 };
