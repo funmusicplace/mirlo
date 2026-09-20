@@ -61,7 +61,7 @@ const Index: React.FC = () => {
         (isArtistUserLoggedInUser && artist.isLabelProfile)) && (
         <>
           <TrackgroupGrid
-            gridNumber={"3"}
+            gridNumber={String(artist.properties?.releasesPerRow ?? 3)}
             wrap
             as="ul"
             role="list"
