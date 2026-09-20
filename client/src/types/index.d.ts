@@ -108,6 +108,8 @@ interface TrackGroup {
   about?: string;
   currency: string;
   isGettable: boolean;
+  isIncludedInSubscription?: boolean;
+  isSubscriberExclusive?: boolean;
   credits?: string;
   artistId?: number;
   artist: Artist;

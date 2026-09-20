@@ -956,6 +956,7 @@
     "manageAlbum": "Manage",
     "private": "Private",
     "onlyVisibleToYou": "Only visible to you",
+    "subscriberExclusive": "Subscriber exclusive",
     "backgroundColor": "Background color",
     "deleteTrackGroupConfirm": "Are you sure you want to delete this release?",
     "albumDeleted": "Release deleted",
@@ -1661,6 +1662,7 @@
     "successfullyUpdated": "Successfully updated track"
   },
   "trackGroupDetails": {
+    "subscriberExclusive": "Subscriber exclusive",
     "trackgroup": "Release:",
     "untitled": "Untitled",
     "nowPlaying": "Now playing:",

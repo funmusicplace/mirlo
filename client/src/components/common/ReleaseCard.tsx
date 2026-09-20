@@ -12,6 +12,7 @@ import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPublished } from "utils/artist";
 
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
+import Pill from "./Pill";
 import PlayableCover, {
   buildCoverImage,
   playableCoverCardRevealClass,
@@ -165,6 +166,14 @@ function ReleaseCard({
             </>
           }
         />
+        {trackGroup.isSubscriberExclusive && (
+          <Pill
+            variant="cover"
+            className="absolute bottom-2 left-2 z-5 pointer-events-none text-xs!"
+          >
+            {t("subscriberExclusive")}
+          </Pill>
+        )}
       </div>
       {showArtist && (
         <div className="order-3 min-w-0 mt-[0.2rem]">
