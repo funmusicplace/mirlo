@@ -562,10 +562,12 @@ export const sendSubscriptionCancellationEmail = async (
 export const singleInclude = (queryOptions?: {
   includeDefaultTier?: boolean;
   includePrivate?: boolean;
+  loggedInUserId?: number;
 }): Prisma.ProfileInclude<DefaultArgs> & {
   merch: { include: { images: boolean } };
 } => {
-  const { includeDefaultTier, includePrivate } = queryOptions ?? {};
+  const { includeDefaultTier, includePrivate, loggedInUserId } =
+    queryOptions ?? {};
   return {
     trackGroups: {
       where: {
@@ -654,6 +656,19 @@ export const singleInclude = (queryOptions?: {
                 urlSlug: true,
                 isGettable: true,
                 _count: { select: { subscriptionTierReleases: true } },
+                tracks: {
+                  where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
+                  orderBy: { order: "asc" },
+                  select: { id: true, order: true, isPreview: true },
+                },
+                ...(loggedInUserId
+                  ? {
+                      userTrackGroupPurchases: {
+                        where: { userId: loggedInUserId },
+                        select: { userId: true },
+                      },
+                    }
+                  : {}),
                 profile: {
                   select: {
                     name: true,

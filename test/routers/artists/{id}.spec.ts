@@ -8,9 +8,11 @@ import { describe, it } from "mocha";
 import {
   clearTables,
   createProfile,
+  createSubscription,
   createTier,
   createTrackGroup,
   createUser,
+  createUserTrackGroupPurchase,
 } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -228,6 +230,62 @@ describe("artists", () => {
         )
       );
       assert.deepEqual(tierFlags, { Exclusive: true, Bonus: false });
+    });
+
+    it("should return tier releases with tracks and viewer-aware playability", async () => {
+      const { user } = await createUser({ email: "playable@test.com" });
+      const profile = await createProfile(user.id, {
+        name: "Playable Artist",
+        urlSlug: "playable-artist",
+      });
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const album = await createTrackGroup(profile.id, {
+        title: "Tiered",
+        urlSlug: "tiered",
+        tracks: [
+          {
+            title: "preview",
+            isPreview: true,
+            order: 1,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+          {
+            title: "must own",
+            isPreview: false,
+            order: 2,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+      await prisma.subscriptionTierRelease.create({
+        data: { tierId: tier.id, trackGroupId: album.id },
+      });
+
+      const playabilityFor = async (accessToken?: string) => {
+        const request = requestApp
+          .get(`artists/${profile.urlSlug}`)
+          .set("Accept", "application/json");
+        if (accessToken) {
+          request.set("Cookie", [`jwt=${accessToken}`]);
+        }
+        const response = await request;
+        assert.equal(response.status, 200);
+        const [returnedTier] = response.body.result.subscriptionTiers;
+        return returnedTier.releases[0].trackGroup.tracks.map(
+          (t: { isPlayable: boolean }) => t.isPlayable
+        );
+      };
+
+      assert.deepEqual(await playabilityFor(), [true, false]);
+
+      const { user: subscriber, accessToken } = await createUser({
+        email: "subscriber@test.com",
+      });
+      await createSubscription(subscriber.id, tier.id);
+      assert.deepEqual(await playabilityFor(accessToken), [true, false]);
+
+      await createUserTrackGroupPurchase(subscriber.id, album.id);
+      assert.deepEqual(await playabilityFor(accessToken), [true, true]);
     });
 
     it("should return an empty user.artistLabels for a label with empty roster", async () => {

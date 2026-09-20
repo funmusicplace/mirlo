@@ -2,6 +2,7 @@ import { Image, TrackGroupCover } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../utils/artist";
 import { finalCoversBucket, finalImageBucket } from "../utils/minio";
+import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { isSubscriberExclusive } from "./trackGroup";
 import { omitApPrivateKey, Serialized } from "./utils";
@@ -10,7 +11,8 @@ import { omitApPrivateKey, Serialized } from "./utils";
  * Enrich a subscription tier and emit artist* wire shape.
  */
 export const serializeProfileSubscriptionTier = <T extends object>(
-  tier: T
+  tier: T,
+  options?: { loggedInUserId?: number }
 ): Serialized<T> => {
   const {
     profileId,
@@ -29,6 +31,8 @@ export const serializeProfileSubscriptionTier = <T extends object>(
         cover?: TrackGroupCover | null;
         isGettable?: boolean;
         _count?: { subscriptionTierReleases?: number };
+        tracks?: { id: number; order?: number | null; isPreview?: boolean }[];
+        userTrackGroupPurchases?: { userId: number }[];
       } | null;
     }[];
   };
@@ -45,12 +49,21 @@ export const serializeProfileSubscriptionTier = <T extends object>(
         profileId: tgPid,
         profile: tgProf,
         _count,
+        userTrackGroupPurchases,
         ...tgRest
       } = rel.trackGroup ?? {};
       return {
         ...rel,
         trackGroup: {
           ...tgRest,
+          tracks: rel.trackGroup?.tracks?.map((track) => ({
+            ...track,
+            isPlayable: isTrackPlayableNested({
+              isPreview: track.isPreview,
+              trackGroupPurchases: userTrackGroupPurchases,
+              userId: options?.loggedInUserId,
+            }),
+          })),
           isIncludedInSubscription: true,
           isSubscriberExclusive: isSubscriberExclusive(rel.trackGroup ?? {}),
           artistId: tgPid ?? tgProf?.id,

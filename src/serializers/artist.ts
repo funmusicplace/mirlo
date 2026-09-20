@@ -22,11 +22,6 @@ import {
 } from "../utils/minio";
 import { resolvePayee } from "../utils/payments/payee";
 
-import {
-  omitApPrivateKey,
-  renameProfileIdToArtistId,
-  Serialized,
-} from "./utils";
 import { LocalArtistLabel, serializeArtistLabel } from "./artistLabel";
 import { serializeMerch } from "./merch";
 import { serializePost } from "./post";
@@ -36,6 +31,11 @@ import {
   serializeSingleTrackGroupIntoCanimus,
   LocalTrackGroup,
 } from "./trackGroup";
+import {
+  omitApPrivateKey,
+  renameProfileIdToArtistId,
+  Serialized,
+} from "./utils";
 
 export interface LocalProfile extends Profile {
   artistLabels?: LocalArtistLabel[];
@@ -104,7 +104,7 @@ export const serializeProfile = <T extends LocalProfile>(
       )
     ),
     subscriptionTiers: profile.subscriptionTiers?.map((tier) =>
-      serializeProfileSubscriptionTier(tier)
+      serializeProfileSubscriptionTier(tier, { loggedInUserId: userId })
     ),
     user: profile.user
       ? {
