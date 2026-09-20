@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
+import SubscriptionForm from "components/ManageArtist/SubscriptionForm";
 import {
   queryManagedArtist,
   queryManagedArtistSubscriptionTier,
@@ -8,8 +9,6 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-
-import SubscriptionForm from "components/ManageArtist/SubscriptionForm";
 
 const Index: React.FC = () => {
   const { artistId, tierId } = useParams();
@@ -43,7 +42,7 @@ const Index: React.FC = () => {
   return (
     <div className="p-4">
       <BackToArtistLink subPage="tiers" />
-      <h1 className="text-xl font-bold mb-4">
+      <h1 className="text-xl font-bold mb-6!">
         {tier?.name || t("newSubscriptionTier")}
       </h1>
       <SubscriptionForm artist={artist} existing={tier} reload={handleReload} />

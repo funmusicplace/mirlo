@@ -7,10 +7,10 @@ import { FaFileUpload } from "react-icons/fa";
 
 import { bp } from "../../constants";
 
-export const Img = styled.img<{ rounded?: boolean }>`
+export const Img = styled.img<{ rounded?: boolean; naturalRatio?: boolean }>`
   transition: .25s background-color, .25s filter;
-  aspect-ratio: 1/1;
-  object-fit: cover;
+  ${({ naturalRatio }) =>
+    naturalRatio ? "height: auto;" : "aspect-ratio: 1/1; object-fit: cover;"}
 
   &:hover {
     filter: brightness(80%);
