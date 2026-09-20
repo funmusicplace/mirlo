@@ -421,6 +421,7 @@ interface SubscriptionTierRelease {
   tierId: number;
   trackGroupId: number;
   trackGroup: TrackGroup & { artist: Artist };
+  order?: number | null;
   createdAt: string;
 }
 

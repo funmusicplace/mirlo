@@ -647,6 +647,10 @@ export const singleInclude = (queryOptions?: {
               deletedAt: null,
             },
           },
+          orderBy: [
+            { order: { sort: "asc", nulls: "last" } },
+            { trackGroup: { releaseDate: "desc" } },
+          ],
           select: {
             trackGroup: {
               select: {

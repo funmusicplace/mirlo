@@ -55,6 +55,10 @@ export default function () {
                 deletedAt: null,
               },
             },
+            orderBy: [
+              { order: { sort: "asc", nulls: "last" } },
+              { trackGroup: { releaseDate: "desc" } },
+            ],
             include: {
               trackGroup: {
                 include: {

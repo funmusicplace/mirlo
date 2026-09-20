@@ -236,6 +236,7 @@ const SubscriptionTierPage: React.FC<{
           </h3>
           <SubscriptionTierReleases
             tier={subscriptionTier}
+            artist={artist}
             maxItems={INCLUDED_RELEASES_MAX_ROWS * INCLUDED_RELEASES_PER_ROW}
           />
         </section>

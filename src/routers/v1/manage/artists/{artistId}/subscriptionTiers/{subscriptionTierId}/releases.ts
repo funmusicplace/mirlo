@@ -61,9 +61,10 @@ export default function () {
             },
           },
         },
-        orderBy: {
-          createdAt: "asc",
-        },
+        orderBy: [
+          { order: { sort: "asc", nulls: "last" } },
+          { trackGroup: { releaseDate: "desc" } },
+        ],
       });
 
       res.status(200).json({

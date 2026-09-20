@@ -109,6 +109,7 @@ const routes = [
   "manage/artists/{artistId}/subscriptionTiers",
   "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}",
   "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}/releases",
+  "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}/releaseOrder",
   "manage/artists/{artistId}/applyPlatformFee",
   "manage/artists/{artistId}/posts",
   "manage/downloadableContent",

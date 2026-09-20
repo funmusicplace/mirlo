@@ -441,6 +441,7 @@ model SubscriptionTierRelease {
   tier         ProfileSubscriptionTier @relation(fields: [tierId], references: [id])
   trackGroupId Int
   trackGroup   TrackGroup              @relation(fields: [trackGroupId], references: [id])
+  order        Int?
   createdAt    DateTime                @default(now())
 
   @@unique([tierId, trackGroupId])
