@@ -562,6 +562,8 @@
     "locationUpdated": "Location updated",
     "removeLocationTag": "Remove location tag",
     "includesTheseReleases": "Includes these releases:",
+    "seeAllIncludedReleases": "See all {{count}} included releases",
+    "hideIncludedReleases": "Show fewer releases",
     "chooseAnAmount": "Choose an amount",
     "locations": "Locations",
     "hideLocations": "Hide locations",

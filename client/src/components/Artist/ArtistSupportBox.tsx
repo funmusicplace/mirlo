@@ -1,121 +1,34 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import Box from "components/common/Box";
 import MarkdownContent from "components/common/MarkdownContent";
-import Modal from "components/common/Modal";
 import PlatformPercent from "components/common/PlatformPercent";
-import PurchaseModal from "components/common/Purchase/PurchaseModal";
-import { usePurchase } from "components/common/Purchase/usePurchase";
-import { useSubscriptionCheckout } from "components/common/Purchase/useSubscriptionCheckout";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import api from "services/api";
-import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageTiersUrl } from "utils/artist";
 
 import Money from "../common/Money";
 
-import { ArtistButton, ArtistButtonLink } from "./ArtistButtons";
-import ArtistVariableSupport from "./ArtistVariableSupport";
-import IncludedReleases from "./IncludedReleases";
+import { ArtistButtonLink } from "./ArtistButtons";
 import LoadingBlocks from "./LoadingBlocks";
-import SubscriptionCancelledNotice, {
-  isSubscriptionCancelled,
-} from "./SubscriptionCancelledNotice";
+import SubscriptionTierActions, {
+  isUserSubscribedToTier,
+} from "./SubscriptionTierActions";
+import SubscriptionTierRewards, {
+  hasTierRewards,
+} from "./SubscriptionTierRewards";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
 }> = ({ subscriptionTier }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const { user, refreshLoggedInUser } = useAuthContext();
-  const snackbar = useSnackbar();
+  const { user } = useAuthContext();
   const { artistId } = useParams();
-  const { data: artist, refetch: refresh } = useQuery(
-    queryArtist({ artistSlug: artistId })
-  );
+  const { data: artist } = useQuery(queryArtist({ artistSlug: artistId }));
 
   const secondaryColor = "var(--mi-button-text-color)";
-
-  const errorHandler = useErrorHandler();
-
-  const {
-    checkout,
-    isLoading: isCheckingForSubscription,
-    startPurchase,
-    reset,
-    handlePurchaseComplete,
-    returnUrl,
-  } = useSubscriptionCheckout({ artist, refresh });
-
-  // A separate usePurchase instance for the payment-method-update flow: same
-  // checkout/<PurchaseModal> machinery as the tier-switch flow above, but its
-  // clientSecret comes from PUT manage/subscriptions/:id (not POST
-  // /v1/purchase), so it drives its own openCheckout call instead of
-  // startPurchase — hence its own loading flag around that fetch, rather than
-  // usePurchase's own isLoading (which only tracks startPurchase).
-  const {
-    checkout: paymentMethodCheckout,
-    openCheckout: openPaymentMethodCheckout,
-    reset: resetPaymentMethodCheckout,
-  } = usePurchase();
-  const [isStartingPaymentMethodUpdate, setIsStartingPaymentMethodUpdate] =
-    React.useState(false);
-
-  const startPaymentMethodUpdate = async (subscriptionId: number) => {
-    try {
-      setIsStartingPaymentMethodUpdate(true);
-      const { result } = await api.put<
-        undefined,
-        { result: { clientSecret: string; stripeAccountId: string } }
-      >(`manage/subscriptions/${subscriptionId}`, undefined);
-      openPaymentMethodCheckout(result);
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      setIsStartingPaymentMethodUpdate(false);
-    }
-  };
-
-  const handlePaymentMethodUpdateComplete = React.useCallback(() => {
-    resetPaymentMethodCheckout();
-    snackbar(t("paymentMethodUpdated"), { type: "success" });
-    refresh();
-  }, [refresh, resetPaymentMethodCheckout, snackbar, t]);
-
-  const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
-    const result = await startPurchase({
-      artistId: tier.artistId,
-      items: [{ type: "subscription", tierId: tier.id }],
-    });
-    refresh();
-    refreshLoggedInUser();
-    if (result?.success) {
-      snackbar(t("subscriptionTierChanged", { tierName: tier.name }), {
-        type: "success",
-      });
-    }
-  };
-
-  const [isConfirmingCancel, setIsConfirmingCancel] = React.useState(false);
-
-  const cancelSubscription = async (keepFollowing: boolean) => {
-    try {
-      await api.delete(`artists/${subscriptionTier.artistId}/subscribe`, {
-        keepFollowing,
-        tierId: subscriptionTier.id,
-      });
-      snackbar(t("subscriptionCancelled"), { type: "success" });
-      setIsConfirmingCancel(false);
-      refresh();
-      refreshLoggedInUser();
-    } catch (e) {
-      errorHandler(e);
-    }
-  };
 
   if (!artist) {
     return <LoadingBlocks rows={2} />;
@@ -128,36 +41,11 @@ const ArtistSupportBox: React.FC<{
     return null;
   }
 
-  const isSubscribedToTier = !!user?.artistUserSubscriptions?.find(
-    (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
-  );
-
-  const currentSubscription = user?.artistUserSubscriptions?.find(
-    (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
-  );
-
-  const hasFailedPayment =
-    currentSubscription?.artistUserSubscriptionCharges?.[0]?.transaction
-      ?.paymentStatus === "FAILED";
-
-  const isCancelled = isSubscriptionCancelled(currentSubscription);
-
-  const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
-    (sub) =>
-      sub.artistSubscriptionTier.artistId === artist.id &&
-      sub.artistSubscriptionTier.id !== subscriptionTier.id &&
-      !sub.artistSubscriptionTier.isDefaultTier
-  );
+  const isSubscribedToTier = isUserSubscribedToTier(user, subscriptionTier);
 
   const link = "var(--mi-button-color)";
   const tierBorderColor = `color-mix(in srgb, ${link} ${isSubscribedToTier ? "100%" : "20%"}, transparent)`;
   const tierInnerBorderColor = `color-mix(in srgb, ${link} 20%, transparent)`;
-
-  const hasRewards =
-    subscriptionTier.autoPurchaseAlbums ||
-    (subscriptionTier.releases && subscriptionTier.releases.length > 0) ||
-    !!subscriptionTier.digitalDiscountPercent ||
-    !!subscriptionTier.merchDiscountPercent;
 
   return (
     <div
@@ -245,161 +133,23 @@ const ArtistSupportBox: React.FC<{
           `
         }
       >
-        {((!isSubscribedToTier && !isSubscribedToArtist) || isCancelled) && (
-          <ArtistVariableSupport tier={subscriptionTier} />
-        )}
-        {(isSubscribedToTier || isSubscribedToArtist) && (
-          <div className="flex items-center justify-center gap-3 flex-col">
-            {user && isSubscribedToArtist && !isSubscribedToTier && (
-              <ArtistButton
-                onClick={() => subscribeToTier(subscriptionTier)}
-                isLoading={isCheckingForSubscription}
-              >
-                {t("chooseThisSubscription")}
-              </ArtistButton>
-            )}
-            {user && isSubscribedToTier && !isCancelled && (
-              <ArtistButton
-                onClick={() =>
-                  currentSubscription &&
-                  startPaymentMethodUpdate(currentSubscription.id)
-                }
-                variant="outlined"
-                isLoading={isStartingPaymentMethodUpdate}
-              >
-                {t("changePaymentMethod")}
-              </ArtistButton>
-            )}
-            {user && isSubscribedToTier && !isCancelled && (
-              <ArtistButton
-                onClick={() => setIsConfirmingCancel(true)}
-                variant="outlined"
-              >
-                {t("cancelSubscription")}
-              </ArtistButton>
-            )}
-            {user && isSubscribedToTier && (
-              <SubscriptionCancelledNotice
-                subscription={currentSubscription}
-                className="text-sm text-center"
-              />
-            )}
-            {hasFailedPayment && (
-              <Box variant="warning" className="text-sm text-center">
-                {t("subscriptionPaymentFailed")}
-                <ArtistButton
-                  onClick={() => setIsConfirmingCancel(true)}
-                  variant="outlined"
-                >
-                  {t("cancelSubscription")}
-                </ArtistButton>
-              </Box>
-            )}
-            <p>
-              {isSubscribedToTier &&
-                t("thankYouForSupporting", { artistName: artist.name })}
-            </p>
-          </div>
-        )}
+        <SubscriptionTierActions subscriptionTier={subscriptionTier} />
       </div>
       {subscriptionTier.description && (
         <div className="text-base px-5">
           <MarkdownContent content={subscriptionTier.description} />
         </div>
       )}
-      {hasRewards && (
+      {hasTierRewards(subscriptionTier) && (
         <>
           <hr className="border-(--tier-inner-border-color)" />
-          <ul className="w-full flex gap-2 flex-col px-5 text-sm">
-            {subscriptionTier.autoPurchaseAlbums && (
-              <li>{t("includesNewReleases")}</li>
-            )}
-
-            <li>
-              {!!subscriptionTier.digitalDiscountPercent &&
-                !subscriptionTier.merchDiscountPercent &&
-                t("tierStoreDigitalDiscount", {
-                  discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
-                  artistName: artist.name,
-                })}
-              {!subscriptionTier.digitalDiscountPercent &&
-                !!subscriptionTier.merchDiscountPercent &&
-                t("tierStoreMerchDiscount", {
-                  discountPercent: subscriptionTier.merchDiscountPercent ?? 0,
-                  artistName: artist.name,
-                })}
-              {!!subscriptionTier.digitalDiscountPercent &&
-                !!subscriptionTier.merchDiscountPercent &&
-                subscriptionTier.digitalDiscountPercent !==
-                  subscriptionTier.merchDiscountPercent &&
-                t("differentTierStoreDiscount", {
-                  digitalDiscountPercent:
-                    subscriptionTier.digitalDiscountPercent ?? 0,
-                  merchDiscountPercent:
-                    subscriptionTier.merchDiscountPercent ?? 0,
-                  artistName: artist.name,
-                })}
-              {!!subscriptionTier.digitalDiscountPercent &&
-                !!subscriptionTier.merchDiscountPercent &&
-                subscriptionTier.digitalDiscountPercent ===
-                  subscriptionTier.merchDiscountPercent &&
-                t("sameTierStoreDiscount", {
-                  discountPercent: subscriptionTier.digitalDiscountPercent ?? 0,
-                  artistName: artist.name,
-                })}
-            </li>
-            {subscriptionTier.releases &&
-              subscriptionTier.releases.length > 0 && (
-                <li>
-                  <IncludedReleases tier={subscriptionTier} />
-                </li>
-              )}
-          </ul>
+          <SubscriptionTierRewards
+            subscriptionTier={subscriptionTier}
+            artistName={artist.name}
+            className="px-5 text-sm"
+          />
         </>
       )}
-      <PurchaseModal
-        open={!!checkout}
-        onClose={reset}
-        clientSecret={checkout?.clientSecret}
-        stripeAccountId={checkout?.stripeAccountId}
-        requiresShipping={checkout?.requiresShipping}
-        allowedCountries={checkout?.allowedCountries}
-        returnUrl={returnUrl}
-        onSuccess={handlePurchaseComplete}
-        title={t("support") ?? ""}
-        buttonLabel={t("letsSupport") ?? ""}
-      />
-      <PurchaseModal
-        open={!!paymentMethodCheckout}
-        onClose={resetPaymentMethodCheckout}
-        clientSecret={paymentMethodCheckout?.clientSecret}
-        stripeAccountId={paymentMethodCheckout?.stripeAccountId}
-        returnUrl={window.location.href}
-        onSuccess={handlePaymentMethodUpdateComplete}
-        title={t("changePaymentMethodTitle") ?? ""}
-        buttonLabel={t("updatePaymentMethodButton") ?? ""}
-      />
-      <Modal
-        open={isConfirmingCancel}
-        onClose={() => setIsConfirmingCancel(false)}
-        size="small"
-      >
-        <div className="flex flex-col gap-3">
-          <p>{t("cancelSubscriptionConfirm")}</p>
-          <ArtistButton
-            variant="outlined"
-            onClick={() => cancelSubscription(false)}
-          >
-            {t("unsubscribeEntirely")}
-          </ArtistButton>
-          <ArtistButton onClick={() => cancelSubscription(true)}>
-            {t("stopPaymentsKeepFollowing")}
-          </ArtistButton>
-          <ArtistButton onClick={() => setIsConfirmingCancel(false)}>
-            {t("nevermind")}
-          </ArtistButton>
-        </div>
-      </Modal>
     </div>
   );
 };
