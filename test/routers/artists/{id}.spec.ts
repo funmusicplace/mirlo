@@ -167,6 +167,69 @@ describe("artists", () => {
       assert.deepEqual(releasedTitles, ["Kept Album"]);
     });
 
+    it("should flag releases that are only available through a subscription tier", async () => {
+      const { user } = await createUser({ email: "exclusive@test.com" });
+      const profile = await createProfile(user.id, {
+        name: "Exclusive Artist",
+        urlSlug: "exclusive-artist",
+      });
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const exclusive = await createTrackGroup(profile.id, {
+        title: "Exclusive",
+        urlSlug: "exclusive",
+        isGettable: false,
+      });
+      const bonus = await createTrackGroup(profile.id, {
+        title: "Bonus",
+        urlSlug: "bonus",
+        isGettable: true,
+      });
+      await createTrackGroup(profile.id, {
+        title: "Streaming only",
+        urlSlug: "streaming-only",
+        isGettable: false,
+      });
+      await prisma.subscriptionTierRelease.createMany({
+        data: [
+          { tierId: tier.id, trackGroupId: exclusive.id },
+          { tierId: tier.id, trackGroupId: bonus.id },
+        ],
+      });
+
+      const response = await requestApp
+        .get(`artists/${profile.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const flags = Object.fromEntries(
+        response.body.result.trackGroups.map(
+          (tg: {
+            title: string;
+            isSubscriberExclusive: boolean;
+            isIncludedInSubscription: boolean;
+          }) => [
+            tg.title,
+            [tg.isIncludedInSubscription, tg.isSubscriberExclusive],
+          ]
+        )
+      );
+      assert.deepEqual(flags, {
+        Exclusive: [true, true],
+        Bonus: [true, false],
+        "Streaming only": [false, false],
+      });
+
+      const [returnedTier] = response.body.result.subscriptionTiers;
+      const tierFlags = Object.fromEntries(
+        returnedTier.releases.map(
+          (r: {
+            trackGroup: { title: string; isSubscriberExclusive: boolean };
+          }) => [r.trackGroup.title, r.trackGroup.isSubscriberExclusive]
+        )
+      );
+      assert.deepEqual(tierFlags, { Exclusive: true, Bonus: false });
+    });
+
     it("should return an empty user.artistLabels for a label with empty roster", async () => {
       const { user: labelUser } = await createUser({
         email: "label@test.com",

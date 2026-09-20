@@ -57,6 +57,7 @@ export default function () {
             include: {
               cover: true,
               profile: true,
+              _count: { select: { subscriptionTierReleases: true } },
             },
           },
         },

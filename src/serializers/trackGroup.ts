@@ -16,13 +16,13 @@ import { generateFullStaticImageUrl } from "../utils/images";
 import { finalArtistAvatarBucket, finalCoversBucket } from "../utils/minio";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
+import { serializeMerch } from "./merch";
+import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 import {
   omitApPrivateKey,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
-import { serializeMerch } from "./merch";
-import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 
 type TrackGroupOwner = Partial<Profile> & {
   avatar?: ProfileAvatar | null;
@@ -52,8 +52,21 @@ type TrackGroupInput = TrackGroup & {
     downloadableContentId: string;
   }[];
   trackGroupPurchases?: { userId: number }[];
-  _count?: { tracks?: number; userTrackGroupPurchases?: number };
+  _count?: {
+    tracks?: number;
+    userTrackGroupPurchases?: number;
+    subscriptionTierReleases?: number;
+  };
 };
+
+export const isIncludedInSubscription = (trackGroup: {
+  _count?: { subscriptionTierReleases?: number };
+}) => (trackGroup._count?.subscriptionTierReleases ?? 0) > 0;
+
+export const isSubscriberExclusive = (trackGroup: {
+  isGettable?: boolean;
+  _count?: { subscriptionTierReleases?: number };
+}) => trackGroup.isGettable === false && isIncludedInSubscription(trackGroup);
 
 export const processSingleTrackGroup = <T extends TrackGroupInput>(
   tg: T,
@@ -62,6 +75,8 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
   currency: string;
   totalTracks?: number;
   hasNotifiedFollowers: boolean;
+  isIncludedInSubscription: boolean;
+  isSubscriberExclusive: boolean;
   tags: string[];
 } => {
   const { _count, profile, profileId, artist, ...rest } = tg;
@@ -84,6 +99,8 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     totalTracks: _count?.tracks ?? tg.tracks?.length,
     currency,
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
+    isIncludedInSubscription: isIncludedInSubscription(tg),
+    isSubscriberExclusive: isSubscriberExclusive(tg),
     tracks: tg.tracks?.map((track) => ({
       ...track,
       isPlayable: isTrackPlayableNested({
@@ -113,6 +130,8 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     currency: string;
     totalTracks?: number;
     hasNotifiedFollowers: boolean;
+    isIncludedInSubscription: boolean;
+    isSubscriberExclusive: boolean;
     tags: string[];
   };
 };

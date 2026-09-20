@@ -3,6 +3,7 @@ import { Image, TrackGroupCover } from "@mirlo/prisma/client";
 import { addSizesToImage } from "../utils/artist";
 import { finalCoversBucket, finalImageBucket } from "../utils/minio";
 
+import { isSubscriberExclusive } from "./trackGroup";
 import { omitApPrivateKey, Serialized } from "./utils";
 
 /**
@@ -26,6 +27,8 @@ export const serializeProfileSubscriptionTier = <T extends object>(
         profileId?: number;
         profile?: { id?: number } | null;
         cover?: TrackGroupCover | null;
+        isGettable?: boolean;
+        _count?: { subscriptionTierReleases?: number };
       } | null;
     }[];
   };
@@ -41,12 +44,15 @@ export const serializeProfileSubscriptionTier = <T extends object>(
       const {
         profileId: tgPid,
         profile: tgProf,
+        _count,
         ...tgRest
       } = rel.trackGroup ?? {};
       return {
         ...rel,
         trackGroup: {
           ...tgRest,
+          isIncludedInSubscription: true,
+          isSubscriberExclusive: isSubscriberExclusive(rel.trackGroup ?? {}),
           artistId: tgPid ?? tgProf?.id,
           artist:
             tgProf && typeof tgProf === "object"

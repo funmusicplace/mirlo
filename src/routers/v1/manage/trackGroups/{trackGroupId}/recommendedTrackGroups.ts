@@ -6,9 +6,9 @@ import {
   userAuthenticated,
   trackGroupBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 type Params = {
   trackGroupId: number;
@@ -47,6 +47,7 @@ export default function () {
                 },
               },
               cover: true,
+              _count: { select: { subscriptionTierReleases: true } },
             },
           },
         },
@@ -128,6 +129,7 @@ export default function () {
                 },
               },
               cover: true,
+              _count: { select: { subscriptionTierReleases: true } },
             },
           },
         },

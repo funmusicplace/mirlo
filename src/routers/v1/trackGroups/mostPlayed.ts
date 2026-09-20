@@ -56,6 +56,7 @@ export default function () {
           },
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
           cover: true,
+          _count: { select: { subscriptionTierReleases: true } },
         },
       });
 

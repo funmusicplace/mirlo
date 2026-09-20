@@ -592,6 +592,7 @@ export const singleInclude = (queryOptions?: {
         paymentToUser: {
           select: { currency: true },
         },
+        _count: { select: { subscriptionTierReleases: true } },
       },
     },
     tourDates: true,
@@ -651,6 +652,8 @@ export const singleInclude = (queryOptions?: {
                 id: true,
                 title: true,
                 urlSlug: true,
+                isGettable: true,
+                _count: { select: { subscriptionTierReleases: true } },
                 profile: {
                   select: {
                     name: true,

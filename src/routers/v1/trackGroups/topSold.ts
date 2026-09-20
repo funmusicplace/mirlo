@@ -66,6 +66,7 @@ export default function () {
           _count: {
             select: {
               userTrackGroupPurchases: true,
+              subscriptionTierReleases: true,
             },
           },
           profile: {
