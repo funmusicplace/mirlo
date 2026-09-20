@@ -7,11 +7,11 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistManageTiersUrl } from "utils/artist";
+import { getArtistManageTiersUrl, getArtistTierUrl } from "utils/artist";
 
 import Money from "../common/Money";
 
-import { ArtistButtonLink } from "./ArtistButtons";
+import ArtistRouterLink, { ArtistButtonLink } from "./ArtistButtons";
 import LoadingBlocks from "./LoadingBlocks";
 import SubscriptionTierActions, {
   isUserSubscribedToTier,
@@ -22,7 +22,8 @@ import SubscriptionTierRewards, {
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
-}> = ({ subscriptionTier }) => {
+  showDetailsLink?: boolean;
+}> = ({ subscriptionTier, showDetailsLink = true }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const { artistId } = useParams();
@@ -149,6 +150,13 @@ const ArtistSupportBox: React.FC<{
             className="px-5 text-sm"
           />
         </>
+      )}
+      {showDetailsLink && (
+        <div className="px-5 text-center mt-auto">
+          <ArtistRouterLink to={getArtistTierUrl(artist, subscriptionTier)}>
+            {t("learnMoreAboutTier")}
+          </ArtistRouterLink>
+        </div>
       )}
     </div>
   );
