@@ -16,7 +16,10 @@ import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../constants";
 
-import ArtistRouterLink, { ArtistButtonLink } from "./ArtistButtons";
+import ArtistRouterLink, {
+  ArtistButton,
+  ArtistButtonLink,
+} from "./ArtistButtons";
 import ArtistSupportBox from "./ArtistSupportBox";
 import SubscriptionTierActions from "./SubscriptionTierActions";
 import SubscriptionTierReleases from "./SubscriptionTierReleases";
@@ -92,7 +95,8 @@ const Details = styled.div`
 const SubscriptionTierPage: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
   artist: Artist;
-}> = ({ subscriptionTier, artist }) => {
+  onSeeAllTiers?: () => void;
+}> = ({ subscriptionTier, artist, onSeeAllTiers }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.medium}px)`);
@@ -147,9 +151,22 @@ const SubscriptionTierPage: React.FC<{
           )}
         </div>
       </div>
-      <ArtistRouterLink to={getArtistTiersUrl(artist)} className="text-center">
-        {t("seeAllTiers")}
-      </ArtistRouterLink>
+      {onSeeAllTiers ? (
+        <ArtistButton
+          variant="link"
+          onClick={onSeeAllTiers}
+          className="self-center"
+        >
+          {t("seeAllTiers")}
+        </ArtistButton>
+      ) : (
+        <ArtistRouterLink
+          to={getArtistTiersUrl(artist)}
+          className="text-center"
+        >
+          {t("seeAllTiers")}
+        </ArtistRouterLink>
+      )}
     </nav>
   );
 

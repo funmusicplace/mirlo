@@ -32,6 +32,8 @@ const Index: React.FC = () => {
     React.useState<ArtistUserSubscription>();
   const [userSubscriptionTier, setUserSubscriptionTier] =
     React.useState<ArtistSubscriptionTier>();
+  const [showAllTiers, setShowAllTiers] = React.useState(false);
+  const tiersGridRef = React.useRef<HTMLDivElement>(null);
   const { search } = useLocation();
   const userId = user?.id;
   const artistId = artist?.id;
@@ -65,6 +67,12 @@ const Index: React.FC = () => {
   React.useEffect(() => {
     checkForSubscription();
   }, [checkForSubscription]);
+
+  React.useEffect(() => {
+    if (showAllTiers) {
+      tiersGridRef.current?.focus();
+    }
+  }, [showAllTiers]);
 
   const queryClient = useQueryClient();
   React.useEffect(() => {
@@ -116,6 +124,9 @@ const Index: React.FC = () => {
   const paidTiers = artist.subscriptionTiers.filter((p) => !p.isDefaultTier);
   const paidTierCount = paidTiers.length;
   const isScrollable = paidTierCount > 3;
+  const isOwner = artist.userId === user?.id;
+  const subscribedTier =
+    !isOwner && !showAllTiers ? userSubscriptionTier : undefined;
 
   return (
     <>
@@ -145,10 +156,19 @@ const Index: React.FC = () => {
           />
         </div>
       )}
-      {paidTierCount === 1 && (
+      {subscribedTier && (
+        <SubscriptionTierPage
+          subscriptionTier={subscribedTier}
+          artist={artist}
+          onSeeAllTiers={
+            paidTierCount > 1 ? () => setShowAllTiers(true) : undefined
+          }
+        />
+      )}
+      {!subscribedTier && paidTierCount === 1 && (
         <SubscriptionTierPage subscriptionTier={paidTiers[0]} artist={artist} />
       )}
-      {paidTierCount > 1 && (
+      {!subscribedTier && paidTierCount > 1 && (
         <div className="relative">
           {isScrollable && (
             <ScrollButton
@@ -161,6 +181,8 @@ const Index: React.FC = () => {
 
           <div
             id="artist-support-tiers-scroll"
+            ref={tiersGridRef}
+            tabIndex={-1}
             className={
               "list-none gap-3 " +
               (isScrollable
