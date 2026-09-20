@@ -97,6 +97,13 @@ const routePatterns: Array<RoutePattern<any>> = [
         ? { type: "merch-index", artistSlug: segments[0] }
         : null,
   },
+  // /artistSlug/support/tierId (by id or slug)
+  {
+    pattern: (segments) =>
+      segments.length === 3 && segments[1] === "support"
+        ? { type: "support", artistSlug: segments[0], tierId: segments[2] }
+        : null,
+  },
   // /artistSlug/support
   {
     pattern: (segments) =>

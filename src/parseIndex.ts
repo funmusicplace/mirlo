@@ -19,6 +19,7 @@ import {
   fetchAlbumMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
+  fetchSubscriptionTierMetadata,
 } from "./parseIndex/metadata";
 import {
   matchRoute as matchRoutePattern,
@@ -43,6 +44,7 @@ import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import {
   finalCoversBucket,
+  finalImageBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
@@ -534,12 +536,12 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
   }
 };
 
-type SupportParams = { artistSlug: string };
+type SupportParams = { artistSlug: string; tierId?: string };
 const handleSupport: RouteHandler<SupportParams> = async ({
   $,
   client,
   avatarUrl,
-  params: { artistSlug },
+  params: { artistSlug, tierId },
   hydrations,
 }) => {
   const artist = await fetchArtistMetadata(artistSlug);
@@ -549,11 +551,49 @@ const handleSupport: RouteHandler<SupportParams> = async ({
 
   const artistName = artist.name ?? "A Mirlo Artist";
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
+  const supportUrl = `${client.applicationUrl}/${artist.urlSlug}/support`;
+  const supportDescription = `Support ${artistName} on Mirlo`;
+
+  const tier = tierId
+    ? await fetchSubscriptionTierMetadata(artistSlug, tierId)
+    : null;
+
+  if (tier) {
+    const tierImage = tier.images[0]?.image;
+    const imageString = tierImage?.url.find((u) => u.includes("x1200"));
+    const tierUrl = `${supportUrl}/${tier.urlSlug ?? tier.id}`;
+    const tierDescription = tier.description
+      ? `${supportDescription}\n${tier.description}`
+      : supportDescription;
+    const imageUrl = imageString
+      ? generateFullStaticImageUrl(imageString, finalImageBucket)
+      : avatarUrl;
+
+    const schema = buildArticleSchema({
+      title: tier.name,
+      description: tierDescription,
+      url: tierUrl,
+      imageUrl,
+      artistName,
+      releaseDate: tier.createdAt.toISOString().split("T")[0],
+    });
+
+    buildOpenGraphTags($, {
+      title: tier.name,
+      description: tierDescription,
+      url: tierUrl,
+      imageUrl,
+      rss,
+      artistName,
+      schemas: [schema],
+    });
+    return;
+  }
 
   buildOpenGraphTags($, {
     title: artistName,
-    description: `Support ${artistName} on Mirlo`,
-    url: `${client.applicationUrl}/${artist?.urlSlug}/support`,
+    description: supportDescription,
+    url: supportUrl,
     imageUrl: avatarUrl,
     rss,
   });
@@ -758,7 +798,10 @@ const dispatchRoute = async (
     case "support":
       await handleSupport({
         ...contextWithHydrations,
-        params: { artistSlug: routeParams.artistSlug },
+        params: {
+          artistSlug: routeParams.artistSlug,
+          tierId: routeParams.tierId,
+        },
       });
       break;
     case "artist-releases":
