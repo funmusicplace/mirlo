@@ -420,8 +420,11 @@ model ProfileSubscriptionTier {
   merchDiscountPercent   Int?                      @default(0)
   autoPurchaseAlbums     Boolean                   @default(false)
   collectAddress         Boolean?                  @default(false)
+  urlSlug                String?
   images                 SubscriptionTierImage[]
   releases               SubscriptionTierRelease[]
+
+  @@unique([profileId, urlSlug])
 }
 
 model SubscriptionTierImage {

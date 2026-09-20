@@ -9,6 +9,7 @@ import {
 } from "../../../../../../auth/passport";
 import { serializeProfileSubscriptionTier } from "../../../../../../serializers/profileSubscriptionTier";
 import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
+import { generateUniqueTierSlug } from "../../../../../../utils/subscriptionTier";
 
 type Params = {
   artistId: string;
@@ -97,6 +98,7 @@ export default function () {
       const subscription = await prisma.profileSubscriptionTier.create({
         data: {
           name,
+          urlSlug: await generateUniqueTierSlug(Number(artistId), name),
           profileId: Number(artistId),
           description,
           minAmount,

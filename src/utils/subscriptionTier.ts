@@ -2,6 +2,31 @@ import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
 
+import generateSlug from "./generateSlug";
+
+export const generateUniqueTierSlug = async (
+  profileId: number,
+  name: string,
+  excludeTierId?: number
+) => {
+  const base = generateSlug(name) || "tier";
+  let candidate = base;
+  for (let suffix = 2; ; suffix++) {
+    const taken = await prisma.profileSubscriptionTier.findFirst({
+      where: {
+        profileId,
+        urlSlug: candidate,
+        ...(excludeTierId ? { id: { not: excludeTierId } } : {}),
+      },
+      select: { id: true },
+    });
+    if (!taken) {
+      return candidate;
+    }
+    candidate = `${base}-${suffix}`;
+  }
+};
+
 export const hasSubscriptionTiers = async (profileId: number) => {
   const count = await prisma.profileSubscriptionTier.count({
     where: {
