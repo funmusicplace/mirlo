@@ -79,6 +79,7 @@ const SubscriptionTierReleases: React.FC<{
         <ReleaseCard
           trackGroup={release.trackGroup}
           showArtist
+          hidePurchase
           headingLevel="h4"
         />
       </SortableGridItem>
@@ -87,6 +88,7 @@ const SubscriptionTierReleases: React.FC<{
         key={release.id}
         trackGroup={release.trackGroup}
         showArtist
+        hidePurchase
         headingLevel="h4"
       />
     )

@@ -19,7 +19,8 @@ const PurchaseOrDownloadAlbum: React.FC<{
   collapse?: boolean;
   fixed?: boolean;
   flex?: boolean;
-}> = ({ trackGroup, track, collapse, fixed, flex }) => {
+  hidePurchase?: boolean;
+}> = ({ trackGroup, track, collapse, fixed, flex, hidePurchase }) => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [isOwned, setIsOwned] = React.useState(false);
@@ -91,13 +92,17 @@ const PurchaseOrDownloadAlbum: React.FC<{
     }
   }
 
-  const showPurchase = !isOwned;
+  const showPurchase = !isOwned && !hidePurchase;
 
   const showPreOrdered =
     isOwned && trackGroup.isPreorder && !(track?.isPreview ?? false);
 
   const showDownload =
     isOwned && (!trackGroup.isPreorder || (track?.isPreview ?? false));
+
+  if (!showPurchase && !showPreOrdered && !showDownload) {
+    return null;
+  }
 
   return (
     <>

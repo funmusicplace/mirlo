@@ -29,6 +29,7 @@ const cardRootClass = "flex min-w-0 w-full flex-col list-none mb-4";
  * @param trackGroup - The album or single to display.
  * @param showArtist - Whether to show the artist name below the title.
  * @param showWishlist - Whether to show the wishlist button for logged-in users.
+ * @param hidePurchase - Hide the purchase action; download stays for owners.
  * @param headingLevel - Semantic heading level for the title link.
  * @param as - Root element type; defaults to `li` for list layouts.
  */
@@ -36,12 +37,14 @@ function ReleaseCard({
   trackGroup,
   showArtist,
   showWishlist = true,
+  hidePurchase,
   headingLevel,
   as,
 }: React.PropsWithChildren<{
   trackGroup: TrackGroup;
   showArtist?: boolean;
   showWishlist?: boolean;
+  hidePurchase?: boolean;
   headingLevel: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   as?: React.ElementType;
 }>) {
@@ -156,7 +159,11 @@ function ReleaseCard({
           overlayActions={
             <>
               <PlayableCover.WideAction>
-                <PurchaseOrDownloadAlbum trackGroup={trackGroup} collapse />
+                <PurchaseOrDownloadAlbum
+                  trackGroup={trackGroup}
+                  hidePurchase={hidePurchase}
+                  collapse
+                />
               </PlayableCover.WideAction>
               {user && showWishlist && (
                 <PlayableCover.SquareAction>

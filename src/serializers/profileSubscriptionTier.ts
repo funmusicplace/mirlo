@@ -27,7 +27,8 @@ export const serializeProfileSubscriptionTier = <T extends object>(
     releases?: {
       trackGroup?: {
         profileId?: number;
-        profile?: { id?: number } | null;
+        profile?: { id?: number; user?: { currency?: string } | null } | null;
+        paymentToUser?: { currency?: string } | null;
         cover?: TrackGroupCover | null;
         isGettable?: boolean;
         _count?: { subscriptionTierReleases?: number };
@@ -48,6 +49,7 @@ export const serializeProfileSubscriptionTier = <T extends object>(
       const {
         profileId: tgPid,
         profile: tgProf,
+        paymentToUser,
         _count,
         userTrackGroupPurchases,
         ...tgRest
@@ -56,6 +58,7 @@ export const serializeProfileSubscriptionTier = <T extends object>(
         ...rel,
         trackGroup: {
           ...tgRest,
+          currency: paymentToUser?.currency ?? tgProf?.user?.currency ?? "usd",
           tracks: rel.trackGroup?.tracks?.map((track) => ({
             ...track,
             isPlayable: isTrackPlayableNested({

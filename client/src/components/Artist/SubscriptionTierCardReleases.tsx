@@ -53,6 +53,7 @@ const SubscriptionTierCardReleases: React.FC<{
               key={release.trackGroup.id}
               trackGroup={release.trackGroup}
               showArtist
+              hidePurchase
               headingLevel="h4"
             />
           ))}

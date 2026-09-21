@@ -288,6 +288,40 @@ describe("artists", () => {
       assert.deepEqual(await playabilityFor(accessToken), [true, true]);
     });
 
+    it("should return tier releases with the fields the purchase button needs", async () => {
+      const { user } = await createUser({
+        email: "purchasable@test.com",
+        currency: "eur",
+      });
+      const profile = await createProfile(user.id, {
+        name: "Purchasable Artist",
+        urlSlug: "purchasable-artist",
+      });
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const album = await createTrackGroup(profile.id, {
+        title: "For sale",
+        urlSlug: "for-sale",
+        minPrice: 700,
+      });
+      await prisma.subscriptionTierRelease.create({
+        data: { tierId: tier.id, trackGroupId: album.id },
+      });
+
+      const response = await requestApp
+        .get(`artists/${profile.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const [returnedTier] = response.body.result.subscriptionTiers;
+      const { trackGroup } = returnedTier.releases[0];
+      assert.equal(trackGroup.isPublic, true);
+      assert.equal(trackGroup.isPreorder, false);
+      assert.equal(trackGroup.minPrice, 700);
+      assert.equal(trackGroup.currency, "eur");
+      assert.ok(trackGroup.publishedAt);
+      assert.equal(trackGroup.paymentToUser, undefined);
+    });
+
     it("should return an empty user.artistLabels for a label with empty roster", async () => {
       const { user: labelUser } = await createUser({
         email: "label@test.com",
