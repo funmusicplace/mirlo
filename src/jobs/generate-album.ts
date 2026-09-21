@@ -25,16 +25,31 @@ import { convertAudioToFormat, resolveTrackArtistName } from "../utils/tracks";
 import { logger } from "./queue-worker";
 
 export type Format = {
-  format: "mp3" | "wav" | "flac" | "opus" | "libmp3lame";
-  audioCodec?: "flac" | "libmp3lame" | "opus" | "wav";
+  format: "mp3" | "wav" | "flac" | "opus" | "libmp3lame" | "ipod";
+  audioCodec?: "flac" | "libmp3lame" | "opus" | "wav" | "alac";
   audioBitrate?: "320" | "256" | "128";
+  fileExtension?: string;
 };
 
 const TEMP_LOCATION = process.env.TEMP_LOCATION;
 
 const parseFormat = (format: string): Format => {
   const split = format.split(".");
-  const form = split[split.length - 1] as "wav" | "mp3" | "flac" | "opus";
+  const form = split[split.length - 1] as
+    | "wav"
+    | "mp3"
+    | "flac"
+    | "opus"
+    | "alac";
+
+  if (form === "alac") {
+    return {
+      format: "ipod",
+      audioCodec: "alac",
+      fileExtension: "m4a",
+    };
+  }
+
   const codec =
     form === "mp3"
       ? "libmp3lame"

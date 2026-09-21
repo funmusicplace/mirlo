@@ -27,15 +27,20 @@ const baseMerch = (
 
 describe("utils/merch", () => {
   describe("resolveMerchOptionIds", () => {
+    const sizeOptions = [
+      { id: "opt-small", additionalPrice: 0, quantityRemaining: 5 },
+      { id: "opt-large", additionalPrice: 200, quantityRemaining: 2 },
+    ];
+
     const merch = baseMerch({
       optionTypes: [
-        {
-          id: "ot-1",
-          options: [
-            { id: "opt-small", additionalPrice: 0, quantityRemaining: 5 },
-            { id: "opt-large", additionalPrice: 200, quantityRemaining: 2 },
-          ],
-        },
+        { id: "ot-1", required: false, options: sizeOptions },
+      ] as any,
+    });
+
+    const merchWithRequiredOption = baseMerch({
+      optionTypes: [
+        { id: "ot-1", required: true, options: sizeOptions },
       ] as any,
     });
 
@@ -58,6 +63,36 @@ describe("utils/merch", () => {
         () => resolveMerchOptionIds(merch, ["not-a-real-option"]),
         (e: unknown) => e instanceof AppError && e.httpCode === 400
       );
+    });
+
+    it("throws 400 when a required option type wasn't answered", () => {
+      assert.throws(
+        () => resolveMerchOptionIds(merchWithRequiredOption, []),
+        (e: unknown) => e instanceof AppError && e.httpCode === 400
+      );
+    });
+
+    it("accepts a required option type that was answered", () => {
+      const result = resolveMerchOptionIds(merchWithRequiredOption, [
+        "opt-small",
+      ]);
+      assert.deepEqual(
+        result.options.map((o) => o.id),
+        ["opt-small"]
+      );
+    });
+
+    it("ignores the empty value an untouched optional select submits", () => {
+      const result = resolveMerchOptionIds(merch, [""]);
+      assert.deepEqual(result, { options: [], additionalPricePerUnit: 0 });
+    });
+
+    it("treats a required option type with nothing to pick as answered", () => {
+      const emptyRequired = baseMerch({
+        optionTypes: [{ id: "ot-1", required: true, options: [] }] as any,
+      });
+      const result = resolveMerchOptionIds(emptyRequired, []);
+      assert.deepEqual(result, { options: [], additionalPricePerUnit: 0 });
     });
   });
 

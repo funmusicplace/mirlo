@@ -8,6 +8,7 @@ import ArtistSlugInput from "components/common/SlugInput";
 import { Toggle } from "components/common/Toggle";
 import DeleteArtist from "components/ManageArtist/DeleteArtist";
 import ArtistFormColors from "components/ManageArtist/ManageArtistDetails/ArtistFormColors";
+import ArtistPaymentReceiver from "components/ManageArtist/ManageArtistDetails/ArtistPaymentReceiver";
 import CustomNamesForTabs from "components/ManageArtist/ManageArtistDetails/CustomNamesForTabs";
 import LabelConfirmation from "components/ManageArtist/ManageArtistDetails/LabelConfirmation";
 import LayoutSettings from "components/ManageArtist/ManageArtistDetails/LayoutSettings";
@@ -447,6 +448,12 @@ export const Index: React.FC = () => {
         </form>
       </FormProvider>
       {!artist.isLabelProfile && <LabelConfirmation />}
+
+      {!artist.isLabelProfile && (
+        <ArtistFormSection>
+          <ArtistPaymentReceiver artist={artist} />
+        </ArtistFormSection>
+      )}
 
       {!artist.isLabelProfile && <DeleteArtist />}
     </div>

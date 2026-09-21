@@ -206,6 +206,124 @@ describe("manage/posts/{postId}", () => {
       assert(response.statusCode === 200);
     });
 
+    // #1253: a post can be addressed to any set of the artist's tiers.
+    it("should PUT / set several subscription tiers on a post", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const profile = await createProfile(user.id, {
+        subscriptionTiers: {
+          create: [{ name: "a tier" }, { name: "another tier" }],
+        },
+      });
+
+      const post = await createPost(profile.id);
+      const tierIds = profile.subscriptionTiers.map((t) => t.id);
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({ postSubscriptionTierIds: tierIds })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const saved = await prisma.postSubscriptionTier.findMany({
+        where: { postId: post.id },
+      });
+      assert.deepEqual(
+        saved.map((t) => t.profileSubscriptionTierId).sort(),
+        [...tierIds].sort()
+      );
+    });
+
+    it("should PUT / clear the legacy minimum tier once explicit tiers are set", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const profile = await createProfile(user.id, {
+        subscriptionTiers: {
+          create: [{ name: "a tier" }, { name: "another tier" }],
+        },
+      });
+
+      const post = await createPost(profile.id, {
+        minimumSubscriptionTierId: profile.subscriptionTiers[0].id,
+      });
+
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({
+          postSubscriptionTierIds: [profile.subscriptionTiers[1].id],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const updated = await prisma.post.findFirstOrThrow({
+        where: { id: post.id },
+      });
+      assert.equal(updated.minimumSubscriptionTierId, null);
+    });
+
+    it("should PUT / remove tiers that are no longer selected", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const profile = await createProfile(user.id, {
+        subscriptionTiers: {
+          create: [{ name: "a tier" }, { name: "another tier" }],
+        },
+      });
+
+      const post = await createPost(profile.id);
+      const tierIds = profile.subscriptionTiers.map((t) => t.id);
+
+      await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({ postSubscriptionTierIds: tierIds })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({ postSubscriptionTierIds: [] })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      const saved = await prisma.postSubscriptionTier.findMany({
+        where: { postId: post.id },
+      });
+      assert.equal(saved.length, 0);
+    });
+
+    it("should PUT / reject a tier belonging to another artist", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+      });
+
+      const profile = await createProfile(user.id);
+      const otherProfile = await createProfile(otherUser.id, {
+        urlSlug: "other-artist",
+        subscriptionTiers: { create: { name: "their tier" } },
+      });
+
+      const post = await createPost(profile.id);
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({
+          postSubscriptionTierIds: [otherProfile.subscriptionTiers[0].id],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should PUT and update shouldSendEmail", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",

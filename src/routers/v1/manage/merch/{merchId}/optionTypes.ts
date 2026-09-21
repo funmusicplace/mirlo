@@ -22,6 +22,7 @@ export default function () {
     const { merchId } = req.params as unknown as Params;
     const optionTypes = req.body as unknown as {
       optionName: string;
+      required?: boolean;
       options: {
         name: string;
         additionalPrice: string;
@@ -42,6 +43,7 @@ export default function () {
             data: {
               merchId,
               optionName: oType.optionName,
+              required: oType.required !== false,
               options: {
                 createMany: {
                   data: oType.options.map((o) => ({

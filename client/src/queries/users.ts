@@ -238,6 +238,7 @@ export type UpdateArtistBody = Partial<
   >
 > & {
   displayLabelUserId?: number | null;
+  paymentToUserId?: number | null;
 };
 
 async function updateArtist({

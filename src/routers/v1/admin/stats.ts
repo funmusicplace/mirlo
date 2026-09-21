@@ -236,7 +236,7 @@ export default function () {
       {
         in: "query",
         name: "days",
-        type: "integer",
+        type: "string",
         required: false,
         description: `How far back to report on. Defaults to ${DEFAULT_DAYS}.`,
       },

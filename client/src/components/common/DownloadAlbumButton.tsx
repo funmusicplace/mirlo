@@ -11,10 +11,19 @@ import { FixedButton } from "./FixedButton";
 import LoadingSpinner from "./LoadingSpinner";
 import Modal from "./Modal";
 
-const formats = ["flac", "wav", "128.opus", "320.mp3", "256.mp3", "128.mp3"];
+const formats = [
+  "flac",
+  "alac",
+  "wav",
+  "128.opus",
+  "320.mp3",
+  "256.mp3",
+  "128.mp3",
+];
 const formatsDisplay: { [format: string]: string } = {
   "": "",
   flac: "FLAC",
+  alac: "ALAC (Apple Lossless)",
   wav: "WAV",
   "128.opus": "OPUS 128kbps",
   "320.mp3": "MP3 320kbps",

@@ -4,6 +4,8 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
+import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
+import { AppError } from "../../../../utils/error";
 import { zipExists } from "../../../../utils/minio";
 import {
   basicTrackGroupInclude,
@@ -17,51 +19,57 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: trackId }: { id?: string } = req.params;
-    const { format = "flac" } = req.query as {
+    const { format: requestedFormat = "flac" } = req.query as {
       format?: FormatOptions;
     };
 
-    const track = await prisma.track.findFirst({
-      where: {
-        id: Number(trackId),
-        NOT: {
-          audio: null,
+    try {
+      const format = assertSupportedDownloadFormat(requestedFormat);
+
+      const track = await prisma.track.findFirst({
+        where: {
+          id: Number(trackId),
+          NOT: {
+            audio: null,
+          },
         },
-      },
-      include: {
-        audio: { where: { uploadState: "SUCCESS" } },
-        trackGroup: basicTrackGroupInclude,
-      },
-    });
-
-    if (!track) {
-      res.status(404).json({
-        error: "No track found",
+        include: {
+          audio: { where: { uploadState: "SUCCESS" } },
+          trackGroup: basicTrackGroupInclude,
+        },
       });
-      return next();
-    }
 
-    logger.info(`trackId: ${trackId} Found a track`);
+      if (!track) {
+        throw new AppError({
+          httpCode: 404,
+          description: "No track found",
+        });
+      }
 
-    logger.info("checking if track is already zipped");
-    if (await zipExists("track", track.id, format)) {
-      logger.info("there is already a zip for this track");
+      logger.info(`trackId: ${trackId} Found a track`);
+
+      logger.info("checking if track is already zipped");
+      if (await zipExists("track", track.id, format)) {
+        logger.info("there is already a zip for this track");
+        return res.json({
+          message: "The album has already been generated",
+          result: true,
+        });
+      }
+      logger.info("folder for track doesn't exist yet, start generating it");
+      const jobId = await startGeneratingZip(
+        track.trackGroup,
+        [track],
+        format,
+        "track"
+      );
       return res.json({
-        message: "The album has already been generated",
-        result: true,
+        message: "We've started generating the folder",
+        result: { jobId },
       });
+    } catch (e) {
+      next(e);
     }
-    logger.info("folder for track doesn't exist yet, start generating it");
-    const jobId = await startGeneratingZip(
-      track.trackGroup,
-      [track],
-      format,
-      "track"
-    );
-    return res.json({
-      message: "We've started generating the folder",
-      result: { jobId },
-    });
   }
 
   GET.apiDoc = {

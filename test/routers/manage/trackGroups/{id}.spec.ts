@@ -60,6 +60,97 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(response.body.result.defaultIsPreview, true);
     });
 
+    it("should move a release to another artist on the same account", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const from = await createProfile(user.id, { urlSlug: "from-artist" });
+      const to = await createProfile(user.id, { urlSlug: "to-artist" });
+      const trackGroup = await createTrackGroup(from.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ moveToArtistId: to.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const moved = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(moved.profileId, to.id);
+    });
+
+    it("should give a moved release a free slug when the destination already uses it", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const from = await createProfile(user.id, { urlSlug: "from-artist" });
+      const to = await createProfile(user.id, { urlSlug: "to-artist" });
+      const trackGroup = await createTrackGroup(from.id, {
+        urlSlug: "a-title",
+      });
+      await createTrackGroup(to.id, { urlSlug: "a-title" });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ moveToArtistId: to.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const moved = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(moved.profileId, to.id);
+      assert.notEqual(moved.urlSlug, "a-title");
+    });
+
+    it("should refuse to move a release to someone else's artist", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+      });
+      const from = await createProfile(user.id, { urlSlug: "from-artist" });
+      const theirs = await createProfile(otherUser.id, {
+        urlSlug: "their-artist",
+      });
+      const trackGroup = await createTrackGroup(from.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ moveToArtistId: theirs.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+      const unmoved = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(unmoved.profileId, from.id);
+    });
+
+    it("should not move a release when only artistId is in the body", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const from = await createProfile(user.id, { urlSlug: "from-artist" });
+      const to = await createProfile(user.id, { urlSlug: "to-artist" });
+      const trackGroup = await createTrackGroup(from.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ artistId: to.id, title: "Still here" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const unmoved = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(unmoved.profileId, from.id);
+    });
+
     it("should reject a negative minPrice", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const profile = await createProfile(user.id);

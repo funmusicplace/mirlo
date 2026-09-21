@@ -156,8 +156,7 @@ describe("blog post subscriber visibility", () => {
         .type("This is exclusive content only for paying subscribers.");
 
       // The post is created with isPublic: false (subscribers-only is checked by default).
-      // Select the subscription tier to enable the Publish button.
-      cy.get("#select-minimum-tier").select("Supporter");
+      cy.get(`#subscription-tier-${tierId}`).check();
 
       // Publish the post — this saves title + content + tier then publishes.
       cy.contains("button", "Publish post").click();

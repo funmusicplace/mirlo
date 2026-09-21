@@ -592,6 +592,7 @@ model MerchShippingDestination {
 model MerchOptionType {
   id         String        @id @default(uuid()) @db.Uuid
   optionName String // eg. "shirt size"
+  required   Boolean       @default(true)
   merch      Merch         @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   merchId    String        @db.Uuid
   options    MerchOption[]
