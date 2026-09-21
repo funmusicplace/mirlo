@@ -1,12 +1,12 @@
 # Object storage & bucket structure
 
 Mirlo stores all media (audio, images, downloadable files) in S3-compatible
-object storage: MinIO in local development, Backblaze B2 (or any S3-compatible
-provider) in production.
+object storage: [Garage](https://garagehq.deuxfleurs.fr/) in local development
+and CI, Backblaze B2 (or any S3-compatible provider) in production.
 
 All storage access goes through [`src/utils/minio.ts`](https://github.com/funmusicplace/mirlo/blob/main/src/utils/minio.ts),
-which is a backend-agnostic abstraction over both MinIO and S3 clients (the
-filename is historical). Call sites express intent (`uploadIncomingAudio`,
+which is a backend-agnostic abstraction over both the MinIO SDK (used to talk
+to Garage) and the AWS S3 client (the filename is historical). Call sites express intent (`uploadIncomingAudio`,
 `getCoverBuffer`, `uploadZip`, …) and that module decides which bucket and
 object key to use.
 
@@ -90,7 +90,7 @@ One bucket per media type, with bare object keys. Most types have a separate
 
 ## How images are served
 
-In development (MinIO), the API proxies images at
+In development (Garage), the API proxies images at
 `/images/<bucket>/<key>` — note that in consolidated mode the key contains
 slashes (e.g. `/images/mirlo-images/trackgroup-covers/<id>-x600.webp`).
 
@@ -99,4 +99,53 @@ settings) or directly at the provider's public bucket URL. URL construction
 lives in `generateFullStaticImageUrl` in `src/utils/images.ts`, which derives
 the bucket and key prefix from the same routing table used for uploads.
 
-Buckets are created automatically on first use; MinIO needs no manual setup.
+Buckets are created automatically on first use. Garage additionally
+pre-creates `mirlo-audio`, `mirlo-images` and `mirlo-downloads` in
+`scripts/garage/init.sh` so they carry _global_ aliases — buckets created over
+the S3 API are only aliased locally to the key that made them, which works
+fine for the app but hides them from `garage bucket info <name>` and from S3
+browser UIs.
+
+## Inspecting storage in development
+
+Garage has no web console. The `garage` binary is the entrypoint of a
+distroless image, so run it with `docker exec` (there's no shell to `sh` into):
+
+```bash
+docker exec blackbird-garage /garage bucket list
+docker exec blackbird-garage /garage bucket info mirlo-images       # size, object count
+docker exec blackbird-garage /garage bucket inspect-object mirlo-images <key>
+docker exec blackbird-garage /garage status
+```
+
+That covers cluster and bucket state but cannot list objects — Garage's CLI is
+cluster administration, not an object browser. For browsing objects, point any
+S3 client at `localhost:9000` with the `LOCAL_S3_USER` / `LOCAL_S3_PASSWORD`
+from your `.env`:
+
+```bash
+export MC_HOST_dev="http://$LOCAL_S3_USER:$LOCAL_S3_PASSWORD@localhost:9000"
+mc ls --recursive dev/mirlo-images
+mc du dev/mirlo-audio
+mc stat dev/mirlo-images/trackgroup-covers/<id>-x600.webp
+```
+
+`rclone`, `aws s3` and `s5cmd` work the same way. If you want a visual
+browser, [garage-webui](https://github.com/khairul169/garage-webui) runs
+against the admin API on port 3903 and lists buckets and objects; it resolves
+buckets by global alias, which is why `init.sh` pre-creates them.
+
+## Provisioning (development / CI only)
+
+Garage serves nothing until a cluster layout is assigned, and its S3 keys are
+created through the admin API rather than read from environment variables. The
+`garage-init` compose service ([`scripts/garage/init.sh`](https://github.com/funmusicplace/mirlo/blob/main/scripts/garage/init.sh))
+does that on every `docker compose up` and is a no-op once provisioned: it
+assigns the layout, imports the key from `LOCAL_S3_USER` /
+`LOCAL_S3_PASSWORD`, and pre-creates the standard buckets. `api` and
+`background` wait on it via `service_completed_successfully`.
+
+Garage validates key shape: the access key must be `GK` followed by 24 hex
+characters and the secret exactly 64 hex characters. A malformed key fails at
+import with `Invalid key format`; a mismatched pair fails _every_ S3 request
+with `AuthorizationHeaderMalformed`.

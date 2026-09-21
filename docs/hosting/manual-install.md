@@ -29,7 +29,7 @@ git clone https://github.com/funmusicplace/mirlo.git .
 ## 3. Configure Environment Variables
 
 The easiest way is the setup script, which prompts for your instance's public
-URL and generates random credentials for PostgreSQL, Redis, MinIO and the JWT
+URL and generates random credentials for PostgreSQL, Redis, Garage and the JWT
 secrets. It writes both `.env` and `client/.env`, with `DATABASE_URL` derived
 from the same generated values so they can't disagree, and sets
 `NODE_ENV=production` for https domains (development otherwise — see the
@@ -46,9 +46,9 @@ MIRLO_DOMAIN=https://yourdomain.com bash scripts/generate-env.sh
 ```
 
 Afterwards, open `.env` to fill in anything optional (Stripe keys, S3
-credentials if you're not using MinIO, etc.).
+credentials if you're not using the bundled Garage store, etc.).
 
-> **Note**: the database, Redis and MinIO bake their credentials into their
+> **Note**: the database, Redis and Garage bake their credentials into their
 > data volumes on first start, so run this **before** the first
 > `docker compose up`. The script refuses to overwrite an existing `.env` for
 > the same reason.
@@ -88,14 +88,17 @@ POSTGRES_PASSWORD=secure-password
 REDIS_PASSWORD=secure-redis-password
 
 ###
-# Choose one: MinIO or an S3 Service. S3 Services are recommended in production. https://mirlo.space uses Backblaze as an S3 Service.
+# Choose one: the bundled Garage store or an S3 Service. S3 Services are recommended in production. https://mirlo.space uses Backblaze as an S3 Service.
 # Mirlo uses the S3 service whenever both S3 credentials below are set, and
-# MinIO otherwise (set STORAGE_BACKEND=minio|s3 to override explicitly).
+# Garage otherwise (set STORAGE_BACKEND=minio|s3 to override explicitly; the
+# "minio" value is historical and selects the bundled Garage store).
 ###
 
-# MinIO
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=secure-minio-password
+# Garage. The access key must be "GK" + 24 hex characters and the secret
+# exactly 64 hex characters — Garage rejects any other shape. Use
+# scripts/generate-env.sh to generate a valid pair.
+LOCAL_S3_USER=GK0e7a1c94b2df63805a7e4d12
+LOCAL_S3_PASSWORD=5f3b9d20c8a7e146b0d94f27a3c5e8b16d20f74a9c3e581bd67a0f4923ce8d15
 
 # Backblaze B2 / S3 / Hetzner Object Storage
 S3_ACCESS_KEY_ID=
@@ -154,7 +157,9 @@ Verify all services are running:
 docker compose ps
 ```
 
-You should see 6 services: api, background, pgsql, redis, minio, mailhog
+You should see 6 long-running services: api, background, pgsql, redis, garage
+(the object store) and mailhog, plus a `garage-init` container that provisions
+it and exits 0.
 
 MailHog is a dev-only mail catcher. Until you configure a real email provider
 (Mailgun, Postmark, or SendGrid) in the admin settings panel, password resets

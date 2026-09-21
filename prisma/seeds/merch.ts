@@ -55,7 +55,7 @@ export async function seedMerch() {
   if (minioClient) {
     await ensureBuckets(minioClient);
   } else {
-    console.log("MINIO_HOST not set — merch images will be skipped");
+    console.log("LOCAL_S3_HOST not set — merch images will be skipped");
   }
 
   for (const artist of artists) {
