@@ -73,6 +73,32 @@ describe("manage/artists/{artistId}/subscriptionTiers", () => {
       assert.equal(first.body.result.urlSlug, "inner-circle");
       assert.equal(second.body.result.urlSlug, "inner-circle-2");
     });
+
+    it("should not reuse the urlSlug of a deleted tier", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const create = () =>
+        requestApp
+          .post(`manage/artists/${artist.id}/subscriptionTiers`)
+          .send({ name: "Gold", minAmount: 500 })
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+
+      const first = await create();
+      await requestApp
+        .delete(
+          `manage/artists/${artist.id}/subscriptionTiers/${first.body.result.id}`
+        )
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      const second = await create();
+
+      assert.equal(second.statusCode, 200);
+      assert.equal(second.body.result.urlSlug, "gold-2");
+    });
   });
 });
 

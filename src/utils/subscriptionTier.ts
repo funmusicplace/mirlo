@@ -16,6 +16,7 @@ export const generateUniqueTierSlug = async (
       where: {
         profileId,
         urlSlug: candidate,
+        deletedAt: {},
         ...(excludeTierId ? { id: { not: excludeTierId } } : {}),
       },
       select: { id: true },
