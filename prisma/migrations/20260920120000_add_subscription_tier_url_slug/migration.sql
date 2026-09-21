@@ -1,21 +1,16 @@
 -- AlterTable
 ALTER TABLE "ProfileSubscriptionTier" ADD COLUMN     "urlSlug" TEXT;
 
-UPDATE "ProfileSubscriptionTier" AS t
-SET "urlSlug" = CASE
-  WHEN ranked.rn = 1 THEN ranked.base
-  ELSE ranked.base || '-' || ranked.rn
-END
-FROM (
-  SELECT
-    id,
-    base,
-    ROW_NUMBER() OVER (PARTITION BY "profileId", base ORDER BY "createdAt", id) AS rn
-  FROM (
+DO $$
+DECLARE
+  tier RECORD;
+  candidate TEXT;
+  suffix INTEGER;
+BEGIN
+  FOR tier IN
     SELECT
       id,
       "profileId",
-      "createdAt",
       COALESCE(
         NULLIF(
           regexp_replace(
@@ -27,9 +22,20 @@ FROM (
         'tier'
       ) AS base
     FROM "ProfileSubscriptionTier"
-  ) AS slugged
-) AS ranked
-WHERE t.id = ranked.id;
+    ORDER BY "profileId", "createdAt", id
+  LOOP
+    candidate := tier.base;
+    suffix := 2;
+    WHILE EXISTS (
+      SELECT 1 FROM "ProfileSubscriptionTier"
+      WHERE "profileId" = tier."profileId" AND "urlSlug" = candidate
+    ) LOOP
+      candidate := tier.base || '-' || suffix;
+      suffix := suffix + 1;
+    END LOOP;
+    UPDATE "ProfileSubscriptionTier" SET "urlSlug" = candidate WHERE id = tier.id;
+  END LOOP;
+END $$;
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ProfileSubscriptionTier_profileId_urlSlug_key" ON "ProfileSubscriptionTier"("profileId", "urlSlug");
