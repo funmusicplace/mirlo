@@ -93,8 +93,6 @@ const TrackGroupTitle: React.FC<{
   const playableTrackIds = trackGroup.tracks
     .filter((t) => t.isPlayable)
     .map((t) => t.id);
-  const subscribersOnlyListening =
-    !!trackGroup.isIncludedInSubscription && playableTrackIds.length === 0;
 
   return (
     <div
@@ -110,7 +108,7 @@ const TrackGroupTitle: React.FC<{
         }
       `}
     >
-      {trackGroup.tracks.length > 0 && !subscribersOnlyListening && (
+      {playableTrackIds.length > 0 && (
         <ClickToPlayTracks
           trackIds={playableTrackIds}
           className={css`

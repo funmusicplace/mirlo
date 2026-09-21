@@ -17,9 +17,7 @@ import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlb
 import RecommendedAlbums from "components/TrackGroup/RecommendedAlbums";
 import ReleaseDate from "components/TrackGroup/ReleaseDate";
 import ReleaseDownloadableContent from "components/TrackGroup/ReleaseDownloadableContent";
-import SubscriberExclusivePill, {
-  isSubscribersOnly,
-} from "components/TrackGroup/SubscriberExclusivePill";
+import SubscriberExclusivePill from "components/TrackGroup/SubscriberExclusivePill";
 import TrackGroupEmbed from "components/TrackGroup/TrackGroupEmbed";
 import TrackGroupMerch from "components/TrackGroup/TrackGroupMerch";
 import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
@@ -248,6 +246,9 @@ function Index() {
   const trackGroupAbout = trackGroup.about;
 
   const showAboutInsteadOfTrackListing = trackGroup.tracks.length === 0;
+  const playableTrackIds = trackGroup.tracks
+    .filter((t) => t.isPlayable)
+    .map((t) => t.id);
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -304,7 +305,7 @@ function Index() {
                   <TrackGroupEmbed trackGroup={trackGroup} />
                   <Wishlist trackGroup={trackGroup} inArtistPage />
                   <div className="grow-0 max-md:grow min-w-0 flex justify-end items-center self-stretch">
-                    {isSubscribersOnly(trackGroup) && (
+                    {trackGroup.isSubscriberExclusive && (
                       <SubscriberExclusivePill artist={artist} />
                     )}
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
@@ -321,14 +322,14 @@ function Index() {
                     <TrackGroupMerch merch={trackGroup.merch} />
                   </div>
                 )}
-                <SmallScreenPlayWrapper>
-                  <ClickToPlayTracks
-                    trackIds={trackGroup.tracks
-                      .filter((t) => t.isPlayable)
-                      .map((t) => t.id)}
-                    playLabel="album"
-                  />
-                </SmallScreenPlayWrapper>
+                {playableTrackIds.length > 0 && (
+                  <SmallScreenPlayWrapper>
+                    <ClickToPlayTracks
+                      trackIds={playableTrackIds}
+                      playLabel="album"
+                    />
+                  </SmallScreenPlayWrapper>
+                )}
               </ImageAndDetailsWrapper>
               {trackGroup.tracks.length > 0 && (
                 <TrackListingWrapper>

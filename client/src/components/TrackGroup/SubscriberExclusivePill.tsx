@@ -4,14 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistTiersUrl } from "utils/artist";
 
-export const isSubscribersOnly = (trackGroup: TrackGroup) => {
-  const hasPlayableTrack = trackGroup.tracks.some((track) => track.isPlayable);
-  return (
-    !!trackGroup.isSubscriberExclusive ||
-    (!!trackGroup.isIncludedInSubscription && !hasPlayableTrack)
-  );
-};
-
 const SubscriberExclusivePill: React.FC<{
   artist: Artist;
   className?: string;
