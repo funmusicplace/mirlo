@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import logger from "../../logger";
 import { subscribeUserToArtist } from "../../utils/artist";
+import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getSiteSettings } from "../../utils/settings";
 
@@ -21,7 +22,9 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     promoCode,
     emailInvited,
     inviteToken,
+    cfTurnstile,
   } = req.body;
+  const connectingIP = req.body["CF-Connecting-IP"];
 
   if (!email || !password) {
     next(
@@ -32,6 +35,13 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     );
   }
   try {
+    await checkCloudFlareTurnstile({
+      token: cfTurnstile,
+      ip: connectingIP,
+      missingTokenMessage: "Sounds like a robot",
+      failureMessage: "Sounds like a robot",
+    });
+
     const settings = await getSiteSettings();
     let hasInvite = null;
     let canCreateArtists = true;

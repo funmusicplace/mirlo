@@ -1,6 +1,14 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { useQuery } from "@tanstack/react-query";
+import checkmark from "animations/lotties/checkmark.json";
+import Box from "components/common/Box";
+import Button from "components/common/Button";
+import Checkbox from "components/common/FormCheckbox";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import WidthContainer from "components/common/WidthContainer";
 import { querySetting } from "queries/settings";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -10,16 +18,7 @@ import api, { APIResponseError } from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
-import Box from "components/common/Box";
-import Button from "components/common/Button";
-import Checkbox from "components/common/FormCheckbox";
-import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
-import WidthContainer from "components/common/WidthContainer";
-
 const Lottie = React.lazy(() => import("lottie-react"));
-
-import checkmark from "animations/lotties/checkmark.json";
 
 type SignupInputs = {
   email: string;
@@ -110,6 +109,7 @@ function Index() {
   const accountType = search.get("accountType");
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
+  const cfTurnstile = React.useRef<string | undefined>(undefined);
   const methods = useForm<SignupInputs>({
     defaultValues: {
       email: search.get("email") ?? "",
@@ -157,6 +157,7 @@ function Index() {
             ...data,
             receiveMailingList: !!data.receiveMailingList,
             client: import.meta.env.VITE_CLIENT_DOMAIN,
+            cfTurnstile: cfTurnstile.current,
           },
           {
             credentials: undefined,
@@ -450,6 +451,14 @@ function Index() {
                 cookie: <Link to="/pages/cookie-policy"></Link>,
               }}
             />{" "}
+          </div>
+          <div className="flex justify-center mb-4">
+            <Turnstile
+              siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
+              onSuccess={(token) => {
+                cfTurnstile.current = token;
+              }}
+            />
           </div>
           <Button
             className={css`
