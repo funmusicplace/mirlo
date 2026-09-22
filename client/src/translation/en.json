@@ -624,6 +624,7 @@
     "whyAreYouFlaggingIt": "Why are you flagging it?",
     "copyrightViolation": "Copyright violation",
     "inappropriateContent": "Inappropriate content",
+    "spamContactMessage": "Spam contact message",
     "howContact": "How can we contact you?",
     "submit": "Report",
     "reportContentDescription": "Is there a problem with this content? Please let us know.",
@@ -1663,7 +1664,9 @@
     "unresolveFlag": "Reopen",
     "resolvedBy": "Resolved by {{name}}",
     "updateSuccess": "Updated",
-    "updateError": "Something went wrong while updating"
+    "updateError": "Something went wrong while updating",
+    "reportedAccount": "Reported account",
+    "reportedAccountTrustLevel": "Trust level: {{trustLevel}}"
   },
   "trackDetails": {
     "track": "Track:",

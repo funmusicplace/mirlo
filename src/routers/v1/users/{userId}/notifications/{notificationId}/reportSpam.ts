@@ -68,6 +68,15 @@ export default function () {
           where: { id: notification.relatedUserId },
           data: { trustLevel: nextTrustLevel },
         }),
+        prisma.contentFlag.create({
+          data: {
+            source: "USER_REPORT",
+            reason: "spamContactMessage",
+            description: notification.content,
+            reporterEmail: loggedInUser.email,
+            reportedUserId: notification.relatedUserId,
+          },
+        }),
       ]);
     }
 

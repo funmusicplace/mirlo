@@ -120,7 +120,8 @@ model User {
   transactions                        UserTransaction[]
   trackGroupDownloads                 TrackGroupDownload[]
   clients                             Client[]
-  resolvedContentFlags                ContentFlag[]
+  resolvedContentFlags                ContentFlag[]                    @relation("resolvedContentFlags")
+  reportedContentFlags                ContentFlag[]                    @relation("reportedContentFlags")
 }
 
 model Invite {
@@ -821,7 +822,9 @@ model ContentFlag {
   trackGroup       TrackGroup?       @relation(fields: [trackGroupId], references: [id])
   resolvedAt       DateTime?
   resolvedByUserId Int?
-  resolvedByUser   User?             @relation(fields: [resolvedByUserId], references: [id])
+  resolvedByUser   User?             @relation("resolvedContentFlags", fields: [resolvedByUserId], references: [id])
+  reportedUserId   Int?
+  reportedUser     User?             @relation("reportedContentFlags", fields: [reportedUserId], references: [id])
 }
 
 enum ContentFlagSource {

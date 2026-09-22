@@ -211,6 +211,13 @@ export interface AdminContentFlag {
   resolvedAt: string | null;
   resolvedByUserId: number | null;
   resolvedByUser: { id: number; name: string | null; email: string } | null;
+  reportedUserId: number | null;
+  reportedUser: {
+    id: number;
+    name: string | null;
+    email: string;
+    trustLevel: number | null;
+  } | null;
 }
 
 export type AdminContentFlagsResolvedFilter = "unresolved" | "resolved" | "all";
