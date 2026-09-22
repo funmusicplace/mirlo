@@ -8,18 +8,15 @@ import { useTranslation } from "react-i18next";
 import { FaChevronLeft, FaChevronRight, FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import {
+  getArtistAllTiersUrl,
   getArtistManageTiersUrl,
   getArtistTierUrl,
-  getArtistTiersUrl,
 } from "utils/artist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../constants";
 
-import ArtistRouterLink, {
-  ArtistButton,
-  ArtistButtonLink,
-} from "./ArtistButtons";
+import ArtistRouterLink, { ArtistButtonLink } from "./ArtistButtons";
 import ArtistSupportBox from "./ArtistSupportBox";
 import SubscriptionTierActions from "./SubscriptionTierActions";
 import SubscriptionTierReleases from "./SubscriptionTierReleases";
@@ -95,8 +92,7 @@ const Details = styled.div`
 const SubscriptionTierPage: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
   artist: Artist;
-  onSeeAllTiers?: () => void;
-}> = ({ subscriptionTier, artist, onSeeAllTiers }) => {
+}> = ({ subscriptionTier, artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.medium}px)`);
@@ -151,22 +147,12 @@ const SubscriptionTierPage: React.FC<{
           )}
         </div>
       </div>
-      {onSeeAllTiers ? (
-        <ArtistButton
-          variant="link"
-          onClick={onSeeAllTiers}
-          className="self-center"
-        >
-          {t("seeAllTiers")}
-        </ArtistButton>
-      ) : (
-        <ArtistRouterLink
-          to={getArtistTiersUrl(artist)}
-          className="text-center"
-        >
-          {t("seeAllTiers")}
-        </ArtistRouterLink>
-      )}
+      <ArtistRouterLink
+        to={getArtistAllTiersUrl(artist)}
+        className="text-center"
+      >
+        {t("seeAllTiers")}
+      </ArtistRouterLink>
     </nav>
   );
 

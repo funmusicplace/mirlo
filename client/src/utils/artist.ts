@@ -64,6 +64,15 @@ export const getArtistTiersUrl = (artist: {
   return `/${getArtistUrlReference(artist)}/support`;
 };
 
+export const TIERS_VIEW_ALL_SEARCH = "?view=all";
+
+export const getArtistAllTiersUrl = (artist: {
+  urlSlug?: string;
+  id?: number;
+}) => {
+  return `${getArtistTiersUrl(artist)}${TIERS_VIEW_ALL_SEARCH}`;
+};
+
 export const getArtistTierUrl = (
   artist: { urlSlug?: string; id?: number },
   tier: { id: number; urlSlug?: string | null }

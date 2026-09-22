@@ -32,9 +32,9 @@ const Index: React.FC = () => {
     React.useState<ArtistUserSubscription>();
   const [userSubscriptionTier, setUserSubscriptionTier] =
     React.useState<ArtistSubscriptionTier>();
-  const [showAllTiers, setShowAllTiers] = React.useState(false);
-  const tiersGridRef = React.useRef<HTMLDivElement>(null);
   const { search } = useLocation();
+  const showAllTiers = new URLSearchParams(search).get("view") === "all";
+  const tiersGridRef = React.useRef<HTMLDivElement>(null);
   const userId = user?.id;
   const artistId = artist?.id;
   const userSubscriptions = user?.artistUserSubscriptions;
@@ -160,9 +160,6 @@ const Index: React.FC = () => {
         <SubscriptionTierPage
           subscriptionTier={subscribedTier}
           artist={artist}
-          onSeeAllTiers={
-            paidTierCount > 1 ? () => setShowAllTiers(true) : undefined
-          }
         />
       )}
       {!subscribedTier && paidTierCount === 1 && (
