@@ -115,6 +115,7 @@ const SubscriptionTierPage: React.FC<{
       : null;
   const hasSiblings = paidTiers.length > 1;
   const hasReleases = hasTierReleases(subscriptionTier);
+  const hasPerks = hasTierPerks(subscriptionTier);
   const isOwner = !!user && user.id === artist.userId;
   const currentSubscription = getUserSubscriptionToTier(user, subscriptionTier);
   const canChangePaymentMethod =
@@ -245,27 +246,31 @@ const SubscriptionTierPage: React.FC<{
             <MarkdownContent content={subscriptionTier.description} />
           </Description>
         )}
-        {hasTierPerks(subscriptionTier) && (
-          <>
-            <hr className="border-(--mi-darken-x-background-color)" />
-            <SubscriptionTierRewards
-              subscriptionTier={subscriptionTier}
-              artistName={artist.name}
-              includeReleases={false}
-            />
-          </>
-        )}
       </section>
-      {hasReleases && (
+      {(hasReleases || hasPerks) && (
         <section className="flex flex-col gap-4 p-5 bg-(--mi-tint-color) border border-(--mi-tint-x-color)">
-          <h3 className="text-sm! font-semibold! uppercase tracking-[0.08em] opacity-70">
-            {t("includedReleases")}
-          </h3>
-          <SubscriptionTierReleases
-            tier={subscriptionTier}
-            artist={artist}
-            maxItems={INCLUDED_RELEASES_MAX_ROWS * INCLUDED_RELEASES_PER_ROW}
-          />
+          <div className="flex flex-col gap-2">
+            {hasReleases && (
+              <h3 className="text-base! font-semibold! uppercase tracking-[0.08em] opacity-70">
+                {t("includedReleases")}
+              </h3>
+            )}
+            {hasPerks && (
+              <SubscriptionTierRewards
+                subscriptionTier={subscriptionTier}
+                artistName={artist.name}
+                includeReleases={false}
+                className="text-[calc(var(--mi-font-size-small)*var(--page-scale,1))] font-bold list-disc pl-5"
+              />
+            )}
+          </div>
+          {hasReleases && (
+            <SubscriptionTierReleases
+              tier={subscriptionTier}
+              artist={artist}
+              maxItems={INCLUDED_RELEASES_MAX_ROWS * INCLUDED_RELEASES_PER_ROW}
+            />
+          )}
         </section>
       )}
       {siblingsNav}
