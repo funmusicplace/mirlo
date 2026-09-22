@@ -9,4 +9,7 @@ block content
           br
         span= line
     p You can reply directly to this email to respond to #{sender.name}.
-    p This message is also visible in your Mirlo notifications.
+    p
+      | This message is also visible in your&nbsp;
+      a(href!=`${client}/profile/notifications`) Mirlo notifications
+      | , where you can report it as spam if it's unwanted.
