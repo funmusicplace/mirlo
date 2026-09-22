@@ -22,6 +22,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
         name: "Test Artist",
         userId: 10,
         user: { currency: "usd" },
+        subscriptionTiers: [],
       },
       refetch: vi.fn(),
     }),
