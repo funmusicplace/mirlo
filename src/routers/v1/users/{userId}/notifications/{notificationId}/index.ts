@@ -1,9 +1,9 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../../auth/passport";
-import { AppError } from "../../../../../utils/error";
+import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../../../auth/passport";
+import { AppError } from "../../../../../../utils/error";
 
 type Params = {
   userId: string;
@@ -21,24 +21,35 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
 
-    if (Number(userId) === Number(loggedInUser.id)) {
-      const notification = await prisma.notification.update({
-        where: {
-          id: notificationId,
-        },
-        data: {
-          isRead: true,
-        },
-      });
-      return res.status(200).json({
-        result: notification,
-      });
-    } else {
+    if (Number(userId) !== Number(loggedInUser.id)) {
       throw new AppError({
         httpCode: 401,
         description: "Invalid access",
       });
     }
+
+    const notification = await prisma.notification.findFirst({
+      where: {
+        id: notificationId,
+        userId: Number(userId),
+      },
+    });
+
+    if (!notification) {
+      throw new AppError({
+        httpCode: 404,
+        description: "Notification not found",
+      });
+    }
+
+    const updated = await prisma.notification.update({
+      where: { id: notificationId },
+      data: { isRead: true },
+    });
+
+    return res.status(200).json({
+      result: updated,
+    });
   }
 
   PUT.apiDoc = {

@@ -1,7 +1,12 @@
+import Button from "components/common/Button";
 import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
+import { reportNotificationAsSpam } from "queries/notifications";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 
 const ArtistContactMessage: React.FC<{
@@ -11,12 +16,36 @@ const ArtistContactMessage: React.FC<{
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "notifications",
   });
+  const { user } = useAuthContext();
+  const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
+  const [isReported, setIsReported] = React.useState(
+    !!notification.spamReportedAt
+  );
+  const [isReporting, setIsReporting] = React.useState(false);
+
   if (!notification.relatedUser) {
     return null;
   }
 
   const senderName =
     notification.relatedUser?.name ?? notification.relatedUser?.email;
+
+  const handleReportSpam = async () => {
+    if (!user?.id || isReporting || isReported) {
+      return;
+    }
+    try {
+      setIsReporting(true);
+      await reportNotificationAsSpam(user.id, notification.id);
+      setIsReported(true);
+      snackbar(t("reportSpamSuccess"), { type: "success" });
+    } catch (e) {
+      errorHandler(e);
+    } finally {
+      setIsReporting(false);
+    }
+  };
 
   return (
     <div
@@ -69,8 +98,19 @@ const ArtistContactMessage: React.FC<{
             {notification.content}
           </p>
         )}
-        <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
+        <div className="text-xs text-(--mi-light-foreground-color) mt-0.5 flex items-center gap-2">
           {formatRelativeTime({ date: notification.createdAt, i18n })}
+          {!compact && (
+            <Button
+              variant="link"
+              size="compact"
+              disabled={isReporting || isReported}
+              isLoading={isReporting}
+              onClick={handleReportSpam}
+            >
+              {isReported ? t("reportedSpam") : t("reportSpam")}
+            </Button>
+          )}
         </div>
       </div>
     </div>

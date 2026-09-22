@@ -200,6 +200,7 @@ model ActivityPubProfileFollowers {
 model Notification {
   id               String                     @id @default(uuid())
   isRead           Boolean                    @default(false)
+  spamReportedAt   DateTime?
   userId           Int
   user             User                       @relation(fields: [userId], references: [id], name: "receivingUser")
   notificationType NotificationType
