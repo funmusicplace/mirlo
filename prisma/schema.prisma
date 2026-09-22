@@ -322,6 +322,7 @@ model Profile {
   location                            String?
   purchaseEntireCatalogMinPrice       Int                                   @default(0) // in cents
   purchaseEntireCatalogPercentage     Int? // 0-100; when set, the floor is this % of the summed minPrice
+  purchaseEntireCatalogEnabled        Boolean                               @default(true) // when false, hide the buy-the-catalogue button
   maxFreePlays                        Int?
   merchStoreURL                       String?
   activityPub                         Boolean                               @default(false)
@@ -811,6 +812,7 @@ model ContentFlag {
   reporterEmail    String?
   imageModel       String?
   imageId          String?
+  externalId       String?
   score            Float?
   profileId        Int?
   profile          Profile?          @relation(fields: [profileId], references: [id])

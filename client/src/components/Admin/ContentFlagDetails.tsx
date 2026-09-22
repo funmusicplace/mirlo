@@ -32,6 +32,11 @@ const ContentFlagDetails: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
             score: flag.score?.toFixed(2),
           })}
         </span>
+        {flag.externalId && (
+          <small>
+            {t("sightEngineReference", { externalId: flag.externalId })}
+          </small>
+        )}
       </div>
     );
   }

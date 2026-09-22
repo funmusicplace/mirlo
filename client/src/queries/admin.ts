@@ -191,6 +191,7 @@ export interface AdminContentFlag {
   reporterEmail: string | null;
   imageModel: string | null;
   imageId: string | null;
+  externalId: string | null;
   score: number | null;
   artistId: number | null;
   artist: {
