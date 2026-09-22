@@ -9,6 +9,7 @@ import {
 import { serializeProfileSubscriptionTier } from "../../../../../../../serializers/profileSubscriptionTier";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import { getSiteSettings } from "../../../../../../../utils/settings";
+import { generateUniqueTierSlug } from "../../../../../../../utils/subscriptionTier";
 
 const normalizeDiscountPercent = (value: unknown): number | undefined => {
   if (value === undefined || value === null || value === "") {
@@ -97,10 +98,23 @@ export default function () {
         return next();
       }
 
+      const nameChanged =
+        typeof req.body.name === "string" &&
+        req.body.name !== subscriptionTier.name;
+      const urlSlug =
+        nameChanged || !subscriptionTier.urlSlug
+          ? await generateUniqueTierSlug(
+              subscriptionTier.profileId,
+              req.body.name ?? subscriptionTier.name,
+              subscriptionTier.id
+            )
+          : undefined;
+
       const updatedTier = await prisma.profileSubscriptionTier.update({
         where: { id: Number(subscriptionTierId) },
         data: {
           name: req.body.name,
+          urlSlug,
           description: req.body.description,
           allowVariable: req.body.allowVariable,
           interval: req.body.interval ?? "MONTH",

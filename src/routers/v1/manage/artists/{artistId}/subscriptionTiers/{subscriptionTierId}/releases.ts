@@ -57,12 +57,14 @@ export default function () {
             include: {
               cover: true,
               profile: true,
+              _count: { select: { subscriptionTierReleases: true } },
             },
           },
         },
-        orderBy: {
-          createdAt: "asc",
-        },
+        orderBy: [
+          { order: { sort: "asc", nulls: "last" } },
+          { trackGroup: { releaseDate: "desc" } },
+        ],
       });
 
       res.status(200).json({
@@ -156,16 +158,23 @@ export default function () {
       }
 
       const release = await prisma.$transaction(async (tx) => {
+        await tx.subscriptionTierRelease.updateMany({
+          where: { tierId: Number(subscriptionTierId) },
+          data: { order: { increment: 1 } },
+        });
+
         const release = await tx.subscriptionTierRelease.create({
           data: {
             tierId: Number(subscriptionTierId),
             trackGroupId: Number(trackGroupId),
+            order: 1,
           },
           include: {
             trackGroup: {
               include: {
                 cover: true,
                 profile: true,
+                _count: { select: { subscriptionTierReleases: true } },
               },
             },
           },

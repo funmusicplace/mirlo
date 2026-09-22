@@ -1,5 +1,6 @@
 import assert from "node:assert";
 
+import prisma from "@mirlo/prisma";
 import * as cheerio from "cheerio";
 import * as dotenv from "dotenv";
 import { describe, it, beforeEach } from "mocha";
@@ -21,6 +22,7 @@ import {
   createPost,
   createMerch,
   createSiteSettings,
+  createTier,
 } from "./utils";
 
 describe("analyzePathAndGenerateHTML", () => {
@@ -280,6 +282,113 @@ describe("analyzePathAndGenerateHTML", () => {
       assert(ogTitle?.includes("My Artist"));
       const ogDesc = $('meta[property="og:description"]').attr("content");
       assert(ogDesc?.includes("Support My Artist"));
+    });
+
+    it("should handle artist/support/{slug} route with tier name, description and image", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      const tier = await createTier(artist.id, {
+        name: "Gold Tier",
+        minAmount: 500,
+      });
+      const image = await prisma.image.create({
+        data: { url: [], dimensions: "banner" },
+      });
+      await prisma.image.update({
+        where: { id: image.id },
+        data: {
+          url: [2500, 1250, 1200, 1024, 625].map(
+            (width) => `${image.id}-x${width}`
+          ),
+        },
+      });
+      await prisma.profileSubscriptionTier.update({
+        where: { id: tier.id },
+        data: {
+          urlSlug: "gold-tier",
+          description: "Early access to everything",
+          images: { create: { imageId: image.id } },
+        },
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/support/Gold-Tier", $);
+
+      assert.equal($('meta[property="og:title"]').attr("content"), "Gold Tier");
+      const ogDesc = $('meta[property="og:description"]').attr("content");
+      assert(ogDesc?.includes("Support My Artist"));
+      assert(ogDesc?.includes("Early access to everything"));
+      assert(
+        $('link[rel="canonical"]')
+          .attr("href")
+          ?.endsWith("/test-artist/support/gold-tier")
+      );
+      assert(
+        $('meta[property="og:image"]')
+          .attr("content")
+          ?.includes(`${image.id}-x1200`)
+      );
+      const schema = JSON.parse(
+        $('script[type="application/ld+json"]').html()!
+      );
+      assert.equal(schema.headline, "Gold Tier");
+      assert.equal(schema.author.name, "My Artist");
+
+      const script = $("#__MIRLO_ARTIST__");
+      assert.equal(script.attr("data-object-id"), "test-artist");
+      const data = JSON.parse(script.html()!);
+      assert.equal(data.artist.subscriptionTiers[0].urlSlug, "gold-tier");
+    });
+
+    it("should handle artist/support/{id} route by tier id", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      const tier = await createTier(artist.id, {
+        name: "Silver Tier",
+        minAmount: 300,
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML(`/test-artist/support/${tier.id}`, $);
+
+      assert.equal(
+        $('meta[property="og:title"]').attr("content"),
+        "Silver Tier"
+      );
+      assert(
+        $('link[rel="canonical"]')
+          .attr("href")
+          ?.endsWith(`/test-artist/support/${tier.id}`)
+      );
+    });
+
+    it("should fall back to the support page tags for an unknown tier", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      await createArtist(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/support/nope", $);
+
+      assert.equal($('meta[property="og:title"]').attr("content"), "My Artist");
+      assert.equal(
+        $('meta[property="og:description"]').attr("content"),
+        "Support My Artist on Mirlo"
+      );
+      assert(
+        $('link[rel="canonical"]')
+          .attr("href")
+          ?.endsWith("/test-artist/support")
+      );
+      assert.equal($("#__MIRLO_ARTIST__").length, 1);
     });
 
     it("should handle artist/release/{slug} route with album title", async () => {

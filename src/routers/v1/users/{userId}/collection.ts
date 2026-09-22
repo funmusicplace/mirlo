@@ -43,6 +43,7 @@ export default function () {
             include: {
               profile: true,
               cover: true,
+              _count: { select: { subscriptionTierReleases: true } },
               tracks: {
                 orderBy: {
                   order: "asc",
@@ -76,6 +77,7 @@ export default function () {
                 include: {
                   profile: true,
                   cover: true,
+                  _count: { select: { subscriptionTierReleases: true } },
                   tracks: {
                     orderBy: {
                       order: "asc",

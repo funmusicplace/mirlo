@@ -159,7 +159,6 @@ const UploadGeneralImage: React.FC<{
         {size && existingImage?.sizes?.[size] && (
           <div
             className={css`
-              height: ${height};
               span {
                 opacity: 0;
                 color: rgba(0, 0, 0, 0);
@@ -179,9 +178,9 @@ const UploadGeneralImage: React.FC<{
               src={existingImage.sizes[size] + `?updatedAt=${Date.now()}`}
               alt={imageAlt}
               rounded={rounded}
+              naturalRatio
               className={css`
                 width: ${width};
-                height: ${height};
               `}
             />
           </div>

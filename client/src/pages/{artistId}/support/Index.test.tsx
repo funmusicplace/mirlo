@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -59,6 +59,19 @@ vi.mock("components/Artist/ArtistSupportBox", () => ({
   ),
 }));
 
+vi.mock("components/Artist/SubscriptionTierPage", () => ({
+  default: ({ subscriptionTier, onSeeAllTiers }: any) => (
+    <div data-testid="tier-page">
+      {subscriptionTier.name}
+      {onSeeAllTiers && (
+        <button type="button" onClick={onSeeAllTiers}>
+          seeAllTiers
+        </button>
+      )}
+    </div>
+  ),
+}));
+
 vi.mock("components/Artist/ScrollButton", () => ({
   default: () => null,
 }));
@@ -110,7 +123,7 @@ describe("Support Index", () => {
     expect(screen.getAllByTestId("support-box")).toHaveLength(2);
   });
 
-  test("shows the active-subscription message alongside all tier boxes, not instead of them", () => {
+  test("shows the subscribed tier page instead of the tier boxes, and the boxes on demand", () => {
     artistState.artist = makeArtist([supporterTier, otherTier]);
     authState.user = {
       id: 20,
@@ -127,8 +140,31 @@ describe("Support Index", () => {
     expect(screen.getByTestId("manage-subscription")).toHaveTextContent(
       "Supporter"
     );
+    expect(screen.getByTestId("tier-page")).toHaveTextContent("Supporter");
+    expect(screen.queryByTestId("support-box")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "seeAllTiers" }));
+
+    expect(screen.queryByTestId("tier-page")).not.toBeInTheDocument();
     const boxes = screen.getAllByTestId("support-box");
-    expect(boxes).toHaveLength(2);
     expect(boxes.map((b) => b.textContent)).toEqual(["Supporter", "Superfan"]);
+  });
+
+  test("keeps the tier boxes for the artist owner even when subscribed", () => {
+    artistState.artist = makeArtist([supporterTier, otherTier]);
+    authState.user = {
+      id: 99,
+      artistUserSubscriptions: [
+        {
+          artistSubscriptionTierId: supporterTier.id,
+          artistSubscriptionTier: supporterTier,
+        },
+      ],
+    };
+
+    render(<Index />);
+
+    expect(screen.queryByTestId("tier-page")).not.toBeInTheDocument();
+    expect(screen.getAllByTestId("support-box")).toHaveLength(2);
   });
 });

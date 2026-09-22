@@ -2,14 +2,17 @@ import { Image, TrackGroupCover } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../utils/artist";
 import { finalCoversBucket, finalImageBucket } from "../utils/minio";
+import { isTrackPlayableNested } from "../utils/trackPlayability";
 
+import { isSubscriberExclusive } from "./trackGroup";
 import { omitApPrivateKey, Serialized } from "./utils";
 
 /**
  * Enrich a subscription tier and emit artist* wire shape.
  */
 export const serializeProfileSubscriptionTier = <T extends object>(
-  tier: T
+  tier: T,
+  options?: { loggedInUserId?: number }
 ): Serialized<T> => {
   const {
     profileId,
@@ -24,8 +27,13 @@ export const serializeProfileSubscriptionTier = <T extends object>(
     releases?: {
       trackGroup?: {
         profileId?: number;
-        profile?: { id?: number } | null;
+        profile?: { id?: number; user?: { currency?: string } | null } | null;
+        paymentToUser?: { currency?: string } | null;
         cover?: TrackGroupCover | null;
+        isGettable?: boolean;
+        _count?: { subscriptionTierReleases?: number };
+        tracks?: { id: number; order?: number | null; isPreview?: boolean }[];
+        userTrackGroupPurchases?: { userId: number }[];
       } | null;
     }[];
   };
@@ -41,12 +49,26 @@ export const serializeProfileSubscriptionTier = <T extends object>(
       const {
         profileId: tgPid,
         profile: tgProf,
+        paymentToUser,
+        _count,
+        userTrackGroupPurchases,
         ...tgRest
       } = rel.trackGroup ?? {};
       return {
         ...rel,
         trackGroup: {
           ...tgRest,
+          currency: paymentToUser?.currency ?? tgProf?.user?.currency ?? "usd",
+          tracks: rel.trackGroup?.tracks?.map((track) => ({
+            ...track,
+            isPlayable: isTrackPlayableNested({
+              isPreview: track.isPreview,
+              trackGroupPurchases: userTrackGroupPurchases,
+              userId: options?.loggedInUserId,
+            }),
+          })),
+          isIncludedInSubscription: true,
+          isSubscriberExclusive: isSubscriberExclusive(rel.trackGroup ?? {}),
           artistId: tgPid ?? tgProf?.id,
           artist:
             tgProf && typeof tgProf === "object"

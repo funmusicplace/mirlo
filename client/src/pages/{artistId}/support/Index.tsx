@@ -4,6 +4,7 @@ import ArtistManageSubscription from "components/Artist/ArtistManageSubscription
 import { ArtistOutletContext } from "components/Artist/artistOutletContext";
 import ArtistSupportBox from "components/Artist/ArtistSupportBox";
 import ScrollButton from "components/Artist/ScrollButton";
+import SubscriptionTierPage from "components/Artist/SubscriptionTierPage";
 import Box from "components/common/Box";
 import TipArtist from "components/common/TipArtist";
 import { queryUserStripeStatus } from "queries";
@@ -13,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useOutletContext } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { getPaidTierCount, isTipOnlyArtist } from "utils/artist";
+import { isTipOnlyArtist } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
 const Index: React.FC = () => {
@@ -31,6 +32,8 @@ const Index: React.FC = () => {
     React.useState<ArtistUserSubscription>();
   const [userSubscriptionTier, setUserSubscriptionTier] =
     React.useState<ArtistSubscriptionTier>();
+  const [showAllTiers, setShowAllTiers] = React.useState(false);
+  const tiersGridRef = React.useRef<HTMLDivElement>(null);
   const { search } = useLocation();
   const userId = user?.id;
   const artistId = artist?.id;
@@ -64,6 +67,12 @@ const Index: React.FC = () => {
   React.useEffect(() => {
     checkForSubscription();
   }, [checkForSubscription]);
+
+  React.useEffect(() => {
+    if (showAllTiers) {
+      tiersGridRef.current?.focus();
+    }
+  }, [showAllTiers]);
 
   const queryClient = useQueryClient();
   React.useEffect(() => {
@@ -112,9 +121,12 @@ const Index: React.FC = () => {
     return <Box />;
   }
 
-  const paidTierCount = getPaidTierCount(artist);
-  const onlyOneTier = paidTierCount === 1;
-  const moreThanThreeTiers = paidTierCount > 3;
+  const paidTiers = artist.subscriptionTiers.filter((p) => !p.isDefaultTier);
+  const paidTierCount = paidTiers.length;
+  const isScrollable = paidTierCount > 3;
+  const isOwner = artist.userId === user?.id;
+  const subscribedTier =
+    !isOwner && !showAllTiers ? userSubscriptionTier : undefined;
 
   return (
     <>
@@ -144,23 +156,36 @@ const Index: React.FC = () => {
           />
         </div>
       )}
-      <div className="relative">
-        {moreThanThreeTiers && (
-          <ScrollButton
-            direction="left"
-            scrollElementId="artist-support-tiers-scroll"
-            ariaLabel={t("scrollLeft")}
-            pageBackground={pageBackground}
-          />
-        )}
+      {subscribedTier && (
+        <SubscriptionTierPage
+          subscriptionTier={subscribedTier}
+          artist={artist}
+          onSeeAllTiers={
+            paidTierCount > 1 ? () => setShowAllTiers(true) : undefined
+          }
+        />
+      )}
+      {!subscribedTier && paidTierCount === 1 && (
+        <SubscriptionTierPage subscriptionTier={paidTiers[0]} artist={artist} />
+      )}
+      {!subscribedTier && paidTierCount > 1 && (
+        <div className="relative">
+          {isScrollable && (
+            <ScrollButton
+              direction="left"
+              scrollElementId="artist-support-tiers-scroll"
+              ariaLabel={t("scrollLeft")}
+              pageBackground={pageBackground}
+            />
+          )}
 
-        <div
-          id="artist-support-tiers-scroll"
-          className={
-            "list-none gap-3 " +
-            (onlyOneTier
-              ? `flex justify-center`
-              : moreThanThreeTiers
+          <div
+            id="artist-support-tiers-scroll"
+            ref={tiersGridRef}
+            tabIndex={-1}
+            className={
+              "list-none gap-3 " +
+              (isScrollable
                 ? `grid grid-cols-1 md:grid-cols-none md:grid-flow-col md:auto-cols-[30%] md:snap-x md:snap-mandatory md:overflow-x-scroll ${css`
                     &::-webkit-scrollbar {
                       display: none;
@@ -168,29 +193,25 @@ const Index: React.FC = () => {
                     scrollbar-width: none;
                   `}`
                 : `grid grid-cols-1 md:grid-cols-3`)
-          }
-        >
-          {artist.subscriptionTiers
-            ?.filter((p) => !p.isDefaultTier)
-            .map((p) => (
-              <div
-                key={p.id}
-                className={`snap-center${onlyOneTier ? " w-full max-w-sm" : ""}`}
-              >
+            }
+          >
+            {paidTiers.map((p) => (
+              <div key={p.id} className="snap-center">
                 <ArtistSupportBox subscriptionTier={p} />
               </div>
             ))}
-        </div>
+          </div>
 
-        {moreThanThreeTiers && (
-          <ScrollButton
-            direction="right"
-            scrollElementId="artist-support-tiers-scroll"
-            ariaLabel={t("scrollRight")}
-            pageBackground={pageBackground}
-          />
-        )}
-      </div>
+          {isScrollable && (
+            <ScrollButton
+              direction="right"
+              scrollElementId="artist-support-tiers-scroll"
+              ariaLabel={t("scrollRight")}
+              pageBackground={pageBackground}
+            />
+          )}
+        </div>
+      )}
     </>
   );
 };

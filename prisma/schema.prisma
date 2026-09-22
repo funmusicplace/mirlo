@@ -420,8 +420,11 @@ model ProfileSubscriptionTier {
   merchDiscountPercent   Int?                      @default(0)
   autoPurchaseAlbums     Boolean                   @default(false)
   collectAddress         Boolean?                  @default(false)
+  urlSlug                String?
   images                 SubscriptionTierImage[]
   releases               SubscriptionTierRelease[]
+
+  @@unique([profileId, urlSlug])
 }
 
 model SubscriptionTierImage {
@@ -438,6 +441,7 @@ model SubscriptionTierRelease {
   tier         ProfileSubscriptionTier @relation(fields: [tierId], references: [id])
   trackGroupId Int
   trackGroup   TrackGroup              @relation(fields: [trackGroupId], references: [id])
+  order        Int?
   createdAt    DateTime                @default(now())
 
   @@unique([tierId, trackGroupId])

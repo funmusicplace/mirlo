@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import { coverSizeMax } from "pages/{artistId}/release/{trackGroupId}/Index";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -11,7 +12,6 @@ import { between, bp } from "../../constants";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
 import ArtistByLine, { FromAlbum } from "./ArtistByLine";
-import { coverSizeMax } from "pages/{artistId}/release/{trackGroupId}/Index";
 
 export const ItemViewTitle: React.FC<{
   title: string;
@@ -90,6 +90,10 @@ const TrackGroupTitle: React.FC<{
     return <FullPageLoadingSpinner />;
   }
 
+  const playableTrackIds = trackGroup.tracks
+    .filter((t) => t.isPlayable)
+    .map((t) => t.id);
+
   return (
     <div
       className={css`
@@ -104,11 +108,9 @@ const TrackGroupTitle: React.FC<{
         }
       `}
     >
-      {trackGroup.tracks.length > 0 && (
+      {playableTrackIds.length > 0 && (
         <ClickToPlayTracks
-          trackIds={trackGroup.tracks
-            .filter((t) => t.isPlayable)
-            .map((t) => t.id)}
+          trackIds={playableTrackIds}
           className={css`
             width: 64px !important;
             flex-shrink: 0;

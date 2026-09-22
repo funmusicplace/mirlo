@@ -76,6 +76,32 @@ export async function fetchPostMetadata(
   });
 }
 
+export async function fetchSubscriptionTierMetadata(
+  artistSlug: string,
+  tierId: string
+) {
+  const profile = { urlSlug: artistSlug, ...whereForVisibleProfile() };
+  const numericId = Number(tierId);
+
+  return await prisma.profileSubscriptionTier.findFirst({
+    where: {
+      deletedAt: null,
+      isDefaultTier: false,
+      profile,
+      OR: [
+        { urlSlug: { equals: tierId, mode: "insensitive" as const } },
+        ...(Number.isInteger(numericId) ? [{ id: numericId }] : []),
+      ],
+    },
+    include: {
+      images: {
+        where: { image: { deletedAt: null } },
+        include: { image: true },
+      },
+    },
+  });
+}
+
 export async function fetchMerchMetadata(
   artistSlug: string,
   merchLookup: { id: string } | { slug: string }

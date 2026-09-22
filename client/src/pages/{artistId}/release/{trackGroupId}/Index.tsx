@@ -1,6 +1,8 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
+import Box, { ArtistBox } from "components/common/Box";
+import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import MarkdownContent from "components/common/MarkdownContent";
@@ -8,16 +10,6 @@ import { MetaCard } from "components/common/MetaCard";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import WidthContainer from "components/common/WidthContainer";
-import { queryArtist, queryTrackGroup } from "queries";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-import { isTrackGroupPublished } from "utils/artist";
-import { useMatchMedia } from "utils/useMatchMedia";
-
-import { between, bp } from "../../../../constants";
-import Box, { ArtistBox } from "components/common/Box";
-import ClickToPlayTracks from "components/common/ClickToPlayTracks";
-
 import FlagContent from "components/TrackGroup/FlagContent";
 import Fundraiser from "components/TrackGroup/Fundraiser";
 import TrackGroupTitle from "components/TrackGroup/ItemViewTitle";
@@ -25,10 +17,18 @@ import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlb
 import RecommendedAlbums from "components/TrackGroup/RecommendedAlbums";
 import ReleaseDate from "components/TrackGroup/ReleaseDate";
 import ReleaseDownloadableContent from "components/TrackGroup/ReleaseDownloadableContent";
+import SubscriberExclusivePill from "components/TrackGroup/SubscriberExclusivePill";
 import TrackGroupEmbed from "components/TrackGroup/TrackGroupEmbed";
 import TrackGroupMerch from "components/TrackGroup/TrackGroupMerch";
 import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 import Wishlist from "components/TrackGroup/Wishlist";
+import { queryArtist, queryTrackGroup } from "queries";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { isTrackGroupPublished } from "utils/artist";
+import { useMatchMedia } from "utils/useMatchMedia";
+
+import { between, bp } from "../../../../constants";
 
 export const coverSizeMin = "280px";
 export const coverSizeMax = "470px";
@@ -246,6 +246,9 @@ function Index() {
   const trackGroupAbout = trackGroup.about;
 
   const showAboutInsteadOfTrackListing = trackGroup.tracks.length === 0;
+  const playableTrackIds = trackGroup.tracks
+    .filter((t) => t.isPlayable)
+    .map((t) => t.id);
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -301,7 +304,10 @@ function Index() {
                   )}
                   <TrackGroupEmbed trackGroup={trackGroup} />
                   <Wishlist trackGroup={trackGroup} inArtistPage />
-                  <div className="grow-0 max-md:grow min-w-0 flex justify-end">
+                  <div className="grow-0 max-md:grow min-w-0 flex justify-end items-center self-stretch">
+                    {trackGroup.isSubscriberExclusive && (
+                      <SubscriberExclusivePill artist={artist} />
+                    )}
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                   </div>
                 </UnderneathImage>
@@ -316,14 +322,14 @@ function Index() {
                     <TrackGroupMerch merch={trackGroup.merch} />
                   </div>
                 )}
-                <SmallScreenPlayWrapper>
-                  <ClickToPlayTracks
-                    trackIds={trackGroup.tracks
-                      .filter((t) => t.isPlayable)
-                      .map((t) => t.id)}
-                    playLabel="album"
-                  />
-                </SmallScreenPlayWrapper>
+                {playableTrackIds.length > 0 && (
+                  <SmallScreenPlayWrapper>
+                    <ClickToPlayTracks
+                      trackIds={playableTrackIds}
+                      playLabel="album"
+                    />
+                  </SmallScreenPlayWrapper>
+                )}
               </ImageAndDetailsWrapper>
               {trackGroup.tracks.length > 0 && (
                 <TrackListingWrapper>

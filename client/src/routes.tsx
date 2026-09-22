@@ -1010,12 +1010,26 @@ const routes: RouteObject[] = [
               },
               {
                 path: "support",
-                handle: { title: "artistSupport" },
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/{artistId}/support/Index");
-                  return { Component };
-                },
+                children: [
+                  {
+                    path: ":tierId",
+                    handle: { title: "artistSupportTier" },
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/{artistId}/support/{tierId}/Index");
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: "",
+                    handle: { title: "artistSupport" },
+                    async lazy() {
+                      const { default: Component } =
+                        await import("pages/{artistId}/support/Index");
+                      return { Component };
+                    },
+                  },
+                ],
               },
             ],
           },

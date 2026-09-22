@@ -562,10 +562,12 @@ export const sendSubscriptionCancellationEmail = async (
 export const singleInclude = (queryOptions?: {
   includeDefaultTier?: boolean;
   includePrivate?: boolean;
+  loggedInUserId?: number;
 }): Prisma.ProfileInclude<DefaultArgs> & {
   merch: { include: { images: boolean } };
 } => {
-  const { includeDefaultTier, includePrivate } = queryOptions ?? {};
+  const { includeDefaultTier, includePrivate, loggedInUserId } =
+    queryOptions ?? {};
   return {
     trackGroups: {
       where: {
@@ -592,6 +594,7 @@ export const singleInclude = (queryOptions?: {
         paymentToUser: {
           select: { currency: true },
         },
+        _count: { select: { subscriptionTierReleases: true } },
       },
     },
     tourDates: true,
@@ -644,6 +647,10 @@ export const singleInclude = (queryOptions?: {
               deletedAt: null,
             },
           },
+          orderBy: [
+            { order: { sort: "asc", nulls: "last" } },
+            { trackGroup: { releaseDate: "desc" } },
+          ],
           select: {
             trackGroup: {
               select: {
@@ -651,11 +658,35 @@ export const singleInclude = (queryOptions?: {
                 id: true,
                 title: true,
                 urlSlug: true,
+                isGettable: true,
+                isPublic: true,
+                isPreorder: true,
+                publishedAt: true,
+                releaseDate: true,
+                minPrice: true,
+                fundraiserId: true,
+                fundraiser: true,
+                paymentToUser: { select: { currency: true } },
+                _count: { select: { subscriptionTierReleases: true } },
+                tracks: {
+                  where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
+                  orderBy: { order: "asc" },
+                  select: { id: true, order: true, isPreview: true },
+                },
+                ...(loggedInUserId
+                  ? {
+                      userTrackGroupPurchases: {
+                        where: { userId: loggedInUserId },
+                        select: { userId: true },
+                      },
+                    }
+                  : {}),
                 profile: {
                   select: {
                     name: true,
                     id: true,
                     urlSlug: true,
+                    user: { select: { currency: true } },
                   },
                 },
               },

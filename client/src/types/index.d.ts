@@ -108,6 +108,8 @@ interface TrackGroup {
   about?: string;
   currency: string;
   isGettable: boolean;
+  isIncludedInSubscription?: boolean;
+  isSubscriberExclusive?: boolean;
   credits?: string;
   artistId?: number;
   artist: Artist;
@@ -394,6 +396,7 @@ interface ArtistSubscriptionTier {
   artist: Artist;
   minAmount?: number;
   name: string;
+  urlSlug?: string | null;
   description: string;
   interval: "MONTH" | "YEAR";
   isDefaultTier: boolean;
@@ -418,6 +421,7 @@ interface SubscriptionTierRelease {
   tierId: number;
   trackGroupId: number;
   trackGroup: TrackGroup & { artist: Artist };
+  order?: number | null;
   createdAt: string;
 }
 

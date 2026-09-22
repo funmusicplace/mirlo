@@ -1,25 +1,24 @@
+import styled from "@emotion/styled";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import FormCheckbox from "components/common/FormCheckbox";
+import FormComponent from "components/common/FormComponent";
+import FormError from "components/common/FormError";
+import { SelectEl } from "components/common/Select";
+import { pick } from "lodash";
 import React from "react";
-
 import { FormProvider, useForm } from "react-hook-form";
-import Button from "../common/Button";
+import { useTranslation } from "react-i18next";
+import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+
+import api from "../../services/api";
 import { InputEl } from "../common/Input";
 import TextArea from "../common/TextArea";
-import FormComponent from "components/common/FormComponent";
-import { useSnackbar } from "state/SnackbarContext";
-import { pick } from "lodash";
-import api from "../../services/api";
-import useErrorHandler from "services/useErrorHandler";
-import { useTranslation } from "react-i18next";
-import { css } from "@emotion/css";
-import FormCheckbox from "components/common/FormCheckbox";
-import FormError from "components/common/FormError";
-import { useAuthContext } from "state/AuthContext";
-import { SelectEl } from "components/common/Select";
-import PaymentSlider from "./ManageTrackGroup/AlbumFormComponents/PaymentSlider";
-import styled from "@emotion/styled";
-import UploadGeneralImage from "./UploadGeneralImage";
+
 import ManageSubscriptionTierReleases from "./ManageSubscriptionTierReleases";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import PaymentSlider from "./ManageTrackGroup/AlbumFormComponents/PaymentSlider";
+import UploadGeneralImage from "./UploadGeneralImage";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -155,7 +154,7 @@ const SubscriptionForm: React.FC<{
           imageTypeDescription={t("tierImageDescription")}
           height="200px"
           image={existing?.images?.[0]?.image}
-          width="100%"
+          width="470px"
           size={625}
           dimensions="banner"
           maxDimensions="700x400"

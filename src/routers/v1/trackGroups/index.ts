@@ -255,6 +255,7 @@ export default function () {
             },
           },
           cover: true,
+          _count: { select: { subscriptionTierReleases: true } },
         },
       });
 

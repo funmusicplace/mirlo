@@ -49,6 +49,7 @@ export default function () {
           include: singleInclude({
             includeDefaultTier,
             includePrivate: canManage,
+            loggedInUserId: loggedInUser?.id,
           }) as any,
         });
 

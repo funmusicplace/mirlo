@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 const Pill = styled.span<{
   isHoverable?: boolean;
-  variant?: "warning" | "tint";
+  variant?: "warning" | "tint" | "cover";
 }>`
   display: inline-flex;
   background-color: var(--mi-lighten-x-background-color);
@@ -25,6 +25,12 @@ const Pill = styled.span<{
       case "tint":
         return `
             background-color: var(--mi-button-tint-color);
+          `;
+      case "cover":
+        return `
+            background-color: color-mix(in srgb, var(--mi-black) 80%, transparent);
+            color: var(--mi-white);
+            border-color: color-mix(in srgb, var(--mi-white) 25%, transparent);
           `;
       case "warning":
         return `
@@ -51,7 +57,13 @@ const Pill = styled.span<{
     background-color: var(--mi-button-tint-x-color);
   }
   `
-        : `
+        : props.variant === "cover"
+          ? `
+  &:hover {
+    background-color: color-mix(in srgb, var(--mi-black) 60%, transparent);
+  }
+  `
+          : `
   &:hover {
     background-color: var(--mi-darken-background-color);
   }

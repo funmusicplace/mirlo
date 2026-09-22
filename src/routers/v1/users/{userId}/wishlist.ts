@@ -1,8 +1,9 @@
+import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
+
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import prisma from "@mirlo/prisma";
+import { userAuthenticated } from "../../../../auth/passport";
 import { serializeTrackGroupPurchase } from "../../../../serializers/trackGroup";
 
 type Params = {
@@ -34,6 +35,7 @@ export default function () {
             include: {
               profile: true,
               cover: true,
+              _count: { select: { subscriptionTierReleases: true } },
               tracks: {
                 orderBy: {
                   order: "asc",

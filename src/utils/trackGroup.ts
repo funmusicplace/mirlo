@@ -291,6 +291,7 @@ export const trackGroupSingleInclude = (options: {
         downloadableContent: true,
       },
     },
+    _count: { select: { subscriptionTierReleases: true } },
     profile: {
       include: {
         user: {

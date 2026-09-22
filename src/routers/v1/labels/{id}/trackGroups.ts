@@ -2,11 +2,11 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import {
   findArtistIdForURLSlug,
   whereForAllArtistsThisLabelCanEdit,
 } from "../../../../utils/artist";
-import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -62,6 +62,7 @@ export default function () {
         include: {
           cover: true,
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
+          _count: { select: { subscriptionTierReleases: true } },
           profile: {
             select: {
               name: true,
