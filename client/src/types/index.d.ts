@@ -294,6 +294,7 @@ interface Artist {
   linksJson?: Link[];
   purchaseEntireCatalogMinPrice?: number;
   purchaseEntireCatalogPercentage?: number | null;
+  purchaseEntireCatalogEnabled?: boolean;
   posts: Post[];
   tourDates?: {
     date: string;

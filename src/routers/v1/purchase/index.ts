@@ -537,6 +537,14 @@ export default function () {
             });
           }
 
+          if (!artist.purchaseEntireCatalogEnabled) {
+            throw new AppError({
+              httpCode: 400,
+              description:
+                "This artist isn't selling their catalogue as a bundle",
+            });
+          }
+
           if (loggedInUser) {
             await subscribeUserToArtist(artist, loggedInUser);
           }

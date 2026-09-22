@@ -11,7 +11,7 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
-type PricingMode = "fixed" | "percentage";
+type PricingMode = "fixed" | "percentage" | "off";
 
 const SetEntireCataloguePrice: React.FC = () => {
   const { t } = useTranslation("translation", {
@@ -31,7 +31,11 @@ const SetEntireCataloguePrice: React.FC = () => {
   React.useEffect(() => {
     if (artist) {
       setMode(
-        artist?.purchaseEntireCatalogPercentage != null ? "percentage" : "fixed"
+        artist?.purchaseEntireCatalogEnabled === false
+          ? "off"
+          : artist?.purchaseEntireCatalogPercentage != null
+            ? "percentage"
+            : "fixed"
       );
       setPrice(
         artist?.purchaseEntireCatalogMinPrice
@@ -49,12 +53,18 @@ const SetEntireCataloguePrice: React.FC = () => {
   const handleOk = React.useCallback(async () => {
     if (!artist) return;
     try {
-      if (mode === "percentage") {
+      if (mode === "off") {
         await api.put(`manage/artists/${artist?.id}`, {
+          purchaseEntireCatalogEnabled: false,
+        });
+      } else if (mode === "percentage") {
+        await api.put(`manage/artists/${artist?.id}`, {
+          purchaseEntireCatalogEnabled: true,
           purchaseEntireCatalogPercentage: Number(percentage),
         });
       } else {
         await api.put(`manage/artists/${artist?.id}`, {
+          purchaseEntireCatalogEnabled: true,
           purchaseEntireCatalogMinPrice: Number(price) * 100,
           purchaseEntireCatalogPercentage: null,
         });
@@ -106,10 +116,12 @@ const SetEntireCataloguePrice: React.FC = () => {
                   value: "percentage",
                   label: t("cataloguePricingModePercentage"),
                 },
+                { value: "off", label: t("cataloguePricingModeOff") },
               ]}
             />
           </FormComponent>
           <div className="mb-4 flex items-end gap-4 [&_input]:!mb-0 [&>div]:mb-0">
+            {mode === "off" && <p>{t("cataloguePricingOffDescription")}</p>}
             {mode === "fixed" && (
               <FormComponent>
                 <div className="flex items-center gap-1">
