@@ -2,26 +2,27 @@ import styled from "@emotion/styled";
 import MarkdownContent from "components/common/MarkdownContent";
 import Money from "components/common/Money";
 import PlatformPercent from "components/common/PlatformPercent";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronLeft, FaChevronRight, FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import {
+  getArtistAllTiersUrl,
   getArtistManageTiersUrl,
   getArtistTierUrl,
-  getArtistTiersUrl,
 } from "utils/artist";
+import useArtistQuery from "utils/useArtistQuery";
 import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../constants";
 
-import ArtistRouterLink, {
-  ArtistButton,
-  ArtistButtonLink,
-} from "./ArtistButtons";
+import ArtistRouterLink, { ArtistButtonLink } from "./ArtistButtons";
 import ArtistSupportBox from "./ArtistSupportBox";
-import SubscriptionTierActions from "./SubscriptionTierActions";
+import ChangePaymentMethodButton from "./ChangePaymentMethodButton";
+import { isSubscriptionCancelled } from "./SubscriptionCancelledNotice";
+import SubscriptionTierActions, {
+  getUserSubscriptionToTier,
+} from "./SubscriptionTierActions";
 import SubscriptionTierReleases from "./SubscriptionTierReleases";
 import SubscriptionTierRewards, {
   hasTierPerks,
@@ -41,8 +42,8 @@ const Layout = styled.article`
 
 const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: stretch;
+  justify-content: center;
   gap: 1.5rem;
   flex-wrap: nowrap;
 
@@ -82,7 +83,6 @@ const Description = styled.div<{ twoColumns: boolean }>`
 const Details = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
   flex: 0 1 40%;
   min-width: 0;
   gap: 1rem;
@@ -95,10 +95,10 @@ const Details = styled.div`
 const SubscriptionTierPage: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
   artist: Artist;
-  onSeeAllTiers?: () => void;
-}> = ({ subscriptionTier, artist, onSeeAllTiers }) => {
+}> = ({ subscriptionTier, artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
+  const { refetch } = useArtistQuery();
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.medium}px)`);
 
   const paidTiers = artist.subscriptionTiers.filter(
@@ -114,9 +114,15 @@ const SubscriptionTierPage: React.FC<{
       : null;
   const hasSiblings = paidTiers.length > 1;
   const hasReleases = hasTierReleases(subscriptionTier);
+  const hasPerks = hasTierPerks(subscriptionTier);
+  const isOwner = !!user && user.id === artist.userId;
+  const currentSubscription = getUserSubscriptionToTier(user, subscriptionTier);
+  const canChangePaymentMethod =
+    !!currentSubscription && !isSubscriptionCancelled(currentSubscription);
 
   const currency = artist.user?.currency ?? "usd";
   const image = subscriptionTier.images?.[0]?.image;
+  const hasImage = !!image?.sizes?.[1250];
   const amount = subscriptionTier.minAmount
     ? subscriptionTier.minAmount / 100
     : 0;
@@ -151,22 +157,12 @@ const SubscriptionTierPage: React.FC<{
           )}
         </div>
       </div>
-      {onSeeAllTiers ? (
-        <ArtistButton
-          variant="link"
-          onClick={onSeeAllTiers}
-          className="self-center"
-        >
-          {t("seeAllTiers")}
-        </ArtistButton>
-      ) : (
-        <ArtistRouterLink
-          to={getArtistTiersUrl(artist)}
-          className="text-center"
-        >
-          {t("seeAllTiers")}
-        </ArtistRouterLink>
-      )}
+      <ArtistRouterLink
+        to={getArtistAllTiersUrl(artist)}
+        className="text-center"
+      >
+        {t("seeAllTiers")}
+      </ArtistRouterLink>
     </nav>
   );
 
@@ -185,40 +181,61 @@ const SubscriptionTierPage: React.FC<{
   return (
     <Layout>
       <HeaderRow>
-        {image?.sizes?.[1250] && <HeaderImage src={image.sizes[1250]} alt="" />}
+        {hasImage && <HeaderImage src={image.sizes[1250]} alt="" />}
         <Details>
-          <SpaceBetweenDiv className="items-start gap-3">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-2xl md:text-3xl font-bold!">
-                {subscriptionTier.name}
-              </h2>
-              <div className="flex items-center gap-2 text-lg">
-                <span>
-                  <Money amount={amount} currency={currency} /> /{" "}
-                  {t(
-                    subscriptionTier.interval === "MONTH" ? "monthly" : "yearly"
-                  )}
-                </span>
-                <PlatformPercent
-                  percent={subscriptionTier.platformPercent}
-                  chosenPrice={amount}
-                  artistName={artist.name}
-                  currency={currency}
-                />
-              </div>
+          {!isOwner && canChangePaymentMethod && (
+            <div className="flex justify-end">
+              <ChangePaymentMethodButton
+                subscriptionId={currentSubscription.id}
+                onUpdated={() => refetch()}
+              />
             </div>
-            {user && user.id === artist.userId && (
-              <ArtistButtonLink
-                to={`${getArtistManageTiersUrl(artist.id)}/${subscriptionTier.id}`}
-                size="compact"
-                variant="dashed"
-                startIcon={<FaPen />}
-              >
-                {t("editTier")}
-              </ArtistButtonLink>
-            )}
-          </SpaceBetweenDiv>
-          <SubscriptionTierActions subscriptionTier={subscriptionTier} />
+          )}
+          <div
+            className={
+              hasImage
+                ? "flex flex-col flex-1 justify-center gap-4"
+                : "flex flex-col items-center gap-4 text-center"
+            }
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-2xl md:text-3xl font-bold!">
+                  {subscriptionTier.name}
+                </h2>
+                <div className="flex items-center gap-2 text-lg">
+                  <span>
+                    <Money amount={amount} currency={currency} /> /{" "}
+                    {t(
+                      subscriptionTier.interval === "MONTH"
+                        ? "monthly"
+                        : "yearly"
+                    )}
+                  </span>
+                  <PlatformPercent
+                    percent={subscriptionTier.platformPercent}
+                    chosenPrice={amount}
+                    artistName={artist.name}
+                    currency={currency}
+                  />
+                </div>
+              </div>
+              {isOwner && (
+                <ArtistButtonLink
+                  to={`${getArtistManageTiersUrl(artist.id)}/${subscriptionTier.id}`}
+                  size="compact"
+                  variant="dashed"
+                  startIcon={<FaPen />}
+                >
+                  {t("editTier")}
+                </ArtistButtonLink>
+              )}
+            </div>
+            <SubscriptionTierActions
+              subscriptionTier={subscriptionTier}
+              layout="page"
+            />
+          </div>
         </Details>
       </HeaderRow>
       <hr className="border-(--mi-tint-x-color)" />
@@ -235,27 +252,31 @@ const SubscriptionTierPage: React.FC<{
             <MarkdownContent content={subscriptionTier.description} />
           </Description>
         )}
-        {hasTierPerks(subscriptionTier) && (
-          <>
-            <hr className="border-(--mi-darken-x-background-color)" />
-            <SubscriptionTierRewards
-              subscriptionTier={subscriptionTier}
-              artistName={artist.name}
-              includeReleases={false}
-            />
-          </>
-        )}
       </section>
-      {hasReleases && (
+      {(hasReleases || hasPerks) && (
         <section className="flex flex-col gap-4 p-5 bg-(--mi-tint-color) border border-(--mi-tint-x-color)">
-          <h3 className="text-sm! font-semibold! uppercase tracking-[0.08em] opacity-70">
-            {t("includedReleases")}
-          </h3>
-          <SubscriptionTierReleases
-            tier={subscriptionTier}
-            artist={artist}
-            maxItems={INCLUDED_RELEASES_MAX_ROWS * INCLUDED_RELEASES_PER_ROW}
-          />
+          <div className="flex flex-col gap-2">
+            {hasReleases && (
+              <h3 className="text-base! font-semibold! uppercase tracking-[0.08em] opacity-70">
+                {t("includedReleases")}
+              </h3>
+            )}
+            {hasPerks && (
+              <SubscriptionTierRewards
+                subscriptionTier={subscriptionTier}
+                artistName={artist.name}
+                includeReleases={false}
+                className="text-[calc(var(--mi-font-size-small)*var(--page-scale,1))] font-bold list-disc pl-5"
+              />
+            )}
+          </div>
+          {hasReleases && (
+            <SubscriptionTierReleases
+              tier={subscriptionTier}
+              artist={artist}
+              maxItems={INCLUDED_RELEASES_MAX_ROWS * INCLUDED_RELEASES_PER_ROW}
+            />
+          )}
         </section>
       )}
       {siblingsNav}

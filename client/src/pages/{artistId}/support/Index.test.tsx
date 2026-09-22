@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -27,11 +27,12 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   };
 });
 
+const locationState = { search: "" };
 vi.mock("react-router-dom", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-router-dom")>();
   return {
     ...actual,
-    useLocation: () => ({ search: "" }),
+    useLocation: () => ({ search: locationState.search }),
     useOutletContext: () => ({ openTipModal: vi.fn() }),
   };
 });
@@ -60,15 +61,8 @@ vi.mock("components/Artist/ArtistSupportBox", () => ({
 }));
 
 vi.mock("components/Artist/SubscriptionTierPage", () => ({
-  default: ({ subscriptionTier, onSeeAllTiers }: any) => (
-    <div data-testid="tier-page">
-      {subscriptionTier.name}
-      {onSeeAllTiers && (
-        <button type="button" onClick={onSeeAllTiers}>
-          seeAllTiers
-        </button>
-      )}
-    </div>
+  default: ({ subscriptionTier }: any) => (
+    <div data-testid="tier-page">{subscriptionTier.name}</div>
   ),
 }));
 
@@ -111,6 +105,7 @@ describe("Support Index", () => {
     vi.clearAllMocks();
     authState.user = null;
     artistState.artist = null;
+    locationState.search = "";
   });
 
   test("shows only the tier boxes when the user has no active subscription", () => {
@@ -123,7 +118,7 @@ describe("Support Index", () => {
     expect(screen.getAllByTestId("support-box")).toHaveLength(2);
   });
 
-  test("shows the subscribed tier page instead of the tier boxes, and the boxes on demand", () => {
+  test("shows the subscribed tier page instead of the tier boxes, and the boxes when the URL asks for them", () => {
     artistState.artist = makeArtist([supporterTier, otherTier]);
     authState.user = {
       id: 20,
@@ -135,7 +130,7 @@ describe("Support Index", () => {
       ],
     };
 
-    render(<Index />);
+    const { unmount } = render(<Index />);
 
     expect(screen.getByTestId("manage-subscription")).toHaveTextContent(
       "Supporter"
@@ -143,7 +138,9 @@ describe("Support Index", () => {
     expect(screen.getByTestId("tier-page")).toHaveTextContent("Supporter");
     expect(screen.queryByTestId("support-box")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "seeAllTiers" }));
+    unmount();
+    locationState.search = "?view=all";
+    render(<Index />);
 
     expect(screen.queryByTestId("tier-page")).not.toBeInTheDocument();
     const boxes = screen.getAllByTestId("support-box");
