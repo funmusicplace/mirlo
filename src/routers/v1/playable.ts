@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { userLoggedInWithoutRedirect } from "../../auth/passport";
 
 export default function () {
   const operations = {
@@ -75,11 +76,9 @@ export default function () {
         return false;
       });
 
-      res
-        .json({
-          results: areOwned.map(Number),
-        })
-        .status(200);
+      res.status(200).json({
+        results: areOwned.map(Number),
+      });
     } catch (e) {
       next(e);
     }

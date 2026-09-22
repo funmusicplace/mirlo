@@ -1,7 +1,8 @@
-import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
 
 type Params = {
@@ -29,11 +30,9 @@ export default function () {
           isRead: true,
         },
       });
-      return res
-        .json({
-          result: notification,
-        })
-        .status(200);
+      return res.status(200).json({
+        result: notification,
+      });
     } else {
       throw new AppError({
         httpCode: 401,

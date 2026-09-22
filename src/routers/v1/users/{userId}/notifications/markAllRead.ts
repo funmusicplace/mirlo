@@ -1,9 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
 
 type Params = {
   userId: string;
@@ -22,7 +23,7 @@ export default function () {
       data: { isRead: true },
     });
 
-    return res.json({ result: "ok" }).status(200);
+    return res.status(200).json({ result: "ok" });
   }
 
   PUT.apiDoc = {
