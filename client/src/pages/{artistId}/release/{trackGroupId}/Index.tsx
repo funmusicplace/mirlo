@@ -25,6 +25,7 @@ import Wishlist from "components/TrackGroup/Wishlist";
 import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPublished } from "utils/artist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
@@ -219,6 +220,8 @@ function Index() {
     `screen and (max-width: ${bp.medium}px)`
   );
 
+  const { user } = useAuthContext();
+
   const { artistId, trackGroupId } = useParams();
   const { data: artist, isPending: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
@@ -241,6 +244,8 @@ function Index() {
   }
 
   const isPublished = isTrackGroupPublished(trackGroup);
+  const userCanSeeUnpublished =
+    !!user && (user.id === artist.userId || user.isAdmin);
 
   const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;
@@ -259,7 +264,7 @@ function Index() {
       />
       <Container>
         <ItemViewContentWrapper>
-          {!isPublished && (
+          {!isPublished && userCanSeeUnpublished && (
             <div
               className={css`
                 margin-top: 0.5rem;
