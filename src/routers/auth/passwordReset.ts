@@ -23,6 +23,7 @@ export const passwordResetConfirmation = async (
   res: Response,
   next: NextFunction
 ) => {
+  const log = req.logger ?? logger;
   try {
     let { token } = req.params as {
       token: string;
@@ -70,7 +71,7 @@ export const passwordResetConfirmation = async (
       );
     }
   } catch (e) {
-    logger.info(`Error with password reset ${e}`);
+    log.info(`Error with password reset ${e}`);
   }
 };
 

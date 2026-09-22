@@ -29,6 +29,7 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { artistId: profileId } = req.params as unknown as Params;
 
     try {
@@ -50,7 +51,7 @@ export default function () {
           }
         ) => {
           let image;
-          logger.info(`Upserting image for new image ${fileInfo.filename}`);
+          log.info(`Upserting image for new image ${fileInfo.filename}`);
           if (details.imageId) {
             image = await prisma.image.findUnique({
               where: {
@@ -66,7 +67,7 @@ export default function () {
               },
             });
           }
-          logger.info("Done upserting image, id: " + image.id);
+          log.info("Done upserting image, id: " + image.id);
           return image;
         }
       );

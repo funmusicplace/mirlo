@@ -23,6 +23,7 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { artistId: profileId, imageId } = req.params as unknown as Params;
 
     try {
@@ -46,7 +47,7 @@ export default function () {
       try {
         await removeObjectsFromBucket(finalImageBucket, imageId);
       } catch (e) {
-        logger.info(`No stored objects for image ${imageId}, that's okay`);
+        log.info(`No stored objects for image ${imageId}, that's okay`);
       }
 
       res.json({ message: "Success" });

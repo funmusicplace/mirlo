@@ -22,6 +22,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { id: trackGroupId }: { id?: string } = req.params;
     const {
       email,
@@ -38,7 +39,7 @@ export default function () {
       let trackGroup;
 
       if (token && email) {
-        logger.info(
+        log.info(
           `trackGroupId: ${trackGroupId} being downloaded with a purchase token, ${email}, ${token}`
         );
         const tokenUser = await prisma.user.findFirst({
@@ -56,14 +57,12 @@ export default function () {
             if (!req.user) {
               throw e;
             }
-            logger.info(
+            log.info(
               `trackGroupId: ${trackGroupId} purchase token didn't resolve for ${email}, falling back to the session`
             );
           }
         } else if (!req.user) {
-          logger.info(
-            `trackGroupId: ${trackGroupId} no user found for ${email}`
-          );
+          log.info(`trackGroupId: ${trackGroupId} no user found for ${email}`);
         }
       }
 
@@ -78,9 +77,7 @@ export default function () {
 
           trackGroup = purchase.trackGroup;
         } else {
-          logger.info(
-            `trackGroupId: ${trackGroupId} being downloaded by admin`
-          );
+          log.info(`trackGroupId: ${trackGroupId} being downloaded by admin`);
           trackGroup = await prisma.trackGroup.findFirst({
             where: {
               id: Number(trackGroupId),
@@ -97,13 +94,13 @@ export default function () {
         });
       }
 
-      logger.info(
+      log.info(
         `trackGroupId: ${trackGroupId} Found a trackgroup, preparing download`
       );
 
-      logger.info("checking if trackgroup already zipped");
+      log.info("checking if trackgroup already zipped");
       if (!(await zipExists("trackGroup", trackGroup.id, format))) {
-        logger.info("trackGroup doesn't exist yet, start generating it");
+        log.info("trackGroup doesn't exist yet, start generating it");
         const jobId = await startGeneratingZip(
           trackGroup,
           trackGroup.tracks,
@@ -143,7 +140,7 @@ export default function () {
       );
 
       if (presignedUrl) {
-        logger.info(
+        log.info(
           `trackGroupId: ${trackGroupId} responding with presigned download URL`
         );
         await recordDownload(trackGroup.id);

@@ -40,6 +40,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { id: profileId } = req.params as unknown as Params;
     let { tierId, email, amount, embedded, name } = req.body;
 
@@ -76,7 +77,7 @@ export default function () {
         });
 
         if (oldTier) {
-          logger.info(
+          log.info(
             `Deleting old subscriptions for ${profileId}, old tier: ${oldTier.id}`
           );
           await deleteStripeSubscriptions({
@@ -129,7 +130,7 @@ export default function () {
         userName: name,
         embedded: useEmbedded,
       });
-      logger.info(`Generated a Stripe checkout session ${session.id}`);
+      log.info(`Generated a Stripe checkout session ${session.id}`);
 
       res
         .status(200)

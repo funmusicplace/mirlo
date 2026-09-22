@@ -73,6 +73,7 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { userId } = req.params as unknown as { userId: string };
     const {
       newEmail,
@@ -229,7 +230,7 @@ export default function () {
             },
           },
         } as Job).catch((emailError) => {
-          logger.error(
+          log.error(
             "Failed to send email change confirmation email",
             emailError
           );

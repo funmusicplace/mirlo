@@ -1,8 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import prisma from "@mirlo/prisma";
 import { randomUUID } from "crypto";
+
+import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import logger from "../../logger";
 import { AppError } from "../../utils/error";
+
 import {
   normalizeAccountType,
   sendVerificationEmail,
@@ -15,6 +18,7 @@ const resendVerificationEmail = async (
   res: Response,
   next: NextFunction
 ) => {
+  const log = req.logger ?? logger;
   try {
     let { email, client: clientURL, accountType } = req.body ?? {};
 
@@ -81,7 +85,7 @@ const resendVerificationEmail = async (
       },
     });
 
-    logger.info(
+    log.info(
       `auth/resendVerificationEmail: sending verification email ${updatedUser.email}`
     );
 

@@ -21,6 +21,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { id: trackId }: { id?: string } = req.params;
     const {
       email,
@@ -37,7 +38,7 @@ export default function () {
       let track;
 
       if (token && email) {
-        logger.info(
+        log.info(
           `trackId: ${trackId} being downloaded with a purchase token, ${email}, ${token}`
         );
         const tokenUser = await prisma.user.findFirst({
@@ -55,12 +56,12 @@ export default function () {
             if (!req.user) {
               throw e;
             }
-            logger.info(
+            log.info(
               `trackId: ${trackId} purchase token didn't resolve for ${email}, falling back to the session`
             );
           }
         } else if (!req.user) {
-          logger.info(`trackId: ${trackId} no user found for ${email}`);
+          log.info(`trackId: ${trackId} no user found for ${email}`);
         }
       }
 
@@ -75,7 +76,7 @@ export default function () {
 
           track = purchase.track;
         } else {
-          logger.info(`trackId: ${trackId} being downloaded by admin`);
+          log.info(`trackId: ${trackId} being downloaded by admin`);
           track = await prisma.track.findFirst({
             where: {
               id: Number(trackId),
@@ -94,11 +95,11 @@ export default function () {
         });
       }
 
-      logger.info(`trackId: ${trackId} Found a track, preparing download`);
+      log.info(`trackId: ${trackId} Found a track, preparing download`);
 
-      logger.info("checking if track already zipped");
+      log.info("checking if track already zipped");
       if (!(await zipExists("track", track.id, format))) {
-        logger.info("Track not zipped");
+        log.info("Track not zipped");
         throw new AppError({
           httpCode: 400,
           description: "Need to generate track folder first",
@@ -121,13 +122,11 @@ export default function () {
       });
 
       if (presignedUrl) {
-        logger.info(
-          `trackId: ${trackId} responding with presigned download URL`
-        );
+        log.info(`trackId: ${trackId} responding with presigned download URL`);
         return res.json({ result: { url: presignedUrl } });
       }
 
-      logger.info(`downloading ${title}.zip`);
+      log.info(`downloading ${title}.zip`);
       res.attachment(`${title}.zip`);
 
       const stream = await streamZip("track", track.id, format);

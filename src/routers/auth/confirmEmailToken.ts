@@ -1,14 +1,17 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { setTokens } from "./utils";
-import { AppError } from "../../utils/error";
+import { NextFunction, Request, Response } from "express";
+
 import logger from "../../logger";
+import { AppError } from "../../utils/error";
+
+import { setTokens } from "./utils";
 
 const confirmEmailToken = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  const log = req.logger ?? logger;
   try {
     const {
       token,
@@ -22,7 +25,7 @@ const confirmEmailToken = async (
       accountType: "artist" | "listener";
     };
 
-    logger.info(`auth/confirmEmailToken: confirming email for user ${userId}`);
+    log.info(`auth/confirmEmailToken: confirming email for user ${userId}`);
 
     if (!token || !userId || !clientID) {
       return next(
@@ -99,7 +102,7 @@ const confirmEmailToken = async (
       accountType,
     });
   } catch (e) {
-    logger.error(`Error confirming email token: ${e}`);
+    log.error(`Error confirming email token: ${e}`);
     next(e);
   }
 };

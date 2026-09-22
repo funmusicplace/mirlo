@@ -36,6 +36,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { userId } = req.params as unknown as Params;
     const { password, code } = req.body as {
       password?: string;
@@ -112,7 +113,7 @@ export default function () {
         return res.json({ result: { stripeAccountId: null } });
       }
 
-      logger.info(
+      log.info(
         `stripe/reset: clearing stripeAccountId for user ${user.id} (was ${user.stripeAccountId})`
       );
 

@@ -10,6 +10,7 @@ import { sendVerificationEmail } from "./sendVerificationEmail";
 import { hashPassword } from "./utils";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
+  const log = req.logger ?? logger;
   let {
     name,
     email,
@@ -78,7 +79,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     } else if (existing) {
       const hasPassword = !!existing.password;
       if (hasPassword && existing.emailConfirmationToken) {
-        logger.info(
+        log.info(
           `auth/signup: attempt to signup with completed account pending verification`
         );
         const emailConfirmationExpired =
@@ -94,7 +95,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       }
 
       if (hasPassword) {
-        logger.info(`auth/signup: attempt to signup with completed account`);
+        log.info(`auth/signup: attempt to signup with completed account`);
         return next(
           new AppError({
             httpCode: 400,
@@ -102,7 +103,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           })
         );
       } else {
-        logger.info(`auth/signup: attempt to signup with incomplete account`);
+        log.info(`auth/signup: attempt to signup with incomplete account`);
         return next(
           new AppError({
             httpCode: 400,

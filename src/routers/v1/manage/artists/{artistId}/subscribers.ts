@@ -194,6 +194,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     let { artistId }: { artistId?: string } = req.params;
 
     const { subscribers, artistSubscriptionTierId } = req.body as {
@@ -268,12 +269,12 @@ export default function () {
                   tierId: tier.id,
                 });
               } catch (e) {
-                logger.error(`subscribers error code: ${(e as any).code} ${e}`);
+                log.error(`subscribers error code: ${(e as any).code} ${e}`);
                 if ((e as any).code === "P2002") {
-                  logger.error("instance of prismaclient");
+                  log.error("instance of prismaclient");
                   // do nothing, unique constraint failed
                   // https://www.prisma.io/docs/orm/reference/error-reference#p2002
-                  logger.error(
+                  log.error(
                     "err",
                     (e as PrismaClientKnownRequestError).cause,
                     (e as PrismaClientKnownRequestError).name,
