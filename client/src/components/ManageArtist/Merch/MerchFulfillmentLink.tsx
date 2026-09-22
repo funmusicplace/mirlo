@@ -1,12 +1,14 @@
 import { css } from "@emotion/css";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import React from "react";
-
 import { useTranslation } from "react-i18next";
 import { FaArrowRight } from "react-icons/fa";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 const MerchFulfillmentLink: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
+  const { t: tPageTitles } = useTranslation("translation", {
+    keyPrefix: "pageTitles",
+  });
 
   return (
     <>
@@ -22,7 +24,9 @@ const MerchFulfillmentLink: React.FC<{}> = () => {
           padding-bottom: 1rem;
         `}
       >
-        {t("merchFulfillmentParagraph")}
+        {t("merchFulfillmentParagraph", {
+          pageName: tPageTitles("fulfillment"),
+        })}
       </p>
       <ArtistButtonLink startIcon={<FaArrowRight />} to="/fulfillment">
         {t("viewFulfillment")}

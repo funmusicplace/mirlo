@@ -392,6 +392,9 @@ const OtherArtistsTable: React.FC = () => {
 
 const Index: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
+  const { t: tPageTitles } = useTranslation("translation", {
+    keyPrefix: "pageTitles",
+  });
 
   const { user } = useAuthContext();
 
@@ -447,7 +450,7 @@ const Index: React.FC = () => {
             <h2>{t("managePayment")}</h2>
             <div className="flex gap-2 ">
               <ButtonLink wrap variant="outlined" to="/sales" size="compact">
-                {t("viewSalesPage")}
+                {t("viewSalesPage", { pageName: tPageTitles("sales") })}
               </ButtonLink>
               <ButtonLink
                 wrap
@@ -455,7 +458,9 @@ const Index: React.FC = () => {
                 to="/fulfillment"
                 size="compact"
               >
-                {t("viewFulfillmentPage")}
+                {t("viewFulfillmentPage", {
+                  pageName: tPageTitles("fulfillment"),
+                })}
               </ButtonLink>
             </div>
           </div>
