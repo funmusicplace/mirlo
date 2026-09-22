@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import Box from "components/common/Box";
 import Modal from "components/common/Modal";
 import PurchaseModal from "components/common/Purchase/PurchaseModal";
-import { usePurchase } from "components/common/Purchase/usePurchase";
 import { useSubscriptionCheckout } from "components/common/Purchase/useSubscriptionCheckout";
 import { queryArtist } from "queries";
 import React from "react";
@@ -12,24 +11,32 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { getArtistAllTiersUrl } from "utils/artist";
 
-import { ArtistButton } from "./ArtistButtons";
+import { ArtistButton, ArtistButtonLink } from "./ArtistButtons";
 import ArtistVariableSupport from "./ArtistVariableSupport";
+import ChangePaymentMethodButton from "./ChangePaymentMethodButton";
 import SubscriptionCancelledNotice, {
   isSubscriptionCancelled,
 } from "./SubscriptionCancelledNotice";
 
-export const isUserSubscribedToTier = (
+export const getUserSubscriptionToTier = (
   user: LoggedInUser | null | undefined,
   tier: ArtistSubscriptionTier
 ) =>
-  !!user?.artistUserSubscriptions?.find(
+  user?.artistUserSubscriptions?.find(
     (sub) => sub.artistSubscriptionTier.id === tier.id
   );
 
+export const isUserSubscribedToTier = (
+  user: LoggedInUser | null | undefined,
+  tier: ArtistSubscriptionTier
+) => !!getUserSubscriptionToTier(user, tier);
+
 const SubscriptionTierActions: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
-}> = ({ subscriptionTier }) => {
+  layout?: "page" | "card";
+}> = ({ subscriptionTier, layout = "card" }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const snackbar = useSnackbar();
@@ -47,41 +54,6 @@ const SubscriptionTierActions: React.FC<{
     handlePurchaseComplete,
     returnUrl,
   } = useSubscriptionCheckout({ artist, refresh });
-
-  // A separate usePurchase instance for the payment-method-update flow: same
-  // checkout/<PurchaseModal> machinery as the tier-switch flow above, but its
-  // clientSecret comes from PUT manage/subscriptions/:id (not POST
-  // /v1/purchase), so it drives its own openCheckout call instead of
-  // startPurchase: hence its own loading flag around that fetch, rather than
-  // usePurchase's own isLoading (which only tracks startPurchase).
-  const {
-    checkout: paymentMethodCheckout,
-    openCheckout: openPaymentMethodCheckout,
-    reset: resetPaymentMethodCheckout,
-  } = usePurchase();
-  const [isStartingPaymentMethodUpdate, setIsStartingPaymentMethodUpdate] =
-    React.useState(false);
-
-  const startPaymentMethodUpdate = async (subscriptionId: number) => {
-    try {
-      setIsStartingPaymentMethodUpdate(true);
-      const { result } = await api.put<
-        undefined,
-        { result: { clientSecret: string; stripeAccountId: string } }
-      >(`manage/subscriptions/${subscriptionId}`, undefined);
-      openPaymentMethodCheckout(result);
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      setIsStartingPaymentMethodUpdate(false);
-    }
-  };
-
-  const handlePaymentMethodUpdateComplete = React.useCallback(() => {
-    resetPaymentMethodCheckout();
-    snackbar(t("paymentMethodUpdated"), { type: "success" });
-    refresh();
-  }, [refresh, resetPaymentMethodCheckout, snackbar, t]);
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     const result = await startPurchase({
@@ -120,15 +92,17 @@ const SubscriptionTierActions: React.FC<{
 
   const isSubscribedToTier = isUserSubscribedToTier(user, subscriptionTier);
 
-  const currentSubscription = user?.artistUserSubscriptions?.find(
-    (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
-  );
+  const currentSubscription = getUserSubscriptionToTier(user, subscriptionTier);
 
   const hasFailedPayment =
     currentSubscription?.artistUserSubscriptionCharges?.[0]?.transaction
       ?.paymentStatus === "FAILED";
 
   const isCancelled = isSubscriptionCancelled(currentSubscription);
+
+  const hasOtherPaidTiers = artist.subscriptionTiers.some(
+    (tier) => !tier.isDefaultTier && tier.id !== subscriptionTier.id
+  );
 
   const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
     (sub) =>
@@ -143,7 +117,12 @@ const SubscriptionTierActions: React.FC<{
         <ArtistVariableSupport tier={subscriptionTier} />
       )}
       {(isSubscribedToTier || isSubscribedToArtist) && (
-        <div className="flex items-center justify-center gap-3 flex-col">
+        <div
+          className={
+            "flex gap-3 flex-col " +
+            (layout === "page" ? "items-start" : "items-center justify-center")
+          }
+        >
           {user && isSubscribedToArtist && !isSubscribedToTier && (
             <ArtistButton
               onClick={() => subscribeToTier(subscriptionTier)}
@@ -154,32 +133,35 @@ const SubscriptionTierActions: React.FC<{
           )}
           {user && isSubscribedToTier && !isCancelled && (
             <ArtistButton
-              onClick={() =>
-                currentSubscription &&
-                startPaymentMethodUpdate(currentSubscription.id)
-              }
-              variant="outlined"
-              isLoading={isStartingPaymentMethodUpdate}
-            >
-              {t("changePaymentMethod")}
-            </ArtistButton>
-          )}
-          {user && isSubscribedToTier && !isCancelled && (
-            <ArtistButton
               onClick={() => setIsConfirmingCancel(true)}
               variant="outlined"
             >
-              {t("cancelSubscription")}
+              {t(
+                layout === "page" ? "manageSubscription" : "cancelSubscription"
+              )}
             </ArtistButton>
           )}
+          {layout === "card" &&
+            user &&
+            isSubscribedToTier &&
+            !isCancelled &&
+            currentSubscription && (
+              <ChangePaymentMethodButton
+                subscriptionId={currentSubscription.id}
+                onUpdated={refresh}
+              />
+            )}
           {user && isSubscribedToTier && (
             <SubscriptionCancelledNotice
               subscription={currentSubscription}
-              className="text-sm text-center"
+              className={"text-sm " + (layout === "page" ? "" : "text-center")}
             />
           )}
           {hasFailedPayment && (
-            <Box variant="warning" className="text-sm text-center">
+            <Box
+              variant="warning"
+              className={"text-sm " + (layout === "page" ? "" : "text-center")}
+            >
               {t("subscriptionPaymentFailed")}
               <ArtistButton
                 onClick={() => setIsConfirmingCancel(true)}
@@ -207,16 +189,6 @@ const SubscriptionTierActions: React.FC<{
         title={t("support") ?? ""}
         buttonLabel={t("letsSupport") ?? ""}
       />
-      <PurchaseModal
-        open={!!paymentMethodCheckout}
-        onClose={resetPaymentMethodCheckout}
-        clientSecret={paymentMethodCheckout?.clientSecret}
-        stripeAccountId={paymentMethodCheckout?.stripeAccountId}
-        returnUrl={window.location.href}
-        onSuccess={handlePaymentMethodUpdateComplete}
-        title={t("changePaymentMethodTitle") ?? ""}
-        buttonLabel={t("updatePaymentMethodButton") ?? ""}
-      />
       <Modal
         open={isConfirmingCancel}
         onClose={() => setIsConfirmingCancel(false)}
@@ -224,6 +196,14 @@ const SubscriptionTierActions: React.FC<{
       >
         <div className="flex flex-col gap-3">
           <p>{t("cancelSubscriptionConfirm")}</p>
+          {layout === "page" && hasOtherPaidTiers && (
+            <ArtistButtonLink
+              variant="outlined"
+              to={getArtistAllTiersUrl(artist)}
+            >
+              {t("changeTier")}
+            </ArtistButtonLink>
+          )}
           <ArtistButton
             variant="outlined"
             onClick={() => cancelSubscription(false)}

@@ -12,13 +12,18 @@ import {
   getArtistManageTiersUrl,
   getArtistTierUrl,
 } from "utils/artist";
+import useArtistQuery from "utils/useArtistQuery";
 import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../constants";
 
 import ArtistRouterLink, { ArtistButtonLink } from "./ArtistButtons";
 import ArtistSupportBox from "./ArtistSupportBox";
-import SubscriptionTierActions from "./SubscriptionTierActions";
+import ChangePaymentMethodButton from "./ChangePaymentMethodButton";
+import { isSubscriptionCancelled } from "./SubscriptionCancelledNotice";
+import SubscriptionTierActions, {
+  getUserSubscriptionToTier,
+} from "./SubscriptionTierActions";
 import SubscriptionTierReleases from "./SubscriptionTierReleases";
 import SubscriptionTierRewards, {
   hasTierPerks,
@@ -38,8 +43,8 @@ const Layout = styled.article`
 
 const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: stretch;
+  justify-content: center;
   gap: 1.5rem;
   flex-wrap: nowrap;
 
@@ -79,7 +84,6 @@ const Description = styled.div<{ twoColumns: boolean }>`
 const Details = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
   flex: 0 1 40%;
   min-width: 0;
   gap: 1rem;
@@ -95,6 +99,7 @@ const SubscriptionTierPage: React.FC<{
 }> = ({ subscriptionTier, artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
+  const { refetch } = useArtistQuery();
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.medium}px)`);
 
   const paidTiers = artist.subscriptionTiers.filter(
@@ -110,6 +115,10 @@ const SubscriptionTierPage: React.FC<{
       : null;
   const hasSiblings = paidTiers.length > 1;
   const hasReleases = hasTierReleases(subscriptionTier);
+  const isOwner = !!user && user.id === artist.userId;
+  const currentSubscription = getUserSubscriptionToTier(user, subscriptionTier);
+  const canChangePaymentMethod =
+    !!currentSubscription && !isSubscriptionCancelled(currentSubscription);
 
   const currency = artist.user?.currency ?? "usd";
   const image = subscriptionTier.images?.[0]?.image;
@@ -173,38 +182,53 @@ const SubscriptionTierPage: React.FC<{
       <HeaderRow>
         {image?.sizes?.[1250] && <HeaderImage src={image.sizes[1250]} alt="" />}
         <Details>
-          <SpaceBetweenDiv className="items-start gap-3">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-2xl md:text-3xl font-bold!">
-                {subscriptionTier.name}
-              </h2>
-              <div className="flex items-center gap-2 text-lg">
-                <span>
-                  <Money amount={amount} currency={currency} /> /{" "}
-                  {t(
-                    subscriptionTier.interval === "MONTH" ? "monthly" : "yearly"
-                  )}
-                </span>
-                <PlatformPercent
-                  percent={subscriptionTier.platformPercent}
-                  chosenPrice={amount}
-                  artistName={artist.name}
-                  currency={currency}
-                />
-              </div>
+          {!isOwner && canChangePaymentMethod && (
+            <div className="flex justify-end">
+              <ChangePaymentMethodButton
+                subscriptionId={currentSubscription.id}
+                onUpdated={() => refetch()}
+              />
             </div>
-            {user && user.id === artist.userId && (
-              <ArtistButtonLink
-                to={`${getArtistManageTiersUrl(artist.id)}/${subscriptionTier.id}`}
-                size="compact"
-                variant="dashed"
-                startIcon={<FaPen />}
-              >
-                {t("editTier")}
-              </ArtistButtonLink>
-            )}
-          </SpaceBetweenDiv>
-          <SubscriptionTierActions subscriptionTier={subscriptionTier} />
+          )}
+          <div className="flex flex-col flex-1 justify-center gap-4">
+            <SpaceBetweenDiv className="items-start gap-3">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-2xl md:text-3xl font-bold!">
+                  {subscriptionTier.name}
+                </h2>
+                <div className="flex items-center gap-2 text-lg">
+                  <span>
+                    <Money amount={amount} currency={currency} /> /{" "}
+                    {t(
+                      subscriptionTier.interval === "MONTH"
+                        ? "monthly"
+                        : "yearly"
+                    )}
+                  </span>
+                  <PlatformPercent
+                    percent={subscriptionTier.platformPercent}
+                    chosenPrice={amount}
+                    artistName={artist.name}
+                    currency={currency}
+                  />
+                </div>
+              </div>
+              {isOwner && (
+                <ArtistButtonLink
+                  to={`${getArtistManageTiersUrl(artist.id)}/${subscriptionTier.id}`}
+                  size="compact"
+                  variant="dashed"
+                  startIcon={<FaPen />}
+                >
+                  {t("editTier")}
+                </ArtistButtonLink>
+              )}
+            </SpaceBetweenDiv>
+            <SubscriptionTierActions
+              subscriptionTier={subscriptionTier}
+              layout="page"
+            />
+          </div>
         </Details>
       </HeaderRow>
       <hr className="border-(--mi-tint-x-color)" />

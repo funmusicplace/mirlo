@@ -733,6 +733,7 @@
     "yourNameHint": "Shown to the artist alongside your support.",
     "letsSupport": "Support this artist",
     "cancelSubscription": "Cancel subscription",
+    "changeTier": "Change tier",
     "cancelSubscriptionConfirm": "Are you sure you want to cancel? You can stop payments while still following the artist, or unsubscribe entirely.",
     "unsubscribeEntirely": "Unsubscribe entirely",
     "stopPaymentsKeepFollowing": "Stop payments but keep following",
