@@ -209,6 +209,7 @@ type ArtistColors = {
 interface Notification {
   content: string;
   isRead: boolean;
+  spamReportedAt?: string | null;
   id: string;
   createdAt: string;
   notificationType:
@@ -433,14 +434,15 @@ interface ArtistUserSubscription {
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
   shippingAddress?: {
-    name: string;
-    phone: string;
-    line1: string;
-    line2: string;
-    postal_code: string;
-    city?: string;
-    state?: string;
-    country?: string;
+    name?: string;
+    address?: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      state?: string;
+      postal_code?: string;
+      country?: string;
+    };
   };
   artistUserSubscriptionCharges?: {
     id: string;
@@ -624,15 +626,16 @@ interface MerchPurchase {
   trackingWebsite?: string;
   options?: MerchOption[];
   fulfillmentStatus: "NO_PROGRESS" | "STARTED" | "SHIPPED" | "COMPLETED";
-  shippingAddress: {
-    name: string;
-    phone: string;
-    line1: string;
-    line2: string;
-    postal_code: string;
-    city?: string;
-    state?: string;
-    country?: string;
+  shippingAddress?: {
+    name?: string;
+    address?: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      state?: string;
+      postal_code?: string;
+      country?: string;
+    };
   };
 }
 

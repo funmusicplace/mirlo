@@ -76,28 +76,28 @@ const MerchPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
         <Section>
           <label>{t("shippingAddress")}</label>
           <p>
-            {purchase.shippingAddress && (
+            {purchase.shippingAddress?.address && (
               <>
-                {purchase.shippingAddress.line1 && (
+                {purchase.shippingAddress.address.line1 && (
                   <>
-                    {purchase.shippingAddress.line1}
+                    {purchase.shippingAddress.address.line1}
                     <br />
                   </>
                 )}
-                {purchase.shippingAddress.line1 && (
+                {purchase.shippingAddress.address.line2 && (
                   <>
-                    {purchase.shippingAddress.line2}
+                    {purchase.shippingAddress.address.line2}
                     <br />
                   </>
                 )}
-                {purchase.shippingAddress.city && (
+                {purchase.shippingAddress.address.city && (
                   <>
-                    {purchase.shippingAddress.city}
+                    {purchase.shippingAddress.address.city}
                     <br />
                   </>
                 )}
-                {purchase.shippingAddress.state},
-                {purchase.shippingAddress.postal_code}
+                {purchase.shippingAddress.address.state},
+                {purchase.shippingAddress.address.postal_code}
               </>
             )}
           </p>

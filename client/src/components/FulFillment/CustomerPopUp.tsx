@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import Button from "components/common/Button";
-import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
@@ -42,8 +41,19 @@ export const Section = styled.div`
 export const RenderAddress = ({
   shippingAddress,
 }: {
-  shippingAddress: Record<string, string>;
+  shippingAddress: {
+    name?: string;
+    address?: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      state?: string;
+      postal_code?: string;
+      country?: string;
+    };
+  };
 }) => {
+  const address = shippingAddress.address ?? {};
   return (
     <div>
       <>
@@ -53,29 +63,27 @@ export const RenderAddress = ({
             <br />
           </>
         )}
-        {shippingAddress.line1 && (
+        {address.line1 && (
           <>
-            {shippingAddress.line1}
+            {address.line1}
             <br />
           </>
         )}
-        {shippingAddress.line2 && (
+        {address.line2 && (
           <>
-            {shippingAddress.line2}
+            {address.line2}
             <br />
           </>
         )}
-        {shippingAddress.city && (
+        {address.city && (
           <>
-            {shippingAddress.city}
+            {address.city}
             <br />
           </>
         )}
-        {shippingAddress.state}, {shippingAddress.postal_code}
+        {address.state}, {address.postal_code}
         <br />
-        {shippingAddress.country}
-        <br />
-        {shippingAddress.phone}
+        {address.country}
       </>
     </div>
   );
