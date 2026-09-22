@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 import MarkdownContent from "components/common/MarkdownContent";
 import Money from "components/common/Money";
 import PlatformPercent from "components/common/PlatformPercent";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronLeft, FaChevronRight, FaPen } from "react-icons/fa";
@@ -123,6 +122,7 @@ const SubscriptionTierPage: React.FC<{
 
   const currency = artist.user?.currency ?? "usd";
   const image = subscriptionTier.images?.[0]?.image;
+  const hasImage = !!image?.sizes?.[1250];
   const amount = subscriptionTier.minAmount
     ? subscriptionTier.minAmount / 100
     : 0;
@@ -181,7 +181,7 @@ const SubscriptionTierPage: React.FC<{
   return (
     <Layout>
       <HeaderRow>
-        {image?.sizes?.[1250] && <HeaderImage src={image.sizes[1250]} alt="" />}
+        {hasImage && <HeaderImage src={image.sizes[1250]} alt="" />}
         <Details>
           {!isOwner && canChangePaymentMethod && (
             <div className="flex justify-end">
@@ -191,8 +191,14 @@ const SubscriptionTierPage: React.FC<{
               />
             </div>
           )}
-          <div className="flex flex-col flex-1 justify-center gap-4">
-            <SpaceBetweenDiv className="items-start gap-3">
+          <div
+            className={
+              hasImage
+                ? "flex flex-col flex-1 justify-center gap-4"
+                : "flex flex-col items-center gap-4 text-center"
+            }
+          >
+            <div className="flex items-start justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h2 className="text-2xl md:text-3xl font-bold!">
                   {subscriptionTier.name}
@@ -224,7 +230,7 @@ const SubscriptionTierPage: React.FC<{
                   {t("editTier")}
                 </ArtistButtonLink>
               )}
-            </SpaceBetweenDiv>
+            </div>
             <SubscriptionTierActions
               subscriptionTier={subscriptionTier}
               layout="page"
