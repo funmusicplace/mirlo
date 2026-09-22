@@ -33,6 +33,7 @@ export const FormSection = styled.div`
 const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
   const vals = {
     ...existing,
+    imageId: existing?.images?.[0]?.image?.id,
     minAmount: `${
       existing?.minAmount !== undefined ? existing.minAmount / 100 : ""
     }`,
@@ -75,6 +76,13 @@ const SubscriptionForm: React.FC<{
 
   const [localExisting, setLocalExisting] = React.useState(existing);
   const localExistingId = localExisting?.id;
+
+  const existingId = existing?.id;
+  React.useEffect(() => {
+    setLocalExisting(existing);
+    reset(generateDefaultValues(existing));
+  }, [existingId, reset]);
+
   const userId = user?.id;
   const artistId = artist.id;
 

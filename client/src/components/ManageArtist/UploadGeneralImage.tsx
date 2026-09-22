@@ -62,6 +62,12 @@ const UploadGeneralImage: React.FC<{
 
   const [isSaving, setIsSaving] = React.useState(false);
 
+  const imageId = image?.id;
+  React.useEffect(() => {
+    setLocalImageId(imageId);
+    setExistingImage(image);
+  }, [imageId]);
+
   const resetWrapper = React.useCallback(async () => {
     let result = await api.get<ExistingImage>(`images/${localImageId}`);
 
