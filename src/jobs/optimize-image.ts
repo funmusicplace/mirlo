@@ -16,7 +16,6 @@ import {
 } from "../utils/minio";
 
 import { logger } from "./queue-worker";
-import sendMail from "./send-mail";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
@@ -366,24 +365,12 @@ const optimizeImage = async (job: Job) => {
               source: "SIGHTENGINE",
               imageModel: model,
               imageId: destinationId,
+              externalId: result.request.id,
               score: result.nudity.sexual_display,
               ...owner,
             },
           });
-          logger.info("Sending an email report about SightEngine");
-          await sendMail({
-            data: {
-              template: "sight-engine-report",
-              message: {
-                to: "hi@mirlo.space",
-              },
-              locals: {
-                model,
-                destinationId,
-                sightEngineId: result.request.id,
-              },
-            },
-          } as Job);
+          logger.info("Flagged content for review via SightEngine");
         }
       }
     }
