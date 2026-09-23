@@ -5,6 +5,7 @@ import { userAuthenticated } from "../../../../../auth/passport";
 import logger from "../../../../../logger";
 import { sendPostNotificationQueue } from "../../../../../queues/send-post-notification-queue";
 import { serializePost } from "../../../../../serializers/post";
+import { clearPageCache } from "../../../../../utils/pageCache";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 
 export default function () {
@@ -47,6 +48,8 @@ export default function () {
           }
         }
       }
+
+      clearPageCache();
 
       res.json({
         result: serializePost(updatedPost, undefined, undefined, true),

@@ -915,12 +915,15 @@ export const analyzePathAndGenerateHTML = async (
   return $;
 };
 
-/**
- * FIXME: make this function a little more sane. Also write tests for it.
- * @param pathname
- * @returns
- */
-const parseIndex = async (pathname: string, req?: Request) => {
+const isDev = process.env.NODE_ENV === "development";
+
+let cachedIndexHtml: string | undefined;
+
+const readIndexHtml = () => {
+  if (cachedIndexHtml !== undefined && !isDev) {
+    return cachedIndexHtml;
+  }
+
   const fileLocation = path.join(
     __dirname,
     "..",
@@ -929,13 +932,25 @@ const parseIndex = async (pathname: string, req?: Request) => {
     "index.html" // We fetch the index.html file
   );
 
-  let buffer;
   try {
-    buffer = await fs.readFileSync(fileLocation);
+    cachedIndexHtml = fs.readFileSync(fileLocation, "utf-8");
   } catch (e) {
+    return undefined;
+  }
+  return cachedIndexHtml;
+};
+
+/**
+ * FIXME: make this function a little more sane. Also write tests for it.
+ * @param pathname
+ * @returns
+ */
+const parseIndex = async (pathname: string, req?: Request) => {
+  const indexHtml = readIndexHtml();
+  if (indexHtml === undefined) {
     return "<html>No built client</html>";
   }
-  const $ = cheerio.load(buffer);
+  const $ = cheerio.load(indexHtml);
   await analyzePathAndGenerateHTML(pathname, $, req);
   return $.html();
 };

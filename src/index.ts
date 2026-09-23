@@ -35,6 +35,7 @@ import {
   BucketConfig,
   ensureAllBucketsExist,
 } from "./utils/minio";
+import { getCachedPage } from "./utils/pageCache";
 import {
   attachRequestId,
   sanitizeHeadersForLogs,
@@ -280,12 +281,9 @@ app.use(
       } else if (isHtmlPageRequest(req.path)) {
         // HTML pages must never be cached — they reference hashed asset filenames
         res.setHeader("Cache-Control", "no-store");
-        const memBefore = process.memoryUsage();
-        const html = await parseIndex(req.path, req);
-        const memAfter = process.memoryUsage();
-        logger.info(
-          `memory:parseIndex: path=${req.path} rss=${formatMb(memAfter.rss)} heapUsed=${formatMb(memAfter.heapUsed)} rssDelta=${formatMb(memAfter.rss - memBefore.rss)}`
-        );
+        const html = req.user
+          ? await parseIndex(req.path, req)
+          : await getCachedPage(req.path, () => parseIndex(req.path));
         res.send(html);
       } else {
         // Vite hashes /assets/ filenames on every build — safe to cache permanently
