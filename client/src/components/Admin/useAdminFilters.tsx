@@ -52,115 +52,133 @@ const useAdminFilters = ({
     Filters: () => (
       <form
         onSubmit={handleSubmit(submitToSearchParams)}
-        className={css`
-          display: flex;
-          align-items: center;
-
-          > div {
-            margin-right: 1rem;
-          }
-        `}
+        className="flex flex-col"
       >
-        {fields.includes("acceptPayments") && (
-          <FormComponent>
-            <label>Accepts payments</label>
-            <SelectEl {...register("acceptPayments")}>
-              <option value="">All</option>
-              <option value="true">Can accept payments</option>
-            </SelectEl>
-          </FormComponent>
-        )}
-        {fields.includes("isPublished") && (
-          <FormComponent>
-            <label>Is published</label>
-            <SelectEl {...register("isPublished")}>
-              <option value="">All</option>
-              <option value="true">Is published</option>
-            </SelectEl>
-          </FormComponent>
-        )}
-        {fields.includes("artistName") && (
-          <FormComponent>
-            <label>artist.name</label>
-            <InputEl {...register("artistName")} />
-          </FormComponent>
-        )}
+        <div
+          className={css`
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+
+            > div {
+              margin-right: 1rem;
+            }
+          `}
+        >
+          {fields.includes("acceptPayments") && (
+            <FormComponent>
+              <label>Accepts payments</label>
+              <SelectEl {...register("acceptPayments")}>
+                <option value="">All</option>
+                <option value="true">Can accept payments</option>
+              </SelectEl>
+            </FormComponent>
+          )}
+          {fields.includes("isPublished") && (
+            <FormComponent>
+              <label>Is published</label>
+              <SelectEl {...register("isPublished")}>
+                <option value="">All</option>
+                <option value="true">Is published</option>
+              </SelectEl>
+            </FormComponent>
+          )}
+          {fields.includes("artistName") && (
+            <FormComponent>
+              <label>artist.name</label>
+              <InputEl {...register("artistName")} />
+            </FormComponent>
+          )}
+          {fields.includes("name") && (
+            <FormComponent>
+              <label>name</label>
+              <InputEl {...register("name")} />
+            </FormComponent>
+          )}
+          {fields.includes("email") && (
+            <FormComponent>
+              <label>email</label>
+              <InputEl {...register("email")} />
+            </FormComponent>
+          )}
+          {fields.includes("title") && (
+            <FormComponent>
+              <label>title</label>
+              <InputEl {...register("title")} />
+            </FormComponent>
+          )}
+          {fields.includes("datePurchased") && (
+            <FormComponent>
+              <label>Date filter</label>
+              <SelectEl {...register("datePurchased")}>
+                <option value="">All</option>
+                <option value="thisMonth">Current month to date</option>
+                <option value="previousMonth">Previous month</option>
+                <option value="thisYear">Current year to date</option>
+                <option value="lastYear">Last year</option>
+              </SelectEl>
+            </FormComponent>
+          )}
+          {fields.includes("lastSubscription") && (
+            <FormComponent>
+              <label>Last subscription</label>
+              <SelectEl {...register("lastSubscription")}>
+                <option value="">All</option>
+                <option value="thisMonth">Current month to date</option>
+                <option value="previousMonth">Previous month</option>
+                <option value="thisYear">Current year to date</option>
+                <option value="lastYear">Last year</option>
+              </SelectEl>
+            </FormComponent>
+          )}
+          {fields.includes("pricePaid") && (
+            <FormComponent>
+              <label>Price paid</label>
+              <SelectEl {...register("pricePaid")}>
+                <option value="">All</option>
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </SelectEl>
+            </FormComponent>
+          )}
+          {fields.includes("search") && (
+            <FormComponent>
+              <label>Search</label>
+              <InputEl placeholder="Search..." {...register("search")} />
+            </FormComponent>
+          )}
+          {fields.includes("pledgeStatus") && (
+            <FormComponent>
+              <label>Pledge Status</label>
+              <SelectEl {...register("pledgeStatus")}>
+                <option value="">All</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+              </SelectEl>
+            </FormComponent>
+          )}
+          <Button>Filter</Button>
+        </div>
         {fields.includes("allowMirloPromo") && (
-          <FormComponent>
-            <label>Allow Mirlo Promo</label>
-            <InputEl type="checkbox" {...register("allowMirloPromo")} />
+          <FormComponent direction="row">
+            <InputEl
+              id="input-allow-mirlo-promo"
+              type="checkbox"
+              aria-describedby="hint-allow-mirlo-promo"
+              {...register("allowMirloPromo")}
+            />
+            <div className="flex flex-col">
+              <label htmlFor="input-allow-mirlo-promo">
+                Allows Mirlo promo
+              </label>
+              <small id="hint-allow-mirlo-promo">
+                Only display tracks that have been granted permission by the
+                artist to be used to promote the platform.
+              </small>
+            </div>
           </FormComponent>
         )}
-        {fields.includes("name") && (
-          <FormComponent>
-            <label>name</label>
-            <InputEl {...register("name")} />
-          </FormComponent>
-        )}
-        {fields.includes("email") && (
-          <FormComponent>
-            <label>email</label>
-            <InputEl {...register("email")} />
-          </FormComponent>
-        )}
-        {fields.includes("title") && (
-          <FormComponent>
-            <label>title</label>
-            <InputEl {...register("title")} />
-          </FormComponent>
-        )}
-        {fields.includes("datePurchased") && (
-          <FormComponent>
-            <label>Date filter</label>
-            <SelectEl {...register("datePurchased")}>
-              <option value="">All</option>
-              <option value="thisMonth">Current month to date</option>
-              <option value="previousMonth">Previous month</option>
-              <option value="thisYear">Current year to date</option>
-              <option value="lastYear">Last year</option>
-            </SelectEl>
-          </FormComponent>
-        )}
-        {fields.includes("lastSubscription") && (
-          <FormComponent>
-            <label>Last subscription</label>
-            <SelectEl {...register("lastSubscription")}>
-              <option value="">All</option>
-              <option value="thisMonth">Current month to date</option>
-              <option value="previousMonth">Previous month</option>
-              <option value="thisYear">Current year to date</option>
-              <option value="lastYear">Last year</option>
-            </SelectEl>
-          </FormComponent>
-        )}
-        {fields.includes("pricePaid") && (
-          <FormComponent>
-            <label>Price paid</label>
-            <SelectEl {...register("pricePaid")}>
-              <option value="">All</option>
-              <option value="free">Free</option>
-              <option value="paid">Paid</option>
-            </SelectEl>
-          </FormComponent>
-        )}
-        {fields.includes("search") && (
-          <FormComponent>
-            <label>Search</label>
-            <InputEl placeholder="Search..." {...register("search")} />
-          </FormComponent>
-        )}
-        {fields.includes("pledgeStatus") && (
-          <FormComponent>
-            <label>Pledge Status</label>
-            <SelectEl {...register("pledgeStatus")}>
-              <option value="">All</option>
-              <option value="paid">Paid</option>
-              <option value="pending">Pending</option>
-              <option value="cancelled">Cancelled</option>
-            </SelectEl>
-          </FormComponent>
-        )}
-        <Button>Filter</Button>
       </form>
     ),
   };
