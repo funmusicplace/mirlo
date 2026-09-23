@@ -1705,7 +1705,10 @@
     "cloudflareTurnstileSecret": "Cloudflare Turnstile secret",
     "defconLevel": "Defcon level",
     "editTrack": "Edit {{title}}",
-    "deleteClient": "Delete client"
+    "deleteClient": "Delete client",
+    "pledgeCollectionTrackGroupId": "Trigger pledge collection for track group id:",
+    "triggerPledgeCollection": "Trigger pledge collection",
+    "pledgeCollectionTriggered": "Pledge collection triggered"
   },
   "flaggedContent": {
     "title": "Flagged content",
