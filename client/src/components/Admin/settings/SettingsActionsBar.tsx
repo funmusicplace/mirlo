@@ -15,7 +15,7 @@ const SettingsActionsBar: React.FC<{ isSaving: boolean }> = ({ isSaving }) => {
         headerShow === "down" ? "top-0" : "top-(--header-cover-sticky-height)"
       )}
     >
-      <Button type="submit" isLoading={isSaving} disabled={isSaving}>
+      <Button type="submit" uppercase isLoading={isSaving} disabled={isSaving}>
         {t("save")}
       </Button>
     </div>

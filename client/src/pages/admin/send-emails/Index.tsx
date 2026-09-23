@@ -83,7 +83,9 @@ const Index = () => {
               );
             }}
           />
-          <Button type="submit">Send email</Button>
+          <Button type="submit" className="mt-4">
+            Send email
+          </Button>
         </form>
       </FormProvider>
     </WidthContainer>

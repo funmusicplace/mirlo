@@ -77,7 +77,9 @@ export const Index: React.FC = () => {
           {Object.keys(total).map((currency) => (
             <tr key={currency}>
               <td>{currency}</td>
-              <Money amount={total[currency] / 100} currency={currency} />
+              <td>
+                <Money amount={total[currency] / 100} currency={currency} />
+              </td>
             </tr>
           ))}
         </tbody>

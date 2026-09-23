@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import useAdminFilters from "components/Admin/useAdminFilters";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
@@ -6,8 +7,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistUrl } from "utils/artist";
 import usePagination from "utils/usePagination";
-
-import useAdminFilters from "components/Admin/useAdminFilters";
 
 interface AdminPurchase extends UserArtistTip {
   user: User;
@@ -81,7 +80,9 @@ export const Index: React.FC = () => {
           {Object.keys(total).map((currency) => (
             <tr key={currency}>
               <td>{currency}</td>
-              <Money amount={total[currency] / 100} currency={currency} />
+              <td>
+                <Money amount={total[currency] / 100} currency={currency} />
+              </td>
             </tr>
           ))}
         </tbody>

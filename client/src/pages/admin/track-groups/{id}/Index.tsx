@@ -1,15 +1,13 @@
 import Button from "components/common/Button";
+import FormCheckbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
-import TextArea from "components/common/TextArea";
-import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useTranslation } from "react-i18next";
-import FormCheckbox from "components/common/FormCheckbox";
 import useErrorHandler from "services/useErrorHandler";
+import { useSnackbar } from "state/SnackbarContext";
 
 interface TrackGroupFormData {
   coverFile: File[];
@@ -75,7 +73,7 @@ export const Index: React.FC = () => {
   return (
     <FormProvider {...methods}>
       <h3>
-        {t("trackgroup")} {trackgroup?.title}
+        {t("trackGroup")} {trackgroup?.title}
       </h3>
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent style={{ display: "flex" }}>
