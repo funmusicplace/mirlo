@@ -585,6 +585,10 @@ const routes: RouteObject[] = [
             },
             children: [
               {
+                index: true,
+                Component: () => <Navigate to="fundraising" replace />,
+              },
+              {
                 path: "server-tasks",
                 handle: { title: "adminServerTasks" },
                 async lazy() {
@@ -613,6 +617,10 @@ const routes: RouteObject[] = [
               return { Component };
             },
             children: [
+              {
+                index: true,
+                Component: () => <Navigate to="purchases" replace />,
+              },
               {
                 path: "purchases",
                 handle: { title: "adminPurchases" },
@@ -669,6 +677,10 @@ const routes: RouteObject[] = [
               return { Component };
             },
             children: [
+              {
+                index: true,
+                Component: () => <Navigate to="track-groups" replace />,
+              },
               {
                 path: "users",
                 children: [
