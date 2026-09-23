@@ -96,6 +96,7 @@ model User {
   pendingEmailExpiration              DateTime?
   failedLoginAttempts                 Int                              @default(0)
   lockedUntil                         DateTime?
+  disabledAt                          DateTime?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   profileUserSubscriptions            ProfileUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]

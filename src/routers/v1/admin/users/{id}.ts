@@ -24,6 +24,7 @@ export default function () {
       canCreateArtists,
       stripeAccountId,
       accountingEmail,
+      disabled,
     } = req.body as {
       email: string;
       isLabelAccount: boolean;
@@ -32,6 +33,7 @@ export default function () {
       canCreateArtists: boolean;
       stripeAccountId: string;
       accountingEmail?: string;
+      disabled?: boolean;
     };
     try {
       await prisma.user.update({
@@ -44,6 +46,8 @@ export default function () {
           canCreateArtists,
           stripeAccountId,
           accountingEmail,
+          disabledAt:
+            disabled === undefined ? undefined : disabled ? new Date() : null,
         },
       });
       res.json({
@@ -73,6 +77,11 @@ export default function () {
           featureFlags: true,
           stripeAccountId: true,
           emailConfirmationToken: true,
+          disabledAt: true,
+          trustLevel: true,
+          currency: true,
+          receiveMailingList: true,
+          accountingEmail: true,
         },
       });
       if (!user) {

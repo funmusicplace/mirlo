@@ -35,7 +35,12 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       const userIsVerified = foundUser.emailConfirmationToken == null;
       const match = await bcrypt.compare(password, foundUser.password);
       if (match) {
-        if (userIsVerified) {
+        if (foundUser.disabledAt) {
+          throw new AppError({
+            httpCode: 401,
+            description: "This account has been disabled",
+          });
+        } else if (userIsVerified) {
           if (foundUser.failedLoginAttempts > 0 || foundUser.lockedUntil) {
             await prisma.user.update({
               where: { id: foundUser.id },

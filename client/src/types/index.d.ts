@@ -385,6 +385,7 @@ interface UserFromAdmin {
   trustLevel: number;
   canCreateArtists: boolean;
   accountingEmail?: string;
+  disabledAt?: string | null;
 }
 
 interface ArtistFromAdmin {

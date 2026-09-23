@@ -52,7 +52,7 @@ passport.use(
         },
       });
 
-      if (!foundUser) {
+      if (!foundUser || foundUser.disabledAt) {
         return done(null, false);
       }
       return done(null, {
