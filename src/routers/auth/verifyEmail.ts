@@ -40,9 +40,10 @@ const generate = (n: number, chunks = 0, separator = " "): string => {
 };
 
 const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+  const log = req.logger ?? logger;
   let { email, code } = req.body;
 
-  logger.info(`auth/verifyEmail: verifying email ${email}`);
+  log.info(`auth/verifyEmail: verifying email ${email}`);
   if (!email) {
     return next(
       new AppError({
@@ -56,7 +57,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
     code = code?.toString().trim().replace(/ /g, "");
 
     if (code) {
-      logger.info(`auth/verifyEmail: verifying code for email ${email}`);
+      log.info(`auth/verifyEmail: verifying code for email ${email}`);
       // If a code is provided, we send
       const verification = await prisma.emailVerification.findFirst({
         where: {
@@ -65,7 +66,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
         },
       });
       if (!verification) {
-        logger.warn(
+        log.warn(
           `auth/verifyEmail: no matching verification code found for email ${email}`
         );
         throw new AppError({
@@ -76,7 +77,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
         verification.tokenExpiration &&
         verification.tokenExpiration < new Date()
       ) {
-        logger.warn(
+        log.warn(
           `auth/verifyEmail: expired verification code used for email ${email} (expired ${verification.tokenExpiration.toISOString()})`
         );
         throw new AppError({
@@ -130,7 +131,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
         },
       });
       const client = await getClient();
-      logger.info(`auth/verifyEmail: sending verification email ${email}`);
+      log.info(`auth/verifyEmail: sending verification email ${email}`);
 
       try {
         await sendMail({
@@ -148,7 +149,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
           },
         } as Job);
       } catch (e) {
-        logger.error(
+        log.error(
           `auth/verifyEmail: failed to send verification email to ${email}: ${e}`
         );
         throw new AppError({

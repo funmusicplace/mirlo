@@ -1,9 +1,20 @@
 import { QueryFunction, queryOptions } from "@tanstack/react-query";
+
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_NOTIFICATIONS } from "./queryKeys";
 
 export const markAllNotificationsRead = (userId: number) => {
   return api.put(`v1/users/${userId}/notifications/markAllRead`, {});
+};
+
+export const reportNotificationAsSpam = (
+  userId: number,
+  notificationId: string
+) => {
+  return api.post(
+    `v1/users/${userId}/notifications/${notificationId}/reportSpam`,
+    {}
+  );
 };
 
 const fetchNotifications: QueryFunction<

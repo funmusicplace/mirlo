@@ -1,8 +1,8 @@
-import { Job } from "bullmq";
 import { randomInt } from "crypto";
-import { NextFunction, Request, Response } from "express";
 
 import prisma from "@mirlo/prisma";
+import { Job } from "bullmq";
+import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
@@ -16,8 +16,7 @@ type Params = {
 
 const CODE_EXPIRATION_MS = 15 * 60 * 1000; // 15 minutes
 
-const generateCode = () =>
-  randomInt(0, 1_000_000).toString().padStart(6, "0");
+const generateCode = () => randomInt(0, 1_000_000).toString().padStart(6, "0");
 
 /**
  * POST /v1/users/{userId}/stripe/resetCode
@@ -33,6 +32,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { userId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
@@ -66,9 +66,7 @@ export default function () {
         },
       });
 
-      logger.info(
-        `stripe/resetCode: emailing reset code to user ${user.id}`
-      );
+      log.info(`stripe/resetCode: emailing reset code to user ${user.id}`);
 
       await sendMail({
         data: {

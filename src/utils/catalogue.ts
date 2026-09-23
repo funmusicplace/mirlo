@@ -26,7 +26,12 @@ export const calculateCatalogueFloorPrice = async (profile: {
   userId: number;
   purchaseEntireCatalogMinPrice: number;
   purchaseEntireCatalogPercentage: number | null;
+  purchaseEntireCatalogEnabled?: boolean;
 }) => {
+  if (profile.purchaseEntireCatalogEnabled === false) {
+    return 0;
+  }
+
   const trackGroups = await findCataloguePurchasableTrackGroups(profile);
   const total = trackGroups.reduce((sum, tg) => sum + (tg.minPrice ?? 0), 0);
 

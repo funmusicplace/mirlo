@@ -139,15 +139,15 @@ describe("home page", () => {
 
     it("sign up button is disabled until an email is entered", () => {
       scrollToNewsletter();
-      cy.contains("button", "Sign up").should("be.disabled");
-      cy.get("#input-newsletter-email").type(newsletterEmail);
-      cy.contains("button", "Sign up").should("not.be.disabled");
+      cy.findByRole("button", { name: "Sign up" }).should("be.disabled");
+      cy.findByLabelText("Email address").type(newsletterEmail);
+      cy.findByRole("button", { name: "Sign up" }).should("not.be.disabled");
     });
 
     it("completes the full signup flow", () => {
       scrollToNewsletter();
-      cy.get("#input-newsletter-email").type(newsletterEmail);
-      cy.contains("button", "Sign up").click();
+      cy.findByLabelText("Email address").type(newsletterEmail);
+      cy.findByRole("button", { name: "Sign up" }).click();
       cy.wait("@verifyEmail");
 
       cy.get("[data-cy='modal']").should("be.visible");
@@ -156,8 +156,8 @@ describe("home page", () => {
         "be.visible"
       );
 
-      cy.get("#input-newsletter-code").type(verificationCode);
-      cy.contains("button", "Verify & subscribe").click();
+      cy.findByLabelText("Verification code").type(verificationCode);
+      cy.findByRole("button", { name: "Verify & subscribe" }).click();
       cy.wait("@verifyEmail");
       cy.wait("@followArtist");
 
@@ -167,11 +167,11 @@ describe("home page", () => {
 
     it("resends the verification code", () => {
       scrollToNewsletter();
-      cy.get("#input-newsletter-email").type(newsletterEmail);
-      cy.contains("button", "Sign up").click();
+      cy.findByLabelText("Email address").type(newsletterEmail);
+      cy.findByRole("button", { name: "Sign up" }).click();
       cy.wait("@verifyEmail");
 
-      cy.contains("button", "Resend code").click();
+      cy.findByRole("button", { name: "Resend code" }).click();
       cy.wait("@verifyEmail");
       cy.contains("Code resent!").should("be.visible");
     });
@@ -189,12 +189,12 @@ describe("home page", () => {
       }).as("verifyEmailFail");
 
       scrollToNewsletter();
-      cy.get("#input-newsletter-email").type(newsletterEmail);
-      cy.contains("button", "Sign up").click();
+      cy.findByLabelText("Email address").type(newsletterEmail);
+      cy.findByRole("button", { name: "Sign up" }).click();
       cy.wait("@verifyEmailFail");
 
-      cy.get("#input-newsletter-code").type("000000");
-      cy.contains("button", "Verify & subscribe").click();
+      cy.findByLabelText("Verification code").type("000000");
+      cy.findByRole("button", { name: "Verify & subscribe" }).click();
       cy.wait("@verifyEmailFail");
 
       cy.contains(
@@ -205,17 +205,17 @@ describe("home page", () => {
 
     it("resets code and step when modal is closed and reopened", () => {
       scrollToNewsletter();
-      cy.get("#input-newsletter-email").type(newsletterEmail);
-      cy.contains("button", "Sign up").click();
+      cy.findByLabelText("Email address").type(newsletterEmail);
+      cy.findByRole("button", { name: "Sign up" }).click();
       cy.wait("@verifyEmail");
 
-      cy.get("#input-newsletter-code").type("9999");
-      cy.get("[aria-label='close']").click();
+      cy.findByLabelText("Verification code").type("9999");
+      cy.findByRole("button", { name: "close" }).click();
       cy.get("[data-cy='modal']").should("not.exist");
 
-      cy.contains("button", "Sign up").click();
+      cy.findByRole("button", { name: "Sign up" }).click();
       cy.wait("@verifyEmail");
-      cy.get("#input-newsletter-code").should("have.value", "");
+      cy.findByLabelText("Verification code").should("have.value", "");
     });
   });
 
@@ -256,6 +256,6 @@ describe("home page", () => {
     );
 
     cy.contains("Get on the mailing list").should("be.visible");
-    cy.contains("button", "Sign up").should("be.visible");
+    cy.findByRole("button", { name: "Sign up" }).should("be.visible");
   });
 });

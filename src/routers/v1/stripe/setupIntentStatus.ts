@@ -1,12 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 
-import stripe from "../../../utils/stripe";
-import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
-import { createOrUpdatePledge } from "../../../utils/trackGroup";
-import { subscribeUserToArtist } from "../../../utils/artist";
+import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { logger } from "../../../logger";
+import { subscribeUserToArtist } from "../../../utils/artist";
+import stripe from "../../../utils/stripe";
+import { createOrUpdatePledge } from "../../../utils/trackGroup";
+import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
 
 export default function () {
   const operations = {
@@ -14,6 +14,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { setupIntent, stripeAccountId } = req.query;
     try {
       if (
@@ -50,7 +51,7 @@ export default function () {
             intent.metadata?.fundraiserId &&
             intent.metadata?.paymentIntentAmount
           ) {
-            logger.info(
+            log.info(
               `Setting up succeeded intent: ${userId}, fundraiserId: ${intent.metadata?.fundraiserId}`
             );
             await createOrUpdatePledge({
@@ -78,15 +79,13 @@ export default function () {
             }
           }
 
-          return res
-            .json({
-              result: {
-                status: intent.status,
-                paymentIntentAmount: intent.metadata?.paymentIntentAmount,
-                trackGroupId: intent.metadata?.trackGroupId,
-              },
-            })
-            .status(200);
+          return res.status(200).json({
+            result: {
+              status: intent.status,
+              paymentIntentAmount: intent.metadata?.paymentIntentAmount,
+              trackGroupId: intent.metadata?.trackGroupId,
+            },
+          });
         } else {
           res.status(404).json({ error: "SetupIntent not found" });
         }

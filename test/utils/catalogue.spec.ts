@@ -57,6 +57,18 @@ describe("calculateCatalogueFloorPrice", () => {
     assert.equal(floor, 3000);
   });
 
+  it("returns zero when the artist has turned the catalogue bundle off", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const artist = await createArtist(user.id, {
+      purchaseEntireCatalogEnabled: false,
+    });
+
+    await createTrackGroup(artist.id, { title: "Album One", minPrice: 1000 });
+
+    const floor = await calculateCatalogueFloorPrice(artist);
+    assert.equal(floor, 0);
+  });
+
   it("excludes releases that aren't currently purchasable from the percentage total", async () => {
     const { user } = await createUser({ email: "artist@artist.com" });
     const artist = await createArtist(user.id, {

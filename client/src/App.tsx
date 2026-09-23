@@ -5,6 +5,7 @@ import FailedSubscriptionBanner from "components/common/FailedSubscriptionBanner
 import { MetaCard } from "components/common/MetaCard";
 import ReloadPrompt from "components/common/ReloadPrompt";
 import Snackbar from "components/common/Snackbar";
+import TranslationHelpBanner from "components/common/TranslationHelpBanner";
 import UploadProgressPanel from "components/common/UploadProgressPanel";
 import UserBanner from "components/common/UserBanner";
 import CookieDisclaimer from "components/CookieDisclaimer";
@@ -85,6 +86,7 @@ function App() {
           <Header />
           <ReloadPrompt />
           <FailedSubscriptionBanner />
+          <TranslationHelpBanner />
           <CookieDisclaimer />
           <div
             className={css`

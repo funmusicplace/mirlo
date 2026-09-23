@@ -1,10 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
+import { Request, Response, NextFunction } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../../auth/passport";
+import logger from "../../../../../logger";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import stripe from "../../../../../utils/stripe";
-import logger from "../../../../../logger";
 const { API_DOMAIN } = process.env;
 
 type Params = {
@@ -17,6 +18,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { userId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const loggedInUser = req.user;
@@ -30,7 +32,7 @@ export default function () {
           let accountId = user.stripeAccountId;
           const alreadyExisted = !!accountId;
 
-          logger.info(
+          log.info(
             `Connecting ${user.id} to Stripe. Have existing account: ${alreadyExisted} ${accountId}`
           );
 
@@ -49,7 +51,7 @@ export default function () {
               },
             });
             accountId = account.id;
-            logger.info(`Created new stripe account ${account.id}`);
+            log.info(`Created new stripe account ${account.id}`);
           }
 
           let stripeAccount;
@@ -84,7 +86,7 @@ export default function () {
             type: "account_onboarding", // FIXME: is it ever possible to pass "account_update" here?
           });
 
-          logger.info(`Generated Stripe account link`);
+          log.info(`Generated Stripe account link`);
 
           res.redirect(accountLink.url);
         }

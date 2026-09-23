@@ -120,7 +120,8 @@ model User {
   transactions                        UserTransaction[]
   trackGroupDownloads                 TrackGroupDownload[]
   clients                             Client[]
-  resolvedContentFlags                ContentFlag[]
+  resolvedContentFlags                ContentFlag[]                    @relation("resolvedContentFlags")
+  reportedContentFlags                ContentFlag[]                    @relation("reportedContentFlags")
 }
 
 model Invite {
@@ -200,6 +201,7 @@ model ActivityPubProfileFollowers {
 model Notification {
   id               String                     @id @default(uuid())
   isRead           Boolean                    @default(false)
+  spamReportedAt   DateTime?
   userId           Int
   user             User                       @relation(fields: [userId], references: [id], name: "receivingUser")
   notificationType NotificationType
@@ -322,6 +324,7 @@ model Profile {
   location                            String?
   purchaseEntireCatalogMinPrice       Int                                   @default(0) // in cents
   purchaseEntireCatalogPercentage     Int? // 0-100; when set, the floor is this % of the summed minPrice
+  purchaseEntireCatalogEnabled        Boolean                               @default(true) // when false, hide the buy-the-catalogue button
   maxFreePlays                        Int?
   merchStoreURL                       String?
   activityPub                         Boolean                               @default(false)
@@ -811,6 +814,7 @@ model ContentFlag {
   reporterEmail    String?
   imageModel       String?
   imageId          String?
+  externalId       String?
   score            Float?
   profileId        Int?
   profile          Profile?          @relation(fields: [profileId], references: [id])
@@ -818,7 +822,9 @@ model ContentFlag {
   trackGroup       TrackGroup?       @relation(fields: [trackGroupId], references: [id])
   resolvedAt       DateTime?
   resolvedByUserId Int?
-  resolvedByUser   User?             @relation(fields: [resolvedByUserId], references: [id])
+  resolvedByUser   User?             @relation("resolvedContentFlags", fields: [resolvedByUserId], references: [id])
+  reportedUserId   Int?
+  reportedUser     User?             @relation("reportedContentFlags", fields: [reportedUserId], references: [id])
 }
 
 enum ContentFlagSource {

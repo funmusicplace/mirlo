@@ -19,6 +19,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
@@ -31,6 +32,7 @@ function Index() {
     keyPrefix: "trackGroupDetails",
   });
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -48,6 +50,11 @@ function Index() {
   const redeemAlbum = React.useCallback(
     async (code: string, email: string) => {
       if (artist && trackGroup) {
+        if (!user && !email.trim()) {
+          snackbar(t("redeemCodeNeedEmail"), { type: "warning" });
+          return;
+        }
+
         try {
           const result = await api.post<unknown, UserTrackGroupPurchase>(
             `trackGroups/${tId}/redeemCode`,
@@ -65,11 +72,23 @@ function Index() {
             `${getReleaseUrl(artist, trackGroup)}/download?${downloadQuery.toString()}`
           );
         } catch (e) {
-          snackbar(t("redeemCodeError"), { type: "warning" });
+          errorHandler(e, {
+            overrides: [
+              {
+                body: "Code not found or already used.",
+                message: t("redeemCodeError"),
+              },
+              {
+                body: "Need to be either logged in or supply email address",
+                message: t("redeemCodeNeedEmail"),
+              },
+              { status: 429, message: t("redeemCodeRateLimited") },
+            ],
+          });
         }
       }
     },
-    [artist, navigate, tId, trackGroup, user?.email]
+    [artist, errorHandler, navigate, snackbar, t, tId, trackGroup, user]
   );
 
   if (!artist && !isLoadingArtist) {

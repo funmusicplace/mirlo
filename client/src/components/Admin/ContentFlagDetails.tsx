@@ -4,7 +4,11 @@ import { AdminContentFlag } from "queries/admin";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const KNOWN_FLAG_REASONS = ["copyrightViolation", "inappropriateContent"];
+const KNOWN_FLAG_REASONS = [
+  "copyrightViolation",
+  "inappropriateContent",
+  "spamContactMessage",
+];
 
 const SHORT_DESCRIPTION_MAX_LENGTH = 160;
 
@@ -32,6 +36,11 @@ const ContentFlagDetails: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
             score: flag.score?.toFixed(2),
           })}
         </span>
+        {flag.externalId && (
+          <small>
+            {t("sightEngineReference", { externalId: flag.externalId })}
+          </small>
+        )}
       </div>
     );
   }

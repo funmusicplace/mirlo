@@ -31,13 +31,14 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: Function) {
-    logger.info("stripe-connect: receiving user account webhook");
+    const log = req.logger ?? logger;
+    log.info("stripe-connect: receiving user account webhook");
     const event = await verifyStripeSignature(
       req,
       res,
       getStripeWebhookConnectSigningSecret()
     );
-    logger.info(`stripe-connect: event for stripe account ${event.account}`);
+    log.info(`stripe-connect: event for stripe account ${event.account}`);
 
     try {
       // Handle the event
@@ -46,7 +47,7 @@ export default function () {
           // To trigger this event type use
           // `stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2`
           const session = event.data.object;
-          logger.info(`stripe-connect: checkout status is ${session.status}.`);
+          log.info(`stripe-connect: checkout status is ${session.status}.`);
 
           await handleCheckoutSession(session);
           break;
@@ -54,7 +55,7 @@ export default function () {
           // To trigger this event type use
           // `stripe trigger setup_intent.succeeded --add setup_intent:metadata.userId=3`
           const setupIntent = event.data.object;
-          logger.info(
+          log.info(
             `stripe-connect: setup intent status is ${setupIntent.status}.`
           );
 
@@ -108,14 +109,14 @@ export default function () {
           break;
         default:
           // Unexpected event type
-          logger.info(
+          log.info(
             `stripe-connect: unhandled Stripe event type ${event.type}.`
           );
       }
       // Return a 200 response to acknowledge receipt of the event
       res.send();
     } catch (err) {
-      logger.error("stripe-connect: error in webhook handler", err);
+      log.error("stripe-connect: error in webhook handler", err);
       next(err);
     }
   }

@@ -4,24 +4,26 @@ import { css } from "@emotion/css";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import type { ArtistFormData } from "pages/manage/artists/{artistId}/customize/Index";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { AiOutlineDrag } from "react-icons/ai";
 import { TabId } from "utils/artistTabs";
 
-import type { ArtistFormData } from "pages/manage/artists/{artistId}/customize/Index";
-
-const TAB_LABEL_KEYS: Record<TabId, string> = {
-  roster: "rosterTab",
-  releases: "releasesTab",
-  posts: "postsTab",
-  support: "supportTab",
-  merch: "merchTab",
+const TAB_NAME_KEYS: Record<TabId, string> = {
+  roster: "roster",
+  releases: "releases",
+  posts: "updates",
+  support: "support",
+  merch: "merch",
 };
 
 const SortableTabItem: React.FC<{ tabId: TabId }> = ({ tabId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
+  const { t: tArtist } = useTranslation("translation", {
+    keyPrefix: "artist",
+  });
   const methods = useFormContext<ArtistFormData>();
 
   const {
@@ -38,7 +40,8 @@ const SortableTabItem: React.FC<{ tabId: TabId }> = ({ tabId }) => {
     transition,
   };
 
-  const labelKey = TAB_LABEL_KEYS[tabId];
+  const tabName = tArtist(TAB_NAME_KEYS[tabId]);
+  const tabLabel = t("tabNameLabel", { tabName });
   const inputId = `input-${tabId}-tab`;
 
   return (
@@ -67,14 +70,14 @@ const SortableTabItem: React.FC<{ tabId: TabId }> = ({ tabId }) => {
             cursor: grabbing;
           }
         `}
-        aria-label={t("reorderTab", { tab: t(labelKey) })}
+        aria-label={t("reorderTab", { tab: tabLabel })}
       />
       <FormComponent className="flex-1 max-md:m-0!">
-        <label htmlFor={inputId}>{t(labelKey)}</label>
+        <label htmlFor={inputId}>{tabLabel}</label>
         <InputEl
           id={inputId}
           type="text"
-          placeholder={t(labelKey) ?? ""}
+          placeholder={tabName ?? ""}
           {...methods.register(`properties.titles.${tabId}` as const)}
         />
       </FormComponent>

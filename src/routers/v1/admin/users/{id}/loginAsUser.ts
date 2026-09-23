@@ -1,12 +1,13 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { setTokens } from "../../../../auth/utils";
 import { logger } from "../../../../../logger";
+import { setTokens } from "../../../../auth/utils";
 
 export default function () {
   const operations = {
@@ -14,6 +15,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { id } = req.params;
     try {
       assertLoggedIn(req);
@@ -25,7 +27,7 @@ export default function () {
         return res.status(404).json({ message: "User not found" });
       }
       setTokens(res, user);
-      logger.info(`Admin ${req.user.email} logged in as user ${user.email}`);
+      log.info(`Admin ${req.user.email} logged in as user ${user.email}`);
       res.json({ message: "success" });
     } catch (e) {
       next(e);

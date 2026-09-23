@@ -23,7 +23,11 @@ const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
     });
   }, [artist, floorPrice, startPurchase]);
 
-  if (!artist.user || !floorPrice) {
+  if (
+    !artist.user ||
+    !floorPrice ||
+    artist.purchaseEntireCatalogEnabled === false
+  ) {
     return null;
   }
 

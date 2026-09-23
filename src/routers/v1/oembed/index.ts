@@ -41,6 +41,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { url: urlParam, format = "json" } = req.query as {
       url: string | string[];
       format?: string | string[];
@@ -263,14 +264,14 @@ export default function () {
         };
 
         if (error.httpCode === 404) {
-          logger.info(message, context);
+          log.info(message, context);
         } else if (error.httpCode >= 400 && error.httpCode < 500) {
-          logger.warn(message, context);
+          log.warn(message, context);
         } else {
-          logger.error(message, context);
+          log.error(message, context);
         }
       } else {
-        logger.error("Error in oEmbed endpoint:", error);
+        log.error("Error in oEmbed endpoint:", error);
       }
       next(error);
     }

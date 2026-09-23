@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+
 import { userAuthenticated } from "../../../../../auth/passport";
-import { doesPostBelongToUser } from "../../../../../utils/post";
-import { serializePost } from "../../../../../serializers/post";
-import { sendPostNotificationQueue } from "../../../../../queues/send-post-notification-queue";
 import logger from "../../../../../logger";
+import { sendPostNotificationQueue } from "../../../../../queues/send-post-notification-queue";
+import { serializePost } from "../../../../../serializers/post";
+import { doesPostBelongToUser } from "../../../../../utils/post";
 
 export default function () {
   const operations = {
@@ -12,6 +13,7 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response) {
+    const log = req.logger ?? logger;
     const { postId } = req.params;
 
     try {
@@ -27,7 +29,7 @@ export default function () {
       // remove any pending notification jobs to prevent emails from being sent.
       // This provides a grace period for users to unpublish if needed.
       if (existingPost?.isDraft === false && updatedPost.isDraft === true) {
-        logger.info(
+        log.info(
           `publish: removing pending notification job for post ${postId}`
         );
         // Find all jobs for this post and remove pending ones
@@ -39,7 +41,7 @@ export default function () {
         for (const job of jobs) {
           if (job.data.postId === Number(postId)) {
             await job.remove();
-            logger.info(
+            log.info(
               `publish: removed pending job ${job.id} for post ${postId}`
             );
           }

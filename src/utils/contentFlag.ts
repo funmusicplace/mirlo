@@ -17,6 +17,9 @@ export const contentFlagInclude = {
   resolvedByUser: {
     select: { id: true, name: true, email: true },
   },
+  reportedUser: {
+    select: { id: true, name: true, email: true, trustLevel: true },
+  },
 } satisfies Prisma.ContentFlagInclude;
 
 export const findFlaggedImageOwner = async (

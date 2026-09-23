@@ -18,6 +18,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { id: trackGroupId }: { id?: string } = req.params;
     const { format: requestedFormat = "flac" } = req.query as {
       format?: FormatOptions;
@@ -40,17 +41,17 @@ export default function () {
         });
       }
 
-      logger.info(`trackGroupId: ${trackGroupId} Found a trackgroup`);
+      log.info(`trackGroupId: ${trackGroupId} Found a trackgroup`);
 
-      logger.info("checking if trackgroup is already zipped");
+      log.info("checking if trackgroup is already zipped");
       if (await zipExists("trackGroup", trackGroup.id, format)) {
-        logger.info("the trackgroup is already zipped");
+        log.info("the trackgroup is already zipped");
         return res.json({
           message: "The album has already been generated",
           result: true,
         });
       }
-      logger.info("trackGroup doesn't exist yet, start generating it");
+      log.info("trackGroup doesn't exist yet, start generating it");
       const jobId = await startGeneratingZip(
         trackGroup,
         trackGroup.tracks,

@@ -120,6 +120,19 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
                 {artist.name}
               </Link>
             )}
+            {flag.reportedUser && (
+              <div className="flex flex-col">
+                <small>{t("reportedAccount")}</small>
+                <Link to={`/admin/content/users/${flag.reportedUser.id}`}>
+                  {flag.reportedUser.name ?? flag.reportedUser.email}
+                </Link>
+                <small>
+                  {t("reportedAccountTrustLevel", {
+                    trustLevel: flag.reportedUser.trustLevel ?? 0,
+                  })}
+                </small>
+              </div>
+            )}
           </div>
         </td>
         <td>

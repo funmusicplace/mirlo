@@ -1,16 +1,16 @@
 import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { Prisma } from "@mirlo/prisma/client";
+import { serializeMerchPurchase } from "../../../../serializers/merchPurchase";
 import {
   buyerUserSelect,
   resolveManagedArtistIds,
 } from "../../../../utils/artist";
 import { getDateRange } from "../../../../utils/dateRange";
 import { downloadCSVFile } from "../../../../utils/download";
-import { serializeMerchPurchase } from "../../../../serializers/merchPurchase";
 
 export default function () {
   const operations = {
@@ -131,19 +131,27 @@ const csvColumns = [
   },
   {
     label: "Shipping address line 1",
-    value: "shippingAddress.line1",
+    value: "shippingAddress.address.line1",
   },
   {
-    label: "Shipping address line 1",
-    value: "shippingAddress.line2",
+    label: "Shipping address line 2",
+    value: "shippingAddress.address.line2",
   },
   {
     label: "Shipping address city",
-    value: "shippingAddress.city",
+    value: "shippingAddress.address.city",
+  },
+  {
+    label: "Shipping address state",
+    value: "shippingAddress.address.state",
+  },
+  {
+    label: "Shipping address postal code",
+    value: "shippingAddress.address.postal_code",
   },
   {
     label: "Shipping address country",
-    value: "shippingAddress.country",
+    value: "shippingAddress.address.country",
   },
   {
     label: "Billing address",

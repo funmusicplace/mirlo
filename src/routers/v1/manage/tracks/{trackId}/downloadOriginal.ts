@@ -18,6 +18,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const log = req.logger ?? logger;
     const { trackId }: { trackId?: string } = req.params;
 
     try {
@@ -38,7 +39,7 @@ export default function () {
         });
       }
 
-      logger.info(`trackId: ${trackId} Found a track, preparing download`);
+      log.info(`trackId: ${trackId} Found a track, preparing download`);
 
       try {
         const title = cleanHeaderValue(
@@ -46,7 +47,7 @@ export default function () {
             `${track.trackGroup.profile.name} - ${track.title ?? "track"}`
           )
         );
-        logger.info(`downloading ${title}.zip`);
+        log.info(`downloading ${title}.zip`);
         res.set(
           "Content-Disposition",
           `attachment; filename="${title}.${track.audio.fileExtension}"`
