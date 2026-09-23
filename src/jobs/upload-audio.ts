@@ -110,6 +110,11 @@ export default async (job: Job) => {
     return response;
   } catch (e) {
     logger.error("Error creating audio folder", e);
-    return { error: e };
+    return {
+      error:
+        e instanceof Error
+          ? { message: e.message, stack: e.stack }
+          : { message: String(e) },
+    };
   }
 };
