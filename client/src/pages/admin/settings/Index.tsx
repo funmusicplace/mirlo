@@ -1,101 +1,47 @@
-import { css } from "@emotion/css";
+import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import FeaturedArtistsSelector from "components/Admin/FeaturedArtistsSelector";
-import Button from "components/common/Button";
+import EmailProviderSection from "components/Admin/settings/EmailProviderSection";
+import GeneralSettingsSection from "components/Admin/settings/GeneralSettingsSection";
+import PoliciesSection from "components/Admin/settings/PoliciesSection";
+import SettingsActionsBar from "components/Admin/settings/SettingsActionsBar";
+import {
+  FormSettings,
+  SettingsFromAPI,
+} from "components/Admin/settings/settingsForm";
+import SettingsSectionNav from "components/Admin/settings/SettingsSectionNav";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import { SelectEl } from "components/common/Select";
-import Table from "components/common/Table";
-import TextArea from "components/common/TextArea";
 import WidthContainer from "components/common/WidthContainer";
 import { queryFeaturedArtists } from "queries/settings";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
-interface FormSettings {
-  platformPercent: number;
-  cdnUrl?: string;
-  terms: string;
-  privacyPolicy: string;
-  cookiePolicy: string;
-  contentPolicy: string;
-  instanceCustomization?: SettingsFromAPI["settings"]["instanceCustomization"];
-  stripe?: SettingsFromAPI["settings"]["stripe"];
-  isClosedToPublicArtistSignup: boolean;
-  showQueueDashboard: boolean;
-  emailProvider?: SettingsFromAPI["settings"]["emailProvider"];
-  cloudflareTurnstileSecret?: string;
-  defconLevel?: number;
-  useConsolidatedBuckets?: boolean;
-  bucketPrefix?: string;
-  trustLevelNames?: string[];
-}
+import { bp } from "../../../constants";
 
-interface SettingsFromAPI {
-  cdnUrl?: string;
-  bucketNames?: { prefix: string } | null;
-  settings: {
-    platformPercent: number;
-    instanceCustomization?: {
-      colors?: {
-        button?: string;
-        buttonText?: string;
-        background?: string;
-        text?: string;
-      };
-      artistId?: string;
-      title?: string;
-      supportEmail?: string;
-      purchaseEmail?: string;
-      showHeroOnHome?: boolean;
-    };
-    stripe?: {
-      key?: string;
-      keyConfigured?: boolean;
-      webhookSigningSecret?: string;
-      webhookConnectSigningSecret?: string;
-    };
-    emailProvider?: {
-      provider?: "sendgrid" | "mailgun" | "postmark";
-      fromEmail?: string;
-      sendgrid?: {
-        apiKey?: string;
-      };
-      mailgun?: {
-        apiKey?: string;
-        domain?: string;
-      };
-      postmark?: {
-        apiKey?: string;
-      };
-    };
-    cloudflareTurnstileSecret?: string;
-    featuredArtistIds?: number[];
-    trustLevelNames?: string[];
-  };
-  terms: string;
-  privacyPolicy: string;
-  cookiePolicy: string;
-  showQueueDashboard: boolean;
-  isClosedToPublicArtistSignup: boolean;
-  contentPolicy: string;
-  defconLevel: number;
-}
+const SettingsLayout = styled.div`
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: 2.5rem;
 
-const colorInputClass = css`
-  min-height: 2.5rem;
+  @media screen and (max-width: ${bp.medium}px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
 `;
 
 const Index = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const snackbar = useSnackbar();
   const [isLoading, setIsLoading] = React.useState(false);
-  const { reset, register, handleSubmit, watch } = useForm<FormSettings>();
+  const methods = useForm<FormSettings>();
+  const { reset, register, handleSubmit, watch } = methods;
   const stripeKeyConfigured = watch("stripe.keyConfigured");
   const useConsolidatedBuckets = watch("useConsolidatedBuckets");
-  const emailProviderSelected = watch("emailProvider.provider");
   const { data: initialFeaturedArtists } = useQuery(queryFeaturedArtists());
   const [featuredArtistsOverride, setFeaturedArtistsOverride] = React.useState<
     Artist[] | undefined
@@ -193,400 +139,155 @@ const Index = () => {
   );
 
   return (
-    <WidthContainer variant="big" justify="center" className="p-4">
-      <form onSubmit={handleSubmit(updateSettings)}>
-        <Table
-          className={css`
-            &.mi-table {
-              border: none;
-            }
-          `}
-        >
-          <tr>
-            <h3>General Settings</h3>
-          </tr>
-          <tr>
-            <td>Platform percent</td>
-            <td>
-              <InputEl
-                {...register("platformPercent")}
-                type="number"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>CDN URL</td>
-            <td>
-              <InputEl
-                {...register("cdnUrl")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Is closed to public artist signup</td>
-            <td>
-              <InputEl
-                {...register("isClosedToPublicArtistSignup")}
-                type="checkbox"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Show queue dashboard</td>
-            <td>
-              <InputEl
-                {...register("showQueueDashboard")}
-                type="checkbox"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Show hero on home</td>
-            <td>
-              <InputEl
-                {...register("instanceCustomization.showHeroOnHome")}
-                type="checkbox"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Instance artist ID</td>
-            <td>
-              <InputEl
-                {...register("instanceCustomization.artistId")}
-                type="number"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Colors</td>
-            <td>
-              <FormComponent>
-                <label>Button Color</label>
-                <InputEl
-                  {...register("instanceCustomization.colors.button")}
-                  type="color"
-                  className={colorInputClass}
+    <WidthContainer variant="big" justify="center" className="px-4 pb-4">
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(updateSettings)}>
+          <SettingsActionsBar isSaving={isLoading} />
+          <SettingsLayout>
+            <SettingsSectionNav />
+            <div className="max-w-2xl">
+              <GeneralSettingsSection />
+              <fieldset
+                id="settings-featured-artists"
+                className="mb-8 scroll-mt-32"
+              >
+                <legend className="mb-2 text-lg font-semibold">
+                  {t("featuredArtists")}
+                </legend>
+                <FeaturedArtistsSelector
+                  value={featuredArtists}
+                  onChange={setFeaturedArtistsOverride}
                 />
-              </FormComponent>
-              <FormComponent>
-                <label>Button Text Color</label>
-                <InputEl
-                  {...register("instanceCustomization.colors.buttonText")}
-                  type="color"
-                  className={colorInputClass}
-                />
-              </FormComponent>
-              <FormComponent>
-                <label>Text Color</label>
-                <InputEl
-                  {...register("instanceCustomization.colors.text")}
-                  type="color"
-                  className={colorInputClass}
-                />
-              </FormComponent>
-              <FormComponent>
-                <label>Background Color</label>
-                <InputEl
-                  {...register("instanceCustomization.colors.background")}
-                  type="color"
-                  className={colorInputClass}
-                />
-              </FormComponent>
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={2}>
-              <h3>Featured Artists</h3>
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={2}>
-              <FeaturedArtistsSelector
-                value={featuredArtists}
-                onChange={setFeaturedArtistsOverride}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <h3>Stripe Settings</h3>
-            </td>
-          </tr>
-          <tr>
-            <td>stripeKey</td>
-            <td>
-              <InputEl
-                {...register("stripe.key")}
-                type="password"
-                placeholder={
-                  stripeKeyConfigured
-                    ? "sk_*** (leave blank to keep)"
-                    : "No key set"
-                }
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>webhookConnectSigningSecret</td>
-            <td>
-              <InputEl
-                {...register("stripe.webhookConnectSigningSecret")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <h3>Email Provider Settings</h3>
-            </td>
-          </tr>
-          <tr>
-            <td>Email Provider</td>
-            <td>
-              <SelectEl {...register("emailProvider.provider")}>
-                <option value="">None</option>
-                <option value="sendgrid">SendGrid</option>
-                <option value="mailgun">Mailgun</option>
-                <option value="postmark">Postmark</option>
-              </SelectEl>
-            </td>
-          </tr>
-          <tr>
-            <td>From Email</td>
-            <td>
-              <InputEl
-                {...register("emailProvider.fromEmail", {
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Please enter a valid email address",
-                  },
-                })}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          {/* SendGrid Settings */}
-          {emailProviderSelected === "sendgrid" && (
-            <>
-              <tr>
-                <td colSpan={2}>
-                  <h4>SendGrid Settings</h4>
-                </td>
-              </tr>
-              <tr>
-                <td>API Key</td>
-                <td>
+              </fieldset>
+
+              <fieldset id="settings-stripe" className="mb-8 scroll-mt-32">
+                <legend className="mb-2 text-lg font-semibold">
+                  {t("stripeSettings")}
+                </legend>
+                <FormComponent>
+                  <label htmlFor="input-stripe-key">
+                    {t("stripeSecretKey")}
+                  </label>
                   <InputEl
-                    {...register("emailProvider.sendgrid.apiKey")}
+                    id="input-stripe-key"
                     type="password"
-                    className={css`
-                      text-align: right;
-                    `}
+                    className="max-w-md"
+                    placeholder={
+                      stripeKeyConfigured
+                        ? t("stripeKeyPlaceholderConfigured")
+                        : t("stripeKeyPlaceholderEmpty")
+                    }
+                    {...register("stripe.key")}
                   />
-                </td>
-              </tr>
-            </>
-          )}
-          {/* Mailgun Settings */}
-          {emailProviderSelected === "mailgun" && (
-            <>
-              <tr>
-                <td colSpan={2}>
-                  <h4>Mailgun Settings</h4>
-                </td>
-              </tr>
-              <tr>
-                <td>API Key</td>
-                <td>
+                </FormComponent>
+                <FormComponent>
+                  <label htmlFor="input-stripe-webhook-connect-signing-secret">
+                    {t("stripeWebhookConnectSigningSecret")}
+                  </label>
                   <InputEl
-                    {...register("emailProvider.mailgun.apiKey")}
-                    type="password"
-                    className={css`
-                      text-align: right;
-                    `}
+                    id="input-stripe-webhook-connect-signing-secret"
+                    type="text"
+                    className="max-w-md"
+                    {...register("stripe.webhookConnectSigningSecret")}
                   />
-                </td>
-              </tr>
-              <tr>
-                <td>Domain</td>
-                <td>
+                </FormComponent>
+              </fieldset>
+
+              <EmailProviderSection />
+
+              <fieldset id="settings-storage" className="mb-8 scroll-mt-32">
+                <legend className="mb-2 text-lg font-semibold">
+                  {t("storage")}
+                </legend>
+                <FormComponent direction="row">
                   <InputEl
-                    {...register("emailProvider.mailgun.domain")}
-                    className={css`
-                      text-align: right;
-                    `}
+                    id="input-use-consolidated-buckets"
+                    type="checkbox"
+                    aria-describedby="hint-use-consolidated-buckets"
+                    {...register("useConsolidatedBuckets")}
                   />
-                </td>
-              </tr>
-            </>
-          )}
-          {/* Postmark Settings */}
-          {emailProviderSelected === "postmark" && (
-            <>
-              <tr>
-                <td colSpan={2}>
-                  <h4>Postmark Settings</h4>
-                </td>
-              </tr>
-              <tr>
-                <td>API Key</td>
-                <td>
+                  <div className="flex flex-col">
+                    <label htmlFor="input-use-consolidated-buckets">
+                      {t("useConsolidatedBuckets")}
+                    </label>
+                    <small
+                      id="hint-use-consolidated-buckets"
+                      className="max-w-md"
+                    >
+                      {t("useConsolidatedBucketsHint")}
+                    </small>
+                  </div>
+                </FormComponent>
+                {useConsolidatedBuckets && (
+                  <FormComponent>
+                    <label htmlFor="input-bucket-prefix">
+                      {t("bucketPrefix")}
+                    </label>
+                    <InputEl
+                      id="input-bucket-prefix"
+                      type="text"
+                      className="max-w-xs"
+                      placeholder={t("bucketPrefixPlaceholder")}
+                      {...register("bucketPrefix")}
+                    />
+                  </FormComponent>
+                )}
+              </fieldset>
+
+              <PoliciesSection />
+
+              <fieldset
+                id="settings-trust-levels"
+                className="mb-8 scroll-mt-32"
+              >
+                <legend className="mb-2 text-lg font-semibold">
+                  {t("trustLevels")}
+                </legend>
+                {DEFAULT_TRUST_LEVEL_NAMES.map((defaultName, level) => (
+                  <FormComponent key={level}>
+                    <label htmlFor={`input-trust-level-name-${level}`}>
+                      {t("trustLevelName", { level })}
+                    </label>
+                    <InputEl
+                      id={`input-trust-level-name-${level}`}
+                      type="text"
+                      className="max-w-xs"
+                      placeholder={defaultName}
+                      {...register(`trustLevelNames.${level}`)}
+                    />
+                  </FormComponent>
+                ))}
+              </fieldset>
+
+              <fieldset id="settings-security" className="mb-8 scroll-mt-32">
+                <legend className="mb-2 text-lg font-semibold">
+                  {t("security")}
+                </legend>
+                <FormComponent>
+                  <label htmlFor="input-cloudflare-turnstile-secret">
+                    {t("cloudflareTurnstileSecret")}
+                  </label>
                   <InputEl
-                    {...register("emailProvider.postmark.apiKey")}
-                    // type="password"
-                    className={css`
-                      text-align: right;
-                    `}
+                    id="input-cloudflare-turnstile-secret"
+                    type="text"
+                    className="max-w-md"
+                    {...register("cloudflareTurnstileSecret")}
                   />
-                </td>
-              </tr>
-            </>
-          )}
-          <tr>
-            <td colSpan={2}>
-              <h3>Storage</h3>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Use consolidated bucket mode
-              <small className="block max-w-md">
-                Off keeps legacy mode (separate per-type buckets): leave off for
-                existing installs unless you've migrated their data. On switches
-                to the consolidated 3-bucket layout: mirlo-audio, mirlo-images,
-                mirlo-downloads.
-              </small>
-            </td>
-            <td>
-              <InputEl
-                {...register("useConsolidatedBuckets")}
-                type="checkbox"
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          {useConsolidatedBuckets && (
-            <tr>
-              <td>Bucket prefix</td>
-              <td>
-                <InputEl
-                  {...register("bucketPrefix")}
-                  placeholder="(optional prefix)"
-                  className={css`
-                    text-align: right;
-                  `}
-                />
-              </td>
-            </tr>
-          )}
-          <tr>
-            <td>cloudflareTurnstileSecret</td>
-            <td>
-              <InputEl
-                {...register("cloudflareTurnstileSecret")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Terms and Conditions Markdown</td>
-            <td>
-              <TextArea {...register("terms")} rows={10} />
-            </td>
-          </tr>
-          <tr>
-            <td>Privacy Policy Markdown</td>
-            <td>
-              <TextArea {...register("privacyPolicy")} rows={10} />
-            </td>
-          </tr>
-          <tr>
-            <td>Cookie Policy Markdown</td>
-            <td>
-              <TextArea {...register("cookiePolicy")} rows={10} />
-            </td>
-          </tr>
-          <tr>
-            <td>Content Policy Markdown</td>
-            <td>
-              <TextArea {...register("contentPolicy")} rows={10} />
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={2}>
-              <h3>Trust levels</h3>
-            </td>
-          </tr>
-          {DEFAULT_TRUST_LEVEL_NAMES.map((defaultName, level) => (
-            <tr key={level}>
-              <td>
-                <label htmlFor={`input-trust-level-name-${level}`}>
-                  Level {level} name
-                </label>
-              </td>
-              <td>
-                <InputEl
-                  id={`input-trust-level-name-${level}`}
-                  {...register(`trustLevelNames.${level}`)}
-                  placeholder={defaultName}
-                  className={css`
-                    text-align: right;
-                  `}
-                />
-              </td>
-            </tr>
-          ))}
-          <tr>
-            <td>
-              <h3>Security</h3>
-            </td>
-          </tr>
-          <tr>
-            <td>defconLevel</td>
-            <td>
-              <InputEl
-                {...register("defconLevel")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-        </Table>
-        <Button type="submit" isLoading={isLoading}>
-          Save
-        </Button>
-      </form>
+                </FormComponent>
+                <FormComponent>
+                  <label htmlFor="input-defcon-level">{t("defconLevel")}</label>
+                  <InputEl
+                    id="input-defcon-level"
+                    type="text"
+                    className="max-w-xs"
+                    {...register("defconLevel")}
+                  />
+                </FormComponent>
+              </fieldset>
+            </div>
+          </SettingsLayout>
+        </form>
+      </FormProvider>
     </WidthContainer>
   );
 };
