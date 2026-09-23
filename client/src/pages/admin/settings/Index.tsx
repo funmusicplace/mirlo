@@ -151,7 +151,7 @@ const Index = () => {
                 id="settings-featured-artists"
                 className="mb-8 scroll-mt-32"
               >
-                <legend className="mb-2 text-lg font-semibold">
+                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
                   {t("featuredArtists")}
                 </legend>
                 <FeaturedArtistsSelector
@@ -161,7 +161,7 @@ const Index = () => {
               </fieldset>
 
               <fieldset id="settings-stripe" className="mb-8 scroll-mt-32">
-                <legend className="mb-2 text-lg font-semibold">
+                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
                   {t("stripeSettings")}
                 </legend>
                 <FormComponent>
@@ -196,7 +196,7 @@ const Index = () => {
               <EmailProviderSection />
 
               <fieldset id="settings-storage" className="mb-8 scroll-mt-32">
-                <legend className="mb-2 text-lg font-semibold">
+                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
                   {t("storage")}
                 </legend>
                 <FormComponent direction="row">
@@ -240,7 +240,7 @@ const Index = () => {
                 id="settings-trust-levels"
                 className="mb-8 scroll-mt-32"
               >
-                <legend className="mb-2 text-lg font-semibold">
+                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
                   {t("trustLevels")}
                 </legend>
                 {DEFAULT_TRUST_LEVEL_NAMES.map((defaultName, level) => (
@@ -260,7 +260,7 @@ const Index = () => {
               </fieldset>
 
               <fieldset id="settings-security" className="mb-8 scroll-mt-32">
-                <legend className="mb-2 text-lg font-semibold">
+                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
                   {t("security")}
                 </legend>
                 <FormComponent>

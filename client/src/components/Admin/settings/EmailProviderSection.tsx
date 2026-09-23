@@ -21,7 +21,7 @@ const EmailProviderSection: React.FC = () => {
 
   return (
     <fieldset id="settings-email-provider" className="mb-8 scroll-mt-32">
-      <legend className="mb-2 text-lg font-semibold">
+      <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
         {t("emailProviderSettings")}
       </legend>
 

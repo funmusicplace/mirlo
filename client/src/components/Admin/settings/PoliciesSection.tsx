@@ -19,7 +19,9 @@ const PoliciesSection: React.FC = () => {
 
   return (
     <fieldset id="settings-policies" className="mb-8 scroll-mt-32">
-      <legend className="mb-2 text-lg font-semibold">{t("policies")}</legend>
+      <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
+        {t("policies")}
+      </legend>
       {POLICY_FIELDS.map(({ key, labelKey }) => (
         <FormComponent key={key} className="w-full">
           <label htmlFor={`input-${key}`}>{t(labelKey)}</label>

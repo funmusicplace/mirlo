@@ -4,7 +4,8 @@ import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import { bp } from "../../../constants";
 
@@ -54,7 +55,7 @@ const GeneralSettingsSection: React.FC = () => {
 
   return (
     <fieldset id="settings-general" className="mb-8 scroll-mt-32">
-      <legend className="mb-2 text-lg font-semibold">
+      <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
         {t("generalSettings")}
       </legend>
 
@@ -82,11 +83,21 @@ const GeneralSettingsSection: React.FC = () => {
         <InputEl
           id="input-is-closed-to-public-artist-signup"
           type="checkbox"
+          aria-describedby="hint-is-closed-to-public-artist-signup"
           {...register("isClosedToPublicArtistSignup")}
         />
-        <label htmlFor="input-is-closed-to-public-artist-signup">
-          {t("isClosedToPublicArtistSignup")}
-        </label>
+        <div className="flex flex-col">
+          <label htmlFor="input-is-closed-to-public-artist-signup">
+            {t("isClosedToPublicArtistSignup")}
+          </label>
+          <small id="hint-is-closed-to-public-artist-signup">
+            <Trans
+              t={t}
+              i18nKey="isClosedToPublicArtistSignupHint"
+              components={{ invitesLink: <Link to="/admin/content/invites" /> }}
+            />
+          </small>
+        </div>
       </FormComponent>
 
       <FormComponent direction="row">

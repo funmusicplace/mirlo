@@ -1708,7 +1708,8 @@
     "deleteClient": "Delete client",
     "pledgeCollectionTrackGroupId": "Trigger pledge collection for track group id:",
     "triggerPledgeCollection": "Trigger pledge collection",
-    "pledgeCollectionTriggered": "Pledge collection triggered"
+    "pledgeCollectionTriggered": "Pledge collection triggered",
+    "isClosedToPublicArtistSignupHint": "New users can only join through an <invitesLink>invite</invitesLink>."
   },
   "flaggedContent": {
     "title": "Flagged content",
