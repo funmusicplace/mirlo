@@ -23,9 +23,7 @@ const FollowArtist: React.FC<{
 }> = ({ artistId, hideWhenSubscribed, variant = "outlined" }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
-  );
+  const { data: artist } = useQuery(queryArtist({ artistSlug: `${artistId}` }));
 
   const localArtistId = artistId ?? artist?.id;
   const artistUserSubscriptions = user?.artistUserSubscriptions;

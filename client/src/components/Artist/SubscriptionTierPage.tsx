@@ -117,8 +117,12 @@ const SubscriptionTierPage: React.FC<{
   const hasPerks = hasTierPerks(subscriptionTier);
   const isOwner = !!user && user.id === artist.userId;
   const currentSubscription = getUserSubscriptionToTier(user, subscriptionTier);
-  const canChangePaymentMethod =
-    !!currentSubscription && !isSubscriptionCancelled(currentSubscription);
+  const paymentMethodSubscription =
+    !isOwner &&
+    currentSubscription &&
+    !isSubscriptionCancelled(currentSubscription)
+      ? currentSubscription
+      : undefined;
 
   const currency = artist.user?.currency ?? "usd";
   const image = subscriptionTier.images?.[0]?.image;
@@ -183,43 +187,8 @@ const SubscriptionTierPage: React.FC<{
       <HeaderRow>
         {hasImage && <HeaderImage src={image.sizes[1250]} alt="" />}
         <Details>
-          {!isOwner && canChangePaymentMethod && (
+          {(isOwner || paymentMethodSubscription) && (
             <div className="flex justify-end">
-              <ChangePaymentMethodButton
-                subscriptionId={currentSubscription.id}
-                onUpdated={() => refetch()}
-              />
-            </div>
-          )}
-          <div
-            className={
-              hasImage
-                ? "flex flex-col flex-1 justify-center gap-4"
-                : "flex flex-col items-center gap-4 text-center"
-            }
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-2xl md:text-3xl font-bold!">
-                  {subscriptionTier.name}
-                </h2>
-                <div className="flex items-center gap-2 text-lg">
-                  <span>
-                    <Money amount={amount} currency={currency} /> /{" "}
-                    {t(
-                      subscriptionTier.interval === "MONTH"
-                        ? "monthly"
-                        : "yearly"
-                    )}
-                  </span>
-                  <PlatformPercent
-                    percent={subscriptionTier.platformPercent}
-                    chosenPrice={amount}
-                    artistName={artist.name}
-                    currency={currency}
-                  />
-                </div>
-              </div>
               {isOwner && (
                 <ArtistButtonLink
                   to={`${getArtistManageTiersUrl(artist.id)}/${subscriptionTier.id}`}
@@ -230,10 +199,59 @@ const SubscriptionTierPage: React.FC<{
                   {t("editTier")}
                 </ArtistButtonLink>
               )}
+              {paymentMethodSubscription && (
+                <ChangePaymentMethodButton
+                  subscriptionId={paymentMethodSubscription.id}
+                  onUpdated={() => refetch()}
+                />
+              )}
+            </div>
+          )}
+          <div
+            className={
+              hasImage
+                ? "flex flex-col flex-1 justify-center gap-4"
+                : "flex flex-col items-center gap-4 text-center"
+            }
+          >
+            <div className="flex flex-col gap-1">
+              <h2
+                className={
+                  hasImage
+                    ? "text-2xl md:text-3xl font-bold!"
+                    : "text-3xl! md:text-4xl! font-bold!"
+                }
+              >
+                {subscriptionTier.name}
+              </h2>
+              <div
+                className={
+                  "flex items-center gap-2 text-lg" +
+                  (hasImage ? "" : " justify-center")
+                }
+              >
+                <span>
+                  <Money amount={amount} currency={currency} /> /{" "}
+                  {t(
+                    subscriptionTier.interval === "MONTH" ? "monthly" : "yearly"
+                  )}
+                </span>
+                <PlatformPercent
+                  percent={subscriptionTier.platformPercent}
+                  chosenPrice={amount}
+                  artistName={artist.name}
+                  currency={currency}
+                />
+              </div>
             </div>
             <SubscriptionTierActions
               subscriptionTier={subscriptionTier}
               layout="page"
+              supportButton={
+                hasImage
+                  ? { size: "big", className: "w-full" }
+                  : { className: "w-[70%]" }
+              }
             />
           </div>
         </Details>

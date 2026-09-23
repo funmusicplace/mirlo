@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import Box from "components/common/Box";
+import { ButtonProps } from "components/common/Button";
 import Modal from "components/common/Modal";
 import PurchaseModal from "components/common/Purchase/PurchaseModal";
 import { useSubscriptionCheckout } from "components/common/Purchase/useSubscriptionCheckout";
@@ -36,7 +37,8 @@ export const isUserSubscribedToTier = (
 const SubscriptionTierActions: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
   layout?: "page" | "card";
-}> = ({ subscriptionTier, layout = "card" }) => {
+  supportButton?: { size?: ButtonProps["size"]; className?: string };
+}> = ({ subscriptionTier, layout = "card", supportButton }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
   const snackbar = useSnackbar();
@@ -114,7 +116,7 @@ const SubscriptionTierActions: React.FC<{
   return (
     <>
       {((!isSubscribedToTier && !isSubscribedToArtist) || isCancelled) && (
-        <ArtistVariableSupport tier={subscriptionTier} />
+        <ArtistVariableSupport tier={subscriptionTier} button={supportButton} />
       )}
       {(isSubscribedToTier || isSubscribedToArtist) && (
         <div

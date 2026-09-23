@@ -7,6 +7,7 @@ import { describe, it } from "mocha";
 import {
   clearTables,
   createProfile,
+  createTier,
   createTrackGroup,
   createUser,
   createUserTrackGroupPurchase,
@@ -32,6 +33,73 @@ describe("trackGroups/{id}", () => {
         .get("trackGroups/1")
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 404);
+    });
+
+    it("should point a subscriber exclusive release to the profile whose tier includes it", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const artist = await createProfile(artistUser.id, {
+        name: "Roster Artist",
+        urlSlug: "roster-artist",
+      });
+      const { user: labelUser } = await createUser({
+        email: "label@test.com",
+      });
+      const label = await createProfile(labelUser.id, {
+        name: "The Label",
+        urlSlug: "the-label",
+        isLabelProfile: true,
+      });
+      const trackGroup = await createTrackGroup(artist.id, {
+        title: "Label exclusive",
+        urlSlug: "label-exclusive",
+        isGettable: false,
+      });
+      const labelTier = await createTier(label.id, { minAmount: 500 });
+      await prisma.subscriptionTierRelease.create({
+        data: { tierId: labelTier.id, trackGroupId: trackGroup.id },
+      });
+
+      const viaLabel = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(viaLabel.status, 200);
+      assert.equal(viaLabel.body.result.isSubscriberExclusive, true);
+      assert.equal(
+        viaLabel.body.result.subscriptionArtist.urlSlug,
+        "the-label"
+      );
+
+      const ownTier = await createTier(artist.id, { minAmount: 300 });
+      await prisma.subscriptionTierRelease.create({
+        data: { tierId: ownTier.id, trackGroupId: trackGroup.id },
+      });
+
+      const viaOwn = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(
+        viaOwn.body.result.subscriptionArtist.urlSlug,
+        "roster-artist"
+      );
+
+      await prisma.profileSubscriptionTier.delete({
+        where: { id: ownTier.id },
+      });
+      await prisma.profileSubscriptionTier.delete({
+        where: { id: labelTier.id },
+      });
+
+      const orphaned = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(orphaned.body.result.isIncludedInSubscription, false);
+      assert.equal(orphaned.body.result.isSubscriberExclusive, false);
+      assert.equal(orphaned.body.result.subscriptionArtist, undefined);
     });
 
     it("should GET / 404 when the artist is disabled", async () => {

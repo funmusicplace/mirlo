@@ -4,7 +4,10 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { processSingleTrackGroup } from "../../../serializers/trackGroup";
-import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
+import {
+  subscriptionTierReleasesCount,
+  whereForPublishedTrackGroups,
+} from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -66,7 +69,7 @@ export default function () {
           _count: {
             select: {
               userTrackGroupPurchases: true,
-              subscriptionTierReleases: true,
+              ...subscriptionTierReleasesCount.select,
             },
           },
           profile: {

@@ -57,7 +57,10 @@ type TrackGroupInput = TrackGroup & {
     userTrackGroupPurchases?: number;
     subscriptionTierReleases?: number;
   };
+  subscriptionTierReleases?: { tier: { profile: SubscriptionArtist } }[];
 };
+
+type SubscriptionArtist = { id: number; urlSlug: string | null; name: string };
 
 export const isIncludedInSubscription = (trackGroup: {
   _count?: { subscriptionTierReleases?: number };
@@ -68,6 +71,14 @@ export const isSubscriberExclusive = (trackGroup: {
   _count?: { subscriptionTierReleases?: number };
 }) => trackGroup.isGettable === false && isIncludedInSubscription(trackGroup);
 
+const findSubscriptionArtist = (
+  ownerId: number | undefined,
+  releases?: { tier: { profile: SubscriptionArtist } }[]
+): SubscriptionArtist | undefined => {
+  const profiles = releases?.map((release) => release.tier.profile) ?? [];
+  return profiles.find((profile) => profile.id === ownerId) ?? profiles[0];
+};
+
 export const processSingleTrackGroup = <T extends TrackGroupInput>(
   tg: T,
   options?: { loggedInUserId?: number }
@@ -77,9 +88,17 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
   hasNotifiedFollowers: boolean;
   isIncludedInSubscription: boolean;
   isSubscriberExclusive: boolean;
+  subscriptionArtist?: SubscriptionArtist;
   tags: string[];
 } => {
-  const { _count, profile, profileId, artist, ...rest } = tg;
+  const {
+    _count,
+    profile,
+    profileId,
+    artist,
+    subscriptionTierReleases,
+    ...rest
+  } = tg;
   const owner = profile ?? artist;
   const currency = tg.paymentToUser?.currency ?? owner?.user?.currency ?? "usd";
 
@@ -101,6 +120,10 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
     isIncludedInSubscription: isIncludedInSubscription(tg),
     isSubscriberExclusive: isSubscriberExclusive(tg),
+    subscriptionArtist: findSubscriptionArtist(
+      profileId ?? owner?.id,
+      subscriptionTierReleases
+    ),
     tracks: tg.tracks?.map((track) => ({
       ...track,
       isPlayable: isTrackPlayableNested({
@@ -132,6 +155,7 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     hasNotifiedFollowers: boolean;
     isIncludedInSubscription: boolean;
     isSubscriberExclusive: boolean;
+    subscriptionArtist?: SubscriptionArtist;
     tags: string[];
   };
 };

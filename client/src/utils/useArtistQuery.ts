@@ -4,9 +4,7 @@ import { useParams } from "react-router-dom";
 
 const useArtistQuery = () => {
   const { artistId } = useParams();
-  const queryResponse = useQuery(
-    queryArtist({ artistSlug: artistId, includeDefaultTier: true })
-  );
+  const queryResponse = useQuery(queryArtist({ artistSlug: artistId }));
   return queryResponse;
 };
 

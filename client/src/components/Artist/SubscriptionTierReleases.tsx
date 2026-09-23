@@ -55,14 +55,9 @@ const SubscriptionTierReleases: React.FC<{
           `manage/artists/${artist.id}/subscriptionTiers/${tier.id}/releaseOrder`,
           { trackGroupIds: [...visibleIds, ...hiddenIds] }
         );
-        await Promise.all(
-          [true, false].map((includeDefaultTier) =>
-            queryClient.invalidateQueries({
-              queryKey: queryArtist({ artistSlug, includeDefaultTier })
-                .queryKey,
-            })
-          )
-        );
+        await queryClient.invalidateQueries({
+          queryKey: queryArtist({ artistSlug }).queryKey,
+        });
       } catch (e) {
         errorHandler(e);
       }

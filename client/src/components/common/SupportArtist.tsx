@@ -29,9 +29,7 @@ const SupportArtist: React.FC<{
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
-  );
+  const { data: artist } = useQuery(queryArtist({ artistSlug: `${artistId}` }));
   const { hasNonDefaultTiers } = useGetArtistSubscriptionTiers(artist?.urlSlug);
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)

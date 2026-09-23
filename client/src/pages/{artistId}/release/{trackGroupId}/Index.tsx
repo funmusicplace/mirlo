@@ -311,7 +311,10 @@ function Index() {
                   <Wishlist trackGroup={trackGroup} inArtistPage />
                   <div className="grow-0 max-md:grow min-w-0 flex justify-end items-center self-stretch">
                     {trackGroup.isSubscriberExclusive && (
-                      <SubscriberExclusivePill artist={artist} />
+                      <SubscriberExclusivePill
+                        artist={artist}
+                        trackGroup={trackGroup}
+                      />
                     )}
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                   </div>

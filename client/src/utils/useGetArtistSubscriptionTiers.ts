@@ -6,7 +6,7 @@ function useGetArtistSubscriptionTiers(urlSlug?: string) {
   const { user } = useAuthContext();
 
   const { data: artistDetails, ...props } = useQuery(
-    queryArtist({ artistSlug: urlSlug ?? "", includeDefaultTier: true })
+    queryArtist({ artistSlug: urlSlug ?? "" })
   );
 
   const userTierForArtist = user?.artistUserSubscriptions?.find(
