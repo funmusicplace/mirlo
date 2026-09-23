@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
@@ -86,15 +85,7 @@ const Index = () => {
       <div>
         <SpaceBetweenDiv>
           <div>
-            <h2
-              className={css`
-                display: flex;
-                align-items: center;
-                a {
-                  margin-right: 0.3rem;
-                }
-              `}
-            >
+            <h2 className="flex items-center [&_a]:mr-[0.3rem]">
               <Link to="/admin/content/users">
                 <FaArrowCircleLeft />
               </Link>
@@ -151,14 +142,31 @@ const Index = () => {
                 </td>
               </tr>
               <tr>
+                <td>Account disabled?</td>
+                <td>
+                  <div className="flex flex-col">
+                    <Toggle
+                      toggled={!!user.disabledAt}
+                      label=""
+                      onClick={async (checked) => {
+                        await api.put(`admin/users/${id}`, {
+                          disabled: checked,
+                        });
+                        callback();
+                      }}
+                    />
+                    <small>
+                      Disabling an account immediately blocks the user from
+                      logging in, without deleting or anonymising their data. It
+                      can be re-enabled at any time.
+                    </small>
+                  </div>
+                </td>
+              </tr>
+              <tr>
                 <td>Can create artists?</td>
                 <td>
-                  <div
-                    className={css`
-                      display: flex;
-                      flex-direction: column;
-                    `}
-                  >
+                  <div className="flex flex-col">
                     <Toggle
                       toggled={user.canCreateArtists}
                       label=""
