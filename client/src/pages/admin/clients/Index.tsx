@@ -18,6 +18,7 @@ import {
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { FaSyncAlt, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
 interface ClientForm {
@@ -186,13 +187,23 @@ const Index: React.FC = () => {
                     />
                   )}
                 </td>
-                <td>
-                  <Button onClick={() => onRotateKey(client)}>
-                    {t("rotateKey")}
-                  </Button>
-                  <Button onClick={() => onDelete(client)}>
-                    {t("delete")}
-                  </Button>
+                <td className="whitespace-nowrap">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outlined"
+                      startIcon={<FaSyncAlt />}
+                      onClick={() => onRotateKey(client)}
+                    >
+                      {t("rotateKey")}
+                    </Button>
+                    <Button
+                      buttonRole="warning"
+                      startIcon={<FaTrash />}
+                      onClick={() => onDelete(client)}
+                    >
+                      {t("deleteClient")}
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}

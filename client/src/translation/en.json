@@ -1704,7 +1704,8 @@
     "security": "Security",
     "cloudflareTurnstileSecret": "Cloudflare Turnstile secret",
     "defconLevel": "Defcon level",
-    "editTrack": "Edit {{title}}"
+    "editTrack": "Edit {{title}}",
+    "deleteClient": "Delete client"
   },
   "flaggedContent": {
     "title": "Flagged content",
