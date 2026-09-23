@@ -407,7 +407,8 @@
     "downloadButtonGenerating": "We're generating the release! Hold on for a minute...",
     "downloadFailed": "Couldn't download the release. Please try again in a moment.",
     "chooseAnotherFormat": "Choose another format",
-    "downloadFiletypeQuery": "What file type do you want to download?"
+    "downloadFiletypeQuery": "What file type do you want to download?",
+    "signUpToGetFreeRelease": "Sign up or log in to add this free release to your collection."
   },
   "sales": {
     "sales": "Sales",
@@ -434,7 +435,11 @@
     "platformCut": "Platform cut",
     "paymentProcessorCut": "Payment processor cut",
     "expandDetails": "Show details",
-    "collapseDetails": "Hide details"
+    "collapseDetails": "Hide details",
+    "resendReceipt": "Resend receipt",
+    "receiptSent": "Receipt sent",
+    "receiptResent": "Receipt sent again to {{email}}",
+    "receipt": "Receipt"
   },
   "fulfillment": {
     "fulfillment": "Fulfillment",
@@ -1749,7 +1754,10 @@
     "trackDoesntExist": "That track doesn't exist",
     "downloadLinkNotValid": "This download link isn't valid",
     "downloadLinkNotValidHint": "It may have been replaced by a newer one, or the address it was sent to doesn't match this purchase. Check the most recent e-mail we sent you, or sign in to download from your collection.",
-    "goToRelease": "Go to the release"
+    "goToRelease": "Go to the release",
+    "artistDoesNotExist": "This artist does not exist or does not have a public presence.",
+    "redeemForArtist": "Redeem a download code for a release by {{artistName}}",
+    "redeemAnyReleaseByArtist": "Your code will unlock the release it was made for."
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",
