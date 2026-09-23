@@ -89,7 +89,7 @@ export const Index: React.FC = () => {
                 <td>{user.stripeAccountId ?? ""}</td>
                 <td className="alignRight">
                   <ButtonLink
-                    size="compact"
+                    variant="transparent"
                     startIcon={<FaEdit />}
                     to={`/admin/content/users/${user.id}`}
                   />

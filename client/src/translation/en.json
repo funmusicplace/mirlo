@@ -1703,7 +1703,8 @@
     "trustLevelName": "Level {{level}} name",
     "security": "Security",
     "cloudflareTurnstileSecret": "Cloudflare Turnstile secret",
-    "defconLevel": "Defcon level"
+    "defconLevel": "Defcon level",
+    "editTrack": "Edit {{title}}"
   },
   "flaggedContent": {
     "title": "Flagged content",

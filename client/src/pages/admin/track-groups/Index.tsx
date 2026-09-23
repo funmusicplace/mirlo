@@ -4,8 +4,9 @@ import Table from "components/common/Table";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { FaCheck, FaDollarSign, FaEdit } from "react-icons/fa";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "services/api";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import usePagination from "utils/usePagination";
 
 import CreatePurchaseModal from "./CreatePurchaseModal";
@@ -76,23 +77,35 @@ export const Index: React.FC = () => {
               <tr key={trackgroup.id}>
                 <td>{index + 1}</td>
                 <td>
-                  {trackgroup.title} (id: {trackgroup.id})
+                  {trackgroup.artist ? (
+                    <Link to={getReleaseUrl(trackgroup.artist, trackgroup)}>
+                      {trackgroup.title}
+                    </Link>
+                  ) : (
+                    trackgroup.title
+                  )}{" "}
+                  (id: {trackgroup.id})
                 </td>
-
-                <td>{trackgroup.artist?.name}</td>
+                <td>
+                  {trackgroup.artist && (
+                    <Link to={getArtistUrl(trackgroup.artist)}>
+                      {trackgroup.artist.name}
+                    </Link>
+                  )}
+                </td>
                 <td>{trackgroup.releaseDate}</td>
                 <td>{trackgroup.createdAt}</td>
                 <td>{trackgroup.publishedAt ? <FaCheck /> : undefined}</td>
                 <td className="alignRight">
                   <div className="flex gap-1 justify-end">
                     <Button
-                      size="compact"
+                      variant="transparent"
                       startIcon={<FaDollarSign />}
                       title="Add purchase for users"
                       onClick={() => setPurchaseTrackGroup(trackgroup)}
                     />
                     <Button
-                      size="compact"
+                      variant="transparent"
                       startIcon={<FaEdit />}
                       onClick={() => onClickQueue(trackgroup.id)}
                     />

@@ -5,6 +5,7 @@ import React from "react";
 import { FaCheck } from "react-icons/fa";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "services/api";
+import { getArtistUrl } from "utils/artist";
 import usePagination from "utils/usePagination";
 
 interface AdminArtist extends Artist {
@@ -67,14 +68,15 @@ export const Index: React.FC = () => {
               <tr key={artist.id}>
                 <td>{index + 1}</td>
                 <td>
-                  {artist.name} (id: {artist.id})
+                  <Link to={getArtistUrl(artist)}>{artist.name}</Link> (id:{" "}
+                  {artist.id})
                 </td>
                 <td>
                   {artist.user.email} (userId: {artist.userId})
                 </td>
                 <td>{artist.user.stripeAccountId ? <FaCheck /> : ""}</td>
                 <td>{artist.createdAt}</td>
-                <td>
+                <td className="whitespace-nowrap">
                   <Link to={`/admin/content/artists/${artist.id}`}>Manage</Link>
                 </td>
               </tr>
