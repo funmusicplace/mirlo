@@ -119,6 +119,7 @@ const AutoComplete = React.forwardRef<
     ) => React.ReactNode;
     placeholder?: string | null;
     allowNew?: boolean;
+    commitOnComma?: boolean;
     showBackground?: boolean;
     onEnter?: (val: string) => void;
     usesNavigation?: boolean;
@@ -138,6 +139,7 @@ const AutoComplete = React.forwardRef<
       onEnter,
       placeholder,
       allowNew,
+      commitOnComma,
       showBackground,
       id,
     },
@@ -154,9 +156,26 @@ const AutoComplete = React.forwardRef<
 
     const onChangeValue = React.useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchValue(e.target.value);
+        const value = e.target.value;
+
+        if (commitOnComma && value.includes(",")) {
+          const parts = value.split(",");
+          const remainder = parts.pop() ?? "";
+
+          parts
+            .map((part) => part.trim())
+            .filter((part) => part.length > 0)
+            .forEach((part) => {
+              onSelect?.({ id: part, name: part, isNew: true });
+            });
+
+          setSearchValue(remainder);
+          return;
+        }
+
+        setSearchValue(value);
       },
-      []
+      [commitOnComma, onSelect]
     );
 
     const searchCallback = useDebouncedCallback(

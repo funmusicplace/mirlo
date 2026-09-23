@@ -52,14 +52,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const removeTag = (index: number) => {
-    setTags((allTags) => {
-      const clones = cloneDeep(allTags);
-      clones.splice(index, 1);
-      update(clones);
-      return clones;
-    });
-  };
+  const tagsRef = React.useRef(tags);
 
   const update = React.useCallback(
     async (newTags: string[]) => {
@@ -70,6 +63,24 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
       }
     },
     [trackGroupId, userId]
+  );
+
+  const setAndSaveTags = React.useCallback(
+    (newTags: string[]) => {
+      tagsRef.current = newTags;
+      setTags(newTags);
+      update(newTags);
+    },
+    [update]
+  );
+
+  const removeTag = React.useCallback(
+    (index: number) => {
+      const clones = cloneDeep(tagsRef.current);
+      clones.splice(index, 1);
+      setAndSaveTags(clones);
+    },
+    [setAndSaveTags]
   );
 
   const findTags = async (searchValue: string) => {
@@ -103,7 +114,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
           .map((t) => t.trim().toLowerCase())
           .filter((t) => t.length > 0);
         const finalTags = uniq([
-          ...tags,
+          ...tagsRef.current,
           ...newTags.map((t) =>
             t
               .split(" ")
@@ -112,11 +123,10 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
           ),
         ]);
 
-        update(finalTags);
-        setTags(finalTags);
+        setAndSaveTags(finalTags);
       }
     },
-    [tags, update]
+    [setAndSaveTags]
   );
 
   return (
@@ -144,6 +154,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
           onSelect={saveTags}
           placeholder={t("typeForTags")}
           allowNew
+          commitOnComma
         />
       </div>
       {tags.length > 0 && (

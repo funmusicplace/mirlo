@@ -30,12 +30,29 @@ vi.mock("services/api", () => ({
 
 // The AutoComplete is exercised separately; here we just need a way to fire its
 // `onSelect` with a controllable value to drive ManageTags' tag-splitting logic.
-const hoisted = vi.hoisted(() => ({ selectValue: "" }));
+const hoisted = vi.hoisted(() => ({
+  selectValue: "",
+  selectValues: [] as string[],
+}));
 vi.mock("components/common/AutoComplete", () => ({
   default: ({ onSelect }: { onSelect: (value: unknown) => void }) => (
-    <button type="button" onClick={() => onSelect({ id: hoisted.selectValue })}>
-      select-tag
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => onSelect({ id: hoisted.selectValue })}
+      >
+        select-tag
+      </button>
+      {/* commitOnComma hands us one value per entry, all within one tick. */}
+      <button
+        type="button"
+        onClick={() =>
+          hoisted.selectValues.forEach((value) => onSelect({ id: value }))
+        }
+      >
+        select-tags-in-one-tick
+      </button>
+    </>
   ),
 }));
 
@@ -117,6 +134,23 @@ describe("ManageTags", () => {
     await waitFor(() =>
       expect(apiPut).toHaveBeenCalledWith("manage/trackGroups/5/tags", [
         "noise",
+      ])
+    );
+  });
+
+  test("accumulates tags committed one after another in a single tick", async () => {
+    hoisted.selectValues = ["ambient", "drone"];
+    render(<ManageTags />);
+
+    await userEvent.click(screen.getByText("select-tags-in-one-tick"));
+
+    expect(screen.getByText("ambient")).toBeInTheDocument();
+    expect(screen.getByText("drone")).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(apiPut).toHaveBeenLastCalledWith("manage/trackGroups/5/tags", [
+        "ambient",
+        "drone",
       ])
     );
   });
