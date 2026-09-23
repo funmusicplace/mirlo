@@ -11,6 +11,7 @@ import {
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
+import { clearPageCache } from "../../../../../utils/pageCache";
 import {
   deleteTrackGroup,
   finalizeTrackGroupPublication,
@@ -288,6 +289,8 @@ export default function () {
           where: { id: Number(trackGroupId) },
         });
       }
+
+      clearPageCache();
 
       res.json({
         result: trackGroup

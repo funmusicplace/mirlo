@@ -7,6 +7,7 @@ import { userAuthenticated } from "../../../../../auth/passport";
 import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
+import { clearPageCache } from "../../../../../utils/pageCache";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 
 async function syncPostImages(
@@ -264,6 +265,8 @@ export default function () {
           postSubscriptionTiers: true,
         },
       });
+      clearPageCache();
+
       res.json({
         result: refreshedPost
           ? serializePost(refreshedPost, undefined, undefined, true)

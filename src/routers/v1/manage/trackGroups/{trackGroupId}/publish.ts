@@ -3,9 +3,10 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
+import { clearPageCache } from "../../../../../utils/pageCache";
 import { finalizeTrackGroupPublication } from "../../../../../utils/trackGroup";
 
 export default function () {
@@ -49,6 +50,8 @@ export default function () {
           now
         );
       }
+      clearPageCache();
+
       res.json(processSingleTrackGroup(updatedTrackgroup));
     } catch (e) {
       next(e);
