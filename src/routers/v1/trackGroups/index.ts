@@ -7,6 +7,7 @@ import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { processSingleTrackGroup } from "../../../serializers/trackGroup";
 import { turnItemsIntoRSS } from "../../../utils/rss";
 import {
+  subscriptionTierReleasesCount,
   processTrackGroupQueryOrder,
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
@@ -255,7 +256,7 @@ export default function () {
             },
           },
           cover: true,
-          _count: { select: { subscriptionTierReleases: true } },
+          _count: subscriptionTierReleasesCount,
         },
       });
 

@@ -20,8 +20,8 @@ import IncludedReleases from "./IncludedReleases";
 
 const ArtistVariableSupport: React.FC<{
   tier: ArtistSubscriptionTier;
-  button?: { size?: ButtonProps["size"]; width?: string };
-}> = ({ tier, button = { size: "big", width: "100%" } }) => {
+  button?: { size?: ButtonProps["size"]; className?: string };
+}> = ({ tier, button = { size: "big", className: "w-full" } }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   const { handleSubmit, register, formState, getValues } = useForm({
@@ -82,9 +82,7 @@ const ArtistVariableSupport: React.FC<{
         onClick={() => (needsModal ? setOpen(true) : subscribeToTier(tier))}
         isLoading={isCheckingForSubscription}
         disabled={isCheckingForSubscription}
-        className={css`
-          width: ${button.width ?? "auto"};
-        `}
+        className={button.className}
       >
         {supportButtonText}
       </ArtistButton>

@@ -248,7 +248,9 @@ const SubscriptionTierPage: React.FC<{
               subscriptionTier={subscriptionTier}
               layout="page"
               supportButton={
-                hasImage ? { size: "big", width: "100%" } : { width: "70%" }
+                hasImage
+                  ? { size: "big", className: "w-full" }
+                  : { className: "w-[70%]" }
               }
             />
           </div>

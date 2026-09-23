@@ -7,7 +7,10 @@ import {
   findArtistIdForURLSlug,
   whereForAllArtistsThisLabelCanEdit,
 } from "../../../../utils/artist";
-import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
+import {
+  subscriptionTierReleasesCount,
+  whereForPublishedTrackGroups,
+} from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -62,7 +65,7 @@ export default function () {
         include: {
           cover: true,
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
-          _count: { select: { subscriptionTierReleases: true } },
+          _count: subscriptionTierReleasesCount,
           profile: {
             select: {
               name: true,

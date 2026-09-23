@@ -9,6 +9,7 @@ import {
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { subscriptionTierReleasesCount } from "../../../../../utils/trackGroup";
 
 type Params = {
   trackGroupId: number;
@@ -47,7 +48,7 @@ export default function () {
                 },
               },
               cover: true,
-              _count: { select: { subscriptionTierReleases: true } },
+              _count: subscriptionTierReleasesCount,
             },
           },
         },
@@ -129,7 +130,7 @@ export default function () {
                 },
               },
               cover: true,
-              _count: { select: { subscriptionTierReleases: true } },
+              _count: subscriptionTierReleasesCount,
             },
           },
         },

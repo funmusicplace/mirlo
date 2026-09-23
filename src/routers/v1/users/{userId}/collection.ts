@@ -9,7 +9,10 @@ import {
   processSingleTrackGroup,
   serializeTrackGroupPurchase,
 } from "../../../../serializers/trackGroup";
-import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
+import {
+  subscriptionTierReleasesCount,
+  whereForPublishedTrackGroups,
+} from "../../../../utils/trackGroup";
 
 type Params = {
   userId: string;
@@ -43,7 +46,7 @@ export default function () {
             include: {
               profile: true,
               cover: true,
-              _count: { select: { subscriptionTierReleases: true } },
+              _count: subscriptionTierReleasesCount,
               tracks: {
                 orderBy: {
                   order: "asc",
@@ -77,7 +80,7 @@ export default function () {
                 include: {
                   profile: true,
                   cover: true,
-                  _count: { select: { subscriptionTierReleases: true } },
+                  _count: subscriptionTierReleasesCount,
                   tracks: {
                     orderBy: {
                       order: "asc",

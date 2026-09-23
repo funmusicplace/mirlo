@@ -31,6 +31,7 @@ import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
 import {
   deleteTrackGroup,
+  subscriptionTierReleasesCount,
   trackGroupPublishedObject,
   whereForPublishedTrackGroups,
 } from "./trackGroup";
@@ -594,7 +595,7 @@ export const singleInclude = (queryOptions?: {
         paymentToUser: {
           select: { currency: true },
         },
-        _count: { select: { subscriptionTierReleases: true } },
+        _count: subscriptionTierReleasesCount,
       },
     },
     tourDates: true,
@@ -667,7 +668,7 @@ export const singleInclude = (queryOptions?: {
                 fundraiserId: true,
                 fundraiser: true,
                 paymentToUser: { select: { currency: true } },
-                _count: { select: { subscriptionTierReleases: true } },
+                _count: subscriptionTierReleasesCount,
                 tracks: {
                   where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
                   orderBy: { order: "asc" },

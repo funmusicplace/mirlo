@@ -37,7 +37,7 @@ export const isUserSubscribedToTier = (
 const SubscriptionTierActions: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
   layout?: "page" | "card";
-  supportButton?: { size?: ButtonProps["size"]; width?: string };
+  supportButton?: { size?: ButtonProps["size"]; className?: string };
 }> = ({ subscriptionTier, layout = "card", supportButton }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();

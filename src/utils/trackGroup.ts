@@ -291,7 +291,7 @@ export const trackGroupSingleInclude = (options: {
         downloadableContent: true,
       },
     },
-    _count: { select: { subscriptionTierReleases: true } },
+    _count: subscriptionTierReleasesCount,
     subscriptionTierReleases: {
       where: { tier: { deletedAt: null } },
       select: {
@@ -654,6 +654,12 @@ export const registerTrackPurchase = async ({
     });
   }
   return refreshedPurchase;
+};
+
+export const subscriptionTierReleasesCount = {
+  select: {
+    subscriptionTierReleases: { where: { tier: { deletedAt: null } } },
+  },
 };
 
 export const basicTrackGroupInclude = {

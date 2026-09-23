@@ -85,6 +85,21 @@ describe("trackGroups/{id}", () => {
         viaOwn.body.result.subscriptionArtist.urlSlug,
         "roster-artist"
       );
+
+      await prisma.profileSubscriptionTier.delete({
+        where: { id: ownTier.id },
+      });
+      await prisma.profileSubscriptionTier.delete({
+        where: { id: labelTier.id },
+      });
+
+      const orphaned = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(orphaned.body.result.isIncludedInSubscription, false);
+      assert.equal(orphaned.body.result.isSubscriberExclusive, false);
+      assert.equal(orphaned.body.result.subscriptionArtist, undefined);
     });
 
     it("should GET / 404 when the artist is disabled", async () => {

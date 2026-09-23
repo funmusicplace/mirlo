@@ -10,6 +10,7 @@ import { processSingleTrackGroup } from "../../../../../../../serializers/trackG
 import { AppError } from "../../../../../../../utils/error";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import { grantReleaseToExistingSubscribers } from "../../../../../../../utils/subscriptionTier";
+import { subscriptionTierReleasesCount } from "../../../../../../../utils/trackGroup";
 
 type Params = {
   profileId: string;
@@ -57,7 +58,7 @@ export default function () {
             include: {
               cover: true,
               profile: true,
-              _count: { select: { subscriptionTierReleases: true } },
+              _count: subscriptionTierReleasesCount,
             },
           },
         },
@@ -174,7 +175,7 @@ export default function () {
               include: {
                 cover: true,
                 profile: true,
-                _count: { select: { subscriptionTierReleases: true } },
+                _count: subscriptionTierReleasesCount,
               },
             },
           },

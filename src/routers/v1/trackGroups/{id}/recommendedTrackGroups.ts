@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import { subscriptionTierReleasesCount } from "../../../../utils/trackGroup";
 
 type Params = {
   id: number;
@@ -41,7 +42,7 @@ export default function () {
                 },
               },
               cover: true,
-              _count: { select: { subscriptionTierReleases: true } },
+              _count: subscriptionTierReleasesCount,
             },
           },
         },
