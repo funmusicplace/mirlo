@@ -16,36 +16,20 @@ import {
 
 const fetchArtist: QueryFunction<
   Artist,
-  ["fetchArtist", { artistSlug?: string; includeDefaultTier?: boolean }]
-> = ({ queryKey: [_, { artistSlug, includeDefaultTier }], signal }) => {
+  ["fetchArtist", { artistSlug?: string }]
+> = ({ queryKey: [_, { artistSlug }], signal }) => {
   return api
     .get<{
       result: Artist;
-    }>(
-      `v1/artists/${artistSlug}?includeDefaultTier=${includeDefaultTier === true}`,
-      {
-        signal,
-      }
-    )
+    }>(`v1/artists/${artistSlug}?includeDefaultTier=true`, {
+      signal,
+    })
     .then((r) => r.result);
 };
 
-export function queryArtist(opts: {
-  artistSlug?: string;
-  includeDefaultTier?: boolean;
-}) {
-  // Normalize undefined → false so callers that omit includeDefaultTier share
-  // the same cache entry as callers that pass false explicitly, avoiding a
-  // third redundant network request for the same artist record.
-  const includeDefaultTier = opts.includeDefaultTier ?? false;
+export function queryArtist(opts: { artistSlug?: string }) {
   return queryOptions({
-    queryKey: [
-      "fetchArtist",
-      {
-        artistSlug: opts.artistSlug,
-        includeDefaultTier,
-      },
-    ],
+    queryKey: ["fetchArtist", { artistSlug: opts.artistSlug }],
     queryFn: fetchArtist,
     initialData: () =>
       opts.artistSlug ? getInjectedArtist(opts.artistSlug) : undefined,

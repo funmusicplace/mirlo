@@ -38,9 +38,7 @@ const TipArtist: React.FC<{
   label?: string;
 }> = ({ artistId, label }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
-  );
+  const { data: artist } = useQuery(queryArtist({ artistSlug: `${artistId}` }));
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)
   );

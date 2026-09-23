@@ -14,7 +14,7 @@ import { useParams } from "react-router-dom";
 export const useArtistContext = () => {
   const { artistId } = useParams();
   const { data: artist, isLoading } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "", includeDefaultTier: false })
+    queryArtist({ artistSlug: artistId ?? "" })
   );
   const { data: userStripeStatus } = useQuery(
     queryUserStripeStatus(Number(artist?.userId))

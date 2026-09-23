@@ -43,7 +43,7 @@ const TipArtistForm: React.FC<{
   }>({ defaultValues: {} });
 
   const { data: artistDetails } = useQuery(
-    queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
+    queryArtist({ artistSlug: artist.urlSlug ?? "" })
   );
 
   const currency = artistDetails?.user?.currency ?? "usd";
