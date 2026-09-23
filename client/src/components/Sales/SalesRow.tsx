@@ -10,6 +10,8 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getMerchUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
 
+import ResendReceiptButton from "./ResendReceiptButton";
+
 export const getSaleType = (sale: Sale) =>
   sale.trackGroupPurchases?.length
     ? "trackGroup"
@@ -175,6 +177,9 @@ const SalesRow: React.FC<{ sale: Sale }> = ({ sale }) => {
             />
           </Modal>
         )}
+      </td>
+      <td>
+        <ResendReceiptButton sale={sale} />
       </td>
     </tr>
   );

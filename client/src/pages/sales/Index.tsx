@@ -9,15 +9,14 @@ import { moneyDisplay } from "components/common/Money";
 import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
 import WidthContainer from "components/common/WidthContainer";
+import { SalesCard } from "components/Sales/SalesCard";
+import SalesRow from "components/Sales/SalesRow";
 import { queryManagedArtists, queryUserSales } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaDownload } from "react-icons/fa";
 import api from "services/api";
 import usePagination from "utils/usePagination";
-
-import { SalesCard } from "components/Sales/SalesCard";
-import SalesRow from "components/Sales/SalesRow";
 
 const pageSize = 50;
 
@@ -133,6 +132,7 @@ export const Sales: React.FC = () => {
                   <th>{t("platformCut")}</th>
                   <th>{t("paymentProcessorCut")}</th>
                   <th>{t("item")}</th>
+                  <th className="sr-only">{t("receipt")}</th>
                 </tr>
               </thead>
               <tbody>

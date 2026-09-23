@@ -116,6 +116,7 @@ const queryUserTransactions = (
       OR: or,
     },
     select: {
+      id: true,
       amount: true,
       currency: true,
       createdAt: true,
