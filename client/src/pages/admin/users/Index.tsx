@@ -1,9 +1,11 @@
-import { css } from "@emotion/css";
+import AddUsersModal from "components/Admin/AddUsersModal";
 import useAdminFilters from "components/Admin/useAdminFilters";
-import { ButtonLink } from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import Table from "components/common/Table";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
-import { FaEdit } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import { FaEdit, FaPlus } from "react-icons/fa";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
@@ -11,7 +13,9 @@ import usePagination from "utils/usePagination";
 const pageSize = 100;
 
 export const Index: React.FC = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const [results, setResults] = React.useState<User[]>([]);
+  const [showAddUsers, setShowAddUsers] = React.useState(false);
 
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [searchParams] = useSearchParams();
@@ -42,11 +46,13 @@ export const Index: React.FC = () => {
   });
 
   return (
-    <div
-      className={css`
-        flex-grow: 1;
-      `}
-    >
+    <WidthContainer variant="big" justify="center" className="p-4 grow">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <h3>{t("users")}</h3>
+        <Button startIcon={<FaPlus />} onClick={() => setShowAddUsers(true)}>
+          {t("addUsers")}
+        </Button>
+      </div>
       <Filters />
 
       {results.length > 0 && (
@@ -94,7 +100,12 @@ export const Index: React.FC = () => {
         </Table>
       )}
       <PaginationComponent amount={results.length} />
-    </div>
+      <AddUsersModal
+        open={showAddUsers}
+        onClose={() => setShowAddUsers(false)}
+        onDone={callback}
+      />
+    </WidthContainer>
   );
 };
 

@@ -79,7 +79,7 @@
     "adminContent": "Admin: content",
     "adminUsers": "Admin: users",
     "adminUser": "Admin: user",
-    "adminUserInvites": "Admin: user invites",
+    "adminInvites": "Admin: invites",
     "adminArtists": "Admin: artists",
     "adminArtist": "Admin: artist",
     "adminTrackGroups": "Admin: releases",
@@ -1633,7 +1633,28 @@
     "artistDisableSuccess": "Artist {{name}} disabled",
     "disableReasonRequired": "Please provide a reason for disabling this artist",
     "failedToDisableArtist": "Failed to disable artist",
-    "artistEnabledDescription": "An artist who is enabled will have their music show up in search results. Their profile page will still be visible but only directly via URL."
+    "artistEnabledDescription": "An artist who is enabled will have their music show up in search results. Their profile page will still be visible but only directly via URL.",
+    "addUsers": "Add users",
+    "addUsersEmails": "Email addresses",
+    "addUsersMode": "How to add them",
+    "addUsersInvite": "Send an invitation email",
+    "addUsersInviteHint": "Each person in the list will receive a link allowing them to create their own account.",
+    "addUsersCreate": "Create the accounts directly",
+    "addUsersCreateHint": "No email is sent, but users in the list will be able to claim an account later by signing up with the same email or by using the password reset.",
+    "addUsersAccountType": "Account type",
+    "accountTypeARTIST": "Artist",
+    "accountTypeLABEL": "Label",
+    "accountTypeLISTENER": "Listener",
+    "sendInvitations": "Send invitations",
+    "createAccounts": "Create accounts",
+    "addUsersNoEmails": "Add at least one email address",
+    "addUsersInvalidEmails": "Remove the invalid email addresses first",
+    "addUsersFailed": "Something went wrong, nothing was added",
+    "sendInvites": "Send invites",
+    "invitationsSent_one": "{{count}} invitation sent",
+    "invitationsSent_other": "{{count}} invitations sent",
+    "accountsCreated_one": "{{count}} account created",
+    "accountsCreated_other": "{{count}} accounts created"
   },
   "flaggedContent": {
     "title": "Flagged content",
@@ -1986,5 +2007,13 @@
     "fileTooLarge": "File is too large (max {{size}}).",
     "error": "Error",
     "zipUploadDescription": "When you upload a zip file we'll do our best to parse the track information for content. This works best with flac files that have metadata tags filled out, but we'll try to parse whatever we can from any audio files. We'll also look for a cover image in the zip file, and any additional downloadable content. After the upload, you can review and edit the imported information before saving it to your release."
+  },
+  "emailListInput": {
+    "placeholder": "Type or paste emails, separated by commas or new lines",
+    "removeEmail": "Remove {{email}}",
+    "summary_one": "{{count}} email",
+    "summary_other": "{{count}} emails",
+    "invalidSummary_one": "{{count}} invalid",
+    "invalidSummary_other": "{{count}} invalid"
   }
 }

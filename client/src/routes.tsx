@@ -671,11 +671,6 @@ const routes: RouteObject[] = [
             children: [
               {
                 path: "users",
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/admin/users/Layout");
-                  return { Component };
-                },
                 children: [
                   {
                     path: "",
@@ -683,15 +678,6 @@ const routes: RouteObject[] = [
                     async lazy() {
                       const { default: Component } =
                         await import("pages/admin/users/Index");
-                      return { Component };
-                    },
-                  },
-                  {
-                    path: "invites",
-                    handle: { title: "adminUserInvites" },
-                    async lazy() {
-                      const { default: Component } =
-                        await import("pages/admin/users/invites/Index");
                       return { Component };
                     },
                   },
@@ -705,6 +691,15 @@ const routes: RouteObject[] = [
                     },
                   },
                 ],
+              },
+              {
+                path: "invites",
+                handle: { title: "adminInvites" },
+                async lazy() {
+                  const { default: Component } =
+                    await import("pages/admin/invites/Index");
+                  return { Component };
+                },
               },
               {
                 path: "artists",
