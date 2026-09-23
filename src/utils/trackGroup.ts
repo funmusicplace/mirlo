@@ -292,6 +292,16 @@ export const trackGroupSingleInclude = (options: {
       },
     },
     _count: { select: { subscriptionTierReleases: true } },
+    subscriptionTierReleases: {
+      where: { tier: { deletedAt: null } },
+      select: {
+        tier: {
+          select: {
+            profile: { select: { id: true, urlSlug: true, name: true } },
+          },
+        },
+      },
+    },
     profile: {
       include: {
         user: {

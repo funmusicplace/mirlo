@@ -110,6 +110,7 @@ interface TrackGroup {
   isGettable: boolean;
   isIncludedInSubscription?: boolean;
   isSubscriberExclusive?: boolean;
+  subscriptionArtist?: { id: number; urlSlug: string; name: string };
   credits?: string;
   artistId?: number;
   artist: Artist;
