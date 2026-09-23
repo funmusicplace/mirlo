@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import { ButtonProps } from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import MarkdownContent from "components/common/MarkdownContent";
 import Modal from "components/common/Modal";
@@ -19,7 +20,8 @@ import IncludedReleases from "./IncludedReleases";
 
 const ArtistVariableSupport: React.FC<{
   tier: ArtistSubscriptionTier;
-}> = ({ tier }) => {
+  button?: { size?: ButtonProps["size"]; width?: string };
+}> = ({ tier, button = { size: "big", width: "100%" } }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   const { handleSubmit, register, formState, getValues } = useForm({
@@ -74,14 +76,14 @@ const ArtistVariableSupport: React.FC<{
   return (
     <>
       <ArtistButton
-        size="big"
+        size={button.size}
         rounded
         uppercase
         onClick={() => (needsModal ? setOpen(true) : subscribeToTier(tier))}
         isLoading={isCheckingForSubscription}
         disabled={isCheckingForSubscription}
         className={css`
-          width: 100%;
+          width: ${button.width ?? "auto"};
         `}
       >
         {supportButtonText}
