@@ -37,6 +37,7 @@ export default function () {
     try {
       const format = assertSupportedDownloadFormat(requestedFormat);
       let trackGroup;
+      let requestedByUserId = req.user?.id;
 
       if (token && email) {
         log.info(
@@ -47,6 +48,7 @@ export default function () {
         });
 
         if (tokenUser) {
+          requestedByUserId = requestedByUserId ?? tokenUser.id;
           try {
             trackGroup = await findPurchaseBasedOnTokenAndUpdate(
               Number(trackGroupId),
@@ -104,7 +106,9 @@ export default function () {
         const jobId = await startGeneratingZip(
           trackGroup,
           trackGroup.tracks,
-          format
+          format,
+          "trackGroup",
+          requestedByUserId
         );
         return res.json({
           message: "We've started generating the album",

@@ -14,15 +14,21 @@ import archiver from "archiver";
 import { Job } from "bullmq";
 import filenamify from "filenamify";
 
+import { sendMailQueue } from "../queues/send-mail-queue";
+import { getClient } from "../utils/getClient";
 import {
   downloadOriginalAudio,
   getDownloadableContentBuffer,
   getCoverBuffer,
   uploadZip,
+  zipExists,
 } from "../utils/minio";
+import { hasSubscriptionTiers } from "../utils/subscriptionTier";
 import { convertAudioToFormat, resolveTrackArtistName } from "../utils/tracks";
 
 import { logger } from "./queue-worker";
+
+const NOTIFY_AFTER_MS = 60 * 1000;
 
 export type Format = {
   format: "mp3" | "wav" | "flac" | "opus" | "libmp3lame" | "ipod";
@@ -409,12 +415,65 @@ const downloadAndZipTracks = async ({
   }
 };
 
+const notifyRequesters = async ({
+  requestedByUserIds,
+  trackGroup,
+  artist,
+  formatString,
+}: {
+  requestedByUserIds: number[];
+  trackGroup: TrackGroup;
+  artist: Profile;
+  formatString: string;
+}) => {
+  if (requestedByUserIds.length === 0) {
+    return;
+  }
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: requestedByUserIds } },
+  });
+
+  if (users.length === 0) {
+    return;
+  }
+
+  const { applicationUrl } = await getClient();
+  const artistHasSubscriptionTiers = await hasSubscriptionTiers(artist.id);
+
+  await Promise.all(
+    users.map((user) =>
+      sendMailQueue.add("send-mail", {
+        template: "download-ready",
+        message: {
+          to: user.email,
+        },
+        locals: {
+          trackGroup: {
+            title: trackGroup.title,
+            urlSlug: trackGroup.urlSlug,
+            artist: {
+              name: artist.name,
+              urlSlug: artist.urlSlug,
+            },
+          },
+          format: formatString,
+          client: applicationUrl,
+          host: process.env.API_DOMAIN,
+          hasSubscriptionTiers: artistHasSubscriptionTiers,
+        },
+      })
+    )
+  );
+};
+
 export default async (job: Job) => {
   const {
     trackGroup,
     format: formatString,
     tracks,
     destinationType = "trackGroup",
+    requestedByUserIds = [],
   } = job.data as {
     tracks: (Track & {
       audio: TrackAudio;
@@ -425,7 +484,9 @@ export default async (job: Job) => {
     };
     format: string;
     destinationType: "track" | "trackGroup";
+    requestedByUserIds?: number[];
   };
+  const startedAt = Date.now();
   let tempFolder = `${TEMP_LOCATION}trackGroup/${trackGroup.id}/${formatString}`;
 
   if (destinationType === "track") {
@@ -450,6 +511,29 @@ export default async (job: Job) => {
       artist,
       destinationType,
     });
+
+    const zipId = destinationType === "track" ? tracks[0].id : trackGroup.id;
+    const builtZip = await zipExists(destinationType, zipId, formatString);
+
+    if (
+      builtZip &&
+      destinationType === "trackGroup" &&
+      Date.now() - startedAt > NOTIFY_AFTER_MS
+    ) {
+      try {
+        await notifyRequesters({
+          requestedByUserIds,
+          trackGroup,
+          artist,
+          formatString,
+        });
+      } catch (e) {
+        logger.error(
+          `Couldn't queue download-ready email for trackGroup ${trackGroup.id}`
+        );
+        console.error(e);
+      }
+    }
   } catch (e) {
     logger.error(`Error creating zip of tracks folder: ${tempFolder}`);
     if (e instanceof Error) {

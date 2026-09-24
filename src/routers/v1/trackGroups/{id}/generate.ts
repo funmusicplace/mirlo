@@ -55,7 +55,9 @@ export default function () {
       const jobId = await startGeneratingZip(
         trackGroup,
         trackGroup.tracks,
-        format
+        format,
+        "trackGroup",
+        req.user?.id
       );
       return res.json({
         message: "We've started generating the album",
