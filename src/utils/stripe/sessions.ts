@@ -1,17 +1,10 @@
-import prisma, { SECRET_USER_FIELDS } from "@mirlo/prisma";
+import prisma from "@mirlo/prisma";
 import { Prisma, User } from "@mirlo/prisma/client";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { getPlatformFeeForArtist } from "../artist";
 import { AppError } from "../error";
-import { generateFullStaticImageUrl } from "../images";
-import { finalArtistAvatarBucket } from "../minio";
-import {
-  calculateAppFee,
-  calculatePlatformPercent,
-  castToFixed,
-} from "../processingPayments";
+import { calculatePlatformPercent } from "../processingPayments";
 
 import stripe, { createSubscriptionStripeProduct } from ".";
 const { API_DOMAIN } = process.env;
@@ -37,92 +30,6 @@ const buildCheckoutCancelSearchParams = ({
   params.set("artistId", artistId.toString());
 
   return params;
-};
-
-export const createStripeCheckoutSessionForCatalogue = async ({
-  loggedInUser,
-  email,
-  priceNumber,
-  artist,
-  message,
-  stripeAccountId,
-}: {
-  loggedInUser?: User;
-  email?: string;
-  priceNumber: number;
-  message?: string;
-  artist: Prisma.ProfileGetPayload<{
-    include: {
-      user: { omit: typeof SECRET_USER_FIELDS };
-      avatar: true;
-    };
-  }>;
-  stripeAccountId: string;
-}) => {
-  const client = await prisma.client.findFirst({
-    where: {
-      applicationName: "frontend",
-    },
-  });
-  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  const currency = await getCurrency(artist.id, stripeAccountId);
-
-  const cancelUrlParams = buildCheckoutCancelSearchParams({
-    artistId: artist.id,
-    clientId: client?.id,
-  });
-
-  const session = await stripe.checkout.sessions.create(
-    {
-      billing_address_collection: "auto",
-      customer_email: loggedInUser?.email || email,
-      payment_intent_data: {
-        application_fee_amount: await calculateAppFee(
-          priceNumber,
-          currency,
-          await getPlatformFeeForArtist(artist.id),
-          stripeAccount.country
-        ),
-      },
-      line_items: [
-        {
-          price_data: {
-            tax_behavior: "exclusive",
-            unit_amount: castToFixed(priceNumber),
-            currency,
-            product_data: {
-              name: `Entire digital catalogue of ${artist.name}`,
-              description: `You're purchasing ${artist.name}'s entire digital catalogue`,
-              images: artist.avatar
-                ? [
-                    generateFullStaticImageUrl(
-                      artist.avatar?.url[4],
-                      finalArtistAvatarBucket
-                    ),
-                  ]
-                : [],
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        clientId: client?.id ?? null,
-        purchaseType: "artistCatalogue",
-        artistId: artist.id,
-        userId: loggedInUser?.id ?? null,
-        userEmail: email ?? null,
-        stripeAccountId,
-        message: message ?? null,
-      },
-      mode: "payment",
-      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${API_DOMAIN}/v1/checkout?${cancelUrlParams.toString()}`,
-    },
-    { stripeAccount: stripeAccountId }
-  );
-
-  return session;
 };
 
 export const getCurrency = async (

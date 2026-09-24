@@ -728,6 +728,54 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 404);
     });
 
+    it("should reject a catalogue price below the percentage-based floor", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_catalogue_percentage",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id, {
+        purchaseEntireCatalogPercentage: 50,
+      });
+      await createTrackGroup(artist.id, { title: "Album One", minPrice: 1000 });
+      await createTrackGroup(artist.id, { title: "Album Two", minPrice: 2000 });
+
+      // Floor is 50% of (1000 + 2000) = 1500
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "catalogue", price: "1000" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should reject a paid catalogue purchase when the artist has no payment processor", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id, {
+        purchaseEntireCatalogMinPrice: 500,
+      });
+      await createTrackGroup(artist.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "catalogue", price: "1000" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      assert.match(response.body.error, /payment processor/i);
+    });
+
     it("should return 200 with clientSecret for an online merch purchase", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",

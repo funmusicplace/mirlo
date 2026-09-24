@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { uniq } from "lodash";
 
+import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
 import { getCurrency } from "../stripe/sessions";
 
@@ -13,11 +14,8 @@ export type ResolvedItem = {
   quantity: number;
   amount: number;
   message?: string;
-  /** merch only — selected MerchOption ids (size/colour/etc.), if any. */
   optionIds?: string[];
-  /** merch only — chosen shipping destination, when the item ships physically. */
   shippingDestinationId?: string;
-  /** The resource's own platformPercent override (trackGroup/merch), if set — falls back to the artist's defaultPlatformFee, then the site default. */
   platformPercent?: number | null;
 };
 
@@ -44,7 +42,10 @@ export const resolveArtistPaymentContext = async (
     stripeAccountIdOverride ?? resolvePayee({ artist }).stripeAccountId;
 
   if (!stripeAccountId) {
-    throw new Error("Artist is not set up with a payment processor");
+    throw new AppError({
+      httpCode: 400,
+      description: "Artist is not set up with a payment processor",
+    });
   }
 
   const currency = await getCurrency(artistId, stripeAccountId);
