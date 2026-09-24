@@ -1,11 +1,13 @@
 import FormComponent from "components/common/FormComponent";
 import { SelectEl } from "components/common/Select";
+import {
+  ArtistFormData,
+  ArtistFormSection,
+} from "pages/manage/artists/{artistId}/customize/Index";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
-
-import { ArtistFormData, ArtistFormSection } from "pages/manage/artists/{artistId}/customize/Index";
 
 export const LayoutSettings: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });

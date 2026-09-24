@@ -17,7 +17,7 @@ const AddToCollection: React.FC<{
   fixed?: boolean;
 }> = ({ trackGroup, track, fixed }) => {
   const snackbar = useSnackbar();
-  const { user } = useAuthContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const isLoggedOut = !user;
   const { isLoading, startPurchase } = usePurchase();
@@ -34,12 +34,13 @@ const AddToCollection: React.FC<{
           },
         ],
       });
+      refreshLoggedInUser();
       snackbar(t("success"), { type: "success" });
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
     }
-  }, [snackbar, t, trackGroup, track, startPurchase]);
+  }, [snackbar, t, trackGroup, track, startPurchase, refreshLoggedInUser]);
 
   return (
     <>

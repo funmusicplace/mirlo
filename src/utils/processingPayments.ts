@@ -1,15 +1,13 @@
 import { getSiteSettings } from "./settings";
 
-// Stripe rejects application_fee_amount when the platform is in one
-// jurisdiction and the connected account is in another that Stripe doesn't
-// allow cross-border fees for. We skip the platform cut for those countries
-// (and their currencies, which catches the case where the account country
-// isn't propagated) so the purchase itself can complete. See #1614.
 const COUNTRIES_WITHOUT_CROSS_BORDER_APP_FEES = new Set(["MX", "BR"]);
 const CURRENCIES_WITHOUT_PLATFORM_FEE = new Set(["mxn", "brl"]);
 
 const shouldSkipPlatformFee = (currency: string, country?: string | null) => {
-  if (country && COUNTRIES_WITHOUT_CROSS_BORDER_APP_FEES.has(country.toUpperCase())) {
+  if (
+    country &&
+    COUNTRIES_WITHOUT_CROSS_BORDER_APP_FEES.has(country.toUpperCase())
+  ) {
     return true;
   }
   return CURRENCIES_WITHOUT_PLATFORM_FEE.has(currency.toLowerCase());

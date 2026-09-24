@@ -8,6 +8,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
+import ResendReceiptButton from "./ResendReceiptButton";
 import { getSaleType, SaleItem, useShippingDestinations } from "./SalesRow";
 
 export const SalesCard: React.FC<{ sale: Sale }> = ({ sale }) => {
@@ -117,6 +118,7 @@ export const SalesCard: React.FC<{ sale: Sale }> = ({ sale }) => {
               })}
             </dd>
           </div>
+          <ResendReceiptButton sale={sale} className="self-start mt-1" />
         </dl>
       )}
 

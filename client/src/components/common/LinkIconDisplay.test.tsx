@@ -1,4 +1,5 @@
 import { test, expect } from "vitest";
+
 import { isEmailLink, linkUrlDisplay, linkUrlHref } from "./LinkIconDisplay";
 
 test("isEmailLink returns true when a link is entered", () => {
@@ -79,17 +80,14 @@ test.each([
   ],
   [{ url: "https://youtu.be/abc", linkType: undefined }, "YouTube"],
   [{ url: "https://artist.bandcamp.com/", linkType: undefined }, "Bandcamp"],
-  [{ url: "https://www.mirlo.space/some-artist", linkType: undefined }, "Mirlo"],
   [
-    { url: "https://discord.gg/some-invite", linkType: undefined },
-    "Discord",
+    { url: "https://www.mirlo.space/some-artist", linkType: undefined },
+    "Mirlo",
   ],
+  [{ url: "https://discord.gg/some-invite", linkType: undefined }, "Discord"],
   // The reporter in #1153 noted these were getting wrong icons via the old
   // substring matcher. They should NOT match a pinned platform now:
-  [
-    { url: "https://musician.social/@mirlo", linkType: undefined },
-    "Musician",
-  ],
+  [{ url: "https://musician.social/@mirlo", linkType: undefined }, "Musician"],
   [
     { url: "https://evilsite.com/youtube.com-spoof", linkType: undefined },
     "Evilsite",

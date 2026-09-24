@@ -1,0 +1,19 @@
+extends ../layout.pug
+include ../mixins.pug
+
+block content
+  p
+    | We've finished preparing your download of
+    strong  #{trackGroup.title}
+    |  by
+    strong  #{trackGroup.artist.name}
+    | , in #{format} format. It took a little while, so here's a link in case you'd stopped waiting.
+  table
+    tr
+      td #{trackGroup.title}
+      td
+        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download`) download
+
+  p
+  +supportArtist(trackGroup.artist, client, hasSubscriptionTiers)
+  p Enjoy!

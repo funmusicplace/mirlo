@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 
-import { assertLoggedIn } from "../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../auth/passport";
-import { resolveManagedArtistIds } from "../../../utils/artist";
-import { getDateRange } from "../../../utils/dateRange";
-import { downloadCSVFile } from "../../../utils/download";
-import { findSales } from "../artists/{id}/supporters";
-import { serializeUserTransaction } from "../../../serializers/userTransaction";
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
+import { serializeUserTransaction } from "../../../../serializers/userTransaction";
+import { resolveManagedArtistIds } from "../../../../utils/artist";
+import { getDateRange } from "../../../../utils/dateRange";
+import { downloadCSVFile } from "../../../../utils/download";
+import { findSales } from "../../artists/{id}/supporters";
 
 export default function () {
   const operations = {

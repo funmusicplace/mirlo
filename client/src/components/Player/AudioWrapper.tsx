@@ -251,6 +251,35 @@ export const AudioWrapper: React.FC<{
     dispatch({ type: "setPlaying", playing: true });
   }, [dispatch]);
 
+  // The audio element gets paused by plenty of things we don't drive: Android
+  // handing audio focus to another app, headset buttons, the OS media
+  // notification. When that happens the button has to follow, otherwise it
+  // keeps showing a pause icon on a track that isn't playing (#761).
+  //
+  // Not every pause event means playback actually stopped, though, and acting
+  // on those breaks the player:
+  // - Changing tracks tears down the hls instance, which detaches the media and
+  //   calls load() on it. That fires a pause with the element back at
+  //   HAVE_NOTHING, and honouring it would stop the queue from advancing.
+  // - Reaching the end of a track fires pause just before ended, and onEnded
+  //   needs `playing` left alone to move to the next track.
+  // - We pause on purpose when the buy modal opens, and playback picks up from
+  //   there once the listener buys the album (#1630).
+  const onPause = React.useCallback(() => {
+    const player = playerRef.current;
+
+    if (
+      !player ||
+      player.ended ||
+      player.readyState === player.HAVE_NOTHING ||
+      showBuyModalRef.current
+    ) {
+      return;
+    }
+
+    dispatch({ type: "setPlaying", playing: false });
+  }, [dispatch]);
+
   React.useEffect(() => {
     if (playerRef.current) {
       playerRef.current.volume = volume;
@@ -293,6 +322,7 @@ export const AudioWrapper: React.FC<{
           width="100%"
           height="2rem"
           onPlay={onPlay}
+          onPause={onPause}
           onEnded={onEnded}
           playerRef={playerRef}
           onTimeUpdate={onListen}

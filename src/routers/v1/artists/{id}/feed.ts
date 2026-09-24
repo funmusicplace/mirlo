@@ -73,7 +73,10 @@ const MAX_ALBUMS_IN_FEED = 100;
 export const getAlbumsVisibleToUser = async (profile: Profile) => {
   const albums = await prisma.trackGroup.findMany({
     where: { ...whereForPublishedTrackGroups(), profileId: profile.id },
-    include: { profile: { omit: { apPrivateKey: true } } },
+    include: {
+      profile: { omit: { apPrivateKey: true } },
+      tags: { include: { tag: true } },
+    },
     orderBy: {
       releaseDate: "desc",
     },

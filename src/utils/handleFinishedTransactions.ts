@@ -737,6 +737,139 @@ export type ArtistPurchaseNotificationEmailType = {
   client: string;
 };
 
+/** The full shape of a transaction that the receipt templates expect. */
+export const transactionsForEmails = async (transactionIds: string[]) => {
+  return prisma.userTransaction.findMany({
+    where: {
+      id: {
+        in: transactionIds,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+      tips: {
+        include: {
+          profile: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      trackGroupPurchases: {
+        include: {
+          trackGroup: {
+            select: {
+              id: true,
+              title: true,
+              urlSlug: true,
+              profile: {
+                include: {
+                  user: {
+                    select: {
+                      name: true,
+                      email: true,
+                      urlSlug: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      merchPurchases: {
+        include: {
+          options: {
+            select: {
+              name: true,
+            },
+          },
+          merch: {
+            include: {
+              profile: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      trackPurchases: {
+        include: {
+          track: {
+            include: {
+              trackGroup: {
+                include: {
+                  profile: {
+                    include: {
+                      user: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+export type TransactionForEmails = Awaited<
+  ReturnType<typeof transactionsForEmails>
+>[number];
+
+/**
+ * The buyer's half of the sale emails. Kept separate from the artist
+ * notification so a receipt can be re-sent on its own, without the artist
+ * getting a second "you made a sale" email (#2286).
+ */
+export const sendPurchaseReceipt = async (
+  artist: Profile & {
+    user: SafeUser;
+    properties?: { emails?: { purchase?: string } } | null;
+  },
+  purchaser: SafeUser,
+  transactions: TransactionForEmails[]
+) => {
+  const { applicationUrl } = await getClient();
+
+  await sendMail<PurchaseReceiptEmailType>({
+    data: {
+      template: "purchase-receipt",
+      message: {
+        to: purchaser.email,
+      },
+      locals: {
+        artist: processSingleArtist(
+          artist
+        ) as unknown as PurchaseReceiptEmailType["artist"],
+        transactions: transactions.map(
+          (t) =>
+            serializeUserTransaction(t, {
+              emailShape: true,
+            }) as unknown as PurchaseTransaction
+        ),
+        email: purchaser.email,
+        client: applicationUrl,
+        host: process.env.API_DOMAIN,
+      } as PurchaseReceiptEmailType,
+    },
+  } as Job);
+};
+
 export const sendSaleEmails = async (
   artist: Profile & {
     user: SafeUser;
@@ -748,92 +881,7 @@ export const sendSaleEmails = async (
 ) => {
   try {
     const { applicationUrl } = await getClient();
-    const transactions = await prisma.userTransaction.findMany({
-      where: {
-        id: {
-          in: transactionIds,
-        },
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        tips: {
-          include: {
-            profile: {
-              include: {
-                user: {
-                  select: {
-                    name: true,
-                    email: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        trackGroupPurchases: {
-          include: {
-            trackGroup: {
-              select: {
-                id: true,
-                title: true,
-                urlSlug: true,
-                profile: {
-                  include: {
-                    user: {
-                      select: {
-                        name: true,
-                        email: true,
-                        urlSlug: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        merchPurchases: {
-          include: {
-            options: {
-              select: {
-                name: true,
-              },
-            },
-            merch: {
-              include: {
-                profile: {
-                  include: {
-                    user: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        trackPurchases: {
-          include: {
-            track: {
-              include: {
-                trackGroup: {
-                  include: {
-                    profile: {
-                      include: {
-                        user: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    const transactions = await transactionsForEmails(transactionIds);
 
     const serializedTransactions = transactions.map(
       (t) =>
@@ -841,25 +889,8 @@ export const sendSaleEmails = async (
           emailShape: true,
         }) as unknown as PurchaseTransaction
     );
-    const serializedArtist = processSingleArtist(
-      artist
-    ) as unknown as PurchaseReceiptEmailType["artist"];
 
-    await sendMail<PurchaseReceiptEmailType>({
-      data: {
-        template: "purchase-receipt",
-        message: {
-          to: purchaser.email,
-        },
-        locals: {
-          artist: serializedArtist,
-          transactions: serializedTransactions,
-          email: purchaser.email,
-          client: applicationUrl,
-          host: process.env.API_DOMAIN,
-        } as PurchaseReceiptEmailType,
-      },
-    } as Job);
+    await sendPurchaseReceipt(artist, purchaser, transactions);
 
     await sendMail<ArtistPurchaseNotificationEmailType>({
       data: {

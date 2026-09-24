@@ -66,7 +66,8 @@ export const startGeneratingZip = async (
   trackGroup: TrackGroup & { tracks: Track[] },
   tracks: (Track & { audio: TrackAudio | null })[],
   format: string,
-  destinationType: "track" | "trackGroup" = "trackGroup"
+  destinationType: "track" | "trackGroup" = "trackGroup",
+  requestedByUserId?: number
 ) => {
   const jobKey = `${trackGroup.id}-${format}`;
 
@@ -88,6 +89,20 @@ export const startGeneratingZip = async (
     logger.info(
       `Job for trackGroup ${trackGroup.id} format ${format} already queued (jobId: ${duplicateJob.id}). Returning existing job.`
     );
+
+    // Everyone waiting on this zip should hear about it, not just whoever
+    // happened to ask for it first
+    if (requestedByUserId) {
+      const existing: number[] =
+        (duplicateJob.data as any).requestedByUserIds ?? [];
+      if (!existing.includes(requestedByUserId)) {
+        await duplicateJob.updateData({
+          ...(duplicateJob.data as any),
+          requestedByUserIds: [...existing, requestedByUserId],
+        });
+      }
+    }
+
     return duplicateJob.id;
   }
 
@@ -98,6 +113,7 @@ export const startGeneratingZip = async (
       tracks,
       format,
       destinationType,
+      requestedByUserIds: requestedByUserId ? [requestedByUserId] : [],
     },
     { deduplication: { id: jobKey, ttl: 5000 } }
   );

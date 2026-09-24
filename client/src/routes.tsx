@@ -1034,6 +1034,15 @@ const routes: RouteObject[] = [
             ],
           },
           {
+            path: "redeem",
+            handle: { title: "redeemDownloadCode" },
+            async lazy() {
+              const { default: Component } =
+                await import("pages/{artistId}/redeem/Index");
+              return { Component };
+            },
+          },
+          {
             path: "unsubscribe",
             handle: { title: "artistUnsubscribe" },
             async lazy() {

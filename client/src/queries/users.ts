@@ -301,6 +301,7 @@ export function useDeleteArtistMutation() {
 }
 
 export type Sale = {
+  id?: string;
   amount: number;
   artist: (Partial<Artist> & { id: number; urlSlug: string })[];
   currency: string;

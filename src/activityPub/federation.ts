@@ -18,6 +18,7 @@ import {
   PUBLIC_COLLECTION,
   Undo,
   Audio,
+  Hashtag,
 } from "@fedify/fedify/vocab";
 import { RedisKvStore, RedisMessageQueue } from "@fedify/redis";
 import prisma from "@mirlo/prisma";
@@ -220,6 +221,10 @@ federation
               published: getTemporal(item.releaseDate),
               to: PUBLIC_COLLECTION,
               cc: followersUri,
+              tags: buildHashtags(
+                (item as { tags?: string[] }).tags ?? [],
+                client.applicationUrl
+              ),
             }),
           });
         } else {
@@ -262,9 +267,23 @@ const findAPReleaseById = async (id: number) => {
     },
     include: {
       profile: true,
+      tags: { include: { tag: true } },
     },
   });
 };
+
+const buildHashtags = (tags: string[], applicationUrl: string) =>
+  tags
+    .filter((tag) => !!tag)
+    .map(
+      (tag) =>
+        new Hashtag({
+          name: `#${tag}`,
+          href: new URL(
+            `${applicationUrl}/releases?tag=${encodeURIComponent(tag)}`
+          ),
+        })
+    );
 
 const findAPPostById = async (id: number) => {
   return await prisma.post.findFirst({
@@ -315,11 +334,17 @@ federation.setObjectDispatcher(
     const trackGroup = await findAPReleaseById(Number(releaseId));
     if (!trackGroup || trackGroup.profileId !== parsedId) return null;
 
+    const client = await getClient();
+
     return new Audio({
       id: ctx.getObjectUri(Audio, { identifier, releaseId }),
       name: trackGroup.title ?? undefined,
       content: trackGroup.about ?? undefined,
       published: getTemporal(trackGroup.releaseDate),
+      tags: buildHashtags(
+        trackGroup.tags.map((t) => t.tag.tag),
+        client.applicationUrl
+      ),
     });
   }
 );

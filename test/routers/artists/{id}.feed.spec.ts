@@ -300,6 +300,37 @@ describe("artists/{id}/feed", () => {
     assert.equal(obj.items[0].title, `${trackGroup.title} by ${profile.name}`);
   });
 
+  it("should GET / an album's genre tags as RSS categories", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+      },
+    });
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
+
+    for (const tag of ["shoegaze", "dream-pop"]) {
+      const { id: tagId } = await prisma.tag.create({ data: { tag } });
+      await prisma.trackGroupTag.create({
+        data: { trackGroupId: trackGroup.id, tagId },
+      });
+    }
+
+    const response = await requestApp
+      .get(`artists/${profile.id}/feed?format=rss`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    const parser = new Parser();
+    const obj = await parser.parseString(response.text);
+
+    assert.equal(obj.items.length, 1);
+    assert.deepEqual(obj.items[0].categories?.sort(), [
+      "dream-pop",
+      "shoegaze",
+    ]);
+  });
+
   it("should GET / not display an album if it's not public", async () => {
     const user = await prisma.user.create({
       data: {

@@ -256,6 +256,7 @@ export default function () {
             },
           },
           cover: true,
+          tags: { include: { tag: true } },
           _count: subscriptionTierReleasesCount,
         },
       });

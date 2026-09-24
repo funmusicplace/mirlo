@@ -3,6 +3,12 @@ import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import { AudioWrapper } from "components/Player/AudioWrapper";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
+import { PlayButtonsWrapper } from "components/Widget/PlayButtonsWrapper";
+import {
+  TgWidgetWrapper,
+  TrackListWrapper,
+  WidgetWrapper,
+} from "components/Widget/utils";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
@@ -11,9 +17,6 @@ import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
-
-import { PlayButtonsWrapper } from "components/Widget/PlayButtonsWrapper";
-import { TgWidgetWrapper, TrackListWrapper, WidgetWrapper } from "components/Widget/utils";
 
 const Index = () => {
   const { t } = useTranslation("translation", {

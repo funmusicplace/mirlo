@@ -1,5 +1,6 @@
 import { truncate } from "lodash";
 import React from "react";
+
 import Button from "./Button";
 
 export const OverflowableText: React.FC<{ text?: string }> = ({ text }) => {
@@ -22,7 +23,9 @@ export const OverflowableText: React.FC<{ text?: string }> = ({ text }) => {
 
   React.useEffect(() => {
     setDisplayText(
-      isExpanded ? text ?? "" : truncate(text ?? "", { length: truncateLength })
+      isExpanded
+        ? (text ?? "")
+        : truncate(text ?? "", { length: truncateLength })
     );
   }, [text, isExpanded]);
 

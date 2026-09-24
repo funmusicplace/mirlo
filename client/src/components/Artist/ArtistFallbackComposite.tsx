@@ -64,14 +64,7 @@ export const ArtistFallbackComposite: React.FC<{
 
   // If we don't have any covers, render empty placeholder
   if (covers.length === 0) {
-    return (
-      <ImageWithPlaceholder
-        src={undefined}
-        alt=""
-        size={300}
-        square
-      />
-    );
+    return <ImageWithPlaceholder src={undefined} alt="" size={300} square />;
   }
 
   return (

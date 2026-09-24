@@ -1,5 +1,11 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
+import {
+  linkCardClass,
+  linkCardOnTransparentClass,
+} from "components/Artist/linkCardStyle";
+import LinkPageHeader from "components/Artist/LinkPageHeader";
 import { useTransparentContainer } from "components/ArtistColorsProvider";
 import {
   findOutsideSite,
@@ -14,10 +20,6 @@ import { useParams } from "react-router-dom";
 import { transformFromLinks } from "utils/links";
 
 import { bp } from "../../../constants";
-
-import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
-import { linkCardClass, linkCardOnTransparentClass } from "components/Artist/linkCardStyle";
-import LinkPageHeader from "components/Artist/LinkPageHeader";
 
 const Index: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
