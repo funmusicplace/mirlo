@@ -2,9 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
-import logger from "../../../../../logger";
 import { AppError, HttpCode } from "../../../../../utils/error";
-import { recordPaymentAccountStatus } from "../../../../../utils/paymentAccountStatus";
 import stripe from "../../../../../utils/stripe";
 
 type Params = {
@@ -53,17 +51,6 @@ export default function () {
               description:
                 "Failed to retrieve Stripe account information. Please try again later.",
             });
-          }
-          try {
-            await recordPaymentAccountStatus(
-              user.id,
-              !!account?.charges_enabled
-            );
-          } catch (e) {
-            logger.error(
-              `checkAccountStatus: could not record payment account status for user ${user.id}`,
-              e
-            );
           }
           res.status(200).json({
             result: {
