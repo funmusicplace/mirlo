@@ -6,6 +6,7 @@ hero:
   name: "Mirlo:"
   text: "Documentation for an open source music sales and patronage platform."
   tagline: 🐦‍⬛
+  image: /images/docs.png
   actions:
     - theme: brand
       text: Mirlo features

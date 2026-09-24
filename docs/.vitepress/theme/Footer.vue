@@ -1,4 +1,8 @@
 <script setup>
+import { useLayout } from "vitepress/theme";
+
+const { hasSidebar } = useLayout();
+
 const columns = [
   {
     heading: "Mirlo",
@@ -33,7 +37,7 @@ const columns = [
 </script>
 
 <template>
-  <footer class="mirlo-footer">
+  <footer class="mirlo-footer" :class="{ 'has-sidebar': hasSidebar }">
     <div class="mirlo-footer__container">
       <div class="mirlo-footer__columns">
         <div
@@ -65,6 +69,29 @@ const columns = [
 .mirlo-footer__container {
   max-width: var(--vp-layout-max-width, 1440px);
   margin: 0 auto;
+}
+
+/*
+ * On pages with a sidebar, the sidebar is fixed-position and sits on top of
+ * whatever's beneath it, so a centered container would have its left column
+ * hidden behind it. Match VPContent.has-sidebar's own padding instead of
+ * centering, so the footer lines up with the nav bar's content area.
+ */
+@media (min-width: 960px) {
+  .mirlo-footer.has-sidebar .mirlo-footer__container {
+    max-width: none;
+    margin: 0;
+    padding-left: var(--vp-sidebar-width);
+  }
+}
+
+@media (min-width: 1440px) {
+  .mirlo-footer.has-sidebar .mirlo-footer__container {
+    padding-right: calc((100vw - var(--vp-layout-max-width)) / 2);
+    padding-left: calc(
+      (100vw - var(--vp-layout-max-width)) / 2 + var(--vp-sidebar-width)
+    );
+  }
 }
 
 .mirlo-footer__columns {
