@@ -5,25 +5,34 @@ import assert from "assert";
 
 import { describe, it } from "mocha";
 import sinon from "sinon";
-import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 
 import syncPaymentAccountStatuses from "../../src/jobs/tasks/sync-payment-account-statuses";
+import { PaymentAccountStatus } from "../../src/utils/payments/PaymentProcessor";
 import { StripePaymentProcessor } from "../../src/utils/payments/stripeProcessor";
-import * as stripeUtils from "../../src/utils/stripe";
 import { clearTables, createUser } from "../utils";
 
-const stubAccountList = (accounts: Partial<Stripe.Account>[]) =>
-  sinon.stub(stripeUtils.stripe.accounts, "list").returns({
-    async *[Symbol.asyncIterator]() {
+const stubAccountList = (
+  accounts: { id: string; charges_enabled: boolean }[]
+) =>
+  sinon
+    .stub(StripePaymentProcessor.prototype, "listAccountStatuses")
+    .callsFake(async function* (): AsyncIterable<PaymentAccountStatus> {
       for (const account of accounts) {
-        yield account as Stripe.Account;
+        yield {
+          accountId: account.id,
+          canReceivePayments: account.charges_enabled,
+        };
       }
-    },
-  } as unknown as ReturnType<typeof stripeUtils.stripe.accounts.list>);
+    });
 
 describe("syncPaymentAccountStatuses", () => {
+  let refresh: sinon.SinonStub;
+
   beforeEach(async () => {
+    refresh = sinon
+      .stub(StripePaymentProcessor.prototype, "refresh")
+      .resolves();
     try {
       await clearTables();
     } catch (e) {
@@ -100,7 +109,7 @@ describe("syncPaymentAccountStatuses", () => {
       stripeAccountId: "acct_verified",
     });
     sinon
-      .stub(stripeUtils.stripe.accounts, "list")
+      .stub(StripePaymentProcessor.prototype, "listAccountStatuses")
       .throws(new Error("No API key provided"));
 
     const summary = await syncPaymentAccountStatuses();
@@ -113,9 +122,6 @@ describe("syncPaymentAccountStatuses", () => {
   });
 
   it("refreshes the processor before listing accounts", async () => {
-    const refresh = sinon
-      .stub(StripePaymentProcessor.prototype, "refresh")
-      .resolves();
     stubAccountList([]);
 
     await syncPaymentAccountStatuses();
