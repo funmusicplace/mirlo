@@ -70,7 +70,8 @@ const TRUNCATE_TABLES_SQL = `
     "UserTrackGroupPurchase",
     "UserTrackGroupWishlist",
     "UserTrackPurchase",
-    "UserTransaction"
+    "UserTransaction",
+    "UserTrustLevelChange"
   CASCADE
 `;
 

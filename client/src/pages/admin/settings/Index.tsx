@@ -13,6 +13,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 interface FormSettings {
   platformPercent: number;
@@ -30,6 +31,7 @@ interface FormSettings {
   defconLevel?: number;
   useConsolidatedBuckets?: boolean;
   bucketPrefix?: string;
+  trustLevelNames?: string[];
 }
 
 interface SettingsFromAPI {
@@ -72,6 +74,7 @@ interface SettingsFromAPI {
     };
     cloudflareTurnstileSecret?: string;
     featuredArtistIds?: number[];
+    trustLevelNames?: string[];
   };
   terms: string;
   privacyPolicy: string;
@@ -137,6 +140,11 @@ const Index = () => {
         cookiePolicy: response.result.cookiePolicy,
         contentPolicy: response.result.contentPolicy,
         defconLevel: response.result.defconLevel,
+        trustLevelNames: DEFAULT_TRUST_LEVEL_NAMES.map(
+          (defaultName, level) =>
+            response.result.settings?.trustLevelNames?.[level]?.trim() ||
+            defaultName
+        ),
       });
       setIsLoading(false);
       snackbar("Settings loaded", { type: "success" });
@@ -161,6 +169,7 @@ const Index = () => {
             },
             cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
             featuredArtistIds: featuredArtists.map((a) => a.id),
+            trustLevelNames: data.trustLevelNames,
           },
           cdnUrl: data.cdnUrl,
           bucketNames: data.useConsolidatedBuckets
@@ -185,7 +194,6 @@ const Index = () => {
 
   return (
     <WidthContainer variant="big" justify="center" className="p-4">
-      <h3>Settings</h3>
       <form onSubmit={handleSubmit(updateSettings)}>
         <Table
           className={css`
@@ -468,12 +476,11 @@ const Index = () => {
           <tr>
             <td>
               Use consolidated bucket mode
-              <br />
-              <small>
-                Off keeps legacy mode (separate per-type buckets) — leave off
-                for existing installs unless you've migrated their data. On
-                switches to the consolidated 3-bucket layout: mirlo-audio,
-                mirlo-images, mirlo-downloads.
+              <small className="block max-w-md">
+                Off keeps legacy mode (separate per-type buckets): leave off for
+                existing installs unless you've migrated their data. On switches
+                to the consolidated 3-bucket layout: mirlo-audio, mirlo-images,
+                mirlo-downloads.
               </small>
             </td>
             <td>
@@ -535,6 +542,30 @@ const Index = () => {
               <TextArea {...register("contentPolicy")} rows={10} />
             </td>
           </tr>
+          <tr>
+            <td colSpan={2}>
+              <h3>Trust levels</h3>
+            </td>
+          </tr>
+          {DEFAULT_TRUST_LEVEL_NAMES.map((defaultName, level) => (
+            <tr key={level}>
+              <td>
+                <label htmlFor={`input-trust-level-name-${level}`}>
+                  Level {level} name
+                </label>
+              </td>
+              <td>
+                <InputEl
+                  id={`input-trust-level-name-${level}`}
+                  {...register(`trustLevelNames.${level}`)}
+                  placeholder={defaultName}
+                  className={css`
+                    text-align: right;
+                  `}
+                />
+              </td>
+            </tr>
+          ))}
           <tr>
             <td>
               <h3>Security</h3>

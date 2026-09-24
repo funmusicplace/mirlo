@@ -6,6 +6,8 @@ import {
   userHasPermission,
 } from "../../../../auth/passport";
 import { serializeUser } from "../../../../serializers/user";
+import { AppError } from "../../../../utils/error";
+import { isTrustLevel, setUserTrustLevel } from "../../../../utils/trustLevel";
 import { deleteUser } from "../../../../utils/user";
 
 export default function () {
@@ -25,6 +27,7 @@ export default function () {
       stripeAccountId,
       accountingEmail,
       disabled,
+      trustLevel,
     } = req.body as {
       email: string;
       isLabelAccount: boolean;
@@ -34,8 +37,15 @@ export default function () {
       stripeAccountId: string;
       accountingEmail?: string;
       disabled?: boolean;
+      trustLevel?: number;
     };
     try {
+      if (trustLevel !== undefined && !isTrustLevel(trustLevel)) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Invalid trust level",
+        });
+      }
       await prisma.user.update({
         where: { id: Number(req.params.id) },
         data: {
@@ -50,6 +60,14 @@ export default function () {
             disabled === undefined ? undefined : disabled ? new Date() : null,
         },
       });
+      if (trustLevel !== undefined && req.user) {
+        await setUserTrustLevel(
+          Number(req.params.id),
+          trustLevel,
+          "ADMIN",
+          req.user.id
+        );
+      }
       res.json({
         message: "success",
       });
@@ -76,6 +94,17 @@ export default function () {
           isAdmin: true,
           featureFlags: true,
           stripeAccountId: true,
+          trustLevelChanges: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              fromLevel: true,
+              toLevel: true,
+              reason: true,
+              createdAt: true,
+              changedBy: { select: { email: true } },
+            },
+          },
           emailConfirmationToken: true,
           disabledAt: true,
           trustLevel: true,

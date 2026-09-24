@@ -107,6 +107,10 @@ export interface PaymentProcessor {
     accountId: string;
     shippingAddress: { name?: string; address: Record<string, unknown> };
   }): Promise<void>;
+
+  refresh(): Promise<void>;
+
+  listAccountStatuses(): AsyncIterable<PaymentAccountStatus>;
 }
 
 export type TerminalReader = {
@@ -114,6 +118,11 @@ export type TerminalReader = {
   label: string | null;
   deviceType: string;
   status: string | null;
+};
+
+export type PaymentAccountStatus = {
+  accountId: string;
+  canReceivePayments: boolean;
 };
 
 export type PaymentStatusResult = {

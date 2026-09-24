@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+import TrustLevelHistoryModal from "components/Admin/TrustLevelHistoryModal";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
@@ -5,13 +7,21 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
 import { formatDate as formatDateForLocale } from "components/TrackGroup/ReleaseDate";
+import { queryTrustLevelNames } from "queries/settings";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
+import {
+  FaArrowCircleLeft,
+  FaCheck,
+  FaHistory,
+  FaTimes,
+  FaTrash,
+} from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
+import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 const Index = () => {
   const { id } = useParams();
@@ -19,9 +29,15 @@ const Index = () => {
   const [stripeAccountId, setStripeAccountId] = React.useState<string>("");
   const [accountingEmail, setAccountingEmail] = React.useState<string>("");
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
+  const [showTrustLevelHistory, setShowTrustLevelHistory] =
+    React.useState(false);
+  const emailStatusCellRef = React.useRef<HTMLTableCellElement>(null);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { i18n } = useTranslation();
+  const { data: trustLevelNames = DEFAULT_TRUST_LEVEL_NAMES } = useQuery(
+    queryTrustLevelNames()
+  );
 
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);
@@ -33,8 +49,26 @@ const Index = () => {
 
   const onConfirmationEmailClick = React.useCallback(async () => {
     await api.post(`users/${id}/confirmEmail`, {});
-    callback();
+    await callback();
+    emailStatusCellRef.current?.focus();
   }, [callback, id]);
+
+  const onResendConfirmationEmailClick = React.useCallback(async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      await api.post("resend-verification-email", {
+        email: user.email,
+        client: import.meta.env.VITE_CLIENT_DOMAIN,
+      });
+      snackbar(`Confirmation email sent to ${user.email}`, {
+        type: "success",
+      });
+    } catch (e) {
+      snackbar("Could not send the confirmation email", { type: "warning" });
+    }
+  }, [snackbar, user]);
 
   const onLoginAsUserClick = React.useCallback(async () => {
     if (
@@ -92,6 +126,9 @@ const Index = () => {
               User "{user.email}"
             </h2>
           </div>
+          <div>
+            <Button onClick={onLoginAsUserClick}>Log in as user</Button>
+          </div>
         </SpaceBetweenDiv>
         <div>
           <Table>
@@ -113,8 +150,37 @@ const Index = () => {
                 <td>{formatDate(user.updatedAt)}</td>
               </tr>
               <tr>
-                <td>Trust level</td>
-                <td>{user.trustLevel}</td>
+                <td>
+                  <label htmlFor="input-trust-level">Trust level</label>
+                </td>
+                <td>
+                  <div className="flex items-center gap-2">
+                    <SelectEl
+                      id="input-trust-level"
+                      value={user.trustLevel}
+                      onChange={async (e) => {
+                        await api.put(`admin/users/${id}`, {
+                          trustLevel: Number(e.target.value),
+                        });
+                        callback();
+                      }}
+                    >
+                      {trustLevelNames.map((name, level) => (
+                        <option key={level} value={level}>
+                          {name}
+                        </option>
+                      ))}
+                    </SelectEl>
+                    <Button
+                      variant="outlined"
+                      size="compact"
+                      startIcon={<FaHistory />}
+                      onClick={() => setShowTrustLevelHistory(true)}
+                    >
+                      View history
+                    </Button>
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td>artists</td>
@@ -191,8 +257,28 @@ const Index = () => {
               </tr>
               <tr>
                 <td>email confirmed?</td>
-                <td>
-                  {user.hasPendingEmailConfirmation ? <FaTimes /> : <FaCheck />}
+                <td ref={emailStatusCellRef} tabIndex={-1}>
+                  {user.hasPendingEmailConfirmation ? (
+                    <div className="flex items-center gap-2">
+                      <FaTimes />
+                      <Button
+                        variant="outlined"
+                        size="compact"
+                        onClick={onResendConfirmationEmailClick}
+                      >
+                        Resend confirmation email
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="compact"
+                        onClick={onConfirmationEmailClick}
+                      >
+                        Mark as confirmed
+                      </Button>
+                    </div>
+                  ) : (
+                    <FaCheck />
+                  )}
                 </td>
               </tr>
               <tr>
@@ -214,35 +300,35 @@ const Index = () => {
               <tr>
                 <td>Feature flags</td>
                 <td>
-                  <SelectEl
-                    multiple
-                    defaultValue={featureFlags}
-                    onChange={(e) => {
-                      const selectedOptions = Array.from(
-                        e.target.selectedOptions,
-                        (option) => option.value
-                      );
-                      setFeatureFlags(selectedOptions);
-                    }}
-                  >
-                    {["activityPub", "federatedStreaming"].map((flag) => (
-                      <option key={flag} value={flag}>
-                        {flag}
-                      </option>
-                    ))}
-                  </SelectEl>
-                </td>
-                <td>
-                  <Button
-                    onClick={async () => {
-                      await api.put(`admin/users/${id}`, {
-                        featureFlags: featureFlags,
-                      });
-                      callback();
-                    }}
-                  >
-                    Save
-                  </Button>
+                  <div className="flex flex-col items-start gap-2">
+                    <SelectEl
+                      multiple
+                      defaultValue={featureFlags}
+                      onChange={(e) => {
+                        const selectedOptions = Array.from(
+                          e.target.selectedOptions,
+                          (option) => option.value
+                        );
+                        setFeatureFlags(selectedOptions);
+                      }}
+                    >
+                      {["activityPub", "federatedStreaming"].map((flag) => (
+                        <option key={flag} value={flag}>
+                          {flag}
+                        </option>
+                      ))}
+                    </SelectEl>
+                    <Button
+                      onClick={async () => {
+                        await api.put(`admin/users/${id}`, {
+                          featureFlags: featureFlags,
+                        });
+                        callback();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -251,7 +337,7 @@ const Index = () => {
                     Stripe account ID
                   </label>
                 </td>
-                <td className="flex">
+                <td className="flex gap-2">
                   <InputEl
                     id="input-stripe-account-id"
                     onChange={(event) => setStripeAccountId(event.target.value)}
@@ -274,7 +360,7 @@ const Index = () => {
                     Transaction email
                   </label>
                 </td>
-                <td className="flex">
+                <td className="flex gap-2">
                   <InputEl
                     id="input-transaction-email"
                     onChange={(event) => setAccountingEmail(event.target.value)}
@@ -297,11 +383,28 @@ const Index = () => {
               </tr>
             </tbody>
           </Table>
-          <Button onClick={onConfirmationEmailClick}>Confirm user email</Button>
-          <Button onClick={onLoginAsUserClick}>Log in as user</Button>
-          <Button onClick={onDeleteClick}>Delete user</Button>
+          <section className="mt-8 flex flex-col items-start gap-2">
+            <h3>Delete user</h3>
+            <small>
+              This permanently deletes the user, their artists and everything
+              attached to them. It cannot be undone.
+            </small>
+            <Button
+              buttonRole="warning"
+              startIcon={<FaTrash />}
+              onClick={onDeleteClick}
+            >
+              Delete user
+            </Button>
+          </section>
         </div>
       </div>
+      <TrustLevelHistoryModal
+        open={showTrustLevelHistory}
+        onClose={() => setShowTrustLevelHistory(false)}
+        changes={user.trustLevelChanges}
+        trustLevelNames={trustLevelNames}
+      />
     </>
   );
 };

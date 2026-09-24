@@ -384,9 +384,19 @@ interface UserFromAdmin {
   isLabelAccount: boolean;
   featureFlags: string[];
   trustLevel: number;
+  trustLevelChanges: UserTrustLevelChange[];
   canCreateArtists: boolean;
   accountingEmail?: string;
   disabledAt?: string | null;
+}
+
+interface UserTrustLevelChange {
+  id: number;
+  fromLevel: number;
+  toLevel: number;
+  reason: "ADMIN" | "PAYMENT_ACCOUNT_VERIFIED";
+  createdAt: string;
+  changedBy?: { email: string } | null;
 }
 
 interface ArtistFromAdmin {

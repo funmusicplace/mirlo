@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import cleanUpFiles from "../../../jobs/tasks/clean-up-files";
 import initiateUserNotifcations from "../../../jobs/tasks/initiate-user-notifications";
+import syncPaymentAccountStatuses from "../../../jobs/tasks/sync-payment-account-statuses";
 import logger from "../../../logger";
 import { startMovingFiles } from "../../../queues/moving-files-to-backblaze";
 import { cleanUpDeletedUsers } from "../../../utils/user";
@@ -15,7 +16,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const log = req.logger ?? logger;
     const { jobName, jobParam } = req.query;
-    const result: { [key: string]: "Success" } = {};
+    const result: { [key: string]: "Success" | { error?: string } } = {};
     log.info(`triggering job ${jobName} with ${jobParam}`);
 
     try {
@@ -47,6 +48,9 @@ export default function () {
         if (jobName === "cleanUpDeletedUsers") {
           await cleanUpDeletedUsers();
           result[jobName] = "Success";
+        }
+        if (jobName === "syncPaymentAccountStatuses") {
+          result[jobName] = await syncPaymentAccountStatuses();
         }
       }
       res.status(200).json({ result });

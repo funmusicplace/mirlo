@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import stripe from "../../../../../utils/stripe";
 

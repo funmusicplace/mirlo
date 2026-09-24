@@ -9,6 +9,7 @@ import stripe, {
   createSubscriptionStripeProduct,
   findOrCreateStripeCustomer,
   isSetupIntentId,
+  refreshStripeClient,
 } from "../stripe";
 import { getIntentStatus } from "../stripe/status";
 import {
@@ -26,6 +27,7 @@ import {
   CreatePledgeSetupArgs,
   CreateSubscriptionSetupArgs,
   UpdateSubscriptionTierArgs,
+  PaymentAccountStatus,
   PaymentStatusResult,
   TerminalReader,
 } from "./PaymentProcessor";
@@ -350,6 +352,19 @@ export class StripePaymentProcessor implements PaymentProcessor {
       deviceType: r.device_type,
       status: r.status ?? null,
     }));
+  }
+
+  async refresh(): Promise<void> {
+    await refreshStripeClient();
+  }
+
+  async *listAccountStatuses(): AsyncIterable<PaymentAccountStatus> {
+    for await (const account of stripe.accounts.list({ limit: 100 })) {
+      yield {
+        accountId: account.id,
+        canReceivePayments: !!account.charges_enabled,
+      };
+    }
   }
 
   async attachIdentity({

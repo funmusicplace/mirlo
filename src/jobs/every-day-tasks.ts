@@ -1,10 +1,12 @@
 import { logger } from "./queue-worker";
 import sendOnboardingEmail from "./send-onboarding-email";
 import sendSubscriptionRenewalReminders from "./send-subscription-renewal-reminders";
+import syncPaymentAccountStatuses from "./tasks/sync-payment-account-statuses";
 
 const triggerDailyTasks = async () => {
   await sendOnboardingEmail();
   await sendSubscriptionRenewalReminders();
+  await syncPaymentAccountStatuses();
 };
 
 triggerDailyTasks()

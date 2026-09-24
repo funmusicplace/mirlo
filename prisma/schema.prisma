@@ -74,6 +74,7 @@ model User {
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
+  canReceivePayments                  Boolean                          @default(false)
   urlSlug                             String?
   receiveMailingList                  Boolean                          @default(false)
   promoCodes                          String[]
@@ -87,7 +88,7 @@ model User {
   properties                          Json?
   userConfirmationCode                String?
   userConfirmationCodeExpiration      DateTime?
-  trustLevel                          Int?                             @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
+  trustLevel                          Int                              @default(0)
   stripeCustomerId                    String?
   canCreateArtists                    Boolean                          @default(true)
   accountingEmail                     String?
@@ -123,6 +124,27 @@ model User {
   clients                             Client[]
   resolvedContentFlags                ContentFlag[]                    @relation("resolvedContentFlags")
   reportedContentFlags                ContentFlag[]                    @relation("reportedContentFlags")
+  trustLevelChanges                   UserTrustLevelChange[]           @relation("trustLevelChangeUser")
+  trustLevelChangesMade               UserTrustLevelChange[]           @relation("trustLevelChangeActor")
+}
+
+enum TrustLevelChangeReason {
+  ADMIN
+  PAYMENT_ACCOUNT_VERIFIED
+}
+
+model UserTrustLevelChange {
+  id              Int                    @id @default(autoincrement())
+  userId          Int
+  user            User                   @relation("trustLevelChangeUser", fields: [userId], references: [id], onDelete: Cascade)
+  fromLevel       Int
+  toLevel         Int
+  reason          TrustLevelChangeReason
+  changedByUserId Int?
+  changedBy       User?                  @relation("trustLevelChangeActor", fields: [changedByUserId], references: [id], onDelete: SetNull)
+  createdAt       DateTime               @default(now())
+
+  @@index([userId])
 }
 
 model Invite {

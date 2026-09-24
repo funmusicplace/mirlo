@@ -74,6 +74,7 @@ function makeSettings(overrides: object = {}) {
           mailgun: { apiKey: "", domain: "" },
         },
         cloudflareTurnstileSecret: "cf-secret",
+        trustLevelNames: ["Newcomer", "Member"],
       },
       bucketNames: null,
       ...overrides,
@@ -246,6 +247,39 @@ describe("Settings", () => {
     });
   });
 
+  test("fills trust level names with defaults when unset", async () => {
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    expect(screen.getByLabelText("Level 0 name")).toHaveValue("Newcomer");
+    expect(screen.getByLabelText("Level 1 name")).toHaveValue("Member");
+    expect(screen.getByLabelText("Level 2 name")).toHaveValue("Regular");
+    expect(screen.getByLabelText("Level 3 name")).toHaveValue("Trusted");
+  });
+
+  test("submits edited trust level names", async () => {
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    const input = screen.getByLabelText("Level 3 name");
+    await userEvent.clear(input);
+    await userEvent.type(input, "Veteran");
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith(
+        "admin/settings",
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            trustLevelNames: ["Newcomer", "Member", "Regular", "Veteran"],
+          }),
+        })
+      );
+    });
+  });
+
   test("renders all section headings", async () => {
     renderSettings();
 
@@ -255,6 +289,7 @@ describe("Settings", () => {
     expect(screen.getByText("Stripe Settings")).toBeInTheDocument();
     expect(screen.getByText("Email Provider Settings")).toBeInTheDocument();
     expect(screen.getByText("Storage")).toBeInTheDocument();
+    expect(screen.getByText("Trust levels")).toBeInTheDocument();
     expect(screen.getByText("Security")).toBeInTheDocument();
   });
 });

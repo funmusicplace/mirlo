@@ -31,6 +31,7 @@ import {
 import { generateFullStaticImageUrl } from "../images";
 import { decrementMerchStock } from "../merch";
 import { finalMerchImageBucket } from "../minio";
+import { recordPaymentAccountStatus } from "../paymentAccountStatus";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -1443,6 +1444,19 @@ export const handleAccountUpdate = async (account: Stripe.Account) => {
     });
     if (user && stripeAccount.default_currency && !user.currency) {
       updateCurrencies(user.id, stripeAccount.default_currency);
+    }
+    if (user) {
+      try {
+        await recordPaymentAccountStatus(
+          user.id,
+          !!stripeAccount.charges_enabled
+        );
+      } catch (e) {
+        logger.error(
+          `account.update: could not record payment account status for user ${user.id}`,
+          e
+        );
+      }
     }
   } catch (e: any) {
     if (e?.code === "account_invalid" || e?.type === "StripePermissionError") {
