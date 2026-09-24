@@ -12,9 +12,15 @@ vi.mock("react-i18next", () => ({
   Trans: ({ i18nKey }: { i18nKey: string }) => <>{i18nKey}</>,
 }));
 
-const authState: { user: any } = { user: null };
+const authState = vi.hoisted(() => ({
+  user: null as any,
+  refreshLoggedInUser: vi.fn(),
+}));
 vi.mock("state/AuthContext", () => ({
-  useAuthContext: () => ({ user: authState.user }),
+  useAuthContext: () => ({
+    user: authState.user,
+    refreshLoggedInUser: authState.refreshLoggedInUser,
+  }),
 }));
 
 const mockSnackbar = vi.fn();
@@ -104,6 +110,16 @@ describe("AddToCollection", () => {
     );
 
     expect(mockSnackbar).toHaveBeenCalledWith("success", { type: "success" });
+  });
+
+  test("refreshes the logged in user so the release stops looking unowned", async () => {
+    authState.user = { id: 1 };
+    startPurchase.mockResolvedValueOnce(undefined);
+    renderComponent({ trackGroup: makeTrackGroup() });
+
+    await userEvent.click(screen.getByRole("button"));
+
+    expect(authState.refreshLoggedInUser).toHaveBeenCalled();
   });
 
   test("shows a warning snackbar when the purchase throws", async () => {

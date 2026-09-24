@@ -9,6 +9,7 @@ vi.mock("react-i18next", () => ({
     t: (key: string) => key,
     i18n: { language: "en" },
   }),
+  Trans: ({ i18nKey }: { i18nKey: string }) => <>{i18nKey}</>,
   initReactI18next: { type: "3rdParty", init: vi.fn() },
 }));
 
@@ -27,10 +28,30 @@ vi.mock("./utils", () => ({
   testOwnership: vi.fn().mockResolvedValue(false),
 }));
 
+const authState = vi.hoisted(() => ({
+  user: { id: 1, email: "buyer@test.com", artistUserSubscriptions: [] } as {
+    id: number;
+    email: string;
+    artistUserSubscriptions: unknown[];
+  } | null,
+  refreshLoggedInUser: vi.fn(),
+}));
 vi.mock("state/AuthContext", () => ({
   useAuthContext: () => ({
-    user: { id: 1, email: "buyer@test.com", artistUserSubscriptions: [] },
+    user: authState.user,
+    refreshLoggedInUser: authState.refreshLoggedInUser,
   }),
+}));
+
+const navigate = vi.hoisted(() => vi.fn());
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react-router-dom")>();
+  return { ...actual, useNavigate: () => navigate };
+});
+
+const snackbar = vi.hoisted(() => vi.fn());
+vi.mock("state/SnackbarContext", () => ({
+  useSnackbar: () => snackbar,
 }));
 
 const startPurchase = vi.fn().mockResolvedValue(undefined);
@@ -96,6 +117,15 @@ async function submitForm(container: HTMLElement) {
 describe("BuyTrackGroup", () => {
   beforeEach(() => {
     startPurchase.mockClear();
+    startPurchase.mockResolvedValue(undefined);
+    navigate.mockClear();
+    snackbar.mockClear();
+    authState.refreshLoggedInUser.mockClear();
+    authState.user = {
+      id: 1,
+      email: "buyer@test.com",
+      artistUserSubscriptions: [],
+    };
     purchaseState.checkout = null;
   });
 
@@ -160,6 +190,89 @@ describe("BuyTrackGroup", () => {
         ],
       })
     );
+  });
+
+  describe("naming a price of zero on a free release", () => {
+    const freeTrackGroup = {
+      ...baseTrackGroup,
+      minPrice: 0,
+      suggestedPrice: 0,
+    };
+
+    test("acquires it for free rather than opening a Stripe checkout", async () => {
+      startPurchase.mockResolvedValue({ redirectUrl: "/somewhere/download" });
+      const { container } = renderComponent({ trackGroup: freeTrackGroup });
+      await submitForm(container);
+
+      expect(startPurchase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          artistId: 10,
+          items: [
+            expect.objectContaining({
+              type: "trackGroup",
+              id: 100,
+              price: "0",
+            }),
+          ],
+        }),
+        { skipRedirect: true }
+      );
+    });
+
+    test("refreshes the logged in user so the release stops looking unowned", async () => {
+      startPurchase.mockResolvedValue({ redirectUrl: "/somewhere/download" });
+      const { container } = renderComponent({ trackGroup: freeTrackGroup });
+      await submitForm(container);
+
+      await waitFor(() =>
+        expect(authState.refreshLoggedInUser).toHaveBeenCalled()
+      );
+    });
+
+    test("sends the buyer to the checkout complete page", async () => {
+      startPurchase.mockResolvedValue({ redirectUrl: "/somewhere/download" });
+      const { container } = renderComponent({ trackGroup: freeTrackGroup });
+      await submitForm(container);
+
+      await waitFor(() => expect(navigate).toHaveBeenCalled());
+      const [target] = navigate.mock.calls[0];
+      expect(target).toContain("checkout-complete");
+      expect(target).toContain("purchaseType=trackGroup");
+      expect(target).toContain("trackGroupId=100");
+    });
+
+    test("asks a logged out visitor to sign up instead of charging them", async () => {
+      authState.user = null;
+      const { container } = renderComponent({ trackGroup: freeTrackGroup });
+
+      const form = container.querySelector("form");
+      if (!form) throw new Error("form not found");
+      fireEvent.submit(form);
+
+      await waitFor(() =>
+        expect(snackbar).toHaveBeenCalledWith("signUpToGetFreeRelease", {
+          type: "warning",
+        })
+      );
+      expect(startPurchase).not.toHaveBeenCalled();
+    });
+
+    test("still charges normally when a price above zero is named", async () => {
+      const { container } = renderComponent({ trackGroup: freeTrackGroup });
+
+      const priceInput = container.querySelector(
+        "input[name='chosenPrice']"
+      ) as HTMLInputElement;
+      fireEvent.change(priceInput, { target: { value: "5" } });
+
+      await submitForm(container);
+
+      expect(startPurchase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [expect.objectContaining({ price: "500" })],
+        })
+      );
+    });
   });
 
   test("a fundraiser that is no longer ACTIVE purchases the trackGroup normally, not as a pledge", async () => {

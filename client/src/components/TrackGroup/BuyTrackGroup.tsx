@@ -39,7 +39,7 @@ const BuyTrackGroup: React.FC<{
   const snackbar = useSnackbar();
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const { user } = useAuthContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
 
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
   const currency = trackGroup.currency ?? "usd";
@@ -72,6 +72,9 @@ const BuyTrackGroup: React.FC<{
     !!trackGroup.fundraiser?.isAllOrNothing &&
     (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
 
+  const isFreeAcquisition =
+    !isPledgeMode && !minPrice && Number(chosenPrice || 0) === 0;
+
   const checkoutCompletePath = (buyerEmail?: string) =>
     buildCheckoutCompletePath(trackGroup.artist, {
       purchaseType: track ? "track" : "trackGroup",
@@ -92,6 +95,35 @@ const BuyTrackGroup: React.FC<{
           if (alreadyOwns && !window.confirm(t("albumExists") ?? "")) {
             return;
           }
+        }
+
+        if (isFreeAcquisition) {
+          if (!user) {
+            snackbar(t("signUpToGetFreeRelease"), { type: "warning" });
+            return;
+          }
+
+          const result = await startPurchase(
+            {
+              artistId: trackGroup.artistId ?? trackGroup.artist.id,
+              items: [
+                {
+                  type: track ? "track" : "trackGroup",
+                  id: track ? track.id : trackGroup.id,
+                  price: "0",
+                  message: data.message,
+                },
+              ],
+            },
+            { skipRedirect: true }
+          );
+
+          if (result) {
+            refreshLoggedInUser();
+            onPurchaseComplete?.();
+            navigate(checkoutCompletePath(user.email));
+          }
+          return;
         }
 
         if (isPledgeMode && trackGroup.fundraiserId) {
@@ -141,7 +173,11 @@ const BuyTrackGroup: React.FC<{
       user,
       verifiedEmail,
       isPledgeMode,
+      isFreeAcquisition,
       startPurchase,
+      refreshLoggedInUser,
+      onPurchaseComplete,
+      navigate,
     ]
   );
 
@@ -154,9 +190,11 @@ const BuyTrackGroup: React.FC<{
 
   const purchaseText = isPledgeMode
     ? "addPaymentInformation"
-    : trackGroup.isPreorder
-      ? "preOrder"
-      : "buy";
+    : isFreeAcquisition
+      ? "addToCollection"
+      : trackGroup.isPreorder
+        ? "preOrder"
+        : "buy";
 
   const isDisabled =
     lessThanMin ||

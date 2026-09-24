@@ -55,11 +55,17 @@ export const usePurchase = () => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const startPurchase = React.useCallback(
-    async (args: {
-      artistId: number;
-      items: PurchaseItem[];
-      email?: string;
-    }): Promise<{ success: true } | undefined> => {
+    async (
+      args: {
+        artistId: number;
+        items: PurchaseItem[];
+        email?: string;
+      },
+      // Free acquisitions come back as a redirect to the download page. Callers
+      // that want to land somewhere else (e.g. the checkout complete page) opt
+      // out of the automatic navigation and route the user themselves.
+      options?: { skipRedirect?: boolean }
+    ): Promise<{ success?: true; redirectUrl?: string } | undefined> => {
       try {
         setIsLoading(true);
         const response = await api.post<typeof args, PurchaseResponse>(
@@ -68,6 +74,9 @@ export const usePurchase = () => {
         );
 
         if (response.redirectUrl) {
+          if (options?.skipRedirect) {
+            return { redirectUrl: response.redirectUrl };
+          }
           navigate(response.redirectUrl);
           return;
         }
