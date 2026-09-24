@@ -23,7 +23,9 @@ const syncPaymentAccountStatuses = async () => {
   } = { users: users.length, matched: 0, updated: 0 };
 
   try {
-    for await (const status of getPaymentProcessor().listAccountStatuses()) {
+    const processor = getPaymentProcessor();
+    await processor.refresh();
+    for await (const status of processor.listAccountStatuses()) {
       const userId = userIdByAccountId.get(status.accountId);
       if (userId === undefined) {
         continue;

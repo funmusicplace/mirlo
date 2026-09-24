@@ -108,6 +108,8 @@ export interface PaymentProcessor {
     shippingAddress: { name?: string; address: Record<string, unknown> };
   }): Promise<void>;
 
+  refresh(): Promise<void>;
+
   listAccountStatuses(): AsyncIterable<PaymentAccountStatus>;
 }
 

@@ -9,6 +9,7 @@ import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 
 import syncPaymentAccountStatuses from "../../src/jobs/tasks/sync-payment-account-statuses";
+import { StripePaymentProcessor } from "../../src/utils/payments/stripeProcessor";
 import * as stripeUtils from "../../src/utils/stripe";
 import { clearTables, createUser } from "../utils";
 
@@ -109,6 +110,17 @@ describe("syncPaymentAccountStatuses", () => {
     assert.equal(summary.matched, 0);
     assert.ok(summary.error?.includes("No API key provided"));
     assert.equal(updated?.trustLevel, 0);
+  });
+
+  it("refreshes the processor before listing accounts", async () => {
+    const refresh = sinon
+      .stub(StripePaymentProcessor.prototype, "refresh")
+      .resolves();
+    stubAccountList([]);
+
+    await syncPaymentAccountStatuses();
+
+    assert.equal(refresh.calledOnce, true);
   });
 
   it("writes nothing when everything is already in sync", async () => {
