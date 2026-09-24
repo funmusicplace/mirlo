@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef } from "react";
 import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 import type { EditorState } from "prosemirror-state";
-
+import { useCallback, useEffect, useRef } from "react";
 import api from "services/api";
 
 export type UsePastedImageUploadArgs = {
@@ -171,10 +170,9 @@ export const usePastedImageUpload = ({
       try {
         uploadingPastedImagesRef.current.add(src);
         const file = await dataUriToFile(src, index);
-        const response = await api.uploadFile(
-          `manage/posts/${postId}/images`,
-          [file]
-        );
+        const response = await api.uploadFile(`manage/posts/${postId}/images`, [
+          file,
+        ]);
 
         if (!imageWithSrcExists(manager, src)) {
           processedPastedImagesRef.current.delete(src);

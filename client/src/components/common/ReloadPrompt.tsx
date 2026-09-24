@@ -26,10 +26,7 @@ const ReloadPrompt: React.FC = () => {
       className="w-full flex flex-wrap items-center justify-center gap-3 px-4 py-2 bg-(--mi-warning-background-color) text-(--mi-warning-text-color) text-sm"
     >
       <span>{t("newVersionAvailable")}</span>
-      <Button
-        size="compact"
-        onClick={() => updateServiceWorker(true)}
-      >
+      <Button size="compact" onClick={() => updateServiceWorker(true)}>
         {t("reload")}
       </Button>
       <Button

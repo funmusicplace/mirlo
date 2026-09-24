@@ -1,24 +1,18 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import Box from "components/common/Box";
+import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import WidthContainer from "components/common/WidthContainer";
-import { queryArtist, queryTrackGroup } from "queries";
-import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
-import { getReleaseUrl } from "utils/artist";
-import { useMatchMedia } from "utils/useMatchMedia";
-
-import { bp } from "../../../../../../constants";
-import Box from "components/common/Box";
-import ClickToPlayTracks from "components/common/ClickToPlayTracks";
-
 import TrackGroupTitle from "components/TrackGroup/ItemViewTitle";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import ReleaseDate from "components/TrackGroup/ReleaseDate";
+import { TrackEmbed } from "components/TrackGroup/TrackGroupEmbed";
+import TrackGroupMerch from "components/TrackGroup/TrackGroupMerch";
 import {
   Container,
   ImageAndDetailsWrapper,
@@ -28,8 +22,13 @@ import {
   TrackListingWrapper,
   UnderneathImage,
 } from "pages/{artistId}/release/{trackGroupId}/Index";
-import TrackGroupEmbed, { TrackEmbed } from "components/TrackGroup/TrackGroupEmbed";
-import TrackGroupMerch from "components/TrackGroup/TrackGroupMerch";
+import { queryArtist, queryTrackGroup } from "queries";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { getReleaseUrl } from "utils/artist";
+import { useMatchMedia } from "utils/useMatchMedia";
+
+import { bp } from "../../../../../../constants";
 
 function Index() {
   const { t } = useTranslation("translation", {

@@ -12,15 +12,7 @@ const ItemTransactionCard: React.FC<
     artistName?: string;
     artistUrl?: string;
   }>
-> = ({
-  header,
-  cover,
-  title,
-  titleLink,
-  artistName,
-  artistUrl,
-  children,
-}) => {
+> = ({ header, cover, title, titleLink, artistName, artistUrl, children }) => {
   const { t: tPost } = useTranslation("translation", { keyPrefix: "post" });
 
   return (

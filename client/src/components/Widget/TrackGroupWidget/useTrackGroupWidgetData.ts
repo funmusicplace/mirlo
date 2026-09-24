@@ -70,7 +70,7 @@ export const useTrackGroupWidgetData = () => {
       : currentTrack;
   const elapsedSeconds = embeddedInMirlo
     ? hasSyncedTrack
-      ? playerSyncState?.currentSeconds ?? 0
+      ? (playerSyncState?.currentSeconds ?? 0)
       : 0
     : currentSeconds;
 

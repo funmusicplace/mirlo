@@ -24,7 +24,10 @@ class MockDoc {
   constructor(public readonly nodes: MockNode[]) {}
 
   descendants(
-    callback: (node: { type: { name: string }; attrs: Record<string, unknown> }, pos: number) => void
+    callback: (
+      node: { type: { name: string }; attrs: Record<string, unknown> },
+      pos: number
+    ) => void
   ): void {
     this.nodes.forEach((node, index) => {
       if (node.type === "image") {
@@ -121,7 +124,9 @@ const convertDocToHtml = (doc: MockDoc): string =>
     .join("");
 
 vi.mock("@remirror/core-utils", () => ({
-  prosemirrorNodeToHtml: vi.fn((doc: unknown) => convertDocToHtml(doc as MockDoc)),
+  prosemirrorNodeToHtml: vi.fn((doc: unknown) =>
+    convertDocToHtml(doc as MockDoc)
+  ),
 }));
 
 type MockImageNode = {
@@ -189,14 +194,19 @@ describe("usePastedImageUpload", () => {
         name: string;
         lastModified: number;
 
-        constructor(parts: BlobPart[], fileName: string, options?: FilePropertyBag) {
+        constructor(
+          parts: BlobPart[],
+          fileName: string,
+          options?: FilePropertyBag
+        ) {
           super(parts, options);
           this.name = fileName;
           this.lastModified = options?.lastModified ?? Date.now();
         }
       }
 
-      (global as unknown as { File: typeof File }).File = PolyfillFile as unknown as typeof File;
+      (global as unknown as { File: typeof File }).File =
+        PolyfillFile as unknown as typeof File;
     }
   });
 
@@ -243,7 +253,9 @@ describe("usePastedImageUpload", () => {
     const onChange = vi.fn();
     const reloadImages = vi.fn();
     const fetchMock = setupFetchMock();
-    const deferred = createDeferred<{ result: { jobId: string; imageId: string } }>();
+    const deferred = createDeferred<{
+      result: { jobId: string; imageId: string };
+    }>();
 
     vi.mocked(api.uploadFile).mockImplementation(() => deferred.promise);
 
@@ -265,14 +277,19 @@ describe("usePastedImageUpload", () => {
       removeImageFromView(view, DATA_URI);
     });
 
-    deferred.resolve({ result: { jobId: "uploaded-src", imageId: "image-123" } });
+    deferred.resolve({
+      result: { jobId: "uploaded-src", imageId: "image-123" },
+    });
 
     await act(async () => {
       await uploadPromise;
     });
 
     expect(fetchMock).toHaveBeenCalledWith(DATA_URI);
-    expect(api.uploadFile).toHaveBeenCalledWith("manage/posts/123/images", expect.any(Array));
+    expect(api.uploadFile).toHaveBeenCalledWith(
+      "manage/posts/123/images",
+      expect.any(Array)
+    );
     expect(onChange).not.toHaveBeenCalled();
     expect(setState).not.toHaveBeenCalled();
     expect(reloadImages).not.toHaveBeenCalled();
@@ -290,7 +307,9 @@ describe("usePastedImageUpload", () => {
     const onChange = vi.fn();
     const reloadImages = vi.fn();
     const fetchMock = setupFetchMock();
-    const deferred = createDeferred<{ result: { jobId: string; imageId: string } }>();
+    const deferred = createDeferred<{
+      result: { jobId: string; imageId: string };
+    }>();
 
     vi.mocked(api.uploadFile).mockImplementation(() => deferred.promise);
 
@@ -312,14 +331,19 @@ describe("usePastedImageUpload", () => {
       appendParagraph(view, "later edit");
     });
 
-    deferred.resolve({ result: { jobId: "hosted-image", imageId: "image-456" } });
+    deferred.resolve({
+      result: { jobId: "hosted-image", imageId: "image-456" },
+    });
 
     await act(async () => {
       await uploadPromise;
     });
 
     expect(fetchMock).toHaveBeenCalledWith(DATA_URI);
-    expect(api.uploadFile).toHaveBeenCalledWith("manage/posts/456/images", expect.any(Array));
+    expect(api.uploadFile).toHaveBeenCalledWith(
+      "manage/posts/456/images",
+      expect.any(Array)
+    );
     expect(onChange).toHaveBeenCalled();
     const latestHtml = onChange.mock.calls.at(-1)?.[0];
     expect(latestHtml).toContain("later edit");

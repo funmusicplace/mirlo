@@ -378,9 +378,7 @@ function PlayableCover({
             {!currentlyPlaying && trackIds.length > 0 && (
               <PlayButton className="[&_button]:!mr-0" onPlay={onClickPlay} />
             )}
-            {currentlyPlaying && (
-              <PauseButton className="[&_button]:!mr-0" />
-            )}
+            {currentlyPlaying && <PauseButton className="[&_button]:!mr-0" />}
           </div>
         </div>
 

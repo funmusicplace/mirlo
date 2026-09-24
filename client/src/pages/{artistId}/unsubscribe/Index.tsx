@@ -1,22 +1,17 @@
 import { css } from "@emotion/css";
-
-import { useNavigate, useSearchParams } from "react-router-dom";
-
-import { useArtistContext } from "state/ArtistContext";
-
-import { WidthWrapper } from "components/common/WidthContainer";
-
-import React from "react";
-import api from "services/api";
-import { useForm } from "react-hook-form";
-import { InputEl } from "components/common/Input";
-import { useTranslation } from "react-i18next";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Button from "components/common/Button";
+import { InputEl } from "components/common/Input";
+import { WidthWrapper } from "components/common/WidthContainer";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import useErrorHandler from "services/useErrorHandler";
 
 function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -82,7 +77,7 @@ function Index() {
         <label>{t("enterEmail")}</label>
         <InputEl {...register("email")} type="email" required />
         <Button type="submit">
-          {t("stopReceivingUpdates", {artistName: artist.name})}
+          {t("stopReceivingUpdates", { artistName: artist.name })}
         </Button>
       </form>
     </WidthWrapper>

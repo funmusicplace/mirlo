@@ -1,9 +1,11 @@
-import signup from "../../src/routers/auth/signup";
+import assert from "assert";
+
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
-import * as sendMail from "../../src/jobs/send-mail";
 import sinon from "sinon";
-import assert from "assert";
+
+import * as sendMail from "../../src/jobs/send-mail";
+import signup from "../../src/routers/auth/signup";
 import { clearTables, createUser } from "../utils";
 
 describe("auth/signup", () => {
@@ -140,7 +142,7 @@ describe("auth/signup", () => {
       email: "test@test.com",
       password: "tstt",
     });
-    
+
     await signup(
       { body: { email: user.email, password: "hi" } } as unknown as Request,
       mockRes,
@@ -155,8 +157,8 @@ describe("auth/signup", () => {
           error: "A user with this email already exists",
           requiresEmailVerification: true,
           emailConfirmationExpired: false,
-          emailConfirmationExpiresAt: sinon.match((value) =>
-            typeof value === "string"
+          emailConfirmationExpiresAt: sinon.match(
+            (value) => typeof value === "string"
           ),
         })
       )
@@ -195,8 +197,8 @@ describe("auth/signup", () => {
           error: "A user with this email already exists",
           requiresEmailVerification: true,
           emailConfirmationExpired: true,
-          emailConfirmationExpiresAt: sinon.match((value) =>
-            typeof value === "string"
+          emailConfirmationExpiresAt: sinon.match(
+            (value) => typeof value === "string"
           ),
         })
       )
