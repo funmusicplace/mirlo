@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import ArtistColorsProvider from "components/ArtistColorsProvider";
 import PageBackground from "components/common/ArtistBackground";
 import FailedSubscriptionBanner from "components/common/FailedSubscriptionBanner";
@@ -18,13 +17,11 @@ import { isEmpty } from "lodash";
 import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
 import { useGlobalPlayerSyncIntegration } from "utils/playerSync";
 import useRouteTitle from "utils/useRouteTitle";
 
 import Header from "./components/Header/Header";
-import { bp } from "./constants";
 
 function App() {
   const { t } = useTranslation("translation", { keyPrefix: "app" });
@@ -33,7 +30,6 @@ function App() {
   const location = useLocation();
   const snackbar = useSnackbar();
   const [search, setSearch] = useSearchParams();
-  const { user } = useAuthContext();
   const { currentTrack } = useCurrentTrackHook();
   const routeTitle = useRouteTitle();
 
@@ -88,38 +84,15 @@ function App() {
           <FailedSubscriptionBanner />
           <TranslationHelpBanner />
           <CookieDisclaimer />
-          <div
-            className={css`
-              @media screen and (max-width: ${bp.medium}px) {
-                display: none !important;
-              }
-            `}
-          >
+          <div className="hidden md:block">
             <PageBackground />
             <UserBanner />
           </div>
-          <div
-            className={css`
-              flex-grow: 1;
-              display: flex;
-              flex-direction: column;
-              padding-bottom: 65px;
-              min-height: calc(100vh - 65px);
-            `}
-          >
+          <div className="grow flex flex-col pb-[65px] min-h-[calc(100vh-65px)]">
             <ManageArtistButtons />
             <div className="w-full flex flex-col min-h-screen">
               <main
-                className={css`
-                  margin: 0 auto;
-                  width: 100%;
-                  border-radius: var(--mi-border-radius);
-                  display: flex;
-                  justify-content: center;
-                  z-index: 1;
-                  ${user ? "display: flex;" : ""}
-                  flex-grow: 1;
-                `}
+                className="mx-auto w-full rounded-[var(--mi-border-radius)] flex justify-center z-[1] grow"
                 id="main-content"
               >
                 <Outlet />

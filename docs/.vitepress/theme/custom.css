@@ -39,3 +39,97 @@
     height: 7rem;
   }
 }
+
+/* Full-bleed banner image on home feature cards, e.g. docs/features/index.md.
+   Only applies to cards that pass `icon` as an image object (icon.src). */
+.VPFeatures .VPFeature {
+  overflow: hidden;
+}
+
+.VPFeatures .VPFeature .box > img.VPImage {
+  width: calc(100% + 48px);
+  max-width: calc(100% + 48px);
+  margin: -24px -24px 20px -24px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 12px 12px 0 0;
+}
+
+/* Full-width hero banner image with readability overlay, docs/index.md.
+   Turns the default side-by-side hero image into a full-bleed background
+   behind the title, with a dark scrim so the text stays readable. */
+.VPHero.has-image {
+  position: relative;
+  overflow: hidden;
+  min-height: 420px;
+}
+
+@media (min-width: 960px) {
+  .VPHero.has-image {
+    min-height: 520px;
+  }
+}
+
+.VPHero.has-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.4)
+  );
+  pointer-events: none;
+}
+
+.VPHero.has-image .main {
+  max-width: none !important;
+}
+
+.VPHero.has-image .image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  width: auto;
+  height: auto;
+}
+
+.VPHero.has-image .image-container {
+  position: static;
+  width: 100%;
+  height: 100%;
+  transform: none;
+}
+
+.VPHero.has-image .image-bg {
+  display: none;
+}
+
+.VPHero.has-image .image-src {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  transform: none;
+  border-radius: 0;
+}
+
+.VPHero.has-image .name,
+.VPHero.has-image .text,
+.VPHero.has-image .clip {
+  color: #fff;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: #fff;
+}
+
+.VPHero.has-image .tagline {
+  color: rgba(255, 255, 255, 0.85);
+}

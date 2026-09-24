@@ -18,10 +18,53 @@ export const Footer = () => {
     i18n.changeLanguage(language);
   };
 
+  const columns: {
+    heading: string;
+    links: { text: string; to?: string; href?: string; icon?: JSX.Element }[];
+  }[] = [
+    {
+      heading: t("aboutHeading"),
+      links: [
+        { text: t("about"), href: "https://docs.mirlo.space" },
+        { text: t("documentation"), href: "https://docs.mirlo.space" },
+        { text: t("contact"), href: "mailto:hi@mirlo.space" },
+      ],
+    },
+    {
+      heading: t("legalHeading"),
+      links: [
+        { text: t("terms"), to: "/pages/terms" },
+        { text: t("privacy"), to: "/pages/privacy" },
+        { text: t("cookies"), to: "/pages/cookie-policy" },
+        { text: t("content"), to: "/pages/content-policy" },
+      ],
+    },
+    {
+      heading: t("connectHeading"),
+      links: [
+        {
+          text: "Instagram",
+          href: "https://instagram.com/mirlo.space",
+          icon: <FaInstagram aria-hidden />,
+        },
+        {
+          text: "Mastodon",
+          href: "https://musician.social/@mirlo",
+          icon: <FaMastodon aria-hidden />,
+        },
+        {
+          text: "Bluesky",
+          href: "https://bsky.app/profile/mirlo.space",
+          icon: <FaBluesky aria-hidden />,
+        },
+      ],
+    },
+  ];
+
   return (
     <footer
       className={css`
-        text-align: center;
+        text-align: left;
         display: block;
         margin: 0rem auto;
         padding: var(--mi-side-paddings-normal);
@@ -42,11 +85,61 @@ export const Footer = () => {
             padding: 2rem;
           `}`}
         >
-          <p
-            className={css`
-              margin-bottom: 1rem;
-            `}
-          >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mbe-8">
+            {columns.map((column) => (
+              <div key={column.heading}>
+                <h2 className="text-sm! font-bold! mbe-2">{column.heading}</h2>
+                <ul className="flex flex-col gap-2">
+                  {column.links.map((link) => (
+                    <li key={link.text}>
+                      {link.to ? (
+                        <Link to={link.to}>{link.text}</Link>
+                      ) : (
+                        <a href={link.href} title={link.text}>
+                          {link.icon ? (
+                            <span className="inline-flex items-center gap-2">
+                              {link.icon} {link.text}
+                            </span>
+                          ) : (
+                            link.text
+                          )}
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <div>
+              <h2 className="text-sm! font-bold! mbe-2">{t("language")}</h2>
+              <div className="flex flex-col gap-2 items-start">
+                <SelectEl
+                  id="footer-language"
+                  className="w-auto!"
+                  value={
+                    finishedLanguages.find(
+                      (lang) => lang.short === i18n.resolvedLanguage
+                    )?.short ?? "en"
+                  }
+                  onChange={(e) => onChangeLanguage(e.target.value)}
+                >
+                  {finishedLanguages.map((lang) => (
+                    <option key={lang.short} value={lang.short}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </SelectEl>
+                <a
+                  href="https://docs.mirlo.space/maintaining/translation#how-to-get-started"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("helpTranslate")}
+                </a>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs">
             <Trans
               t={t}
               i18nKey="getInTouch"
@@ -57,87 +150,6 @@ export const Footer = () => {
               }}
             />
           </p>
-          <ul className="flex gap-4 justify-center flex-wrap mbe-4">
-            <li>
-              <a href="https://docs.mirlo.space">{t("about")}</a>
-            </li>
-            <li>
-              <a href="https://docs.mirlo.space">{t("documentation")}</a>
-            </li>
-            <li>
-              <Link to="/pages/terms">{t("terms")}</Link>
-            </li>
-            <li>
-              <Link to="/pages/privacy">{t("privacy")}</Link>
-            </li>
-            <li>
-              <Link to="/pages/cookie-policy">{t("cookies")}</Link>
-            </li>
-            <li>
-              <Link to="/pages/content-policy">{t("content")}</Link>
-            </li>
-            <li>
-              <a href="mailto:hi@mirlo.space">{t("contact")}</a>
-            </li>
-          </ul>
-          <div className="flex flex-wrap items-center justify-center gap-2 mbe-4">
-            <label htmlFor="footer-language">{t("language")}</label>
-            <SelectEl
-              id="footer-language"
-              className="w-auto!"
-              value={
-                finishedLanguages.find(
-                  (lang) => lang.short === i18n.resolvedLanguage
-                )?.short ?? "en"
-              }
-              onChange={(e) => onChangeLanguage(e.target.value)}
-            >
-              {finishedLanguages.map((lang) => (
-                <option key={lang.short} value={lang.short}>
-                  {lang.name}
-                </option>
-              ))}
-            </SelectEl>
-            <a
-              href="https://docs.mirlo.space/maintaining/translation#how-to-get-started"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t("helpTranslate")}
-            </a>
-          </div>
-          <ul className="flex justify-center gap-4 pb-1">
-            <li>
-              <a
-                href="https://instagram.com/mirlo.space"
-                title="Instagram"
-                className="text-2xl"
-                aria-label="Instagram"
-              >
-                <FaInstagram aria-hidden />
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://musician.social/@mirlo"
-                title="Mastodon"
-                className="text-2xl"
-                aria-label="Mastodon"
-              >
-                <FaMastodon aria-hidden />
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://bsky.app/profile/mirlo.space"
-                title="Bluesky"
-                className="text-2xl"
-                aria-label="Bluesky"
-              >
-                <FaBluesky aria-hidden />
-              </a>
-            </li>
-          </ul>
         </div>
       </WidthContainer>
     </footer>
