@@ -1,100 +1,126 @@
 import Button from "components/common/Button";
-import FormCheckbox from "components/common/FormCheckbox";
-import FormComponent from "components/common/FormComponent";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import Table from "components/common/Table";
+import { Toggle } from "components/common/Toggle";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { useUpdateAdminTrackGroupMutation } from "queries/admin";
 import React from "react";
-import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { FaArrowCircleLeft } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
+import { getManageReleaseUrl } from "utils/artist";
 
-interface TrackGroupFormData {
-  coverFile: File[];
-  title: string;
-  enabled: boolean;
-  id: number;
-  releaseDate: string;
-  about: string;
-  artistId: number;
-  cover: { id: string; url: string[] };
-}
-
-export const Index: React.FC = () => {
+const Index: React.FC = () => {
   const { id } = useParams();
   const snackbar = useSnackbar();
-  const methods = useForm<TrackGroupFormData>();
-  const { register, handleSubmit, reset } = methods;
-  const [isLoading, setIsLoading] = React.useState(false);
-  const { t } = useTranslation("translation", {
-    keyPrefix: "admin",
-  });
   const errorHandler = useErrorHandler();
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "admin" });
+  const { mutateAsync: updateTrackGroup } = useUpdateAdminTrackGroupMutation();
+  const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
 
-  const [trackgroup, setTrackgroup] = React.useState<TrackGroup>();
-
-  const fetchTrackWrapper = React.useCallback(
-    async (id: string) => {
-      const { result } = await api.get<TrackGroup>(`trackGroups/${id}`);
-      setTrackgroup(result);
-      reset({
-        ...result,
-      });
-    },
-    [reset]
-  );
+  const fetchTrackGroup = React.useCallback(async () => {
+    const { result } = await api.get<TrackGroup>(`trackGroups/${id}`);
+    setTrackGroup(result);
+  }, [id]);
 
   React.useEffect(() => {
     if (id) {
-      fetchTrackWrapper(id);
+      fetchTrackGroup();
     }
-  }, [fetchTrackWrapper, id]);
+  }, [fetchTrackGroup, id]);
 
-  const doSave = React.useCallback(
-    async (data: TrackGroupFormData) => {
-      if (id) {
-        try {
-          setIsLoading(true);
-          await api.put<TrackGroupFormData, TrackGroup>(
-            `admin/trackGroups/${id}`,
-            data
-          );
-          snackbar("Successfully updated track group", { type: "success" });
-        } catch (e) {
-          errorHandler(e);
-        } finally {
-          setIsLoading(false);
-        }
+  const save = React.useCallback(
+    async (changes: { adminEnabled?: boolean; hideFromSearch?: boolean }) => {
+      if (!trackGroup) {
+        return;
+      }
+      try {
+        await updateTrackGroup({
+          trackGroupId: trackGroup.id,
+          adminEnabled: trackGroup.adminEnabled,
+          hideFromSearch: trackGroup.hideFromSearch ?? false,
+          ...changes,
+        });
+        snackbar(t("trackGroupUpdateSuccess"), { type: "success" });
+        await fetchTrackGroup();
+      } catch (e) {
+        errorHandler(e);
       }
     },
-    [id, errorHandler, snackbar]
+    [errorHandler, fetchTrackGroup, snackbar, t, trackGroup, updateTrackGroup]
   );
 
+  if (!trackGroup) {
+    return null;
+  }
+
   return (
-    <FormProvider {...methods}>
-      <h3>
-        {t("trackGroup")} {trackgroup?.title}
-      </h3>
-      <form onSubmit={handleSubmit(doSave)}>
-        <FormComponent style={{ display: "flex" }}>
-          <FormCheckbox keyName="adminEnabled" description={t("isEnabled")} />
-        </FormComponent>
-        <FormComponent style={{ display: "flex" }}>
-          <FormCheckbox
-            keyName="hideFromSearch"
-            description={t("hideFromSearch")}
-          />
-        </FormComponent>
-        <Button
-          type="submit"
-          style={{ marginTop: "1rem" }}
-          disabled={isLoading}
-          isLoading={isLoading}
-        >
-          {t("save")}
-        </Button>
-      </form>
-    </FormProvider>
+    <div>
+      <SpaceBetweenDiv>
+        <h2 className="flex items-center">
+          <Link to="/admin/content/track-groups" className="mr-1">
+            <FaArrowCircleLeft />
+          </Link>
+          {t("trackGroup")} "{trackGroup.title}"
+        </h2>
+        <Link to={getManageReleaseUrl(trackGroup.artist, trackGroup)}>
+          <Button>{t("manageRelease")}</Button>
+        </Link>
+      </SpaceBetweenDiv>
+      <Table>
+        <tbody>
+          <tr>
+            <td>{t("title")}</td>
+            <td>{trackGroup.title}</td>
+          </tr>
+          <tr>
+            <td>{t("artist")}</td>
+            <td>
+              <Link to={`/admin/content/artists/${trackGroup.artist.id}`}>
+                {trackGroup.artist.name}
+              </Link>
+            </td>
+          </tr>
+          <tr>
+            <td>{t("releaseDate")}</td>
+            <td>
+              {trackGroup.releaseDate
+                ? formatDate({ date: trackGroup.releaseDate, i18n })
+                : "-"}
+            </td>
+          </tr>
+          <tr>
+            <td>{t("isEnabledLabel")}</td>
+            <td>
+              <div className="flex flex-col">
+                <Toggle
+                  toggled={trackGroup.adminEnabled}
+                  label=""
+                  onClick={(adminEnabled) => save({ adminEnabled })}
+                />
+                <small>{t("trackGroupEnabledDescription")}</small>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>{t("hideFromSearch")}</td>
+            <td>
+              <div className="flex flex-col">
+                <Toggle
+                  toggled={!!trackGroup.hideFromSearch}
+                  label=""
+                  onClick={(hideFromSearch) => save({ hideFromSearch })}
+                />
+                <small>{t("hideFromSearchDescription")}</small>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </Table>
+    </div>
   );
 };
 

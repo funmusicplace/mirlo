@@ -100,6 +100,7 @@ interface Tag {
 interface TrackGroup {
   title?: string;
   adminEnabled: boolean;
+  hideFromSearch?: boolean;
   catalogNumber?: string;
   coverImageAlt?: string;
   id: number;
