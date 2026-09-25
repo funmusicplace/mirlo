@@ -7,9 +7,11 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string, opts?: { level?: number }) =>
+      opts?.level === undefined ? key : `${key} ${opts.level}`,
     i18n: { language: "en" },
   }),
+  Trans: ({ i18nKey }: { i18nKey: string }) => <>{i18nKey}</>,
 }));
 
 vi.mock("queries/settings", () => ({
@@ -143,7 +145,7 @@ describe("Settings", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByPlaceholderText("sk_*** (leave blank to keep)")
+        screen.getByPlaceholderText("stripeKeyPlaceholderConfigured")
       ).toBeInTheDocument();
     });
   });
@@ -152,7 +154,9 @@ describe("Settings", () => {
     renderSettings();
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("No key set")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("stripeKeyPlaceholderEmpty")
+      ).toBeInTheDocument();
     });
   });
 
@@ -252,10 +256,10 @@ describe("Settings", () => {
 
     await waitFor(() => screen.getByDisplayValue("10"));
 
-    expect(screen.getByLabelText("Level 0 name")).toHaveValue("Newcomer");
-    expect(screen.getByLabelText("Level 1 name")).toHaveValue("Member");
-    expect(screen.getByLabelText("Level 2 name")).toHaveValue("Regular");
-    expect(screen.getByLabelText("Level 3 name")).toHaveValue("Trusted");
+    expect(screen.getByLabelText("trustLevelName 0")).toHaveValue("Newcomer");
+    expect(screen.getByLabelText("trustLevelName 1")).toHaveValue("Member");
+    expect(screen.getByLabelText("trustLevelName 2")).toHaveValue("Regular");
+    expect(screen.getByLabelText("trustLevelName 3")).toHaveValue("Trusted");
   });
 
   test("submits edited trust level names", async () => {
@@ -263,7 +267,7 @@ describe("Settings", () => {
 
     await waitFor(() => screen.getByDisplayValue("10"));
 
-    const input = screen.getByLabelText("Level 3 name");
+    const input = screen.getByLabelText("trustLevelName 3");
     await userEvent.clear(input);
     await userEvent.type(input, "Veteran");
     await userEvent.click(screen.getByRole("button", { name: /save/i }));
@@ -285,11 +289,11 @@ describe("Settings", () => {
 
     await waitFor(() => screen.getByDisplayValue("10"));
 
-    expect(screen.getByText("General Settings")).toBeInTheDocument();
-    expect(screen.getByText("Stripe Settings")).toBeInTheDocument();
-    expect(screen.getByText("Email Provider Settings")).toBeInTheDocument();
-    expect(screen.getByText("Storage")).toBeInTheDocument();
-    expect(screen.getByText("Trust levels")).toBeInTheDocument();
-    expect(screen.getByText("Security")).toBeInTheDocument();
+    expect(screen.getByText("generalSettings")).toBeInTheDocument();
+    expect(screen.getByText("stripeSettings")).toBeInTheDocument();
+    expect(screen.getByText("emailProviderSettings")).toBeInTheDocument();
+    expect(screen.getByText("storage")).toBeInTheDocument();
+    expect(screen.getByText("trustLevels")).toBeInTheDocument();
+    expect(screen.getByText("security")).toBeInTheDocument();
   });
 });

@@ -8,24 +8,24 @@ dotenv.config();
 import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
+import { requestApp } from "./routers/utils";
 import {
   clearTables,
   createArtist,
   createSiteSettings,
   createUser,
 } from "./utils";
-import { requestApp } from "./routers/utils";
 
 const REPO_ROOT = join(__dirname, "..");
 const PRISMA_JSON_TYPES = join(REPO_ROOT, "prisma", "index.ts");
-const CLIENT_SETTINGS_PAGE = join(
+const CLIENT_SETTINGS_FORM = join(
   REPO_ROOT,
   "client",
   "src",
-  "pages",
-  "admin",
+  "components",
+  "Admin",
   "settings",
-  "Index.tsx"
+  "settingsForm.ts"
 );
 const THIS_BASENAME = basename(__filename);
 
@@ -241,7 +241,7 @@ describe("settings JSON key contract", () => {
 
   it("keeps the client admin settings shape aligned with PrismaJson.Settings", () => {
     const canonical = loadCanonicalSettingsPaths();
-    const clientSource = readFileSync(CLIENT_SETTINGS_PAGE, "utf8");
+    const clientSource = readFileSync(CLIENT_SETTINGS_FORM, "utf8");
     const clientSettings = clientSource.match(
       /interface SettingsFromAPI\s*\{[\s\S]*?settings:\s*\{([\s\S]*?)\n  \};/
     )?.[1];
