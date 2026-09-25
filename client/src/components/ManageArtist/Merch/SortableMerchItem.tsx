@@ -32,15 +32,9 @@ const SortableMerchItem: React.FC<{ artist: Artist; item: Merch }> = ({
     transition,
   };
 
-  const cover = item.images?.[0]?.sizes?.[60];
-
   return (
     <li ref={setNodeRef} style={style} {...attributes}>
-      <div
-        className={`flex items-center [&>span]:ml-4${
-          !cover ? " first:max-w-[60px]" : ""
-        }`}
-      >
+      <div className="flex items-center [&>span]:ml-4">
         <ArtistButton
           className="mr-2 cursor-grab touch-none"
           {...listeners}
@@ -52,6 +46,7 @@ const SortableMerchItem: React.FC<{ artist: Artist; item: Merch }> = ({
           src={item.images?.[0]?.sizes?.[60]}
           alt={item.title}
           size={60}
+          className="w-[60px] shrink-0"
           square
           objectFit="contain"
         />
