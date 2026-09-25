@@ -1,5 +1,5 @@
 import Button from "components/common/Button";
-import EmailListInput, { isValidEmail } from "components/common/EmailListInput";
+import EmailListInput from "components/common/EmailListInput";
 import FormComponent from "components/common/FormComponent";
 import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
@@ -7,10 +7,12 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+import { isValidEmail } from "utils/email";
 
 const ACCOUNT_TYPES = ["ARTIST", "LABEL", "LISTENER"] as const;
 type AccountType = (typeof ACCOUNT_TYPES)[number];
 type AddMode = "invite" | "create";
+type AddUsersResponse = { created: number; skipped: number };
 
 const AddUsersModal: React.FC<{
   open: boolean;
@@ -45,17 +47,23 @@ const AddUsersModal: React.FC<{
     const users = emails.map((email) => ({ email }));
     setIsSaving(true);
     try {
-      if (mode === "invite") {
-        await api.post("admin/invites", { users, inviteType: accountType });
-        snackbar(t("invitationsSent", { count: users.length }), {
-          type: "success",
-        });
-      } else {
-        await api.post("admin/users", { users });
-        snackbar(t("accountsCreated", { count: users.length }), {
-          type: "success",
-        });
-      }
+      const { created, skipped } =
+        mode === "invite"
+          ? await api.post<unknown, AddUsersResponse>("admin/invites", {
+              users,
+              inviteType: accountType,
+            })
+          : await api.post<unknown, AddUsersResponse>("admin/users", { users });
+      const summary = t(
+        mode === "invite" ? "invitationsSent" : "accountsCreated",
+        { count: created }
+      );
+      snackbar(
+        skipped > 0
+          ? `${summary}. ${t("addUsersSkipped", { count: skipped })}`
+          : summary,
+        { type: created > 0 ? "success" : "warning" }
+      );
       onDone();
       onClose();
     } catch (e) {

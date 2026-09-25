@@ -1655,6 +1655,8 @@
     "invitationsSent_other": "{{count}} invitations sent",
     "accountsCreated_one": "{{count}} account created",
     "accountsCreated_other": "{{count}} accounts created",
+    "addUsersSkipped_one": "{{count}} address already existed and was skipped.",
+    "addUsersSkipped_other": "{{count}} addresses already existed and were skipped.",
     "settingsSectionsNav": "Settings sections",
     "sectionGeneral": "General",
     "sectionFeaturedArtists": "Featured artists",

@@ -27,11 +27,13 @@ export default function () {
       const newUsers = users.filter(
         (user) => !existingEmails.includes(user.email)
       );
-      await prisma.user.createMany({
+      const { count } = await prisma.user.createMany({
         data: uniqBy(newUsers, "email").map((newUser) => newUser),
       });
       res.json({
         message: "success",
+        created: count,
+        skipped: users.length - count,
       });
     } catch (e) {
       next(e);
