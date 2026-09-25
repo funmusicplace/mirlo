@@ -157,6 +157,7 @@ const Index = () => {
                   <div className="flex items-center gap-2">
                     <SelectEl
                       id="input-trust-level"
+                      variant="compact"
                       value={user.trustLevel}
                       onChange={async (e) => {
                         await api.put(`admin/users/${id}`, {
