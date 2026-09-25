@@ -28,6 +28,7 @@ export default function () {
       accountingEmail,
       disabled,
       trustLevel,
+      resetSpamStrikes,
     } = req.body as {
       email: string;
       isLabelAccount: boolean;
@@ -38,6 +39,7 @@ export default function () {
       accountingEmail?: string;
       disabled?: boolean;
       trustLevel?: number;
+      resetSpamStrikes?: boolean;
     };
     try {
       if (trustLevel !== undefined && !isTrustLevel(trustLevel)) {
@@ -58,15 +60,13 @@ export default function () {
           accountingEmail,
           disabledAt:
             disabled === undefined ? undefined : disabled ? new Date() : null,
+          spamStrikes: resetSpamStrikes ? 0 : undefined,
         },
       });
       if (trustLevel !== undefined && req.user) {
-        await setUserTrustLevel(
-          Number(req.params.id),
-          trustLevel,
-          "ADMIN",
-          req.user.id
-        );
+        await setUserTrustLevel(Number(req.params.id), trustLevel, "ADMIN", {
+          changedByUserId: req.user.id,
+        });
       }
       res.json({
         message: "success",
@@ -108,6 +108,7 @@ export default function () {
           emailConfirmationToken: true,
           disabledAt: true,
           trustLevel: true,
+          spamStrikes: true,
           currency: true,
           receiveMailingList: true,
           accountingEmail: true,

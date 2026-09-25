@@ -3,8 +3,8 @@ import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
-import { AppError } from "../../../../../utils/error";
 import { serializeNotification } from "../../../../../serializers/notification";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   userId: string;
@@ -29,6 +29,7 @@ export default function () {
 
       const where = {
         userId: Number(userId),
+        spamReportedAt: null,
         ...(types && types.length > 0
           ? { notificationType: { in: types as any[] } }
           : {}),

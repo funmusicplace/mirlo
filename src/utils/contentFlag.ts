@@ -3,7 +3,13 @@ import { Prisma } from "@mirlo/prisma/client";
 
 export const contentFlagInclude = {
   profile: {
-    select: { id: true, name: true, urlSlug: true, enabled: true },
+    select: {
+      id: true,
+      name: true,
+      urlSlug: true,
+      enabled: true,
+      user: { select: { id: true, name: true, email: true, disabledAt: true } },
+    },
   },
   trackGroup: {
     select: {
@@ -18,7 +24,10 @@ export const contentFlagInclude = {
     select: { id: true, name: true, email: true },
   },
   reportedUser: {
-    select: { id: true, name: true, email: true, trustLevel: true },
+    select: { id: true, name: true, email: true, disabledAt: true },
+  },
+  trustLevelChange: {
+    select: { fromLevel: true, toLevel: true, createdAt: true },
   },
 } satisfies Prisma.ContentFlagInclude;
 
