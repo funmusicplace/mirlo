@@ -4,10 +4,9 @@ import { SelectEl } from "components/common/Select";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { EMAIL_REGEX } from "utils/email";
 
 import { FormSettings } from "./settingsForm";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EmailProviderSection: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });

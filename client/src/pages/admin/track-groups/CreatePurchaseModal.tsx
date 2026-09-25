@@ -1,13 +1,12 @@
 import Button from "components/common/Button";
+import EmailListInput from "components/common/EmailListInput";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
-import TextArea from "components/common/TextArea";
 import React from "react";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import parseEmailList from "utils/parseEmailList";
 
 const paymentStatuses = ["COMPLETED", "PENDING", "FAILED"] as const;
 
@@ -16,7 +15,7 @@ const CreatePurchaseModal: React.FC<{
   onClose: () => void;
 }> = ({ trackGroup, onClose }) => {
   const snackbar = useSnackbar();
-  const [emails, setEmails] = React.useState("");
+  const [emails, setEmails] = React.useState<string[]>([]);
   const [withTransaction, setWithTransaction] = React.useState(false);
   const [amount, setAmount] = React.useState("");
   const [currency, setCurrency] = React.useState("usd");
@@ -26,7 +25,7 @@ const CreatePurchaseModal: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
 
   const reset = () => {
-    setEmails("");
+    setEmails([]);
     setWithTransaction(false);
     setAmount("");
     setCurrency("usd");
@@ -38,7 +37,7 @@ const CreatePurchaseModal: React.FC<{
     if (!trackGroup) {
       return;
     }
-    const users = parseEmailList(emails);
+    const users = emails.map((email) => ({ email }));
 
     if (users.length === 0) {
       snackbar("Add at least one user email", { type: "warning" });
@@ -95,29 +94,30 @@ const CreatePurchaseModal: React.FC<{
       title={`Add purchase: ${trackGroup?.title ?? ""}`}
     >
       <FormComponent>
-        <label>User emails (comma or newline separated)</label>
-        <TextArea
-          value={emails}
-          onChange={(e) => setEmails(e.target.value)}
-          rows={4}
+        <label htmlFor="input-purchase-emails">User emails</label>
+        <EmailListInput
+          id="input-purchase-emails"
+          emails={emails}
+          onChange={setEmails}
         />
       </FormComponent>
       <FormComponent direction="row">
         <input
-          id="withTransaction"
+          id="input-with-transaction"
           type="checkbox"
           checked={withTransaction}
           onChange={(e) => setWithTransaction(e.target.checked)}
         />
-        <label htmlFor="withTransaction">
+        <label htmlFor="input-with-transaction">
           Also create a transaction for each purchase
         </label>
       </FormComponent>
       {withTransaction && (
         <>
           <FormComponent>
-            <label>Amount in cents</label>
+            <label htmlFor="input-purchase-amount">Amount in cents</label>
             <InputEl
+              id="input-purchase-amount"
               type="number"
               min={0}
               value={amount}
@@ -125,23 +125,30 @@ const CreatePurchaseModal: React.FC<{
             />
           </FormComponent>
           <FormComponent>
-            <label>Currency</label>
+            <label htmlFor="input-purchase-currency">Currency</label>
             <InputEl
+              id="input-purchase-currency"
               value={currency}
               onChange={(e) => setCurrency(e.target.value.toLowerCase())}
             />
           </FormComponent>
           <FormComponent>
-            <label>Stripe ID (optional)</label>
+            <label htmlFor="input-purchase-stripe-id">
+              Stripe ID (optional)
+            </label>
             <InputEl
+              id="input-purchase-stripe-id"
               value={stripeId}
               onChange={(e) => setStripeId(e.target.value)}
               placeholder="e.g. a checkout session or payment intent id"
             />
           </FormComponent>
           <FormComponent>
-            <label>Payment status</label>
+            <label htmlFor="input-purchase-payment-status">
+              Payment status
+            </label>
             <SelectEl
+              id="input-purchase-payment-status"
               value={paymentStatus}
               onChange={(e) =>
                 setPaymentStatus(

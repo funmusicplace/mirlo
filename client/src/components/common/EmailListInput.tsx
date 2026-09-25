@@ -1,13 +1,12 @@
 import Pill from "components/common/Pill";
 import TextArea from "components/common/TextArea";
+import { uniq } from "lodash";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
+import { isValidEmail } from "utils/email";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMAIL_SEPARATOR_REGEX = /[,;\s]+/;
-
-export const isValidEmail = (email: string) => EMAIL_REGEX.test(email);
 
 const splitEmails = (text: string) =>
   text
@@ -29,7 +28,7 @@ const EmailListInput: React.FC<{
       (email) => !emails.includes(email)
     );
     if (incoming.length > 0) {
-      onChange([...emails, ...Array.from(new Set(incoming))]);
+      onChange([...emails, ...uniq(incoming)]);
     }
   };
 
