@@ -99,6 +99,7 @@ const routes = [
   "manage/artists/{artistId}/labels/{labelUserId}",
   "manage/artists/{artistId}/codes",
   "manage/artists/{artistId}/subscribers",
+  "manage/artists/{artistId}/subscribers/{subscriptionId}",
   "manage/artists/{artistId}/background",
   "manage/artists/{artistId}/avatar",
   "manage/artists/{artistId}/drafts",

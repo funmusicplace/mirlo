@@ -9,6 +9,7 @@ import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
 import ArtistSubscriberDataDownload from "components/ManageArtist/ArtistSubscriberDataDownload";
 import ArtistSubscriberUploadData from "components/ManageArtist/ArtistSubscriberUploadData";
+import CancelSupporterButton from "components/ManageArtist/CancelSupporterButton";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { sumBy } from "lodash";
@@ -243,6 +244,7 @@ const Index = () => {
               <th>{t("tier")}</th>
               <th>{t("interval")}</th>
               <th>{t("amount")}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
@@ -295,6 +297,15 @@ const Index = () => {
                       amount={r.amount / 100}
                       currency={artist?.user?.currency ?? "usd"}
                     />
+                  </td>
+                  <td>
+                    {artistId && (
+                      <CancelSupporterButton
+                        artistId={artistId}
+                        subscriptionId={r.id}
+                        supporterName={r.user.name ?? r.user.email}
+                      />
+                    )}
                   </td>
                 </tr>
               ))}

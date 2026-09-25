@@ -1476,7 +1476,13 @@
     "free": "Free",
     "cancelling": "Cancelling",
     "cancellingExplanation": "This supporter has cancelled — they'll keep access until the end of their current paid period, then be removed from this list.",
-    "noSupportersYet": "No supporters yet, share your profile with others to grow your community."
+    "noSupportersYet": "No supporters yet, share your profile with others to grow your community.",
+    "cancelSupporter": "Cancel",
+    "cancelSupporterTitle": "Cancel subscription",
+    "cancelSupporterConfirm": "Cancel {{ name }}'s subscription? They won't be charged again and will keep access until the end of the period they've already paid for. We'll email them to let them know.",
+    "cancelSupporterSubmit": "Cancel subscription",
+    "supporterCancelled": "Subscription cancelled",
+    "nevermind": "Never mind"
   },
   "share": {
     "copied": "Copied!",

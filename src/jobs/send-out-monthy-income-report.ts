@@ -4,9 +4,9 @@ import { groupBy, keyBy, uniq } from "lodash";
 
 import logger from "../logger";
 import { findSales } from "../routers/v1/artists/{id}/supporters";
-import { getClient } from "../utils/getClient";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { serializeUserTransaction } from "../serializers/userTransaction";
+import { getClient } from "../utils/getClient";
 
 import sendMail from "./send-mail";
 
@@ -49,7 +49,8 @@ const deleteReasonLabels: Record<SubscriptionDeleteReason, string> = {
   PAYMENT_FAILURE: "Payment failed",
   USER_ACCOUNT_DELETED: "Account deleted",
   ADMIN_REMOVED: "Removed by an admin",
-  TIER_SWITCHED: "Switched tiers", // filtered out of the report, listed for exhaustiveness
+  ARTIST_CANCELLED: "Cancelled by you",
+  TIER_SWITCHED: "Switched tiers",
 };
 
 const sendOutMonthlyIncomeReport = async () => {

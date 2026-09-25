@@ -230,11 +230,11 @@ type CancellableSubscription = Prisma.ProfileUserSubscriptionGetPayload<{
   include: { profileSubscriptionTier: true };
 }>;
 
-// Cancels a user's subscription to an artist and emails them a confirmation.
 export const cancelUserSubscription = async (
   subscription: CancellableSubscription,
   userEmail: string,
-  keepFollowing: boolean = false
+  keepFollowing: boolean = false,
+  cancelledByArtist: boolean = false
 ) => {
   const artistId = subscription.profileSubscriptionTier.profileId;
 
@@ -263,7 +263,7 @@ export const cancelUserSubscription = async (
     await prisma.profileUserSubscription.update({
       where: { id: subscription.id },
       data: {
-        deleteReason: "USER_CANCELLED",
+        deleteReason: cancelledByArtist ? "ARTIST_CANCELLED" : "USER_CANCELLED",
         keepFollowingOnCancel: keepFollowing,
       },
     });
@@ -278,7 +278,8 @@ export const cancelUserSubscription = async (
     await sendSubscriptionCancellationEmail(
       userEmail,
       profile,
-      subscription.stripeSubscriptionKey ? subscription.nextBillingDate : null
+      subscription.stripeSubscriptionKey ? subscription.nextBillingDate : null,
+      cancelledByArtist
     );
   }
 };

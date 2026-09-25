@@ -473,6 +473,7 @@ enum SubscriptionDeleteReason {
   USER_ACCOUNT_DELETED
   ADMIN_REMOVED
   PAYMENT_FAILURE
+  ARTIST_CANCELLED
 }
 
 model ProfileTipTier {

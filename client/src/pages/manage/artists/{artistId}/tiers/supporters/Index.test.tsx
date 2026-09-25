@@ -36,6 +36,9 @@ vi.mock("components/ManageArtist/ArtistSubscriberDataDownload", () => ({
 vi.mock("components/ManageArtist/ArtistSubscriberUploadData", () => ({
   default: () => null,
 }));
+vi.mock("components/ManageArtist/CancelSupporterButton", () => ({
+  default: () => null,
+}));
 vi.mock("components/common/DropdownMenu", () => ({
   default: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
