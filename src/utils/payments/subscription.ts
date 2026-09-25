@@ -269,6 +269,12 @@ export const cancelUserSubscription = async (
     });
   } else {
     // Free/follow tier
+    if (cancelledByArtist) {
+      await prisma.profileUserSubscription.update({
+        where: { id: subscription.id },
+        data: { deleteReason: "ARTIST_CANCELLED" },
+      });
+    }
     await prisma.profileUserSubscription.deleteMany({
       where: { id: subscription.id },
     });

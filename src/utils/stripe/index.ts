@@ -833,12 +833,17 @@ export const finalizeSubscriptionSetup = async ({
   }
 
   // The new tier's row is now the user's only subscription to this artist.
+  const oldTierSubscriptionsWhere = {
+    userId,
+    profileSubscriptionTierId: { not: tier.id },
+    profileSubscriptionTier: { profileId: tier.profileId },
+  };
+  await prisma.profileUserSubscription.updateMany({
+    where: oldTierSubscriptionsWhere,
+    data: { deleteReason: "TIER_SWITCHED" },
+  });
   await prisma.profileUserSubscription.deleteMany({
-    where: {
-      userId,
-      profileSubscriptionTierId: { not: tier.id },
-      profileSubscriptionTier: { profileId: tier.profileId },
-    },
+    where: oldTierSubscriptionsWhere,
   });
 
   logger.info(

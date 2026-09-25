@@ -48,6 +48,13 @@ export default function () {
         });
       }
 
+      if (subscription.deleteReason) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Subscription is already being cancelled",
+        });
+      }
+
       await cancelUserSubscription(
         subscription,
         subscription.user.email,

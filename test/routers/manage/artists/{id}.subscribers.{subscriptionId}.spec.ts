@@ -61,6 +61,32 @@ describe("manage/artists/{artistId}/subscribers/{subscriptionId}", () => {
       assert.equal(after?.deleteReason, "ARTIST_CANCELLED");
     });
 
+    it("refuses to re-cancel a subscription the supporter already cancelled", async () => {
+      const { artist, tier, supporter, accessToken } = await createTestData();
+      const subscription = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: tier.id,
+          userId: supporter.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_already_cancelling",
+          deleteReason: "USER_CANCELLED",
+          keepFollowingOnCancel: true,
+        },
+      });
+
+      const response = await requestApp
+        .delete(`manage/artists/${artist.id}/subscribers/${subscription.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { id: subscription.id },
+      });
+      assert.equal(after?.deleteReason, "USER_CANCELLED");
+      assert.equal(after?.keepFollowingOnCancel, true);
+    });
+
     it("removes a free subscription immediately", async () => {
       const { artist, tier, supporter, accessToken } = await createTestData();
       const subscription = await prisma.profileUserSubscription.create({

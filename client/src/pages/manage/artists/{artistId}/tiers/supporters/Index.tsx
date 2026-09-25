@@ -299,7 +299,7 @@ const Index = () => {
                     />
                   </td>
                   <td>
-                    {artistId && (
+                    {artistId && !r.deleteReason && (
                       <CancelSupporterButton
                         artistId={artistId}
                         subscriptionId={r.id}
