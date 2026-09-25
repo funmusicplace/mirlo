@@ -12,7 +12,7 @@ import { QUERY_KEY_AUTH } from "./queryKeys";
 // Deduplicates concurrent 401s so only one refresh call is in flight at a time.
 let pendingRefresh: Promise<void> | null = null;
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30 * 1000, // 30 seconds

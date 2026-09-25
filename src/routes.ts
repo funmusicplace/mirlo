@@ -172,6 +172,7 @@ const routes = [
   "admin/chargePledges",
   "admin/fundraiserPledges",
   "admin/stats",
+  "admin/topAccounts",
   "admin/clients",
   "admin/clients/{id}",
   "admin/contentFlags",

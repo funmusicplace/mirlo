@@ -1,3 +1,4 @@
+import TopAccountsTables from "components/Admin/TopAccountsTables";
 import { moneyDisplay } from "components/common/Money";
 import Select from "components/common/Select";
 import StatCard from "components/common/StatCard";
@@ -9,6 +10,7 @@ import {
   useAdminStatsQuery,
 } from "queries/admin";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Area,
   AreaChart,
@@ -24,33 +26,13 @@ import {
 
 const DAYS = 365;
 
-/**
- * Categorical slots, assigned in order and never cycled - so a chart with
- * fewer series always uses the same leading colors.
- */
 const SERIES_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"];
 
-/** Stacked bands are separated by a hairline in the surface color. */
 const SURFACE = "var(--mi-background-color)";
 
 type Series = { key: string; name: string };
 
 type ChartPoint = { label: string } & Record<string, number | string>;
-
-const REVENUE_SERIES: Series[] = [
-  { key: "purchases", name: "Purchases" },
-  { key: "subscriptions", name: "Subscriptions" },
-  { key: "purchasesConverted", name: "Purchases (converted to USD)" },
-  { key: "subscriptionsConverted", name: "Subscriptions (converted to USD)" },
-];
-
-const PLATFORM_SERIES: Series[] = [
-  { key: "platformCut", name: "Platform cut (USD)" },
-  {
-    key: "platformCutConverted",
-    name: "Platform cut (converted from foreign)",
-  },
-];
 
 const usd = (value: number) => moneyDisplay({ amount: value, currency: "usd" });
 
@@ -93,6 +75,8 @@ export const StackedTooltip: React.FC<{
   payload?: Array<{ name?: string; value?: number; color?: string }>;
   format: (value: number) => string;
 }> = ({ active, label, payload, format }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "adminDashboard" });
+
   if (!active || !payload?.length) {
     return null;
   }
@@ -113,7 +97,7 @@ export const StackedTooltip: React.FC<{
         </div>
       ))}
       <div className="mt-1 flex justify-between gap-6 border-t border-(--mi-tint-x-color) pt-1 font-semibold">
-        <span>Total</span>
+        <span>{t("total")}</span>
         <span>{format(sumBy(payload, (entry) => entry.value ?? 0))}</span>
       </div>
     </div>
@@ -154,24 +138,28 @@ const StackedChart: React.FC<{
 const CountChart: React.FC<{ data: ChartPoint[]; color: string }> = ({
   data,
   color,
-}) => (
-  <ResponsiveContainer width="100%" height={200}>
-    <LineChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="label" />
-      <YAxis />
-      <Tooltip />
-      <Line
-        type="monotone"
-        dataKey="count"
-        name="Count"
-        stroke={color}
-        strokeWidth={2}
-        dot={{ r: 4 }}
-      />
-    </LineChart>
-  </ResponsiveContainer>
-);
+}) => {
+  const { t } = useTranslation("translation", { keyPrefix: "adminDashboard" });
+
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="label" />
+        <YAxis />
+        <Tooltip />
+        <Line
+          type="monotone"
+          dataKey="count"
+          name={t("count")}
+          stroke={color}
+          strokeWidth={2}
+          dot={{ r: 4 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+};
 
 const toCountPoints = (
   points: AdminStats["userSignups"],
@@ -205,20 +193,33 @@ const toTransactionPoints = (stats: AdminStats) =>
   );
 
 export const Index: React.FC = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "adminDashboard" });
   const [granularity, setGranularity] =
     React.useState<StatsGranularity>("week");
   const { data: stats, error } = useAdminStatsQuery(granularity, DAYS);
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>{t("error", { message: error.message })}</div>;
   }
 
   if (!stats) {
-    return <div>Loading dashboard...</div>;
+    return <div>{t("loading")}</div>;
   }
 
   // Titles follow the data that came back, not the pending toggle.
-  const per = stats.granularity === "month" ? "Month" : "Week";
+  const isMonthly = stats.granularity === "month";
+
+  const revenueSeries: Series[] = [
+    { key: "purchases", name: t("purchases") },
+    { key: "subscriptions", name: t("subscriptions") },
+    { key: "purchasesConverted", name: t("purchasesConverted") },
+    { key: "subscriptionsConverted", name: t("subscriptionsConverted") },
+  ];
+
+  const platformSeries: Series[] = [
+    { key: "platformCut", name: t("platformCut") },
+    { key: "platformCutConverted", name: t("platformCutConverted") },
+  ];
 
   const currencySeries = uniq(
     stats.transactionCounts.map((point) => point.currency)
@@ -230,72 +231,94 @@ export const Index: React.FC = () => {
 
   return (
     <WidthContainer variant="big" justify="center" className="grow p-4">
-      <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
+      <h2 className="text-2xl font-bold mb-6">{t("title")}</h2>
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <StatCard
-          label="Monthly Plays"
+          label={t("monthlyPlays")}
           value={stats.avgMonthlyPlays.toLocaleString()}
-          subtext="avg / month (last 12 months)"
+          subtext={t("avgPerMonthLast12")}
         />
         <StatCard
-          label="Monthly Active Users"
+          label={t("monthlyActiveUsers")}
           value={stats.avgMonthlyActiveUsers.toLocaleString()}
-          subtext="avg / month (last 12 months)"
+          subtext={t("avgPerMonthLast12")}
         />
         <StatCard
-          label="Monthly Album Downloads"
+          label={t("monthlyAlbumDownloads")}
           value={stats.avgMonthlyAlbumDownloads.toLocaleString()}
-          subtext="avg / month (last 12 months)"
+          subtext={t("avgPerMonthLast12")}
         />
       </div>
 
+      <TopAccountsTables />
+
       <label className="mb-4 flex items-center gap-2">
-        Show results by
+        {t("showResultsBy")}
         <Select
           value={granularity}
           onChange={(e) => setGranularity(e.target.value as StatsGranularity)}
           options={[
-            { label: "Week", value: "week" },
-            { label: "Month", value: "month" },
+            { label: t("week"), value: "week" },
+            { label: t("month"), value: "month" },
           ]}
         />
       </label>
 
       <div className="flex flex-col flex-wrap gap-4 w-full justify-stretch">
-        <ChartContainer title={`Artist Signups Per ${per}`}>
+        <ChartContainer
+          title={
+            isMonthly ? t("artistSignupsPerMonth") : t("artistSignupsPerWeek")
+          }
+        >
           <CountChart
             data={toCountPoints(stats.artistSignups, stats.granularity)}
             color={SERIES_COLORS[0]}
           />
         </ChartContainer>
 
-        <ChartContainer title={`User Signups Per ${per}`}>
+        <ChartContainer
+          title={isMonthly ? t("userSignupsPerMonth") : t("userSignupsPerWeek")}
+        >
           <CountChart
             data={toCountPoints(stats.userSignups, stats.granularity)}
             color={SERIES_COLORS[1]}
           />
         </ChartContainer>
 
-        <ChartContainer title={`USD Revenue Per ${per}`}>
+        <ChartContainer
+          title={isMonthly ? t("usdRevenuePerMonth") : t("usdRevenuePerWeek")}
+        >
           <StackedChart
             data={revenuePoints}
-            series={REVENUE_SERIES}
+            series={revenueSeries}
             format={usd}
             formatAxis={usdCompact}
           />
         </ChartContainer>
 
-        <ChartContainer title={`Platform Revenue Per ${per}`}>
+        <ChartContainer
+          title={
+            isMonthly
+              ? t("platformRevenuePerMonth")
+              : t("platformRevenuePerWeek")
+          }
+        >
           <StackedChart
             data={revenuePoints}
-            series={PLATFORM_SERIES}
+            series={platformSeries}
             format={usd}
             formatAxis={usdCompact}
           />
         </ChartContainer>
 
-        <ChartContainer title={`Transactions Per ${per} by Currency`}>
+        <ChartContainer
+          title={
+            isMonthly
+              ? t("transactionsPerMonthByCurrency")
+              : t("transactionsPerWeekByCurrency")
+          }
+        >
           <StackedChart
             data={toTransactionPoints(stats)}
             series={currencySeries}

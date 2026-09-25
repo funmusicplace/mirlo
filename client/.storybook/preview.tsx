@@ -8,7 +8,10 @@ import {
   reactRouterParameters,
 } from "storybook-addon-remix-react-router";
 
-import { QueryClientWrapper } from "../src/queries/QueryClientWrapper";
+import {
+  queryClient,
+  QueryClientWrapper,
+} from "../src/queries/QueryClientWrapper";
 import { AuthContextProvider } from "../src/state/AuthContext";
 import { GlobalStateProvider } from "../src/state/GlobalState";
 import { SnackBarContextProvider } from "../src/state/SnackbarContext";
@@ -53,8 +56,15 @@ function withGlobalContext(Outlet: any) {
   );
 }
 
+// The app's query client is a module-level singleton, so without this each
+// story would render whatever the previously viewed story cached.
+const clearQueryCache = async () => {
+  queryClient.clear();
+  return {};
+};
+
 const preview: Preview = {
-  loaders: [mswLoader],
+  loaders: [clearQueryCache, mswLoader],
   decorators: [
     withRouter,
     withGlobalContext,
