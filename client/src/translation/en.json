@@ -1651,6 +1651,8 @@
     "addUsersInvalidEmails": "Remove the invalid email addresses first",
     "addUsersFailed": "Something went wrong, nothing was added",
     "sendInvites": "Send invites",
+    "allowMirloPromoFilter": "Allows Mirlo promo",
+    "allowMirloPromoFilterHint": "Only display tracks that have been granted permission by the artist to be used to promote the platform.",
     "invitationsSent_one": "{{count}} invitation sent",
     "invitationsSent_other": "{{count}} invitations sent",
     "accountsCreated_one": "{{count}} account created",

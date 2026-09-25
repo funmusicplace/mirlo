@@ -4,6 +4,7 @@ import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 
 const useAdminFilters = ({
@@ -26,6 +27,7 @@ const useAdminFilters = ({
     | "pledgeStatus"
   )[];
 }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const { register, handleSubmit } = useForm();
   const [_, setSearchParams] = useSearchParams();
 
@@ -170,11 +172,10 @@ const useAdminFilters = ({
             />
             <div className="flex flex-col">
               <label htmlFor="input-allow-mirlo-promo">
-                Allows Mirlo promo
+                {t("allowMirloPromoFilter")}
               </label>
               <small id="hint-allow-mirlo-promo">
-                Only display tracks that have been granted permission by the
-                artist to be used to promote the platform.
+                {t("allowMirloPromoFilterHint")}
               </small>
             </div>
           </FormComponent>
