@@ -1,11 +1,11 @@
 import { TrackArtistLinks } from "components/Player/PlayingTrackDetails";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { MdLyrics } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 import { WidgetLink } from "./utils";
-import { MdLyrics } from "react-icons/md";
 
 export const TrackTitleContent: React.FC<{
   track: Track;
@@ -31,15 +31,10 @@ export const TrackTitleContent: React.FC<{
     keyPrefix: "trackGroupDetails",
   });
 
-  const trackGroupLabel = track.trackGroup.isDraft
-    ? "Drafts"
-    : track.trackGroup.title || tTrackGroup("untitled");
+  const isInHiddenDraftAlbum =
+    !!track.trackGroup.isHiddenTrackGroupForSongDrafts;
+  const trackGroupLabel = track.trackGroup.title || tTrackGroup("untitled");
 
-  // WidgetLink always opens in a new tab, which is correct when this content is
-  // rendered inside an embeddable widget (or a widget preview). The persistent
-  // player, however, sets useTrackArtistLinks to indicate we're navigating inside
-  // the main Mirlo app itself, where the artist and track title links already stay
-  // in the current tab — so the album link should match instead of standing out.
   const trackGroupLink = useTrackArtistLinks ? (
     <Link to={getReleaseUrl(track.trackGroup.artist, track.trackGroup)}>
       {trackGroupLabel}
@@ -108,10 +103,14 @@ export const TrackTitleContent: React.FC<{
       {combineFromAndBy ? (
         <div className={byLineWrapperClass}>
           <span className={byLineTruncateClass}>
-            <span className="opacity-60">{t("from")}</span> {trackGroupLink}
+            {!isInHiddenDraftAlbum && (
+              <>
+                <span className="opacity-60">{t("from")}</span> {trackGroupLink}
+              </>
+            )}
             {artistLink && (
               <>
-                {" · "}
+                {!isInHiddenDraftAlbum && " · "}
                 <span className="opacity-60">{t("by")}</span> {artistLink}
               </>
             )}
@@ -124,9 +123,11 @@ export const TrackTitleContent: React.FC<{
         </div>
       ) : (
         <>
-          <div className="text-sm leading-normal truncate break-normal max-sm:text-xs max-xs:text-[0.65rem] [&_a:hover]:underline!">
-            <span className="opacity-60">{t("from")}</span> {trackGroupLink}
-          </div>
+          {!isInHiddenDraftAlbum && (
+            <div className="text-sm leading-normal truncate break-normal max-sm:text-xs max-xs:text-[0.65rem] [&_a:hover]:underline!">
+              <span className="opacity-60">{t("from")}</span> {trackGroupLink}
+            </div>
+          )}
           <div className={byLineWrapperClass}>
             <span className={byLineTruncateClass}>
               <span className="opacity-60">{t("by")}</span> {artistLink}

@@ -111,11 +111,15 @@ const PlayingTrackDetails: React.FC<{
           embeddedInMirlo={false}
           combineFromAndBy
           useTrackArtistLinks
-          titleLinkTo={getTrackUrl(
-            currentTrack.trackGroup.artist,
-            currentTrack.trackGroup,
-            currentTrack
-          )}
+          titleLinkTo={
+            currentTrack.trackGroup.isHiddenTrackGroupForSongDrafts
+              ? undefined
+              : getTrackUrl(
+                  currentTrack.trackGroup.artist,
+                  currentTrack.trackGroup,
+                  currentTrack
+                )
+          }
           byLineEnd={byLineEnd}
           foldByLineAtSm
           compactTitle

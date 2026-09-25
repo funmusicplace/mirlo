@@ -3,6 +3,7 @@ import BulkTrackUpload from "components/ManageArtist/ManageTrackGroup/BulkTrackU
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { FaTrash } from "react-icons/fa";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 
@@ -29,7 +30,7 @@ const UploadMusicModal: React.FC<Props> = ({
   const errorHandler = useErrorHandler();
   const [draftAlbum, setDraftAlbum] = React.useState<TrackGroup>();
   const [newSongs, setNewSongs] = React.useState<Track[]>([]);
-  const methods = useForm<{ titles: string[] }>();
+  const methods = useForm<{ titles: Record<string, string> }>();
   const titles = methods.watch("titles");
 
   const loadDraft = React.useCallback(async () => {
@@ -44,7 +45,7 @@ const UploadMusicModal: React.FC<Props> = ({
     if (open) {
       loadDraft().catch((e) => errorHandler(e, true));
     } else {
-      methods.reset({ titles: [] });
+      methods.reset({ titles: {} });
       setNewSongs([]);
     }
   }, [open, loadDraft, errorHandler, methods]);
@@ -63,13 +64,27 @@ const UploadMusicModal: React.FC<Props> = ({
     [loadDraft, errorHandler]
   );
 
+  const removeSong = React.useCallback(
+    async (trackId: number) => {
+      try {
+        await api.delete(`manage/tracks/${trackId}`);
+        setNewSongs((existing) => existing.filter((s) => s.id !== trackId));
+        methods.unregister(`titles.${trackId}`);
+        loadDraft();
+      } catch (e) {
+        errorHandler(e, true);
+      }
+    },
+    [methods, loadDraft, errorHandler]
+  );
+
   const addTracks = React.useCallback(async () => {
     const formTitles = methods.getValues("titles");
     try {
       await Promise.all(
-        newSongs.map(async (song, idx) => {
+        newSongs.map(async (song) => {
           await api.put(`manage/tracks/${song.id}`, {
-            title: formTitles[idx],
+            title: formTitles[song.id],
           });
         })
       );
@@ -80,7 +95,7 @@ const UploadMusicModal: React.FC<Props> = ({
     }
   }, [newSongs, methods, onTrackReady, onClose, errorHandler]);
 
-  const hasEmptyTitle = titles?.some((title) => title === "");
+  const hasEmptyTitle = newSongs.some((song) => !titles?.[song.id]);
 
   return (
     <Modal
@@ -111,17 +126,26 @@ const UploadMusicModal: React.FC<Props> = ({
                 }
               `}
             >
-              {newSongs.map((song, idx) => (
+              {newSongs.map((song) => (
                 <FormComponent key={song.id}>
-                  <label htmlFor={`input-song-title-${idx}`}>
+                  <label htmlFor={`input-song-title-${song.id}`}>
                     {t("songTitle")}
                   </label>
                   <InputEl
-                    id={`input-song-title-${idx}`}
-                    {...methods.register(`titles.${idx}`)}
+                    id={`input-song-title-${song.id}`}
+                    {...methods.register(`titles.${song.id}`)}
                     required
                   />
                   <small>{song.audio?.originalFilename}</small>
+                  <Button
+                    type="button"
+                    variant="dashed"
+                    size="compact"
+                    startIcon={<FaTrash />}
+                    onClick={() => removeSong(song.id)}
+                  >
+                    {t("removeUploadedSong")}
+                  </Button>
                 </FormComponent>
               ))}
               {hasEmptyTitle && (

@@ -36,27 +36,30 @@ export const SnackBarContextProvider: React.FC<{
   const [position, setPosition] = React.useState<Position>("center");
   const timer = React.useRef<NodeJS.Timeout>();
 
-  const displayHandler = (
-    msg: string,
-    options?: { type: Variant; position?: Position; timeout?: number }
-  ) => {
-    setMsg(msg);
-    setIsDisplayed(true);
-    setVariant(options?.type);
-    setPosition(options?.position);
-
-    timer.current = setTimeout(() => {
-      closeHandler();
-    }, options?.timeout ?? 3000); // close snackbar after 3 seconds
-  };
-
-  const closeHandler = () => {
+  const closeHandler = React.useCallback(() => {
     if (timer.current) {
       clearTimeout(timer.current);
     }
     setIsDisplayed(false);
     setVariant(undefined);
-  };
+  }, []);
+
+  const displayHandler = React.useCallback(
+    (
+      msg: string,
+      options?: { type: Variant; position?: Position; timeout?: number }
+    ) => {
+      setMsg(msg);
+      setIsDisplayed(true);
+      setVariant(options?.type);
+      setPosition(options?.position);
+
+      timer.current = setTimeout(() => {
+        closeHandler();
+      }, options?.timeout ?? 3000); // close snackbar after 3 seconds
+    },
+    [closeHandler]
+  );
 
   return (
     <SnackbarContext.Provider
