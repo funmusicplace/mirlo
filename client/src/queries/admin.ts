@@ -199,6 +199,12 @@ export interface AdminContentFlag {
     name: string;
     urlSlug: string;
     enabled: boolean;
+    user: {
+      id: number;
+      name: string | null;
+      email: string;
+      disabledAt: string | null;
+    } | null;
   } | null;
   trackGroupId: number | null;
   trackGroup: {
@@ -216,8 +222,14 @@ export interface AdminContentFlag {
     id: number;
     name: string | null;
     email: string;
-    trustLevel: number | null;
+    disabledAt: string | null;
   } | null;
+  trustLevelChange: {
+    fromLevel: number;
+    toLevel: number;
+    createdAt: string;
+  } | null;
+  spamStrikeNumber: number | null;
 }
 
 export type AdminContentFlagsResolvedFilter = "unresolved" | "resolved" | "all";
@@ -339,6 +351,30 @@ export const useUpdateAdminArtistMutation = () => {
           queryKey: [QUERY_KEY_ADMIN_CONTENT_FLAGS],
         }),
       ]);
+    },
+  });
+};
+
+async function updateAdminUser(opts: {
+  userId: number;
+  disabled?: boolean;
+  resetSpamStrikes?: boolean;
+}) {
+  const { userId, ...data } = opts;
+  return api.put<typeof data, { message: string }>(
+    `admin/users/${userId}`,
+    data
+  );
+}
+
+export const useUpdateAdminUserMutation = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateAdminUser,
+    onSuccess: async () => {
+      await client.invalidateQueries({
+        queryKey: [QUERY_KEY_ADMIN_CONTENT_FLAGS],
+      });
     },
   });
 };

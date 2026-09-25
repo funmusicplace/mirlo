@@ -76,12 +76,13 @@ const Index: React.FC = () => {
         ) : (
           <Table className="table-fixed min-w-5xl">
             <colgroup>
-              <col className="w-28" />
+              <col className="w-24" />
               <col />
-              <col className="w-48" />
-              <col className="w-48" />
+              <col className="w-40" />
+              <col className="w-40" />
+              <col className="w-28" />
               <col className="w-32" />
-              <col className="w-44" />
+              <col className="w-36" />
             </colgroup>
             <thead>
               <tr>
@@ -90,6 +91,7 @@ const Index: React.FC = () => {
                 <th>{t("columnContent")}</th>
                 <th>{t("columnRelease")}</th>
                 <th>{t("columnArtist")}</th>
+                <th>{t("columnUser")}</th>
                 <th>
                   <span className="sr-only">{t("columnActions")}</span>
                 </th>
