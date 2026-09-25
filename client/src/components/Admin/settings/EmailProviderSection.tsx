@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { EMAIL_REGEX } from "utils/email";
 
 import { FormSettings } from "./settingsForm";
-
+import SettingsSection from "./SettingsSection";
 const EmailProviderSection: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const {
@@ -19,11 +19,10 @@ const EmailProviderSection: React.FC = () => {
   const fromEmailError = errors.emailProvider?.fromEmail?.message;
 
   return (
-    <fieldset id="settings-email-provider" className="mb-8 scroll-mt-32">
-      <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
-        {t("emailProviderSettings")}
-      </legend>
-
+    <SettingsSection
+      id="settings-email-provider"
+      title={t("emailProviderSettings")}
+    >
       <FormComponent>
         <label htmlFor="input-email-provider">{t("emailProviderLabel")}</label>
         <SelectEl
@@ -112,7 +111,7 @@ const EmailProviderSection: React.FC = () => {
           </FormComponent>
         </fieldset>
       )}
-    </fieldset>
+    </SettingsSection>
   );
 };
 

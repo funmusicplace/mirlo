@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import React from "react";
@@ -7,9 +6,8 @@ import { useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { bp } from "../../../constants";
-
 import { FormSettings } from "./settingsForm";
+import SettingsSection from "./SettingsSection";
 
 const colorInputClass = css`
   &[type="color"] {
@@ -32,16 +30,6 @@ const colorInputClass = css`
   }
 `;
 
-const ColorGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-`;
-
 const COLOR_FIELDS = [
   { key: "button", labelKey: "colorButton" },
   { key: "buttonText", labelKey: "colorButtonText" },
@@ -54,11 +42,7 @@ const GeneralSettingsSection: React.FC = () => {
   const { register } = useFormContext<FormSettings>();
 
   return (
-    <fieldset id="settings-general" className="mb-8 scroll-mt-32">
-      <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
-        {t("generalSettings")}
-      </legend>
-
+    <SettingsSection id="settings-general" title={t("generalSettings")}>
       <FormComponent>
         <label htmlFor="input-platform-percent">{t("platformPercent")}</label>
         <InputEl
@@ -134,7 +118,7 @@ const GeneralSettingsSection: React.FC = () => {
 
       <fieldset>
         <legend className="mb-2 font-semibold">{t("colors")}</legend>
-        <ColorGrid>
+        <div className="grid grid-cols-4 gap-4 max-md:grid-cols-2">
           {COLOR_FIELDS.map(({ key, labelKey }) => (
             <FormComponent key={key}>
               <label htmlFor={`input-color-${key}`}>{t(labelKey)}</label>
@@ -146,9 +130,9 @@ const GeneralSettingsSection: React.FC = () => {
               />
             </FormComponent>
           ))}
-        </ColorGrid>
+        </div>
       </fieldset>
-    </fieldset>
+    </SettingsSection>
   );
 };
 

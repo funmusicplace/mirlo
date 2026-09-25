@@ -1,17 +1,19 @@
-import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import FeaturedArtistsSelector from "components/Admin/FeaturedArtistsSelector";
 import EmailProviderSection from "components/Admin/settings/EmailProviderSection";
 import GeneralSettingsSection from "components/Admin/settings/GeneralSettingsSection";
 import PoliciesSection from "components/Admin/settings/PoliciesSection";
+import SecuritySection from "components/Admin/settings/SecuritySection";
 import SettingsActionsBar from "components/Admin/settings/SettingsActionsBar";
 import {
   FormSettings,
   SettingsFromAPI,
 } from "components/Admin/settings/settingsForm";
+import SettingsSection from "components/Admin/settings/SettingsSection";
 import SettingsSectionNav from "components/Admin/settings/SettingsSectionNav";
-import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
+import StorageSection from "components/Admin/settings/StorageSection";
+import StripeSection from "components/Admin/settings/StripeSection";
+import TrustLevelsSection from "components/Admin/settings/TrustLevelsSection";
 import WidthContainer from "components/common/WidthContainer";
 import { queryFeaturedArtists } from "queries/settings";
 import React from "react";
@@ -21,27 +23,12 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
-import { bp } from "../../../constants";
-
-const SettingsLayout = styled.div`
-  display: grid;
-  grid-template-columns: 12rem minmax(0, 1fr);
-  gap: 2.5rem;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
-  }
-`;
-
 const Index = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const snackbar = useSnackbar();
   const [isLoading, setIsLoading] = React.useState(false);
   const methods = useForm<FormSettings>();
-  const { reset, register, handleSubmit, watch } = methods;
-  const stripeKeyConfigured = watch("stripe.keyConfigured");
-  const useConsolidatedBuckets = watch("useConsolidatedBuckets");
+  const { reset, handleSubmit } = methods;
   const { data: initialFeaturedArtists } = useQuery(queryFeaturedArtists());
   const [featuredArtistsOverride, setFeaturedArtistsOverride] = React.useState<
     Artist[] | undefined
@@ -143,149 +130,33 @@ const Index = () => {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(updateSettings)}>
           <SettingsActionsBar isSaving={isLoading} />
-          <SettingsLayout>
+          <div className="grid grid-cols-[12rem_minmax(0,1fr)] gap-10 max-md:grid-cols-1 max-md:gap-6">
             <SettingsSectionNav />
             <div className="max-w-2xl">
               <GeneralSettingsSection />
-              <fieldset
+              <SettingsSection
                 id="settings-featured-artists"
-                className="mb-8 scroll-mt-32"
+                title={t("featuredArtists")}
               >
-                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
-                  {t("featuredArtists")}
-                </legend>
                 <FeaturedArtistsSelector
                   value={featuredArtists}
                   onChange={setFeaturedArtistsOverride}
                 />
-              </fieldset>
+              </SettingsSection>
 
-              <fieldset id="settings-stripe" className="mb-8 scroll-mt-32">
-                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
-                  {t("stripeSettings")}
-                </legend>
-                <FormComponent>
-                  <label htmlFor="input-stripe-key">
-                    {t("stripeSecretKey")}
-                  </label>
-                  <InputEl
-                    id="input-stripe-key"
-                    type="password"
-                    className="max-w-md"
-                    placeholder={
-                      stripeKeyConfigured
-                        ? t("stripeKeyPlaceholderConfigured")
-                        : t("stripeKeyPlaceholderEmpty")
-                    }
-                    {...register("stripe.key")}
-                  />
-                </FormComponent>
-                <FormComponent>
-                  <label htmlFor="input-stripe-webhook-connect-signing-secret">
-                    {t("stripeWebhookConnectSigningSecret")}
-                  </label>
-                  <InputEl
-                    id="input-stripe-webhook-connect-signing-secret"
-                    type="text"
-                    className="max-w-md"
-                    {...register("stripe.webhookConnectSigningSecret")}
-                  />
-                </FormComponent>
-              </fieldset>
+              <StripeSection />
 
               <EmailProviderSection />
 
-              <fieldset id="settings-storage" className="mb-8 scroll-mt-32">
-                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
-                  {t("storage")}
-                </legend>
-                <FormComponent direction="row">
-                  <InputEl
-                    id="input-use-consolidated-buckets"
-                    type="checkbox"
-                    aria-describedby="hint-use-consolidated-buckets"
-                    {...register("useConsolidatedBuckets")}
-                  />
-                  <div className="flex flex-col">
-                    <label htmlFor="input-use-consolidated-buckets">
-                      {t("useConsolidatedBuckets")}
-                    </label>
-                    <small
-                      id="hint-use-consolidated-buckets"
-                      className="max-w-md"
-                    >
-                      {t("useConsolidatedBucketsHint")}
-                    </small>
-                  </div>
-                </FormComponent>
-                {useConsolidatedBuckets && (
-                  <FormComponent>
-                    <label htmlFor="input-bucket-prefix">
-                      {t("bucketPrefix")}
-                    </label>
-                    <InputEl
-                      id="input-bucket-prefix"
-                      type="text"
-                      className="max-w-xs"
-                      placeholder={t("bucketPrefixPlaceholder")}
-                      {...register("bucketPrefix")}
-                    />
-                  </FormComponent>
-                )}
-              </fieldset>
+              <StorageSection />
 
               <PoliciesSection />
 
-              <fieldset
-                id="settings-trust-levels"
-                className="mb-8 scroll-mt-32"
-              >
-                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
-                  {t("trustLevels")}
-                </legend>
-                {DEFAULT_TRUST_LEVEL_NAMES.map((defaultName, level) => (
-                  <FormComponent key={level}>
-                    <label htmlFor={`input-trust-level-name-${level}`}>
-                      {t("trustLevelName", { level })}
-                    </label>
-                    <InputEl
-                      id={`input-trust-level-name-${level}`}
-                      type="text"
-                      className="max-w-xs"
-                      placeholder={defaultName}
-                      {...register(`trustLevelNames.${level}`)}
-                    />
-                  </FormComponent>
-                ))}
-              </fieldset>
+              <TrustLevelsSection />
 
-              <fieldset id="settings-security" className="mb-8 scroll-mt-32">
-                <legend className="mb-4 w-full border-b border-(--mi-tint-x-color) pb-2 text-lg font-semibold">
-                  {t("security")}
-                </legend>
-                <FormComponent>
-                  <label htmlFor="input-cloudflare-turnstile-secret">
-                    {t("cloudflareTurnstileSecret")}
-                  </label>
-                  <InputEl
-                    id="input-cloudflare-turnstile-secret"
-                    type="text"
-                    className="max-w-md"
-                    {...register("cloudflareTurnstileSecret")}
-                  />
-                </FormComponent>
-                <FormComponent>
-                  <label htmlFor="input-defcon-level">{t("defconLevel")}</label>
-                  <InputEl
-                    id="input-defcon-level"
-                    type="text"
-                    className="max-w-xs"
-                    {...register("defconLevel")}
-                  />
-                </FormComponent>
-              </fieldset>
+              <SecuritySection />
             </div>
-          </SettingsLayout>
+          </div>
         </form>
       </FormProvider>
     </WidthContainer>
