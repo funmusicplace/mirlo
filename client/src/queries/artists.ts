@@ -329,6 +329,27 @@ export function queryManageArtistSubscribers(opts: { artistId?: number }) {
   });
 }
 
+async function cancelArtistSubscriber(opts: {
+  artistId: number;
+  subscriptionId: number;
+}) {
+  return api.del(
+    `v1/manage/artists/${opts.artistId}/subscribers/${opts.subscriptionId}`
+  );
+}
+
+export function useCancelArtistSubscriberMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: cancelArtistSubscriber,
+    async onSuccess(_, { artistId }) {
+      await client.invalidateQueries({
+        queryKey: ["fetchManageArtistSubscribers", { artistId }],
+      });
+    },
+  });
+}
+
 export type ArtistQueryOptions = {
   skip?: number;
   take?: number;

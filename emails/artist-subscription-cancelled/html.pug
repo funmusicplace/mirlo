@@ -2,15 +2,19 @@ extends ../layout.pug
 
 block content
     p Hi,
-    if endsAt
-      p
-        | Your subscription to #{artist.name} on Mirlo has been cancelled.
-        | You won't be charged again, and you'll keep access until the end of the
-        | period you've already paid for, on #{new Date(endsAt).toLocaleDateString()}.
+    if cancelledByArtist
+      p #{artist.name} has cancelled your subscription to them on Mirlo.
     else
       p Your subscription to #{artist.name} on Mirlo has been cancelled.
+    if endsAt
+      p
+        | You won't be charged again, and you'll keep access until the end of the
+        | period you've already paid for, on #{new Date(endsAt).toLocaleDateString()}.
     p
       | Thank you for your support! You can subscribe again any time from
       a(href!=`${client}`) our website
       | .
-    p If you didn't request this, please get in touch.
+    if cancelledByArtist
+      p If you have questions about this, please get in touch with #{artist.name}.
+    else
+      p If you didn't request this, please get in touch.

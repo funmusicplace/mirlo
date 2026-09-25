@@ -16,6 +16,7 @@ yarn-error.log
 __generated__/
 
 *storybook.log
+storybook-static
 .idea/
 docs/.vitepress/cache
 docs/.vitepress/dist

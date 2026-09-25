@@ -20,17 +20,20 @@ const WidgetActionButtons: React.FC<{
   const buyUrl = `${buyPath}?buy=true`;
 
   const hasTiers = (artist?.subscriptionTiers?.length ?? 0) > 0;
+  const canBuy = !trackGroup.isHiddenTrackGroupForSongDrafts;
 
   return (
     <div className="flex gap-2 ml-auto">
-      <ButtonAnchor
-        href={buyUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        variant="pill"
-      >
-        {t("buy")}
-      </ButtonAnchor>
+      {canBuy && (
+        <ButtonAnchor
+          href={buyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="pill"
+        >
+          {t("buy")}
+        </ButtonAnchor>
+      )}
       {hasTiers && (
         <ButtonAnchor
           href={`${getArtistUrl(trackGroup.artist)}/support`}

@@ -531,14 +531,11 @@ export const deleteStripeSubscriptions = async (
   });
 };
 
-// Sends the buyer confirmation that their subscription has been cancelled.
-// For a paid subscription, `endsAt` is when access remains active until (the
-// end of the period they already paid for); for a free/follow tier it is null
-// and the cancellation is effective immediately.
 export const sendSubscriptionCancellationEmail = async (
   email: string,
   profile: Profile,
-  endsAt: Date | null
+  endsAt: Date | null,
+  cancelledByArtist: boolean = false
 ) => {
   return sendMail({
     data: {
@@ -550,6 +547,7 @@ export const sendSubscriptionCancellationEmail = async (
         artist: serializeProfile(profile),
         email,
         endsAt: endsAt ? endsAt.toISOString() : null,
+        cancelledByArtist,
         host: process.env.API_DOMAIN,
         client: (await getClient()).applicationUrl,
       },

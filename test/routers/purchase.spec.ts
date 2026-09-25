@@ -2047,7 +2047,6 @@ describe("purchase", () => {
         currency: "usd",
         userId: buyer.id,
         userEmail: buyer.email,
-        oldTierId: oldTier.id,
         oldStripeSubscriptionKey: "sub_old_789",
       });
 
@@ -2204,6 +2203,82 @@ describe("purchase", () => {
         "sub_same_tier_new",
         "the row should now point at the new Stripe subscription"
       );
+    });
+
+    it("cancels every other paid subscription to the artist, not just the one being switched from", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_finalize_duplicates",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const strayTier = await createTier(artist.id, { minAmount: 500 });
+      const oldTier = await createTier(artist.id, { minAmount: 700 });
+      const newTier = await createTier(artist.id, { minAmount: 1000 });
+
+      // A buyer left with two live paid subscriptions to the same artist
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: strayTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_stray_dup",
+        },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 700,
+          stripeSubscriptionKey: "sub_old_dup",
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_duplicates",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_duplicates",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
+        id: "sub_new_dup",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const cancelStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "cancel")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await finalizeSubscriptionSetup({
+        stripeAccountId: "acct_sub_finalize_duplicates",
+        paymentMethodId: "pm_test",
+        tierId: newTier.id,
+        amount: 1000,
+        currency: "usd",
+        userId: buyer.id,
+        userEmail: buyer.email,
+        oldStripeSubscriptionKey: "sub_old_dup",
+      });
+
+      assert.deepEqual(
+        cancelStub
+          .getCalls()
+          .map((call) => call.args[0])
+          .sort(),
+        ["sub_old_dup", "sub_stray_dup"],
+        "both old Stripe subscriptions should be cancelled"
+      );
+
+      const remaining = await prisma.profileUserSubscription.findMany({
+        where: { userId: buyer.id },
+      });
+      assert.equal(remaining.length, 1, "only the new tier's row is left");
+      assert.equal(remaining[0].profileSubscriptionTierId, newTier.id);
+      assert.equal(remaining[0].stripeSubscriptionKey, "sub_new_dup");
     });
 
     it("falls back to the artist's defaultPlatformFee when the tier has no platformPercent override", async () => {

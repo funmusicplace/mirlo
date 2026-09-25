@@ -170,6 +170,31 @@ describe("trackGroups/{id}", () => {
       assert.equal(response.body.result.id, trackGroup.id);
     });
 
+    it("should GET / 404 for the hidden drafts album, even for its owner", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist-drafts@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        urlSlug: "hidden-draft-album",
+      });
+      await prisma.trackGroup.update({
+        where: { id: trackGroup.id },
+        data: { isHiddenTrackGroupForSongDrafts: true },
+      });
+
+      const loggedOut = await requestApp
+        .get(`trackGroups/hidden-draft-album?artistId=${profile.urlSlug}`)
+        .set("Accept", "application/json");
+      assert.equal(loggedOut.statusCode, 404);
+
+      const asOwner = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(asOwner.statusCode, 404);
+    });
+
     it("should GET / 200 for an private but published trackGroup (URL access)", async () => {
       const { user } = await createUser({
         email: "artist-private-url@artist.com",

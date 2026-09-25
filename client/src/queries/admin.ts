@@ -9,6 +9,7 @@ import api from "services/api";
 const QUERY_KEY_ADMIN_FUNDRAISER_PLEDGES = "admin-fundraiser-pledges";
 const QUERY_KEY_ADMIN_CLIENTS = "admin-clients";
 const QUERY_KEY_ADMIN_STATS = "admin-stats";
+const QUERY_KEY_ADMIN_TOP_ACCOUNTS = "admin-top-accounts";
 const QUERY_KEY_ADMIN_ARTIST = "admin-artist";
 const QUERY_KEY_ADMIN_CONTENT_FLAGS = "admin-content-flags";
 
@@ -55,6 +56,44 @@ export const useAdminStatsQuery = (
     },
     // Toggling week/month swaps the query key; keep the old charts on screen
     // instead of blanking the page while the new ones load.
+    placeholderData: keepPreviousData,
+  });
+};
+
+/** How far back the admin dashboard's top sellers/purchasers look. */
+export type TopAccountsPeriod = "month" | "year";
+
+export interface AdminTopSeller {
+  id: number;
+  name: string;
+  urlSlug: string;
+  usdCents: number;
+  transactionCount: number;
+}
+
+export interface AdminTopPurchaser {
+  id: number;
+  name: string | null;
+  email: string;
+  usdCents: number;
+  transactionCount: number;
+}
+
+export interface AdminTopAccounts {
+  period: TopAccountsPeriod;
+  sellers: AdminTopSeller[];
+  purchasers: AdminTopPurchaser[];
+}
+
+export const useAdminTopAccountsQuery = (period: TopAccountsPeriod) => {
+  return useQuery({
+    queryKey: [QUERY_KEY_ADMIN_TOP_ACCOUNTS, period],
+    queryFn: async () => {
+      const { result } = await api.get<AdminTopAccounts>(
+        `admin/topAccounts?period=${period}`
+      );
+      return result;
+    },
     placeholderData: keepPreviousData,
   });
 };

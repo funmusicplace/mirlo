@@ -33,7 +33,12 @@ export default function () {
         trackGroup = await prisma.trackGroup.findFirst({
           where: {
             id: actualId,
-            ...(loggedInUser?.isAdmin ? {} : whereForVisibleTrackGroup()),
+            ...(loggedInUser?.isAdmin
+              ? {}
+              : {
+                  isHiddenTrackGroupForSongDrafts: false,
+                  ...whereForVisibleTrackGroup(),
+                }),
           },
           include: {
             ...trackGroupSingleInclude({

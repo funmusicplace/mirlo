@@ -5,6 +5,8 @@ import React from "react";
 import api from "services/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+import "i18n";
+
 vi.mock("services/api", () => ({
   default: { get: vi.fn() },
 }));
@@ -97,6 +99,20 @@ function makeStats(overrides: Record<string, unknown> = {}) {
   };
 }
 
+const emptyTopAccounts = {
+  result: { period: "month", sellers: [], purchasers: [] },
+};
+
+/** Serves the top-accounts tables so tests can focus on the stats payload. */
+const mockStats = (stats: (endpoint: string) => unknown = () => makeStats()) =>
+  vi
+    .mocked(api.get)
+    .mockImplementation(async (endpoint: string) =>
+      endpoint.startsWith("admin/topAccounts")
+        ? (emptyTopAccounts as any)
+        : (stats(endpoint) as any)
+    );
+
 const renderDashboard = () =>
   render(
     <QueryClientProvider
@@ -135,7 +151,7 @@ describe("admin dashboard Index", () => {
   });
 
   test("fetches a year of weekly stats on mount", async () => {
-    vi.mocked(api.get).mockResolvedValue(makeStats() as any);
+    mockStats();
 
     renderDashboard();
 
@@ -147,18 +163,20 @@ describe("admin dashboard Index", () => {
   });
 
   test("refetches monthly stats when the granularity is switched", async () => {
-    vi.mocked(api.get).mockImplementation(
-      async (endpoint: string) =>
-        makeStats(
-          endpoint.includes("granularity=month") ? { granularity: "month" } : {}
-        ) as any
+    mockStats((endpoint) =>
+      makeStats(
+        endpoint.includes("granularity=month") ? { granularity: "month" } : {}
+      )
     );
 
     renderDashboard();
 
     await waitFor(() => screen.getByText("USD Revenue Per Week"));
 
-    await userEvent.selectOptions(screen.getByRole("combobox"), "month");
+    await userEvent.selectOptions(
+      screen.getByRole("combobox", { name: /Show results by/ }),
+      "month"
+    );
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith(
@@ -188,7 +206,7 @@ describe("admin dashboard Index", () => {
   });
 
   test("renders the KPI cards", async () => {
-    vi.mocked(api.get).mockResolvedValue(makeStats() as any);
+    mockStats();
 
     renderDashboard();
 
@@ -200,7 +218,7 @@ describe("admin dashboard Index", () => {
   });
 
   test("stacks the USD Revenue purchase/subscription series", async () => {
-    vi.mocked(api.get).mockResolvedValue(makeStats() as any);
+    mockStats();
 
     renderDashboard();
 
@@ -218,7 +236,7 @@ describe("admin dashboard Index", () => {
   });
 
   test("passes one data point per bucket to the USD Revenue chart", async () => {
-    vi.mocked(api.get).mockResolvedValue(makeStats() as any);
+    mockStats();
 
     renderDashboard();
 
@@ -231,7 +249,7 @@ describe("admin dashboard Index", () => {
   });
 
   test("stacks the Platform Revenue USD and converted series", async () => {
-    vi.mocked(api.get).mockResolvedValue(makeStats() as any);
+    mockStats();
 
     renderDashboard();
 
@@ -247,7 +265,7 @@ describe("admin dashboard Index", () => {
   });
 
   test("stacks one transaction series per currency seen", async () => {
-    vi.mocked(api.get).mockResolvedValue(makeStats() as any);
+    mockStats();
 
     renderDashboard();
 

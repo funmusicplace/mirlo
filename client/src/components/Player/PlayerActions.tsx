@@ -36,6 +36,7 @@ const PlayerActions: React.FC = () => {
 
   const totalTracks = trackGroup.totalTracks ?? trackGroup.tracks?.length ?? 1;
   const isMultiTrack = totalTracks > 1;
+  const isHiddenDraftAlbum = !!trackGroup.isHiddenTrackGroupForSongDrafts;
 
   return (
     <div
@@ -57,19 +58,21 @@ const PlayerActions: React.FC = () => {
         }
       `}
     >
-      {isMultiTrack ? (
-        <WishlistTargetMenu track={currentTrack} trackGroup={trackGroup} />
-      ) : (
-        <Wishlist trackGroup={{ id: trackGroup.id }} fixed />
-      )}
+      {!isHiddenDraftAlbum &&
+        (isMultiTrack ? (
+          <WishlistTargetMenu track={currentTrack} trackGroup={trackGroup} />
+        ) : (
+          <Wishlist trackGroup={{ id: trackGroup.id }} fixed />
+        ))}
       {trackGroup.artistId && (
         <SupportArtist artistId={trackGroup.artistId} fixed />
       )}
-      {isMultiTrack ? (
-        <BuyTargetMenu track={currentTrack} trackGroup={trackGroup} />
-      ) : (
-        <PurchaseOrDownloadAlbum trackGroup={trackGroup} fixed />
-      )}
+      {!isHiddenDraftAlbum &&
+        (isMultiTrack ? (
+          <BuyTargetMenu track={currentTrack} trackGroup={trackGroup} />
+        ) : (
+          <PurchaseOrDownloadAlbum trackGroup={trackGroup} fixed />
+        ))}
     </div>
   );
 };

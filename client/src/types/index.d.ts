@@ -120,7 +120,7 @@ interface TrackGroup {
   createdAt: string;
   tags?: string[];
   merch?: Merch[];
-  isDraft?: boolean;
+  isHiddenTrackGroupForSongDrafts?: boolean;
   paymentToUserId?: number;
   fundraiserId?: number;
   fundraiser?: {

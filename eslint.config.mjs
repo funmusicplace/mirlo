@@ -13,6 +13,8 @@ export default [
       "**/coverage/**",
       "**/*.d.ts",
       "client/dist/**",
+      "client/storybook-static/**",
+      "client/.storybook/public/mockServiceWorker.js",
       "prisma/generated/**",
       "prisma/migrations/**",
     ],

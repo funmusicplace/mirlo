@@ -7,6 +7,7 @@ import {
 } from "@mirlo/prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
+import { uniq } from "lodash";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
@@ -559,7 +560,6 @@ export const handleSetupIntentSucceeded = async (
       amount,
       currency,
       stripeAccountId,
-      oldTierId,
       oldStripeSubscriptionKey,
     } = metadata;
 
@@ -598,7 +598,6 @@ export const handleSetupIntentSucceeded = async (
       currency,
       userId: Number(actualUserId),
       userEmail,
-      oldTierId: oldTierId ? Number(oldTierId) : undefined,
       oldStripeSubscriptionKey,
       shippingAddress,
     });
@@ -727,7 +726,6 @@ export const finalizeSubscriptionSetup = async ({
   currency,
   userId,
   userEmail,
-  oldTierId,
   oldStripeSubscriptionKey,
   shippingAddress = null,
 }: {
@@ -738,7 +736,6 @@ export const finalizeSubscriptionSetup = async ({
   currency: string;
   userId: number;
   userEmail?: string;
-  oldTierId?: number;
   oldStripeSubscriptionKey?: string;
   shippingAddress?: { name?: string; address: Record<string, unknown> } | null;
 }) => {
@@ -755,25 +752,16 @@ export const finalizeSubscriptionSetup = async ({
     return;
   }
 
-  if (!oldTierId) {
-    const existingSubscription = await prisma.profileUserSubscription.findFirst(
-      {
-        where: {
-          userId,
-          deletedAt: null,
-          profileSubscriptionTier: { profileId: tier.profileId },
-        },
-        orderBy: { createdAt: "desc" },
-      }
-    );
-    if (existingSubscription) {
-      oldTierId = existingSubscription.profileSubscriptionTierId;
-      oldStripeSubscriptionKey =
-        oldStripeSubscriptionKey ??
-        existingSubscription.stripeSubscriptionKey ??
-        undefined;
-    }
-  }
+  const existingPaidSubscriptions =
+    await prisma.profileUserSubscription.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        stripeSubscriptionKey: { not: null },
+        profileSubscriptionTier: { profileId: tier.profileId },
+      },
+      select: { stripeSubscriptionKey: true },
+    });
 
   const platformPercent = await calculatePlatformPercent(
     currency || "usd",
@@ -825,28 +813,39 @@ export const finalizeSubscriptionSetup = async ({
     shippingAddress,
   });
 
-  // Cancel the specific old subscription.
-  if (
-    oldStripeSubscriptionKey &&
-    oldStripeSubscriptionKey !== subscription.id
-  ) {
+  const oldStripeSubscriptionKeys = uniq(
+    [
+      oldStripeSubscriptionKey,
+      ...existingPaidSubscriptions.map((sub) => sub.stripeSubscriptionKey),
+    ].filter((key): key is string => !!key && key !== subscription.id)
+  );
+
+  for (const oldKey of oldStripeSubscriptionKeys) {
     try {
-      await stripe.subscriptions.cancel(oldStripeSubscriptionKey, {
+      await stripe.subscriptions.cancel(oldKey, {
         stripeAccount: stripeAccountId,
       });
     } catch (e) {
       logger.error(
-        `finalizeSubscriptionSetup: failed to cancel old subscription ${oldStripeSubscriptionKey}`,
+        `finalizeSubscriptionSetup: failed to cancel old subscription ${oldKey}`,
         e
       );
     }
   }
 
-  if (oldTierId && oldTierId !== tier.id) {
-    await prisma.profileUserSubscription.deleteMany({
-      where: { userId, profileSubscriptionTierId: oldTierId },
-    });
-  }
+  // The new tier's row is now the user's only subscription to this artist.
+  const oldTierSubscriptionsWhere = {
+    userId,
+    profileSubscriptionTierId: { not: tier.id },
+    profileSubscriptionTier: { profileId: tier.profileId },
+  };
+  await prisma.profileUserSubscription.updateMany({
+    where: oldTierSubscriptionsWhere,
+    data: { deleteReason: "TIER_SWITCHED" },
+  });
+  await prisma.profileUserSubscription.deleteMany({
+    where: oldTierSubscriptionsWhere,
+  });
 
   logger.info(
     `finalizeSubscriptionSetup: created subscription ${subscription.id} for user ${userId}, tier ${tier.id}`
