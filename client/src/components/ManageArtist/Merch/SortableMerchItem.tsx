@@ -33,10 +33,10 @@ const SortableMerchItem: React.FC<{ artist: Artist; item: Merch }> = ({
   };
 
   return (
-    <li ref={setNodeRef} style={style} {...attributes}>
-      <div className="flex items-center [&>span]:ml-4">
+    <li ref={setNodeRef} style={style} className="gap-4" {...attributes}>
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         <ArtistButton
-          className="mr-2 cursor-grab touch-none"
+          className="cursor-grab touch-none"
           {...listeners}
           ref={setActivatorNodeRef}
           startIcon={<AiOutlineDrag />}
@@ -50,16 +50,23 @@ const SortableMerchItem: React.FC<{ artist: Artist; item: Merch }> = ({
           square
           objectFit="contain"
         />
-        <span className="max-md:text-sm">{item.title}</span>
-        {!item.isPublic && (
-          <Pill variant="warning">
-            <ImWarning />
-            {t("notPublic")}
-          </Pill>
-        )}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
+          <span className="break-words max-md:text-sm">{item.title}</span>
+          {!item.isPublic && (
+            <Pill variant="warning" className="max-w-full">
+              <ImWarning />
+              {t("notPublic")}
+            </Pill>
+          )}
+          {item.catalogNumber && (
+            <span className="w-full text-sm md:hidden">
+              {item.catalogNumber}
+            </span>
+          )}
+        </div>
       </div>
-      <div className="max-md:text-sm">{item.catalogNumber}</div>
-      <div className="flex gap-2">
+      <div className="w-32 shrink-0 max-md:hidden">{item.catalogNumber}</div>
+      <div className="flex shrink-0 gap-2">
         <ArtistButtonLink
           to={getMerchUrl(artist, item)}
           startIcon={<FaEye />}
