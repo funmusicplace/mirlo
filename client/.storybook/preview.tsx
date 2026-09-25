@@ -1,16 +1,28 @@
+import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react";
+import { initialize, mswLoader } from "msw-storybook-addon";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   withRouter,
   reactRouterParameters,
 } from "storybook-addon-remix-react-router";
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { withThemeByDataAttribute } from "@storybook/addon-themes";
 
-import { GlobalStateProvider } from "../src/state/GlobalState";
 import { QueryClientWrapper } from "../src/queries/QueryClientWrapper";
+import { AuthContextProvider } from "../src/state/AuthContext";
+import { GlobalStateProvider } from "../src/state/GlobalState";
+import { SnackBarContextProvider } from "../src/state/SnackbarContext";
+import { UploadContextProvider } from "../src/state/UploadContext";
+
+import "../src/i18n";
 import "../src/styles/index.css";
 import "./global.css";
+import { defaultHandlers } from "./handlers";
+
+// Requests with no matching handler fall through to the network, which in
+// Storybook usually means a failed request to a local API that isn't running.
+// Warn so a missing mock is easy to spot in the console.
+initialize({ onUnhandledRequest: "warn" });
 
 function RouterErrorHandler() {
   const navigate = useNavigate();
@@ -24,17 +36,25 @@ function RouterErrorHandler() {
   return null;
 }
 
+// Mirrors the provider stack in src/index.tsx
 function withGlobalContext(Outlet: any) {
   return (
-    <GlobalStateProvider>
-      <QueryClientWrapper devTools={false}>
-        <Outlet />
-      </QueryClientWrapper>
-    </GlobalStateProvider>
+    <QueryClientWrapper devTools={false}>
+      <AuthContextProvider>
+        <GlobalStateProvider>
+          <SnackBarContextProvider>
+            <UploadContextProvider>
+              <Outlet />
+            </UploadContextProvider>
+          </SnackBarContextProvider>
+        </GlobalStateProvider>
+      </AuthContextProvider>
+    </QueryClientWrapper>
   );
 }
 
 const preview: Preview = {
+  loaders: [mswLoader],
   decorators: [
     withRouter,
     withGlobalContext,
@@ -48,6 +68,7 @@ const preview: Preview = {
     }),
   ],
   parameters: {
+    msw: { handlers: defaultHandlers },
     reactRouter: reactRouterParameters({
       routing: {
         path: "/",

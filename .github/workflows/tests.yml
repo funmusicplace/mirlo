@@ -38,9 +38,54 @@ jobs:
       - name: Run tests
         run: yarn client:test
 
+  storybook:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+
+      - name: Copy env file
+        run: |
+          cp .env.example .env
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build Storybook
+        working-directory: client
+        run: yarn client:storybook:build --disable-telemetry -o storybook-static
+
+      - name: Install Playwright browser
+        working-directory: client
+        run: npx playwright install --with-deps chromium
+
+      - name: Test stories
+        working-directory: client
+        run: |
+          npx http-server storybook-static --port 6006 --silent &
+          npx wait-on tcp:127.0.0.1:6006
+          yarn client:storybook:test --url http://127.0.0.1:6006
+
+      - name: Upload Storybook
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: storybook
+          path: client/storybook-static
+          retention-days: 14
+
   api-unit:
-    # Successful runs take ~7-8m (build ~4m + tests ~3-4m). 10m left almost no
-    # headroom and was cancelling mid-suite under transient runner slowness.
     timeout-minutes: 30
     runs-on: ubuntu-latest
 
