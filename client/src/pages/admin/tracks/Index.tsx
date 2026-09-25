@@ -7,8 +7,9 @@ import TrackRowPlayControl from "components/common/TrackList/TrackRowPlayControl
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaEdit, FaEye } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import {
+  Link,
   Outlet,
   useNavigate,
   useParams,
@@ -100,7 +101,17 @@ export const Index: React.FC = () => {
                     canPlayTrack
                   />
                 </td>
-                <td>{track.title}</td>
+                <td>
+                  <Link
+                    to={getTrackUrl(
+                      track.trackGroup.artist,
+                      track.trackGroup,
+                      track
+                    )}
+                  >
+                    {track.title}
+                  </Link>
+                </td>
                 <td>{track.trackGroup.title}</td>
                 <td>{track.trackGroup.artist?.name}</td>
                 <td>{track.isPreview}</td>
@@ -114,18 +125,10 @@ export const Index: React.FC = () => {
                   }
                 >
                   <Button
+                    variant="transparent"
                     startIcon={<FaEdit />}
-                    size="compact"
+                    aria-label={t("editTrack", { title: track.title })}
                     onClick={() => onClickQueue(track.id)}
-                  />
-                  <ButtonLink
-                    startIcon={<FaEye />}
-                    size="compact"
-                    to={getTrackUrl(
-                      track.trackGroup.artist,
-                      track.trackGroup,
-                      track
-                    )}
                   />
                 </td>
               </tr>

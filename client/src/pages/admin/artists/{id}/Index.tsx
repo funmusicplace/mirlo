@@ -9,7 +9,7 @@ import {
 } from "queries/admin";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaArrowCircleLeft } from "react-icons/fa";
+import { FaArrowCircleLeft, FaTrash } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
@@ -93,7 +93,14 @@ const Index = () => {
               </tr>
             </tbody>
           </Table>
-          <Button onClick={onDeleteClick}>{t("deleteArtist")}</Button>
+          <Button
+            className="mt-8"
+            buttonRole="warning"
+            startIcon={<FaTrash />}
+            onClick={onDeleteClick}
+          >
+            {t("deleteArtist")}
+          </Button>
         </div>
       </div>
 

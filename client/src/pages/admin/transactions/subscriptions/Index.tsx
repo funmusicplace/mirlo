@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import useAdminFilters from "components/Admin/useAdminFilters";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
@@ -7,8 +8,6 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
-
-import useAdminFilters from "components/Admin/useAdminFilters";
 
 interface AdminSubscription extends ArtistUserSubscription {
   user: User;
@@ -97,7 +96,9 @@ export const Index: React.FC = () => {
           {Object.keys(total).map((currency) => (
             <tr key={currency}>
               <td>{currency}</td>
-              <Money currency={currency} amount={total[currency] / 100} />
+              <td>
+                <Money currency={currency} amount={total[currency] / 100} />
+              </td>
             </tr>
           ))}
         </tbody>

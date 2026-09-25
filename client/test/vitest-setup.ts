@@ -138,6 +138,18 @@ class ResizeObserverStub {
 }
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
+// jsdom doesn't implement IntersectionObserver either, which in-page
+// navigations use to track the visible section.
+class IntersectionObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+}
+vi.stubGlobal("IntersectionObserver", IntersectionObserverStub);
+
 // jsdom doesn't implement matchMedia, which responsive hooks observe.
 vi.stubGlobal(
   "matchMedia",

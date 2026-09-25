@@ -21,6 +21,9 @@ export const Index: React.FC = () => {
             <NavLink to="users">{t("users")}</NavLink>
           </li>
           <li>
+            <NavLink to="invites">{t("invites")}</NavLink>
+          </li>
+          <li>
             <NavLink to="tracks">{t("tracks")}</NavLink>
           </li>
         </SectionNav>

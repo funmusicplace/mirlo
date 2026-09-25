@@ -585,6 +585,10 @@ const routes: RouteObject[] = [
             },
             children: [
               {
+                index: true,
+                Component: () => <Navigate to="fundraising" replace />,
+              },
+              {
                 path: "server-tasks",
                 handle: { title: "adminServerTasks" },
                 async lazy() {
@@ -613,6 +617,10 @@ const routes: RouteObject[] = [
               return { Component };
             },
             children: [
+              {
+                index: true,
+                Component: () => <Navigate to="purchases" replace />,
+              },
               {
                 path: "purchases",
                 handle: { title: "adminPurchases" },
@@ -670,12 +678,11 @@ const routes: RouteObject[] = [
             },
             children: [
               {
+                index: true,
+                Component: () => <Navigate to="track-groups" replace />,
+              },
+              {
                 path: "users",
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/admin/users/Layout");
-                  return { Component };
-                },
                 children: [
                   {
                     path: "",
@@ -683,15 +690,6 @@ const routes: RouteObject[] = [
                     async lazy() {
                       const { default: Component } =
                         await import("pages/admin/users/Index");
-                      return { Component };
-                    },
-                  },
-                  {
-                    path: "invites",
-                    handle: { title: "adminUserInvites" },
-                    async lazy() {
-                      const { default: Component } =
-                        await import("pages/admin/users/invites/Index");
                       return { Component };
                     },
                   },
@@ -705,6 +703,15 @@ const routes: RouteObject[] = [
                     },
                   },
                 ],
+              },
+              {
+                path: "invites",
+                handle: { title: "adminInvites" },
+                async lazy() {
+                  const { default: Component } =
+                    await import("pages/admin/invites/Index");
+                  return { Component };
+                },
               },
               {
                 path: "artists",

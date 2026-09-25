@@ -1,9 +1,9 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import Table from "components/common/Table";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -12,6 +12,7 @@ interface FormSettings {
 }
 
 const Index = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const snackbar = useSnackbar();
   const { register, handleSubmit } = useForm<FormSettings>();
 
@@ -21,35 +22,31 @@ const Index = () => {
         await api.post("admin/chargePledges", {
           trackGroupId: data.trackGroupId,
         });
+        snackbar(t("pledgeCollectionTriggered"), { type: "success" });
       } catch (e) {
         console.error(e);
         snackbar("Oops something went wrong", { type: "warning" });
       }
     },
-    [snackbar]
+    [snackbar, t]
   );
 
   return (
-    <div>
-      <h3>Settings</h3>
-      <form onSubmit={handleSubmit(triggerPledgeCollection)}>
-        <Table>
-          <tr>
-            <td>Trigger pledge collection for track group id: </td>
-            <td>
-              <InputEl
-                {...register("trackGroupId")}
-                className={css`
-                  text-align: right;
-                  background: white !important;
-                `}
-              />
-            </td>
-          </tr>
-        </Table>
-        <Button type="submit">Save</Button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit(triggerPledgeCollection)}>
+      <h3>{t("fundraising")}</h3>
+      <FormComponent>
+        <label htmlFor="input-pledge-track-group-id">
+          {t("pledgeCollectionTrackGroupId")}
+        </label>
+        <InputEl
+          id="input-pledge-track-group-id"
+          type="number"
+          className="max-w-xs"
+          {...register("trackGroupId")}
+        />
+      </FormComponent>
+      <Button type="submit">{t("triggerPledgeCollection")}</Button>
+    </form>
   );
 };
 

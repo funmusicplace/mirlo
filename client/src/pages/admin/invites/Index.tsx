@@ -1,20 +1,20 @@
-import { css } from "@emotion/css";
-import Button, { ButtonLink } from "components/common/Button";
+import AddUsersModal from "components/Admin/AddUsersModal";
+import Button from "components/common/Button";
 import Table from "components/common/Table";
-import TextArea from "components/common/TextArea";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
-import { FaCheck, FaEdit } from "react-icons/fa";
-import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { FaPlus } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
-import useAdminFilters from "components/Admin/useAdminFilters";
-import FormComponent from "components/common/FormComponent";
-import { SelectEl } from "components/common/Select";
 
 const pageSize = 100;
 
 export const Index: React.FC = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const [results, setResults] = React.useState<Invite[]>([]);
+  const [showSendInvites, setShowSendInvites] = React.useState(false);
 
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [searchParams] = useSearchParams();
@@ -40,11 +40,13 @@ export const Index: React.FC = () => {
   }, [page]);
 
   return (
-    <div
-      className={css`
-        flex-grow: 1;
-      `}
-    >
+    <WidthContainer variant="big" justify="center" className="p-4 grow">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <h3>{t("invites")}</h3>
+        <Button startIcon={<FaPlus />} onClick={() => setShowSendInvites(true)}>
+          {t("sendInvites")}
+        </Button>
+      </div>
       {results.length > 0 && (
         <Table>
           <thead>
@@ -72,7 +74,13 @@ export const Index: React.FC = () => {
         </Table>
       )}
       <PaginationComponent amount={results.length} />
-    </div>
+      <AddUsersModal
+        open={showSendInvites}
+        onClose={() => setShowSendInvites(false)}
+        onDone={callback}
+        lockedMode="invite"
+      />
+    </WidthContainer>
   );
 };
 

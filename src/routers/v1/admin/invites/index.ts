@@ -74,6 +74,8 @@ export default function () {
       });
       res.json({
         message: "success",
+        created: invites.length,
+        skipped: users.length - invites.length,
       });
     } catch (e) {
       next(e);

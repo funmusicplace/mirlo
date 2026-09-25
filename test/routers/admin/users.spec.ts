@@ -182,3 +182,55 @@ describe("admin/users/{id}", () => {
     });
   });
 });
+
+describe("admin/users", () => {
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  describe("POST", () => {
+    it("should return 401 for non-admin user", async () => {
+      const { accessToken } = await createUser({ email: "user@test.com" });
+
+      const response = await requestApp
+        .post("admin/users")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ users: [{ email: "new@test.com" }] });
+
+      assert.equal(response.statusCode, 401);
+    });
+
+    it("should report how many accounts were created and skipped", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createUser({ email: "already@test.com" });
+
+      const response = await requestApp
+        .post("admin/users")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          users: [
+            { email: "new@test.com" },
+            { email: "already@test.com" },
+            { email: "new@test.com" },
+          ],
+        });
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.created, 1);
+      assert.equal(response.body.skipped, 2);
+      const created = await prisma.user.findMany({
+        where: { email: { in: ["new@test.com", "already@test.com"] } },
+      });
+      assert.equal(created.length, 2);
+    });
+  });
+});
