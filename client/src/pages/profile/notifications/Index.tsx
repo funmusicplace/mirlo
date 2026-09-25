@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { WidthWrapper } from "components/common/WidthContainer";
+import NotificationColumn from "components/Profile/UserNotificationFeed/NotificationColumn";
 import {
   markAllNotificationsRead,
   queryNotifications,
@@ -8,8 +9,6 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
-
-import NotificationColumn from "components/Profile/UserNotificationFeed/NotificationColumn";
 
 const FOLLOW_TYPES: Notification["notificationType"][] = [
   "NEW_ARTIST_ALBUM",
@@ -24,6 +23,7 @@ const ACTIVITY_TYPES: Notification["notificationType"][] = [
   "USER_BOUGHT_YOUR_TRACK",
   "LABEL_ADDED_ARTIST",
   "FUNDRAISER_PLEDGE_CHARGED",
+  "ARTIST_CONTACT_MESSAGE",
 ];
 
 const hasNotifications = (data: { total?: number } | undefined): boolean =>
@@ -61,6 +61,14 @@ const Index = () => {
     ...queryNotifications(user?.id, {
       take: 1,
       notificationType: ["LABEL_ADDED_ARTIST"],
+    }),
+    enabled: !!user?.id,
+  });
+
+  const { data: messageCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["ARTIST_CONTACT_MESSAGE"],
     }),
     enabled: !!user?.id,
   });
@@ -107,6 +115,17 @@ const Index = () => {
             value: "labels",
             label: t("categoryLabels"),
             types: ["LABEL_ADDED_ARTIST"] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+    ...(hasNotifications(messageCheck)
+      ? [
+          {
+            value: "messages",
+            label: t("categoryMessages"),
+            types: [
+              "ARTIST_CONTACT_MESSAGE",
+            ] as Notification["notificationType"][],
           },
         ]
       : []),

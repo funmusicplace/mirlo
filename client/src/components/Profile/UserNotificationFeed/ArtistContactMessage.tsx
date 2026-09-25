@@ -1,6 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import Button from "components/common/Button";
+import Modal from "components/common/Modal";
 import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
 import { reportNotificationAsSpam } from "queries/notifications";
+import { QUERY_KEY_NOTIFICATIONS } from "queries/queryKeys";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -19,9 +22,8 @@ const ArtistContactMessage: React.FC<{
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
-  const [isReported, setIsReported] = React.useState(
-    !!notification.spamReportedAt
-  );
+  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = React.useState(false);
   const [isReporting, setIsReporting] = React.useState(false);
 
   if (!notification.relatedUser) {
@@ -30,16 +32,40 @@ const ArtistContactMessage: React.FC<{
 
   const senderName =
     notification.relatedUser?.name ?? notification.relatedUser?.email;
+  const firstLine = notification.content?.split("\n")[0] ?? "";
+  const sentAt = formatRelativeTime({ date: notification.createdAt, i18n });
+
+  const senderLine = (
+    <>
+      <Trans
+        t={t}
+        i18nKey="sentYouAMessage"
+        values={{ senderName }}
+        components={{ author: <strong /> }}
+      />
+      {notification.artist && (
+        <>
+          {": "}
+          <Link to={getArtistUrl(notification.artist)}>
+            {notification.artist.name}
+          </Link>
+        </>
+      )}
+    </>
+  );
 
   const handleReportSpam = async () => {
-    if (!user?.id || isReporting || isReported) {
+    if (!user?.id || isReporting) {
       return;
     }
     try {
       setIsReporting(true);
       await reportNotificationAsSpam(user.id, notification.id);
-      setIsReported(true);
+      setIsOpen(false);
       snackbar(t("reportSpamSuccess"), { type: "success" });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes(QUERY_KEY_NOTIFICATIONS),
+      });
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -66,11 +92,6 @@ const ArtistContactMessage: React.FC<{
       </div>
 
       <div className="flex-1 min-w-0">
-        {!compact && (
-          <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-pink) mb-1">
-            {t("newMessage")}
-          </div>
-        )}
         <div
           className={
             compact
@@ -78,41 +99,51 @@ const ArtistContactMessage: React.FC<{
               : "text-sm text-(--mi-text-color)"
           }
         >
-          <Trans
-            t={t}
-            i18nKey="sentYouAMessage"
-            values={{ senderName }}
-            components={{ author: <strong /> }}
-          />
-          {notification.artist && (
-            <>
-              {": "}
-              <Link to={getArtistUrl(notification.artist)}>
-                {notification.artist.name}
-              </Link>
-            </>
-          )}
+          {senderLine}
         </div>
-        {notification.content && !compact && (
-          <p className="text-sm text-(--mi-text-color) whitespace-pre-wrap mt-1">
-            {notification.content}
+        {firstLine && (
+          <p className="text-sm text-(--mi-text-color) truncate mt-1">
+            {firstLine}
           </p>
         )}
         <div className="text-xs text-(--mi-light-foreground-color) mt-0.5 flex items-center gap-2">
-          {formatRelativeTime({ date: notification.createdAt, i18n })}
-          {!compact && (
+          {sentAt}
+          <Button
+            type="button"
+            variant="link"
+            size="compact"
+            onClick={() => setIsOpen(true)}
+          >
+            {t("viewMessage")}
+          </Button>
+        </div>
+      </div>
+
+      <Modal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={t("messageFrom", { senderName })}
+        size="small"
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm">{senderLine}</p>
+          <p className="whitespace-pre-wrap">{notification.content}</p>
+          <div className="flex items-center justify-between gap-2">
+            <small className="text-(--mi-light-foreground-color)">
+              {sentAt}
+            </small>
             <Button
-              variant="link"
-              size="compact"
-              disabled={isReporting || isReported}
+              type="button"
+              variant="outlined"
+              disabled={isReporting}
               isLoading={isReporting}
               onClick={handleReportSpam}
             >
-              {isReported ? t("reportedSpam") : t("reportSpam")}
+              {t("reportSpam")}
             </Button>
-          )}
+          </div>
         </div>
-      </div>
+      </Modal>
     </div>
   );
 };
