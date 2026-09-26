@@ -6,3 +6,4 @@ data
 dist
 __generated__
 .yarn
+prisma/dist

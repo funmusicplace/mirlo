@@ -133,6 +133,12 @@ Some cron jobs exist:
 docker exec -it blackbird-api yarn ts-node src/jobs/every-minute-tasks.ts
 ```
 
+In production (`docker-compose.prod.yml`) the containers run compiled JS, so use:
+
+```sh
+docker exec -it blackbird-api node --conditions=mirlo-dist dist/jobs/every-minute-tasks.js
+```
+
 ## File Storage
 
 See [the file storage docs](/docs/FileStorage.md) for details.
