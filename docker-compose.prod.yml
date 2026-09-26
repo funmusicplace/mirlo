@@ -4,6 +4,25 @@ include:
 services:
   redis:
     ports: []
-  
+
   pgsql:
     ports: []
+
+  api:
+    build:
+      target: prod
+
+  background:
+    build:
+      target: prod
+    command:
+      [
+        "node",
+        "--conditions=mirlo-dist",
+        "--enable-source-maps",
+        "dist/jobs/queue-worker.js",
+        "run",
+      ]
+    # The prod image's HEALTHCHECK probes the API's /health; the worker has no HTTP server
+    healthcheck:
+      test: ["CMD", "true"]

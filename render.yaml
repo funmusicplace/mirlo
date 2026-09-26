@@ -3,15 +3,13 @@ services:
   - type: web
     name: api
     env: node
-    # env: docker
     repo: https://github.com/funmusicplace/mirlo.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     plan: standard # Supposedly this should be free but
-    # dockerCommand: ./start.sh
-    # dockerfilePath: ./prod.Dockerfile
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=3072 yarn client:build
-    startCommand: yarn ts-node src/index.ts
+
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=3072 yarn client:build && yarn api:build
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/index.js
     envVars:
       - key: SKIP_INSTALL_DEPS
         value: true
@@ -98,7 +96,7 @@ services:
     env: docker
     plan: standard # optional (defaults to starter)
     dockerfilePath: ./Dockerfile # optional
-    dockerCommand: yarn ts-node src/jobs/queue-worker.ts run
+    dockerCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/queue-worker.js run
     disk: # this disk gets used to process audio. They should get moved to the
       # minIO service and deleted after upload
       name: data
@@ -144,8 +142,8 @@ services:
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/every-minute-tasks.ts
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/every-minute-tasks.js
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=2048 yarn api:build
     schedule: "*/10 * * * *"
     envVars:
       - key: NODE_OPTIONS
@@ -191,8 +189,8 @@ services:
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/every-day-tasks.ts
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/every-day-tasks.js
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=2048 yarn api:build
     schedule: "0 22 * * *"
     envVars:
       - key: NODE_OPTIONS
@@ -222,8 +220,8 @@ services:
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/every-month-tasks.ts
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/every-month-tasks.js
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=2048 yarn api:build
     schedule: "0 0 1 * *"
     envVars:
       - key: NODE_OPTIONS
