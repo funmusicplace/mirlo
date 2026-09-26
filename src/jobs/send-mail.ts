@@ -240,6 +240,7 @@ export const sendMail = async <T>(job: {
     template: string;
     message: Mail.Options;
     locals: T;
+    fromName?: string;
   };
 }): Promise<{ fromEmail: string }> => {
   logger.info(`sendMail: sending: ${job.data.template}`);
@@ -250,7 +251,10 @@ export const sendMail = async <T>(job: {
 
     const email = new Email({
       message: {
-        from: `"Mirlo" <${fromEmail}>`,
+        from: {
+          name: job.data.fromName?.trim() || "Mirlo",
+          address: fromEmail,
+        },
         attachDataUrls: true,
       },
       juice: true,

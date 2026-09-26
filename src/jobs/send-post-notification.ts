@@ -235,6 +235,7 @@ export default async function sendPostNotification(job: {
           "send-mail",
           {
             template: "announce-post-published",
+            fromName: post.profile?.name,
             message: {
               to: notification.user.email,
             },
