@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import { SelectEl } from "components/common/Select";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
@@ -5,16 +6,20 @@ import {
   AdminContentFlag,
   useUpdateAdminArtistMutation,
   useUpdateAdminContentFlagMutation,
+  useUpdateAdminUserMutation,
   useUpdateAdminTrackGroupMutation,
 } from "queries/admin";
+import { queryTrustLevelNames } from "queries/settings";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { getReleaseUrl } from "utils/artist";
+import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 import ContentFlagDetails from "./ContentFlagDetails";
 import DisableArtistModal from "./DisableArtistModal";
+import ResolveSpamFlagModal from "./ResolveSpamFlagModal";
 
 type ReleaseStatus = "visible" | "hiddenFromSearch" | "disabled";
 type ArtistStatus = "visible" | "disabled";
@@ -25,6 +30,8 @@ const RELEASE_STATUSES: ReleaseStatus[] = [
   "disabled",
 ];
 const ARTIST_STATUSES: ArtistStatus[] = ["visible", "disabled"];
+type UserStatus = "active" | "disabled";
+const USER_STATUSES: UserStatus[] = ["active", "disabled"];
 
 const getReleaseStatus = (trackGroup: {
   adminEnabled: boolean;
@@ -42,6 +49,10 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
   });
   const snackbar = useSnackbar();
   const [showDisableModal, setShowDisableModal] = React.useState(false);
+  const [showResolveModal, setShowResolveModal] = React.useState(false);
+  const { data: trustLevelNames = DEFAULT_TRUST_LEVEL_NAMES } = useQuery(
+    queryTrustLevelNames()
+  );
 
   const { mutateAsync: updateFlag, isPending: isUpdatingFlag } =
     useUpdateAdminContentFlagMutation();
@@ -49,10 +60,17 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
     useUpdateAdminTrackGroupMutation();
   const { mutateAsync: updateArtist, isPending: isUpdatingArtist } =
     useUpdateAdminArtistMutation();
+  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
+    useUpdateAdminUserMutation();
 
-  const isPending = isUpdatingFlag || isUpdatingTrackGroup || isUpdatingArtist;
+  const isPending =
+    isUpdatingFlag ||
+    isUpdatingTrackGroup ||
+    isUpdatingArtist ||
+    isUpdatingUser;
   const isResolved = flag.resolvedAt !== null;
   const { artist, trackGroup } = flag;
+  const account = flag.reportedUser ?? artist?.user ?? null;
 
   const run = React.useCallback(
     async (action: () => Promise<unknown>) => {
@@ -85,6 +103,45 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
       );
     },
     [run, trackGroup, updateTrackGroup]
+  );
+
+  const isSpamFlag = flag.spamStrikeNumber !== null && !!flag.reportedUser;
+
+  const onToggleResolved = React.useCallback(() => {
+    if (!isResolved && isSpamFlag) {
+      setShowResolveModal(true);
+      return;
+    }
+    run(() => updateFlag({ flagId: flag.id, resolved: !isResolved }));
+  }, [flag.id, isResolved, isSpamFlag, run, updateFlag]);
+
+  const onConfirmResolve = React.useCallback(
+    async (resetSpamStrikes: boolean) => {
+      const reportedUser = flag.reportedUser;
+      await run(async () => {
+        await updateFlag({ flagId: flag.id, resolved: true });
+        if (resetSpamStrikes && reportedUser) {
+          await updateUser({ userId: reportedUser.id, resetSpamStrikes: true });
+        }
+      });
+      setShowResolveModal(false);
+    },
+    [flag.id, flag.reportedUser, run, updateFlag, updateUser]
+  );
+
+  const onChangeUserStatus = React.useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      if (!account) {
+        return;
+      }
+      run(() =>
+        updateUser({
+          userId: account.id,
+          disabled: e.target.value === "disabled",
+        })
+      );
+    },
+    [account, run, updateUser]
   );
 
   const onChangeArtistStatus = React.useCallback(
@@ -126,11 +183,19 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
                 <Link to={`/admin/content/users/${flag.reportedUser.id}`}>
                   {flag.reportedUser.name ?? flag.reportedUser.email}
                 </Link>
-                <small>
-                  {t("reportedAccountTrustLevel", {
-                    trustLevel: flag.reportedUser.trustLevel ?? 0,
-                  })}
-                </small>
+                {flag.spamStrikeNumber !== null && (
+                  <small>
+                    {t("spamStrikeNumber", { number: flag.spamStrikeNumber })}
+                  </small>
+                )}
+                {flag.trustLevelChange && (
+                  <small>
+                    {t("trustLevelDropped", {
+                      from: trustLevelNames[flag.trustLevelChange.fromLevel],
+                      to: trustLevelNames[flag.trustLevelChange.toLevel],
+                    })}
+                  </small>
+                )}
               </div>
             )}
           </div>
@@ -187,14 +252,47 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
             </>
           )}
         </td>
+        <td>
+          {account && (
+            <div className="flex flex-col gap-1">
+              <span aria-hidden className="invisible text-xs">
+                {t("manageUser")}
+              </span>
+              <label
+                htmlFor={`input-user-status-${flag.id}`}
+                className="sr-only"
+              >
+                {t("columnUser")}
+              </label>
+              <SelectEl
+                id={`input-user-status-${flag.id}`}
+                className="w-full"
+                variant="compact"
+                value={account.disabledAt ? "disabled" : "active"}
+                onChange={onChangeUserStatus}
+                disabled={isPending}
+              >
+                {USER_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {t(`status.${status}`)}
+                  </option>
+                ))}
+              </SelectEl>
+              <Link
+                to={`/admin/content/users/${account.id}`}
+                className="text-xs"
+              >
+                {t("manageUser")}
+              </Link>
+            </div>
+          )}
+        </td>
         <td className="text-right">
           <Button
             type="button"
             size="compact"
             disabled={isPending}
-            onClick={() =>
-              run(() => updateFlag({ flagId: flag.id, resolved: !isResolved }))
-            }
+            onClick={onToggleResolved}
           >
             {isResolved ? t("unresolveFlag") : t("resolveFlag")}
           </Button>
@@ -207,6 +305,15 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
           )}
         </td>
       </tr>
+      {flag.reportedUser && (
+        <ResolveSpamFlagModal
+          open={showResolveModal}
+          accountName={flag.reportedUser.name ?? flag.reportedUser.email}
+          isPending={isPending}
+          onClose={() => setShowResolveModal(false)}
+          onConfirm={onConfirmResolve}
+        />
+      )}
       {artist && (
         <DisableArtistModal
           artistId={artist.id}

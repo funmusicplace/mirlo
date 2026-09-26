@@ -386,6 +386,7 @@ interface UserFromAdmin {
   featureFlags: string[];
   trustLevel: number;
   trustLevelChanges: UserTrustLevelChange[];
+  spamStrikes: number;
   canCreateArtists: boolean;
   accountingEmail?: string;
   disabledAt?: string | null;
@@ -395,7 +396,7 @@ interface UserTrustLevelChange {
   id: number;
   fromLevel: number;
   toLevel: number;
-  reason: "ADMIN" | "PAYMENT_ACCOUNT_VERIFIED";
+  reason: "ADMIN" | "PAYMENT_ACCOUNT_VERIFIED" | "SPAM_REPORTED";
   createdAt: string;
   changedBy?: { email: string } | null;
 }

@@ -1558,11 +1558,10 @@
     "newPost": "New Post",
     "newFollower": "New Follower",
     "newSubscriber": "New Subscriber",
-    "newMessage": "New Message",
+    "messageFrom": "Message from {{senderName}}",
     "sentYouAMessage": "<author>{{senderName}}</author> sent you a message",
     "reportSpam": "Report as spam",
-    "reportedSpam": "Reported as spam",
-    "reportSpamSuccess": "Thanks, we've noted this account.",
+    "reportSpamSuccess": "Message reported as spam.",
     "purchaseTag": "Purchase",
     "labelTag": "Label",
     "startedFollowingYou": "<author>{{userName}}</author> started following you",
@@ -1582,7 +1581,9 @@
     "categoryFollowers": "Followers",
     "categoryPurchases": "Purchases",
     "categoryPledges": "Pledges",
-    "categoryLabels": "Labels"
+    "categoryLabels": "Labels",
+    "categoryMessages": "Messages",
+    "viewMessage": "View message"
   },
   "kickstarter": {
     "donateNow": "Donate now"
@@ -1799,15 +1800,24 @@
     "status": {
       "visible": "Visible",
       "hiddenFromSearch": "Hidden from search",
-      "disabled": "Disabled"
+      "disabled": "Disabled",
+      "active": "Active"
     },
     "resolveFlag": "Mark as resolved",
     "unresolveFlag": "Reopen",
     "resolvedBy": "Resolved by {{name}}",
     "updateSuccess": "Updated",
     "updateError": "Something went wrong while updating",
+    "readFullMessage": "Read full message",
+    "trustLevelDropped": "Trust level dropped from {{from}} to {{to}}",
+    "spamStrikeNumber": "Spam strike #{{number}}",
+    "columnUser": "User status",
     "reportedAccount": "Reported account",
-    "reportedAccountTrustLevel": "Trust level: {{trustLevel}}"
+    "manageUser": "Manage user",
+    "resolveSpamFlagTitle": "Resolve this report",
+    "resolveAndResetStrikes": "Also reset the spam strikes of {{name}}",
+    "resolveAndResetStrikesHint": "Use this if you consider the spam strikes illegitimate. Existing reports stay in the feed but the strikes count goes back to zero, so the next penalty starts over.",
+    "cancel": "Cancel"
   },
   "trackDetails": {
     "track": "Track:",
