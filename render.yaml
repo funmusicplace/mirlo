@@ -58,24 +58,6 @@ services:
           name: minio
           property: host
 
-  # A private minIO instance
-  - type: web
-    name: minio
-    env: docker
-    autoDeploy: false
-    plan: standard
-    dockerfilePath: "./minio/Dockerfile"
-    envVars:
-      - key: MINIO_ROOT_PASSWORD
-        generateValue: true # will generate a base64-encoded 256-bit secret
-      - fromGroup: blackbrd
-      - key: PORT
-        value: 9000
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 600 # optional
-
   # Umami analytics (https://umami.is)
   # Runs against a separate `umami` database inside the existing blackbrd
   # Postgres instance. Umami is itself a Prisma app, so it must NOT share
