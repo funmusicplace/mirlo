@@ -70,6 +70,17 @@ const Index = () => {
     }
   }, [snackbar, user]);
 
+  const onResetSpamStrikesClick = React.useCallback(async () => {
+    if (
+      window.confirm(
+        "Reset the spam strikes of this account? Existing reports stay in the flagged content feed but no longer count towards the next penalty."
+      )
+    ) {
+      await api.put(`admin/users/${id}`, { resetSpamStrikes: true });
+      callback();
+    }
+  }, [callback, id]);
+
   const onLoginAsUserClick = React.useCallback(async () => {
     if (
       window.confirm(
@@ -227,6 +238,22 @@ const Index = () => {
                       logging in, without deleting or anonymising their data. It
                       can be re-enabled at any time.
                     </small>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Spam strikes</td>
+                <td>
+                  <div className="flex items-center gap-2">
+                    <span>{user.spamStrikes}</span>
+                    <Button
+                      variant="outlined"
+                      size="compact"
+                      disabled={user.spamStrikes === 0}
+                      onClick={onResetSpamStrikesClick}
+                    >
+                      Reset spam strikes
+                    </Button>
                   </div>
                 </td>
               </tr>

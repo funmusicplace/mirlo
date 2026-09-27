@@ -75,6 +75,7 @@ model User {
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
   canReceivePayments                  Boolean                          @default(false)
+  spamStrikes                         Int                              @default(0)
   urlSlug                             String?
   receiveMailingList                  Boolean                          @default(false)
   promoCodes                          String[]
@@ -131,6 +132,7 @@ model User {
 enum TrustLevelChangeReason {
   ADMIN
   PAYMENT_ACCOUNT_VERIFIED
+  SPAM_REPORTED
 }
 
 model UserTrustLevelChange {
@@ -142,6 +144,8 @@ model UserTrustLevelChange {
   reason          TrustLevelChangeReason
   changedByUserId Int?
   changedBy       User?                  @relation("trustLevelChangeActor", fields: [changedByUserId], references: [id], onDelete: SetNull)
+  contentFlagId   Int?                   @unique
+  contentFlag     ContentFlag?           @relation(fields: [contentFlagId], references: [id], onDelete: SetNull)
   createdAt       DateTime               @default(now())
 
   @@index([userId])
@@ -830,8 +834,8 @@ model TrackGroup {
 }
 
 model ContentFlag {
-  id               Int               @id @default(autoincrement())
-  createdAt        DateTime          @default(now())
+  id               Int                   @id @default(autoincrement())
+  createdAt        DateTime              @default(now())
   source           ContentFlagSource
   reason           String?
   description      String?
@@ -841,14 +845,18 @@ model ContentFlag {
   externalId       String?
   score            Float?
   profileId        Int?
-  profile          Profile?          @relation(fields: [profileId], references: [id])
+  profile          Profile?              @relation(fields: [profileId], references: [id])
   trackGroupId     Int?
-  trackGroup       TrackGroup?       @relation(fields: [trackGroupId], references: [id])
+  trackGroup       TrackGroup?           @relation(fields: [trackGroupId], references: [id])
   resolvedAt       DateTime?
   resolvedByUserId Int?
-  resolvedByUser   User?             @relation("resolvedContentFlags", fields: [resolvedByUserId], references: [id])
+  resolvedByUser   User?                 @relation("resolvedContentFlags", fields: [resolvedByUserId], references: [id])
   reportedUserId   Int?
-  reportedUser     User?             @relation("reportedContentFlags", fields: [reportedUserId], references: [id])
+  reportedUser     User?                 @relation("reportedContentFlags", fields: [reportedUserId], references: [id])
+  spamStrikeNumber Int?
+  trustLevelChange UserTrustLevelChange?
+
+  @@index([reportedUserId])
 }
 
 enum ContentFlagSource {

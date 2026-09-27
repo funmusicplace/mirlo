@@ -86,7 +86,9 @@ describe("trustLevel", () => {
         trustLevel: 2,
       });
 
-      const change = await setUserTrustLevel(user.id, 0, "ADMIN", admin.id);
+      const change = await setUserTrustLevel(user.id, 0, "ADMIN", {
+        changedByUserId: admin.id,
+      });
 
       const updated = await prisma.user.findUnique({
         where: { id: user.id },

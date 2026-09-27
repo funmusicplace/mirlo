@@ -6,6 +6,7 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "@mirlo/prisma";
 
+import { setUserTrustLevel } from "../../../src/utils/trustLevel";
 import {
   clearTables,
   createArtist,
@@ -87,6 +88,38 @@ describe("admin/contentFlags", () => {
       assert.equal(flag.resolvedAt, null);
       assert.equal(flag.profileId, undefined);
       assert.equal(flag.profile, undefined);
+    });
+
+    it("should expose the trust level change linked to a spam flag", async () => {
+      const { accessToken } = await setupAdminAndFlaggedRelease();
+      const { user: sender } = await createUser({
+        email: "sender@test.com",
+        trustLevel: 2,
+      });
+      const flag = await createContentFlag({
+        reason: "spamContactMessage",
+        description: "Buy followers now",
+        reporterEmail: "artist@test.com",
+        reportedUserId: sender.id,
+        spamStrikeNumber: 2,
+      });
+      await setUserTrustLevel(sender.id, 1, "SPAM_REPORTED", {
+        contentFlagId: flag.id,
+      });
+
+      const response = await requestApp
+        .get("admin/contentFlags")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const result = response.body.results.find(
+        (f: { id: number }) => f.id === flag.id
+      );
+      assert.equal(result.reportedUser.id, sender.id);
+      assert.equal(result.spamStrikeNumber, 2);
+      assert.equal(result.trustLevelChange.fromLevel, 2);
+      assert.equal(result.trustLevelChange.toLevel, 1);
     });
 
     it("should filter by resolved state", async () => {

@@ -4,6 +4,10 @@ import { Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
+import {
+  applySpamStrike,
+  SPAM_CONTACT_MESSAGE_REASON,
+} from "../../../../../../utils/spamStrikes";
 
 type Params = {
   userId: string;
@@ -53,31 +57,26 @@ export default function () {
     }
 
     if (!notification.spamReportedAt) {
-      const sender = await prisma.user.findUnique({
-        where: { id: notification.relatedUserId },
-        select: { trustLevel: true },
-      });
-      const nextTrustLevel = Math.min((sender?.trustLevel ?? 0) + 1, 3);
-
-      await prisma.$transaction([
-        prisma.notification.update({
-          where: { id: notificationId },
+      const senderId = notification.relatedUserId;
+      await prisma.$transaction(async (tx) => {
+        const claimed = await tx.notification.updateMany({
+          where: { id: notificationId, spamReportedAt: null },
           data: { spamReportedAt: new Date(), isRead: true },
-        }),
-        prisma.user.update({
-          where: { id: notification.relatedUserId },
-          data: { trustLevel: nextTrustLevel },
-        }),
-        prisma.contentFlag.create({
+        });
+        if (claimed.count === 0) {
+          return;
+        }
+        const flag = await tx.contentFlag.create({
           data: {
             source: "USER_REPORT",
-            reason: "spamContactMessage",
+            reason: SPAM_CONTACT_MESSAGE_REASON,
             description: notification.content,
             reporterEmail: loggedInUser.email,
-            reportedUserId: notification.relatedUserId,
+            reportedUserId: senderId,
           },
-        }),
-      ]);
+        });
+        await applySpamStrike(senderId, flag.id, tx);
+      });
     }
 
     const updated = await prisma.notification.findUnique({

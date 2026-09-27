@@ -4,6 +4,7 @@ import { queryNotifications } from "queries/notifications";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import usePagination from "utils/usePagination";
+
 import FilterGroup from "./FilterGroup";
 import NotificationFeedItem from "./NotificationFeedItem";
 
@@ -28,10 +29,9 @@ const NotificationColumn: React.FC<{
     pageParam: filterName,
   });
 
-  const activeTypes =
-    filter === "all"
-      ? baseTypes
-      : (filterOptions.find((o) => o.value === filter)?.types ?? baseTypes);
+  const selectedOption = filterOptions.find((o) => o.value === filter);
+  const activeFilter = selectedOption ? filter : "all";
+  const activeTypes = selectedOption?.types ?? baseTypes;
 
   const { data, isPending } = useQuery(
     queryNotifications(userId, {
@@ -52,7 +52,7 @@ const NotificationColumn: React.FC<{
 
   React.useEffect(() => {
     unreadIdsAtMount.current = null;
-  }, [filter]);
+  }, [activeFilter]);
 
   const separatorIndex = unreadIdsAtMount.current
     ? results.findIndex((n) => !unreadIdsAtMount.current!.has(n.id))
@@ -75,7 +75,7 @@ const NotificationColumn: React.FC<{
         legend={t("filterLegend", { column: title })}
         name={filterName}
         options={options}
-        value={filter}
+        value={activeFilter}
         onChange={(value) => {
           setFilter(value);
           resetPage();

@@ -53,8 +53,8 @@ const ContentFlagDetails: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
         <span
           className={
             isLongDescription
-              ? "whitespace-pre-wrap line-clamp-3"
-              : "whitespace-pre-wrap"
+              ? "whitespace-pre-wrap line-clamp-3 text-xs italic"
+              : "whitespace-pre-wrap text-xs italic"
           }
         >
           {flag.description}
@@ -67,7 +67,11 @@ const ContentFlagDetails: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
           variant="link"
           onClick={() => setIsReportOpen(true)}
         >
-          {t("readFullReport")}
+          {t(
+            flag.reason === "spamContactMessage"
+              ? "readFullMessage"
+              : "readFullReport"
+          )}
         </Button>
       )}
       {flag.reporterEmail && (

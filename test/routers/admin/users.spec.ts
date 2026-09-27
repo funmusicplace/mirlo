@@ -71,7 +71,9 @@ describe("admin/users/{id}", () => {
         isAdmin: true,
       });
       const { user } = await createUser({ email: "user@test.com" });
-      await setUserTrustLevel(user.id, 2, "ADMIN", admin.id);
+      await setUserTrustLevel(user.id, 2, "ADMIN", {
+        changedByUserId: admin.id,
+      });
 
       const response = await requestApp
         .get(`admin/users/${user.id}`)
@@ -131,6 +133,36 @@ describe("admin/users/{id}", () => {
       assert.equal(changes[0].toLevel, 3);
       assert.equal(changes[0].reason, "ADMIN");
       assert.equal(changes[0].changedByUserId, admin.id);
+    });
+
+    it("should reset the spam strikes and report the count", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      const { user } = await createUser({
+        email: "user@test.com",
+        spamStrikes: 3,
+      });
+
+      const before = await requestApp
+        .get(`admin/users/${user.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(before.body.result.spamStrikes, 3);
+
+      const response = await requestApp
+        .put(`admin/users/${user.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ resetSpamStrikes: true });
+      assert.equal(response.statusCode, 200);
+
+      const after = await requestApp
+        .get(`admin/users/${user.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(after.body.result.spamStrikes, 0);
     });
 
     it("should reject an unknown trust level", async () => {
