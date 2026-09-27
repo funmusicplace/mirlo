@@ -176,4 +176,29 @@ describe("users/{userId}/notifications/{notificationId}/reportSpam", () => {
     const { flags } = await senderState(sender.id);
     assert.equal(flags.length, 1);
   });
+
+  it("counts a single strike when the same message is reported twice at once", async () => {
+    const { artistUser, accessToken, sender, profile } =
+      await seedArtistAndSender(3);
+    const notification = await createNotification({
+      userId: artistUser.id,
+      notificationType: "ARTIST_CONTACT_MESSAGE",
+      relatedUserId: sender.id,
+      profileId: profile.id,
+    });
+    const report = () =>
+      requestApp
+        .post(
+          `users/${artistUser.id}/notifications/${notification.id}/reportSpam`
+        )
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+    const responses = await Promise.all([report(), report()]);
+
+    responses.forEach((response) => assert.equal(response.statusCode, 200));
+    const { user, flags } = await senderState(sender.id);
+    assert.equal(flags.length, 1);
+    assert.equal(user?.spamStrikes, 1);
+  });
 });

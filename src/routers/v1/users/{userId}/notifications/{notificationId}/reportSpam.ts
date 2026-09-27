@@ -59,10 +59,13 @@ export default function () {
     if (!notification.spamReportedAt) {
       const senderId = notification.relatedUserId;
       await prisma.$transaction(async (tx) => {
-        await tx.notification.update({
-          where: { id: notificationId },
+        const claimed = await tx.notification.updateMany({
+          where: { id: notificationId, spamReportedAt: null },
           data: { spamReportedAt: new Date(), isRead: true },
         });
+        if (claimed.count === 0) {
+          return;
+        }
         const flag = await tx.contentFlag.create({
           data: {
             source: "USER_REPORT",
