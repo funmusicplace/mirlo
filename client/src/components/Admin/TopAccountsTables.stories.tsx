@@ -18,10 +18,6 @@ const topAccountsHandler = (
     return HttpResponse.json({ result: respond(period) });
   });
 
-/**
- * The admin dashboard's top 50 sellers (artists) and purchasers (users) by
- * USD revenue, over the past month or year.
- */
 const meta = {
   title: "Admin/TopAccountsTables",
   component: TopAccountsTables,
@@ -57,6 +53,25 @@ export const SwitchToYear: Story = {
   },
 };
 
+export const ExpandTable: Story = {
+  parameters: {
+    msw: {
+      handlers: {
+        topAccounts: topAccountsHandler((period) =>
+          makeTopAccounts(period, 50)
+        ),
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Uploader 15");
+    await expect(canvas.queryByText("Uploader 16")).not.toBeInTheDocument();
+    await userEvent.click(canvas.getAllByText("Show all 50")[3]);
+    await canvas.findByText("Uploader 50");
+  },
+};
+
 export const Empty: Story = {
   parameters: {
     msw: {
@@ -70,6 +85,15 @@ export const Empty: Story = {
     await expect(
       await canvas.findAllByText("No sales in this period.")
     ).toHaveLength(2);
+    await expect(
+      canvas.getByText("No free downloads in this period.")
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByText("No uploads in this period.")
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByText("No album downloads in this period.")
+    ).toBeInTheDocument();
   },
 };
 
