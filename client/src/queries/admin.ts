@@ -79,10 +79,36 @@ export interface AdminTopPurchaser {
   transactionCount: number;
 }
 
+export interface AdminTopFreeDownloadArtist {
+  id: number;
+  name: string;
+  urlSlug: string;
+  downloadCount: number;
+}
+
+export interface AdminTopUploader {
+  id: number;
+  name: string;
+  urlSlug: string;
+  trackCount: number;
+  trackGroupCount: number;
+}
+
+export interface AdminTopDownloadedAlbum {
+  id: number;
+  title: string | null;
+  artistId: number;
+  artistName: string;
+  downloadCount: number;
+}
+
 export interface AdminTopAccounts {
   period: TopAccountsPeriod;
   sellers: AdminTopSeller[];
   purchasers: AdminTopPurchaser[];
+  freeDownloads: AdminTopFreeDownloadArtist[];
+  uploaders: AdminTopUploader[];
+  downloadedAlbums: AdminTopDownloadedAlbum[];
 }
 
 export const useAdminTopAccountsQuery = (period: TopAccountsPeriod) => {

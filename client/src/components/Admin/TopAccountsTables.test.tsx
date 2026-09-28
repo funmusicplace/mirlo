@@ -51,6 +51,25 @@ describe("TopAccountsTables", () => {
             transactionCount: 1,
           },
         ],
+        freeDownloads: [
+          { id: 4, name: "Free Artist", urlSlug: "free", downloadCount: 42 },
+        ],
+        uploaders: Array.from({ length: 20 }, (_, index) => ({
+          id: 100 + index,
+          name: `Uploader ${index + 1}`,
+          urlSlug: `uploader-${index + 1}`,
+          trackCount: 20 - index,
+          trackGroupCount: 1,
+        })),
+        downloadedAlbums: [
+          {
+            id: 9,
+            title: null,
+            artistId: 5,
+            artistName: "Album Artist",
+            downloadCount: 77,
+          },
+        ],
       },
     } as any);
   });
@@ -71,6 +90,48 @@ describe("TopAccountsTables", () => {
     );
     expect(screen.getByText("$50.00")).toBeInTheDocument();
     expect(screen.getByText("$12.50")).toBeInTheDocument();
+  });
+
+  test("shows free downloads and uploads", async () => {
+    renderTables();
+
+    await waitFor(() => screen.getByText("Free Artist"));
+
+    expect(screen.getByText("Free Artist").closest("a")).toHaveAttribute(
+      "href",
+      "/admin/content/artists/4"
+    );
+    expect(screen.getByText("42")).toBeInTheDocument();
+  });
+
+  test("links downloaded albums to their album and artist", async () => {
+    renderTables();
+
+    // Untitled albums get a fallback label.
+    await waitFor(() => screen.getByText("Untitled"));
+
+    expect(screen.getByText("Untitled").closest("a")).toHaveAttribute(
+      "href",
+      "/admin/content/track-groups/9"
+    );
+    expect(screen.getByText("Album Artist").closest("a")).toHaveAttribute(
+      "href",
+      "/admin/content/artists/5"
+    );
+    expect(screen.getByText("77")).toBeInTheDocument();
+  });
+
+  test("collapses long tables to 15 rows until expanded", async () => {
+    renderTables();
+
+    await waitFor(() => screen.getByText("Uploader 15"));
+    expect(screen.queryByText("Uploader 16")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByText("Show all 20"));
+    expect(screen.getByText("Uploader 20")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText("Show top 15 only"));
+    expect(screen.queryByText("Uploader 16")).not.toBeInTheDocument();
   });
 
   test("refetches for the past year when the period is switched", async () => {

@@ -41,6 +41,26 @@ export const makeTopAccounts = (
       usdCents: (count - index) * 1800 * scale,
       transactionCount: (count - index) * scale,
     })),
+    freeDownloads: Array.from({ length: count }, (_, index) => ({
+      id: 200 + index,
+      name: `Free Artist ${index + 1}`,
+      urlSlug: `free-artist-${index + 1}`,
+      downloadCount: (count - index) * 7 * scale,
+    })),
+    uploaders: Array.from({ length: count }, (_, index) => ({
+      id: 300 + index,
+      name: `Uploader ${index + 1}`,
+      urlSlug: `uploader-${index + 1}`,
+      trackCount: (count - index) * 2 * scale,
+      trackGroupCount: Math.ceil(((count - index) * scale) / 5),
+    })),
+    downloadedAlbums: Array.from({ length: count }, (_, index) => ({
+      id: 400 + index,
+      title: `Album ${index + 1}`,
+      artistId: 500 + index,
+      artistName: `Album Artist ${index + 1}`,
+      downloadCount: (count - index) * 11 * scale,
+    })),
   };
 };
 

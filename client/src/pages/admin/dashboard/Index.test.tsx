@@ -100,7 +100,14 @@ function makeStats(overrides: Record<string, unknown> = {}) {
 }
 
 const emptyTopAccounts = {
-  result: { period: "month", sellers: [], purchasers: [] },
+  result: {
+    period: "month",
+    sellers: [],
+    purchasers: [],
+    freeDownloads: [],
+    uploaders: [],
+    downloadedAlbums: [],
+  },
 };
 
 /** Serves the top-accounts tables so tests can focus on the stats payload. */

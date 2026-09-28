@@ -1773,7 +1773,21 @@
     "user": "User",
     "transactions": "Transactions",
     "usd": "USD",
-    "noSalesInPeriod": "No sales in this period."
+    "noSalesInPeriod": "No sales in this period.",
+    "topFreeDownloads": "Top 50 Artists by Free Downloads",
+    "topUploaders": "Top 50 Uploaders",
+    "freeDownloads": "Free downloads",
+    "releases": "Releases",
+    "tracks": "Tracks",
+    "noFreeDownloadsInPeriod": "No free downloads in this period.",
+    "noUploadsInPeriod": "No uploads in this period.",
+    "showAllRows": "Show all {{count}}",
+    "showTopRows": "Show top {{count}} only",
+    "topDownloadedAlbums": "Top 50 Downloaded Albums",
+    "album": "Album",
+    "downloads": "Downloads",
+    "untitledAlbum": "Untitled",
+    "noAlbumDownloadsInPeriod": "No album downloads in this period."
   },
   "flaggedContent": {
     "title": "Flagged content",
