@@ -38,23 +38,6 @@ services:
           type: redis
           name: redis
           property: port
-      - key: MINIO_ROOT_PASSWORD
-        fromService:
-          type: web
-          name: minio
-          envVarKey: MINIO_ROOT_PASSWORD
-      - key: MINIO_PORT
-        fromService:
-          type: web
-          name: minio
-          envVarKey: PORT
-      - key: MINIO_API_PORT
-        value: 9000
-      - key: MINIO_HOST
-        fromService:
-          type: web
-          name: minio
-          property: host
 
   # Umami analytics (https://umami.is)
   # Runs against a separate `umami` database inside the existing blackbrd
@@ -121,21 +104,6 @@ services:
           type: redis
           name: redis
           property: port
-      - key: MINIO_ROOT_PASSWORD
-        fromService:
-          type: web
-          name: minio
-          envVarKey: MINIO_ROOT_PASSWORD
-      - key: MINIO_PORT
-        fromService:
-          type: web
-          name: minio
-          envVarKey: PORT
-      - key: MINIO_HOST
-        fromService:
-          type: web
-          name: minio
-          property: host
 
   - type: cron
     name: every-minute-tasks
@@ -155,16 +123,6 @@ services:
       - fromGroup: blackbrd
       - key: STORAGE_BACKEND
         value: s3
-      - key: MINIO_ROOT_PASSWORD
-        fromService:
-          type: web
-          name: minio
-          envVarKey: MINIO_ROOT_PASSWORD
-      - key: MINIO_PORT
-        fromService:
-          type: web
-          name: minio
-          envVarKey: PORT
       - key: REDIS_HOST
         fromService:
           type: redis
@@ -175,13 +133,6 @@ services:
           type: redis
           name: redis
           property: port
-      - key: MINIO_API_PORT
-        value: 9000
-      - key: MINIO_HOST
-        fromService:
-          type: web
-          name: minio
-          property: host
     branch: main # optional (defaults to master)
 
   - type: cron
