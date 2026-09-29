@@ -93,6 +93,8 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals0 = data0.locals as AutomaticallyReceivedAlbumEmailType;
     assert.equal(locals0.trackGroup.id, tg.id);
+    assert.equal(locals0.trackGroup.urlSlug, tg.urlSlug);
+    assert.equal(locals0.trackGroup.artist.urlSlug, artist.urlSlug);
     assert.equal(locals0.artist.id, artist.id);
   });
 

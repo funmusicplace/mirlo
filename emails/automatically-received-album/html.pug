@@ -2,15 +2,13 @@ extends ../layout.pug
 
 block content
   p Yay!
-  p Because you support #{artist.name} with a regular contribution, you've received their newest release #{trackGroup.title}!
+  if trackGroup.title
+    p Because you support #{artist.name} with a regular contribution, you've received their newest release, #{trackGroup.title}!
+  else
+    p Because you support #{artist.name} with a regular contribution, you've received their newest release!
 
-  table
-    thead
-      tr
-        th Title
-    tbody
-      tr
-        td #{trackGroup.title}
+  p
+    a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`) #{trackGroup.title || "Listen to the release"}
 
   p The release is now available in your collection for unlimited listening and downloading.
   p Enjoy!
