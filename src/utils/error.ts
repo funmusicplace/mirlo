@@ -1,4 +1,5 @@
 import {
+  PrismaClientInitializationError,
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
@@ -36,6 +37,7 @@ export enum HttpCode {
   TOO_MANY_REQUESTS = 429,
   INTERNAL_SERVER_ERROR = 500,
   NOT_IMPLEMENTED = 501,
+  SERVICE_UNAVAILABLE = 503,
 }
 
 interface AppErrorArgs {
@@ -68,6 +70,39 @@ export class AppError extends Error {
   }
 }
 
+const DATABASE_UNAVAILABLE_CODES = new Set([
+  "P1001",
+  "P1002",
+  "P1008",
+  "P1017",
+  "P2024",
+]);
+
+const isDatabaseUnavailableError = (err: any) =>
+  err instanceof PrismaClientInitializationError ||
+  err?.name === "PrismaClientInitializationError" ||
+  ((err instanceof PrismaClientKnownRequestError ||
+    err?.name === "PrismaClientKnownRequestError") &&
+    DATABASE_UNAVAILABLE_CODES.has(err.code));
+
+const DATABASE_UNAVAILABLE_MESSAGE =
+  "Mirlo is temporarily unavailable, probably for maintenance. Please try again in a few minutes.";
+
+const databaseUnavailablePage = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="60" />
+    <title>Temporarily unavailable</title>
+  </head>
+  <body style="font-family: system-ui, sans-serif; max-width: 32rem; margin: 4rem auto; padding: 0 1rem; line-height: 1.5;">
+    <h1>We'll be right back</h1>
+    <p>${DATABASE_UNAVAILABLE_MESSAGE}</p>
+    <p>This page will reload automatically.</p>
+  </body>
+</html>`;
+
 const errorHandler = (
   err: any,
   req: Request,
@@ -96,6 +131,25 @@ const errorHandler = (
     return res.status(err.httpCode).json({
       error: err.message,
     });
+  }
+
+  if (isDatabaseUnavailableError(err)) {
+    log.error(`Database unavailable on ${req.method} ${req.path}`, {
+      name: err.name,
+      code: err.code ?? err.errorCode,
+      message: err.message,
+    });
+    res.setHeader("Retry-After", "60");
+    res.status(HttpCode.SERVICE_UNAVAILABLE);
+    const wantsHtml =
+      !req.path.startsWith("/v1") &&
+      !req.path.startsWith("/auth") &&
+      req.accepts(["json", "html"]) === "html";
+    if (wantsHtml) {
+      res.setHeader("Cache-Control", "no-store");
+      return res.type("html").send(databaseUnavailablePage);
+    }
+    return res.json({ error: DATABASE_UNAVAILABLE_MESSAGE });
   }
 
   // Stripe SDK errors (e.g. terminal reader failures, card declines). Surface
