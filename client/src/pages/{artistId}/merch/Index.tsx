@@ -4,14 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { NewMerchButton } from "components/ManageArtist/Merch/NewMerchButton";
+import SortableArtistMerchItem from "components/Merch/SortableArtistMerchItem";
 import { queryArtist } from "queries";
 import React from "react";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
+import { canUserEditArtist } from "utils/artist";
 import useSortableReorder from "utils/useSortableReorder";
-
-import SortableArtistMerchItem from "components/Merch/SortableArtistMerchItem";
 
 const Index: React.FC = () => {
   const { user } = useAuthContext();
@@ -29,7 +29,9 @@ const Index: React.FC = () => {
     await refetch();
   });
 
-  if (!artist || (artist.merch?.length === 0 && artist.userId !== user?.id)) {
+  const canEdit = canUserEditArtist(user, artist);
+
+  if (!artist || (artist.merch?.length === 0 && !canEdit)) {
     return null;
   }
 
@@ -37,7 +39,7 @@ const Index: React.FC = () => {
     <div className="mt-0 mb-8 max-md:mb-0 max-md:rounded-none">
       <SpaceBetweenDiv>
         <div />
-        {artist.userId === user?.id && <NewMerchButton artist={artist} />}
+        {canEdit && <NewMerchButton artist={artist} />}
       </SpaceBetweenDiv>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <TrackgroupGrid

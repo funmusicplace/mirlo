@@ -4,10 +4,10 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializeProfile } from "../../../../serializers/artist";
 import {
+  canUserEditProfile,
   checkIsUserSubscriber,
   findProfileIdForURLSlug,
   singleInclude,
-  whereForAllProfilesThisLabelCanEdit,
   whereForVisibleProfile,
 } from "../../../../utils/artist";
 
@@ -30,16 +30,7 @@ export default function () {
       const parsedId = await findProfileIdForURLSlug(id);
       let isUserSubscriber = false;
       if (parsedId) {
-        const canManage =
-          !!loggedInUser &&
-          (await prisma.profile.findFirst({
-            where: {
-              id: parsedId,
-              enabled: true,
-              ...whereForAllProfilesThisLabelCanEdit(loggedInUser.id),
-            },
-            select: { id: true },
-          })) !== null;
+        const canManage = await canUserEditProfile(parsedId, loggedInUser);
 
         const profile = await prisma.profile.findFirst({
           where: {
@@ -63,7 +54,7 @@ export default function () {
           result: serializeProfile(
             profile as any,
             loggedInUser?.id,
-            isUserSubscriber
+            isUserSubscriber || canManage
           ),
         });
       } else {

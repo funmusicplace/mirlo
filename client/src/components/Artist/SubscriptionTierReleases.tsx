@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
+import { canUserEditArtist } from "utils/artist";
 import useSortableReorder from "utils/useSortableReorder";
 
 import { ArtistButton } from "./ArtistButtons";
@@ -42,7 +43,7 @@ const SubscriptionTierReleases: React.FC<{
     [isTruncated, releases, maxItems]
   );
 
-  const isOwner = !!user && user.id === artist.userId;
+  const isOwner = canUserEditArtist(user, artist);
 
   const { items, sensors, onDragEnd } = useSortableReorder(
     visibleReleases,

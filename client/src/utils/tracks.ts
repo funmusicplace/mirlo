@@ -1,6 +1,8 @@
 import produce from "immer";
 import api from "services/api";
 
+import { canUserEditArtist } from "./artist";
+
 export const determineNewTrackOrder = produce(
   (oldTracks: Track[], droppedInId: number, draggingTrackId: number) => {
     const dragIdx = oldTracks.findIndex(
@@ -57,7 +59,10 @@ export const isTrackOwnedOrPreview = (
     return false;
   }
   const lookInTrackGroup = trackGroup ?? track.trackGroup;
-  const ownsTrack = lookInTrackGroup.artist?.userId === user.id;
+  const ownsTrack = canUserEditArtist(user, {
+    id: lookInTrackGroup.artistId ?? lookInTrackGroup.artist?.id,
+    userId: lookInTrackGroup.artist?.userId,
+  });
   const boughtTrack = !!lookInTrackGroup.userTrackGroupPurchases?.find(
     (utgp) => utgp.userId === user.id
   );

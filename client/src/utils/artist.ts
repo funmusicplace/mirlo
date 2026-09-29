@@ -1,3 +1,23 @@
+export const canUserEditArtist = (
+  user:
+    | Pick<LoggedInUser, "id" | "isAdmin" | "editableArtistIds">
+    | null
+    | undefined,
+  artist: { id?: number; userId?: number } | null | undefined,
+  { allowAdmin = true }: { allowAdmin?: boolean } = {}
+): boolean => {
+  if (!user || !artist) {
+    return false;
+  }
+  if (allowAdmin && user.isAdmin) {
+    return true;
+  }
+  return (
+    artist.userId === user.id ||
+    (artist.id !== undefined && !!user.editableArtistIds?.includes(artist.id))
+  );
+};
+
 export const getPaidTierCount = (artist: {
   subscriptionTiers: { isDefaultTier: boolean }[];
 }) => artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length;

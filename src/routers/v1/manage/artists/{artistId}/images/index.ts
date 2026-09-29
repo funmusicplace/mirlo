@@ -114,12 +114,10 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { artistId: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
-    const loggedInUser = req.user;
     try {
       const profile = await prisma.profile.findFirst({
         where: {
           id: Number(profileId),
-          userId: loggedInUser.id,
         },
       });
 

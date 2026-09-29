@@ -2,25 +2,18 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { useTransparentContainer } from "components/ArtistColorsProvider";
+import ArtistHeaderSection from "components/common/ArtistHeaderSection";
 import { ArtistBox } from "components/common/Box";
+import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
-import {
-  Link,
-  Navigate,
-  Outlet,
-  useLocation,
-  useParams,
-} from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
 
 import { bp, pageScaleCascade } from "../../../../constants";
-import ArtistHeaderSection from "components/common/ArtistHeaderSection";
-
-import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 
 const Container = styled.div<{ hasBackground: boolean }>`
   width: 100%;
@@ -102,10 +95,6 @@ const Layout: React.FC<{}> = () => {
 
   if (!artist) {
     return null;
-  }
-
-  if (user?.id !== artist?.userId) {
-    <Navigate to="/manage" />;
   }
 
   const isLinksPage = location.pathname.endsWith("/links");

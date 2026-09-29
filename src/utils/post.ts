@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import showdown from "showdown";
 
+import { whereForAllProfilesUserCanEdit } from "./artist";
 import { AppError } from "./error";
 
 const converter = new showdown.Converter({ headerLevelStart: 2 });
@@ -39,9 +40,7 @@ export const doesPostBelongToUser = async (
       const post = await prisma.post.findFirst({
         where: {
           id: Number(postId),
-          profile: {
-            userId: Number(loggedInUser.id),
-          },
+          profile: whereForAllProfilesUserCanEdit(Number(loggedInUser.id)),
           deletedAt: null,
         },
         select: {

@@ -26,7 +26,7 @@ import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { isTrackGroupPublished } from "utils/artist";
+import { canUserEditArtist, isTrackGroupPublished } from "utils/artist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
 import { between, bp } from "../../../../constants";
@@ -244,8 +244,7 @@ function Index() {
   }
 
   const isPublished = isTrackGroupPublished(trackGroup);
-  const userCanSeeUnpublished =
-    !!user && (user.id === artist.userId || user.isAdmin);
+  const userCanSeeUnpublished = canUserEditArtist(user, artist);
 
   const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;

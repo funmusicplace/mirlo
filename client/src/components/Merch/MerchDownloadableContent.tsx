@@ -1,13 +1,11 @@
 import { css } from "@emotion/css";
-
+import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 import { useTranslation } from "react-i18next";
-
-import { bp } from "../../constants";
-
 import { FaDownload } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
+import { canUserEditArtist } from "utils/artist";
 
-import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
+import { bp } from "../../constants";
 
 const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
   merch,
@@ -19,7 +17,7 @@ const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
 
   const { user } = useAuthContext();
 
-  const userIsOwner = user?.id === artist.userId || user?.isAdmin;
+  const userIsOwner = canUserEditArtist(user, artist);
 
   const userHasPurchasedMerch = user?.merchPurchase?.some(
     (m) => m.merchId === merch.id

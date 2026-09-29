@@ -7,7 +7,11 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistManageTiersUrl, getArtistTierUrl } from "utils/artist";
+import {
+  canUserEditArtist,
+  getArtistManageTiersUrl,
+  getArtistTierUrl,
+} from "utils/artist";
 
 import Money from "../common/Money";
 
@@ -71,7 +75,7 @@ const ArtistSupportBox: React.FC<{
       )}
       <div>
         <div className="absolute top-2 right-2 flex items-center justify-center gap-2 z-21 ">
-          {user && user.id === artist.userId && (
+          {canUserEditArtist(user, artist) && (
             <ArtistButtonLink
               to={
                 getArtistManageTiersUrl(subscriptionTier.artistId) +

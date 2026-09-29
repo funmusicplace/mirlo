@@ -11,6 +11,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializePost } from "../../../../serializers/post";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import {
+  canUserEditProfile,
   findProfileIdForURLSlug,
   resolveProfileImageUrl,
   whereForVisibleProfile,
@@ -53,7 +54,7 @@ export const getPostsVisibleToUser = async (
     prisma.post.count({ where }),
   ]);
 
-  const isProfileOwner = !!(user && user.id === profile.userId);
+  const isProfileOwner = await canUserEditProfile(profile.id, user);
   const subscriptions = await getUserSubscriptionsForProfile(user, profile.id);
 
   const processedPosts = posts.map((post) =>

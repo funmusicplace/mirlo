@@ -71,20 +71,19 @@ export interface LocalProfile extends Profile {
 export const serializeProfile = <T extends LocalProfile>(
   profile: T,
   userId?: number,
-  isUserSubscriber?: boolean
+  canSeeSupporterContent?: boolean
 ): Serialized<T> => {
   return {
     ...omitApPrivateKey(profile),
     artistLabels: profile.artistLabels?.map((al) =>
-      serializeArtistLabel(al as LocalArtistLabel, userId, isUserSubscriber)
+      serializeArtistLabel(
+        al as LocalArtistLabel,
+        userId,
+        canSeeSupporterContent
+      )
     ),
     posts: profile?.posts?.map((p: Post) =>
-      serializePost(
-        p,
-        undefined,
-        undefined,
-        isUserSubscriber || profile.userId === userId
-      )
+      serializePost(p, undefined, undefined, canSeeSupporterContent)
     ),
     merch: profile?.merch?.map((m) =>
       serializeMerch(m, {

@@ -13,13 +13,33 @@ location, to find what's happening in a particular city or country.
 
 ### No account required for some things
 
-You can listen to previews and browse artist pages without an account. You only need to create one when you're ready to purchase, subscribe, or download.
+You can listen to music and browse artist pages without an account.
+You can also grab free downloads and sign up for artists' newsletters
+with just your email address. An account lets you keep everything
+you've bought in one collection, follow artists, and message them.
+
+### Listen to whole songs
+
+There are no 30-second snippets. You hear the full track. Some
+artists limit how many times you can play a song before they ask
+you to buy it, and others leave listening unlimited.
 
 ## Buying and owning music
 
+### See what an artist offers
+
+Every artist decides what they want to offer on Mirlo. Some sell
+downloads and merch, and others just share their music to stream.
+
+On a release's page, a **Buy** or **Download** button means you can
+get a copy of it. If there's no button, that release is for
+listening only. CDs, vinyl, T-shirts and other physical items are
+in the artist's **Merch** tab, and merch that goes with a release
+also shows up on that release's page.
+
 ### Purchase and download music
 
-Buy music directly from artists and download it in the format you prefer. Your purchases are yours to keep — no subscriptions required to access music you've bought.
+Buy music directly from artists and download it in the format you prefer: lossless FLAC or WAV, or smaller MP3 or OPUS files. Your purchases are yours to keep — no subscriptions required to access music you've bought.
 
 You can buy a whole release, a single track, or — when an artist
 offers it — their entire catalog in one go. Some releases come with
@@ -60,11 +80,22 @@ Want to support an artist on an ongoing basis? Subscribe to an artist's support 
 Don't want an ongoing commitment? You can tip an artist a one-off
 amount instead — as much or as little as you'd like.
 
-### Say something
+## Getting in touch with artists
 
-When you buy something, you can leave the artist a message with it.
-And if an artist has opened up their inbox, you can write to them
-directly from their page.
+### Find them elsewhere
+
+Artist pages often link to the artist's own website, their social
+media, or an email address, so you can find them wherever they are.
+
+### Send a message
+
+If an artist has turned on direct messages, you can write to them
+from their page while logged in. They'll get it by email, and when
+they reply it comes straight to your inbox. That means the artist
+will see your email address.
+
+When you buy something, you can also leave the artist a message
+with it.
 
 ## Staying in touch
 
@@ -74,8 +105,10 @@ Follow along with what your favorite artists are up to. Many artists publish blo
 
 ### Leave whenever you like
 
-Following an artist isn't a commitment. Every email an artist sends
-you carries an unsubscribe link, and you can stop following from
+Following an artist isn't a commitment. Artists agree to use your
+email only to send you their news and updates, and never to share
+it with anyone. Every email an artist sends you carries an
+unsubscribe link, and you can stop following from
 their page at any time — including if you followed by email without
 ever making a Mirlo account.
 

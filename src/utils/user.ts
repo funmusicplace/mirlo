@@ -3,8 +3,13 @@ import { Prisma, User } from "@mirlo/prisma/client";
 import { v4 as uuid } from "uuid";
 
 import logger from "../logger";
+import { serializeUser } from "../serializers/user";
 
-import { deleteArtist, deleteStripeSubscriptions } from "./artist";
+import {
+  deleteArtist,
+  deleteStripeSubscriptions,
+  getEditableProfileIds,
+} from "./artist";
 import countries from "./country-codes-currencies";
 
 export const userSelect = {
@@ -101,6 +106,11 @@ export const userSelect = {
 export type UserSelectPayload = Prisma.UserGetPayload<{
   select: typeof userSelect;
 }>;
+
+export const serializeLoggedInUser = async (user: UserSelectPayload) => ({
+  ...serializeUser(user),
+  editableArtistIds: await getEditableProfileIds(user.id),
+});
 
 const anonymiseDeletedUser = async (userId: number) => {
   const scrambledEmail = `${uuid()}@deleted`;

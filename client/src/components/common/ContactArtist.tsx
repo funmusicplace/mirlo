@@ -8,6 +8,7 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { canUserEditArtist } from "utils/artist";
 
 import Button, { ButtonProps } from "./Button";
 import FormComponent from "./FormComponent";
@@ -37,7 +38,7 @@ const ContactArtist: React.FC<{
   if (
     !user ||
     artist.allowDirectMessages === false ||
-    artist.userId === user.id
+    canUserEditArtist(user, artist)
   ) {
     return null;
   }

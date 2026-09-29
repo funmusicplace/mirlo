@@ -5,7 +5,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import {
   findArtistIdForURLSlug,
-  whereForAllArtistsThisLabelCanEdit,
+  whereForAllProfilesUserCanEdit,
 } from "../../../../utils/artist";
 import {
   subscriptionTierReleasesCount,
@@ -43,7 +43,7 @@ export default function () {
           where: {
             id: artistId,
             enabled: true,
-            ...whereForAllArtistsThisLabelCanEdit(loggedInUser.id),
+            ...whereForAllProfilesUserCanEdit(loggedInUser.id),
           },
           select: { id: true },
         })) !== null;

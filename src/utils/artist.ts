@@ -124,7 +124,14 @@ export const getPlatformFeeForProfile = async (
   return profile?.defaultPlatformFee ?? settings.platformPercent;
 };
 
-export const whereForAllProfilesThisLabelCanEdit = (
+/**
+ * The single definition of "who can manage a profile" (other than admins,
+ * who can't be expressed as a profile filter). Every permission check —
+ * route middleware, ownership helpers, and the `editableArtistIds` sent to
+ * the client — should go through this or `canUserEditProfile`, so adding a
+ * new kind of manager only means changing it here.
+ */
+export const whereForAllProfilesUserCanEdit = (
   userId: number
 ): Prisma.ProfileWhereInput => ({
   OR: [
@@ -164,7 +171,7 @@ export const resolveManagedArtistIds = async (
   const managed = await prisma.profile.findMany({
     where: {
       ...(requested !== undefined
-        ? whereForAllProfilesThisLabelCanEdit(userId)
+        ? whereForAllProfilesUserCanEdit(userId)
         : { userId }),
       ...(requested !== undefined ? { id: { in: requested } } : {}),
     },
@@ -174,14 +181,13 @@ export const resolveManagedArtistIds = async (
   return managed.map((a) => a.id);
 };
 
-/** Buyer fields safe to return on manage purchase/fulfillment endpoints. */
 export const buyerUserSelect = {
   id: true,
   name: true,
   email: true,
 } as const;
 
-export const whereForAllProfilesThisLabelCanAddReleasesFor = (
+export const whereForAllProfilesUserCanAddReleasesFor = (
   userId: number
 ): Prisma.ProfileWhereInput => ({
   OR: [
@@ -196,6 +202,37 @@ export const whereForAllProfilesThisLabelCanAddReleasesFor = (
     },
   ],
 });
+
+export const canUserEditProfile = async (
+  profileId: number | null | undefined,
+  user: { id: number; isAdmin?: boolean | null } | null | undefined,
+  { allowAdmin = true }: { allowAdmin?: boolean } = {}
+): Promise<boolean> => {
+  if (!user || !profileId) {
+    return false;
+  }
+  if (allowAdmin && user.isAdmin) {
+    return true;
+  }
+  const profile = await prisma.profile.findFirst({
+    where: {
+      id: Number(profileId),
+      ...whereForAllProfilesUserCanEdit(user.id),
+    },
+    select: { id: true },
+  });
+  return !!profile;
+};
+
+export const getEditableProfileIds = async (
+  userId: number
+): Promise<number[]> => {
+  const profiles = await prisma.profile.findMany({
+    where: whereForAllProfilesUserCanEdit(userId),
+    select: { id: true },
+  });
+  return profiles.map((p) => p.id);
+};
 
 export const profileDeleted: Prisma.ProfileWhereInput = {
   deletedAt: { not: null },
@@ -849,10 +886,6 @@ export const resolveProfileImageUrl = (artist: {
  */
 export const confirmArtistIdExists = confirmProfileIdExists;
 export const getPlatformFeeForArtist = getPlatformFeeForProfile;
-export const whereForAllArtistsThisLabelCanEdit =
-  whereForAllProfilesThisLabelCanEdit;
-export const whereForAllArtistsThisLabelCanAddReleasesFor =
-  whereForAllProfilesThisLabelCanAddReleasesFor;
 export const artistDeleted = profileDeleted;
 export const federatedArtist = federatedProfile;
 export const federatedArtistAtSomePoint = federatedProfileAtSomePoint;

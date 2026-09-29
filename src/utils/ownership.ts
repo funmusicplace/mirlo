@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { ProfileSubscriptionTier, User } from "@mirlo/prisma/client";
 
+import { canUserEditProfile, whereForAllProfilesUserCanEdit } from "./artist";
 import { AppError } from "./error";
 
 export const doesSubscriptionTierBelongToUser = async (
@@ -25,15 +26,9 @@ export const doesSubscriptionTierBelongToUser = async (
     });
   }
 
-  const artists = await prisma.profile.findMany({
-    where: {
-      userId: user.id,
-    },
-  });
-
   const subscription = await prisma.profileSubscriptionTier.findFirst({
     where: {
-      profileId: { in: artists.map((a) => a.id) },
+      profile: whereForAllProfilesUserCanEdit(user.id),
       id: subscriptionId,
     },
     include: {
@@ -74,9 +69,7 @@ export const doesTrackGroupBelongToUser = async (
       where: {
         OR: [
           {
-            profile: {
-              userId: user.id,
-            },
+            profile: whereForAllProfilesUserCanEdit(user.id),
           },
           {
             paymentToUserId: user.id,
@@ -115,9 +108,7 @@ export const doesMerchBelongToUser = async (merchId: string, user: User) => {
   } else {
     merch = await prisma.merch.findFirst({
       where: {
-        profile: {
-          userId: user.id,
-        },
+        profile: whereForAllProfilesUserCanEdit(user.id),
         id: merchId,
       },
     });
@@ -148,9 +139,7 @@ export const doesMerchPurchaseBelongToUser = async (
     merch = await prisma.merchPurchase.findFirst({
       where: {
         merch: {
-          profile: {
-            userId: user.id,
-          },
+          profile: whereForAllProfilesUserCanEdit(user.id),
         },
         id: purchaseId,
       },
@@ -219,7 +208,7 @@ export const getPlayLimitContext = async (
       trackGroupId: true,
       trackGroup: {
         select: {
-          profile: { select: { maxFreePlays: true, userId: true } },
+          profile: { select: { id: true, maxFreePlays: true } },
         },
       },
     },
@@ -230,7 +219,12 @@ export const getPlayLimitContext = async (
   if (!max) return null;
 
   if (user) {
-    if (track.trackGroup?.profile?.userId === user.id) return null;
+    const isArtistManager = await canUserEditProfile(
+      track.trackGroup?.profile?.id,
+      user,
+      { allowAdmin: false }
+    );
+    if (isArtistManager) return null;
     const owns = await prisma.userTrackGroupPurchase.findFirst({
       where: { trackGroupId: track.trackGroupId, userId: user.id },
       select: { userId: true },

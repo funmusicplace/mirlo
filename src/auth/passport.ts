@@ -6,9 +6,10 @@ import passportJWT, { JwtFromRequestFunction } from "passport-jwt";
 
 import logger from "../logger";
 import {
+  canUserEditProfile,
   findProfileIdForURLSlug,
-  whereForAllProfilesThisLabelCanAddReleasesFor,
-  whereForAllProfilesThisLabelCanEdit,
+  whereForAllProfilesUserCanAddReleasesFor,
+  whereForAllProfilesUserCanEdit,
 } from "../utils/artist";
 import { AppError } from "../utils/error";
 import {
@@ -202,18 +203,12 @@ export const profileEditableByUser = async (
         httpCode: 401,
       });
     } else {
-      if (loggedInUser.isAdmin) {
-        return true;
-      }
+      const canEdit = await canUserEditProfile(
+        Number(castProfileId),
+        loggedInUser
+      );
 
-      const profile = await prisma.profile.findFirst({
-        where: {
-          ...whereForAllProfilesThisLabelCanEdit(loggedInUser.id),
-          id: Number(castProfileId),
-        },
-      });
-
-      if (!profile) {
+      if (!canEdit) {
         throw new AppError({
           description:
             "Artist not found or user does not have permission to edit",
@@ -345,18 +340,14 @@ export const contentBelongsToLoggedInUser = async (
           trackGroups: {
             where: {
               trackGroup: {
-                profile: {
-                  userId: loggedInUser.id,
-                },
+                profile: whereForAllProfilesUserCanEdit(loggedInUser.id),
               },
             },
           },
           merch: {
             where: {
               merch: {
-                profile: {
-                  userId: loggedInUser.id,
-                },
+                profile: whereForAllProfilesUserCanEdit(loggedInUser.id),
               },
             },
           },
@@ -376,7 +367,7 @@ export const contentBelongsToLoggedInUser = async (
       }
     }
   } catch (e) {
-    next(e);
+    return next(e);
   }
   return next();
 };
@@ -457,9 +448,7 @@ export const trackBelongsToLoggedInUser = async (
       const track = await prisma.track.findFirst({
         where: {
           trackGroup: {
-            profile: whereForAllProfilesThisLabelCanAddReleasesFor(
-              loggedInUser.id
-            ),
+            profile: whereForAllProfilesUserCanAddReleasesFor(loggedInUser.id),
           },
           id: Number(trackId),
         },
