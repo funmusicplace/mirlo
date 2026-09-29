@@ -124,7 +124,7 @@ describe("purchase", () => {
       );
     });
 
-    it("should return requiresShipping + allowedCountries for a collectAddress tier's first-time subscription", async () => {
+    it("should return requiresShipping with no allowedCountries restriction for a collectAddress tier's first-time subscription", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_address",
@@ -151,10 +151,10 @@ describe("purchase", () => {
         "clientSecret should be a SetupIntent secret"
       );
       assert.equal(response.body.requiresShipping, true);
-      assert.ok(
-        Array.isArray(response.body.allowedCountries) &&
-          response.body.allowedCountries.length > 0,
-        "should include a non-empty allowedCountries list"
+      assert.equal(
+        response.body.allowedCountries,
+        undefined,
+        "should not restrict which countries the address picker offers"
       );
     });
 

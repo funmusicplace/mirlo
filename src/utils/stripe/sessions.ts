@@ -4,6 +4,7 @@ import Stripe from "stripe";
 
 import { logger } from "../../logger";
 import { AppError } from "../error";
+import { getStripeShippableCountries } from "../merch";
 import { calculatePlatformPercent } from "../processingPayments";
 
 import stripe, { createSubscriptionStripeProduct } from ".";
@@ -136,7 +137,8 @@ export const createCheckoutSessionForSubscription = async ({
       billing_address_collection: "auto",
       shipping_address_collection: tier.collectAddress
         ? {
-            allowed_countries: ["US", "GB", "CA", "AU", "NZ"],
+            allowed_countries:
+              getStripeShippableCountries() as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[],
           }
         : undefined,
       customer_email: loggedInUser?.email || email,
