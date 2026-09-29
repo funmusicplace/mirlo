@@ -440,6 +440,7 @@ export const registerPurchase = async ({
   paymentProcessorKey,
   platformCut = null,
   transactionId,
+  proGratis = false,
 }: {
   userId: number;
   pricePaid: number;
@@ -449,6 +450,7 @@ export const registerPurchase = async ({
   trackGroupId: number;
   platformCut?: number | null;
   transactionId?: string | null;
+  proGratis?: boolean;
 }) => {
   const token = randomUUID();
   logger.info(
@@ -485,6 +487,7 @@ export const registerPurchase = async ({
         message: message ?? null,
         singleDownloadToken: token,
         userTransactionId: transactionId,
+        proGratis,
       },
     });
   }

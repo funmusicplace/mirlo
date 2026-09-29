@@ -1,19 +1,20 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it, after } from "mocha";
-
-import { clearTables, createTrackGroup, createUser } from "../utils";
-
-import prisma from "@mirlo/prisma";
-import assert from "assert";
-import * as sendMailQueue from "../../src/queues/send-mail-queue";
 import sinon from "sinon";
+
+import { triggerAutoPurchaseNewAlbums } from "../../src/jobs/trigger-auto-purchase-new-albums";
 import {
   autoPurchaseNewAlbumsProcessor as autoPurchaseNewAlbums,
   AutomaticallyReceivedAlbumEmailType,
   autoPurchaseNewAlbumsQueue,
 } from "../../src/queues/auto-purchase-new-albums-queue";
-import { triggerAutoPurchaseNewAlbums } from "../../src/jobs/trigger-auto-purchase-new-albums";
+import * as sendMailQueue from "../../src/queues/send-mail-queue";
+import { clearTables, createTrackGroup, createUser } from "../utils";
+
+import prisma from "@mirlo/prisma";
+
+import assert from "assert";
 
 describe("auto-purchase-new-albums", () => {
   beforeEach(async () => {
@@ -307,6 +308,7 @@ describe("auto-purchase-new-albums", () => {
     assert.ok(purchase);
     assert.equal(purchase.userId, followerUser.id);
     assert.equal(purchase.trackGroupId, tg.id);
+    assert.equal(purchase.proGratis, true);
   });
 
   it("should handle multiple subscribers for same album", async () => {
@@ -767,5 +769,202 @@ describe("auto-purchase-new-albums", () => {
 
     // Verify no jobs were enqueued
     assert.equal(addStub.calledOnce, false);
+  });
+
+  it("trigger should not enqueue for private albums", async () => {
+    const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
+    addStub.resolves(undefined);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+            autoPurchaseAlbums: true,
+          },
+        },
+      },
+      include: {
+        subscriptionTiers: true,
+      },
+    });
+
+    await prisma.profileUserSubscription.create({
+      data: {
+        userId: followerUser.id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 5,
+      },
+    });
+
+    await createTrackGroup(artist.id, {
+      publishedAt: new Date(),
+      isPublic: false,
+    });
+
+    await triggerAutoPurchaseNewAlbums();
+
+    assert.equal(addStub.called, false);
+  });
+
+  it("trigger should not enqueue for albums without a cover", async () => {
+    const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
+    addStub.resolves(undefined);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+            autoPurchaseAlbums: true,
+          },
+        },
+      },
+      include: {
+        subscriptionTiers: true,
+      },
+    });
+
+    await prisma.profileUserSubscription.create({
+      data: {
+        userId: followerUser.id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 5,
+      },
+    });
+
+    await createTrackGroup(artist.id, {
+      publishedAt: new Date(),
+      title: "",
+      cover: { create: { url: [] } },
+    });
+
+    await triggerAutoPurchaseNewAlbums();
+
+    assert.equal(addStub.called, false);
+  });
+
+  it("trigger should not enqueue for the hidden song-drafts album", async () => {
+    const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
+    addStub.resolves(undefined);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+            autoPurchaseAlbums: true,
+          },
+        },
+      },
+      include: {
+        subscriptionTiers: true,
+      },
+    });
+
+    await prisma.profileUserSubscription.create({
+      data: {
+        userId: followerUser.id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 5,
+      },
+    });
+
+    await createTrackGroup(artist.id, {
+      publishedAt: new Date(),
+      isHiddenTrackGroupForSongDrafts: true,
+    });
+
+    await triggerAutoPurchaseNewAlbums();
+
+    assert.equal(addStub.called, false);
+  });
+
+  it("trigger should not enqueue for admin-disabled albums", async () => {
+    const addStub = sinon.stub(autoPurchaseNewAlbumsQueue, "add");
+    addStub.resolves(undefined);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+            autoPurchaseAlbums: true,
+          },
+        },
+      },
+      include: {
+        subscriptionTiers: true,
+      },
+    });
+
+    await prisma.profileUserSubscription.create({
+      data: {
+        userId: followerUser.id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 5,
+      },
+    });
+
+    await createTrackGroup(artist.id, {
+      publishedAt: new Date(),
+      adminEnabled: false,
+    });
+
+    await triggerAutoPurchaseNewAlbums();
+
+    assert.equal(addStub.called, false);
   });
 });
