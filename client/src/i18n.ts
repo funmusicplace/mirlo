@@ -1,7 +1,9 @@
 import { TransifexI18next } from "@transifex/i18next";
 import i18n from "i18next";
+import { uniqBy } from "lodash";
 import { initReactI18next } from "react-i18next";
 import * as en from "translation/en.json";
+import { getInjectedLanguages } from "utils/injectedData";
 
 const hasTransifex = !!import.meta.env.VITE_TRANSIFEX_TOKEN;
 
@@ -20,13 +22,54 @@ const resources = {
 
 const userLanguage = navigator.language;
 
-export const finishedLanguages = [
+const fallbackLanguages = [
   { short: "en", name: "English" },
   { short: "fr", name: "Français" },
   { short: "es", name: "Español" },
   { short: "uk", name: "Українська" },
   { short: "de", name: "Deutsch" },
 ];
+
+const buildLanguageList = () => {
+  const injected = getInjectedLanguages();
+  if (!injected || injected.length === 0) {
+    return fallbackLanguages;
+  }
+  const withKnownNames = injected.map((lang) => ({
+    short: lang.short,
+    name:
+      fallbackLanguages.find((known) => known.short === lang.short)?.name ??
+      (lang.name || lang.short),
+  }));
+  // English is the bundled source language and must always be offered.
+  return uniqBy(
+    [{ short: "en", name: "English" }, ...withKnownNames],
+    (lang) => lang.short
+  );
+};
+
+export const finishedLanguages = buildLanguageList();
+
+const normalizeCode = (code: string) => code.replace(/-/g, "_").toLowerCase();
+
+export const matchLanguage = (code?: string) => {
+  if (!code) {
+    return undefined;
+  }
+  const normalized = normalizeCode(code);
+  const base = normalized.split("_")[0];
+  return (
+    finishedLanguages.find(
+      (lang) => normalizeCode(lang.short) === normalized
+    ) ??
+    finishedLanguages.find((lang) =>
+      normalized.startsWith(`${normalizeCode(lang.short)}_`)
+    ) ??
+    finishedLanguages.find(
+      (lang) => normalizeCode(lang.short).split("_")[0] === base
+    )
+  );
+};
 
 export const LANGUAGE_STORAGE_KEY = "mirlo-language";
 
@@ -51,9 +94,7 @@ export const setStoredLanguage = (language: string) => {
   }
 };
 
-const browserLanguage = finishedLanguages.find((lang) =>
-  userLanguage.startsWith(lang.short)
-);
+const browserLanguage = matchLanguage(userLanguage);
 
 const defaultLanguage = getStoredLanguage() ?? browserLanguage?.short;
 

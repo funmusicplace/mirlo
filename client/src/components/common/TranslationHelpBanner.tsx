@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { finishedLanguages } from "../../i18n";
+import { matchLanguage } from "../../i18n";
 
 export const TRANSLATION_BANNER_STORAGE_KEY = "mirlo-hide-translation-banner";
 export const TRANSLATION_GUIDE_URL =
@@ -27,7 +27,7 @@ export const isUntranslatedLanguage = (language?: string) => {
   if (!language) {
     return false;
   }
-  return !finishedLanguages.some((lang) => language.startsWith(lang.short));
+  return !matchLanguage(language);
 };
 
 const TranslationHelpBanner: React.FC = () => {
