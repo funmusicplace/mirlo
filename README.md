@@ -125,9 +125,9 @@ stripe trigger checkout.session.completed --stripe-account acct_yourconnectedacc
 
 You'll also want fake Stripe data. You can find [the details on that here](https://stripe.com/docs/connect/testing).
 
-## CRON Jobs
+## Scheduled Jobs
 
-Some cron jobs exist:
+Recurring tasks run inside the background worker as BullMQ job schedulers (see `src/jobs/scheduled-tasks.ts`). Set `SCHEDULED_TASKS_ENABLED=false` on the worker to turn them off. They show up as the `scheduled-tasks` queue at `/admin/queues`. To run one by hand:
 
 ```sh
 docker exec -it blackbird-api yarn ts-node src/jobs/every-minute-tasks.ts

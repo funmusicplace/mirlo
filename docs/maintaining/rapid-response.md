@@ -13,17 +13,13 @@ We've had a weird instance where things in Cloudflare seem to not be connecting 
 
 It could be that something is repeatedly going wrong at a very regular interval--the most obvious indication of this is if an e-mail is getting sent out every x minutes. This likely means that a cron job is breaking and not completing, and the next time it runs it tries to do it with the same set of information. See: the famous April 13 incident with the April Update Email, which some users received 11 times.
 
-We've got two cron jobs: every-minute-tasks (runs every 10 minutes) and every-month-tasks (runs every month). These are controlled by two separate Render services, which you can find on [the dashboard](https://dashboard.render.com/).
+We've got three recurring tasks: every-minute-tasks (runs every 10 minutes), every-day-tasks (22:00 UTC) and every-month-tasks (1st of the month, 00:00 UTC). They run inside the `background` worker as BullMQ job schedulers on the `scheduled-tasks` queue.
 
-![repeating tasks](../images/repeating-tasks-screenshot.png)
+You can see what these jobs do in `src/jobs/every-minute-tasks.ts`, `src/jobs/every-day-tasks.ts` and `src/jobs/every-month-tasks.ts`. The schedules themselves are in `src/jobs/scheduled-tasks.ts`. Scheduled runs are never retried, so a failing run won't immediately repeat itself, but the next scheduled run will try again. Setting `SCHEDULED_TASKS_ENABLED=false` on the worker turns them off.
 
-You can see what these jobs do in the `src/jobs/every-month-tasks.ts` and `src/jobs/every-minute-tasks.ts` files.
+Currently there's nothing critical that these tasks do that needs to run every ten minutes, so it is safe to pause them until we're able to figure out what is wrong. As an admin, turn on "show queue dashboard" in Admin Settings if it isn't already, then go to `/admin/queues` on the API, open the `scheduled-tasks` queue and pause it. This stops all three tasks without affecting the other queues (uploads, emails, etc.). Resume it from the same page once things are fixed.
 
-Currently there's nothing critical that a cron job does that needs to run every ten minutes, so it is safe to suspend both of these jobs until we're able to figure out what is wrong. Here's how:
-
-![navigating to suspend](../images/navigating-to-suspend.gif).
-
-> Note: suspending any other service (anything that is not a cron job) will negatively impact the service and likely make core functionality unavailable. Suspending the service is **likely not the solution** for those scenarios.
+> Note: suspending any Render service will negatively impact the service and likely make core functionality unavailable. Suspending the service is **likely not the solution** for those scenarios.
 
 ### Then
 

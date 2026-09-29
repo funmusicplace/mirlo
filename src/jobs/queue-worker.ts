@@ -19,15 +19,18 @@ import { getSiteSettings } from "../utils/settings";
 import cleanUpOldFilesJob from "./clean-up-old-files";
 import generateAlbumJob from "./generate-album";
 import optimizeImage from "./optimize-image";
+import scheduledTasksJob, {
+  registerScheduledTasks,
+  removeScheduledTasks,
+} from "./scheduled-tasks";
 import sendMail from "./send-mail";
 import sendPostNotification from "./send-post-notification";
+import uploadAudioJob from "./upload-audio";
+import verifyAudioJob from "./verify-audio";
 
 import "../queues/send-mail-queue";
 import "../queues/send-post-notification-queue";
 import "../queues/auto-purchase-new-albums-queue";
-
-import uploadAudioJob from "./upload-audio";
-import verifyAudioJob from "./verify-audio";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -78,6 +81,8 @@ const withMemoryLogging =
     }
   };
 
+const workers: Worker[] = [];
+
 /**
  * Factory function to create a worker with standard event logging
  */
@@ -93,6 +98,7 @@ function createWorkerWithLogging(
     withMemoryLogging(queueName, withFreshBucketConfig(processor)),
     options
   );
+  workers.push(worker);
   logger.info(startupMessage);
 
   if (includeActiveEvent) {
@@ -125,8 +131,25 @@ function createWorkerWithLogging(
   return worker;
 }
 
+// Let in-flight jobs finish before exiting, so a deploy doesn't kill a
+// scheduled task (which is never retried) partway through
+const shutdown = async (signal: string) => {
+  logger.info(`${signal} received, closing workers`);
+  try {
+    await Promise.all(workers.map((worker) => worker.close()));
+    process.exit(0);
+  } catch (e) {
+    logger.error("Error closing workers", e);
+    process.exit(1);
+  }
+};
 yargs
   .command("run", "starts file processing queue", async (argv: any) => {
+    process.once("SIGTERM", () => shutdown("SIGTERM"));
+    process.once("SIGINT", () => shutdown("SIGINT"));
+    process.on("unhandledRejection", (reason) => {
+      logger.error(`Unhandled promise rejection: ${reason}`);
+    });
     const settings = await getSiteSettings();
     setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
     ensureAllBucketsExist().catch((e) => {
@@ -143,6 +166,7 @@ yargs
     sendPostNotificationQueue();
     autoPurchaseNewAlbumsQueue();
     cleanUpFilesQueue();
+    scheduledTasksQueueWorker();
   })
   .help().argv;
 
@@ -221,4 +245,35 @@ export async function cleanUpFilesQueue() {
     workerOptions,
     "clean up old files worker started"
   );
+}
+
+export async function scheduledTasksQueueWorker() {
+  if (process.env.SCHEDULED_TASKS_ENABLED === "false") {
+    logger.info("Scheduled tasks disabled (SCHEDULED_TASKS_ENABLED=false)");
+    removeScheduledTasks().catch((e) => {
+      logger.error("Failed to remove scheduled tasks", e);
+    });
+    return;
+  }
+
+  createWorkerWithLogging(
+    "scheduled-tasks",
+    scheduledTasksJob,
+    {
+      ...workerOptions,
+      concurrency: 1,
+      // Never re-run a stalled task (it may have sent emails), and give it a
+      // long lock so heavy jobs elsewhere in this process don't make it stall
+      maxStalledCount: 0,
+      lockDuration: 10 * 60 * 1000, // 10 minutes
+      lockRenewTime: 5 * 60 * 1000, // Renew every 5 minutes
+    },
+    "Scheduled tasks worker started",
+    true // includeActiveEvent
+  );
+  registerScheduledTasks().catch((e) => {
+    // Exit so the platform restarts us, rather than running with nothing scheduled
+    logger.error("Failed to register scheduled tasks", e);
+    process.exit(1);
+  });
 }

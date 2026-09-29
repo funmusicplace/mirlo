@@ -25,6 +25,7 @@ import logger from "./logger";
 import parseIndex from "./parseIndex";
 import { imageQueue } from "./queues/processImages";
 import { audioQueue } from "./queues/processTrackAudio";
+import { scheduledTasksQueue } from "./queues/scheduled-tasks-queue";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import auth from "./routers/auth";
 import { serveStatic } from "./static";
@@ -54,6 +55,7 @@ createBullBoard({
     new BullMQAdapter(imageQueue),
     new BullMQAdapter(audioQueue),
     new BullMQAdapter(sendMailQueue),
+    new BullMQAdapter(scheduledTasksQueue),
   ],
   serverAdapter: queueDashboardAdapter,
 });
