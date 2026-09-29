@@ -31,7 +31,8 @@ announcement to the top of your profile.
 ### Links and locations
 
 Let your community know where you are on the internet. Add links to
-social media and an email address to let people contact you.
+your own website, social media, and an email address to let people
+contact you.
 
 You can also tag the places you're from or based in. Listeners
 browsing Mirlo by location will find you there, which makes it
@@ -168,7 +169,8 @@ Don't want to manage another mailing list? Us neither. You can
 migrate your current supporters' emails to Mirlo and do
 everything from one platform. And if you ever want to take that
 list somewhere else, you can export it — it's your community, not
-ours.
+ours. Your list is for keeping supporters up to date on your news
+and releases; for one-on-one conversations, use direct messages.
 
 ### Monthly support
 
@@ -207,7 +209,9 @@ Want to hear from the people listening to your music?
 
 Turn on direct messages and logged-in listeners can write to you
 from your profile. Messages reach you as a notification and by
-email. If you'd rather not have an open inbox, leave it off.
+email, and you can reply to that email to answer the listener
+directly. Direct messages are off until you switch them on, so if
+you'd rather not have an open inbox, just leave them off.
 
 ### Keep your own inbox manageable
 

@@ -225,6 +225,69 @@ You can limit the amount of times a listener can listen to the entire song thoug
 
 Currently we don't make a dashboard available to track stats on plays of your music. This is sort of by design and we're contemplating how we'll do this going forward. We're not an anti-stats household but we're a "which stats when and where" household. If you have ideas about this please give us a shout at [hi@mirlo.space](mailto:hi@mirlo.space).
 
+:::
+
+::: details Can I link my own website to my Mirlo page?
+
+Yes. In your artist profile settings you can add links to your website, social media, and other places you're on the internet. They'll show on your artist page.
+
+It works the other way too: you can embed your tracks and albums on your own website, so people can listen there without leaving your site.
+
+:::
+
+::: details Can listeners contact me directly?
+
+Yes, if you'd like them to. There are two ways:
+
+- **Add an email address** to your profile's links, so anyone can write to you.
+- **Turn on direct messages** in your profile settings. Logged-in listeners can then write to you from your artist page. You'll get a notification on Mirlo and an email, and you can reply to that email to answer them directly.
+
+Direct messages are off by default, so nobody can message you until you switch them on.
+
+:::
+
+::: details Can I use my newsletter subscribers' emails to answer their questions?
+
+Your subscribers signed up to hear from you, so anything you send through your posts or mailing list is fair game, including answering common questions in a post. What you can't do is use the list for anything other than your news and updates, or pass the emails on to anyone else. Every email you send must also let people unsubscribe. The full details are in our [Terms of Use](https://mirlo.space/pages/terms).
+
+For one-on-one conversations, turn on direct messages instead (see above). When a listener messages you, you can reply straight to them by email.
+
+:::
+
+## For listeners
+
+::: details How do I tell if an artist sells downloads or CDs?
+
+On a release's page, look for a **Buy** or **Download** button near the top. If there is one, you can buy or download that release. If there isn't, the artist has chosen to make it available for streaming only.
+
+CDs, vinyl, T-shirts and other physical items are in the **Merch** tab on the artist's page. The artist may have renamed this tab. Merch that goes with a particular release also shows up on that release's page.
+
+Not every artist sells things on Mirlo. Some just share their music to listen to.
+
+:::
+
+::: details What format will my download be in?
+
+You pick when you download. You can choose lossless (FLAC, WAV) or smaller files (MP3, OPUS), and you can come back and download it again in a different format from your collection.
+
+:::
+
+::: details How do I get in touch with an artist?
+
+Check the links on their artist page. Many artists list a website, social media, or an email address.
+
+If the artist has turned on direct messages, you'll see an option to write to them on their page (you'll need to be logged in). When they reply, it comes to you by email, so the artist will see your email address.
+
+You can also leave the artist a message when you buy something from them.
+
+:::
+
+::: details What happens to my email if I sign up for an artist's newsletter?
+
+The artist uses it to send you their news, posts and updates. Artists agree not to use it for anything else or to share it with anyone. Every email includes an unsubscribe link, and you can stop following an artist at any time.
+
+:::
+
 ## Technical details
 
 ::: details Are you open source?
@@ -312,13 +375,13 @@ processor Stripe first.
 
 ::: details How do I connect my Mirlo profile to FairPlayer for federated streaming?
 
- If you head over to your profile settings (bottom left corner) and scroll down the page until you reach the section under "Default platform cut", you should see three toggle buttons. Toggle the middle button for "Enable federated streaming", press save, and your Mirlo catalogue will then appear in FairPlayer! Kindly note: this usually takes an hour to appear in FairPlayer or so though occasionally, it has taken up to 24 hours when other maintenance is occurring. You also do not need a FairPlayer account to get started.
+If you head over to your profile settings (bottom left corner) and scroll down the page until you reach the section under "Default platform cut", you should see three toggle buttons. Toggle the middle button for "Enable federated streaming", press save, and your Mirlo catalogue will then appear in FairPlayer! Kindly note: this usually takes an hour to appear in FairPlayer or so though occasionally, it has taken up to 24 hours when other maintenance is occurring. You also do not need a FairPlayer account to get started.
 
- Additionally, we should mention that this is a discoverability option and FairPlayer has nothing in common with corporate streaming. Think of it as more of a search bar and listening outpost for musicians using Faircamp and Mirlo!
+Additionally, we should mention that this is a discoverability option and FairPlayer has nothing in common with corporate streaming. Think of it as more of a search bar and listening outpost for musicians using Faircamp and Mirlo!
 
- ::: details Do you have plans to work with other services?
+::: details Do you have plans to work with other services?
 
- Yes, we are collaborating with other devs (including [FairPlayer](https://fairplayer.org/about-us/)) in order to create a better experience for listeners and musicians. For instance, we are looking into a scenario where an artist catalogue uploaded to one service will appear in the others' search, to bring together more of the independent ecosystem. However, we do rely on the goodwill of our community to realise these ambitions. If you are able to, you can support us [here](https://mirlo.space/team/connect).
+Yes, we are collaborating with other devs (including [FairPlayer](https://fairplayer.org/about-us/)) in order to create a better experience for listeners and musicians. For instance, we are looking into a scenario where an artist catalogue uploaded to one service will appear in the others' search, to bring together more of the independent ecosystem. However, we do rely on the goodwill of our community to realise these ambitions. If you are able to, you can support us [here](https://mirlo.space/team/connect).
 
 ::: details How do I make my artist profile visible on the Social Web / Fediverse
 
@@ -331,6 +394,7 @@ Simply go to your artist profile, click "Profile settings" in the bottom left, a
 No, each artist profile has to have social web features enabled individually. We might streamline this in the future if there's demand and we have capacity.
 
 :::
+
 ## Other questions
 
 ::: details Have you heard /project x/?
