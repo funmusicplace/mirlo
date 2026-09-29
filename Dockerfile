@@ -31,3 +31,10 @@ HEALTHCHECK --interval=10s --timeout=5s --retries=10 CMD ["yarn", "ts-node", "sr
 FROM base AS background
 CMD [ "yarn", "ts-node", "src/jobs/queue-worker.ts", "run"]
 HEALTHCHECK --interval=10s CMD ["true"]
+
+FROM base AS build
+RUN yarn api:build
+
+FROM build AS prod
+CMD [ "/bin/sh", "-c", "yarn prisma:migrate:deploy && exec node --conditions=mirlo-dist --enable-source-maps dist/index.js" ]
+HEALTHCHECK --interval=10s --timeout=5s --retries=10 CMD ["node", "dist/healthcheck.js"]

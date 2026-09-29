@@ -20,6 +20,21 @@ services:
       file: docker-compose.api.yml
       service: api
     container_name: blackbird-api-test
+    # Run the compiled build (plain node) so route tests exercise what production runs
+    build:
+      target: prod
+    # Syncing src into the container is useless here — it runs dist/ — so rebuild instead
+    develop: !override
+      watch:
+        - action: rebuild
+          path: ./src
+        - action: sync+restart
+          path: ./emails
+          target: /var/www/api/emails
+        - action: rebuild
+          path: ./prisma
+        - action: rebuild
+          path: package.json
     networks: !reset [test-network]
     links:
       - redis-test:redis

@@ -3,15 +3,13 @@ services:
   - type: web
     name: api
     env: node
-    # env: docker
     repo: https://github.com/funmusicplace/mirlo.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     plan: standard # Supposedly this should be free but
-    # dockerCommand: ./start.sh
-    # dockerfilePath: ./prod.Dockerfile
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=3072 yarn client:build
-    startCommand: yarn ts-node src/index.ts
+
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=3072 yarn client:build && yarn api:build
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/index.js
     envVars:
       - key: SKIP_INSTALL_DEPS
         value: true
@@ -40,41 +38,6 @@ services:
           type: redis
           name: redis
           property: port
-      - key: MINIO_ROOT_PASSWORD
-        fromService:
-          type: web
-          name: minio
-          envVarKey: MINIO_ROOT_PASSWORD
-      - key: MINIO_PORT
-        fromService:
-          type: web
-          name: minio
-          envVarKey: PORT
-      - key: MINIO_API_PORT
-        value: 9000
-      - key: MINIO_HOST
-        fromService:
-          type: web
-          name: minio
-          property: host
-
-  # A private minIO instance
-  - type: web
-    name: minio
-    env: docker
-    autoDeploy: false
-    plan: standard
-    dockerfilePath: "./minio/Dockerfile"
-    envVars:
-      - key: MINIO_ROOT_PASSWORD
-        generateValue: true # will generate a base64-encoded 256-bit secret
-      - fromGroup: blackbrd
-      - key: PORT
-        value: 9000
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 600 # optional
 
   # Umami analytics (https://umami.is)
   # Runs against a separate `umami` database inside the existing blackbrd
@@ -116,7 +79,7 @@ services:
     env: docker
     plan: standard # optional (defaults to starter)
     dockerfilePath: ./Dockerfile # optional
-    dockerCommand: yarn ts-node src/jobs/queue-worker.ts run
+    dockerCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/queue-worker.js run
     disk: # this disk gets used to process audio. They should get moved to the
       # minIO service and deleted after upload
       name: data
@@ -141,29 +104,14 @@ services:
           type: redis
           name: redis
           property: port
-      - key: MINIO_ROOT_PASSWORD
-        fromService:
-          type: web
-          name: minio
-          envVarKey: MINIO_ROOT_PASSWORD
-      - key: MINIO_PORT
-        fromService:
-          type: web
-          name: minio
-          envVarKey: PORT
-      - key: MINIO_HOST
-        fromService:
-          type: web
-          name: minio
-          property: host
 
   - type: cron
     name: every-minute-tasks
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/every-minute-tasks.ts
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/every-minute-tasks.js
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=2048 yarn api:build
     schedule: "*/10 * * * *"
     envVars:
       - key: NODE_OPTIONS
@@ -175,16 +123,6 @@ services:
       - fromGroup: blackbrd
       - key: STORAGE_BACKEND
         value: s3
-      - key: MINIO_ROOT_PASSWORD
-        fromService:
-          type: web
-          name: minio
-          envVarKey: MINIO_ROOT_PASSWORD
-      - key: MINIO_PORT
-        fromService:
-          type: web
-          name: minio
-          envVarKey: PORT
       - key: REDIS_HOST
         fromService:
           type: redis
@@ -195,13 +133,6 @@ services:
           type: redis
           name: redis
           property: port
-      - key: MINIO_API_PORT
-        value: 9000
-      - key: MINIO_HOST
-        fromService:
-          type: web
-          name: minio
-          property: host
     branch: main # optional (defaults to master)
 
   - type: cron
@@ -209,8 +140,8 @@ services:
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/every-day-tasks.ts
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/every-day-tasks.js
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=2048 yarn api:build
     schedule: "0 22 * * *"
     envVars:
       - key: NODE_OPTIONS
@@ -240,8 +171,8 @@ services:
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/every-month-tasks.ts
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    startCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/every-month-tasks.js
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=2048 yarn api:build
     schedule: "0 0 1 * *"
     envVars:
       - key: NODE_OPTIONS

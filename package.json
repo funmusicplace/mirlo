@@ -8,6 +8,8 @@
     "api:test:docker": "docker compose -f docker-compose.api.yml -f docker-compose.test.yml --profile test run --rm test",
     "api:watch": "NODE_ENV=development PORT=${PORT:-3000} nodemon src/index.ts",
     "api:start": "ts-node src/index.ts",
+    "api:build": "yarn workspace @mirlo/prisma build && tsc -p tsconfig.build.json",
+    "api:start:prod": "node --conditions=mirlo-dist --enable-source-maps dist/index.js",
     "prepare": "husky",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

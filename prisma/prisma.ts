@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "./__generated__";
+import { Prisma, PrismaClient } from "@mirlo/prisma/client";
 
 const ENABLE_LOGGING = false;
 

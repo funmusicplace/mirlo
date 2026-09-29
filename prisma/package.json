@@ -4,6 +4,7 @@
   "type": "commonjs",
   "exports": {
     ".": {
+      "mirlo-dist": "./dist/prisma.js",
       "import": "./prisma.ts",
       "require": "./prisma.ts",
       "types": "./prisma.ts",
@@ -17,6 +18,7 @@
     }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "prisma:build": "pnpify prisma generate",
     "prisma:format": "pnpify prisma format",
     "prisma:migrate": "DEBUG=prisma:client pnpify prisma migrate dev",
