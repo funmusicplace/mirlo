@@ -280,7 +280,7 @@ export default function () {
         });
       } else {
         return res.json({
-          result: serializeProfile(artist, Number(user.id)),
+          result: serializeProfile(artist, Number(user.id), true),
         });
       }
     } catch (e) {

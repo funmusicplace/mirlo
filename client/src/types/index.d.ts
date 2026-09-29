@@ -12,6 +12,7 @@ interface LoggedInUser {
   id: number;
   urlSlug?: string;
   artists: Artist[];
+  editableArtistIds?: number[];
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
   userTrackPurchases?: { trackId: number }[];

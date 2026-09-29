@@ -1,12 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+import prisma from "@mirlo/prisma";
 import busboy from "connect-busboy";
+import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { processProfileBackground } from "../../../../../queues/processImages";
-import prisma from "@mirlo/prisma";
 import { deleteProfileBackground } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import { busboyOptions } from "../../../../../utils/images";
@@ -77,12 +78,10 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { artistId: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
-    const loggedInUser = req.user;
     try {
       const profile = await prisma.profile.findFirst({
         where: {
           id: Number(profileId),
-          userId: loggedInUser.id,
         },
       });
 

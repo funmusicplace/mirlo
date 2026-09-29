@@ -6,7 +6,7 @@ import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
-import { isTrackGroupPublished } from "utils/artist";
+import { canUserEditArtist, isTrackGroupPublished } from "utils/artist";
 
 import { bp } from "../../constants";
 
@@ -83,9 +83,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     if (
       !(
         user &&
-        (artist.userId === user.id ||
-          artist.paymentToUserId === user.id ||
-          user.isAdmin)
+        (canUserEditArtist(user, artist) || artist.paymentToUserId === user.id)
       )
     ) {
       return null;

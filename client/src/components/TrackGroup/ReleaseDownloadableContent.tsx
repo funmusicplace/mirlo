@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { FaDownload } from "react-icons/fa";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
+import { canUserEditArtist } from "utils/artist";
 
 import { bp } from "../../constants";
 
@@ -17,7 +18,7 @@ const ReleaseDownloadableContent: React.FC<{
 
   const { user } = useAuthContext();
 
-  const userIsOwner = user?.id === artist.userId || user?.isAdmin;
+  const userIsOwner = canUserEditArtist(user, artist);
 
   const userHasPurchasedTrackGroup = user?.userTrackGroupPurchases?.some(
     (m) => m.trackGroupId === trackGroup.id

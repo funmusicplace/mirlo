@@ -1,15 +1,9 @@
-import { NextFunction, Request, Response } from "express";
 import busboy from "connect-busboy";
-import {
-  artistBelongsToLoggedInUser,
-  userAuthenticated,
-} from "../../../../auth/passport";
+import { NextFunction, Request, Response } from "express";
+
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
 import { processUserBanner } from "../../../../queues/processImages";
-import prisma from "@mirlo/prisma";
-import { User } from "@mirlo/prisma/client";
-import { deleteArtistBackground } from "../../../../utils/artist";
-import { AppError } from "../../../../utils/error";
 import { busboyOptions } from "../../../../utils/images";
 
 type Params = {
@@ -20,7 +14,6 @@ type Params = {
 export default function () {
   const operations = {
     PUT: [userAuthenticated, busboy(busboyOptions), PUT],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -58,56 +51,6 @@ export default function () {
     responses: {
       200: {
         description: "Updated User",
-        schema: {
-          type: "object",
-        },
-      },
-      default: {
-        description: "An error occurred",
-        schema: {
-          additionalProperties: true,
-        },
-      },
-    },
-  };
-
-  async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
-    assertLoggedIn(req);
-    const loggedInUser = req.user;
-    try {
-      const artist = await prisma.profile.findFirst({
-        where: {
-          id: Number(artistId),
-          userId: loggedInUser.id,
-        },
-      });
-
-      if (!artist) {
-        throw new AppError({ description: "Artist not found", httpCode: 404 });
-      }
-
-      await deleteArtistBackground(artist.id);
-
-      res.json({ message: "Success" });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  DELETE.apiDoc = {
-    summary: "Deletes an artist banner belonging to a user",
-    parameters: [
-      {
-        in: "path",
-        name: "artistId",
-        required: true,
-        type: "string",
-      },
-    ],
-    responses: {
-      200: {
-        description: "Updated Artist",
         schema: {
           type: "object",
         },

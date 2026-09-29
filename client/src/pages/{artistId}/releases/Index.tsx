@@ -10,6 +10,7 @@ import { queryArtist, queryPublicLabelTrackGroups } from "queries";
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
+import { canUserEditArtist } from "utils/artist";
 
 import { bp } from "../../../constants";
 
@@ -32,7 +33,7 @@ const Index: React.FC = () => {
     ? labelTrackGroups?.results
     : artist.trackGroups.map((tg) => ({ ...tg, artist }));
 
-  const isArtistUserLoggedInUser = artist.userId === user?.id;
+  const isArtistUserLoggedInUser = canUserEditArtist(user, artist);
 
   if ((releases?.length ?? 0) === 0 && !isArtistUserLoggedInUser) {
     return null;

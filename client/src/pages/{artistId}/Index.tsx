@@ -1,5 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import DefaultSection from "components/common/Artist/DefaultSection";
+import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ScrollFadeOverlay from "components/common/ScrollFadeOverlay";
 import ScrollMoreButton from "components/common/ScrollMoreButton";
@@ -26,15 +28,16 @@ import {
 } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import { getPaidTierCount, isTipOnlyArtist } from "utils/artist";
+import {
+  canUserEditArtist,
+  getPaidTierCount,
+  isTipOnlyArtist,
+} from "utils/artist";
 import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
 import { transformFromLinks } from "utils/links";
 import { useScrollActiveTabIntoView } from "utils/useScrollActiveTabIntoView";
 
 import { bp } from "../../constants";
-import Box from "components/common/Box";
-
-import DefaultSection from "components/common/Artist/DefaultSection";
 
 export const ArtistSection: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className,
@@ -95,7 +98,7 @@ function Index() {
     return <FullPageLoadingSpinner />;
   }
 
-  const isArtistUser = artist.userId === user?.id;
+  const isArtistUser = canUserEditArtist(user, artist);
   const releasesTitle = artist.properties?.titles?.releases || t("releases");
   const merchTitle = artist.properties?.titles?.merch || t("merch");
   const postsTitle = artist.properties?.titles?.posts || t("updates");

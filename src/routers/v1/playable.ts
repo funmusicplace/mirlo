@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../auth/passport";
+import { getEditableProfileIds } from "../../utils/artist";
 
 export default function () {
   const operations = {
@@ -38,7 +39,7 @@ export default function () {
             select: {
               profile: {
                 select: {
-                  userId: true,
+                  id: true,
                 },
               },
               ...(loggedInUser
@@ -55,6 +56,10 @@ export default function () {
         },
       });
 
+      const editableProfileIds = loggedInUser
+        ? await getEditableProfileIds(loggedInUser.id)
+        : [];
+
       const areOwned = trackIds.filter((id) => {
         const track = tracks.find((t) => t.id === Number(id));
         if (track) {
@@ -63,8 +68,9 @@ export default function () {
           const hasPurchasedTrackGroup =
             track.trackGroup.userTrackGroupPurchases &&
             track.trackGroup.userTrackGroupPurchases.length > 0;
-          const isArtistOwner =
-            track.trackGroup.profile.userId === loggedInUser?.id;
+          const isArtistOwner = editableProfileIds.includes(
+            track.trackGroup.profile.id
+          );
 
           return (
             hasPurchasedTrack ||

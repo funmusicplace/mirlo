@@ -24,7 +24,11 @@ import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
+import {
+  canUserEditArtist,
+  getArtistManageMerchUrl,
+  getReleaseUrl,
+} from "utils/artist";
 
 import { bp } from "../../../../constants";
 
@@ -63,7 +67,7 @@ function Index() {
       ? merch.includePurchaseTrackGroup.about
       : merch.description;
 
-  const userIsOwner = user?.id === artist.userId || user?.isAdmin;
+  const userIsOwner = canUserEditArtist(user, artist);
 
   return (
     <WidthContainer variant="big" justify="center">

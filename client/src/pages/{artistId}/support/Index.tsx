@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useOutletContext } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { isTipOnlyArtist } from "utils/artist";
+import { canUserEditArtist, isTipOnlyArtist } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
 const Index: React.FC = () => {
@@ -104,7 +104,7 @@ const Index: React.FC = () => {
   if (
     !isPending &&
     !userStripeStatus?.chargesEnabled &&
-    artist.userId !== user?.id
+    !canUserEditArtist(user, artist)
   ) {
     return (
       <div
@@ -124,7 +124,7 @@ const Index: React.FC = () => {
   const paidTiers = artist.subscriptionTiers.filter((p) => !p.isDefaultTier);
   const paidTierCount = paidTiers.length;
   const isScrollable = paidTierCount > 3;
-  const isOwner = artist.userId === user?.id;
+  const isOwner = canUserEditArtist(user, artist);
   const subscribedTier =
     !isOwner && !showAllTiers ? userSubscriptionTier : undefined;
 

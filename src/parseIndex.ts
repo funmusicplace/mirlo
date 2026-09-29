@@ -38,7 +38,6 @@ import {
 } from "./parseIndex/widgetUrls";
 import { processSingleArtist } from "./serializers/artist";
 import { postIncludeForUser } from "./serializers/post";
-import { serializeUser } from "./serializers/user";
 import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
@@ -58,7 +57,7 @@ import {
   whereForVisibleTrackGroup,
 } from "./utils/trackGroup";
 import { getAvailableLanguages } from "./utils/transifexLanguages";
-import { userSelect } from "./utils/user";
+import { serializeLoggedInUser, userSelect } from "./utils/user";
 
 type RouteParams = Record<string, string | number | undefined>;
 
@@ -862,7 +861,7 @@ export const analyzePathAndGenerateHTML = async (
       });
       if (user) {
         appendHydrationScript($, "__MIRLO_AUTH__", user.id, {
-          user: serializeUser(user),
+          user: await serializeLoggedInUser(user),
         });
       }
     }

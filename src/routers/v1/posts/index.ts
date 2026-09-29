@@ -7,7 +7,10 @@ import {
   serializePost,
   whereForVisiblePostTrack,
 } from "../../../serializers/post";
-import { checkIsUserSubscriber } from "../../../utils/artist";
+import {
+  checkIsUserSubscriber,
+  getEditableProfileIds,
+} from "../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -89,6 +92,10 @@ export default function () {
         skip: skip ? Number(skip) : undefined,
       });
 
+      const editableProfileIds = user
+        ? await getEditableProfileIds(user.id)
+        : [];
+
       const processedPosts = await Promise.all(
         posts.map(async (p) =>
           serializePost(
@@ -97,7 +104,8 @@ export default function () {
             undefined,
             (p.profileId
               ? await checkIsUserSubscriber(user, p.profileId)
-              : false) || p.profile?.userId === user?.id
+              : false) ||
+              (!!p.profileId && editableProfileIds.includes(p.profileId))
           )
         )
       );

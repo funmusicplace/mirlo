@@ -10,7 +10,7 @@ import {
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import {
   getPlatformFeeForArtist,
-  whereForAllArtistsThisLabelCanAddReleasesFor,
+  whereForAllProfilesUserCanAddReleasesFor,
 } from "../../../../../utils/artist";
 
 export default function () {
@@ -39,7 +39,7 @@ export default function () {
             ? {
                 OR: [
                   {
-                    profile: whereForAllArtistsThisLabelCanAddReleasesFor(
+                    profile: whereForAllProfilesUserCanAddReleasesFor(
                       loggedInUser.id
                     ),
                   },

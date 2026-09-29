@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { FaChevronLeft, FaChevronRight, FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import {
+  canUserEditArtist,
   getArtistAllTiersUrl,
   getArtistManageTiersUrl,
   getArtistTierUrl,
@@ -115,7 +116,7 @@ const SubscriptionTierPage: React.FC<{
   const hasSiblings = paidTiers.length > 1;
   const hasReleases = hasTierReleases(subscriptionTier);
   const hasPerks = hasTierPerks(subscriptionTier);
-  const isOwner = !!user && user.id === artist.userId;
+  const isOwner = canUserEditArtist(user, artist);
   const currentSubscription = getUserSubscriptionToTier(user, subscriptionTier);
   const paymentMethodSubscription =
     !isOwner &&

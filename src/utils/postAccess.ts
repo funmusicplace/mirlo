@@ -1,6 +1,8 @@
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 
+import { canUserEditProfile } from "./artist";
+
 export const getUserSubscriptionsForProfile = async (
   user: User | undefined,
   profileId: number
@@ -24,7 +26,6 @@ export type ProfileSubscription = {
 type PostAccessFields = {
   isPublic: boolean;
   profileId?: number | null;
-  profile?: { userId?: number } | null;
   minimumSubscriptionTier?: { minAmount: number | null } | null;
   postSubscriptionTiers?: { profileSubscriptionTierId: number }[];
 };
@@ -62,7 +63,9 @@ export const getCanUserSeePostContent = async (
   user: User | undefined,
   post: PostAccessFields
 ): Promise<boolean> => {
-  const isProfileOwner = !!(user && post.profile?.userId === user.id);
+  const isProfileOwner = await canUserEditProfile(post.profileId, user, {
+    allowAdmin: false,
+  });
   const subscriptions = post.profileId
     ? await getUserSubscriptionsForProfile(user, post.profileId)
     : [];

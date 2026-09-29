@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import { canUserEditProfile } from "../../../../utils/artist";
 import {
   findTrackGroupIdForSlug,
   trackGroupSingleInclude,
@@ -51,11 +52,11 @@ export default function () {
       const isPublished =
         trackGroup?.publishedAt && trackGroup.publishedAt < new Date();
 
-      const canSeeUnpublished =
-        loggedInUser?.isAdmin ||
-        loggedInUser?.id === trackGroup?.profile.userId;
-
       if (trackGroup && !isPublished) {
+        const canSeeUnpublished = await canUserEditProfile(
+          trackGroup.profileId,
+          loggedInUser
+        );
         if (!canSeeUnpublished) {
           trackGroup = null;
         }

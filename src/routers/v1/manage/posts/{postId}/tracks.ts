@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
+import { whereForAllProfilesUserCanEdit } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 
@@ -25,7 +26,7 @@ export default function () {
       const ownedTrack = await prisma.track.findFirst({
         where: {
           id: trackId,
-          trackGroup: { profile: { userId: req.user.id } },
+          trackGroup: { profile: whereForAllProfilesUserCanEdit(req.user.id) },
         },
       });
       if (!ownedTrack) {
