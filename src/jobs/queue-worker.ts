@@ -19,15 +19,15 @@ import { getSiteSettings } from "../utils/settings";
 import cleanUpOldFilesJob from "./clean-up-old-files";
 import generateAlbumJob from "./generate-album";
 import optimizeImage from "./optimize-image";
+import scheduledTasksJob, { registerScheduledTasks } from "./scheduled-tasks";
 import sendMail from "./send-mail";
 import sendPostNotification from "./send-post-notification";
+import uploadAudioJob from "./upload-audio";
+import verifyAudioJob from "./verify-audio";
 
 import "../queues/send-mail-queue";
 import "../queues/send-post-notification-queue";
 import "../queues/auto-purchase-new-albums-queue";
-
-import uploadAudioJob from "./upload-audio";
-import verifyAudioJob from "./verify-audio";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -143,6 +143,7 @@ yargs
     sendPostNotificationQueue();
     autoPurchaseNewAlbumsQueue();
     cleanUpFilesQueue();
+    scheduledTasksQueueWorker();
   })
   .help().argv;
 
@@ -210,7 +211,7 @@ export async function generateAlbumQueueWorker() {
       lockRenewTime: 5 * 60 * 1000, // Renew every 5 minutes
     },
     "Generate Album worker started",
-    true // includeActiveEvent
+    true
   );
 }
 
@@ -221,4 +222,21 @@ export async function cleanUpFilesQueue() {
     workerOptions,
     "clean up old files worker started"
   );
+}
+
+export async function scheduledTasksQueueWorker() {
+  createWorkerWithLogging(
+    "scheduled-tasks",
+    scheduledTasksJob,
+    {
+      ...workerOptions,
+      concurrency: 1,
+      maxStalledCount: 0,
+    },
+    "Scheduled tasks worker started",
+    true
+  );
+  registerScheduledTasks().catch((e) => {
+    logger.error("Failed to register scheduled tasks", e);
+  });
 }
