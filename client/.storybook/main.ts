@@ -40,6 +40,7 @@ const config: StorybookConfig = {
       /^vite:legacy|^vite-plugin-pwa/.test(plugin.name);
     const plugins = (config.plugins ?? []).flat(Infinity) as PluginOption[];
     config.plugins = plugins.filter((plugin) => !isUnwanted(plugin));
+    config.publicDir = false;
     return config;
   },
 };
