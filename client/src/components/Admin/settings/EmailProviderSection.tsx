@@ -33,6 +33,7 @@ const EmailProviderSection: React.FC = () => {
           <option value="sendgrid">SendGrid</option>
           <option value="mailgun">Mailgun</option>
           <option value="postmark">Postmark</option>
+          <option value="smtp">SMTP</option>
         </SelectEl>
       </FormComponent>
 
@@ -107,6 +108,72 @@ const EmailProviderSection: React.FC = () => {
               type="text"
               className="max-w-md"
               {...register("emailProvider.postmark.apiKey")}
+            />
+          </FormComponent>
+        </fieldset>
+      )}
+
+      {provider === "smtp" && (
+        <fieldset>
+          <legend className="mb-2 font-semibold">SMTP</legend>
+          <FormComponent>
+            <label htmlFor="input-smtp-host">{t("smtpHost")}</label>
+            <InputEl
+              id="input-smtp-host"
+              type="text"
+              className="max-w-md"
+              placeholder="smtp.example.com"
+              {...register("emailProvider.smtp.host")}
+            />
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="input-smtp-port">{t("smtpPort")}</label>
+            <InputEl
+              id="input-smtp-port"
+              type="number"
+              className="max-w-md"
+              aria-describedby="hint-smtp-port"
+              {...register("emailProvider.smtp.port", {
+                setValueAs: (value) =>
+                  value === "" || value === undefined
+                    ? undefined
+                    : Number(value),
+              })}
+            />
+            <small id="hint-smtp-port">{t("smtpPortHint")}</small>
+          </FormComponent>
+          <FormComponent direction="row">
+            <InputEl
+              id="input-smtp-secure"
+              type="checkbox"
+              aria-describedby="hint-smtp-secure"
+              {...register("emailProvider.smtp.secure")}
+            />
+            <div className="flex flex-col">
+              <label htmlFor="input-smtp-secure">{t("smtpSecure")}</label>
+              <small id="hint-smtp-secure" className="max-w-md">
+                {t("smtpSecureHint")}
+              </small>
+            </div>
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="input-smtp-user">{t("smtpUser")}</label>
+            <InputEl
+              id="input-smtp-user"
+              type="text"
+              className="max-w-md"
+              autoComplete="off"
+              {...register("emailProvider.smtp.user")}
+            />
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="input-smtp-password">{t("smtpPassword")}</label>
+            <InputEl
+              id="input-smtp-password"
+              type="password"
+              className="max-w-md"
+              autoComplete="new-password"
+              {...register("emailProvider.smtp.password")}
             />
           </FormComponent>
         </fieldset>
