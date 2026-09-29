@@ -1,16 +1,15 @@
-import { Trans, useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
-import FormComponent from "components/common/FormComponent";
+import Button from "components/common/Button";
 import FormCheckbox from "components/common/FormCheckbox";
+import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import { FormProvider, useForm } from "react-hook-form";
-import Button, { ButtonLink } from "components/common/Button";
+import WelcomeUrlSlugStep from "components/ManageArtist/Welcome/WelcomeUrlSlugStep";
 import React from "react";
-import ArtistSlugInput from "components/common/SlugInput";
-import api from "services/api";
+import { FormProvider, useForm } from "react-hook-form";
+import { Trans, useTranslation } from "react-i18next";
 import { FaArrowRight } from "react-icons/fa";
-import { css } from "@emotion/css";
 import { Link, useNavigate } from "react-router-dom";
+import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 
 const PageWrapper = styled.div`
@@ -36,16 +35,19 @@ function Index() {
   const [localArtist, setLocalArtist] = React.useState<Artist>();
   const { t } = useTranslation("translation", { keyPrefix: "welcome" });
   const methods = useForm<FormData>();
-  const { register, handleSubmit, reset, formState, watch, getValues } =
-    methods;
-  const slugInputRef = React.useRef<HTMLInputElement>(null);
+  const { register, handleSubmit, reset } = methods;
 
-  const vals = {
-    urlSlug: watch("urlSlug"),
-    name: watch("name"),
-    confirmContentPolicy: watch("confirmContentPolicy"),
-  };
-  const localArtistLink = `/${localArtist?.urlSlug}`;
+  const saveArtist = React.useCallback(
+    async (artist: Artist, data: FormData) => {
+      const response = await api.put<Partial<Artist>, { result: Artist }>(
+        `manage/artists/${artist.id}`,
+        { name: data.name, urlSlug: data.urlSlug }
+      );
+      setLocalArtist(response.result);
+      return response.result;
+    },
+    []
+  );
 
   const onClickNext = React.useCallback(
     async (data: FormData) => {
@@ -65,19 +67,10 @@ function Index() {
             urlSlug: response.result.urlSlug,
             confirmContentPolicy: true,
           });
-        } else if (localArtist && step > 1) {
-          const response = await api.put<Partial<Artist>, { result: Artist }>(
-            `manage/artists/${localArtist.id}`,
-            data
-          );
-
-          setLocalArtist(response.result);
-          reset(response.result);
-        }
-        if (localArtist && steps[step] === "urlSlug") {
-          navigate(`/manage/artists/${localArtist.id}/customize`);
-        } else {
           setStep((s) => s + 1);
+        } else if (localArtist && steps[step] === "urlSlug") {
+          await saveArtist(localArtist, data);
+          navigate(`/manage/artists/${localArtist.id}/customize`);
         }
       } catch (e) {
         console.error(e);
@@ -85,25 +78,21 @@ function Index() {
         setIsLoading(false);
       }
     },
-    [
-      vals.confirmContentPolicy,
-      localArtist,
-      localArtistLink,
-      navigate,
-      reset,
-      step,
-      userId,
-    ]
+    [localArtist, navigate, reset, saveArtist, step, userId]
   );
 
-  const nameValue = watch("name");
-  const contentPolicy = watch("confirmContentPolicy");
-
-  React.useEffect(() => {
-    if (step > 0) {
-      slugInputRef.current?.focus();
+  const onGoToArtistPage = handleSubmit(async (data: FormData) => {
+    if (!localArtist) return;
+    setIsLoading(true);
+    try {
+      const saved = await saveArtist(localArtist, data);
+      navigate(`/${saved.urlSlug}`);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
     }
-  }, [slugInputRef.current, step]);
+  });
 
   return (
     <FormProvider {...methods}>
@@ -159,52 +148,12 @@ function Index() {
             </Button>
           )}
 
-          {step > 0 && (
-            <FormComponent>
-              <label htmlFor="input-slug">{t("showInTheURL")}</label>
-              <small id="description-slug">
-                <Trans
-                  i18nKey="thisWillLookLikeURL"
-                  t={t}
-                  components={{
-                    span: <span className="font-bold p-1 bg-gray-200"></span>,
-                  }}
-                  values={{
-                    url: `${window.location.host}/${vals.urlSlug}`,
-                  }}
-                />
-              </small>
-              <ArtistSlugInput
-                ariaDescribedBy="description-slug"
-                id="input-slug"
-                ref={slugInputRef}
-                type="artist"
-                currentArtistId={localArtist?.id}
-              />
-            </FormComponent>
-          )}
-
-          {step === 1 && (
-            <Button
+          {steps[step] === "urlSlug" && (
+            <WelcomeUrlSlugStep
+              artistId={localArtist?.id}
               isLoading={isLoading}
-              type="submit"
-              endIcon={<FaArrowRight />}
-            >
-              {t("customizeYourPage")}
-            </Button>
-          )}
-
-          {step > 0 && (
-            <ButtonLink
-              to={localArtistLink}
-              variant="outlined"
-              endIcon={<FaArrowRight />}
-              className={css`
-                margin-top: 1rem;
-              `}
-            >
-              {t("takeMeToTheArtistPage")}
-            </ButtonLink>
+              onGoToArtistPage={onGoToArtistPage}
+            />
           )}
         </PageWrapper>
       </form>

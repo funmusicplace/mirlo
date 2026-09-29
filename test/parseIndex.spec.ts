@@ -3,7 +3,8 @@ import assert from "node:assert";
 import prisma from "@mirlo/prisma";
 import * as cheerio from "cheerio";
 import * as dotenv from "dotenv";
-import { describe, it, beforeEach } from "mocha";
+import { describe, it, beforeEach, afterEach } from "mocha";
+import sinon from "sinon";
 
 dotenv.config();
 
@@ -12,6 +13,10 @@ import {
   getTrackGroupWidget,
   getTrackWidget,
 } from "../src/parseIndex/widgetUrls";
+import {
+  __resetAvailableLanguagesForTests,
+  refreshAvailableLanguages,
+} from "../src/utils/transifexLanguages";
 
 import {
   clearTables,
@@ -889,6 +894,52 @@ describe("analyzePathAndGenerateHTML", () => {
         $("#__MIRLO_POST__").length === 0,
         "unexpected __MIRLO_POST__ on home"
       );
+    });
+  });
+});
+
+describe("analyzePathAndGenerateHTML available languages", () => {
+  const originalToken = process.env.TRANSIFEX_API_TOKEN;
+
+  afterEach(() => {
+    sinon.restore();
+    process.env.TRANSIFEX_API_TOKEN = originalToken;
+    __resetAvailableLanguagesForTests();
+  });
+
+  it("doesn't inject a language list when nothing is cached", async () => {
+    __resetAvailableLanguagesForTests();
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/", $);
+    assert.equal($("#__MIRLO_LANGUAGES__").length, 0);
+  });
+
+  it("injects the cached Transifex language list", async () => {
+    process.env.TRANSIFEX_API_TOKEN = "secret";
+    sinon.stub(globalThis, "fetch").resolves(
+      new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: "o:mirlo:p:mirlo:r:r1:l:uk",
+              attributes: { translated_strings: 9, total_strings: 10 },
+              relationships: { language: { data: { id: "l:uk" } } },
+            },
+          ],
+        })
+      )
+    );
+    await refreshAvailableLanguages();
+
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/", $);
+    const script = $("#__MIRLO_LANGUAGES__");
+    assert.equal(script.attr("type"), "application/json");
+    assert.deepEqual(JSON.parse(script.text()), {
+      languages: [
+        { short: "en", name: "English" },
+        { short: "uk", name: "Українська" },
+      ],
     });
   });
 });

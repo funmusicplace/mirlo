@@ -42,7 +42,7 @@ export interface SettingsFromAPI {
       webhookConnectSigningSecret?: string;
     };
     emailProvider?: {
-      provider?: "sendgrid" | "mailgun" | "postmark";
+      provider?: "sendgrid" | "mailgun" | "postmark" | "smtp";
       fromEmail?: string;
       sendgrid?: {
         apiKey?: string;
@@ -53,6 +53,13 @@ export interface SettingsFromAPI {
       };
       postmark?: {
         apiKey?: string;
+      };
+      smtp?: {
+        host?: string;
+        port?: number;
+        secure?: boolean;
+        user?: string;
+        password?: string;
       };
     };
     cloudflareTurnstileSecret?: string;

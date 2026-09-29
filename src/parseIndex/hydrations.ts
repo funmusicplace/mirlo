@@ -5,6 +5,13 @@ import { serializePost } from "../serializers/post";
 import { processSingleTrack } from "../serializers/track";
 import { processSingleTrackGroup } from "../serializers/trackGroup";
 
+/**
+ * JSON.stringify, with "<" escaped so a value containing "</script>" can't
+ * close the tag early. JSON.parse turns "\u003c" back into "<".
+ */
+export const serializeForScript = (data: unknown) =>
+  JSON.stringify(data).replace(/</g, "\\u003c");
+
 export type HydrationData = {
   scriptId: string;
   objectId: string | number;
@@ -25,7 +32,7 @@ export const appendHydrationScript = (
   try {
     const injectedAt = new Date().toISOString();
     $("head").append(
-      `<script id="${scriptId}" type="application/json" data-object-id="${objectId}" data-injected-at="${injectedAt}"${artistId ? ` data-artist-id="${artistId}"` : ""}>${JSON.stringify(data)}</script>`
+      `<script id="${scriptId}" type="application/json" data-object-id="${objectId}" data-injected-at="${injectedAt}"${artistId ? ` data-artist-id="${artistId}"` : ""}>${serializeForScript(data)}</script>`
     );
   } catch (err) {
     console.error(

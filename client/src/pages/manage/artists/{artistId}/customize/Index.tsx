@@ -4,10 +4,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import ArtistSlugInput from "components/common/SlugInput";
 import { Toggle } from "components/common/Toggle";
 import DeleteArtist from "components/ManageArtist/DeleteArtist";
 import ArtistFormColors from "components/ManageArtist/ManageArtistDetails/ArtistFormColors";
+import ArtistIdentitySection from "components/ManageArtist/ManageArtistDetails/ArtistIdentitySection";
 import ArtistPaymentReceiver from "components/ManageArtist/ManageArtistDetails/ArtistPaymentReceiver";
 import CustomNamesForTabs from "components/ManageArtist/ManageArtistDetails/CustomNamesForTabs";
 import LabelConfirmation from "components/ManageArtist/ManageArtistDetails/LabelConfirmation";
@@ -132,7 +132,7 @@ export const Index: React.FC = () => {
   React.useEffect(() => {
     if (existingId) {
       const defaults = generateDefaults(artist);
-      methods.reset(defaults);
+      methods.reset(defaults, { keepDirtyValues: true });
     }
   }, [artist, existingId, methods]);
 
@@ -143,9 +143,15 @@ export const Index: React.FC = () => {
   const isPending = isCreatePending || isUpdatePending;
   const client = useQueryClient();
 
-  const onSuccess = React.useCallback(() => {
-    snackbar(t("updatedArtist"), { type: "success" });
-  }, [existingId, t, snackbar]);
+  const onSuccess = React.useCallback(
+    (updated?: Artist) => {
+      if (updated) {
+        methods.reset(generateDefaults({ ...artist, ...updated }));
+      }
+      snackbar(t("updatedArtist"), { type: "success" });
+    },
+    [artist, methods, t, snackbar]
+  );
 
   const onError = React.useCallback(() => {
     snackbar("Something went wrong with the API", { type: "warning" });
@@ -212,80 +218,7 @@ export const Index: React.FC = () => {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onValidSubmit)}>
           <div>
-            <ArtistFormSection
-              className={css`
-                display: flex;
-              `}
-            >
-              <div
-                className={css`
-                  max-width: 15rem;
-                  margin-right: 2rem;
-                `}
-              >
-                <FormComponent>
-                  <UploadArtistImage
-                    existing={artist}
-                    imageTypeDescription={t("yourAvatar")}
-                    imageType="avatar"
-                    height="auto"
-                    width="100%"
-                    maxDimensions="1500x1500"
-                    maxSize="15mb"
-                  />
-                </FormComponent>
-              </div>
-
-              <div
-                className={css`
-                  flex-grow: 1;
-                `}
-              >
-                <FormComponent>
-                  <label htmlFor="input-name">{t("displayName")} </label>
-                  <SavingInput
-                    formKey="name"
-                    id="input-name"
-                    url={`manage/artists/${artist.id}`}
-                    extraData={{}}
-                  />
-                </FormComponent>
-                <FormComponent
-                  className={css`
-                    width: 100%;
-                  `}
-                >
-                  <label htmlFor="input-slug">{t("urlSlug")} </label>
-                  <ArtistSlugInput
-                    currentArtistId={existingId}
-                    id="input-slug"
-                    type="artist"
-                  />
-                </FormComponent>
-                <FormComponent>
-                  <label htmlFor="input-description">
-                    {t("shortDescription")}
-                  </label>
-                  <SavingInput
-                    formKey="shortDescription"
-                    id="input-description"
-                    maxLength={160}
-                    url={`manage/artists/${artist.id}`}
-                    extraData={{}}
-                  />
-                </FormComponent>
-                <FormComponent>
-                  <label htmlFor="textarea-bio">{t("bio")}</label>
-                  <SavingInput
-                    formKey="bio"
-                    id="textarea-bio"
-                    rows={7}
-                    url={`manage/artists/${artist.id}`}
-                    extraData={{}}
-                  />
-                </FormComponent>
-              </div>
-            </ArtistFormSection>
+            <ArtistIdentitySection artist={artist} />
             <ArtistFormSection isOdd>
               <div
                 className={css`

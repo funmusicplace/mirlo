@@ -3,8 +3,11 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
+import {
+  serializePost,
+  whereForVisiblePostTrack,
+} from "../../../serializers/post";
 import { checkIsUserSubscriber } from "../../../utils/artist";
-import { serializePost } from "../../../serializers/post";
 
 export default function () {
   const operations = {
@@ -73,6 +76,7 @@ export default function () {
           profile: true,
           featuredImage: true,
           tracks: {
+            where: whereForVisiblePostTrack(),
             orderBy: {
               order: "asc",
             },

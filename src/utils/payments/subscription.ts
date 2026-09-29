@@ -15,14 +15,6 @@ import { calculatePlatformPercent } from "../processingPayments";
 import { getPaymentProcessor } from "./PaymentProcessor";
 import { resolveArtistPaymentContext } from "./purchase";
 
-export const SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES = [
-  "US",
-  "GB",
-  "CA",
-  "AU",
-  "NZ",
-];
-
 const resolveTierAndAmount = async (
   artistId: number,
   tierId: number,
@@ -109,7 +101,6 @@ export const initiateOnlineSubscription = async ({
       stripeAccountId: string;
       setupIntentId: string;
       requiresShipping: boolean;
-      allowedCountries?: string[];
     }
 > => {
   const { tier, resolvedAmount } = await resolveTierAndAmount(
@@ -166,9 +157,6 @@ export const initiateOnlineSubscription = async ({
     existingSubscription?.stripeSubscriptionKey ?? undefined;
 
   const requiresShipping = !!tier.collectAddress;
-  const allowedCountries = tier.collectAddress
-    ? SUBSCRIPTION_SHIPPING_ALLOWED_COUNTRIES
-    : undefined;
 
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
@@ -186,7 +174,6 @@ export const initiateOnlineSubscription = async ({
         : undefined,
       oldStripeSubscriptionKey,
       requiresShipping,
-      allowedCountries,
     });
 
   return {
@@ -194,7 +181,6 @@ export const initiateOnlineSubscription = async ({
     stripeAccountId,
     setupIntentId,
     requiresShipping,
-    allowedCountries,
   };
 };
 

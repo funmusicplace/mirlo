@@ -162,7 +162,8 @@ You should see 6 long-running services: api, background, pgsql, redis, garage
 it and exits 0.
 
 MailHog is a dev-only mail catcher. Until you configure a real email provider
-(Mailgun, Postmark, or SendGrid) in the admin settings panel, password resets
+(Mailgun, Postmark, SendGrid, or plain SMTP with an existing mailbox from Gmail,
+Fastmail, your domain host, etc.) in the admin settings panel, password resets
 and other transactional emails go nowhere: with `NODE_ENV=production` they're
 silently dropped, and otherwise they land in MailHog's own inbox at
 `http://localhost:8025` (see

@@ -13,7 +13,7 @@ const viewsDir = path.join(__dirname, "../emails");
 
 /**
  * Creates a nodemailer transport based on site settings
- * Supports SendGrid, Mailgun, and MailHog (development) providers
+ * Supports SendGrid, Mailgun, Postmark, plain SMTP, and MailHog (development) providers
  * Falls back to JSON transport if no provider is configured
  */
 async function createTransport(): Promise<Transporter> {
@@ -71,6 +71,17 @@ async function createTransport(): Promise<Transporter> {
           },
         })
       );
+    }
+
+    if (emailSettings?.provider === "smtp" && emailSettings?.smtp?.host) {
+      const { host, port, secure, user, password } = emailSettings.smtp;
+      logger.info(`Creating SMTP transport for ${host}`);
+      return nodemailer.createTransport({
+        host,
+        port: port || (secure ? 465 : 587),
+        secure: !!secure,
+        auth: user ? { user, pass: password } : undefined,
+      });
     }
 
     // Fallback: check legacy environment variable

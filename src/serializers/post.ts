@@ -1,8 +1,9 @@
-import { Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
+import { Prisma, Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
 import { finalArtistAvatarBucket, finalPostImageBucket } from "../utils/minio";
+import { whereForVisibleTrackGroup } from "../utils/trackGroup";
 import { isTrackPlayable } from "../utils/trackPlayability";
 
 import {
@@ -15,6 +16,13 @@ const extractFirstParagraph = (html: string): string | null => {
   const match = html.match(/<p[^>]*>[\s\S]*?<\/p>/);
   return match ? match[0] : null;
 };
+
+export const whereForVisiblePostTrack = (): Prisma.PostTrackWhereInput => ({
+  track: {
+    deletedAt: null,
+    trackGroup: whereForVisibleTrackGroup(),
+  },
+});
 
 /**
  * Prisma include for fetching a public post with everything needed to
@@ -32,6 +40,7 @@ const extractFirstParagraph = (html: string): string | null => {
  */
 export const postIncludeForUser = (userId?: number) => ({
   tracks: {
+    where: whereForVisiblePostTrack(),
     include: {
       track: {
         select: {

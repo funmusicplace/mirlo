@@ -73,6 +73,14 @@ export const deleteMerch = async (merchId: string) => {
 const stripeBannedDestinations =
   "AS, CX, CC, CU, HM, IR, KP, MH, FM, NF, MP, PW, SD, SY, UM, VI".split(", ");
 
+export const getStripeShippableCountries = (exclude: string[] = []) =>
+  countryCodesCurrencies
+    .map((country) => country.countryCode)
+    .filter(
+      (code) =>
+        !stripeBannedDestinations.includes(code) && !exclude.includes(code)
+    );
+
 const SCHENGEN_COUNTRY_CODES = [
   "AT",
   "BE",
@@ -199,16 +207,9 @@ export const calculateMerchShippingCost = (
       (d) => d.destinationCountry !== ""
     );
 
-    allowedCountries = countryCodesCurrencies
-      .map((country) => {
-        const inSpecific = specificShippingCosts.find(
-          (d) => d.destinationCountry === country.countryCode
-        );
-        const banned = stripeBannedDestinations.includes(country.countryCode);
-        if (banned || inSpecific) return null;
-        return country.countryCode;
-      })
-      .filter((country): country is string => !!country);
+    allowedCountries = getStripeShippableCountries(
+      specificShippingCosts.map((d) => d.destinationCountry as string)
+    );
   }
 
   const costCents =

@@ -51,6 +51,16 @@ At that point the translations become available for translators to translate in 
 
 If you want to discuss or edit English language strings with that please edit the JSON file in the repo directly!
 
+### Which languages show up in the language picker
+
+Once a language is at least 70% translated in Transifex it's offered in Mirlo's language picker automatically. The server checks Transifex when it starts and then once a week, so a language that crosses the threshold appears after the next deploy or within a week.
+
+For people running their own instance, this is configured with these environment variables on the API server:
+
+- `TRANSIFEX_API_TOKEN`: a Transifex REST API token (from your Transifex user settings). It stays on the server and is never sent to browsers. If it's blank, Mirlo falls back to a built-in list of languages.
+- `TRANSIFEX_LANGUAGE_THRESHOLD`: the percentage (0-100) of strings that must be translated. Defaults to `70`.
+- `TRANSIFEX_ORGANIZATION` / `TRANSIFEX_PROJECT`: the Transifex organization and project slugs. Both default to `mirlo`.
+
 ## Translating the documentation site (docs.mirlo.space)
 
 Unlike the main Mirlo app, this documentation site is **not** wired up to Transifex — VitePress content is plain Markdown, not JSON strings, so translations here are done directly via pull request.

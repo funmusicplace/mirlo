@@ -57,6 +57,7 @@ import {
   whereForPublishedTrackGroups,
   whereForVisibleTrackGroup,
 } from "./utils/trackGroup";
+import { getAvailableLanguages } from "./utils/transifexLanguages";
 import { userSelect } from "./utils/user";
 
 type RouteParams = Record<string, string | number | undefined>;
@@ -896,6 +897,15 @@ export const analyzePathAndGenerateHTML = async (
   } catch (error) {
     console.error("Error in analyzePathAndGenerateHTML:", error);
     // Silently fail - don't crash page rendering
+  }
+
+  // Languages offered in the UI, from the in-memory Transifex cache. Never
+  // fetches; if nothing is cached the client uses its built-in list.
+  const availableLanguages = getAvailableLanguages();
+  if (availableLanguages) {
+    appendHydrationScript($, "__MIRLO_LANGUAGES__", "languages", {
+      languages: availableLanguages,
+    });
   }
 
   const settings = await getSiteSettings();

@@ -43,6 +43,7 @@ import {
 } from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
 import { refreshStripeClient } from "./utils/stripe";
+import { startAvailableLanguagesRefresh } from "./utils/transifexLanguages";
 import wellKnown from "./wellKnown";
 
 const { createBullBoard } = require("@bull-board/api");
@@ -345,6 +346,9 @@ process.on("unhandledRejection", (reason) => {
 });
 
 app.listen(process.env.PORT, async () => {
+  // Fire and forget: page renders read the cached list and fall back to the
+  // client's built-in languages until (or unless) this succeeds.
+  startAvailableLanguagesRefresh();
   const settings = await getSiteSettings();
   setCdnUrl(settings.cdnUrl ?? undefined);
   await refreshStripeClient();
