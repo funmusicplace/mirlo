@@ -15,7 +15,7 @@ It could be that something is repeatedly going wrong at a very regular interval-
 
 We've got three recurring tasks: every-minute-tasks (runs every 10 minutes), every-day-tasks (22:00 UTC) and every-month-tasks (1st of the month, 00:00 UTC). They run inside the `background` worker as BullMQ job schedulers on the `scheduled-tasks` queue.
 
-You can see what these jobs do in `src/jobs/every-minute-tasks.ts`, `src/jobs/every-day-tasks.ts` and `src/jobs/every-month-tasks.ts`. The schedules themselves are in `src/jobs/scheduled-tasks.ts`. Scheduled runs are never retried, so a failing run won't immediately repeat itself — but the next scheduled run will try again.
+You can see what these jobs do in `src/jobs/every-minute-tasks.ts`, `src/jobs/every-day-tasks.ts` and `src/jobs/every-month-tasks.ts`. The schedules themselves are in `src/jobs/scheduled-tasks.ts`. Scheduled runs are never retried, so a failing run won't immediately repeat itself, but the next scheduled run will try again. Setting `SCHEDULED_TASKS_ENABLED=false` on the worker turns them off.
 
 Currently there's nothing critical that these tasks do that needs to run every ten minutes, so it is safe to pause them until we're able to figure out what is wrong. As an admin, turn on "show queue dashboard" in Admin Settings if it isn't already, then go to `/admin/queues` on the API, open the `scheduled-tasks` queue and pause it. This stops all three tasks without affecting the other queues (uploads, emails, etc.). Resume it from the same page once things are fixed.
 

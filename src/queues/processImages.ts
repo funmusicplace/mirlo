@@ -4,7 +4,7 @@ import sharp from "sharp";
 
 import { REDIS_CONFIG } from "../config/redis";
 import sharpConfig from "../config/sharp";
-import { logger } from "../jobs/queue-worker";
+import logger from "../logger";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
 import {

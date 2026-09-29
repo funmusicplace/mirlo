@@ -147,7 +147,7 @@ const sendOutMonthlyIncomeReport = async () => {
         name: mappedArtists[Number(artist[0].id)]?.user?.name || "",
       };
       try {
-        sendMail<MonthlyIncomeReportEmailType>({
+        await sendMail<MonthlyIncomeReportEmailType>({
           data: {
             template: "announce-monthly-income-report",
             message: {

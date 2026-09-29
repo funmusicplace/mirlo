@@ -80,6 +80,7 @@ services:
     plan: standard # optional (defaults to starter)
     dockerfilePath: ./Dockerfile # optional
     dockerCommand: node --conditions=mirlo-dist --enable-source-maps dist/jobs/queue-worker.js run
+    maxShutdownDelaySeconds: 300
     disk: # this disk gets used to process audio. They should get moved to the
       # minIO service and deleted after upload
       name: data

@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import logger from "../logger";
 
 import sendOnboardingEmail from "./send-onboarding-email";

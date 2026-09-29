@@ -1,4 +1,6 @@
 // import cleanUpFiles from "./clean-up-files";
+import "dotenv/config";
+
 import logger from "../logger";
 
 import cleanUpTrackGroups from "./clean-up-trackgroups";
