@@ -10,6 +10,8 @@ import {
   clearTables,
   createProfile,
   createPost,
+  createTrack,
+  createTrackGroup,
   createUser,
 } from "../../utils";
 import { requestApp } from "../utils";
@@ -141,6 +143,48 @@ describe("posts/{id}", () => {
 
       assert.equal(response.body.result.content, null);
       assert.equal(response.body.result.isContentHidden, true);
+    });
+
+    it("should GET / without tracks whose artist has been deleted", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, {
+        isDraft: false,
+        isPublic: true,
+      });
+
+      const trackGroup = await createTrackGroup(profile.id);
+      const visibleTrack = await createTrack(trackGroup.id);
+
+      const { user: leftUser } = await createUser({
+        email: "left@artist.com",
+      });
+      const leftProfile = await createProfile(leftUser.id, {
+        urlSlug: "left-artist",
+      });
+      const leftTrackGroup = await createTrackGroup(leftProfile.id);
+      const leftTrack = await createTrack(leftTrackGroup.id);
+      await prisma.profile.update({
+        where: { id: leftProfile.id },
+        data: { deletedAt: new Date() },
+      });
+
+      await prisma.postTrack.createMany({
+        data: [
+          { postId: post.id, trackId: visibleTrack.id, order: 0 },
+          { postId: post.id, trackId: leftTrack.id, order: 1 },
+        ],
+      });
+
+      const response = await requestApp
+        .get(`posts/${post.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.deepEqual(
+        response.body.result.tracks.map((t: { trackId: number }) => t.trackId),
+        [visibleTrack.id]
+      );
     });
   });
 });
