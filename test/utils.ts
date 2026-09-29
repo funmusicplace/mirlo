@@ -244,6 +244,9 @@ export const createTrackGroup = async (
       hideFromSearch: data?.hideFromSearch ?? false,
       platformPercent: data?.platformPercent,
       ...(data?.isPublic !== undefined && { isPublic: data.isPublic }),
+      ...(data?.adminEnabled !== undefined && {
+        adminEnabled: data.adminEnabled,
+      }),
       ...(data?.isHiddenTrackGroupForSongDrafts !== undefined && {
         isHiddenTrackGroupForSongDrafts: data.isHiddenTrackGroupForSongDrafts,
       }),

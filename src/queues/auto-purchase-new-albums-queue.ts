@@ -3,9 +3,9 @@ import { Queue, QueueEvents } from "bullmq";
 
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
-import { getClient } from "../utils/getClient";
-import { processSingleTrackGroup } from "../serializers/trackGroup";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
+import { processSingleTrackGroup } from "../serializers/trackGroup";
+import { getClient } from "../utils/getClient";
 import { registerPurchase } from "../utils/trackGroup";
 
 import { sendMailQueue } from "./send-mail-queue";
@@ -140,6 +140,7 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
         pricePaid: 0,
         currencyPaid: "usd",
         paymentProcessorKey: null,
+        proGratis: true,
       });
     });
 
