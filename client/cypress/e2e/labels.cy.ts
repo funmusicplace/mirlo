@@ -59,83 +59,70 @@ describe("labels", () => {
   it("allows user to toggle label account on", () => {
     cy.visit("/account");
 
-    // Find and click the label account toggle
-    // Look for a label element containing "Label" text and locate the toggle switch within its parent
-    cy.get("label")
-      .filter((index, el) => el.textContent?.includes("Label"))
-      .first()
-      .should("exist")
-      .parent()
-      .find(".toggle")
-      .should("exist")
-      .click();
+    // The switch input is visually hidden (sr-only) behind its styled track
+    cy.findByRole("switch", { name: "Label/Collective account" }).click({
+      force: true,
+    });
 
-    // Submit the form by clicking the update button
-    cy.contains("button", /update|UpdateAccountButton/i).click();
+    cy.findByRole("button", { name: "Update account" }).click();
 
-    // Verify success message appears
-    cy.contains(/updated|profileUpdated/i, { timeout: 5000 }).should("exist");
+    cy.findByText("Profile updated", { timeout: 5000 }).should("exist");
   });
 
   it("shows manage label link after enabling label account", () => {
     cy.visit("/account");
 
-    // Check if label account is already enabled by looking for manage label link
-    cy.get("body").then(($body) => {
-      if (!$body.text().includes("manageLabel")) {
-        // Not enabled, so enable it
-        cy.get("label")
-          .filter((index, el) => el.textContent?.includes("Label"))
-          .first()
-          .should("exist")
-          .parent()
-          .find(".toggle")
-          .should("exist")
-          .click();
-
-        cy.contains("button", /update|UpdateAccountButton/i).click();
-        cy.contains(/updated|profileUpdated/i, { timeout: 5000 }).should(
-          "exist"
-        );
+    // Enable the label account if an earlier test hasn't already
+    cy.findByRole("switch", { name: "Label/Collective account" }).then(
+      ($switch) => {
+        if (!$switch.is(":checked")) {
+          cy.wrap($switch).click({ force: true });
+          cy.findByRole("button", { name: "Update account" }).click();
+          cy.findByText("Profile updated", { timeout: 5000 }).should("exist");
+        }
       }
-    });
+    );
 
-    // Verify the manage label link exists
-    cy.contains("a", /manage|label|manageLabel/i).should("exist");
+    cy.findByRole("link", { name: "Manage label" }).should("exist");
   });
 
   describe("is label", () => {
     it("allows adding an existing artist to the label roster", () => {
       cy.visit("/account/label");
 
-      // Type artist name in the autocomplete search field
-      // The input has id="input-existing-artist"
-      cy.get("#input-existing-artist").first().type(artistName, { delay: 50 });
+      cy.findByRole("searchbox", { name: "Invite an existing artist." }).type(
+        artistName,
+        { delay: 50 }
+      );
 
-      // Wait for the autocomplete dropdown to show results
-      // The results render in a SearchResultsDiv with buttons
-      cy.get("button").contains(artistName, { timeout: 5000 }).should("exist");
-
-      // Click the artist option in the autocomplete dropdown
-      cy.get("button").contains(artistName).first().click();
+      // Wait for the autocomplete dropdown to show results, then pick the artist
+      cy.findByRole("button", {
+        name: new RegExp(artistName),
+        timeout: 5000,
+      }).click();
 
       // Verify the artist was successfully added to the roster
-      // The artist should now appear in the roster list/table
-      cy.get("body", { timeout: 5000 }).contains(artistName).should("exist");
+      cy.findAllByText(new RegExp(artistName), { timeout: 5000 }).should(
+        "exist"
+      );
     });
 
     it("displays added artist in the roster table", () => {
       cy.visit("/account/label");
 
-      // Search and add artist to roster
-      cy.get("#input-existing-artist").first().type(artistName, { delay: 50 });
+      cy.findByRole("searchbox", { name: "Invite an existing artist." }).type(
+        artistName,
+        { delay: 50 }
+      );
 
-      // Wait and click the artist option
-      cy.get("button").contains(artistName, { timeout: 5000 }).first().click();
+      cy.findByRole("button", {
+        name: new RegExp(artistName),
+        timeout: 5000,
+      }).click();
 
-      // Verify the artist is displayed in the roster
-      // After being added, the artist should appear in the roster display
-      cy.contains(artistName, { timeout: 5000 }).should("be.visible");
+      cy.findAllByText(new RegExp(artistName), { timeout: 5000 })
+        .first()
+        .should("be.visible");
     });
   });
 });
