@@ -123,10 +123,11 @@ export default function () {
         }
         return res.status(200).json({ result: settings.contentPolicy });
       }
+      if (setting === "instanceArtist") {
+        return res.status(200).json({ result: null });
+      }
       return res.status(200).json({
-        result: Object.keys(settings).includes(setting)
-          ? settings[setting as keyof typeof settings]
-          : settings,
+        result: settings[setting as keyof typeof settings] ?? null,
       });
     } catch (e) {
       next(e);
