@@ -224,7 +224,11 @@ async function saveAlbumForm(opts: {
       `v1/manage/fundraisers/${fundraiserId}`,
       {
         goalAmount: toCentsOrNull(formData.goalAmount) ?? 0,
-        isAllOrNothing: !!formData.isAllOrNothing,
+        // Undefined when the checkbox is disabled (pledges exist); leave it as is
+        isAllOrNothing:
+          formData.isAllOrNothing === undefined
+            ? undefined
+            : !!formData.isAllOrNothing,
         name: formData.fundraiserName,
         description: formData.fundraiserDescription,
       }

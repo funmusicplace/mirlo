@@ -6,18 +6,17 @@ import { isEmpty } from "lodash";
 import React from "react";
 import { FormProvider, Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { getArtistUrl } from "utils/artist";
 import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
 
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
-import EmbeddedStripeForm from "./stripe/EmbeddedStripe";
+import PurchaseElements from "./Purchase/PurchaseElements";
+import { useSubscriptionCheckout } from "./Purchase/useSubscriptionCheckout";
 import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 
 const SupportArtistTiersForm: React.FC<{
@@ -38,6 +37,7 @@ const SupportArtistTiersForm: React.FC<{
     data: artistDetails,
     tiers: options,
     currentTier,
+    refetch,
   } = useGetArtistSubscriptionTiers(artist.urlSlug);
 
   const methods = useForm<{
@@ -59,11 +59,13 @@ const SupportArtistTiersForm: React.FC<{
     },
   });
 
-  const navigate = useNavigate();
-  const [checkout, setCheckout] = React.useState<{
-    clientSecret: string;
-    stripeAccountId: string;
-  } | null>(null);
+  const {
+    checkout,
+    isLoading: isStartingPurchase,
+    startPurchase,
+    handlePurchaseComplete,
+    returnUrl,
+  } = useSubscriptionCheckout({ artist, refresh: refetch });
 
   const subscribeToTier = async () => {
     try {
@@ -71,21 +73,17 @@ const SupportArtistTiersForm: React.FC<{
       const tier = methods.getValues("tier");
       const email = methods.getValues("email");
       if (!tier.isDefaultTier) {
-        const response = await api.post<
-          { tierId: number; email: string; embedded: boolean },
-          { clientSecret: string; stripeAccountId: string }
-        >(`artists/${artist.id}/subscribe`, {
-          tierId: tier.id,
-          email,
-          embedded: true,
+        const result = await startPurchase({
+          artistId: artist.id,
+          items: [{ type: "subscription", tierId: tier.id }],
+          email: user ? undefined : email,
         });
-        if (response.clientSecret) {
-          setCheckout({
-            clientSecret: response.clientSecret,
-            stripeAccountId: response.stripeAccountId,
+        if (result?.success) {
+          snackbar(t("subscriptionTierChanged", { tierName: tier.name }), {
+            type: "success",
           });
-          return;
         }
+        return;
       } else {
         // @ts-ignore
         const cfTurnstile = turnstile.getResponse();
@@ -105,13 +103,6 @@ const SupportArtistTiersForm: React.FC<{
       onFinishedSubscribing?.(false);
     }
   };
-
-  const handleEmbeddedComplete = React.useCallback(() => {
-    const params = new URLSearchParams();
-    params.set("purchaseType", "subscription");
-    refreshLoggedInUser();
-    navigate(`${getArtistUrl(artist)}/checkout-complete?${params.toString()}`);
-  }, [artist, navigate, refreshLoggedInUser]);
 
   const value = methods.watch("tier");
 
@@ -138,14 +129,16 @@ const SupportArtistTiersForm: React.FC<{
     }
   }, [singleOption, singleOptionCurrency, value?.id, methods]);
 
-  // All hooks must run before this early return, otherwise React throws
-  // "Rendered fewer hooks than expected" once `checkout` is set.
   if (checkout) {
     return (
-      <EmbeddedStripeForm
+      <PurchaseElements
         clientSecret={checkout.clientSecret}
         stripeAccountId={checkout.stripeAccountId}
-        onComplete={handleEmbeddedComplete}
+        requiresShipping={checkout.requiresShipping}
+        allowedCountries={checkout.allowedCountries}
+        returnUrl={returnUrl}
+        onSuccess={handlePurchaseComplete}
+        buttonLabel={t("letsSupport") ?? ""}
       />
     );
   }
@@ -155,6 +148,29 @@ const SupportArtistTiersForm: React.FC<{
 
   const isSubscribedToCurrentTier =
     value && currentTier && value.id === currentTier.id;
+
+  let buttonLabel: string;
+  if (isSubscribedToCurrentTier) {
+    buttonLabel = value.isDefaultTier
+      ? t("youAreFollowingThisArtist", { artistName: artist.name })
+      : t("youAreAlreadySubscribed");
+  } else if (!value) {
+    buttonLabel = t("chooseToContinue");
+  } else if (value.isDefaultTier) {
+    buttonLabel = t("followArtist", { artistName: artist.name });
+  } else {
+    buttonLabel = t(
+      value.interval === "MONTH"
+        ? "continueWithPriceMonthly"
+        : "continueWithPriceYearly",
+      {
+        amount: moneyDisplay({
+          amount: value.minAmount / 100,
+          currency: value.currency,
+        }),
+      }
+    );
+  }
 
   return (
     <>
@@ -184,7 +200,7 @@ const SupportArtistTiersForm: React.FC<{
 
       <ArtistButton
         onClick={() => subscribeToTier()}
-        isLoading={isCheckingForSubscription}
+        isLoading={isCheckingForSubscription || isStartingPurchase}
         disabled={!noErrors || !value || isSubscribedToCurrentTier}
         wrap
         className={css`
@@ -192,29 +208,7 @@ const SupportArtistTiersForm: React.FC<{
           margin-top: 0.25rem;
         `}
       >
-        {isSubscribedToCurrentTier &&
-          (value?.isDefaultTier
-            ? t("youAreFollowingThisArtist", { artistName: artist.name })
-            : t("youAreAlreadySubscribed"))}
-        {!value && !isSubscribedToCurrentTier && t("chooseToContinue")}
-        {value?.id !== currentTier?.id &&
-          value &&
-          value?.isDefaultTier &&
-          t("followArtist", { artistName: artist.name })}
-        {value &&
-          !value.isDefaultTier &&
-          !isSubscribedToCurrentTier &&
-          t(
-            value.interval === "MONTH"
-              ? "continueWithPriceMonthly"
-              : "continueWithPriceYearly",
-            {
-              amount: moneyDisplay({
-                amount: value?.minAmount / 100,
-                currency: value?.currency,
-              }),
-            }
-          )}
+        {buttonLabel}
       </ArtistButton>
 
       {value && !value.isDefaultTier && (

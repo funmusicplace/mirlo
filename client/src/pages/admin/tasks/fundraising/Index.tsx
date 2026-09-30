@@ -42,7 +42,8 @@ const Index = () => {
           id="input-pledge-track-group-id"
           type="number"
           className="max-w-xs"
-          {...register("trackGroupId")}
+          required
+          {...register("trackGroupId", { required: true })}
         />
       </FormComponent>
       <Button type="submit">{t("triggerPledgeCollection")}</Button>

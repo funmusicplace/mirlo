@@ -13,7 +13,11 @@ import { sendMailQueue } from "./send-mail-queue";
 export type AutomaticallyReceivedAlbumEmailType = {
   trackGroup: {
     id: number;
-    title: string;
+    title: string | null;
+    urlSlug: string;
+    artist: {
+      urlSlug: string;
+    };
   };
   artist: {
     id: number;

@@ -73,6 +73,33 @@ export default function () {
         "isAllOrNothing",
       ]);
 
+      if (newValues.isAllOrNothing !== undefined) {
+        const current = await prisma.fundraiser.findFirst({
+          where: { id: Number(fundraiserId) },
+          select: { isAllOrNothing: true },
+        });
+
+        // Supporters pledged under the current terms, so don't let them change
+        // while there are pledges still waiting to be charged
+        if (current && !!newValues.isAllOrNothing !== current.isAllOrNothing) {
+          const openPledges = await prisma.fundraiserPledge.count({
+            where: {
+              fundraiserId: Number(fundraiserId),
+              paidAt: null,
+              cancelledAt: null,
+            },
+          });
+
+          if (openPledges > 0) {
+            throw new AppError({
+              httpCode: 400,
+              description:
+                "All or nothing can't be changed while the fundraiser has pledges",
+            });
+          }
+        }
+      }
+
       await prisma.fundraiser.updateMany({
         where: { id: Number(fundraiserId) },
         data: newValues,
