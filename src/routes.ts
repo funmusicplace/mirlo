@@ -21,6 +21,7 @@ const routes = [
   "fundraisers/{id}/changePledge",
   "playable",
   "settings/{setting}",
+  "instance",
   "tracks",
   "tracks/topSold",
   "tracks/mostPlayed",
