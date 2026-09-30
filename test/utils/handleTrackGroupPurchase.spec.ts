@@ -16,6 +16,7 @@ import {
   handleTrackGroupPurchase,
 } from "../../src/utils/handleFinishedTransactions";
 import stripe from "../../src/utils/stripe";
+import { completedPaymentFromIntent } from "../../src/utils/stripe/completedPayment";
 import { clearTables, createTrackGroup, createUser } from "../utils";
 
 describe("handleTrackGroupPurchase", () => {
@@ -187,7 +188,7 @@ describe("handleTrackGroupPurchase", () => {
     // throw and abort the whole handler, so the charge succeeded in Stripe but
     // left no purchase record and sent no emails (#issue).
     sinon
-      .stub(stripe.paymentIntents, "retrieve")
+      .stub(stripe.charges, "retrieve")
       .rejects(new Error("Stripe is unreachable"));
 
     const { user: artistUser } = await createUser({
@@ -212,13 +213,17 @@ describe("handleTrackGroupPurchase", () => {
       title: "Our Custom Title",
     });
 
-    await handleTrackGroupPurchase(purchaser.id, trackGroup.id, {
-      id: "cs_test_123",
-      amount_total: 1000,
-      currency: "usd",
-      payment_intent: "pi_test_123",
-      metadata: { stripeAccountId: "acct_123" },
-    } as unknown as Stripe.Checkout.Session);
+    const payment = await completedPaymentFromIntent(
+      {
+        id: "pi_test_123",
+        amount_received: 1000,
+        currency: "usd",
+        latest_charge: "ch_test_123",
+        metadata: {},
+      } as unknown as Stripe.PaymentIntent,
+      "acct_123"
+    );
+    await handleTrackGroupPurchase(purchaser.id, trackGroup.id, payment);
 
     const purchase = await prisma.userTrackGroupPurchase.findFirst({
       where: { userId: purchaser.id, trackGroupId: trackGroup.id },

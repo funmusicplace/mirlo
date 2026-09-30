@@ -5,8 +5,8 @@ import {
   FundraiserPledge,
   Fundraiser,
 } from "@mirlo/prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Job } from "bullmq";
-import Stripe from "stripe";
 
 import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
@@ -20,193 +20,36 @@ import { subscribeUserToArtist } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { findCataloguePurchasableTrackGroups } from "./catalogue";
 import { getClient } from "./getClient";
+import { decrementMerchStock } from "./merch";
+import {
+  CompletedPayment,
+  withPlatformCurrency,
+} from "./payments/completedPayment";
 import { resolvePayee } from "./payments/payee";
+import type { ResolvedItem } from "./payments/purchase";
 import { calculateAppFee } from "./processingPayments";
-import stripe from "./stripe";
 import { hasSubscriptionTiers, registerSubscription } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 
-const getPaymentIntent = async (
-  paymentIntentId: string,
-  stripeAccount: string
-) => {
-  try {
-    return await stripe.paymentIntents.retrieve(paymentIntentId, {
-      stripeAccount,
-    });
-  } catch (error) {
-    logger.error(`Error retrieving payment intent: ${error}`);
-    throw new Error("Failed to retrieve payment intent");
-  }
-};
-
-export const getFeesFromPaymentIntent = async (
-  paymentIntent: Stripe.PaymentIntent,
-  stripeAccount: string
-): Promise<{ applicationFee: number; paymentProcessorFee: number }> => {
-  let balanceTransaction: Stripe.BalanceTransaction | undefined;
-
-  if (
-    paymentIntent.latest_charge &&
-    typeof paymentIntent.latest_charge !== "string" &&
-    paymentIntent.latest_charge.balance_transaction &&
-    typeof paymentIntent.latest_charge.balance_transaction !== "string"
-  ) {
-    balanceTransaction = paymentIntent.latest_charge.balance_transaction;
-  } else {
-    const chargeId =
-      typeof paymentIntent.latest_charge === "string"
-        ? paymentIntent.latest_charge
-        : (paymentIntent.latest_charge?.id ?? "");
-
-    if (chargeId) {
-      const charge = await stripe.charges.retrieve(
-        chargeId,
-        { expand: ["balance_transaction"] },
-        { stripeAccount }
-      );
-      balanceTransaction = charge.balance_transaction as
-        | Stripe.BalanceTransaction
-        | undefined;
-    }
-  }
-
-  const paymentProcessorFee =
-    balanceTransaction?.fee_details.find((fee) => fee.type === "stripe_fee")
-      ?.amount ?? 0;
-
-  return {
-    applicationFee: paymentIntent.application_fee_amount ?? 0,
-    paymentProcessorFee,
-  };
-};
-
-export type PlatformCurrencyValue = {
-  platformCurrencyAmount: number | null; // `amount` converted to platformCurrency, in cents
-  platformCurrency: string | null;
-  exchangeRate: number | null;
-};
-
-export const EMPTY_PLATFORM_CURRENCY_VALUE: PlatformCurrencyValue = {
-  platformCurrencyAmount: null,
-  platformCurrency: null,
-  exchangeRate: null,
-};
-
-export const withPlatformCurrency = (value?: PlatformCurrencyValue) =>
-  value ?? EMPTY_PLATFORM_CURRENCY_VALUE;
-
-export const getPlatformCurrencyValueFromIntent = async (
-  paymentIntent: Stripe.PaymentIntent,
-  stripeAccount: string
-): Promise<PlatformCurrencyValue> => {
-  try {
-    const chargeId =
-      typeof paymentIntent.latest_charge === "string"
-        ? paymentIntent.latest_charge
-        : (paymentIntent.latest_charge?.id ?? "");
-    if (!chargeId) return EMPTY_PLATFORM_CURRENCY_VALUE;
-
-    // Charge is on the connected account; its application_fee id lives on the platform.
-    const charge = await stripe.charges.retrieve(
-      chargeId,
-      {},
-      { stripeAccount }
-    );
-    const applicationFeeId =
-      typeof charge.application_fee === "string"
-        ? charge.application_fee
-        : (charge.application_fee?.id ?? "");
-    if (!applicationFeeId) return EMPTY_PLATFORM_CURRENCY_VALUE;
-
-    // No { stripeAccount }: application fees live on the platform account.
-    const applicationFee = await stripe.applicationFees.retrieve(
-      applicationFeeId,
-      { expand: ["balance_transaction"] }
-    );
-
-    const balanceTransaction = applicationFee.balance_transaction;
-    if (!balanceTransaction || typeof balanceTransaction === "string") {
-      // Not yet settled — record nothing rather than a wrong figure.
-      return EMPTY_PLATFORM_CURRENCY_VALUE;
-    }
-
-    // exchange_rate is null when presentment currency == platform currency (rate 1).
-    const exchangeRate = balanceTransaction.exchange_rate ?? 1;
-    const amount = paymentIntent.amount_received ?? paymentIntent.amount ?? 0;
-
-    return {
-      platformCurrencyAmount: Math.round(amount * exchangeRate),
-      platformCurrency: balanceTransaction.currency,
-      exchangeRate,
-    };
-  } catch (e) {
-    logger.warn(
-      `getPlatformCurrencyValueFromIntent: could not determine platform currency value for ${paymentIntent.id}: ${e}`
-    );
-    return EMPTY_PLATFORM_CURRENCY_VALUE;
-  }
-};
-
-const getApplicationFee = async (
-  session?: Stripe.Checkout.Session
-): Promise<{
-  applicationFee: number;
-  paymentProcessorFee: number;
-  platformCurrencyValue: PlatformCurrencyValue;
-}> => {
-  try {
-    const paymentIntentId =
-      typeof session?.payment_intent === "string"
-        ? session?.payment_intent
-        : (session?.payment_intent?.id ?? null);
-
-    const stripeAccount = session?.metadata?.stripeAccountId ?? null;
-
-    if (!paymentIntentId) {
-      logger.warn("No payment intent ID found in session metadata");
-      return {
-        applicationFee: 0,
-        paymentProcessorFee: 0,
-        platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
-      };
-    }
-    if (!stripeAccount) {
-      logger.warn("No stripe account found in session metadata");
-      return {
-        applicationFee: 0,
-        paymentProcessorFee: 0,
-        platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
-      };
-    }
-    const paymentIntent = await getPaymentIntent(
-      paymentIntentId,
-      stripeAccount
-    );
-
-    const fees = await getFeesFromPaymentIntent(paymentIntent, stripeAccount);
-    const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
-      paymentIntent,
-      stripeAccount
-    );
-
-    logger.info(
-      `Application fee: ${fees.applicationFee}, Stripe fee: ${fees.paymentProcessorFee}`
-    );
-
-    return { ...fees, platformCurrencyValue };
-  } catch (error) {
-    logger.error(
-      `Error retrieving application fee for session ${session?.id}, recording purchase without fee details:`,
-      error
-    );
-    return {
-      applicationFee: 0,
-      paymentProcessorFee: 0,
-      platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
-    };
-  }
-};
+export const recordCompletedTransaction = (
+  userId: number,
+  payment?: CompletedPayment
+) =>
+  prisma.userTransaction.create({
+    data: {
+      userId: Number(userId),
+      amount: payment?.amount ?? 0,
+      currency: payment?.currency ?? "usd",
+      platformCut: payment?.platformCut ?? 0,
+      stripeCut: payment?.processorFee ?? 0,
+      stripeId: payment?.id ?? null,
+      ...withPlatformCurrency(payment?.platformCurrencyValue),
+      paymentStatus: "COMPLETED",
+      discountPercent: payment?.metadata.discountPercent
+        ? Number(payment.metadata.discountPercent)
+        : undefined,
+    },
+  });
 
 export type AlbumPurchaseEmailType = {
   trackGroup: {
@@ -303,375 +146,6 @@ export type AlbumPurchaseArtistNotificationEmailType = {
     };
   };
   email: string;
-};
-
-export const handleTrackGroupPurchase = async (
-  userId: number,
-  trackGroupId: number,
-  session?: Stripe.Checkout.Session,
-  newUser?: boolean,
-  platformCurrencyValue?: PlatformCurrencyValue
-) => {
-  try {
-    const { applicationUrl } = await getClient();
-    const {
-      applicationFee,
-      paymentProcessorFee,
-      platformCurrencyValue: feePlatformCurrencyValue,
-    } = await getApplicationFee(session);
-    const amount = session?.amount_total ?? 0;
-    const pricePaid = amount;
-    const currencyPaid = session?.currency ?? "usd";
-    const paymentProcessorKey = session?.id ?? null;
-
-    const transaction = await prisma.userTransaction.create({
-      data: {
-        userId: Number(userId),
-        amount: pricePaid,
-        currency: currencyPaid,
-        platformCut: applicationFee ?? null,
-        stripeId: paymentProcessorKey ?? "",
-        stripeCut: paymentProcessorFee ?? null,
-        ...withPlatformCurrency(
-          platformCurrencyValue ?? feePlatformCurrencyValue
-        ),
-        paymentStatus: "COMPLETED",
-        discountPercent: session?.metadata?.discountPercent
-          ? Number(session.metadata.discountPercent)
-          : undefined,
-      },
-    });
-
-    const purchase = await registerPurchase({
-      userId: Number(userId),
-      trackGroupId: Number(trackGroupId),
-      pricePaid: session?.amount_total ?? 0,
-      message: session?.metadata?.message ?? null,
-      currencyPaid: session?.currency ?? "usd",
-      paymentProcessorKey: session?.id ?? null,
-      platformCut: applicationFee ?? null,
-      transactionId: transaction.id,
-    });
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-    });
-
-    const trackGroup = await prisma.trackGroup.findFirst({
-      where: {
-        id: trackGroupId,
-      },
-      include: {
-        profile: {
-          include: {
-            subscriptionTiers: true,
-            user: true,
-
-            paymentToUser: true,
-          },
-        },
-        paymentToUser: true,
-      },
-    });
-
-    if (user && trackGroup && purchase) {
-      const serializedTrackGroup = processSingleTrackGroup(
-        trackGroup
-      ) as unknown as AlbumPurchaseEmailType["trackGroup"];
-      const isBeforeReleaseDate = trackGroup.releaseDate
-        ? new Date(trackGroup.releaseDate) > new Date()
-        : false;
-
-      await sendMail<AlbumPurchaseEmailType>({
-        data: {
-          template: newUser ? "album-download" : "album-purchase-receipt",
-          message: {
-            to: user.email,
-          },
-          locals: {
-            trackGroup: serializedTrackGroup,
-            purchase: purchaseForAlbumPurchaseEmail(purchase),
-            isBeforeReleaseDate,
-            token: purchase.singleDownloadToken,
-            email: user.email,
-            client: applicationUrl,
-            host: process.env.API_DOMAIN,
-            hasSubscriptionTiers: await hasSubscriptionTiers(
-              trackGroup.profileId
-            ),
-          },
-        },
-      } as Job);
-
-      const transactions = await prisma.userTransaction.findMany({
-        where: {
-          id: transaction.id,
-        },
-        include: {
-          user: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-          trackGroupPurchases: {
-            include: {
-              trackGroup: {
-                include: {
-                  profile: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const payee = resolvePayee({
-        artist: trackGroup.profile,
-        releasePaymentToUser: trackGroup.paymentToUser,
-      });
-
-      await sendMail<ArtistPurchaseNotificationEmailType>({
-        data: {
-          template: "artist-purchase-notification",
-          message: {
-            to: payee.email,
-            cc: payee.accountingEmail,
-          },
-          locals: {
-            transactions: transactions.map(
-              (t) =>
-                serializeUserTransaction(t, {
-                  emailShape: true,
-                }) as unknown as PurchaseTransaction
-            ),
-            totalGross: transactions.reduce((acc, t) => acc + t.amount, 0),
-            totalNet: transactions.reduce(
-              (acc, t) =>
-                acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
-              0
-            ),
-            currency: transactions[0]?.currency ?? "usd",
-            message: session?.metadata?.message,
-            email: user.email,
-            client: applicationUrl,
-          } as ArtistPurchaseNotificationEmailType,
-        },
-      } as Job);
-
-      await sendBasecampAMessage(
-        `New album purchase: <i>${trackGroup.title}</i> by ${trackGroup.profile.name}, purchased by <b>${user.email}</b>`
-      );
-    }
-
-    return purchase;
-  } catch (e) {
-    logger.error(
-      `Error creating album purchase for trackGroupId ${trackGroupId}, userId ${userId}, session ${session?.id}:`,
-      e
-    );
-  }
-};
-
-export const handleCataloguePurchase = async (
-  userId: number,
-  artistId: number,
-  session?: Stripe.Checkout.Session,
-  platformCurrencyValue?: PlatformCurrencyValue
-) => {
-  try {
-    const { applicationUrl } = await getClient();
-    const artist = await prisma.profile.findFirst({
-      where: {
-        id: artistId,
-      },
-      include: {
-        user: true,
-      },
-    });
-    const artistTrackGroups = artist
-      ? await findCataloguePurchasableTrackGroups(artist)
-      : [];
-
-    const amountPaidPerTrackGroup =
-      (session?.amount_total ?? 0) / artistTrackGroups.length;
-
-    const {
-      applicationFee,
-      paymentProcessorFee,
-      platformCurrencyValue: feePlatformCurrencyValue,
-    } = await getApplicationFee(session);
-    const appFeePerTrackGroup =
-      (applicationFee ?? 0) / artistTrackGroups.length;
-
-    const pricePaid = session?.amount_total ?? 0;
-    const currencyPaid = session?.currency ?? "usd";
-    const paymentProcessorKey = session?.id ?? null;
-
-    // We only create one transaction for the whole purchase
-    // so that we can use the same transaction for all track groups
-    const transaction = await prisma.userTransaction.create({
-      data: {
-        userId: Number(userId),
-        amount: pricePaid,
-        currency: currencyPaid,
-        platformCut: applicationFee ?? null,
-        stripeId: paymentProcessorKey ?? "",
-        stripeCut: paymentProcessorFee ?? null,
-        ...withPlatformCurrency(
-          platformCurrencyValue ?? feePlatformCurrencyValue
-        ),
-        paymentStatus: "COMPLETED",
-      },
-    });
-
-    const purchases = await Promise.all(
-      artistTrackGroups.map(async (trackGroup) => {
-        return registerPurchase({
-          userId: Number(userId),
-          trackGroupId: Number(trackGroup.id),
-          message: session?.metadata?.message ?? null,
-          pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
-          currencyPaid: session?.currency ?? "usd",
-          paymentProcessorKey: session?.id ?? null,
-          platformCut: Number(appFeePerTrackGroup.toFixed(2)),
-          transactionId: transaction.id,
-        });
-      })
-    );
-
-    const downloadTokensByTrackGroupId = new Map(
-      purchases
-        .filter(
-          (purchase): purchase is NonNullable<typeof purchase> =>
-            purchase !== null
-        )
-        .map((purchase) => [
-          purchase.trackGroupId,
-          purchase.singleDownloadToken,
-        ])
-    );
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (user && artist && artistTrackGroups.length > 0) {
-      const serializedArtist = processSingleArtist(artist);
-      await sendMail({
-        data: {
-          template: "catalogue-receipt",
-          message: {
-            to: user.email,
-          },
-          locals: {
-            artist: serializedArtist,
-            trackGroups: artistTrackGroups.map((tg) => ({
-              ...processSingleTrackGroup(tg),
-              token: downloadTokensByTrackGroupId.get(tg.id),
-            })),
-            email: user.email,
-            client: applicationUrl,
-            host: process.env.API_DOMAIN,
-            hasSubscriptionTiers: await hasSubscriptionTiers(artist.id),
-          },
-        },
-      } as Job);
-
-      const pricePaid = session?.amount_total ?? 0;
-      const catalogueAppFee = await calculateAppFee(
-        pricePaid,
-        session?.currency ?? "usd"
-      );
-      await sendMail({
-        data: {
-          template: "catalogue-purchase-artist-notification",
-          message: {
-            to: artist.user.email,
-          },
-          locals: {
-            artist: serializedArtist,
-            pricePaid,
-            currencyPaid: session?.currency ?? "usd",
-            platformCut: (catalogueAppFee ?? 0) / 100,
-            email: user.email,
-          },
-        },
-      } as Job);
-    }
-  } catch (e) {
-    logger.error(
-      `Error creating catalogue purchase for profileId ${artistId}, userId ${userId}, session ${session?.id}:`,
-      e
-    );
-  }
-};
-
-export const handleTrackPurchase = async (
-  userId: number,
-  trackId: number,
-  session?: Stripe.Checkout.Session,
-  platformCurrencyValue?: PlatformCurrencyValue
-) => {
-  try {
-    const { applicationFee, platformCurrencyValue: feePlatformCurrencyValue } =
-      await getApplicationFee(session);
-    const purchase = await registerTrackPurchase({
-      userId: Number(userId),
-      trackId: Number(trackId),
-      pricePaid: session?.amount_total ?? 0,
-      message: session?.metadata?.message ?? null,
-      currencyPaid: session?.currency ?? "usd",
-      paymentProcessorKey: session?.id ?? null,
-      platformCut: applicationFee ?? null,
-      discountPercent: session?.metadata?.discountPercent
-        ? Number(session.metadata.discountPercent)
-        : undefined,
-      platformCurrencyValue: platformCurrencyValue ?? feePlatformCurrencyValue,
-    });
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-    });
-
-    const track = await prisma.track.findFirst({
-      where: {
-        id: trackId,
-      },
-      include: {
-        trackGroup: {
-          include: {
-            profile: {
-              include: {
-                subscriptionTiers: true,
-                user: true,
-              },
-            },
-            paymentToUser: true,
-          },
-        },
-      },
-    });
-
-    if (user && track && purchase && purchase.transactionId) {
-      await sendSaleEmails(track.trackGroup.profile, user, [
-        purchase.transactionId,
-      ]);
-    }
-
-    return purchase;
-  } catch (e) {
-    logger.error(
-      `Error creating track purchase for trackId ${trackId}, userId ${userId}, session ${session?.id}:`,
-      e
-    );
-  }
 };
 
 type PurchaseTransaction = {
@@ -870,124 +344,512 @@ export const sendPurchaseReceipt = async (
   } as Job);
 };
 
-export const sendSaleEmails = async (
-  artist: Profile & {
-    user: SafeUser;
-    properties?: { emails?: { purchase?: string } } | null;
-  },
-  purchaser: SafeUser,
-  transactionIds: string[],
-  message?: string
-) => {
-  try {
+/**
+ * The "you made a sale" email. Goes to the payee (see resolvePayee), cc'ing
+ * their accounting address, so a label set as `paymentToUser` hears about
+ * every sale it gets paid for.
+ */
+export const sendArtistSaleNotification = async ({
+  payee,
+  purchaser,
+  transactions,
+  message,
+}: {
+  payee: Pick<SafeUser, "email" | "accountingEmail">;
+  purchaser: SafeUser;
+  transactions: TransactionForEmails[];
+  message?: string;
+}) => {
+  const { applicationUrl } = await getClient();
+  const serializedTransactions = transactions.map(
+    (t) =>
+      serializeUserTransaction(t, {
+        emailShape: true,
+      }) as unknown as PurchaseTransaction
+  );
+
+  await sendMail<ArtistPurchaseNotificationEmailType>({
+    data: {
+      template: "artist-purchase-notification",
+      message: {
+        to: payee.email,
+        cc: payee.accountingEmail,
+      },
+      locals: {
+        transactions: serializedTransactions,
+        totalGross: serializedTransactions.reduce(
+          (acc, t) => acc + t.amount,
+          0
+        ),
+        totalNet: serializedTransactions.reduce(
+          (acc, t) =>
+            acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
+          0
+        ),
+        currency: serializedTransactions[0]?.currency ?? "usd",
+        message: message ?? null,
+        email: purchaser.email,
+        client: applicationUrl,
+        host: process.env.API_DOMAIN,
+      } as ArtistPurchaseNotificationEmailType,
+    },
+  } as Job);
+};
+
+type SaleArtist = Profile & {
+  user: SafeUser;
+  paymentToUser: SafeUser | null;
+  properties?: { emails?: { purchase?: string } } | null;
+};
+
+type SaleContext = {
+  artist: SaleArtist;
+  releasePaymentToUser?: SafeUser | null;
+};
+
+type AttachContext = {
+  userId: number;
+  user: SafeUser | null;
+  transaction: Awaited<ReturnType<typeof recordCompletedTransaction>>;
+  payment?: CompletedPayment;
+  message?: string;
+  newUser: boolean;
+};
+
+type AttachResult = {
+  sale?: SaleContext;
+  genericReceipt?: boolean;
+  genericNotification?: boolean;
+};
+
+const attachTrackGroup = async (
+  item: ResolvedItem,
+  { userId, user, transaction, message, newUser }: AttachContext
+): Promise<AttachResult> => {
+  const trackGroupId = Number(item.id);
+  const purchase = await registerPurchase({
+    userId,
+    trackGroupId,
+    pricePaid: item.amount,
+    message: message ?? null,
+    currencyPaid: transaction.currency,
+    paymentProcessorKey: transaction.stripeId,
+    platformCut: transaction.platformCut,
+    transactionId: transaction.id,
+  });
+
+  const trackGroup = await prisma.trackGroup.findFirst({
+    where: { id: trackGroupId },
+    include: {
+      profile: {
+        include: { subscriptionTiers: true, user: true, paymentToUser: true },
+      },
+      paymentToUser: true,
+    },
+  });
+  if (!trackGroup) return {};
+
+  if (user && purchase) {
     const { applicationUrl } = await getClient();
-    const transactions = await transactionsForEmails(transactionIds);
+    const isBeforeReleaseDate = trackGroup.releaseDate
+      ? new Date(trackGroup.releaseDate) > new Date()
+      : false;
 
-    const serializedTransactions = transactions.map(
-      (t) =>
-        serializeUserTransaction(t, {
-          emailShape: true,
-        }) as unknown as PurchaseTransaction
-    );
-
-    await sendPurchaseReceipt(artist, purchaser, transactions);
-
-    await sendMail<ArtistPurchaseNotificationEmailType>({
+    await sendMail<AlbumPurchaseEmailType>({
       data: {
-        template: "artist-purchase-notification",
+        template: newUser ? "album-download" : "album-purchase-receipt",
         message: {
-          to: artist.user.email,
+          to: user.email,
         },
         locals: {
-          transactions: serializedTransactions,
-          totalGross: serializedTransactions.reduce(
-            (acc, t) => acc + t.amount,
-            0
-          ),
-          totalNet: serializedTransactions.reduce(
-            (acc, t) =>
-              acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
-            0
-          ),
-          currency: serializedTransactions[0]?.currency ?? "usd",
-          message: message ?? null,
-          email: purchaser.email,
+          trackGroup: processSingleTrackGroup(
+            trackGroup
+          ) as unknown as AlbumPurchaseEmailType["trackGroup"],
+          purchase: purchaseForAlbumPurchaseEmail(purchase),
+          isBeforeReleaseDate,
+          token: purchase.singleDownloadToken,
+          email: user.email,
           client: applicationUrl,
           host: process.env.API_DOMAIN,
-        } as ArtistPurchaseNotificationEmailType,
+          hasSubscriptionTiers: await hasSubscriptionTiers(
+            trackGroup.profileId
+          ),
+        },
       },
     } as Job);
-  } catch (e) {
-    logger.error(`Error creating sale emails: ${e}`);
+
+    await sendBasecampAMessage(
+      `New album purchase: <i>${trackGroup.title}</i> by ${trackGroup.profile.name}, purchased by <b>${user.email}</b>`
+    );
   }
+
+  return {
+    sale: {
+      artist: trackGroup.profile,
+      releasePaymentToUser: trackGroup.paymentToUser,
+    },
+    genericNotification: true,
+  };
 };
 
-export const handleArtistGift = async (
+const attachTrack = async (
+  item: ResolvedItem,
+  { userId, transaction, message }: AttachContext
+): Promise<AttachResult> => {
+  const trackId = Number(item.id);
+  await registerTrackPurchase({
+    userId,
+    trackId,
+    message: message ?? null,
+    transactionId: transaction.id,
+  });
+
+  const track = await prisma.track.findFirst({
+    where: { id: trackId },
+    include: {
+      trackGroup: {
+        include: {
+          profile: {
+            include: {
+              subscriptionTiers: true,
+              user: true,
+              paymentToUser: true,
+            },
+          },
+          paymentToUser: true,
+        },
+      },
+    },
+  });
+  if (!track) return {};
+
+  return {
+    sale: {
+      artist: track.trackGroup.profile,
+      releasePaymentToUser: track.trackGroup.paymentToUser,
+    },
+    genericReceipt: true,
+    genericNotification: true,
+  };
+};
+
+const attachTip = async (
+  artistId: number,
+  { userId, user, transaction, message }: AttachContext
+): Promise<AttachResult> => {
+  const tip = await prisma.userProfileTip.create({
+    data: {
+      userId,
+      profileId: artistId,
+      message: message ?? null,
+      transactionId: transaction.id,
+    },
+    include: {
+      profile: {
+        include: { user: true, paymentToUser: true, subscriptionTiers: true },
+      },
+    },
+  });
+
+  subscribeUserToArtist(tip.profile, user);
+
+  return {
+    sale: { artist: tip.profile },
+    genericReceipt: true,
+    genericNotification: true,
+  };
+};
+
+const attachMerch = async (
+  item: ResolvedItem,
+  { userId, transaction, payment }: AttachContext
+): Promise<AttachResult> => {
+  const merch = await prisma.merch.findFirst({
+    where: { id: item.id },
+    include: {
+      profile: { include: { user: true, paymentToUser: true } },
+    },
+  });
+
+  if (!merch) {
+    logger.warn(`completePurchase: merch ${item.id} not found`);
+    return {};
+  }
+
+  const quantity = item.quantity ?? 1;
+
+  await prisma.merchPurchase.create({
+    data: {
+      userId,
+      merchId: merch.id,
+      transactionId: transaction.id,
+      fulfillmentStatus: "NO_PROGRESS",
+      quantity,
+      ...(item.optionIds?.length && {
+        options: { connect: item.optionIds.map((id) => ({ id })) },
+      }),
+      ...(payment?.shippingAddress && {
+        shippingAddress: payment.shippingAddress,
+      }),
+    },
+  });
+
+  if (merch.includePurchaseTrackGroupId) {
+    try {
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          trackGroupId: merch.includePurchaseTrackGroupId,
+          userId,
+          proGratis: true,
+        },
+      });
+    } catch (e: any) {
+      if (
+        e instanceof PrismaClientKnownRequestError ||
+        e?.name === "PrismaClientKnownRequestError"
+      ) {
+        if (e.code !== "P2002") {
+          throw e;
+        }
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  await decrementMerchStock(merch.id, item.optionIds ?? [], quantity);
+
+  logger.info(
+    `completePurchase: created purchase for merch ${merch.id}, userId ${userId}`
+  );
+
+  return {
+    sale: { artist: merch.profile },
+    genericReceipt: true,
+    genericNotification: true,
+  };
+};
+
+const attachCatalogue = async (
+  artistId: number,
+  item: ResolvedItem,
+  { userId, user, transaction, message }: AttachContext
+): Promise<AttachResult> => {
+  const artist = await prisma.profile.findFirst({
+    where: { id: artistId },
+    include: { user: true, paymentToUser: true },
+  });
+  if (!artist) return {};
+
+  const artistTrackGroups = await findCataloguePurchasableTrackGroups(artist);
+  const amountPaidPerTrackGroup = item.amount / artistTrackGroups.length;
+  const appFeePerTrackGroup =
+    (transaction.platformCut ?? 0) / artistTrackGroups.length;
+
+  const purchases = await Promise.all(
+    artistTrackGroups.map((trackGroup) =>
+      registerPurchase({
+        userId,
+        trackGroupId: Number(trackGroup.id),
+        message: message ?? null,
+        pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
+        currencyPaid: transaction.currency,
+        paymentProcessorKey: transaction.stripeId,
+        platformCut: Number(appFeePerTrackGroup.toFixed(2)),
+        transactionId: transaction.id,
+      })
+    )
+  );
+
+  const downloadTokensByTrackGroupId = new Map(
+    purchases
+      .filter(
+        (purchase): purchase is NonNullable<typeof purchase> =>
+          purchase !== null
+      )
+      .map((purchase) => [purchase.trackGroupId, purchase.singleDownloadToken])
+  );
+
+  if (user && artistTrackGroups.length > 0) {
+    const { applicationUrl } = await getClient();
+    const serializedArtist = processSingleArtist(artist);
+    await sendMail({
+      data: {
+        template: "catalogue-receipt",
+        message: {
+          to: user.email,
+        },
+        locals: {
+          artist: serializedArtist,
+          trackGroups: artistTrackGroups.map((tg) => ({
+            ...processSingleTrackGroup(tg),
+            token: downloadTokensByTrackGroupId.get(tg.id),
+          })),
+          email: user.email,
+          client: applicationUrl,
+          host: process.env.API_DOMAIN,
+          hasSubscriptionTiers: await hasSubscriptionTiers(artist.id),
+        },
+      },
+    } as Job);
+
+    const catalogueAppFee = await calculateAppFee(
+      item.amount,
+      transaction.currency
+    );
+    const payee = resolvePayee({ artist });
+    await sendMail({
+      data: {
+        template: "catalogue-purchase-artist-notification",
+        message: {
+          to: payee.email,
+          cc: payee.accountingEmail,
+        },
+        locals: {
+          artist: serializedArtist,
+          pricePaid: item.amount,
+          currencyPaid: transaction.currency,
+          platformCut: (catalogueAppFee ?? 0) / 100,
+          email: user.email,
+        },
+      },
+    } as Job);
+  }
+
+  return { sale: { artist } };
+};
+
+export const completePurchase = async (
+  userId: number,
+  items: ResolvedItem[],
+  payment?: CompletedPayment,
+  { newUser = false, artistId }: { newUser?: boolean; artistId?: number } = {}
+) => {
+  if (items.length === 0) {
+    logger.error(
+      `completePurchase: payment ${payment?.id} for userId ${userId} carried no items, nothing recorded`
+    );
+    return;
+  }
+
+  const transaction = await recordCompletedTransaction(userId, payment);
+  const user = await prisma.user.findFirst({ where: { id: userId } });
+  const resolvedArtistId = artistId ?? Number(payment?.metadata.artistId);
+
+  let sale: SaleContext | undefined;
+  let genericReceipt = false;
+  let genericNotification = false;
+
+  for (const item of items) {
+    const context: AttachContext = {
+      userId,
+      user,
+      transaction,
+      payment,
+      message: item.message ?? payment?.metadata.message,
+      newUser,
+    };
+    try {
+      let result: AttachResult = {};
+      if (item.type === "trackGroup") {
+        result = await attachTrackGroup(item, context);
+      } else if (item.type === "track") {
+        result = await attachTrack(item, context);
+      } else if (item.type === "tip") {
+        result = await attachTip(resolvedArtistId, context);
+      } else if (item.type === "merch") {
+        result = await attachMerch(item, context);
+      } else if (item.type === "catalogue") {
+        result = await attachCatalogue(resolvedArtistId, item, context);
+      }
+      sale ??= result.sale;
+      genericReceipt ||= !!result.genericReceipt;
+      genericNotification ||= !!result.genericNotification;
+    } catch (e) {
+      logger.error(
+        `completePurchase: failed to record ${item.type} ${item.id ?? ""} for userId ${userId}, payment ${payment?.id}:`,
+        e
+      );
+    }
+  }
+
+  if (user && sale && (genericReceipt || genericNotification)) {
+    try {
+      const transactions = await transactionsForEmails([transaction.id]);
+      if (genericReceipt) {
+        await sendPurchaseReceipt(sale.artist, user, transactions);
+      }
+      if (genericNotification) {
+        await sendArtistSaleNotification({
+          payee: resolvePayee(sale),
+          purchaser: user,
+          transactions,
+          message:
+            items.find((i) => i.message)?.message ?? payment?.metadata.message,
+        });
+      }
+    } catch (e) {
+      logger.error(`Error creating sale emails: ${e}`);
+    }
+  }
+
+  return transaction;
+};
+
+const singleItem = (
+  type: ResolvedItem["type"],
+  id: number | undefined,
+  payment?: CompletedPayment
+): ResolvedItem[] => [
+  {
+    type,
+    ...(id !== undefined && { id: String(id) }),
+    quantity: 1,
+    amount: payment?.amount ?? 0,
+  },
+];
+
+export const handleTrackGroupPurchase = (
+  userId: number,
+  trackGroupId: number,
+  payment?: CompletedPayment,
+  newUser?: boolean
+) =>
+  completePurchase(
+    userId,
+    singleItem("trackGroup", trackGroupId, payment),
+    payment,
+    {
+      newUser,
+    }
+  );
+
+export const handleTrackPurchase = (
+  userId: number,
+  trackId: number,
+  payment?: CompletedPayment
+) => completePurchase(userId, singleItem("track", trackId, payment), payment);
+
+export const handleArtistGift = (
   userId: number,
   artistId: number,
-  session?: Stripe.Checkout.Session,
-  platformCurrencyValue?: PlatformCurrencyValue
-) => {
-  try {
-    const {
-      applicationFee,
-      paymentProcessorFee,
-      platformCurrencyValue: feePlatformCurrencyValue,
-    } = await getApplicationFee(session);
+  payment?: CompletedPayment
+) =>
+  completePurchase(userId, singleItem("tip", undefined, payment), payment, {
+    artistId,
+  });
 
-    const transaction = await prisma.userTransaction.create({
-      data: {
-        userId: Number(userId),
-        amount: session?.amount_total ?? 0,
-        currency: session?.currency ?? "usd",
-        platformCut: applicationFee ?? null,
-        stripeCut: paymentProcessorFee ?? null,
-        stripeId: session?.id ?? "",
-        ...withPlatformCurrency(
-          platformCurrencyValue ?? feePlatformCurrencyValue
-        ),
-        paymentStatus: "COMPLETED",
-      },
-    });
-
-    const createdTip = await prisma.userProfileTip.create({
-      data: {
-        userId,
-        profileId: artistId,
-        message: session?.metadata?.message ?? null,
-        transactionId: transaction.id,
-      },
-    });
-
-    const tip = await prisma.userProfileTip.findFirst({
-      where: {
-        id: createdTip.id,
-      },
-      include: {
-        profile: { include: { user: true, subscriptionTiers: true } },
-      },
-    });
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (tip) {
-      subscribeUserToArtist(tip.profile, user);
-    }
-
-    if (user && tip) {
-      await sendSaleEmails(tip.profile, user, [transaction.id]);
-    }
-
-    return tip;
-  } catch (e) {
-    logger.error(`Error creating tip: ${e}`);
-    throw e;
-  }
-};
+export const handleCataloguePurchase = (
+  userId: number,
+  artistId: number,
+  payment?: CompletedPayment
+) =>
+  completePurchase(
+    userId,
+    singleItem("catalogue", undefined, payment),
+    payment,
+    { artistId }
+  );
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "monthly" | "yearly";
@@ -1033,17 +895,17 @@ export type ArtistNewSubscriberAnnounceEmailType = {
 export const handleSubscription = async (
   userId: number,
   tierId: number,
-  session: Stripe.Checkout.Session
+  payment: CompletedPayment,
+  subscriptionKey: string
 ) => {
   try {
-    const { applicationFee } = await getApplicationFee(session);
     await registerSubscription({
       userId: Number(userId),
       tierId: Number(tierId),
-      amount: session.amount_total ?? 0,
-      paymentProcessorKey: session.subscription as string,
-      platformCut: applicationFee ?? null,
-      shippingAddress: session.shipping_details ?? null,
+      amount: payment.amount,
+      paymentProcessorKey: subscriptionKey,
+      platformCut: payment.platformCut,
+      shippingAddress: payment.shippingAddress,
     });
   } catch (e) {
     logger.error(`Error creating subscription: ${e}`);

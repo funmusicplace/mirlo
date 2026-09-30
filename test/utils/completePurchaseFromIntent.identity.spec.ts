@@ -1,8 +1,7 @@
+import assert from "node:assert";
+
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
-dotenv.config();
-
-import assert from "assert";
-
 import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
@@ -15,8 +14,7 @@ import {
   createTrackGroup,
   createUser,
 } from "../utils";
-
-import prisma from "@mirlo/prisma";
+dotenv.config();
 
 describe("completePurchaseFromIntent - buyer identity recovery", () => {
   beforeEach(async () => {
@@ -46,6 +44,9 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
       metadata: {
         purchaseType: "trackGroup",
         trackGroupId: String(tg.id),
+        items: JSON.stringify([
+          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
+        ]),
         artistId: String(artist.id),
       },
     } as unknown as Stripe.PaymentIntent;
@@ -79,6 +80,9 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
       metadata: {
         purchaseType: "trackGroup",
         trackGroupId: String(tg.id),
+        items: JSON.stringify([
+          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
+        ]),
         artistId: String(artist.id),
         userId: String(buyer.id),
         userEmail: buyer.email,
@@ -109,6 +113,9 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
       metadata: {
         purchaseType: "trackGroup",
         trackGroupId: String(tg.id),
+        items: JSON.stringify([
+          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
+        ]),
         artistId: String(artist.id),
       },
     } as unknown as Stripe.PaymentIntent;

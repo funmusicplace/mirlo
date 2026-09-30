@@ -8,6 +8,10 @@ import { slug } from "github-slugger";
 import prisma from "../prisma/prisma";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
 import { finalAudioBucket, uploadWrapper } from "../src/utils/minio";
+import {
+  CompletedPayment,
+  EMPTY_PLATFORM_CURRENCY_VALUE,
+} from "../src/utils/payments/completedPayment";
 
 const TRUNCATE_TABLES_SQL = `
   TRUNCATE TABLE
@@ -535,6 +539,20 @@ export const createSilentWavBuffer = (durationSeconds = 0.5) => {
 
   return wav;
 };
+
+export const fakePayment = (
+  overrides: Partial<CompletedPayment> = {}
+): CompletedPayment => ({
+  id: "pi_test",
+  amount: 0,
+  currency: "usd",
+  metadata: {},
+  platformCut: 0,
+  processorFee: 0,
+  platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
+  shippingAddress: null,
+  ...overrides,
+});
 
 export const mockJob = (data: object): Job =>
   ({ data, updateProgress: async () => {} }) as unknown as Job;

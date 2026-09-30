@@ -54,6 +54,9 @@ describe("completePurchaseFromIntent - track routing", () => {
       metadata: {
         purchaseType: "track",
         trackId: String(track.id),
+        items: JSON.stringify([
+          { type: "track", id: String(track.id), quantity: 1, amount: 500 },
+        ]),
         artistId: String(artist.id),
         userId: String(buyer.id),
         userEmail: buyer.email,

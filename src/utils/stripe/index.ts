@@ -1,11 +1,10 @@
-import prisma, { SafeUser, SECRET_USER_FIELDS } from "@mirlo/prisma";
+import prisma, { SafeUser } from "@mirlo/prisma";
 import {
   Prisma,
   FundraiserPledge,
   Fundraiser,
   TrackGroup,
 } from "@mirlo/prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 import { uniq } from "lodash";
 import Stripe from "stripe";
@@ -15,8 +14,6 @@ import { subscribeUserToArtist } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
-  getFeesFromPaymentIntent,
-  getPlatformCurrencyValueFromIntent,
   handleArtistGift,
   handleCataloguePurchase,
   handleFundraiserPledge,
@@ -25,12 +22,9 @@ import {
   handleSubscription,
   handleTrackGroupPurchase,
   handleTrackPurchase,
-  PlatformCurrencyValue,
-  sendSaleEmails,
-  withPlatformCurrency,
+  completePurchase,
 } from "../handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "../images";
-import { decrementMerchStock } from "../merch";
 import { finalMerchImageBucket } from "../minio";
 import { recordPaymentAccountStatus } from "../paymentAccountStatus";
 import {
@@ -41,6 +35,13 @@ import { manageSubscriptionReceipt } from "../subscription";
 import { registerSubscription } from "../subscriptionTier";
 import { createOrUpdatePledge } from "../trackGroup";
 import { findOrCreateUserBasedOnEmail, updateCurrencies } from "../user";
+
+import {
+  completedPaymentFromIntent,
+  completedPaymentFromSession,
+  getFeesFromPaymentIntent,
+  getPlatformCurrencyValueFromIntent,
+} from "./completedPayment";
 
 export const OPTION_JOINER = ";;";
 
@@ -426,29 +427,35 @@ export const handleCheckoutSession = async (
       userName
     );
     logger.info(`checkout.session: ${session.id} Processing session`);
+    const payment = await completedPaymentFromSession(session);
     if (purchaseType === "tip") {
       logger.info(`checkout.session: ${session.id} handling tip`);
-      await handleArtistGift(Number(actualUserId), Number(artistId), session);
+      await handleArtistGift(Number(actualUserId), Number(artistId), payment);
     } else if (purchaseType === "subscription") {
       logger.info(`checkout.session: ${session.id} handling subscription`);
-      await handleSubscription(Number(actualUserId), Number(tierId), session);
+      await handleSubscription(
+        Number(actualUserId),
+        Number(tierId),
+        payment,
+        session.subscription as string
+      );
     } else if (purchaseType === "trackGroup") {
       logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
       await handleTrackGroupPurchase(
         Number(actualUserId),
         Number(trackGroupId),
-        session,
+        payment,
         newUser
       );
     } else if (purchaseType === "track") {
       logger.info(`checkout.session: ${session.id} handleTrackPurchase`);
-      await handleTrackPurchase(Number(actualUserId), Number(trackId), session);
+      await handleTrackPurchase(Number(actualUserId), Number(trackId), payment);
     } else if (purchaseType === "artistCatalogue") {
       logger.info(`checkout.session: ${session.id} handleCataloguePurchase`);
       await handleCataloguePurchase(
         Number(actualUserId),
         Number(artistId),
-        session
+        payment
       );
     }
   } catch (e) {
@@ -1158,133 +1165,6 @@ export const handleSubscriptionDeleted = async (
   );
 };
 
-type MerchPurchaseItem = {
-  type: "merch";
-  id: string;
-  quantity?: number;
-  amount: number;
-  optionIds?: string[];
-};
-
-export const handleMerchPurchasesFromIntent = async (
-  userId: number,
-  items: MerchPurchaseItem[],
-  paymentIntent: Stripe.PaymentIntent,
-  stripeAccountId: string,
-  platformCurrencyValue?: PlatformCurrencyValue
-) => {
-  const merchItems = items.filter((item) => item.type === "merch");
-  if (merchItems.length === 0) return;
-
-  let applicationFee = paymentIntent.application_fee_amount ?? 0;
-  let stripeFee = 0;
-
-  try {
-    ({ applicationFee, paymentProcessorFee: stripeFee } =
-      await getFeesFromPaymentIntent(paymentIntent, stripeAccountId));
-  } catch (e) {
-    logger.warn(
-      `handleMerchPurchasesFromIntent: could not retrieve fees: ${e}`
-    );
-  }
-
-  const transaction = await prisma.userTransaction.create({
-    data: {
-      userId,
-      amount: merchItems.reduce((sum, item) => sum + item.amount, 0),
-      currency: paymentIntent.currency,
-      platformCut: applicationFee,
-      stripeCut: stripeFee,
-      stripeId: paymentIntent.id,
-      ...withPlatformCurrency(platformCurrencyValue),
-      paymentStatus: "COMPLETED",
-    },
-  });
-
-  let artist:
-    | Prisma.ProfileGetPayload<{
-        include: { user: { omit: typeof SECRET_USER_FIELDS } };
-      }>
-    | undefined;
-
-  for (const item of merchItems) {
-    const merch = await prisma.merch.findFirst({
-      where: { id: item.id },
-      include: { profile: { include: { user: true } } },
-    });
-
-    if (!merch) {
-      logger.warn(`handleMerchPurchasesFromIntent: merch ${item.id} not found`);
-      continue;
-    }
-
-    if (!artist && merch.profile) {
-      artist = merch.profile;
-    }
-
-    const quantity = item.quantity ?? 1;
-
-    await prisma.merchPurchase.create({
-      data: {
-        userId,
-        merchId: merch.id,
-        transactionId: transaction.id,
-        fulfillmentStatus: "NO_PROGRESS",
-        quantity,
-        ...(item.optionIds?.length && {
-          options: { connect: item.optionIds.map((id) => ({ id })) },
-        }),
-        ...(paymentIntent.shipping && {
-          shippingAddress: {
-            name: paymentIntent.shipping.name,
-            address: paymentIntent.shipping.address,
-          },
-        }),
-      },
-    });
-
-    if (merch.includePurchaseTrackGroupId) {
-      try {
-        await prisma.userTrackGroupPurchase.create({
-          data: {
-            trackGroupId: merch.includePurchaseTrackGroupId,
-            userId,
-            proGratis: true,
-          },
-        });
-      } catch (e: any) {
-        if (
-          e instanceof PrismaClientKnownRequestError ||
-          e?.name === "PrismaClientKnownRequestError"
-        ) {
-          if (e.code !== "P2002") {
-            throw e;
-          }
-        } else {
-          throw e;
-        }
-      }
-    }
-
-    await decrementMerchStock(merch.id, item.optionIds ?? [], quantity);
-
-    logger.info(
-      `handleMerchPurchasesFromIntent: created purchase for merch ${merch.id}, userId ${userId}`
-    );
-  }
-
-  const purchaser = await prisma.user.findFirst({ where: { id: userId } });
-
-  if (purchaser && artist) {
-    await sendSaleEmails(
-      artist,
-      purchaser,
-      [transaction.id],
-      paymentIntent.metadata?.message
-    );
-  }
-};
-
 /**
  * Last-resort buyer email, read back from what Stripe itself collected. Only
  * used when an intent reaches us with no identity in its metadata at all: the
@@ -1318,16 +1198,7 @@ export const completePurchaseFromIntent = async (
   const metadata = (intent.metadata ?? {}) as unknown as SessionMetaData & {
     items?: string;
   };
-  const { purchaseType, userId, userEmail, trackGroupId, trackId, artistId } =
-    metadata;
-
-  const sessionAdapter = {
-    id: intent.id,
-    amount_total: intent.amount_received,
-    currency: intent.currency,
-    metadata: { ...metadata, stripeAccountId: accountId },
-    payment_intent: intent.id,
-  } as unknown as Stripe.Checkout.Session;
+  const { userId, userEmail } = metadata;
 
   // The email normally lands in metadata — either supplied at initiation, or
   // attached during the payment step via PUT /purchase/:id.
@@ -1346,49 +1217,14 @@ export const completePurchaseFromIntent = async (
     userId
   );
 
-  const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
-    intent,
-    accountId
-  );
+  const payment = await completedPaymentFromIntent(intent, accountId);
 
-  if (purchaseType === "trackGroup" && trackGroupId) {
-    await handleTrackGroupPurchase(
-      Number(actualUserId),
-      Number(trackGroupId),
-      sessionAdapter,
-      newUser,
-      platformCurrencyValue
-    );
-  } else if (purchaseType === "track" && trackId) {
-    await handleTrackPurchase(
-      Number(actualUserId),
-      Number(trackId),
-      sessionAdapter,
-      platformCurrencyValue
-    );
-  } else if (purchaseType === "tip" && artistId) {
-    await handleArtistGift(
-      Number(actualUserId),
-      Number(artistId),
-      sessionAdapter,
-      platformCurrencyValue
-    );
-  } else if (purchaseType === "merch" && metadata.items) {
-    await handleMerchPurchasesFromIntent(
-      Number(actualUserId),
-      JSON.parse(metadata.items),
-      intent,
-      accountId,
-      platformCurrencyValue
-    );
-  } else if (purchaseType === "catalogue" && artistId) {
-    await handleCataloguePurchase(
-      Number(actualUserId),
-      Number(artistId),
-      sessionAdapter,
-      platformCurrencyValue
-    );
-  }
+  await completePurchase(
+    Number(actualUserId),
+    JSON.parse(metadata.items ?? "[]"),
+    payment,
+    { newUser }
+  );
 };
 
 export const handlePaymentIntentSucceeded = async (

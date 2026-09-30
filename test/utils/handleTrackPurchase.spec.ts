@@ -1,23 +1,26 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it } from "mocha";
-
-import {
-  clearTables,
-  createTrack,
-  createTrackGroup,
-  createUser,
-} from "../utils";
 
 import prisma from "@mirlo/prisma";
+
 import assert from "assert";
+
+import { describe, it } from "mocha";
 import sinon from "sinon";
+
 import * as sendMail from "../../src/jobs/send-mail";
 import {
   ArtistPurchaseNotificationEmailType,
   handleTrackPurchase,
   PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
+import {
+  clearTables,
+  createTrack,
+  createTrackGroup,
+  createUser,
+  fakePayment,
+} from "../utils";
 
 describe("handleTrackPurchase", () => {
   beforeEach(async () => {
@@ -127,5 +130,86 @@ describe("handleTrackPurchase", () => {
       track.id
     );
     assert.equal(locals1.transactions[0]?.amount, 0);
+  });
+
+  it("sends the artist notification to the release's paymentToUser, cc'ing their accounting email", async () => {
+    const stub = sinon.spy(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const { user: label } = await createUser({
+      email: "label@label.com",
+      accountingEmail: "accounts@label.com",
+    });
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+    const trackGroup = await createTrackGroup(artist.id);
+    await prisma.trackGroup.update({
+      where: { id: trackGroup.id },
+      data: { paymentToUserId: label.id },
+    });
+    const track = await createTrack(trackGroup.id);
+
+    await handleTrackPurchase(purchaser.id, track.id);
+
+    const notification = stub
+      .getCalls()
+      .find(
+        (call) => call.args[0].data.template === "artist-purchase-notification"
+      );
+    assert.ok(notification, "should send the artist notification");
+    assert.equal(notification!.args[0].data.message.to, "label@label.com");
+    assert.equal(notification!.args[0].data.message.cc, "accounts@label.com");
+  });
+
+  it("records the processing fee on the transaction", async () => {
+    sinon.stub(sendMail, "default").resolves();
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+    });
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+    const trackGroup = await createTrackGroup(artist.id);
+    const track = await createTrack(trackGroup.id);
+
+    await handleTrackPurchase(
+      purchaser.id,
+      track.id,
+      fakePayment({ amount: 500, platformCut: 50, processorFee: 30 })
+    );
+
+    const purchase = await prisma.userTrackPurchase.findFirst({
+      where: { userId: purchaser.id, trackId: track.id },
+      include: { transaction: true },
+    });
+    assert.equal(purchase?.transaction?.amount, 500);
+    assert.equal(purchase?.transaction?.platformCut, 50);
+    assert.equal(
+      purchase?.transaction?.stripeCut,
+      30,
+      "track purchases used to drop the processing fee"
+    );
   });
 });

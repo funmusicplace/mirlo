@@ -9,7 +9,7 @@ import { getClient } from "./getClient";
 import {
   PlatformCurrencyValue,
   withPlatformCurrency,
-} from "./handleFinishedTransactions";
+} from "./payments/completedPayment";
 import { resolvePayee } from "./payments/payee";
 import { grantSubscriptionTierReleases } from "./subscriptionTier";
 

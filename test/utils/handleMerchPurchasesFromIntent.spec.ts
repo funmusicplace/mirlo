@@ -1,19 +1,19 @@
-import * as dotenv from "dotenv";
-
-dotenv.config();
 import assert from "node:assert";
 
+import prisma from "@mirlo/prisma";
+import * as dotenv from "dotenv";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
-import prisma from "@mirlo/prisma";
 
 import * as sendMail from "../../src/jobs/send-mail";
 import {
   ArtistPurchaseNotificationEmailType,
   PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
-import stripe, { handleMerchPurchasesFromIntent } from "../../src/utils/stripe";
+import { completePurchase as handleMerchPurchasesFromIntent } from "../../src/utils/handleFinishedTransactions";
+import stripe from "../../src/utils/stripe";
+import { completedPaymentFromIntent } from "../../src/utils/stripe/completedPayment";
 import {
   clearTables,
   createArtist,
@@ -21,6 +21,7 @@ import {
   createTrackGroup,
   createUser,
 } from "../utils";
+dotenv.config();
 
 // A bare-bones PaymentIntent with no `latest_charge` — getFeesFromPaymentIntent
 // short-circuits without an actual Stripe call whenever that's absent, so these
@@ -58,8 +59,7 @@ describe("handleMerchPurchasesFromIntent", () => {
     await handleMerchPurchasesFromIntent(
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 2, amount: 1600 }],
-      fakeIntent(),
-      "acct_test"
+      await completedPaymentFromIntent(fakeIntent(), "acct_test")
     );
 
     const purchase = await prisma.merchPurchase.findFirst({
@@ -104,8 +104,7 @@ describe("handleMerchPurchasesFromIntent", () => {
           optionIds: [option.id],
         },
       ],
-      fakeIntent(),
-      "acct_test"
+      await completedPaymentFromIntent(fakeIntent(), "acct_test")
     );
 
     const purchase = await prisma.merchPurchase.findFirst({
@@ -142,20 +141,22 @@ describe("handleMerchPurchasesFromIntent", () => {
     await handleMerchPurchasesFromIntent(
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 1, amount: 1000 }],
-      fakeIntent({
-        shipping: {
-          name: "Ada Lovelace",
-          address: {
-            line1: "1 Analytical Engine Way",
-            line2: null,
-            city: "London",
-            state: "",
-            postal_code: "SW1A 1AA",
-            country: "GB",
+      await completedPaymentFromIntent(
+        fakeIntent({
+          shipping: {
+            name: "Ada Lovelace",
+            address: {
+              line1: "1 Analytical Engine Way",
+              line2: null,
+              city: "London",
+              state: "",
+              postal_code: "SW1A 1AA",
+              country: "GB",
+            },
           },
-        },
-      }),
-      "acct_test"
+        }),
+        "acct_test"
+      )
     );
 
     const purchase = await prisma.merchPurchase.findFirst({
@@ -184,8 +185,7 @@ describe("handleMerchPurchasesFromIntent", () => {
     await handleMerchPurchasesFromIntent(
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 1, amount: 1000 }],
-      fakeIntent(),
-      "acct_test"
+      await completedPaymentFromIntent(fakeIntent(), "acct_test")
     );
 
     const grant = await prisma.userTrackGroupPurchase.findFirst({
@@ -206,8 +206,7 @@ describe("handleMerchPurchasesFromIntent", () => {
     await handleMerchPurchasesFromIntent(
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 1, amount: 1000 }],
-      fakeIntent(),
-      "acct_test"
+      await completedPaymentFromIntent(fakeIntent(), "acct_test")
     );
 
     const grants = await prisma.userTrackGroupPurchase.findMany({
@@ -239,8 +238,7 @@ describe("handleMerchPurchasesFromIntent", () => {
     await handleMerchPurchasesFromIntent(
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 1, amount: 1000 }],
-      fakeIntent(),
-      "acct_test"
+      await completedPaymentFromIntent(fakeIntent(), "acct_test")
     );
 
     const grants = await prisma.userTrackGroupPurchase.findMany({
@@ -262,8 +260,13 @@ describe("handleMerchPurchasesFromIntent", () => {
     await handleMerchPurchasesFromIntent(
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 1, amount: 2000 }],
-      fakeIntent({ metadata: { message: "Enjoy the merch!" } }),
-      "acct_test"
+      await completedPaymentFromIntent(
+        fakeIntent({
+          amount_received: 2000,
+          metadata: { message: "Enjoy the merch!" },
+        }),
+        "acct_test"
+      )
     );
 
     assert.equal(stub.calledTwice, true);
@@ -302,11 +305,14 @@ describe("handleMerchPurchasesFromIntent", () => {
     await handleMerchPurchasesFromIntent(
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 1, amount: 2000 }],
-      fakeIntent({
-        application_fee_amount: 200,
-        latest_charge: "ch_123",
-      }),
-      "acct_test"
+      await completedPaymentFromIntent(
+        fakeIntent({
+          amount_received: 2000,
+          application_fee_amount: 200,
+          latest_charge: "ch_123",
+        }),
+        "acct_test"
+      )
     );
 
     const transaction = await prisma.userTransaction.findFirst({
