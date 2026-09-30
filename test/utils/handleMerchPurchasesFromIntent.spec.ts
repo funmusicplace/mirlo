@@ -1,19 +1,18 @@
-import * as dotenv from "dotenv";
-
-dotenv.config();
 import assert from "node:assert";
 
+import prisma from "@mirlo/prisma";
+import * as dotenv from "dotenv";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
-import prisma from "@mirlo/prisma";
 
 import * as sendMail from "../../src/jobs/send-mail";
 import {
   ArtistPurchaseNotificationEmailType,
   PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
-import stripe, { handleMerchPurchasesFromIntent } from "../../src/utils/stripe";
+import { completePurchase as handleMerchPurchasesFromIntent } from "../../src/utils/handleFinishedTransactions";
+import stripe from "../../src/utils/stripe";
 import { completedPaymentFromIntent } from "../../src/utils/stripe/completedPayment";
 import {
   clearTables,
@@ -22,6 +21,7 @@ import {
   createTrackGroup,
   createUser,
 } from "../utils";
+dotenv.config();
 
 // A bare-bones PaymentIntent with no `latest_charge` — getFeesFromPaymentIntent
 // short-circuits without an actual Stripe call whenever that's absent, so these

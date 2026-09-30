@@ -388,6 +388,103 @@ describe("purchase", () => {
       assert.ok(response.body.clientSecret);
     });
 
+    it("should charge a two-album cart to the one account both albums pay", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_two_albums",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg1 = await createTrackGroup(artist.id, {
+        title: "Album One",
+        minPrice: 1000,
+      });
+      const tg2 = await createTrackGroup(artist.id, {
+        title: "Album Two",
+        minPrice: 500,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [
+            { type: "trackGroup", id: tg1.id, price: "1000" },
+            { type: "trackGroup", id: tg2.id, price: "500" },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.stripeAccountId, "acct_two_albums");
+    });
+
+    it("should return 400 when a release paid to a label is in the same cart as the artist's merch", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_artist_own",
+      });
+      const { user: label } = await createUser({
+        email: "label@test.com",
+        stripeAccountId: "acct_label",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      await prisma.trackGroup.update({
+        where: { id: tg.id },
+        data: { paymentToUserId: label.id },
+      });
+      const merch = await createMerch(artist.id, {
+        isPublic: true,
+        minPrice: 800,
+        quantityRemaining: 10,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [
+            { type: "trackGroup", id: tg.id, price: "1000" },
+            { type: "merch", id: merch.id, quantity: 1 },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      assert.match(response.body.error, /same account/i);
+    });
+
+    it("should return 400 when a release's paymentToUser hasn't connected a payment processor, rather than paying the artist", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_artist_fallback",
+      });
+      const { user: label } = await createUser({ email: "label@test.com" });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const artist = await createArtist(artistUser.id);
+      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      await prisma.trackGroup.update({
+        where: { id: tg.id },
+        data: { paymentToUserId: label.id },
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: artist.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      assert.match(response.body.error, /payment processor/i);
+    });
+
     it("should return 200 for a logged-out purchase with no email", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",

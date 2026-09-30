@@ -1,5 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+import { uniq } from "lodash";
 
 import {
   artistEditableByUser,
@@ -390,7 +391,25 @@ export default function () {
       }
 
       const resolvedItems: ResolvedItem[] = [];
-      let resolvedStripeAccountId: string | undefined;
+      // Every item's payee account. A PaymentIntent is a direct charge on one
+      // connected account, so the cart can only pay one of them.
+      const payeeAccountIds: (string | null)[] = [];
+      let artistPayeeAccountId: string | null | undefined;
+      const resolveArtistPayeeAccountId = async () => {
+        if (artistPayeeAccountId === undefined) {
+          const artist = await prisma.profile.findFirst({
+            where: { id: artistId },
+            include: {
+              user: { select: { stripeAccountId: true } },
+              paymentToUser: { select: { stripeAccountId: true } },
+            },
+          });
+          artistPayeeAccountId = artist
+            ? (resolvePayee({ artist }).stripeAccountId ?? null)
+            : null;
+        }
+        return artistPayeeAccountId;
+      };
       let requiresShipping = false;
       let allowedCountries: string[] | undefined;
 
@@ -436,7 +455,7 @@ export default function () {
           if (result.kind === "free") {
             return res.status(200).json({ redirectUrl: result.redirectUrl });
           }
-          resolvedStripeAccountId = result.stripeAccountId;
+          payeeAccountIds.push(result.stripeAccountId ?? null);
           resolvedItems.push(result.item);
         } else if (item.type === "track") {
           const track = await prisma.track.findFirst({
@@ -483,7 +502,7 @@ export default function () {
           if (result.kind === "free") {
             return res.status(200).json({ redirectUrl: result.redirectUrl });
           }
-          resolvedStripeAccountId = result.stripeAccountId;
+          payeeAccountIds.push(result.stripeAccountId ?? null);
           resolvedItems.push(result.item);
         } else if (item.type === "merch") {
           const merch: MerchWithOptionsAndShipping | null =
@@ -507,6 +526,7 @@ export default function () {
           }
 
           const resolved = resolveMerchPurchaseItem(merch, item);
+          payeeAccountIds.push(await resolveArtistPayeeAccountId());
           resolvedItems.push(resolved.item);
           requiresShipping = requiresShipping || resolved.requiresShipping;
           if (resolved.requiresShipping) {
@@ -519,6 +539,7 @@ export default function () {
               description: "Tip amount must be greater than 0",
             });
           }
+          payeeAccountIds.push(await resolveArtistPayeeAccountId());
           resolvedItems.push({
             type: "tip",
             quantity: 1,
@@ -561,6 +582,7 @@ export default function () {
             });
           }
 
+          payeeAccountIds.push(await resolveArtistPayeeAccountId());
           resolvedItems.push({
             type: "catalogue",
             quantity: 1,
@@ -568,6 +590,22 @@ export default function () {
             message: item.message,
           });
         }
+      }
+
+      const cartAccountIds = uniq(payeeAccountIds);
+      if (cartAccountIds.length > 1) {
+        throw new AppError({
+          httpCode: 400,
+          description:
+            "Items in one cart must all be paid to the same account; buy them separately",
+        });
+      }
+      const [payeeAccountId] = cartAccountIds;
+      if (!payeeAccountId) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Artist is not set up with a payment processor",
+        });
       }
 
       const totalAmount = resolvedItems.reduce((sum, i) => sum + i.amount, 0);
@@ -586,7 +624,7 @@ export default function () {
         userId: loggedInUser ? String(loggedInUser.id) : undefined,
         clientId,
         successUrl,
-        stripeAccountId: resolvedStripeAccountId,
+        stripeAccountId: payeeAccountId,
         requiresShipping,
         allowedCountries,
       });

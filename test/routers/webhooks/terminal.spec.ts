@@ -45,7 +45,7 @@ describe("terminal.reader webhooks", () => {
   });
 
   describe("handleTerminalReaderActionSucceeded — process_payment_intent", () => {
-    it("should capture the payment intent and call handleTrackGroupPurchase", async () => {
+    it("should capture the payment intent and complete a trackGroup purchase", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
       });
@@ -64,14 +64,21 @@ describe("terminal.reader webhooks", () => {
           userId: String(buyer.id),
           userEmail: buyer.email,
           artistId: String(artist.id),
-          items: "[]",
+          items: JSON.stringify([
+            {
+              type: "trackGroup",
+              id: String(tg.id),
+              quantity: 1,
+              amount: 1000,
+            },
+          ]),
         },
         status: "succeeded",
       } as unknown as Stripe.Response<Stripe.PaymentIntent>);
 
-      const handleTrackGroupPurchaseStub = sinon.stub(
+      const completePurchaseStub = sinon.stub(
         handleFinishedTransactions,
-        "handleTrackGroupPurchase"
+        "completePurchase"
       );
 
       const reader = buildReader({
@@ -85,15 +92,15 @@ describe("terminal.reader webhooks", () => {
       await handleTerminalReaderActionSucceeded(reader, "acct_test");
 
       assert.ok(
-        handleTrackGroupPurchaseStub.calledOnce,
-        "handleTrackGroupPurchase should be called once"
+        completePurchaseStub.calledOnce,
+        "completePurchase should be called once"
       );
-      const [, calledTrackGroupId] =
-        handleTrackGroupPurchaseStub.getCall(0).args;
-      assert.equal(calledTrackGroupId, tg.id);
+      const [, calledItems] = completePurchaseStub.getCall(0).args;
+      assert.equal(calledItems[0].type, "trackGroup");
+      assert.equal(calledItems[0].id, String(tg.id));
     });
 
-    it("should capture the payment intent and call handleArtistGift for a tip", async () => {
+    it("should capture the payment intent and complete a tip", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
       });
@@ -110,14 +117,14 @@ describe("terminal.reader webhooks", () => {
           stripeAccountId: "acct_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
-          items: "[]",
+          items: JSON.stringify([{ type: "tip", quantity: 1, amount: 500 }]),
         },
         status: "succeeded",
       } as unknown as Stripe.Response<Stripe.PaymentIntent>);
 
-      const handleArtistGiftStub = sinon.stub(
+      const completePurchaseStub = sinon.stub(
         handleFinishedTransactions,
-        "handleArtistGift"
+        "completePurchase"
       );
 
       const reader = buildReader({
@@ -131,9 +138,10 @@ describe("terminal.reader webhooks", () => {
       await handleTerminalReaderActionSucceeded(reader, "acct_test");
 
       assert.ok(
-        handleArtistGiftStub.calledOnce,
-        "handleArtistGift should be called once"
+        completePurchaseStub.calledOnce,
+        "completePurchase should be called once"
       );
+      assert.equal(completePurchaseStub.getCall(0).args[1][0].type, "tip");
     });
 
     it("should do nothing when action type is not process_payment_intent or process_setup_intent", async () => {
