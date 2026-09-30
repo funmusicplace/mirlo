@@ -92,6 +92,36 @@ describe("manage/posts/{postId}", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should PUT / save featuredImageCredit and return it from the public GET", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { isDraft: false });
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({ featuredImageCredit: "Illustration by Jane Doe" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(
+        response.body.result.featuredImageCredit,
+        "Illustration by Jane Doe"
+      );
+
+      const publicResponse = await requestApp
+        .get(`posts/${post.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(publicResponse.statusCode, 200);
+      assert.equal(
+        publicResponse.body.result.featuredImageCredit,
+        "Illustration by Jane Doe"
+      );
+    });
+
     it("should PUT / generate a urlSlug from the title when post has none", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",

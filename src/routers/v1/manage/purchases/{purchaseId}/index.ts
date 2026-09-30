@@ -5,8 +5,14 @@ import {
   merchPurchaseBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import logger from "../../../../../logger";
 import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
 import { buyerUserSelect } from "../../../../../utils/artist";
+import { AppError } from "../../../../../utils/error";
+import {
+  hasShipmentChanged,
+  sendShipmentUpdateEmail,
+} from "../../../../../utils/shipmentUpdateEmail";
 
 type Params = {
   purchaseId: string;
@@ -22,7 +28,23 @@ export default function () {
     const { purchaseId } = req.params as unknown as Params;
     const { fulfillmentStatus, trackingNumber, trackingWebsite } = req.body;
     try {
-      const updatedCount = await prisma.merchPurchase.updateMany({
+      const existing = await prisma.merchPurchase.findFirst({
+        where: { id: purchaseId },
+        select: {
+          fulfillmentStatus: true,
+          trackingNumber: true,
+          trackingWebsite: true,
+        },
+      });
+
+      if (!existing) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Merch purchase not found",
+        });
+      }
+
+      const updated = await prisma.merchPurchase.update({
         where: {
           id: purchaseId,
         },
@@ -31,25 +53,40 @@ export default function () {
           trackingNumber,
           trackingWebsite,
         },
+        include: {
+          merch: {
+            select: {
+              title: true,
+              profile: { select: { name: true, urlSlug: true } },
+            },
+          },
+          user: { select: buyerUserSelect },
+        },
       });
 
-      if (updatedCount) {
-        const artist = await prisma.merchPurchase.findFirst({
-          where: { id: purchaseId },
-        });
-        res.json({ result: artist });
-      } else {
-        res.json({
-          error: "An unknown error occurred",
-        });
+      if (hasShipmentChanged(existing, updated)) {
+        try {
+          await sendShipmentUpdateEmail(updated);
+        } catch (e) {
+          // Don't fail the artist's update just because the email couldn't
+          // be queued.
+          logger.error("Failed to queue shipment update email", e);
+        }
       }
+
+      res.json({ result: updated });
     } catch (error) {
       next(error);
     }
   }
 
   PUT.apiDoc = {
-    summary: "Updates a merch purchase belonging to a user",
+    summary:
+      "Updates the fulfillment status and tracking info of a merch purchase",
+    description:
+      "Only fulfillmentStatus, trackingNumber and trackingWebsite are updated. " +
+      "If the fulfillment status changes, or tracking info is newly added or " +
+      "changed, the buyer is emailed about the shipment update.",
     parameters: [
       {
         in: "path",
@@ -61,7 +98,15 @@ export default function () {
         in: "body",
         name: "purchase",
         schema: {
-          $ref: "#/definitions/MerchPurchase",
+          type: "object",
+          properties: {
+            fulfillmentStatus: {
+              type: "string",
+              enum: ["NO_PROGRESS", "STARTED", "SHIPPED", "COMPLETED"],
+            },
+            trackingNumber: { type: ["string", "null"] },
+            trackingWebsite: { type: ["string", "null"] },
+          },
         },
       },
     ],
