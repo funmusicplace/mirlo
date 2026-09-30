@@ -261,7 +261,10 @@ describe("handleMerchPurchasesFromIntent", () => {
       buyer.id,
       [{ type: "merch", id: merch.id, quantity: 1, amount: 2000 }],
       await completedPaymentFromIntent(
-        fakeIntent({ metadata: { message: "Enjoy the merch!" } }),
+        fakeIntent({
+          amount_received: 2000,
+          metadata: { message: "Enjoy the merch!" },
+        }),
         "acct_test"
       )
     );
@@ -304,6 +307,7 @@ describe("handleMerchPurchasesFromIntent", () => {
       [{ type: "merch", id: merch.id, quantity: 1, amount: 2000 }],
       await completedPaymentFromIntent(
         fakeIntent({
+          amount_received: 2000,
           application_fee_amount: 200,
           latest_charge: "ch_123",
         }),

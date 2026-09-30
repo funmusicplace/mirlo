@@ -23,16 +23,14 @@ import {
   handleSubscription,
   handleTrackGroupPurchase,
   handleTrackPurchase,
+  recordCompletedTransaction,
   sendSaleEmails,
 } from "../handleFinishedTransactions";
 import { generateFullStaticImageUrl } from "../images";
 import { decrementMerchStock } from "../merch";
 import { finalMerchImageBucket } from "../minio";
 import { recordPaymentAccountStatus } from "../paymentAccountStatus";
-import {
-  CompletedPayment,
-  withPlatformCurrency,
-} from "../payments/completedPayment";
+import { CompletedPayment } from "../payments/completedPayment";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -1187,29 +1185,23 @@ export const handleMerchPurchasesFromIntent = async (
   const merchItems = items.filter((item) => item.type === "merch");
   if (merchItems.length === 0) return;
 
-  const transaction = await prisma.userTransaction.create({
-    data: {
-      userId,
-      amount: merchItems.reduce((sum, item) => sum + item.amount, 0),
-      currency: payment.currency,
-      platformCut: payment.platformCut,
-      stripeCut: payment.processorFee,
-      stripeId: payment.id,
-      ...withPlatformCurrency(payment.platformCurrencyValue),
-      paymentStatus: "COMPLETED",
-    },
-  });
+  const transaction = await recordCompletedTransaction(userId, payment);
 
   let artist:
     | Prisma.ProfileGetPayload<{
-        include: { user: { omit: typeof SECRET_USER_FIELDS } };
+        include: {
+          user: { omit: typeof SECRET_USER_FIELDS };
+          paymentToUser: { omit: typeof SECRET_USER_FIELDS };
+        };
       }>
     | undefined;
 
   for (const item of merchItems) {
     const merch = await prisma.merch.findFirst({
       where: { id: item.id },
-      include: { profile: { include: { user: true } } },
+      include: {
+        profile: { include: { user: true, paymentToUser: true } },
+      },
     });
 
     if (!merch) {
@@ -1272,12 +1264,9 @@ export const handleMerchPurchasesFromIntent = async (
   const purchaser = await prisma.user.findFirst({ where: { id: userId } });
 
   if (purchaser && artist) {
-    await sendSaleEmails(
-      artist,
-      purchaser,
-      [transaction.id],
-      payment.metadata.message
-    );
+    await sendSaleEmails(artist, purchaser, [transaction.id], {
+      message: payment.metadata.message,
+    });
   }
 };
 

@@ -1,18 +1,20 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it } from "mocha";
-
-import { clearTables, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
+
 import assert from "assert";
+
+import { describe, it } from "mocha";
 import sinon from "sinon";
+
 import * as sendMail from "../../src/jobs/send-mail";
 import {
   ArtistPurchaseNotificationEmailType,
   handleArtistGift,
   PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
+import { clearTables, createUser } from "../utils";
 
 describe("handleArtistGift", () => {
   beforeEach(async () => {
@@ -109,5 +111,37 @@ describe("handleArtistGift", () => {
     assert.equal(subscription?.profileSubscriptionTier.profileId, artist.id);
     assert.equal(subscription?.profileSubscriptionTier.isDefaultTier, true);
     assert.equal(subscription?.profileSubscriptionTier.name, "follow");
+  });
+
+  it("sends the artist notification to the artist's paymentToUser", async () => {
+    const stub = sinon.spy(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const { user: label } = await createUser({ email: "label@label.com" });
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+    const artist = await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+        paymentToUserId: label.id,
+      },
+    });
+
+    await handleArtistGift(purchaser.id, artist.id);
+
+    const notification = stub
+      .getCalls()
+      .find(
+        (call) => call.args[0].data.template === "artist-purchase-notification"
+      );
+    assert.ok(notification, "should send the artist notification");
+    assert.equal(notification!.args[0].data.message.to, "label@label.com");
   });
 });

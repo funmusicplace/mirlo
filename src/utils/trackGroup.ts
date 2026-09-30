@@ -21,10 +21,6 @@ import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
 import { streamOriginalAudio, removeCoverImages } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
-import {
-  PlatformCurrencyValue,
-  withPlatformCurrency,
-} from "./payments/completedPayment";
 import { deleteTrack } from "./tracks";
 
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
@@ -551,85 +547,35 @@ export const registerPurchase = async ({
 export const registerTrackPurchase = async ({
   userId,
   trackId,
-  pricePaid,
-  currencyPaid,
-  paymentProcessorKey,
   message,
-  platformCut = null,
-  discountPercent,
-  platformCurrencyValue,
+  transactionId,
 }: {
   userId: number;
-  pricePaid: number;
-  currencyPaid: string;
-  paymentProcessorKey: string | null;
-  message?: string | null;
   trackId: number;
-  platformCut?: number | null;
-  discountPercent?: number;
-  platformCurrencyValue?: PlatformCurrencyValue;
+  message?: string | null;
+  transactionId: string;
 }) => {
   const token = randomUUID();
 
-  let purchase = await prisma.userTrackPurchase.findFirst({
+  await prisma.userTrackPurchase.upsert({
     where: {
-      userId: Number(userId),
-      trackId: Number(trackId),
-    },
-  });
-
-  if (purchase) {
-    let transaction;
-    if (!purchase.transactionId) {
-      transaction = await prisma.userTransaction.create({
-        data: {
-          userId: Number(userId),
-          amount: pricePaid,
-          currency: currencyPaid,
-          stripeId: paymentProcessorKey,
-          platformCut: platformCut,
-          discountPercent: discountPercent,
-          ...withPlatformCurrency(platformCurrencyValue),
-          paymentStatus: "COMPLETED",
-        },
-      });
-    }
-    await prisma.userTrackPurchase.update({
-      where: {
-        userId_trackId: {
-          userId: Number(userId),
-          trackId: Number(trackId),
-        },
-      },
-      data: {
-        singleDownloadToken: token,
-        transactionId: transaction?.id,
-      },
-    });
-  }
-
-  if (!purchase) {
-    const transaction = await prisma.userTransaction.create({
-      data: {
-        userId: Number(userId),
-        amount: pricePaid,
-        currency: currencyPaid,
-        stripeId: paymentProcessorKey,
-        platformCut: platformCut,
-        ...withPlatformCurrency(platformCurrencyValue),
-        paymentStatus: "COMPLETED",
-      },
-    });
-    purchase = await prisma.userTrackPurchase.create({
-      data: {
+      userId_trackId: {
         userId: Number(userId),
         trackId: Number(trackId),
-        message: message ?? null,
-        singleDownloadToken: token,
-        transactionId: transaction.id,
       },
-    });
-  }
+    },
+    update: {
+      singleDownloadToken: token,
+      transactionId,
+    },
+    create: {
+      userId: Number(userId),
+      trackId: Number(trackId),
+      message: message ?? null,
+      singleDownloadToken: token,
+      transactionId,
+    },
+  });
 
   const refreshedPurchase = await prisma.userTrackPurchase.findFirst({
     where: {
