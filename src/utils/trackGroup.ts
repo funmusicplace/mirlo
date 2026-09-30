@@ -159,11 +159,23 @@ export const deleteTrackGroup = async (
 ) => {
   await deleteTrackGroupCover(Number(trackGroupId));
 
-  await prisma.fundraiserPledge.deleteMany({
-    where: {
-      trackGroupId,
-    },
+  // Pledges are linked by fundraiser, not trackGroup. Cancel the unpaid ones
+  // so they can't be charged after the release is gone.
+  const trackGroup = await prisma.trackGroup.findFirst({
+    where: { id: Number(trackGroupId) },
+    select: { fundraiserId: true },
   });
+
+  if (trackGroup?.fundraiserId) {
+    await prisma.fundraiserPledge.updateMany({
+      where: {
+        fundraiserId: trackGroup.fundraiserId,
+        paidAt: null,
+        cancelledAt: null,
+      },
+      data: { cancelledAt: new Date() },
+    });
+  }
 
   await prisma.trackGroupTag.deleteMany({
     where: {

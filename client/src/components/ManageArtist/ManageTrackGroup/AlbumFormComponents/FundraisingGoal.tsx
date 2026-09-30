@@ -31,7 +31,7 @@ const FundraisingGoal: React.FC<{
 }> = ({ trackGroupId, fundraiser }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const { register, watch } = useFormContext<TrackGroupFormData>();
+  const { register } = useFormContext<TrackGroupFormData>();
   const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(false);
   const [didAddFundraiser, setDidAddFundraiser] = React.useState(false);
@@ -40,8 +40,10 @@ const FundraisingGoal: React.FC<{
     queryManagedTrackGroup(trackGroupId)
   );
 
-  const goal = watch("goalAmount");
-  const isAllOrNothing = watch("isAllOrNothing");
+  // Use the saved fundraiser, not unsaved form state, to decide whether
+  // pledges can be charged
+  const isAllOrNothing = !!fundraiser?.isAllOrNothing;
+  const goalAmount = fundraiser?.goalAmount ?? 0;
 
   const {
     data: { totalAmount, totalPledges } = {
@@ -58,7 +60,7 @@ const FundraisingGoal: React.FC<{
   const isFundraiserComplete = fundraiser?.status === "SUCCESSFUL";
   const chargePledgesVisible =
     !isFundraiserComplete &&
-    (!isAllOrNothing || (totalAmount > 0 && Number(goal) < totalAmount));
+    (!isAllOrNothing || (totalAmount > 0 && goalAmount <= totalAmount));
 
   const onChargePledges = async () => {
     try {
@@ -269,6 +271,7 @@ const FundraisingGoal: React.FC<{
             aria-describedby="description-all-or-nothing"
             id="isAllOrNothing"
             type="checkbox"
+            disabled={hasPledges}
             {...register("isAllOrNothing")}
           />
         </div>
@@ -276,6 +279,7 @@ const FundraisingGoal: React.FC<{
           <label htmlFor="isAllOrNothing">{t("isAllOrNothing")}</label>
           <small id="description-all-or-nothing">
             {t("isAllOrNothingDescription")}
+            {hasPledges && <> {t("isAllOrNothingLockedWithPledges")}</>}
           </small>
         </div>
       </FormComponent>

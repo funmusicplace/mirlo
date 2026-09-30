@@ -8,6 +8,8 @@ import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
+  createFundraiser,
+  createFundraiserPledge,
   createProfile,
   createTrackGroup,
   createUser,
@@ -443,6 +445,48 @@ describe("manage/trackGroups/{trackGroupId}", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 200);
+    });
+
+    it("should cancel unpaid pledges on the release's fundraiser", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: backer } = await createUser({ email: "backer@test.com" });
+      const { user: paidBacker } = await createUser({
+        email: "paid-backer@test.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        urlSlug: "a-title",
+      });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+      const unpaidPledge = await createFundraiserPledge(
+        fundraiser.id,
+        backer.id
+      );
+      const paidAt = new Date();
+      const paidPledge = await createFundraiserPledge(
+        fundraiser.id,
+        paidBacker.id,
+        { paidAt }
+      );
+
+      const response = await requestApp
+        .delete(`manage/trackGroups/${trackGroup.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+
+      const refreshedUnpaid = await prisma.fundraiserPledge.findUnique({
+        where: { id: unpaidPledge.id },
+      });
+      assert.notEqual(refreshedUnpaid?.cancelledAt, null);
+
+      const refreshedPaid = await prisma.fundraiserPledge.findUnique({
+        where: { id: paidPledge.id },
+      });
+      assert.equal(refreshedPaid?.cancelledAt, null);
     });
   });
 });

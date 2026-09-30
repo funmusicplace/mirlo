@@ -9,6 +9,7 @@ import {
   clearTables,
   createArtist,
   createFundraiser,
+  createFundraiserPledge,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -30,7 +31,7 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     const artist = await createArtist(user.id);
     const trackGroup = await createTrackGroup(artist.id);
     const fundraiser = await createFundraiser(trackGroup.id, {
-      isAllOrNothing: true,
+      isAllOrNothing: false,
     });
 
     assert.equal(fundraiser.status, "ACTIVE");
@@ -47,6 +48,58 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
       where: { id: fundraiser.id },
     });
     assert.equal(refreshed?.status, "SUCCESSFUL");
+  });
+
+  it("refuses to charge an all-or-nothing fundraiser below its goal", async () => {
+    const { user, accessToken } = await createUser({
+      email: "fundraiser-owner@example.com",
+    });
+    const { user: backer } = await createUser({ email: "backer@example.com" });
+    const artist = await createArtist(user.id);
+    const trackGroup = await createTrackGroup(artist.id);
+    const fundraiser = await createFundraiser(trackGroup.id, {
+      isAllOrNothing: true,
+      goalAmount: 50000,
+    });
+    const pledge = await createFundraiserPledge(fundraiser.id, backer.id, {
+      amount: 5000,
+    });
+
+    const response = await requestApp
+      .post(`manage/fundraisers/${fundraiser.id}/chargePledges`)
+      .send({})
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 400);
+
+    const refreshed = await prisma.fundraiser.findUnique({
+      where: { id: fundraiser.id },
+    });
+    assert.equal(refreshed?.status, "ACTIVE");
+    const refreshedPledge = await prisma.fundraiserPledge.findUnique({
+      where: { id: pledge.id },
+    });
+    assert.equal(refreshedPledge?.paidAt, null);
+  });
+
+  it("refuses to charge a fundraiser that is no longer active", async () => {
+    const { user, accessToken } = await createUser({
+      email: "fundraiser-owner@example.com",
+    });
+    const artist = await createArtist(user.id);
+    const trackGroup = await createTrackGroup(artist.id);
+    const fundraiser = await createFundraiser(trackGroup.id, {
+      status: "SUCCESSFUL",
+    });
+
+    const response = await requestApp
+      .post(`manage/fundraisers/${fundraiser.id}/chargePledges`)
+      .send({})
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 400);
   });
 
   it("rejects requests from other artists", async () => {

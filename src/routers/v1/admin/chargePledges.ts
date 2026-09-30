@@ -1,7 +1,9 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { chargePledgePayments } from "../../../utils/stripe";
+import { NextFunction, Request, Response } from "express";
+
+import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { AppError } from "../../../utils/error";
+import { chargeFundraiserPledges } from "../../../utils/fundraiser";
 
 export default function () {
   const operations = {
@@ -11,27 +13,26 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.body;
     try {
-      const pledgesForFundraiser = await prisma.fundraiserPledge.findMany({
-        where: {
-          trackGroupId: trackGroupId ? Number(trackGroupId) : undefined,
-          paidAt: null,
-          cancelledAt: null,
-        },
-        include: {
-          user: true,
-          fundraiser: {
-            include: {
-              trackGroups: {
-                include: { profile: { include: { user: true } } },
-              },
-            },
-          },
-        },
+      if (!trackGroupId || !Number.isInteger(Number(trackGroupId))) {
+        throw new AppError({
+          httpCode: 400,
+          description: "A trackGroupId is required",
+        });
+      }
+
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: { id: Number(trackGroupId) },
+        select: { fundraiserId: true },
       });
 
-      for (const pledge of pledgesForFundraiser) {
-        await chargePledgePayments(pledge);
+      if (!trackGroup?.fundraiserId) {
+        throw new AppError({
+          httpCode: 404,
+          description: "No fundraiser found for this track group",
+        });
       }
+
+      await chargeFundraiserPledges(trackGroup.fundraiserId);
 
       return res.status(200).json({ success: true });
     } catch (e) {
