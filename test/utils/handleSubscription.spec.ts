@@ -1,10 +1,9 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import Stripe from "stripe";
 
 import { handleSubscription } from "../../src/utils/handleFinishedTransactions";
-import { clearTables, createUser } from "../utils";
+import { clearTables, createUser, fakePayment } from "../utils";
 
 import prisma from "@mirlo/prisma";
 
@@ -45,13 +44,12 @@ describe("handleSubscription", () => {
       },
     });
 
-    const mockSession = {
-      amount_total: 1000,
-      currency: "usd",
-      subscription: "sub_test123",
-    } as Stripe.Checkout.Session;
-
-    await handleSubscription(purchaser.id, tier.id, mockSession);
+    await handleSubscription(
+      purchaser.id,
+      tier.id,
+      fakePayment({ amount: 1000 }),
+      "sub_test123"
+    );
 
     // Verify subscription was created with correct data
     const subscription = await prisma.profileUserSubscription.findFirst({
@@ -94,13 +92,12 @@ describe("handleSubscription", () => {
       },
     });
 
-    const mockSession = {
-      amount_total: 1000,
-      currency: "usd",
-      subscription: "sub_test123",
-    } as Stripe.Checkout.Session;
-
-    await handleSubscription(purchaser.id, tier.id, mockSession);
+    await handleSubscription(
+      purchaser.id,
+      tier.id,
+      fakePayment({ amount: 1000 }),
+      "sub_test123"
+    );
 
     const subscription = await prisma.profileUserSubscription.findFirst({
       where: { userId: purchaser.id, profileSubscriptionTierId: tier.id },
@@ -158,13 +155,12 @@ describe("handleSubscription", () => {
       },
     });
 
-    const mockSession = {
-      amount_total: 1000,
-      currency: "usd",
-      subscription: "sub_new",
-    } as Stripe.Checkout.Session;
-
-    await handleSubscription(purchaser.id, tier.id, mockSession);
+    await handleSubscription(
+      purchaser.id,
+      tier.id,
+      fakePayment({ amount: 1000 }),
+      "sub_new"
+    );
 
     const subscriptions = await prisma.profileUserSubscription.findMany({
       where: {

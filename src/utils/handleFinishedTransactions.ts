@@ -6,7 +6,6 @@ import {
   Fundraiser,
 } from "@mirlo/prisma/client";
 import { Job } from "bullmq";
-import Stripe from "stripe";
 
 import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
@@ -20,193 +19,14 @@ import { subscribeUserToArtist } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { findCataloguePurchasableTrackGroups } from "./catalogue";
 import { getClient } from "./getClient";
+import {
+  CompletedPayment,
+  withPlatformCurrency,
+} from "./payments/completedPayment";
 import { resolvePayee } from "./payments/payee";
 import { calculateAppFee } from "./processingPayments";
-import stripe from "./stripe";
 import { hasSubscriptionTiers, registerSubscription } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
-
-const getPaymentIntent = async (
-  paymentIntentId: string,
-  stripeAccount: string
-) => {
-  try {
-    return await stripe.paymentIntents.retrieve(paymentIntentId, {
-      stripeAccount,
-    });
-  } catch (error) {
-    logger.error(`Error retrieving payment intent: ${error}`);
-    throw new Error("Failed to retrieve payment intent");
-  }
-};
-
-export const getFeesFromPaymentIntent = async (
-  paymentIntent: Stripe.PaymentIntent,
-  stripeAccount: string
-): Promise<{ applicationFee: number; paymentProcessorFee: number }> => {
-  let balanceTransaction: Stripe.BalanceTransaction | undefined;
-
-  if (
-    paymentIntent.latest_charge &&
-    typeof paymentIntent.latest_charge !== "string" &&
-    paymentIntent.latest_charge.balance_transaction &&
-    typeof paymentIntent.latest_charge.balance_transaction !== "string"
-  ) {
-    balanceTransaction = paymentIntent.latest_charge.balance_transaction;
-  } else {
-    const chargeId =
-      typeof paymentIntent.latest_charge === "string"
-        ? paymentIntent.latest_charge
-        : (paymentIntent.latest_charge?.id ?? "");
-
-    if (chargeId) {
-      const charge = await stripe.charges.retrieve(
-        chargeId,
-        { expand: ["balance_transaction"] },
-        { stripeAccount }
-      );
-      balanceTransaction = charge.balance_transaction as
-        | Stripe.BalanceTransaction
-        | undefined;
-    }
-  }
-
-  const paymentProcessorFee =
-    balanceTransaction?.fee_details.find((fee) => fee.type === "stripe_fee")
-      ?.amount ?? 0;
-
-  return {
-    applicationFee: paymentIntent.application_fee_amount ?? 0,
-    paymentProcessorFee,
-  };
-};
-
-export type PlatformCurrencyValue = {
-  platformCurrencyAmount: number | null; // `amount` converted to platformCurrency, in cents
-  platformCurrency: string | null;
-  exchangeRate: number | null;
-};
-
-export const EMPTY_PLATFORM_CURRENCY_VALUE: PlatformCurrencyValue = {
-  platformCurrencyAmount: null,
-  platformCurrency: null,
-  exchangeRate: null,
-};
-
-export const withPlatformCurrency = (value?: PlatformCurrencyValue) =>
-  value ?? EMPTY_PLATFORM_CURRENCY_VALUE;
-
-export const getPlatformCurrencyValueFromIntent = async (
-  paymentIntent: Stripe.PaymentIntent,
-  stripeAccount: string
-): Promise<PlatformCurrencyValue> => {
-  try {
-    const chargeId =
-      typeof paymentIntent.latest_charge === "string"
-        ? paymentIntent.latest_charge
-        : (paymentIntent.latest_charge?.id ?? "");
-    if (!chargeId) return EMPTY_PLATFORM_CURRENCY_VALUE;
-
-    // Charge is on the connected account; its application_fee id lives on the platform.
-    const charge = await stripe.charges.retrieve(
-      chargeId,
-      {},
-      { stripeAccount }
-    );
-    const applicationFeeId =
-      typeof charge.application_fee === "string"
-        ? charge.application_fee
-        : (charge.application_fee?.id ?? "");
-    if (!applicationFeeId) return EMPTY_PLATFORM_CURRENCY_VALUE;
-
-    // No { stripeAccount }: application fees live on the platform account.
-    const applicationFee = await stripe.applicationFees.retrieve(
-      applicationFeeId,
-      { expand: ["balance_transaction"] }
-    );
-
-    const balanceTransaction = applicationFee.balance_transaction;
-    if (!balanceTransaction || typeof balanceTransaction === "string") {
-      // Not yet settled — record nothing rather than a wrong figure.
-      return EMPTY_PLATFORM_CURRENCY_VALUE;
-    }
-
-    // exchange_rate is null when presentment currency == platform currency (rate 1).
-    const exchangeRate = balanceTransaction.exchange_rate ?? 1;
-    const amount = paymentIntent.amount_received ?? paymentIntent.amount ?? 0;
-
-    return {
-      platformCurrencyAmount: Math.round(amount * exchangeRate),
-      platformCurrency: balanceTransaction.currency,
-      exchangeRate,
-    };
-  } catch (e) {
-    logger.warn(
-      `getPlatformCurrencyValueFromIntent: could not determine platform currency value for ${paymentIntent.id}: ${e}`
-    );
-    return EMPTY_PLATFORM_CURRENCY_VALUE;
-  }
-};
-
-const getApplicationFee = async (
-  session?: Stripe.Checkout.Session
-): Promise<{
-  applicationFee: number;
-  paymentProcessorFee: number;
-  platformCurrencyValue: PlatformCurrencyValue;
-}> => {
-  try {
-    const paymentIntentId =
-      typeof session?.payment_intent === "string"
-        ? session?.payment_intent
-        : (session?.payment_intent?.id ?? null);
-
-    const stripeAccount = session?.metadata?.stripeAccountId ?? null;
-
-    if (!paymentIntentId) {
-      logger.warn("No payment intent ID found in session metadata");
-      return {
-        applicationFee: 0,
-        paymentProcessorFee: 0,
-        platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
-      };
-    }
-    if (!stripeAccount) {
-      logger.warn("No stripe account found in session metadata");
-      return {
-        applicationFee: 0,
-        paymentProcessorFee: 0,
-        platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
-      };
-    }
-    const paymentIntent = await getPaymentIntent(
-      paymentIntentId,
-      stripeAccount
-    );
-
-    const fees = await getFeesFromPaymentIntent(paymentIntent, stripeAccount);
-    const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
-      paymentIntent,
-      stripeAccount
-    );
-
-    logger.info(
-      `Application fee: ${fees.applicationFee}, Stripe fee: ${fees.paymentProcessorFee}`
-    );
-
-    return { ...fees, platformCurrencyValue };
-  } catch (error) {
-    logger.error(
-      `Error retrieving application fee for session ${session?.id}, recording purchase without fee details:`,
-      error
-    );
-    return {
-      applicationFee: 0,
-      paymentProcessorFee: 0,
-      platformCurrencyValue: EMPTY_PLATFORM_CURRENCY_VALUE,
-    };
-  }
-};
 
 export type AlbumPurchaseEmailType = {
   trackGroup: {
@@ -308,36 +128,27 @@ export type AlbumPurchaseArtistNotificationEmailType = {
 export const handleTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
-  session?: Stripe.Checkout.Session,
-  newUser?: boolean,
-  platformCurrencyValue?: PlatformCurrencyValue
+  payment?: CompletedPayment,
+  newUser?: boolean
 ) => {
   try {
     const { applicationUrl } = await getClient();
-    const {
-      applicationFee,
-      paymentProcessorFee,
-      platformCurrencyValue: feePlatformCurrencyValue,
-    } = await getApplicationFee(session);
-    const amount = session?.amount_total ?? 0;
-    const pricePaid = amount;
-    const currencyPaid = session?.currency ?? "usd";
-    const paymentProcessorKey = session?.id ?? null;
+    const pricePaid = payment?.amount ?? 0;
+    const currencyPaid = payment?.currency ?? "usd";
+    const paymentProcessorKey = payment?.id ?? null;
 
     const transaction = await prisma.userTransaction.create({
       data: {
         userId: Number(userId),
         amount: pricePaid,
         currency: currencyPaid,
-        platformCut: applicationFee ?? null,
+        platformCut: payment?.platformCut ?? 0,
         stripeId: paymentProcessorKey ?? "",
-        stripeCut: paymentProcessorFee ?? null,
-        ...withPlatformCurrency(
-          platformCurrencyValue ?? feePlatformCurrencyValue
-        ),
+        stripeCut: payment?.processorFee ?? 0,
+        ...withPlatformCurrency(payment?.platformCurrencyValue),
         paymentStatus: "COMPLETED",
-        discountPercent: session?.metadata?.discountPercent
-          ? Number(session.metadata.discountPercent)
+        discountPercent: payment?.metadata.discountPercent
+          ? Number(payment.metadata.discountPercent)
           : undefined,
       },
     });
@@ -345,11 +156,11 @@ export const handleTrackGroupPurchase = async (
     const purchase = await registerPurchase({
       userId: Number(userId),
       trackGroupId: Number(trackGroupId),
-      pricePaid: session?.amount_total ?? 0,
-      message: session?.metadata?.message ?? null,
-      currencyPaid: session?.currency ?? "usd",
-      paymentProcessorKey: session?.id ?? null,
-      platformCut: applicationFee ?? null,
+      pricePaid,
+      message: payment?.metadata.message ?? null,
+      currencyPaid,
+      paymentProcessorKey,
+      platformCut: payment?.platformCut ?? 0,
       transactionId: transaction.id,
     });
 
@@ -454,7 +265,7 @@ export const handleTrackGroupPurchase = async (
               0
             ),
             currency: transactions[0]?.currency ?? "usd",
-            message: session?.metadata?.message,
+            message: payment?.metadata.message,
             email: user.email,
             client: applicationUrl,
           } as ArtistPurchaseNotificationEmailType,
@@ -469,7 +280,7 @@ export const handleTrackGroupPurchase = async (
     return purchase;
   } catch (e) {
     logger.error(
-      `Error creating album purchase for trackGroupId ${trackGroupId}, userId ${userId}, session ${session?.id}:`,
+      `Error creating album purchase for trackGroupId ${trackGroupId}, userId ${userId}, payment ${payment?.id}:`,
       e
     );
   }
@@ -478,8 +289,7 @@ export const handleTrackGroupPurchase = async (
 export const handleCataloguePurchase = async (
   userId: number,
   artistId: number,
-  session?: Stripe.Checkout.Session,
-  platformCurrencyValue?: PlatformCurrencyValue
+  payment?: CompletedPayment
 ) => {
   try {
     const { applicationUrl } = await getClient();
@@ -495,20 +305,13 @@ export const handleCataloguePurchase = async (
       ? await findCataloguePurchasableTrackGroups(artist)
       : [];
 
-    const amountPaidPerTrackGroup =
-      (session?.amount_total ?? 0) / artistTrackGroups.length;
+    const pricePaid = payment?.amount ?? 0;
+    const currencyPaid = payment?.currency ?? "usd";
+    const paymentProcessorKey = payment?.id ?? null;
+    const applicationFee = payment?.platformCut ?? 0;
 
-    const {
-      applicationFee,
-      paymentProcessorFee,
-      platformCurrencyValue: feePlatformCurrencyValue,
-    } = await getApplicationFee(session);
-    const appFeePerTrackGroup =
-      (applicationFee ?? 0) / artistTrackGroups.length;
-
-    const pricePaid = session?.amount_total ?? 0;
-    const currencyPaid = session?.currency ?? "usd";
-    const paymentProcessorKey = session?.id ?? null;
+    const amountPaidPerTrackGroup = pricePaid / artistTrackGroups.length;
+    const appFeePerTrackGroup = applicationFee / artistTrackGroups.length;
 
     // We only create one transaction for the whole purchase
     // so that we can use the same transaction for all track groups
@@ -517,12 +320,10 @@ export const handleCataloguePurchase = async (
         userId: Number(userId),
         amount: pricePaid,
         currency: currencyPaid,
-        platformCut: applicationFee ?? null,
+        platformCut: applicationFee,
         stripeId: paymentProcessorKey ?? "",
-        stripeCut: paymentProcessorFee ?? null,
-        ...withPlatformCurrency(
-          platformCurrencyValue ?? feePlatformCurrencyValue
-        ),
+        stripeCut: payment?.processorFee ?? 0,
+        ...withPlatformCurrency(payment?.platformCurrencyValue),
         paymentStatus: "COMPLETED",
       },
     });
@@ -532,10 +333,10 @@ export const handleCataloguePurchase = async (
         return registerPurchase({
           userId: Number(userId),
           trackGroupId: Number(trackGroup.id),
-          message: session?.metadata?.message ?? null,
+          message: payment?.metadata.message ?? null,
           pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
-          currencyPaid: session?.currency ?? "usd",
-          paymentProcessorKey: session?.id ?? null,
+          currencyPaid,
+          paymentProcessorKey,
           platformCut: Number(appFeePerTrackGroup.toFixed(2)),
           transactionId: transaction.id,
         });
@@ -582,11 +383,7 @@ export const handleCataloguePurchase = async (
         },
       } as Job);
 
-      const pricePaid = session?.amount_total ?? 0;
-      const catalogueAppFee = await calculateAppFee(
-        pricePaid,
-        session?.currency ?? "usd"
-      );
+      const catalogueAppFee = await calculateAppFee(pricePaid, currencyPaid);
       await sendMail({
         data: {
           template: "catalogue-purchase-artist-notification",
@@ -596,7 +393,7 @@ export const handleCataloguePurchase = async (
           locals: {
             artist: serializedArtist,
             pricePaid,
-            currencyPaid: session?.currency ?? "usd",
+            currencyPaid,
             platformCut: (catalogueAppFee ?? 0) / 100,
             email: user.email,
           },
@@ -605,7 +402,7 @@ export const handleCataloguePurchase = async (
     }
   } catch (e) {
     logger.error(
-      `Error creating catalogue purchase for profileId ${artistId}, userId ${userId}, session ${session?.id}:`,
+      `Error creating catalogue purchase for profileId ${artistId}, userId ${userId}, payment ${payment?.id}:`,
       e
     );
   }
@@ -614,24 +411,21 @@ export const handleCataloguePurchase = async (
 export const handleTrackPurchase = async (
   userId: number,
   trackId: number,
-  session?: Stripe.Checkout.Session,
-  platformCurrencyValue?: PlatformCurrencyValue
+  payment?: CompletedPayment
 ) => {
   try {
-    const { applicationFee, platformCurrencyValue: feePlatformCurrencyValue } =
-      await getApplicationFee(session);
     const purchase = await registerTrackPurchase({
       userId: Number(userId),
       trackId: Number(trackId),
-      pricePaid: session?.amount_total ?? 0,
-      message: session?.metadata?.message ?? null,
-      currencyPaid: session?.currency ?? "usd",
-      paymentProcessorKey: session?.id ?? null,
-      platformCut: applicationFee ?? null,
-      discountPercent: session?.metadata?.discountPercent
-        ? Number(session.metadata.discountPercent)
+      pricePaid: payment?.amount ?? 0,
+      message: payment?.metadata.message ?? null,
+      currencyPaid: payment?.currency ?? "usd",
+      paymentProcessorKey: payment?.id ?? null,
+      platformCut: payment?.platformCut ?? 0,
+      discountPercent: payment?.metadata.discountPercent
+        ? Number(payment.metadata.discountPercent)
         : undefined,
-      platformCurrencyValue: platformCurrencyValue ?? feePlatformCurrencyValue,
+      platformCurrencyValue: payment?.platformCurrencyValue,
     });
 
     const user = await prisma.user.findFirst({
@@ -668,7 +462,7 @@ export const handleTrackPurchase = async (
     return purchase;
   } catch (e) {
     logger.error(
-      `Error creating track purchase for trackId ${trackId}, userId ${userId}, session ${session?.id}:`,
+      `Error creating track purchase for trackId ${trackId}, userId ${userId}, payment ${payment?.id}:`,
       e
     );
   }
@@ -925,27 +719,18 @@ export const sendSaleEmails = async (
 export const handleArtistGift = async (
   userId: number,
   artistId: number,
-  session?: Stripe.Checkout.Session,
-  platformCurrencyValue?: PlatformCurrencyValue
+  payment?: CompletedPayment
 ) => {
   try {
-    const {
-      applicationFee,
-      paymentProcessorFee,
-      platformCurrencyValue: feePlatformCurrencyValue,
-    } = await getApplicationFee(session);
-
     const transaction = await prisma.userTransaction.create({
       data: {
         userId: Number(userId),
-        amount: session?.amount_total ?? 0,
-        currency: session?.currency ?? "usd",
-        platformCut: applicationFee ?? null,
-        stripeCut: paymentProcessorFee ?? null,
-        stripeId: session?.id ?? "",
-        ...withPlatformCurrency(
-          platformCurrencyValue ?? feePlatformCurrencyValue
-        ),
+        amount: payment?.amount ?? 0,
+        currency: payment?.currency ?? "usd",
+        platformCut: payment?.platformCut ?? 0,
+        stripeCut: payment?.processorFee ?? 0,
+        stripeId: payment?.id ?? "",
+        ...withPlatformCurrency(payment?.platformCurrencyValue),
         paymentStatus: "COMPLETED",
       },
     });
@@ -954,7 +739,7 @@ export const handleArtistGift = async (
       data: {
         userId,
         profileId: artistId,
-        message: session?.metadata?.message ?? null,
+        message: payment?.metadata.message ?? null,
         transactionId: transaction.id,
       },
     });
@@ -1033,17 +818,17 @@ export type ArtistNewSubscriberAnnounceEmailType = {
 export const handleSubscription = async (
   userId: number,
   tierId: number,
-  session: Stripe.Checkout.Session
+  payment: CompletedPayment,
+  subscriptionKey: string
 ) => {
   try {
-    const { applicationFee } = await getApplicationFee(session);
     await registerSubscription({
       userId: Number(userId),
       tierId: Number(tierId),
-      amount: session.amount_total ?? 0,
-      paymentProcessorKey: session.subscription as string,
-      platformCut: applicationFee ?? null,
-      shippingAddress: session.shipping_details ?? null,
+      amount: payment.amount,
+      paymentProcessorKey: subscriptionKey,
+      platformCut: payment.platformCut,
+      shippingAddress: payment.shippingAddress,
     });
   } catch (e) {
     logger.error(`Error creating subscription: ${e}`);

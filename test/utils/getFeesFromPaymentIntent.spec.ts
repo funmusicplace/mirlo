@@ -7,14 +7,9 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
 
-import { getFeesFromPaymentIntent } from "../../src/utils/handleFinishedTransactions";
 import stripe from "../../src/utils/stripe";
+import { getFeesFromPaymentIntent } from "../../src/utils/stripe/completedPayment";
 
-// getFeesFromPaymentIntent is the single place that walks a balance
-// transaction's fee_details for the Stripe processing fee — getApplicationFee
-// (session-based, handleFinishedTransactions.ts) and getFeeDetailsFromInvoice
-// (invoice-based, stripe/index.ts) both resolve down to a PaymentIntent and
-// delegate here instead of each re-deriving the fee themselves.
 describe("getFeesFromPaymentIntent", () => {
   afterEach(() => {
     sinon.restore();

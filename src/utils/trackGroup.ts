@@ -19,12 +19,12 @@ import { FormatOptions } from "./audioFormats";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
+import { streamOriginalAudio, removeCoverImages } from "./minio";
+import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import {
   PlatformCurrencyValue,
   withPlatformCurrency,
-} from "./handleFinishedTransactions";
-import { streamOriginalAudio, removeCoverImages } from "./minio";
-import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
+} from "./payments/completedPayment";
 import { deleteTrack } from "./tracks";
 
 export const notifyFollowersOfNewAlbum = async (trackGroup: {

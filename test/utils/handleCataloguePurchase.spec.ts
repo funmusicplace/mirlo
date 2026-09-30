@@ -11,7 +11,12 @@ import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 import { handleCataloguePurchase } from "../../src/utils/handleFinishedTransactions";
 import { calculateAppFee } from "../../src/utils/processingPayments";
-import { clearTables, createTrackGroup, createUser } from "../utils";
+import {
+  clearTables,
+  createTrackGroup,
+  createUser,
+  fakePayment,
+} from "../utils";
 
 describe("handleCataloguePurchase", () => {
   beforeEach(async () => {
@@ -47,14 +52,11 @@ describe("handleCataloguePurchase", () => {
 
     await createTrackGroup(artist.id, { title: "Album One" });
 
-    const session = {
-      id: "cs_test_catalogue",
-      amount_total: 1000,
-      currency: "usd",
-      metadata: {},
-    } as any;
-
-    await handleCataloguePurchase(purchaser.id, artist.id, session);
+    await handleCataloguePurchase(
+      purchaser.id,
+      artist.id,
+      fakePayment({ id: "pi_test_catalogue", amount: 1000 })
+    );
 
     const notificationCall = stub
       .getCalls()
