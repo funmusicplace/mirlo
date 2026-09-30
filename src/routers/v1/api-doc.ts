@@ -22,6 +22,7 @@ const apiDoc = {
         publishedAt: { type: ["string", "null"], format: "date-time" },
         about: { type: ["string", "null"] },
         coverImageAlt: { type: ["string", "null"] },
+        coverCredit: { type: ["string", "null"] },
       },
     },
     Fundraiser: {

@@ -185,6 +185,7 @@ export default function () {
         "defaultIsPreview",
         "catalogNumber",
         "coverImageAlt",
+        "coverCredit",
         "urlSlug",
         "isPreorder",
         "scheduleEndOnReleaseDate",

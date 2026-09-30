@@ -48,7 +48,13 @@ const SaveDraftButton: React.FC<{
           setIsSaving(true);
           let postId;
           const picked = {
-            ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
+            ...pick(data, [
+              "title",
+              "isPublic",
+              "shouldSendEmail",
+              "urlSlug",
+              "featuredImageCredit",
+            ]),
             content: getBodyContent(),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
             postSubscriptionTierIds: data.subscriptionTierIds

@@ -30,6 +30,7 @@ export type PostFormData = {
   subscriptionTierIds: string[];
   shouldSendEmail: boolean;
   urlSlug?: string;
+  featuredImageCredit?: string;
 };
 
 export const tiersForLegacyMinimumTier = (
@@ -121,6 +122,7 @@ const PostForm: React.FC<{
       isPublic: postWithEmail.isPublic,
       shouldSendEmail: postWithEmail.shouldSendEmail,
       urlSlug: postWithEmail.urlSlug,
+      featuredImageCredit: postWithEmail.featuredImageCredit ?? "",
       subscriptionTierIds: tiersForPost(post, tiers?.results ?? []),
     };
   }, [post, tiers]);
@@ -252,6 +254,19 @@ const PostForm: React.FC<{
             images={images}
             reload={reloadImages}
           />
+        </FormComponent>
+        <FormComponent>
+          <label htmlFor="input-featured-image-credit">
+            {t("featuredImageCredit")}
+          </label>
+          <InputEl
+            id="input-featured-image-credit"
+            aria-describedby="hint-featured-image-credit"
+            {...register("featuredImageCredit")}
+          />
+          <small id="hint-featured-image-credit">
+            {t("featuredImageCreditHint")}
+          </small>
         </FormComponent>
         <FormComponent
           className={css`

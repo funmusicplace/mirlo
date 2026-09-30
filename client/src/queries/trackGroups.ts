@@ -198,6 +198,7 @@ async function saveAlbumForm(opts: {
     suggestedPrice: toCentsOrNull(formData.suggestedPrice),
     catalogNumber: formData.catalogNumber,
     coverImageAlt: formData.coverImageAlt,
+    coverCredit: formData.coverCredit,
     urlSlug: formData.urlSlug,
     isPublic: formData.isPublic,
     isGettable: formData.isGettable,

@@ -231,6 +231,7 @@ const DownloadAlbumButton: React.FC<{
       ) : (
         <ArtistButton
           onlyIcon={onlyIcon}
+          aria-label={onlyIcon ? t("download") : undefined}
           data-testid="download-button"
           className="mt-0 text-xl bg-transparent text-[var(--mi-button-color)]"
           startIcon={<RiDownloadLine />}

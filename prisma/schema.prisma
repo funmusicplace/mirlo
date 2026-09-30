@@ -299,6 +299,7 @@ model Post {
   images                    PostImage[]              @relation("images")
   featuredImage             PostImage?               @relation(fields: [featuredImageId], references: [id])
   featuredImageId           String?                  @db.Uuid
+  featuredImageCredit       String?
   tracks                    PostTrack[]
 }
 
@@ -802,6 +803,7 @@ model TrackGroup {
   credits                         String?
   catalogNumber                   String?
   coverImageAlt                   String?
+  coverCredit                     String?
   userTrackGroupWishlist          UserTrackGroupWishlist[]
   platformPercent                 Int?                            @default(7)
   tags                            TrackGroupTag[]

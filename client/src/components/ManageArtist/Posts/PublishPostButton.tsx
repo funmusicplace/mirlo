@@ -78,7 +78,13 @@ const PublishPostButton: React.FC<{
           }
         }
         const picked = {
-          ...pick(data, ["title", "isPublic", "shouldSendEmail", "urlSlug"]),
+          ...pick(data, [
+            "title",
+            "isPublic",
+            "shouldSendEmail",
+            "urlSlug",
+            "featuredImageCredit",
+          ]),
           content: bodyContent,
           publishedAt:
             publishedAtOverride ??
