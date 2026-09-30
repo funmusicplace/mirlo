@@ -1,3 +1,5 @@
+import assert from "node:assert";
+
 import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 import { describe, it } from "mocha";
