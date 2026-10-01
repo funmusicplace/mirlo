@@ -74,7 +74,7 @@ function App() {
     <>
       <ScrollToTop />
       <MetaCard
-        title={routeTitle ?? "Mirlo"}
+        title={routeTitle ?? instanceSettings.name}
         description="A music distribution and patronage site"
         image="/default-meta-image.webp"
       />
