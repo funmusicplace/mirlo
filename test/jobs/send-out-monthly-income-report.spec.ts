@@ -7,7 +7,12 @@ import * as sendMail from "../../src/jobs/send-mail";
 import sendOutMonthlyIncomeReport, {
   MonthlyIncomeReportEmailType,
 } from "../../src/jobs/send-out-monthy-income-report";
-import { clearTables, createArtist, createUser } from "../utils";
+import {
+  clearTables,
+  createArtist,
+  createTrackGroup,
+  createUser,
+} from "../utils";
 
 import prisma from "@mirlo/prisma";
 
@@ -99,11 +104,15 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
-    assert.equal(locals.userSales.length, 1);
+    assert.equal(locals.sales.length, 0);
+    assert.equal(locals.subscriptionPayments.length, 1);
     assert.equal(locals.totalIncome, 5);
-    assert.equal(locals.userSales[0].amount, 5);
-    assert.equal(locals.userSales[0].saleType, "transaction");
-    assert.equal(locals.userSales[0].artistUserSubscriptionCharges?.length, 1);
+    assert.equal(locals.subscriptionTotal, 5);
+    assert.equal(locals.subscriptionPayments[0].amount, 5);
+    assert.equal(
+      locals.subscriptionPayments[0].artistUserSubscriptionCharges?.length,
+      1
+    );
   });
 
   it("should send an income report to an artist who has gained a tip", async () => {
@@ -160,11 +169,12 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
-    assert.equal(locals.userSales.length, 1);
+    assert.equal(locals.sales.length, 1);
+    assert.equal(locals.subscriptionPayments.length, 0);
     assert.equal(locals.totalIncome, 7);
-    assert.equal(locals.userSales[0].amount, 7);
-    assert.equal(locals.userSales[0].saleType, "transaction");
-    assert.equal(locals.userSales[0].title, "Tip");
+    assert.equal(locals.salesTotal, 7);
+    assert.equal(locals.sales[0].amount, 7);
+    assert.equal(locals.sales[0].saleTypeLabel, "Tip");
   });
 
   it("should not send an e-mail if sale is from two months ago", async () => {
@@ -447,21 +457,19 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
-    assert.equal(locals.userSales.length, 1);
+    assert.equal(locals.subscriptionPayments.length, 1);
     assert.equal(locals.totalIncome, 5);
-    assert.equal(locals.userSales[0].amount, 5);
-    assert.equal(locals.userSales[0].saleType, "transaction");
-    assert.equal(locals.userSales[0].artist[0]?.id, artist.id);
+    assert.equal(locals.subscriptionPayments[0].amount, 5);
+    assert.equal(locals.subscriptionPayments[0].artist[0]?.id, artist.id);
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "announce-monthly-income-report");
     assert.equal(data1.message.to, "artist2@artist.com");
     const locals2 = data1.locals as MonthlyIncomeReportEmailType;
-    assert.equal(locals2.userSales.length, 1);
+    assert.equal(locals2.sales.length, 1);
     assert.equal(locals2.totalIncome, 7);
-    assert.equal(locals2.userSales[0].amount, 7);
-    assert.equal(locals2.userSales[0].saleType, "transaction");
-    assert.equal(locals2.userSales[0].artist[0]?.id, artist2.id);
+    assert.equal(locals2.sales[0].amount, 7);
+    assert.equal(locals2.sales[0].artist[0]?.id, artist2.id);
   });
 
   it("should include buyer details and last month's cancellations, excluding tier switches", async () => {
@@ -548,10 +556,13 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(stub.calledOnce, true);
     const data0 = stub.getCall(0).args[0].data;
     const locals = data0.locals as MonthlyIncomeReportEmailType;
-    assert.equal(locals.userSales.length, 1);
-    assert.equal(locals.userSales[0].user.name, "Fan");
-    assert.equal(locals.userSales[0].user.email, "follower@follower.com");
-    assert.equal(typeof locals.userSales[0].datePurchased, "string");
+    assert.equal(locals.subscriptionPayments.length, 1);
+    assert.equal(locals.subscriptionPayments[0].user.name, "Fan");
+    assert.equal(
+      locals.subscriptionPayments[0].user.email,
+      "follower@follower.com"
+    );
+    assert.equal(typeof locals.subscriptionPayments[0].datePurchased, "string");
     assert.equal(locals.cancelledSubscriptions.length, 1);
     assert.equal(locals.cancelledSubscriptions[0].user.name, "Leaver");
     assert.equal(locals.cancelledSubscriptions[0].amount, 700);
@@ -649,16 +660,130 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
-    assert.equal(locals.userSales.length, 2);
+    assert.equal(locals.sales.length, 2);
     assert.equal(locals.user.name, "Gia");
     assert.equal(locals.totalIncome, 10);
-    assert.equal(locals.userSales[0].amount, 7);
-    assert.equal(locals.userSales[0].artist[0].id, artist.id);
-    assert.equal(locals.userSales[0].saleType, "transaction");
-    assert.equal(locals.userSales[1].amount, 3);
-    assert.equal(locals.userSales[1].artist[0].id, artist2.id);
-    assert.equal(locals.userSales[1].saleType, "transaction");
-    assert.equal(locals.userSales[0].title, "Tip");
-    assert.equal(locals.userSales[1].title, "Tip");
+    assert.equal(locals.sales[0].amount, 7);
+    assert.equal(locals.sales[0].artist[0].id, artist.id);
+    assert.equal(locals.sales[1].amount, 3);
+    assert.equal(locals.sales[1].artist[0].id, artist2.id);
+    assert.equal(locals.sales[0].saleTypeLabel, "Tip");
+    assert.equal(locals.sales[1].saleTypeLabel, "Tip");
+  });
+
+  it("should list each transaction once, splitting sales from subscription payments", async () => {
+    const stub = sinon.stub(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      subscriptionTiers: { create: { name: "a tier" } },
+    });
+    const trackGroup = await createTrackGroup(artist.id);
+
+    const lastMonthDate = faker.date.recent({
+      days: 20,
+      refDate: lastDayPreviousMonth,
+    });
+
+    const aus = await prisma.profileUserSubscription.create({
+      data: {
+        userId: followerUser.id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 500,
+      },
+    });
+    const subscriptionTransaction = await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        amount: 500,
+        createdAt: lastMonthDate,
+      },
+    });
+    await prisma.profileUserSubscriptionCharge.create({
+      data: {
+        profileUserSubscriptionId: aus.id,
+        createdAt: lastMonthDate,
+        transactionId: subscriptionTransaction.id,
+      },
+    });
+
+    const albumTransaction = await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        amount: 1200,
+        createdAt: lastMonthDate,
+      },
+    });
+    await prisma.userTrackGroupPurchase.create({
+      data: {
+        userId: followerUser.id,
+        trackGroupId: trackGroup.id,
+        userTransactionId: albumTransaction.id,
+      },
+    });
+
+    await sendOutMonthlyIncomeReport();
+
+    assert.equal(stub.calledOnce, true);
+    const locals = stub.getCall(0).args[0].data
+      .locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals.sales.length, 1);
+    assert.equal(locals.sales[0].saleTypeLabel, "Album");
+    assert.equal(locals.subscriptionPayments.length, 1);
+    assert.equal(locals.salesTotal, 1200);
+    assert.equal(locals.subscriptionTotal, 500);
+    assert.equal(locals.totalIncome, 1700);
+    assert.equal(locals.currency, "usd");
+  });
+
+  it("should send a report to an artist whose only news is a cancellation", async () => {
+    const stub = sinon.stub(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const { user: leaverUser } = await createUser({
+      email: "leaver@leaver.com",
+      name: "Leaver",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await createArtist(artistUser.id, {
+      subscriptionTiers: { create: { name: "a tier" } },
+    });
+
+    await prisma.profileUserSubscription.create({
+      data: {
+        userId: leaverUser.id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 700,
+        deletedAt: faker.date.recent({
+          days: 20,
+          refDate: lastDayPreviousMonth,
+        }),
+        deleteReason: "USER_CANCELLED",
+      },
+    });
+
+    await sendOutMonthlyIncomeReport();
+
+    assert.equal(stub.calledOnce, true);
+    const data0 = stub.getCall(0).args[0].data;
+    assert.equal(data0.message.to, "artist@artist.com");
+    const locals = data0.locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals.sales.length, 0);
+    assert.equal(locals.subscriptionPayments.length, 0);
+    assert.equal(locals.totalIncome, 0);
+    assert.equal(locals.cancelledSubscriptions.length, 1);
+    assert.equal(locals.cancelledSubscriptions[0].user.name, "Leaver");
   });
 });
