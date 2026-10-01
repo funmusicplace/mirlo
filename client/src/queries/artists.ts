@@ -48,10 +48,6 @@ const fetchCataloguePrice: QueryFunction<
     .then((r) => r.result);
 };
 
-// Recalculated by the server on every call (it sums the artist's current
-// releases when they price the catalogue as a percentage) — fetched lazily
-// by the buy-catalogue button rather than folded into queryArtist, so
-// artists who never show that button don't pay for it on every page view.
 export function queryCataloguePrice(opts: { artistId?: number }) {
   return queryOptions({
     queryKey: ["fetchCataloguePrice", opts, QUERY_KEY_ARTISTS],
@@ -63,7 +59,7 @@ export function queryCataloguePrice(opts: { artistId?: number }) {
 export type ManagedArtist = Pick<
   Artist,
   "id" | "name" | "urlSlug" | "isLabelProfile" | "avatar"
->;
+> & { relationship: "owner" | "manager" };
 
 const fetchManagedArtists: QueryFunction<
   { results: ManagedArtist[] },

@@ -1,19 +1,8 @@
 import { http, HttpResponse } from "msw";
 
+import type { ManagedArtist } from "../src/queries";
 import { USER_EXAMPLE } from "../test/mocks";
 
-/**
- * Handlers every story gets. They're keyed so a story can replace one group
- * without dropping the rest, e.g. a logged-out story:
- *
- *   parameters: {
- *     msw: {
- *       handlers: {
- *         auth: http.get("*\/auth/profile", () => new HttpResponse(null, { status: 401 })),
- *       },
- *     },
- *   }
- */
 export const defaultHandlers = {
   auth: [
     http.get("*/auth/profile", () =>
@@ -21,4 +10,56 @@ export const defaultHandlers = {
     ),
     http.post("*/auth/refresh", () => HttpResponse.json({})),
   ],
+  settings: [
+    http.get("*/v1/settings/isClosedToPublicArtistSignup", () =>
+      HttpResponse.json({ result: false })
+    ),
+  ],
+  stripe: stripeStatusHandlers({ chargesEnabled: true }),
 };
+
+export function stripeStatusHandlers({
+  chargesEnabled,
+}: {
+  chargesEnabled: boolean;
+}) {
+  return [
+    http.get("*/v1/users/:userId/stripe/checkAccountStatus", () =>
+      HttpResponse.json({
+        result: {
+          chargesEnabled,
+          detailsSubmitted: chargesEnabled,
+          stripeAccountId: "acct_1",
+        } satisfies AccountStatus,
+      })
+    ),
+  ];
+}
+
+export function managedArtistsHandler(artists: ManagedArtist[]) {
+  return http.get("*/v1/manage/artists", () =>
+    HttpResponse.json({ results: artists })
+  );
+}
+
+export function artistHandlers(
+  artist: Artist | (() => Artist),
+  {
+    relationship = "owner",
+  }: { relationship?: ManagedArtist["relationship"] | null } = {}
+) {
+  const current = typeof artist === "function" ? artist : () => artist;
+  return [
+    http.get("*/v1/manage/artists", () =>
+      HttpResponse.json({
+        results: relationship ? [{ ...current(), relationship }] : [],
+      })
+    ),
+    http.get("*/v1/manage/artists/:artistId", () =>
+      HttpResponse.json({ result: current() })
+    ),
+    http.get("*/v1/artists/:artistSlug", () =>
+      HttpResponse.json({ result: current() })
+    ),
+  ];
+}

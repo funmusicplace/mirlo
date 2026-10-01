@@ -20,6 +20,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import {
+  canUserEditArtist,
   getArtistTiersUrl,
   getManageReleaseUrl,
   getMerchUrl,
@@ -68,8 +69,7 @@ const ManageArtistButtons: React.FC = () => {
   );
 
   const canEditArtist =
-    artist &&
-    (user?.id === artist?.userId || user?.isAdmin || canLabelEditArtist);
+    artist && (canUserEditArtist(user, artist) || canLabelEditArtist);
 
   const isAlbumPage = Boolean(trackGroupId);
 

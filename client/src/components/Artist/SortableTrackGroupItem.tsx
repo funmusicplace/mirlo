@@ -1,9 +1,9 @@
+import ReleaseCard from "components/common/ReleaseCard";
 import SortableGridItem from "components/common/SortableGridItem";
 import React from "react";
 import { useAuthContext } from "state/AuthContext";
+import { canUserEditArtist } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
-
-import ReleaseCard from "components/common/ReleaseCard";
 
 const SortableTrackGroupItem: React.FC<{
   id: number;
@@ -13,7 +13,10 @@ const SortableTrackGroupItem: React.FC<{
   const { user } = useAuthContext();
 
   return (
-    <SortableGridItem id={props.id} showHandle={user?.id === artist?.userId}>
+    <SortableGridItem
+      id={props.id}
+      showHandle={canUserEditArtist(user, artist, { allowAdmin: false })}
+    >
       <ReleaseCard trackGroup={props.trackGroup} as="li" headingLevel="h2" />
     </SortableGridItem>
   );

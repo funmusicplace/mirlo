@@ -28,11 +28,7 @@ import {
 } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import {
-  canUserEditArtist,
-  getPaidTierCount,
-  isTipOnlyArtist,
-} from "utils/artist";
+import { getPaidTierCount, isTipOnlyArtist } from "utils/artist";
 import { TabConfig, TabId, sortTabsByOrder } from "utils/artistTabs";
 import { transformFromLinks } from "utils/links";
 import { useScrollActiveTabIntoView } from "utils/useScrollActiveTabIntoView";
@@ -98,7 +94,6 @@ function Index() {
     return <FullPageLoadingSpinner />;
   }
 
-  const isArtistUser = canUserEditArtist(user, artist);
   const releasesTitle = artist.properties?.titles?.releases || t("releases");
   const merchTitle = artist.properties?.titles?.merch || t("merch");
   const postsTitle = artist.properties?.titles?.posts || t("updates");
@@ -211,7 +206,7 @@ function Index() {
                     )}
                   </li>
                 ))}
-              {user && isArtistUser && !canReceivePayments && (
+              {user && artist.userId === user.id && !canReceivePayments && (
                 <li>
                   <a
                     href={api.paymentProcessor.stripeConnect(user.id)}

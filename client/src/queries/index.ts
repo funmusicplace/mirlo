@@ -8,5 +8,6 @@ export * from "./users";
 export * from "./merch";
 export * from "./merchItemTypes";
 export * from "./labels";
+export * from "./artistManagers";
 export * from "./tip";
 export * from "./purchase";

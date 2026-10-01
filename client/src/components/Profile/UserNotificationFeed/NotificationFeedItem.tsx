@@ -4,6 +4,7 @@ import React from "react";
 import ArtistContactMessage from "./ArtistContactMessage";
 import FundraiserPledge from "./FundraiserPledge";
 import LabelInvite from "./LabelInvite";
+import ManagerInvite from "./ManagerInvite";
 import NewArtistAlbum from "./NewArtistAlbum";
 import NewArtistPost from "./NewArtistPost";
 import UserBoughtYourAlbum from "./UserBoughtYourAlbum";
@@ -78,6 +79,9 @@ const NotificationFeedItem: React.FC<{
       )}
       {notification.notificationType === "LABEL_ADDED_ARTIST" && (
         <LabelInvite notification={notification} compact={compact} />
+      )}
+      {notification.notificationType === "PROFILE_MANAGER_INVITE" && (
+        <ManagerInvite notification={notification} compact={compact} />
       )}
       {notification.notificationType === "ARTIST_CONTACT_MESSAGE" && (
         <ArtistContactMessage notification={notification} compact={compact} />

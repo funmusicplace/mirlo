@@ -8,56 +8,62 @@ import {
   reactRouterParameters,
 } from "storybook-addon-remix-react-router";
 
+import { ConfirmDialog } from "../src/components/common/ConfirmDialog";
+import Snackbar from "../src/components/common/Snackbar";
 import {
   queryClient,
   QueryClientWrapper,
 } from "../src/queries/QueryClientWrapper";
 import { AuthContextProvider } from "../src/state/AuthContext";
 import { GlobalStateProvider } from "../src/state/GlobalState";
-import { SnackBarContextProvider } from "../src/state/SnackbarContext";
+import SnackbarContext, {
+  SnackBarContextProvider,
+} from "../src/state/SnackbarContext";
 import { UploadContextProvider } from "../src/state/UploadContext";
+import { ConfirmContextProvider } from "../src/utils/useConfirm";
 
 import "../src/i18n";
 import "../src/styles/index.css";
 import "./global.css";
 import { defaultHandlers } from "./handlers";
 
-// Requests with no matching handler fall through to the network, which in
-// Storybook usually means a failed request to a local API that isn't running.
-// Warn so a missing mock is easy to spot in the console.
 initialize({ onUnhandledRequest: "warn" });
 
 function RouterErrorHandler() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    // If a component links to an invalid route, it'll reach this error handler
-    // - which just navigates back to the previous state
     navigate(-1);
   }, []);
 
   return null;
 }
 
-// Mirrors the provider stack in src/index.tsx
+function SnackbarOutlet() {
+  const { isDisplayed } = React.useContext(SnackbarContext);
+  return isDisplayed ? <Snackbar /> : null;
+}
+
 function withGlobalContext(Outlet: any) {
   return (
     <QueryClientWrapper devTools={false}>
       <AuthContextProvider>
         <GlobalStateProvider>
-          <SnackBarContextProvider>
-            <UploadContextProvider>
-              <Outlet />
-            </UploadContextProvider>
-          </SnackBarContextProvider>
+          <ConfirmContextProvider>
+            <ConfirmDialog />
+            <SnackBarContextProvider>
+              <UploadContextProvider>
+                <Outlet />
+                <SnackbarOutlet />
+              </UploadContextProvider>
+            </SnackBarContextProvider>
+          </ConfirmContextProvider>
         </GlobalStateProvider>
       </AuthContextProvider>
     </QueryClientWrapper>
   );
 }
 
-// The app's query client is a module-level singleton, so without this each
-// story would render whatever the previously viewed story cached.
 const clearQueryCache = async () => {
   queryClient.clear();
   return {};

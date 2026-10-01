@@ -4,6 +4,7 @@ import { delay, http, HttpResponse } from "msw";
 import ManageMerchPage from "pages/manage/artists/{artistId}/merch/Index";
 import { reactRouterParameters } from "storybook-addon-remix-react-router";
 
+import { artistHandlers } from "../../../../.storybook/handlers";
 import {
   ARTIST_EXAMPLE,
   DRAFT_MERCH_EXAMPLE,
@@ -31,9 +32,6 @@ const MERCH_LIST: Merch[] = [
 ];
 
 const merchHandlers = (merch: Merch[]) => [
-  http.get("*/v1/manage/artists/:artistId", () =>
-    HttpResponse.json({ result: ARTIST_EXAMPLE })
-  ),
   http.get("*/v1/manage/artists/:artistId/merch", () =>
     HttpResponse.json({ results: merch })
   ),
@@ -51,7 +49,12 @@ const meta = {
   component: ManageMerchPage,
   parameters: {
     layout: "padded",
-    msw: { handlers: { merch: merchHandlers(MERCH_LIST) } },
+    msw: {
+      handlers: {
+        artist: artistHandlers(ARTIST_EXAMPLE),
+        merch: merchHandlers(MERCH_LIST),
+      },
+    },
     reactRouter: reactRouterParameters({
       location: { pathParams: { artistId: String(ARTIST_EXAMPLE.id) } },
       routing: { path: "/manage/artists/:artistId/merch" },
@@ -91,12 +94,12 @@ export const Loading: Story = {
   parameters: {
     msw: {
       handlers: {
-        merch: [
-          http.get("*/v1/manage/artists/:artistId", () => delay("infinite")),
-          http.get("*/v1/manage/artists/:artistId/merch", () =>
-            delay("infinite")
-          ),
-        ],
+        artist: http.get("*/v1/manage/artists/:artistId", () =>
+          delay("infinite")
+        ),
+        merch: http.get("*/v1/manage/artists/:artistId/merch", () =>
+          delay("infinite")
+        ),
       },
     },
   },
