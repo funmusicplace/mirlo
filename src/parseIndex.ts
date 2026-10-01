@@ -52,7 +52,7 @@ import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
 } from "./utils/postAccess";
-import { getSiteSettings } from "./utils/settings";
+import { getSiteSettings, resolveInstanceName } from "./utils/settings";
 import {
   whereForPublishedTrackGroups,
   whereForVisibleTrackGroup,
@@ -65,6 +65,7 @@ type RouteParams = Record<string, string | number | undefined>;
 type RouteContext<T extends RouteParams = RouteParams> = {
   $: cheerio.CheerioAPI;
   client: Client;
+  instanceName: string;
   avatarUrl?: string;
   params: T;
   req?: Request;
@@ -114,7 +115,11 @@ const determineType = (metadata: PageMetadata) => {
 const mirloDefaultDescription = "Buy and sell music directly from musicians.";
 const mirloDefaultImagePath = "default-meta-image.webp";
 
-const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
+const buildOpenGraphTags = (
+  $: cheerio.CheerioAPI,
+  instanceName: string,
+  metadata: PageMetadata
+) => {
   const {
     title,
     description,
@@ -140,7 +145,7 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta name="description" content="${metaDescription}">
-    <meta property="og:site_name" content="${artistName || "Mirlo"}">
+    <meta property="og:site_name" content="${artistName || instanceName}">
     <meta property="og:url" content="${url}">
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
@@ -181,10 +186,14 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, metadata: PageMetadata) => {
   `);
 };
 
-const handleReleasesPage: RouteHandler<{}> = async ({ $, client }) => {
-  buildOpenGraphTags($, {
-    title: "Mirlo Releases",
-    description: "The latest releases on Mirlo",
+const handleReleasesPage: RouteHandler<{}> = async ({
+  $,
+  client,
+  instanceName,
+}) => {
+  buildOpenGraphTags($, instanceName, {
+    title: `${instanceName} Releases`,
+    description: `The latest releases on ${instanceName}`,
     url: `${client.applicationUrl}/releases`,
     imageUrl: `${client.applicationUrl}/images/mirlo-typeface.png`,
     rss: `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`,
@@ -195,6 +204,7 @@ type ArtistParams = { artistSlug: string };
 const handleArtistProfile: RouteHandler<ArtistParams> = async ({
   $,
   client,
+  instanceName,
   avatarUrl,
   params: { artistSlug },
   hydrations,
@@ -204,8 +214,8 @@ const handleArtistProfile: RouteHandler<ArtistParams> = async ({
 
   const artistUrl = `${client.applicationUrl}/${artist.urlSlug}`;
   const schema = buildMusicGroupSchema({
-    title: artist.name ?? "A Mirlo Artist",
-    description: artist.bio ?? "An artist on Mirlo",
+    title: artist.name ?? `A ${instanceName} Artist`,
+    description: artist.bio ?? `An artist on ${instanceName}`,
     url: artistUrl,
     imageUrl: avatarUrl,
     artistUrl: artistUrl,
@@ -213,9 +223,9 @@ const handleArtistProfile: RouteHandler<ArtistParams> = async ({
 
   registerArtistHydration(hydrations, artist);
 
-  buildOpenGraphTags($, {
-    title: artist.name ?? "A Mirlo Artist",
-    description: artist.bio ?? "An artist on Mirlo",
+  buildOpenGraphTags($, instanceName, {
+    title: artist.name ?? `A ${instanceName} Artist`,
+    description: artist.bio ?? `An artist on ${instanceName}`,
     url: artistUrl,
     imageUrl: avatarUrl,
     artistName: artist.name,
@@ -227,6 +237,7 @@ type PostParams = { artistSlug: string; postId?: number; postSlug?: string };
 const handlePost: RouteHandler<PostParams> = async ({
   $,
   client,
+  instanceName,
   avatarUrl,
   req,
   hydrations,
@@ -237,7 +248,7 @@ const handlePost: RouteHandler<PostParams> = async ({
 
   registerArtistHydration(hydrations, artist);
 
-  const artistName = artist.name ?? "A Mirlo Artist";
+  const artistName = artist.name ?? `A ${instanceName} Artist`;
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
 
   // Try to find specific post
@@ -270,7 +281,7 @@ const handlePost: RouteHandler<PostParams> = async ({
       releaseDate: postCreatedDate,
     });
 
-    buildOpenGraphTags($, {
+    buildOpenGraphTags($, instanceName, {
       title: post.title,
       rss,
       description: postDescription,
@@ -334,10 +345,10 @@ const handlePost: RouteHandler<PostParams> = async ({
     }
   } else {
     // Index of all posts
-    buildOpenGraphTags($, {
+    buildOpenGraphTags($, instanceName, {
       title: artistName,
       rss,
-      description: `All posts by ${artistName} on Mirlo`,
+      description: `All posts by ${artistName} on ${instanceName}`,
       url: `${client.applicationUrl}/${artist?.urlSlug}/posts`,
       imageUrl: avatarUrl,
     });
@@ -348,6 +359,7 @@ type MerchParams = { artistSlug: string; merchId?: string };
 const handleMerch: RouteHandler<MerchParams> = async ({
   $,
   client,
+  instanceName,
   avatarUrl,
   params: { artistSlug, merchId },
   hydrations,
@@ -357,7 +369,7 @@ const handleMerch: RouteHandler<MerchParams> = async ({
 
   registerArtistHydration(hydrations, artist);
 
-  const artistName = artist.name ?? "A Mirlo Artist";
+  const artistName = artist.name ?? `A ${instanceName} Artist`;
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
 
   // Try to find specific merch - first try as ID, then as slug
@@ -386,7 +398,7 @@ const handleMerch: RouteHandler<MerchParams> = async ({
       artistName: artistName,
     });
 
-    buildOpenGraphTags($, {
+    buildOpenGraphTags($, instanceName, {
       title: merch.title,
       description: merchDescription,
       url: merchUrl,
@@ -399,9 +411,9 @@ const handleMerch: RouteHandler<MerchParams> = async ({
     });
   } else {
     // Index of all merch
-    buildOpenGraphTags($, {
+    buildOpenGraphTags($, instanceName, {
       title: `${artistName} merch`,
-      description: `All merch by ${artistName} on Mirlo`,
+      description: `All merch by ${artistName} on ${instanceName}`,
       url: `${client.applicationUrl}/${artist?.urlSlug}/merch`,
       imageUrl: avatarUrl,
       rss,
@@ -417,6 +429,7 @@ type AlbumParams = {
 const handleAlbum: RouteHandler<AlbumParams> = async ({
   $,
   client,
+  instanceName,
   params: { artistSlug, albumSlug, trackId },
   hydrations,
 }) => {
@@ -446,7 +459,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
 
     const schema = buildMusicRecordingSchema({
-      title: track.title ?? "A track on Mirlo",
+      title: track.title ?? `A track on ${instanceName}`,
       description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverString
@@ -458,8 +471,8 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       duration: track.audio?.duration || undefined,
     });
 
-    buildOpenGraphTags($, {
-      title: track.title ?? "A track on Mirlo",
+    buildOpenGraphTags($, instanceName, {
+      title: track.title ?? `A track on ${instanceName}`,
       description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverString
@@ -499,7 +512,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     }
 
     const schema = buildMusicAlbumSchema({
-      title: tg.title ?? "Mirlo Album",
+      title: tg.title ?? `${instanceName} Album`,
       description: description,
       url: albumUrl,
       imageUrl: coverString
@@ -512,8 +525,8 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       tracks: tracksList,
     });
 
-    buildOpenGraphTags($, {
-      title: tg.title ?? "Mirlo Album",
+    buildOpenGraphTags($, instanceName, {
+      title: tg.title ?? `${instanceName} Album`,
       description: description,
       url: albumUrl,
       imageUrl: coverString
@@ -541,6 +554,7 @@ type SupportParams = { artistSlug: string; tierId?: string };
 const handleSupport: RouteHandler<SupportParams> = async ({
   $,
   client,
+  instanceName,
   avatarUrl,
   params: { artistSlug, tierId },
   hydrations,
@@ -550,10 +564,10 @@ const handleSupport: RouteHandler<SupportParams> = async ({
 
   registerArtistHydration(hydrations, artist);
 
-  const artistName = artist.name ?? "A Mirlo Artist";
+  const artistName = artist.name ?? `A ${instanceName} Artist`;
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
   const supportUrl = `${client.applicationUrl}/${artist.urlSlug}/support`;
-  const supportDescription = `Support ${artistName} on Mirlo`;
+  const supportDescription = `Support ${artistName} on ${instanceName}`;
 
   const tier = tierId
     ? await fetchSubscriptionTierMetadata(artistSlug, tierId)
@@ -579,7 +593,7 @@ const handleSupport: RouteHandler<SupportParams> = async ({
       releaseDate: tier.createdAt.toISOString().split("T")[0],
     });
 
-    buildOpenGraphTags($, {
+    buildOpenGraphTags($, instanceName, {
       title: tier.name,
       description: tierDescription,
       url: tierUrl,
@@ -591,7 +605,7 @@ const handleSupport: RouteHandler<SupportParams> = async ({
     return;
   }
 
-  buildOpenGraphTags($, {
+  buildOpenGraphTags($, instanceName, {
     title: artistName,
     description: supportDescription,
     url: supportUrl,
@@ -604,6 +618,7 @@ type ArtistReleasesParams = { artistSlug: string };
 const handleArtistReleases: RouteHandler<ArtistReleasesParams> = async ({
   $,
   client,
+  instanceName,
   avatarUrl,
   params: { artistSlug },
   hydrations,
@@ -613,12 +628,12 @@ const handleArtistReleases: RouteHandler<ArtistReleasesParams> = async ({
 
   registerArtistHydration(hydrations, artist);
 
-  const artistName = artist.name ?? "A Mirlo Artist";
+  const artistName = artist.name ?? `A ${instanceName} Artist`;
   const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
 
-  buildOpenGraphTags($, {
+  buildOpenGraphTags($, instanceName, {
     title: `${artistName} releases`,
-    description: `All releases by ${artistName} on Mirlo`,
+    description: `All releases by ${artistName} on ${instanceName}`,
     url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
     imageUrl: avatarUrl,
     rss,
@@ -630,10 +645,14 @@ type AuthParams = { pageType: AuthPageType };
 const handleAuthPage: RouteHandler<AuthParams> = async ({
   $,
   client,
+  instanceName,
   params: { pageType },
 }) => {
-  const title = pageType === "login" ? "Log in to Mirlo" : "Sign up to Mirlo";
-  buildOpenGraphTags($, {
+  const title =
+    pageType === "login"
+      ? `Log in to ${instanceName}`
+      : `Sign up to ${instanceName}`;
+  buildOpenGraphTags($, instanceName, {
     title,
     description: mirloDefaultDescription,
     url: `${client.applicationUrl}/${pageType}`,
@@ -641,9 +660,9 @@ const handleAuthPage: RouteHandler<AuthParams> = async ({
   });
 };
 
-const handleDefault: RouteHandler<{}> = async ({ $, client }) => {
-  buildOpenGraphTags($, {
-    title: "Mirlo",
+const handleDefault: RouteHandler<{}> = async ({ $, client, instanceName }) => {
+  buildOpenGraphTags($, instanceName, {
+    title: instanceName,
     description: mirloDefaultDescription,
     url: client.applicationUrl,
     imageUrl: `${client.applicationUrl}/${mirloDefaultImagePath}`,
@@ -852,6 +871,8 @@ export const analyzePathAndGenerateHTML = async (
   req?: Request
 ) => {
   const segments = splitPathIntoSegments(pathname);
+  const settings = await getSiteSettings();
+  const instanceName = resolveInstanceName(settings);
   try {
     const client = await getClient();
     // Inject logged-in user state so the client doesn't need to wait for /auth/profile
@@ -889,10 +910,22 @@ export const analyzePathAndGenerateHTML = async (
     // Match against route patterns using shared matcher
     const routeParams = matchRoutePattern(segments);
     if (routeParams) {
-      await dispatchRoute(routeParams, { $, client, avatarUrl, req });
+      await dispatchRoute(routeParams, {
+        $,
+        client,
+        instanceName,
+        avatarUrl,
+        req,
+      });
     } else {
       // No matching route - use default
-      await handleDefault({ $, client, hydrations: [], params: {} });
+      await handleDefault({
+        $,
+        client,
+        instanceName,
+        hydrations: [],
+        params: {},
+      });
     }
   } catch (error) {
     console.error("Error in analyzePathAndGenerateHTML:", error);
@@ -900,11 +933,12 @@ export const analyzePathAndGenerateHTML = async (
   }
 
   const instanceSettings = serializeInstanceSettings(
-    await getSiteSettings(),
+    settings,
     getAvailableLanguages()
   );
   appendHydrationScript($, "__MIRLO_INSTANCE__", "instance", instanceSettings);
 
+  $("title").text(instanceName);
   $("title").after(`
     <style>
     html {
