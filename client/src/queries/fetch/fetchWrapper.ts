@@ -1,4 +1,5 @@
 import { API_ROOT } from "../../constants";
+
 import { MirloFetchError } from "./MirloFetchError";
 
 const baseUrl = API_ROOT?.replace(" ", "") ?? "";
@@ -22,12 +23,15 @@ async function fetchWrapper<R>(
   });
   if (!res.ok) {
     let message;
+    let code;
     try {
-      message = (await res.json()).error;
+      const body = await res.json();
+      message = body.error;
+      code = body.code;
     } catch (e) {
       message = res.text;
     }
-    throw new MirloFetchError(res, message);
+    throw new MirloFetchError(res, message, code);
   }
   return await res.json();
 }
