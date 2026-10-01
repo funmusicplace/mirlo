@@ -14,7 +14,6 @@ import {
 
 import ArtistManagers from "./ArtistManagers";
 
-// Requests the component sends, so play functions can check them.
 let invitedEmails: string[] = [];
 let removedUserIds: string[] = [];
 let leftArtistIds: string[] = [];
@@ -22,11 +21,11 @@ let leftArtistIds: string[] = [];
 const handlers = ({
   managers = [ARTIST_MANAGER_EXAMPLE, PENDING_ARTIST_MANAGER_EXAMPLE],
   managedArtists = [{ ...ARTIST_EXAMPLE, relationship: "owner" }],
-  inviteStatus = 200,
+  inviteError,
 }: {
   managers?: ArtistManager[];
   managedArtists?: ManagedArtist[];
-  inviteStatus?: number;
+  inviteError?: { status: number; code: string };
 } = {}) => [
   managedArtistsHandler(managedArtists),
   http.get("*/v1/manage/artists/:artistId/managers", () =>
@@ -35,10 +34,10 @@ const handlers = ({
   http.post("*/v1/manage/artists/:artistId/managers", async ({ request }) => {
     const { email } = (await request.json()) as { email: string };
     invitedEmails.push(email);
-    if (inviteStatus !== 200) {
+    if (inviteError) {
       return HttpResponse.json(
-        { error: "Invite failed" },
-        { status: inviteStatus }
+        { error: "Invite failed", code: inviteError.code },
+        { status: inviteError.status }
       );
     }
     return HttpResponse.json({ results: managers });
@@ -124,7 +123,13 @@ export const InviteSent: Story = {
 /** The API returns 404 when no Mirlo account uses the email. */
 export const InviteEmailHasNoAccount: Story = {
   parameters: {
-    msw: { handlers: { managers: handlers({ inviteStatus: 404 }) } },
+    msw: {
+      handlers: {
+        managers: handlers({
+          inviteError: { status: 404, code: "manager_invite_no_account" },
+        }),
+      },
+    },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -133,13 +138,22 @@ export const InviteEmailHasNoAccount: Story = {
       "nobody@example.com"
     );
     await userEvent.click(canvas.getByRole("button", { name: "Send invite" }));
-    await within(document.body).findByText("No Mirlo account uses that email.");
+    await within(document.body).findByText("No account uses that email.");
   },
 };
 
 export const InviteAlreadySent: Story = {
   parameters: {
-    msw: { handlers: { managers: handlers({ inviteStatus: 409 }) } },
+    msw: {
+      handlers: {
+        managers: handlers({
+          inviteError: {
+            status: 409,
+            code: "manager_invite_already_invited",
+          },
+        }),
+      },
+    },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -157,10 +171,10 @@ export const InviteAlreadySent: Story = {
 export const RemoveManager: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const [firstRemove] = await canvas.findAllByRole("button", {
-      name: "Remove",
-    });
-    await userEvent.click(firstRemove);
+    // Each Remove button names the person, for screen reader users.
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Remove Sam Manager" })
+    );
     await confirmDialog();
     await waitFor(() =>
       expect(removedUserIds).toEqual([String(ARTIST_MANAGER_EXAMPLE.userId)])
@@ -202,7 +216,11 @@ export const AsManager: Story = {
       canvas.queryByLabelText("Invite someone by email")
     ).not.toBeInTheDocument();
     await expect(
-      canvas.queryByRole("button", { name: "Remove" })
+      canvas.queryByRole("button", { name: /^Remove (?!my access)/ })
+    ).not.toBeInTheDocument();
+    // Only the owner sees managers' email addresses.
+    await expect(
+      canvas.queryByRole("columnheader", { name: "Email" })
     ).not.toBeInTheDocument();
 
     await userEvent.click(leaveButton);

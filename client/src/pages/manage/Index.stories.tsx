@@ -93,6 +93,10 @@ export const WithPendingInvite: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("Invites to manage artists");
-    await expect(canvas.getByRole("button", { name: "Accept" })).toBeVisible();
+    await expect(
+      canvas.getByRole("button", {
+        name: `Accept invite to manage ${SHARED_ARTIST_EXAMPLE.name}`,
+      })
+    ).toBeVisible();
   },
 };

@@ -6,21 +6,27 @@ export type ArtistRelationship = "owner" | "manager" | "label" | "admin";
 
 const useArtistRelationship = (
   artist?: Pick<Artist, "id" | "userId"> | null
-): { relationship?: ArtistRelationship; isOwner: boolean } => {
+): { relationship?: ArtistRelationship; hasOwnerRights: boolean } => {
   const { user } = useAuthContext();
-  const { data: { results: managedArtists } = {} } = useQuery({
+  const { data: { results: managedArtists } = {}, isFetched } = useQuery({
     ...queryManagedArtists(),
     enabled: !!user,
   });
 
   if (!user || !artist) {
-    return { isOwner: false };
+    return { hasOwnerRights: false };
+  }
+
+  if (artist.userId === user.id) {
+    return { relationship: "owner", hasOwnerRights: true };
+  }
+
+  if (!isFetched) {
+    return { hasOwnerRights: !!user.isAdmin };
   }
 
   let relationship: ArtistRelationship;
-  if (artist.userId === user.id) {
-    relationship = "owner";
-  } else if (
+  if (
     managedArtists?.find((a) => a.id === artist.id)?.relationship === "manager"
   ) {
     relationship = "manager";
@@ -30,10 +36,7 @@ const useArtistRelationship = (
     relationship = "label";
   }
 
-  return {
-    relationship,
-    isOwner: relationship === "owner" || !!user.isAdmin,
-  };
+  return { relationship, hasOwnerRights: !!user.isAdmin };
 };
 
 export default useArtistRelationship;

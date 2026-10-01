@@ -23,7 +23,9 @@ export default function () {
       await prisma.profileManager.deleteMany({
         where: { profileId, userId: Number(userId) },
       });
-      res.json({ results: await findProfileManagers(profileId) });
+      res.json({
+        results: await findProfileManagers(profileId, { showEmail: true }),
+      });
     } catch (e) {
       next(e);
     }

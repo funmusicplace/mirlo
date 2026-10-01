@@ -23,8 +23,16 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as { artistId: string };
     try {
-      const profileId = await findProfileIdForURLSlug(artistId);
-      res.json({ results: await findProfileManagers(Number(profileId)) });
+      assertLoggedIn(req);
+      const profileId = Number(await findProfileIdForURLSlug(artistId));
+      const profile = await prisma.profile.findFirstOrThrow({
+        where: { id: profileId },
+        select: { userId: true },
+      });
+      const showEmail = profile.userId === req.user.id || !!req.user.isAdmin;
+      res.json({
+        results: await findProfileManagers(profileId, { showEmail }),
+      });
     } catch (e) {
       next(e);
     }
@@ -32,7 +40,7 @@ export default function () {
 
   GET.apiDoc = {
     summary:
-      "Returns the users who manage an artist, including pending invites",
+      "Returns the users who manage an artist, including pending invites. Emails are only included for the owner and admins",
     parameters: [
       { in: "path", name: "artistId", required: true, type: "string" },
     ],
@@ -69,13 +77,15 @@ export default function () {
       if (!invitedUser) {
         throw new AppError({
           httpCode: 404,
-          description: "No Mirlo account uses that email",
+          description: "No account uses that email",
+          code: "manager_invite_no_account",
         });
       }
       if (invitedUser.id === profile.userId) {
         throw new AppError({
           httpCode: 400,
           description: "That user already owns this artist",
+          code: "manager_invite_is_owner",
         });
       }
 
@@ -88,6 +98,7 @@ export default function () {
         throw new AppError({
           httpCode: 409,
           description: "That user has already been invited",
+          code: "manager_invite_already_invited",
         });
       }
 
@@ -101,7 +112,10 @@ export default function () {
 
       await sendProfileManagerInvite(profile, invitedUser, loggedInUser);
 
-      res.json({ results: await findProfileManagers(profileId) });
+      // Only the owner (or an admin) can invite, so they see emails.
+      res.json({
+        results: await findProfileManagers(profileId, { showEmail: true }),
+      });
     } catch (e) {
       next(e);
     }

@@ -460,6 +460,10 @@ export const deleteProfile = async (userId: number, profileId: number) => {
       artistId: Number(profileId),
     },
   });
+
+  await prisma.profileManager.deleteMany({
+    where: { profileId: Number(profileId) },
+  });
 };
 
 export const deleteProfileAvatar = async (profileId: number) => {

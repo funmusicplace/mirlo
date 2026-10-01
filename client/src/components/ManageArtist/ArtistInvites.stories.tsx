@@ -10,8 +10,13 @@ let acceptedArtistIds: string[] = [];
 let declinedArtistIds: string[] = [];
 
 const handlers = (invites = [ARTIST_MANAGER_INVITE_EXAMPLE]) => [
+  // Declined invites drop out of the list, like they do on the server.
   http.get("*/v1/manage/artistInvites", () =>
-    HttpResponse.json({ results: invites })
+    HttpResponse.json({
+      results: invites.filter(
+        (invite) => !declinedArtistIds.includes(String(invite.artist.id))
+      ),
+    })
   ),
   http.put("*/v1/manage/artistInvites/:artistId", ({ params }) => {
     acceptedArtistIds.push(String(params.artistId));
@@ -82,7 +87,9 @@ export const Accept: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(
-      await canvas.findByRole("button", { name: "Accept" })
+      await canvas.findByRole("button", {
+        name: "Accept invite to manage The Borrowed Cabin",
+      })
     );
     await waitFor(() =>
       expect(acceptedArtistIds).toEqual([
@@ -96,7 +103,9 @@ export const Decline: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(
-      await canvas.findByRole("button", { name: "Decline" })
+      await canvas.findByRole("button", {
+        name: "Decline invite to manage The Borrowed Cabin",
+      })
     );
     await waitFor(() =>
       expect(declinedArtistIds).toEqual([
@@ -104,5 +113,10 @@ export const Decline: Story = {
       ])
     );
     await within(document.body).findByText("Invite declined");
+    // The heading stays, with focus on it, once the last invite is gone.
+    await canvas.findByText("You have no pending invites.");
+    await expect(
+      canvas.getByRole("heading", { name: "Invites to manage artists" })
+    ).toHaveFocus();
   },
 };

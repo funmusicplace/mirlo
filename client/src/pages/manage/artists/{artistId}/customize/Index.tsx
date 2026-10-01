@@ -122,7 +122,7 @@ export const Index: React.FC = () => {
   const { user } = useAuthContext();
   const userId = user?.id;
   const { data: artist, refetch: refetchArtist } = useManagedArtistQuery();
-  const { isOwner } = useArtistRelationship(artist);
+  const { hasOwnerRights } = useArtistRelationship(artist);
 
   const methods = useForm<ArtistFormData>({
     defaultValues: generateDefaults(artist),
@@ -387,15 +387,15 @@ export const Index: React.FC = () => {
         <ArtistManagers artist={artist} />
       </ArtistFormSection>
 
-      {isOwner && !artist.isLabelProfile && <LabelConfirmation />}
+      {hasOwnerRights && !artist.isLabelProfile && <LabelConfirmation />}
 
-      {isOwner && !artist.isLabelProfile && (
+      {hasOwnerRights && !artist.isLabelProfile && (
         <ArtistFormSection>
           <ArtistPaymentReceiver artist={artist} />
         </ArtistFormSection>
       )}
 
-      {isOwner && !artist.isLabelProfile && <DeleteArtist />}
+      {hasOwnerRights && !artist.isLabelProfile && <DeleteArtist />}
     </div>
   );
 };

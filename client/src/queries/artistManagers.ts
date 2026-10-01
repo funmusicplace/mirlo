@@ -18,7 +18,7 @@ export type ArtistManager = {
   userId: number;
   acceptedAt: string | null;
   createdAt: string;
-  user: { id: number; name: string | null; email: string };
+  user: { id: number; name: string | null; email?: string };
   invitedBy: { id: number; name: string | null };
 };
 

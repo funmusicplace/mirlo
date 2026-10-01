@@ -52,7 +52,7 @@ export const Default: Story = {
       canvas.getByRole("link", { name: "The Borrowed Cabin" })
     ).toBeVisible();
     await expect(
-      canvas.getByRole("link", { name: "Review the invite" })
+      canvas.getByRole("link", { name: "Go to your artists" })
     ).toHaveAttribute("href", "/manage");
   },
 };

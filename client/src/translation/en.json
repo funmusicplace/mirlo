@@ -887,6 +887,10 @@
     "someone": "Someone",
     "acceptInvite": "Accept",
     "declineInvite": "Decline",
+    "acceptInviteNamed": "Accept invite to manage {{artistName}}",
+    "declineInviteNamed": "Decline invite to manage {{artistName}}",
+    "inviteActionError": "Something went wrong. Please try again.",
+    "noPendingInvites": "You have no pending invites.",
     "inviteAccepted": "You can now manage {{artistName}}",
     "inviteDeclined": "Invite declined",
     "sharedWithYou": "Shared with you"
@@ -1463,15 +1467,18 @@
     "teamPending": "Invite pending",
     "teamActive": "Active",
     "teamStatus": "Status",
+    "teamNoName": "No name set",
+    "teamActionError": "Something went wrong. Please try again.",
     "inviteEmailLabel": "Invite someone by email",
-    "inviteEmailHint": "They need to have a Mirlo account already.",
+    "inviteEmailHint": "They need to have an account here already.",
     "sendInvite": "Send invite",
     "inviteSent": "Invite sent",
-    "inviteNoAccount": "No Mirlo account uses that email.",
+    "inviteNoAccount": "No account uses that email.",
     "inviteAlreadyInvited": "That person has already been invited.",
     "inviteIsOwner": "That's the email of this artist's owner.",
     "inviteError": "Something went wrong sending the invite.",
     "removeManager": "Remove",
+    "removeManagerNamed": "Remove {{name}}",
     "removeManagerConfirm": "Remove {{name}}'s access to this artist?",
     "leaveArtist": "Remove my access",
     "leaveArtistConfirm": "Remove your access to this artist? The owner would need to invite you again."
@@ -1616,11 +1623,12 @@
     "categoryPurchases": "Purchases",
     "categoryPledges": "Pledges",
     "categoryLabels": "Labels",
+    "categoryTeam": "Team",
     "categoryMessages": "Messages",
     "viewMessage": "View message",
     "managerInviteTag": "Team",
     "inviteToManageArtist": "<bold>{{inviterName}}</bold> invited you to help manage <artistLink>{{artistName}}</artistLink>.",
-    "reviewInvite": "Review the invite"
+    "reviewInvite": "Go to your artists"
   },
   "kickstarter": {
     "donateNow": "Donate now"

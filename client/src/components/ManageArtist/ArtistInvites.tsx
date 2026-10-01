@@ -23,29 +23,44 @@ const ArtistInvites: React.FC = () => {
     useAcceptArtistInviteMutation();
   const { mutateAsync: decline, isPending: isDeclining } =
     useLeaveArtistMutation();
+  const [hasDeclined, setHasDeclined] = React.useState(false);
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
 
-  if (!invites?.length) {
+  if (!invites?.length && !hasDeclined) {
     return null;
   }
 
   const onAccept = async (invite: ArtistManagerInvite) => {
-    await accept({ artistId: invite.artist.id });
-    snackbar(t("inviteAccepted", { artistName: invite.artist.name }), {
-      type: "success",
-    });
-    navigate(getArtistManageUrl(invite.artist.id));
+    try {
+      await accept({ artistId: invite.artist.id });
+      snackbar(t("inviteAccepted", { artistName: invite.artist.name }), {
+        type: "success",
+      });
+      navigate(getArtistManageUrl(invite.artist.id));
+    } catch (e) {
+      snackbar(t("inviteActionError"), { type: "warning" });
+    }
   };
 
   const onDecline = async (invite: ArtistManagerInvite) => {
-    await decline({ artistId: invite.artist.id });
-    snackbar(t("inviteDeclined"), { type: "success" });
+    setHasDeclined(true);
+    try {
+      await decline({ artistId: invite.artist.id });
+      snackbar(t("inviteDeclined"), { type: "success" });
+      headingRef.current?.focus();
+    } catch (e) {
+      snackbar(t("inviteActionError"), { type: "warning" });
+    }
   };
 
   return (
     <section className="mt-4">
-      <h2>{t("artistInvites")}</h2>
+      <h2 ref={headingRef} tabIndex={-1}>
+        {t("artistInvites")}
+      </h2>
+      {!invites?.length && <p>{t("noPendingInvites")}</p>}
       <ul className="flex flex-col gap-2 list-none p-0 m-0">
-        {invites.map((invite) => (
+        {invites?.map((invite) => (
           <li key={invite.artist.id}>
             <Box
               variant="info"
@@ -67,6 +82,9 @@ const ArtistInvites: React.FC = () => {
                   size="compact"
                   buttonRole="primary"
                   disabled={isAccepting || isDeclining}
+                  aria-label={t("acceptInviteNamed", {
+                    artistName: invite.artist.name,
+                  })}
                   onClick={() => onAccept(invite)}
                 >
                   {t("acceptInvite")}
@@ -75,6 +93,9 @@ const ArtistInvites: React.FC = () => {
                   size="compact"
                   variant="outlined"
                   disabled={isAccepting || isDeclining}
+                  aria-label={t("declineInviteNamed", {
+                    artistName: invite.artist.name,
+                  })}
                   onClick={() => onDecline(invite)}
                 >
                   {t("declineInvite")}

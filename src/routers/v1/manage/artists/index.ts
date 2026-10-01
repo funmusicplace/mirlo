@@ -7,6 +7,7 @@ import {
   userAuthenticated,
 } from "../../../../auth/passport";
 import { serializeProfile } from "../../../../serializers/artist";
+import { serializeManagedProfile } from "../../../../serializers/profileManager";
 import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
@@ -66,11 +67,9 @@ export default function () {
         },
       });
       res.json({
-        results: profiles.map((artistProfile) => ({
-          ...serializeProfile(artistProfile as any, Number(loggedInUser.id)),
-          relationship:
-            artistProfile.userId === loggedInUser.id ? "owner" : "manager",
-        })),
+        results: profiles.map((profile) =>
+          serializeManagedProfile(profile, loggedInUser.id)
+        ),
       });
     } catch (e) {
       next(e);

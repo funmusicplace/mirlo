@@ -6,6 +6,7 @@ import { slug } from "github-slugger";
 
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../auth/passport";
+import { whereForProfilesUserManages } from "../../../utils/artist";
 import { AppError, HttpCode } from "../../../utils/error";
 
 interface TrackArtistData {
@@ -93,6 +94,7 @@ export default function () {
               OR: [
                 { userId: loggedInUserId },
                 { paymentToUserId: loggedInUserId },
+                whereForProfilesUserManages(loggedInUserId),
               ],
             },
             include: {

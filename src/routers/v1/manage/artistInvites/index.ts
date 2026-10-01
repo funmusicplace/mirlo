@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { serializeProfile } from "../../../../serializers/artist";
+import { serializeArtistInvite } from "../../../../serializers/profileManager";
 
 export default function () {
   const operations = {
@@ -15,7 +15,11 @@ export default function () {
     const loggedInUser = req.user;
     try {
       const invites = await prisma.profileManager.findMany({
-        where: { userId: loggedInUser.id, acceptedAt: null },
+        where: {
+          userId: loggedInUser.id,
+          acceptedAt: null,
+          profile: { deletedAt: null },
+        },
         include: {
           profile: {
             select: { id: true, name: true, urlSlug: true, avatar: true },
@@ -24,13 +28,7 @@ export default function () {
         },
         orderBy: { createdAt: "desc" },
       });
-      res.json({
-        results: invites.map((invite) => ({
-          ...invite,
-          artist: serializeProfile(invite.profile as any),
-          profile: undefined,
-        })),
-      });
+      res.json({ results: invites.map(serializeArtistInvite) });
     } catch (e) {
       next(e);
     }

@@ -66,6 +66,14 @@ const Index = () => {
     enabled: !!user?.id,
   });
 
+  const { data: teamCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["PROFILE_MANAGER_INVITE"],
+    }),
+    enabled: !!user?.id,
+  });
+
   const { data: messageCheck } = useQuery({
     ...queryNotifications(user?.id, {
       take: 1,
@@ -116,6 +124,17 @@ const Index = () => {
             value: "labels",
             label: t("categoryLabels"),
             types: ["LABEL_ADDED_ARTIST"] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+    ...(hasNotifications(teamCheck)
+      ? [
+          {
+            value: "team",
+            label: t("categoryTeam"),
+            types: [
+              "PROFILE_MANAGER_INVITE",
+            ] as Notification["notificationType"][],
           },
         ]
       : []),

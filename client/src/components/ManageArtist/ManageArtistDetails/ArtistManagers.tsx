@@ -20,34 +20,35 @@ import { useSnackbar } from "state/SnackbarContext";
 import useArtistRelationship from "utils/useArtistRelationship";
 import { useConfirm } from "utils/useConfirm";
 
-const inviteErrorKey = (e: unknown) => {
-  if (e instanceof MirloFetchError) {
-    switch (e.status) {
-      case 404:
-        return "inviteNoAccount";
-      case 409:
-        return "inviteAlreadyInvited";
-      case 400:
-        return "inviteIsOwner";
-    }
-  }
-  return "inviteError";
+const INVITE_ERROR_KEYS: Record<string, string> = {
+  manager_invite_no_account: "inviteNoAccount",
+  manager_invite_already_invited: "inviteAlreadyInvited",
+  manager_invite_is_owner: "inviteIsOwner",
 };
+
+const inviteErrorKey = (e: unknown) =>
+  (e instanceof MirloFetchError && e.code && INVITE_ERROR_KEYS[e.code]) ||
+  "inviteError";
 
 const ArtistManagers: React.FC<{ artist: Artist }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const { user } = useAuthContext();
-  const { isOwner } = useArtistRelationship(artist);
+  const { relationship, hasOwnerRights } = useArtistRelationship(artist);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { ask } = useConfirm();
   const [email, setEmail] = React.useState("");
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
+  const emailRef = React.useRef<HTMLInputElement>(null);
 
   const { data: managers } = useQuery(queryArtistManagers(artist.id));
   const { mutateAsync: invite, isPending: isInviting } =
     useInviteArtistManagerMutation();
   const { mutateAsync: remove } = useRemoveArtistManagerMutation();
   const { mutateAsync: leave } = useLeaveArtistMutation();
+
+  const displayName = (manager: ArtistManager) =>
+    manager.user.name || manager.user.email || t("teamNoName");
 
   const onInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,30 +59,47 @@ const ArtistManagers: React.FC<{ artist: Artist }> = ({ artist }) => {
     } catch (e) {
       snackbar(t(inviteErrorKey(e)), { type: "warning" });
     }
+    emailRef.current?.focus();
   };
 
   const onRemove = async (manager: ArtistManager) => {
-    const name = manager.user.name || manager.user.email;
-    if (!(await ask(t("removeManagerConfirm", { name })))) {
+    if (
+      !(await ask(t("removeManagerConfirm", { name: displayName(manager) })))
+    ) {
       return;
     }
-    await remove({ artistId: artist.id, userId: manager.userId });
+    try {
+      await remove({ artistId: artist.id, userId: manager.userId });
+      headingRef.current?.focus();
+    } catch (e) {
+      snackbar(t("teamActionError"), { type: "warning" });
+    }
   };
 
   const onLeave = async () => {
     if (!(await ask(t("leaveArtistConfirm")))) {
       return;
     }
-    await leave({ artistId: artist.id });
-    navigate("/manage");
+    try {
+      await leave({ artistId: artist.id });
+      navigate("/manage");
+    } catch (e) {
+      snackbar(t("teamActionError"), { type: "warning" });
+    }
   };
+
+  if (!relationship && !hasOwnerRights) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-4 w-full" id="team">
       <div>
-        <h2 className="mb-2">{t("teamTitle")}</h2>
+        <h2 className="mb-2" ref={headingRef} tabIndex={-1}>
+          {t("teamTitle")}
+        </h2>
         <p className="text-sm">
-          {isOwner ? t("teamDescription") : t("teamManagerDescription")}
+          {hasOwnerRights ? t("teamDescription") : t("teamManagerDescription")}
         </p>
       </div>
 
@@ -92,7 +110,9 @@ const ArtistManagers: React.FC<{ artist: Artist }> = ({ artist }) => {
           <thead>
             <tr>
               <th>{t("name", { keyPrefix: "manageArtist" })}</th>
-              <th>{t("email", { keyPrefix: "manageArtist" })}</th>
+              {hasOwnerRights && (
+                <th>{t("email", { keyPrefix: "manageArtist" })}</th>
+              )}
               <th>{t("teamStatus")}</th>
               <th>
                 <span className="sr-only">
@@ -104,8 +124,8 @@ const ArtistManagers: React.FC<{ artist: Artist }> = ({ artist }) => {
           <tbody>
             {managers.map((manager) => (
               <tr key={manager.userId}>
-                <td>{manager.user.name}</td>
-                <td>{manager.user.email}</td>
+                <td>{manager.user.name || t("teamNoName")}</td>
+                {hasOwnerRights && <td>{manager.user.email}</td>}
                 <td>
                   {manager.acceptedAt ? (
                     t("teamActive")
@@ -114,17 +134,20 @@ const ArtistManagers: React.FC<{ artist: Artist }> = ({ artist }) => {
                   )}
                 </td>
                 <td className="text-right">
-                  {isOwner && (
+                  {hasOwnerRights && (
                     <ArtistButton
                       type="button"
                       size="compact"
                       variant="outlined"
+                      aria-label={t("removeManagerNamed", {
+                        name: displayName(manager),
+                      })}
                       onClick={() => onRemove(manager)}
                     >
                       {t("removeManager")}
                     </ArtistButton>
                   )}
-                  {!isOwner && manager.userId === user?.id && (
+                  {!hasOwnerRights && manager.userId === user?.id && (
                     <ArtistButton
                       type="button"
                       size="compact"
@@ -141,7 +164,7 @@ const ArtistManagers: React.FC<{ artist: Artist }> = ({ artist }) => {
         </Table>
       )}
 
-      {isOwner && (
+      {hasOwnerRights && (
         <form onSubmit={onInvite} className="max-w-[500px]">
           <FormComponent>
             <label htmlFor="input-invite-manager">
@@ -150,6 +173,7 @@ const ArtistManagers: React.FC<{ artist: Artist }> = ({ artist }) => {
             <InputEl
               aria-describedby="hint-invite-manager"
               id="input-invite-manager"
+              ref={emailRef}
               type="email"
               required
               value={email}

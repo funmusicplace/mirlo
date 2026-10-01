@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  canUserCreateArtistContent,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
@@ -19,7 +19,7 @@ export default function () {
     POST: [
       userAuthenticated,
       artistBelongsToLoggedInUser,
-      canUserCreateArtists,
+      canUserCreateArtistContent,
       POST,
     ],
   };

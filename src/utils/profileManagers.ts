@@ -3,18 +3,27 @@ import { Profile, User } from "@mirlo/prisma/client";
 
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfile } from "../serializers/artist";
+import { serializeProfileManager } from "../serializers/profileManager";
 
 import { getClient } from "./getClient";
 
-export const findProfileManagers = (profileId: number) =>
-  prisma.profileManager.findMany({
-    where: { profileId },
+export const findProfileManagers = async (
+  profileId: number,
+  { showEmail }: { showEmail: boolean }
+) => {
+  const managers = await prisma.profileManager.findMany({
+    // Nested relations aren't soft-delete filtered automatically.
+    where: { profileId, user: { deletedAt: null } },
     include: {
       user: { select: { id: true, name: true, email: true } },
       invitedBy: { select: { id: true, name: true } },
     },
     orderBy: { createdAt: "asc" },
   });
+  return managers.map((manager) =>
+    serializeProfileManager(manager, { showEmail })
+  );
+};
 
 export const sendProfileManagerInvite = async (
   profile: Profile,
@@ -23,15 +32,24 @@ export const sendProfileManagerInvite = async (
 ) => {
   const client = await getClient();
 
-  await prisma.notification.create({
-    data: {
+  const existingNotification = await prisma.notification.findFirst({
+    where: {
       userId: invitedUser.id,
       notificationType: "PROFILE_MANAGER_INVITE",
-      deliveryMethod: "IN_APP",
       profileId: profile.id,
-      relatedUserId: invitedBy.id,
     },
   });
+  if (!existingNotification) {
+    await prisma.notification.create({
+      data: {
+        userId: invitedUser.id,
+        notificationType: "PROFILE_MANAGER_INVITE",
+        deliveryMethod: "IN_APP",
+        profileId: profile.id,
+        relatedUserId: invitedBy.id,
+      },
+    });
+  }
 
   try {
     await sendMailQueue.add("send-mail", {
