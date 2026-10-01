@@ -125,6 +125,7 @@ export default function () {
         postSubscriptionTierIds,
         shouldSendEmail,
         urlSlug,
+        featuredImageCredit,
       } = req.body;
       assertLoggedIn(req);
 
@@ -220,6 +221,7 @@ export default function () {
             : { minimumSubscriptionTierId }),
           shouldSendEmail,
           urlSlug: effectiveSlug,
+          featuredImageCredit,
         },
         where: {
           id: Number(postId),

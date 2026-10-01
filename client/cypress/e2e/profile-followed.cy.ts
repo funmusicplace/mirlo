@@ -71,31 +71,35 @@ describe("/profile/followed", () => {
     cy.login({ email: followerEmail, password });
     cy.visit("/profile/followed");
 
-    cy.contains("h1", "Followed artists").should("be.visible");
-    cy.contains(followArtistName).should("be.visible");
-    cy.contains(subscribeArtistName).should("be.visible");
-    cy.contains(paidTierName).should("be.visible");
+    cy.findByRole("heading", { level: 1, name: "Followed artists" }).should(
+      "be.visible"
+    );
+    cy.findByText(followArtistName).should("be.visible");
+    cy.findByText(subscribeArtistName).should("be.visible");
+    cy.findByText(paidTierName).should("be.visible");
   });
 
   it("filters to subscriptions only when Subscriptions is selected", () => {
     cy.login({ email: followerEmail, password });
     cy.visit("/profile/followed");
 
-    cy.contains("label", "Subscriptions").click();
+    // The radio input is visually hidden (sr-only) behind its pill label
+    cy.findByRole("radio", { name: "Subscriptions" }).check({ force: true });
 
-    cy.contains(subscribeArtistName).should("be.visible");
-    cy.contains(paidTierName).should("be.visible");
-    cy.contains(followArtistName).should("not.exist");
+    cy.findByText(subscribeArtistName).should("be.visible");
+    cy.findByText(paidTierName).should("be.visible");
+    cy.findByText(followArtistName).should("not.exist");
   });
 
   it("filters to follows only when Following is selected", () => {
     cy.login({ email: followerEmail, password });
     cy.visit("/profile/followed");
 
-    cy.contains("label", "Following").click();
+    // The radio input is visually hidden (sr-only) behind its pill label
+    cy.findByRole("radio", { name: "Following" }).check({ force: true });
 
-    cy.contains(followArtistName).should("be.visible");
-    cy.contains(subscribeArtistName).should("not.exist");
-    cy.contains(paidTierName).should("not.exist");
+    cy.findByText(followArtistName).should("be.visible");
+    cy.findByText(subscribeArtistName).should("not.exist");
+    cy.findByText(paidTierName).should("not.exist");
   });
 });

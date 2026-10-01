@@ -428,6 +428,30 @@ describe("manage/trackGroups/{trackGroupId}", () => {
         "Abstract blue album artwork"
       );
     });
+
+    it("should save coverCredit and return it from the public GET", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ coverCredit: "Photo by Jane Doe" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.coverCredit, "Photo by Jane Doe");
+
+      const publicResponse = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(publicResponse.status, 200);
+      assert.equal(publicResponse.body.result.coverCredit, "Photo by Jane Doe");
+    });
   });
 
   describe("DELETE", () => {

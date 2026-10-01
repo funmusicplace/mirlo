@@ -302,6 +302,11 @@ function Index() {
                     objectFit="contain"
                   />
                 </ImageWrapper>
+                {trackGroup.coverCredit && (
+                  <p className="mt-1 mb-0 text-xs opacity-75">
+                    {t("coverCredit", { credit: trackGroup.coverCredit })}
+                  </p>
+                )}
                 <UnderneathImage>
                   {!isSingleColumn && (
                     <ReleaseDate releaseDate={trackGroup.releaseDate} />

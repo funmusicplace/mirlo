@@ -843,7 +843,8 @@
     "likedThisPost": "Liked this post?",
     "readPost": "Read post",
     "tracksInPost_one": "{{count}} track",
-    "tracksInPost_other": "{{count}} tracks"
+    "tracksInPost_other": "{{count}} tracks",
+    "featuredImageCredit": "Image: {{credit}}"
   },
   "postTracksDock": {
     "label": "Playing in this post"
@@ -1360,7 +1361,9 @@
     "moveRelease": "Move release",
     "confirmMoveRelease": "Move this release to {{artistName}}? Links to its current address will stop working.",
     "releaseMoved": "Release moved",
-    "releaseMoveFailed": "We couldn't move that release"
+    "releaseMoveFailed": "We couldn't move that release",
+    "coverCredit": "Artwork credit",
+    "coverCreditHint": "Credit the artist or photographer who made the cover art. Shown under the cover on the release page."
   },
   "artistForm": {
     "allowDirectMessages": "Allow direct messages from listeners",
@@ -1924,7 +1927,8 @@
     "goToRelease": "Go to the release",
     "artistDoesNotExist": "This artist does not exist or does not have a public presence.",
     "redeemForArtist": "Redeem a download code for a release by {{artistName}}",
-    "redeemAnyReleaseByArtist": "Your code will unlock the release it was made for."
+    "redeemAnyReleaseByArtist": "Your code will unlock the release it was made for.",
+    "coverCredit": "Cover art: {{credit}}"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",
@@ -2040,7 +2044,9 @@
     "urlSlug": "Post URL slug",
     "slugTaken": "This URL is taken, try something else.",
     "slugWarning": "Changes to this value will break existing links to this post.",
-    "tiersHint": "Leave all of them unchecked to send this post to every subscriber."
+    "tiersHint": "Leave all of them unchecked to send this post to every subscriber.",
+    "featuredImageCredit": "Featured image credit",
+    "featuredImageCreditHint": "Credit the artist or photographer who made the featured image. Shown as a footnote at the end of the post."
   },
   "errorPage": {
     "reactError": "React error ",

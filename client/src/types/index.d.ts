@@ -104,6 +104,7 @@ interface TrackGroup {
   hideFromSearch?: boolean;
   catalogNumber?: string;
   coverImageAlt?: string;
+  coverCredit?: string | null;
   id: number;
   releaseDate?: string;
   publishedAt?: string;
@@ -181,6 +182,7 @@ interface Post {
   postSubscriptionTiers?: { profileSubscriptionTierId: number }[];
   featuredImageId?: string;
   featuredImage?: { src: string };
+  featuredImageCredit?: string | null;
   isDraft: boolean;
   tracks?: {
     postId: number;

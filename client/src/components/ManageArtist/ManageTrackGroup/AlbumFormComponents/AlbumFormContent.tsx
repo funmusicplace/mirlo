@@ -192,6 +192,17 @@ const AlbumFormContent: React.FC<{
             />
             <small id="hint-cover-image-alt">{t("coverImageAltHint")}</small>
           </div>
+          <div className="flex flex-col gap-2 max-w-[72ch] mt-4 w-full">
+            <RestoredLabel htmlFor="input-cover-credit" field="coverCredit">
+              {t("coverCredit")}
+            </RestoredLabel>
+            <InputEl
+              id="input-cover-credit"
+              aria-describedby="hint-cover-credit"
+              {...register("coverCredit")}
+            />
+            <small id="hint-cover-credit">{t("coverCreditHint")}</small>
+          </div>
         </FormComponent>
       </FormSection>
       <Pricing reload={reload} existingObject={existingObject} />

@@ -134,7 +134,9 @@ describe("home page", () => {
 
   describe("newsletter signup", () => {
     const scrollToNewsletter = () => {
-      cy.contains("Get on the mailing list").scrollIntoView();
+      cy.findByRole("heading", {
+        name: "Get on the mailing list",
+      }).scrollIntoView();
     };
 
     it("sign up button is disabled until an email is entered", () => {
@@ -150,19 +152,21 @@ describe("home page", () => {
       cy.findByRole("button", { name: "Sign up" }).click();
       cy.wait("@verifyEmail");
 
-      cy.get("[data-cy='modal']").should("be.visible");
-      cy.contains("Check your inbox").should("be.visible");
-      cy.contains(`We sent a verification code to ${newsletterEmail}`).should(
+      cy.findByRole("dialog").should("be.visible");
+      cy.findByRole("heading", { name: "Check your inbox" }).should(
         "be.visible"
       );
+      cy.findByText(
+        `We sent a verification code to ${newsletterEmail}.`
+      ).should("be.visible");
 
       cy.findByLabelText("Verification code").type(verificationCode);
       cy.findByRole("button", { name: "Verify & subscribe" }).click();
       cy.wait("@verifyEmail");
       cy.wait("@followArtist");
 
-      cy.contains("Thanks! You're now on the list.").should("be.visible");
-      cy.get("[data-cy='modal']").should("not.exist");
+      cy.findByText("Thanks! You're now on the list.").should("be.visible");
+      cy.findByRole("dialog").should("not.exist");
     });
 
     it("resends the verification code", () => {
@@ -173,7 +177,7 @@ describe("home page", () => {
 
       cy.findByRole("button", { name: "Resend code" }).click();
       cy.wait("@verifyEmail");
-      cy.contains("Code resent!").should("be.visible");
+      cy.findByText("Code resent!").should("be.visible");
     });
 
     it("shows an error when verification fails", () => {
@@ -197,10 +201,10 @@ describe("home page", () => {
       cy.findByRole("button", { name: "Verify & subscribe" }).click();
       cy.wait("@verifyEmailFail");
 
-      cy.contains(
+      cy.findByText(
         "That code doesn't look right. Make sure you entered the correct number, or click resend code."
       ).should("be.visible");
-      cy.get("[data-cy='modal']").should("be.visible");
+      cy.findByRole("dialog").should("be.visible");
     });
 
     it("resets code and step when modal is closed and reopened", () => {
@@ -211,7 +215,7 @@ describe("home page", () => {
 
       cy.findByLabelText("Verification code").type("9999");
       cy.findByRole("button", { name: "close" }).click();
-      cy.get("[data-cy='modal']").should("not.exist");
+      cy.findByRole("dialog").should("not.exist");
 
       cy.findByRole("button", { name: "Sign up" }).click();
       cy.wait("@verifyEmail");
@@ -220,42 +224,48 @@ describe("home page", () => {
   });
 
   it("renders curated sections with links to releases, posts, and tags", () => {
-    cy.contains("Recent releases").scrollIntoView().should("be.visible");
-    cy.contains("a", featuredRelease.title)
+    cy.findByRole("heading", { name: "Recent releases" })
+      .scrollIntoView()
+      .should("be.visible");
+    cy.findByRole("link", { name: featuredRelease.title })
       .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/example-artist/release/example-album");
-    cy.contains("a", featuredRelease.artist.name)
+    cy.findByRole("link", { name: featuredRelease.artist.name })
       .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/example-artist");
 
-    cy.contains("Recent purchases").scrollIntoView().should("be.visible");
-    cy.contains("a", popularRelease.title)
+    cy.findByRole("heading", { name: "Recent purchases" })
+      .scrollIntoView()
+      .should("be.visible");
+    cy.findByRole("link", { name: popularRelease.title })
       .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/popular-artist/release/popular-album");
 
-    cy.contains("Popular Tags").scrollIntoView().should("be.visible");
-    cy.contains("a", "experimental")
+    cy.findByRole("heading", { name: "Popular Tags" })
+      .scrollIntoView()
+      .should("be.visible");
+    cy.findByRole("link", { name: "experimental" })
       .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/releases?tag=experimental");
-    cy.contains("a", "Browse tags")
+    cy.findByRole("link", { name: "Browse tags" })
       .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/tags");
 
-    cy.contains("Support Mirlo").should("be.visible");
-    cy.contains(
-      "Mirlo's work is sustained by our community, not by venture capital."
-    ).should("be.visible");
-    cy.get('a[href="/example-artist/support"]').should(
-      "contain",
-      "Support Mirlo"
-    );
+    cy.findByRole("heading", {
+      name: "Mirlo's work is sustained by our community, not by venture capital.",
+    }).should("be.visible");
+    cy.findByRole("link", { name: "Support Mirlo" })
+      .should("be.visible")
+      .and("have.attr", "href", "/example-artist/support");
 
-    cy.contains("Get on the mailing list").should("be.visible");
+    cy.findByRole("heading", { name: "Get on the mailing list" }).should(
+      "be.visible"
+    );
     cy.findByRole("button", { name: "Sign up" }).should("be.visible");
   });
 });

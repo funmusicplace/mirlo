@@ -98,6 +98,11 @@ const Index: React.FC = () => {
               })}
             </MarkdownWrapper>
           )}
+          {post.featuredImage && post.featuredImageCredit && (
+            <p className="mt-8 pt-2 mb-0 border-t border-(--mi-tint-x-color) text-sm opacity-75">
+              {t("featuredImageCredit", { credit: post.featuredImageCredit })}
+            </p>
+          )}
         </PageMarkdownWrapper>
       </div>
       {post.artist &&

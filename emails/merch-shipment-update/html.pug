@@ -1,0 +1,38 @@
+extends ../layout.pug
+
+block content
+  if buyerName
+    p Hi #{buyerName},
+  else
+    p Hi,
+  p
+    | There's an update on your order of
+    |
+    strong #{merchTitle}
+    if quantity > 1
+      |  (× #{quantity})
+    |
+    | from
+    |
+    a(href!=`${client}/${artistUrlSlug}`) #{artistName}
+    | .
+  p
+    | Status:
+    |
+    strong #{statusLabel}
+  if trackingNumber
+    p
+      | Tracking number:
+      |
+      strong #{trackingNumber}
+  if trackingUrl
+    p
+      | Track your shipment:
+      |
+      a(href=trackingUrl) #{trackingWebsite}
+  p
+    | You can see all your purchases on
+    |
+    a(href!=`${client}/profile/purchases`) your Mirlo profile
+    | .
+  p If you have questions about your order, you can contact the artist from your purchases page.
