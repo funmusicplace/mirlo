@@ -1,0 +1,15 @@
+extends ../layout.pug
+
+block content
+  p 
+    | Hi #{(user && user.name) || 'there'},
+  p 
+    | #{(invitedBy && invitedBy.name) || 'Someone'} has invited you to help manage 
+    strong #{(artist && artist.name) || 'an artist'} 
+    | on Mirlo.
+  p 
+    | Once you accept, you'll be able to edit the artist's page, releases, merch and posts, and see their sales.
+  p 
+    a(href!=`${client}/manage`) Review the invite
+  p 
+    | If you weren't expecting this, you can ignore this email.

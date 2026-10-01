@@ -45,6 +45,7 @@ const TRUNCATE_TABLES_SQL = `
     "ProfileAvatar",
     "ProfileBackground",
     "ProfileLocationTag",
+    "ProfileManager",
     "ProfileSubscriptionTier",
     "ProfileTipTier",
     "ProfileUserSubscription",

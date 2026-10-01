@@ -1,16 +1,16 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
 import {
-  profileBelongsToLoggedInUser,
+  profileOwnedByLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
-    PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
+    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
+    PUT: [userAuthenticated, profileOwnedByLoggedInUser, PUT],
   };
   async function PUT(req: Request, res: Response, next: NextFunction) {
     let { artistId, labelUserId }: { artistId?: string; labelUserId?: string } =

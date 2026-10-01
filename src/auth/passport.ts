@@ -246,6 +246,42 @@ export const profileBelongsToLoggedInUser = async (
   }
 };
 
+export const profileOwnedByLoggedInUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { artistId: profileId } = req.params as unknown as {
+    artistId: string;
+  };
+  const loggedInUser = req.user;
+
+  if (!loggedInUser) {
+    throw new AppError({ description: "Not logged in user", httpCode: 401 });
+  }
+
+  const castProfileId = await findProfileIdForURLSlug(profileId);
+  const profile = castProfileId
+    ? await prisma.profile.findFirst({
+        where: { id: castProfileId },
+        select: { userId: true },
+      })
+    : null;
+
+  if (!profile) {
+    throw new AppError({ description: "Artist not found", httpCode: 404 });
+  }
+
+  if (profile.userId !== loggedInUser.id && !loggedInUser.isAdmin) {
+    throw new AppError({
+      description: "Only the owner of this artist can do this",
+      httpCode: 403,
+    });
+  }
+
+  return next();
+};
+
 export const fundraiserBelongsToLoggedInUser = async (
   req: Request,
   _res: Response,

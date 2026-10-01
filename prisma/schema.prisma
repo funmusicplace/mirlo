@@ -127,6 +127,8 @@ model User {
   reportedContentFlags                ContentFlag[]                    @relation("reportedContentFlags")
   trustLevelChanges                   UserTrustLevelChange[]           @relation("trustLevelChangeUser")
   trustLevelChangesMade               UserTrustLevelChange[]           @relation("trustLevelChangeActor")
+  managedProfiles                     ProfileManager[]                 @relation("profileManagerUser")
+  profileManagerInvitesSent           ProfileManager[]                 @relation("profileManagerInvitedBy")
 }
 
 enum TrustLevelChangeReason {
@@ -266,6 +268,7 @@ enum NotificationType {
   AP_FOLLOW
   ARTIST_CONTACT_MESSAGE
   MENTION_IN_POST
+  PROFILE_MANAGER_INVITE
 }
 
 enum NotificationDeliveryMethod {
@@ -377,6 +380,22 @@ model Profile {
   profileLocationTags                 ProfileLocationTag[]
   allowDirectMessages                 Boolean                               @default(false)
   contentFlags                        ContentFlag[]
+  managers                            ProfileManager[]
+}
+
+model ProfileManager {
+  profile     Profile   @relation(fields: [profileId], references: [id])
+  profileId   Int
+  user        User      @relation("profileManagerUser", fields: [userId], references: [id])
+  userId      Int
+  invitedBy   User      @relation("profileManagerInvitedBy", fields: [invitedById], references: [id])
+  invitedById Int
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@id([profileId, userId])
+  @@index([userId])
 }
 
 model ProfileAvatar {
