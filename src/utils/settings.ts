@@ -26,6 +26,9 @@ export const resolveInstanceName = (settings: SettingsType): string =>
   settings.settings?.instanceCustomization?.title?.trim() ||
   DEFAULT_INSTANCE_NAME;
 
+export const getInstanceName = async (): Promise<string> =>
+  resolveInstanceName(await getSiteSettings());
+
 export const getSiteSettings = async (): Promise<SettingsType> => {
   let [result] = await prisma.settings.findMany();
   if (!result) {

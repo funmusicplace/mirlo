@@ -7,7 +7,11 @@ import postmarkTransport from "nodemailer-postmark-transport";
 import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
-import { getSiteSettings } from "../utils/settings";
+import {
+  DEFAULT_INSTANCE_NAME,
+  getSiteSettings,
+  resolveInstanceName,
+} from "../utils/settings";
 
 const viewsDir = path.join(__dirname, "../emails");
 
@@ -219,12 +223,16 @@ const dedupeRecipients = (message: Mail.Options): Mail.Options => {
 };
 
 /**
- * Gets the 'from' email address from settings
+ * Gets the 'from' email address and the instance name from settings
  */
-async function getFromEmail(): Promise<string> {
+async function getSender(): Promise<{
+  fromEmail: string;
+  instanceName: string;
+}> {
   try {
     const settings = await getSiteSettings();
     const emailSettings = settings.settings?.emailProvider;
+    const instanceName = resolveInstanceName(settings);
 
     const fromEmail =
       emailSettings?.fromEmail ??
@@ -236,13 +244,16 @@ async function getFromEmail(): Promise<string> {
       logger.warn(
         `Invalid from email configured: "${fromEmail}", using default instead`
       );
-      return "no-reply@mirlo.space";
+      return { fromEmail: "no-reply@mirlo.space", instanceName };
     }
 
-    return fromEmail;
+    return { fromEmail, instanceName };
   } catch (err) {
     logger.error("Error getting from email, using default", err);
-    return process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space";
+    return {
+      fromEmail: process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space",
+      instanceName: DEFAULT_INSTANCE_NAME,
+    };
   }
 }
 
@@ -257,13 +268,13 @@ export const sendMail = async <T>(job: {
   logger.info(`sendMail: sending: ${job.data.template}`);
   try {
     const transport = await createTransport();
-    const fromEmail = await getFromEmail();
+    const { fromEmail, instanceName } = await getSender();
     const message = dedupeRecipients(job.data.message);
 
     const email = new Email({
       message: {
         from: {
-          name: job.data.fromName?.trim() || "Mirlo",
+          name: job.data.fromName?.trim() || instanceName,
           address: fromEmail,
         },
         attachDataUrls: true,
@@ -285,6 +296,7 @@ export const sendMail = async <T>(job: {
     const locals = {
       ...(job.data.locals as Record<string, unknown>),
       fromEmail,
+      instanceName,
     };
 
     if (

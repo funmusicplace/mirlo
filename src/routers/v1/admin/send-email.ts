@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { sendMailQueue } from "../../../queues/send-mail-queue";
 import { serializeUser } from "../../../serializers/user";
+import { getInstanceName } from "../../../utils/settings";
 
 export default function () {
   const operations = {
@@ -37,13 +38,15 @@ export default function () {
         });
       }
 
+      const instanceName = await getInstanceName();
+
       await Promise.all(
         sendToUsers.map(async (user) => {
           await sendMailQueue.add("send-mail", {
             template: "admin-announcement",
             message: {
               to: user.email,
-              subject: title ?? "Mirlo: Platform Notice",
+              subject: title ?? `${instanceName}: Platform Notice`,
             },
             locals: {
               email: user.email,

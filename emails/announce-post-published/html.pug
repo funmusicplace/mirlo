@@ -7,10 +7,10 @@ block content
         a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`)
           img(src=post.featuredImage.src, alt="Featured Image", style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:8px;")
 
-      p.email-byline #{artist.name} just published a new post on Mirlo
+      p.email-byline #{artist.name} just published a new post on #{instanceName}
       h1.email-title #{post.title}
       p.read-on-mirlo
-        a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`) Read it on Mirlo.
+        a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`) Read it on #{instanceName}.
 
     div
       | !{post.htmlContent}

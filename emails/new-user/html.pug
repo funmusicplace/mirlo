@@ -2,7 +2,7 @@ extends ../layout.pug
 
 block content
   p Hi!
-  p Someone signed up to mirlo using this email address
+  p Someone signed up to #{instanceName} using this email address
   p #{user.email}
   p 
     a(href!=`${clientDomain}/email-confirmation?token=${user.emailConfirmationToken}&id=${user.id}&client=${client}&accountType=${accountType}&email=${encodeURIComponent(user.email)}`) Click here to confirm

@@ -4,11 +4,11 @@ block content
   p Wow!
   p
     if isNewSubscription
-      | (#{user.email}) #{user.name} started supporting your on Mirlo.
+      | (#{user.email}) #{user.name} started supporting your on #{instanceName}.
     else
-      | (#{user.email}) #{user.name} is supporting your on Mirlo!
+      | (#{user.email}) #{user.name} is supporting your on #{instanceName}!
   p
-    | Support for #{artist.name} on Mirlo with a #{interval === 'MONTH' ? 'monthly': 'yearly'}
+    | Support for #{artist.name} on #{instanceName} with a #{interval === 'MONTH' ? 'monthly': 'yearly'}
     | contribution at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
   if transaction
     table
@@ -24,5 +24,5 @@ block content
           td.num #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : 0}
           td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : 0}
           td.num #{transaction.currency.toUpperCase()} #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
-  p To view all your supporters log in to Mirlo and go to your artist supporter page.
+  p To view all your supporters log in to #{instanceName} and go to your artist supporter page.
   p Enjoy!

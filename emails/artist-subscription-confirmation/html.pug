@@ -2,7 +2,7 @@ extends ../layout.pug
 
 block content
     p Hi,
-    p Someone used this email address to subscribe to #{artist.name} on Mirlo 
+    p Someone used this email address to subscribe to #{artist.name} on #{instanceName} 
     p 
       a(href!=`${host}/v1/artists/${artist.id}/confirmFollow?email=${encodeURIComponent(email)}&token=${token}`) Click here to confirm
     p 

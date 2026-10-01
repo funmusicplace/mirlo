@@ -1,7 +1,7 @@
 extends ../layout.pug
 
 block content
-    p Hello from Mirlo!
+    p Hello from #{instanceName}!
     p #{sender.name} (#{sender.email}) sent you a message regarding #{artist.name}:
     blockquote(style="border-left: 3px solid #ccc; margin: 1rem 0; padding: 0.25rem 1rem;")
       each line, i in message.split("\n")
@@ -11,5 +11,5 @@ block content
     p You can reply directly to this email to respond to #{sender.name}.
     p
       | This message is also visible in your&nbsp;
-      a(href!=`${client}/profile/notifications`) Mirlo notifications
+      a(href!=`${client}/profile/notifications`) #{instanceName} notifications
       | , where you can report it as spam if it's unwanted.
