@@ -3,7 +3,7 @@ import Table from "components/common/Table";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-export const COLLAPSED_ROWS = 15;
+export const COLLAPSED_ROWS = 10;
 
 export type RankingColumn<T> = {
   header: string;
