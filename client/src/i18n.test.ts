@@ -1,26 +1,22 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-const injectLanguages = (languages: unknown) => {
-  const script = document.createElement("script");
-  script.id = "__MIRLO_LANGUAGES__";
-  script.type = "application/json";
-  script.textContent = JSON.stringify({ languages });
-  document.head.appendChild(script);
-};
+import { DEFAULT_INSTANCE_SETTINGS } from "./utils/instanceSettings";
 
 const loadI18n = async () => {
   vi.resetModules();
   return import("./i18n");
 };
 
-describe("i18n language list", () => {
-  afterEach(() => {
-    document.getElementById("__MIRLO_LANGUAGES__")?.remove();
-  });
+const withLanguages = (languages: InstanceSettings["languages"]) => ({
+  ...DEFAULT_INSTANCE_SETTINGS,
+  languages,
+});
 
-  it("falls back to the built-in list when nothing is injected", async () => {
-    const { finishedLanguages } = await loadI18n();
-    expect(finishedLanguages.map((l) => l.short)).toEqual([
+describe("i18n language list", () => {
+  it("falls back to the built-in list when the instance offers none", async () => {
+    const { initI18n, getFinishedLanguages } = await loadI18n();
+    await initI18n(withLanguages(null));
+    expect(getFinishedLanguages().map((l) => l.short)).toEqual([
       "en",
       "fr",
       "es",
@@ -29,14 +25,16 @@ describe("i18n language list", () => {
     ]);
   });
 
-  it("uses the injected list, keeping known names and always English", async () => {
-    injectLanguages([
-      { short: "pt_BR", name: "Português (Brasil)" },
-      { short: "uk", name: "українська" },
-      { bogus: true },
-    ]);
-    const { finishedLanguages } = await loadI18n();
-    expect(finishedLanguages).toEqual([
+  it("uses the offered list, keeping known names and always English", async () => {
+    const { initI18n, getFinishedLanguages } = await loadI18n();
+    await initI18n(
+      withLanguages([
+        { short: "pt_BR", name: "Português (Brasil)" },
+        { short: "uk", name: "українська" },
+        { bogus: true } as unknown as { short: string; name: string },
+      ])
+    );
+    expect(getFinishedLanguages()).toEqual([
       { short: "en", name: "English" },
       { short: "pt_BR", name: "Português (Brasil)" },
       { short: "uk", name: "Українська" },
@@ -44,17 +42,29 @@ describe("i18n language list", () => {
   });
 
   it("matches browser-style codes to Transifex codes", async () => {
-    injectLanguages([
-      { short: "en", name: "English" },
-      { short: "fr", name: "Français" },
-      { short: "pt_BR", name: "Português (Brasil)" },
-    ]);
-    const { matchLanguage } = await loadI18n();
+    const { initI18n, matchLanguage } = await loadI18n();
+    await initI18n(
+      withLanguages([
+        { short: "en", name: "English" },
+        { short: "fr", name: "Français" },
+        { short: "pt_BR", name: "Português (Brasil)" },
+      ])
+    );
     expect(matchLanguage("pt-BR")?.short).toBe("pt_BR");
     expect(matchLanguage("pt")?.short).toBe("pt_BR");
     expect(matchLanguage("fr-CA")?.short).toBe("fr");
     expect(matchLanguage("en-US")?.short).toBe("en");
     expect(matchLanguage("ja")).toBeUndefined();
     expect(matchLanguage(undefined)).toBeUndefined();
+  });
+});
+
+describe("i18n instance name", () => {
+  it("exposes the instance name as a default interpolation variable", async () => {
+    const { initI18n, default: i18n } = await loadI18n();
+    await initI18n({ ...DEFAULT_INSTANCE_SETTINGS, name: "Nightjar" });
+    expect(i18n.options.interpolation?.defaultVariables).toEqual({
+      instanceName: "Nightjar",
+    });
   });
 });

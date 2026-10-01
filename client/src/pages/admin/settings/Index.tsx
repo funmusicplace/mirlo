@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FeaturedArtistsSelector from "components/Admin/FeaturedArtistsSelector";
 import EmailProviderSection from "components/Admin/settings/EmailProviderSection";
 import GeneralSettingsSection from "components/Admin/settings/GeneralSettingsSection";
@@ -15,6 +15,7 @@ import StorageSection from "components/Admin/settings/StorageSection";
 import StripeSection from "components/Admin/settings/StripeSection";
 import TrustLevelsSection from "components/Admin/settings/TrustLevelsSection";
 import WidthContainer from "components/common/WidthContainer";
+import { queryInstanceSettings } from "queries/instanceSettings";
 import { queryFeaturedArtists } from "queries/settings";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -26,6 +27,7 @@ import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 const Index = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const snackbar = useSnackbar();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = React.useState(false);
   const methods = useForm<FormSettings>();
   const { reset, handleSubmit } = methods;
@@ -117,12 +119,15 @@ const Index = () => {
           defconLevel: Number(data.defconLevel),
         });
         snackbar("Settings updated", { type: "success" });
+        await queryClient.invalidateQueries({
+          queryKey: queryInstanceSettings().queryKey,
+        });
       } catch (e) {
         console.error(e);
         snackbar("Oops something went wrong", { type: "warning" });
       }
     },
-    [snackbar, featuredArtists]
+    [snackbar, featuredArtists, queryClient]
   );
 
   return (

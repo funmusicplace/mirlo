@@ -12,8 +12,6 @@ import { describe, expect, it } from "vitest";
 
 import useRouteTitle from "./useRouteTitle";
 
-import "i18n";
-
 const titles = (en as unknown as { pageTitles: Record<string, string> })
   .pageTitles;
 

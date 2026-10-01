@@ -6,8 +6,6 @@ import { MemoryRouter } from "react-router-dom";
 import api from "services/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import "i18n";
-
 vi.mock("services/api", () => ({
   default: { get: vi.fn() },
 }));

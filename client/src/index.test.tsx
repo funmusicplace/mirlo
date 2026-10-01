@@ -23,7 +23,7 @@ test("bootstraps the application", async () => {
 
   await import("./index");
 
-  expect(createRootMock).toHaveBeenCalledWith(root);
+  await vi.waitFor(() => expect(createRootMock).toHaveBeenCalledWith(root));
   expect(renderMock).toHaveBeenCalledTimes(1);
   expect(renderMock.mock.calls[0][0]).toBeTruthy();
 });

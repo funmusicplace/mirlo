@@ -2,12 +2,17 @@ import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
 import { expect, afterEach, vi } from "vitest";
 
+import { initI18n } from "../src/i18n";
+import { DEFAULT_INSTANCE_SETTINGS } from "../src/utils/instanceSettings";
+
 expect.extend(matchers);
 
 Object.assign(import.meta.env, {
   VITE_API_DOMAIN: "http://localhost:3000",
   VITE_PUBLISHABLE_STRIPE_KEY: "pk_test_fake",
 });
+
+await initI18n();
 
 // NOTE: Exercising the Vitest suite against a fully booted API environment
 // (via docker-compose) would dramatically increase setup time in CI and makes
@@ -95,6 +100,10 @@ const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
 
   if (url.includes("/v1/settings/instanceArtist")) {
     return jsonResponse({ result: { id: 1, name: "Mirlo", urlSlug: "mirlo" } });
+  }
+
+  if (url.includes("/v1/instance")) {
+    return jsonResponse({ result: DEFAULT_INSTANCE_SETTINGS });
   }
 
   if (url.includes("/v1/playable")) {

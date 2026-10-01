@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { finishedLanguages, setStoredLanguage } from "i18n";
+import { getFinishedLanguages, setStoredLanguage } from "i18n";
 import { Trans, useTranslation } from "react-i18next";
 import { FaInstagram, FaMastodon } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
@@ -12,6 +12,8 @@ import WidthContainer from "./common/WidthContainer";
 
 export const Footer = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "footer" });
+
+  const finishedLanguages = getFinishedLanguages();
 
   const onChangeLanguage = (language: string) => {
     setStoredLanguage(language);

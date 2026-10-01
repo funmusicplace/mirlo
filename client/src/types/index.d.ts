@@ -5,6 +5,20 @@ interface Paginated<T> {
   pages: number;
 }
 
+interface InstanceSettings {
+  name: string;
+  colors: {
+    button: string;
+    buttonText: string;
+    background: string;
+    text: string;
+  };
+  showHeroOnHome: boolean;
+  isClosedToPublicArtistSignup: boolean;
+  trustLevelNames: string[];
+  languages: { short: string; name: string }[] | null;
+}
+
 interface LoggedInUser {
   email: string;
   accountingEmail?: string;

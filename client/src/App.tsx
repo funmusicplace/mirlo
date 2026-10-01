@@ -14,10 +14,12 @@ import Player from "components/Player";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import ScrollToTop from "components/ScrollToTop";
 import { isEmpty } from "lodash";
+import { useInstanceSettings } from "queries/instanceSettings";
 import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
+import { applyInstanceStyles } from "utils/instanceSettings";
 import { useGlobalPlayerSyncIntegration } from "utils/playerSync";
 import useRouteTitle from "utils/useRouteTitle";
 
@@ -32,6 +34,11 @@ function App() {
   const [search, setSearch] = useSearchParams();
   const { currentTrack } = useCurrentTrackHook();
   const routeTitle = useRouteTitle();
+  const instanceSettings = useInstanceSettings();
+
+  useEffect(() => {
+    applyInstanceStyles(instanceSettings);
+  }, [instanceSettings]);
 
   const isWidget = location.pathname.includes("widget");
 
