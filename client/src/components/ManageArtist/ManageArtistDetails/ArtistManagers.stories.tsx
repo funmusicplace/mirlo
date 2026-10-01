@@ -157,8 +157,9 @@ export const InviteAlreadySent: Story = {
 export const RemoveManager: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText("Sam Manager");
-    const [firstRemove] = canvas.getAllByRole("button", { name: "Remove" });
+    const [firstRemove] = await canvas.findAllByRole("button", {
+      name: "Remove",
+    });
     await userEvent.click(firstRemove);
     await confirmDialog();
     await waitFor(() =>
@@ -187,9 +188,16 @@ export const AsManager: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText(
-      "Only the owner of this artist can invite or remove people."
-    );
+    // Wait for something that only renders once the user is known to be a
+    // manager, so the absence checks below aren't trivially true.
+    const leaveButton = await canvas.findByRole("button", {
+      name: "Remove my access",
+    });
+    await expect(
+      canvas.getByText(
+        "Only the owner of this artist can invite or remove people."
+      )
+    ).toBeVisible();
     await expect(
       canvas.queryByLabelText("Invite someone by email")
     ).not.toBeInTheDocument();
@@ -197,9 +205,7 @@ export const AsManager: Story = {
       canvas.queryByRole("button", { name: "Remove" })
     ).not.toBeInTheDocument();
 
-    await userEvent.click(
-      await canvas.findByRole("button", { name: "Remove my access" })
-    );
+    await userEvent.click(leaveButton);
     await confirmDialog();
     await waitFor(() =>
       expect(leftArtistIds).toEqual([String(SHARED_ARTIST_EXAMPLE.id)])
