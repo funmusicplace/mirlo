@@ -37,6 +37,7 @@ import {
   getTrackWidget,
 } from "./parseIndex/widgetUrls";
 import { processSingleArtist } from "./serializers/artist";
+import { serializeInstanceSettings } from "./serializers/instanceSettings";
 import { postIncludeForUser } from "./serializers/post";
 import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
 import { getClient } from "./utils/getClient";
@@ -898,25 +899,20 @@ export const analyzePathAndGenerateHTML = async (
     // Silently fail - don't crash page rendering
   }
 
-  // Languages offered in the UI, from the in-memory Transifex cache. Never
-  // fetches; if nothing is cached the client uses its built-in list.
-  const availableLanguages = getAvailableLanguages();
-  if (availableLanguages) {
-    appendHydrationScript($, "__MIRLO_LANGUAGES__", "languages", {
-      languages: availableLanguages,
-    });
-  }
-
-  const settings = await getSiteSettings();
+  const instanceSettings = serializeInstanceSettings(
+    await getSiteSettings(),
+    getAvailableLanguages()
+  );
+  appendHydrationScript($, "__MIRLO_INSTANCE__", "instance", instanceSettings);
 
   $("title").after(`
     <style>
     html {
-      --mi-instance-button-color: ${settings.settings?.instanceCustomization?.colors?.button ?? "#be3455"};
-      --mi-instance-button-text-color: ${settings.settings?.instanceCustomization?.colors?.buttonText ?? "#ffffff"};
-      --mi-instance-background-color: ${settings.settings?.instanceCustomization?.colors?.background ?? "#ffffff"};
-      --mi-instance-text-color: ${settings.settings?.instanceCustomization?.colors?.text ?? "#000000"};
-      --mi-instance-show-hero-on-home: ${settings.settings?.instanceCustomization?.showHeroOnHome ? "flex" : "none"};
+      --mi-instance-button-color: ${instanceSettings.colors.button};
+      --mi-instance-button-text-color: ${instanceSettings.colors.buttonText};
+      --mi-instance-background-color: ${instanceSettings.colors.background};
+      --mi-instance-text-color: ${instanceSettings.colors.text};
+      --mi-instance-show-hero-on-home: ${instanceSettings.showHeroOnHome ? "flex" : "none"};
     }
     </style>
   `);
