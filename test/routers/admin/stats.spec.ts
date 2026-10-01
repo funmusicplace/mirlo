@@ -5,7 +5,13 @@ dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
 
-import { clearTables, createArtist, createTier, createUser } from "../../utils";
+import {
+  clearTables,
+  createArtist,
+  createSiteSettings,
+  createTier,
+  createUser,
+} from "../../utils";
 
 import prisma from "@mirlo/prisma";
 
@@ -281,6 +287,85 @@ describe("admin/stats", () => {
     assert(weekRow, `expected a revenue row for week ${week}`);
     assert.equal(weekRow.platformCutUsdCents, 150);
     assert.equal(weekRow.platformCutConvertedUsdCents, 180);
+  });
+
+  it("should report the instance profile's income net of the platform cut", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+    const { user: instanceUser } = await createUser({
+      email: "instance@instance.com",
+    });
+    const { user: otherUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+    const instanceArtist = await createArtist(instanceUser.id);
+    const otherArtist = await createArtist(otherUser.id, {
+      name: "Other",
+      urlSlug: "other",
+    });
+    await createSiteSettings({
+      instanceCustomization: { artistId: String(instanceArtist.id) },
+    });
+
+    const now = new Date();
+    const week = mondayOf(now);
+
+    const tip = async (
+      profileId: number,
+      data: {
+        amount: number;
+        currency: string;
+        platformCut: number;
+        platformCurrency?: string;
+        platformCurrencyAmount?: number;
+        exchangeRate?: number;
+      }
+    ) => {
+      const transaction = await prisma.userTransaction.create({
+        data: { userId: buyer.id, createdAt: now, ...data },
+      });
+      await prisma.userProfileTip.create({
+        data: { userId: buyer.id, profileId, transactionId: transaction.id },
+      });
+    };
+
+    await tip(instanceArtist.id, {
+      amount: 1000,
+      currency: "usd",
+      platformCut: 100,
+    });
+    await tip(instanceArtist.id, {
+      amount: 2000,
+      currency: "eur",
+      platformCut: 200,
+      platformCurrency: "usd",
+      platformCurrencyAmount: 1800,
+      exchangeRate: 0.9,
+    });
+    // Another artist's income isn't the instance's.
+    await tip(otherArtist.id, {
+      amount: 5000,
+      currency: "usd",
+      platformCut: 500,
+    });
+
+    const response = await requestApp
+      .get("admin/stats")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+
+    const weekRow = response.body.result.revenue.find(
+      (row: { date: string }) => row.date === week
+    );
+    assert(weekRow, `expected a revenue row for week ${week}`);
+    // (1000 - 100) + (1800 - 200 * 0.9)
+    assert.equal(weekRow.instanceProfileUsdCents, 2520);
+    assert.equal(weekRow.platformCutUsdCents, 600);
   });
 
   it("should bucket by month when asked for monthly granularity", async () => {

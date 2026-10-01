@@ -1777,6 +1777,7 @@
     "subscriptionsConverted": "Subscriptions (converted to USD)",
     "platformCut": "Platform cut (USD)",
     "platformCutConverted": "Platform cut (converted from foreign)",
+    "instanceProfileIncome": "Instance artist income",
     "topAccountsOverThePast": "Top accounts over the past",
     "loadingTopAccounts": "Loading top accounts...",
     "topSellers": "Top 50 Sellers",

@@ -57,7 +57,7 @@ vi.mock("recharts", () => ({
   Legend: () => null,
 }));
 
-import Index, { StackedTooltip } from "./Index";
+import Index, { ChartTooltip } from "./Index";
 
 function makeStats(overrides: Record<string, unknown> = {}) {
   return {
@@ -74,6 +74,7 @@ function makeStats(overrides: Record<string, unknown> = {}) {
           subscriptionsConvertedUsdCents: 0,
           platformCutUsdCents: 100,
           platformCutConvertedUsdCents: 20,
+          instanceProfileUsdCents: 300,
         },
         {
           date: "2026-01-12",
@@ -83,6 +84,7 @@ function makeStats(overrides: Record<string, unknown> = {}) {
           subscriptionsConvertedUsdCents: 100,
           platformCutUsdCents: 200,
           platformCutConvertedUsdCents: 30,
+          instanceProfileUsdCents: 0,
         },
       ],
       transactionCounts: [
@@ -197,7 +199,7 @@ describe("admin dashboard Index", () => {
 
   test("adds the hovered bands up into a total", () => {
     render(
-      <StackedTooltip
+      <ChartTooltip
         active
         label="Jan 5"
         payload={[
@@ -255,7 +257,7 @@ describe("admin dashboard Index", () => {
     expect(chart.dataset.points).toBe("2");
   });
 
-  test("stacks the Platform Revenue USD and converted series", async () => {
+  test("stacks the Platform Revenue USD, converted and instance artist series", async () => {
     mockStats();
 
     renderDashboard();
@@ -268,6 +270,7 @@ describe("admin dashboard Index", () => {
     expect(areas.map((area) => area.dataset.key)).toEqual([
       "platformCut",
       "platformCutConverted",
+      "instanceProfile",
     ]);
   });
 
