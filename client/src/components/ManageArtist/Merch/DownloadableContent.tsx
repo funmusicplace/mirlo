@@ -54,11 +54,14 @@ export const uploadDownloadableContentFile = async (
   }
 
   try {
-    await fetch(response.uploadUrl, {
+    const result = await fetch(response.uploadUrl, {
       method: "PUT",
       body: file,
       headers: { "Content-Type": file.type },
     });
+    if (!result.ok) {
+      throw new Error(`Upload to storage failed with status ${result.status}`);
+    }
   } catch (e) {
     await api.delete(`manage/downloadableContent/${response.result.id}`);
     console.error("Error uploading to remote server", e);
