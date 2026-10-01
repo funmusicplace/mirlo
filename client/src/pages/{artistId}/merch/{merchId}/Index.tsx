@@ -73,7 +73,9 @@ function Index() {
     <WidthContainer variant="big" justify="center">
       <MetaCard
         title={merch.title}
-        description={`Merch by ${merch.artist?.name ?? "an artist"} on Mirlo`}
+        description={t("merchByArtist", {
+          artist: merch.artist?.name ?? "an artist",
+        })}
         image={merch.images?.[0]?.sizes?.[600]}
       />
       <div

@@ -70,7 +70,7 @@ const Card = () => {
     >
       <MetaCard
         title={`${track.title} by ${track.trackGroup.artist?.name ?? "Unknown"}`}
-        description={"A track on Mirlo"}
+        description={t("trackOnInstance")}
         image={track.trackGroup.cover?.sizes?.[300]}
         player={widgetUrl(track.id, "track")}
       />

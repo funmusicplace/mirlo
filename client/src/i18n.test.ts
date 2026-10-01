@@ -67,4 +67,19 @@ describe("i18n instance name", () => {
       instanceName: "Nightjar",
     });
   });
+
+  it("interpolates the instance name in translations", async () => {
+    const { initI18n, default: i18n } = await loadI18n();
+    await initI18n({ ...DEFAULT_INSTANCE_SETTINGS, name: "Nightjar" });
+    expect(i18n.t("trackDetails.trackOnInstance")).toBe("A track on Nightjar");
+    expect(i18n.t("merchDetails.merchByArtist", { artist: "Some Band" })).toBe(
+      "Merch by Some Band on Nightjar"
+    );
+  });
+
+  it("falls back to Mirlo with the default settings", async () => {
+    const { initI18n, default: i18n } = await loadI18n();
+    await initI18n();
+    expect(i18n.t("trackDetails.trackOnInstance")).toBe("A track on Mirlo");
+  });
 });
