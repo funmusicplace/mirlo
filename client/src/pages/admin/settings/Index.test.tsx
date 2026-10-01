@@ -284,6 +284,44 @@ describe("Settings", () => {
     });
   });
 
+  test("populates the instance name from the settings", async () => {
+    vi.mocked(api.get).mockResolvedValue(
+      makeSettings({
+        settings: {
+          platformPercent: 10,
+          instanceCustomization: { title: "Nightjar" },
+        },
+      }) as any
+    );
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    expect(screen.getByLabelText("instanceName")).toHaveValue("Nightjar");
+  });
+
+  test("submits the edited instance name", async () => {
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    await userEvent.type(screen.getByLabelText("instanceName"), "Nightjar");
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith(
+        "admin/settings",
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            instanceCustomization: expect.objectContaining({
+              title: "Nightjar",
+            }),
+          }),
+        })
+      );
+    });
+  });
+
   test("renders all section headings", async () => {
     renderSettings();
 

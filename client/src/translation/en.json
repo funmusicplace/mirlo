@@ -1735,6 +1735,7 @@
     "sectionTrustLevels": "Trust levels",
     "sectionSecurity": "Security",
     "generalSettings": "General Settings",
+    "instanceName": "Instance name",
     "platformPercent": "Platform percent",
     "cdnUrl": "CDN URL",
     "isClosedToPublicArtistSignup": "Is closed to public artist signup",

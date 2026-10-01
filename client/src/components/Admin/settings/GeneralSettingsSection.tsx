@@ -44,6 +44,17 @@ const GeneralSettingsSection: React.FC = () => {
   return (
     <SettingsSection id="settings-general" title={t("generalSettings")}>
       <FormComponent>
+        <label htmlFor="input-instance-name">{t("instanceName")}</label>
+        <InputEl
+          id="input-instance-name"
+          type="text"
+          className="max-w-md"
+          maxLength={60}
+          {...register("instanceCustomization.title")}
+        />
+      </FormComponent>
+
+      <FormComponent>
         <label htmlFor="input-platform-percent">{t("platformPercent")}</label>
         <InputEl
           id="input-platform-percent"
