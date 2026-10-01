@@ -21,6 +21,7 @@ import {
   getUserSubscriptionsForProfile,
 } from "../../../../utils/postAccess";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
+import { getInstanceName } from "../../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 
@@ -173,6 +174,7 @@ export default function () {
             apiEndpoint: `artists/${profile.urlSlug}/feed`,
             clientUrl: profile.urlSlug,
             imageUrl: resolveProfileImageUrl(profile),
+            instanceName: await getInstanceName(),
           },
           zipped as unknown as Parameters<typeof turnItemsIntoRSS>[1]
         );

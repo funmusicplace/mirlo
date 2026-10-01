@@ -145,7 +145,10 @@ export const serializeProfile = <T extends LocalProfile>(
   } as Serialized<T>;
 };
 
-export const serializeSingleArtistIntoCanimus = (artist: LocalProfile) => {
+export const serializeSingleArtistIntoCanimus = (
+  artist: LocalProfile,
+  instanceName: string
+) => {
   const artistUrl = new URL(artist.urlSlug, String(process.env.API_DOMAIN))
     .href;
   const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
@@ -196,7 +199,8 @@ export const serializeSingleArtistIntoCanimus = (artist: LocalProfile) => {
         trackGroup,
         artistUrl,
         artist.name,
-        artistSupportsPayment
+        artistSupportsPayment,
+        instanceName
       )
     ),
   };

@@ -24,6 +24,7 @@ export const turnItemsIntoRSS = async (
     apiEndpoint: string;
     clientUrl: string;
     imageUrl?: string | null;
+    instanceName: string;
   },
   zipped: (
     | FeedTrackGroup
@@ -95,7 +96,9 @@ export const turnItemsIntoRSS = async (
     } else if (isArtist(p)) {
       feed.item({
         title: p.name,
-        description: p.bio ? markdownAsHtml(p.bio) : `An artist on Mirlo`,
+        description: p.bio
+          ? markdownAsHtml(p.bio)
+          : `An artist on ${feedDetails.instanceName}`,
         url: `${client?.applicationUrl}/${p.urlSlug}`,
         date: new Date(),
       });

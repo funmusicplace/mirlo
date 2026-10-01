@@ -15,12 +15,14 @@ import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
+import { getInstanceName } from "../../../../../../utils/settings";
 
 const sendArtistNotificationOfLabel = async (
   artist: Profile,
   labelUser: User
 ) => {
   const client = await getClient();
+  const instanceName = await getInstanceName();
   const existingNotification = await prisma.notification.findFirst({
     where: {
       userId: artist.userId,
@@ -41,7 +43,7 @@ const sendArtistNotificationOfLabel = async (
           </p>
           <p>To accept their invitation, 
             <a href="${client.applicationUrl}/manage/artists/${artist.id}/customize#labels">
-            manage your artist account on Mirlo</a>.
+            manage your artist account on ${instanceName}</a>.
           </p>
           <p>
           If you do not wish to be associated with this label,

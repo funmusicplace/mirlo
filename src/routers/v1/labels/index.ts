@@ -2,8 +2,9 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import { turnItemsIntoRSS } from "../../../utils/rss";
 import { serializeProfile } from "../../../serializers/artist";
+import { turnItemsIntoRSS } from "../../../utils/rss";
+import { getInstanceName } from "../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -85,11 +86,13 @@ export default function () {
       });
 
       if (format === "rss") {
+        const instanceName = await getInstanceName();
         const feed = await turnItemsIntoRSS(
           {
-            name: "All Mirlo Releases",
+            name: `All ${instanceName} Releases`,
             apiEndpoint: "trackGroups",
             clientUrl: "/releases",
+            instanceName,
           },
           labels.map((label) =>
             serializeProfile(label)

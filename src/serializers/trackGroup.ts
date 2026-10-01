@@ -179,7 +179,8 @@ export const serializeSingleTrackGroupIntoCanimus = (
   trackGroup: LocalTrackGroup,
   artistUrl: string,
   artistName: string,
-  canBePurchased: boolean
+  canBePurchased: boolean,
+  instanceName: string
 ) => {
   const releaseUrl = `${artistUrl}/release/${trackGroup.urlSlug}`;
   const coverString = trackGroup.cover?.url.find((u) => u.includes("x600"));
@@ -189,7 +190,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
     const purchaseUrl = `${releaseUrl}?buy=true`;
     links = [
       {
-        name: `Buy ${trackGroup.title} on Mirlo`,
+        name: `Buy ${trackGroup.title} on ${instanceName}`,
         href: purchaseUrl,
         type: "Purchase",
         rel: "purchase",

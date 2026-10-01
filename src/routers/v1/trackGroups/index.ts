@@ -6,6 +6,7 @@ import { set } from "lodash";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { processSingleTrackGroup } from "../../../serializers/trackGroup";
 import { turnItemsIntoRSS } from "../../../utils/rss";
+import { getInstanceName } from "../../../utils/settings";
 import {
   subscriptionTierReleasesCount,
   processTrackGroupQueryOrder,
@@ -262,12 +263,16 @@ export default function () {
       });
 
       if (format === "rss") {
+        const instanceName = await getInstanceName();
         const feed = await turnItemsIntoRSS(
           {
-            name: tag ? `All Mirlo Releases for ${tag}` : "All Mirlo Releases",
+            name: tag
+              ? `All ${instanceName} Releases for ${tag}`
+              : `All ${instanceName} Releases`,
             apiEndpoint: "trackGroups",
-            description: "Mirlo's most recent releases",
+            description: `${instanceName}'s most recent releases`,
             clientUrl: "releases",
+            instanceName,
           },
           trackGroups.map((tg) =>
             processSingleTrackGroup(tg, {
