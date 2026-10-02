@@ -115,7 +115,6 @@ export const SongTimeDisplay: React.FC<{
           height: ${compact ? "1rem" : "0.4rem"};
           overflow: none;
           transition: 0.2s width;
-          width: ${displayPercent * 100}%;
           background: var(--mi-button-color);
           pointer-events: none;
           ${compact
@@ -145,6 +144,9 @@ export const SongTimeDisplay: React.FC<{
           `
             : ""}
         `}
+        style={{
+          width: `${(isFinite(displayPercent) ? displayPercent : 0) * 100}%`,
+        }}
       ></div>
     </div>
   );
