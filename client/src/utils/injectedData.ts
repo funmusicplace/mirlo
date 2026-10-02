@@ -89,22 +89,19 @@ export const getInjectedArtist = (
   return parsed?.artist;
 };
 
-export type InjectedLanguage = { short: string; name: string };
-
 /**
- * UI languages offered, computed server-side from Transifex completion stats
- * (see src/utils/transifexLanguages.ts). Missing when the server has no
- * Transifex data or when index.html is served by the Vite dev server.
+ * The public instance settings, serialized server-side (see
+ * src/serializers/instanceSettings.ts). Missing when index.html is served by
+ * the Vite dev server, in which case the client fetches them instead.
  */
-export const getInjectedLanguages = (): InjectedLanguage[] | undefined => {
-  const parsed = readInjectedScript<{ languages?: unknown }>(
-    "__MIRLO_LANGUAGES__"
-  );
-  if (!Array.isArray(parsed?.languages)) return undefined;
-  return parsed.languages.filter(
-    (lang): lang is InjectedLanguage =>
-      typeof lang?.short === "string" &&
-      lang.short.length > 0 &&
-      typeof lang?.name === "string"
-  );
+export const getInjectedInstanceSettings = (): InstanceSettings | undefined => {
+  const parsed =
+    readInjectedScript<Partial<InstanceSettings>>("__MIRLO_INSTANCE__");
+  if (
+    typeof parsed?.name !== "string" ||
+    typeof parsed.colors?.button !== "string"
+  ) {
+    return undefined;
+  }
+  return parsed as InstanceSettings;
 };

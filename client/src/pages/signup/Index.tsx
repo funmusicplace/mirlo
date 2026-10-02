@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { useQuery } from "@tanstack/react-query";
 import checkmark from "animations/lotties/checkmark.json";
 import Box from "components/common/Box";
 import Button from "components/common/Button";
@@ -9,7 +8,7 @@ import Checkbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import WidthContainer from "components/common/WidthContainer";
-import { querySetting } from "queries/settings";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -101,9 +100,7 @@ function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "signUp" });
   const [search] = useSearchParams();
   const snackbar = useSnackbar();
-  const { data: isClosedToPublicArtistSignup, isFetching } = useQuery(
-    querySetting("isClosedToPublicArtistSignup")
-  );
+  const { isClosedToPublicArtistSignup } = useInstanceSettings();
   const errorHandler = useErrorHandler();
   const invitedBy = search.get("invitedBy");
   const accountType = search.get("accountType");
@@ -382,7 +379,7 @@ function Index() {
             />
           </FormComponent>
 
-          {!isClosedToPublicArtistSignup && !isFetching && (
+          {!isClosedToPublicArtistSignup && (
             <>
               <fieldset>
                 <legend className="font-bold mbe-[1rem]">{t("howUse")}</legend>

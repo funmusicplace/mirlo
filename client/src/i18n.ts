@@ -3,7 +3,7 @@ import i18n from "i18next";
 import { uniqBy } from "lodash";
 import { initReactI18next } from "react-i18next";
 import * as en from "translation/en.json";
-import { getInjectedLanguages } from "utils/injectedData";
+import { DEFAULT_INSTANCE_SETTINGS } from "utils/instanceSettings";
 
 const hasTransifex = !!import.meta.env.VITE_TRANSIFEX_TOKEN;
 
@@ -20,8 +20,6 @@ const resources = {
   },
 };
 
-const userLanguage = navigator.language;
-
 const fallbackLanguages = [
   { short: "en", name: "English" },
   { short: "fr", name: "Français" },
@@ -30,12 +28,17 @@ const fallbackLanguages = [
   { short: "de", name: "Deutsch" },
 ];
 
-const buildLanguageList = () => {
-  const injected = getInjectedLanguages();
-  if (!injected || injected.length === 0) {
+const buildLanguageList = (offered: InstanceSettings["languages"]) => {
+  const valid = (offered ?? []).filter(
+    (lang) =>
+      typeof lang?.short === "string" &&
+      lang.short.length > 0 &&
+      typeof lang?.name === "string"
+  );
+  if (valid.length === 0) {
     return fallbackLanguages;
   }
-  const withKnownNames = injected.map((lang) => ({
+  const withKnownNames = valid.map((lang) => ({
     short: lang.short,
     name:
       fallbackLanguages.find((known) => known.short === lang.short)?.name ??
@@ -48,7 +51,9 @@ const buildLanguageList = () => {
   );
 };
 
-export const finishedLanguages = buildLanguageList();
+let finishedLanguages = fallbackLanguages;
+
+export const getFinishedLanguages = () => finishedLanguages;
 
 const normalizeCode = (code: string) => code.replace(/-/g, "_").toLowerCase();
 
@@ -94,17 +99,19 @@ export const setStoredLanguage = (language: string) => {
   }
 };
 
-const browserLanguage = matchLanguage(userLanguage);
+export const initI18n = (
+  settings: InstanceSettings = DEFAULT_INSTANCE_SETTINGS
+) => {
+  finishedLanguages = buildLanguageList(settings.languages);
 
-const defaultLanguage = getStoredLanguage() ?? browserLanguage?.short;
+  const browserLanguage = matchLanguage(navigator.language);
+  const defaultLanguage = getStoredLanguage() ?? browserLanguage?.short;
 
-if (hasTransifex) {
-  i18n.use(txBackend);
-}
+  if (hasTransifex) {
+    i18n.use(txBackend);
+  }
 
-i18n
-  .use(initReactI18next) // passes i18n down to react-i18next
-  .init({
+  return i18n.use(initReactI18next).init({
     resources, // always bundle en.json as fallback if remote translations fail
     ...(hasTransifex ? { partialBundledLanguages: true } : {}),
     lng: defaultLanguage ?? "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
@@ -113,7 +120,9 @@ i18n
     fallbackLng: "en",
     interpolation: {
       escapeValue: false, // react already safes from xss
+      defaultVariables: { instanceName: settings.name },
     },
   });
+};
 
 export default i18n;

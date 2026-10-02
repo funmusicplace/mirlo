@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 
 import type { ManagedArtist } from "../src/queries";
+import { DEFAULT_INSTANCE_SETTINGS } from "../src/utils/instanceSettings";
 import { USER_EXAMPLE } from "../test/mocks";
 
 export const defaultHandlers = {
@@ -13,6 +14,11 @@ export const defaultHandlers = {
   settings: [
     http.get("*/v1/settings/isClosedToPublicArtistSignup", () =>
       HttpResponse.json({ result: false })
+    ),
+  ],
+  instance: [
+    http.get("*/v1/instance", () =>
+      HttpResponse.json({ result: DEFAULT_INSTANCE_SETTINGS })
     ),
   ],
   stripe: stripeStatusHandlers({ chargesEnabled: true }),

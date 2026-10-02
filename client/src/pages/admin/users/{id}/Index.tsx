@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import TrustLevelHistoryModal from "components/Admin/TrustLevelHistoryModal";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
@@ -7,7 +6,7 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
 import { formatDate as formatDateForLocale } from "components/TrackGroup/ReleaseDate";
-import { queryTrustLevelNames } from "queries/settings";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -21,7 +20,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
-import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 const Index = () => {
   const { id } = useParams();
@@ -35,9 +33,7 @@ const Index = () => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { i18n } = useTranslation();
-  const { data: trustLevelNames = DEFAULT_TRUST_LEVEL_NAMES } = useQuery(
-    queryTrustLevelNames()
-  );
+  const { trustLevelNames } = useInstanceSettings();
 
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);

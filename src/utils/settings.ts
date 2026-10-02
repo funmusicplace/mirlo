@@ -3,7 +3,7 @@ import { Settings } from "@mirlo/prisma/client";
 
 import { BucketConfig } from "./minio";
 
-interface SettingsType extends Partial<Settings> {
+export interface SettingsType extends Partial<Settings> {
   platformPercent: number;
   cdnUrl?: string;
   bucketNames?: BucketConfig | null;
@@ -19,6 +19,12 @@ const defaultSettings = {
 // Default bucket config for fresh installs: consolidated 3-bucket structure.
 // Existing installs with null bucketNames stay in legacy mode (no change to bucket layout).
 const DEFAULT_BUCKET_CONFIG: BucketConfig = { prefix: "" };
+
+export const DEFAULT_INSTANCE_NAME = "Mirlo";
+
+export const resolveInstanceName = (settings: SettingsType): string =>
+  settings.settings?.instanceCustomization?.title?.trim() ||
+  DEFAULT_INSTANCE_NAME;
 
 export const getSiteSettings = async (): Promise<SettingsType> => {
   let [result] = await prisma.settings.findMany();

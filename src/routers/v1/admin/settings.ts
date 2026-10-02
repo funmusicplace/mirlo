@@ -5,6 +5,7 @@ import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { AppError } from "../../../utils/error";
 import { setCdnUrl } from "../../../utils/images";
 import { setBucketConfig, BucketConfig } from "../../../utils/minio";
+import { clearPageCache } from "../../../utils/pageCache";
 import { getSiteSettings } from "../../../utils/settings";
 import { refreshStripeClient } from "../../../utils/stripe";
 import { isTrustLevelNames } from "../../../utils/trustLevel";
@@ -91,6 +92,7 @@ export default function () {
       if (bucketNames !== undefined) {
         setBucketConfig((bucketNames as BucketConfig | null) ?? null);
       }
+      clearPageCache();
       const refreshedSettings = await getSiteSettings();
       return res.status(200).json({ result: maskStripeKey(refreshedSettings) });
     } catch (e) {

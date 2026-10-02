@@ -9,43 +9,53 @@ window.addEventListener("vite:preloadError", () => {
 });
 
 import "./styles/index.css";
-import "./i18n";
 
 import routes from "routes";
 import { AuthContextProvider } from "state/AuthContext";
 import { SnackBarContextProvider } from "state/SnackbarContext";
 import { UploadContextProvider } from "state/UploadContext";
+import { applyInstanceStyles } from "utils/instanceSettings";
 import { ConfirmContextProvider } from "utils/useConfirm";
 
 import { initAnalytics } from "./analytics";
+import { initI18n } from "./i18n";
 import { GlobalStateProvider } from "./state/GlobalState";
 
-import { QueryClientWrapper } from "queries/QueryClientWrapper";
+import { QueryClientWrapper, queryClient } from "queries/QueryClientWrapper";
+import { loadInstanceSettings } from "queries/instanceSettings";
 import { ConfirmDialog } from "components/common/ConfirmDialog";
 
 initAnalytics();
 
-const router = createBrowserRouter(routes);
+const bootstrap = async () => {
+  const instanceSettings = await loadInstanceSettings(queryClient);
+  applyInstanceStyles(instanceSettings);
+  void initI18n(instanceSettings);
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+  const router = createBrowserRouter(routes);
 
-root.render(
-  <React.StrictMode>
-    <QueryClientWrapper>
-      <AuthContextProvider>
-        <GlobalStateProvider>
-          <ConfirmContextProvider>
-            <ConfirmDialog />
-            <SnackBarContextProvider>
-              <UploadContextProvider>
-                <RouterProvider router={router} />
-              </UploadContextProvider>
-            </SnackBarContextProvider>
-          </ConfirmContextProvider>
-        </GlobalStateProvider>
-      </AuthContextProvider>
-    </QueryClientWrapper>
-  </React.StrictMode>
-);
+  const root = ReactDOM.createRoot(
+    document.getElementById("root") as HTMLElement
+  );
+
+  root.render(
+    <React.StrictMode>
+      <QueryClientWrapper>
+        <AuthContextProvider>
+          <GlobalStateProvider>
+            <ConfirmContextProvider>
+              <ConfirmDialog />
+              <SnackBarContextProvider>
+                <UploadContextProvider>
+                  <RouterProvider router={router} />
+                </UploadContextProvider>
+              </SnackBarContextProvider>
+            </ConfirmContextProvider>
+          </GlobalStateProvider>
+        </AuthContextProvider>
+      </QueryClientWrapper>
+    </React.StrictMode>
+  );
+};
+
+void bootstrap();

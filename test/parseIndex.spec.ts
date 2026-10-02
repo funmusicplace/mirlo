@@ -898,6 +898,9 @@ describe("analyzePathAndGenerateHTML", () => {
   });
 });
 
+const readInjectedInstance = ($: cheerio.CheerioAPI) =>
+  JSON.parse($("#__MIRLO_INSTANCE__").text());
+
 describe("analyzePathAndGenerateHTML available languages", () => {
   const originalToken = process.env.TRANSIFEX_API_TOKEN;
 
@@ -907,11 +910,11 @@ describe("analyzePathAndGenerateHTML available languages", () => {
     __resetAvailableLanguagesForTests();
   });
 
-  it("doesn't inject a language list when nothing is cached", async () => {
+  it("injects null languages when nothing is cached", async () => {
     __resetAvailableLanguagesForTests();
     const $ = cheerio.load("<html><head><title></title></head></html>");
     await analyzePathAndGenerateHTML("/", $);
-    assert.equal($("#__MIRLO_LANGUAGES__").length, 0);
+    assert.equal(readInjectedInstance($).languages, null);
   });
 
   it("injects the cached Transifex language list", async () => {
@@ -933,13 +936,67 @@ describe("analyzePathAndGenerateHTML available languages", () => {
 
     const $ = cheerio.load("<html><head><title></title></head></html>");
     await analyzePathAndGenerateHTML("/", $);
-    const script = $("#__MIRLO_LANGUAGES__");
-    assert.equal(script.attr("type"), "application/json");
-    assert.deepEqual(JSON.parse(script.text()), {
-      languages: [
-        { short: "en", name: "English" },
-        { short: "uk", name: "Українська" },
-      ],
+    assert.equal($("#__MIRLO_INSTANCE__").attr("type"), "application/json");
+    assert.deepEqual(readInjectedInstance($).languages, [
+      { short: "en", name: "English" },
+      { short: "uk", name: "Українська" },
+    ]);
+  });
+});
+
+describe("analyzePathAndGenerateHTML instance settings", () => {
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  it("injects the defaults when nothing is customised", async () => {
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/", $);
+
+    const injected = readInjectedInstance($);
+    assert.equal(injected.name, "Mirlo");
+    assert.deepEqual(injected.colors, {
+      button: "#be3455",
+      buttonText: "#ffffff",
+      background: "#ffffff",
+      text: "#000000",
     });
+    assert.equal(injected.showHeroOnHome, true);
+    assert.equal(injected.isClosedToPublicArtistSignup, false);
+    assert.deepEqual(injected.trustLevelNames, [
+      "New",
+      "Verified",
+      "Regular",
+      "Trusted",
+    ]);
+    assert.match($("style").text(), /--mi-instance-button-color: #be3455;/);
+  });
+
+  it("injects the customised settings and never the secrets", async () => {
+    await createSiteSettings({
+      instanceCustomization: {
+        title: "Nightjar",
+        showHeroOnHome: false,
+        colors: { button: "#123456" },
+      },
+      stripe: { key: "sk_live_secret" },
+    });
+
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/", $);
+
+    const injected = readInjectedInstance($);
+    assert.equal(injected.name, "Nightjar");
+    assert.equal(injected.showHeroOnHome, false);
+    assert.equal(injected.colors.button, "#123456");
+    assert.equal(injected.colors.text, "#000000");
+    assert.equal(injected.stripe, undefined);
+    assert.ok(!$("#__MIRLO_INSTANCE__").text().includes("sk_live_secret"));
+    assert.match($("style").text(), /--mi-instance-button-color: #123456;/);
+    assert.match($("style").text(), /--mi-instance-show-hero-on-home: none;/);
   });
 });

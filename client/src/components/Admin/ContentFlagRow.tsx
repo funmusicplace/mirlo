@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import { SelectEl } from "components/common/Select";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
@@ -9,13 +8,12 @@ import {
   useUpdateAdminUserMutation,
   useUpdateAdminTrackGroupMutation,
 } from "queries/admin";
-import { queryTrustLevelNames } from "queries/settings";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { getReleaseUrl } from "utils/artist";
-import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 import ContentFlagDetails from "./ContentFlagDetails";
 import DisableArtistModal from "./DisableArtistModal";
@@ -50,9 +48,7 @@ const ContentFlagRow: React.FC<{ flag: AdminContentFlag }> = ({ flag }) => {
   const snackbar = useSnackbar();
   const [showDisableModal, setShowDisableModal] = React.useState(false);
   const [showResolveModal, setShowResolveModal] = React.useState(false);
-  const { data: trustLevelNames = DEFAULT_TRUST_LEVEL_NAMES } = useQuery(
-    queryTrustLevelNames()
-  );
+  const { trustLevelNames } = useInstanceSettings();
 
   const { mutateAsync: updateFlag, isPending: isUpdatingFlag } =
     useUpdateAdminContentFlagMutation();

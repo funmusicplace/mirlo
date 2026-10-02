@@ -11,6 +11,7 @@ import {
 
 import { ConfirmDialog } from "../src/components/common/ConfirmDialog";
 import Snackbar from "../src/components/common/Snackbar";
+import { initI18n } from "../src/i18n";
 import {
   queryClient,
   QueryClientWrapper,
@@ -23,10 +24,11 @@ import SnackbarContext, {
 import { UploadContextProvider } from "../src/state/UploadContext";
 import { ConfirmContextProvider } from "../src/utils/useConfirm";
 
-import "../src/i18n";
 import "../src/styles/index.css";
 import "./global.css";
 import { defaultHandlers } from "./handlers";
+
+void initI18n();
 
 initialize({ onUnhandledRequest: "warn" });
 

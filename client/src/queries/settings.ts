@@ -2,40 +2,6 @@ import { QueryFunction, queryOptions } from "@tanstack/react-query";
 
 import * as api from "./fetch/fetchWrapper";
 
-const fetchSetting: QueryFunction<
-  string,
-  ["fetchSetting", { setting: string }]
-> = ({ queryKey: [_, { setting }], signal }) => {
-  return api
-    .get<{
-      result: string;
-    }>(`v1/settings/${setting}`, { signal })
-    .then((r) => r.result);
-};
-
-export function querySetting(setting: string) {
-  return queryOptions({
-    queryKey: ["fetchSetting", { setting }],
-    queryFn: fetchSetting,
-  });
-}
-
-const fetchTrustLevelNames: QueryFunction<
-  string[],
-  ["fetchTrustLevelNames"]
-> = ({ signal }) => {
-  return api
-    .get<{ result: string[] }>(`v1/settings/trustLevelNames`, { signal })
-    .then((r) => r.result);
-};
-
-export function queryTrustLevelNames() {
-  return queryOptions({
-    queryKey: ["fetchTrustLevelNames"],
-    queryFn: fetchTrustLevelNames,
-  });
-}
-
 const fetchFeaturedArtists: QueryFunction<
   Artist[],
   ["fetchFeaturedArtists"]
