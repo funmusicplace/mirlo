@@ -1,3 +1,4 @@
+import { useInstanceSettings } from "queries/instanceSettings";
 import { Helmet } from "react-helmet";
 
 function strip(html: string) {
@@ -5,16 +6,17 @@ function strip(html: string) {
   return doc.body.textContent || "";
 }
 
-const SITE_NAME = "Mirlo";
-
 export const MetaCard: React.FC<{
   title: string;
   description: string;
   image?: string;
   player?: string;
 }> = ({ title, description, image, player }) => {
+  const { name: instanceName } = useInstanceSettings();
   const pageTitle =
-    title && title !== SITE_NAME ? `${title} | ${SITE_NAME}` : SITE_NAME;
+    title && title !== instanceName
+      ? `${title} | ${instanceName}`
+      : instanceName;
 
   return (
     <>

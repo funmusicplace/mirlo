@@ -6,6 +6,7 @@ import Button, { ButtonLink } from "components/common/Button";
 import Logo from "components/common/Logo";
 import UserBanner from "components/common/UserBanner";
 import Menu from "components/Header/Menu";
+import { useInstanceSettings } from "queries/instanceSettings";
 import { queryInstanceArtist } from "queries/settings";
 import { useRef } from "react";
 import { createPortal } from "react-dom";
@@ -97,10 +98,12 @@ const HeaderWrapper = styled.header<{
 `;
 
 const LogoWrapper = () => {
+  const { name: instanceName } = useInstanceSettings();
+
   return (
     <Link
       to="/"
-      aria-label="Mirlo"
+      aria-label={instanceName}
       className="mt-[-.1rem] leading-none text-[1.5rem] flex justify-start items-center"
     >
       <span aria-hidden className="max-md:hidden">

@@ -258,7 +258,9 @@ function Index() {
     <WidthContainer variant="big" justify="center">
       <MetaCard
         title={trackGroup.title ?? "Untitled release"}
-        description={`An album by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`}
+        description={t("albumByArtist", {
+          artist: trackGroup.artist?.name ?? "an artist",
+        })}
         image={trackGroup.cover?.sizes?.[600]}
       />
       <Container>

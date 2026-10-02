@@ -15,7 +15,7 @@ mixin purchaseRow(title, sku, transaction, url)
     td.num #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
 
 block content
-  p New purchases on your Mirlo store!
+  p New purchases on your #{instanceName} store!
   p Purchased by: #{email}
 
   table

@@ -901,6 +901,72 @@ describe("analyzePathAndGenerateHTML", () => {
 const readInjectedInstance = ($: cheerio.CheerioAPI) =>
   JSON.parse($("#__MIRLO_INSTANCE__").text());
 
+describe("analyzePathAndGenerateHTML instance name", () => {
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  it("falls back to Mirlo when no instance title is set", async () => {
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/", $);
+
+    assert.equal($('meta[property="og:title"]').attr("content"), "Mirlo");
+    assert.equal($('meta[property="og:site_name"]').attr("content"), "Mirlo");
+    assert.equal($("title").text(), "Mirlo");
+    assert.equal(readInjectedInstance($).name, "Mirlo");
+  });
+
+  it("uses the instance title from settings in tags and hydration", async () => {
+    await createSiteSettings({
+      instanceCustomization: { title: "Nightjar" },
+    });
+
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/", $);
+
+    assert.equal($('meta[property="og:title"]').attr("content"), "Nightjar");
+    assert.equal(
+      $('meta[property="og:site_name"]').attr("content"),
+      "Nightjar"
+    );
+    assert.equal($("title").text(), "Nightjar");
+    assert.equal(readInjectedInstance($).name, "Nightjar");
+  });
+
+  it("uses the instance title on the auth and releases pages", async () => {
+    await createSiteSettings({
+      instanceCustomization: { title: "Nightjar" },
+    });
+
+    const $login = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/login", $login);
+    assert.equal(
+      $login('meta[property="og:title"]').attr("content"),
+      "Log in to Nightjar"
+    );
+
+    const $releases = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/releases", $releases);
+    assert.equal(
+      $releases('meta[property="og:title"]').attr("content"),
+      "Nightjar Releases"
+    );
+  });
+
+  it("treats a blank instance title as unset", async () => {
+    await createSiteSettings({ instanceCustomization: { title: "   " } });
+
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/", $);
+
+    assert.equal(readInjectedInstance($).name, "Mirlo");
+  });
+});
+
 describe("analyzePathAndGenerateHTML available languages", () => {
   const originalToken = process.env.TRANSIFEX_API_TOKEN;
 

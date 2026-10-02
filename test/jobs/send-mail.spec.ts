@@ -522,6 +522,68 @@ describe("send-mail job", () => {
       );
     });
 
+    it("renders the instance title in the sender, subject and body", async () => {
+      await createSiteSettings({
+        instanceCustomization: { title: "Nightjar" },
+        emailProvider: {
+          provider: "mailgun",
+          fromEmail: "hello@mirlo.test",
+          mailgun: {
+            apiKey: "key-test",
+            domain: "mg.mirlo.test",
+          },
+        },
+      });
+
+      let sent: { html?: string; subject?: string; from?: unknown } = {};
+      const transport = {
+        sendMail: (mail: typeof sent) => {
+          sent = mail;
+          return Promise.resolve({ messageId: "test-instance-name" });
+        },
+      };
+      sandbox.stub(nodemailer, "createTransport").returns(transport as any);
+
+      const originalMailhog = process.env.MAILHOG_PORT;
+      process.env.MAILHOG_PORT = "1025";
+      try {
+        await sendMail({
+          data: {
+            template: "new-user",
+            locals: {
+              user: {
+                id: 1,
+                email: "recipient@example.com",
+                emailConfirmationToken: "tok",
+              },
+              clientDomain: "http://localhost",
+              client: "frontend",
+              accountType: "LISTENER",
+            },
+            message: {
+              to: "recipient@example.com",
+            },
+          },
+        } as Job);
+      } finally {
+        if (originalMailhog === undefined) {
+          delete process.env.MAILHOG_PORT;
+        } else {
+          process.env.MAILHOG_PORT = originalMailhog;
+        }
+      }
+
+      assert.equal(sent.subject, "Welcome to Nightjar!");
+      assert.ok(
+        JSON.stringify(sent.from).includes("Nightjar"),
+        `expected the sender name to be the instance title, got: ${JSON.stringify(sent.from)}`
+      );
+      assert.ok(
+        (sent.html ?? "").includes("future emails from Nightjar"),
+        `expected the footer to name the instance, got: ${(sent.html ?? "").slice(0, 500)}`
+      );
+    });
+
     it("should use default when configured fromEmail is invalid", async () => {
       await createSiteSettings({
         emailProvider: {

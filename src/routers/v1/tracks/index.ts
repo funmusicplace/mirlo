@@ -3,9 +3,10 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userHasPermission } from "../../../auth/passport";
-import { turnItemsIntoRSS } from "../../../utils/rss";
 import { processSingleTrack } from "../../../serializers/track";
 import { processSingleTrackGroup } from "../../../serializers/trackGroup";
+import { turnItemsIntoRSS } from "../../../utils/rss";
+import { getInstanceName } from "../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
 
 export default function () {
@@ -90,12 +91,14 @@ export default function () {
       });
 
       if (format === "rss") {
+        const instanceName = await getInstanceName();
         const feed = await turnItemsIntoRSS(
           {
-            name: "All Mirlo Tracks",
+            name: `All ${instanceName} Tracks`,
             apiEndpoint: "tracks",
-            description: "Mirlo's most recent tracks",
+            description: `${instanceName}'s most recent tracks`,
             clientUrl: "releases",
+            instanceName,
           },
           tracks.map((tr) =>
             processSingleTrack(tr, { loggedInUserId: req.user?.id })

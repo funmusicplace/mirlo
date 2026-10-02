@@ -5,16 +5,17 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  federatedArtistAtSomePoint,
-  federatedArtist,
-  artistOptedOutOrDeleted,
-} from "../../../../utils/artist";
-import {
   serializeSingleArtistIntoCanimus,
   serializeSingleDeletedArtistIntoCanimus,
 } from "../../../../serializers/artist";
 import { serializeSingleDeletedTrackIntoCanimus } from "../../../../serializers/track";
 import { serializeSingleDeletedTrackGroupIntoCanimus } from "../../../../serializers/trackGroup";
+import {
+  federatedArtistAtSomePoint,
+  federatedArtist,
+  artistOptedOutOrDeleted,
+} from "../../../../utils/artist";
+import { getInstanceName } from "../../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -230,11 +231,13 @@ export default function () {
           )
         );
 
+      const instanceName = await getInstanceName();
+
       res.json({
         type: "root",
         url: process.env.API_DOMAIN,
         children: artists.map((artist) =>
-          serializeSingleArtistIntoCanimus(artist)
+          serializeSingleArtistIntoCanimus(artist, instanceName)
         ),
         deleted: deletedEntities,
       });

@@ -20,6 +20,7 @@ import {
   finalPostImageBucket,
   finalArtistAvatarBucket,
 } from "../../../utils/minio";
+import { getInstanceName } from "../../../utils/settings";
 
 interface oEmbedResponse {
   type: "rich" | "photo" | "link";
@@ -67,6 +68,8 @@ export default function () {
       }
 
       const client = await getClient();
+      const getFallbackAuthorName = async () =>
+        `${await getInstanceName()} Artist`;
       let oembedData: oEmbedResponse | null = null;
 
       // Parse URL and extract path
@@ -169,7 +172,8 @@ export default function () {
               width: 400,
               height: 300,
               title: post.title,
-              author_name: post.profile?.name || "Mirlo Artist",
+              author_name:
+                post.profile?.name || (await getFallbackAuthorName()),
               author_url: `${client.applicationUrl}/${post.profile?.urlSlug}`,
               thumbnail_url: imageUrl,
               thumbnail_width: 400,
@@ -203,7 +207,8 @@ export default function () {
               width: 400,
               height: 300,
               title: merch.title,
-              author_name: merch.profile?.name || "Mirlo Artist",
+              author_name:
+                merch.profile?.name || (await getFallbackAuthorName()),
               author_url: `${client.applicationUrl}/${merch.profile?.urlSlug}`,
               thumbnail_url: coverUrl
                 ? generateFullStaticImageUrl(coverUrl, finalMerchImageBucket)
@@ -223,12 +228,13 @@ export default function () {
             const avatarUrl = artist.avatar?.url.find((u: string) =>
               u.includes("x600")
             );
+            const artistName = artist.name || (await getFallbackAuthorName());
             oembedData = {
               type: "link",
               width: 400,
               height: 300,
-              title: artist.name || "Mirlo Artist",
-              author_name: artist.name || "Mirlo Artist",
+              title: artistName,
+              author_name: artistName,
               author_url: `${client.applicationUrl}/${artist.urlSlug}`,
               thumbnail_url: avatarUrl
                 ? generateFullStaticImageUrl(avatarUrl, finalArtistAvatarBucket)

@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, waitFor } from "@testing-library/react";
 import { MetaCard } from "components/common/MetaCard";
 import React from "react";
@@ -56,9 +57,11 @@ const routes: RouteObject[] = [
 
 const renderAt = (path: string) =>
   render(
-    <RouterProvider
-      router={createMemoryRouter(routes, { initialEntries: [path] })}
-    />
+    <QueryClientProvider client={new QueryClient()}>
+      <RouterProvider
+        router={createMemoryRouter(routes, { initialEntries: [path] })}
+      />
+    </QueryClientProvider>
   );
 
 describe("useRouteTitle", () => {

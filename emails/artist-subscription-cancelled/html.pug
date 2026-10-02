@@ -3,9 +3,9 @@ extends ../layout.pug
 block content
     p Hi,
     if cancelledByArtist
-      p #{artist.name} has cancelled your subscription to them on Mirlo.
+      p #{artist.name} has cancelled your subscription to them on #{instanceName}.
     else
-      p Your subscription to #{artist.name} on Mirlo has been cancelled.
+      p Your subscription to #{artist.name} on #{instanceName} has been cancelled.
     if endsAt
       p
         | You won't be charged again, and you'll keep access until the end of the
