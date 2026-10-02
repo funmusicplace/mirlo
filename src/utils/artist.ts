@@ -453,7 +453,7 @@ export const deleteProfile = async (userId: number, profileId: number) => {
     },
   });
 
-  await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id)));
+  await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id, true)));
 
   await prisma.artistLabel.deleteMany({
     where: {

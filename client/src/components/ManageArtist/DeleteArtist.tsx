@@ -1,18 +1,17 @@
-import React from "react";
-import Button from "../common/Button";
-import { bp } from "../../constants";
 import { css } from "@emotion/css";
-import { useSnackbar } from "state/SnackbarContext";
-import { useTranslation } from "react-i18next";
-
-import { queryManagedArtist, useDeleteArtistMutation } from "queries";
-
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
-import { FaTrash } from "react-icons/fa";
-import { AiOutlineWarning } from "react-icons/ai";
-import { ArtistSection } from "pages/{artistId}/Index";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import ConfirmDeleteModal from "components/common/ConfirmDeleteModal";
+import { ArtistSection } from "pages/{artistId}/Index";
+import { queryManagedArtist, useDeleteArtistMutation } from "queries";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { AiOutlineWarning } from "react-icons/ai";
+import { FaTrash } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSnackbar } from "state/SnackbarContext";
+
+import { bp } from "../../constants";
 
 export const DeleteArtist: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
@@ -22,23 +21,27 @@ export const DeleteArtist: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const { mutate: deleteArtist } = useDeleteArtistMutation();
+  const { mutate: deleteArtist, isPending: isDeleting } =
+    useDeleteArtistMutation();
+  const [isConfirming, setIsConfirming] = React.useState(false);
 
   const onDelete = React.useCallback(() => {
-    if (!!artist && window.confirm(t("areYouSureDelete") ?? "")) {
-      navigate("/manage");
-      deleteArtist(
-        { artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
-        {
-          onSuccess() {
-            snackbar(t("artistDeleted"), { type: "success" });
-          },
-          onError() {
-            snackbar(t("problemDeletingArtist"), { type: "warning" });
-          },
-        }
-      );
+    if (!artist) {
+      return;
     }
+    deleteArtist(
+      { artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
+      {
+        onSuccess() {
+          setIsConfirming(false);
+          navigate("/manage");
+          snackbar(t("artistDeleted"), { type: "success" });
+        },
+        onError() {
+          snackbar(t("problemDeletingArtist"), { type: "warning" });
+        },
+      }
+    );
   }, [artist, t, deleteArtist, navigate, snackbar]);
 
   return (
@@ -79,11 +82,28 @@ export const DeleteArtist: React.FC = () => {
         <ArtistButton
           buttonRole="warning"
           startIcon={<FaTrash />}
-          onClick={onDelete}
+          onClick={() => setIsConfirming(true)}
         >
           {t("deleteArtist")}
         </ArtistButton>
       </div>
+      {artist && (
+        <ConfirmDeleteModal
+          open={isConfirming}
+          onClose={() => setIsConfirming(false)}
+          onConfirm={onDelete}
+          title={t("deleteArtistModalTitle", { artist: artist.name })}
+          consequences={[
+            t("deleteArtistConsequenceMusic"),
+            t("deleteArtistConsequenceContent"),
+            t("deleteArtistConsequenceSubscribers"),
+            t("deleteArtistConsequenceUrl"),
+          ]}
+          confirmText={artist.name}
+          confirmLabel={t("deleteArtist")}
+          isDeleting={isDeleting}
+        />
+      )}
     </ArtistSection>
   );
 };
