@@ -6,7 +6,7 @@ import BulkPricingPage from "pages/manage/artists/{artistId}/pricing/Index";
 import { artistHandlers } from "../../../.storybook/handlers";
 import { manageArtistPage, layoutHandlers } from "../shared/AppFrame";
 import { RELEASES, SHOWCASE_ARTIST_WITH_RELEASES } from "../shared/fixtures";
-import { pause, recordingViewport } from "../shared/helpers";
+import { pause, recordingViewport, typeLikeAPerson } from "../shared/helpers";
 
 import { RELEASES_WITH_THUMBS, SHOWCASE_MERCH } from "./moneyFixtures";
 
@@ -66,11 +66,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/**
- * Clean start for a live recording: change a few prices (try $7 -> $5 on
- * "Moss Choir", then the vinyl) and press Save on each row. Every save shows
- * the "Price saved" snackbar.
- */
 export const Default: Story = {};
 
 const setPrice = async (
@@ -82,17 +77,13 @@ const setPrice = async (
   input.scrollIntoView({ block: "center", behavior: "smooth" });
   await pause(400);
   await userEvent.clear(input);
-  await userEvent.type(input, price, { delay: 120 });
+  await typeLikeAPerson(input, price);
   await pause(300);
   const row = input.closest("form") as HTMLElement;
   await userEvent.click(within(row).getByRole("button", { name: "Save" }));
   await pause(1200);
 };
 
-/**
- * Hands-free: drops two release prices and the vinyl price, saving each row
- * so the "Price saved" snackbar pops up. Start recording, then reload.
- */
 export const EditingPrices: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

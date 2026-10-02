@@ -7,7 +7,7 @@ import ManageTiers from "pages/manage/artists/{artistId}/tiers/Index";
 import SupportersPage from "pages/manage/artists/{artistId}/tiers/supporters/Index";
 
 import { AppFrame, appRouting, artistPageRoutes } from "../shared/AppFrame";
-import { recordingViewport } from "../shared/helpers";
+import { recordingViewport, TYPING, pause } from "../shared/helpers";
 
 import {
   ARTIST_WITH_TIERS,
@@ -282,6 +282,8 @@ export const ImportSupporters: Story = {
       await body.findByRole("button", { name: /Upload email addresses/ })
     );
     const textarea = await body.findByPlaceholderText(/email1@/);
-    await userEvent.type(textarea, IMPORTED_EMAILS.join(", "), { delay: 5 });
+    await userEvent.click(textarea);
+    await pause(TYPING.pauseBefore);
+    await userEvent.paste(IMPORTED_EMAILS.join(", "));
   },
 };

@@ -1,3 +1,4 @@
+import { userEvent } from "@storybook/test";
 import { http, HttpResponse } from "msw";
 
 import { SHOWCASE_VIEWPORTS } from "./fixtures";
@@ -30,6 +31,31 @@ const isTestRunner = () =>
  */
 export const pause = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, isTestRunner() ? 0 : ms));
+
+/** How hands-free stories type, tuned to read as a person on camera */
+export const TYPING = {
+  /** Thinking time between focusing a field and the first keystroke */
+  pauseBefore: 700,
+  /** Average gap between keystrokes; each one varies by ±40% */
+  msPerKey: 110,
+};
+
+export const typeLikeAPerson = async (
+  element: Element,
+  text: string,
+  { pauseBefore = TYPING.pauseBefore, msPerKey = TYPING.msPerKey } = {}
+) => {
+  if (isTestRunner()) {
+    await userEvent.type(element, text);
+    return;
+  }
+  await userEvent.click(element);
+  await pause(pauseBefore);
+  for (const char of text) {
+    await userEvent.keyboard(char.replace(/[{[]/, "$&$&"));
+    await pause(msPerKey * (0.6 + Math.random() * 0.8));
+  }
+};
 
 /**
  * Scroll the page so `element` sits `offset` px below the top of the frame.

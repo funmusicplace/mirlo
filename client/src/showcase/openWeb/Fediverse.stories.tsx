@@ -13,7 +13,7 @@ import {
 } from "../../../.storybook/handlers";
 import { withArtistColors } from "../shared/AppFrame";
 import { SHOWCASE_ARTIST } from "../shared/fixtures";
-import { authAs, recordingViewport } from "../shared/helpers";
+import { authAs, recordingViewport, typeLikeAPerson } from "../shared/helpers";
 
 import { OPEN_WEB_ARTIST } from "./openWebFixtures";
 
@@ -137,7 +137,7 @@ export const FollowModalFilledIn: Story = {
   play: async ({ canvasElement }) => {
     const input = await openFollowModal(canvasElement);
     scrollToFediverseForm(input);
-    await userEvent.type(input, "@marta@harbour.social", { delay: 40 });
+    await typeLikeAPerson(input, "@marta@harbour.social");
   },
 };
 
