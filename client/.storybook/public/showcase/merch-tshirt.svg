@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe7d8"/><stop offset="1" stop-color="#dfd3bf"/></linearGradient>
+    <linearGradient id="print" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f2d4a"/><stop offset="1" stop-color="#1d7a8c"/></linearGradient>
+    <clipPath id="c"><circle cx="600" cy="560" r="150"/></clipPath>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+  <ellipse cx="600" cy="1050" rx="380" ry="40" fill="#000" opacity="0.08"/>
+  <path d="M430 200 Q600 270 770 200 L1010 320 L930 520 L840 480 L840 1010 Q600 1040 360 1010 L360 480 L270 520 L190 320 Z" fill="#14324f"/>
+  <path d="M430 200 Q600 290 770 200 Q600 250 430 200Z" fill="#0b2238"/>
+  <g clip-path="url(#c)">
+    <rect x="440" y="400" width="320" height="320" fill="url(#print)"/>
+    <circle cx="660" cy="500" r="55" fill="#f2c14e"/>
+    <path d="M440 620 Q520 580 600 620 T760 620 V720 H440Z" fill="#071320"/>
+  </g>
+  <circle cx="600" cy="560" r="150" fill="none" stroke="#f6f1e7" stroke-width="6"/>
+  <text x="600" y="780" text-anchor="middle" font-family="Georgia, serif" font-size="54" letter-spacing="10" fill="#f6f1e7">LUMEN TIDE</text>
+</svg>

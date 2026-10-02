@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Follow</title>
+    <!--
+      A generic stand-in for the "remote follow" confirmation screen on the
+      fan's own fediverse server, used by the Showcase/Fediverse stories.
+      Deliberately unbranded: it isn't meant to look like any real server.
+    -->
+    <style>
+      :root {
+        --bg: #191b22;
+        --panel: #282c37;
+        --text: #eceff4;
+        --muted: #9baec8;
+        --accent: #6c7ef0;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #313543;
+      }
+      .server { font-weight: 700; letter-spacing: 0.02em; }
+      .me { color: var(--muted); font-size: 14px; }
+      main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: var(--panel);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      }
+      .banner { height: 120px; background: url(banner.svg) center / cover; }
+      .body { padding: 0 24px 24px; }
+      .avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 14px;
+        border: 4px solid var(--panel);
+        margin-top: -44px;
+        background: #f6f1e7 url(avatar.svg) center / cover;
+      }
+      h1 { font-size: 22px; margin: 12px 0 2px; }
+      .handle { color: var(--muted); margin: 0 0 12px; font-size: 15px; }
+      .bio { line-height: 1.5; margin: 0 0 20px; }
+      .stats { display: flex; gap: 20px; color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+      .stats b { color: var(--text); }
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        background: var(--accent);
+        color: white;
+        transition: background 0.2s;
+      }
+      button.following { background: #3a3f50; color: var(--text); }
+      .note { margin-top: 12px; text-align: center; color: var(--muted); font-size: 13px; min-height: 1em; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="server" id="server">harbour.social</span>
+      <span class="me" id="me">@marta</span>
+    </header>
+    <main>
+      <div class="card">
+        <div class="banner"></div>
+        <div class="body">
+          <div class="avatar"></div>
+          <h1 id="name">Lumen Tide</h1>
+          <p class="handle" id="actor">@lumen-tide@mirlo.space</p>
+          <p class="bio">
+            Ambient folk from the north coast. New releases and posts from
+            Mirlo show up right in your timeline.
+          </p>
+          <div class="stats">
+            <span><b>4</b> releases</span>
+            <span><b>1,284</b> followers</span>
+          </div>
+          <button id="follow" type="button">Follow</button>
+          <p class="note" id="note"></p>
+        </div>
+      </div>
+    </main>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const handle = (params.get("handle") || "@marta@harbour.social")
+        .trim()
+        .replace(/^@/, "");
+      const [user, server] = handle.split("@");
+      if (server) document.getElementById("server").textContent = server;
+      if (user) document.getElementById("me").textContent = "@" + user;
+      if (params.get("artist"))
+        document.getElementById("name").textContent = params.get("artist");
+      if (params.get("actor"))
+        document.getElementById("actor").textContent = params.get("actor");
+
+      const button = document.getElementById("follow");
+      button.addEventListener("click", () => {
+        const following = button.classList.toggle("following");
+        button.textContent = following ? "Following" : "Follow";
+        document.getElementById("note").textContent = following
+          ? "New posts and releases will appear in your home timeline."
+          : "";
+      });
+    </script>
+  </body>
+</html>

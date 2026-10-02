@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d7a8c"/><stop offset="1" stop-color="#145a68"/></linearGradient></defs>
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+  <path d="M470 420 Q470 210 600 210 Q730 210 730 420" fill="none" stroke="#e8dcc4" stroke-width="34"/>
+  <rect x="330" y="400" width="540" height="620" rx="8" fill="#f1e7d2"/>
+  <path d="M380 800 Q490 740 600 800 T820 800" fill="none" stroke="#0f2d4a" stroke-width="16"/>
+  <path d="M380 860 Q490 800 600 860 T820 860" fill="none" stroke="#1d7a8c" stroke-width="16"/>
+  <circle cx="680" cy="610" r="80" fill="#f2c14e"/>
+  <text x="600" y="960" text-anchor="middle" font-family="Georgia, serif" font-size="38" letter-spacing="8" fill="#0f2d4a">LUMEN TIDE</text>
+  <ellipse cx="600" cy="1060" rx="320" ry="26" fill="#000" opacity="0.15"/>
+</svg>

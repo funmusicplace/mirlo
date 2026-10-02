@@ -1,5 +1,6 @@
 import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react";
+import { configure } from "@storybook/test";
 import { initialize, mswLoader } from "msw-storybook-addon";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +29,8 @@ import "./global.css";
 import { defaultHandlers } from "./handlers";
 
 initialize({ onUnhandledRequest: "warn" });
+
+configure({ asyncUtilTimeout: 5000 });
 
 function RouterErrorHandler() {
   const navigate = useNavigate();

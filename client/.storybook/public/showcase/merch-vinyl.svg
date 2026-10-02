@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9e2d3"/><stop offset="1" stop-color="#d5cab4"/></linearGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f2d4a"/><stop offset="1" stop-color="#1d7a8c"/></linearGradient>
+    <radialGradient id="r" cx="0.7" cy="0.3" r="0.6"><stop offset="0" stop-color="#f2c14e" stop-opacity="0.9"/><stop offset="1" stop-color="#f2c14e" stop-opacity="0"/></radialGradient>
+    <radialGradient id="disc" cx="0.5" cy="0.5" r="0.5"><stop offset="0.3" stop-color="#2a6f7d"/><stop offset="1" stop-color="#174a57"/></radialGradient>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+  <g transform="translate(380 230)">
+    <circle cx="400" cy="370" r="360" fill="url(#disc)" opacity="0.95"/>
+    <g fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="3">
+      <circle cx="400" cy="370" r="320"/><circle cx="400" cy="370" r="280"/><circle cx="400" cy="370" r="240"/><circle cx="400" cy="370" r="200"/>
+    </g>
+    <circle cx="400" cy="370" r="110" fill="#f2c14e"/>
+    <circle cx="400" cy="370" r="10" fill="#e9e2d3"/>
+  </g>
+  <g transform="translate(150 230)">
+    <rect width="740" height="740" fill="url(#g)"/>
+    <rect width="740" height="740" fill="url(#r)"/>
+    <circle cx="505" cy="235" r="105" fill="#f2c14e" opacity="0.85"/>
+    <path d="M0 505 Q185 430 370 505 T740 505 V740 H0Z" fill="#0b1e33" opacity="0.8"/>
+    <path d="M0 567 Q185 505 370 567 T740 567 V740 H0Z" fill="#071320"/>
+    <text x="40" y="690" font-family="Georgia, serif" font-size="44" letter-spacing="6" fill="#f6f1e7">TIDAL HOURS</text>
+  </g>
+  <ellipse cx="600" cy="1030" rx="460" ry="30" fill="#000" opacity="0.08"/>
+</svg>

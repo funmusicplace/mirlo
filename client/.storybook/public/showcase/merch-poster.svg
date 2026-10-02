@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  <rect width="1200" height="1200" fill="#e7dfcf"/>
+  <g transform="translate(300 120)">
+    <rect width="600" height="900" fill="#2b0f0a"/>
+    <circle cx="300" cy="360" r="200" fill="#e0592a"/>
+    <circle cx="300" cy="360" r="130" fill="#f2a541"/>
+    <path d="M0 600 Q150 520 300 600 T600 600 V900 H0Z" fill="#160604"/>
+    <text x="300" y="720" text-anchor="middle" font-family="Georgia, serif" font-size="46" letter-spacing="8" fill="#f6e7d0">LUMEN TIDE</text>
+    <text x="300" y="780" text-anchor="middle" font-family="Georgia, serif" font-size="24" letter-spacing="6" fill="#f2a541">AUTUMN TOUR 2026</text>
+  </g>
+  <ellipse cx="600" cy="1060" rx="330" ry="26" fill="#000" opacity="0.1"/>
+</svg>

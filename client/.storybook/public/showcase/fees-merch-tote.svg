@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <rect width="600" height="600" fill="#e8dcc6"/>
+  <path d="M220 190 Q220 90 300 90 Q380 90 380 190" fill="none" stroke="#c9b48f" stroke-width="22"/>
+  <rect x="150" y="180" width="300" height="340" rx="6" fill="#f6f1e7"/>
+  <circle cx="300" cy="320" r="70" fill="none" stroke="#0f2d4a" stroke-width="8"/>
+  <path d="M230 345 Q265 320 300 345 T370 345" fill="none" stroke="#1d7a8c" stroke-width="8"/>
+  <text x="300" y="455" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#0f2d4a">LUMEN TIDE</text>
+</svg>
