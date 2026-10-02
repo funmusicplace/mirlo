@@ -15,6 +15,7 @@ export default [
       "client/dist/**",
       "client/storybook-static/**",
       "client/.storybook/public/mockServiceWorker.js",
+      "client/.storybook/public/showcase/**",
       "prisma/generated/**",
       "prisma/migrations/**",
     ],

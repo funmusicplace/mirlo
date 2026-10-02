@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 700" width="1250" height="700" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1e33"/><stop offset="0.7" stop-color="#1d4f6e"/><stop offset="1" stop-color="#e9a65a"/></linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f2c14e" stop-opacity="0.75"/><stop offset="1" stop-color="#f2c14e" stop-opacity="0"/></linearGradient>
+  </defs>
+  <rect width="1250" height="700" fill="url(#sky)"/>
+  <g fill="#f6f1e7" opacity="0.7"><circle cx="120" cy="90" r="2.5"/><circle cx="260" cy="160" r="2"/><circle cx="420" cy="70" r="2.5"/><circle cx="1050" cy="110" r="2"/><circle cx="1160" cy="60" r="2.5"/><circle cx="880" cy="150" r="2"/></g>
+  <path d="M640 210 L1250 90 L1250 330 Z" fill="url(#beam)"/>
+  <path d="M600 210 L0 120 L0 300 Z" fill="url(#beam)" transform="matrix(-1 0 0 1 1200 0)" opacity="0.5"/>
+  <path d="M570 560 L590 230 H650 L670 560 Z" fill="#f6f1e7"/>
+  <path d="M577 440 H663 L667 480 H573 Z M584 330 H656 L659 365 H581 Z" fill="#c8553d"/>
+  <rect x="580" y="190" width="80" height="40" fill="#f2c14e"/>
+  <path d="M570 190 L620 150 L670 190 Z" fill="#c8553d"/>
+  <path d="M440 600 Q520 540 620 550 T820 600 V700 H440Z" fill="#071320"/>
+  <path d="M0 610 Q160 590 320 610 T640 610 T960 610 T1250 610 V700 H0Z" fill="#0f2d4a"/>
+  <path d="M0 650 Q200 630 400 650 T800 650 T1250 650 V700 H0Z" fill="#071320"/>
+</svg>
