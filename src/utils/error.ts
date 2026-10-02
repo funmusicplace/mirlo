@@ -45,6 +45,7 @@ interface AppErrorArgs {
   httpCode: HttpCode;
   description: string;
   isOperational?: boolean;
+  code?: string;
 }
 
 export class AppError extends Error {
@@ -52,6 +53,7 @@ export class AppError extends Error {
   public readonly description: string;
   public readonly httpCode: HttpCode;
   public readonly isOperational: boolean = true;
+  public readonly code?: string;
 
   constructor(args: AppErrorArgs) {
     super(args.description);
@@ -61,6 +63,7 @@ export class AppError extends Error {
     this.name = args.name || "Error";
     this.httpCode = args.httpCode;
     this.description = args.description;
+    this.code = args.code;
 
     if (args.isOperational !== undefined) {
       this.isOperational = args.isOperational;
@@ -130,6 +133,7 @@ const errorHandler = (
     });
     return res.status(err.httpCode).json({
       error: err.message,
+      ...(err.code && { code: err.code }),
     });
   }
 

@@ -145,22 +145,28 @@ export const UploadContextProvider: React.FC<{
         newTrack = response.result;
         setQueue((q) => produceNewStatus(q, firstTrack.t.title, 25));
 
-        if (response.uploadUrl) {
-          const result = await fetch(response.uploadUrl, {
-            method: "PUT",
-            body: firstTrack.t.file,
+        const uploadedDirectly = response.uploadUrl
+          ? await fetch(response.uploadUrl, {
+              method: "PUT",
+              body: firstTrack.t.file,
+            })
+              .then((result) => result.ok)
+              .catch((err) => {
+                console.error("Direct upload to storage failed", err);
+                return false;
+              })
+          : false;
+
+        if (uploadedDirectly) {
+          await api.put(`manage/tracks/${newTrack.id}/process`, {
+            source: "upload",
           });
-          if (result.ok) {
-            await api.put(`manage/tracks/${newTrack.id}/process`, {
-              source: "upload",
-            });
-            setQueue((q) => produceNewStatus(q, firstTrack.t.title, 90));
-          }
         } else {
           await api.uploadFile(`manage/tracks/${newTrack.id}/audio`, [
             firstTrack.t.file,
           ]);
         }
+        setQueue((q) => produceNewStatus(q, firstTrack.t.title, 90));
       } catch (e) {
         console.error(e);
         snackbar(

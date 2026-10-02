@@ -124,18 +124,24 @@ export const getPlatformFeeForProfile = async (
   return profile?.defaultPlatformFee ?? settings.platformPercent;
 };
 
-/**
- * The single definition of "who can manage a profile" (other than admins,
- * who can't be expressed as a profile filter). Every permission check —
- * route middleware, ownership helpers, and the `editableArtistIds` sent to
- * the client — should go through this or `canUserEditProfile`, so adding a
- * new kind of manager only means changing it here.
- */
+export const whereForProfilesUserManages = (
+  userId: number
+): Prisma.ProfileWhereInput => ({
+  managers: { some: { userId, acceptedAt: { not: null } } },
+});
+
+export const whereForProfilesUserOwnsOrManages = (
+  userId: number
+): Prisma.ProfileWhereInput => ({
+  OR: [{ userId }, whereForProfilesUserManages(userId)],
+});
+
 export const whereForAllProfilesUserCanEdit = (
   userId: number
 ): Prisma.ProfileWhereInput => ({
   OR: [
     { userId },
+    whereForProfilesUserManages(userId),
     {
       artistLabels: {
         some: {
@@ -147,14 +153,6 @@ export const whereForAllProfilesUserCanEdit = (
   ],
 });
 
-/**
- * Artist IDs for manage purchases/sales scoping.
- *
- * - No `requestedArtistIds`: owned artists only (`userId`) — matches historical
- *   default list behavior.
- * - With `requestedArtistIds`: intersect with artists the user owns or can
- *   manage as a label (never expands to artists they cannot manage).
- */
 export const resolveManagedArtistIds = async (
   userId: number,
   requestedArtistIds?: string | string[] | number[]
@@ -172,7 +170,7 @@ export const resolveManagedArtistIds = async (
     where: {
       ...(requested !== undefined
         ? whereForAllProfilesUserCanEdit(userId)
-        : { userId }),
+        : whereForProfilesUserOwnsOrManages(userId)),
       ...(requested !== undefined ? { id: { in: requested } } : {}),
     },
     select: { id: true },
@@ -192,6 +190,7 @@ export const whereForAllProfilesUserCanAddReleasesFor = (
 ): Prisma.ProfileWhereInput => ({
   OR: [
     { userId },
+    whereForProfilesUserManages(userId),
     {
       artistLabels: {
         some: {
@@ -460,6 +459,10 @@ export const deleteProfile = async (userId: number, profileId: number) => {
     where: {
       artistId: Number(profileId),
     },
+  });
+
+  await prisma.profileManager.deleteMany({
+    where: { profileId: Number(profileId) },
   });
 };
 

@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  canUserCreateArtistContent,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeMerch } from "../../../../../serializers/merch";
@@ -17,7 +17,7 @@ export default function () {
     POST: [
       userAuthenticated,
       artistBelongsToLoggedInUser,
-      canUserCreateArtists,
+      canUserCreateArtistContent,
       POST,
     ],
   };

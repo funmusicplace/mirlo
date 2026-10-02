@@ -5,15 +5,16 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
   profileBelongsToLoggedInUser,
+  profileOwnedByLoggedInUser,
   canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { sendMailQueue } from "../../../../../../queues/send-mail-queue";
+import { serializeProfile } from "../../../../../../serializers/artist";
 import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
-import { serializeProfile } from "../../../../../../serializers/artist";
 
 const sendArtistNotificationOfLabel = async (
   artist: Profile,
@@ -95,7 +96,7 @@ export default function () {
   const operations = {
     GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
     POST: [userAuthenticated, canUserCreateProfiles, POST],
-    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
   };
 
   async function GET(req: Request, res: Response) {

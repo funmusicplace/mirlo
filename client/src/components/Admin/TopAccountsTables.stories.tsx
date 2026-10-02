@@ -65,8 +65,8 @@ export const ExpandTable: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText("Uploader 15");
-    await expect(canvas.queryByText("Uploader 16")).not.toBeInTheDocument();
+    await canvas.findByText("Uploader 10");
+    await expect(canvas.queryByText("Uploader 11")).not.toBeInTheDocument();
     await userEvent.click(canvas.getAllByText("Show all 50")[3]);
     await canvas.findByText("Uploader 50");
   },

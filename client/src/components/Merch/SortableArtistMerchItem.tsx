@@ -1,6 +1,7 @@
 import SortableGridItem from "components/common/SortableGridItem";
 import React from "react";
 import { useAuthContext } from "state/AuthContext";
+import { canUserEditArtist } from "utils/artist";
 
 import ArtistMerchListItem from "./ArtistMerchListItem";
 
@@ -13,7 +14,9 @@ const SortableArtistMerchItem: React.FC<{
   return (
     <SortableGridItem
       id={props.id}
-      showHandle={user?.id === props.merch.artist?.userId}
+      showHandle={canUserEditArtist(user, props.merch.artist, {
+        allowAdmin: false,
+      })}
     >
       <ArtistMerchListItem merch={props.merch} as="li" />
     </SortableGridItem>

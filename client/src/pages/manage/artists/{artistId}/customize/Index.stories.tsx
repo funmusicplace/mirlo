@@ -1,10 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { expect, userEvent, waitFor, within } from "@storybook/test";
 import { http, HttpResponse } from "msw";
+import type { ArtistManager } from "queries";
 import { queryClient } from "queries/QueryClientWrapper";
 import { reactRouterParameters } from "storybook-addon-remix-react-router";
 
-import { ARTIST_EXAMPLE } from "../../../../../../test/mocks";
+import { artistHandlers } from "../../../../../../.storybook/handlers";
+import {
+  ARTIST_EXAMPLE,
+  ARTIST_MANAGER_EXAMPLE,
+  CURRENT_USER_AS_MANAGER_EXAMPLE,
+  SHARED_ARTIST_EXAMPLE,
+} from "../../../../../../test/mocks";
 
 import CustomizeArtistPage from "./Index";
 
@@ -13,10 +20,13 @@ const ARTIST: Artist = { ...ARTIST_EXAMPLE, urlSlug: "example-user" };
 let serverArtist: Artist = ARTIST;
 let savedArtistBodies: Partial<Artist>[] = [];
 
+// The artist's team, for the Team section.
+const teamHandler = (managers: ArtistManager[]) =>
+  http.get("*/v1/manage/artists/:artistId/managers", () =>
+    HttpResponse.json({ results: managers })
+  );
+
 const customizeHandlers = [
-  http.get("*/v1/manage/artists/:artistId", () =>
-    HttpResponse.json({ result: serverArtist })
-  ),
   http.put("*/v1/manage/artists/:artistId", async ({ request }) => {
     const body = (await request.json()) as Partial<Artist>;
     savedArtistBodies.push(body);
@@ -29,9 +39,6 @@ const customizeHandlers = [
   http.get("*/v1/artists/testExistence", () =>
     HttpResponse.json({ result: { exists: false } })
   ),
-  http.get("*/v1/artists/:artistSlug", () =>
-    HttpResponse.json({ result: serverArtist })
-  ),
 ];
 
 const meta = {
@@ -39,7 +46,15 @@ const meta = {
   component: CustomizeArtistPage,
   parameters: {
     layout: "padded",
-    msw: { handlers: { customize: customizeHandlers } },
+    msw: {
+      handlers: {
+        // Before `artist`, so `artists/testExistence` isn't caught by its
+        // `artists/:artistSlug` handler.
+        customize: customizeHandlers,
+        artist: artistHandlers(() => serverArtist),
+        team: teamHandler([ARTIST_MANAGER_EXAMPLE]),
+      },
+    },
     reactRouter: reactRouterParameters({
       location: { pathParams: { artistId: String(ARTIST.id) } },
       routing: { path: "/manage/artists/:artistId/customize" },
@@ -95,5 +110,43 @@ export const KeepsUnsavedSlugWhenArtistRefetches: Story = {
         expect.objectContaining({ urlSlug: "exampleuser" })
       )
     );
+  },
+};
+
+export const AsOwner: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole("heading", { name: "Team" });
+    await expect(
+      await canvas.findByLabelText("Invite someone by email")
+    ).toBeVisible();
+    await expect(canvas.getByText("Artist page termination")).toBeVisible();
+  },
+};
+
+export const AsManager: Story = {
+  beforeEach: () => {
+    serverArtist = { ...SHARED_ARTIST_EXAMPLE, id: ARTIST.id };
+  },
+  parameters: {
+    msw: {
+      handlers: {
+        artist: artistHandlers(() => serverArtist, {
+          relationship: "manager",
+        }),
+        team: teamHandler([CURRENT_USER_AS_MANAGER_EXAMPLE]),
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole("button", { name: "Remove my access" });
+    await expect(
+      canvas.queryByLabelText("Invite someone by email")
+    ).not.toBeInTheDocument();
+    await expect(
+      canvas.queryByText("Artist page termination")
+    ).not.toBeInTheDocument();
+    await expect(canvas.getByLabelText("Display name")).toBeVisible();
   },
 };

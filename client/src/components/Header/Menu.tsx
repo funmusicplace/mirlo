@@ -167,7 +167,14 @@ const Menu = forwardRef<
                             title={a.name}
                             to={getArtistManageUrl(a.id)}
                           >
-                            {a.name}
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="min-w-0 truncate">{a.name}</span>
+                              {a.relationship === "manager" && (
+                                <span className="shrink-0 text-xs opacity-75">
+                                  {t("sharedWithYou")}
+                                </span>
+                              )}
+                            </span>
                           </MenuLink>
                         </li>
                       );

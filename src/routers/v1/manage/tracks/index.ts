@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
 import { processSingleTrack } from "../../../../serializers/track";
+import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
 import { assertSupportedAudioExtension } from "../../../../utils/audioFormats";
 import { getAudioUploadUrl } from "../../../../utils/minio";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
@@ -22,9 +23,7 @@ export default function () {
     const tracks = await prisma.track.findMany({
       where: {
         trackGroup: {
-          profile: {
-            userId: loggedInUser.id,
-          },
+          profile: whereForProfilesUserOwnsOrManages(loggedInUser.id),
         },
       },
     });

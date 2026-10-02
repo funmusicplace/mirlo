@@ -5,6 +5,7 @@ import { merge } from "lodash";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   profileBelongsToLoggedInUser,
+  profileOwnedByLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeProfile } from "../../../../../serializers/artist";
@@ -24,7 +25,7 @@ export default function () {
   const operations = {
     PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
     GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
-    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -77,6 +78,21 @@ export default function () {
       });
       // FIXME: check type of properties object.
       const oldProperties = existingProfile?.properties || {};
+
+      const isChangingPaymentTo =
+        paymentToUserId !== undefined &&
+        (paymentToUserId === null ? null : Number(paymentToUserId)) !==
+          existingProfile?.paymentToUserId;
+      if (
+        isChangingPaymentTo &&
+        existingProfile?.userId !== user.id &&
+        !user.isAdmin
+      ) {
+        throw new AppError({
+          httpCode: 403,
+          description: "Only the owner of this artist can change payouts",
+        });
+      }
 
       let federatedStreamingOptInDate =
         existingProfile?.federatedStreamingOptInDate;

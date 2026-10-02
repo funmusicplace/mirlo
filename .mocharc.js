@@ -5,7 +5,7 @@ console.log("in CI: ", inCI);
 module.exports = {
   extension: ["ts"],
   spec: "test/**/*.spec.ts",
-  require: "ts-node/register",
+  require: ["ts-node/register", "test/rootHooks.ts"],
   forbidOnly: inCI,
   timeout: 10000,
   "watch-files": ["test/**/*.ts", "src/**/*.ts"],

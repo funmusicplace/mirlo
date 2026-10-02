@@ -141,6 +141,30 @@ export const userHasPermission = (role: "admin" | "owner") => {
   };
 };
 
+type CreationRights = Pick<
+  Express.User,
+  "canCreateArtists" | "isAdmin" | "isLabelAccount"
+>;
+
+const creationBlockedReason = async (
+  user: CreationRights
+): Promise<string | null> => {
+  if (user.canCreateArtists || user.isAdmin || user.isLabelAccount) {
+    return null;
+  }
+
+  const settings = await getSiteSettings();
+
+  if (settings.defconLevel === 2) {
+    return "This server has temporarily closed sign-ups";
+  }
+
+  if (settings.isClosedToPublicArtistSignup) {
+    return "Your instance administrator needs to invite you to become an artist.";
+  }
+  return null;
+};
+
 export const canUserCreateProfiles = async (
   req: Request,
   res: Response,
@@ -153,34 +177,53 @@ export const canUserCreateProfiles = async (
     return;
   }
 
-  if (loggedInUser.canCreateArtists) {
+  const blocked = await creationBlockedReason(loggedInUser);
+  if (blocked) {
+    return res.status(403).json({ error: blocked });
+  }
+  return next();
+};
+
+export const canUserCreateArtistContent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const loggedInUser = req.user;
+
+  if (!loggedInUser) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const blocked = await creationBlockedReason(loggedInUser);
+  if (!blocked) {
     return next();
   }
 
-  if (loggedInUser.isAdmin) {
+  const { artistId } = req.params as { artistId?: string };
+  const profileId = artistId ? await findProfileIdForURLSlug(artistId) : null;
+  const owner = profileId
+    ? (
+        await prisma.profile.findFirst({
+          where: { id: profileId },
+          select: {
+            user: {
+              select: {
+                canCreateArtists: true,
+                isAdmin: true,
+                isLabelAccount: true,
+              },
+            },
+          },
+        })
+      )?.user
+    : null;
+
+  if (owner && !(await creationBlockedReason(owner))) {
     return next();
   }
-
-  if (loggedInUser.isLabelAccount) {
-    return next();
-  }
-
-  const settings = await getSiteSettings();
-
-  if (settings.defconLevel === 2) {
-    return res
-      .status(403)
-      .json({ error: "This server has temporarily closed sign-ups" });
-  }
-
-  if (settings.isClosedToPublicArtistSignup) {
-    return res.status(403).json({
-      error:
-        "Your instance administrator needs to invite you to become an artist.",
-    });
-  } else {
-    return next();
-  }
+  return res.status(403).json({ error: blocked });
 };
 
 export const profileEditableByUser = async (
@@ -244,6 +287,42 @@ export const profileBelongsToLoggedInUser = async (
       httpCode: 404,
     });
   }
+};
+
+export const profileOwnedByLoggedInUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { artistId: profileId } = req.params as unknown as {
+    artistId: string;
+  };
+  const loggedInUser = req.user;
+
+  if (!loggedInUser) {
+    throw new AppError({ description: "Not logged in user", httpCode: 401 });
+  }
+
+  const castProfileId = await findProfileIdForURLSlug(profileId);
+  const profile = castProfileId
+    ? await prisma.profile.findFirst({
+        where: { id: castProfileId },
+        select: { userId: true },
+      })
+    : null;
+
+  if (!profile) {
+    throw new AppError({ description: "Artist not found", httpCode: 404 });
+  }
+
+  if (profile.userId !== loggedInUser.id && !loggedInUser.isAdmin) {
+    throw new AppError({
+      description: "Only the owner of this artist can do this",
+      httpCode: 403,
+    });
+  }
+
+  return next();
 };
 
 export const fundraiserBelongsToLoggedInUser = async (

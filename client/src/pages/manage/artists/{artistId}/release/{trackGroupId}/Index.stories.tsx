@@ -3,6 +3,7 @@ import { userEvent, within } from "@storybook/test";
 import { http, HttpResponse } from "msw";
 import { reactRouterParameters } from "storybook-addon-remix-react-router";
 
+import { artistHandlers } from "../../../../../../../.storybook/handlers";
 import {
   ARTIST_EXAMPLE,
   TRACK_EXAMPLE,
@@ -76,15 +77,6 @@ const TRACK_GROUP: TrackGroup = {
 };
 
 const trackGroupHandlers = (trackGroup: TrackGroup) => [
-  http.get("*/v1/artists/:artistSlug", () =>
-    HttpResponse.json({ result: ARTIST })
-  ),
-  http.get("*/v1/manage/artists", () =>
-    HttpResponse.json({ results: [ARTIST] })
-  ),
-  http.get("*/v1/manage/artists/:artistId", () =>
-    HttpResponse.json({ result: ARTIST })
-  ),
   http.get("*/v1/manage/trackGroups/:trackGroupId", () =>
     HttpResponse.json({ result: trackGroup })
   ),
@@ -128,21 +120,18 @@ const VIEWPORTS = {
   },
 };
 
-/**
- * The release editor at /manage/artists/:artistId/release/:trackGroupId:
- * album details, pricing, the track table and the upload box.
- *
- * #1350: on small screens the inputs in this form collapse and the track
- * table overflows. These stories default to a phone viewport to reproduce
- * that; `Desktop` is there for comparison.
- */
 const meta = {
   title: "ManageArtist/Release/EditRelease",
   component: ManageTrackGroupPage,
   parameters: {
     layout: "fullscreen",
     viewport: { viewports: VIEWPORTS, defaultViewport: "phone" },
-    msw: { handlers: { release: trackGroupHandlers(TRACK_GROUP) } },
+    msw: {
+      handlers: {
+        artist: artistHandlers(ARTIST),
+        release: trackGroupHandlers(TRACK_GROUP),
+      },
+    },
     reactRouter: reactRouterParameters({
       location: {
         pathParams: {

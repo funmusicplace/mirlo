@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
-  canUserCreateArtists,
+  canUserCreateArtistContent,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { serializeProfileSubscriptionTier } from "../../../../../../serializers/profileSubscriptionTier";
@@ -20,13 +20,13 @@ export default function () {
   const operations = {
     GET: [
       userAuthenticated,
-      canUserCreateArtists,
+      canUserCreateArtistContent,
       artistBelongsToLoggedInUser,
       GET,
     ],
     POST: [
       userAuthenticated,
-      canUserCreateArtists,
+      canUserCreateArtistContent,
       artistBelongsToLoggedInUser,
       POST,
     ],

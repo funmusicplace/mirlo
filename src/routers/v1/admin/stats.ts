@@ -3,6 +3,8 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { getSiteSettings } from "../../../utils/settings";
+import { transactionSellerLinks } from "../../../utils/transactionSellers";
 
 /**
  * The x-axis of every chart on the admin dashboard. Postgres buckets weeks to
@@ -102,8 +104,15 @@ const avgPerMonth = async (
  * `amount`/`currency` are presentment values, so USD charges are summed
  * directly while foreign charges are counted through the frozen
  * `platformCurrencyAmount`/`exchangeRate` reporting fields.
+ *
+ * `instanceProfileUsdCents` is what the instance's own artist profile took in,
+ * net of the platform cut so it doesn't double count `platformCut*`.
  */
-const revenuePerBucket = (granularity: Granularity, days: number) =>
+const revenuePerBucket = (
+  granularity: Granularity,
+  days: number,
+  instanceProfileId: number | null
+) =>
   prisma.$queryRaw<
     Array<{
       date: string;
@@ -113,6 +122,7 @@ const revenuePerBucket = (granularity: Granularity, days: number) =>
       subscriptionsConvertedUsdCents: number;
       platformCutUsdCents: number;
       platformCutConvertedUsdCents: number;
+      instanceProfileUsdCents: number;
     }>
   >`
     WITH ${bucketSeries(granularity, days)},
@@ -129,6 +139,10 @@ const revenuePerBucket = (granularity: Granularity, days: number) =>
           SELECT 1 FROM "ProfileUserSubscriptionCharge" c
           WHERE c."transactionId" = t.id
         ) AS "isSubscription",
+        EXISTS (
+          SELECT 1 FROM (${transactionSellerLinks}) links
+          WHERE links.tx_id = t.id AND links."profileId" = ${instanceProfileId}
+        ) AS "isInstanceProfile",
         -- Foreign charges only count once they were settled into USD.
         (t.currency != 'usd' AND t."platformCurrency" = 'usd') AS "isUsdConverted"
       FROM "UserTransaction" t
@@ -142,7 +156,12 @@ const revenuePerBucket = (granularity: Granularity, days: number) =>
       COALESCE(SUM(CASE WHEN tx."isUsdConverted" AND NOT tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "purchasesConvertedUsdCents",
       COALESCE(SUM(CASE WHEN tx."isUsdConverted" AND tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "subscriptionsConvertedUsdCents",
       COALESCE(SUM(CASE WHEN tx.currency = 'usd' THEN tx."platformCut" END), 0)::double precision AS "platformCutUsdCents",
-      COALESCE(SUM(CASE WHEN tx."isUsdConverted" THEN ROUND(tx."platformCut" * tx."exchangeRate") END), 0)::double precision AS "platformCutConvertedUsdCents"
+      COALESCE(SUM(CASE WHEN tx."isUsdConverted" THEN ROUND(tx."platformCut" * tx."exchangeRate") END), 0)::double precision AS "platformCutConvertedUsdCents",
+      COALESCE(SUM(CASE
+        WHEN NOT tx."isInstanceProfile" THEN NULL
+        WHEN tx.currency = 'usd' THEN tx.amount - COALESCE(tx."platformCut", 0)
+        WHEN tx."isUsdConverted" THEN tx."platformCurrencyAmount" - ROUND(COALESCE(tx."platformCut", 0) * tx."exchangeRate")
+      END), 0)::double precision AS "instanceProfileUsdCents"
     FROM buckets
     LEFT JOIN tx ON DATE_TRUNC(${granularity}, tx."createdAt") = buckets.bucket_start
     GROUP BY buckets.bucket_start
@@ -191,6 +210,15 @@ export default function () {
       const granularity: Granularity =
         req.query.granularity === "month" ? "month" : "week";
 
+      const settings = await getSiteSettings();
+      const parsedInstanceProfileId = Number(
+        settings.settings?.instanceCustomization?.artistId
+      );
+      const instanceProfileId =
+        Number.isInteger(parsedInstanceProfileId) && parsedInstanceProfileId > 0
+          ? parsedInstanceProfileId
+          : null;
+
       const [
         userSignups,
         artistSignups,
@@ -202,7 +230,7 @@ export default function () {
       ] = await Promise.all([
         countPerBucket("User", granularity, days),
         countPerBucket("Profile", granularity, days),
-        revenuePerBucket(granularity, days),
+        revenuePerBucket(granularity, days, instanceProfileId),
         transactionCountsPerBucket(granularity, days),
         avgPerMonth(Prisma.sql`"TrackPlay"`, Prisma.sql`COUNT(*)`),
         avgPerMonth(

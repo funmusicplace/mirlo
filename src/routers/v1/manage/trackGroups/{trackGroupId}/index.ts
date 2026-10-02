@@ -45,6 +45,17 @@ const resolveTargetProfileId = async (
     return currentProfileId;
   }
 
+  const isManagerOfSource = await prisma.profileManager.findFirst({
+    where: { profileId: currentProfileId, userId: user.id },
+    select: { profileId: true },
+  });
+  if (isManagerOfSource && !user.isAdmin) {
+    throw new AppError({
+      httpCode: 403,
+      description: "Only the owner of this artist can move its releases",
+    });
+  }
+
   const destination = await prisma.profile.findFirst({
     where: {
       id: profileId,

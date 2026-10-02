@@ -6,9 +6,11 @@ import {
   canUserCreateProfiles,
   userAuthenticated,
 } from "../../../../auth/passport";
+import { serializeProfile } from "../../../../serializers/artist";
+import { serializeManagedProfile } from "../../../../serializers/profileManager";
+import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
-import { serializeProfile } from "../../../../serializers/artist";
 import { getSiteSettings } from "../../../../utils/settings";
 
 const forbiddenNames = [
@@ -53,22 +55,20 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      const where = {
-        userId: Number(loggedInUser.id),
-      };
       const profiles = await prisma.profile.findMany({
-        where,
+        where: whereForProfilesUserOwnsOrManages(loggedInUser.id),
         select: {
           id: true,
           name: true,
           urlSlug: true,
           isLabelProfile: true,
           avatar: true,
+          userId: true,
         },
       });
       res.json({
-        results: profiles.map((artistProfile) =>
-          serializeProfile(artistProfile as any, Number(loggedInUser.id))
+        results: profiles.map((profile) =>
+          serializeManagedProfile(profile, loggedInUser.id)
         ),
       });
     } catch (e) {
@@ -77,7 +77,8 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns user artists",
+    summary:
+      "Returns artists the user owns or manages. Each has a `relationship` of `owner` or `manager`",
     responses: {
       200: {
         description: "A track that matches the id",

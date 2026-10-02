@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { transactionSellerLinks } from "../../../utils/transactionSellers";
 
 type Period = "month" | "year";
 
@@ -71,32 +72,7 @@ const topSellers = (period: Period) =>
     WITH ${transactionsInPeriod(period)},
     sellers AS (
       SELECT DISTINCT ON (links.tx_id) links.tx_id, links."profileId"
-      FROM (
-        SELECT x."userTransactionId" AS tx_id, tg."profileId"
-        FROM "UserTrackGroupPurchase" x
-        JOIN "TrackGroup" tg ON tg.id = x."trackGroupId"
-        UNION ALL
-        SELECT x."transactionId", tg."profileId"
-        FROM "UserTrackPurchase" x
-        JOIN "Track" tr ON tr.id = x."trackId"
-        JOIN "TrackGroup" tg ON tg.id = tr."trackGroupId"
-        UNION ALL
-        SELECT x."transactionId", m."profileId"
-        FROM "MerchPurchase" x
-        JOIN "Merch" m ON m.id = x."merchId"
-        UNION ALL
-        SELECT x."transactionId", x."profileId"
-        FROM "UserProfileTip" x
-        UNION ALL
-        SELECT x."transactionId", st."profileId"
-        FROM "ProfileUserSubscriptionCharge" x
-        JOIN "ProfileUserSubscription" s ON s.id = x."profileUserSubscriptionId"
-        JOIN "ProfileSubscriptionTier" st ON st.id = s."profileSubscriptionTierId"
-        UNION ALL
-        SELECT x."associatedTransactionId", tg."profileId"
-        FROM "FundraiserPledge" x
-        JOIN "TrackGroup" tg ON tg.id = x."trackGroupId"
-      ) links
+      FROM (${transactionSellerLinks}) links
       JOIN tx ON tx.id = links.tx_id
     )
     SELECT

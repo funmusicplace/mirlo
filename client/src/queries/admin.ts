@@ -29,6 +29,7 @@ export interface StatsRevenuePoint {
   subscriptionsConvertedUsdCents: number;
   platformCutUsdCents: number;
   platformCutConvertedUsdCents: number;
+  instanceProfileUsdCents: number;
 }
 
 export interface AdminStats {

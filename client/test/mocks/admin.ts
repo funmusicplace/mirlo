@@ -108,6 +108,7 @@ export const makeAdminStats = (granularity: StatsGranularity): AdminStats => {
       subscriptionsConvertedUsdCents: wave(index, 15000, 300),
       platformCutUsdCents: wave(index, 19000, 280),
       platformCutConvertedUsdCents: wave(index, 3900, 60),
+      instanceProfileUsdCents: wave(index, 6000, 90),
     })),
     transactionCounts: ["usd", "eur", "gbp"].flatMap((currency, rank) =>
       dates.map((date, index) => ({

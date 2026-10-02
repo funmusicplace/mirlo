@@ -10,25 +10,29 @@ import { getClient } from "../utils/getClient";
 
 import sendMail from "./send-mail";
 
+type ReportSale = {
+  artist: { name: string; id: number }[];
+  datePurchased: string;
+  saleType: string;
+  title: string;
+  user: { name: string; email: string };
+  currency: string;
+  amount: number;
+  artistUserSubscriptionCharges?: {
+    artistUserSubscription?: {
+      artistSubscriptionTier: {
+        name: string;
+        interval: string;
+      };
+    };
+  }[];
+};
+
 export type MonthlyIncomeReportEmailType = {
   user: { name: string; email: string };
-  userSales: {
-    artist: { name: string; id: number }[];
-    datePurchased: string;
-    saleType: string;
-    title: string;
-    user: { name: string; email: string };
-    currency: string;
-    amount: number;
-    artistUserSubscriptionCharges?: {
-      artistUserSubscription?: {
-        artistSubscriptionTier: {
-          name: string;
-          interval: string;
-        };
-      };
-    }[];
-  }[];
+  /** One-off sales: albums, tracks, merch and tips. */
+  sales: (ReportSale & { saleTypeLabel: string })[];
+  subscriptionPayments: ReportSale[];
   cancelledSubscriptions: {
     amount: number;
     deleteReason: string | null;
@@ -39,7 +43,11 @@ export type MonthlyIncomeReportEmailType = {
       artist: { user: { currency: string | null } };
     };
   }[];
+  salesTotal: number;
+  subscriptionTotal: number;
   totalIncome: number;
+  /** Artists sell in a single currency, so one code labels every amount. */
+  currency: string;
   host: string;
   client: string;
 };
@@ -52,6 +60,21 @@ const deleteReasonLabels: Record<SubscriptionDeleteReason, string> = {
   ARTIST_CANCELLED: "Cancelled by you",
   TIER_SWITCHED: "Switched tiers",
 };
+
+type Sale = Awaited<ReturnType<typeof findSales>>[number];
+
+const isSubscriptionPayment = (sale: Sale) =>
+  sale.profileUserSubscriptionCharges.length > 0;
+
+const saleTypeLabel = (sale: Sale) => {
+  if (sale.merchPurchases.length) return "Merch";
+  if (sale.trackGroupPurchases.length) return "Album";
+  if (sale.trackPurchases.length) return "Track";
+  return "Tip";
+};
+
+const sumAmounts = (sales: { amount: number }[]) =>
+  sales.reduce((sum, sale) => sum + sale.amount, 0);
 
 const sendOutMonthlyIncomeReport = async () => {
   try {
@@ -77,8 +100,6 @@ const sendOutMonthlyIncomeReport = async () => {
       orderBy: { datePurchased: "asc" },
     });
 
-    // Only artists with sales last month receive a report, so buyers and
-    // cancellations are both scoped to (and depend only on) `sales`.
     const [buyerRows, cancelledSubscriptions] = await Promise.all([
       // findSales doesn't return the buyer (the public supporters endpoint
       // uses it too, so it must not carry buyer PII) — look buyers up
@@ -89,7 +110,8 @@ const sendOutMonthlyIncomeReport = async () => {
       }),
       // Subscriptions that ended last month. TIER_SWITCHED is excluded: the
       // supporter is still subscribed on another tier, so it isn't lost
-      // income.
+      // income. An artist whose only news is a cancellation still gets a
+      // report, so this isn't scoped to `sales`.
       prisma.profileUserSubscription.findMany({
         where: {
           deletedAt: { gte: startOfLastMonth, lt: endOfLastMonth },
@@ -98,10 +120,7 @@ const sendOutMonthlyIncomeReport = async () => {
             { deleteReason: { not: "TIER_SWITCHED" } },
           ],
           profileSubscriptionTier: {
-            profile: {
-              deletedAt: null,
-              userId: { in: uniq(sales.map((sale) => sale.artist[0].userId)) },
-            },
+            profile: { deletedAt: null },
           },
         },
         select: {
@@ -130,22 +149,39 @@ const sendOutMonthlyIncomeReport = async () => {
       (subscription) => subscription.profileSubscriptionTier.profile.userId
     );
 
-    const mappedArtists = keyBy(allArtists, "id");
+    const artistUsers = keyBy(allArtists, "userId");
     const clientUrl = (await getClient()).applicationUrl;
 
     const groupedSales = groupBy(sales, (a) => a.artist[0].userId);
-    for (const [userId, userSales] of Object.entries(groupedSales)) {
-      if (userSales.length === 0) {
+    const recipientIds = uniq([
+      ...Object.keys(groupedSales),
+      ...Object.keys(groupedCancellations),
+    ]);
+    for (const userId of recipientIds) {
+      const userSales = groupedSales[userId] ?? [];
+      const cancellations = groupedCancellations[userId] ?? [];
+      const artistUser = artistUsers[userId]?.user;
+      if (!artistUser) {
         continue;
       }
-      const artist = userSales[0].artist;
-      const totalIncome = userSales.reduce((sum, sale) => sum + sale.amount, 0);
+
+      const serializeSale = (sale: Sale) =>
+        serializeUserTransaction({
+          ...sale,
+          user: {
+            name: buyers[sale.userId]?.name || "A supporter",
+            email: buyers[sale.userId]?.email || "",
+          },
+        });
+      const oneOffSales = userSales.filter(
+        (sale) => !isSubscriptionPayment(sale)
+      );
+      const subscriptionPayments = userSales.filter(isSubscriptionPayment);
+      const salesTotal = sumAmounts(oneOffSales);
+      const subscriptionTotal = sumAmounts(subscriptionPayments);
 
       // Ensure user.name is not null
-      const user = {
-        ...mappedArtists[Number(artist[0].id)]?.user,
-        name: mappedArtists[Number(artist[0].id)]?.user?.name || "",
-      };
+      const user = { ...artistUser, name: artistUser.name || "" };
       try {
         await sendMail<MonthlyIncomeReportEmailType>({
           data: {
@@ -155,19 +191,22 @@ const sendOutMonthlyIncomeReport = async () => {
             },
             locals: {
               user,
-              userSales: userSales.map((sale) =>
-                serializeUserTransaction({
-                  ...sale,
-                  user: {
-                    name: buyers[sale.userId]?.name || "A supporter",
-                    email: buyers[sale.userId]?.email || "",
-                  },
-                })
+              sales: oneOffSales.map((sale) => ({
+                ...serializeSale(sale),
+                saleTypeLabel: saleTypeLabel(sale),
+              })),
+              subscriptionPayments: subscriptionPayments.map(serializeSale),
+              cancelledSubscriptions: cancellations.map((subscription) =>
+                serializeProfileUserSubscription(subscription)
               ),
-              cancelledSubscriptions: (groupedCancellations[userId] ?? []).map(
-                (subscription) => serializeProfileUserSubscription(subscription)
-              ),
-              totalIncome,
+              salesTotal,
+              subscriptionTotal,
+              totalIncome: salesTotal + subscriptionTotal,
+              currency:
+                userSales[0]?.currency ||
+                cancellations[0]?.profileSubscriptionTier.profile.user
+                  .currency ||
+                "usd",
               host: process.env.API_DOMAIN || "",
               client: clientUrl,
             },

@@ -142,6 +142,8 @@ export const deleteUser = async (userId: number) => {
     },
   });
 
+  await prisma.profileManager.deleteMany({ where: { userId } });
+
   await anonymiseDeletedUser(userId);
   await prisma.user.delete({ where: { id: userId } });
 };

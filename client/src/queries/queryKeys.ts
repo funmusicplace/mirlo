@@ -65,6 +65,12 @@ export const QUERY_KEY_NOTIFICATIONS = "notifications";
  */
 export const QUERY_KEY_LABELS = "labels";
 
+/**
+ * Categorizes queries about who manages an artist, and the logged in user's
+ * pending invites to manage artists.
+ */
+export const QUERY_KEY_ARTIST_MANAGERS = "artistManagers";
+
 export type QueryTag =
   | typeof QUERY_KEY_AUTH
   | typeof QUERY_KEY_ARTISTS
@@ -76,7 +82,8 @@ export type QueryTag =
   | typeof QUERY_KEY_TAGS
   | typeof QUERY_KEY_POSTS
   | typeof QUERY_KEY_NOTIFICATIONS
-  | typeof QUERY_KEY_LABELS;
+  | typeof QUERY_KEY_LABELS
+  | typeof QUERY_KEY_ARTIST_MANAGERS;
 
 export type QueryArgs = {
   artistId: number;

@@ -8,6 +8,7 @@ import { Toggle } from "components/common/Toggle";
 import DeleteArtist from "components/ManageArtist/DeleteArtist";
 import ArtistFormColors from "components/ManageArtist/ManageArtistDetails/ArtistFormColors";
 import ArtistIdentitySection from "components/ManageArtist/ManageArtistDetails/ArtistIdentitySection";
+import ArtistManagers from "components/ManageArtist/ManageArtistDetails/ArtistManagers";
 import ArtistPaymentReceiver from "components/ManageArtist/ManageArtistDetails/ArtistPaymentReceiver";
 import CustomNamesForTabs from "components/ManageArtist/ManageArtistDetails/CustomNamesForTabs";
 import LabelConfirmation from "components/ManageArtist/ManageArtistDetails/LabelConfirmation";
@@ -25,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import useArtistRelationship from "utils/useArtistRelationship";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 import { bp } from "../../../../../constants";
@@ -120,6 +122,7 @@ export const Index: React.FC = () => {
   const { user } = useAuthContext();
   const userId = user?.id;
   const { data: artist, refetch: refetchArtist } = useManagedArtistQuery();
+  const { hasOwnerRights } = useArtistRelationship(artist);
 
   const methods = useForm<ArtistFormData>({
     defaultValues: generateDefaults(artist),
@@ -380,15 +383,19 @@ export const Index: React.FC = () => {
           </div>
         </form>
       </FormProvider>
-      {!artist.isLabelProfile && <LabelConfirmation />}
+      <ArtistFormSection isOdd>
+        <ArtistManagers artist={artist} />
+      </ArtistFormSection>
 
-      {!artist.isLabelProfile && (
+      {hasOwnerRights && !artist.isLabelProfile && <LabelConfirmation />}
+
+      {hasOwnerRights && !artist.isLabelProfile && (
         <ArtistFormSection>
           <ArtistPaymentReceiver artist={artist} />
         </ArtistFormSection>
       )}
 
-      {!artist.isLabelProfile && <DeleteArtist />}
+      {hasOwnerRights && !artist.isLabelProfile && <DeleteArtist />}
     </div>
   );
 };

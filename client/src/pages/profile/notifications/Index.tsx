@@ -22,6 +22,7 @@ const ACTIVITY_TYPES: Notification["notificationType"][] = [
   "USER_BOUGHT_YOUR_ALBUM",
   "USER_BOUGHT_YOUR_TRACK",
   "LABEL_ADDED_ARTIST",
+  "PROFILE_MANAGER_INVITE",
   "FUNDRAISER_PLEDGE_CHARGED",
   "ARTIST_CONTACT_MESSAGE",
 ];
@@ -61,6 +62,14 @@ const Index = () => {
     ...queryNotifications(user?.id, {
       take: 1,
       notificationType: ["LABEL_ADDED_ARTIST"],
+    }),
+    enabled: !!user?.id,
+  });
+
+  const { data: teamCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["PROFILE_MANAGER_INVITE"],
     }),
     enabled: !!user?.id,
   });
@@ -115,6 +124,17 @@ const Index = () => {
             value: "labels",
             label: t("categoryLabels"),
             types: ["LABEL_ADDED_ARTIST"] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+    ...(hasNotifications(teamCheck)
+      ? [
+          {
+            value: "team",
+            label: t("categoryTeam"),
+            types: [
+              "PROFILE_MANAGER_INVITE",
+            ] as Notification["notificationType"][],
           },
         ]
       : []),

@@ -226,7 +226,8 @@
     "fulfillment": "Order fulfillment",
     "viewSalesPage": "View sales",
     "menu": "Menu",
-    "main": "Main"
+    "main": "Main",
+    "sharedWithYou": "Shared"
   },
   "headerSearch": {
     "noResults": "Hmm, couldn't find anything for that search",
@@ -880,7 +881,19 @@
     "stripeResetCodeFailed": "Couldn't send the verification code. Try again in a moment.",
     "verificationCodeLabel": "Verification code",
     "confirmPasswordLabel": "Password",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "artistInvites": "Invites to manage artists",
+    "inviteFromTo": "<bold>{{inviterName}}</bold> invited you to help manage <bold>{{artistName}}</bold>.",
+    "someone": "Someone",
+    "acceptInvite": "Accept",
+    "declineInvite": "Decline",
+    "acceptInviteNamed": "Accept invite to manage {{artistName}}",
+    "declineInviteNamed": "Decline invite to manage {{artistName}}",
+    "inviteActionError": "Something went wrong. Please try again.",
+    "noPendingInvites": "You have no pending invites.",
+    "inviteAccepted": "You can now manage {{artistName}}",
+    "inviteDeclined": "Invite declined",
+    "sharedWithYou": "Shared with you"
   },
   "manageArtist": {
     "manageLinks": "Manage links",
@@ -1013,7 +1026,9 @@
     "noReleases": "No releases found",
     "selected": "Selected",
     "saving": "Saving changes...",
-    "doesNotExist": "This artist page does not exist."
+    "doesNotExist": "This artist page does not exist.",
+    "viewingAsManager": "You're helping manage this artist. Only the owner can change payouts, labels or the team, or delete the artist.",
+    "ownerPaymentProcessorNotSetUp": "The owner of this artist hasn't set up payments yet, so fans can't buy anything here."
   },
   "managePost": {
     "untitledPost": "Untitled post",
@@ -1444,7 +1459,29 @@
     "chooseALabel": "Choose a label",
     "savePaymentReceiver": "Save",
     "paymentReceiverUpdated": "Payment receiver updated",
-    "paymentReceiverUpdateFailed": "We couldn't update the payment receiver"
+    "paymentReceiverUpdateFailed": "We couldn't update the payment receiver",
+    "teamTitle": "Team",
+    "teamDescription": "People you invite can edit this artist's page, releases, merch and posts, and see its sales and supporters. Only you can change payouts, labels or the team, or delete the artist.",
+    "teamManagerDescription": "Only the owner of this artist can invite or remove people.",
+    "teamEmpty": "Nobody else manages this artist yet.",
+    "teamPending": "Invite pending",
+    "teamActive": "Active",
+    "teamStatus": "Status",
+    "teamNoName": "No name set",
+    "teamActionError": "Something went wrong. Please try again.",
+    "inviteEmailLabel": "Invite someone by email",
+    "inviteEmailHint": "They need to have an account here already.",
+    "sendInvite": "Send invite",
+    "inviteSent": "Invite sent",
+    "inviteNoAccount": "No account uses that email.",
+    "inviteAlreadyInvited": "That person has already been invited.",
+    "inviteIsOwner": "That's the email of this artist's owner.",
+    "inviteError": "Something went wrong sending the invite.",
+    "removeManager": "Remove",
+    "removeManagerNamed": "Remove {{name}}",
+    "removeManagerConfirm": "Remove {{name}}'s access to this artist?",
+    "leaveArtist": "Remove my access",
+    "leaveArtistConfirm": "Remove your access to this artist? The owner would need to invite you again."
   },
   "manageSubscriptions": {
     "uploadSubscribers": "Upload subscriber e-mail addresses",
@@ -1586,8 +1623,12 @@
     "categoryPurchases": "Purchases",
     "categoryPledges": "Pledges",
     "categoryLabels": "Labels",
+    "categoryTeam": "Team",
     "categoryMessages": "Messages",
-    "viewMessage": "View message"
+    "viewMessage": "View message",
+    "managerInviteTag": "Team",
+    "inviteToManageArtist": "<bold>{{inviterName}}</bold> invited you to help manage <artistLink>{{artistName}}</artistLink>.",
+    "reviewInvite": "Go to your artists"
   },
   "kickstarter": {
     "donateNow": "Donate now"
@@ -1777,6 +1818,7 @@
     "subscriptionsConverted": "Subscriptions (converted to USD)",
     "platformCut": "Platform cut (USD)",
     "platformCutConverted": "Platform cut (converted from foreign)",
+    "instanceProfileIncome": "Instance artist income",
     "topAccountsOverThePast": "Top accounts over the past",
     "loadingTopAccounts": "Loading top accounts...",
     "topSellers": "Top 50 Sellers",

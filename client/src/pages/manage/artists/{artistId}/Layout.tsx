@@ -12,6 +12,7 @@ import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
+import useArtistRelationship from "utils/useArtistRelationship";
 
 import { bp, pageScaleCascade } from "../../../../constants";
 
@@ -78,6 +79,7 @@ const Layout: React.FC<{}> = () => {
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryManagedArtist(Number(artistId))
   );
+  const { relationship } = useArtistRelationship(artist);
 
   const hasLabel = artist?.artistLabels?.find((al) => al.labelUser.id);
 
@@ -141,34 +143,44 @@ const Layout: React.FC<{}> = () => {
         <div>
           {hasTopWarning && (
             <div className="pt-4 max-md:px-2 max-md:text-sm">
-              {user && artist.userId !== user.id && user.isAdmin && (
+              {relationship === "admin" && (
                 <ArtistBox variant="warning">
                   You are viewing this artist as an admin
                 </ArtistBox>
               )}
 
-              {user && artist.userId !== user.id && !user.isAdmin && (
+              {relationship === "label" && (
                 <ArtistBox variant="warning">
                   You are viewing this user as their label
                 </ArtistBox>
+              )}
+
+              {relationship === "manager" && (
+                <ArtistBox variant="info">{t("viewingAsManager")}</ArtistBox>
               )}
               {user &&
                 stripeAccountStatus &&
                 !stripeAccountStatus?.chargesEnabled && (
                   <ArtistBox variant="warning">
-                    <p>
-                      <Trans
-                        t={t}
-                        i18nKey={"paymentProcessorNotSetUp"}
-                        components={{
-                          manage: (
-                            <a
-                              href={api.paymentProcessor.stripeConnect(user.id)}
-                            ></a>
-                          ),
-                        }}
-                      />
-                    </p>
+                    {relationship === "owner" ? (
+                      <p>
+                        <Trans
+                          t={t}
+                          i18nKey={"paymentProcessorNotSetUp"}
+                          components={{
+                            manage: (
+                              <a
+                                href={api.paymentProcessor.stripeConnect(
+                                  user.id
+                                )}
+                              ></a>
+                            ),
+                          }}
+                        />
+                      </p>
+                    ) : (
+                      <p>{t("ownerPaymentProcessorNotSetUp")}</p>
+                    )}
                     {labelStripeAccountStatus && labelProfile && (
                       <p>
                         <Trans

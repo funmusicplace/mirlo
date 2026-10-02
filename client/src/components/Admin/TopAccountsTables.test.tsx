@@ -121,17 +121,17 @@ describe("TopAccountsTables", () => {
     expect(screen.getByText("77")).toBeInTheDocument();
   });
 
-  test("collapses long tables to 15 rows until expanded", async () => {
+  test("collapses long tables to 10 rows until expanded", async () => {
     renderTables();
 
-    await waitFor(() => screen.getByText("Uploader 15"));
-    expect(screen.queryByText("Uploader 16")).not.toBeInTheDocument();
+    await waitFor(() => screen.getByText("Uploader 10"));
+    expect(screen.queryByText("Uploader 11")).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByText("Show all 20"));
     expect(screen.getByText("Uploader 20")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByText("Show top 15 only"));
-    expect(screen.queryByText("Uploader 16")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByText("Show top 10 only"));
+    expect(screen.queryByText("Uploader 11")).not.toBeInTheDocument();
   });
 
   test("refetches for the past year when the period is switched", async () => {

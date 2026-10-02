@@ -227,7 +227,8 @@ interface Notification {
     | "USER_SUBSCRIBED_TO_YOU"
     | "LABEL_ADDED_ARTIST"
     | "FUNDRAISER_PLEDGE_CHARGED"
-    | "ARTIST_CONTACT_MESSAGE";
+    | "ARTIST_CONTACT_MESSAGE"
+    | "PROFILE_MANAGER_INVITE";
   post?: Post;
   relatedUser?: User & {
     userAvatar?: { sizes?: { [key: number]: string } };

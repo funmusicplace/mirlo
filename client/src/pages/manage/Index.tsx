@@ -1,36 +1,33 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
 import AccountNav from "components/Account/AccountNav";
+import { ButtonLink } from "components/common/Button";
 import StripeStatus from "components/common/stripe/StripeStatusAndButton";
 import WidthContainer from "components/common/WidthContainer";
+import ArtistInvites from "components/ManageArtist/ArtistInvites";
+import { queryManagedArtists } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPlus } from "react-icons/fa";
-import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../../constants";
-import { ButtonLink } from "components/common/Button";
 
 export const Index: React.FC = () => {
   const { user } = useAuthContext();
-  const [artists, setArtists] = React.useState<Artist[]>([]);
+  const { data: { results: artists = [] } = {} } = useQuery({
+    ...queryManagedArtists(),
+    enabled: !!user,
+  });
 
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
-  const userId = user?.id;
-
-  const fetchArtists = React.useCallback(async () => {
-    if (userId) {
-      const fetchedArtists = await api.getMany<Artist>(`manage/artists`);
-      if (fetchedArtists) {
-        setArtists(fetchedArtists.results);
-      }
-    }
-  }, [userId]);
-
-  React.useEffect(() => {
-    fetchArtists();
-  }, [fetchArtists]);
+  const ownedArtists = artists.filter(
+    (a) => !a.isLabelProfile && a.relationship === "owner"
+  );
+  const sharedArtists = artists.filter(
+    (a) => !a.isLabelProfile && a.relationship === "manager"
+  );
 
   return (
     <>
@@ -63,6 +60,7 @@ export const Index: React.FC = () => {
               Add from CSV
             </ButtonLink>
           </div>
+          <ArtistInvites />
 
           <div
             className={css`
@@ -81,17 +79,15 @@ export const Index: React.FC = () => {
                 gap: 1rem;
               `}
             >
-              {artists
-                .filter((a) => !a.isLabelProfile)
-                .map((a) => (
-                  <ButtonLink
-                    key={a.id}
-                    to={`artists/${a.id}`}
-                    variant="outlined"
-                  >
-                    {a.name}
-                  </ButtonLink>
-                ))}
+              {ownedArtists.map((a) => (
+                <ButtonLink
+                  key={a.id}
+                  to={`artists/${a.id}`}
+                  variant="outlined"
+                >
+                  {a.name}
+                </ButtonLink>
+              ))}
               <ButtonLink
                 wrap
                 to="/manage/welcome"
@@ -107,6 +103,22 @@ export const Index: React.FC = () => {
               </ButtonLink>
             </div>
           </div>
+          {sharedArtists.length > 0 && (
+            <section className="mt-8">
+              <h2>{t("sharedWithYou")}</h2>
+              <div className="flex flex-wrap items-center gap-4 mt-4">
+                {sharedArtists.map((a) => (
+                  <ButtonLink
+                    key={a.id}
+                    to={`artists/${a.id}`}
+                    variant="outlined"
+                  >
+                    {a.name}
+                  </ButtonLink>
+                ))}
+              </div>
+            </section>
+          )}
           <div
             className={css`
               margin-top: 3rem;
