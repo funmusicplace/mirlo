@@ -19,6 +19,48 @@ export const attachRequestId = (
   next();
 };
 
+const HEAVY_REQUEST_DURATION_MS = 2000;
+const HEAVY_REQUEST_MEMORY_BYTES = 50 * 1024 * 1024;
+
+const toMb = (bytes: number) => Math.round(bytes / 1024 / 1024);
+
+export const logHeavyRequests = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const start = process.hrtime.bigint();
+  const before = process.memoryUsage();
+  let logged = false;
+
+  const onDone = () => {
+    if (logged) {
+      return;
+    }
+    logged = true;
+    const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
+    const after = process.memoryUsage();
+    const heapDelta = after.heapUsed - before.heapUsed;
+    const rssDelta = after.rss - before.rss;
+
+    if (
+      durationMs < HEAVY_REQUEST_DURATION_MS &&
+      heapDelta < HEAVY_REQUEST_MEMORY_BYTES &&
+      rssDelta < HEAVY_REQUEST_MEMORY_BYTES
+    ) {
+      return;
+    }
+
+    (req.logger ?? logger).warn(
+      `heavy-request: ${req.method} ${req.originalUrl.split("?")[0]} status=${res.statusCode} finished=${res.writableFinished} durationMs=${Math.round(durationMs)} heapDelta=${toMb(heapDelta)}MB rssDelta=${toMb(rssDelta)}MB heapUsed=${toMb(after.heapUsed)}MB rss=${toMb(after.rss)}MB contentLength=${res.getHeader("content-length") ?? "-"}`
+    );
+  };
+
+  res.on("finish", onDone);
+  res.on("close", onDone);
+  next();
+};
+
 const SENSITIVE_HEADERS = new Set([
   "authorization",
   "proxy-authorization",

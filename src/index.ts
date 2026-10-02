@@ -39,6 +39,7 @@ import {
 import { getCachedPage } from "./utils/pageCache";
 import {
   attachRequestId,
+  logHeavyRequests,
   sanitizeHeadersForLogs,
 } from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
@@ -85,6 +86,7 @@ app.get("/x-forwarded-for", (request, response) =>
 );
 
 app.use(attachRequestId);
+app.use(logHeavyRequests);
 app.use(corsMiddleware);
 app.use(cookieParser());
 // @fedify/express's fromERequest builds the request URL using req.host, which
