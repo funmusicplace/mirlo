@@ -1,3 +1,4 @@
+import AdminDeleteUser from "components/Admin/AdminDeleteUser";
 import TrustLevelHistoryModal from "components/Admin/TrustLevelHistoryModal";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
@@ -9,14 +10,8 @@ import { formatDate as formatDateForLocale } from "components/TrackGroup/Release
 import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  FaArrowCircleLeft,
-  FaCheck,
-  FaHistory,
-  FaTimes,
-  FaTrash,
-} from "react-icons/fa";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { FaArrowCircleLeft, FaCheck, FaHistory, FaTimes } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
@@ -31,7 +26,6 @@ const Index = () => {
     React.useState(false);
   const emailStatusCellRef = React.useRef<HTMLTableCellElement>(null);
   const snackbar = useSnackbar();
-  const navigate = useNavigate();
   const { i18n } = useTranslation();
   const { trustLevelNames } = useInstanceSettings();
 
@@ -85,18 +79,6 @@ const Index = () => {
     ) {
       await api.post(`admin/users/${id}/loginAsUser`, {});
       window.location.href = "/";
-    }
-  }, [id, user?.email]);
-
-  const onDeleteClick = React.useCallback(async () => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete user ${user?.email}? This action cannot be undone.`
-      )
-    ) {
-      await api.delete(`admin/users/${id}`);
-      snackbar(`User ${user?.email} deleted`, { type: "success" });
-      navigate("/admin/content/users");
     }
   }, [id, user?.email]);
 
@@ -407,20 +389,7 @@ const Index = () => {
               </tr>
             </tbody>
           </Table>
-          <section className="mt-8 flex flex-col items-start gap-2">
-            <h3>Delete user</h3>
-            <small>
-              This permanently deletes the user, their artists and everything
-              attached to them. It cannot be undone.
-            </small>
-            <Button
-              buttonRole="warning"
-              startIcon={<FaTrash />}
-              onClick={onDeleteClick}
-            >
-              Delete user
-            </Button>
-          </section>
+          <AdminDeleteUser user={user} />
         </div>
       </div>
       <TrustLevelHistoryModal

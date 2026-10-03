@@ -1,5 +1,6 @@
 import DisableArtistModal from "components/Admin/DisableArtistModal";
 import Button from "components/common/Button";
+import ConfirmDeleteModal from "components/common/ConfirmDeleteModal";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
@@ -12,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { FaArrowCircleLeft, FaTrash } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
 
@@ -24,15 +26,26 @@ const Index = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const [showDisableModal, setShowDisableModal] = React.useState(false);
 
-  const onDeleteClick = React.useCallback(async () => {
-    if (window.confirm(t("deleteArtistConfirm", { name: artist?.name }))) {
+  const { t: tArtistForm } = useTranslation("translation", {
+    keyPrefix: "artistForm",
+  });
+  const errorHandler = useErrorHandler();
+  const [isConfirmingDelete, setIsConfirmingDelete] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const onDelete = React.useCallback(async () => {
+    try {
+      setIsDeleting(true);
       await api.delete(`admin/artists/${id}`);
       snackbar(t("artistDeleteSuccess", { name: artist?.name }), {
         type: "success",
       });
       navigate("/admin/content/artists");
+    } catch (e) {
+      errorHandler(e);
+      setIsDeleting(false);
     }
-  }, [id, artist?.name, t]);
+  }, [id, artist?.name, t, snackbar, navigate, errorHandler]);
 
   const handleDisableToggle = React.useCallback(
     async (checked: boolean) => {
@@ -97,12 +110,30 @@ const Index = () => {
             className="mt-8"
             buttonRole="warning"
             startIcon={<FaTrash />}
-            onClick={onDeleteClick}
+            onClick={() => setIsConfirmingDelete(true)}
           >
             {t("deleteArtist")}
           </Button>
         </div>
       </div>
+
+      <ConfirmDeleteModal
+        open={isConfirmingDelete}
+        onClose={() => setIsConfirmingDelete(false)}
+        onConfirm={onDelete}
+        title={tArtistForm("deleteArtistModalTitle", {
+          artist: artist.name ?? artist.id,
+        })}
+        consequences={[
+          tArtistForm("deleteArtistConsequenceMusic"),
+          tArtistForm("deleteArtistConsequenceContent"),
+          tArtistForm("deleteArtistConsequenceSubscribers"),
+          tArtistForm("deleteArtistConsequenceUrl"),
+        ]}
+        confirmText={artist.name ?? String(artist.id)}
+        confirmLabel={t("deleteArtist")}
+        isDeleting={isDeleting}
+      />
 
       <DisableArtistModal
         artistId={artist.id}

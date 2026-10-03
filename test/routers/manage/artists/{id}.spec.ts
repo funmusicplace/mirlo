@@ -179,5 +179,26 @@ describe("manage/artists/{artistId}", () => {
 
       assert.equal(response.statusCode, 200);
     });
+
+    it("should let an admin delete an artist they don't own", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const { accessToken: adminAccessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+      const profile = await createProfile(user.id);
+      await createBucketIfNotExists(finalArtistAvatarBucket);
+
+      const response = await requestApp
+        .delete(`manage/artists/${profile.id}`)
+        .set("Cookie", [`jwt=${adminAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const deleted = await prisma.profile.findFirst({
+        where: { id: profile.id, deletedAt: { not: null } },
+      });
+      assert.notEqual(deleted, null);
+    });
   });
 });

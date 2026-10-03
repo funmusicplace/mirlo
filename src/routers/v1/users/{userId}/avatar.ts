@@ -1,14 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import {
-  artistBelongsToLoggedInUser,
-  userAuthenticated,
-} from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { processUserAvatar } from "../../../../queues/processImages";
 import busboy from "connect-busboy";
-import { User } from "@mirlo/prisma/client";
-import prisma from "@mirlo/prisma";
-import { deleteArtistAvatar } from "../../../../utils/artist";
+import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../auth/passport";
+import { processUserAvatar } from "../../../../queues/processImages";
+import { deleteUserAvatar } from "../../../../utils/artist";
 import { busboyOptions } from "../../../../utils/images";
 
 export default function () {
@@ -69,7 +65,7 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      await deleteArtistAvatar(loggedInUser.id);
+      await deleteUserAvatar(loggedInUser.id);
 
       res.json({ message: "Success" });
     } catch (error) {

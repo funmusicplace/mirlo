@@ -1703,7 +1703,6 @@
     "disableArtistButton": "Disable Artist",
     "disablingArtist": "Disabling...",
     "deleteArtist": "Delete artist",
-    "deleteArtistConfirm": "Are you sure you want to delete artist {{name}}? This action cannot be undone.",
     "artistDeleteSuccess": "Artist {{name}} deleted",
     "artistEnableSuccess": "Artist {{name}} enabled",
     "artistDisableSuccess": "Artist {{name}} disabled",
@@ -1797,7 +1796,15 @@
     "pledgeCollectionTrackGroupId": "Trigger pledge collection for track group id:",
     "triggerPledgeCollection": "Trigger pledge collection",
     "pledgeCollectionTriggered": "Pledge collection triggered",
-    "isClosedToPublicArtistSignupHint": "New users can only join through an <invitesLink>invite</invitesLink>."
+    "isClosedToPublicArtistSignupHint": "New users can only join through an <invitesLink>invite</invitesLink>.",
+    "deleteUser": "Delete user",
+    "deleteUserDescription": "This permanently deletes the user, their artists and everything attached to them. It cannot be undone.",
+    "deleteUserModalTitle": "Delete user {{email}}",
+    "deleteUserConsequenceArtists": "All of this user's artist pages are deleted, along with their music, posts and merch. Fans who bought their music will no longer be able to download it.",
+    "deleteUserConsequenceArtistSubscribers": "Everyone subscribed to their artist pages has their subscription cancelled.",
+    "deleteUserConsequenceCollection": "They lose access to everything in their collection, including music they've bought.",
+    "deleteUserConsequenceSubscriptions": "Their subscriptions to other artists are cancelled.",
+    "userDeleteSuccess": "User {{email}} deleted"
   },
   "adminDashboard": {
     "title": "Admin Dashboard",

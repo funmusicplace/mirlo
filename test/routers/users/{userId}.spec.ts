@@ -286,4 +286,60 @@ describe("users/{userId}", () => {
       assert.equal(confirmResponse.body.error, "No pending email change");
     });
   });
+
+  describe("DELETE", () => {
+    it("should delete the logged in user", async () => {
+      const { user, accessToken } = await createUser({
+        email: "user@testcom",
+      });
+
+      const response = await requestApp
+        .delete(`users/${user.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const deleted = await prisma.user.findUnique({ where: { id: user.id } });
+      assert.notEqual(deleted?.deletedAt, null);
+    });
+
+    it("should not let a user delete someone else", async () => {
+      const { accessToken } = await createUser({ email: "user@testcom" });
+      const { user: other } = await createUser({ email: "other@testcom" });
+
+      const response = await requestApp
+        .delete(`users/${other.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 401);
+      const untouched = await prisma.user.findUnique({
+        where: { id: other.id },
+      });
+      assert.equal(untouched?.deletedAt, null);
+    });
+
+    it("should delete the user in the URL when an admin calls it, not the admin", async () => {
+      const { user: admin, accessToken: adminAccessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+      const { user: other } = await createUser({ email: "other@testcom" });
+
+      const response = await requestApp
+        .delete(`users/${other.id}`)
+        .set("Cookie", [`jwt=${adminAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const deleted = await prisma.user.findUnique({
+        where: { id: other.id },
+      });
+      assert.notEqual(deleted?.deletedAt, null);
+      const stillAdmin = await prisma.user.findUnique({
+        where: { id: admin.id },
+      });
+      assert.equal(stillAdmin?.deletedAt, null);
+    });
+  });
 });
