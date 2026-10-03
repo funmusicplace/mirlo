@@ -1,12 +1,14 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { isEmpty } from "lodash";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useBroadcastPlayerSync } from "utils/playerSync";
+import { isSchemeLight } from "utils/themeVariables";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 
 import { bp } from "../../constants";
@@ -51,12 +53,10 @@ const Player = () => {
   const [playLimit, setPlayLimit] = React.useState<PlayLimit | null>(null);
   const mountId = React.useId();
   const isArtistPageLight = useIsArtistPageLight();
-  const tone =
-    isArtistPageLight === true
-      ? "light"
-      : isArtistPageLight === false
-        ? "dark"
-        : undefined;
+  const instanceSettings = useInstanceSettings();
+  const pageLight =
+    isArtistPageLight ?? isSchemeLight(instanceSettings.colors.background);
+  const tone = pageLight ? "light" : "dark";
 
   useBroadcastPlayerSync(
     React.useMemo(
@@ -85,7 +85,7 @@ const Player = () => {
   }
 
   // Portal to document.body is there to prevent the Player from using #artist-colors-root's CSS
-  // var cascade. Keeps a neutral Mirlo palette regardless of artist page.
+  // var cascade. Its fixed colors only follow the light or dark tone of the current page.
   return createPortal(
     <div
       data-tone={tone}

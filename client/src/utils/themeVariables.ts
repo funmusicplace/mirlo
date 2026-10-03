@@ -13,6 +13,7 @@ type ButtonTintOverlay = {
 };
 
 export type ThemeProfile = {
+  baseVariablePrefix: "--mi-" | "--mi-instance-";
   tint: { light: TintOverlay; dark: TintOverlay };
   buttonTint?: { light: ButtonTintOverlay; dark: ButtonTintOverlay };
   chipBrightness?: { light: string; dark: string };
@@ -26,6 +27,7 @@ const SITE_DARKEN: Rgb = [50, 0, 0];
 const FIXED_SCHEME_BRIGHTNESS_THRESHOLD = 100;
 
 export const SITE_THEME_PROFILE: ThemeProfile = {
+  baseVariablePrefix: "--mi-instance-",
   tint: {
     light: { color: SITE_DARKEN, alphas: [0.03, 0.2, 0.2] },
     dark: { color: WHITE, alphas: [0.08, 0.18, 0.35] },
@@ -35,6 +37,7 @@ export const SITE_THEME_PROFILE: ThemeProfile = {
 };
 
 export const ARTIST_THEME_PROFILE: ThemeProfile = {
+  baseVariablePrefix: "--mi-",
   tint: {
     light: { color: BLACK, alphas: [0.05, 0.15, 0.3] },
     dark: { color: WHITE, alphas: [0.08, 0.18, 0.35] },
@@ -48,16 +51,19 @@ export const ARTIST_THEME_PROFILE: ThemeProfile = {
   fixedColorsFromBackground: true,
 };
 
-const isDefined = (value?: string) => Boolean(value && value !== "");
+export const isDefined = (value?: string) => Boolean(value && value !== "");
 
 const rgba = ([r, g, b]: Rgb, alpha: number) =>
   `rgba(${r}, ${g}, ${b}, ${alpha})`;
 
-const baseVariables = (colors: ArtistColors): Record<string, string> => {
+const baseVariables = (
+  colors: ArtistColors,
+  profile: ThemeProfile
+): Record<string, string> => {
   const map: Record<string, string> = {};
   for (const [slot, value] of Object.entries(colors)) {
     if (!isDefined(value)) continue;
-    const cssVar = `--mi-${slot.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())}-color`;
+    const cssVar = `${profile.baseVariablePrefix}${slot.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())}-color`;
     map[cssVar] = value as string;
   }
   return map;
@@ -102,14 +108,19 @@ const buttonTintVariables = (
   };
 };
 
+export const isSchemeLight = (surface: string): boolean => {
+  const brightness = getBrightness(surface);
+  return (
+    brightness === undefined || brightness > FIXED_SCHEME_BRIGHTNESS_THRESHOLD
+  );
+};
+
 const fixedVariables = (
   surface: string | undefined,
   profile: ThemeProfile
 ): Record<string, string> => {
   if (!surface || !profile.fixedColorsFromBackground) return {};
-  const brightness = getBrightness(surface);
-  const pageLight =
-    brightness === undefined || brightness > FIXED_SCHEME_BRIGHTNESS_THRESHOLD;
+  const pageLight = isSchemeLight(surface);
   return {
     "--mi-fixed-bg-color": pageLight
       ? "var(--mi-off-white)"
@@ -124,7 +135,7 @@ export const deriveThemeVariables = (
   colors: ArtistColors,
   profile: ThemeProfile
 ): Record<string, string> => ({
-  ...baseVariables(colors),
+  ...baseVariables(colors, profile),
   ...tintVariables(colors.background, profile),
   ...buttonTintVariables(colors.button, profile),
   ...fixedVariables(colors.background, profile),

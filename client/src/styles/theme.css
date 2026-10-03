@@ -16,9 +16,6 @@ html {
   --mi-background-color: var(--mi-instance-background-color, var(--mi-white));
   --mi-lighten-background-color: rgba(255, 255, 255, 0.35);
   --mi-lighten-x-background-color: rgba(255, 255, 255, 0.5);
-  --mi-darken-background-color: rgba(50, 0, 0, 0.03);
-  --mi-darken-x-background-color: rgba(50, 0, 0, 0.2);
-  --mi-darken-xx-background-color: rgba(50, 0, 0, 0.2);
 
   --mi-button-tint-color: var(--mi-tint-color);
   --mi-button-tint-x-color: var(--mi-tint-x-color);
@@ -28,8 +25,6 @@ html {
   --mi-fixed-fg-color: var(--mi-text-color);
 
   --mi-text-color: var(--mi-instance-text-color, var(--mi-black));
-  --mi-light-foreground-color: #454545; /* FIXME: remove */
-  --mi-lighter-foreground-color: #515151; /* FIXME: remove */
 
   --mi-button-color: var(--mi-instance-button-color, #be3455);
   --mi-button-text-color: var(--mi-instance-button-text-color, #ffffff);
@@ -75,4 +70,28 @@ html,
 #artist-colors-root {
   --mi-secondary-text-color: var(--mi-text-color);
   --mi-border: solid 1px var(--mi-tint-x-color);
+}
+
+html,
+#artist-colors-root {
+  --mi-darken-background-color: var(--mi-tint-color);
+  --mi-darken-x-background-color: var(--mi-tint-x-color);
+  --mi-darken-xx-background-color: var(--mi-tint-xx-color);
+
+  --mi-light-foreground-color: color-mix(
+    in srgb,
+    var(--mi-text-color) 73%,
+    var(--mi-background-color)
+  );
+  --mi-lighter-foreground-color: color-mix(
+    in srgb,
+    var(--mi-text-color) 68.2%,
+    var(--mi-background-color)
+  );
+
+  --mi-alternate-background-color: color-mix(
+    in srgb,
+    var(--mi-text-color) 6%,
+    var(--mi-background-color)
+  );
 }

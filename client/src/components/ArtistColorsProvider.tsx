@@ -5,10 +5,11 @@ import { queryArtist, queryManagedArtist } from "queries";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { getBrightness } from "../utils/colors";
 import {
   ARTIST_THEME_PROFILE,
   deriveThemeVariables,
+  isDefined,
+  isSchemeLight,
 } from "../utils/themeVariables";
 
 const RootDiv = styled.div`
@@ -65,12 +66,8 @@ export const useIsArtistPageLight = (): boolean | null => {
   const ctx = React.useContext(ArtistColorsContext);
   const bg = ctx?.colors.background;
   if (!bg) return null;
-  const brightness = getBrightness(bg);
-  if (brightness === undefined) return true;
-  return brightness > 100;
+  return isSchemeLight(bg);
 };
-
-const isDefined = (value?: string) => Boolean(value && value !== "");
 
 export const resolveColors = (raw?: ArtistColors): ArtistColors => {
   const c = raw ?? {};

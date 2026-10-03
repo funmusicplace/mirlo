@@ -1,12 +1,12 @@
 export function getBrightness(hex: string): number | undefined {
   let sanitized = hex.replace(/^#/, "");
-  if (/^[0-9a-fA-F]{3}$/.test(sanitized)) {
+  if (/^[0-9a-fA-F]{3,4}$/.test(sanitized)) {
     sanitized = sanitized
       .split("")
       .map((c) => c + c)
       .join("");
   }
-  if (!/^[0-9a-fA-F]{6}$/.test(sanitized)) {
+  if (!/^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(sanitized)) {
     return undefined;
   }
   const r = parseInt(sanitized.slice(0, 2), 16);
