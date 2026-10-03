@@ -152,8 +152,8 @@ const CustomButton = styled.button<Sizable>(
           }
 
           &[disabled] {
-            color: #ddd;
-            border-color: #ddd;
+            color: var(--mi-disabled-color);
+            border-color: var(--mi-disabled-color);
           }
         `;
         case "pill":
@@ -201,8 +201,8 @@ const CustomButton = styled.button<Sizable>(
           }
 
           &[disabled] {
-            color: #ddd;
-            border-color: #ddd;
+            color: var(--mi-disabled-color);
+            border-color: var(--mi-disabled-color);
           }`;
         default:
           return `

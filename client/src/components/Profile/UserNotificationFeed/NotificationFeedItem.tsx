@@ -29,10 +29,10 @@ const LI = styled.li<{
 }>`
   background-color: ${(props) =>
     props.compact
-      ? `rgba(255, 255, 255, 0.5)`
+      ? `var(--mi-background-color)`
       : props.isRead
-        ? `rgba(0, 0, 0, 0.01)`
-        : `rgba(0, 0, 0, 0.025)`};
+        ? `transparent`
+        : `var(--mi-tint-color)`};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;

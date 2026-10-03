@@ -89,6 +89,12 @@ html,
     var(--mi-background-color)
   );
 
+  --mi-disabled-color: color-mix(
+    in srgb,
+    var(--mi-text-color) 13.3%,
+    var(--mi-background-color)
+  );
+
   --mi-alternate-background-color: color-mix(
     in srgb,
     var(--mi-text-color) 6%,

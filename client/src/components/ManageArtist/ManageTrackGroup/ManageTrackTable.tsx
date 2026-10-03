@@ -55,13 +55,13 @@ const TrackTableComponent = styled(Table)`
 
     tr {
       margin-bottom: 1rem;
-      border: 1px solid #ccc;
+      border: 1px solid var(--mi-tint-x-color);
     }
 
     td {
       /* Behave  like a "row" */
       border: none;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--mi-tint-color);
       position: relative;
       width: 100%;
       display: flex;
