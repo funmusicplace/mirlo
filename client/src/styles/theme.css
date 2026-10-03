@@ -69,6 +69,7 @@ html,
 [data-mi-theme="dark"],
 #artist-colors-root {
   --mi-secondary-text-color: var(--mi-text-color);
+  --mi-normal-foreground-color: var(--mi-text-color);
   --mi-border: solid 1px var(--mi-tint-x-color);
 }
 
