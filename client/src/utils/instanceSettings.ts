@@ -1,3 +1,4 @@
+import { SITE_THEME_PROFILE, deriveThemeVariables } from "./themeVariables";
 import { DEFAULT_TRUST_LEVEL_NAMES } from "./trustLevel";
 
 export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
@@ -16,16 +17,10 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
 
 export const applyInstanceStyles = (settings: InstanceSettings) => {
   const { style } = document.documentElement;
-  style.setProperty("--mi-instance-button-color", settings.colors.button);
-  style.setProperty(
-    "--mi-instance-button-text-color",
-    settings.colors.buttonText
-  );
-  style.setProperty(
-    "--mi-instance-background-color",
-    settings.colors.background
-  );
-  style.setProperty("--mi-instance-text-color", settings.colors.text);
+  const variables = deriveThemeVariables(settings.colors, SITE_THEME_PROFILE);
+  for (const [name, value] of Object.entries(variables)) {
+    style.setProperty(name, value);
+  }
   style.setProperty(
     "--mi-instance-show-hero-on-home",
     settings.showHeroOnHome ? "flex" : "none"

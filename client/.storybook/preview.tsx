@@ -22,6 +22,10 @@ import SnackbarContext, {
   SnackBarContextProvider,
 } from "../src/state/SnackbarContext";
 import { UploadContextProvider } from "../src/state/UploadContext";
+import {
+  applyInstanceStyles,
+  DEFAULT_INSTANCE_SETTINGS,
+} from "../src/utils/instanceSettings";
 import { ConfirmContextProvider } from "../src/utils/useConfirm";
 
 import "../src/styles/index.css";
@@ -29,6 +33,8 @@ import "./global.css";
 import { defaultHandlers } from "./handlers";
 
 void initI18n();
+
+applyInstanceStyles(DEFAULT_INSTANCE_SETTINGS);
 
 initialize({ onUnhandledRequest: "warn" });
 

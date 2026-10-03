@@ -71,7 +71,7 @@ const HomeReleases = () => {
       >
         <SectionHeader
           className={css`
-            background-color: var(--mi-white);
+            background-color: var(--mi-background-color);
           `}
         >
           <WidthContainer variant="big">

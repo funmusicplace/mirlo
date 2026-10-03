@@ -20,9 +20,6 @@ html {
   --mi-darken-x-background-color: rgba(50, 0, 0, 0.2);
   --mi-darken-xx-background-color: rgba(50, 0, 0, 0.2);
 
-  --mi-tint-color: var(--mi-darken-background-color);
-  --mi-tint-x-color: var(--mi-darken-x-background-color);
-  --mi-tint-xx-color: var(--mi-darken-xx-background-color);
   --mi-button-tint-color: var(--mi-tint-color);
   --mi-button-tint-x-color: var(--mi-tint-x-color);
   --mi-contrast-color: var(--mi-button-color);
