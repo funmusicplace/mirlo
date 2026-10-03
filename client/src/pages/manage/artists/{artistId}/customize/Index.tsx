@@ -49,9 +49,6 @@ export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
     padding: 1rem !important;
     margin-top: 0;
   }
-  @media (prefers-color-scheme: dark) {
-    ${(props) => (!props.isOdd ? "background: rgba(125, 125, 125, 0.1);" : "")}
-  }
 `;
 
 export type ArtistFormData = {

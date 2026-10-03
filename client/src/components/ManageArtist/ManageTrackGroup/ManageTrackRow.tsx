@@ -28,10 +28,6 @@ import ReplaceTrackAudioInput from "./AlbumFormComponents/ReplaceTrackAudioInput
 const TrackRow = styled("tr")`
   &:hover {
     background-color: var(--mi-tint-color);
-
-    @media (prefers-color-scheme: dark) {
-      background-color: var(--mi-tint-color);
-    }
   }
 `;
 

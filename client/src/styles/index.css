@@ -175,12 +175,6 @@ a {
   word-break: break-word;
 }
 
-@media (prefers-color-scheme: dark) {
-  a {
-    color: var(--mi-button-color);
-  }
-}
-
 button {
   font-family: var(--mi-font-family-stack);
 }

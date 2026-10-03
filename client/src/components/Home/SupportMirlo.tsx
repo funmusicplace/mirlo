@@ -28,10 +28,6 @@ const SupportMirlo = () => {
         @media screen and (max-width: ${bp.medium}px) {
           margin: 0;
         }
-
-        @media (min-width: 768px) and (prefers-color-scheme: dark) {
-          background-color: var(--mi-button-text-color);
-        }
       `}
     >
       <SplashWrapper
@@ -85,11 +81,6 @@ const SupportMirlo = () => {
 
                   &:hover {
                     text-decoration: underline;
-                  }
-
-                  @media (prefers-color-scheme: dark) {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
                   }
                 `}
               >

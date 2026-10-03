@@ -32,11 +32,6 @@ export const SelectEl = styled.select<{ variant?: "compact" }>`
   option {
     padding: 0.4rem;
   }
-
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--mi-darken-background-color);
-    border: var(--mi-border);
-  }
 `;
 
 export const Select: React.FC<{
