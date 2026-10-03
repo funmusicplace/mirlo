@@ -24,24 +24,28 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const getDeleteButton = (canvasElement: HTMLElement) =>
-  // Modal portals into document.body, outside the story's canvas
-  within(canvasElement.ownerDocument.body).getByRole("button", {
+// Modal portals into document.body (after its first render), outside the
+// story's canvas, so query the body and wait for it to appear
+const getBody = (canvasElement: HTMLElement) =>
+  within(canvasElement.ownerDocument.body);
+
+const findDeleteButton = (canvasElement: HTMLElement) =>
+  getBody(canvasElement).findByRole("button", {
     name: /permanently delete artist page/i,
   });
 
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    await expect(getDeleteButton(canvasElement)).toBeDisabled();
+    await expect(await findDeleteButton(canvasElement)).toBeDisabled();
   },
 };
 
 export const WrongTextStaysDisabled: Story = {
   play: async ({ canvasElement, args }) => {
-    const body = within(canvasElement.ownerDocument.body);
-    await userEvent.type(body.getByRole("textbox"), "The Mirlo");
+    const body = getBody(canvasElement);
+    await userEvent.type(await body.findByRole("textbox"), "The Mirlo");
 
-    const button = getDeleteButton(canvasElement);
+    const button = await findDeleteButton(canvasElement);
     await expect(button).toBeDisabled();
     await userEvent.click(button);
     await expect(args.onConfirm).not.toHaveBeenCalled();
@@ -50,10 +54,10 @@ export const WrongTextStaysDisabled: Story = {
 
 export const MatchingTextEnablesDelete: Story = {
   play: async ({ canvasElement, args }) => {
-    const body = within(canvasElement.ownerDocument.body);
-    await userEvent.type(body.getByRole("textbox"), "The Mirlo Band");
+    const body = getBody(canvasElement);
+    await userEvent.type(await body.findByRole("textbox"), "The Mirlo Band");
 
-    const button = getDeleteButton(canvasElement);
+    const button = await findDeleteButton(canvasElement);
     await expect(button).toBeEnabled();
     await userEvent.click(button);
     await expect(args.onConfirm).toHaveBeenCalledOnce();
