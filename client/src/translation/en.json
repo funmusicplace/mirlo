@@ -307,7 +307,6 @@
     "filterFollows": "Following",
     "filterSubscriptions": "Subscriptions",
     "noSubscriptionsYet": "You don't have any subscriptions yet.",
-    "areYouSureDeleteAccount": "Are you sure you want to delete your account?",
     "deleteAccount": "Delete account",
     "collectionEmpty": "There's nothing in your collection yet. Check out some recent <releases>releases</releases>, browse some <tags>tags</tags>, or browse some <artists>artists</artists>.",
     "yourCollection": "Your collection",
@@ -325,7 +324,12 @@
     "albumLink": "<albumLink>{{albumTitle}}</albumLink> by <artistLink>{{artistName}}</artistLink>",
     "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!",
     "subscriptionCharges": "Subscription payments",
-    "verificationEmailSent": "We've sent you a verification email to confirm your new email address. Please check your inbox and click the link in the email to verify your new email."
+    "verificationEmailSent": "We've sent you a verification email to confirm your new email address. Please check your inbox and click the link in the email to verify your new email.",
+    "deleteAccountModalTitle": "Delete your account",
+    "deleteAccountConsequenceArtists": "All of your artist pages are deleted, along with their music, posts and merch. Fans who bought your music will no longer be able to download it.",
+    "deleteAccountConsequenceArtistSubscribers": "Everyone subscribed to your artist pages has their subscription cancelled.",
+    "deleteAccountConsequenceCollection": "You lose access to everything in your collection, including music you've bought. Download anything you want to keep first.",
+    "deleteAccountConsequenceSubscriptions": "Your subscriptions to other artists are cancelled."
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",
@@ -1391,7 +1395,6 @@
     "editAnnouncement": "Edit announcement",
     "close": "Close",
     "announcementDescription": "This announcement will appear at the top of the profile page in a highlighted box. Leave it blank to not display anything. You can format it with Markdown syntax.",
-    "areYouSureDelete": "Are your sure you want to delete this profile page?",
     "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist page termination ",
     "backgroundImageLabel": "Background image",
@@ -1482,7 +1485,13 @@
     "removeManagerNamed": "Remove {{name}}",
     "removeManagerConfirm": "Remove {{name}}'s access to this artist?",
     "leaveArtist": "Remove my access",
-    "leaveArtistConfirm": "Remove your access to this artist? The owner would need to invite you again."
+    "leaveArtistConfirm": "Remove your access to this artist? The owner would need to invite you again.",
+    "deleteArtistModalTitle": "Delete {{artist}}",
+    "deleteArtistConsequenceMusic": "All music on this page is deleted immediately. Fans who bought it will no longer be able to download it.",
+    "deleteArtistConsequenceContent": "All posts, merch and subscription tiers are deleted.",
+    "deleteArtistConsequenceSubscribers": "Everyone subscribed to this page has their subscription cancelled.",
+    "deleteArtistConsequenceUrl": "The page's web address is released and someone else can claim it.",
+    "problemDeletingArtist": "Problem deleting artist page"
   },
   "manageSubscriptions": {
     "uploadSubscribers": "Upload subscriber e-mail addresses",
@@ -2222,5 +2231,10 @@
     "summary_other": "{{count}} emails",
     "invalidSummary_one": "{{count}} invalid",
     "invalidSummary_other": "{{count}} invalid"
+  },
+  "confirmDelete": {
+    "cannotBeUndone": "This is permanent. Neither you nor Mirlo support can undo it.",
+    "typeToConfirm": "To confirm, type \"{{text}}\" below.",
+    "cancel": "Cancel"
   }
 }

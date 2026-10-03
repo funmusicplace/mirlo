@@ -6,19 +6,16 @@ import { InputEl } from "components/common/Input";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
 import CurrencySelect from "components/ManageArtist/CountrySelectForm";
-import ProfileSection from "components/Profile/ProfileSection";
+import DeleteAccount from "components/Profile/DeleteAccount";
 import { useProfileMutation } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight, FaEye } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import api from "services/api";
+import { Link } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-
-import { API_ROOT } from "../../constants";
 
 type FormData = {
   name: string;
@@ -34,7 +31,7 @@ type FormData = {
 
 const Index: React.FC = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
-  const { user, refreshLoggedInUser } = useAuthContext();
+  const { user } = useAuthContext();
   const [isSaving, setIsSaving] = React.useState(false);
   const errorHandler = useErrorHandler();
   const language = user?.language ?? navigator.language;
@@ -51,8 +48,6 @@ const Index: React.FC = () => {
     },
   });
   const { register, handleSubmit, watch, setValue } = methods;
-
-  const navigate = useNavigate();
 
   const userId = user?.id;
   const snackbar = useSnackbar();
@@ -88,19 +83,6 @@ const Index: React.FC = () => {
     },
     [snackbar, userId, user?.email, errorHandler, i18n, mutateAsync, t]
   );
-
-  const deleteAccount = React.useCallback(async () => {
-    const confirmed = window.confirm(t("areYouSureDeleteAccount") ?? "");
-    if (confirmed) {
-      await api.delete(`users/${userId}`);
-      await fetch(API_ROOT + "/auth/logout", {
-        method: "GET",
-        credentials: "include",
-      });
-      refreshLoggedInUser();
-      navigate("/");
-    }
-  }, [t, userId, navigate, refreshLoggedInUser]);
 
   if (!user) {
     return null;
@@ -232,19 +214,7 @@ const Index: React.FC = () => {
           {t("resetPasswordLink")}
         </Link>
 
-        <ProfileSection>
-          <h2>{t("deleteYourAccount")}</h2>
-          <Button
-            style={{
-              width: "100%",
-              marginTop: "1rem",
-            }}
-            buttonRole="warning"
-            onClick={deleteAccount}
-          >
-            {t("deleteAccount")}
-          </Button>
-        </ProfileSection>
+        <DeleteAccount />
       </FormProvider>
     </WidthContainer>
   );

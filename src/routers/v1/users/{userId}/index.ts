@@ -246,12 +246,11 @@ export default function () {
     assertLoggedIn(req);
     const user = req.user;
     try {
-      deleteUser(user.id);
+      await deleteUser(user.id);
+      res.json({ message: "Success" });
     } catch (e) {
-      res.status(400);
-      next();
+      next(e);
     }
-    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {
