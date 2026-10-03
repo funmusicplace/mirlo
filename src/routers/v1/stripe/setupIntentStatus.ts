@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { logger } from "../../../logger";
-import { subscribeUserToArtist } from "../../../utils/artist";
+import { subscribeUserToProfile } from "../../../utils/artist";
 import stripe from "../../../utils/stripe";
 import { createOrUpdatePledge } from "../../../utils/trackGroup";
 import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
@@ -61,7 +61,7 @@ export default function () {
               amount: Number(intent.metadata?.paymentIntentAmount),
               stripeSetupIntentId: intent.id,
             });
-            const artist = await prisma.profile.findFirst({
+            const profile = await prisma.profile.findFirst({
               where: {
                 trackGroups: {
                   some: {
@@ -74,8 +74,8 @@ export default function () {
             const user = await prisma.user.findUnique({
               where: { id: userId },
             });
-            if (artist && user) {
-              await subscribeUserToArtist(artist, user);
+            if (profile && user) {
+              await subscribeUserToProfile(profile, user);
             }
           }
 

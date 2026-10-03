@@ -29,7 +29,7 @@ import { getIntentStatus } from "../../src/utils/stripe/status";
 import * as terminalUtils from "../../src/utils/stripe/terminal";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createFundraiser,
   createTrack,
   createTrackGroup,
@@ -79,12 +79,12 @@ describe("purchase", () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id);
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id);
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             { type: "subscription", tierId: tier.id },
             { type: "tip", amount: 500 },
@@ -101,13 +101,13 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_online",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "subscription", tierId: tier.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -130,8 +130,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_address",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
         minAmount: 500,
         collectAddress: true,
       });
@@ -139,7 +139,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "subscription", tierId: tier.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -164,8 +164,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_hosted",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
 
       sinon.stub(stripeUtils.stripe.setupIntents, "create").resolves({
         id: "seti_hosted_new",
@@ -175,7 +175,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "subscription", tierId: tier.id }],
           hosted: true,
         })
@@ -201,9 +201,9 @@ describe("purchase", () => {
       const { user: buyer, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, {
         minAmount: 1000,
         collectAddress: false,
       });
@@ -230,7 +230,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "subscription", tierId: newTier.id }],
           hosted: true,
         })
@@ -247,12 +247,12 @@ describe("purchase", () => {
 
     it("should return 401 when a readerId is supplied without being logged in", async () => {
       const { user } = await createUser({ email: "artist@test.com" });
-      const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           readerId: "tmr_test",
           items: [{ type: "subscription", tierId: tier.id }],
         })
@@ -265,12 +265,12 @@ describe("purchase", () => {
         email: "artist@test.com",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           readerId: "tmr_test",
           items: [{ type: "subscription", tierId: tier.id }],
         })
@@ -283,11 +283,11 @@ describe("purchase", () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           readerId: "tmr_test",
           items: [{ type: "subscription", tierId: 99999 }],
         })
@@ -300,11 +300,11 @@ describe("purchase", () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(user.id);
+      const profile = await createProfile(user.id);
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "tip", amount: 0 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -318,18 +318,18 @@ describe("purchase", () => {
       });
       const { user: otherUser } = await createUser({ email: "other@test.com" });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const otherArtist = await createArtist(otherUser.id, {
+      const profile = await createProfile(artistUser.id);
+      const otherProfile = await createProfile(otherUser.id, {
         urlSlug: "other-artist",
       });
-      const tgFromOther = await createTrackGroup(otherArtist.id, {
+      const tgFromOther = await createTrackGroup(otherProfile.id, {
         minPrice: 1000,
       });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tgFromOther.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -344,13 +344,13 @@ describe("purchase", () => {
       const { user: buyer, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 0 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -372,13 +372,13 @@ describe("purchase", () => {
         stripeAccountId: "acct_tg_online",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -394,12 +394,12 @@ describe("purchase", () => {
         stripeAccountId: "acct_two_albums",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg1 = await createTrackGroup(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const tg1 = await createTrackGroup(profile.id, {
         title: "Album One",
         minPrice: 1000,
       });
-      const tg2 = await createTrackGroup(artist.id, {
+      const tg2 = await createTrackGroup(profile.id, {
         title: "Album Two",
         minPrice: 500,
       });
@@ -407,7 +407,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             { type: "trackGroup", id: tg1.id, price: "1000" },
             { type: "trackGroup", id: tg2.id, price: "500" },
@@ -430,13 +430,13 @@ describe("purchase", () => {
         stripeAccountId: "acct_label",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
       await prisma.trackGroup.update({
         where: { id: tg.id },
         data: { paymentToUserId: label.id },
       });
-      const merch = await createMerch(artist.id, {
+      const merch = await createMerch(profile.id, {
         isPublic: true,
         minPrice: 800,
         quantityRemaining: 10,
@@ -445,7 +445,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             { type: "trackGroup", id: tg.id, price: "1000" },
             { type: "merch", id: merch.id, quantity: 1 },
@@ -465,8 +465,8 @@ describe("purchase", () => {
       });
       const { user: label } = await createUser({ email: "label@test.com" });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
       await prisma.trackGroup.update({
         where: { id: tg.id },
         data: { paymentToUserId: label.id },
@@ -475,7 +475,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -490,13 +490,13 @@ describe("purchase", () => {
         email: "artist@test.com",
         stripeAccountId: "acct_tg_guest",
       });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
         })
         .set("Accept", "application/json");
@@ -512,11 +512,11 @@ describe("purchase", () => {
       });
       const { user: otherUser } = await createUser({ email: "other@test.com" });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const otherArtist = await createArtist(otherUser.id, {
+      const profile = await createProfile(artistUser.id);
+      const otherProfile = await createProfile(otherUser.id, {
         urlSlug: "other-artist-2",
       });
-      const tgFromOther = await createTrackGroup(otherArtist.id, {
+      const tgFromOther = await createTrackGroup(otherProfile.id, {
         minPrice: 1000,
       });
       const trackFromOther = await createTrack(tgFromOther.id, {
@@ -526,7 +526,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "track", id: trackFromOther.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -541,14 +541,14 @@ describe("purchase", () => {
       const { user: buyer, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 0 });
       const track = await createTrack(tg.id, { minPrice: 0 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "track", id: track.id }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -570,14 +570,14 @@ describe("purchase", () => {
         stripeAccountId: "acct_track_online",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 0 });
       const track = await createTrack(tg.id, { minPrice: 500 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "track", id: track.id, price: "500" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -593,14 +593,14 @@ describe("purchase", () => {
         stripeAccountId: "acct_track_min",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 0 });
       const track = await createTrack(tg.id, { minPrice: 500 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "track", id: track.id, price: "100" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -615,13 +615,13 @@ describe("purchase", () => {
         stripeAccountId: "acct_tg_hosted",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
         })
@@ -645,13 +645,13 @@ describe("purchase", () => {
         stripeAccountId: "acct_tg_badurl",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
           successUrl: "https://evil.example.com/thanks",
@@ -668,14 +668,14 @@ describe("purchase", () => {
         stripeAccountId: "acct_tg_goodurl",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
       const client = await getClient();
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
           successUrl: `${client.applicationUrl}/thanks`,
@@ -693,12 +693,12 @@ describe("purchase", () => {
         stripeAccountId: "acct_tip_test",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(artistUser.id);
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "tip", amount: 500 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -715,15 +715,15 @@ describe("purchase", () => {
         stripeAccountId: "acct_catalogue_test",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(artistUser.id, {
         purchaseEntireCatalogMinPrice: 1500,
       });
-      await createTrackGroup(artist.id, { minPrice: 1000 });
+      await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "catalogue" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -740,15 +740,15 @@ describe("purchase", () => {
         stripeAccountId: "acct_catalogue_more",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(artistUser.id, {
         purchaseEntireCatalogMinPrice: 1500,
       });
-      await createTrackGroup(artist.id, { minPrice: 1000 });
+      await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "catalogue", price: "3000" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -764,12 +764,12 @@ describe("purchase", () => {
         stripeAccountId: "acct_catalogue_zero",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(artistUser.id);
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "catalogue" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -786,15 +786,15 @@ describe("purchase", () => {
       const { user: buyer, accessToken } = await createUser({
         email: "buyer@test.com",
       });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(artistUser.id, {
         purchaseEntireCatalogMinPrice: 1500,
       });
-      await createTrackGroup(artist.id, { minPrice: 1000 });
+      await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "catalogue" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -807,7 +807,7 @@ describe("purchase", () => {
         include: { profileSubscriptionTier: true },
       });
       assert.ok(subscription, "buyer should be subscribed to the artist");
-      assert.equal(subscription?.profileSubscriptionTier.profileId, artist.id);
+      assert.equal(subscription?.profileSubscriptionTier.profileId, profile.id);
     });
 
     it("should return 404 when the artist does not exist for a catalogue purchase", async () => {
@@ -831,17 +831,17 @@ describe("purchase", () => {
         stripeAccountId: "acct_catalogue_percentage",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(artistUser.id, {
         purchaseEntireCatalogPercentage: 50,
       });
-      await createTrackGroup(artist.id, { title: "Album One", minPrice: 1000 });
-      await createTrackGroup(artist.id, { title: "Album Two", minPrice: 2000 });
+      await createTrackGroup(profile.id, { title: "Album One", minPrice: 1000 });
+      await createTrackGroup(profile.id, { title: "Album Two", minPrice: 2000 });
 
       // Floor is 50% of (1000 + 2000) = 1500
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "catalogue", price: "1000" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -855,15 +855,15 @@ describe("purchase", () => {
         email: "artist@test.com",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(artistUser.id, {
         purchaseEntireCatalogMinPrice: 500,
       });
-      await createTrackGroup(artist.id, { minPrice: 1000 });
+      await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "catalogue", price: "1000" }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -879,8 +879,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_merch_test",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const merch = await createMerch(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const merch = await createMerch(profile.id, {
         isPublic: true,
         minPrice: 800,
         quantityRemaining: 10,
@@ -889,7 +889,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "merch", id: merch.id, quantity: 1 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -905,8 +905,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_merch_options_test",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const merch = await createMerch(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const merch = await createMerch(profile.id, {
         isPublic: true,
         minPrice: 800,
         quantityRemaining: 10,
@@ -932,7 +932,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             {
               type: "merch",
@@ -956,8 +956,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_merch_bad_option",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const merch = await createMerch(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const merch = await createMerch(profile.id, {
         isPublic: true,
         minPrice: 800,
       });
@@ -965,7 +965,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             {
               type: "merch",
@@ -987,8 +987,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_merch_oos",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const merch = await createMerch(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const merch = await createMerch(profile.id, {
         isPublic: true,
         minPrice: 800,
         quantityRemaining: 1,
@@ -997,7 +997,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "merch", id: merch.id, quantity: 2 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -1012,8 +1012,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_merch_no_dest",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const merch = await createMerch(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const merch = await createMerch(profile.id, {
         isPublic: true,
         minPrice: 800,
       });
@@ -1027,7 +1027,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [{ type: "merch", id: merch.id, quantity: 1 }],
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -1042,8 +1042,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_pledge",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
       const fundraiser = await createFundraiser(trackGroup.id, {
         isAllOrNothing: true,
       });
@@ -1051,7 +1051,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             {
               type: "fundraiserPledge",
@@ -1078,8 +1078,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_pledge_done",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
       const fundraiser = await createFundraiser(trackGroup.id, {
         isAllOrNothing: true,
         status: "SUCCESSFUL",
@@ -1088,7 +1088,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             {
               type: "fundraiserPledge",
@@ -1109,8 +1109,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_pledge_combo",
       });
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
       const fundraiser = await createFundraiser(trackGroup.id, {
         isAllOrNothing: true,
       });
@@ -1118,7 +1118,7 @@ describe("purchase", () => {
       const response = await requestApp
         .post("purchase")
         .send({
-          artistId: artist.id,
+          artistId: profile.id,
           items: [
             {
               type: "fundraiserPledge",
@@ -1142,8 +1142,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_pledge_customer",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
       const fundraiser = await createFundraiser(trackGroup.id, {
         isAllOrNothing: true,
       });
@@ -1164,7 +1164,7 @@ describe("purchase", () => {
         } as unknown as Stripe.Response<Stripe.SetupIntent>);
 
       await initiateFundraiserPledge({
-        artistId: artist.id,
+        profileId: profile.id,
         fundraiserId: fundraiser.id,
         trackGroupId: trackGroup.id,
         price: "2000",
@@ -1192,8 +1192,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_pledge_success_url",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
       const fundraiser = await createFundraiser(trackGroup.id, {
         isAllOrNothing: true,
       });
@@ -1212,7 +1212,7 @@ describe("purchase", () => {
         } as unknown as Stripe.Response<Stripe.SetupIntent>);
 
       await initiateFundraiserPledge({
-        artistId: artist.id,
+        profileId: profile.id,
         fundraiserId: fundraiser.id,
         trackGroupId: trackGroup.id,
         price: "2000",
@@ -1253,8 +1253,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_tg_terminal",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
         id: "acct_tg_terminal",
@@ -1271,7 +1271,7 @@ describe("purchase", () => {
 
       const result = await initiatePayment({
         readerId: "tmr_test",
-        artistId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -1295,13 +1295,13 @@ describe("purchase", () => {
         stripeAccountId: "acct_meta_tg",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const createStub = stubStripeForOnline();
 
       const result = await initiatePayment({
-        artistId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -1324,12 +1324,12 @@ describe("purchase", () => {
         stripeAccountId: "acct_meta_multi_tg",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg1 = await createTrackGroup(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const tg1 = await createTrackGroup(profile.id, {
         title: "First album",
         minPrice: 1000,
       });
-      const tg2 = await createTrackGroup(artist.id, {
+      const tg2 = await createTrackGroup(profile.id, {
         title: "Second album",
         minPrice: 500,
       });
@@ -1337,7 +1337,7 @@ describe("purchase", () => {
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        artistId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg1.id), quantity: 1, amount: 1000 },
           { type: "trackGroup", id: String(tg2.id), quantity: 1, amount: 500 },
@@ -1357,14 +1357,14 @@ describe("purchase", () => {
         stripeAccountId: "acct_meta_track",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 0 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 0 });
       const track = await createTrack(tg.id, { minPrice: 500 });
 
       const createStub = stubStripeForOnline();
 
       const result = await initiatePayment({
-        artistId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "track", id: String(track.id), quantity: 1, amount: 500 },
         ],
@@ -1391,12 +1391,12 @@ describe("purchase", () => {
         stripeAccountId: "acct_meta_tip",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
+      const profile = await createProfile(artistUser.id);
 
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        artistId: artist.id,
+        profileId: profile.id,
         items: [{ type: "tip", quantity: 1, amount: 500 }],
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -1413,13 +1413,13 @@ describe("purchase", () => {
         stripeAccountId: "acct_meta_mixed",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const createStub = stubStripeForOnline();
 
       await initiatePayment({
-        artistId: artist.id,
+        profileId: profile.id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
           { type: "tip", quantity: 1, amount: 500 },
@@ -1442,8 +1442,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_meta_sum",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       const createStub = stubStripeForOnline("eur");
 
@@ -1458,7 +1458,7 @@ describe("purchase", () => {
       ];
 
       const result = await initiatePayment({
-        artistId: artist.id,
+        profileId: profile.id,
         items,
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -1475,7 +1475,7 @@ describe("purchase", () => {
       assert.equal(metadata.items, JSON.stringify(items));
       assert.equal(metadata.userEmail, buyer.email);
       assert.equal(metadata.userId, String(buyer.id));
-      assert.equal(metadata.artistId, String(artist.id));
+      assert.equal(metadata.artistId, String(profile.id));
 
       assert.ok("clientSecret" in result);
       assert.equal(
@@ -1495,10 +1495,10 @@ describe("purchase", () => {
           stripeAccountId: "acct_fee_100",
         });
         const { user: buyer } = await createUser({ email: "buyer@test.com" });
-        const artist = await createArtist(artistUser.id, {
+        const profile = await createProfile(artistUser.id, {
           defaultPlatformFee: 10,
         });
-        const tg = await createTrackGroup(artist.id, {
+        const tg = await createTrackGroup(profile.id, {
           minPrice: 1000,
           platformPercent: 100,
         });
@@ -1506,7 +1506,7 @@ describe("purchase", () => {
         const createStub = stubStripeForOnline();
 
         await initiatePayment({
-          artistId: artist.id,
+          profileId: profile.id,
           items: [
             {
               type: "trackGroup",
@@ -1535,10 +1535,10 @@ describe("purchase", () => {
           stripeAccountId: "acct_fee_artist_fallback",
         });
         const { user: buyer } = await createUser({ email: "buyer@test.com" });
-        const artist = await createArtist(artistUser.id, {
+        const profile = await createProfile(artistUser.id, {
           defaultPlatformFee: 20,
         });
-        const tg = await createTrackGroup(artist.id, {
+        const tg = await createTrackGroup(profile.id, {
           minPrice: 1000,
           platformPercent: null,
         });
@@ -1546,7 +1546,7 @@ describe("purchase", () => {
         const createStub = stubStripeForOnline();
 
         await initiatePayment({
-          artistId: artist.id,
+          profileId: profile.id,
           items: [
             {
               type: "trackGroup",
@@ -1575,10 +1575,10 @@ describe("purchase", () => {
           stripeAccountId: "acct_fee_album_override",
         });
         const { user: buyer } = await createUser({ email: "buyer@test.com" });
-        const artist = await createArtist(artistUser.id, {
+        const profile = await createProfile(artistUser.id, {
           defaultPlatformFee: 50,
         });
-        const tg = await createTrackGroup(artist.id, {
+        const tg = await createTrackGroup(profile.id, {
           minPrice: 1000,
           platformPercent: 15,
         });
@@ -1586,7 +1586,7 @@ describe("purchase", () => {
         const createStub = stubStripeForOnline();
 
         await initiatePayment({
-          artistId: artist.id,
+          profileId: profile.id,
           items: [
             {
               type: "trackGroup",
@@ -1615,10 +1615,10 @@ describe("purchase", () => {
           stripeAccountId: "acct_fee_site_default",
         });
         const { user: buyer } = await createUser({ email: "buyer@test.com" });
-        const artist = await createArtist(artistUser.id, {
+        const profile = await createProfile(artistUser.id, {
           defaultPlatformFee: null,
         });
-        const tg = await createTrackGroup(artist.id, {
+        const tg = await createTrackGroup(profile.id, {
           minPrice: 1000,
           platformPercent: null,
         });
@@ -1626,7 +1626,7 @@ describe("purchase", () => {
         const createStub = stubStripeForOnline();
 
         await initiatePayment({
-          artistId: artist.id,
+          profileId: profile.id,
           items: [
             {
               type: "trackGroup",
@@ -1653,15 +1653,15 @@ describe("purchase", () => {
         const { user: artistUser } = await createUser({
           email: "artist@test.com",
         });
-        const artist = await createArtist(artistUser.id, {
+        const profile = await createProfile(artistUser.id, {
           defaultPlatformFee: 10,
         });
-        const tg = await createTrackGroup(artist.id, {
+        const tg = await createTrackGroup(profile.id, {
           minPrice: 1000,
           platformPercent: 100,
         });
-        const fullArtist = await prisma.profile.findFirstOrThrow({
-          where: { id: artist.id },
+        const fullProfile = await prisma.profile.findFirstOrThrow({
+          where: { id: profile.id },
           include: { user: true, paymentToUser: true, subscriptionTiers: true },
         });
 
@@ -1671,7 +1671,7 @@ describe("purchase", () => {
           price: "1000",
           minPrice: tg.minPrice,
           platformPercent: tg.platformPercent,
-          artist: fullArtist,
+          profile: fullProfile,
           paymentToUser: null,
           releaseUrlSlug: tg.urlSlug,
           releaseId: tg.id,
@@ -1690,10 +1690,10 @@ describe("purchase", () => {
         const { user: artistUser } = await createUser({
           email: "artist@test.com",
         });
-        const artist = await createArtist(artistUser.id, {
+        const profile = await createProfile(artistUser.id, {
           defaultPlatformFee: 10,
         });
-        const merch = await createMerch(artist.id, {
+        const merch = await createMerch(profile.id, {
           isPublic: true,
           minPrice: 800,
           quantityRemaining: 10,
@@ -1729,8 +1729,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_terminal",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
         minAmount: 500,
         defaultAmount: 1000,
       });
@@ -1749,7 +1749,7 @@ describe("purchase", () => {
 
       const result = await initiateSubscription({
         readerId: "tmr_test",
-        artistId: artist.id,
+        profileId: profile.id,
         tierId: tier.id,
         amount: 1000,
         userEmail: buyer.email,
@@ -1767,9 +1767,9 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_switch",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, {
         minAmount: 1000,
         collectAddress: false,
         platformPercent: 12,
@@ -1796,7 +1796,7 @@ describe("purchase", () => {
       } as unknown as Stripe.Response<Stripe.Product>);
 
       const result = await initiateOnlineSubscription({
-        artistId: artist.id,
+        profileId: profile.id,
         tierId: newTier.id,
         userEmail: buyer.email,
         userId: buyer.id,
@@ -1835,11 +1835,11 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_switch_fee_fallback",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(artistUser.id, {
         defaultPlatformFee: 25,
       });
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, {
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, {
         minAmount: 1000,
         collectAddress: false,
         platformPercent: null,
@@ -1866,7 +1866,7 @@ describe("purchase", () => {
       } as unknown as Stripe.Response<Stripe.Product>);
 
       await initiateOnlineSubscription({
-        artistId: artist.id,
+        profileId: profile.id,
         tierId: newTier.id,
         userEmail: buyer.email,
         userId: buyer.id,
@@ -1890,9 +1890,9 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_resubscribe",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, { minAmount: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
 
       const existing = await prisma.profileUserSubscription.create({
         data: {
@@ -1915,7 +1915,7 @@ describe("purchase", () => {
       } as unknown as Stripe.Response<Stripe.Product>);
 
       const result = await initiateOnlineSubscription({
-        artistId: artist.id,
+        profileId: profile.id,
         tierId: newTier.id,
         userEmail: buyer.email,
         userId: buyer.id,
@@ -1940,9 +1940,9 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_switch_2",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, {
         minAmount: 1000,
         collectAddress: true,
       });
@@ -1962,7 +1962,7 @@ describe("purchase", () => {
       } as unknown as Stripe.Response<Stripe.SetupIntent>);
 
       const result = await initiateOnlineSubscription({
-        artistId: artist.id,
+        profileId: profile.id,
         tierId: newTier.id,
         userEmail: buyer.email,
         userId: buyer.id,
@@ -1986,12 +1986,12 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_switch_3",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, {
         minAmount: 500,
         collectAddress: true,
       });
-      const newTier = await createTier(artist.id, {
+      const newTier = await createTier(profile.id, {
         minAmount: 1000,
         collectAddress: true,
         platformPercent: 12,
@@ -2027,7 +2027,7 @@ describe("purchase", () => {
       } as unknown as Stripe.Response<Stripe.Product>);
 
       const result = await initiateOnlineSubscription({
-        artistId: artist.id,
+        profileId: profile.id,
         tierId: newTier.id,
         userEmail: buyer.email,
         userId: buyer.id,
@@ -2061,9 +2061,9 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_switch_4",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, {
         minAmount: 1000,
         collectAddress: true,
       });
@@ -2085,7 +2085,7 @@ describe("purchase", () => {
         } as unknown as Stripe.Response<Stripe.SetupIntent>);
 
       await initiateOnlineSubscription({
-        artistId: artist.id,
+        profileId: profile.id,
         tierId: newTier.id,
         userEmail: buyer.email,
         userId: buyer.id,
@@ -2104,9 +2104,9 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_finalize",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, { minAmount: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
 
       await prisma.profileUserSubscription.create({
         data: {
@@ -2175,9 +2175,9 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_finalize_late_identity",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const oldTier = await createTier(artist.id, { minAmount: 500 });
-      const newTier = await createTier(artist.id, { minAmount: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
 
       await prisma.profileUserSubscription.create({
         data: {
@@ -2245,8 +2245,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_finalize_same_tier",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
 
       await prisma.profileUserSubscription.create({
         data: {
@@ -2308,10 +2308,10 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_finalize_duplicates",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const strayTier = await createTier(artist.id, { minAmount: 500 });
-      const oldTier = await createTier(artist.id, { minAmount: 700 });
-      const newTier = await createTier(artist.id, { minAmount: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const strayTier = await createTier(profile.id, { minAmount: 500 });
+      const oldTier = await createTier(profile.id, { minAmount: 700 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
 
       // A buyer left with two live paid subscriptions to the same artist
       await prisma.profileUserSubscription.create({
@@ -2384,10 +2384,10 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_finalize_fee_fallback",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id, {
+      const profile = await createProfile(artistUser.id, {
         defaultPlatformFee: 30,
       });
-      const tier = await createTier(artist.id, {
+      const tier = await createTier(profile.id, {
         minAmount: 1000,
         platformPercent: null,
       });
@@ -2438,8 +2438,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_finalize_address",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
         minAmount: 500,
         collectAddress: true,
       });
@@ -2489,8 +2489,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_sub_finalize_same_tier",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
         minAmount: 500,
         collectAddress: true,
       });
@@ -2558,8 +2558,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_pm_update_free",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 0 });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 0 });
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
@@ -2582,8 +2582,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_pm_update",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
 
       const subscription = await prisma.profileUserSubscription.create({
         data: {
@@ -2695,8 +2695,8 @@ describe("purchase", () => {
         email: "artist@test.com",
         stripeAccountId: "acct_sub_anon",
       });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, { minAmount: 500 });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
 
       sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
         id: "seti_anon",
@@ -2761,8 +2761,8 @@ describe("purchase", () => {
         email: "artist@test.com",
         stripeAccountId: "acct_sub_anon_address",
       });
-      const artist = await createArtist(artistUser.id);
-      const tier = await createTier(artist.id, {
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
         minAmount: 500,
         collectAddress: true,
       });
@@ -3203,8 +3203,8 @@ describe("purchase", () => {
         stripeAccountId: "acct_orphan",
       });
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const artist = await createArtist(artistUser.id);
-      const tg = await createTrackGroup(artist.id, { minPrice: 1000 });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
         id: "acct_orphan",
@@ -3228,7 +3228,7 @@ describe("purchase", () => {
       await assert.rejects(
         initiatePayment({
           readerId: "tmr_test",
-          artistId: artist.id,
+          profileId: profile.id,
           items: [
             {
               type: "trackGroup",

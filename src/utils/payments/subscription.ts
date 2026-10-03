@@ -13,15 +13,15 @@ import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
 
 import { getPaymentProcessor } from "./PaymentProcessor";
-import { resolveArtistPaymentContext } from "./purchase";
+import { resolveProfilePaymentContext } from "./purchase";
 
 const resolveTierAndAmount = async (
-  artistId: number,
+  profileId: number,
   tierId: number,
   amount?: number
 ) => {
   const tier = await prisma.profileSubscriptionTier.findFirst({
-    where: { id: tierId, profileId: artistId, deletedAt: null },
+    where: { id: tierId, profileId, deletedAt: null },
     include: { profile: true },
   });
   if (!tier) {
@@ -44,32 +44,32 @@ const resolveTierAndAmount = async (
 
 export const initiateSubscription = async ({
   readerId,
-  artistId,
+  profileId,
   tierId,
   amount,
   userEmail,
   userId,
 }: {
   readerId: string;
-  artistId: number;
+  profileId: number;
   tierId: number;
   amount?: number;
   userEmail: string;
   userId?: string;
 }): Promise<{ setupIntentId: string }> => {
   const { resolvedAmount } = await resolveTierAndAmount(
-    artistId,
+    profileId,
     tierId,
     amount
   );
 
   const { stripeAccountId, currency } =
-    await resolveArtistPaymentContext(artistId);
+    await resolveProfilePaymentContext(profileId);
 
   return getPaymentProcessor().createTerminalSubscriptionSetup({
     readerId,
     tierId,
-    artistId,
+    profileId,
     accountId: stripeAccountId,
     amount: resolvedAmount,
     currency,
@@ -79,7 +79,7 @@ export const initiateSubscription = async ({
 };
 
 export const initiateOnlineSubscription = async ({
-  artistId,
+  profileId,
   tierId,
   amount,
   userEmail,
@@ -87,7 +87,7 @@ export const initiateOnlineSubscription = async ({
   userName,
   successUrl,
 }: {
-  artistId: number;
+  profileId: number;
   tierId: number;
   amount?: number;
   userEmail: string;
@@ -104,17 +104,20 @@ export const initiateOnlineSubscription = async ({
     }
 > => {
   const { tier, resolvedAmount } = await resolveTierAndAmount(
-    artistId,
+    profileId,
     tierId,
     amount
   );
 
   const [{ stripeAccountId, currency }, existingSubscription] =
     await Promise.all([
-      resolveArtistPaymentContext(artistId),
+      resolveProfilePaymentContext(profileId),
       userId
         ? prisma.profileUserSubscription.findFirst({
-            where: { userId, profileSubscriptionTier: { profileId: artistId } },
+            where: {
+              userId,
+              profileSubscriptionTier: { profileId: profileId },
+            },
           })
         : null,
     ]);
@@ -161,7 +164,7 @@ export const initiateOnlineSubscription = async ({
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
       tierId,
-      artistId,
+      profileId,
       accountId: stripeAccountId,
       amount: resolvedAmount,
       currency,
@@ -199,7 +202,7 @@ export const initiateSubscriptionPaymentMethodUpdate = async (
     });
   }
 
-  const { stripeAccountId } = await resolveArtistPaymentContext(
+  const { stripeAccountId } = await resolveProfilePaymentContext(
     subscription.profileSubscriptionTier.profileId
   );
 
@@ -222,10 +225,10 @@ export const cancelUserSubscription = async (
   keepFollowing: boolean = false,
   cancelledByArtist: boolean = false
 ) => {
-  const artistId = subscription.profileSubscriptionTier.profileId;
+  const profileId = subscription.profileSubscriptionTier.profileId;
 
   const profile = await prisma.profile.findFirst({
-    where: { id: artistId },
+    where: { id: profileId },
     include: {
       user: { select: { stripeAccountId: true } },
       paymentToUser: { select: { stripeAccountId: true } },
@@ -244,7 +247,7 @@ export const cancelUserSubscription = async (
     }
 
     logger.info(
-      `Cancelling user ${subscription.userId} their subscription ${subscription.id} to profile ${artistId} (${profile?.name}).`
+      `Cancelling user ${subscription.userId} their subscription ${subscription.id} to profile ${profileId} (${profile?.name}).`
     );
     await prisma.profileUserSubscription.update({
       where: { id: subscription.id },
