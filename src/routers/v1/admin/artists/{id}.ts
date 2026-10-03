@@ -1,11 +1,12 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { deleteArtist } from "../../../../utils/artist";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
+import { deleteArtist } from "../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -116,11 +117,10 @@ export default function () {
         return res.status(404).json({ message: "Artist not found" });
       }
       await deleteArtist(artist.userId, Number(id));
+      res.json({ message: "Success" });
     } catch (e) {
-      res.status(400);
-      next();
+      next(e);
     }
-    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {

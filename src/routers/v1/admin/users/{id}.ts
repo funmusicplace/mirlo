@@ -133,11 +133,10 @@ export default function () {
     const { id } = req.params;
     try {
       await deleteUser(Number(id));
+      res.json({ message: "Success" });
     } catch (e) {
-      res.status(400);
-      next();
+      next(e);
     }
-    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {

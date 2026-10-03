@@ -333,10 +333,17 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { artistId: profileId } = req.params as unknown as Params;
     assertLoggedIn(req);
-    const user = req.user;
-
     try {
-      await deleteProfile(Number(user.id), Number(profileId));
+      // Admins can delete profiles they don't own, so use the profile's
+      // owner rather than the logged-in user
+      const profile = await prisma.profile.findFirst({
+        where: { id: Number(profileId) },
+        select: { userId: true },
+      });
+      if (!profile) {
+        throw new AppError({ httpCode: 404, description: "Artist not found" });
+      }
+      await deleteProfile(profile.userId, Number(profileId));
     } catch (e) {
       return next(e);
     }

@@ -243,10 +243,11 @@ export default function () {
   }
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    assertLoggedIn(req);
-    const user = req.user;
+    const { userId } = req.params as unknown as { userId: string };
     try {
-      await deleteUser(user.id);
+      // userHasPermission("owner") also lets admins through, so delete the
+      // user in the URL rather than the logged-in user
+      await deleteUser(Number(userId));
       res.json({ message: "Success" });
     } catch (e) {
       next(e);
