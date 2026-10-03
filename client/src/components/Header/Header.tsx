@@ -213,7 +213,7 @@ const Header = () => {
               to={getArtistUrl(instanceArtist) + "/support"}
               collapsible
               startIcon={<FaHandHoldingHeart />}
-              className="block no-underline text-center hover:underline! color-white! &_svg:fill-white! bg-black! max-md:text-(--mi-font-size-xsmall)!"
+              className="block no-underline text-center hover:underline! text-(--mi-background-color)! [&_svg]:fill-(--mi-background-color)! bg-(--mi-text-color)! max-md:text-(--mi-font-size-xsmall)!"
             >
               {t("donateNow", { keyPrefix: "kickstarter" })}
             </ButtonLink>
