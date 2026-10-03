@@ -1,7 +1,8 @@
-import React, { useState } from "react";
 import Table from "components/common/Table";
-import { PreviewTrackGroup } from "./TrackGroupPreview";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+
+import { PreviewTrackGroup } from "./TrackGroupPreview";
 
 const TrackGroupCard: React.FC<{
   trackGroup: PreviewTrackGroup;
@@ -18,14 +19,14 @@ const TrackGroupCard: React.FC<{
       : undefined;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#ddd] bg-white">
+    <div className="overflow-hidden rounded-lg border border-(--mi-tint-x-color) bg-(--mi-background-color)">
       <div
         onClick={() => setExpanded(!expanded)}
-        className="flex cursor-pointer items-center justify-between border-b border-[#ddd] bg-[#f9f9f9] p-6 hover:bg-[#f0f0f0]"
+        className="flex cursor-pointer items-center justify-between border-b border-(--mi-tint-x-color) bg-(--mi-tint-color) p-6 hover:bg-(--mi-alternate-background-color)"
       >
         <div>
           <h4 className="mb-2 mt-0 text-[1.1rem]">{trackGroup.title}</h4>
-          <p className="m-0 text-[0.9rem] text-[#666]">
+          <p className="m-0 text-[0.9rem] opacity-60">
             {trackGroup.tracks.length} track
             {trackGroup.tracks.length !== 1 ? "s" : ""}
           </p>
@@ -49,7 +50,7 @@ const TrackGroupCard: React.FC<{
             </p>
           )}
         </div>
-        <span className="text-2xl text-[#999]">{expanded ? "−" : "+"}</span>
+        <span className="text-2xl opacity-40">{expanded ? "−" : "+"}</span>
       </div>
 
       {expanded && (

@@ -5,7 +5,7 @@ interface StepCardProps {
   className?: string;
 }
 
-const BASE_CLASS_NAME = "rounded-lg bg-gray-100 p-8";
+const BASE_CLASS_NAME = "rounded-lg bg-(--mi-alternate-background-color) p-8";
 
 const StepCard: React.FC<StepCardProps> = ({ children, className }) => {
   const composedClassName = className

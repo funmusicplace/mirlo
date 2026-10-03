@@ -135,7 +135,7 @@ function CampaignSummary({
               }}
             />
           </span>
-          <span className="ml-2 mt-2 text-gray-500 hidden md:inline">
+          <span className="ml-2 mt-2 opacity-60 hidden md:inline">
             <Trans
               t={t}
               i18nKey="fromXSupporters"

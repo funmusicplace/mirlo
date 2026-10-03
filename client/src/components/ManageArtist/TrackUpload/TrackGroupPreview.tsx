@@ -302,7 +302,7 @@ const TrackGroupPreview: React.FC<TrackGroupPreviewProps> = ({
           {uploadResult.tracksCreated || 0} tracks
         </Box>
       )}
-      <div className="rounded-lg bg-gray-100 p-8">
+      <div className="rounded-lg bg-(--mi-alternate-background-color) p-8">
         <h3>Review Album Data</h3>
         <p>
           Found {trackGroups.length} album{trackGroups.length !== 1 ? "s" : ""}{" "}

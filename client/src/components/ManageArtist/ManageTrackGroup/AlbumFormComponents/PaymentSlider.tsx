@@ -184,7 +184,7 @@ const PaymentSlider: React.FC<{
             <div
               className={css`
                 background-color: var(--mi-button-color);
-                color: var(--mi-white);
+                color: var(--mi-button-text-color);
                 padding: 1rem;
                 border-radius: 0.5rem;
                 text-align: center;

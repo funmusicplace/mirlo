@@ -19,7 +19,7 @@ const FeaturedArtistsSection = styled.section`
   }
 
   .image-container {
-    background-color: #fff;
+    background-color: var(--mi-background-color);
   }
 
   a {

@@ -23,7 +23,7 @@ const SupportMirlo = () => {
       className={css`
         width: 100%;
         background-color: var(--mi-button-color) !important;
-        color: var(--mi-white);
+        color: var(--mi-button-text-color);
 
         @media screen and (max-width: ${bp.medium}px) {
           margin: 0;
@@ -76,8 +76,8 @@ const SupportMirlo = () => {
                   text-decoration: none;
                   text-align: center;
 
-                  background-color: var(--mi-black) !important;
-                  color: var(--mi-white) !important;
+                  background-color: var(--mi-text-color) !important;
+                  color: var(--mi-background-color) !important;
 
                   &:hover {
                     text-decoration: underline;
