@@ -23,7 +23,8 @@ const TopToolbar: React.FC<{
   return (
     <div
       className={css`
-        background: black;
+        background-color: var(--mi-white);
+        color: var(--mi-black);
 
         > button,
         > div > div > span > button,
@@ -34,7 +35,7 @@ const TopToolbar: React.FC<{
           background-color: inherit !important;
           color: inherit !important;
           border: none;
-          border-radius: 100%;
+          border-radius: var(--mi-border-radius);
           height: 2rem;
           width: 2rem;
           padding: 0;
@@ -48,8 +49,12 @@ const TopToolbar: React.FC<{
           }
           &:hover,
           &.Mui-selected {
-            background-color: var(--mi-button-color) !important;
-            color: var(--mi-button-text-color);
+            background-color: var(--mi-black) !important;
+            color: var(--mi-white) !important;
+
+            svg {
+              fill: var(--mi-white) !important;
+            }
           }
         }
       `}
