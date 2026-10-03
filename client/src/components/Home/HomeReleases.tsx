@@ -140,7 +140,7 @@ const HomeReleases = () => {
                 aria-label={t("rssFeed")}
                 title={t("rssFeed")}
                 target="_blank"
-                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?released=released&format=rss`}
+                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?isReleased=released&format=rss`}
                 rel="noreferrer"
                 onlyIcon
                 smallIcon

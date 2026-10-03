@@ -1,6 +1,12 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import { ButtonAnchor, ButtonLink } from "components/common/Button";
+import ReleaseCard from "components/common/ReleaseCard";
+import { SectionHeader } from "components/common/SectionHeader";
+import Select from "components/common/Select";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
+import WidthContainer from "components/common/WidthContainer";
+import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 import { queryTrackGroups, TrackGroupQueryOptions } from "queries";
 import { queryTags } from "queries/tags";
 import React from "react";
@@ -10,13 +16,6 @@ import { useSearchParams } from "react-router-dom";
 import usePagination from "utils/usePagination";
 
 import { bp } from "../../constants";
-
-import ReleaseCard from "components/common/ReleaseCard";
-import { ButtonAnchor, ButtonLink } from "components/common/Button";
-import Select from "components/common/Select";
-import WidthContainer from "components/common/WidthContainer";
-import { SectionHeader } from "components/common/SectionHeader";
-import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 
 const pageSize = 40;
 
@@ -162,7 +161,7 @@ const Index = () => {
               aria-label={t("rssFeed")}
               title={t("rssFeed")}
               target="_blank"
-              href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${tag}` : ""}&released=released&format=rss`}
+              href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${encodeURIComponent(tag)}&` : ""}isReleased=released&format=rss`}
               rel="noreferrer"
               onlyIcon
               smallIcon
