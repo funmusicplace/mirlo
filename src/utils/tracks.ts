@@ -334,14 +334,6 @@ export const convertAudioToFormat = (
     content.artist.name
   );
 
-  if (content.track.metadata) {
-    processor.outputOptions(
-      "-metadata",
-      // @ts-ignore
-      `genre=${content.track.metadata?.common?.genre ?? "Unknown"}`
-    );
-  }
-
   if (hasEmbeddedCoverArt && content.trackGroup.coverLocation) {
     processor
       .input(content.trackGroup.coverLocation)
