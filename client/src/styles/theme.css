@@ -48,7 +48,8 @@ html {
 }
 
 html,
-#artist-colors-root {
+#artist-colors-root,
+.artist-colors-wrapper {
   --mi-secondary-text-color: var(--mi-text-color);
   --mi-normal-foreground-color: var(--mi-text-color);
   --mi-border: solid 1px var(--mi-tint-x-color);

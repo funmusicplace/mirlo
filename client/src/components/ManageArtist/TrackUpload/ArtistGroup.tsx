@@ -35,7 +35,7 @@ const ArtistGroup: React.FC<{
         onClick={() => setExpanded(!expanded)}
         className={`flex cursor-pointer items-center justify-between border-b p-6 ${
           isUploaded
-            ? "border-[#4caf50] bg-[#e8f5e9] hover:bg-[#e0f2f1]"
+            ? "border-[#4caf50] bg-[#e8f5e9] text-(--mi-black) hover:bg-[#e0f2f1]"
             : "border-(--mi-tint-x-color) bg-(--mi-tint-color) hover:bg-(--mi-alternate-background-color)"
         }`}
       >

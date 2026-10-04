@@ -56,7 +56,7 @@ export const ArtistColorsWrapper: React.FC<{
       ) as React.CSSProperties)
     : undefined;
   return (
-    <div className={className} style={style}>
+    <div className={cx("artist-colors-wrapper", className)} style={style}>
       {children}
     </div>
   );
