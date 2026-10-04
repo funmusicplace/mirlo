@@ -6,6 +6,7 @@ import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { clearTrackDownloads } from "../../../../../utils/downloadCache";
 import { AppError } from "../../../../../utils/error";
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
@@ -96,6 +97,8 @@ export default function () {
         },
       });
 
+      await clearTrackDownloads(newTrack.id);
+
       res.json({ result: newTrack });
     } catch (error) {
       console.error(error);
@@ -151,6 +154,7 @@ export default function () {
     }
 
     try {
+      await clearTrackDownloads(trackId);
       await deleteTrack(trackId);
 
       res.json({ message: "Success" });

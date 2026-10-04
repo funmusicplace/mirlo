@@ -1,9 +1,14 @@
 import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
+import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { removeDownloadableContent } from "../utils/minio";
 
 export const deleteDownloadableContent = async (contentId: string) => {
+  const trackGroupLinks = await prisma.trackGroupDownloadableContent.findMany({
+    where: { downloadableContentId: contentId },
+    select: { trackGroupId: true },
+  });
   await prisma.trackGroupDownloadableContent.deleteMany({
     where: {
       downloadableContentId: contentId,
@@ -33,4 +38,8 @@ export const deleteDownloadableContent = async (contentId: string) => {
       },
     });
   }
+
+  await Promise.all(
+    trackGroupLinks.map((link) => clearTrackGroupDownloads(link.trackGroupId))
+  );
 };

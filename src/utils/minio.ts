@@ -1086,8 +1086,12 @@ const zipBucket = (type: "track" | "trackGroup") =>
     ? getDownloadsBucket(trackFormatBucket)
     : getDownloadsBucket(trackGroupFormatBucket);
 
+// The trailing slash keeps id 12 from matching 123 when used as a prefix.
+const zipFolder = (type: "track" | "trackGroup", id: number) =>
+  `${isConsolidatedMode() ? `${type === "track" ? "track" : "trackgroup"}/` : ""}${id}/`;
+
 const zipKey = (type: "track" | "trackGroup", id: number, format: string) =>
-  `${isConsolidatedMode() ? `${type === "track" ? "track" : "trackgroup"}/` : ""}${id}/${format}.zip`;
+  `${zipFolder(type, id)}${format}.zip`;
 
 export const statZip = (
   type: "track" | "trackGroup",
@@ -1128,6 +1132,10 @@ export const uploadZip = async (
   await ensureBucketCached(bucket);
   return uploadWrapper(bucket, zipKey(type, id, format), stream);
 };
+
+// Removes every cached format of a zip.
+export const removeZips = (type: "track" | "trackGroup", id: number) =>
+  removeObjectsFromBucket(zipBucket(type), zipFolder(type, id));
 
 const allLegacyBuckets = [
   incomingArtistBackgroundBucket,

@@ -1,11 +1,13 @@
 import assert from "node:assert";
+import { Readable } from "node:stream";
 
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import prisma from "@mirlo/prisma";
 
+import { uploadZip, zipExists } from "../../../../src/utils/minio";
 import {
   clearTables,
   createFundraiser,
@@ -28,6 +30,58 @@ describe("manage/trackGroups/{trackGroupId}", () => {
   });
 
   describe("PUT", () => {
+    it("should clear cached download zips when the title changes (#1606)", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        urlSlug: "a-title",
+      });
+      await uploadZip(
+        "trackGroup",
+        trackGroup.id,
+        "320.mp3",
+        Readable.from([Buffer.from("zip")])
+      );
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ title: "A new title" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(
+        await zipExists("trackGroup", trackGroup.id, "320.mp3"),
+        false
+      );
+    });
+
+    it("should keep cached download zips when only the price changes", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        urlSlug: "a-title",
+      });
+      await uploadZip(
+        "trackGroup",
+        trackGroup.id,
+        "320.mp3",
+        Readable.from([Buffer.from("zip")])
+      );
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ minPrice: 500 })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(
+        await zipExists("trackGroup", trackGroup.id, "320.mp3"),
+        true
+      );
+    });
+
     it("should update defaultIsPreview on a track group", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const profile = await createProfile(user.id);

@@ -8,6 +8,7 @@ import {
   audioExtensionFromFilename,
   unsupportedAudioFormatError,
 } from "../utils/audioFormats";
+import { clearTrackDownloads } from "../utils/downloadCache";
 import { uploadIncomingAudio } from "../utils/minio";
 
 import { verifyAudioQueue } from "./verify-audio-queue";
@@ -65,6 +66,10 @@ audioQueueEvents.on(
         });
 
         logger.info(`audioId: ${audio.id} updated trackAudio`);
+
+        if (audio.trackId) {
+          await clearTrackDownloads(audio.trackId);
+        }
 
         await verifyAudioQueue.add("verify-audio", {
           audioId: audio.id,

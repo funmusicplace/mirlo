@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
+
 import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
+import { clearTrackDownloads } from "../../../../../utils/downloadCache";
 import { updateTrackArtists } from "../../../../../utils/tracks";
 
 interface TrackBody {
@@ -34,6 +36,7 @@ export default function () {
         Number(trackId),
         trackArtists
       );
+      await clearTrackDownloads(Number(trackId));
 
       res.json({ results: newTrackArtists });
     } catch (error) {

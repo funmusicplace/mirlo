@@ -349,7 +349,7 @@ const downloadAndZipTracks = async ({
   trackGroup: {
     title: string | null;
     id: number;
-    cover: TrackGroupCover;
+    cover?: TrackGroupCover | null;
     releaseDate?: Date | null;
   };
   job: Job;
@@ -372,7 +372,7 @@ const downloadAndZipTracks = async ({
     logger.info(`Have folder locally ${tempFolder}`);
 
     const coverLocation = await downloadCover({
-      coverId: trackGroup.cover.id,
+      coverId: trackGroup.cover?.id,
       coverDestination,
     });
 
