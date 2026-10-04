@@ -1,4 +1,3 @@
-import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react";
 import { configure } from "@storybook/test";
 import { initialize, mswLoader } from "msw-storybook-addon";
@@ -82,18 +81,7 @@ const clearQueryCache = async () => {
 
 const preview: Preview = {
   loaders: [clearQueryCache, mswLoader],
-  decorators: [
-    withRouter,
-    withGlobalContext,
-    withThemeByDataAttribute({
-      themes: {
-        light: "light",
-        dark: "dark",
-      },
-      defaultTheme: "light",
-      attributeName: "data-mi-theme",
-    }),
-  ],
+  decorators: [withRouter, withGlobalContext],
   parameters: {
     msw: { handlers: defaultHandlers },
     reactRouter: reactRouterParameters({
