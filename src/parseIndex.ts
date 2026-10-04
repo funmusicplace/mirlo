@@ -6,6 +6,7 @@ import { Client, User } from "@mirlo/prisma/client";
 import * as cheerio from "cheerio";
 import { Request } from "express";
 
+import { findActivityPubAlternate } from "./activityPub/pageAlternate";
 import {
   registerArtistHydration,
   registerPostHydration,
@@ -926,6 +927,13 @@ export const analyzePathAndGenerateHTML = async (
         hydrations: [],
         params: {},
       });
+    }
+
+    const activityPubUrl = await findActivityPubAlternate(pathname);
+    if (activityPubUrl) {
+      $("head").append(
+        `<link rel="alternate" type="application/activity+json" href="${activityPubUrl}" />`
+      );
     }
   } catch (error) {
     console.error("Error in analyzePathAndGenerateHTML:", error);
