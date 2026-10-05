@@ -162,7 +162,7 @@ const SubscriptionTierActions: React.FC<{
           {hasFailedPayment && (
             <Box
               variant="warning"
-              className={"text-sm " + (layout === "page" ? "" : "text-center")}
+              className="flex flex-col items-start gap-3 text-sm"
             >
               {t("subscriptionPaymentFailed")}
               <ArtistButton

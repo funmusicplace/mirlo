@@ -304,7 +304,7 @@ function Index() {
           {invitedBy && (
             <Box
               className={css`
-                margin: 0 auto;
+                margin: 0.75rem auto 1rem;
                 max-width: 320px;
                 text-align: center;
               `}
