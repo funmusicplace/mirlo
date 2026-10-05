@@ -1,6 +1,14 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import NotFound from "components/404";
+import ArtistSquare from "components/Artist/ArtistSquare";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { ButtonLink } from "components/common/Button";
+import ReleaseCard from "components/common/ReleaseCard";
+import { SectionHeader } from "components/common/SectionHeader";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
+import WidthContainer from "components/common/WidthContainer";
 import { queryArtists, queryTrackGroups } from "queries";
 import { getLocationTagBySlug } from "queries/locationTags";
 import { useId } from "react";
@@ -11,16 +19,6 @@ import { useParams } from "react-router-dom";
 import usePagination from "utils/usePagination";
 
 import { bp } from "../../../../constants";
-
-import NotFound from "components/404";
-import ArtistSquare from "components/Artist/ArtistSquare";
-import { ButtonLink } from "components/common/Button";
-import WidthContainer from "components/common/WidthContainer";
-import { SectionHeader } from "components/common/SectionHeader";
-
-import ReleaseCard from "components/common/ReleaseCard";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 
 const pageSize = 40;
 
@@ -68,7 +66,7 @@ const Index: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     <div
       className={css`
         padding: 2rem 0;
-        background-color: var(--mi-white);
+        background-color: var(--mi-background-color);
 
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;

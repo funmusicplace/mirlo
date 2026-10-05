@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import ArtistSquare from "components/Artist/ArtistSquare";
+import { SectionHeader } from "components/common/SectionHeader";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { queryFeaturedArtists } from "queries/settings";
 import { useTranslation } from "react-i18next";
@@ -8,15 +9,9 @@ import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 import WidthContainer from "../common/WidthContainer";
 
-import { SectionHeader } from "components/common/SectionHeader";
-
 const FeaturedArtistsSection = styled.section`
   width: 100%;
-  background-color: color-mix(
-    in srgb,
-    var(--mi-text-color) 6%,
-    var(--mi-background-color)
-  );
+  background-color: var(--mi-alternate-background-color);
   padding: 4rem 0;
 
   & > :first-child {
@@ -24,7 +19,7 @@ const FeaturedArtistsSection = styled.section`
   }
 
   .image-container {
-    background-color: #fff;
+    background-color: var(--mi-background-color);
   }
 
   a {

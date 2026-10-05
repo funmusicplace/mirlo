@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+
 import Button from "../../common/Button";
+
 import TrackGroupCard from "./TrackGroupCard";
 import { PreviewTrackGroup } from "./TrackGroupPreview";
-import { Link } from "react-router-dom";
 
 const ArtistGroup: React.FC<{
   artistName: string;
@@ -25,16 +27,16 @@ const ArtistGroup: React.FC<{
 
   return (
     <div
-      className={`overflow-hidden rounded-lg border-2 bg-white ${
-        isUploaded ? "border-[#4caf50]" : "border-[#ddd]"
+      className={`overflow-hidden rounded-lg border-2 bg-(--mi-background-color) ${
+        isUploaded ? "border-[#4caf50]" : "border-(--mi-tint-x-color)"
       }`}
     >
       <div
         onClick={() => setExpanded(!expanded)}
         className={`flex cursor-pointer items-center justify-between border-b p-6 ${
           isUploaded
-            ? "border-[#4caf50] bg-[#e8f5e9] hover:bg-[#e0f2f1]"
-            : "border-[#ddd] bg-[#f9f9f9] hover:bg-[#f0f0f0]"
+            ? "border-[#4caf50] bg-[#e8f5e9] text-(--mi-black) hover:bg-[#e0f2f1]"
+            : "border-(--mi-tint-x-color) bg-(--mi-tint-color) hover:bg-(--mi-alternate-background-color)"
         }`}
       >
         <div className="flex-1">
@@ -42,7 +44,7 @@ const ArtistGroup: React.FC<{
             {isUploaded && <span className="text-2xl text-[#4caf50]">✓</span>}
             <div>
               <h4 className="mb-2 mt-0 text-[1.1rem]">Artist: {artistName}</h4>
-              <p className="m-0 text-[0.9rem] text-[#666]">
+              <p className="m-0 text-[0.9rem] opacity-60">
                 {albums.length} album{albums.length !== 1 ? "s" : ""} •{" "}
                 {albums.reduce((sum, tg) => sum + tg.tracks.length, 0)} total
                 tracks
@@ -79,7 +81,7 @@ const ArtistGroup: React.FC<{
               {isUploading ? "Uploading..." : "Upload Artist"}
             </Button>
           )}
-          <span className="text-2xl text-[#999]">{expanded ? "−" : "+"}</span>
+          <span className="text-2xl opacity-40">{expanded ? "−" : "+"}</span>
         </div>
       </div>
 

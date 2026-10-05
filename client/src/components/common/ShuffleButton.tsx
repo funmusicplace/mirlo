@@ -26,7 +26,7 @@ export const ShuffleButton: React.FC = () => {
       aria-pressed={!!shuffle}
       variant={shuffle ? "default" : "outlined"}
       className={css`
-        ${shuffle ? "color: white !important;" : ""}
+        ${shuffle ? "color: var(--mi-button-text-color) !important;" : ""}
       `}
     />
   );

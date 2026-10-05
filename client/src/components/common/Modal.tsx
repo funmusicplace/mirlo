@@ -281,7 +281,7 @@ export const Modal: React.FC<{
                   var(--mi-border-radius-x) 0 0;
                 background-color: inherit;
                 ${title
-                  ? "border-bottom: solid 1px rgba(125, 125, 125, 0.3);"
+                  ? "border-bottom: solid 1px var(--mi-tint-x-color);"
                   : ""}
                 z-index: 12;
 

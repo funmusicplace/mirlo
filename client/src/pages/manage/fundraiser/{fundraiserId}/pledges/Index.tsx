@@ -143,7 +143,7 @@ const Index: React.FC = () => {
                   <td>{formatDate({ date: pledge.createdAt, i18n })}</td>
                   <td>
                     {pledge.cancelledAt ? (
-                      <span className="text-gray-400">{t("cancelled")}</span>
+                      <span className="opacity-50">{t("cancelled")}</span>
                     ) : pledge.paidAt ? (
                       <span className="text-blue-500">{t("paid")}</span>
                     ) : (

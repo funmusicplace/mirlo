@@ -29,7 +29,9 @@ const WelcomeUrlSlugStep: React.FC<{
             i18nKey="thisWillLookLikeURL"
             t={t}
             components={{
-              span: <span className="font-bold p-1 bg-gray-200"></span>,
+              span: (
+                <span className="font-bold p-1 bg-(--mi-tint-x-color)"></span>
+              ),
             }}
             values={{
               url: `${window.location.host}/${urlSlug}`,

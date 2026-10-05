@@ -28,14 +28,6 @@ const SearchResultsDiv = styled.div`
   @media (max-width: ${bp.small}px) {
     left: 0;
   }
-
-  @media (prefers-color-scheme: dark) {
-    color: var(--mi-text-color);
-    &::placeholder {
-      color: var(--mi-text-color) !important;
-      opacity: 0.3;
-    }
-  }
 `;
 
 const SearchResultList = styled.ol`
@@ -71,12 +63,6 @@ const SearchResult = styled.li`
   a:hover {
     color: var(--mi-background-color) !important;
     background-color: var(--mi-text-color) !important;
-  }
-  @media (prefers-color-scheme: dark) {
-    button:hover,
-    a:hover {
-      background-color: var(--mi-text-color) !important;
-    }
   }
 `;
 
@@ -254,13 +240,6 @@ const AutoComplete = React.forwardRef<
             &::placeholder {
               color: var(--mi-text-color) !important;
               opacity: 0.75;
-            }
-            @media (prefers-color-scheme: dark) {
-              color: var(--mi-text-color) !important;
-              background: var(--mi-background-color) !important;
-              &::placeholder {
-                color: var(--mi-text-color) !important;
-              }
             }
           `}
           onKeyUp={(e) => {

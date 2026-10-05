@@ -235,7 +235,7 @@ const Index: React.FC = () => {
 
   const sectionClass = "flex flex-col gap-2 mb-6";
   const rowClass =
-    "flex items-center justify-between gap-3 py-2 border-b border-gray-200";
+    "flex items-center justify-between gap-3 py-2 border-b border-(--mi-tint-x-color)";
 
   return (
     <ManageSectionWrapper>
@@ -294,7 +294,7 @@ const Index: React.FC = () => {
       </div>
 
       {message && (
-        <div className="mb-4 p-3 rounded bg-gray-100 text-sm">
+        <div className="mb-4 p-3 rounded bg-(--mi-alternate-background-color) text-sm">
           {activeLabel && <strong>{activeLabel}: </strong>}
           {message}
         </div>
@@ -314,7 +314,7 @@ const Index: React.FC = () => {
       )}
 
       {onlineCheckout && stripeAccountId && (
-        <div className="mb-6 p-3 rounded border border-gray-300 max-w-md">
+        <div className="mb-6 p-3 rounded border border-(--mi-tint-x-color) max-w-md">
           <OnlinePaymentWrapper
             clientSecret={onlineCheckout.clientSecret}
             stripeAccountId={stripeAccountId}

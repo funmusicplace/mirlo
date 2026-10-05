@@ -67,7 +67,9 @@ export const LoopButton: React.FC = () => {
           margin-left: 0.25rem;
           position: relative;
           svg {
-            color: ${looping ? "white !important" : "inherit"};
+            color: ${looping
+              ? "var(--mi-button-text-color) !important"
+              : "inherit"};
           }
           ${looping
             ? `color: var(--mi-button-color) !important;

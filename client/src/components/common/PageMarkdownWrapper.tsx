@@ -9,12 +9,12 @@ export const PageMarkdownWrapper = styled.div`
   gap: 1rem;
 
   a {
-    color: #5c899c;
+    color: var(--mi-info-background-color);
   }
 
   blockquote {
     font-style: italic;
-    border-left: 4px solid #d1d5db;
+    border-left: 4px solid var(--mi-tint-x-color);
     padding-left: 1rem;
     margin: 1rem 0;
   }

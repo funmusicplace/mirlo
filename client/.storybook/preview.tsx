@@ -1,4 +1,3 @@
-import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react";
 import { configure } from "@storybook/test";
 import { initialize, mswLoader } from "msw-storybook-addon";
@@ -22,6 +21,10 @@ import SnackbarContext, {
   SnackBarContextProvider,
 } from "../src/state/SnackbarContext";
 import { UploadContextProvider } from "../src/state/UploadContext";
+import {
+  applyInstanceStyles,
+  DEFAULT_INSTANCE_SETTINGS,
+} from "../src/utils/instanceSettings";
 import { ConfirmContextProvider } from "../src/utils/useConfirm";
 
 import "../src/styles/index.css";
@@ -29,6 +32,8 @@ import "./global.css";
 import { defaultHandlers } from "./handlers";
 
 void initI18n();
+
+applyInstanceStyles(DEFAULT_INSTANCE_SETTINGS);
 
 initialize({ onUnhandledRequest: "warn" });
 
@@ -76,18 +81,7 @@ const clearQueryCache = async () => {
 
 const preview: Preview = {
   loaders: [clearQueryCache, mswLoader],
-  decorators: [
-    withRouter,
-    withGlobalContext,
-    withThemeByDataAttribute({
-      themes: {
-        light: "light",
-        dark: "dark",
-      },
-      defaultTheme: "light",
-      attributeName: "data-mi-theme",
-    }),
-  ],
+  decorators: [withRouter, withGlobalContext],
   parameters: {
     msw: { handlers: defaultHandlers },
     reactRouter: reactRouterParameters({

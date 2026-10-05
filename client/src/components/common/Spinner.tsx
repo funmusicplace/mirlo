@@ -1,7 +1,6 @@
-import React from "react";
-
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import React from "react";
 
 const SpinnerWrapper = styled.div<{ size?: "small" }>`
   display: inline-block;
@@ -10,7 +9,7 @@ const SpinnerWrapper = styled.div<{ size?: "small" }>`
   height: ${(props) => (props.size ? "60px" : "80px")};
   div {
     position: absolute;
-    border: 4px solid #555;
+    border: 4px solid var(--mi-lighter-foreground-color);
     opacity: 1;
     border-radius: 50%;
     animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;

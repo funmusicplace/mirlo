@@ -1,12 +1,13 @@
+import Papa from "papaparse";
 import React, { useState } from "react";
-import Button from "../../common/Button";
+import { useAuthContext } from "state/AuthContext";
+import { read, utils } from "xlsx";
+
 import Box from "../../common/Box";
+import Button from "../../common/Button";
 import { Input } from "../../common/Input";
 import { Select } from "../../common/Select";
 import StepCard from "../../common/StepCard";
-import { read, utils } from "xlsx";
-import Papa from "papaparse";
-import { useAuthContext } from "state/AuthContext";
 
 interface CSVUploadProps {
   onMappingComplete: (
@@ -263,7 +264,7 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
           name="csv-file"
         />
 
-        <div className="mt-4 rounded bg-[#e3f2fd] p-4 text-sm">
+        <div className="mt-4 rounded bg-[#e3f2fd] p-4 text-sm text-(--mi-black)">
           <strong>CSV Format:</strong>
           <p>Your CSV should have headers in the first row. Example:</p>
           <code>
@@ -291,7 +292,9 @@ const CSVUploadStep: React.FC<CSVUploadProps> = ({ onMappingComplete }) => {
             <div
               key={index}
               className={`grid grid-cols-[1fr_2fr] items-center gap-4 rounded p-4 ${
-                mapping[index] ? "bg-[var(--mi-button-color)]" : "bg-white"
+                mapping[index]
+                  ? "bg-(--mi-button-color)"
+                  : "bg-(--mi-background-color)"
               }`}
             >
               <label className="font-medium">

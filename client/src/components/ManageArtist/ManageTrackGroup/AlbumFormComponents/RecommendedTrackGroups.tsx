@@ -121,7 +121,7 @@ const RecommendedTrackGroups: React.FC<{
             {results?.map((rec: TrackGroup) => (
               <li
                 key={rec.id}
-                className="relative border border-gray-300 rounded p-2 flex flex-col gap-2"
+                className="relative border border-(--mi-tint-x-color) rounded p-2 flex flex-col gap-2"
               >
                 {rec.cover?.sizes?.[300] && (
                   <img
@@ -132,7 +132,9 @@ const RecommendedTrackGroups: React.FC<{
                 )}
                 <div>
                   <p className="text-sm font-bold m-0">{rec.title}</p>
-                  <p className="text-xs text-gray-600 m-0">{rec.artist.name}</p>
+                  <p className="text-xs text-(--mi-light-foreground-color) m-0">
+                    {rec.artist.name}
+                  </p>
                 </div>
                 <ArtistButton
                   type="button"

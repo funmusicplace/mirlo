@@ -92,7 +92,7 @@ const PaymentSlider: React.FC<{
               flex-grow: 1;
               height: 15px;
               border-radius: 5px;
-              background: #d3d3d3;
+              background: var(--mi-tint-x-color);
               outline: none;
               opacity: 0.7;
               -webkit-transition: 0.2s;
@@ -184,7 +184,7 @@ const PaymentSlider: React.FC<{
             <div
               className={css`
                 background-color: var(--mi-button-color);
-                color: var(--mi-white);
+                color: var(--mi-button-text-color);
                 padding: 1rem;
                 border-radius: 0.5rem;
                 text-align: center;

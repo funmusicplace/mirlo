@@ -37,10 +37,6 @@ const StyledInput = styled.input`
     background-color: transparent;
     border: 0;
   }
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--mi-darken-background-color);
-    border: var(--mi-border);
-  }
 `;
 
 // Wrapping the styled input so that scrolling the mouse wheel over a

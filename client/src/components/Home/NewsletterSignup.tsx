@@ -18,11 +18,7 @@ import { SplashTitle } from "./Splash";
 
 const containerStyles = css`
   width: 100%;
-  background-color: color-mix(
-    in srgb,
-    var(--mi-text-color) 6%,
-    var(--mi-background-color)
-  );
+  background-color: var(--mi-alternate-background-color);
   display: flex;
   justify-content: center;
   padding: 7rem 1rem;

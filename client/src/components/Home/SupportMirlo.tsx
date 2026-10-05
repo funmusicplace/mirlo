@@ -23,14 +23,10 @@ const SupportMirlo = () => {
       className={css`
         width: 100%;
         background-color: var(--mi-button-color) !important;
-        color: var(--mi-white);
+        color: var(--mi-button-text-color);
 
         @media screen and (max-width: ${bp.medium}px) {
           margin: 0;
-        }
-
-        @media (min-width: 768px) and (prefers-color-scheme: dark) {
-          background-color: var(--mi-button-text-color);
         }
       `}
     >
@@ -80,16 +76,11 @@ const SupportMirlo = () => {
                   text-decoration: none;
                   text-align: center;
 
-                  background-color: var(--mi-black) !important;
-                  color: var(--mi-white) !important;
+                  background-color: var(--mi-text-color) !important;
+                  color: var(--mi-background-color) !important;
 
                   &:hover {
                     text-decoration: underline;
-                  }
-
-                  @media (prefers-color-scheme: dark) {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
                   }
                 `}
               >
