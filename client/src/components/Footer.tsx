@@ -68,7 +68,7 @@ export const Footer = () => {
       className={css`
         text-align: left;
         display: block;
-        margin: 0rem auto;
+        margin: 5rem auto 0;
         padding: var(--mi-side-paddings-normal);
         max-width: var(--mi-container-big);
         z-index: 2;
@@ -76,6 +76,7 @@ export const Footer = () => {
 
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 0;
+          margin-top: 3rem;
           padding: 0;
           z-index: 0;
         }
@@ -87,7 +88,7 @@ export const Footer = () => {
             padding: 2rem;
           `}`}
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mbe-8">
+          <div className="grid grid-cols-2 md:grid-cols-[1fr_1fr_1fr_auto] gap-8 mbe-8">
             {columns.map((column) => (
               <div key={column.heading}>
                 <h2 className="text-sm! font-bold! mbe-2">{column.heading}</h2>
@@ -141,7 +142,7 @@ export const Footer = () => {
               </div>
             </div>
           </div>
-          <p className="text-xs">
+          <p className="text-xs md:text-center">
             <Trans
               t={t}
               i18nKey="getInTouch"

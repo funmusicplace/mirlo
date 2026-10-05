@@ -1,11 +1,14 @@
 import { css } from "@emotion/css";
+import AccountNav from "components/Account/AccountNav";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useMatch } from "react-router-dom";
 
 export const MANAGE_ANNOUNCEMENT_MOUNT_ID = "manage-announcement-mount";
 
 const Layout: React.FC = () => {
+  const isManageIndex = useMatch("/manage");
+
   return (
     <div
       className={css`
@@ -17,6 +20,7 @@ const Layout: React.FC = () => {
       `}
     >
       <div id={MANAGE_ANNOUNCEMENT_MOUNT_ID} />
+      {isManageIndex && <AccountNav />}
       <WidthContainer variant="big" justify="center">
         <Outlet />
       </WidthContainer>
