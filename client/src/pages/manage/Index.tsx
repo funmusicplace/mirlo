@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import AccountNav from "components/Account/AccountNav";
 import { ButtonLink } from "components/common/Button";
 import StripeStatus from "components/common/stripe/StripeStatusAndButton";
 import WidthContainer from "components/common/WidthContainer";
@@ -31,9 +30,6 @@ export const Index: React.FC = () => {
 
   return (
     <>
-      <WidthContainer variant="big" justify="center">
-        <AccountNav />
-      </WidthContainer>
       <div
         className={css`
           display: flex;
