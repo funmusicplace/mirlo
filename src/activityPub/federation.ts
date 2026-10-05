@@ -316,6 +316,8 @@ federation.setObjectDispatcher(
     const client = await getClient();
     return new Article({
       id: ctx.getObjectUri(Article, { identifier, postId }),
+      attribution: ctx.getActorUri(identifier),
+      to: PUBLIC_COLLECTION,
       name: post.title,
       content: post.content ?? undefined,
       published: getTemporal(post.publishedAt),
@@ -338,6 +340,11 @@ federation.setObjectDispatcher(
 
     return new Audio({
       id: ctx.getObjectUri(Audio, { identifier, releaseId }),
+      attribution: ctx.getActorUri(identifier),
+      to: PUBLIC_COLLECTION,
+      url: new URL(
+        `${client.applicationUrl}/${trackGroup.profile.urlSlug}/release/${trackGroup.urlSlug}`
+      ),
       name: trackGroup.title ?? undefined,
       content: trackGroup.about ?? undefined,
       published: getTemporal(trackGroup.releaseDate),

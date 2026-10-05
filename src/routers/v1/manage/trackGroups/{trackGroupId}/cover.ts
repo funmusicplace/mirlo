@@ -1,11 +1,13 @@
+import busboy from "connect-busboy";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import busboy from "connect-busboy";
 import processTrackGroupCover from "../../../../../utils/processTrackGroupCover";
 import { deleteTrackGroupCover } from "../../../../../utils/trackGroup";
 
@@ -91,6 +93,7 @@ export default function () {
       );
 
       await deleteTrackGroupCover(trackgroup.id);
+      await clearTrackGroupDownloads(trackgroup.id);
 
       res.json({ message: "Success" });
     } catch (error) {

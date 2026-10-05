@@ -19,7 +19,7 @@ export const deleteMerchCover = async (merchId: string) => {
     try {
       await prisma.merchImage.delete({
         where: {
-          id: merchId,
+          id: image.id,
         },
       });
     } catch (e) {
@@ -28,7 +28,7 @@ export const deleteMerchCover = async (merchId: string) => {
     }
 
     try {
-      removeObjectsFromBucket(finalMerchImageBucket, image.id);
+      await removeObjectsFromBucket(finalMerchImageBucket, image.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }

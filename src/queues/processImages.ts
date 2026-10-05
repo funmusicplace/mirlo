@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { REDIS_CONFIG } from "../config/redis";
 import sharpConfig from "../config/sharp";
 import logger from "../logger";
+import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
 import {
@@ -39,6 +40,15 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
 
   try {
     const job = await imageQueue.getJob(result.jobId);
+    if (job?.data.model === "trackGroupCover") {
+      const cover = await prisma.trackGroupCover.findFirst({
+        where: { id: job.data.destinationId },
+        select: { trackGroupId: true },
+      });
+      if (cover) {
+        await clearTrackGroupDownloads(cover.trackGroupId);
+      }
+    }
     if (job) {
       // FIXME: post image processing updates
       // await File.update(

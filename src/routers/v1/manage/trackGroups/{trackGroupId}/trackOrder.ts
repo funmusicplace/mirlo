@@ -6,8 +6,9 @@ import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
+import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
+import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 
 type Params = {
   trackGroupId: number;
@@ -43,6 +44,7 @@ export default function () {
           });
         })
       );
+      await clearTrackGroupDownloads(trackGroup.id);
 
       const updatedTrackGroup = await prisma.trackGroup.findFirst({
         where: { id: trackGroup.id },

@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
+import { clearTrackGroupDownloads } from "../../../../utils/downloadCache";
 import { AppError } from "../../../../utils/error";
 import { getDownloadableContentUploadUrl } from "../../../../utils/minio";
 import {
@@ -83,6 +84,7 @@ export default function () {
             downloadableContentId: downloadableContent.id,
           },
         });
+        await clearTrackGroupDownloads(trackGroup.id);
       }
       if (merch) {
         await prisma.merchDownloadableContent.create({

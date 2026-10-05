@@ -12,7 +12,11 @@ import qs from "qs";
 import swaggerUi from "swagger-ui-express";
 
 import { federation } from "./activityPub/federation";
-import { isValidActivityPubEndpoint } from "./activityPub/utils";
+import { findActivityPubAlternate } from "./activityPub/pageAlternate";
+import {
+  headersAreForActivityPub,
+  isValidActivityPubEndpoint,
+} from "./activityPub/utils";
 import apiApp from "./api";
 import "./auth/passport";
 import { corsMiddleware } from "./auth/cors";
@@ -284,6 +288,14 @@ app.use(
       if (req.path.startsWith("/v1")) {
         res.sendStatus(404);
       } else if (isHtmlPageRequest(req.path)) {
+        if (headersAreForActivityPub(req.headers, "GET")) {
+          const activityPubUrl = await findActivityPubAlternate(req.path);
+          if (activityPubUrl) {
+            res.setHeader("Cache-Control", "no-store");
+            res.setHeader("Vary", "Accept");
+            return res.redirect(303, activityPubUrl);
+          }
+        }
         // HTML pages must never be cached — they reference hashed asset filenames
         res.setHeader("Cache-Control", "no-store");
         const html = req.user

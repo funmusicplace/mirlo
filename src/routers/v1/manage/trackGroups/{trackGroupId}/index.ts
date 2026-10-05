@@ -9,6 +9,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
+import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { clearPageCache } from "../../../../../utils/pageCache";
@@ -300,6 +301,16 @@ export default function () {
         trackGroup = await prisma.trackGroup.findFirst({
           where: { id: Number(trackGroupId) },
         });
+      }
+
+      if (
+        trackGroup &&
+        (trackGroup.title !== existingTrackGroup.title ||
+          trackGroup.releaseDate?.getTime() !==
+            existingTrackGroup.releaseDate?.getTime() ||
+          movingToNewProfile)
+      ) {
+        await clearTrackGroupDownloads(trackGroup.id);
       }
 
       clearPageCache();
