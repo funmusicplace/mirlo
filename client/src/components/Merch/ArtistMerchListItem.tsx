@@ -1,9 +1,8 @@
 import { cx } from "@emotion/css";
-import React from "react";
-
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import ArtistItemLink from "components/Artist/ArtistItemLink";
 import ArtistLink from "components/Artist/ArtistLink";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import React from "react";
 import { Link } from "react-router-dom";
 import { getMerchUrl } from "utils/artist";
 
@@ -11,8 +10,7 @@ const ArtistMerchListItem: React.FC<{
   merch: Merch & { artist?: Artist };
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
 }> = ({ merch, as }) => {
-  const merchImageUrl =
-    merch.images?.[0]?.sizes?.[600] + "?" + merch.images?.[0]?.updatedAt;
+  const merchImageUrl = merch.images?.[0]?.sizes?.[600];
   const Root = as ?? "div";
 
   return (

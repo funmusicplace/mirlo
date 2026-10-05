@@ -14,9 +14,9 @@ import {
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
 import { generateFullStaticImageUrl } from "../../../utils/images";
+import { merchImageUrl } from "../../../utils/merch";
 import {
   finalCoversBucket,
-  finalMerchImageBucket,
   finalPostImageBucket,
   finalArtistAvatarBucket,
 } from "../../../utils/minio";
@@ -198,9 +198,7 @@ export default function () {
           }
 
           if (merch) {
-            const coverUrl = merch.images?.[0]?.url.find((u) =>
-              u.includes("x600")
-            );
+            const coverUrl = merchImageUrl(merch.images?.[0], 600);
             oembedData = {
               type: "rich",
               html: `<a href="${client.applicationUrl}/${merch.profile?.urlSlug}/merch/${merch.id}">${merch.title}</a>`,
@@ -210,9 +208,7 @@ export default function () {
               author_name:
                 merch.profile?.name || (await getFallbackAuthorName()),
               author_url: `${client.applicationUrl}/${merch.profile?.urlSlug}`,
-              thumbnail_url: coverUrl
-                ? generateFullStaticImageUrl(coverUrl, finalMerchImageBucket)
-                : undefined,
+              thumbnail_url: coverUrl,
               thumbnail_width: 300,
               thumbnail_height: 300,
               cache_age: 86400,

@@ -12,6 +12,7 @@ import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
+import { merchImagesInclude } from "../../../../../utils/merch";
 import { clearPageCache } from "../../../../../utils/pageCache";
 import {
   deleteTrackGroup,
@@ -119,7 +120,7 @@ export default function () {
           }),
           merch: {
             include: {
-              images: true,
+              images: merchImagesInclude,
             },
           },
           fundraiser: true,

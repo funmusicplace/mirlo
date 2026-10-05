@@ -1024,6 +1024,14 @@ export const removeIncomingImageByType = (
   );
 };
 
+export const removeImagesByType = (imageType: ImageType, imageId: string) => {
+  const { final, prefix } = imageTypeBuckets[imageType];
+  return removeObjectsFromBucket(
+    getImagesBucket(final),
+    isConsolidatedMode() && prefix ? `${prefix}/${imageId}` : imageId
+  );
+};
+
 export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>
   getBufferFromStorage(
     getImagesBucket(finalCoversBucket),

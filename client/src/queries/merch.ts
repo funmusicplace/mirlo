@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+
 import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_MERCH,
@@ -67,6 +68,50 @@ export function useDeleteMerchMutation() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: deleteMerch,
+    async onSuccess(_, { merchId }) {
+      await client.invalidateQueries({
+        predicate: (query) =>
+          queryKeyMatches(query, { merchId }) ||
+          queryKeyIncludes(query, QUERY_KEY_MERCH),
+      });
+    },
+  });
+}
+
+async function deleteMerchImage(opts: {
+  merchId: string;
+  merchImageId: string;
+}) {
+  return api.del(`v1/manage/merch/${opts.merchId}/images/${opts.merchImageId}`);
+}
+
+export function useDeleteMerchImageMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: deleteMerchImage,
+    async onSuccess(_, { merchId }) {
+      await client.invalidateQueries({
+        predicate: (query) =>
+          queryKeyMatches(query, { merchId }) ||
+          queryKeyIncludes(query, QUERY_KEY_MERCH),
+      });
+    },
+  });
+}
+
+async function reorderMerchImages(opts: {
+  merchId: string;
+  merchImageIds: string[];
+}) {
+  return api.put(`v1/manage/merch/${opts.merchId}/images`, {
+    merchImageIds: opts.merchImageIds,
+  });
+}
+
+export function useReorderMerchImagesMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: reorderMerchImages,
     async onSuccess(_, { merchId }) {
       await client.invalidateQueries({
         predicate: (query) =>

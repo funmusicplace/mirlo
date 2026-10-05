@@ -1,49 +1,91 @@
 import prisma from "@mirlo/prisma";
-import { Merch, MerchOption, MerchOptionType } from "@mirlo/prisma/client";
+import {
+  Image,
+  Merch,
+  MerchImage,
+  MerchOption,
+  MerchOptionType,
+  Prisma,
+} from "@mirlo/prisma/client";
 
 import logger from "../logger";
 
 import { deleteDownloadableContent } from "./content";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { AppError } from "./error";
-import { finalMerchImageBucket, removeObjectsFromBucket } from "./minio";
+import { generateFullStaticImageUrl } from "./images";
+import {
+  finalImageBucket,
+  finalMerchImageBucket,
+  removeImagesByType,
+} from "./minio";
 
-export const deleteMerchCover = async (merchId: string) => {
-  const image = await prisma.merchImage.findFirst({
-    where: {
-      merchId,
-    },
+export const merchImagesInclude = {
+  include: { image: true },
+  orderBy: { position: "asc" },
+} satisfies Prisma.Merch$imagesArgs;
+
+export type MerchImageWithImage = MerchImage & { image?: Image | null };
+
+export const resolveMerchImage = (merchImage: MerchImageWithImage) =>
+  merchImage.image
+    ? {
+        image: merchImage.image,
+        imageType: "image" as const,
+        bucket: finalImageBucket,
+      }
+    : {
+        image: merchImage,
+        imageType: "merch" as const,
+        bucket: finalMerchImageBucket,
+      };
+
+export const merchImageUrl = (
+  merchImage: MerchImageWithImage | undefined,
+  size: number
+) => {
+  if (!merchImage) {
+    return undefined;
+  }
+  const { image, bucket } = resolveMerchImage(merchImage);
+  const variant = image.url.find((u) => u.endsWith(`-x${size}`));
+  return variant ? generateFullStaticImageUrl(variant, bucket) : undefined;
+};
+
+export const deleteMerchImage = async (merchImage: MerchImageWithImage) => {
+  const { imageType } = resolveMerchImage(merchImage);
+  const storedId = merchImage.imageId ?? merchImage.id;
+
+  await prisma.merchImage.delete({ where: { id: merchImage.id } });
+  if (merchImage.imageId) {
+    await prisma.image.delete({ where: { id: merchImage.imageId } });
+  }
+
+  try {
+    await removeImagesByType(imageType, storedId);
+  } catch (e) {
+    logger.info(`No stored objects for merch image ${storedId}, that's okay`);
+  }
+};
+
+export const deleteMerchImages = async (merchId: string) => {
+  const images = await prisma.merchImage.findMany({
+    where: { merchId },
+    include: { image: true },
   });
 
-  if (image) {
+  for (const image of images) {
     try {
-      await prisma.merchImage.delete({
-        where: {
-          id: image.id,
-        },
-      });
+      await deleteMerchImage(image);
     } catch (e) {
-      logger.error(`Error deleting merch cover`);
+      logger.error(`Error deleting merch image ${image.id}`);
       console.error(e);
-    }
-
-    try {
-      await removeObjectsFromBucket(finalMerchImageBucket, image.id);
-    } catch (e) {
-      console.error("Found no files, that's okay");
     }
   }
 };
 
-/**
- * We use our own custom function to handle this until we
- * can figure out a way to soft delete cascade. Maybe
- * we can't?
- *
- * @param trackGroupId
- */
 export const deleteMerch = async (merchId: string) => {
-  await deleteMerchCover(merchId);
+  await deleteMerchImages(merchId);
 
   const downloadableContents = await prisma.merchDownloadableContent.findMany({
     where: {

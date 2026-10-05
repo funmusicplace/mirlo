@@ -77,6 +77,19 @@ export const findFlaggedImageOwner = async (
       });
       return { profileId: image?.merch.profileId };
     }
+    case "image": {
+      const image = await prisma.image.findUnique({
+        where: { id: imageId },
+        select: {
+          merchImage: { select: { merch: { select: { profileId: true } } } },
+          tiers: { select: { tier: { select: { profileId: true } } } },
+        },
+      });
+      return {
+        profileId:
+          image?.merchImage?.merch.profileId ?? image?.tiers[0]?.tier.profileId,
+      };
+    }
     default:
       return {};
   }

@@ -22,6 +22,10 @@ const MERCH_LIST: Merch[] = [
     urlSlug: "example-album-vinyl",
     images: [
       {
+        id: "merch-image-vinyl",
+        merchId: "8b0d5a6e-0000-4000-8000-000000000003",
+        imageId: null,
+        position: 0,
         url: ["/Logo_Mirlo_InsideCircle.svg"],
         updatedAt: "1999-09-09T09:09:09Z",
         sizes: { 60: "/Logo_Mirlo_InsideCircle.svg" },

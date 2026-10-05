@@ -11,7 +11,7 @@ import { serializeMerch } from "../../../../../serializers/merch";
 import { whereForAllProfilesUserCanEdit } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
-import { deleteMerch } from "../../../../../utils/merch";
+import { deleteMerch, merchImagesInclude } from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -35,7 +35,7 @@ export default function () {
         include: {
           profile: { include: { user: { select: { currency: true } } } },
           shippingDestinations: true,
-          images: true,
+          images: merchImagesInclude,
           includePurchaseTrackGroup: true,
           itemType: true,
           downloadableContent: {

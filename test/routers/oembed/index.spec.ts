@@ -283,7 +283,7 @@ describe("oembed", () => {
         await prisma.merchImage.create({
           data: {
             merchId: merch.id,
-            url: ["https://example.com/merch.jpgx600"],
+            url: ["merch-x600"],
           },
         });
 

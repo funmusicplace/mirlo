@@ -5,6 +5,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializeMerch } from "../../../../serializers/merch";
 import { whereForVisibleProfile } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { merchImagesInclude } from "../../../../utils/merch";
 
 export default function () {
   const operations = {
@@ -50,7 +51,7 @@ export default function () {
         },
         include: {
           profile: { include: { user: { select: { currency: true } } } },
-          images: true,
+          images: merchImagesInclude,
           itemType: true,
           shippingDestinations: true,
           downloadableContent: {

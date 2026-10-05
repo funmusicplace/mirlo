@@ -6,7 +6,7 @@ import {
   TrackGroup,
 } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
-import { uniq } from "lodash";
+import { compact, uniq } from "lodash";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
@@ -24,8 +24,7 @@ import {
   handleTrackPurchase,
   completePurchase,
 } from "../handleFinishedTransactions";
-import { generateFullStaticImageUrl } from "../images";
-import { finalMerchImageBucket } from "../minio";
+import { merchImageUrl } from "../merch";
 import { recordPaymentAccountStatus } from "../paymentAccountStatus";
 import {
   calculateAppFee,
@@ -228,7 +227,7 @@ const createOrReuseStripeProduct = async ({
  */
 export const createMerchStripeProduct = async (
   merch: Prisma.MerchGetPayload<{
-    include: { profile: true; images: true };
+    include: { profile: true; images: { include: { image: true } } };
   }>,
   stripeAccountId: string,
   options?: { merchOptionIds?: string[] }
@@ -253,15 +252,7 @@ export const createMerchStripeProduct = async (
           ? options?.merchOptionIds.join(OPTION_JOINER)
           : null,
       },
-      images:
-        merch.images?.length > 0
-          ? [
-              generateFullStaticImageUrl(
-                merch.images?.[0]?.url[4],
-                finalMerchImageBucket
-              ),
-            ]
-          : [],
+      images: compact([merchImageUrl(merch.images?.[0], 600)]),
     }),
     // do not set a product key if there are options
     persistProductKey: hasOptions

@@ -20,6 +20,7 @@ import { FormatOptions } from "./audioFormats";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
+import { merchImagesInclude } from "./merch";
 import { streamOriginalAudio, removeCoverImages } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { deleteTrack } from "./tracks";
@@ -338,7 +339,7 @@ export const trackGroupSingleInclude = (options: {
     merch: {
       where: { isPublic: true },
       include: {
-        images: true,
+        images: merchImagesInclude,
         shippingDestinations: true,
         optionTypes: { include: { options: true } },
       },
