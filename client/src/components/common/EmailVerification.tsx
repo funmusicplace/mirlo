@@ -115,7 +115,7 @@ const EmailVerification: React.FC<{
         <Box variant="info">
           <p className="text-sm mb-3">{t("checkEmail")}</p>
           <div className="flex flex-col gap-3">
-            <FormComponent>
+            <FormComponent className="mb-0!">
               <label htmlFor="input-verification-code">
                 {t("verificationCode")}
               </label>

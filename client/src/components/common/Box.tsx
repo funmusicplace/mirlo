@@ -54,6 +54,13 @@ export const ArtistBox: React.FC<{
   );
 };
 
+const tintedSurface = (color: string) => `
+  background-color: color-mix(in srgb, ${color} 30%, var(--mi-background-color));
+  border-left: 4px solid ${color};
+  border-radius: var(--mi-border-radius);
+  color: var(--mi-text-color);
+`;
+
 const Box = styled.div<{
   variant?: "success" | "info" | "warning";
   compact?: boolean;
@@ -68,26 +75,11 @@ const Box = styled.div<{
   ${(props) => {
     switch (props.variant) {
       case "success":
-        return `
-            background: var(--mi-success-background-color);
-            border: var(--mi-success-background-color) 1px solid;
-            color: var(--mi-white);
-        `;
+        return tintedSurface("var(--mi-success-background-color)");
       case "info":
-        return `
-          background-color: var(--mi-info-background-color);
-          color: var(--mi-white);
-        `;
+        return tintedSurface("var(--mi-info-background-color)");
       case "warning":
-        return `
-            background: var(--mi-warning-background-color);
-            border: var(--mi-warning-background-color) 1px solid;
-            color: var(--mi-text-color);
-
-            a {
-              color: var(--mi-white);
-            }
-          `;
+        return tintedSurface("var(--mi-warning-background-color)");
       default:
         return `
           // background-color: var(--mi-lighten-background-color);
