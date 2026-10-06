@@ -16,6 +16,22 @@ echo ""
 
 git pull origin main
 
+if ! grep -qE "^COMPOSE_PROFILES=" .env; then
+  env_value() { { grep -E "^$1=" .env || true; } | tail -1 | cut -d= -f2- | tr -d "'\" "; }
+  STORAGE_BACKEND_VALUE=$(env_value STORAGE_BACKEND | tr '[:upper:]' '[:lower:]')
+  if [ "$STORAGE_BACKEND_VALUE" = "minio" ] || {
+    [ -z "$STORAGE_BACKEND_VALUE" ] &&
+      { [ -z "$(env_value S3_ACCESS_KEY_ID)" ] || [ -z "$(env_value S3_SECRET_ACCESS_KEY)" ]; }
+  }; then
+    echo "" >> .env
+    echo "COMPOSE_PROFILES=garage" >> .env
+    echo "✓ Set COMPOSE_PROFILES=garage in .env (bundled object store is now opt-in)"
+  else
+    echo "ℹ️  Using external S3 storage — the bundled Garage containers will no"
+    echo "   longer start. Remove them with: docker compose rm -sf garage garage-init"
+  fi
+fi
+
 # Source code is baked into the images, so a rebuild is required.
 docker compose build
 docker compose up -d

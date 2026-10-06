@@ -70,7 +70,7 @@ services:
     volumes: !override
       - garage_storage-test:/var/lib/garage
       - ./scripts/garage/garage.toml:/etc/garage.toml:ro
-    profiles: [test]
+    profiles: !override [test]
 
   garage-init-test:
     extends:
@@ -84,7 +84,7 @@ services:
       - garage-test
     environment:
       GARAGE_HOST: garage
-    profiles: [test]
+    profiles: !override [test]
 
   pgsql-test:
     extends:
