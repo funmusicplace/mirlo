@@ -31,7 +31,7 @@ const LI = styled.li<{
     props.compact
       ? `var(--mi-background-color)`
       : props.isRead
-        ? `transparent`
+        ? `color-mix(in srgb, var(--mi-tint-color) 35%, transparent)`
         : `var(--mi-tint-color)`};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
