@@ -10,7 +10,6 @@ import MerchImagesEditor from "./MerchImagesEditor";
 
 const MERCH_ID = VINYL_MERCH_EXAMPLE.id;
 
-// Cycled through for each upload so new tiles are visually distinct.
 const UPLOAD_ASSETS = [
   "merch-tshirt.svg",
   "fees-merch-cassette.svg",
@@ -18,11 +17,12 @@ const UPLOAD_ASSETS = [
   "fees-merch-tote.svg",
 ];
 
-/**
- * An in-memory stand-in for the merch image endpoints, so uploading,
- * reordering and deleting change what the next GET returns. Uploads stay
- * "processing" (no sizes) until the optimize-image job poll reports done.
- */
+type StoreOptions = {
+  failDelete?: boolean;
+  failReorder?: boolean;
+  failUploadsAfter?: number;
+};
+
 const createImageStore = (initial: MerchImage[]) => {
   let images: MerchImage[] = [];
   let processing = new Set<string>();
@@ -42,7 +42,7 @@ const createImageStore = (initial: MerchImage[]) => {
         : { ...image, position }
     );
 
-  const handlers = (options: { failDelete?: boolean } = {}) => [
+  const handlers = (options: StoreOptions = {}) => [
     http.get("*/v1/manage/merch/:merchId", () =>
       HttpResponse.json({
         result: { ...VINYL_MERCH_EXAMPLE, images: serialize() },
@@ -50,6 +50,15 @@ const createImageStore = (initial: MerchImage[]) => {
     ),
     http.post("*/v1/manage/merch/:merchId/images", async () => {
       await delay(300);
+      if (
+        options.failUploadsAfter !== undefined &&
+        uploads >= options.failUploadsAfter
+      ) {
+        return HttpResponse.json(
+          { error: "Something went wrong" },
+          { status: 500 }
+        );
+      }
       const file = UPLOAD_ASSETS[uploads % UPLOAD_ASSETS.length];
       const image = {
         ...merchImageFixture(file, images.length),
@@ -71,6 +80,12 @@ const createImageStore = (initial: MerchImage[]) => {
       });
     }),
     http.put("*/v1/manage/merch/:merchId/images", async ({ request }) => {
+      if (options.failReorder) {
+        return HttpResponse.json(
+          { error: "Something went wrong" },
+          { status: 500 }
+        );
+      }
       const { merchImageIds } = (await request.json()) as {
         merchImageIds: string[];
       };
@@ -107,10 +122,7 @@ const EditorHarness = () => {
   return <MerchImagesEditor merch={merch} reload={refetch} />;
 };
 
-const withStore = (
-  initial: MerchImage[],
-  options?: { failDelete?: boolean }
-) => {
+const withStore = (initial: MerchImage[], options?: StoreOptions) => {
   const store = createImageStore(initial);
   return {
     loaders: [
@@ -134,6 +146,25 @@ const svgFile = (name: string) =>
 
 const imageTiles = (canvasElement: HTMLElement) =>
   within(canvasElement).queryAllByAltText(/^Merch image \d+$/);
+
+const chooseFiles = (canvasElement: HTMLElement, files: File[]) => {
+  const input = canvasElement.querySelector<HTMLInputElement>(
+    "#merch-images-input"
+  )!;
+  // Not userEvent.upload: it pins `input.files`, and the editor clears the
+  // input after reading it. A real FileList behaves like the file picker.
+  const transfer = new DataTransfer();
+  files.forEach((file) => transfer.items.add(file));
+  input.files = transfer.files;
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+};
+
+const dragSecondImageToFront = async (canvasElement: HTMLElement) => {
+  within(canvasElement).getAllByLabelText("Drag to reorder image")[1].focus();
+  await userEvent.keyboard("[Space]");
+  await userEvent.keyboard("[ArrowLeft]");
+  await userEvent.keyboard("[Space]");
+};
 
 /**
  * The image list on the manage merch page: upload several photos (front,
@@ -197,10 +228,7 @@ export const DragSecondImageToFront: Story = {
     const canvas = within(canvasElement);
     await waitFor(() => expect(imageTiles(canvasElement)).toHaveLength(4));
 
-    canvas.getAllByLabelText("Drag to reorder image")[1].focus();
-    await userEvent.keyboard("[Space]");
-    await userEvent.keyboard("[ArrowLeft]");
-    await userEvent.keyboard("[Space]");
+    await dragSecondImageToFront(canvasElement);
 
     await waitFor(() =>
       expect(imageTiles(canvasElement)[0]).toHaveAttribute(
@@ -241,16 +269,7 @@ export const UploadSeveral: Story = {
     const canvas = within(canvasElement);
     await canvas.findByText("Primary");
 
-    const input = canvasElement.querySelector<HTMLInputElement>(
-      "#merch-images-input"
-    )!;
-    // Not userEvent.upload: it pins `input.files`, and the editor clears the
-    // input after reading it. A real FileList behaves like the file picker.
-    const transfer = new DataTransfer();
-    transfer.items.add(svgFile("back.svg"));
-    transfer.items.add(svgFile("insert.svg"));
-    input.files = transfer.files;
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+    chooseFiles(canvasElement, [svgFile("back.svg"), svgFile("insert.svg")]);
 
     await waitFor(
       () => expect(canvas.getAllByLabelText("Delete image")).toHaveLength(3),
@@ -260,6 +279,64 @@ export const UploadSeveral: Story = {
       timeout: 10000,
     });
     await expect(canvas.getAllByText("Primary")).toHaveLength(1);
+  },
+};
+
+/**
+ * The second of three files fails. The first one still shows up and gets
+ * processed, and the artist is told something went wrong.
+ */
+export const UploadPartlyFails: Story = {
+  ...withStore([merchImageFixture("merch-vinyl.svg", 0)], {
+    failUploadsAfter: 1,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Primary");
+
+    chooseFiles(canvasElement, [
+      svgFile("back.svg"),
+      svgFile("insert.svg"),
+      svgFile("poster.svg"),
+    ]);
+
+    await within(canvasElement.ownerDocument.body).findByText(
+      "Couldn't upload the image"
+    );
+    await waitFor(
+      () => expect(canvas.getAllByLabelText("Delete image")).toHaveLength(2),
+      { timeout: 5000 }
+    );
+    await waitFor(() => expect(imageTiles(canvasElement)).toHaveLength(2), {
+      timeout: 10000,
+    });
+  },
+};
+
+/**
+ * A just-uploaded image can't be deleted until its optimize-image job is
+ * done, or the job would write resized files after the image is gone.
+ */
+export const NoDeleteWhileProcessing: Story = {
+  ...withStore([merchImageFixture("merch-vinyl.svg", 0)]),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Primary");
+
+    chooseFiles(canvasElement, [svgFile("back.svg")]);
+
+    await waitFor(
+      () => expect(canvas.getAllByLabelText("Delete image")).toHaveLength(2),
+      { timeout: 5000 }
+    );
+    const [existing, uploaded] = canvas.getAllByLabelText("Delete image");
+    await expect(existing).toBeEnabled();
+    await expect(uploaded).toBeDisabled();
+
+    await waitFor(
+      () => expect(canvas.getAllByLabelText("Delete image")[1]).toBeEnabled(),
+      { timeout: 10000 }
+    );
   },
 };
 
@@ -279,6 +356,24 @@ export const StillProcessing: Story = {
       expect(canvas.getAllByLabelText("Delete image")).toHaveLength(2)
     );
     await expect(imageTiles(canvasElement)).toHaveLength(1);
+  },
+};
+
+/** A failed reorder puts the images back in their saved order. */
+export const ReorderFails: Story = {
+  ...withStore(VINYL_MERCH_EXAMPLE.images, { failReorder: true }),
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(imageTiles(canvasElement)).toHaveLength(4));
+
+    await dragSecondImageToFront(canvasElement);
+
+    await within(canvasElement.ownerDocument.body).findByText(
+      "Couldn't reorder the images"
+    );
+    await expect(imageTiles(canvasElement)[0]).toHaveAttribute(
+      "src",
+      "/showcase/merch-vinyl.svg"
+    );
   },
 };
 

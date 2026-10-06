@@ -7,25 +7,38 @@
  * and the cache-busting version in served URLs stay the same — only the bucket
  * changes. Source objects are never deleted.
  *
+ * Rows that can't be migrated are left alone unless --prune is passed:
+ * - missing: optimized URLs are recorded but the files are gone.
+ * - unprocessed: the upload never finished optimizing. Rows younger than
+ *   PENDING_HOURS count as pending instead, since their job may still run.
+ * --prune deletes missing and unprocessed rows and whatever files they left.
+ * They show a broken image or a spinner today, so nothing visible is lost.
+ *
  * Dry run by default. Usage:
- *   yarn images:backfill-merch [--apply] [--limit N]
- *   node --conditions=mirlo-dist dist/scripts/backfillMerchImages.js [--apply] [--limit N]
+ *   yarn images:backfill-merch [--apply] [--prune] [--limit N]
+ *   node --conditions=mirlo-dist dist/scripts/backfillMerchImages.js [--apply] [--prune] [--limit N]
  */
 import prisma from "@mirlo/prisma";
 
+import { deleteMerchImage } from "../utils/merch";
 import {
   BucketConfig,
   copyImagesBetweenTypes,
   listImagesByType,
+  removeIncomingImageByType,
   setBucketConfig,
 } from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
 
+const PENDING_HOURS = 24;
+
 export const backfillMerchImages = async ({
   apply,
+  prune = false,
   limit,
 }: {
   apply: boolean;
+  prune?: boolean;
   limit?: number;
 }) => {
   const settings = await getSiteSettings();
@@ -35,7 +48,7 @@ export const backfillMerchImages = async ({
   console.log(
     `${apply ? "APPLYING" : "DRY RUN"} — bucket layout: ${
       bucketConfig ? `consolidated (prefix "${bucketConfig.prefix}")` : "legacy"
-    }${limit ? `, limit ${limit}` : ""}`
+    }${prune ? ", pruning" : ""}${limit ? `, limit ${limit}` : ""}`
   );
 
   const legacyImages = await prisma.merchImage.findMany({
@@ -44,24 +57,54 @@ export const backfillMerchImages = async ({
     take: limit,
   });
 
-  const summary = { migrated: 0, unprocessed: 0, missing: 0, failed: 0 };
+  const summary = {
+    migrated: 0,
+    unprocessed: 0,
+    pending: 0,
+    missing: 0,
+    pruned: 0,
+    failed: 0,
+  };
+  const pendingCutoff = new Date(Date.now() - PENDING_HOURS * 60 * 60 * 1000);
 
   for (const merchImage of legacyImages) {
     const label = `${merchImage.id} (merch ${merchImage.merchId})`;
 
-    if (merchImage.url.length === 0) {
-      // The upload never finished optimizing, so there's nothing to serve.
-      console.log(`unprocessed  ${label}`);
-      summary.unprocessed += 1;
-      continue;
-    }
+    const pruneRow = async (reason: "missing" | "unprocessed") => {
+      summary[reason] += 1;
+      if (!prune) {
+        console.log(`${reason.padEnd(12)} ${label}`);
+        return;
+      }
+      if (apply) {
+        await deleteMerchImage(merchImage);
+        if (reason === "unprocessed") {
+          // The upload's original may still be waiting in incoming storage.
+          await removeIncomingImageByType("merch", merchImage.id).catch(
+            () => undefined
+          );
+        }
+      }
+      console.log(`${apply ? "deleted" : "would delete"} ${label} (${reason})`);
+      summary.pruned += 1;
+    };
 
     try {
+      if (merchImage.url.length === 0) {
+        // The upload never finished optimizing, so there's nothing to serve.
+        if (merchImage.createdAt > pendingCutoff) {
+          console.log(`pending      ${label}`);
+          summary.pending += 1;
+        } else {
+          await pruneRow("unprocessed");
+        }
+        continue;
+      }
+
       if (!apply) {
         const files = await listImagesByType("merch", merchImage.id);
         if (files.length === 0) {
-          console.log(`missing      ${label}`);
-          summary.missing += 1;
+          await pruneRow("missing");
         } else {
           console.log(`would copy   ${label}: ${files.length} files`);
           summary.migrated += 1;
@@ -75,8 +118,7 @@ export const backfillMerchImages = async ({
         merchImage.id
       );
       if (copied.length === 0) {
-        console.log(`missing      ${label}`);
-        summary.missing += 1;
+        await pruneRow("missing");
         continue;
       }
 
@@ -114,8 +156,15 @@ export const backfillMerchImages = async ({
   console.log(
     `\n${apply ? "Migrated" : "Would migrate"}: ${summary.migrated}, ` +
       `missing files: ${summary.missing}, unprocessed: ${summary.unprocessed}, ` +
+      `pending: ${summary.pending}, ` +
+      `${apply ? "deleted" : "would delete"}: ${summary.pruned}, ` +
       `failed: ${summary.failed}`
   );
+  if (!prune && summary.missing + summary.unprocessed > 0) {
+    console.log(
+      "Re-run with --prune to delete the missing and unprocessed images."
+    );
+  }
   if (!apply) {
     console.log("Nothing was written. Re-run with --apply to migrate.");
   }
@@ -131,7 +180,11 @@ if (require.main === module) {
     process.exit(1);
   }
 
-  backfillMerchImages({ apply: args.includes("--apply"), limit })
+  backfillMerchImages({
+    apply: args.includes("--apply"),
+    prune: args.includes("--prune"),
+    limit,
+  })
     .then((summary) => process.exit(summary.failed > 0 ? 1 : 0))
     .catch((e) => {
       console.error(e);

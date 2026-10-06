@@ -105,6 +105,7 @@ export async function generateAndUploadImage(
   sizes: number[]
 ): Promise<{ id: string; urls: string[] }> {
   const id = randomUUID();
+  const keyPrefix = prefix ? `${prefix}/` : "";
   // Seed covers don't need full 1500px; smaller base cuts sharp peak memory hard.
   const baseSize = 600;
   const seedSizes = sizes.filter((s) => s <= baseSize);
@@ -118,7 +119,7 @@ export async function generateAndUploadImage(
 
   await minioClient.putObject(
     IMAGES_BUCKET,
-    `${prefix}/${id}-original.webp`,
+    `${keyPrefix}${id}-original.webp`,
     baseWebp
   );
 
@@ -132,7 +133,7 @@ export async function generateAndUploadImage(
       .toBuffer();
     await minioClient.putObject(
       IMAGES_BUCKET,
-      `${prefix}/${id}-x${size}.webp`,
+      `${keyPrefix}${id}-x${size}.webp`,
       resized
     );
     sizeUrls.push(`${id}-x${size}`);

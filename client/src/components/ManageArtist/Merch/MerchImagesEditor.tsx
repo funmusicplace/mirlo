@@ -1,4 +1,4 @@
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import SortableGridItem from "components/common/SortableGridItem";
@@ -40,15 +40,19 @@ const MerchImagesEditor: React.FC<{
     sensors,
     onDragEnd,
   } = useSortableReorder(merch.images, async (merchImageIds) => {
+    await reorderImages({ merchId: merch.id, merchImageIds });
+  });
+  const isProcessing = uploadJobs.length > 0;
+  const isBusy = isUploading || isDeleting || isReordering;
+
+  const onImageDragEnd = async (event: DragEndEvent) => {
     try {
-      await reorderImages({ merchId: merch.id, merchImageIds });
+      await onDragEnd(event);
     } catch (err) {
       snackbar(t("imageReorderFailed"), { type: "warning" });
       console.error(err);
     }
-  });
-  const isProcessing = uploadJobs.length > 0;
-  const isBusy = isUploading || isDeleting || isReordering;
+  };
 
   const onFilesChosen = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -57,9 +61,8 @@ const MerchImagesEditor: React.FC<{
       return;
     }
     setIsUploading(true);
+    const jobs: { jobId: string; jobStatus: string }[] = [];
     try {
-      // One request per file: the upload endpoint takes a single file.
-      const jobs = [];
       for (const file of files) {
         const { result } = await api.uploadFile(
           `manage/merch/${merch.id}/images`,
@@ -69,11 +72,15 @@ const MerchImagesEditor: React.FC<{
         );
         jobs.push({ jobId: result.jobId, jobStatus: "waiting" });
       }
-      setUploadJobs(jobs);
-      await reload();
     } catch (err) {
       snackbar(t("imageUploadFailed"), { type: "warning" });
       console.error(err);
+    }
+    try {
+      if (jobs.length > 0) {
+        setUploadJobs(jobs);
+        await reload();
+      }
     } finally {
       setIsUploading(false);
     }
@@ -93,7 +100,7 @@ const MerchImagesEditor: React.FC<{
       <h2 className="text-lg font-bold">{t("merchImages")}</h2>
       <p className="text-sm">{t("merchImagesDescription")}</p>
       <div className="grid grid-cols-2 gap-2">
-        <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+        <DndContext sensors={sensors} onDragEnd={onImageDragEnd}>
           <SortableContext items={images}>
             {images.map((image, i) => (
               <SortableGridItem
@@ -125,7 +132,7 @@ const MerchImagesEditor: React.FC<{
                     className="absolute bottom-2 right-2"
                     startIcon={<AiFillDelete />}
                     aria-label={t("deleteImage")}
-                    disabled={isBusy}
+                    disabled={isBusy || (isProcessing && !image.sizes?.[300])}
                     onClick={() => remove(image.id)}
                   />
                 </div>

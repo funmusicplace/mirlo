@@ -14,7 +14,8 @@ import React from "react";
  * Keeps a local copy of `items` (so the grid updates optimistically while the
  * request is in flight), exposes dnd-kit `sensors` + an `onDragEnd` handler,
  * and calls `persistOrder` with the reordered ids whenever the user drops an
- * item in a new position.
+ * item in a new position. If `persistOrder` throws, the local order is rolled
+ * back and the error is rethrown.
  */
 function useSortableReorder<T extends { id: string | number }>(
   items: T[] | undefined,
@@ -42,7 +43,12 @@ function useSortableReorder<T extends { id: string | number }>(
     const newIndex = orderedItems.findIndex((i) => i.id === over.id);
     const newOrder = arrayMove(orderedItems, oldIndex, newIndex);
     setOrderedItems(newOrder);
-    await persistOrder(newOrder.map((i) => i.id));
+    try {
+      await persistOrder(newOrder.map((i) => i.id));
+    } catch (err) {
+      setOrderedItems(orderedItems);
+      throw err;
+    }
   }
 
   return { items: orderedItems, sensors, onDragEnd };
