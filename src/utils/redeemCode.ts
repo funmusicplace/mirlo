@@ -100,6 +100,7 @@ export const redeemDownloadCode = async ({
     pricePaid: 0,
     currencyPaid: "usd",
     paymentProcessorKey: null,
+    notificationType: "USER_REDEEMED_YOUR_ALBUM",
   });
 
   return {

@@ -145,6 +145,7 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
         currencyPaid: "usd",
         paymentProcessorKey: null,
         proGratis: true,
+        notificationType: null,
       });
     });
 

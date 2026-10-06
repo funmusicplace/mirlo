@@ -21,6 +21,7 @@ const ACTIVITY_TYPES: Notification["notificationType"][] = [
   "USER_SUBSCRIBED_TO_YOU",
   "USER_BOUGHT_YOUR_ALBUM",
   "USER_BOUGHT_YOUR_TRACK",
+  "USER_REDEEMED_YOUR_ALBUM",
   "LABEL_ADDED_ARTIST",
   "PROFILE_MANAGER_INVITE",
   "FUNDRAISER_PLEDGE_CHARGED",
@@ -45,7 +46,11 @@ const Index = () => {
   const { data: purchaseCheck } = useQuery({
     ...queryNotifications(user?.id, {
       take: 1,
-      notificationType: ["USER_BOUGHT_YOUR_ALBUM", "USER_BOUGHT_YOUR_TRACK"],
+      notificationType: [
+        "USER_BOUGHT_YOUR_ALBUM",
+        "USER_BOUGHT_YOUR_TRACK",
+        "USER_REDEEMED_YOUR_ALBUM",
+      ],
     }),
     enabled: !!user?.id,
   });
@@ -103,6 +108,7 @@ const Index = () => {
             types: [
               "USER_BOUGHT_YOUR_ALBUM",
               "USER_BOUGHT_YOUR_TRACK",
+              "USER_REDEEMED_YOUR_ALBUM",
             ] as Notification["notificationType"][],
           },
         ]

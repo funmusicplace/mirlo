@@ -55,10 +55,9 @@ const NotificationFeedItem: React.FC<{
       notificationType={notification.notificationType}
       compact={compact}
     >
-      {notification.notificationType === "USER_BOUGHT_YOUR_ALBUM" && (
-        <UserBoughtYourAlbum notification={notification} compact={compact} />
-      )}
-      {notification.notificationType === "USER_BOUGHT_YOUR_TRACK" && (
+      {(notification.notificationType === "USER_BOUGHT_YOUR_ALBUM" ||
+        notification.notificationType === "USER_BOUGHT_YOUR_TRACK" ||
+        notification.notificationType === "USER_REDEEMED_YOUR_ALBUM") && (
         <UserBoughtYourAlbum notification={notification} compact={compact} />
       )}
       {notification.notificationType === "FUNDRAISER_PLEDGE_CHARGED" && (

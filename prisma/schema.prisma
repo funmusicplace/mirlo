@@ -269,6 +269,7 @@ enum NotificationType {
   ARTIST_CONTACT_MESSAGE
   MENTION_IN_POST
   PROFILE_MANAGER_INVITE
+  USER_REDEEMED_YOUR_ALBUM
 }
 
 enum NotificationDeliveryMethod {
