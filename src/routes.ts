@@ -171,6 +171,7 @@ const routes = [
   "admin/subscriptions",
   "admin/purchases",
   "admin/settings",
+  "admin/setup",
   "admin/tips",
   "admin/users",
   "admin/users/{id}",
