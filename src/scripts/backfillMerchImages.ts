@@ -44,9 +44,10 @@ export const backfillMerchImages = async ({
   prune?: boolean | "unprocessed";
   limit?: number;
 }) => {
+  // The caller sets the in-memory bucket layout (the CLI below, or the worker
+  // on boot). Setting it here would leak into whatever process calls this.
   const settings = await getSiteSettings();
   const bucketConfig = (settings.bucketNames as BucketConfig | null) ?? null;
-  setBucketConfig(bucketConfig);
 
   console.log(
     `${apply ? "APPLYING" : "DRY RUN"} — bucket layout: ${
@@ -183,11 +184,15 @@ if (require.main === module) {
     process.exit(1);
   }
 
-  backfillMerchImages({
-    apply: args.includes("--apply"),
-    prune: args.includes("--prune"),
-    limit,
-  })
+  getSiteSettings()
+    .then((settings) => {
+      setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+      return backfillMerchImages({
+        apply: args.includes("--apply"),
+        prune: args.includes("--prune"),
+        limit,
+      });
+    })
     .then((summary) => process.exit(summary.failed > 0 ? 1 : 0))
     .catch((e) => {
       console.error(e);

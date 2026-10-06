@@ -40,6 +40,10 @@ describe("clean-up-files", () => {
   });
 
   describe("legacy mode", () => {
+    beforeEach(() => {
+      setBucketConfig(null);
+    });
+
     it("matches legacy trackgroup bucket path", async () => {
       await cleanUpFiles(`${trackGroupFormatBucket}/42`);
       assert.equal(listObjectsV2Stub.firstCall.args[0], trackGroupFormatBucket);
