@@ -39,6 +39,7 @@ import {
   setBucketConfig,
   BucketConfig,
   ensureAllBucketsExist,
+  assertLocalStorageReachable,
 } from "./utils/minio";
 import { getCachedPage } from "./utils/pageCache";
 import {
@@ -360,6 +361,12 @@ process.on("unhandledRejection", (reason) => {
 });
 
 app.listen(process.env.PORT, async () => {
+  try {
+    await assertLocalStorageReachable();
+  } catch (e) {
+    logger.error(e instanceof Error ? e.message : e);
+    process.exit(1);
+  }
   // Fire and forget: page renders read the cached list and fall back to the
   // client's built-in languages until (or unless) this succeeds.
   startAvailableLanguagesRefresh();

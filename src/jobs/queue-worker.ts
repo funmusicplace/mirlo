@@ -13,6 +13,7 @@ import {
   setBucketConfig,
   BucketConfig,
   ensureAllBucketsExist,
+  assertLocalStorageReachable,
 } from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
 
@@ -150,6 +151,12 @@ yargs
     process.on("unhandledRejection", (reason) => {
       logger.error(`Unhandled promise rejection: ${reason}`);
     });
+    try {
+      await assertLocalStorageReachable();
+    } catch (e) {
+      logger.error(e instanceof Error ? e.message : e);
+      process.exit(1);
+    }
     const settings = await getSiteSettings();
     setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
     ensureAllBucketsExist().catch((e) => {

@@ -188,6 +188,46 @@ export const resolveBackendStorage = (
 
 export const backendStorage: "minio" | "backblaze" = resolveBackendStorage();
 
+/**
+ * Fails fast when local storage (Garage) is selected but can't be reached, so
+ * a missing COMPOSE_PROFILES=garage shows up at boot instead of as broken
+ * uploads later. Retries briefly in case Garage is still starting.
+ */
+export const assertLocalStorageReachable = async ({
+  attempts = 5,
+  delayMs = 2000,
+}: { attempts?: number; delayMs?: number } = {}) => {
+  if (backendStorage !== "minio") {
+    return;
+  }
+  const hint =
+    "Either enable the bundled Garage service (COMPOSE_PROFILES=garage in .env) " +
+    "or configure S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY to use external storage.";
+  if (!minioClient) {
+    throw new Error(
+      `Local storage (Garage) is selected but LOCAL_S3_HOST is not set. ${hint}`
+    );
+  }
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      await minioClient.listBuckets();
+      return;
+    } catch (e) {
+      lastError = e;
+      logger.warn(
+        `Local storage at ${LOCAL_S3_HOST}:${LOCAL_S3_API_PORT} not reachable (attempt ${attempt}/${attempts})`
+      );
+      if (attempt < attempts) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+  throw new Error(
+    `Local storage (Garage) at ${LOCAL_S3_HOST}:${LOCAL_S3_API_PORT} is selected but not reachable: ${lastError}. ${hint}`
+  );
+};
+
 // and access keys as shown below.
 export const minioClient =
   backendStorage === "minio" && LOCAL_S3_HOST
