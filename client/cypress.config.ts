@@ -7,6 +7,7 @@ import { parse } from "dotenv";
 
 import pkg, {
   clearTables,
+  completeInstanceSetup,
   createTrack,
   createSubscription,
   createNotification,
@@ -51,6 +52,11 @@ export default defineConfig({
         },
         clearTables: async () => {
           await clearTables();
+          await completeInstanceSetup();
+          return true;
+        },
+        completeInstanceSetup: async () => {
+          await completeInstanceSetup();
           return true;
         },
         createTrackGroup: async (query: {

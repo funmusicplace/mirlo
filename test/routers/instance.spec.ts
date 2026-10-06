@@ -3,6 +3,7 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+import prisma from "@mirlo/prisma";
 
 import { clearTables, createSiteSettings } from "../utils";
 
@@ -36,6 +37,7 @@ describe("instance", () => {
         isClosedToPublicArtistSignup: false,
         trustLevelNames: ["New", "Verified", "Regular", "Trusted"],
         languages: null,
+        setupStage: "welcome",
       });
     });
 
@@ -80,10 +82,37 @@ describe("instance", () => {
         "isClosedToPublicArtistSignup",
         "languages",
         "name",
+        "setupStage",
         "showHeroOnHome",
         "trustLevelNames",
       ]);
       assert.ok(!JSON.stringify(response.body).includes("secret"));
+    });
+
+    it("reports the guide stage once the instance has a name", async () => {
+      await createSiteSettings({
+        instanceCustomization: { title: "Nightjar" },
+      });
+
+      const response = await requestApp
+        .get("instance")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.result.setupStage, "guide");
+    });
+
+    it("reports the setup as done once it was completed", async () => {
+      const row = await createSiteSettings({ instanceCustomization: {} });
+      await prisma.settings.update({
+        where: { id: row.id },
+        data: { setupCompletedAt: new Date() },
+      });
+
+      const response = await requestApp
+        .get("instance")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.result.setupStage, "done");
     });
 
     it("replaces a malformed colour with the default", async () => {

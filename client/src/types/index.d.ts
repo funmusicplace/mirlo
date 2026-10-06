@@ -17,6 +17,7 @@ interface InstanceSettings {
   isClosedToPublicArtistSignup: boolean;
   trustLevelNames: string[];
   languages: { short: string; name: string }[] | null;
+  setupStage: "welcome" | "guide" | "done";
 }
 
 interface LoggedInUser {

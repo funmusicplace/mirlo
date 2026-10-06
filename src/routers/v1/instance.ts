@@ -23,7 +23,7 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns the public settings of this instance",
     description:
-      "Name, colours, hero flag, artist signup policy, trust level names and offered UI languages. Never includes secrets.",
+      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages and how far the first setup went. Never includes secrets.",
     responses: {
       200: {
         description: "The public instance settings",
@@ -58,6 +58,10 @@ export default function () {
                       name: { type: "string" },
                     },
                   },
+                },
+                setupStage: {
+                  type: "string",
+                  enum: ["welcome", "guide", "done"],
                 },
               },
             },

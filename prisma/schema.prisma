@@ -38,6 +38,7 @@ model Settings {
   privacyPolicy                String?
   cookiePolicy                 String?
   defconLevel                  Int?    @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
+  setupCompletedAt             DateTime?
 }
 
 enum ClientStatus {

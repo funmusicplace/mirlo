@@ -12,6 +12,7 @@ import {
   CompletedPayment,
   EMPTY_PLATFORM_CURRENCY_VALUE,
 } from "../src/utils/payments/completedPayment";
+import { getSiteSettings } from "../src/utils/settings";
 
 const TRUNCATE_TABLES_SQL = `
   TRUNCATE TABLE
@@ -461,6 +462,14 @@ export const createSiteSettings = async (data?: Record<string, any>) => {
     },
   });
   return settings;
+};
+
+export const completeInstanceSetup = async () => {
+  const { id } = await getSiteSettings();
+  await prisma.settings.update({
+    where: { id },
+    data: { setupCompletedAt: new Date() },
+  });
 };
 
 export const getUserByEmail = async (email: string) => {
