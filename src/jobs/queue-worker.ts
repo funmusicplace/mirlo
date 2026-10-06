@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
+import { Job, Worker } from "bullmq";
 import * as dotenv from "dotenv";
 dotenv.config();
-
-import { Job, Worker } from "bullmq";
 import winston from "winston";
 import yargs from "yargs";
 
 import { REDIS_CONFIG } from "../config/redis";
+import { runPendingDataMigrations } from "../dataMigrations";
 import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
 import {
   setBucketConfig,
@@ -156,6 +156,7 @@ yargs
       logger.error("Failed to eagerly create storage buckets on boot");
       logger.error(e);
     });
+    startDataMigrations();
     logger.info("STARTING WORKER QUEUE");
     audioQueue();
     // audioDurationQueue();
@@ -169,6 +170,16 @@ yargs
     scheduledTasksQueueWorker();
   })
   .help().argv;
+
+function startDataMigrations() {
+  if (process.env.DATA_MIGRATIONS_ENABLED === "false") {
+    logger.info("Data migrations disabled (DATA_MIGRATIONS_ENABLED=false)");
+    return;
+  }
+  runPendingDataMigrations().catch((e) => {
+    logger.error("Data migrations failed to run", e);
+  });
+}
 
 async function imageQueue() {
   createWorkerWithLogging(

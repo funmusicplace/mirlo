@@ -18,6 +18,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model DataMigration {
+  name        String   @id
+  completedAt DateTime @default(now())
+}
+
 model Settings {
   id                           Int     @id @default(autoincrement())
   /// [Settings]

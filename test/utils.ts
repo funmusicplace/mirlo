@@ -20,6 +20,7 @@ const TRUNCATE_TABLES_SQL = `
     "ArtistTourDate",
     "Client",
     "ContentFlag",
+    "DataMigration",
     "DownloadableContent",
     "EmailVerification",
     "Fundraiser",

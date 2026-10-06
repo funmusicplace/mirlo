@@ -13,6 +13,9 @@
  *   PENDING_HOURS count as pending instead, since their job may still run.
  * --prune deletes missing and unprocessed rows and whatever files they left.
  * They show a broken image or a spinner today, so nothing visible is lost.
+ * Passing prune: "unprocessed" (as the data migration does) only deletes
+ * unprocessed rows: an empty or misconfigured bucket makes every row look
+ * missing, so deleting those needs someone to check storage first.
  *
  * Dry run by default. Usage:
  *   yarn images:backfill-merch [--apply] [--prune] [--limit N]
@@ -38,7 +41,7 @@ export const backfillMerchImages = async ({
   limit,
 }: {
   apply: boolean;
-  prune?: boolean;
+  prune?: boolean | "unprocessed";
   limit?: number;
 }) => {
   const settings = await getSiteSettings();
@@ -48,7 +51,7 @@ export const backfillMerchImages = async ({
   console.log(
     `${apply ? "APPLYING" : "DRY RUN"} — bucket layout: ${
       bucketConfig ? `consolidated (prefix "${bucketConfig.prefix}")` : "legacy"
-    }${prune ? ", pruning" : ""}${limit ? `, limit ${limit}` : ""}`
+    }${prune ? `, pruning${prune === true ? "" : ` ${prune} only`}` : ""}${limit ? `, limit ${limit}` : ""}`
   );
 
   const legacyImages = await prisma.merchImage.findMany({
@@ -72,7 +75,7 @@ export const backfillMerchImages = async ({
 
     const pruneRow = async (reason: "missing" | "unprocessed") => {
       summary[reason] += 1;
-      if (!prune) {
+      if (prune !== true && prune !== reason) {
         console.log(`${reason.padEnd(12)} ${label}`);
         return;
       }
@@ -160,7 +163,7 @@ export const backfillMerchImages = async ({
       `${apply ? "deleted" : "would delete"}: ${summary.pruned}, ` +
       `failed: ${summary.failed}`
   );
-  if (!prune && summary.missing + summary.unprocessed > 0) {
+  if (summary.missing + summary.unprocessed > summary.pruned) {
     console.log(
       "Re-run with --prune to delete the missing and unprocessed images."
     );

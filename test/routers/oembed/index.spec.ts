@@ -280,10 +280,11 @@ describe("oembed", () => {
         const artist = await createArtist(user.user.id);
         const merch = await createMerch(artist.id);
 
-        await prisma.merchImage.create({
+        await prisma.image.create({
           data: {
-            merchId: merch.id,
             url: ["merch-x600"],
+            dimensions: "square",
+            merchImage: { create: { merchId: merch.id } },
           },
         });
 
