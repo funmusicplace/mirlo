@@ -1,0 +1,50 @@
+name: Pull translations from Transifex
+
+# Keeps client/src/translation/<locale>.json in sync with Transifex so builds
+# without VITE_TRANSIFEX_TOKEN (self-hosted instances) still ship every
+# language. Opens (or updates) a single PR rather than pushing to main.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pull-transifex:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: install node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+
+      - name: install dependencies
+        run: yarn install --immutable
+
+      - name: Pull translations
+        env:
+          TRANSIFEX_TOKEN: ${{ secrets.TRANSIFEX_TOKEN }}
+        run: yarn ts-node scripts/pull-translations.ts
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/transifex-translations
+          commit-message: "chore(i18n): pull translations from Transifex"
+          title: "chore(i18n): pull translations from Transifex"
+          body: |
+            Automated weekly pull of translations from Transifex into
+            `client/src/translation/`, so builds without a Transifex token
+            still include every language.
+          add-paths: client/src/translation/*.json
+          delete-branch: true
