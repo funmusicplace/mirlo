@@ -3,6 +3,7 @@ import { Readable } from "stream";
 
 import {
   S3Client,
+  CopyObjectCommand,
   CreateBucketCommand,
   HeadBucketCommand,
   GetObjectCommand,
@@ -647,6 +648,37 @@ export const removeObjectFromStorage = async (
   }
 };
 
+/**
+ * Server-side copy: the bytes never leave the storage provider, and the
+ * source's metadata (content type, cache control) carries over. Both B2 and
+ * Garage implement CopyObject.
+ */
+export const copyObjectInStorage = async (
+  fromBucket: string,
+  fromKey: string,
+  toBucket: string,
+  toKey: string
+) => {
+  const client =
+    backendStorage === "backblaze" ? backblazeClient : localS3Client;
+  if (!client) {
+    throw new Error(`${backendStorage}: no S3 client to copy with`);
+  }
+  logger.info(
+    `${backendStorage}: copying ${fromBucket}/${fromKey} to ${toBucket}/${toKey}`
+  );
+  await client.send(
+    new CopyObjectCommand({
+      Bucket: toBucket,
+      Key: toKey,
+      // CopySource is a URL path, so each key segment has to be encoded.
+      CopySource: [fromBucket, ...fromKey.split("/")]
+        .map(encodeURIComponent)
+        .join("/"),
+    })
+  );
+};
+
 export const getBufferFromStorage = async (
   bucket: string,
   filename: string
@@ -1037,15 +1069,6 @@ const imageKeyPrefix = (imageType: ImageType) => {
   return isConsolidatedMode() && prefix ? `${prefix}/` : "";
 };
 
-const imageContentTypes: Record<string, string> = {
-  webp: "image/webp",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  ico: "image/x-icon",
-};
-
 export const listImagesByType = async (
   imageType: ImageType,
   imageId: string
@@ -1075,18 +1098,12 @@ export const copyImagesBetweenTypes = async (
 
   const copied: string[] = [];
   for (const name of names) {
-    const { buffer } = await getBufferFromStorage(
+    await copyObjectInStorage(
       fromBucket,
-      `${fromPrefix}${name}`
+      `${fromPrefix}${name}`,
+      toBucket,
+      `${toPrefix}${name}`
     );
-    if (!buffer) {
-      throw new Error(`Could not read ${fromBucket}/${fromPrefix}${name}`);
-    }
-    const extension = name.split(".").pop()?.toLowerCase() ?? "";
-    await uploadWrapper(toBucket, `${toPrefix}${name}`, Buffer.from(buffer), {
-      contentType: imageContentTypes[extension] ?? "application/octet-stream",
-      cacheControl: "public, max-age=31536000, immutable",
-    });
     copied.push(name);
   }
   return copied;

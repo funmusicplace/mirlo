@@ -10,6 +10,7 @@ import {
   runPendingDataMigrations,
 } from "../../src/dataMigrations";
 import merchImagesToCentralImages from "../../src/dataMigrations/merchImagesToCentralImages";
+import { uploadOptimizedImageByType } from "../../src/utils/minio";
 import { clearTables, createMerch, createProfile, createUser } from "../utils";
 
 const fakeMigration = (
@@ -125,10 +126,23 @@ describe("dataMigrations: merchImagesToCentralImages", () => {
     assert.ok(await prisma.merchImage.findUnique({ where: { id: upload.id } }));
   });
 
-  it("prunes stale unprocessed images but keeps ones whose files look missing", async () => {
+  it("prunes stale unprocessed images and skips ones whose files are missing", async () => {
     const { user } = await createUser({ email: "artist@artist.com" });
     const profile = await createProfile(user.id);
     const merch = await createMerch(profile.id, {});
+    const stored = await prisma.merchImage.create({
+      data: { merchId: merch.id },
+    });
+    await prisma.merchImage.update({
+      where: { id: stored.id },
+      data: { url: [`${stored.id}-x600`] },
+    });
+    await uploadOptimizedImageByType(
+      "merch",
+      `${stored.id}-x600.webp`,
+      Buffer.from("image"),
+      { contentType: "image/webp" }
+    );
     const missing = await prisma.merchImage.create({
       data: { merchId: merch.id, url: ["gone-x600"] },
     });
@@ -139,13 +153,32 @@ describe("dataMigrations: merchImagesToCentralImages", () => {
       },
     });
 
-    assert.equal(await merchImagesToCentralImages.run(), false);
-    assert.ok(
-      await prisma.merchImage.findUnique({ where: { id: missing.id } })
-    );
+    assert.equal(await merchImagesToCentralImages.run(), true);
+    const migrated = await prisma.merchImage.findUniqueOrThrow({
+      where: { id: stored.id },
+    });
+    assert.equal(migrated.imageId, stored.id);
+    const skipped = await prisma.merchImage.findUniqueOrThrow({
+      where: { id: missing.id },
+    });
+    assert.equal(skipped.imageId, null);
     assert.equal(
       await prisma.merchImage.findUnique({ where: { id: unprocessed.id } }),
       null
+    );
+  });
+
+  it("stays pending when no image's files can be found at all", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id);
+    const merch = await createMerch(profile.id, {});
+    const missing = await prisma.merchImage.create({
+      data: { merchId: merch.id, url: ["gone-x600"] },
+    });
+
+    assert.equal(await merchImagesToCentralImages.run(), false);
+    assert.ok(
+      await prisma.merchImage.findUnique({ where: { id: missing.id } })
     );
   });
 });
