@@ -4,16 +4,12 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import React from "react";
 import { AiOutlineDrag } from "react-icons/ai";
 
-/**
- * Wraps a grid card (track group, merch item, …) so it can be dragged within a
- * dnd-kit `SortableContext`. The drag handle overlays the top-right corner and
- * is only rendered when `showHandle` is true (i.e. for the owner).
- */
 const SortableGridItem: React.FC<{
   id: string | number;
   showHandle?: boolean;
+  handleLabel?: string;
   children: React.ReactNode;
-}> = ({ id, showHandle, children }) => {
+}> = ({ id, showHandle, handleLabel, children }) => {
   const {
     attributes,
     listeners,
@@ -40,6 +36,7 @@ const SortableGridItem: React.FC<{
           className="absolute top-2 right-2 z-[999]"
           {...listeners}
           ref={setActivatorNodeRef}
+          aria-label={handleLabel}
           startIcon={<AiOutlineDrag />}
         />
       )}

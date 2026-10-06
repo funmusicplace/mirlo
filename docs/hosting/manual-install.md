@@ -89,10 +89,14 @@ REDIS_PASSWORD=secure-redis-password
 
 ###
 # Choose one: the bundled Garage store or an S3 Service. S3 Services are recommended in production. https://mirlo.space uses Backblaze as an S3 Service.
+# The Garage containers only run when COMPOSE_PROFILES=garage is set. Delete
+# that line if you're using an S3 Service, so they don't start or bind ports.
 # Mirlo uses the S3 service whenever both S3 credentials below are set, and
 # Garage otherwise (set STORAGE_BACKEND=minio|s3 to override explicitly; the
 # "minio" value is historical and selects the bundled Garage store).
 ###
+
+COMPOSE_PROFILES=garage
 
 # Garage. The access key must be "GK" + 24 hex characters and the secret
 # exactly 64 hex characters — Garage rejects any other shape. Use
@@ -157,9 +161,10 @@ Verify all services are running:
 docker compose ps
 ```
 
-You should see 6 long-running services: api, background, pgsql, redis, garage
-(the object store) and mailhog, plus a `garage-init` container that provisions
-it and exits 0.
+You should see 5 long-running services: api, background, pgsql, redis and
+mailhog. With the bundled store (`COMPOSE_PROFILES=garage`) there's also
+garage (the object store) plus a `garage-init` container that provisions it and
+exits 0.
 
 MailHog is a dev-only mail catcher. Until you configure a real email provider
 (Mailgun, Postmark, SendGrid, or plain SMTP with an existing mailbox from Gmail,

@@ -1,9 +1,20 @@
-import { Merch, MerchImage } from "@mirlo/prisma/client";
+import { Merch } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../utils/artist";
-import { finalMerchImageBucket } from "../utils/minio";
+import { MerchImageWithImage, resolveMerchImage } from "../utils/merch";
 
 import { omitApPrivateKey, Serialized } from "./utils";
+
+export const serializeMerchImage = (merchImage: MerchImageWithImage) => {
+  const { image, bucket } = resolveMerchImage(merchImage);
+  return {
+    ...addSizesToImage(bucket, image),
+    id: merchImage.id,
+    merchId: merchImage.merchId,
+    imageId: merchImage.imageId,
+    position: merchImage.position,
+  };
+};
 
 export const serializeMerch = <T extends object>(
   merch: T,
@@ -11,7 +22,7 @@ export const serializeMerch = <T extends object>(
 ): Serialized<T> & { currency: string } => {
   const { profileId, profile, includePurchaseTrackGroup, ...rest } =
     merch as T &
-      Merch & { images?: MerchImage[] } & {
+      Merch & { images?: MerchImageWithImage[] } & {
         profileId?: number;
         profile?: {
           user?: { currency?: string | null } | null;
@@ -65,8 +76,8 @@ export const serializeMerch = <T extends object>(
           `/v1/downloadableContent/${dc.downloadableContentId}`,
       },
     })),
-    images: (merch as { images?: MerchImage[] }).images?.map((t) =>
-      addSizesToImage(finalMerchImageBucket, t)
+    images: (merch as { images?: MerchImageWithImage[] }).images?.map(
+      serializeMerchImage
     ),
     ...(tgInclude ? { includePurchaseTrackGroup: tgInclude } : {}),
   } as unknown as Serialized<T> & { currency: string };

@@ -9,7 +9,6 @@ import {
   generateAndUploadImage,
 } from "./publishedTrackGroups";
 
-const MERCH_PREFIX = "merch-images";
 const MERCH_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
 const ITEMS_PER_ARTIST = 3;
 
@@ -120,14 +119,16 @@ export async function seedMerch() {
           try {
             const { id: imageId, urls } = await generateAndUploadImage(
               minioClient,
-              MERCH_PREFIX,
+              "",
               MERCH_SIZES
             );
-            await prisma.merchImage.create({
+            // Merch images are central Image rows at the bucket root.
+            await prisma.image.create({
               data: {
                 id: imageId,
-                merchId: merch.id,
                 url: urls,
+                dimensions: "square",
+                merchImage: { create: { merchId: merch.id, position: 0 } },
               },
             });
             console.log(`  → Merch image uploaded (${urls.length} sizes)`);

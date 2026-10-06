@@ -78,6 +78,15 @@ REDIS_PASSWORD=$(generate_secret)
 LOCAL_S3_USER=GK$(openssl rand -hex 12)
 LOCAL_S3_PASSWORD=$(openssl rand -hex 32)
 
+# The bundled Garage store only runs under the "garage" compose profile, so
+# leave it off when an external S3 service is configured — otherwise it would
+# start for nothing and claim host ports 9000/3903.
+if [ -n "${S3_ACCESS_KEY_ID:-}" ]; then
+  COMPOSE_PROFILES_VALUE=
+else
+  COMPOSE_PROFILES_VALUE=garage
+fi
+
 # The postgres image names the database after POSTGRES_USER by default, and
 # DATABASE_URL is derived from the same values so they can never disagree.
 DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgsql:5432/${POSTGRES_USER}?schema=public"
@@ -92,6 +101,7 @@ sed -E \
   -e "s|^POSTGRES_USER=.*|POSTGRES_USER=${POSTGRES_USER}|" \
   -e "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${POSTGRES_PASSWORD}|" \
   -e "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=${REDIS_PASSWORD}|" \
+  -e "s|^COMPOSE_PROFILES=.*|COMPOSE_PROFILES=${COMPOSE_PROFILES_VALUE}|" \
   -e "s|^LOCAL_S3_USER=.*|LOCAL_S3_USER=${LOCAL_S3_USER}|" \
   -e "s|^LOCAL_S3_PASSWORD=.*|LOCAL_S3_PASSWORD=${LOCAL_S3_PASSWORD}|" \
   -e "s|^S3_ACCESS_KEY_ID=.*|S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}|" \

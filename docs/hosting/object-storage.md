@@ -145,6 +145,11 @@ assigns the layout, imports the key from `LOCAL_S3_USER` /
 `LOCAL_S3_PASSWORD`, and pre-creates the standard buckets. `api` and
 `background` wait on it via `service_completed_successfully`.
 
+Both services sit behind the `garage` compose profile, enabled by
+`COMPOSE_PROFILES=garage` in `.env` (the default in `.env.example`). Installs
+on an external S3 service leave it unset, so the containers never start; the
+dependency is `required: false`, so `api` and `background` start without them.
+
 Garage validates key shape: the access key must be `GK` followed by 24 hex
 characters and the secret exactly 64 hex characters. A malformed key fails at
 import with `Invalid key format`; a mismatched pair fails _every_ S3 request

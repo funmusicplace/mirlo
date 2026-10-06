@@ -1,18 +1,11 @@
-/**
- * Shared metadata fetchers for parseIndex and oEmbed.
- * Prevents code duplication and ensures consistency across endpoints.
- */
-
 import prisma from "@mirlo/prisma";
 
 import { singleInclude, whereForVisibleProfile } from "../utils/artist";
+import { merchImagesInclude } from "../utils/merch";
 
 export async function fetchArtistMetadata(artistSlug: string): Promise<any> {
   return await prisma.profile.findFirst({
     where: { urlSlug: artistSlug, ...whereForVisibleProfile() },
-    // singleInclude is deeply nested enough to hit TypeScript's recursive type
-    // depth limit ("Excessive stack depth comparing types"). The `as any` cast
-    // is the standard workaround — it doesn't affect runtime behaviour.
     include: singleInclude({ includeDefaultTier: true }) as any,
   });
 }
@@ -119,6 +112,6 @@ export async function fetchMerchMetadata(
 
   return await prisma.merch.findFirst({
     where,
-    include: { profile: true, images: true },
+    include: { profile: true, images: merchImagesInclude },
   });
 }

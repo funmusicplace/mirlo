@@ -1,8 +1,3 @@
-/**
- * Data and MSW handlers shared by the artist-page showcase stories
- * (ArtistPage, ArtistCustomize, MerchItem, ReleaseLyrics). Builds on the
- * shared fixtures in ./fixtures.ts.
- */
 import { http, HttpResponse } from "msw";
 
 import { stripeStatusHandlers } from "../../../.storybook/handlers";
@@ -15,6 +10,10 @@ import {
 const merchImage = (file: string) => {
   const url = `/showcase/${file}`;
   return {
+    id: url,
+    merchId: "",
+    imageId: null,
+    position: 0,
     url: [url],
     updatedAt: "2026-09-01T00:00:00Z",
     sizes: { 60: url, 120: url, 300: url, 600: url, 960: url, 1200: url },

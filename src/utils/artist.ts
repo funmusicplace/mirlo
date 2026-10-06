@@ -19,7 +19,7 @@ import { serializeProfile } from "../serializers/artist";
 import { AppError } from "./error";
 import { getClient } from "./getClient";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
-import { deleteMerch } from "./merch";
+import { deleteMerch, merchImagesInclude } from "./merch";
 import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
@@ -603,7 +603,7 @@ export const singleInclude = (queryOptions?: {
   includePrivate?: boolean;
   loggedInUserId?: number;
 }): Prisma.ProfileInclude<DefaultArgs> & {
-  merch: { include: { images: boolean } };
+  merch: { include: { images: typeof merchImagesInclude } };
 } => {
   const { includeDefaultTier, includePrivate, loggedInUserId } =
     queryOptions ?? {};
@@ -657,7 +657,7 @@ export const singleInclude = (queryOptions?: {
         { createdAt: "asc" },
       ],
       include: {
-        images: true,
+        images: merchImagesInclude,
         includePurchaseTrackGroup: true,
       },
     },

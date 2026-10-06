@@ -16,6 +16,7 @@ import {
 } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
+import { merchImagesInclude } from "../../../../../utils/merch";
 
 type Params = {
   artistId: string;
@@ -285,7 +286,10 @@ export default function () {
             where: {
               deletedAt: null,
             },
-            include: { images: true, includePurchaseTrackGroup: true },
+            include: {
+              images: merchImagesInclude,
+              includePurchaseTrackGroup: true,
+            },
           },
         } as any,
       });

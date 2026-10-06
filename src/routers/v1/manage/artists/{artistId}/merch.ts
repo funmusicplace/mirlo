@@ -9,6 +9,7 @@ import {
 } from "../../../../../auth/passport";
 import { serializeMerch } from "../../../../../serializers/merch";
 import { getPlatformFeeForArtist } from "../../../../../utils/artist";
+import { merchImagesInclude } from "../../../../../utils/merch";
 import { getUserCountry } from "../../../../../utils/user";
 
 export default function () {
@@ -36,7 +37,7 @@ export default function () {
         ],
         include: {
           profile: { include: { user: { select: { currency: true } } } },
-          images: true,
+          images: merchImagesInclude,
           optionTypes: { include: { options: true } },
         },
       });

@@ -101,6 +101,15 @@ This pulls latest, rebuilds the images, restarts, and rebuilds the frontend
 [Maintenance and Updates](./maintenance.md) for the equivalent manual steps,
 plus logs, backups and restores.
 
+Some updates also include data migrations, such as moving stored files to a
+new layout. The background worker runs any pending ones when it starts, so
+these need no extra step either. To check on them, look for `dataMigrations:`
+in the worker's logs, or run `yarn data:migrate --status` in the API
+container. A migration that can't finish yet (for example, because uploads
+are still processing) is retried the next time the worker starts. Updates
+that remove support for the old data say so in their release notes, and
+expect the migrations before them to have finished.
+
 The [step-by-step guide](./manual-install.md) is what `install.sh` automates
 — useful if you want to understand or customize what it's doing, or if
 you're not using Docker/Ubuntu and need to adapt the steps.

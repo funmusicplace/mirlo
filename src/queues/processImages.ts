@@ -353,21 +353,21 @@ export const processMerchImage = (ctx: APIContext) => {
   return async (merchId: string) => {
     return uploadAndSendToImageQueue(
       ctx,
-      "merch",
-      "merchImage",
+      "image",
+      "image",
       "artwork",
-      async (_fileInfo: { filename: string }) => {
-        const exists = await prisma.merchImage.findFirst({
-          where: {
-            merchId,
-          },
+      async (fileInfo: { filename: string }) => {
+        const last = await prisma.merchImage.findFirst({
+          where: { merchId },
+          orderBy: { position: "desc" },
         });
-        if (exists) {
-          return exists;
-        }
-        return prisma.merchImage.create({
+        return prisma.image.create({
           data: {
-            merchId,
+            originalFilename: fileInfo.filename,
+            dimensions: "square",
+            merchImage: {
+              create: { merchId, position: last ? last.position + 1 : 0 },
+            },
           },
         });
       }

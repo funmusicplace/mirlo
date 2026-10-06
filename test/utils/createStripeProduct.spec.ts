@@ -87,7 +87,7 @@ describe("createXStripeProduct", () => {
 
       const fullMerch = await prisma.merch.findFirstOrThrow({
         where: { id: merch.id },
-        include: { profile: true, images: true },
+        include: { profile: true, images: { include: { image: true } } },
       });
 
       const productKey = await createMerchStripeProduct(
@@ -126,7 +126,7 @@ describe("createXStripeProduct", () => {
 
       const fullMerch = await prisma.merch.findFirstOrThrow({
         where: { id: merch.id },
-        include: { profile: true, images: true },
+        include: { profile: true, images: { include: { image: true } } },
       });
 
       const productKey = await createMerchStripeProduct(
@@ -166,7 +166,7 @@ describe("createXStripeProduct", () => {
 
       const fullMerch = await prisma.merch.findFirstOrThrow({
         where: { id: merch.id },
-        include: { profile: true, images: true },
+        include: { profile: true, images: { include: { image: true } } },
       });
 
       const productKey = await createMerchStripeProduct(

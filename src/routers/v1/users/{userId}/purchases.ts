@@ -9,6 +9,7 @@ import {
   serializeTrackGroupPurchase,
 } from "../../../../serializers/trackGroup";
 import { serializeUserTransaction } from "../../../../serializers/userTransaction";
+import { merchImagesInclude } from "../../../../utils/merch";
 import { subscriptionTierReleasesCount } from "../../../../utils/trackGroup";
 
 type Params = {
@@ -55,7 +56,7 @@ export default function () {
                     include: { user: { select: { currency: true } } },
                   },
                   includePurchaseTrackGroup: true,
-                  images: true,
+                  images: merchImagesInclude,
                 },
               },
             },

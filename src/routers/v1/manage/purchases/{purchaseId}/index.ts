@@ -9,6 +9,7 @@ import logger from "../../../../../logger";
 import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
 import { buyerUserSelect } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
+import { merchImagesInclude } from "../../../../../utils/merch";
 import {
   hasShipmentChanged,
   sendShipmentUpdateEmail,
@@ -137,7 +138,7 @@ export default function () {
         include: {
           merch: {
             include: {
-              images: true,
+              images: merchImagesInclude,
               profile: { omit: { apPrivateKey: true } },
             },
           },

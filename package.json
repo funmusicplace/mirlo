@@ -17,7 +17,9 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "setup:admin": "ts-node scripts/setup-admin-user.ts",
-    "setup:client": "ts-node scripts/setup-client.ts"
+    "setup:client": "ts-node scripts/setup-client.ts",
+    "data:migrate": "ts-node src/scripts/runDataMigrations.ts",
+    "images:backfill-merch": "ts-node src/scripts/backfillMerchImages.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.882.0",

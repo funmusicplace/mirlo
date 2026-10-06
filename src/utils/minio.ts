@@ -1024,6 +1024,74 @@ export const removeIncomingImageByType = (
   );
 };
 
+export const removeImagesByType = (imageType: ImageType, imageId: string) => {
+  const { final, prefix } = imageTypeBuckets[imageType];
+  return removeObjectsFromBucket(
+    getImagesBucket(final),
+    isConsolidatedMode() && prefix ? `${prefix}/${imageId}` : imageId
+  );
+};
+
+const imageKeyPrefix = (imageType: ImageType) => {
+  const { prefix } = imageTypeBuckets[imageType];
+  return isConsolidatedMode() && prefix ? `${prefix}/` : "";
+};
+
+const imageContentTypes: Record<string, string> = {
+  webp: "image/webp",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  ico: "image/x-icon",
+};
+
+export const listImagesByType = async (
+  imageType: ImageType,
+  imageId: string
+) => {
+  const prefix = imageKeyPrefix(imageType);
+  const objects = await getObjectList(
+    getImagesBucket(imageTypeBuckets[imageType].final),
+    `${prefix}${imageId}`
+  );
+  return objects.map((o) => o.name!.slice(prefix.length));
+};
+
+export const copyImagesBetweenTypes = async (
+  fromType: ImageType,
+  toType: ImageType,
+  imageId: string
+) => {
+  const fromBucket = getImagesBucket(imageTypeBuckets[fromType].final);
+  const toBucket = getImagesBucket(imageTypeBuckets[toType].final);
+  const fromPrefix = imageKeyPrefix(fromType);
+  const toPrefix = imageKeyPrefix(toType);
+
+  const names = await listImagesByType(fromType, imageId);
+  if (names.length > 0) {
+    await ensureBucketCached(toBucket, true);
+  }
+
+  const copied: string[] = [];
+  for (const name of names) {
+    const { buffer } = await getBufferFromStorage(
+      fromBucket,
+      `${fromPrefix}${name}`
+    );
+    if (!buffer) {
+      throw new Error(`Could not read ${fromBucket}/${fromPrefix}${name}`);
+    }
+    const extension = name.split(".").pop()?.toLowerCase() ?? "";
+    await uploadWrapper(toBucket, `${toPrefix}${name}`, Buffer.from(buffer), {
+      contentType: imageContentTypes[extension] ?? "application/octet-stream",
+      cacheControl: "public, max-age=31536000, immutable",
+    });
+    copied.push(name);
+  }
+  return copied;
+};
+
 export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>
   getBufferFromStorage(
     getImagesBucket(finalCoversBucket),

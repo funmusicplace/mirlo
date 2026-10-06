@@ -4,6 +4,10 @@ import { RELEASES, SHOWCASE_ARTIST } from "../shared/fixtures";
 const merchImage = (file: string) => {
   const url = `/showcase/${file}`;
   return {
+    id: url,
+    merchId: "",
+    imageId: null,
+    position: 0,
     url: [url],
     updatedAt: "2026-09-01T00:00:00Z",
     sizes: {

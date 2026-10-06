@@ -510,7 +510,8 @@
     "includesDownloadOf": "Includes a download of <albumLink>{{albumTitle}}</albumLink>",
     "destinationCost": "Cost to ship here: {{costUnit}} ({{costExtraUnit}} per extra item)",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you",
-    "optionalOptionType": "{{name}} (optional)"
+    "optionalOptionType": "{{name}} (optional)",
+    "showImage": "Show image {{number}}"
   },
   "label": {
     "artistsOnYourRoster": "Artists on your roster ({{ count }})",
@@ -1154,7 +1155,17 @@
     "trackGroupRelatedDownloadableContent": "Purchasing this release will also allow the download of this content.",
     "merchFulfillmentParagraph": "To manage orders for merch, check the {{pageName}} page",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country",
-    "optionalCategoryName": "{{name}} (optional)"
+    "optionalCategoryName": "{{name}} (optional)",
+    "merchImages": "Images",
+    "merchImagesDescription": "Add photos of the front, back, inserts, or anything else. Drag to reorder: the first image is used in lists, previews, and checkout.",
+    "addMerchImages": "Add images",
+    "primaryImage": "Primary",
+    "merchImageAlt": "Merch image {{number}}",
+    "deleteImage": "Delete image",
+    "imageUploadFailed": "Couldn't upload the image",
+    "imageReorderFailed": "Couldn't reorder the images",
+    "imageDeleteFailed": "Couldn't delete the image",
+    "dragToReorderImage": "Drag to reorder image"
   },
   "paymentSlider": {
     "howMuchGoesToMirlo": "How much goes to {{instanceName}}?",

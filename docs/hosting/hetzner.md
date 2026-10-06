@@ -100,7 +100,10 @@ directly in `.env`:
 
 1. In Hetzner Console, go to "Storage" → "Object Storage"
 2. Create an API Token (project-level, not scoped to a single bucket, since it needs to create one)
-3. Add the S3 variables to `.env` and recreate the api/background containers:
+3. Add the S3 variables to `.env`, remove the `COMPOSE_PROFILES=garage` line
+   (it starts the bundled store, which you no longer need), and run
+   `docker compose up -d --remove-orphans` to recreate api/background and stop
+   the Garage containers:
 
 ```dotenv
 S3_ACCESS_KEY_ID=your-hetzner-key

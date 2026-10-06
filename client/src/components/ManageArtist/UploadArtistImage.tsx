@@ -54,14 +54,12 @@ export function isMerch(entity: unknown): entity is Merch {
 }
 
 const getExistingImage = (
-  existing: Artist | TrackGroup | Merch | LoggedInUser,
+  existing: Artist | TrackGroup | LoggedInUser,
   imageType: ImageType
 ) => {
   let image = undefined;
   if (isTrackgroup(existing)) {
     image = existing["cover"];
-  } else if (isMerch(existing)) {
-    image = existing.images?.[0];
   } else if (isUser(existing)) {
     if (isUser(existing) && imageType === "avatar") {
       image = existing.userAvatar;
@@ -84,12 +82,10 @@ const getExistingImage = (
   return `${actualImageLocation}?updatedAt=${image?.updatedAt}`;
 };
 
-const buildRootUrl = (existing: TrackGroup | Artist | Merch | LoggedInUser) => {
+const buildRootUrl = (existing: TrackGroup | Artist | LoggedInUser) => {
   let url = "";
   if (isTrackgroup(existing)) {
     url = `manage/trackGroups/${existing.id}/`;
-  } else if (isMerch(existing)) {
-    url = `manage/merch/${existing.id}/`;
   } else if (isUser(existing)) {
     url = `users/${existing.id}/`;
   } else {
@@ -99,7 +95,7 @@ const buildRootUrl = (existing: TrackGroup | Artist | Merch | LoggedInUser) => {
 };
 
 const UploadArtistImage: React.FC<{
-  existing: Artist | TrackGroup | Merch | LoggedInUser;
+  existing: Artist | TrackGroup | LoggedInUser;
   imageType: ImageType;
   height: string;
   width: string;
@@ -138,9 +134,7 @@ const UploadArtistImage: React.FC<{
       refreshLoggedInUser();
       setExistingImage(getExistingImage(user, "profile"));
     } else {
-      let result = await api.get<TrackGroup | Artist | Merch>(
-        buildRootUrl(existing)
-      );
+      let result = await api.get<TrackGroup | Artist>(buildRootUrl(existing));
       const image = getExistingImage(result.result, imageType);
 
       setExistingImage(image);

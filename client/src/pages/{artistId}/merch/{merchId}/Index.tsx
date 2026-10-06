@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import MarkdownContent from "components/common/MarkdownContent";
 import { MetaCard } from "components/common/MetaCard";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -12,6 +11,7 @@ import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGrou
 import WidthContainer from "components/common/WidthContainer";
 import MerchButtonPopUp from "components/Merch/MerchButtonPopUp";
 import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
+import MerchImageGallery from "components/Merch/MerchImageGallery";
 import { ItemViewTitle } from "components/TrackGroup/ItemViewTitle";
 import {
   coverSizeMax,
@@ -153,17 +153,7 @@ function Index() {
               `}
             >
               <ImageWrapper>
-                <ImageWithPlaceholder
-                  src={
-                    merch.images?.[0]?.sizes?.[960] +
-                    "?" +
-                    merch.images?.[0]?.updatedAt
-                  }
-                  alt={merch.title}
-                  size={960}
-                  square
-                  objectFit="cover"
-                />
+                <MerchImageGallery merch={merch} />
               </ImageWrapper>
             </ImageAndDetailsWrapper>
             <div

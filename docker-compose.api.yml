@@ -34,6 +34,7 @@ services:
         condition: service_started
       garage-init:
         condition: service_completed_successfully
+        required: false
     networks: [api-network]
     ports:
       - "${APP_HOST_PORT:-3000}:3000"
@@ -73,6 +74,7 @@ services:
         condition: service_started
       garage-init:
         condition: service_completed_successfully
+        required: false
     restart: unless-stopped
     networks: [api-network]
     volumes:
@@ -91,9 +93,12 @@ services:
         - action: rebuild
           path: package.json
 
+  # The bundled object store is opt-in: enable it with COMPOSE_PROFILES=garage
+  # in .env
   garage:
     container_name: blackbird-garage
     image: dxflrs/garage:v2.1.0
+    profiles: [garage]
     networks: [api-network]
     ports:
       - "9000:9000" # S3 API, the port LOCAL_S3_API_PORT expects
@@ -107,6 +112,7 @@ services:
   garage-init:
     container_name: blackbird-garage-init
     image: curlimages/curl:8.11.1
+    profiles: [garage]
     networks: [api-network]
     depends_on:
       - garage

@@ -452,6 +452,16 @@ interface ArtistSubscriptionTier {
   releases?: SubscriptionTierRelease[];
 }
 
+interface MerchImage {
+  id: string;
+  merchId: string;
+  imageId: string | null;
+  position: number;
+  url: string[];
+  updatedAt: string;
+  sizes?: { [key: number]: string };
+}
+
 interface SubscriptionTierRelease {
   tierId: number;
   trackGroupId: number;
@@ -599,11 +609,7 @@ interface Merch {
   includePurchaseTrackGroupId?: number | null;
   includePurchaseTrackGroup?: TrackGroup;
   isPublic: boolean;
-  images: {
-    url: string[];
-    updatedAt: string;
-    sizes?: { [key: number]: string };
-  }[];
+  images: MerchImage[];
   shippingDestinations: ShippingDestination[];
   optionTypes?: MerchOptionType[];
   downloadableContent?: MerchDownloadableContent[];

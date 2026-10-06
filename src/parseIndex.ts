@@ -43,10 +43,10 @@ import { postIncludeForUser } from "./serializers/post";
 import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
+import { merchImageUrl } from "./utils/merch";
 import {
   finalCoversBucket,
   finalImageBucket,
-  finalMerchImageBucket,
   finalPostImageBucket,
 } from "./utils/minio";
 import {
@@ -385,7 +385,7 @@ const handleMerch: RouteHandler<MerchParams> = async ({
   }
 
   if (merch) {
-    const coverString = merch.images?.[0]?.url.find((u) => u.includes("x600"));
+    const coverUrl = merchImageUrl(merch.images?.[0], 600);
     const merchUrl = `${client.applicationUrl}/${merch.profile?.urlSlug}/merch/${merch.id}`;
     const merchDescription = `Merch by ${artistName}`;
 
@@ -393,9 +393,7 @@ const handleMerch: RouteHandler<MerchParams> = async ({
       title: merch.title,
       description: merchDescription,
       url: merchUrl,
-      imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, finalMerchImageBucket)
-        : avatarUrl,
+      imageUrl: coverUrl ?? avatarUrl,
       artistName: artistName,
     });
 
@@ -403,9 +401,7 @@ const handleMerch: RouteHandler<MerchParams> = async ({
       title: merch.title,
       description: merchDescription,
       url: merchUrl,
-      imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, finalMerchImageBucket)
-        : avatarUrl,
+      imageUrl: coverUrl ?? avatarUrl,
       rss,
       artistName: artistName,
       schemas: [schema],

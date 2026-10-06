@@ -4,6 +4,13 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
 import { Toggle } from "components/common/Toggle";
 import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
+import ManageSectionWrapper from "components/ManageArtist/ManageSectionWrapper";
+import DeleteMerchButton from "components/ManageArtist/Merch/DeleteMerchButton";
+import MerchDestinations from "components/ManageArtist/Merch/MerchDestinations";
+import MerchForm from "components/ManageArtist/Merch/MerchForm";
+import MerchFulfillmentLink from "components/ManageArtist/Merch/MerchFulfillmentLink";
+import MerchImagesEditor from "components/ManageArtist/Merch/MerchImagesEditor";
+import MerchOptions from "components/ManageArtist/Merch/MerchOptions";
 import { queryArtist, queryManagedMerch } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -13,14 +20,6 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 
 import { bp } from "../../../../../../constants";
-import ManageSectionWrapper from "components/ManageArtist/ManageSectionWrapper";
-import UploadArtistImage from "components/ManageArtist/UploadArtistImage";
-
-import DeleteMerchButton from "components/ManageArtist/Merch/DeleteMerchButton";
-import MerchDestinations from "components/ManageArtist/Merch/MerchDestinations";
-import MerchForm from "components/ManageArtist/Merch/MerchForm";
-import MerchFulfillmentLink from "components/ManageArtist/Merch/MerchFulfillmentLink";
-import MerchOptions from "components/ManageArtist/Merch/MerchOptions";
 
 const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
@@ -136,15 +135,7 @@ const Index: React.FC<{}> = () => {
             }
           `}
         >
-          <UploadArtistImage
-            imageTypeDescription={t("merchImage")}
-            existing={merch}
-            imageType="image"
-            height="400"
-            width="400"
-            maxDimensions="1500x1500"
-            maxSize="15mb"
-          />
+          <MerchImagesEditor merch={merch} reload={refetch} />
           <MerchForm merch={merch} artist={artist} reload={refetch} />
         </div>
 
