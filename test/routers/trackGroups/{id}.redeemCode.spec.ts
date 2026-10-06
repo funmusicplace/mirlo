@@ -1,13 +1,16 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
+
 import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../utils";
@@ -134,7 +137,7 @@ describe("trackGroups/{id}/redeemCode", () => {
 
       assert.equal(
         artistNotification?.notificationType,
-        "USER_BOUGHT_YOUR_ALBUM"
+        "USER_REDEEMED_YOUR_ALBUM"
       );
       assert.equal(artistNotification?.relatedUserId, purchaser.id);
     });

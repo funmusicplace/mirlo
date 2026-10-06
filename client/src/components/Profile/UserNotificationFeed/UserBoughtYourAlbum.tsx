@@ -6,6 +6,26 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
+const NOTIFICATION_COPY_KEYS: Partial<
+  Record<
+    Notification["notificationType"],
+    { tagKey: string; messageKey: string }
+  >
+> = {
+  USER_BOUGHT_YOUR_ALBUM: {
+    tagKey: "purchaseTag",
+    messageKey: "boughtRelease",
+  },
+  USER_BOUGHT_YOUR_TRACK: {
+    tagKey: "purchaseTag",
+    messageKey: "boughtRelease",
+  },
+  USER_REDEEMED_YOUR_ALBUM: {
+    tagKey: "redeemTag",
+    messageKey: "redeemedRelease",
+  },
+};
+
 const UserBoughtYourAlbum: React.FC<{
   notification: Notification;
   compact?: boolean;
@@ -14,7 +34,9 @@ const UserBoughtYourAlbum: React.FC<{
     keyPrefix: "notifications",
   });
 
-  if (!notification.trackGroup) {
+  const copy = NOTIFICATION_COPY_KEYS[notification.notificationType];
+
+  if (!notification.trackGroup || !copy) {
     return null;
   }
 
@@ -60,7 +82,7 @@ const UserBoughtYourAlbum: React.FC<{
       <div className="flex-1 min-w-0">
         {!compact && (
           <div className="text-xs font-bold uppercase tracking-[0.08em] text-(--mi-info-background-color) mb-1">
-            {t("purchaseTag")}
+            {t(copy.tagKey)}
           </div>
         )}
         <div
@@ -72,7 +94,7 @@ const UserBoughtYourAlbum: React.FC<{
         >
           <Trans
             t={t}
-            i18nKey="boughtRelease"
+            i18nKey={copy.messageKey}
             values={{ buyerName, title: notification.trackGroup.title }}
             components={{
               author: <strong />,

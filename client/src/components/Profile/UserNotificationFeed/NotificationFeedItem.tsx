@@ -31,7 +31,7 @@ const LI = styled.li<{
     props.compact
       ? `var(--mi-background-color)`
       : props.isRead
-        ? `transparent`
+        ? `color-mix(in srgb, var(--mi-tint-color) 35%, transparent)`
         : `var(--mi-tint-color)`};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
@@ -55,10 +55,9 @@ const NotificationFeedItem: React.FC<{
       notificationType={notification.notificationType}
       compact={compact}
     >
-      {notification.notificationType === "USER_BOUGHT_YOUR_ALBUM" && (
-        <UserBoughtYourAlbum notification={notification} compact={compact} />
-      )}
-      {notification.notificationType === "USER_BOUGHT_YOUR_TRACK" && (
+      {(notification.notificationType === "USER_BOUGHT_YOUR_ALBUM" ||
+        notification.notificationType === "USER_BOUGHT_YOUR_TRACK" ||
+        notification.notificationType === "USER_REDEEMED_YOUR_ALBUM") && (
         <UserBoughtYourAlbum notification={notification} compact={compact} />
       )}
       {notification.notificationType === "FUNDRAISER_PLEDGE_CHARGED" && (

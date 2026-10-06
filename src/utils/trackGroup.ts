@@ -7,6 +7,7 @@ import {
   Prisma,
   User,
   UploadState,
+  NotificationType,
 } from "@mirlo/prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import archiver from "archiver";
@@ -449,6 +450,7 @@ export const registerPurchase = async ({
   platformCut = null,
   transactionId,
   proGratis = false,
+  notificationType = "USER_BOUGHT_YOUR_ALBUM",
 }: {
   userId: number;
   pricePaid: number;
@@ -459,6 +461,10 @@ export const registerPurchase = async ({
   platformCut?: number | null;
   transactionId?: string | null;
   proGratis?: boolean;
+  notificationType?: Extract<
+    NotificationType,
+    "USER_BOUGHT_YOUR_ALBUM" | "USER_REDEEMED_YOUR_ALBUM"
+  > | null;
 }) => {
   const token = randomUUID();
   logger.info(
@@ -530,10 +536,10 @@ export const registerPurchase = async ({
     },
   });
 
-  if (refreshedPurchase) {
+  if (refreshedPurchase && notificationType) {
     await prisma.notification.create({
       data: {
-        notificationType: "USER_BOUGHT_YOUR_ALBUM",
+        notificationType,
         userId: refreshedPurchase?.trackGroup.profile.userId,
         relatedUserId: Number(userId),
         trackGroupId: Number(trackGroupId),

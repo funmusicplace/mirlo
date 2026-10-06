@@ -1618,6 +1618,8 @@
     "startedFollowingYou": "<author>{{userName}}</author> started following you",
     "subscribedToYou": "<author>{{userName}}</author> subscribed to you",
     "boughtRelease": "<author>{{buyerName}}</author> bought <releaseLink>{{title}}</releaseLink>",
+    "redeemTag": "Download code",
+    "redeemedRelease": "<author>{{buyerName}}</author> redeemed a download code for <releaseLink>{{title}}</releaseLink>",
     "by": "by",
     "readPost": "Read post",
     "earlierNotifications": "Last read",
