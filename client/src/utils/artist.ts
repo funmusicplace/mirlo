@@ -60,17 +60,11 @@ export const getArtistUrl = (artist: { urlSlug?: string; id?: number }) => {
   return `/${getArtistUrlReference(artist)}`;
 };
 
-/**
- * The post-payment return path every purchase flow (album, track, merch, …)
- * navigates to once `usePurchase`'s Payment Element confirms.
- */
 export const buildCheckoutCompletePath = (
   artist: { urlSlug?: string; id?: number },
   params: Record<string, string>
 ) => {
-  return encodeURI(
-    `${getArtistUrl(artist)}/checkout-complete?${new URLSearchParams(params).toString()}`
-  );
+  return `${encodeURI(getArtistUrl(artist))}/checkout-complete?${new URLSearchParams(params).toString()}`;
 };
 
 export const getArtistManageUrl = (artistId: number) => {
