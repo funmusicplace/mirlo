@@ -1781,49 +1781,6 @@ describe("purchase", () => {
         "the pledge SetupIntent must be attached to a Customer, or chargePledgePayments has no payment method to find later"
       );
     });
-
-    it("passes successUrl through to the pledge SetupIntent's metadata", async () => {
-      const { user: artistUser } = await createUser({
-        email: "artist@test.com",
-        stripeAccountId: "acct_pledge_success_url",
-      });
-      const { user: buyer } = await createUser({ email: "buyer@test.com" });
-      const profile = await createProfile(artistUser.id);
-      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
-        isAllOrNothing: true,
-      });
-
-      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
-        data: [],
-      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
-      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
-        id: "cus_pledge_success_url",
-      } as unknown as Stripe.Response<Stripe.Customer>);
-      const createSetupIntentStub = sinon
-        .stub(stripeUtils.stripe.setupIntents, "create")
-        .resolves({
-          id: "seti_pledge_success_url",
-          client_secret: "seti_pledge_success_url_secret",
-        } as unknown as Stripe.Response<Stripe.SetupIntent>);
-
-      await initiateFundraiserPledge({
-        profileId: profile.id,
-        fundraiserId: fundraiser.id,
-        trackGroupId: trackGroup.id,
-        price: "2000",
-        userEmail: buyer.email,
-        userId: buyer.id,
-        successUrl: "https://example.com/thanks",
-      });
-
-      const setupIntentParams = createSetupIntentStub.firstCall
-        .args[0] as Stripe.SetupIntentCreateParams;
-      assert.equal(
-        setupIntentParams.metadata?.successUrl,
-        "https://example.com/thanks"
-      );
-    });
   });
 
   describe("initiatePayment (direct)", () => {
@@ -3469,73 +3426,48 @@ describe("purchase", () => {
     });
   });
 
-  describe("getIntentStatus (direct) — requiresShipping/allowedCountries", () => {
-    it("reads requiresShipping + allowedCountries back off a PaymentIntent's metadata (merch)", async () => {
+  describe("getIntentStatus (direct)", () => {
+    it("reads the status and paying artist off a PaymentIntent", async () => {
       sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
-        id: "pi_merch_shipping",
+        id: "pi_status",
         status: "requires_payment_method",
-        client_secret: "pi_merch_shipping_secret_test",
-        amount: 1000,
-        currency: "usd",
-        metadata: {
-          artistId: "1",
-          requiresShipping: "true",
-          allowedCountries: "US,CA",
-        },
-      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
-
-      const result = await getIntentStatus({
-        id: "pi_merch_shipping",
-        stripeAccountId: "acct_test",
-      });
-
-      assert.equal(result.requiresShipping, true);
-      assert.deepEqual(result.allowedCountries, ["US", "CA"]);
-    });
-
-    it("reads requiresShipping + allowedCountries back off a SetupIntent's metadata (collectAddress subscription)", async () => {
-      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
-        id: "seti_sub_shipping",
-        status: "requires_payment_method",
-        client_secret: "seti_sub_shipping_secret_test",
-        metadata: {
-          artistId: "1",
-          requiresShipping: "true",
-          allowedCountries: "US,GB,CA,AU,NZ",
-        },
-      } as unknown as Stripe.Response<Stripe.SetupIntent>);
-
-      const result = await getIntentStatus({
-        id: "seti_sub_shipping",
-        stripeAccountId: "acct_test",
-      });
-
-      assert.equal(result.requiresShipping, true);
-      assert.deepEqual(result.allowedCountries, ["US", "GB", "CA", "AU", "NZ"]);
-      assert.equal(
-        result.amount,
-        null,
-        "SetupIntents have no immediate charge"
-      );
-    });
-
-    it("defaults to no shipping requirement when metadata has none", async () => {
-      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
-        id: "pi_no_shipping",
-        status: "requires_payment_method",
-        client_secret: "pi_no_shipping_secret_test",
-        amount: 500,
-        currency: "usd",
         metadata: { artistId: "1" },
       } as unknown as Stripe.Response<Stripe.PaymentIntent>);
 
       const result = await getIntentStatus({
-        id: "pi_no_shipping",
+        id: "pi_status",
         stripeAccountId: "acct_test",
       });
 
-      assert.equal(result.requiresShipping, false);
-      assert.equal(result.allowedCountries, null);
+      assert.deepEqual(result, {
+        id: "pi_status",
+        status: "requires_payment_method",
+        profileId: "1",
+      });
+    });
+
+    it("reads a seti_ id off the SetupIntent API instead, and tolerates metadata with no artist", async () => {
+      const paymentIntents = sinon.stub(
+        stripeUtils.stripe.paymentIntents,
+        "retrieve"
+      );
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_status",
+        status: "succeeded",
+        metadata: {},
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      const result = await getIntentStatus({
+        id: "seti_status",
+        stripeAccountId: "acct_test",
+      });
+
+      assert.deepEqual(result, {
+        id: "seti_status",
+        status: "succeeded",
+        profileId: null,
+      });
+      assert.equal(paymentIntents.callCount, 0);
     });
   });
 

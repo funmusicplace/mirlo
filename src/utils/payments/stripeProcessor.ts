@@ -113,18 +113,13 @@ export class StripePaymentProcessor implements PaymentProcessor {
     userEmail,
     userId,
     userName,
-    successUrl,
     oldTierId,
     oldStripeSubscriptionKey,
-    requiresShipping,
-    allowedCountries,
     shippingAddress,
     checkoutId,
   }: CreateSubscriptionSetupArgs & {
     oldTierId?: number;
     oldStripeSubscriptionKey?: string;
-    requiresShipping?: boolean;
-    allowedCountries?: string[];
     shippingAddress?: ShippingAddress;
   }): Promise<{ setupIntentId: string; clientSecret: string | null }> {
     const setupIntent = await stripe.setupIntents.create(
@@ -140,13 +135,8 @@ export class StripePaymentProcessor implements PaymentProcessor {
           userEmail,
           ...(userId && { userId }),
           ...(userName?.trim() && { userName: userName.trim() }),
-          ...(successUrl && { successUrl }),
           ...(oldTierId !== undefined && { oldTierId: String(oldTierId) }),
           ...(oldStripeSubscriptionKey && { oldStripeSubscriptionKey }),
-          ...(requiresShipping && { requiresShipping: "true" }),
-          ...(allowedCountries?.length && {
-            allowedCountries: allowedCountries.join(","),
-          }),
           ...(shippingAddress && {
             shippingAddress: JSON.stringify(shippingAddress),
           }),
@@ -171,7 +161,6 @@ export class StripePaymentProcessor implements PaymentProcessor {
     userEmail,
     userId,
     message,
-    successUrl,
     checkoutId,
   }: CreatePledgeSetupArgs): Promise<{
     setupIntentId: string;
@@ -197,7 +186,6 @@ export class StripePaymentProcessor implements PaymentProcessor {
           paymentIntentAmount: String(amount),
           ...(userId && { userId }),
           ...(message && { message }),
-          ...(successUrl && { successUrl }),
           ...(checkoutId && { checkoutId }),
         },
       },

@@ -89,7 +89,6 @@ export const initiateOnlineSubscription = async ({
   userEmail,
   userId,
   userName,
-  successUrl,
   deferred,
   shippingAddress,
   checkoutId,
@@ -101,7 +100,6 @@ export const initiateOnlineSubscription = async ({
   userEmail: string;
   userId?: number;
   userName?: string;
-  successUrl?: string;
   /** Resolve what the checkout needs to render, without creating a SetupIntent. */
   deferred?: boolean;
   shippingAddress?: ShippingAddress;
@@ -197,12 +195,10 @@ export const initiateOnlineSubscription = async ({
       userEmail,
       userId: userId ? String(userId) : undefined,
       userName,
-      successUrl,
       oldTierId: isTierSwitch
         ? existingSubscription.profileSubscriptionTierId
         : undefined,
       oldStripeSubscriptionKey,
-      requiresShipping,
       shippingAddress,
       checkoutId,
     });

@@ -18,7 +18,6 @@ export type CreateSubscriptionSetupArgs = {
   userEmail: string;
   userId?: string;
   userName?: string;
-  successUrl?: string;
   checkoutId?: string;
 };
 
@@ -31,7 +30,6 @@ export type CreatePledgeSetupArgs = {
   userEmail: string;
   userId?: string;
   message?: string;
-  successUrl?: string;
   checkoutId?: string;
 };
 
@@ -76,8 +74,6 @@ export interface PaymentProcessor {
     args: CreateSubscriptionSetupArgs & {
       oldTierId?: number;
       oldStripeSubscriptionKey?: string;
-      requiresShipping?: boolean;
-      allowedCountries?: string[];
       shippingAddress?: ShippingAddress;
     }
   ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
@@ -132,14 +128,8 @@ export type PaymentAccountStatus = {
 export type PaymentStatusResult = {
   id: string;
   status: string;
-  clientSecret: string | null;
-  successUrl: string | null;
-  amount: number | null;
-  currency: string | null;
+  /** The artist the intent pays, from its metadata. */
   profileId: string | null;
-  requiresShipping: boolean;
-  allowedCountries: string[] | null;
-  userEmail: string | null;
 };
 
 import { StripePaymentProcessor } from "./stripeProcessor";
