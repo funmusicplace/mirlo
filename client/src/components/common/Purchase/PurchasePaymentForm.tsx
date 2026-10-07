@@ -74,9 +74,9 @@ const PurchasePaymentForm: React.FC<{
 
   const resolveClientSecret = async (
     shipping?: ShippingAddress
-  ): Promise<string | undefined> => {
+  ): Promise<{ clientSecret: string } | { alreadyPaid: true } | undefined> => {
     if (checkout.kind === "intent") {
-      return checkout.clientSecret;
+      return { clientSecret: checkout.clientSecret };
     }
     try {
       const response = await api.post<
@@ -85,16 +85,19 @@ const PurchasePaymentForm: React.FC<{
           email?: string;
           shippingAddress?: ShippingAddress;
         },
-        { clientSecret?: string }
+        { clientSecret?: string; success?: boolean }
       >("purchase", {
         checkoutId: checkout.quote.checkoutId,
         ...(needsEmail && { email }),
         ...(isSetup && shipping && { shippingAddress: shipping }),
       });
+      if (response.success) {
+        return { alreadyPaid: true };
+      }
       if (!response.clientSecret) {
         throw new Error("Payment could not be started.");
       }
-      return response.clientSecret;
+      return { clientSecret: response.clientSecret };
     } catch (e) {
       handler(e);
       return undefined;
@@ -129,11 +132,20 @@ const PurchasePaymentForm: React.FC<{
     }
 
     const shipping = await resolveShipping();
-    const clientSecret = await resolveClientSecret(shipping);
-    if (!clientSecret) {
+    const resolved = await resolveClientSecret(shipping);
+    if (!resolved) {
       setIsLoading(false);
       return;
     }
+    if ("alreadyPaid" in resolved) {
+      if (onSuccess) {
+        onSuccess(needsEmail ? email : undefined);
+      } else {
+        window.location.assign(returnUrl);
+      }
+      return;
+    }
+    const { clientSecret } = resolved;
 
     const confirmParams = {
       return_url: returnUrl,

@@ -8,6 +8,7 @@ import sinon from "sinon";
 import Stripe from "stripe";
 
 import {
+  cancelPreviousAttempt,
   resolveDigitalPurchaseItem,
   resolveMerchPurchaseItem,
 } from "../../src/routers/v1/purchase";
@@ -1356,17 +1357,19 @@ describe("purchase", () => {
       assert.ok(afterPay?.stripeId, "the intent is recorded on the checkout");
       assert.equal(afterPay?.stripeAccountId, "acct_hosted_checkout");
 
-      // Paying again (a declined card, a double click) reuses that intent.
+      // Paying again (a declined card, a corrected email) replaces that
+      // intent with one built from the new request.
       const retried = await requestApp
         .post("purchase")
-        .send({ checkoutId, email: "guest@test.com" })
+        .send({ checkoutId, email: "corrected@test.com" })
         .set("Accept", "application/json");
       assert.equal(retried.statusCode, 200);
       assert.ok(retried.body.clientSecret);
       const afterRetry = await prisma.checkout.findUnique({
         where: { id: checkoutId },
       });
-      assert.equal(afterRetry?.stripeId, afterPay?.stripeId);
+      assert.ok(afterRetry?.stripeId);
+      assert.notEqual(afterRetry?.stripeId, afterPay?.stripeId);
     });
 
     it("404s for an unknown checkout", async () => {
@@ -1519,6 +1522,91 @@ describe("purchase", () => {
         0,
         "an empty email filter must never reach customers.list"
       );
+    });
+  });
+
+  describe("cancelPreviousAttempt (direct)", () => {
+    const stubIntent = (
+      resource: "paymentIntents" | "setupIntents",
+      status: string
+    ) => {
+      sinon
+        .stub(stripeUtils.stripe[resource], "retrieve")
+        .resolves({ id: "intent", status, metadata: {} } as any);
+      return sinon
+        .stub(stripeUtils.stripe[resource], "cancel")
+        .resolves({ id: "intent", status: "canceled" } as any);
+    };
+
+    it("cancels an attempt that wasn't paid, so the retry builds a new intent", async () => {
+      const cancel = stubIntent("paymentIntents", "requires_payment_method");
+
+      const result = await cancelPreviousAttempt({
+        stripeId: "pi_declined",
+        stripeAccountId: "acct_retry",
+      });
+
+      assert.equal(result.alreadyPaid, false);
+      assert.equal(cancel.callCount, 1);
+      assert.deepEqual(cancel.firstCall.args, [
+        "pi_declined",
+        {},
+        { stripeAccount: "acct_retry" },
+      ]);
+    });
+
+    it("reports a succeeded or processing payment as paid, without cancelling it", async () => {
+      for (const status of ["succeeded", "processing"]) {
+        sinon.restore();
+        const cancel = stubIntent("paymentIntents", status);
+
+        const result = await cancelPreviousAttempt({
+          stripeId: "pi_paid",
+          stripeAccountId: "acct_retry",
+        });
+
+        assert.equal(result.alreadyPaid, true, status);
+        assert.equal(cancel.callCount, 0, status);
+      }
+    });
+
+    it("reports a subscription's succeeded SetupIntent as paid, so a retry can't start a second subscription", async () => {
+      const cancel = stubIntent("setupIntents", "succeeded");
+
+      const result = await cancelPreviousAttempt({
+        stripeId: "seti_confirmed",
+        stripeAccountId: "acct_retry",
+      });
+
+      assert.equal(result.alreadyPaid, true);
+      assert.equal(cancel.callCount, 0);
+    });
+
+    it("leaves an attempt that's already cancelled alone", async () => {
+      const cancel = stubIntent("paymentIntents", "canceled");
+
+      const result = await cancelPreviousAttempt({
+        stripeId: "pi_cancelled",
+        stripeAccountId: "acct_retry",
+      });
+
+      assert.equal(result.alreadyPaid, false);
+      assert.equal(cancel.callCount, 0);
+    });
+
+    it("does nothing for a checkout that hasn't been paid for yet", async () => {
+      const retrieve = sinon.stub(
+        stripeUtils.stripe.paymentIntents,
+        "retrieve"
+      );
+
+      const result = await cancelPreviousAttempt({
+        stripeId: null,
+        stripeAccountId: null,
+      });
+
+      assert.equal(result.alreadyPaid, false);
+      assert.equal(retrieve.callCount, 0);
     });
   });
 

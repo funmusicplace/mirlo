@@ -61,7 +61,9 @@ vi.mock("@stripe/react-stripe-js", () => ({
 }));
 
 const postMock = vi.fn(
-  (..._args: unknown[]): Promise<{ clientSecret?: string }> => {
+  (
+    ..._args: unknown[]
+  ): Promise<{ clientSecret?: string; success?: boolean }> => {
     callOrder.push("post");
     return Promise.resolve({ clientSecret: "pi_new_secret_abc" });
   }
@@ -189,8 +191,29 @@ describe("PurchasePaymentForm", () => {
     fireEvent.click(screen.getByRole("button"));
     await waitFor(() => expect(confirmPayment).toHaveBeenCalledTimes(2));
 
-    // The server returns the intent the first attempt created.
+    // The server replaces the intent the first attempt created.
     expect(postMock).toHaveBeenNthCalledWith(2, "purchase", request);
+  });
+
+  test("finishes without charging again when the checkout is already paid", async () => {
+    postMock.mockImplementation(() => Promise.resolve({ success: true }));
+    const onSuccess = vi.fn();
+
+    render(
+      <PurchasePaymentForm
+        checkout={deferred()}
+        returnUrl="https://example.com/return"
+        buttonLabel="Pay"
+        onSuccess={onSuccess}
+      />
+    );
+
+    await readyTheForm();
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => expect(onSuccess).toHaveBeenCalled());
+    expect(confirmPayment).not.toHaveBeenCalled();
+    expect(handler).not.toHaveBeenCalled();
   });
 
   test("does not confirm when creating the intent fails", async () => {

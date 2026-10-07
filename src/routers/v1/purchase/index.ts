@@ -260,6 +260,26 @@ const assertAllowedSuccessUrl = (
   }
 };
 
+export const cancelPreviousAttempt = async (checkout: {
+  stripeId: string | null;
+  stripeAccountId: string | null;
+}): Promise<{ alreadyPaid: boolean }> => {
+  if (!checkout.stripeId || !checkout.stripeAccountId) {
+    return { alreadyPaid: false };
+  }
+  const processor = getPaymentProcessor();
+  const intent = { id: checkout.stripeId, accountId: checkout.stripeAccountId };
+
+  const { status } = await processor.getStatus(intent);
+  if (status === "succeeded" || status === "processing") {
+    return { alreadyPaid: true };
+  }
+  if (status !== "canceled") {
+    await processor.cancel(intent);
+  }
+  return { alreadyPaid: false };
+};
+
 export default function () {
   const operations = {
     POST: [userLoggedInWithoutRedirect, POST],
@@ -295,22 +315,12 @@ export default function () {
       const deferred = !!body.deferred || !!hosted;
       const { shippingAddress } = body;
 
-      // Paying again (e.g. after a declined card) confirms the same intent,
-      // unless it brings a shipping address: a SetupIntent only takes one
-      // when it's created, and the buyer may have changed it.
       if (
-        checkout?.stripeId &&
-        checkout.stripeAccountId &&
+        checkout &&
         !deferred &&
-        !shippingAddress
+        (await cancelPreviousAttempt(checkout)).alreadyPaid
       ) {
-        const { clientSecret } = await getPaymentProcessor().getStatus({
-          id: checkout.stripeId,
-          accountId: checkout.stripeAccountId,
-        });
-        return res
-          .status(200)
-          .json({ clientSecret, stripeAccountId: checkout.stripeAccountId });
+        return res.status(200).json({ success: true });
       }
 
       if (!profileId || !items?.length) {
@@ -386,7 +396,7 @@ export default function () {
         });
       };
 
-      // So a retry confirms this intent instead of creating another.
+      // So a retry can cancel this intent, or see that it was paid.
       const recordIntent = async (intent: {
         stripeId: string;
         stripeAccountId: string;
@@ -784,7 +794,8 @@ export default function () {
       "which saves the cart as a checkout and returns what Stripe Elements " +
       "needs, and `{ checkoutId, email?, shippingAddress? }` when the " +
       "buyer pays, which creates the intent. Pass `email` on that second " +
-      "call when no one is logged in.",
+      "call when no one is logged in. Paying again replaces the intent; " +
+      "`success: true` means the checkout is already paid.",
     parameters: [
       {
         in: "body",

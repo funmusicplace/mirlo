@@ -1121,8 +1121,6 @@ export const completePurchaseFromIntent = async (
   };
   const { userId, userEmail } = metadata;
 
-  // The email normally lands in metadata — either supplied at initiation, or
-  // attached during the payment step via PUT /purchase/:id.
   let resolvedEmail = userEmail ?? "";
   if (!resolvedEmail && !userId) {
     resolvedEmail = await recoverEmailFromIntent(intent, accountId);
