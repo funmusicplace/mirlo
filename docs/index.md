@@ -17,6 +17,9 @@ hero:
     - theme: alt
       text: Maintaining
       link: /maintaining
+    - theme: alt
+      text: Troubleshooting
+      link: /troubleshooting
 # features:
 #   - title: Feature A
 #     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
@@ -40,6 +43,8 @@ We are building an online audio distribution and patronage platform that aims to
 Want a full product walkthrough? See [Mirlo features](/features/index.md).
 
 Looking for common questions? Read the [FAQ](/faq).
+
+Something not working? See [Troubleshooting](/troubleshooting).
 
 ## Our story
 

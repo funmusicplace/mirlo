@@ -19,6 +19,7 @@ export default defineConfig({
       { text: "Home", link: "/" },
       { text: "FAQ", link: "/faq" },
       { text: "Features", link: "/features" },
+      { text: "Troubleshooting", link: "/troubleshooting" },
     ],
     editLink: {
       pattern: "https://github.com/funmusicplace/mirlo/edit/main/docs/:path",
@@ -35,6 +36,7 @@ export default defineConfig({
         ],
       },
       { text: "FAQ", link: "/faq" },
+      { text: "Troubleshooting", link: "/troubleshooting" },
       {
         text: "How Tos",
         link: "/how-tos",

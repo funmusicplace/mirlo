@@ -256,16 +256,6 @@ For one-on-one conversations, turn on direct messages instead (see above). When 
 
 ## For listeners
 
-::: details How do I tell if an artist sells downloads or CDs?
-
-On a release's page, look for a **Buy** or **Download** button near the top. If there is one, you can buy or download that release. If there isn't, the artist has chosen to make it available for streaming only.
-
-CDs, vinyl, T-shirts and other physical items are in the **Merch** tab on the artist's page. The artist may have renamed this tab. Merch that goes with a particular release also shows up on that release's page.
-
-Not every artist sells things on Mirlo. Some just share their music to listen to.
-
-:::
-
 ::: details What format will my download be in?
 
 You pick when you download. You can choose lossless (FLAC, WAV) or smaller files (MP3, OPUS), and you can come back and download it again in a different format from your collection.
