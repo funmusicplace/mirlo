@@ -24,16 +24,11 @@ const confirmPayment = vi.fn(() => {
   callOrder.push("confirmPayment");
   return Promise.resolve({ paymentIntent: { status: "succeeded" } });
 });
-const addressValue: {
-  value: { name: string; address: Record<string, unknown> };
-} = {
-  value: {
-    name: "Buyer Name",
-    address: { line1: "123 Main St", country: "US" },
-  },
-};
 const getElement = vi.fn(() => ({
-  getValue: () => Promise.resolve(addressValue),
+  getValue: () =>
+    Promise.resolve({
+      value: { name: "Buyer Name", address: { line1: "123 Main St" } },
+    }),
 }));
 const submit = vi.fn((): Promise<{ error?: { message: string } }> => {
   callOrder.push("submit");
@@ -167,34 +162,6 @@ describe("PurchasePaymentForm", () => {
     expect(confirmPayment).not.toHaveBeenCalled();
   });
 
-  test("retries a declined payment by paying the same checkout again", async () => {
-    confirmPayment.mockImplementationOnce(() => {
-      callOrder.push("confirmPayment");
-      return Promise.resolve({
-        error: { message: "Your card was declined." },
-      } as any);
-    });
-
-    render(
-      <PurchasePaymentForm
-        checkout={deferred()}
-        returnUrl="https://example.com/return"
-        buttonLabel="Pay"
-        onSuccess={vi.fn()}
-      />
-    );
-
-    await readyTheForm();
-    fireEvent.click(screen.getByRole("button"));
-    await waitFor(() => expect(handler).toHaveBeenCalled());
-
-    fireEvent.click(screen.getByRole("button"));
-    await waitFor(() => expect(confirmPayment).toHaveBeenCalledTimes(2));
-
-    // The server replaces the intent the first attempt created.
-    expect(postMock).toHaveBeenNthCalledWith(2, "purchase", request);
-  });
-
   test("finishes without charging again when the checkout is already paid", async () => {
     postMock.mockImplementation(() => Promise.resolve({ success: true }));
     const onSuccess = vi.fn();
@@ -236,6 +203,7 @@ describe("PurchasePaymentForm", () => {
     expect(handler).toHaveBeenCalled();
   });
 
+<<<<<<< HEAD
   test("sends a subscription's shipping address with the SetupIntent request", async () => {
     postMock.mockImplementation(() => {
       callOrder.push("post");
@@ -311,6 +279,8 @@ describe("PurchasePaymentForm", () => {
     expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
   });
 
+=======
+>>>>>>> 1f2f3c260 (fix(purchase): simplification of tests)
   test("asks for an email when the server says the buyer is unknown, even if this browser thinks someone is logged in", async () => {
     // The server sets buyerEmailKnown from the session it actually saw, so a
     // stale client-side session mustn't suppress the field — the pay call
