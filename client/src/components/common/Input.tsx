@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import React from "react";
 
@@ -36,6 +37,27 @@ const StyledInput = styled.input`
     padding: 0;
     background-color: transparent;
     border: 0;
+  }
+`;
+
+export const colorInputClass = css`
+  &[type="color"] {
+    min-height: 2.5rem;
+    padding: 2px;
+  }
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  &::-webkit-color-swatch {
+    border: 0;
+    border-radius: calc(var(--mi-border-radius) - 2px);
+  }
+
+  &::-moz-color-swatch {
+    border: 0;
+    border-radius: calc(var(--mi-border-radius) - 2px);
   }
 `;
 

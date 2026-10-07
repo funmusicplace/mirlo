@@ -1,4 +1,9 @@
-import { QueryClient, queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  queryOptions,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import { getInjectedInstanceSettings } from "utils/injectedData";
 import { DEFAULT_INSTANCE_SETTINGS } from "utils/instanceSettings";
 
@@ -20,6 +25,24 @@ export function queryInstanceSettings() {
 
 export const useInstanceSettings = (): InstanceSettings =>
   useQuery(queryInstanceSettings()).data ?? DEFAULT_INSTANCE_SETTINGS;
+
+export type InstanceSetupAnswers = {
+  name: string;
+  supportEmail?: string;
+  colors: { button: string; buttonText: string };
+};
+
+const saveInstanceSetup = (answers: InstanceSetupAnswers) =>
+  api
+    .post<
+      InstanceSetupAnswers,
+      { result: InstanceSettings }
+    >("v1/admin/setup", answers)
+    .then((r) => r.result);
+
+export function useInstanceSetupMutation() {
+  return useMutation({ mutationFn: saveInstanceSetup });
+}
 
 export const loadInstanceSettings = async (
   queryClient: QueryClient

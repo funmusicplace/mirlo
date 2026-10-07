@@ -13,6 +13,7 @@ import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 import Player from "components/Player";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import ScrollToTop from "components/ScrollToTop";
+import SetupRedirect from "components/Setup/SetupRedirect";
 import { isEmpty } from "lodash";
 import { useInstanceSettings } from "queries/instanceSettings";
 import { useContext, useEffect } from "react";
@@ -73,6 +74,7 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <SetupRedirect />
       <MetaCard
         title={routeTitle ?? instanceSettings.name}
         description="A music distribution and patronage site"
