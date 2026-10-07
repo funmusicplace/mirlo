@@ -72,10 +72,10 @@ export const initiateFundraiserPledge = async ({
     };
   }
 
-  if (!userEmail) {
+  if (!userId || !userEmail) {
     throw new AppError({
-      httpCode: 400,
-      description: "An email is required to pledge",
+      httpCode: 401,
+      description: "Log in or verify your email to pledge",
     });
   }
 

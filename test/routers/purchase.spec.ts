@@ -1221,7 +1221,7 @@ describe("purchase", () => {
       assert.equal(response.body.clientSecret, undefined);
     });
 
-    it("rejects a pledge pay call that has no email", async () => {
+    it("rejects a pledge pay call from a buyer who isn't logged in, even with an email", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_deferred_pledge",
@@ -1244,10 +1244,11 @@ describe("purchase", () => {
               price: "1000",
             },
           ],
+          email: "someone-else@test.com",
         })
         .set("Accept", "application/json");
 
-      assert.equal(response.statusCode, 400);
+      assert.equal(response.statusCode, 401);
     });
 
     it("rejects an invalid email", async () => {
@@ -1370,6 +1371,85 @@ describe("purchase", () => {
       });
       assert.ok(afterRetry?.stripeId);
       assert.notEqual(afterRetry?.stripeId, afterPay?.stripeId);
+    });
+
+    it("doesn't follow the artist or claim anything for a logged-in buyer who opens a checkout link", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_checkout_look",
+        currency: "usd",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const free = await createTrackGroup(profile.id, { minPrice: 0 });
+      const checkout = await prisma.checkout.create({
+        data: {
+          profileId: profile.id,
+          items: [
+            { type: "trackGroup", id: free.id, price: "0" },
+            { type: "tip", amount: 500 },
+          ],
+        },
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({ checkoutId: checkout.id, deferred: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.amount, 500);
+      assert.equal(
+        await prisma.profileUserSubscription.count({
+          where: { userId: buyer.id },
+        }),
+        0
+      );
+      assert.equal(
+        await prisma.userTrackGroupPurchase.count({
+          where: { userId: buyer.id },
+        }),
+        0
+      );
+    });
+
+    it("charges a free release in a bigger cart at zero rather than skipping the rest of the cart", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_free_in_cart",
+        currency: "usd",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const free = await createTrackGroup(profile.id, { minPrice: 0 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [
+            { type: "trackGroup", id: free.id, price: "0" },
+            { type: "tip", amount: 500 },
+          ],
+          deferred: true,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.redirectUrl, undefined);
+      assert.equal(response.body.deferred.amount, 500);
+      assert.equal(
+        await prisma.userTrackGroupPurchase.count({
+          where: { userId: buyer.id },
+        }),
+        0
+      );
     });
 
     it("404s for an unknown checkout", async () => {
@@ -1495,7 +1575,7 @@ describe("purchase", () => {
       assert.equal(create.callCount, 0);
     });
 
-    it("refuses to create a pledge without an email", async () => {
+    it("refuses to create a pledge without a logged-in buyer and their email", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_direct_pledge_no_email",
@@ -1507,14 +1587,23 @@ describe("purchase", () => {
         isAllOrNothing: true,
       });
       const list = sinon.stub(stripeUtils.stripe.customers, "list");
+      const pledge = { profileId: profile.id, fundraiserId: fundraiser.id };
 
       await assert.rejects(
         initiateFundraiserPledge({
-          profileId: profile.id,
-          fundraiserId: fundraiser.id,
+          ...pledge,
+          trackGroupId: trackGroup.id,
+          price: "1000",
+          userEmail: "someone-else@test.com",
+        })
+      );
+      await assert.rejects(
+        initiateFundraiserPledge({
+          ...pledge,
           trackGroupId: trackGroup.id,
           price: "1000",
           userEmail: "",
+          userId: artistUser.id,
         })
       );
       assert.equal(
