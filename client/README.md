@@ -2,7 +2,7 @@
 
 ## Translation
 
-You'll need `VITE_TRANSIFEX_TOKEN` set.
+`VITE_TRANSIFEX_TOKEN` is optional. Translations are bundled with the client, but setting the token (see `.env.example`) also fetches the latest strings from Transifex, so you can test your recent translations locally.
 
 Documentation here: https://developers.transifex.com/docs/i18next
 
