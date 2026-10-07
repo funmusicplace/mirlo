@@ -101,6 +101,7 @@ export const resolveDigitalPurchaseItem = async <
   paymentToUser,
   releaseUrlSlug,
   releaseId,
+  quoteOnly,
   handleFreePurchase,
 }: {
   type: T;
@@ -115,7 +116,8 @@ export const resolveDigitalPurchaseItem = async <
   paymentToUser?: { stripeAccountId: string | null } | null;
   releaseUrlSlug: string | null;
   releaseId: number;
-  handleFreePurchase: () => Promise<unknown>;
+  quoteOnly?: boolean;
+  handleFreePurchase?: () => Promise<unknown>;
 }): Promise<
   | { kind: "free"; redirectUrl: string }
   | { kind: "paid"; stripeAccountId?: string; item: ResolvedItem }
@@ -128,7 +130,7 @@ export const resolveDigitalPurchaseItem = async <
   };
   const stripeAccountId = payee.stripeAccountId ?? undefined;
 
-  if (loggedInUser) {
+  if (loggedInUser && !quoteOnly) {
     await subscribeUserToProfile(profile, loggedInUser);
   }
 
@@ -146,7 +148,13 @@ export const resolveDigitalPurchaseItem = async <
 
   const { isPriceZero, priceNumber } = determinePrice(price, minPrice);
 
-  if (isPriceZero && !readerId && loggedInUser) {
+  if (
+    isPriceZero &&
+    !readerId &&
+    loggedInUser &&
+    handleFreePurchase &&
+    !quoteOnly
+  ) {
     await handleFreePurchase();
     return {
       kind: "free",
@@ -314,6 +322,8 @@ export default function () {
         : req.client?.id;
       const deferred = !!body.deferred || !!hosted;
       const { shippingAddress } = body;
+      const quoteOnly = !!checkout && deferred;
+      const canBeFree = items?.length === 1;
 
       if (
         checkout &&
@@ -570,8 +580,10 @@ export default function () {
             paymentToUser: tg.paymentToUser,
             releaseUrlSlug: tg.urlSlug,
             releaseId: tg.id,
-            handleFreePurchase: () =>
-              handleTrackGroupPurchase(loggedInUser!.id, tg.id),
+            quoteOnly,
+            handleFreePurchase: canBeFree
+              ? () => handleTrackGroupPurchase(loggedInUser!.id, tg.id)
+              : undefined,
           });
 
           if (result.kind === "free") {
@@ -617,8 +629,10 @@ export default function () {
             paymentToUser: track.trackGroup.paymentToUser,
             releaseUrlSlug: track.trackGroup.urlSlug,
             releaseId: track.trackGroup.id,
-            handleFreePurchase: () =>
-              handleTrackPurchase(loggedInUser!.id, track.id),
+            quoteOnly,
+            handleFreePurchase: canBeFree
+              ? () => handleTrackPurchase(loggedInUser!.id, track.id)
+              : undefined,
           });
 
           if (result.kind === "free") {
@@ -688,7 +702,7 @@ export default function () {
             });
           }
 
-          if (loggedInUser) {
+          if (loggedInUser && !quoteOnly) {
             await subscribeUserToProfile(profile, loggedInUser);
           }
 
