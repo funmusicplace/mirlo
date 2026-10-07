@@ -297,7 +297,25 @@ describe("PurchasePaymentForm", () => {
     );
   });
 
-  test("does not ask a logged-in buyer for an email", async () => {
+  test("does not ask for an email when the server already knows the buyer", async () => {
+    render(
+      <PurchasePaymentForm
+        checkout={deferred({ buyerEmailKnown: true })}
+        returnUrl="https://example.com/return"
+        buttonLabel="Pay"
+        onSuccess={vi.fn()}
+      />
+    );
+
+    await readyTheForm();
+    expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
+  });
+
+  test("asks for an email when the server says the buyer is unknown, even if this browser thinks someone is logged in", async () => {
+    // The server sets buyerEmailKnown from the session it actually saw, so a
+    // stale client-side session mustn't suppress the field — the pay call
+    // would otherwise reach the server with no email at all.
+    authState.user = { id: 1, email: "stale@test.com" };
     render(
       <PurchasePaymentForm
         checkout={deferred({ buyerEmailKnown: false })}
@@ -308,7 +326,7 @@ describe("PurchasePaymentForm", () => {
     );
 
     await readyTheForm();
-    expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("email")).toBeInTheDocument();
   });
 
   test("sends a logged-out buyer's email with the intent request", async () => {

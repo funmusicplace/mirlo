@@ -5,9 +5,8 @@ import { moneyDisplay } from "components/common/Money";
 import PurchaseElements from "components/common/Purchase/PurchaseElements";
 import { WidthWrapper } from "components/common/WidthContainer";
 import { queryHostedCheckout } from "queries";
-import React from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 
 /**
  * The Mirlo-hosted checkout page. External API consumers send a buyer here.
@@ -16,7 +15,7 @@ function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "hostedCheckout" });
   const [searchParams] = useSearchParams();
   const checkoutId = searchParams.get("checkoutId") ?? "";
-  const { data, isLoading, isError } = useQuery(
+  const { data, isError, isPending } = useQuery(
     queryHostedCheckout(checkoutId)
   );
 
@@ -28,8 +27,12 @@ function Index() {
     );
   }
 
-  if (isLoading) {
+  if (isPending) {
     return <FullPageLoadingSpinner />;
+  }
+
+  if (data?.redirectUrl) {
+    return <Navigate to={data.redirectUrl} replace />;
   }
 
   if (data?.success) {

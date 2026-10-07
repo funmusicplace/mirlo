@@ -1,5 +1,5 @@
 import PurchaseModal from "components/common/Purchase/PurchaseModal";
-import { usePurchase } from "components/common/Purchase/usePurchase";
+import type { Checkout } from "components/common/Purchase/usePurchase";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -16,8 +16,11 @@ const ChangePaymentMethodButton: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
-  const { checkout, openCheckout, reset } = usePurchase();
+  // This flow has its own endpoint for the intent, so it doesn't go through
+  // usePurchase — it only needs somewhere to hold the resulting checkout.
+  const [checkout, setCheckout] = React.useState<Checkout | null>(null);
   const [isStarting, setIsStarting] = React.useState(false);
+  const reset = React.useCallback(() => setCheckout(null), []);
 
   const start = async () => {
     try {
@@ -26,7 +29,7 @@ const ChangePaymentMethodButton: React.FC<{
         undefined,
         { result: { clientSecret: string; stripeAccountId: string } }
       >(`manage/subscriptions/${subscriptionId}`, undefined);
-      openCheckout({ kind: "intent", ...result });
+      setCheckout({ kind: "intent", ...result });
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -53,7 +56,6 @@ const ChangePaymentMethodButton: React.FC<{
         {t("changePaymentMethod")}
       </ArtistButton>
       <PurchaseModal
-        open={!!checkout}
         onClose={reset}
         checkout={checkout}
         returnUrl={window.location.href}

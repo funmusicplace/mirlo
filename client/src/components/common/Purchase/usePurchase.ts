@@ -45,10 +45,12 @@ export type DeferredQuote = {
   successUrl: string | null;
 };
 
-type PurchaseResponse = {
+/** What POST /v1/purchase answers an open call with. */
+export type PurchaseResponse = {
   deferred?: DeferredQuote;
   redirectUrl?: string;
   success?: boolean;
+  successUrl?: string;
 };
 
 export type Checkout =
@@ -106,10 +108,5 @@ export const usePurchase = () => {
 
   const reset = React.useCallback(() => setCheckout(null), []);
 
-  const openCheckout = React.useCallback(
-    (next: Checkout) => setCheckout(next),
-    []
-  );
-
-  return { checkout, isLoading, startPurchase, openCheckout, reset };
+  return { checkout, isLoading, startPurchase, reset };
 };

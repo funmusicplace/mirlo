@@ -54,7 +54,6 @@ const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
         {title}
       </ArtistButton>
       <PurchaseModal
-        open={!!checkout}
         onClose={reset}
         checkout={checkout}
         returnUrl={`${window.location.origin}${completePath()}`}

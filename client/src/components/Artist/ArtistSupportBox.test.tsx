@@ -63,7 +63,6 @@ vi.mock("components/common/Purchase/useSubscriptionCheckout", () => ({
   }),
 }));
 
-const openPaymentMethodCheckout = vi.fn();
 const paymentMethodCheckoutReset = vi.fn();
 const paymentMethodCheckoutState: {
   checkout: null | { clientSecret: string; stripeAccountId: string };
@@ -73,21 +72,13 @@ vi.mock("components/common/Purchase/usePurchase", () => ({
     checkout: paymentMethodCheckoutState.checkout,
     isLoading: false,
     startPurchase: vi.fn(),
-    openCheckout: (next: {
-      kind: "intent";
-      clientSecret: string;
-      stripeAccountId: string;
-    }) => {
-      openPaymentMethodCheckout(next);
-      paymentMethodCheckoutState.checkout = next;
-    },
     reset: paymentMethodCheckoutReset,
   }),
 }));
 
 vi.mock("components/common/Purchase/PurchaseModal", () => ({
   default: (props: any) =>
-    props.open ? <div data-testid="purchase-modal" /> : null,
+    props.checkout ? <div data-testid="purchase-modal" /> : null,
 }));
 
 const apiPut = vi.fn();
@@ -258,7 +249,7 @@ describe("ArtistSupportBox", () => {
       };
     });
 
-    test("PUTs to manage/subscriptions/:id and opens the shared checkout with the result", async () => {
+    test("PUTs to manage/subscriptions/:id and opens its own checkout with the result", async () => {
       apiPut.mockResolvedValue({
         result: { clientSecret: "seti_pm_secret", stripeAccountId: "acct_2" },
       });
@@ -267,16 +258,8 @@ describe("ArtistSupportBox", () => {
 
       fireEvent.click(screen.getByText("changePaymentMethod"));
 
-      await vi.waitFor(() =>
-        expect(openPaymentMethodCheckout).toHaveBeenCalled()
-      );
-
+      expect(await screen.findByTestId("purchase-modal")).toBeInTheDocument();
       expect(apiPut).toHaveBeenCalledWith("manage/subscriptions/55", undefined);
-      expect(openPaymentMethodCheckout).toHaveBeenCalledWith({
-        kind: "intent",
-        clientSecret: "seti_pm_secret",
-        stripeAccountId: "acct_2",
-      });
     });
 
     test("surfaces the error and never opens a checkout when the PUT fails", async () => {
@@ -288,18 +271,7 @@ describe("ArtistSupportBox", () => {
 
       await vi.waitFor(() => expect(snackbar).toHaveBeenCalled());
 
-      expect(openPaymentMethodCheckout).not.toHaveBeenCalled();
-    });
-
-    test("renders a second, independent PurchaseModal once the payment-method checkout is set", async () => {
-      paymentMethodCheckoutState.checkout = {
-        clientSecret: "seti_pm_secret",
-        stripeAccountId: "acct_2",
-      };
-
-      renderComponent(tier);
-
-      expect(await screen.findByTestId("purchase-modal")).toBeInTheDocument();
+      expect(screen.queryByTestId("purchase-modal")).not.toBeInTheDocument();
     });
   });
 });

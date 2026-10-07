@@ -180,7 +180,6 @@ const SubscriptionTierActions: React.FC<{
         </div>
       )}
       <PurchaseModal
-        open={!!checkout}
         onClose={reset}
         checkout={checkout}
         returnUrl={returnUrl}
