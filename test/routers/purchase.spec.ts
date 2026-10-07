@@ -29,6 +29,7 @@ import { getIntentStatus } from "../../src/utils/stripe/status";
 import * as terminalUtils from "../../src/utils/stripe/terminal";
 import {
   clearTables,
+  createClient,
   createProfile,
   createFundraiser,
   createTrack,
@@ -167,11 +168,6 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tier = await createTier(profile.id, { minAmount: 500 });
 
-      sinon.stub(stripeUtils.stripe.setupIntents, "create").resolves({
-        id: "seti_hosted_new",
-        client_secret: "seti_hosted_new_secret",
-      } as unknown as Stripe.Response<Stripe.SetupIntent>);
-
       const response = await requestApp
         .post("purchase")
         .send({
@@ -185,8 +181,7 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
       assert.ok(response.body.redirectUrl.includes("/checkout"));
-      assert.ok(response.body.redirectUrl.includes("intentId="));
-      assert.ok(response.body.redirectUrl.includes("stripeAccountId="));
+      assert.ok(response.body.redirectUrl.includes("checkoutId="));
       assert.ok(
         !response.body.clientSecret,
         "should not leak clientSecret in hosted mode"
@@ -631,8 +626,7 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
       assert.ok(response.body.redirectUrl.includes("/checkout"));
-      assert.ok(response.body.redirectUrl.includes("intentId="));
-      assert.ok(response.body.redirectUrl.includes("stripeAccountId="));
+      assert.ok(response.body.redirectUrl.includes("checkoutId="));
       assert.ok(
         !response.body.clientSecret,
         "should not leak clientSecret in hosted mode"
@@ -834,8 +828,14 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id, {
         purchaseEntireCatalogPercentage: 50,
       });
-      await createTrackGroup(profile.id, { title: "Album One", minPrice: 1000 });
-      await createTrackGroup(profile.id, { title: "Album Two", minPrice: 2000 });
+      await createTrackGroup(profile.id, {
+        title: "Album One",
+        minPrice: 1000,
+      });
+      await createTrackGroup(profile.id, {
+        title: "Album Two",
+        minPrice: 2000,
+      });
 
       // Floor is 50% of (1000 + 2000) = 1500
       const response = await requestApp
@@ -1132,6 +1132,393 @@ describe("purchase", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 400);
+    });
+  });
+
+  // The API under test runs against stripe-mock in another process, so these
+  // check response shapes; the "nothing created" and metadata checks live in
+  // the direct tests below.
+  describe("POST /v1/purchase — deferred intent creation", () => {
+    const checkoutIdFrom = (redirectUrl: string) =>
+      new URL(redirectUrl).searchParams.get("checkoutId") ?? "";
+
+    it("returns a payment quote instead of a clientSecret for deferred: true", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_deferred_tg",
+        currency: "eur",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1500" }],
+          deferred: true,
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.mode, "payment");
+      assert.equal(response.body.deferred.amount, 1500);
+      assert.equal(response.body.deferred.currency, "eur");
+      assert.equal(response.body.deferred.stripeAccountId, "acct_deferred_tg");
+      assert.equal(response.body.deferred.buyerEmailKnown, false);
+      assert.equal(response.body.clientSecret, undefined);
+    });
+
+    it("knows the buyer's email for a logged-in quote", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_deferred_known",
+        currency: "usd",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [{ type: "tip", amount: 500 }],
+          deferred: true,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.buyerEmailKnown, true);
+    });
+
+    it("returns a setup quote for a deferred subscription", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_deferred_sub",
+        currency: "usd",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
+        minAmount: 500,
+        collectAddress: true,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [{ type: "subscription", tierId: tier.id }],
+          deferred: true,
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.mode, "setup");
+      assert.equal(response.body.deferred.amount, undefined);
+      assert.equal(response.body.deferred.requiresShipping, true);
+      assert.equal(response.body.clientSecret, undefined);
+    });
+
+    it("rejects a pledge pay call that has no email", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_deferred_pledge",
+      });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              trackGroupId: trackGroup.id,
+              price: "1000",
+            },
+          ],
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("rejects an invalid email", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_deferred_bad_email",
+      });
+      const profile = await createProfile(artistUser.id);
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [{ type: "tip", amount: 500 }],
+          email: "not-an-email",
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("saves the opened cart as a checkout", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_checkout_open",
+        currency: "usd",
+      });
+      const profile = await createProfile(artistUser.id);
+      const items = [{ type: "tip", amount: 700 }];
+
+      const response = await requestApp
+        .post("purchase")
+        .send({ artistId: profile.id, items, deferred: true })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const checkout = await prisma.checkout.findUnique({
+        where: { id: response.body.deferred.checkoutId },
+      });
+      assert.equal(checkout?.profileId, profile.id);
+      assert.deepEqual(checkout?.items, items);
+      assert.equal(checkout?.stripeId, null);
+      assert.equal(checkout?.completedAt, null);
+      assert.equal(await prisma.userTransaction.count(), 0);
+    });
+
+    it("round-trips a hosted request through its checkout", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_hosted_checkout",
+        currency: "usd",
+      });
+      const profile = await createProfile(artistUser.id, {
+        name: "Checkout Band",
+      });
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const apiClient = await createClient("hosted-checkout-key");
+
+      const opened = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          hosted: true,
+          successUrl: "http://localhost/thanks",
+        })
+        .set("mirlo-api-key", apiClient.key ?? "")
+        .set("Accept", "application/json");
+      assert.equal(opened.statusCode, 200);
+      assert.equal(opened.body.clientSecret, undefined);
+      const checkoutId = checkoutIdFrom(opened.body.redirectUrl);
+      const checkout = await prisma.checkout.findUnique({
+        where: { id: checkoutId },
+      });
+      assert.equal(checkout?.clientId, apiClient.id);
+
+      // The browser tries to change the cart; the checkout's wins.
+      const quote = await requestApp
+        .post("purchase")
+        .send({
+          checkoutId,
+          deferred: true,
+          items: [{ type: "trackGroup", id: tg.id, price: "1" }],
+        })
+        .set("Accept", "application/json");
+      assert.equal(quote.statusCode, 200);
+      assert.equal(quote.body.deferred.checkoutId, checkoutId);
+      assert.equal(quote.body.deferred.amount, 1000);
+      assert.equal(quote.body.deferred.buyerEmailKnown, false);
+      assert.equal(quote.body.deferred.artistName, "Checkout Band");
+      assert.equal(quote.body.deferred.successUrl, "http://localhost/thanks");
+
+      const paid = await requestApp
+        .post("purchase")
+        .send({
+          checkoutId,
+          email: "guest@test.com",
+          successUrl: "https://evil.example.com",
+        })
+        .set("Accept", "application/json");
+      assert.equal(paid.statusCode, 200);
+      assert.ok(paid.body.clientSecret, "paying creates the intent");
+
+      const afterPay = await prisma.checkout.findUnique({
+        where: { id: checkoutId },
+      });
+      assert.ok(afterPay?.stripeId, "the intent is recorded on the checkout");
+      assert.equal(afterPay?.stripeAccountId, "acct_hosted_checkout");
+
+      // Paying again (a declined card, a double click) reuses that intent.
+      const retried = await requestApp
+        .post("purchase")
+        .send({ checkoutId, email: "guest@test.com" })
+        .set("Accept", "application/json");
+      assert.equal(retried.statusCode, 200);
+      assert.ok(retried.body.clientSecret);
+      const afterRetry = await prisma.checkout.findUnique({
+        where: { id: checkoutId },
+      });
+      assert.equal(afterRetry?.stripeId, afterPay?.stripeId);
+    });
+
+    it("404s for an unknown checkout", async () => {
+      const response = await requestApp
+        .post("purchase")
+        .send({ checkoutId: "not-a-checkout", deferred: true })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("reports a paid checkout as done when its link is opened again", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_checkout_done",
+      });
+      const profile = await createProfile(artistUser.id);
+      const checkout = await prisma.checkout.create({
+        data: { profileId: profile.id, items: [], completedAt: new Date() },
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({ checkoutId: checkout.id, deferred: true })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.success, true);
+    });
+  });
+
+  describe("deferred initiation (direct) — nothing created until pay", () => {
+    it("quotes a subscription without creating a SetupIntent", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_direct_deferred_sub",
+        currency: "usd",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const create = sinon.stub(stripeUtils.stripe.setupIntents, "create");
+
+      const result = await initiateOnlineSubscription({
+        profileId: profile.id,
+        tierId: tier.id,
+        userEmail: "",
+        deferred: true,
+      });
+
+      assert.deepEqual(result, {
+        deferred: {
+          mode: "setup",
+          currency: "usd",
+          stripeAccountId: "acct_direct_deferred_sub",
+          requiresShipping: false,
+        },
+      });
+      assert.equal(create.callCount, 0);
+    });
+
+    it("puts a subscription's shippingAddress on the SetupIntent at pay time", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_direct_sub_ship",
+        currency: "usd",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
+        minAmount: 500,
+        collectAddress: true,
+      });
+      const create = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_direct_ship",
+          client_secret: "seti_direct_ship_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+      const shippingAddress = {
+        name: "Buyer",
+        address: { line1: "1 Main St", country: "US" },
+      };
+
+      await initiateOnlineSubscription({
+        profileId: profile.id,
+        tierId: tier.id,
+        userEmail: "guest@test.com",
+        shippingAddress,
+      });
+
+      const params = create.firstCall.args[0] as Stripe.SetupIntentCreateParams;
+      assert.deepEqual(
+        JSON.parse(params.metadata?.shippingAddress as string),
+        shippingAddress
+      );
+      assert.equal(params.metadata?.userEmail, "guest@test.com");
+    });
+
+    it("quotes a pledge without touching Stripe customers or intents", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_direct_deferred_pledge",
+        currency: "usd",
+      });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+      const list = sinon.stub(stripeUtils.stripe.customers, "list");
+      const create = sinon.stub(stripeUtils.stripe.setupIntents, "create");
+
+      const result = await initiateFundraiserPledge({
+        profileId: profile.id,
+        fundraiserId: fundraiser.id,
+        trackGroupId: trackGroup.id,
+        price: "1000",
+        userEmail: "",
+        deferred: true,
+      });
+
+      assert.equal("deferred" in result && result.deferred.mode, "setup");
+      assert.equal(list.callCount, 0);
+      assert.equal(create.callCount, 0);
+    });
+
+    it("refuses to create a pledge without an email", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_direct_pledge_no_email",
+        currency: "usd",
+      });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.id, {
+        isAllOrNothing: true,
+      });
+      const list = sinon.stub(stripeUtils.stripe.customers, "list");
+
+      await assert.rejects(
+        initiateFundraiserPledge({
+          profileId: profile.id,
+          fundraiserId: fundraiser.id,
+          trackGroupId: trackGroup.id,
+          price: "1000",
+          userEmail: "",
+        })
+      );
+      assert.equal(
+        list.callCount,
+        0,
+        "an empty email filter must never reach customers.list"
+      );
     });
   });
 
@@ -1827,6 +2214,43 @@ describe("purchase", () => {
         "sub_existing_123",
         "the underlying Stripe subscription is repriced, not replaced"
       );
+    });
+
+    it("leaves the subscription alone when a checkout link is opened (switchImmediately: false)", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_link",
+        currency: "usd",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_existing_link",
+        },
+      });
+      const updateStub = sinon.stub(stripeUtils.stripe.subscriptions, "update");
+
+      const result = await initiateOnlineSubscription({
+        profileId: profile.id,
+        tierId: newTier.id,
+        userEmail: buyer.email,
+        userId: buyer.id,
+        deferred: true,
+        switchImmediately: false,
+      });
+
+      assert.equal("deferred" in result && result.deferred.mode, "setup");
+      assert.equal(updateStub.callCount, 0);
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id },
+      });
+      assert.equal(after?.profileSubscriptionTierId, oldTier.id);
     });
 
     it("falls back to the artist's defaultPlatformFee when repricing to a tier with no platformPercent override", async () => {
@@ -2727,6 +3151,12 @@ describe("purchase", () => {
       sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
         id: "sub_anon_new",
       } as unknown as Stripe.Response<Stripe.Subscription>);
+      const checkout = await prisma.checkout.create({
+        data: {
+          profileId: profile.id,
+          items: [{ type: "subscription", tierId: tier.id }],
+        },
+      });
 
       await stripeUtils.handleSetupIntentSucceeded({
         id: "seti_anon",
@@ -2737,6 +3167,7 @@ describe("purchase", () => {
           stripeAccountId: "acct_sub_anon",
           userEmail: "anon-supporter@test.com",
           userName: "Anon Supporter",
+          checkoutId: checkout.id,
         },
       } as unknown as Stripe.SetupIntent);
 
@@ -2754,6 +3185,11 @@ describe("purchase", () => {
       });
       assert.ok(subscription, "the subscription should be registered");
       assert.equal(subscription?.stripeSubscriptionKey, "sub_anon_new");
+
+      const completed = await prisma.checkout.findUnique({
+        where: { id: checkout.id },
+      });
+      assert.ok(completed?.completedAt, "the checkout should be completed");
     });
 
     it("parses the JSON-stringified shippingAddress metadata and persists it on the subscription", async () => {
@@ -2821,49 +3257,6 @@ describe("purchase", () => {
       });
       assert.ok(subscription, "the subscription should be registered");
       assert.deepEqual(subscription?.shippingAddress, shippingAddress);
-    });
-  });
-
-  describe("GET /v1/purchase/:id", () => {
-    it("should return 400 when stripeAccountId query param is missing", async () => {
-      const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const response = await requestApp
-        .get("purchase/pi_test123")
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 400);
-    });
-
-    it("should return the PaymentIntent status for a pi_ prefixed id", async () => {
-      const { accessToken } = await createUser({ email: "buyer@test.com" });
-
-      const response = await requestApp
-        .get("purchase/pi_status_test")
-        .query({ stripeAccountId: "acct_test" })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
-
-      assert.equal(response.statusCode, 200);
-      assert.ok(response.body.result.id, "should return a result id");
-      assert.ok(response.body.result.status, "should return a result status");
-      assert.ok(
-        "clientSecret" in response.body.result,
-        "should include a clientSecret field"
-      );
-    });
-
-    it("should return the SetupIntent status for a seti_ prefixed id", async () => {
-      const { accessToken } = await createUser({ email: "buyer@test.com" });
-
-      const response = await requestApp
-        .get("purchase/seti_status_test")
-        .query({ stripeAccountId: "acct_test" })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
-
-      assert.equal(response.statusCode, 200);
-      assert.ok(response.body.result.id, "should return a result id");
-      assert.ok(response.body.result.status, "should return a result status");
     });
   });
 
@@ -2937,173 +3330,33 @@ describe("purchase", () => {
     });
   });
 
-  describe("attachIntentIdentity (direct) — buyer-identity ownership guard", () => {
-    afterEach(() => {
-      sinon.restore();
-    });
-
-    it("refuses to reassign a PaymentIntent already claimed by a different Mirlo account", async () => {
-      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
-        id: "pi_claimed",
-        metadata: { userId: "1" },
-      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
-      const updateStub = sinon.stub(
-        stripeUtils.stripe.paymentIntents,
-        "update"
-      );
-
-      await assert.rejects(
-        stripeUtils.attachIntentIdentity({
-          id: "pi_claimed",
-          stripeAccountId: "acct_test",
-          userId: 2,
-          userEmail: "attacker@test.com",
-        }),
-        (e: any) => e.httpCode === 409
-      );
-      assert.ok(updateStub.notCalled, "should not write metadata once refused");
-    });
-
-    it("refuses to attach a bare email to a PaymentIntent already claimed by a Mirlo account", async () => {
-      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
-        id: "pi_claimed",
-        metadata: { userId: "1" },
-      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
-      const updateStub = sinon.stub(
-        stripeUtils.stripe.paymentIntents,
-        "update"
-      );
-
-      await assert.rejects(
-        stripeUtils.attachIntentIdentity({
-          id: "pi_claimed",
-          stripeAccountId: "acct_test",
-          userEmail: "someone-else@test.com",
-        }),
-        (e: any) => e.httpCode === 409
-      );
-      assert.ok(updateStub.notCalled);
-    });
-
-    it("allows the same Mirlo account to re-attach its own identity (idempotent retry)", async () => {
-      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
-        id: "pi_claimed",
-        metadata: { userId: "1" },
-      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
-      const updateStub = sinon
-        .stub(stripeUtils.stripe.paymentIntents, "update")
-        .resolves({} as unknown as Stripe.Response<Stripe.PaymentIntent>);
-
-      await stripeUtils.attachIntentIdentity({
-        id: "pi_claimed",
-        stripeAccountId: "acct_test",
-        userId: 1,
-        userEmail: "buyer@test.com",
+  for (const method of ["get", "delete"] as const) {
+    describe(`${method.toUpperCase()} /v1/purchase/:id`, () => {
+      it("should return 401 when not logged in", async () => {
+        const response = await requestApp[method]("purchase/pi_cancel_test")
+          .query({ stripeAccountId: "acct_test" })
+          .set("Accept", "application/json");
+        assert.equal(response.statusCode, 401);
       });
 
-      assert.ok(updateStub.calledOnce);
-    });
-
-    it("allows a logged-in buyer to claim an intent that only has a placeholder email so far", async () => {
-      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
-        id: "seti_unclaimed",
-        metadata: { userEmail: "customer-from-external-caller@test.com" },
-      } as unknown as Stripe.Response<Stripe.SetupIntent>);
-      const updateStub = sinon
-        .stub(stripeUtils.stripe.setupIntents, "update")
-        .resolves({} as unknown as Stripe.Response<Stripe.SetupIntent>);
-
-      await stripeUtils.attachIntentIdentity({
-        id: "seti_unclaimed",
-        stripeAccountId: "acct_test",
-        userId: 3,
-        userEmail: "buyer@test.com",
+      it("should return 400 when stripeAccountId query param is missing", async () => {
+        const { accessToken } = await createUser({ email: "buyer@test.com" });
+        const response = await requestApp[method]("purchase/pi_cancel_test")
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+        assert.equal(response.statusCode, 400);
       });
 
-      assert.ok(
-        updateStub.calledOnce,
-        "no userId claim yet — a logged-in buyer should be able to attach"
-      );
+      it("should return 404 for an intent that was not initiated by Mirlo", async () => {
+        const { accessToken } = await createUser({ email: "buyer@test.com" });
+        const response = await requestApp[method]("purchase/pi_cancel_test")
+          .query({ stripeAccountId: "acct_test" })
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+        assert.equal(response.statusCode, 404);
+      });
     });
-  });
-
-  describe("PUT /v1/purchase/:id — attach a subscription's shipping address", () => {
-    it("should return 400 when stripeAccountId query param is missing", async () => {
-      const response = await requestApp
-        .put("purchase/seti_shipping_test")
-        .send({ shippingAddress: { address: { country: "US" } } })
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 400);
-    });
-
-    it("should return 400 for a non-SetupIntent id", async () => {
-      const response = await requestApp
-        .put("purchase/pi_shipping_test")
-        .query({ stripeAccountId: "acct_test" })
-        .send({ shippingAddress: { address: { country: "US" } } })
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 400);
-    });
-
-    it("should return 400 when shippingAddress is missing", async () => {
-      const response = await requestApp
-        .put("purchase/seti_shipping_test")
-        .query({ stripeAccountId: "acct_test" })
-        .send({})
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 400);
-    });
-
-    it("should return 200 when the shipping address is attached to a SetupIntent", async () => {
-      const response = await requestApp
-        .put("purchase/seti_shipping_test")
-        .query({ stripeAccountId: "acct_test" })
-        .send({
-          shippingAddress: {
-            name: "Buyer Name",
-            address: {
-              line1: "123 Main St",
-              city: "Anytown",
-              state: "CA",
-              postal_code: "12345",
-              country: "US",
-            },
-          },
-        })
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 200);
-      assert.equal(response.body.result.id, "seti_shipping_test");
-    });
-  });
-
-  describe("DELETE /v1/purchase/:id", () => {
-    it("should return 401 when not logged in", async () => {
-      const response = await requestApp
-        .delete("purchase/pi_cancel_test")
-        .query({ stripeAccountId: "acct_test" })
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 401);
-    });
-
-    it("should return 400 when stripeAccountId query param is missing", async () => {
-      const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const response = await requestApp
-        .delete("purchase/pi_cancel_test")
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 400);
-    });
-
-    it("should return 404 for an intent that was not initiated by Mirlo", async () => {
-      const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const response = await requestApp
-        .delete("purchase/pi_cancel_test")
-        .query({ stripeAccountId: "acct_test" })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
-      assert.equal(response.statusCode, 404);
-    });
-  });
+  }
 
   describe("cancel purchase (direct)", () => {
     const readerProcessingIntent = (intentId: string) =>

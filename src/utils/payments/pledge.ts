@@ -3,7 +3,7 @@ import prisma from "@mirlo/prisma";
 import { AppError } from "../error";
 import { determinePrice } from "../purchasing";
 
-import { getPaymentProcessor } from "./PaymentProcessor";
+import { getPaymentProcessor, type DeferredQuote } from "./PaymentProcessor";
 import { resolveProfilePaymentContext } from "./purchase";
 
 export const initiateFundraiserPledge = async ({
@@ -15,6 +15,8 @@ export const initiateFundraiserPledge = async ({
   userEmail,
   userId,
   successUrl,
+  deferred,
+  checkoutId,
 }: {
   profileId: number;
   fundraiserId: number;
@@ -24,11 +26,16 @@ export const initiateFundraiserPledge = async ({
   userEmail: string;
   userId?: number;
   successUrl?: string;
-}): Promise<{
-  clientSecret: string | null;
-  stripeAccountId: string;
-  setupIntentId: string;
-}> => {
+  deferred?: boolean;
+  checkoutId?: string;
+}): Promise<
+  | { deferred: DeferredQuote }
+  | {
+      clientSecret: string | null;
+      stripeAccountId: string;
+      setupIntentId: string;
+    }
+> => {
   const trackGroup = await prisma.trackGroup.findFirst({
     where: { id: trackGroupId, profileId, fundraiserId },
     include: { fundraiser: true },
@@ -51,7 +58,26 @@ export const initiateFundraiserPledge = async ({
 
   const { priceNumber } = determinePrice(price, trackGroup.minPrice);
 
-  const { stripeAccountId } = await resolveProfilePaymentContext(profileId);
+  const { stripeAccountId, currency } =
+    await resolveProfilePaymentContext(profileId);
+
+  if (deferred) {
+    return {
+      deferred: {
+        mode: "setup",
+        currency,
+        stripeAccountId,
+        requiresShipping: false,
+      },
+    };
+  }
+
+  if (!userEmail) {
+    throw new AppError({
+      httpCode: 400,
+      description: "An email is required to pledge",
+    });
+  }
 
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlinePledgeSetup({
@@ -64,6 +90,7 @@ export const initiateFundraiserPledge = async ({
       userId: userId ? String(userId) : undefined,
       message,
       successUrl,
+      checkoutId,
     });
 
   return { clientSecret, stripeAccountId, setupIntentId };

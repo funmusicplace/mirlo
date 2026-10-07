@@ -13,13 +13,10 @@ const PurchaseStep: React.FC<{
   if (checkout) {
     return (
       <PurchaseElements
-        clientSecret={checkout.clientSecret}
-        stripeAccountId={checkout.stripeAccountId}
+        checkout={checkout}
         returnUrl={returnUrl}
         onSuccess={onSuccess}
         buttonLabel={buttonLabel}
-        requiresShipping={checkout.requiresShipping}
-        allowedCountries={checkout.allowedCountries}
       />
     );
   }

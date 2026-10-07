@@ -32,21 +32,28 @@ export type PurchaseItem =
       message?: string;
     };
 
-type PurchaseResponse = {
-  clientSecret?: string;
-  stripeAccountId?: string;
-  redirectUrl?: string;
-  requiresShipping?: boolean;
+export type DeferredQuote = {
+  checkoutId: string;
+  mode: "payment" | "setup";
+  amount?: number;
+  currency: string;
+  stripeAccountId: string;
+  requiresShipping: boolean;
   allowedCountries?: string[];
+  buyerEmailKnown: boolean;
+  artistName: string | null;
+  successUrl: string | null;
+};
+
+type PurchaseResponse = {
+  deferred?: DeferredQuote;
+  redirectUrl?: string;
   success?: boolean;
 };
 
-export type Checkout = {
-  clientSecret: string;
-  stripeAccountId: string;
-  requiresShipping?: boolean;
-  allowedCountries?: string[];
-};
+export type Checkout =
+  | { kind: "deferred"; quote: DeferredQuote }
+  | { kind: "intent"; clientSecret: string; stripeAccountId: string };
 
 export const usePurchase = () => {
   const errorHandler = useErrorHandler();
@@ -68,10 +75,10 @@ export const usePurchase = () => {
     ): Promise<{ success?: true; redirectUrl?: string } | undefined> => {
       try {
         setIsLoading(true);
-        const response = await api.post<typeof args, PurchaseResponse>(
-          "purchase",
-          args
-        );
+        const response = await api.post<
+          typeof args & { deferred: true },
+          PurchaseResponse
+        >("purchase", { ...args, deferred: true });
 
         if (response.redirectUrl) {
           if (options?.skipRedirect) {
@@ -83,18 +90,11 @@ export const usePurchase = () => {
         if (response.success) {
           return { success: true };
         }
-        if (response.clientSecret && response.stripeAccountId) {
-          setCheckout({
-            clientSecret: response.clientSecret,
-            stripeAccountId: response.stripeAccountId,
-            requiresShipping: response.requiresShipping,
-            allowedCountries: response.allowedCountries,
-          });
+        if (response.deferred) {
+          setCheckout({ kind: "deferred", quote: response.deferred });
           return;
         }
-        throw new Error(
-          "Payment could not be started (missing client secret or account)."
-        );
+        throw new Error("Payment could not be started.");
       } catch (e) {
         errorHandler(e);
       } finally {

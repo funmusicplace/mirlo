@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Button from "components/common/Button";
-import EmailVerification from "components/common/EmailVerification";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Money, { moneyDisplay } from "components/common/Money";
@@ -46,7 +45,6 @@ const BuyTrackGroup: React.FC<{
   const initialChosenPriceCents = track
     ? (minPrice ?? 0)
     : Math.max(trackGroup.suggestedPrice ?? 0, minPrice ?? 0);
-  const [verifiedEmail, setVerifiedEmail] = React.useState<string | null>(null);
   const methods = useForm<FormData>({
     defaultValues: {
       chosenPrice: `${initialChosenPriceCents ? initialChosenPriceCents / 100 : ""}`,
@@ -87,11 +85,8 @@ const BuyTrackGroup: React.FC<{
     async (data: FormData) => {
       try {
         setStripeLoading(true);
-        if (user || verifiedEmail) {
-          const alreadyOwns = await testOwnership(
-            trackGroup.id,
-            verifiedEmail ?? ""
-          );
+        if (user) {
+          const alreadyOwns = await testOwnership(trackGroup.id, "");
           if (alreadyOwns && !window.confirm(t("albumExists") ?? "")) {
             return;
           }
@@ -140,7 +135,6 @@ const BuyTrackGroup: React.FC<{
                 message: data.message,
               },
             ],
-            email: verifiedEmail ?? undefined,
           });
           return;
         }
@@ -171,7 +165,6 @@ const BuyTrackGroup: React.FC<{
       trackGroup,
       track,
       user,
-      verifiedEmail,
       isPledgeMode,
       isFreeAcquisition,
       startPurchase,
@@ -285,41 +278,30 @@ const BuyTrackGroup: React.FC<{
               />
             </FormComponent>
 
-            {isPledgeMode && !user && (
-              <EmailVerification
-                setVerifiedEmail={setVerifiedEmail}
-                contextSubject={`${trackGroup.title}: ${trackGroup.artist?.name}`}
-              />
+            {isPledgeMode && (
+              <FormComponent direction="row">
+                <InputEl
+                  type="checkbox"
+                  id="consentToStoreData"
+                  {...methods.register("consentToStoreData")}
+                />
+                <label htmlFor="consentToStoreData">
+                  {t("consentToStoreData")}
+                </label>
+              </FormComponent>
             )}
-
-            {(!isPledgeMode || user || verifiedEmail) && (
-              <>
-                {isPledgeMode && (
-                  <FormComponent direction="row">
-                    <InputEl
-                      type="checkbox"
-                      id="consentToStoreData"
-                      {...methods.register("consentToStoreData")}
-                    />
-                    <label htmlFor="consentToStoreData">
-                      {t("consentToStoreData")}
-                    </label>
-                  </FormComponent>
-                )}
-                <Button
-                  size="big"
-                  rounded
-                  type="submit"
-                  endIcon={<FaArrowRight />}
-                  className="self-end"
-                  isLoading={stripeLoading}
-                  title={isDisabled ? t("ensurePrice") : ""}
-                  disabled={isDisabled}
-                >
-                  {t(purchaseText)}
-                </Button>
-              </>
-            )}
+            <Button
+              size="big"
+              rounded
+              type="submit"
+              endIcon={<FaArrowRight />}
+              className="self-end"
+              isLoading={stripeLoading}
+              title={isDisabled ? t("ensurePrice") : ""}
+              disabled={isDisabled}
+            >
+              {t(purchaseText)}
+            </Button>
 
             <div
               className={css`

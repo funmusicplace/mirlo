@@ -5,43 +5,35 @@ import { useTranslation } from "react-i18next";
 import Modal from "../Modal";
 
 import PurchaseElements from "./PurchaseElements";
+import type { Checkout } from "./usePurchase";
 
 const PurchaseModal: React.FC<{
   open: boolean;
   onClose: () => void;
-  clientSecret?: string;
-  stripeAccountId?: string;
+  checkout: Checkout | null;
   returnUrl: string;
   onSuccess?: (buyerEmail?: string) => void;
   title: string;
   buttonLabel: string;
-  requiresShipping?: boolean;
-  allowedCountries?: string[];
 }> = ({
   open,
   onClose,
-  clientSecret,
-  stripeAccountId,
+  checkout,
   returnUrl,
   onSuccess,
   title,
   buttonLabel,
-  requiresShipping,
-  allowedCountries,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   return (
     <Modal size="small" open={open} onClose={onClose} title={title}>
-      {clientSecret && stripeAccountId ? (
+      {checkout ? (
         <PurchaseElements
-          clientSecret={clientSecret}
-          stripeAccountId={stripeAccountId}
+          checkout={checkout}
           returnUrl={returnUrl}
           onSuccess={onSuccess}
           buttonLabel={buttonLabel}
-          requiresShipping={requiresShipping}
-          allowedCountries={allowedCountries}
         />
       ) : (
         <div className="p-4">

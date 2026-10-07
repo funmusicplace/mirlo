@@ -26,7 +26,7 @@ const ChangePaymentMethodButton: React.FC<{
         undefined,
         { result: { clientSecret: string; stripeAccountId: string } }
       >(`manage/subscriptions/${subscriptionId}`, undefined);
-      openCheckout(result);
+      openCheckout({ kind: "intent", ...result });
     } catch (e) {
       errorHandler(e);
     } finally {
@@ -55,8 +55,7 @@ const ChangePaymentMethodButton: React.FC<{
       <PurchaseModal
         open={!!checkout}
         onClose={reset}
-        clientSecret={checkout?.clientSecret}
-        stripeAccountId={checkout?.stripeAccountId}
+        checkout={checkout}
         returnUrl={window.location.href}
         onSuccess={handleComplete}
         title={t("changePaymentMethodTitle") ?? ""}

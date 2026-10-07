@@ -21,10 +21,17 @@ import {
   type MerchWithOptionsAndShipping,
   resolveMerchOptionIds,
 } from "../../../utils/merch";
+import { createCheckout, findCheckout } from "../../../utils/payments/checkout";
 import { resolvePayee } from "../../../utils/payments/payee";
+import {
+  getPaymentProcessor,
+  type DeferredQuote,
+  type ShippingAddress,
+} from "../../../utils/payments/PaymentProcessor";
 import { initiateFundraiserPledge } from "../../../utils/payments/pledge";
 import {
   initiatePayment,
+  resolveProfilePaymentContext,
   type ResolvedItem,
 } from "../../../utils/payments/purchase";
 import {
@@ -69,7 +76,12 @@ type PostBody = {
   email?: string;
   hosted?: boolean;
   successUrl?: string;
+  deferred?: boolean;
+  checkoutId?: string;
+  shippingAddress?: ShippingAddress;
 };
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type DigitalReleaseProfile = Parameters<typeof subscribeUserToProfile>[0] &
   Parameters<typeof resolvePayee>[0]["profile"] & { urlSlug: string | null };
@@ -254,18 +266,53 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const {
-      readerId,
-      artistId: profileId,
-      items,
-      email,
-      hosted,
-      successUrl,
-    } = req.body as PostBody;
+    const body = req.body as PostBody;
     const loggedInUser = req.user;
-    const clientId = req.client?.id;
 
     try {
+      // A checkout opened earlier holds the cart; the browser can only add
+      // the buyer's email and address.
+      const checkout = body.checkoutId
+        ? await findCheckout(body.checkoutId)
+        : undefined;
+
+      // Its link was opened again after the buyer paid.
+      if (checkout?.completedAt) {
+        return res.status(200).json({ success: true });
+      }
+
+      const readerId = checkout ? undefined : body.readerId;
+      const hosted = checkout ? false : body.hosted;
+      const profileId = checkout ? checkout.profileId : body.artistId;
+      const items = (checkout ? checkout.items : body.items) as PurchaseItem[];
+      const email = checkout?.email ?? body.email;
+      const successUrl = checkout
+        ? (checkout.successUrl ?? undefined)
+        : body.successUrl;
+      const clientId = checkout
+        ? (checkout.clientId ?? undefined)
+        : req.client?.id;
+      const deferred = !!body.deferred || !!hosted;
+      const { shippingAddress } = body;
+
+      // Paying again (e.g. after a declined card) confirms the same intent,
+      // unless it brings a shipping address: a SetupIntent only takes one
+      // when it's created, and the buyer may have changed it.
+      if (
+        checkout?.stripeId &&
+        checkout.stripeAccountId &&
+        !deferred &&
+        !shippingAddress
+      ) {
+        const { clientSecret } = await getPaymentProcessor().getStatus({
+          id: checkout.stripeId,
+          accountId: checkout.stripeAccountId,
+        });
+        return res
+          .status(200)
+          .json({ clientSecret, stripeAccountId: checkout.stripeAccountId });
+      }
+
       if (!profileId || !items?.length) {
         throw new AppError({
           httpCode: 400,
@@ -284,15 +331,73 @@ export default function () {
         await profileEditableByUser(profileId, loggedInUser);
       }
 
+      if (email && !loggedInUser && !EMAIL_REGEX.test(email)) {
+        throw new AppError({
+          httpCode: 400,
+          description: "email is not a valid email address",
+        });
+      }
+
       const mirloClient = successUrl || hosted ? await getClient() : null;
 
-      if (successUrl && mirloClient) {
+      // A checkout's successUrl was checked when it was opened.
+      if (successUrl && mirloClient && !checkout) {
         assertAllowedSuccessUrl(
           successUrl,
           mirloClient.applicationUrl,
           req.client ?? undefined
         );
       }
+
+      const respondDeferred = async (quote: DeferredQuote) => {
+        const checkoutId =
+          checkout?.id ??
+          (
+            await createCheckout({
+              profileId,
+              items,
+              email,
+              successUrl,
+              clientId,
+            })
+          ).id;
+
+        if (hosted && mirloClient) {
+          const redirectUrl = buildCheckoutRedirectUrl(
+            mirloClient.applicationUrl,
+            "checkout",
+            new URLSearchParams({ checkoutId })
+          );
+          return res.status(200).json({ redirectUrl });
+        }
+
+        const profile = await prisma.profile.findFirst({
+          where: { id: profileId },
+          select: { name: true },
+        });
+        return res.status(200).json({
+          deferred: {
+            ...quote,
+            checkoutId,
+            buyerEmailKnown: !!(loggedInUser || email),
+            artistName: profile?.name ?? null,
+            successUrl: successUrl ?? null,
+          },
+        });
+      };
+
+      // So a retry confirms this intent instead of creating another.
+      const recordIntent = async (intent: {
+        stripeId: string;
+        stripeAccountId: string;
+      }) => {
+        if (checkout) {
+          await prisma.checkout.update({
+            where: { id: checkout.id },
+            data: intent,
+          });
+        }
+      };
 
       const hasSubscription = items.some((i) => i.type === "subscription");
       if (hasSubscription && items.length > 1) {
@@ -329,18 +434,21 @@ export default function () {
           userId: loggedInUser?.id,
           userName: subItem.userName,
           successUrl,
+          deferred,
+          shippingAddress,
+          checkoutId: checkout?.id,
+          // Opening a checkout link mustn't switch a subscriber's tier.
+          switchImmediately: !checkout,
         });
 
-        if (hosted && mirloClient && "clientSecret" in result) {
-          const redirectUrl = buildCheckoutRedirectUrl(
-            mirloClient.applicationUrl,
-            "checkout",
-            new URLSearchParams({
-              intentId: result.setupIntentId,
-              stripeAccountId: result.stripeAccountId,
-            })
-          );
-          return res.status(200).json({ redirectUrl });
+        if ("deferred" in result) {
+          return respondDeferred(result.deferred);
+        }
+        if ("setupIntentId" in result) {
+          await recordIntent({
+            stripeId: result.setupIntentId,
+            stripeAccountId: result.stripeAccountId,
+          });
         }
 
         return res.status(200).json(result);
@@ -379,19 +487,17 @@ export default function () {
           userEmail: loggedInUser?.email ?? email ?? "",
           userId: loggedInUser?.id,
           successUrl,
+          deferred,
+          checkoutId: checkout?.id,
         });
 
-        if (hosted && mirloClient) {
-          const redirectUrl = buildCheckoutRedirectUrl(
-            mirloClient.applicationUrl,
-            "checkout",
-            new URLSearchParams({
-              intentId: result.setupIntentId,
-              stripeAccountId: result.stripeAccountId,
-            })
-          );
-          return res.status(200).json({ redirectUrl });
+        if ("deferred" in result) {
+          return respondDeferred(result.deferred);
         }
+        await recordIntent({
+          stripeId: result.setupIntentId,
+          stripeAccountId: result.stripeAccountId,
+        });
 
         return res.status(200).json(result);
       }
@@ -622,6 +728,21 @@ export default function () {
         });
       }
 
+      if (deferred && !readerId) {
+        const { currency } = await resolveProfilePaymentContext(
+          profileId,
+          payeeAccountId
+        );
+        return respondDeferred({
+          mode: "payment",
+          amount: totalAmount,
+          currency,
+          stripeAccountId: payeeAccountId,
+          requiresShipping,
+          allowedCountries,
+        });
+      }
+
       const result = await initiatePayment({
         readerId,
         profileId,
@@ -633,18 +754,14 @@ export default function () {
         stripeAccountId: payeeAccountId,
         requiresShipping,
         allowedCountries,
+        checkoutId: checkout?.id,
       });
 
-      if (hosted && mirloClient && "clientSecret" in result) {
-        const redirectUrl = buildCheckoutRedirectUrl(
-          mirloClient.applicationUrl,
-          "checkout",
-          new URLSearchParams({
-            intentId: result.paymentIntentId,
-            stripeAccountId: result.stripeAccountId,
-          })
-        );
-        return res.status(200).json({ redirectUrl });
+      if ("clientSecret" in result) {
+        await recordIntent({
+          stripeId: result.paymentIntentId,
+          stripeAccountId: result.stripeAccountId,
+        });
       }
 
       if ("clientSecret" in result && requiresShipping) {
@@ -663,8 +780,11 @@ export default function () {
     summary: "Initiate a purchase",
     description:
       "Unified purchase endpoint for all item types and channels. " +
-      "The buyer's identity is optional here: pass `email` if you already " +
-      "know it, otherwise attach it before confirming via PUT /purchase/:id.",
+      "A checkout makes two calls: one with `deferred: true` when it opens, " +
+      "which saves the cart as a checkout and returns what Stripe Elements " +
+      "needs, and `{ checkoutId, email?, shippingAddress? }` when the " +
+      "buyer pays, which creates the intent. Pass `email` on that second " +
+      "call when no one is logged in.",
     parameters: [
       {
         in: "body",
@@ -685,6 +805,34 @@ export default function () {
             stripeAccountId: { type: "string" },
             redirectUrl: { type: "string" },
             success: { type: "boolean" },
+            deferred: {
+              type: "object",
+              description:
+                "Returned for `deferred: true`. Initialise Stripe Elements with " +
+                "{ mode, amount, currency } on stripeAccountId's account.",
+              properties: {
+                mode: { type: "string", enum: ["payment", "setup"] },
+                amount: {
+                  type: "number",
+                  description: "Smallest currency unit. Payment mode only.",
+                },
+                currency: { type: "string" },
+                stripeAccountId: { type: "string" },
+                requiresShipping: { type: "boolean" },
+                allowedCountries: { type: "array", items: { type: "string" } },
+                checkoutId: {
+                  type: "string",
+                  description: "The checkout to pay for.",
+                },
+                buyerEmailKnown: {
+                  type: "boolean",
+                  description:
+                    "False when the checkout must collect the buyer's email.",
+                },
+                artistName: { type: "string" },
+                successUrl: { type: "string" },
+              },
+            },
           },
         },
       },

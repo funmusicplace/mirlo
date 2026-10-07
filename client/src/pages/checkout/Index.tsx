@@ -1,41 +1,39 @@
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { useQuery } from "@tanstack/react-query";
 import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { moneyDisplay } from "components/common/Money";
-import PurchasePaymentForm from "components/common/Purchase/PurchasePaymentForm";
+import PurchaseElements from "components/common/Purchase/PurchaseElements";
 import { WidthWrapper } from "components/common/WidthContainer";
-import { queryPurchaseIntent } from "queries";
+import { useOpenHostedCheckoutMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
-
-const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 /**
  * The Mirlo-hosted checkout page. External API consumers send a buyer here.
  */
 function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "hostedCheckout" });
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const intentId = searchParams.get("intentId") ?? "";
-  const stripeAccountId = searchParams.get("stripeAccountId") ?? "";
-  const {
-    data: intent,
-    isLoading,
-    isError,
-  } = useQuery(queryPurchaseIntent({ intentId, stripeAccountId }));
+  const checkoutId = searchParams.get("checkoutId") ?? "";
+  const { mutate, data, isError, isIdle, isPending } =
+    useOpenHostedCheckoutMutation();
+  const opened = React.useRef(false);
 
-  const stripePromise = React.useMemo(
-    () =>
-      stripeAccountId && stripeKey
-        ? loadStripe(stripeKey, { stripeAccount: stripeAccountId })
-        : null,
-    [stripeAccountId]
-  );
+  React.useEffect(() => {
+    if (checkoutId && !opened.current) {
+      opened.current = true;
+      mutate(checkoutId);
+    }
+  }, [checkoutId, mutate]);
 
-  if (!intentId || !stripeAccountId) {
+  React.useEffect(() => {
+    if (data?.redirectUrl) {
+      navigate(data.redirectUrl);
+    }
+  }, [data?.redirectUrl, navigate]);
+
+  if (!checkoutId) {
     return (
       <WidthWrapper variant="small" className="mt-8">
         <Box>{t("missingParameters")}</Box>
@@ -43,15 +41,11 @@ function Index() {
     );
   }
 
-  if (isLoading) {
+  if (isIdle || isPending || data?.redirectUrl) {
     return <FullPageLoadingSpinner />;
   }
 
-  if (intent?.status === "succeeded") {
-    if (intent.successUrl) {
-      window.location.assign(intent.successUrl);
-      return <FullPageLoadingSpinner />;
-    }
+  if (data?.success) {
     return (
       <WidthWrapper variant="small" className="mt-8">
         <Box>{t("alreadyComplete")}</Box>
@@ -59,7 +53,8 @@ function Index() {
     );
   }
 
-  if (isError || !intent?.clientSecret || !stripePromise) {
+  const quote = data?.deferred;
+  if (isError || !quote) {
     return (
       <WidthWrapper variant="small" className="mt-8">
         <Box>{t("couldNotLoad")}</Box>
@@ -67,25 +62,18 @@ function Index() {
     );
   }
 
-  const returnUrl = intent.successUrl ?? window.location.origin;
-  const isSetup = intent.clientSecret.startsWith("seti_");
+  const returnUrl = quote.successUrl ?? window.location.origin;
 
   const total =
-    intent.amount != null
-      ? moneyDisplay({
-          amount: intent.amount / 100,
-          currency: intent.currency ?? undefined,
-        })
+    quote.amount != null
+      ? moneyDisplay({ amount: quote.amount / 100, currency: quote.currency })
       : null;
 
   const summary =
-    intent.artistName && total
-      ? t("payingArtistAmount", {
-          artistName: intent.artistName,
-          amount: total,
-        })
-      : intent.artistName
-        ? t("payingArtist", { artistName: intent.artistName })
+    quote.artistName && total
+      ? t("payingArtistAmount", { artistName: quote.artistName, amount: total })
+      : quote.artistName
+        ? t("payingArtist", { artistName: quote.artistName })
         : total
           ? t("payingAmount", { amount: total })
           : null;
@@ -96,21 +84,11 @@ function Index() {
       {summary && (
         <p className="mb-4 text-(--mi-lighten-foreground-color)">{summary}</p>
       )}
-      <Elements
-        stripe={stripePromise}
-        options={{ clientSecret: intent.clientSecret }}
-      >
-        <PurchasePaymentForm
-          returnUrl={returnUrl}
-          buttonLabel={t("payNow")}
-          isSetup={isSetup}
-          requiresShipping={intent.requiresShipping}
-          allowedCountries={intent.allowedCountries ?? undefined}
-          clientSecret={intent.clientSecret}
-          stripeAccountId={stripeAccountId}
-          buyerEmailKnown={!!intent.userEmail}
-        />
-      </Elements>
+      <PurchaseElements
+        checkout={{ kind: "deferred", quote }}
+        returnUrl={returnUrl}
+        buttonLabel={t("payNow")}
+      />
     </WidthWrapper>
   );
 }

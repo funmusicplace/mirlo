@@ -50,10 +50,18 @@ describe("useSubscriptionCheckout", () => {
     expect(result.current.returnUrl).toBe(window.location.origin);
   });
 
-  test("sets checkout once startPurchase resolves a clientSecret", async () => {
+  test("opens a deferred checkout from the quote, sending deferred: true", async () => {
     vi.mocked(api.post).mockResolvedValue({
-      clientSecret: "seti_secret",
-      stripeAccountId: "acct_1",
+      deferred: {
+        checkoutId: "txn_1",
+        mode: "setup",
+        currency: "usd",
+        stripeAccountId: "acct_1",
+        requiresShipping: false,
+        buyerEmailKnown: true,
+        artistName: null,
+        successUrl: null,
+      },
     });
     const refresh = vi.fn();
     const { result } = renderHook(() =>
@@ -67,18 +75,33 @@ describe("useSubscriptionCheckout", () => {
       });
     });
 
+    expect(api.post).toHaveBeenCalledWith("purchase", {
+      artistId: artist.id,
+      items: [{ type: "subscription", tierId: 1 }],
+      deferred: true,
+    });
     expect(result.current.checkout).toEqual({
-      clientSecret: "seti_secret",
-      stripeAccountId: "acct_1",
-      requiresShipping: undefined,
-      allowedCountries: undefined,
+      kind: "deferred",
+      quote: expect.objectContaining({
+        checkoutId: "txn_1",
+        mode: "setup",
+        stripeAccountId: "acct_1",
+      }),
     });
   });
 
   test("handlePurchaseComplete refreshes user + artist data, resets checkout, and navigates to checkout-complete", async () => {
     vi.mocked(api.post).mockResolvedValue({
-      clientSecret: "seti_secret",
-      stripeAccountId: "acct_1",
+      deferred: {
+        checkoutId: "txn_1",
+        mode: "setup",
+        currency: "usd",
+        stripeAccountId: "acct_1",
+        requiresShipping: false,
+        buyerEmailKnown: true,
+        artistName: null,
+        successUrl: null,
+      },
     });
     const refresh = vi.fn();
     const { result } = renderHook(() =>
