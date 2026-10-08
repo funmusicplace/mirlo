@@ -4,7 +4,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import useShow from "utils/useShow";
 
-const SettingsActionsBar: React.FC<{ isSaving: boolean }> = ({ isSaving }) => {
+const SettingsActionsBar: React.FC<{
+  isSaving: boolean;
+  isDisabled?: boolean;
+}> = ({ isSaving, isDisabled }) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const headerShow = useShow();
 
@@ -15,7 +18,12 @@ const SettingsActionsBar: React.FC<{ isSaving: boolean }> = ({ isSaving }) => {
         headerShow === "down" ? "top-0" : "top-(--header-cover-sticky-height)"
       )}
     >
-      <Button type="submit" uppercase isLoading={isSaving} disabled={isSaving}>
+      <Button
+        type="submit"
+        uppercase
+        isLoading={isSaving}
+        disabled={isSaving || isDisabled}
+      >
         {t("save")}
       </Button>
     </div>
