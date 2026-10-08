@@ -11,6 +11,7 @@ import StorageSection from "components/Admin/settings/StorageSection";
 import StripeSection from "components/Admin/settings/StripeSection";
 import TrustLevelsSection from "components/Admin/settings/TrustLevelsSection";
 import useAdminSettingsForm from "components/Admin/settings/useAdminSettingsForm";
+import { SideNavLayout } from "components/common/SideNav";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { FormProvider } from "react-hook-form";
@@ -64,7 +65,7 @@ const Index = () => {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(updateSettings)}>
           <SettingsActionsBar isSaving={isSaving} isDisabled={!isLoaded} />
-          <div className="grid grid-cols-[12rem_minmax(0,1fr)] gap-10 max-md:grid-cols-1 max-md:gap-6">
+          <SideNavLayout navWidth="12rem">
             <SettingsSectionNav />
             <div className="max-w-2xl">
               <GeneralSettingsSection />
@@ -90,7 +91,7 @@ const Index = () => {
 
               <SecuritySection />
             </div>
-          </div>
+          </SideNavLayout>
         </form>
       </FormProvider>
     </WidthContainer>
