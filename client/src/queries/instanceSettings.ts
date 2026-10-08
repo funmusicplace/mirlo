@@ -44,6 +44,11 @@ export function useInstanceSetupMutation() {
   return useMutation({ mutationFn: saveInstanceSetup });
 }
 
+export const useStripePublishableKey = (): string | undefined =>
+  useInstanceSettings().stripePublishableKey ||
+  import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY ||
+  undefined;
+
 export const loadInstanceSettings = async (
   queryClient: QueryClient
 ): Promise<InstanceSettings> => {

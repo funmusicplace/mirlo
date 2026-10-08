@@ -4,11 +4,10 @@ import {
   Elements,
 } from "@stripe/react-stripe-js";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { useStripePublishableKey } from "queries/instanceSettings";
 import React from "react";
 
 import SetupIntentForm from "./SetupIntentForm";
-
-const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 
 const EmbeddedStripeForm: React.FC<{
   clientSecret: string;
@@ -47,6 +46,7 @@ const LoadStripeWrapper: React.FC<{
   onComplete?: () => void;
 }> = ({ clientSecret, isSetupIntent, stripeAccountId, onComplete }) => {
   const [stripe, setStripe] = React.useState<Stripe | null>();
+  const stripeKey = useStripePublishableKey();
 
   const callback = React.useCallback(
     async (stripeKey: string, stripeAccountId?: string) => {

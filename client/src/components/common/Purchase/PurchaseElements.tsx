@@ -1,11 +1,10 @@
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
+import { useStripePublishableKey } from "queries/instanceSettings";
 import React from "react";
 
 import PurchasePaymentForm from "./PurchasePaymentForm";
 import type { Checkout } from "./usePurchase";
-
-const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 
 const PurchaseElements: React.FC<{
   checkout: Checkout;
@@ -17,13 +16,14 @@ const PurchaseElements: React.FC<{
     checkout.kind === "deferred"
       ? checkout.quote.stripeAccountId
       : checkout.stripeAccountId;
+  const stripeKey = useStripePublishableKey();
 
   const stripePromise = React.useMemo(
     () =>
       stripeAccountId && stripeKey
         ? loadStripe(stripeKey, { stripeAccount: stripeAccountId })
         : null,
-    [stripeAccountId]
+    [stripeAccountId, stripeKey]
   );
 
   // <Elements> compares options deeply, so this needn't be memoized.

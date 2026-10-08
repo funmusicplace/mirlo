@@ -38,8 +38,10 @@ export interface SettingsFromAPI {
     stripe?: {
       key?: string;
       keyConfigured?: boolean;
+      publishableKey?: string;
       webhookSigningSecret?: string;
       webhookConnectSigningSecret?: string;
+      webhookSecretConfigured?: boolean;
       webhookEndpointId?: string;
     };
     emailProvider?: {

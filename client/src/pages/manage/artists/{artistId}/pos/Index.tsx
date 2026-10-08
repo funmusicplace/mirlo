@@ -18,11 +18,10 @@ import {
   queryManagedArtistTrackGroups,
   queryUserStripeStatus,
 } from "queries";
+import { useStripePublishableKey } from "queries/instanceSettings";
 import React from "react";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-
-const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 
 // The /purchase endpoint accepts a list of these.
 type PurchaseItem =
@@ -89,12 +88,13 @@ const OnlinePaymentWrapper: React.FC<{
   onDone: (status: string) => void;
 }> = ({ clientSecret, stripeAccountId, onDone }) => {
   const [stripe, setStripe] = React.useState<Stripe | null>(null);
+  const stripeKey = useStripePublishableKey();
 
   React.useEffect(() => {
     if (stripeKey) {
       loadStripe(stripeKey, { stripeAccount: stripeAccountId }).then(setStripe);
     }
-  }, [stripeAccountId]);
+  }, [stripeAccountId, stripeKey]);
 
   if (!stripe) return null;
 

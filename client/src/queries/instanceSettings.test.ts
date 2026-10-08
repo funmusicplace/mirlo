@@ -1,4 +1,6 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { renderHook } from "@testing-library/react";
+import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DEFAULT_INSTANCE_SETTINGS } from "../utils/instanceSettings";
@@ -6,6 +8,7 @@ import { DEFAULT_INSTANCE_SETTINGS } from "../utils/instanceSettings";
 import {
   loadInstanceSettings,
   queryInstanceSettings,
+  useStripePublishableKey,
 } from "./instanceSettings";
 
 const injectInstance = (data: unknown) => {
@@ -90,5 +93,36 @@ describe("loadInstanceSettings", () => {
     expect(queryClient.getQueryData(queryInstanceSettings().queryKey)).toEqual(
       DEFAULT_INSTANCE_SETTINGS
     );
+  });
+});
+
+describe("useStripePublishableKey", () => {
+  afterEach(() => {
+    document.getElementById("__MIRLO_INSTANCE__")?.remove();
+  });
+
+  const renderKeyHook = () => {
+    const queryClient = new QueryClient();
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        children
+      );
+    return renderHook(() => useStripePublishableKey(), { wrapper }).result
+      .current;
+  };
+
+  it("prefers the key saved in Admin Settings", () => {
+    injectInstance({ ...injected, stripePublishableKey: "pk_test_admin" });
+
+    expect(renderKeyHook()).toBe("pk_test_admin");
+  });
+
+  it("falls back to the build-time env key when none is saved", () => {
+    injectInstance({ ...injected, stripePublishableKey: null });
+
+    // Set in test/vitest-setup.ts.
+    expect(renderKeyHook()).toBe("pk_test_fake");
   });
 });

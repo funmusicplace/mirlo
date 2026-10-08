@@ -12,6 +12,7 @@ declare global {
       defaultCurrency?: string;
       stripe?: {
         key?: string;
+        publishableKey?: string;
         webhookSigningSecret?: string;
         webhookConnectSigningSecret?: string;
         webhookEndpointId?: string;

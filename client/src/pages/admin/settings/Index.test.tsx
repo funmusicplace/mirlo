@@ -335,12 +335,9 @@ describe("Settings", () => {
     expect(screen.getByText("security")).toBeInTheDocument();
   });
 
-  test("registers the Stripe webhook and keeps the new secret in the form", async () => {
+  test("registers the Stripe webhook and shows the secret as configured", async () => {
     vi.mocked(api.post).mockResolvedValue({
-      result: {
-        webhookEndpointId: "we_new",
-        webhookConnectSigningSecret: "whsec_new",
-      },
+      result: { webhookEndpointId: "we_new" },
     } as any);
     renderSettings();
 
@@ -349,7 +346,11 @@ describe("Settings", () => {
     );
 
     expect(api.post).toHaveBeenCalledWith("admin/stripeWebhook", {});
-    expect(await screen.findByDisplayValue("whsec_new")).toBeInTheDocument();
+    expect(
+      await screen.findByPlaceholderText(
+        "stripeWebhookSecretPlaceholderConfigured"
+      )
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "stripeWebhookRegister" })
     ).not.toBeInTheDocument();
