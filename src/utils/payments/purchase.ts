@@ -61,10 +61,7 @@ export const initiatePayment = async ({
   userEmail,
   userId,
   clientId,
-  successUrl,
   stripeAccountId: stripeAccountIdOverride,
-  requiresShipping,
-  allowedCountries,
   checkoutId,
 }: {
   readerId?: string;
@@ -73,10 +70,7 @@ export const initiatePayment = async ({
   userEmail: string;
   userId?: string;
   clientId?: number;
-  successUrl?: string;
   stripeAccountId?: string;
-  requiresShipping?: boolean;
-  allowedCountries?: string[];
   checkoutId?: string;
 }): Promise<
   | { paymentIntentId: string }
@@ -113,14 +107,9 @@ export const initiatePayment = async ({
     userEmail,
     ...(userId && { userId }),
     ...(clientId !== undefined && { clientId: String(clientId) }),
-    ...(successUrl && { successUrl }),
     ...(purchaseType === "trackGroup" &&
       items[0]?.id && { trackGroupId: items[0].id }),
     ...(purchaseType === "track" && items[0]?.id && { trackId: items[0].id }),
-    ...(requiresShipping && { requiresShipping: "true" }),
-    ...(allowedCountries?.length && {
-      allowedCountries: allowedCountries.join(","),
-    }),
     items: JSON.stringify(items),
     ...(checkoutId && { checkoutId }),
   };

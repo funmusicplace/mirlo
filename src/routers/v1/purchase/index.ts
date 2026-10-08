@@ -457,7 +457,6 @@ export default function () {
           userEmail: loggedInUser?.email ?? email ?? "",
           userId: loggedInUser?.id,
           userName: subItem.userName,
-          successUrl,
           deferred,
           shippingAddress,
           checkoutId: checkout?.id,
@@ -510,7 +509,6 @@ export default function () {
           message: pledgeItem.message,
           userEmail: loggedInUser?.email ?? email ?? "",
           userId: loggedInUser?.id,
-          successUrl,
           deferred,
           checkoutId: checkout?.id,
         });
@@ -786,10 +784,7 @@ export default function () {
         userEmail: loggedInUser?.email ?? email ?? "",
         userId: loggedInUser ? String(loggedInUser.id) : undefined,
         clientId,
-        successUrl,
         stripeAccountId: payeeAccountId,
-        requiresShipping,
-        allowedCountries,
         checkoutId: checkout?.id,
       });
 

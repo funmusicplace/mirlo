@@ -14,7 +14,6 @@ export const initiateFundraiserPledge = async ({
   message,
   userEmail,
   userId,
-  successUrl,
   deferred,
   checkoutId,
 }: {
@@ -25,7 +24,6 @@ export const initiateFundraiserPledge = async ({
   message?: string;
   userEmail: string;
   userId?: number;
-  successUrl?: string;
   deferred?: boolean;
   checkoutId?: string;
 }): Promise<
@@ -89,7 +87,6 @@ export const initiateFundraiserPledge = async ({
       userEmail,
       userId: userId ? String(userId) : undefined,
       message,
-      successUrl,
       checkoutId,
     });
 
