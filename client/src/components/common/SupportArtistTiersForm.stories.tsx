@@ -2,6 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { expect, userEvent, waitFor, within } from "@storybook/test";
 import { http, HttpResponse } from "msw";
 
+import {
+  purchaseHandler,
+  setupQuote,
+} from "../../../.storybook/purchaseHandlers";
+import { stripeMock } from "../../../.storybook/stripeMock";
 import { ARTIST_EXAMPLE, USER_EXAMPLE } from "../../../test/mocks";
 
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
@@ -35,17 +40,20 @@ const ARTIST: Artist = {
 /** Records what the form sent to POST /v1/purchase so play tests can check it */
 let lastPurchaseBody: unknown;
 
-const artistHandlers = (artist: Artist) => [
-  http.get("*/v1/artists/:artistSlug", () =>
+/** Keyed so a story can swap one of them without replacing the rest */
+const handlersFor = (artist: Artist) => ({
+  artist: http.get("*/v1/artists/:artistSlug", () =>
     HttpResponse.json({ result: artist })
   ),
   // An existing subscriber switching tiers is updated in place, no checkout
-  http.post("*/v1/purchase", async ({ request }) => {
+  purchase: http.post("*/v1/purchase", async ({ request }) => {
     lastPurchaseBody = await request.json();
     return HttpResponse.json({ success: true });
   }),
-  http.post("*/v1/artists/:artistId/follow", () => HttpResponse.json({})),
-];
+  follow: http.post("*/v1/artists/:artistId/follow", () =>
+    HttpResponse.json({})
+  ),
+});
 
 const loggedInAs = (user: LoggedInUser) =>
   http.get("*/auth/profile", () => HttpResponse.json({ result: user }));
@@ -60,7 +68,7 @@ const meta = {
   component: SupportArtistTiersForm,
   parameters: {
     layout: "padded",
-    msw: { handlers: { artist: artistHandlers(ARTIST) } },
+    msw: { handlers: handlersFor(ARTIST) },
   },
   args: { artist: ARTIST },
   beforeEach: () => {
@@ -161,7 +169,7 @@ export const SinglePaidTier: Story = {
   parameters: {
     msw: {
       handlers: {
-        artist: artistHandlers({
+        ...handlersFor({
           ...ARTIST,
           subscriptionTiers: [FOLLOW_TIER, SUPPORTER_TIER],
         }),
@@ -174,5 +182,31 @@ export const SinglePaidTier: Story = {
       await canvas.findByRole("button", { name: "Continue with $5.00/month" })
     ).toBeInTheDocument();
     await expect(canvas.queryByRole("radio")).not.toBeInTheDocument();
+  },
+};
+
+/**
+ * A first-time subscription: the tier is quoted, then the payment form
+ * creates and confirms the SetupIntent when the buyer pays
+ */
+export const NewSubscription: Story = {
+  parameters: {
+    msw: {
+      handlers: {
+        auth: loggedInAs(USER_EXAMPLE),
+        purchase: purchaseHandler(setupQuote()),
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(await canvas.findByText(/Superfan/));
+    await userEvent.click(
+      await canvas.findByRole("button", { name: /Continue with/ })
+    );
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Support this artist" })
+    );
+    await waitFor(() => expect(stripeMock.confirmed).toHaveLength(1));
   },
 };

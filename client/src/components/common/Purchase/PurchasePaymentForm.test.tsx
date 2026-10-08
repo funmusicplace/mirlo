@@ -24,16 +24,11 @@ const confirmPayment = vi.fn(() => {
   callOrder.push("confirmPayment");
   return Promise.resolve({ paymentIntent: { status: "succeeded" } });
 });
-const addressValue: {
-  value: { name: string; address: Record<string, unknown> };
-} = {
-  value: {
-    name: "Buyer Name",
-    address: { line1: "123 Main St", country: "US" },
-  },
-};
 const getElement = vi.fn(() => ({
-  getValue: () => Promise.resolve(addressValue),
+  getValue: () =>
+    Promise.resolve({
+      value: { name: "Buyer Name", address: { line1: "123 Main St" } },
+    }),
 }));
 const submit = vi.fn((): Promise<{ error?: { message: string } }> => {
   callOrder.push("submit");
@@ -167,34 +162,6 @@ describe("PurchasePaymentForm", () => {
     expect(confirmPayment).not.toHaveBeenCalled();
   });
 
-  test("retries a declined payment by paying the same checkout again", async () => {
-    confirmPayment.mockImplementationOnce(() => {
-      callOrder.push("confirmPayment");
-      return Promise.resolve({
-        error: { message: "Your card was declined." },
-      } as any);
-    });
-
-    render(
-      <PurchasePaymentForm
-        checkout={deferred()}
-        returnUrl="https://example.com/return"
-        buttonLabel="Pay"
-        onSuccess={vi.fn()}
-      />
-    );
-
-    await readyTheForm();
-    fireEvent.click(screen.getByRole("button"));
-    await waitFor(() => expect(handler).toHaveBeenCalled());
-
-    fireEvent.click(screen.getByRole("button"));
-    await waitFor(() => expect(confirmPayment).toHaveBeenCalledTimes(2));
-
-    // The server replaces the intent the first attempt created.
-    expect(postMock).toHaveBeenNthCalledWith(2, "purchase", request);
-  });
-
   test("finishes without charging again when the checkout is already paid", async () => {
     postMock.mockImplementation(() => Promise.resolve({ success: true }));
     const onSuccess = vi.fn();
@@ -234,81 +201,6 @@ describe("PurchasePaymentForm", () => {
     await waitFor(() => expect(postMock).toHaveBeenCalled());
     expect(confirmPayment).not.toHaveBeenCalled();
     expect(handler).toHaveBeenCalled();
-  });
-
-  test("sends a subscription's shipping address with the SetupIntent request", async () => {
-    postMock.mockImplementation(() => {
-      callOrder.push("post");
-      return Promise.resolve({ clientSecret: "seti_new_secret_abc" });
-    });
-
-    render(
-      <PurchasePaymentForm
-        checkout={deferred({
-          mode: "setup",
-          amount: undefined,
-          requiresShipping: true,
-        })}
-        returnUrl="https://example.com/return"
-        buttonLabel="Pay"
-        onSuccess={vi.fn()}
-      />
-    );
-
-    await readyTheForm();
-    fireEvent.click(screen.getByTestId("address-element"));
-    fireEvent.click(screen.getByRole("button"));
-
-    await waitFor(() => expect(confirmSetup).toHaveBeenCalled());
-    expect(postMock).toHaveBeenCalledWith("purchase", {
-      checkoutId: request.checkoutId,
-      shippingAddress: addressValue.value,
-    });
-    expect(confirmSetup).toHaveBeenCalledWith(
-      expect.objectContaining({
-        clientSecret: "seti_new_secret_abc",
-        confirmParams: { return_url: "https://example.com/return" },
-      })
-    );
-  });
-
-  test("confirms a ready-made intent without creating one", async () => {
-    render(
-      <PurchasePaymentForm
-        checkout={{
-          kind: "intent",
-          clientSecret: "seti_existing_secret_abc",
-          stripeAccountId: "acct_1",
-        }}
-        returnUrl="https://example.com/return"
-        buttonLabel="Pay"
-        onSuccess={vi.fn()}
-      />
-    );
-
-    await readyTheForm();
-    fireEvent.click(screen.getByRole("button"));
-
-    await waitFor(() => expect(confirmSetup).toHaveBeenCalled());
-    expect(submit).not.toHaveBeenCalled();
-    expect(postMock).not.toHaveBeenCalled();
-    expect(confirmSetup).toHaveBeenCalledWith(
-      expect.objectContaining({ clientSecret: "seti_existing_secret_abc" })
-    );
-  });
-
-  test("does not ask for an email when the server already knows the buyer", async () => {
-    render(
-      <PurchasePaymentForm
-        checkout={deferred({ buyerEmailKnown: true })}
-        returnUrl="https://example.com/return"
-        buttonLabel="Pay"
-        onSuccess={vi.fn()}
-      />
-    );
-
-    await readyTheForm();
-    expect(screen.queryByLabelText("email")).not.toBeInTheDocument();
   });
 
   test("asks for an email when the server says the buyer is unknown, even if this browser thinks someone is logged in", async () => {

@@ -30,6 +30,8 @@ import { ConfirmContextProvider } from "../src/utils/useConfirm";
 import "../src/styles/index.css";
 import "./global.css";
 import { defaultHandlers } from "./handlers";
+import { resetPurchaseMock } from "./purchaseHandlers";
+import { resetStripeMock } from "./stripeMock";
 
 void initI18n();
 
@@ -74,13 +76,15 @@ function withGlobalContext(Outlet: any) {
   );
 }
 
-const clearQueryCache = async () => {
+const resetStoryState = async () => {
   queryClient.clear();
+  resetStripeMock();
+  resetPurchaseMock();
   return {};
 };
 
 const preview: Preview = {
-  loaders: [clearQueryCache, mswLoader],
+  loaders: [resetStoryState, mswLoader],
   decorators: [withRouter, withGlobalContext],
   parameters: {
     msw: { handlers: defaultHandlers },

@@ -7,6 +7,7 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
 
+import * as sendMail from "../../src/jobs/send-mail";
 import {
   cancelPreviousAttempt,
   resolveDigitalPurchaseItem,
@@ -56,24 +57,32 @@ describe("purchase", () => {
     sinon.restore();
   });
 
+  /** POST /v1/purchase, as a guest unless an access token is given */
+  const postPurchase = (body: Record<string, unknown>, accessToken?: string) =>
+    (accessToken
+      ? requestApp
+          .post("purchase")
+          .send(body)
+          .set("Cookie", [`jwt=${accessToken}`])
+      : requestApp.post("purchase").send(body)
+    ).set("Accept", "application/json");
+
   describe("POST /v1/purchase", () => {
     it("should return 400 when artistId is missing", async () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const response = await requestApp
-        .post("purchase")
-        .send({ items: [{ type: "tip", amount: 500 }] })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+      const response = await postPurchase(
+        { items: [{ type: "tip", amount: 500 }] },
+        accessToken
+      );
       assert.equal(response.statusCode, 400);
     });
 
     it("should return 400 when items array is empty", async () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
-      const response = await requestApp
-        .post("purchase")
-        .send({ artistId: 1, items: [] })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+      const response = await postPurchase(
+        { artistId: 1, items: [] },
+        accessToken
+      );
       assert.equal(response.statusCode, 400);
     });
 
@@ -83,17 +92,16 @@ describe("purchase", () => {
       });
       const profile = await createProfile(user.id);
       const tier = await createTier(profile.id);
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             { type: "subscription", tierId: tier.id },
             { type: "tip", amount: 500 },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
       assert.equal(response.statusCode, 400);
     });
 
@@ -106,14 +114,13 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tier = await createTier(profile.id, { minAmount: 500 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "subscription", tierId: tier.id }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(
@@ -138,14 +145,13 @@ describe("purchase", () => {
         collectAddress: true,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "subscription", tierId: tier.id }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(
@@ -169,15 +175,14 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tier = await createTier(profile.id, { minAmount: 500 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "subscription", tierId: tier.id }],
           hosted: true,
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
@@ -223,15 +228,14 @@ describe("purchase", () => {
         id: "prod_new_tier",
       } as unknown as Stripe.Response<Stripe.Product>);
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "subscription", tierId: newTier.id }],
           hosted: true,
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.success, true);
@@ -245,14 +249,11 @@ describe("purchase", () => {
       const { user } = await createUser({ email: "artist@test.com" });
       const profile = await createProfile(user.id);
       const tier = await createTier(profile.id, { minAmount: 500 });
-      const response = await requestApp
-        .post("purchase")
-        .send({
-          artistId: profile.id,
-          readerId: "tmr_test",
-          items: [{ type: "subscription", tierId: tier.id }],
-        })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        artistId: profile.id,
+        readerId: "tmr_test",
+        items: [{ type: "subscription", tierId: tier.id }],
+      });
       assert.equal(response.statusCode, 401);
     });
 
@@ -263,15 +264,14 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const tier = await createTier(profile.id, { minAmount: 500 });
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           readerId: "tmr_test",
           items: [{ type: "subscription", tierId: tier.id }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
       assert.equal(response.statusCode, 404);
     });
 
@@ -280,15 +280,14 @@ describe("purchase", () => {
         email: "buyer@test.com",
       });
       const profile = await createProfile(user.id);
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           readerId: "tmr_test",
           items: [{ type: "subscription", tierId: 99999 }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
       assert.equal(response.statusCode, 404);
     });
 
@@ -297,14 +296,13 @@ describe("purchase", () => {
         email: "buyer@test.com",
       });
       const profile = await createProfile(user.id);
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "tip", amount: 0 }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
       assert.equal(response.statusCode, 400);
     });
 
@@ -322,14 +320,13 @@ describe("purchase", () => {
         minPrice: 1000,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "trackGroup", id: tgFromOther.id }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
       assert.equal(response.statusCode, 404);
     });
 
@@ -343,14 +340,13 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
@@ -371,14 +367,13 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -400,17 +395,16 @@ describe("purchase", () => {
         minPrice: 500,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             { type: "trackGroup", id: tg1.id, price: "1000" },
             { type: "trackGroup", id: tg2.id, price: "500" },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.stripeAccountId, "acct_two_albums");
@@ -438,17 +432,16 @@ describe("purchase", () => {
         quantityRemaining: 10,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             { type: "trackGroup", id: tg.id, price: "1000" },
             { type: "merch", id: merch.id, quantity: 1 },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
       assert.match(response.body.error, /same account/i);
@@ -468,14 +461,13 @@ describe("purchase", () => {
         data: { paymentToUserId: label.id },
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
       assert.match(response.body.error, /payment processor/i);
@@ -489,13 +481,10 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
-          artistId: profile.id,
-          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
-        })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        artistId: profile.id,
+        items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+      });
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -519,14 +508,13 @@ describe("purchase", () => {
         minPrice: 1000,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "track", id: trackFromOther.id }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
       assert.equal(response.statusCode, 404);
     });
 
@@ -541,14 +529,13 @@ describe("purchase", () => {
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
       const track = await createTrack(tg.id, { minPrice: 0 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "track", id: track.id }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
@@ -570,14 +557,13 @@ describe("purchase", () => {
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
       const track = await createTrack(tg.id, { minPrice: 500 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "track", id: track.id, price: "500" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -593,14 +579,13 @@ describe("purchase", () => {
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
       const track = await createTrack(tg.id, { minPrice: 500 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "track", id: track.id, price: "100" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -614,15 +599,14 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
@@ -643,16 +627,15 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
           successUrl: "https://evil.example.com/thanks",
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -667,16 +650,15 @@ describe("purchase", () => {
       const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
       const client = await getClient();
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
           hosted: true,
           successUrl: `${client.applicationUrl}/thanks`,
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.redirectUrl, "should return a redirectUrl");
@@ -690,14 +672,13 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "tip", amount: 500 }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -715,14 +696,13 @@ describe("purchase", () => {
       });
       await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "catalogue" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -740,14 +720,13 @@ describe("purchase", () => {
       });
       await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "catalogue", price: "3000" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -761,14 +740,13 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "catalogue" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -786,14 +764,13 @@ describe("purchase", () => {
       });
       await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "catalogue" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
 
@@ -808,14 +785,13 @@ describe("purchase", () => {
     it("should return 404 when the artist does not exist for a catalogue purchase", async () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: 999999,
           items: [{ type: "catalogue" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 404);
     });
@@ -839,14 +815,13 @@ describe("purchase", () => {
       });
 
       // Floor is 50% of (1000 + 2000) = 1500
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "catalogue", price: "1000" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -861,14 +836,13 @@ describe("purchase", () => {
       });
       await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "catalogue", price: "1000" }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
       assert.match(response.body.error, /payment processor/i);
@@ -887,14 +861,13 @@ describe("purchase", () => {
         quantityRemaining: 10,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "merch", id: merch.id, quantity: 1 }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -930,9 +903,8 @@ describe("purchase", () => {
         costExtraUnit: 100,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             {
@@ -943,9 +915,9 @@ describe("purchase", () => {
               shippingDestinationId: destination.id,
             },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(response.body.clientSecret);
@@ -963,9 +935,8 @@ describe("purchase", () => {
         minPrice: 800,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             {
@@ -975,9 +946,9 @@ describe("purchase", () => {
               merchOptionIds: ["not-a-real-option"],
             },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -995,14 +966,13 @@ describe("purchase", () => {
         quantityRemaining: 1,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "merch", id: merch.id, quantity: 2 }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -1025,14 +995,13 @@ describe("purchase", () => {
         costExtraUnit: 100,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "merch", id: merch.id, quantity: 1 }],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -1049,9 +1018,8 @@ describe("purchase", () => {
         isAllOrNothing: true,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             {
@@ -1061,9 +1029,9 @@ describe("purchase", () => {
               price: "2000",
             },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.ok(
@@ -1086,9 +1054,8 @@ describe("purchase", () => {
         status: "SUCCESSFUL",
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             {
@@ -1097,9 +1064,9 @@ describe("purchase", () => {
               trackGroupId: trackGroup.id,
             },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -1116,9 +1083,8 @@ describe("purchase", () => {
         isAllOrNothing: true,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             {
@@ -1128,9 +1094,9 @@ describe("purchase", () => {
             },
             { type: "tip", amount: 500 },
           ],
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 400);
     });
@@ -1152,14 +1118,11 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
-          artistId: profile.id,
-          items: [{ type: "trackGroup", id: tg.id, price: "1500" }],
-          deferred: true,
-        })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        artistId: profile.id,
+        items: [{ type: "trackGroup", id: tg.id, price: "1500" }],
+        deferred: true,
+      });
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.deferred.mode, "payment");
@@ -1179,15 +1142,14 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [{ type: "tip", amount: 500 }],
           deferred: true,
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.deferred.buyerEmailKnown, true);
@@ -1205,14 +1167,11 @@ describe("purchase", () => {
         collectAddress: true,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
-          artistId: profile.id,
-          items: [{ type: "subscription", tierId: tier.id }],
-          deferred: true,
-        })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        artistId: profile.id,
+        items: [{ type: "subscription", tierId: tier.id }],
+        deferred: true,
+      });
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.deferred.mode, "setup");
@@ -1232,21 +1191,18 @@ describe("purchase", () => {
         isAllOrNothing: true,
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
-          artistId: profile.id,
-          items: [
-            {
-              type: "fundraiserPledge",
-              fundraiserId: fundraiser.id,
-              trackGroupId: trackGroup.id,
-              price: "1000",
-            },
-          ],
-          email: "someone-else@test.com",
-        })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        artistId: profile.id,
+        items: [
+          {
+            type: "fundraiserPledge",
+            fundraiserId: fundraiser.id,
+            trackGroupId: trackGroup.id,
+            price: "1000",
+          },
+        ],
+        email: "someone-else@test.com",
+      });
 
       assert.equal(response.statusCode, 401);
     });
@@ -1258,14 +1214,11 @@ describe("purchase", () => {
       });
       const profile = await createProfile(artistUser.id);
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
-          artistId: profile.id,
-          items: [{ type: "tip", amount: 500 }],
-          email: "not-an-email",
-        })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        artistId: profile.id,
+        items: [{ type: "tip", amount: 500 }],
+        email: "not-an-email",
+      });
 
       assert.equal(response.statusCode, 400);
     });
@@ -1279,10 +1232,11 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const items = [{ type: "tip", amount: 700 }];
 
-      const response = await requestApp
-        .post("purchase")
-        .send({ artistId: profile.id, items, deferred: true })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        artistId: profile.id,
+        items,
+        deferred: true,
+      });
 
       assert.equal(response.statusCode, 200);
       const checkout = await prisma.checkout.findUnique({
@@ -1326,14 +1280,11 @@ describe("purchase", () => {
       assert.equal(checkout?.clientId, apiClient.id);
 
       // The browser tries to change the cart; the checkout's wins.
-      const quote = await requestApp
-        .post("purchase")
-        .send({
-          checkoutId,
-          deferred: true,
-          items: [{ type: "trackGroup", id: tg.id, price: "1" }],
-        })
-        .set("Accept", "application/json");
+      const quote = await postPurchase({
+        checkoutId,
+        deferred: true,
+        items: [{ type: "trackGroup", id: tg.id, price: "1" }],
+      });
       assert.equal(quote.statusCode, 200);
       assert.equal(quote.body.deferred.checkoutId, checkoutId);
       assert.equal(quote.body.deferred.amount, 1000);
@@ -1341,14 +1292,11 @@ describe("purchase", () => {
       assert.equal(quote.body.deferred.artistName, "Checkout Band");
       assert.equal(quote.body.deferred.successUrl, "http://localhost/thanks");
 
-      const paid = await requestApp
-        .post("purchase")
-        .send({
-          checkoutId,
-          email: "guest@test.com",
-          successUrl: "https://evil.example.com",
-        })
-        .set("Accept", "application/json");
+      const paid = await postPurchase({
+        checkoutId,
+        email: "guest@test.com",
+        successUrl: "https://evil.example.com",
+      });
       assert.equal(paid.statusCode, 200);
       assert.ok(paid.body.clientSecret, "paying creates the intent");
 
@@ -1360,10 +1308,10 @@ describe("purchase", () => {
 
       // Paying again (a declined card, a corrected email) replaces that
       // intent with one built from the new request.
-      const retried = await requestApp
-        .post("purchase")
-        .send({ checkoutId, email: "corrected@test.com" })
-        .set("Accept", "application/json");
+      const retried = await postPurchase({
+        checkoutId,
+        email: "corrected@test.com",
+      });
       assert.equal(retried.statusCode, 200);
       assert.ok(retried.body.clientSecret);
       const afterRetry = await prisma.checkout.findUnique({
@@ -1394,11 +1342,10 @@ describe("purchase", () => {
         },
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({ checkoutId: checkout.id, deferred: true })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+      const response = await postPurchase(
+        { checkoutId: checkout.id, deferred: true },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.deferred.amount, 500);
@@ -1428,18 +1375,17 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const free = await createTrackGroup(profile.id, { minPrice: 0 });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({
+      const response = await postPurchase(
+        {
           artistId: profile.id,
           items: [
             { type: "trackGroup", id: free.id, price: "0" },
             { type: "tip", amount: 500 },
           ],
           deferred: true,
-        })
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+        },
+        accessToken
+      );
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.redirectUrl, undefined);
@@ -1453,12 +1399,60 @@ describe("purchase", () => {
     });
 
     it("404s for an unknown checkout", async () => {
-      const response = await requestApp
-        .post("purchase")
-        .send({ checkoutId: "not-a-checkout", deferred: true })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        checkoutId: "not-a-checkout",
+        deferred: true,
+      });
 
       assert.equal(response.statusCode, 404);
+    });
+
+    it("marks the checkout paid when the payment intent succeeds", async () => {
+      sinon.stub(sendMail, "default").resolves();
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_checkout_webhook",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const items = [
+        { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
+      ];
+      const checkout = await prisma.checkout.create({
+        data: { profileId: profile.id, items },
+      });
+
+      await stripeUtils.handlePaymentIntentSucceeded(
+        {
+          id: "pi_checkout_webhook",
+          status: "succeeded",
+          amount_received: 1000,
+          currency: "usd",
+          application_fee_amount: 70,
+          metadata: {
+            purchaseType: "trackGroup",
+            stripeAccountId: "acct_checkout_webhook",
+            artistId: String(profile.id),
+            trackGroupId: String(tg.id),
+            userId: String(buyer.id),
+            userEmail: buyer.email,
+            items: JSON.stringify(items),
+            checkoutId: checkout.id,
+          },
+        } as unknown as Stripe.PaymentIntent,
+        "acct_checkout_webhook"
+      );
+
+      const purchases = await prisma.userTrackGroupPurchase.findMany({
+        where: { userId: buyer.id, trackGroupId: tg.id },
+      });
+      assert.equal(purchases.length, 1, "the buyer owns the release, once");
+
+      const paid = await prisma.checkout.findUnique({
+        where: { id: checkout.id },
+      });
+      assert.ok(paid?.completedAt, "the checkout is marked paid");
     });
 
     it("reports a paid checkout as done when its link is opened again", async () => {
@@ -1476,10 +1470,10 @@ describe("purchase", () => {
         },
       });
 
-      const response = await requestApp
-        .post("purchase")
-        .send({ checkoutId: checkout.id, deferred: true })
-        .set("Accept", "application/json");
+      const response = await postPurchase({
+        checkoutId: checkout.id,
+        deferred: true,
+      });
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.success, true);
@@ -1869,6 +1863,32 @@ describe("purchase", () => {
       const metadata = metadataOf(createStub);
       assert.equal(metadata.purchaseType, "trackGroup");
       assert.equal(metadata.trackGroupId, String(tg.id));
+    });
+
+    // The webhook is the only thing that marks a checkout paid, and it finds
+    // it by this metadata. Without it a hosted link stays payable forever.
+    it("carries the checkoutId the webhook will complete the checkout by", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_checkout",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const checkout = await prisma.checkout.create({
+        data: { profileId: profile.id, items: [{ type: "tip", amount: 500 }] },
+      });
+
+      const createStub = stubStripeForOnline();
+
+      await initiatePayment({
+        profileId: profile.id,
+        items: [{ type: "tip", quantity: 1, amount: 500 }],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+        checkoutId: checkout.id,
+      });
+
+      assert.equal(metadataOf(createStub).checkoutId, checkout.id);
     });
 
     it("keeps purchaseType 'trackGroup' for several trackGroup items (uniq collapses the type)", async () => {
