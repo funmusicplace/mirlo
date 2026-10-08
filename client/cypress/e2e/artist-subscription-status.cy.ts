@@ -122,7 +122,18 @@ describe("artist support page subscription status", () => {
     cy.intercept("POST", "/v1/purchase", (req) => {
       req.reply({
         statusCode: 200,
-        body: { clientSecret: "seti_secret", stripeAccountId: "acct_1" },
+        body: {
+          deferred: {
+            checkoutId: "checkout_1",
+            mode: "setup",
+            currency: "usd",
+            stripeAccountId: "acct_1",
+            requiresShipping: false,
+            buyerEmailKnown: true,
+            artistName: null,
+            successUrl: null,
+          },
+        },
       });
     }).as("purchase");
 
@@ -139,6 +150,7 @@ describe("artist support page subscription status", () => {
         expect(body.items[0].type).to.eq("subscription");
         expect(body.items[0].tierId).to.eq(tierId);
         expect(body.items[0].amount).to.eq(500);
+        expect(body.deferred).to.eq(true);
       });
   });
 });
