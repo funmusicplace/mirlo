@@ -1,4 +1,10 @@
+import path from "path";
+
 import { Prisma, PrismaClient } from "@mirlo/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import dotenv from "dotenv";
+
+dotenv.config({ path: [".env", path.join(__dirname, ".env")] });
 
 const ENABLE_LOGGING = false;
 
@@ -19,6 +25,7 @@ export type SafeUser = Prisma.UserGetPayload<{
 
 // Create base client before extending it
 const baseClient = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
   // The following controls logging of the database
   ...(ENABLE_LOGGING
     ? {
@@ -56,6 +63,14 @@ baseClient.$on("query", (e) => {
   console.log(queryString);
 });
 
+const SOFT_DELETE_MODELS = new Set<string>(
+  Object.values(Prisma.ModelName).filter(
+    (name) =>
+      "deletedAt" in
+      (Prisma as unknown as Record<string, object>)[`${name}ScalarFieldEnum`]
+  )
+);
+
 /**
  * Client extension for soft deletes and filtered queries.
  *
@@ -77,11 +92,7 @@ const prisma = baseClient.$extends({
     },
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
-        const hasDeletedAtField = Prisma.dmmf.datamodel.models
-          .find((m) => m.name === model)
-          ?.fields.find((field) => field.name === "deletedAt");
-
-        if (!hasDeletedAtField) {
+        if (!SOFT_DELETE_MODELS.has(model)) {
           return query(args);
         }
 

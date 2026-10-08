@@ -34,7 +34,7 @@
     "@fedify/express": "^2.3.4",
     "@fedify/fedify": "^2.3.4",
     "@fedify/redis": "^2.3.4",
-    "@prisma/client": "6",
+    "@prisma/client": "7.10.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/compression": "^1.8.1",
     "@types/connect-busboy": "^1.0.3",
@@ -134,7 +134,7 @@
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
     "prettier": "^3.2.5",
-    "prisma": "6",
+    "prisma": "7.10.0",
     "rss-parser": "^3.13.0",
     "sinon": "^17.0.1",
     "supertest": "^6.3.3",
@@ -149,9 +149,6 @@
       "prettier --write"
     ],
     "*.{json,md,yml,yaml,css}": "prettier --write"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
   },
   "workspaces": [
     "prisma",

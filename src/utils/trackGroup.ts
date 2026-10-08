@@ -9,7 +9,7 @@ import {
   UploadState,
   NotificationType,
 } from "@mirlo/prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime/library";
+import { DefaultArgs } from "@prisma/client/runtime/client";
 import archiver from "archiver";
 import { Response } from "express";
 

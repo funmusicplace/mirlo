@@ -1,8 +1,9 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { NextFunction, Request, Response } from "express";
+
 import { userAuthenticated } from "../../../auth/passport";
 import { AppError, HttpCode } from "../../../utils/error";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export default function () {
   const operations = {

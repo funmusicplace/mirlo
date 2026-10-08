@@ -5,7 +5,7 @@ import {
   FundraiserPledge,
   Fundraiser,
 } from "@mirlo/prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { Job } from "bullmq";
 
 import sendMail from "../jobs/send-mail";

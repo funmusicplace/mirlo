@@ -2,7 +2,7 @@ import {
   PrismaClientInitializationError,
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
-} from "@prisma/client/runtime/library";
+} from "@prisma/client/runtime/client";
 import { NextFunction, Request, Response } from "express";
 
 import logger from "../logger";

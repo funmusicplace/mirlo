@@ -8,7 +8,7 @@ import {
 import {
   DefaultArgs,
   PrismaClientKnownRequestError,
-} from "@prisma/client/runtime/library";
+} from "@prisma/client/runtime/client";
 import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 

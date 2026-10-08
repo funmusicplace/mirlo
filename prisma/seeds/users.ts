@@ -1,4 +1,4 @@
-import { Prisma } from "../__generated__";
+import { Prisma } from "@mirlo/prisma/client";
 
 export const users: Prisma.UserCreateInput[] = [
   {

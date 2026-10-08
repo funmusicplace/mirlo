@@ -1,7 +1,8 @@
+import prisma from "@mirlo/prisma";
+
 import { hashPassword } from "../src/routers/auth/utils";
 import { getSiteSettings } from "../src/utils/settings";
 
-import { PrismaClient } from "./__generated__";
 import { artists } from "./seeds/artists";
 import { clients } from "./seeds/clients";
 import { fundraisers } from "./seeds/fundraisers";
@@ -11,8 +12,6 @@ import { seedPublishedTrackGroups } from "./seeds/publishedTrackGroups";
 import { seedLocationTags } from "./seeds/seedLocationTags";
 import { trackGroups } from "./seeds/trackGroups";
 import { users } from "./seeds/users";
-
-const prisma = new PrismaClient();
 
 console.log("Seeding database...");
 console.log("dev", process.env.NODE_ENV);
