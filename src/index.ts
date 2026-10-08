@@ -48,6 +48,7 @@ import {
 } from "./utils/requestLogging";
 import { getSiteSettings } from "./utils/settings";
 import { refreshStripeClient } from "./utils/stripe";
+import { syncStripeConnectWebhookOnBoot } from "./utils/stripe/webhooks";
 import { startAvailableLanguagesRefresh } from "./utils/transifexLanguages";
 import wellKnown from "./wellKnown";
 
@@ -366,6 +367,9 @@ app.listen(process.env.PORT, async () => {
   const settings = await getSiteSettings();
   setCdnUrl(settings.cdnUrl ?? undefined);
   await refreshStripeClient();
+  syncStripeConnectWebhookOnBoot(
+    process.env.API_DOMAIN ?? "http://localhost:3000"
+  );
   setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
   ensureAllBucketsExist().catch((e) => {
     logger.error("Failed to eagerly create storage buckets on boot");

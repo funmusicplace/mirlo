@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import Stripe from "stripe";
 import type { Logger } from "winston";
 
+import logger from "../../logger";
 import { getSiteSettings } from "../settings";
 
 import {
@@ -71,19 +72,36 @@ export const STRIPE_CONNECT_EVENTS = Object.keys(
 ) as (keyof typeof stripeConnectEventHandlers &
   Stripe.WebhookEndpointCreateParams.EnabledEvent)[];
 
+const connectWebhookUrl = (baseUrl: string) =>
+  `${baseUrl}/v1/webhooks/stripe/connect`;
+
+const updateConnectWebhook = (endpointId: string, baseUrl: string) =>
+  stripe.webhookEndpoints.update(endpointId, {
+    url: connectWebhookUrl(baseUrl),
+    enabled_events: STRIPE_CONNECT_EVENTS,
+  });
+
 export const registerStripeConnectWebhook = async (baseUrl: string) => {
   const { id, settings } = await getSiteSettings();
-  const url = `${baseUrl}/v1/webhooks/stripe/connect`;
   if (settings?.stripe?.webhookEndpointId) {
-    await stripe.webhookEndpoints.update(settings.stripe.webhookEndpointId, {
-      url,
-      enabled_events: STRIPE_CONNECT_EVENTS,
-    });
-    return settings.stripe;
+    try {
+      await updateConnectWebhook(settings.stripe.webhookEndpointId, baseUrl);
+      return settings.stripe;
+    } catch (e) {
+      if (
+        !(e instanceof Stripe.errors.StripeError) ||
+        e.code !== "resource_missing"
+      ) {
+        throw e;
+      }
+      logger.warn(
+        `stripe-connect: webhook ${settings.stripe.webhookEndpointId} no longer exists, registering a new one`
+      );
+    }
   }
 
   const endpoint = await stripe.webhookEndpoints.create({
-    url,
+    url: connectWebhookUrl(baseUrl),
     connect: true,
     enabled_events: STRIPE_CONNECT_EVENTS,
     api_version: STRIPE_API_VERSION,
@@ -106,4 +124,18 @@ export const registerStripeConnectWebhook = async (baseUrl: string) => {
   });
   await refreshStripeClient();
   return stripeSettings;
+};
+
+export const syncStripeConnectWebhookOnBoot = async (baseUrl: string) => {
+  try {
+    const { settings } = await getSiteSettings();
+    const endpointId = settings?.stripe?.webhookEndpointId;
+    if (endpointId) {
+      await updateConnectWebhook(endpointId, baseUrl);
+    }
+  } catch (e) {
+    logger.warn(
+      `stripe-connect: couldn't sync webhook on boot: ${(e as Error).message}`
+    );
+  }
 };
