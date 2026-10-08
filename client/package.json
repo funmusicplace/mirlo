@@ -127,7 +127,7 @@
     "storybook": "^8.1.1",
     "storybook-addon-remix-react-router": "^3.0.0",
     "terser": "^5.30.3",
-    "typescript": "5.8.2",
+    "typescript": "5.9.3",
     "vite": "^5.2.9",
     "vite-plugin-pwa": "^1.2.0",
     "vite-tsconfig-paths": "^4.3.2",
