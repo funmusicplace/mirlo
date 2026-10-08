@@ -1468,7 +1468,12 @@ describe("purchase", () => {
       });
       const profile = await createProfile(artistUser.id);
       const checkout = await prisma.checkout.create({
-        data: { profileId: profile.id, items: [], completedAt: new Date() },
+        data: {
+          profileId: profile.id,
+          items: [],
+          completedAt: new Date(),
+          successUrl: "https://wp-site.com/thanks",
+        },
       });
 
       const response = await requestApp
@@ -1478,6 +1483,33 @@ describe("purchase", () => {
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.success, true);
+      assert.equal(response.body.successUrl, "https://wp-site.com/thanks");
+    });
+
+    it("refuses to pay a different amount than the checkout was quoted at", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_checkout_amount",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const checkout = await prisma.checkout.create({
+        data: {
+          profileId: profile.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1500" }],
+        },
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          checkoutId: checkout.id,
+          email: "buyer@test.com",
+          amount: 1200,
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 409);
     });
   });
 

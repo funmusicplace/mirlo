@@ -84,11 +84,13 @@ const PurchasePaymentForm: React.FC<{
           checkoutId: string;
           email?: string;
           shippingAddress?: ShippingAddress;
+          amount?: number;
         },
         { clientSecret?: string; success?: boolean }
       >("purchase", {
         checkoutId: checkout.quote.checkoutId,
         ...(needsEmail && { email }),
+        ...(!isSetup && { amount: checkout.quote.amount }),
         ...(isSetup && shipping && { shippingAddress: shipping }),
       });
       if (response.success) {

@@ -79,6 +79,7 @@ type PostBody = {
   deferred?: boolean;
   checkoutId?: string;
   shippingAddress?: ShippingAddress;
+  amount?: number;
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -306,7 +307,10 @@ export default function () {
 
       // Its link was opened again after the buyer paid.
       if (checkout?.completedAt) {
-        return res.status(200).json({ success: true });
+        return res.status(200).json({
+          success: true,
+          successUrl: checkout.successUrl ?? undefined,
+        });
       }
 
       const readerId = checkout ? undefined : body.readerId;
@@ -324,14 +328,6 @@ export default function () {
       const { shippingAddress } = body;
       const quoteOnly = !!checkout && deferred;
       const canBeFree = items?.length === 1;
-
-      if (
-        checkout &&
-        !deferred &&
-        (await cancelPreviousAttempt(checkout)).alreadyPaid
-      ) {
-        return res.status(200).json({ success: true });
-      }
 
       if (!profileId || !items?.length) {
         throw new AppError({
@@ -356,6 +352,14 @@ export default function () {
           httpCode: 400,
           description: "email is not a valid email address",
         });
+      }
+
+      if (
+        checkout &&
+        !deferred &&
+        (await cancelPreviousAttempt(checkout)).alreadyPaid
+      ) {
+        return res.status(200).json({ success: true });
       }
 
       const mirloClient = successUrl || hosted ? await getClient() : null;
@@ -752,6 +756,14 @@ export default function () {
         });
       }
 
+      if (checkout && !deferred && body.amount && body.amount !== totalAmount) {
+        throw new AppError({
+          httpCode: 409,
+          description:
+            "The price changed since this checkout opened; reload to see the new price",
+        });
+      }
+
       if (deferred && !readerId) {
         const { currency } = await resolveProfilePaymentContext(
           profileId,
@@ -830,6 +842,11 @@ export default function () {
             stripeAccountId: { type: "string" },
             redirectUrl: { type: "string" },
             success: { type: "boolean" },
+            successUrl: {
+              type: "string",
+              description:
+                "With `success`, where the checkout sends the buyer after payment.",
+            },
             deferred: {
               type: "object",
               description:

@@ -132,6 +132,27 @@ describe("Checkout", () => {
     expect(screen.queryByTestId("payment-form")).not.toBeInTheDocument();
   });
 
+  test("sends the buyer to the successUrl when the checkout has already been paid", async () => {
+    const assign = vi.fn();
+    const original = window.location;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...original, assign },
+    });
+    mockOpen({ success: true, successUrl: "https://wp-site.com/thanks" });
+
+    renderAt(PATH);
+
+    await waitFor(() => {
+      expect(assign).toHaveBeenCalledWith("https://wp-site.com/thanks");
+    });
+    expect(screen.queryByText("alreadyComplete")).not.toBeInTheDocument();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: original,
+    });
+  });
+
   test("shows a load error for an unknown or completed checkout", async () => {
     mockOpen(
       { error: "This checkout doesn't exist or has already been completed" },

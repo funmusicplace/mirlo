@@ -142,6 +142,12 @@ const apiDoc = {
             "the client, which come from the checkout as it was opened. Without " +
             "`deferred`, creates the intent (or returns the one already created).",
         },
+        amount: {
+          type: "number",
+          description:
+            "With `checkoutId`, the amount Stripe Elements was set up with. " +
+            "A 409 means the price changed since the checkout opened.",
+        },
         shippingAddress: {
           type: "object",
           description:

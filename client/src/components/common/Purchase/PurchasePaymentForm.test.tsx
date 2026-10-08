@@ -81,7 +81,7 @@ import PurchasePaymentForm from "./PurchasePaymentForm";
 import type { Checkout, DeferredQuote } from "./usePurchase";
 
 /** What the pay call sends: the saved checkout */
-const request = { checkoutId: "txn_1" };
+const request = { checkoutId: "txn_1", amount: 500 };
 
 const deferred = (quote: Partial<DeferredQuote> = {}): Checkout => ({
   kind: "deferred",
@@ -261,7 +261,7 @@ describe("PurchasePaymentForm", () => {
 
     await waitFor(() => expect(confirmSetup).toHaveBeenCalled());
     expect(postMock).toHaveBeenCalledWith("purchase", {
-      ...request,
+      checkoutId: request.checkoutId,
       shippingAddress: addressValue.value,
     });
     expect(confirmSetup).toHaveBeenCalledWith(
