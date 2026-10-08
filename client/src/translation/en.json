@@ -1780,6 +1780,8 @@
     "stripeWebhookSecretPlaceholderConfigured": "whsec_*** (leave blank to keep)",
     "stripeWebhookSecretPlaceholderEmpty": "No secret set",
     "stripeWebhookRegister": "Register webhook with Stripe",
+    "stripeWebhookSync": "Sync webhook with Stripe",
+    "stripeWebhookSynced": "The webhook's events are up to date.",
     "stripeWebhookRegistered": "The webhook is registered with Stripe.",
     "stripeWebhookRegisterFailed": "Couldn't register the webhook. Save your secret key first, and check that this instance's URL is public.",
     "emailProviderSettings": "Email Provider Settings",

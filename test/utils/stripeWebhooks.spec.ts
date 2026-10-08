@@ -1,6 +1,4 @@
 import assert from "node:assert";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -14,6 +12,7 @@ import { refreshStripeClient, stripe } from "../../src/utils/stripe";
 import {
   registerStripeConnectWebhook,
   STRIPE_CONNECT_EVENTS,
+  syncStripeConnectWebhookOnBoot,
 } from "../../src/utils/stripe/webhooks";
 import { clearTables, createSiteSettings } from "../utils";
 
@@ -26,20 +25,6 @@ describe("utils/stripe/webhooks", () => {
     sinon.restore();
     await clearTables();
     await refreshStripeClient();
-  });
-
-  it("subscribes to exactly the events the Connect handler switches on", () => {
-    const handler = readFileSync(
-      join(__dirname, "../../src/routers/v1/webhooks/stripe/connect.ts"),
-      "utf8"
-    );
-    // Array.from, not spread: ts-node here doesn't downlevel iterators.
-    const handled = Array.from(
-      handler.matchAll(/case "([a-z_.]+)":/g),
-      (m) => m[1]
-    );
-    assert.ok(handled.length > 0, "found no case labels in the handler");
-    assert.deepEqual(handled.sort(), [...STRIPE_CONNECT_EVENTS].sort());
   });
 
   it("creates a Connect endpoint and saves its id and secret", async () => {
@@ -70,17 +55,110 @@ describe("utils/stripe/webhooks", () => {
     });
   });
 
-  it("refuses to register a second endpoint", async () => {
+  it("updates the registered endpoint instead of creating another", async () => {
     await createSiteSettings({
       platformPercent: 7,
-      stripe: { webhookEndpointId: "we_existing" },
+      stripe: {
+        webhookEndpointId: "we_existing",
+        webhookConnectSigningSecret: "whsec_existing",
+      },
     });
     const create = sinon.stub(stripe.webhookEndpoints, "create");
+    const update = sinon.stub(stripe.webhookEndpoints, "update").resolves({
+      id: "we_existing",
+    } as Stripe.Response<Stripe.WebhookEndpoint>);
 
-    await assert.rejects(
-      registerStripeConnectWebhook("https://mirlo.example"),
-      { httpCode: 409 }
-    );
+    await registerStripeConnectWebhook("https://mirlo.example");
+
     assert.equal(create.callCount, 0);
+    assert.equal(update.firstCall.args[0], "we_existing");
+    assert.deepEqual(update.firstCall.args[1], {
+      url: "https://mirlo.example/v1/webhooks/stripe/connect",
+      enabled_events: STRIPE_CONNECT_EVENTS,
+    });
+    const row = await prisma.settings.findFirst();
+    assert.equal(
+      row?.settings?.stripe?.webhookConnectSigningSecret,
+      "whsec_existing"
+    );
+  });
+
+  it("registers a new endpoint when the saved one was deleted in Stripe", async () => {
+    await createSiteSettings({
+      platformPercent: 7,
+      stripe: {
+        webhookEndpointId: "we_deleted",
+        webhookConnectSigningSecret: "whsec_old",
+      },
+    });
+    sinon.stub(stripe.webhookEndpoints, "update").rejects(
+      Stripe.errors.StripeError.generate({
+        type: "invalid_request_error",
+        code: "resource_missing",
+        message: "No such webhook endpoint: 'we_deleted'",
+      })
+    );
+    sinon.stub(stripe.webhookEndpoints, "create").resolves({
+      id: "we_new",
+      secret: "whsec_new",
+    } as Stripe.Response<Stripe.WebhookEndpoint>);
+
+    await registerStripeConnectWebhook("https://mirlo.example");
+
+    const row = await prisma.settings.findFirst();
+    assert.equal(row?.settings?.stripe?.webhookEndpointId, "we_new");
+    assert.equal(
+      row?.settings?.stripe?.webhookConnectSigningSecret,
+      "whsec_new"
+    );
+  });
+
+  describe("syncStripeConnectWebhookOnBoot", () => {
+    it("updates the registered endpoint", async () => {
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { webhookEndpointId: "we_existing" },
+      });
+      const update = sinon.stub(stripe.webhookEndpoints, "update").resolves({
+        id: "we_existing",
+      } as Stripe.Response<Stripe.WebhookEndpoint>);
+
+      await syncStripeConnectWebhookOnBoot();
+
+      assert.equal(update.firstCall.args[0], "we_existing");
+      assert.deepEqual(update.firstCall.args[1], {
+        enabled_events: STRIPE_CONNECT_EVENTS,
+      });
+    });
+
+    it("does nothing when no endpoint is registered", async () => {
+      await createSiteSettings({ platformPercent: 7 });
+      const update = sinon.stub(stripe.webhookEndpoints, "update");
+      const create = sinon.stub(stripe.webhookEndpoints, "create");
+
+      await syncStripeConnectWebhookOnBoot();
+
+      assert.equal(update.callCount, 0);
+      assert.equal(create.callCount, 0);
+    });
+
+    it("doesn't throw or recreate when the endpoint is gone", async () => {
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { webhookEndpointId: "we_deleted" },
+      });
+      sinon.stub(stripe.webhookEndpoints, "update").rejects(
+        Stripe.errors.StripeError.generate({
+          type: "invalid_request_error",
+          code: "resource_missing",
+          message: "No such webhook endpoint",
+        })
+      );
+      const create = sinon.stub(stripe.webhookEndpoints, "create");
+
+      await syncStripeConnectWebhookOnBoot();
+
+      assert.equal(create.callCount, 0);
+    });
   });
 });

@@ -1,22 +1,12 @@
 import { Request, Response } from "express";
+import Stripe from "stripe";
 
 import logger from "../../../../logger";
 import {
   getStripeWebhookConnectSigningSecret,
-  handleAccountUpdate,
-  handleCheckoutSession,
-  handleInvoicePaid,
-  handleInvoicePaymentFailed,
-  handlePaymentIntentFailed,
-  handlePaymentIntentSucceeded,
-  handleSetupIntentSucceeded,
-  handleSubscriptionDeleted,
   verifyStripeSignature,
 } from "../../../../utils/stripe";
-import {
-  handleTerminalReaderActionSucceeded,
-  handleTerminalReaderActionFailed,
-} from "../../../../utils/stripe/terminal";
+import { stripeConnectEventHandlers } from "../../../../utils/stripe/webhooks";
 
 // NOTE: if you are running Mirlo locally, the only way to get these
 // webhooks to be triggered is by running the stripe CLI. See the README
@@ -25,9 +15,9 @@ import {
 // NOTE 2: This is the endpoint that handles the stripe webhook events for
 // _connected_ stripe accounts.
 
-// NOTE 3: Every event handled below must also be listed in
-// STRIPE_CONNECT_EVENTS (src/utils/stripe/webhooks.ts), which is what the
-// endpoint gets subscribed to when an admin registers it.
+// NOTE 3: Events are handled in stripeConnectEventHandlers
+// (src/utils/stripe/webhooks.ts), which also decides what the endpoint
+// subscribes to.
 
 export default function () {
   const operations = {
@@ -45,77 +35,18 @@ export default function () {
     log.info(`stripe-connect: event for stripe account ${event.account}`);
 
     try {
-      // Handle the event
-      switch (event.type) {
-        case "checkout.session.completed":
-          // To trigger this event type use
-          // `stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2`
-          const session = event.data.object;
-          log.info(`stripe-connect: checkout status is ${session.status}.`);
-
-          await handleCheckoutSession(session);
-          break;
-        case "setup_intent.succeeded":
-          // To trigger this event type use
-          // `stripe trigger setup_intent.succeeded --add setup_intent:metadata.userId=3`
-          const setupIntent = event.data.object;
-          log.info(
-            `stripe-connect: setup intent status is ${setupIntent.status}.`
-          );
-
-          await handleSetupIntentSucceeded(setupIntent);
-          break;
-        case "invoice.paid":
-          const invoice = event.data.object;
-
-          await handleInvoicePaid(invoice, event.account);
-          break;
-        case "invoice.payment_failed":
-          const failedInvoice = event.data.object;
-
-          await handleInvoicePaymentFailed(failedInvoice, event.account);
-          break;
-
-        case "payment_intent.succeeded":
-          const paymentIntent = event.data.object;
-          await handlePaymentIntentSucceeded(paymentIntent, event.account);
-          break;
-
-        case "payment_intent.payment_failed":
-          const failedPaymentIntent = event.data.object;
-
-          await handlePaymentIntentFailed(failedPaymentIntent, event.account);
-          break;
-        case "customer.subscription.deleted":
-          // Fires when a subscription actually ends — at the close of a paid
-          // period we scheduled for cancellation, or after Stripe's dunning
-          // retries are exhausted. This is when access is revoked.
-          const deletedSubscription = event.data.object;
-
-          await handleSubscriptionDeleted(deletedSubscription);
-          break;
-        case "account.updated":
-          const accountUpdate = event.data.object;
-
-          await handleAccountUpdate(accountUpdate);
-          break;
-        case "terminal.reader.action_succeeded":
-          // To test: stripe trigger terminal.reader.action_succeeded
-          const succeededReader = event.data.object;
-          await handleTerminalReaderActionSucceeded(
-            succeededReader,
-            event.account ?? ""
-          );
-          break;
-        case "terminal.reader.action_failed":
-          const failedReader = event.data.object;
-          await handleTerminalReaderActionFailed(failedReader);
-          break;
-        default:
-          // Unexpected event type
-          log.info(
-            `stripe-connect: unhandled Stripe event type ${event.type}.`
-          );
+      const handler =
+        stripeConnectEventHandlers[
+          event.type as keyof typeof stripeConnectEventHandlers
+        ];
+      if (handler) {
+        await (handler as (e: Stripe.Event, l: typeof log) => unknown)(
+          event,
+          log
+        );
+      } else {
+        // Unexpected event type
+        log.info(`stripe-connect: unhandled Stripe event type ${event.type}.`);
       }
       // Return a 200 response to acknowledge receipt of the event
       res.send();

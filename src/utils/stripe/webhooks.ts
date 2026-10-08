@@ -1,36 +1,107 @@
 import prisma from "@mirlo/prisma";
 import Stripe from "stripe";
+import type { Logger } from "winston";
 
-import { AppError } from "../error";
+import logger from "../../logger";
 import { getSiteSettings } from "../settings";
 
-import { refreshStripeClient, stripe, STRIPE_API_VERSION } from ".";
+import {
+  handleTerminalReaderActionFailed,
+  handleTerminalReaderActionSucceeded,
+} from "./terminal";
 
-export const STRIPE_CONNECT_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] =
-  [
-    "checkout.session.completed",
-    "setup_intent.succeeded",
-    "invoice.paid",
-    "invoice.payment_failed",
-    "payment_intent.succeeded",
-    "payment_intent.payment_failed",
-    "customer.subscription.deleted",
-    "account.updated",
-    "terminal.reader.action_succeeded",
-    "terminal.reader.action_failed",
-  ];
+import {
+  handleAccountUpdate,
+  handleCheckoutSession,
+  handleInvoicePaid,
+  handleInvoicePaymentFailed,
+  handlePaymentIntentFailed,
+  handlePaymentIntentSucceeded,
+  handleSetupIntentSucceeded,
+  handleSubscriptionDeleted,
+  refreshStripeClient,
+  stripe,
+  STRIPE_API_VERSION,
+} from ".";
+
+type ConnectEventHandlers = {
+  [T in Stripe.Event["type"]]?: (
+    event: Extract<Stripe.Event, { type: T }>,
+    log: Logger
+  ) => Promise<unknown> | unknown;
+};
+
+export const stripeConnectEventHandlers = {
+  "checkout.session.completed": async (event, log) => {
+    // To trigger this event type use
+    // `stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2`
+    const session = event.data.object;
+    log.info(`stripe-connect: checkout status is ${session.status}.`);
+    await handleCheckoutSession(session);
+  },
+  "setup_intent.succeeded": async (event, log) => {
+    // To trigger this event type use
+    // `stripe trigger setup_intent.succeeded --add setup_intent:metadata.userId=3`
+    const setupIntent = event.data.object;
+    log.info(`stripe-connect: setup intent status is ${setupIntent.status}.`);
+    await handleSetupIntentSucceeded(setupIntent);
+  },
+  "invoice.paid": (event) =>
+    handleInvoicePaid(event.data.object, event.account as string),
+  "invoice.payment_failed": (event) =>
+    handleInvoicePaymentFailed(event.data.object, event.account as string),
+  "payment_intent.succeeded": (event) =>
+    handlePaymentIntentSucceeded(event.data.object, event.account as string),
+  "payment_intent.payment_failed": (event) =>
+    handlePaymentIntentFailed(event.data.object, event.account as string),
+  // Fires when a subscription actually ends — at the close of a paid
+  // period we scheduled for cancellation, or after Stripe's dunning
+  // retries are exhausted. This is when access is revoked.
+  "customer.subscription.deleted": (event) =>
+    handleSubscriptionDeleted(event.data.object),
+  "account.updated": (event) => handleAccountUpdate(event.data.object),
+  // To test: stripe trigger terminal.reader.action_succeeded
+  "terminal.reader.action_succeeded": (event) =>
+    handleTerminalReaderActionSucceeded(event.data.object, event.account ?? ""),
+  "terminal.reader.action_failed": (event) =>
+    handleTerminalReaderActionFailed(event.data.object),
+} satisfies ConnectEventHandlers;
+
+export const STRIPE_CONNECT_EVENTS = Object.keys(
+  stripeConnectEventHandlers
+) as (keyof typeof stripeConnectEventHandlers &
+  Stripe.WebhookEndpointCreateParams.EnabledEvent)[];
+
+const connectWebhookUrl = (baseUrl: string) =>
+  `${baseUrl}/v1/webhooks/stripe/connect`;
+
+const updateConnectWebhook = (endpointId: string, baseUrl: string) =>
+  stripe.webhookEndpoints.update(endpointId, {
+    url: connectWebhookUrl(baseUrl),
+    enabled_events: STRIPE_CONNECT_EVENTS,
+  });
 
 export const registerStripeConnectWebhook = async (baseUrl: string) => {
   const { id, settings } = await getSiteSettings();
   if (settings?.stripe?.webhookEndpointId) {
-    throw new AppError({
-      httpCode: 409,
-      description: "A Stripe webhook is already registered",
-    });
+    try {
+      await updateConnectWebhook(settings.stripe.webhookEndpointId, baseUrl);
+      return settings.stripe;
+    } catch (e) {
+      if (
+        !(e instanceof Stripe.errors.StripeError) ||
+        e.code !== "resource_missing"
+      ) {
+        throw e;
+      }
+      logger.warn(
+        `stripe-connect: webhook ${settings.stripe.webhookEndpointId} no longer exists, registering a new one`
+      );
+    }
   }
 
   const endpoint = await stripe.webhookEndpoints.create({
-    url: `${baseUrl}/v1/webhooks/stripe/connect`,
+    url: connectWebhookUrl(baseUrl),
     connect: true,
     enabled_events: STRIPE_CONNECT_EVENTS,
     api_version: STRIPE_API_VERSION,
@@ -53,4 +124,20 @@ export const registerStripeConnectWebhook = async (baseUrl: string) => {
   });
   await refreshStripeClient();
   return stripeSettings;
+};
+
+export const syncStripeConnectWebhookOnBoot = async () => {
+  try {
+    const { settings } = await getSiteSettings();
+    const endpointId = settings?.stripe?.webhookEndpointId;
+    if (endpointId) {
+      await stripe.webhookEndpoints.update(endpointId, {
+        enabled_events: STRIPE_CONNECT_EVENTS,
+      });
+    }
+  } catch (e) {
+    logger.warn(
+      `stripe-connect: couldn't sync webhook on boot: ${(e as Error).message}`
+    );
+  }
 };

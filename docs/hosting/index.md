@@ -154,8 +154,10 @@ a one-time setup for the whole instance), once your domain is live.
 
 The easy way: in **Admin Settings → Stripe Settings**, save your secret key,
 then click **Register webhook with Stripe**. Mirlo creates the endpoint below
-and saves its signing secret; no restart needed. The button only registers
-once. Stripe keeps separate endpoints for test and live mode, so if you switch
+and saves its signing secret; no restart needed. Mirlo updates the endpoint's
+events on every boot, so upgrades pick up newly handled events by themselves.
+If the endpoint was deleted in Stripe, click **Sync webhook with Stripe** to
+register a new one. Stripe keeps separate endpoints for test and live mode, so if you switch
 modes afterwards, set up the new mode's endpoint by hand as below.
 
 To do it by hand instead, go to the
@@ -178,7 +180,7 @@ set "Listen to events on Connected accounts" and select at least:
 - `terminal.reader.action_succeeded`
 - `terminal.reader.action_failed`
 
-The full list is `STRIPE_CONNECT_EVENTS` in `src/utils/stripe/webhooks.ts`.
+The full list is the keys of `stripeConnectEventHandlers` in `src/utils/stripe/webhooks.ts`.
 
 After creating the endpoint, Stripe reveals a **signing secret** (starts with
 `whsec_`). Paste it into Admin Settings, or set it in `.env` as

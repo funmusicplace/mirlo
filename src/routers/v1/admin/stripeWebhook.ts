@@ -27,10 +27,9 @@ export default function () {
 
   POST.apiDoc = {
     summary:
-      "Registers this instance's Connect webhook endpoint with Stripe and saves its signing secret",
+      "Registers this instance's Connect webhook endpoint with Stripe and saves its signing secret, or updates the registered endpoint's events and URL",
     responses: {
-      200: { description: "The new endpoint id" },
-      409: { description: "A webhook is already registered" },
+      200: { description: "The endpoint id" },
     },
   };
 
