@@ -19,7 +19,7 @@ const deferred = (quote = paymentQuote()): Checkout => ({
 });
 
 /** The body the pay call sends for the default checkout */
-const PAY = { checkoutId: "checkout_storybook" };
+const PAY = { checkoutId: "checkout_storybook", amount: 1000 };
 
 const pay = async (canvasElement: HTMLElement, name = "Complete payment") => {
   await userEvent.click(
@@ -112,7 +112,7 @@ export const SubscriptionWithAddress: Story = {
     await pay(canvasElement, "Let's support");
     await waitFor(() => expect(args.onSuccess).toHaveBeenCalled());
     await expect(purchaseMock.bodies[0]).toEqual({
-      ...PAY,
+      checkoutId: PAY.checkoutId,
       shippingAddress: SAMPLE_ADDRESS,
     });
     await expect(stripeMock.confirmed).toEqual([

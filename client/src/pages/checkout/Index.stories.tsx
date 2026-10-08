@@ -69,7 +69,11 @@ export const GuestPurchase: Story = {
     await waitFor(() => expect(stripeMock.confirmed).toHaveLength(1));
     await expect(purchaseMock.bodies).toEqual([
       { checkoutId: CHECKOUT_ID, deferred: true },
-      { checkoutId: CHECKOUT_ID, email: "maya.okafor@fastmail.com" },
+      {
+        checkoutId: CHECKOUT_ID,
+        email: "maya.okafor@fastmail.com",
+        amount: 1000,
+      },
     ]);
     await waitFor(() => expect(window.location.hash).toBe(PAID_URL));
   },
