@@ -22,6 +22,7 @@ export type InstanceSettings = {
   trustLevelNames: string[];
   languages: AvailableLanguage[] | null;
   setupStage: SetupStage;
+  stripePublishableKey: string | null;
 };
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -59,5 +60,7 @@ export const serializeInstanceSettings = (
     trustLevelNames: resolveTrustLevelNames(settings.settings?.trustLevelNames),
     languages: languages ?? null,
     setupStage: resolveSetupStage(settings),
+    stripePublishableKey:
+      settings.settings?.stripe?.publishableKey?.trim() || null,
   };
 };

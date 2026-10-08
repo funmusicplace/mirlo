@@ -1772,6 +1772,8 @@
     "featuredArtists": "Featured Artists",
     "stripeSettings": "Stripe Settings",
     "stripeSecretKey": "Secret key",
+    "stripePublishableKey": "Publishable key",
+    "stripePublishableKeyDescription": "The pk_ key from the same Stripe account and mode (test or live) as the secret key, under Developers → API keys in the Stripe Dashboard.",
     "stripeKeyPlaceholderConfigured": "sk_*** (leave blank to keep)",
     "stripeKeyPlaceholderEmpty": "No key set",
     "stripeWebhookConnectSigningSecret": "Webhook connect signing secret",

@@ -49,6 +49,19 @@ const StripeSection: React.FC = () => {
         />
       </FormComponent>
       <FormComponent>
+        <label htmlFor="input-stripe-publishable-key">
+          {t("stripePublishableKey")}
+        </label>
+        <InputEl
+          id="input-stripe-publishable-key"
+          type="text"
+          className="max-w-md"
+          placeholder="pk_..."
+          {...register("stripe.publishableKey")}
+        />
+        <small>{t("stripePublishableKeyDescription")}</small>
+      </FormComponent>
+      <FormComponent>
         <label htmlFor="input-stripe-webhook-connect-signing-secret">
           {t("stripeWebhookConnectSigningSecret")}
         </label>

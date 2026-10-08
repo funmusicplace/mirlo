@@ -38,6 +38,7 @@ describe("instance", () => {
         trustLevelNames: ["New", "Verified", "Regular", "Trusted"],
         languages: null,
         setupStage: "welcome",
+        stripePublishableKey: null,
       });
     });
 
@@ -52,7 +53,11 @@ describe("instance", () => {
           colors: { button: "#111111", text: "#222222" },
         },
         trustLevelNames: ["Newcomer"],
-        stripe: { key: "sk_live_secret", webhookConnectSigningSecret: "whsec" },
+        stripe: {
+          key: "sk_live_secret",
+          publishableKey: " pk_live_public ",
+          webhookConnectSigningSecret: "whsec",
+        },
         emailProvider: { provider: "sendgrid", sendgrid: { apiKey: "SG.x" } },
         cloudflareTurnstileSecret: "0xsecret",
       });
@@ -84,8 +89,10 @@ describe("instance", () => {
         "name",
         "setupStage",
         "showHeroOnHome",
+        "stripePublishableKey",
         "trustLevelNames",
       ]);
+      assert.equal(result.stripePublishableKey, "pk_live_public");
       assert.ok(!JSON.stringify(response.body).includes("secret"));
     });
 

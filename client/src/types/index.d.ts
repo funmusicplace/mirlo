@@ -18,6 +18,7 @@ interface InstanceSettings {
   trustLevelNames: string[];
   languages: { short: string; name: string }[] | null;
   setupStage: "welcome" | "guide" | "done";
+  stripePublishableKey?: string | null;
 }
 
 interface LoggedInUser {

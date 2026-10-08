@@ -38,6 +38,7 @@ export interface SettingsFromAPI {
     stripe?: {
       key?: string;
       keyConfigured?: boolean;
+      publishableKey?: string;
       webhookSigningSecret?: string;
       webhookConnectSigningSecret?: string;
       webhookEndpointId?: string;
