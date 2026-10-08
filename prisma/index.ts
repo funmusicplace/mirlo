@@ -14,6 +14,7 @@ declare global {
         key?: string;
         webhookSigningSecret?: string;
         webhookConnectSigningSecret?: string;
+        webhookEndpointId?: string;
       };
       emailProvider?: {
         provider?: "sendgrid" | "mailgun" | "postmark" | "smtp";
