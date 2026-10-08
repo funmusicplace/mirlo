@@ -178,7 +178,7 @@ set "Listen to events on Connected accounts" and select at least:
 - `terminal.reader.action_succeeded`
 - `terminal.reader.action_failed`
 
-The full list is `STRIPE_CONNECT_EVENTS` in `src/utils/stripe/webhooks.ts`.
+The full list is the keys of `stripeConnectEventHandlers` in `src/utils/stripe/webhooks.ts`.
 
 After creating the endpoint, Stripe reveals a **signing secret** (starts with
 `whsec_`). Paste it into Admin Settings, or set it in `.env` as

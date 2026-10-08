@@ -1,6 +1,4 @@
 import assert from "node:assert";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -26,20 +24,6 @@ describe("utils/stripe/webhooks", () => {
     sinon.restore();
     await clearTables();
     await refreshStripeClient();
-  });
-
-  it("subscribes to exactly the events the Connect handler switches on", () => {
-    const handler = readFileSync(
-      join(__dirname, "../../src/routers/v1/webhooks/stripe/connect.ts"),
-      "utf8"
-    );
-    // Array.from, not spread: ts-node here doesn't downlevel iterators.
-    const handled = Array.from(
-      handler.matchAll(/case "([a-z_.]+)":/g),
-      (m) => m[1]
-    );
-    assert.ok(handled.length > 0, "found no case labels in the handler");
-    assert.deepEqual(handled.sort(), [...STRIPE_CONNECT_EVENTS].sort());
   });
 
   it("creates a Connect endpoint and saves its id and secret", async () => {
