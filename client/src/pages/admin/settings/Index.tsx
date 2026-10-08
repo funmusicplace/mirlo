@@ -1,6 +1,8 @@
 import FeaturedArtistsSelector from "components/Admin/FeaturedArtistsSelector";
 import EmailProviderSection from "components/Admin/settings/EmailProviderSection";
 import GeneralSettingsSection from "components/Admin/settings/GeneralSettingsSection";
+import IdentitySettingsSection from "components/Admin/settings/IdentitySettingsSection";
+import PlatformPolicySection from "components/Admin/settings/PlatformPolicySection";
 import PoliciesSection from "components/Admin/settings/PoliciesSection";
 import SecuritySection from "components/Admin/settings/SecuritySection";
 import SettingsActionsBar from "components/Admin/settings/SettingsActionsBar";
@@ -68,7 +70,9 @@ const Index = () => {
           <SideNavLayout navWidth="12rem">
             <SettingsSectionNav />
             <div className="max-w-2xl">
+              <IdentitySettingsSection />
               <GeneralSettingsSection />
+              <PlatformPolicySection />
               <SettingsSection
                 id="settings-featured-artists"
                 title={t("featuredArtists")}

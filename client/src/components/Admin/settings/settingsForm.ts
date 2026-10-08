@@ -79,7 +79,9 @@ export interface SettingsFromAPI {
 }
 
 export const SETTINGS_SECTIONS = [
+  { id: "settings-identity", labelKey: "sectionIdentity" },
   { id: "settings-general", labelKey: "sectionGeneral" },
+  { id: "settings-platform-policy", labelKey: "sectionPlatformPolicy" },
   { id: "settings-featured-artists", labelKey: "sectionFeaturedArtists" },
   { id: "settings-stripe", labelKey: "sectionStripe" },
   { id: "settings-email-provider", labelKey: "sectionEmailProvider" },
