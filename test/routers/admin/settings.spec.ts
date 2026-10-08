@@ -97,6 +97,27 @@ describe("admin/settings", () => {
       assert.equal(response.body.result.settings.stripe.key, undefined);
       assert.equal(response.body.result.stripe, undefined);
     });
+
+    it("should mask the webhook signing secret", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { webhookConnectSigningSecret: "whsec_secret" },
+      });
+
+      const response = await requestApp
+        .get("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      const { stripe } = response.body.result.settings;
+      assert.equal(stripe.webhookSecretConfigured, true);
+      assert.equal(stripe.webhookConnectSigningSecret, undefined);
+      assert.ok(!JSON.stringify(response.body).includes("whsec_secret"));
+    });
   });
 
   describe("POST", () => {
@@ -212,6 +233,35 @@ describe("admin/settings", () => {
       const stripe = (row?.settings as Record<string, unknown>)
         ?.stripe as Record<string, unknown>;
       assert.equal(stripe?.key, "sk_test_existing");
+    });
+
+    it("should preserve the existing webhook secret when a blank one is submitted", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { webhookConnectSigningSecret: "whsec_existing" },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 10,
+            stripe: { webhookConnectSigningSecret: "" },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+
+      const row = await prisma.settings.findFirst();
+      const stripe = (row?.settings as Record<string, unknown>)
+        ?.stripe as Record<string, unknown>;
+      assert.equal(stripe?.webhookConnectSigningSecret, "whsec_existing");
     });
 
     it("should save bucketNames: { prefix: 'foo-' } to DB and return it in response", async () => {

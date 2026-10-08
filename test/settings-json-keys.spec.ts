@@ -33,7 +33,10 @@ const THIS_BASENAME = basename(__filename);
  * Keys that appear on settings API responses / forms but are not stored in the
  * Settings JSON column (computed or UI-only).
  */
-const RESPONSE_ONLY_SETTINGS_PATHS = new Set(["stripe.keyConfigured"]);
+const RESPONSE_ONLY_SETTINGS_PATHS = new Set([
+  "stripe.keyConfigured",
+  "stripe.webhookSecretConfigured",
+]);
 
 const listSourceFiles = (dir: string): string[] =>
   readdirSync(dir, { recursive: true, withFileTypes: true })

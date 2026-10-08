@@ -41,6 +41,7 @@ export interface SettingsFromAPI {
       publishableKey?: string;
       webhookSigningSecret?: string;
       webhookConnectSigningSecret?: string;
+      webhookSecretConfigured?: boolean;
       webhookEndpointId?: string;
     };
     emailProvider?: {

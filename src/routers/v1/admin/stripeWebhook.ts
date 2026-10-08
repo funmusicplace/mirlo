@@ -12,13 +12,10 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     try {
-      const { webhookEndpointId, webhookConnectSigningSecret } =
-        await registerStripeConnectWebhook(
-          process.env.API_DOMAIN ?? "http://localhost:3000"
-        );
-      return res
-        .status(200)
-        .json({ result: { webhookEndpointId, webhookConnectSigningSecret } });
+      const { webhookEndpointId } = await registerStripeConnectWebhook(
+        process.env.API_DOMAIN ?? "http://localhost:3000"
+      );
+      return res.status(200).json({ result: { webhookEndpointId } });
     } catch (e) {
       // e.g. an unreachable URL or a missing key: show the admin Stripe's reason
       if (e instanceof Stripe.errors.StripeError) {
@@ -32,7 +29,7 @@ export default function () {
     summary:
       "Registers this instance's Connect webhook endpoint with Stripe and saves its signing secret",
     responses: {
-      200: { description: "The new endpoint id and signing secret" },
+      200: { description: "The new endpoint id" },
       409: { description: "A webhook is already registered" },
     },
   };

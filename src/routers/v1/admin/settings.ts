@@ -62,11 +62,17 @@ export default function () {
         existingSettings.settings as Record<string, unknown> | null
       )?.stripe as Record<string, unknown> | undefined;
       const incomingStripeKey = (settings?.stripe?.key ?? "").trim();
+      const incomingWebhookSecret = (
+        settings?.stripe?.webhookConnectSigningSecret ?? ""
+      ).trim();
       const mergedSettings = {
         ...settings,
         stripe: {
           ...(settings?.stripe ?? {}),
           key: incomingStripeKey || existingStripe?.key,
+          webhookConnectSigningSecret:
+            incomingWebhookSecret ||
+            existingStripe?.webhookConnectSigningSecret,
         },
         featuredArtistIds: settings?.featuredArtistIds ?? [],
       };
@@ -120,6 +126,8 @@ function maskStripeKey(settings: object) {
             ...(stripeJson ?? {}),
             key: undefined,
             keyConfigured: !!stripeJson?.key,
+            webhookConnectSigningSecret: undefined,
+            webhookSecretConfigured: !!stripeJson?.webhookConnectSigningSecret,
           },
         }
       : settingsJson,

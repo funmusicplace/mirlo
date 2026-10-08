@@ -1777,6 +1777,8 @@
     "stripeKeyPlaceholderConfigured": "sk_*** (leave blank to keep)",
     "stripeKeyPlaceholderEmpty": "No key set",
     "stripeWebhookConnectSigningSecret": "Webhook connect signing secret",
+    "stripeWebhookSecretPlaceholderConfigured": "whsec_*** (leave blank to keep)",
+    "stripeWebhookSecretPlaceholderEmpty": "No secret set",
     "stripeWebhookRegister": "Register webhook with Stripe",
     "stripeWebhookRegistered": "The webhook is registered with Stripe.",
     "stripeWebhookRegisterFailed": "Couldn't register the webhook. Save your secret key first, and check that this instance's URL is public.",

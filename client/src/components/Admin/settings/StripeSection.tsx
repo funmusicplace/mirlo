@@ -15,6 +15,7 @@ const StripeSection: React.FC = () => {
   const { register, watch, setValue } = useFormContext<FormSettings>();
   const stripeKeyConfigured = watch("stripe.keyConfigured");
   const webhookEndpointId = watch("stripe.webhookEndpointId");
+  const webhookSecretConfigured = watch("stripe.webhookSecretConfigured");
   const snackbar = useSnackbar();
   const { mutateAsync, isPending } = useRegisterStripeWebhookMutation();
 
@@ -22,10 +23,7 @@ const StripeSection: React.FC = () => {
     try {
       const { result } = await mutateAsync();
       setValue("stripe.webhookEndpointId", result.webhookEndpointId);
-      setValue(
-        "stripe.webhookConnectSigningSecret",
-        result.webhookConnectSigningSecret
-      );
+      setValue("stripe.webhookSecretConfigured", true);
       snackbar(t("stripeWebhookRegistered"), { type: "success" });
     } catch (e) {
       snackbar(t("stripeWebhookRegisterFailed"), { type: "error" });
@@ -67,8 +65,13 @@ const StripeSection: React.FC = () => {
         </label>
         <InputEl
           id="input-stripe-webhook-connect-signing-secret"
-          type="text"
+          type="password"
           className="max-w-md"
+          placeholder={
+            webhookSecretConfigured
+              ? t("stripeWebhookSecretPlaceholderConfigured")
+              : t("stripeWebhookSecretPlaceholderEmpty")
+          }
           {...register("stripe.webhookConnectSigningSecret")}
         />
         {webhookEndpointId ? (

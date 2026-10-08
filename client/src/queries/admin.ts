@@ -449,10 +449,7 @@ async function registerStripeWebhook() {
   return api.post<
     object,
     {
-      result: {
-        webhookEndpointId: string;
-        webhookConnectSigningSecret: string;
-      };
+      result: { webhookEndpointId: string };
     }
   >("admin/stripeWebhook", {});
 }
