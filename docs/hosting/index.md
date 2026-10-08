@@ -154,8 +154,9 @@ a one-time setup for the whole instance), once your domain is live.
 
 The easy way: in **Admin Settings → Stripe Settings**, save your secret key,
 then click **Register webhook with Stripe**. Mirlo creates the endpoint below
-and saves its signing secret; no restart needed. The button only registers
-once. Stripe keeps separate endpoints for test and live mode, so if you switch
+and saves its signing secret; no restart needed. After upgrading Mirlo, click
+**Sync webhook with Stripe** so the endpoint listens to any newly handled
+events. Stripe keeps separate endpoints for test and live mode, so if you switch
 modes afterwards, set up the new mode's endpoint by hand as below.
 
 To do it by hand instead, go to the

@@ -24,7 +24,12 @@ const StripeSection: React.FC = () => {
       const { result } = await mutateAsync();
       setValue("stripe.webhookEndpointId", result.webhookEndpointId);
       setValue("stripe.webhookSecretConfigured", true);
-      snackbar(t("stripeWebhookRegistered"), { type: "success" });
+      snackbar(
+        webhookEndpointId
+          ? t("stripeWebhookSynced")
+          : t("stripeWebhookRegistered"),
+        { type: "success" }
+      );
     } catch (e) {
       snackbar(t("stripeWebhookRegisterFailed"), { type: "error" });
     }
@@ -74,20 +79,19 @@ const StripeSection: React.FC = () => {
           }
           {...register("stripe.webhookConnectSigningSecret")}
         />
-        {webhookEndpointId ? (
-          <small>{t("stripeWebhookRegistered")}</small>
-        ) : (
-          <Button
-            type="button"
-            variant="outlined"
-            className="self-start"
-            isLoading={isPending}
-            disabled={isPending}
-            onClick={registerWebhook}
-          >
-            {t("stripeWebhookRegister")}
-          </Button>
-        )}
+        {webhookEndpointId && <small>{t("stripeWebhookRegistered")}</small>}
+        <Button
+          type="button"
+          variant="outlined"
+          className="self-start"
+          isLoading={isPending}
+          disabled={isPending}
+          onClick={registerWebhook}
+        >
+          {webhookEndpointId
+            ? t("stripeWebhookSync")
+            : t("stripeWebhookRegister")}
+        </Button>
       </FormComponent>
     </SettingsSection>
   );

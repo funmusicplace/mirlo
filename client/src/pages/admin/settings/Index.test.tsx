@@ -352,7 +352,7 @@ describe("Settings", () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "stripeWebhookRegister" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: "stripeWebhookSync" })
+    ).toBeInTheDocument();
   });
 });

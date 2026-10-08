@@ -2,7 +2,6 @@ import prisma from "@mirlo/prisma";
 import Stripe from "stripe";
 import type { Logger } from "winston";
 
-import { AppError } from "../error";
 import { getSiteSettings } from "../settings";
 
 import {
@@ -74,15 +73,17 @@ export const STRIPE_CONNECT_EVENTS = Object.keys(
 
 export const registerStripeConnectWebhook = async (baseUrl: string) => {
   const { id, settings } = await getSiteSettings();
+  const url = `${baseUrl}/v1/webhooks/stripe/connect`;
   if (settings?.stripe?.webhookEndpointId) {
-    throw new AppError({
-      httpCode: 409,
-      description: "A Stripe webhook is already registered",
+    await stripe.webhookEndpoints.update(settings.stripe.webhookEndpointId, {
+      url,
+      enabled_events: STRIPE_CONNECT_EVENTS,
     });
+    return settings.stripe;
   }
 
   const endpoint = await stripe.webhookEndpoints.create({
-    url: `${baseUrl}/v1/webhooks/stripe/connect`,
+    url,
     connect: true,
     enabled_events: STRIPE_CONNECT_EVENTS,
     api_version: STRIPE_API_VERSION,
