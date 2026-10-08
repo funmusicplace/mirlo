@@ -1,4 +1,10 @@
-import { QueryClient, queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { getInjectedInstanceSettings } from "utils/injectedData";
 import { DEFAULT_INSTANCE_SETTINGS } from "utils/instanceSettings";
 
@@ -25,6 +31,24 @@ export const useStripePublishableKey = (): string | undefined =>
   useInstanceSettings().stripePublishableKey ||
   import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY ||
   undefined;
+
+const completeInstanceSetup = () =>
+  api
+    .post<
+      undefined,
+      { result: InstanceSettings }
+    >("v1/admin/setup/complete", undefined)
+    .then((r) => r.result);
+
+export function useCompleteInstanceSetupMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: completeInstanceSetup,
+    onSuccess(settings) {
+      queryClient.setQueryData(queryInstanceSettings().queryKey, settings);
+    },
+  });
+}
 
 export const loadInstanceSettings = async (
   queryClient: QueryClient
