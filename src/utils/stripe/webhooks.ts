@@ -126,12 +126,14 @@ export const registerStripeConnectWebhook = async (baseUrl: string) => {
   return stripeSettings;
 };
 
-export const syncStripeConnectWebhookOnBoot = async (baseUrl: string) => {
+export const syncStripeConnectWebhookOnBoot = async () => {
   try {
     const { settings } = await getSiteSettings();
     const endpointId = settings?.stripe?.webhookEndpointId;
     if (endpointId) {
-      await updateConnectWebhook(endpointId, baseUrl);
+      await stripe.webhookEndpoints.update(endpointId, {
+        enabled_events: STRIPE_CONNECT_EVENTS,
+      });
     }
   } catch (e) {
     logger.warn(

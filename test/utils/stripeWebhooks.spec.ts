@@ -119,19 +119,16 @@ describe("utils/stripe/webhooks", () => {
         platformPercent: 7,
         stripe: { webhookEndpointId: "we_existing" },
       });
-      const update = sinon
-        .stub(stripe.webhookEndpoints, "update")
-        .resolves({
-          id: "we_existing",
-        } as Stripe.Response<Stripe.WebhookEndpoint>);
+      const update = sinon.stub(stripe.webhookEndpoints, "update").resolves({
+        id: "we_existing",
+      } as Stripe.Response<Stripe.WebhookEndpoint>);
 
-      await syncStripeConnectWebhookOnBoot("https://mirlo.example");
+      await syncStripeConnectWebhookOnBoot();
 
       assert.equal(update.firstCall.args[0], "we_existing");
-      assert.deepEqual(
-        update.firstCall.args[1]?.enabled_events,
-        STRIPE_CONNECT_EVENTS
-      );
+      assert.deepEqual(update.firstCall.args[1], {
+        enabled_events: STRIPE_CONNECT_EVENTS,
+      });
     });
 
     it("does nothing when no endpoint is registered", async () => {
@@ -139,7 +136,7 @@ describe("utils/stripe/webhooks", () => {
       const update = sinon.stub(stripe.webhookEndpoints, "update");
       const create = sinon.stub(stripe.webhookEndpoints, "create");
 
-      await syncStripeConnectWebhookOnBoot("https://mirlo.example");
+      await syncStripeConnectWebhookOnBoot();
 
       assert.equal(update.callCount, 0);
       assert.equal(create.callCount, 0);
@@ -159,7 +156,7 @@ describe("utils/stripe/webhooks", () => {
       );
       const create = sinon.stub(stripe.webhookEndpoints, "create");
 
-      await syncStripeConnectWebhookOnBoot("https://mirlo.example");
+      await syncStripeConnectWebhookOnBoot();
 
       assert.equal(create.callCount, 0);
     });
