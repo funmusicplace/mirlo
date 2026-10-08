@@ -3,7 +3,7 @@ import FormComponent from "components/common/FormComponent";
 import { useLoginMutation } from "queries/auth";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import SetupHeading from "./SetupHeading";
 import SetupInput from "./SetupInput";
@@ -67,6 +67,13 @@ const SetupLogin: React.FC = () => {
           {t("logIn")}
         </Button>
       </div>
+      <p className="mt-8 text-sm opacity-70">
+        <Trans
+          t={t}
+          i18nKey="loginLostPassword"
+          components={{ code: <code /> }}
+        />
+      </p>
     </form>
   );
 };

@@ -13,6 +13,7 @@ vi.mock("react-i18next", () => ({
     t: (key: string) => key,
     i18n: { language: "en" },
   }),
+  Trans: ({ i18nKey }: { i18nKey: string }) => <>{i18nKey}</>,
 }));
 
 vi.mock("queries/fetch/fetchWrapper", async (importOriginal) => ({

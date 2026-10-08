@@ -2017,6 +2017,7 @@
     "loginEmail": "Email",
     "loginPassword": "Password",
     "loginError": "These credentials do not match an account.",
+    "loginLostPassword": "Lost the password set during the install? Run <code>yarn setup:admin</code> on the server to set a new one.",
     "logIn": "Log in",
     "notAdminLead": "This platform is still being set up by its admin. Come back soon.",
     "firstStep": "First step",
