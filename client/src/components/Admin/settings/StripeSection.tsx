@@ -1,16 +1,36 @@
+import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { useRegisterStripeWebhookMutation } from "queries/admin";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useSnackbar } from "state/SnackbarContext";
 
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
 
 const StripeSection: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
-  const { register, watch } = useFormContext<FormSettings>();
+  const { register, watch, setValue } = useFormContext<FormSettings>();
   const stripeKeyConfigured = watch("stripe.keyConfigured");
+  const webhookEndpointId = watch("stripe.webhookEndpointId");
+  const snackbar = useSnackbar();
+  const { mutateAsync, isPending } = useRegisterStripeWebhookMutation();
+
+  const registerWebhook = async () => {
+    try {
+      const { result } = await mutateAsync();
+      setValue("stripe.webhookEndpointId", result.webhookEndpointId);
+      setValue(
+        "stripe.webhookConnectSigningSecret",
+        result.webhookConnectSigningSecret
+      );
+      snackbar(t("stripeWebhookRegistered"), { type: "success" });
+    } catch (e) {
+      snackbar(t("stripeWebhookRegisterFailed"), { type: "error" });
+    }
+  };
 
   return (
     <SettingsSection id="settings-stripe" title={t("stripeSettings")}>
@@ -38,6 +58,20 @@ const StripeSection: React.FC = () => {
           className="max-w-md"
           {...register("stripe.webhookConnectSigningSecret")}
         />
+        {webhookEndpointId ? (
+          <small>{t("stripeWebhookRegistered")}</small>
+        ) : (
+          <Button
+            type="button"
+            variant="outlined"
+            className="self-start"
+            isLoading={isPending}
+            disabled={isPending}
+            onClick={registerWebhook}
+          >
+            {t("stripeWebhookRegister")}
+          </Button>
+        )}
       </FormComponent>
     </SettingsSection>
   );

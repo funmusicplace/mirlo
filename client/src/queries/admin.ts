@@ -444,3 +444,18 @@ export const useUpdateAdminUserMutation = () => {
     },
   });
 };
+
+async function registerStripeWebhook() {
+  return api.post<
+    object,
+    {
+      result: {
+        webhookEndpointId: string;
+        webhookConnectSigningSecret: string;
+      };
+    }
+  >("admin/stripeWebhook", {});
+}
+
+export const useRegisterStripeWebhookMutation = () =>
+  useMutation({ mutationFn: registerStripeWebhook });

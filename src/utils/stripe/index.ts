@@ -45,7 +45,9 @@ import {
 
 export const OPTION_JOINER = ";;";
 
-let stripeConfig: Stripe.StripeConfig = { apiVersion: "2023-08-16" };
+export const STRIPE_API_VERSION = "2023-08-16";
+
+let stripeConfig: Stripe.StripeConfig = { apiVersion: STRIPE_API_VERSION };
 
 if (process.env.NODE_ENV === "test") {
   const { STRIPE_HOST, STRIPE_PORT, STRIPE_PROTOCOL } = process.env;

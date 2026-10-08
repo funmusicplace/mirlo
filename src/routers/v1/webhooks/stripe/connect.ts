@@ -25,6 +25,10 @@ import {
 // NOTE 2: This is the endpoint that handles the stripe webhook events for
 // _connected_ stripe accounts.
 
+// NOTE 3: Every event handled below must also be listed in
+// STRIPE_CONNECT_EVENTS (src/utils/stripe/webhooks.ts), which is what the
+// endpoint gets subscribed to when an admin registers it.
+
 export default function () {
   const operations = {
     POST,

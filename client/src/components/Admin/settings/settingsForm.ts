@@ -40,6 +40,7 @@ export interface SettingsFromAPI {
       keyConfigured?: boolean;
       webhookSigningSecret?: string;
       webhookConnectSigningSecret?: string;
+      webhookEndpointId?: string;
     };
     emailProvider?: {
       provider?: "sendgrid" | "mailgun" | "postmark" | "smtp";

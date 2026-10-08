@@ -150,10 +150,17 @@ those connected accounts:
 
 If you're using Stripe, Mirlo needs a webhook endpoint registered against
 **your platform's Stripe account** (not per connected artist account — this is
-a one-time setup for the whole instance). There's currently no way to do this
-from Mirlo itself, so it has to be done by hand in the
+a one-time setup for the whole instance), once your domain is live.
+
+The easy way: in **Admin Settings → Stripe Settings**, save your secret key,
+then click **Register webhook with Stripe**. Mirlo creates the endpoint below
+and saves its signing secret; no restart needed. The button only registers
+once. Stripe keeps separate endpoints for test and live mode, so if you switch
+modes afterwards, set up the new mode's endpoint by hand as below.
+
+To do it by hand instead, go to the
 [Stripe Dashboard](https://dashboard.stripe.com/webhooks) under **Developers →
-Webhooks**, once your domain is live.
+Webhooks**.
 
 Create **`https://yourdomain.com/v1/webhooks/stripe/connect`** — all of
 Mirlo's payment activity happens on connected accounts, and this endpoint is
@@ -171,12 +178,12 @@ set "Listen to events on Connected accounts" and select at least:
 - `terminal.reader.action_succeeded`
 - `terminal.reader.action_failed`
 
-After creating the endpoint, Stripe reveals a **signing secret** (starts with
-`whsec_`) — copy it into `.env` as `STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET`,
-then recreate the api container so it picks up the change (`docker compose up
--d`).
+The full list is `STRIPE_CONNECT_EVENTS` in `src/utils/stripe/webhooks.ts`.
 
-> Note: We will hopefully automate this in the future but you do need to do this if you want to receive Stripe payments.
+After creating the endpoint, Stripe reveals a **signing secret** (starts with
+`whsec_`). Paste it into Admin Settings, or set it in `.env` as
+`STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET` and recreate the api container
+(`docker compose up -d`).
 
 ## Production Best Practices
 

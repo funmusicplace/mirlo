@@ -334,4 +334,24 @@ describe("Settings", () => {
     expect(screen.getByText("trustLevels")).toBeInTheDocument();
     expect(screen.getByText("security")).toBeInTheDocument();
   });
+
+  test("registers the Stripe webhook and keeps the new secret in the form", async () => {
+    vi.mocked(api.post).mockResolvedValue({
+      result: {
+        webhookEndpointId: "we_new",
+        webhookConnectSigningSecret: "whsec_new",
+      },
+    } as any);
+    renderSettings();
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "stripeWebhookRegister" })
+    );
+
+    expect(api.post).toHaveBeenCalledWith("admin/stripeWebhook", {});
+    expect(await screen.findByDisplayValue("whsec_new")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "stripeWebhookRegister" })
+    ).not.toBeInTheDocument();
+  });
 });
