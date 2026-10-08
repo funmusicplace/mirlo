@@ -100,7 +100,8 @@ const apiDoc = {
     },
     PurchaseRequest: {
       type: "object",
-      required: ["artistId", "items"],
+      description:
+        "`artistId` and `items` are required unless `checkoutId` is sent.",
       properties: {
         readerId: {
           type: "string",
@@ -122,7 +123,40 @@ const apiDoc = {
           description:
             "When true, an online paid purchase returns a `redirectUrl` to Mirlo's " +
             "hosted checkout page instead of a `clientSecret`. Lets external API " +
-            "consumers complete payment with a single redirect.",
+            "consumers complete payment with a single redirect. Nothing is created " +
+            "with the payment processor until the buyer pays on that page.",
+        },
+        deferred: {
+          type: "boolean",
+          description:
+            "When true, opens a checkout: saves the cart and returns " +
+            "`deferred`, what Stripe Elements needs to render (mode, amount, " +
+            "currency, account) and the cart's `checkoutId`. No intent is " +
+            "created. Pay with `{ checkoutId }`.",
+        },
+        checkoutId: {
+          type: "string",
+          description:
+            "An open checkout, from a `deferred` response or a hosted checkout " +
+            "`redirectUrl`. Stands in for artistId, items, email, successUrl and " +
+            "the client, which come from the checkout as it was opened. Without " +
+            "`deferred`, creates the intent (or returns the one already created).",
+        },
+        amount: {
+          type: "number",
+          description:
+            "With `checkoutId`, the amount Stripe Elements was set up with. " +
+            "A 409 means the price changed since the checkout opened.",
+        },
+        shippingAddress: {
+          type: "object",
+          description:
+            "Buyer's shipping address, for a subscription tier that collects one.",
+          required: ["address"],
+          properties: {
+            name: { type: "string" },
+            address: { type: "object" },
+          },
         },
         successUrl: {
           type: "string",

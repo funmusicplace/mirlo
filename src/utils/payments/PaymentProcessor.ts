@@ -19,6 +19,7 @@ export type CreateSubscriptionSetupArgs = {
   userId?: string;
   userName?: string;
   successUrl?: string;
+  checkoutId?: string;
 };
 
 export type CreatePledgeSetupArgs = {
@@ -31,6 +32,21 @@ export type CreatePledgeSetupArgs = {
   userId?: string;
   message?: string;
   successUrl?: string;
+  checkoutId?: string;
+};
+
+export type ShippingAddress = {
+  name?: string;
+  address: Record<string, unknown>;
+};
+
+export type DeferredQuote = {
+  mode: "payment" | "setup";
+  amount?: number;
+  currency: string;
+  stripeAccountId: string;
+  requiresShipping: boolean;
+  allowedCountries?: string[];
 };
 
 export type UpdateSubscriptionTierArgs = {
@@ -62,6 +78,7 @@ export interface PaymentProcessor {
       oldStripeSubscriptionKey?: string;
       requiresShipping?: boolean;
       allowedCountries?: string[];
+      shippingAddress?: ShippingAddress;
     }
   ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
 
@@ -94,19 +111,6 @@ export interface PaymentProcessor {
   }): Promise<{ id: string; status: string }>;
 
   listReaders(args: { accountId: string }): Promise<TerminalReader[]>;
-
-  attachIdentity(args: {
-    id: string;
-    accountId: string;
-    userId?: number;
-    userEmail: string;
-  }): Promise<void>;
-
-  attachShippingAddress(args: {
-    id: string;
-    accountId: string;
-    shippingAddress: { name?: string; address: Record<string, unknown> };
-  }): Promise<void>;
 
   refresh(): Promise<void>;
 

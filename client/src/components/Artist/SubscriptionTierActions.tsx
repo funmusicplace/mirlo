@@ -182,10 +182,7 @@ const SubscriptionTierActions: React.FC<{
       <PurchaseModal
         open={!!checkout}
         onClose={reset}
-        clientSecret={checkout?.clientSecret}
-        stripeAccountId={checkout?.stripeAccountId}
-        requiresShipping={checkout?.requiresShipping}
-        allowedCountries={checkout?.allowedCountries}
+        checkout={checkout}
         returnUrl={returnUrl}
         onSuccess={handlePurchaseComplete}
         title={t("support") ?? ""}

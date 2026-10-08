@@ -100,6 +100,7 @@ export const SwitchingTiers: Story = {
       expect(lastPurchaseBody).toEqual({
         artistId: ARTIST.id,
         items: [{ type: "subscription", tierId: SUPERFAN_TIER.id }],
+        deferred: true,
       })
     );
   },

@@ -56,8 +56,7 @@ const PurchaseCatalogueButton: React.FC<{ artist: Artist }> = ({ artist }) => {
       <PurchaseModal
         open={!!checkout}
         onClose={reset}
-        clientSecret={checkout?.clientSecret}
-        stripeAccountId={checkout?.stripeAccountId}
+        checkout={checkout}
         returnUrl={`${window.location.origin}${completePath()}`}
         onSuccess={(buyerEmail) => navigate(completePath(buyerEmail))}
         title={title}

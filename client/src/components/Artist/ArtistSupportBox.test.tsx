@@ -73,7 +73,11 @@ vi.mock("components/common/Purchase/usePurchase", () => ({
     checkout: paymentMethodCheckoutState.checkout,
     isLoading: false,
     startPurchase: vi.fn(),
-    openCheckout: (next: { clientSecret: string; stripeAccountId: string }) => {
+    openCheckout: (next: {
+      kind: "intent";
+      clientSecret: string;
+      stripeAccountId: string;
+    }) => {
       openPaymentMethodCheckout(next);
       paymentMethodCheckoutState.checkout = next;
     },
@@ -269,6 +273,7 @@ describe("ArtistSupportBox", () => {
 
       expect(apiPut).toHaveBeenCalledWith("manage/subscriptions/55", undefined);
       expect(openPaymentMethodCheckout).toHaveBeenCalledWith({
+        kind: "intent",
         clientSecret: "seti_pm_secret",
         stripeAccountId: "acct_2",
       });

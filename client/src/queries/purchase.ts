@@ -1,54 +1,29 @@
 import { QueryFunction, queryOptions } from "@tanstack/react-query";
+import type { DeferredQuote } from "components/common/Purchase/usePurchase";
 
 import * as api from "./fetch/fetchWrapper";
 
-export type PurchaseIntent = {
-  id: string;
-  status: string;
-  clientSecret: string | null;
-  successUrl: string | null;
-  /** Total in the smallest currency unit (e.g. cents). Null for SetupIntents. */
-  amount: number | null;
-  currency: string | null;
-  artistName: string | null;
-  /** Physical merch, or a collectAddress subscription tier — render an AddressElement before confirming. */
-  requiresShipping: boolean;
-  allowedCountries: string[] | null;
-  /** The buyer's email, if already known. Null when the checkout page still needs to collect one (e.g. an external caller initiated this without a logged-in user or an email). */
-  userEmail: string | null;
+export type HostedCheckoutResponse = {
+  deferred?: DeferredQuote;
+  success?: boolean;
+  successUrl?: string;
 };
 
-const fetchPurchaseIntent: QueryFunction<
-  PurchaseIntent,
-  ["fetchPurchaseIntent", { intentId: string; stripeAccountId: string }]
-> = ({ queryKey: [_, { intentId, stripeAccountId }], signal }) => {
-  return api
-    .get<{
-      result: PurchaseIntent;
-    }>(
-      `v1/purchase/${intentId}?stripeAccountId=${encodeURIComponent(stripeAccountId)}`,
-      { signal }
-    )
-    .then((r) => r.result);
-};
+const fetchHostedCheckout: QueryFunction<
+  HostedCheckoutResponse,
+  ["fetchHostedCheckout", { checkoutId: string }]
+> = ({ queryKey: [_, { checkoutId }], signal }) =>
+  api.post<{ checkoutId: string; deferred: true }, HostedCheckoutResponse>(
+    "v1/purchase",
+    { checkoutId, deferred: true },
+    { signal }
+  );
 
-export function queryPurchaseIntent(opts: {
-  /** A PaymentIntent (pi_*) or SetupIntent (seti_*) id. */
-  intentId: string;
-  stripeAccountId: string;
-}) {
+export function queryHostedCheckout(checkoutId: string) {
   return queryOptions({
-    queryKey: [
-      "fetchPurchaseIntent",
-      {
-        intentId: opts.intentId,
-        stripeAccountId: opts.stripeAccountId,
-      },
-    ],
-    queryFn: fetchPurchaseIntent,
-    enabled: !!opts.intentId && !!opts.stripeAccountId,
-    // A one-shot fetch of an intent's secret/status: never goes stale within a
-    // page session, and a transient failure isn't worth retrying here.
+    queryKey: ["fetchHostedCheckout", { checkoutId }],
+    queryFn: fetchHostedCheckout,
+    enabled: !!checkoutId,
     staleTime: Infinity,
     retry: false,
   });

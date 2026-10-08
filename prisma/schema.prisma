@@ -61,6 +61,7 @@ model Client {
   createdAt          DateTime     @default(now())
   deletedAt          DateTime?
   trackPlays         TrackPlay[]
+  checkouts          Checkout[]
 }
 
 model User {
@@ -388,6 +389,7 @@ model Profile {
   allowDirectMessages                 Boolean                               @default(false)
   contentFlags                        ContentFlag[]
   managers                            ProfileManager[]
+  checkouts                           Checkout[]
 }
 
 model ProfileManager {
@@ -766,6 +768,21 @@ enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+model Checkout {
+  id              String    @id @default(uuid())
+  createdAt       DateTime  @default(now())
+  profileId       Int
+  profile         Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  items           Json // PurchaseItem[]
+  email           String?
+  successUrl      String?
+  clientId        Int? // The API client that opened it
+  client          Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  stripeAccountId String? // Set by the pay call, with stripeId
+  stripeId        String? // The intent the pay call created
+  completedAt     DateTime? // Set by the webhook once the intent succeeds
 }
 
 model UserTrackPurchase {

@@ -132,10 +132,7 @@ const SupportArtistTiersForm: React.FC<{
   if (checkout) {
     return (
       <PurchaseElements
-        clientSecret={checkout.clientSecret}
-        stripeAccountId={checkout.stripeAccountId}
-        requiresShipping={checkout.requiresShipping}
-        allowedCountries={checkout.allowedCountries}
+        checkout={checkout}
         returnUrl={returnUrl}
         onSuccess={handlePurchaseComplete}
         buttonLabel={t("letsSupport") ?? ""}

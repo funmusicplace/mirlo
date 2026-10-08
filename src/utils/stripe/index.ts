@@ -26,6 +26,7 @@ import {
 } from "../handleFinishedTransactions";
 import { merchImageUrl } from "../merch";
 import { recordPaymentAccountStatus } from "../paymentAccountStatus";
+import { completeCheckout } from "../payments/checkout";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -371,6 +372,7 @@ type SessionMetaData = {
   artistId: string;
   trackId: string;
   transactionId: string;
+  checkoutId?: string;
   purchaseType:
     | "trackGroup"
     | "subscription"
@@ -491,6 +493,7 @@ export const handleSetupIntentSucceeded = async (
     oldTierId?: string;
     oldStripeSubscriptionKey?: string;
     shippingAddress?: string; // JSON
+    checkoutId?: string;
   };
 
   if (metadata.subscriptionKey) {
@@ -600,87 +603,14 @@ export const handleSetupIntentSucceeded = async (
       shippingAddress,
     });
   }
-};
 
-/**
- * Attaches the buyer's shipping address to a not-yet-confirmed subscription
- */
-export const attachSetupIntentShippingAddress = async ({
-  setupIntentId,
-  stripeAccountId,
-  shippingAddress,
-}: {
-  setupIntentId: string;
-  stripeAccountId: string;
-  shippingAddress: { name?: string; address: Record<string, unknown> };
-}) => {
-  await stripe.setupIntents.update(
-    setupIntentId,
-    { metadata: { shippingAddress: JSON.stringify(shippingAddress) } },
-    { stripeAccount: stripeAccountId }
-  );
+  await completeCheckout(metadata.checkoutId);
 };
 
 /**
  * PaymentIntent ids are prefixed `pi_`, SetupIntent ids `seti_`.
  */
 export const isSetupIntentId = (id: string) => id.startsWith("seti_");
-
-/**
- * Attaches the user's identity to an intent.
- */
-export const attachIntentIdentity = async ({
-  id,
-  stripeAccountId,
-  userId,
-  userEmail,
-}: {
-  id: string;
-  stripeAccountId: string;
-  userId?: number;
-  userEmail: string;
-}) => {
-  const isSetupIntent = isSetupIntentId(id);
-
-  const existing = isSetupIntent
-    ? await stripe.setupIntents.retrieve(
-        id,
-        {},
-        { stripeAccount: stripeAccountId }
-      )
-    : await stripe.paymentIntents.retrieve(
-        id,
-        {},
-        { stripeAccount: stripeAccountId }
-      );
-
-  const existingUserId = existing.metadata?.userId;
-  if (existingUserId && existingUserId !== String(userId)) {
-    throw new AppError({
-      httpCode: 409,
-      description: "This purchase is already associated with a different buyer",
-    });
-  }
-
-  const metadata: Record<string, string> = {
-    userEmail,
-    ...(userId !== undefined && { userId: String(userId) }),
-  };
-
-  if (isSetupIntent) {
-    await stripe.setupIntents.update(
-      id,
-      { metadata },
-      { stripeAccount: stripeAccountId }
-    );
-  } else {
-    await stripe.paymentIntents.update(
-      id,
-      { metadata },
-      { stripeAccount: stripeAccountId }
-    );
-  }
-};
 
 /**
  * Update the payment method of a subscription
@@ -1191,8 +1121,6 @@ export const completePurchaseFromIntent = async (
   };
   const { userId, userEmail } = metadata;
 
-  // The email normally lands in metadata — either supplied at initiation, or
-  // attached during the payment step via PUT /purchase/:id.
   let resolvedEmail = userEmail ?? "";
   if (!resolvedEmail && !userId) {
     resolvedEmail = await recoverEmailFromIntent(intent, accountId);
@@ -1258,6 +1186,7 @@ export const handlePaymentIntentSucceeded = async (
   }
 
   await completePurchaseFromIntent(intent, accountId);
+  await completeCheckout(metadata.checkoutId);
 };
 
 export const handleAccountUpdate = async (account: Stripe.Account) => {

@@ -6,6 +6,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import {
+  ConfirmPaymentData,
   StripeAddressElementChangeEvent,
   StripeError,
   StripePaymentElementChangeEvent,
@@ -21,35 +22,32 @@ import { Button } from "../Button";
 import FormComponent from "../FormComponent";
 import { InputEl } from "../Input";
 
+import type { Checkout } from "./usePurchase";
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type ShippingAddress = NonNullable<ConfirmPaymentData["shipping"]>;
+
 const PurchasePaymentForm: React.FC<{
+  checkout: Checkout;
   returnUrl: string;
   buttonLabel: string;
   onSuccess?: (buyerEmail?: string) => void;
-  requiresShipping?: boolean;
-  allowedCountries?: string[];
-  isSetup?: boolean;
-  clientSecret?: string;
-  stripeAccountId?: string;
-
-  buyerEmailKnown?: boolean;
-}> = ({
-  returnUrl,
-  buttonLabel,
-  onSuccess,
-  requiresShipping,
-  allowedCountries,
-  isSetup,
-  clientSecret,
-  stripeAccountId,
-  buyerEmailKnown,
-}) => {
+}> = ({ checkout, returnUrl, buttonLabel, onSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const handler = useErrorHandler();
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+
+  const quote = checkout.kind === "deferred" ? checkout.quote : undefined;
+  const isSetup = quote
+    ? quote.mode === "setup"
+    : checkout.kind === "intent" && checkout.clientSecret.startsWith("seti_");
+  const requiresShipping = !!quote?.requiresShipping;
+  const allowedCountries = quote?.allowedCountries;
+  const needsEmail = !!quote && !quote.buyerEmailKnown && !user;
+
   const [showButton, setShowButton] = React.useState(false);
   const [isFormComplete, setIsFormComplete] = React.useState(false);
   const [isAddressComplete, setIsAddressComplete] =
@@ -58,39 +56,7 @@ const PurchasePaymentForm: React.FC<{
   const [email, setEmail] = React.useState("");
   const [emailError, setEmailError] = React.useState(false);
 
-  const intentKnowsBuyer = buyerEmailKnown ?? !!user;
-  const needsEmail = !intentKnowsBuyer && !user;
-
-  const intentId = clientSecret?.split("_secret_")[0];
-
-  const attachIdentity = async (): Promise<boolean> => {
-    if (intentKnowsBuyer) {
-      return true;
-    }
-
-    if (needsEmail && !EMAIL_REGEX.test(email)) {
-      setEmailError(true);
-      return false;
-    }
-
-    if (!intentId || !stripeAccountId) {
-      handler(new Error("Missing clientSecret/stripeAccountId for the buyer"));
-      return false;
-    }
-
-    try {
-      await api.put(
-        `purchase/${intentId}?stripeAccountId=${encodeURIComponent(stripeAccountId)}`,
-        needsEmail ? { email } : {}
-      );
-      return true;
-    } catch (e) {
-      handler(e);
-      return false;
-    }
-  };
-
-  const resolveShipping = async () => {
+  const resolveShipping = async (): Promise<ShippingAddress | undefined> => {
     if (!requiresShipping || !elements) {
       return undefined;
     }
@@ -106,6 +72,40 @@ const PurchasePaymentForm: React.FC<{
     };
   };
 
+  const resolveClientSecret = async (
+    shipping?: ShippingAddress
+  ): Promise<{ clientSecret: string } | { alreadyPaid: true } | undefined> => {
+    if (checkout.kind === "intent") {
+      return { clientSecret: checkout.clientSecret };
+    }
+    try {
+      const response = await api.post<
+        {
+          checkoutId: string;
+          email?: string;
+          shippingAddress?: ShippingAddress;
+          amount?: number;
+        },
+        { clientSecret?: string; success?: boolean }
+      >("purchase", {
+        checkoutId: checkout.quote.checkoutId,
+        ...(needsEmail && { email }),
+        ...(!isSetup && { amount: checkout.quote.amount }),
+        ...(isSetup && shipping && { shippingAddress: shipping }),
+      });
+      if (response.success) {
+        return { alreadyPaid: true };
+      }
+      if (!response.clientSecret) {
+        throw new Error("Payment could not be started.");
+      }
+      return { clientSecret: response.clientSecret };
+    } catch (e) {
+      handler(e);
+      return undefined;
+    }
+  };
+
   const handleSubmit = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -118,45 +118,54 @@ const PurchasePaymentForm: React.FC<{
       return;
     }
 
-    if (!(await attachIdentity())) {
+    if (needsEmail && !EMAIL_REGEX.test(email)) {
+      setEmailError(true);
       setIsLoading(false);
       return;
     }
 
+    if (checkout.kind === "deferred") {
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        console.error(submitError);
+        setIsLoading(false);
+        return;
+      }
+    }
+
     const shipping = await resolveShipping();
+    const resolved = await resolveClientSecret(shipping);
+    if (!resolved) {
+      setIsLoading(false);
+      return;
+    }
+    if ("alreadyPaid" in resolved) {
+      if (onSuccess) {
+        onSuccess(needsEmail ? email : undefined);
+      } else {
+        window.location.assign(returnUrl);
+      }
+      return;
+    }
+    const { clientSecret } = resolved;
+
     const confirmParams = {
       return_url: returnUrl,
       shipping,
       ...(needsEmail && { receipt_email: email }),
     };
 
-    if (isSetup && requiresShipping && shipping) {
-      if (!intentId || !stripeAccountId) {
-        handler(new Error("Missing clientSecret/stripeAccountId for shipping"));
-        setIsLoading(false);
-        return;
-      }
-      try {
-        await api.put(
-          `purchase/${intentId}?stripeAccountId=${encodeURIComponent(stripeAccountId)}`,
-          { shippingAddress: shipping }
-        );
-      } catch (e) {
-        handler(e);
-        setIsLoading(false);
-        return;
-      }
-    }
-
     if (onSuccess) {
       const result = isSetup
         ? await stripe.confirmSetup({
             elements,
+            clientSecret,
             confirmParams: { return_url: returnUrl },
             redirect: "if_required",
           })
         : await stripe.confirmPayment({
             elements,
+            clientSecret,
             confirmParams,
             redirect: "if_required",
           });
@@ -185,10 +194,12 @@ const PurchasePaymentForm: React.FC<{
     const { error } = isSetup
       ? await stripe.confirmSetup({
           elements,
+          clientSecret,
           confirmParams: { return_url: returnUrl },
         })
       : await stripe.confirmPayment({
           elements,
+          clientSecret,
           confirmParams,
         });
 

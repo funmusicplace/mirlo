@@ -69,6 +69,20 @@ vi.mock("components/common/Purchase/PurchaseElements", () => ({
   default: () => <div data-testid="purchase-elements" />,
 }));
 
+vi.mock("components/common/EmailVerification", () => ({
+  default: ({
+    setVerifiedEmail,
+  }: {
+    setVerifiedEmail: (email: string) => void;
+  }) => (
+    <button
+      type="button"
+      data-testid="email-verification"
+      onClick={() => setVerifiedEmail("guest@test.com")}
+    />
+  ),
+}));
+
 import BuyTrackGroup from "./BuyTrackGroup";
 
 const baseArtist = {
@@ -189,6 +203,26 @@ describe("BuyTrackGroup", () => {
           }),
         ],
       })
+    );
+  });
+
+  test("a guest verifies their email before they can pledge", async () => {
+    authState.user = null;
+    const pledgeTrackGroup = {
+      ...baseTrackGroup,
+      fundraiserId: 55,
+      fundraiser: { id: 55, isAllOrNothing: true, status: "ACTIVE" },
+    };
+    const { container } = renderComponent({ trackGroup: pledgeTrackGroup });
+
+    expect(container.querySelector('button[type="submit"]')).toBeNull();
+
+    fireEvent.click(screen.getByTestId("email-verification"));
+    fireEvent.click(container.querySelector("#consentToStoreData")!);
+    await submitForm(container);
+
+    expect(startPurchase).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "guest@test.com" })
     );
   });
 

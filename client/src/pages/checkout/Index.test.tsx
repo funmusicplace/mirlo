@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
+import type { Checkout as PurchaseCheckout } from "components/common/Purchase/usePurchase";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -12,47 +13,43 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: vi.fn() },
 }));
 
-// Stripe.js is irrelevant to the branching we're testing — stub it out.
-vi.mock("@stripe/stripe-js", () => ({
-  loadStripe: vi.fn(() => Promise.resolve({})),
-}));
-
-vi.mock("@stripe/react-stripe-js", () => ({
-  Elements: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-vi.mock("components/common/Purchase/PurchasePaymentForm", () => ({
+vi.mock("components/common/Purchase/PurchaseElements", () => ({
   default: ({
+    checkout,
     returnUrl,
-    isSetup,
   }: {
+    checkout: PurchaseCheckout;
     returnUrl: string;
-    isSetup?: boolean;
   }) => (
     <div
       data-testid="payment-form"
       data-return-url={returnUrl}
-      data-is-setup={String(!!isSetup)}
+      data-mode={checkout.kind === "deferred" ? checkout.quote.mode : ""}
+      data-checkout-id={
+        checkout.kind === "deferred" ? checkout.quote.checkoutId : ""
+      }
     />
   ),
 }));
 
 import Checkout from "./Index";
 
-type IntentResult = {
-  id: string;
-  status: string;
-  clientSecret: string | null;
-  successUrl: string | null;
-  amount: number | null;
-  currency: string | null;
-  artistName: string | null;
+const quote = {
+  checkoutId: "txn_abc",
+  mode: "payment",
+  amount: 1000,
+  currency: "usd",
+  stripeAccountId: "acct_1",
+  requiresShipping: false,
+  buyerEmailKnown: false,
+  artistName: "Test Artist",
+  successUrl: "https://wp-site.com/thanks",
 };
 
-function mockIntentFetch(intent: IntentResult) {
+function mockOpen(body: unknown, status = 200) {
   vi.mocked(fetch).mockImplementation(async () => {
-    return new Response(JSON.stringify({ result: intent }), {
-      status: 200,
+    return new Response(JSON.stringify(body), {
+      status,
       headers: { "Content-Type": "application/json" },
     });
   });
@@ -60,7 +57,7 @@ function mockIntentFetch(intent: IntentResult) {
 
 function renderAt(path: string) {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -71,101 +68,96 @@ function renderAt(path: string) {
   );
 }
 
-const PATH = "/checkout?intentId=pi_1&stripeAccountId=acct_1";
+const PATH = "/checkout?checkoutId=txn_abc";
 
 describe("Checkout", () => {
   beforeEach(() => {
-    mockIntentFetch({
-      id: "pi_1",
-      status: "requires_payment_method",
-      clientSecret: "pi_1_secret_abc",
-      successUrl: "https://wp-site.com/thanks",
-      amount: 1000,
-      currency: "usd",
-      artistName: "Test Artist",
-    });
+    vi.mocked(fetch).mockReset();
+    mockOpen({ deferred: quote });
   });
 
-  test("shows an error when required query params are missing", async () => {
+  test("shows an error when the checkout id is missing", async () => {
     renderAt("/checkout");
     await waitFor(() => {
       expect(screen.getByText("missingParameters")).toBeInTheDocument();
     });
+    expect(fetch).not.toHaveBeenCalled();
   });
 
-  test("renders the payment form with the server-supplied successUrl as return", async () => {
+  test("quotes the checkout once and renders the payment form from it", async () => {
     renderAt(PATH);
     await waitFor(() => {
       expect(screen.getByTestId("payment-form")).toBeInTheDocument();
     });
-    expect(screen.getByTestId("payment-form")).toHaveAttribute(
+    const form = screen.getByTestId("payment-form");
+    expect(form).toHaveAttribute(
       "data-return-url",
       "https://wp-site.com/thanks"
     );
-    expect(screen.getByTestId("payment-form")).toHaveAttribute(
-      "data-is-setup",
-      "false"
-    );
+    expect(form).toHaveAttribute("data-mode", "payment");
+    expect(form).toHaveAttribute("data-checkout-id", "txn_abc");
     // Buyer sees who they're paying and how much (the t() mock returns the key).
     expect(screen.getByText("payingArtistAmount")).toBeInTheDocument();
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    const [, init] = vi.mocked(fetch).mock.calls[0];
+    expect(JSON.parse(String(init?.body))).toEqual({
+      checkoutId: "txn_abc",
+      deferred: true,
+    });
   });
 
-  test("passes isSetup to the payment form for a subscription's SetupIntent", async () => {
-    mockIntentFetch({
-      id: "seti_1",
-      status: "requires_payment_method",
-      clientSecret: "seti_1_secret_abc",
-      successUrl: "https://wp-site.com/thanks",
-      amount: null,
-      currency: null,
-      artistName: "Test Artist",
-    });
+  test("renders a subscription's setup-mode quote", async () => {
+    mockOpen({ deferred: { ...quote, mode: "setup", amount: undefined } });
 
-    renderAt("/checkout?intentId=seti_1&stripeAccountId=acct_1");
+    renderAt(PATH);
 
     await waitFor(() => {
-      expect(screen.getByTestId("payment-form")).toBeInTheDocument();
+      expect(screen.getByTestId("payment-form")).toHaveAttribute(
+        "data-mode",
+        "setup"
+      );
     });
-    expect(screen.getByTestId("payment-form")).toHaveAttribute(
-      "data-is-setup",
-      "true"
-    );
+    expect(screen.getByText("payingArtist")).toBeInTheDocument();
   });
 
-  test("bounces to successUrl when the intent already succeeded", async () => {
+  test("says so when the checkout has already been paid", async () => {
+    mockOpen({ success: true });
+
+    renderAt(PATH);
+
+    await waitFor(() => {
+      expect(screen.getByText("alreadyComplete")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("payment-form")).not.toBeInTheDocument();
+  });
+
+  test("sends the buyer to the successUrl when the checkout has already been paid", async () => {
     const assign = vi.fn();
+    const original = window.location;
     Object.defineProperty(window, "location", {
-      value: { ...window.location, origin: "https://mirlo.space", assign },
-      writable: true,
+      configurable: true,
+      value: { ...original, assign },
     });
-    mockIntentFetch({
-      id: "pi_1",
-      status: "succeeded",
-      clientSecret: "pi_1_secret_abc",
-      successUrl: "https://wp-site.com/thanks",
-      amount: 1000,
-      currency: "usd",
-      artistName: "Test Artist",
-    });
+    mockOpen({ success: true, successUrl: "https://wp-site.com/thanks" });
 
     renderAt(PATH);
 
     await waitFor(() => {
       expect(assign).toHaveBeenCalledWith("https://wp-site.com/thanks");
     });
-    expect(screen.queryByTestId("payment-form")).not.toBeInTheDocument();
+    expect(screen.queryByText("alreadyComplete")).not.toBeInTheDocument();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: original,
+    });
   });
 
-  test("shows a load error when no clientSecret comes back", async () => {
-    mockIntentFetch({
-      id: "pi_1",
-      status: "requires_payment_method",
-      clientSecret: null,
-      successUrl: null,
-      amount: 1000,
-      currency: "usd",
-      artistName: "Test Artist",
-    });
+  test("shows a load error for an unknown or completed checkout", async () => {
+    mockOpen(
+      { error: "This checkout doesn't exist or has already been completed" },
+      404
+    );
     renderAt(PATH);
     await waitFor(() => {
       expect(screen.getByText("couldNotLoad")).toBeInTheDocument();

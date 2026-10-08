@@ -65,21 +65,19 @@ export const initiatePayment = async ({
   stripeAccountId: stripeAccountIdOverride,
   requiresShipping,
   allowedCountries,
+  checkoutId,
 }: {
   readerId?: string;
   profileId: number;
   items: ResolvedItem[];
   userEmail: string;
   userId?: string;
-  /** Registered API consumer (Client.id) — carried in metadata so the post-payment return can bounce to that client's applicationUrl. */
   clientId?: number;
-  /** Where the hosted checkout page returns the buyer after payment (validated upstream). */
   successUrl?: string;
-  /** Pre-resolved account ID — use when the item (e.g. trackGroup) has its own paymentToUser that takes precedence over the profile's. */
   stripeAccountId?: string;
-  /** Physical merch in the cart — persisted onto the PaymentIntent's metadata so the hosted checkout page can recover it via getStatus after a redirect. */
   requiresShipping?: boolean;
   allowedCountries?: string[];
+  checkoutId?: string;
 }): Promise<
   | { paymentIntentId: string }
   | {
@@ -124,6 +122,7 @@ export const initiatePayment = async ({
       allowedCountries: allowedCountries.join(","),
     }),
     items: JSON.stringify(items),
+    ...(checkoutId && { checkoutId }),
   };
 
   const processor = getPaymentProcessor();

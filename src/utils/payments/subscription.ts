@@ -12,7 +12,11 @@ import { sendSubscriptionCancellationEmail } from "../artist";
 import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
 
-import { getPaymentProcessor } from "./PaymentProcessor";
+import {
+  getPaymentProcessor,
+  type DeferredQuote,
+  type ShippingAddress,
+} from "./PaymentProcessor";
 import { resolveProfilePaymentContext } from "./purchase";
 
 const resolveTierAndAmount = async (
@@ -86,6 +90,10 @@ export const initiateOnlineSubscription = async ({
   userId,
   userName,
   successUrl,
+  deferred,
+  shippingAddress,
+  checkoutId,
+  switchImmediately = true,
 }: {
   profileId: number;
   tierId: number;
@@ -94,8 +102,19 @@ export const initiateOnlineSubscription = async ({
   userId?: number;
   userName?: string;
   successUrl?: string;
+  /** Resolve what the checkout needs to render, without creating a SetupIntent. */
+  deferred?: boolean;
+  shippingAddress?: ShippingAddress;
+  checkoutId?: string;
+  /**
+   * Whether an existing subscriber's tier switch happens on this call. False
+   * makes them confirm it through a SetupIntent instead, for a call that
+   * isn't their own click (opening a checkout link).
+   */
+  switchImmediately?: boolean;
 }): Promise<
   | { success: true }
+  | { deferred: DeferredQuote }
   | {
       clientSecret: string | null;
       stripeAccountId: string;
@@ -127,6 +146,7 @@ export const initiateOnlineSubscription = async ({
     existingSubscription.profileSubscriptionTierId !== tier.id;
 
   if (
+    switchImmediately &&
     isTierSwitch &&
     existingSubscription.stripeSubscriptionKey &&
     (!tier.collectAddress || existingSubscription.shippingAddress)
@@ -161,6 +181,12 @@ export const initiateOnlineSubscription = async ({
 
   const requiresShipping = !!tier.collectAddress;
 
+  if (deferred) {
+    return {
+      deferred: { mode: "setup", currency, stripeAccountId, requiresShipping },
+    };
+  }
+
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlineSubscriptionSetup({
       tierId,
@@ -177,6 +203,8 @@ export const initiateOnlineSubscription = async ({
         : undefined,
       oldStripeSubscriptionKey,
       requiresShipping,
+      shippingAddress,
+      checkoutId,
     });
 
   return {

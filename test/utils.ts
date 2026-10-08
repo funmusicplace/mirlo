@@ -19,6 +19,7 @@ const TRUNCATE_TABLES_SQL = `
     "ActivityPubProfileFollowers",
     "ArtistLabel",
     "ArtistTourDate",
+    "Checkout",
     "Client",
     "ContentFlag",
     "DataMigration",

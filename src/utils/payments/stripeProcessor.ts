@@ -1,14 +1,10 @@
 // Stripe implementation of the PaymentProcessor interface.
 import logger from "../../logger";
-import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
 import stripe, {
-  attachIntentIdentity,
-  attachSetupIntentShippingAddress,
   createOnlinePaymentIntent,
   createSubscriptionStripeProduct,
   findOrCreateStripeCustomer,
-  isSetupIntentId,
   refreshStripeClient,
 } from "../stripe";
 import { getIntentStatus } from "../stripe/status";
@@ -29,6 +25,7 @@ import {
   UpdateSubscriptionTierArgs,
   PaymentAccountStatus,
   PaymentStatusResult,
+  ShippingAddress,
   TerminalReader,
 } from "./PaymentProcessor";
 
@@ -121,11 +118,14 @@ export class StripePaymentProcessor implements PaymentProcessor {
     oldStripeSubscriptionKey,
     requiresShipping,
     allowedCountries,
+    shippingAddress,
+    checkoutId,
   }: CreateSubscriptionSetupArgs & {
     oldTierId?: number;
     oldStripeSubscriptionKey?: string;
     requiresShipping?: boolean;
     allowedCountries?: string[];
+    shippingAddress?: ShippingAddress;
   }): Promise<{ setupIntentId: string; clientSecret: string | null }> {
     const setupIntent = await stripe.setupIntents.create(
       {
@@ -147,6 +147,10 @@ export class StripePaymentProcessor implements PaymentProcessor {
           ...(allowedCountries?.length && {
             allowedCountries: allowedCountries.join(","),
           }),
+          ...(shippingAddress && {
+            shippingAddress: JSON.stringify(shippingAddress),
+          }),
+          ...(checkoutId && { checkoutId }),
         },
       },
       { stripeAccount: accountId }
@@ -168,6 +172,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
     userId,
     message,
     successUrl,
+    checkoutId,
   }: CreatePledgeSetupArgs): Promise<{
     setupIntentId: string;
     clientSecret: string | null;
@@ -193,6 +198,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
           ...(userId && { userId }),
           ...(message && { message }),
           ...(successUrl && { successUrl }),
+          ...(checkoutId && { checkoutId }),
         },
       },
       { stripeAccount: accountId }
@@ -365,47 +371,5 @@ export class StripePaymentProcessor implements PaymentProcessor {
         canReceivePayments: !!account.charges_enabled,
       };
     }
-  }
-
-  async attachIdentity({
-    id,
-    accountId,
-    userId,
-    userEmail,
-  }: {
-    id: string;
-    accountId: string;
-    userId?: number;
-    userEmail: string;
-  }): Promise<void> {
-    await attachIntentIdentity({
-      id,
-      stripeAccountId: accountId,
-      userId,
-      userEmail,
-    });
-  }
-
-  async attachShippingAddress({
-    id,
-    accountId,
-    shippingAddress,
-  }: {
-    id: string;
-    accountId: string;
-    shippingAddress: { name?: string; address: Record<string, unknown> };
-  }): Promise<void> {
-    if (!isSetupIntentId(id)) {
-      throw new AppError({
-        httpCode: 400,
-        description: "Only a SetupIntent (seti_*) accepts a shipping address",
-      });
-    }
-
-    await attachSetupIntentShippingAddress({
-      setupIntentId: id,
-      stripeAccountId: accountId,
-      shippingAddress,
-    });
   }
 }
