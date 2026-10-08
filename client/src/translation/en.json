@@ -2050,7 +2050,8 @@
     "back": "Back",
     "continue": "Continue",
     "openMyPlatform": "Open my platform",
-    "saveError": "Something went wrong, your answers were not saved. Try again."
+    "saveError": "Something went wrong, your answers were not saved. Try again.",
+    "loadError": "The current settings could not be loaded. Reload the page to try again."
   },
   "welcome": {
     "welcome": "Welcome! Let's get you set up.",

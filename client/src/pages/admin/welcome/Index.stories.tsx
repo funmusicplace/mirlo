@@ -37,6 +37,16 @@ const handlers = ({
     http.post("*/auth/login", () => HttpResponse.json({ result: {} })),
     http.post("*/auth/refresh", () => HttpResponse.json({})),
   ],
+  settings: [
+    http.get("*/admin/settings/", () =>
+      HttpResponse.json({
+        result: { settings: { platformPercent: 7 }, bucketNames: null },
+      })
+    ),
+    http.get("*/v1/settings/featuredArtists", () =>
+      HttpResponse.json({ result: [] })
+    ),
+  ],
   instance: [
     http.get("*/v1/instance", () =>
       HttpResponse.json({ result: WELCOME_INSTANCE_SETTINGS })

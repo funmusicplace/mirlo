@@ -1,9 +1,7 @@
+import useAdminSettingsForm from "components/Admin/settings/useAdminSettingsForm";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
-import {
-  useInstanceSettings,
-  useInstanceSetupMutation,
-} from "queries/instanceSettings";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -37,7 +35,9 @@ const SetupSteps: React.FC = () => {
   });
   const [stepIndex, setStepIndex] = React.useState(0);
   const [accent, setAccent] = React.useState(instanceSettings.colors.button);
-  const { mutate, isPending, isError } = useInstanceSetupMutation();
+  const settingsForm = useAdminSettingsForm();
+  const [isPending, setIsPending] = React.useState(false);
+  const [isError, setIsError] = React.useState(false);
   const accentSwatchRef = React.useRef<HTMLButtonElement>(null);
 
   const step = STEPS[stepIndex];
@@ -70,21 +70,38 @@ const SetupSteps: React.FC = () => {
   );
 
   const onSubmit = React.useCallback(
-    (data: SetupForm) => {
+    async (data: SetupForm) => {
       if (!isLastStep) {
         setStepIndex((index) => index + 1);
         return;
       }
-      mutate(
-        {
-          name: data.name.trim(),
-          supportEmail: data.supportEmail.trim() || undefined,
-          colors: { button: accent, buttonText: buttonTextFor(accent) },
-        },
-        { onSuccess: () => window.location.assign("/") }
-      );
+      const settings = settingsForm.methods.getValues();
+      const customization = settings.instanceCustomization ?? {};
+      const supportEmail = data.supportEmail.trim();
+      setIsPending(true);
+      setIsError(false);
+      try {
+        await settingsForm.saveSettings({
+          ...settings,
+          instanceCustomization: {
+            ...customization,
+            title: data.name.trim(),
+            ...(supportEmail && { supportEmail }),
+            colors: {
+              ...customization.colors,
+              button: accent,
+              buttonText: buttonTextFor(accent),
+            },
+          },
+        });
+        window.location.assign("/");
+      } catch (e) {
+        console.error(e);
+        setIsError(true);
+        setIsPending(false);
+      }
     },
-    [accent, isLastStep, mutate]
+    [accent, isLastStep, settingsForm]
   );
 
   return (
@@ -150,6 +167,11 @@ const SetupSteps: React.FC = () => {
           {t("saveError")}
         </p>
       )}
+      {settingsForm.hasLoadError && (
+        <p role="alert" className="mt-6 text-(--mi-warning-color)">
+          {t("loadError")}
+        </p>
+      )}
 
       <div className="mt-8 flex items-center gap-3">
         {stepIndex > 0 && (
@@ -167,7 +189,7 @@ const SetupSteps: React.FC = () => {
           uppercase
           className="ml-auto"
           isLoading={isPending}
-          disabled={isPending}
+          disabled={isPending || (isLastStep && !settingsForm.isLoaded)}
         >
           {isLastStep ? t("openMyPlatform") : t("continue")}
         </Button>

@@ -167,7 +167,6 @@ const routes = [
   "admin/subscriptions",
   "admin/purchases",
   "admin/settings",
-  "admin/setup",
   "admin/stripeWebhook",
   "admin/tips",
   "admin/users",
