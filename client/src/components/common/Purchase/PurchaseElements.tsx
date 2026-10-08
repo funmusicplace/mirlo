@@ -26,20 +26,17 @@ const PurchaseElements: React.FC<{
     [stripeAccountId]
   );
 
-  const clientSecret =
-    checkout.kind === "intent" ? checkout.clientSecret : undefined;
-  const quote = checkout.kind === "deferred" ? checkout.quote : undefined;
-  const mode = quote?.mode;
-  const amount = quote?.amount;
-  const currency = quote?.currency;
-  const options: StripeElementsOptions = React.useMemo(() => {
-    if (clientSecret) {
-      return { clientSecret };
-    }
-    return mode === "setup"
-      ? { mode, currency }
-      : { mode: "payment", amount: amount ?? 0, currency };
-  }, [clientSecret, mode, amount, currency]);
+  // <Elements> compares options deeply, so this needn't be memoized.
+  const options: StripeElementsOptions =
+    checkout.kind === "intent"
+      ? { clientSecret: checkout.clientSecret }
+      : checkout.quote.mode === "setup"
+        ? { mode: "setup", currency: checkout.quote.currency }
+        : {
+            mode: "payment",
+            amount: checkout.quote.amount ?? 0,
+            currency: checkout.quote.currency,
+          };
 
   if (!stripePromise) {
     return null;

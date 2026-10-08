@@ -7,7 +7,10 @@ import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Money, { moneyDisplay } from "components/common/Money";
 import PurchaseStep from "components/common/Purchase/PurchaseStep";
-import { usePurchase } from "components/common/Purchase/usePurchase";
+import {
+  usePurchase,
+  type PurchaseItem,
+} from "components/common/Purchase/usePurchase";
 import TextArea from "components/common/TextArea";
 import { queryUserStripeStatus } from "queries";
 import React from "react";
@@ -126,37 +129,34 @@ const BuyTrackGroup: React.FC<{
           return;
         }
 
-        if (isPledgeMode && trackGroup.fundraiserId) {
-          await startPurchase({
-            artistId: trackGroup.artistId ?? trackGroup.artist.id,
-            items: [
-              {
+        const price = data.chosenPrice
+          ? String(Number(data.chosenPrice) * 100)
+          : undefined;
+
+        const item: PurchaseItem =
+          isPledgeMode && trackGroup.fundraiserId
+            ? {
                 type: "fundraiserPledge",
                 fundraiserId: trackGroup.fundraiserId,
                 trackGroupId: trackGroup.id,
-                price: data.chosenPrice
-                  ? String(Number(data.chosenPrice) * 100)
-                  : undefined,
+                price,
                 message: data.message,
-              },
-            ],
-            email: verifiedEmail ?? undefined,
-          });
-          return;
-        }
+              }
+            : {
+                type: track ? "track" : "trackGroup",
+                id: track ? track.id : trackGroup.id,
+                price,
+                message: data.message,
+              };
 
         await startPurchase({
           artistId: trackGroup.artistId ?? trackGroup.artist.id,
-          items: [
-            {
-              type: track ? "track" : "trackGroup",
-              id: track ? track.id : trackGroup.id,
-              price: data.chosenPrice
-                ? String(Number(data.chosenPrice) * 100)
-                : undefined,
-              message: data.message,
-            },
-          ],
+          items: [item],
+          // A pledge is only charged if the fundraiser succeeds, so the
+          // buyer's email is verified up front.
+          ...(item.type === "fundraiserPledge" && {
+            email: verifiedEmail ?? undefined,
+          }),
         });
       } catch (e) {
         snackbar(t("error"), { type: "warning" });

@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import {
   AddressElement,
   PaymentElement,
@@ -16,7 +15,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
-import { useAuthContext } from "state/AuthContext";
 
 import { Button } from "../Button";
 import FormComponent from "../FormComponent";
@@ -37,7 +35,6 @@ const PurchasePaymentForm: React.FC<{
   const stripe = useStripe();
   const elements = useElements();
   const handler = useErrorHandler();
-  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
   const quote = checkout.kind === "deferred" ? checkout.quote : undefined;
@@ -46,7 +43,8 @@ const PurchasePaymentForm: React.FC<{
     : checkout.kind === "intent" && checkout.clientSecret.startsWith("seti_");
   const requiresShipping = !!quote?.requiresShipping;
   const allowedCountries = quote?.allowedCountries;
-  const needsEmail = !!quote && !quote.buyerEmailKnown && !user;
+  // The server already accounts for who's logged in when it sets this.
+  const needsEmail = !!quote && !quote.buyerEmailKnown;
 
   const [showButton, setShowButton] = React.useState(false);
   const [isFormComplete, setIsFormComplete] = React.useState(false);
@@ -106,6 +104,15 @@ const PurchasePaymentForm: React.FC<{
     }
   };
 
+  /** Paid: hand back to the caller, or leave for the return URL. */
+  const finish = () => {
+    if (onSuccess) {
+      onSuccess(needsEmail ? email : undefined);
+    } else {
+      window.location.assign(returnUrl);
+    }
+  };
+
   const handleSubmit = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -140,73 +147,48 @@ const PurchasePaymentForm: React.FC<{
       return;
     }
     if ("alreadyPaid" in resolved) {
-      if (onSuccess) {
-        onSuccess(needsEmail ? email : undefined);
-      } else {
-        window.location.assign(returnUrl);
-      }
+      finish();
       return;
     }
     const { clientSecret } = resolved;
 
-    const confirmParams = {
-      return_url: returnUrl,
-      shipping,
-      ...(needsEmail && { receipt_email: email }),
-    };
-
-    if (onSuccess) {
-      const result = isSetup
-        ? await stripe.confirmSetup({
-            elements,
-            clientSecret,
-            confirmParams: { return_url: returnUrl },
-            redirect: "if_required",
-          })
-        : await stripe.confirmPayment({
-            elements,
-            clientSecret,
-            confirmParams,
-            redirect: "if_required",
-          });
-
-      if (result.error) {
-        console.error(result.error);
-        handler(result.error.message);
-        setIsLoading(false);
-        return;
-      }
-
-      const intent =
-        "paymentIntent" in result ? result.paymentIntent : result.setupIntent;
-      if (
-        intent &&
-        (intent.status === "succeeded" || intent.status === "processing")
-      ) {
-        onSuccess(needsEmail ? email : undefined);
-        return;
-      }
-
-      setIsLoading(false);
-      return;
-    }
-
-    const { error } = isSetup
+    // "if_required" keeps the buyer here unless their bank demands a hop
+    // (3DS), in which case Stripe sends them to returnUrl and back.
+    const result = isSetup
       ? await stripe.confirmSetup({
           elements,
           clientSecret,
           confirmParams: { return_url: returnUrl },
+          redirect: "if_required",
         })
       : await stripe.confirmPayment({
           elements,
           clientSecret,
-          confirmParams,
+          confirmParams: {
+            return_url: returnUrl,
+            shipping,
+            ...(needsEmail && { receipt_email: email }),
+          },
+          redirect: "if_required",
         });
 
-    if (error) {
-      console.error(error);
-      handler(error.message);
+    if (result.error) {
+      console.error(result.error);
+      handler(result.error.message);
+      setIsLoading(false);
+      return;
     }
+
+    const intent =
+      "paymentIntent" in result ? result.paymentIntent : result.setupIntent;
+    if (
+      intent &&
+      (intent.status === "succeeded" || intent.status === "processing")
+    ) {
+      finish();
+      return;
+    }
+
     setIsLoading(false);
   };
 
@@ -229,12 +211,7 @@ const PurchasePaymentForm: React.FC<{
   };
 
   return (
-    <div
-      className={css`
-        padding: 1rem;
-        margin: auto;
-      `}
-    >
+    <div className="p-4 m-auto">
       {!showButton && <LoadingBlocks rows={1} />}
       {needsEmail && (
         <FormComponent>
@@ -284,9 +261,7 @@ const PurchasePaymentForm: React.FC<{
             !isAddressComplete ||
             (needsEmail && !email)
           }
-          className={css`
-            margin-top: 1rem;
-          `}
+          className="mt-4"
         >
           {buttonLabel}
         </Button>

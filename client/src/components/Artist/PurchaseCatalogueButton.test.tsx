@@ -34,7 +34,7 @@ vi.mock("components/common/Purchase/usePurchase", () => ({
 
 vi.mock("components/common/Purchase/PurchaseModal", () => ({
   default: (props: any) =>
-    props.open ? <div data-testid="purchase-modal" /> : null,
+    props.checkout ? <div data-testid="purchase-modal" /> : null,
 }));
 
 import PurchaseCatalogueButton from "./PurchaseCatalogueButton";
