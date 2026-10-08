@@ -1116,6 +1116,14 @@ const routes: RouteObject[] = [
       },
     ],
   },
+  {
+    path: "/admin/welcome",
+    errorElement: <ErrorPage />,
+    async lazy() {
+      const { default: Component } = await import("pages/admin/welcome/Index");
+      return { Component };
+    },
+  },
 ];
 
 export default routes;

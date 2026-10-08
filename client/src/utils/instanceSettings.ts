@@ -13,6 +13,7 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   isClosedToPublicArtistSignup: false,
   trustLevelNames: DEFAULT_TRUST_LEVEL_NAMES,
   languages: null,
+  setupStage: "done",
 };
 
 export const applyInstanceStyles = (settings: InstanceSettings) => {

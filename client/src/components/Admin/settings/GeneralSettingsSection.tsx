@@ -1,6 +1,5 @@
-import { css } from "@emotion/css";
 import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
+import { InputEl, colorInputClass } from "components/common/Input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -8,27 +7,6 @@ import { Link } from "react-router-dom";
 
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
-
-const colorInputClass = css`
-  &[type="color"] {
-    min-height: 2.5rem;
-    padding: 2px;
-  }
-
-  &::-webkit-color-swatch-wrapper {
-    padding: 0;
-  }
-
-  &::-webkit-color-swatch {
-    border: 0;
-    border-radius: calc(var(--mi-border-radius) - 2px);
-  }
-
-  &::-moz-color-swatch {
-    border: 0;
-    border-radius: calc(var(--mi-border-radius) - 2px);
-  }
-`;
 
 const COLOR_FIELDS = [
   { key: "button", labelKey: "colorButton" },

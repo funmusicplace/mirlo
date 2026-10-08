@@ -13,11 +13,17 @@ import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 import Player from "components/Player";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import ScrollToTop from "components/ScrollToTop";
+import useSetupRedirect from "components/Setup/useSetupRedirect";
 import { isEmpty } from "lodash";
 import { useInstanceSettings } from "queries/instanceSettings";
 import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation, useSearchParams } from "react-router-dom";
+import {
+  Navigate,
+  Outlet,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
 import { applyInstanceStyles } from "utils/instanceSettings";
 import { useGlobalPlayerSyncIntegration } from "utils/playerSync";
@@ -35,6 +41,7 @@ function App() {
   const { currentTrack } = useCurrentTrackHook();
   const routeTitle = useRouteTitle();
   const instanceSettings = useInstanceSettings();
+  const setupRedirect = useSetupRedirect();
 
   useEffect(() => {
     applyInstanceStyles(instanceSettings);
@@ -53,6 +60,10 @@ function App() {
 
   if (isWidget) {
     return <Outlet />;
+  }
+
+  if (setupRedirect) {
+    return <Navigate to={setupRedirect} replace />;
   }
 
   useEffect(() => {

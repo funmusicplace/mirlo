@@ -1,4 +1,5 @@
 import { hashPassword } from "../src/routers/auth/utils";
+import { getSiteSettings } from "../src/utils/settings";
 
 import { PrismaClient } from "./__generated__";
 import { artists } from "./seeds/artists";
@@ -26,6 +27,12 @@ async function main() {
     );
     return;
   }
+
+  await getSiteSettings();
+  await prisma.settings.updateMany({
+    where: { setupCompletedAt: null },
+    data: { setupCompletedAt: new Date() },
+  });
 
   for (const u of users) {
     u.password = await hashPassword("test1234");

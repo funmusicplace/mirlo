@@ -1,4 +1,9 @@
-import { SettingsType, resolveInstanceName } from "../utils/settings";
+import {
+  SettingsType,
+  SetupStage,
+  resolveInstanceName,
+  resolveSetupStage,
+} from "../utils/settings";
 import { AvailableLanguage } from "../utils/transifexLanguages";
 import { resolveTrustLevelNames } from "../utils/trustLevel";
 
@@ -16,6 +21,7 @@ export type InstanceSettings = {
   isClosedToPublicArtistSignup: boolean;
   trustLevelNames: string[];
   languages: AvailableLanguage[] | null;
+  setupStage: SetupStage;
 };
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -52,5 +58,6 @@ export const serializeInstanceSettings = (
       settings.isClosedToPublicArtistSignup ?? false,
     trustLevelNames: resolveTrustLevelNames(settings.settings?.trustLevelNames),
     languages: languages ?? null,
+    setupStage: resolveSetupStage(settings),
   };
 };
