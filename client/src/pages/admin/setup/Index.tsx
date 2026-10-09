@@ -35,6 +35,8 @@ const SETTING_STEPS = STEPS.slice(1, -1);
 
 const DASHBOARD_PATH = "/admin/dashboard";
 
+const SAVED_STEP_KEYS = ["identity", "email", "platformPolicy"] as const;
+
 const statusesFromSettings = (
   settings: FormSettings
 ): Partial<Record<StepKey, SetupStepStatus>> => ({
@@ -98,7 +100,17 @@ const SetupGuide: React.FC = () => {
       setIsSaving(true);
       try {
         await saveSettings(data);
-        setStatuses((current) => ({ ...current, [activeKey]: "done" }));
+        setStatuses((current) => {
+          const derived = statusesFromSettings(data);
+          const next = { ...current };
+          for (const key of SAVED_STEP_KEYS) {
+            next[key] =
+              derived[key] === "todo" && current[key] === "skipped"
+                ? "skipped"
+                : derived[key];
+          }
+          return next;
+        });
         goTo(activeIndex + 1);
       } catch (e) {
         console.error(e);

@@ -156,6 +156,24 @@ describe("SetupGuide", () => {
     expect(await screen.findByText("email.description")).toBeInTheDocument();
   });
 
+  test("leaves a step to do when it is saved with nothing filled in", async () => {
+    renderGuide();
+    await startGuide();
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+
+    expect(screen.getByText("email.description")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    );
+
+    expect(
+      await screen.findByText("platformPolicy.description")
+    ).toBeInTheDocument();
+    const nav = screen.getByRole("navigation", { name: "guideNavLabel" });
+    expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(1);
+    expect(nav).not.toHaveTextContent("stepSkipped");
+  });
+
   test("skips a step without saving", async () => {
     vi.mocked(api.get).mockResolvedValue(
       storedSettings({
