@@ -1,13 +1,8 @@
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { findOrCreateUserBasedOnEmail } from "../user";
 
-import {
-  completePurchaseFromIntent,
-  finalizeSubscriptionSetup,
-  stripe,
-} from "./index";
+import { stripe } from "./index";
 
 export const createTerminalPaymentIntent = async ({
   totalAmount,
@@ -237,7 +232,6 @@ export const createAndDispatchTerminalSetupIntent = async ({
 };
 
 // Called from the terminal.reader.action_succeeded webhook.
-// Routes to the appropriate post-purchase handler based on action type.
 export const handleTerminalReaderActionSucceeded = async (
   reader: Stripe.Terminal.Reader,
   accountId: string
@@ -246,11 +240,6 @@ export const handleTerminalReaderActionSucceeded = async (
   try {
     const action = reader.action;
     if (!action) return;
-
-    if (action.type === "process_setup_intent") {
-      await handleTerminalSetupIntentSucceeded(reader, accountId);
-      return;
-    }
 
     if (action.type !== "process_payment_intent") {
       return;
@@ -267,12 +256,10 @@ export const handleTerminalReaderActionSucceeded = async (
       return;
     }
 
-    const paymentIntent = await captureTerminalPaymentIntent({
+    await captureTerminalPaymentIntent({
       paymentIntentId,
       stripeAccountId: accountId,
     });
-
-    await completePurchaseFromIntent(paymentIntent, accountId);
   } catch (e) {
     logger.error(`handleTerminalReaderActionSucceeded: ${e}`);
     console.error(e);
@@ -285,70 +272,4 @@ export const handleTerminalReaderActionFailed = (
   logger.warn(
     `terminal.reader.action_failed: reader ${reader.id}, failure: ${reader.action?.failure_message ?? "unknown"}`
   );
-};
-
-// Handles subscription sign-up via terminal SetupIntent.
-// Creates/finds the customer, creates the Stripe Subscription, and records it in DB.
-const handleTerminalSetupIntentSucceeded = async (
-  reader: Stripe.Terminal.Reader,
-  stripeAccountId: string
-) => {
-  const rawSetupIntent = reader.action?.process_setup_intent?.setup_intent;
-  const setupIntentId =
-    typeof rawSetupIntent === "string" ? rawSetupIntent : rawSetupIntent?.id;
-
-  if (!setupIntentId) {
-    logger.warn(
-      `handleTerminalSetupIntentSucceeded: no setup_intent on reader ${reader.id}`
-    );
-    return;
-  }
-
-  const setupIntent = await stripe.setupIntents.retrieve(
-    setupIntentId,
-    { expand: ["latest_attempt"] },
-    { stripeAccount: stripeAccountId }
-  );
-
-  const metadata = setupIntent.metadata as {
-    tierId: string;
-    userId?: string;
-    userEmail?: string;
-    amount: string;
-    currency: string;
-  };
-
-  const { userId: actualUserId, user } = await findOrCreateUserBasedOnEmail(
-    metadata.userEmail ?? "",
-    metadata.userId
-  );
-
-  // card_present payment methods are single-use and can't be saved to a
-  // customer; recurring billing must use the reusable `card` payment method
-  // Stripe generates from the card_present setup.
-  const latestAttempt =
-    typeof setupIntent.latest_attempt === "string"
-      ? null
-      : setupIntent.latest_attempt;
-  const generatedCard =
-    latestAttempt?.payment_method_details?.card_present?.generated_card;
-  const paymentMethodId =
-    typeof generatedCard === "string" ? generatedCard : generatedCard?.id;
-
-  if (!paymentMethodId) {
-    logger.error(
-      `handleTerminalSetupIntentSucceeded: no generated card on setup intent ${setupIntentId}`
-    );
-    return;
-  }
-
-  await finalizeSubscriptionSetup({
-    stripeAccountId,
-    paymentMethodId,
-    tierId: Number(metadata.tierId),
-    amount: Number(metadata.amount),
-    currency: metadata.currency,
-    userId: Number(actualUserId),
-    userEmail: user?.email,
-  });
 };
