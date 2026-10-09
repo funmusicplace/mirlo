@@ -58,23 +58,33 @@ export default function () {
           },
         });
       }
-      const existingStripe = (
-        existingSettings.settings as Record<string, unknown> | null
-      )?.stripe as Record<string, unknown> | undefined;
+      const storedSettings =
+        (existingSettings.settings as Record<string, unknown> | null) ?? {};
+      const existingStripe = storedSettings.stripe as
+        | Record<string, unknown>
+        | undefined;
       const incomingStripeKey = (settings?.stripe?.key ?? "").trim();
       const incomingWebhookSecret = (
         settings?.stripe?.webhookConnectSigningSecret ?? ""
       ).trim();
+      const incomingTitle = settings?.instanceCustomization?.title;
       const mergedSettings = {
+        ...storedSettings,
         ...settings,
+        ...(typeof incomingTitle === "string" && {
+          instanceCustomization: {
+            ...settings.instanceCustomization,
+            title: incomingTitle.trim(),
+          },
+        }),
         stripe: {
+          ...existingStripe,
           ...(settings?.stripe ?? {}),
           key: incomingStripeKey || existingStripe?.key,
           webhookConnectSigningSecret:
             incomingWebhookSecret ||
             existingStripe?.webhookConnectSigningSecret,
         },
-        featuredArtistIds: settings?.featuredArtistIds ?? [],
       };
       await prisma.settings.update({
         data: {
@@ -84,7 +94,9 @@ export default function () {
           isClosedToPublicArtistSignup,
           cookiePolicy,
           contentPolicy,
-          defconLevel: Number(defconLevel),
+          ...(defconLevel !== undefined && {
+            defconLevel: Number(defconLevel),
+          }),
           showQueueDashboard,
           cdnUrl,
           ...(bucketNames !== undefined && { bucketNames }),
