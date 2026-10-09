@@ -75,7 +75,7 @@ describe("terminal.reader webhooks", () => {
       );
     });
 
-    it("should do nothing when action type is not process_payment_intent or process_setup_intent", async () => {
+    it("should do nothing when action type is not process_payment_intent", async () => {
       const captureStub = sinon.stub(
         stripeUtils.stripe.paymentIntents,
         "capture"
@@ -183,8 +183,8 @@ describe("terminal.reader webhooks", () => {
     });
   });
 
-  describe("handleTerminalReaderActionSucceeded — process_setup_intent (subscription)", () => {
-    it("should create a Stripe subscription and record it in DB after a terminal setup intent succeeds", async () => {
+  describe("handleSetupIntentSucceeded — terminal subscription", () => {
+    it("should subscribe with the generated card after a terminal setup intent succeeds", async () => {
       const { user: profileOwner } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_test",
@@ -193,7 +193,7 @@ describe("terminal.reader webhooks", () => {
       const profile = await createProfile(profileOwner.id);
       const tier = await createTier(profile.id, { minAmount: 500 });
 
-      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+      const setupIntent = {
         id: "seti_sub_test",
         status: "succeeded",
         payment_method: "pm_card_present_test",
@@ -205,11 +205,18 @@ describe("terminal.reader webhooks", () => {
         },
         metadata: {
           tierId: String(tier.id),
+          artistId: String(profile.id),
+          stripeAccountId: "acct_sub_test",
           userId: String(buyer.id),
           userEmail: buyer.email,
           amount: "500",
+          currency: "usd",
         },
-      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+      } as unknown as Stripe.SetupIntent;
+
+      sinon
+        .stub(stripeUtils.stripe.setupIntents, "retrieve")
+        .resolves(setupIntent as Stripe.Response<Stripe.SetupIntent>);
 
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
         id: "acct_sub_test",
@@ -241,15 +248,7 @@ describe("terminal.reader webhooks", () => {
           status: "active",
         } as unknown as Stripe.Response<Stripe.Subscription>);
 
-      const reader = buildReader({
-        action: {
-          type: "process_setup_intent",
-          status: "succeeded",
-          process_setup_intent: { setup_intent: "seti_sub_test" },
-        } as any,
-      });
-
-      await handleTerminalReaderActionSucceeded(reader, "acct_sub_test");
+      await stripeUtils.handleSetupIntentSucceeded(setupIntent);
 
       const subscription = await prisma.profileUserSubscription.findFirst({
         where: { userId: buyer.id, profileSubscriptionTierId: tier.id },
@@ -272,27 +271,31 @@ describe("terminal.reader webhooks", () => {
         "generated card should be the subscription default payment method"
       );
     });
+  });
 
-    it("should log a warning and return early when setup_intent id is missing", async () => {
+  describe("handleTerminalReaderActionSucceeded — process_setup_intent", () => {
+    it("should leave the subscription to setup_intent.succeeded", async () => {
       const retrieveStub = sinon.stub(
         stripeUtils.stripe.setupIntents,
         "retrieve"
+      );
+      const subscriptionCreateStub = sinon.stub(
+        stripeUtils.stripe.subscriptions,
+        "create"
       );
 
       const reader = buildReader({
         action: {
           type: "process_setup_intent",
           status: "succeeded",
-          process_setup_intent: {},
+          process_setup_intent: { setup_intent: "seti_sub_test" },
         } as any,
       });
 
       await handleTerminalReaderActionSucceeded(reader, "acct_test");
 
-      assert.ok(
-        !retrieveStub.called,
-        "setupIntents.retrieve should not be called"
-      );
+      assert.ok(!retrieveStub.called, "setupIntents.retrieve not called");
+      assert.ok(!subscriptionCreateStub.called, "no subscription created");
     });
   });
 

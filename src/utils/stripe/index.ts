@@ -478,9 +478,11 @@ export const handleSetupIntentSucceeded = async (
   setupIntent: Stripe.SetupIntent
 ) => {
   logger.info(`setup_intent.succeeded: ${setupIntent.id}`);
-  const intent = await stripe.setupIntents.retrieve(setupIntent.id, {
-    stripeAccount: setupIntent.metadata?.stripeAccountId,
-  });
+  const intent = await stripe.setupIntents.retrieve(
+    setupIntent.id,
+    { expand: ["latest_attempt"] },
+    { stripeAccount: setupIntent.metadata?.stripeAccountId }
+  );
 
   const metadata = setupIntent.metadata as unknown as {
     subscriptionKey?: string;
@@ -566,10 +568,16 @@ export const handleSetupIntentSucceeded = async (
       oldStripeSubscriptionKey,
     } = metadata;
 
+    // card_present payment methods are single-use and can't be saved to a
+    // customer; recurring billing must use the reusable `card` payment method
+    // Stripe generates from the card_present setup.
+    const latestAttempt =
+      typeof intent.latest_attempt === "string" ? null : intent.latest_attempt;
+    const generatedCard =
+      latestAttempt?.payment_method_details?.card_present?.generated_card;
+    const paymentMethod = generatedCard ?? intent.payment_method;
     const paymentMethodId =
-      typeof intent.payment_method === "string"
-        ? intent.payment_method
-        : intent.payment_method?.id;
+      typeof paymentMethod === "string" ? paymentMethod : paymentMethod?.id;
 
     if (!paymentMethodId) {
       logger.error(
