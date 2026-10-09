@@ -3,11 +3,7 @@ import Stripe from "stripe";
 import { logger } from "../../logger";
 import { findOrCreateUserBasedOnEmail } from "../user";
 
-import {
-  completePurchaseFromIntent,
-  finalizeSubscriptionSetup,
-  stripe,
-} from "./index";
+import { finalizeSubscriptionSetup, stripe } from "./index";
 
 export const createTerminalPaymentIntent = async ({
   totalAmount,
@@ -267,12 +263,10 @@ export const handleTerminalReaderActionSucceeded = async (
       return;
     }
 
-    const paymentIntent = await captureTerminalPaymentIntent({
+    await captureTerminalPaymentIntent({
       paymentIntentId,
       stripeAccountId: accountId,
     });
-
-    await completePurchaseFromIntent(paymentIntent, accountId);
   } catch (e) {
     logger.error(`handleTerminalReaderActionSucceeded: ${e}`);
     console.error(e);
