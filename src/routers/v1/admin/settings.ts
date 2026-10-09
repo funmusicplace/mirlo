@@ -60,6 +60,27 @@ export default function () {
       }
       const storedSettings =
         (existingSettings.settings as Record<string, unknown> | null) ?? {};
+      const storedTitle = (
+        storedSettings.instanceCustomization as { title?: string } | undefined
+      )?.title?.trim();
+      const incomingTitle = settings?.instanceCustomization?.title;
+      if (incomingTitle !== undefined && typeof incomingTitle !== "string") {
+        throw new AppError({
+          httpCode: 400,
+          description: "The instance name must be a string",
+        });
+      }
+      if (
+        storedTitle &&
+        settings &&
+        "instanceCustomization" in settings &&
+        !incomingTitle?.trim()
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: "The instance name cannot be removed",
+        });
+      }
       const existingStripe = storedSettings.stripe as
         | Record<string, unknown>
         | undefined;
@@ -67,7 +88,6 @@ export default function () {
       const incomingWebhookSecret = (
         settings?.stripe?.webhookConnectSigningSecret ?? ""
       ).trim();
-      const incomingTitle = settings?.instanceCustomization?.title;
       const mergedSettings = {
         ...storedSettings,
         ...settings,

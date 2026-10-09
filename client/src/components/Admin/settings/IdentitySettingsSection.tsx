@@ -18,7 +18,11 @@ const IdentitySettingsSection: React.FC<{ hideTitle?: boolean }> = ({
   hideTitle,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
-  const { register } = useFormContext<FormSettings>();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<FormSettings>();
+  const titleError = errors.instanceCustomization?.title?.message;
 
   return (
     <SettingsSection
@@ -33,8 +37,20 @@ const IdentitySettingsSection: React.FC<{ hideTitle?: boolean }> = ({
           type="text"
           className="max-w-md"
           maxLength={60}
-          {...register("instanceCustomization.title")}
+          required
+          aria-describedby={titleError ? "error-instance-name" : undefined}
+          aria-invalid={!!titleError}
+          {...register("instanceCustomization.title", {
+            required: t("instanceNameRequired"),
+            validate: (value) =>
+              value?.trim() !== "" || t("instanceNameRequired"),
+          })}
         />
+        {titleError && (
+          <small id="error-instance-name" className="error">
+            {titleError}
+          </small>
+        )}
       </FormComponent>
 
       <fieldset>

@@ -60,6 +60,7 @@ function makeSettings(overrides: object = {}) {
       settings: {
         platformPercent: 10,
         instanceCustomization: {
+          title: "Nightjar",
           colors: {
             button: "#be3455",
             buttonText: "#ffffff",

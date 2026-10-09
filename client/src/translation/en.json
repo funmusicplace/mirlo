@@ -1761,6 +1761,7 @@
     "generalSettings": "General Settings",
     "platformPolicySettings": "Platform policy",
     "instanceName": "Instance name",
+    "instanceNameRequired": "Give your instance a name",
     "platformPercent": "Platform percent",
     "cdnUrl": "CDN URL",
     "isClosedToPublicArtistSignup": "Is closed to public artist signup",

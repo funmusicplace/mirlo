@@ -363,6 +363,81 @@ describe("admin/settings", () => {
       });
     });
 
+    it("should refuse to remove the instance name once it is set", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: { title: "Nightjar Records" },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 10,
+            instanceCustomization: { title: "  " },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(stored.instanceCustomization.title, "Nightjar Records");
+      assert.equal(stored.platformPercent, 7);
+    });
+
+    it("should refuse a null instanceCustomization once the instance is named", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: { title: "Nightjar Records" },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: { platformPercent: 10, instanceCustomization: null },
+        });
+
+      assert.equal(response.statusCode, 400);
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(stored.instanceCustomization.title, "Nightjar Records");
+    });
+
+    it("should reject an instance name that is not a string", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 10,
+            instanceCustomization: { title: 42 },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should save bucketNames: { prefix: 'foo-' } to DB and return it in response", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

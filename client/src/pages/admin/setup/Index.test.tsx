@@ -255,6 +255,20 @@ describe("SetupGuide", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
+  test("refuses to save the identity step without a name", async () => {
+    renderGuide();
+    await startGuide();
+
+    await userEvent.clear(screen.getByLabelText("instanceName"));
+    await userEvent.click(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    );
+
+    expect(await screen.findByText("instanceNameRequired")).toBeInTheDocument();
+    expect(api.post).not.toHaveBeenCalled();
+    expect(screen.getByText("identity.description")).toBeInTheDocument();
+  });
+
   test("keeps a done step done when it is skipped", async () => {
     renderGuide();
     await startGuide();
