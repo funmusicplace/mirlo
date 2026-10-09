@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import { AiFillDelete } from "react-icons/ai";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { formatAcceptList } from "utils/uploadFormats";
 import useJobStatusCheck from "utils/useJobStatusCheck";
@@ -17,26 +16,13 @@ import { bp } from "../../constants";
 
 import { Img, ReplaceSpan, Spinner, UploadPrompt } from "./UploadImage";
 
-type ImageType =
-  | "background"
-  | "banner"
-  | "avatar"
-  | "cover"
-  | "image"
-  | "profile";
+type ImageType = "background" | "avatar" | "cover" | "image";
 
 export function isTrackgroup(entity: unknown): entity is TrackGroup {
   if (!entity) {
     return false;
   }
   return (entity as TrackGroup).cover !== undefined;
-}
-
-export function isUser(entity: unknown): entity is LoggedInUser {
-  if (!entity) {
-    return false;
-  }
-  return (entity as LoggedInUser).userAvatar !== undefined;
 }
 
 export function isTrack(entity: unknown): entity is Track {
@@ -54,18 +40,14 @@ export function isMerch(entity: unknown): entity is Merch {
 }
 
 const getExistingImage = (
-  existing: Artist | TrackGroup | LoggedInUser,
+  existing: Artist | TrackGroup,
   imageType: ImageType
 ) => {
-  let image = undefined;
+  let image:
+    | { sizes?: { [key: number]: string }; updatedAt?: string }
+    | undefined = undefined;
   if (isTrackgroup(existing)) {
     image = existing["cover"];
-  } else if (isUser(existing)) {
-    if (isUser(existing) && imageType === "avatar") {
-      image = existing.userAvatar;
-    } else if (isUser(existing) && imageType === "banner") {
-      image = existing.userBanner;
-    }
   } else if (imageType === "avatar") {
     image = (existing as Artist).avatar;
   } else if (imageType === "background") {
@@ -76,18 +58,14 @@ const getExistingImage = (
     return undefined;
   }
   const actualImageLocation =
-    imageType === "banner" || imageType === "background"
-      ? image?.sizes?.[625]
-      : image?.sizes?.[600];
+    imageType === "background" ? image?.sizes?.[625] : image?.sizes?.[600];
   return `${actualImageLocation}?updatedAt=${image?.updatedAt}`;
 };
 
-const buildRootUrl = (existing: TrackGroup | Artist | LoggedInUser) => {
+const buildRootUrl = (existing: TrackGroup | Artist) => {
   let url = "";
   if (isTrackgroup(existing)) {
     url = `manage/trackGroups/${existing.id}/`;
-  } else if (isUser(existing)) {
-    url = `users/${existing.id}/`;
   } else {
     url = `manage/artists/${existing.id}/`;
   }
@@ -95,7 +73,7 @@ const buildRootUrl = (existing: TrackGroup | Artist | LoggedInUser) => {
 };
 
 const UploadArtistImage: React.FC<{
-  existing: Artist | TrackGroup | LoggedInUser;
+  existing: Artist | TrackGroup;
   imageType: ImageType;
   height: string;
   width: string;
@@ -116,7 +94,6 @@ const UploadArtistImage: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
   const { artistId: artistParamId } = useParams();
-  const { refreshLoggedInUser, user } = useAuthContext();
 
   const { refetch: refresh } = useQuery(
     queryArtist({ artistSlug: artistParamId ?? "" })
@@ -130,18 +107,13 @@ const UploadArtistImage: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
 
   const resetWrapper = React.useCallback(async () => {
-    if (user && isUser(existing)) {
-      refreshLoggedInUser();
-      setExistingImage(getExistingImage(user, "profile"));
-    } else {
-      let result = await api.get<TrackGroup | Artist>(buildRootUrl(existing));
-      const image = getExistingImage(result.result, imageType);
+    let result = await api.get<TrackGroup | Artist>(buildRootUrl(existing));
+    const image = getExistingImage(result.result, imageType);
 
-      setExistingImage(image);
-    }
+    setExistingImage(image);
 
     refresh();
-  }, [existing, imageType, user, refresh]);
+  }, [existing, imageType, refresh]);
 
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: () => {},

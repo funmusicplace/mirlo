@@ -88,7 +88,6 @@ export default function () {
           updatedAt: true,
           id: true,
           canCreateArtists: true,
-          userAvatar: true,
           profiles: true,
           isLabelAccount: true,
           isAdmin: true,

@@ -32,11 +32,6 @@ const LabelConfirmation: React.FC = () => {
     relationships: {
       labelUser: {
         id: number;
-        userAvatar?: {
-          sizes: {
-            [key: number]: string;
-          };
-        };
         name: string;
         email?: string;
       };
@@ -116,7 +111,6 @@ const LabelConfirmation: React.FC = () => {
               <Table>
                 <thead>
                   <tr>
-                    <th />
                     <th>{t("name")}</th>
                     <th>{t("email")}</th>
                     <th>{t("isLabelConfirmed")}</th>
@@ -128,15 +122,6 @@ const LabelConfirmation: React.FC = () => {
                 <tbody>
                   {fields?.map((relationship, idx) => (
                     <tr key={relationship.id}>
-                      <td>
-                        {relationship.labelUser.userAvatar && (
-                          <img
-                            src={relationship.labelUser.userAvatar.sizes[60]}
-                            width={30}
-                            height={30}
-                          />
-                        )}
-                      </td>
                       <td>{relationship.labelUser.name}</td>
                       <td>{relationship.labelUser.email}</td>
                       <td>

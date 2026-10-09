@@ -270,13 +270,10 @@
     "no": "No"
   },
   "profile": {
-    "yourAvatar": "Your avatar",
-    "yourBanner": "Your banner",
     "account": "Account",
     "accountingEmail": "Accounting email",
     "purchaseDetails": "Purchase details",
     "manageLabel": "Manage label",
-    "tileBackgroundImage": "Tile background image",
     "resetPasswordLink": "Want to change your password? Use the reset form.",
     "password": "Updating your email requires entering your password",
     "deleteYourAccount": "No longer want to use {{instanceName}}? Delete your account",

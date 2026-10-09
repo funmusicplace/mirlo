@@ -73,17 +73,9 @@ type Label = {
   urlSlug: string;
   description: string;
   avatar: { sizes: string[]; url: string; updatedAt: string };
-  banner?: {
-    sizes?: { [key: number]: string; original: string };
-    url: string;
-    updatedAt: string;
-  };
   createdAt: string;
   updatedAt: string;
   artistLabels: { artist: Artist }[];
-  properties?: {
-    tileBackgroundImage?: boolean;
-  };
 };
 
 const fetchLabel: QueryFunction<

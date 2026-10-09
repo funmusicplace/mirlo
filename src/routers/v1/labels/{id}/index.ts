@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import { serializeProfile } from "../../../../serializers/artist";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -40,8 +40,6 @@ export default function () {
           name: true,
           id: true,
           currency: true,
-          userAvatar: true,
-          userBanner: true,
           properties: true,
           artistLabels: {
             where: {

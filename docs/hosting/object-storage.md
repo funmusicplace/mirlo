@@ -42,15 +42,14 @@ Image keys are prefixed with the media type they belong to. The prefixes
 deliberately reuse the **legacy final bucket names**, so migrating an existing
 install is a straight copy of each legacy bucket into a same-named folder:
 
-| Key prefix                                   | Contents                                                                  |
-| -------------------------------------------- | ------------------------------------------------------------------------- |
-| `incoming/<type>/<imageId>`                  | Uploaded images awaiting optimization                                     |
-| `trackgroup-covers/`                         | Album/release covers                                                      |
-| `artist-avatars/`, `artist-banners/`         | Artist profile images                                                     |
-| `mirlo-user-avatars/`, `mirlo-user-banners/` | User profile images                                                       |
-| `merch-images/`                              | Merch photos uploaded before they moved to the bucket root                |
-| `post-images/`                               | Images embedded in posts                                                  |
-| _(bucket root)_                              | Generic images (the `image` type): subscription tier images, merch photos |
+| Key prefix                           | Contents                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| `incoming/<type>/<imageId>`          | Uploaded images awaiting optimization                                     |
+| `trackgroup-covers/`                 | Album/release covers                                                      |
+| `artist-avatars/`, `artist-banners/` | Artist profile images                                                     |
+| `merch-images/`                      | Merch photos uploaded before they moved to the bucket root                |
+| `post-images/`                       | Images embedded in posts                                                  |
+| _(bucket root)_                      | Generic images (the `image` type): subscription tier images, merch photos |
 
 Optimized images are stored in multiple sizes as `<imageId>-x<width>.webp`
 (plus `.jpg` for covers).
@@ -79,8 +78,6 @@ One bucket per media type, with bare object keys. Most types have a separate
 | Release covers       | `incoming-covers`         | `trackgroup-covers`          |
 | Artist avatars       | `incoming-artist-avatars` | `artist-avatars`             |
 | Artist banners       | `incoming-artist-banners` | `artist-banners`             |
-| User avatars         | `incoming-artist-avatars` | `mirlo-user-avatars`         |
-| User banners         | `incoming-user-banners`   | `mirlo-user-banners`         |
 | Merch images         | `incoming-merch-images`   | `merch-images`               |
 | Post images          | —                         | `post-images`                |
 | Generic images       | `incoming-mirlo-images`   | `mirlo-images`               |

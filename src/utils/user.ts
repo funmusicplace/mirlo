@@ -62,8 +62,6 @@ export const userSelect = {
       trackId: true,
     },
   },
-  userAvatar: true,
-  userBanner: true,
   profileUserSubscriptions: {
     where: {
       deletedAt: null,

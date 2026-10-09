@@ -1,14 +1,9 @@
 import { addSizesToImage } from "../utils/artist";
-import {
-  finalArtistAvatarBucket,
-  finalCoversBucket,
-  finalUserAvatarBucket,
-  finalUserBannerBucket,
-} from "../utils/minio";
+import { finalArtistAvatarBucket, finalCoversBucket } from "../utils/minio";
 import { UserSelectPayload } from "../utils/user";
 
-import { omitApPrivateKey, Serialized } from "./utils";
 import { serializeProfileUserSubscription } from "./profileUserSubscription";
+import { omitApPrivateKey, Serialized } from "./utils";
 
 type TrackFavorite = UserSelectPayload["trackFavorites"][number];
 type ProfileUserSubscription =
@@ -16,33 +11,19 @@ type ProfileUserSubscription =
 
 /**
  * Serialize a user for outbound responses. Always remaps `profiles` →
- * `artists` when present; optional nested fields (avatar/banner, favorites,
- * subscriptions) are enriched when included on the payload.
+ * `artists` when present; optional nested fields (favorites, subscriptions)
+ * are enriched when included on the payload.
  */
 export const serializeUser = <T extends object>(user: T): Serialized<T> => {
-  const {
-    profiles,
-    profileUserSubscriptions,
-    trackFavorites,
-    userAvatar,
-    userBanner,
-    ...rest
-  } = user as T & {
-    profiles?: object[];
-    profileUserSubscriptions?: ProfileUserSubscription[];
-    trackFavorites?: TrackFavorite[];
-    userAvatar?: UserSelectPayload["userAvatar"];
-    userBanner?: UserSelectPayload["userBanner"];
-  };
+  const { profiles, profileUserSubscriptions, trackFavorites, ...rest } =
+    user as T & {
+      profiles?: object[];
+      profileUserSubscriptions?: ProfileUserSubscription[];
+      trackFavorites?: TrackFavorite[];
+    };
 
   return {
     ...rest,
-    ...(userAvatar !== undefined
-      ? { userAvatar: addSizesToImage(finalUserAvatarBucket, userAvatar) }
-      : {}),
-    ...(userBanner !== undefined
-      ? { userBanner: addSizesToImage(finalUserBannerBucket, userBanner) }
-      : {}),
     ...(profiles !== undefined
       ? { artists: profiles.map(omitApPrivateKey) }
       : {}),

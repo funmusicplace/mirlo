@@ -4,27 +4,27 @@ import { describe, it } from "mocha";
 
 import { serializeProfile } from "../src/serializers/artist";
 import {
-  renameProfileIdToArtistId,
-  omitApPrivateKey,
-} from "../src/serializers/utils";
-import {
   serializeFundraiser,
   serializeFundraiserPledge,
 } from "../src/serializers/fundraiser";
 import { serializeMerch } from "../src/serializers/merch";
+import { serializeMerchPurchase } from "../src/serializers/merchPurchase";
 import { serializeNotification } from "../src/serializers/notification";
 import { serializePost } from "../src/serializers/post";
-import { serializeMerchPurchase } from "../src/serializers/merchPurchase";
 import { serializeProfileSubscriptionTier } from "../src/serializers/profileSubscriptionTier";
-import { serializeUserProfileTip } from "../src/serializers/userProfileTip";
-import { processSingleTrack } from "../src/serializers/track";
-import { processSingleTrackGroup } from "../src/serializers/trackGroup";
-import { serializeUserTransaction } from "../src/serializers/userTransaction";
-import { serializeUser } from "../src/serializers/user";
 import {
   serializeProfileUserSubscription,
   serializeProfileUserSubscriptionCharge,
 } from "../src/serializers/profileUserSubscription";
+import { processSingleTrack } from "../src/serializers/track";
+import { processSingleTrackGroup } from "../src/serializers/trackGroup";
+import { serializeUser } from "../src/serializers/user";
+import { serializeUserProfileTip } from "../src/serializers/userProfileTip";
+import { serializeUserTransaction } from "../src/serializers/userTransaction";
+import {
+  renameProfileIdToArtistId,
+  omitApPrivateKey,
+} from "../src/serializers/utils";
 
 /**
  * Recursively walk a serialized payload and collect the dotted paths of any key
@@ -219,8 +219,6 @@ describe("outbound serializers", () => {
         id: 2,
         email: "a@b.co",
         profiles: [artistFixture(4)],
-        userAvatar: null,
-        userBanner: null,
         trackFavorites: [
           {
             trackId: 1,

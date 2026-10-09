@@ -24,7 +24,6 @@ import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
   finalCoversBucket,
-  finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
 import { getSiteSettings } from "./settings";
@@ -488,28 +487,6 @@ export const deleteProfileAvatar = async (profileId: number) => {
   }
 };
 
-export const deleteUserAvatar = async (userId: number) => {
-  const avatar = await prisma.userAvatar.findFirst({
-    where: {
-      userId,
-    },
-  });
-
-  if (avatar) {
-    await prisma.userAvatar.delete({
-      where: {
-        userId,
-      },
-    });
-
-    try {
-      removeObjectsFromBucket(finalUserAvatarBucket, avatar.id);
-    } catch (e) {
-      console.error("Found no files, that's okay");
-    }
-  }
-};
-
 export const deleteProfileBackground = async (profileId: number) => {
   const background = await prisma.profileBackground.findFirst({
     where: {
@@ -741,7 +718,6 @@ export const singleInclude = (queryOptions?: {
             id: true,
             name: true,
             urlSlug: true,
-            userAvatar: true,
             ...(includePrivate ? { email: true } : {}),
             profiles: {
               where: {

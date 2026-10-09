@@ -262,36 +262,6 @@ const optimizeImage = async (job: Job) => {
         where: { id: destinationId },
         data: { url: urls },
       });
-    } else if (model === "userAvatar") {
-      try {
-        const sharpBuffer = await sharp(buffer).png().toBuffer();
-        const faviconBuffer = ico.encode([sharpBuffer]);
-        logger.info("Uploading user avatar favicon to bucket");
-        await uploadOptimizedImageByType(
-          imageType,
-          `${destinationId}_user_avatar_favicon.ico`,
-          faviconBuffer,
-          {
-            contentType: "image/x-icon",
-            cacheControl:
-              "public, max-age=604800, stale-while-revalidate=604800",
-          }
-        );
-        logger.info("User avatar favicon uploaded successfully");
-      } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : String(e);
-        logger.error(`Error creating user avatar favicon: ${errorMessage}`);
-      }
-
-      await prisma.userAvatar.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
-    } else if (model === "userBanner") {
-      await prisma.userBanner.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
     } else if (model === "artistAvatar") {
       try {
         const sharpBuffer = await sharp(buffer).png().toBuffer();
