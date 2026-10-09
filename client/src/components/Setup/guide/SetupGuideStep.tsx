@@ -24,6 +24,11 @@ const SetupGuideStep: React.FC<{
   submitLabel,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "setup" });
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
+
+  React.useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
 
   return (
     <section className="max-w-2xl">
@@ -31,7 +36,11 @@ const SetupGuideStep: React.FC<{
         <p className="m-0 text-xs uppercase tracking-widest opacity-60">
           {kicker}
         </p>
-        <h1 className="mt-1! mb-2! text-2xl! leading-snug! font-bold!">
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="mt-1! mb-2! text-2xl! leading-snug! font-bold! outline-none"
+        >
           {title}
         </h1>
         <p className="m-0 opacity-80">{description}</p>

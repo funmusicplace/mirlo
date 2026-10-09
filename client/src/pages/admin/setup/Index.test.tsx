@@ -176,6 +176,15 @@ describe("SetupGuide", () => {
     expect(nav).not.toHaveTextContent("stepSkipped");
   });
 
+  test("moves the focus to the title of the new step", async () => {
+    renderGuide();
+    await startGuide();
+
+    expect(
+      screen.getByRole("heading", { name: "steps.identity" })
+    ).toHaveFocus();
+  });
+
   test("skips a step without saving", async () => {
     vi.mocked(api.get).mockResolvedValue(
       storedSettings({
