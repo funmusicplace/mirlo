@@ -23,7 +23,7 @@ Once connected, you can query the database. Useful commands:
 - `SELECT * FROM "User" LIMIT 5;` - query a table
 - `\q` - quit
 
-**"Authentication failed against database server"** (Prisma) usually means one
+**"Authentication failed against the database server"** (Prisma) usually means one
 of two things:
 
 1. **The containers are running with stale environment.** `docker compose

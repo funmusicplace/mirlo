@@ -1,7 +1,6 @@
-import { PrismaClient } from "../prisma/__generated__";
-import { hashPassword } from "../src/routers/auth/utils";
+import prisma from "@mirlo/prisma";
 
-const prisma = new PrismaClient();
+import { hashPassword } from "../src/routers/auth/utils";
 
 async function setupAdminUser() {
   console.log("\nCreating admin user...\n");

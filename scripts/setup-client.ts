@@ -1,8 +1,6 @@
 import crypto from "crypto";
 
-import { PrismaClient } from "../prisma/__generated__";
-
-const prisma = new PrismaClient();
+import prisma from "@mirlo/prisma";
 
 async function setupClient() {
   console.log("\nCreating client...\n");

@@ -3,7 +3,7 @@ import assert from "node:assert";
 import {
   PrismaClientInitializationError,
   PrismaClientKnownRequestError,
-} from "@prisma/client/runtime/library";
+} from "@prisma/client/runtime/client";
 import { describe, it } from "mocha";
 
 import errorHandler, { AppError } from "../../src/utils/error";

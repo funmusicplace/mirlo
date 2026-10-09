@@ -1,11 +1,12 @@
 generator client {
-  provider        = "prisma-client-js"
-  output          = "./__generated__"
-  binaryTargets   = ["native", "debian-openssl-3.0.x"]
-  previewFeatures = ["fullTextSearchPostgres"]
+  provider            = "prisma-client"
+  output              = "./__generated__"
+  moduleFormat        = "cjs"
+  importFileExtension = ""
+  previewFeatures     = ["fullTextSearchPostgres"]
 }
 
-/// Always after the prisma-client-js generator
+/// Always after the prisma-client generator
 generator json {
   provider = "prisma-json-types-generator"
   // namespace = "PrismaJson"
@@ -15,7 +16,6 @@ generator json {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model DataMigration {
@@ -24,11 +24,11 @@ model DataMigration {
 }
 
 model Settings {
-  id                           Int     @id @default(autoincrement())
+  id                           Int       @id @default(autoincrement())
   /// [Settings]
   settings                     Json
-  isClosedToPublicArtistSignup Boolean @default(false)
-  showQueueDashboard           Boolean @default(false)
+  isClosedToPublicArtistSignup Boolean   @default(false)
+  showQueueDashboard           Boolean   @default(false)
   publicKey                    String? // Used for ActivityPub
   privateKey                   String? // Used for ActivityPub
   bucketNames                  Json? // Used for S3
@@ -37,7 +37,7 @@ model Settings {
   contentPolicy                String?
   privacyPolicy                String?
   cookiePolicy                 String?
-  defconLevel                  Int?    @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
+  defconLevel                  Int?      @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
   setupCompletedAt             DateTime?
 }
 
