@@ -126,4 +126,9 @@ const prisma = baseClient.$extends({
   },
 });
 
+export type PrismaTransactionClient = Omit<
+  typeof prisma,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
+
 export default prisma;

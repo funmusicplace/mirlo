@@ -22,7 +22,7 @@
  *   node --conditions=mirlo-dist dist/scripts/backfillImages.js <source> [--apply] [--prune] [--limit N]
  * where <source> is one of the keys of `imageSources`.
  */
-import prisma from "@mirlo/prisma";
+import prisma, { PrismaTransactionClient } from "@mirlo/prisma";
 
 import { deleteMerchImage } from "../utils/merch";
 import {
@@ -36,11 +36,6 @@ import {
 import { getSiteSettings } from "../utils/settings";
 
 const PENDING_HOURS = 24;
-
-type PrismaTransactionClient = Omit<
-  typeof prisma,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
->;
 
 type LegacyImage = {
   id: string;

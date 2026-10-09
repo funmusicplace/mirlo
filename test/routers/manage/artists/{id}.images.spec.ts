@@ -6,7 +6,12 @@ dotenv.config();
 import { describe, it } from "mocha";
 import sharp from "sharp";
 
-import { clearTables, createProfile, createUser } from "../../../utils";
+import {
+  clearTables,
+  createProfile,
+  createTier,
+  createUser,
+} from "../../../utils";
 import { requestApp } from "../../utils";
 
 const createPng = () =>
@@ -69,6 +74,56 @@ describe("manage/artists/{artistId}/images", () => {
         where: { id: response.body.result.imageId },
       });
       assert.equal(image.profileId, profile.id);
+    });
+  });
+
+  describe("DELETE", () => {
+    it("deletes an image owned by the artist", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const image = await prisma.image.create({
+        data: { dimensions: "square", profileId: profile.id },
+      });
+
+      const response = await requestApp
+        .delete(`manage/artists/${profile.id}/images/${image.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const deleted = await prisma.image.findUniqueOrThrow({
+        where: { id: image.id },
+      });
+      assert.notEqual(deleted.deletedAt, null);
+    });
+
+    it("doesn't delete another artist's image linked to the artist's tier", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const { user: otherUser } = await createUser({
+        email: "other@testcom",
+      });
+      const otherProfile = await createProfile(otherUser.id, {
+        urlSlug: "other",
+      });
+      const otherImage = await prisma.image.create({
+        data: { dimensions: "square", profileId: otherProfile.id },
+      });
+      const tier = await createTier(profile.id);
+      await prisma.subscriptionTierImage.create({
+        data: { tierId: tier.id, imageId: otherImage.id },
+      });
+
+      const response = await requestApp
+        .delete(`manage/artists/${profile.id}/images/${otherImage.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 404);
+      const kept = await prisma.image.findUniqueOrThrow({
+        where: { id: otherImage.id },
+      });
+      assert.equal(kept.deletedAt, null);
     });
   });
 });
