@@ -21,6 +21,67 @@ interface InstanceSettings {
   stripePublishableKey?: string | null;
 }
 
+interface SettingsFromAPI {
+  cdnUrl?: string;
+  bucketNames?: { prefix: string } | null;
+  settings: {
+    platformPercent: number;
+    instanceCustomization?: {
+      colors?: {
+        button?: string;
+        buttonText?: string;
+        background?: string;
+        text?: string;
+      };
+      artistId?: string;
+      title?: string;
+      supportEmail?: string;
+      purchaseEmail?: string;
+      showHeroOnHome?: boolean;
+    };
+    stripe?: {
+      key?: string;
+      keyConfigured?: boolean;
+      publishableKey?: string;
+      webhookSigningSecret?: string;
+      webhookConnectSigningSecret?: string;
+      webhookSecretConfigured?: boolean;
+      webhookEndpointId?: string;
+    };
+    emailProvider?: {
+      provider?: "sendgrid" | "mailgun" | "postmark" | "smtp";
+      fromEmail?: string;
+      sendgrid?: {
+        apiKey?: string;
+      };
+      mailgun?: {
+        apiKey?: string;
+        domain?: string;
+      };
+      postmark?: {
+        apiKey?: string;
+      };
+      smtp?: {
+        host?: string;
+        port?: number;
+        secure?: boolean;
+        user?: string;
+        password?: string;
+      };
+    };
+    cloudflareTurnstileSecret?: string;
+    featuredArtistIds?: number[];
+    trustLevelNames?: string[];
+  };
+  terms: string;
+  privacyPolicy: string;
+  cookiePolicy: string;
+  showQueueDashboard: boolean;
+  isClosedToPublicArtistSignup: boolean;
+  contentPolicy: string;
+  defconLevel: number;
+}
+
 interface LoggedInUser {
   email: string;
   accountingEmail?: string;

@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryAdminSettings } from "queries/admin";
 import { queryInstanceSettings } from "queries/instanceSettings";
 import { queryFeaturedArtists } from "queries/settings";
 import React from "react";
@@ -8,7 +9,6 @@ import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 import {
   FormSettings,
-  SettingsFromAPI,
   formToSettingsPayload,
   settingsToForm,
 } from "./settingsForm";
@@ -17,27 +17,21 @@ export const useAdminSettingsForm = () => {
   const queryClient = useQueryClient();
   const methods = useForm<FormSettings>();
   const { reset } = methods;
+  const settingsQuery = useQuery(queryAdminSettings());
+  const featuredArtistsQuery = useQuery(queryFeaturedArtists());
   const [isLoaded, setIsLoaded] = React.useState(false);
-  const [hasLoadError, setHasLoadError] = React.useState(false);
-  const { data: initialFeaturedArtists } = useQuery(queryFeaturedArtists());
   const [featuredArtistsOverride, setFeaturedArtistsOverride] = React.useState<
     Artist[] | undefined
   >(undefined);
   const featuredArtists =
-    featuredArtistsOverride ?? initialFeaturedArtists ?? [];
+    featuredArtistsOverride ?? featuredArtistsQuery.data ?? [];
 
   React.useEffect(() => {
-    const load = async () => {
-      const response =
-        await api.get<Partial<SettingsFromAPI>>("admin/settings/");
-      reset(settingsToForm(response.result, DEFAULT_TRUST_LEVEL_NAMES));
+    if (!isLoaded && settingsQuery.data && featuredArtistsQuery.data) {
+      reset(settingsToForm(settingsQuery.data, DEFAULT_TRUST_LEVEL_NAMES));
       setIsLoaded(true);
-    };
-    load().catch((e) => {
-      console.error(e);
-      setHasLoadError(true);
-    });
-  }, [reset]);
+    }
+  }, [isLoaded, settingsQuery.data, featuredArtistsQuery.data, reset]);
 
   const saveSettings = React.useCallback(
     async (data: Partial<FormSettings>) => {
@@ -48,9 +42,14 @@ export const useAdminSettingsForm = () => {
           featuredArtists.map((artist) => artist.id)
         )
       );
-      await queryClient.invalidateQueries({
-        queryKey: queryInstanceSettings().queryKey,
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryInstanceSettings().queryKey,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryAdminSettings().queryKey,
+        }),
+      ]);
     },
     [featuredArtists, queryClient]
   );
@@ -58,7 +57,7 @@ export const useAdminSettingsForm = () => {
   return {
     methods,
     isLoaded,
-    hasLoadError,
+    hasLoadError: settingsQuery.isError || featuredArtistsQuery.isError,
     featuredArtists,
     setFeaturedArtistsOverride,
     saveSettings,

@@ -119,7 +119,7 @@ describe("Settings", () => {
     });
 
     expect(
-      screen.getByDisplayValue("https://cdn.example.com")
+      await screen.findByDisplayValue("https://cdn.example.com")
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue("10")).toBeInTheDocument();
   });
