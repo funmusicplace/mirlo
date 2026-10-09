@@ -8,7 +8,7 @@ services:
     branch: main # optional (defaults to master)
     plan: standard # Supposedly this should be free but
 
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=3072 yarn client:build && yarn api:build
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:build && yarn prisma:migrate:deploy && NODE_OPTIONS=--max-old-space-size=3072 yarn client:build && yarn api:build
     startCommand: node --conditions=mirlo-dist --enable-source-maps dist/index.js
     envVars:
       - key: SKIP_INSTALL_DEPS
