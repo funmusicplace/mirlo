@@ -551,7 +551,7 @@ const attachTip = async (
     },
   });
 
-  subscribeUserToProfile(tip.profile, user);
+  await subscribeUserToProfile(tip.profile, user);
 
   return {
     sale: { artist: tip.profile },

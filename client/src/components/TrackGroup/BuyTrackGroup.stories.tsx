@@ -154,7 +154,7 @@ export const Pledge: Story = {
     await waitForPriceInput();
     const canvas = within(canvasElement);
     await userEvent.click(
-      canvas.getByLabelText(/payment method will be stored/)
+      await canvas.findByLabelText(/payment method will be stored/)
     );
     await userEvent.click(
       canvas.getByRole("button", { name: "Add payment information" })
