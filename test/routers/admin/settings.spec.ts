@@ -264,6 +264,180 @@ describe("admin/settings", () => {
       assert.equal(stripe?.webhookConnectSigningSecret, "whsec_existing");
     });
 
+    it("should keep the stored settings keys the request does not send", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: { title: "Nightjar Records" },
+        someFutureKey: { nested: true },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 10,
+            instanceCustomization: { title: "Nightjar" },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, unknown>;
+      assert.equal(stored.platformPercent, 10);
+      assert.deepEqual(stored.instanceCustomization, { title: "Nightjar" });
+      assert.deepEqual(stored.someFutureKey, { nested: true });
+    });
+
+    it("should keep the stripe keys, featured artists and defcon level a partial request does not send", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      const { id } = await createSiteSettings({
+        platformPercent: 7,
+        stripe: {
+          key: "sk_test_secret",
+          publishableKey: "pk_test_public",
+          webhookEndpointId: "we_123",
+        },
+        featuredArtistIds: [3, 5],
+      });
+      await prisma.settings.update({ where: { id }, data: { defconLevel: 2 } });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ settings: { platformPercent: 10, stripe: { key: "" } } });
+
+      assert.equal(response.statusCode, 200);
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(stored.platformPercent, 10);
+      assert.deepEqual(stored.stripe, {
+        key: "sk_test_secret",
+        publishableKey: "pk_test_public",
+        webhookEndpointId: "we_123",
+      });
+      assert.deepEqual(stored.featuredArtistIds, [3, 5]);
+      assert.equal(row?.defconLevel, 2);
+    });
+
+    it("should trim the instance name before storing it", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: { title: "  Nightjar  ", artistId: "4" },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(
+        response.body.result.settings.instanceCustomization.title,
+        "Nightjar"
+      );
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.deepEqual(stored.instanceCustomization, {
+        title: "Nightjar",
+        artistId: "4",
+      });
+    });
+
+    it("should refuse to remove the instance name once it is set", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: { title: "Nightjar Records" },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 10,
+            instanceCustomization: { title: "  " },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(stored.instanceCustomization.title, "Nightjar Records");
+      assert.equal(stored.platformPercent, 7);
+    });
+
+    it("should refuse a null instanceCustomization once the instance is named", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: { title: "Nightjar Records" },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: { platformPercent: 10, instanceCustomization: null },
+        });
+
+      assert.equal(response.statusCode, 400);
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(stored.instanceCustomization.title, "Nightjar Records");
+    });
+
+    it("should reject an instance name that is not a string", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 10,
+            instanceCustomization: { title: 42 },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should save bucketNames: { prefix: 'foo-' } to DB and return it in response", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

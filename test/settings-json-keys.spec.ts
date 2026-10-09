@@ -18,14 +18,12 @@ import {
 
 const REPO_ROOT = join(__dirname, "..");
 const PRISMA_JSON_TYPES = join(REPO_ROOT, "prisma", "index.ts");
-const CLIENT_SETTINGS_FORM = join(
+const CLIENT_SETTINGS_TYPES = join(
   REPO_ROOT,
   "client",
   "src",
-  "components",
-  "Admin",
-  "settings",
-  "settingsForm.ts"
+  "types",
+  "index.d.ts"
 );
 const THIS_BASENAME = basename(__filename);
 
@@ -244,7 +242,7 @@ describe("settings JSON key contract", () => {
 
   it("keeps the client admin settings shape aligned with PrismaJson.Settings", () => {
     const canonical = loadCanonicalSettingsPaths();
-    const clientSource = readFileSync(CLIENT_SETTINGS_FORM, "utf8");
+    const clientSource = readFileSync(CLIENT_SETTINGS_TYPES, "utf8");
     const clientSettings = clientSource.match(
       /interface SettingsFromAPI\s*\{[\s\S]*?settings:\s*\{([\s\S]*?)\n  \};/
     )?.[1];

@@ -57,14 +57,6 @@ function App() {
     }
   }, [isWidget]);
 
-  if (isWidget) {
-    return <Outlet />;
-  }
-
-  if (setupRedirect) {
-    return <Navigate to={setupRedirect} replace />;
-  }
-
   useEffect(() => {
     if (search.get("message")) {
       const message = search.get("message");
@@ -77,6 +69,14 @@ function App() {
       }
     }
   }, [search]);
+
+  if (isWidget) {
+    return <Outlet />;
+  }
+
+  if (setupRedirect) {
+    return <Navigate to={setupRedirect} replace />;
+  }
 
   const isPlayerVisible = !(!currentTrack || isEmpty(currentTrack.trackGroup));
 

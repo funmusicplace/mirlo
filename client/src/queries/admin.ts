@@ -1,11 +1,13 @@
 import {
   keepPreviousData,
+  queryOptions,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import api from "services/api";
 
+const QUERY_KEY_ADMIN_SETTINGS = "admin-settings";
 const QUERY_KEY_ADMIN_FUNDRAISER_PLEDGES = "admin-fundraiser-pledges";
 const QUERY_KEY_ADMIN_CLIENTS = "admin-clients";
 const QUERY_KEY_ADMIN_STATS = "admin-stats";
@@ -456,3 +458,10 @@ async function registerStripeWebhook() {
 
 export const useRegisterStripeWebhookMutation = () =>
   useMutation({ mutationFn: registerStripeWebhook });
+
+export const queryAdminSettings = () =>
+  queryOptions({
+    queryKey: [QUERY_KEY_ADMIN_SETTINGS],
+    queryFn: async () =>
+      (await api.get<Partial<SettingsFromAPI>>("admin/settings/")).result,
+  });

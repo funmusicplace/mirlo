@@ -1,10 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import * as api from "queries/fetch/fetchWrapper";
 import { queryInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import api from "services/api";
 import { DEFAULT_INSTANCE_SETTINGS } from "utils/instanceSettings";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -16,10 +16,36 @@ vi.mock("react-i18next", () => ({
   Trans: ({ i18nKey }: { i18nKey: string }) => <>{i18nKey}</>,
 }));
 
-vi.mock("queries/fetch/fetchWrapper", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("queries/fetch/fetchWrapper")>()),
-  post: vi.fn(),
+vi.mock("services/api", () => ({
+  default: { get: vi.fn(), post: vi.fn() },
 }));
+
+vi.mock("queries/settings", () => ({
+  queryFeaturedArtists: () => ({
+    queryKey: ["fetchFeaturedArtists"],
+    queryFn: () => Promise.resolve([]),
+  }),
+}));
+
+const STORED_SETTINGS = {
+  result: {
+    isClosedToPublicArtistSignup: false,
+    showQueueDashboard: false,
+    terms: "Terms text",
+    settings: {
+      platformPercent: 10,
+      instanceCustomization: { artistId: "7" },
+    },
+    bucketNames: null,
+    defconLevel: 0,
+  },
+};
+
+const lastSavedCustomization = () =>
+  (vi.mocked(api.post).mock.calls[0][1] as { settings: SettingsPayload })
+    .settings.instanceCustomization;
+
+type SettingsPayload = { instanceCustomization: Record<string, unknown> };
 
 const authState: { user: Partial<LoggedInUser> | null | undefined } = {
   user: undefined,
@@ -55,6 +81,12 @@ function renderWelcome(setupStage: InstanceSettings["setupStage"]) {
   );
 }
 
+const clickOpenMyPlatform = async () => {
+  const button = screen.getByRole("button", { name: "openMyPlatform" });
+  await waitFor(() => expect(button).toBeEnabled());
+  await userEvent.click(button);
+};
+
 const fillFirstTwoSteps = async (email?: string) => {
   await userEvent.type(screen.getByLabelText("nameLabel"), "Nightjar");
   await userEvent.click(screen.getByRole("button", { name: "continue" }));
@@ -67,10 +99,12 @@ const fillFirstTwoSteps = async (email?: string) => {
 describe("Welcome", () => {
   beforeEach(() => {
     authState.user = { id: 1, isAdmin: true };
+    vi.mocked(api.get).mockReset();
+    vi.mocked(api.get).mockResolvedValue(STORED_SETTINGS as any);
     vi.mocked(api.post).mockReset();
-    vi.mocked(api.post).mockResolvedValue({
-      result: DEFAULT_INSTANCE_SETTINGS,
-    });
+    vi.mocked(api.post).mockImplementation(async (_endpoint, body) => ({
+      result: body,
+    }));
     assign.mockClear();
     Object.defineProperty(window, "location", {
       value: { ...window.location, assign },
@@ -91,10 +125,10 @@ describe("Welcome", () => {
     await userEvent.click(screen.getByRole("button", { name: "logIn" }));
 
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith("auth/login", {
-        email: "admin@example.com",
-        password: "secret",
-      });
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("auth/login"),
+        expect.objectContaining({ method: "POST" })
+      );
     });
     expect(screen.queryByText("nameLead")).not.toBeInTheDocument();
   });
@@ -131,34 +165,47 @@ describe("Welcome", () => {
 
     expect(screen.getByText("colorLead")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "colorYellow" }));
-    await userEvent.click(
-      screen.getByRole("button", { name: "openMyPlatform" })
-    );
+    await clickOpenMyPlatform();
 
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith("v1/admin/setup", {
-        name: "Nightjar",
-        supportEmail: "hello@nightjar.test",
-        colors: { button: "#eda100", buttonText: "#000000" },
-      });
+      expect(api.post).toHaveBeenCalledWith(
+        "admin/settings",
+        expect.objectContaining({
+          terms: "Terms text",
+          settings: expect.objectContaining({ platformPercent: 10 }),
+        })
+      );
     });
-    await waitFor(() => expect(assign).toHaveBeenCalledWith("/"));
+    expect(lastSavedCustomization()).toEqual({
+      artistId: "7",
+      title: "Nightjar",
+      supportEmail: "hello@nightjar.test",
+      colors: {
+        button: "#eda100",
+        buttonText: "#000000",
+        background: "#ffffff",
+        text: "#000000",
+      },
+    });
+    await waitFor(() => expect(assign).toHaveBeenCalledWith("/admin/setup"));
   });
 
   test("leaves the contact email out when it is skipped", async () => {
     renderWelcome("welcome");
 
     await fillFirstTwoSteps();
-    await userEvent.click(
-      screen.getByRole("button", { name: "openMyPlatform" })
-    );
+    await clickOpenMyPlatform();
 
-    await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith("v1/admin/setup", {
-        name: "Nightjar",
-        supportEmail: undefined,
-        colors: { button: "#be3455", buttonText: "#ffffff" },
-      });
+    await waitFor(() => expect(api.post).toHaveBeenCalled());
+    expect(lastSavedCustomization()).toEqual({
+      artistId: "7",
+      title: "Nightjar",
+      colors: {
+        button: "#be3455",
+        buttonText: "#ffffff",
+        background: "#ffffff",
+        text: "#000000",
+      },
     });
   });
 
@@ -187,9 +234,7 @@ describe("Welcome", () => {
     renderWelcome("welcome");
 
     await fillFirstTwoSteps();
-    await userEvent.click(
-      screen.getByRole("button", { name: "openMyPlatform" })
-    );
+    await clickOpenMyPlatform();
 
     expect(await screen.findByRole("alert")).toHaveTextContent("saveError");
     expect(assign).not.toHaveBeenCalled();

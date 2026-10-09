@@ -87,6 +87,7 @@
     "adminTracks": "Admin: tracks",
     "adminLicenses": "Admin: licenses",
     "adminSettings": "Admin: settings",
+    "adminSetup": "Admin: setup guide",
     "adminClients": "Admin: API clients",
     "flaggedContent": "Flagged content",
     "adminSendEmails": "Admin: send emails"
@@ -1745,7 +1746,10 @@
     "addUsersSkipped_one": "{{count}} address already existed and was skipped.",
     "addUsersSkipped_other": "{{count}} addresses already existed and were skipped.",
     "settingsSectionsNav": "Settings sections",
+    "setupGuideUnfinished": "The setup guide is not finished yet. <guideLink>Resume it</guideLink> to go through the remaining steps.",
+    "sectionIdentity": "Identity",
     "sectionGeneral": "General",
+    "sectionPlatformPolicy": "Platform policy",
     "sectionFeaturedArtists": "Featured artists",
     "sectionStripe": "Stripe",
     "sectionEmailProvider": "Email provider",
@@ -1753,8 +1757,11 @@
     "sectionPolicies": "Policies",
     "sectionTrustLevels": "Trust levels",
     "sectionSecurity": "Security",
+    "identitySettings": "Identity",
     "generalSettings": "General Settings",
+    "platformPolicySettings": "Platform policy",
     "instanceName": "Instance name",
+    "instanceNameRequired": "Give your instance a name",
     "platformPercent": "Platform percent",
     "cdnUrl": "CDN URL",
     "isClosedToPublicArtistSignup": "Is closed to public artist signup",
@@ -2050,7 +2057,47 @@
     "back": "Back",
     "continue": "Continue",
     "openMyPlatform": "Open my platform",
-    "saveError": "Something went wrong, your answers were not saved. Try again."
+    "saveError": "Something went wrong, your answers were not saved. Try again.",
+    "loadError": "The current settings could not be loaded. Reload the page to try again.",
+    "guideNavLabel": "Setup steps",
+    "guideNavHeading": "Instance setup",
+    "stepDone": "Done",
+    "stepSkipped": "skipped",
+    "stepOf": "Step {{current}} of {{total}}",
+    "skipForNow": "Skip for now",
+    "finishLater": "Finish later",
+    "saveAndContinue": "Save and continue",
+    "start": "Start",
+    "goToDashboard": "Go to the dashboard",
+    "steps": {
+      "welcome": "Welcome",
+      "identity": "Identity",
+      "email": "Email",
+      "platformPolicy": "Platform policy",
+      "done": "Done"
+    },
+    "status": {
+      "done": "done",
+      "skipped": "skipped",
+      "todo": "to do"
+    },
+    "welcome": {
+      "title": "Your instance is up. Let's finish setting it up.",
+      "description": "This guide walks you through the settings a platform needs before it can welcome artists and listeners. Each step can be skipped and revisited later from the admin settings."
+    },
+    "identity": {
+      "description": "Your platform's name and its color theme."
+    },
+    "email": {
+      "description": "Account confirmations, password resets, receipts and artist notifications are all sent by email. Without a provider, they are not delivered."
+    },
+    "platformPolicy": {
+      "description": "How much of a percentage fee (if any) your platform takes, who gets to publish, and the rules everyone agrees to."
+    },
+    "done": {
+      "title": "You're set up.",
+      "description": "Here is where your instance stands. Skipped items can be finished later from the admin settings."
+    }
   },
   "welcome": {
     "welcome": "Welcome! Let's get you set up.",

@@ -804,6 +804,21 @@ const routes: RouteObject[] = [
         ],
       },
       {
+        path: "admin/setup",
+        handle: { title: "adminSetup" },
+        async lazy() {
+          const { default: Component } =
+            await import("pages/admin/setup/Index");
+          return {
+            Component: () => (
+              <AuthWrapper adminOnly>
+                <Component />
+              </AuthWrapper>
+            ),
+          };
+        },
+      },
+      {
         path: "releases",
         handle: { title: "releases" },
         async lazy() {

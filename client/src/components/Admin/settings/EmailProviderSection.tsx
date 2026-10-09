@@ -8,7 +8,9 @@ import { EMAIL_REGEX } from "utils/email";
 
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
-const EmailProviderSection: React.FC = () => {
+const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
+  hideTitle,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const {
     register,
@@ -22,6 +24,7 @@ const EmailProviderSection: React.FC = () => {
     <SettingsSection
       id="settings-email-provider"
       title={t("emailProviderSettings")}
+      hideTitle={hideTitle}
     >
       <FormComponent>
         <label htmlFor="input-email-provider">{t("emailProviderLabel")}</label>
