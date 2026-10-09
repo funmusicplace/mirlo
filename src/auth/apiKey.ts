@@ -12,7 +12,6 @@ const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 const isExcludedFromKeyCheck = (path: string, query?: { format?: string }) => {
   return (
     path.includes("/oembed") ||
-    path.startsWith("/v1/checkout") ||
     path.startsWith("/v1/webhooks") ||
     path.endsWith("/stripe/connect") ||
     path.endsWith("/stripe/connectComplete") ||

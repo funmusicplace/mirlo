@@ -107,10 +107,6 @@ export const deleteMerch = async (merchId: string) => {
 };
 
 // --- Order-resolution helpers for merch purchases ---
-//
-// Used by both purchase flows: POST /v1/purchase calls these directly, and
-// src/utils/stripe/sessions.ts's determineShipping wraps calculateMerchShippingCost
-// in Stripe's shipping_rate_data shape for the legacy Checkout Session endpoint.
 
 const stripeBannedDestinations =
   "AS, CX, CC, CU, HM, IR, KP, MH, FM, NF, MP, PW, SD, SY, UM, VI".split(", ");

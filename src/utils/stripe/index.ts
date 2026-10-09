@@ -14,14 +14,9 @@ import { subscribeUserToProfile } from "../artist";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
-  handleProfileGift,
-  handleCataloguePurchase,
   handleFundraiserPledge,
   handleFundraiserPledgePaymentFailure,
   handleFundraiserPledgePaymentSuccess,
-  handleSubscription,
-  handleTrackGroupPurchase,
-  handleTrackPurchase,
   completePurchase,
 } from "../handleFinishedTransactions";
 import { merchImageUrl } from "../merch";
@@ -38,7 +33,6 @@ import { findOrCreateUserBasedOnEmail, updateCurrencies } from "../user";
 
 import {
   completedPaymentFromIntent,
-  completedPaymentFromSession,
   getFeesFromPaymentIntent,
   getPlatformCurrencyValueFromIntent,
 } from "./completedPayment";
@@ -381,81 +375,8 @@ type SessionMetaData = {
     | "merch"
     | "tip"
     | "track"
-    | "artistCatalogue"
     | "catalogue"
     | "fundraiserPledge";
-};
-
-export const handleCheckoutSession = async (
-  session: Stripe.Checkout.Session
-) => {
-  try {
-    const metadata = session.metadata as unknown as SessionMetaData;
-    const {
-      tierId,
-      trackGroupId,
-      stripeAccountId,
-      purchaseType,
-      trackId,
-      artistId: profileId,
-    } = metadata;
-    let { userId, userEmail } = metadata;
-    const { userName } = metadata;
-    userEmail = userEmail || (session.customer_details?.email ?? "");
-    logger.info(
-      `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, ${JSON.stringify(metadata)}`
-    );
-    logger.info(
-      `checkout.session: ${session.id}, have user info: userId: ${userId} userEmail: ${userEmail}`
-    );
-    session = await stripe.checkout.sessions.retrieve(
-      session.id,
-      {
-        expand: ["line_items"],
-      },
-      { stripeAccount: stripeAccountId }
-    );
-
-    let { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
-      userEmail,
-      userId,
-      userName
-    );
-    logger.info(`checkout.session: ${session.id} Processing session`);
-    const payment = await completedPaymentFromSession(session);
-    if (purchaseType === "tip") {
-      logger.info(`checkout.session: ${session.id} handling tip`);
-      await handleProfileGift(Number(actualUserId), Number(profileId), payment);
-    } else if (purchaseType === "subscription") {
-      logger.info(`checkout.session: ${session.id} handling subscription`);
-      await handleSubscription(
-        Number(actualUserId),
-        Number(tierId),
-        payment,
-        session.subscription as string
-      );
-    } else if (purchaseType === "trackGroup") {
-      logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
-      await handleTrackGroupPurchase(
-        Number(actualUserId),
-        Number(trackGroupId),
-        payment,
-        newUser
-      );
-    } else if (purchaseType === "track") {
-      logger.info(`checkout.session: ${session.id} handleTrackPurchase`);
-      await handleTrackPurchase(Number(actualUserId), Number(trackId), payment);
-    } else if (purchaseType === "artistCatalogue") {
-      logger.info(`checkout.session: ${session.id} handleCataloguePurchase`);
-      await handleCataloguePurchase(
-        Number(actualUserId),
-        Number(profileId),
-        payment
-      );
-    }
-  } catch (e) {
-    console.error(e);
-  }
 };
 
 const recoverEmailFromSetupIntent = async (

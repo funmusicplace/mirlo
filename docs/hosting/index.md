@@ -169,7 +169,6 @@ Mirlo's payment activity happens on connected accounts, and this endpoint is
 what keeps subscriptions, purchases and payouts in sync. When creating it,
 set "Listen to events on Connected accounts" and select at least:
 
-- `checkout.session.completed`
 - `setup_intent.succeeded`
 - `invoice.paid`
 - `invoice.payment_failed`
