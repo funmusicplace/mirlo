@@ -357,6 +357,10 @@ export const processMerchImage = (ctx: APIContext) => {
       "image",
       "artwork",
       async (fileInfo: { filename: string }) => {
+        const merch = await prisma.merch.findUniqueOrThrow({
+          where: { id: merchId },
+          select: { profileId: true },
+        });
         const last = await prisma.merchImage.findFirst({
           where: { merchId },
           orderBy: { position: "desc" },
@@ -365,6 +369,7 @@ export const processMerchImage = (ctx: APIContext) => {
           data: {
             originalFilename: fileInfo.filename,
             dimensions: "square",
+            profileId: merch.profileId,
             merchImage: {
               create: { merchId, position: last ? last.position + 1 : 0 },
             },

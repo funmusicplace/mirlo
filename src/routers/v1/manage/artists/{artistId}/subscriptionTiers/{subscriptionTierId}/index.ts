@@ -7,6 +7,7 @@ import {
   userAuthenticated,
 } from "../../../../../../../auth/passport";
 import { serializeProfileSubscriptionTier } from "../../../../../../../serializers/profileSubscriptionTier";
+import { AppError } from "../../../../../../../utils/error";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import { getSiteSettings } from "../../../../../../../utils/settings";
 import { generateUniqueTierSlug } from "../../../../../../../utils/subscriptionTier";
@@ -96,6 +97,18 @@ export default function () {
           error: "Subscription must belong to user",
         });
         return next();
+      }
+
+      if (req.body.imageId) {
+        const image = await prisma.image.findFirst({
+          where: {
+            id: req.body.imageId,
+            profileId: subscriptionTier.profileId,
+          },
+        });
+        if (!image) {
+          throw new AppError({ httpCode: 404, description: "Image not found" });
+        }
       }
 
       const nameChanged =

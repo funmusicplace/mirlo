@@ -1,4 +1,4 @@
-import prisma from "@mirlo/prisma";
+import prisma, { PrismaTransactionClient } from "@mirlo/prisma";
 
 import logger from "../logger";
 
@@ -173,11 +173,6 @@ export const grantSubscriptionTierReleases = async ({
 
   return releases.length;
 };
-
-type PrismaTransactionClient = Omit<
-  typeof prisma,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
->;
 
 export const grantReleaseToExistingSubscribers = async (
   {

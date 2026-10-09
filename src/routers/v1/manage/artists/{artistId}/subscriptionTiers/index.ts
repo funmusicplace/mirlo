@@ -9,6 +9,7 @@ import {
 } from "../../../../../../auth/passport";
 import { serializeProfileSubscriptionTier } from "../../../../../../serializers/profileSubscriptionTier";
 import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
+import { AppError } from "../../../../../../utils/error";
 import { generateUniqueTierSlug } from "../../../../../../utils/subscriptionTier";
 
 type Params = {
@@ -79,7 +80,7 @@ export default function () {
     }
   }
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
     assertLoggedIn(req);
     const user = req.user;
@@ -99,6 +100,16 @@ export default function () {
         merchDiscountPercent,
         imageId,
       } = req.body;
+      if (imageId) {
+        const image = await prisma.image.findFirst({
+          where: { id: imageId, profileId: Number(artistId) },
+        });
+        if (!image) {
+          return next(
+            new AppError({ httpCode: 404, description: "Image not found" })
+          );
+        }
+      }
       const subscription = await prisma.profileSubscriptionTier.create({
         data: {
           name,

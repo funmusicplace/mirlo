@@ -4,6 +4,7 @@ import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+import sharp from "sharp";
 import request from "supertest";
 
 import {
@@ -64,6 +65,27 @@ describe("manage/merch/{merchId}/images", () => {
     assert.match(images[0].sizes["600"], /merch-images/);
     assert.doesNotMatch(images[1].sizes["600"], /merch-images/);
     assert.match(images[1].sizes["600"], /mirlo-images/);
+  });
+
+  it("uploads an image owned by the merch's artist", async () => {
+    const { accessToken, profile, merch } = await setup();
+    const png = await sharp({
+      create: { width: 2, height: 2, channels: 3, background: "#fff" },
+    })
+      .png()
+      .toBuffer();
+
+    const response = await requestApp
+      .post(`manage/merch/${merch.id}/images`)
+      .attach("file", png, "photo.png")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    const image = await prisma.image.findUniqueOrThrow({
+      where: { id: response.body.result.imageId },
+    });
+    assert.equal(image.profileId, profile.id);
   });
 
   it("reorders images", async () => {

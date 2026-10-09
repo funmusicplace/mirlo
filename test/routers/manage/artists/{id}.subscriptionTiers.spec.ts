@@ -1,5 +1,7 @@
 import assert from "node:assert";
 
+import { faker } from "@faker-js/faker";
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
@@ -12,8 +14,6 @@ import {
   createUser,
 } from "../../../utils";
 import { requestApp } from "../../utils";
-
-import { faker } from "@faker-js/faker";
 
 describe("manage/artists/{artistId}/subscriptionTiers", () => {
   beforeEach(async () => {
@@ -99,6 +99,61 @@ describe("manage/artists/{artistId}/subscriptionTiers", () => {
       assert.equal(second.statusCode, 200);
       assert.equal(second.body.result.urlSlug, "gold-2");
     });
+
+    it("should link an image belonging to the artist", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const image = await prisma.image.create({
+        data: { dimensions: "square", profileId: artist.id },
+      });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/subscriptionTiers`)
+        .send({ name: "Gold", minAmount: 500, imageId: image.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const links = await prisma.subscriptionTierImage.findMany({
+        where: { tierId: response.body.result.id },
+      });
+      assert.deepEqual(
+        links.map((l) => l.imageId),
+        [image.id]
+      );
+    });
+
+    it("should not link another artist's image", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+      });
+      const otherArtist = await createArtist(otherUser.id, {
+        urlSlug: "other",
+      });
+      const otherImage = await prisma.image.create({
+        data: { dimensions: "square", profileId: otherArtist.id },
+      });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/subscriptionTiers`)
+        .send({ name: "Gold", minAmount: 500, imageId: otherImage.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+      assert.equal(
+        await prisma.profileSubscriptionTier.count({
+          where: { profileId: artist.id },
+        }),
+        0
+      );
+    });
   });
 });
 
@@ -174,6 +229,37 @@ describe("manage/artists/{artistId}/subscriptionTiers/{tierId}", () => {
 
       assert.equal(response.body.result.allowVariable, true);
       assert.equal(response.statusCode, 200);
+    });
+
+    it("should not link another artist's image", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id);
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+      });
+      const otherArtist = await createArtist(otherUser.id, {
+        urlSlug: "other",
+      });
+      const otherImage = await prisma.image.create({
+        data: { dimensions: "square", profileId: otherArtist.id },
+      });
+
+      const response = await requestApp
+        .put(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}`)
+        .send({ minAmount: 500, imageId: otherImage.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+      assert.equal(
+        await prisma.subscriptionTierImage.count({
+          where: { tierId: tier.id },
+        }),
+        0
+      );
     });
   });
 });

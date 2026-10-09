@@ -27,14 +27,11 @@ export default function () {
     const { artistId: profileId, imageId } = req.params as unknown as Params;
 
     try {
-      const tierImage = await prisma.subscriptionTierImage.findFirst({
-        where: {
-          imageId,
-          tier: { profileId: Number(profileId) },
-        },
+      const image = await prisma.image.findFirst({
+        where: { id: imageId, profileId: Number(profileId) },
       });
 
-      if (!tierImage) {
+      if (!image) {
         throw new AppError({
           httpCode: 404,
           description: "Image not found for this artist",

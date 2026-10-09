@@ -7,7 +7,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { afterEach, beforeEach, describe, it } from "mocha";
 
-import { backfillMerchImages } from "../../src/scripts/backfillMerchImages";
+import { backfillImages, merchImages } from "../../src/scripts/backfillImages";
 import {
   BucketConfig,
   downloadIncomingImageByType,
@@ -24,7 +24,7 @@ const layouts: { name: string; config: BucketConfig | null }[] = [
   { name: "consolidated buckets", config: { prefix: "" } },
 ];
 
-describe("scripts/backfillMerchImages", () => {
+describe("scripts/backfillImages", () => {
   for (const layout of layouts) {
     describe(layout.name, () => {
       beforeEach(async () => {
@@ -87,7 +87,7 @@ describe("scripts/backfillMerchImages", () => {
         const reloaded = await prisma.merchImage.findUniqueOrThrow({
           where: { id: stored.id },
         });
-        return { stored: reloaded, missing, unprocessed, pending };
+        return { profile, stored: reloaded, missing, unprocessed, pending };
       };
 
       const incomingIsGone = (id: string) =>
@@ -99,7 +99,7 @@ describe("scripts/backfillMerchImages", () => {
       it("reports without writing on a dry run", async () => {
         const { stored } = await seed();
 
-        const summary = await backfillMerchImages({ apply: false });
+        const summary = await backfillImages(merchImages, { apply: false });
 
         assert.deepEqual(summary, {
           migrated: 1,
@@ -117,9 +117,9 @@ describe("scripts/backfillMerchImages", () => {
       });
 
       it("copies files and links a central Image with the same id, url and updatedAt", async () => {
-        const { stored, missing, unprocessed, pending } = await seed();
+        const { profile, stored, missing, unprocessed, pending } = await seed();
 
-        const summary = await backfillMerchImages({ apply: true });
+        const summary = await backfillImages(merchImages, { apply: true });
 
         assert.deepEqual(summary, {
           migrated: 1,
@@ -135,6 +135,7 @@ describe("scripts/backfillMerchImages", () => {
           include: { image: true },
         });
         assert.equal(linked.imageId, stored.id);
+        assert.equal(linked.image?.profileId, profile.id);
         assert.deepEqual(linked.image?.url, stored.url);
         assert.equal(
           linked.image?.updatedAt.getTime(),
@@ -158,9 +159,9 @@ describe("scripts/backfillMerchImages", () => {
 
       it("is safe to re-run", async () => {
         await seed();
-        await backfillMerchImages({ apply: true });
+        await backfillImages(merchImages, { apply: true });
 
-        const second = await backfillMerchImages({ apply: true });
+        const second = await backfillImages(merchImages, { apply: true });
 
         assert.equal(second.migrated, 0);
         assert.equal(second.failed, 0);
@@ -169,7 +170,7 @@ describe("scripts/backfillMerchImages", () => {
       it("lists what --prune would delete without deleting it", async () => {
         const { missing, unprocessed, pending } = await seed();
 
-        const summary = await backfillMerchImages({
+        const summary = await backfillImages(merchImages, {
           apply: false,
           prune: true,
         });
@@ -188,7 +189,10 @@ describe("scripts/backfillMerchImages", () => {
       it("--prune deletes missing and stale unprocessed images, but not pending ones", async () => {
         const { stored, missing, unprocessed, pending } = await seed();
 
-        const summary = await backfillMerchImages({ apply: true, prune: true });
+        const summary = await backfillImages(merchImages, {
+          apply: true,
+          prune: true,
+        });
 
         assert.deepEqual(summary, {
           migrated: 1,
@@ -213,7 +217,7 @@ describe("scripts/backfillMerchImages", () => {
       it('prune: "unprocessed" keeps missing images', async () => {
         const { missing, unprocessed } = await seed();
 
-        const summary = await backfillMerchImages({
+        const summary = await backfillImages(merchImages, {
           apply: true,
           prune: "unprocessed",
         });
@@ -232,7 +236,10 @@ describe("scripts/backfillMerchImages", () => {
       it("respects the limit", async () => {
         await seed();
 
-        const summary = await backfillMerchImages({ apply: false, limit: 1 });
+        const summary = await backfillImages(merchImages, {
+          apply: false,
+          limit: 1,
+        });
 
         assert.equal(
           summary.migrated + summary.missing + summary.unprocessed,

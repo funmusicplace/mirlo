@@ -53,9 +53,10 @@ export default function () {
           let image;
           log.info(`Upserting image for new image ${fileInfo.filename}`);
           if (details.imageId) {
-            image = await prisma.image.findUnique({
+            image = await prisma.image.findFirst({
               where: {
                 id: details.imageId,
+                profileId: Number(profileId),
               },
             });
           }
@@ -64,6 +65,7 @@ export default function () {
               data: {
                 originalFilename: fileInfo.filename,
                 dimensions: details.dimensions,
+                profileId: Number(profileId),
               },
             });
           }
