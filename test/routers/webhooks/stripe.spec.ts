@@ -1174,4 +1174,97 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.equal(sendMailStub.calledOnce, false);
     });
   });
+
+  describe("chargePledgePayments", () => {
+    it("records the charge so payment_intent.succeeded completes the pledge", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge",
+      });
+      const { user: backer } = await createUser({ email: "backer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const fundraiser = await prisma.fundraiser.create({
+        data: {
+          name: "Help Record",
+          goalAmount: 5000,
+          trackGroups: { connect: [{ id: trackGroup.id }] },
+        },
+      });
+      const { id: pledgeId } = await prisma.fundraiserPledge.create({
+        data: {
+          userId: backer.id,
+          fundraiserId: fundraiser.id,
+          amount: 5000,
+          stripeSetupIntentId: "seti_pledge",
+        },
+      });
+      const pledge = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledgeId },
+        include: {
+          user: true,
+          fundraiser: {
+            include: {
+              trackGroups: {
+                include: { profile: { include: { user: true } } },
+              },
+            },
+          },
+        },
+      });
+
+      sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
+        id: "acct_pledge",
+        default_currency: "usd",
+        country: "US",
+      } as unknown as Stripe.Response<Stripe.Account>);
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [{ id: "cus_backer" }],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.paymentMethods, "list").resolves({
+        data: [{ id: "pm_backer" }],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>);
+      const createStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "create")
+        .resolves({
+          id: "pi_pledge_charge",
+          status: "succeeded",
+        } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      const metadata = (
+        createStub.firstCall.args[0] as Stripe.PaymentIntentCreateParams
+      ).metadata as Record<string, string>;
+      const transaction = await prisma.userTransaction.findFirst({
+        where: { id: metadata.transactionId },
+        include: { associatedPledge: true },
+      });
+      assert.equal(transaction?.stripeId, "pi_pledge_charge");
+      assert.equal(transaction?.paymentStatus, "PENDING");
+      assert.equal(transaction?.associatedPledge?.id, pledge.id);
+
+      const intent = {
+        id: "pi_pledge_charge",
+        status: "succeeded",
+        metadata,
+      } as unknown as Stripe.PaymentIntent;
+      await stripeUtils.handlePaymentIntentSucceeded(intent, "acct_pledge");
+      await stripeUtils.handlePaymentIntentSucceeded(intent, "acct_pledge");
+
+      const completed = await prisma.userTransaction.findFirst({
+        where: { id: metadata.transactionId },
+      });
+      assert.equal(completed?.paymentStatus, "COMPLETED");
+      const paidPledge = await prisma.fundraiserPledge.findFirst({
+        where: { id: pledge.id },
+      });
+      assert.ok(paidPledge?.paidAt, "pledge marked paid");
+      const purchases = await prisma.userTrackGroupPurchase.findMany({
+        where: { userId: backer.id, trackGroupId: trackGroup.id },
+      });
+      assert.equal(purchases.length, 1, "backer gets the album once");
+    });
+  });
 });

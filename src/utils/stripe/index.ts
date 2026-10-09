@@ -765,6 +765,9 @@ export const chargePledgePayments = async (
       const currency = stripeAccount.default_currency ?? "usd";
 
       if (paymentMethods.data[0]?.id) {
+        // The charge confirms immediately, so its webhook can arrive before
+        // create() returns. The transaction has to exist first.
+        const transaction = await handleFundraiserPledge(pledge, currency);
         const paymentIntent = await stripe.paymentIntents.create(
           {
             amount: pledge.amount,
@@ -789,6 +792,7 @@ export const chargePledgePayments = async (
               fundraiserId: pledge.fundraiserId,
               pledgeId: pledge.id,
               purchaseType: "fundraiserPledge",
+              transactionId: transaction.id,
             },
           },
           {
@@ -799,7 +803,10 @@ export const chargePledgePayments = async (
           `Created payment intent ${paymentIntent.id} for pledge ${pledge.id}`
         );
 
-        await handleFundraiserPledge(pledge, paymentIntent.id, currency);
+        await prisma.userTransaction.update({
+          where: { id: transaction.id },
+          data: { stripeId: paymentIntent.id },
+        });
       }
     }
   } catch (err) {
