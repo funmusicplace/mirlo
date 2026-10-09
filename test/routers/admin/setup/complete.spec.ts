@@ -40,6 +40,24 @@ describe("admin/setup/complete", () => {
       assert.equal(response.statusCode, 401);
     });
 
+    it("should refuse while the instance has no name", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 8 });
+
+      const response = await requestApp
+        .post("admin/setup/complete")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+
+      const row = await prisma.settings.findFirst();
+      assert.equal(row?.setupCompletedAt, null);
+    });
+
     it("should mark the setup as done and keep the settings", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",
