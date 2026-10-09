@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import PageBackground from "components/common/ArtistBackground";
 import Button, { ButtonLink } from "components/common/Button";
 import Logo from "components/common/Logo";
-import UserBanner from "components/common/UserBanner";
 import Menu from "components/Header/Menu";
 import { useInstanceSettings } from "queries/instanceSettings";
 import { queryInstanceArtist } from "queries/settings";
@@ -202,7 +201,6 @@ const Header = () => {
     >
       <div className="md:hidden!">
         <PageBackground />
-        <UserBanner />
       </div>
       <div className="absolute w-full h-full md:hidden!"></div>
       <Content artistId={artistId}>
