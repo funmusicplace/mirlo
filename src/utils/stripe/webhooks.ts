@@ -12,7 +12,6 @@ import {
 
 import {
   handleAccountUpdate,
-  handleCheckoutSession,
   handleInvoicePaid,
   handleInvoicePaymentFailed,
   handlePaymentIntentFailed,
@@ -32,13 +31,6 @@ type ConnectEventHandlers = {
 };
 
 export const stripeConnectEventHandlers = {
-  "checkout.session.completed": async (event, log) => {
-    // To trigger this event type use
-    // `stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2`
-    const session = event.data.object;
-    log.info(`stripe-connect: checkout status is ${session.status}.`);
-    await handleCheckoutSession(session);
-  },
   "setup_intent.succeeded": async (event, log) => {
     // To trigger this event type use
     // `stripe trigger setup_intent.succeeded --add setup_intent:metadata.userId=3`

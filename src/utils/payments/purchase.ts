@@ -3,7 +3,7 @@ import { uniq } from "lodash";
 
 import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
-import { getCurrency } from "../stripe/sessions";
+import { getCurrency } from "../stripe/currency";
 
 import { resolvePayee } from "./payee";
 import { getPaymentProcessor } from "./PaymentProcessor";

@@ -158,8 +158,6 @@ const routes = [
   "manage/posts/{postId}/publish",
   "manage/posts/{postId}",
   "activityPub/webfinger",
-  "checkout",
-  "checkout/status",
   "webhooks/stripe/connect",
   "jobs",
   "admin/tasks",

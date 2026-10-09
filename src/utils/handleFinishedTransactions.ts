@@ -28,7 +28,7 @@ import {
 import { resolvePayee } from "./payments/payee";
 import type { ResolvedItem } from "./payments/purchase";
 import { calculateAppFee } from "./processingPayments";
-import { hasSubscriptionTiers, registerSubscription } from "./subscriptionTier";
+import { hasSubscriptionTiers } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 
 export const recordCompletedTransaction = (
@@ -890,26 +890,6 @@ export type ArtistNewSubscriberAnnounceEmailType = {
   email: string;
   client: string;
   host: string;
-};
-
-export const handleSubscription = async (
-  userId: number,
-  tierId: number,
-  payment: CompletedPayment,
-  subscriptionKey: string
-) => {
-  try {
-    await registerSubscription({
-      userId: Number(userId),
-      tierId: Number(tierId),
-      amount: payment.amount,
-      paymentProcessorKey: subscriptionKey,
-      platformCut: payment.platformCut,
-      shippingAddress: payment.shippingAddress,
-    });
-  } catch (e) {
-    logger.error(`Error creating subscription: ${e}`);
-  }
 };
 
 export const handleFundraiserPledge = async (
