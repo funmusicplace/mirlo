@@ -733,6 +733,7 @@ export const chargePledgePayments = async (
     pledge.fundraiser.trackGroups[0].profile.user.stripeAccountId;
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
+  let transactionId: string | undefined;
   try {
     logger.info(
       `Charging pledge payments for fundraiser ${pledge.fundraiser.id} and user ${pledge.userId}`
@@ -768,6 +769,7 @@ export const chargePledgePayments = async (
         // The charge confirms immediately, so its webhook can arrive before
         // create() returns. The transaction has to exist first.
         const transaction = await handleFundraiserPledge(pledge, currency);
+        transactionId = transaction.id;
         const paymentIntent = await stripe.paymentIntents.create(
           {
             amount: pledge.amount,
@@ -829,6 +831,19 @@ export const chargePledgePayments = async (
       console.log("Error code:", err.code);
       console.log("Error message: ", err.message);
       console.log("Full error: ", err);
+    }
+    if (transactionId) {
+      const failedIntentId =
+        err instanceof Stripe.errors.StripeError
+          ? err.payment_intent?.id
+          : undefined;
+      await prisma.userTransaction.updateMany({
+        where: { id: transactionId, paymentStatus: "PENDING" },
+        data: {
+          paymentStatus: "FAILED",
+          ...(failedIntentId && { stripeId: failedIntentId }),
+        },
+      });
     }
   }
 };

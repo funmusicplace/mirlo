@@ -1176,7 +1176,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
   });
 
   describe("chargePledgePayments", () => {
-    it("records the charge so payment_intent.succeeded completes the pledge", async () => {
+    const setUpPledge = async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_pledge",
@@ -1224,13 +1224,18 @@ describe("Stripe Webhooks - Failed Payments", () => {
       sinon.stub(stripeUtils.stripe.paymentMethods, "list").resolves({
         data: [{ id: "pm_backer" }],
       } as unknown as Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>);
+      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+      return { pledge, backer, trackGroup };
+    };
+
+    it("records the charge so payment_intent.succeeded completes the pledge", async () => {
+      const { pledge, backer, trackGroup } = await setUpPledge();
       const createStub = sinon
         .stub(stripeUtils.stripe.paymentIntents, "create")
         .resolves({
           id: "pi_pledge_charge",
           status: "succeeded",
         } as unknown as Stripe.Response<Stripe.PaymentIntent>);
-      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
 
       await stripeUtils.chargePledgePayments(pledge);
 
@@ -1265,6 +1270,33 @@ describe("Stripe Webhooks - Failed Payments", () => {
         where: { userId: backer.id, trackGroupId: trackGroup.id },
       });
       assert.equal(purchases.length, 1, "backer gets the album once");
+    });
+
+    it("marks the transaction failed when the charge is declined", async () => {
+      const { pledge } = await setUpPledge();
+      const createStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "create")
+        .rejects(
+          new Stripe.errors.StripeCardError({
+            type: "card_error",
+            code: "authentication_required",
+            message: "Your card was declined.",
+            payment_intent: {
+              id: "pi_pledge_declined",
+            } as Stripe.PaymentIntent,
+          })
+        );
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      const { transactionId } = (
+        createStub.firstCall.args[0] as Stripe.PaymentIntentCreateParams
+      ).metadata as Record<string, string>;
+      const transaction = await prisma.userTransaction.findFirst({
+        where: { id: transactionId },
+      });
+      assert.equal(transaction?.paymentStatus, "FAILED");
+      assert.equal(transaction?.stripeId, "pi_pledge_declined");
     });
   });
 });
