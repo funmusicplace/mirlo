@@ -732,6 +732,18 @@ export const completePurchase = async (
     return;
   }
 
+  if (payment?.id) {
+    const existing = await prisma.userTransaction.findFirst({
+      where: { stripeId: payment.id, paymentStatus: "COMPLETED" },
+    });
+    if (existing) {
+      logger.info(
+        `completePurchase: payment ${payment.id} already recorded as transaction ${existing.id}, skipping`
+      );
+      return existing;
+    }
+  }
+
   const transaction = await recordCompletedTransaction(userId, payment);
   const user = await prisma.user.findFirst({ where: { id: userId } });
   const resolvedProfileId = profileId ?? Number(payment?.metadata.artistId);
