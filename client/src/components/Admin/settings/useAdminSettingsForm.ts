@@ -35,13 +35,15 @@ export const useAdminSettingsForm = () => {
 
   const saveSettings = React.useCallback(
     async (data: Partial<FormSettings>) => {
-      await api.post(
-        "admin/settings",
-        formToSettingsPayload(
-          data,
-          featuredArtists.map((artist) => artist.id)
-        )
+      const payload = formToSettingsPayload(
+        data,
+        featuredArtists.map((artist) => artist.id)
       );
+      const response = await api.post<
+        typeof payload,
+        { result: Partial<SettingsFromAPI> }
+      >("admin/settings", payload);
+      reset(settingsToForm(response.result, DEFAULT_TRUST_LEVEL_NAMES));
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: queryInstanceSettings().queryKey,
@@ -51,7 +53,7 @@ export const useAdminSettingsForm = () => {
         }),
       ]);
     },
-    [featuredArtists, queryClient]
+    [featuredArtists, queryClient, reset]
   );
 
   return {

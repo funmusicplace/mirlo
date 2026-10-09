@@ -102,7 +102,9 @@ describe("Welcome", () => {
     vi.mocked(api.get).mockReset();
     vi.mocked(api.get).mockResolvedValue(STORED_SETTINGS as any);
     vi.mocked(api.post).mockReset();
-    vi.mocked(api.post).mockResolvedValue({} as any);
+    vi.mocked(api.post).mockImplementation(async (_endpoint, body) => ({
+      result: body,
+    }));
     assign.mockClear();
     Object.defineProperty(window, "location", {
       value: { ...window.location, assign },

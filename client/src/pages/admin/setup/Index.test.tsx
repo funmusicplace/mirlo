@@ -99,7 +99,9 @@ describe("SetupGuide", () => {
     vi.mocked(api.get).mockReset();
     vi.mocked(api.get).mockResolvedValue(storedSettings() as any);
     vi.mocked(api.post).mockReset();
-    vi.mocked(api.post).mockResolvedValue({} as any);
+    vi.mocked(api.post).mockImplementation(async (_endpoint, body) => ({
+      result: body,
+    }));
     vi.mocked(fetchWrapper.post).mockReset();
     vi.mocked(fetchWrapper.post).mockResolvedValue({ result: {} });
   });
@@ -217,6 +219,30 @@ describe("SetupGuide", () => {
     };
     expect(body.settings.emailProvider.provider).toBeFalsy();
     expect(body.settings.emailProvider.fromEmail).toBeFalsy();
+  });
+
+  test("keeps the saved values when a step is skipped after a save", async () => {
+    renderGuide();
+    await startGuide();
+
+    const nameInput = screen.getByLabelText("instanceName");
+    await userEvent.clear(nameInput);
+    await userEvent.type(nameInput, "Nightjar Records");
+    await userEvent.click(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    );
+    expect(await screen.findByText("email.description")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "back" }));
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    );
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2));
+    expect(vi.mocked(api.post).mock.calls[1][1]).toMatchObject({
+      settings: { instanceCustomization: { title: "Nightjar Records" } },
+    });
   });
 
   test("does not link out of the guide from the platform policy step", async () => {

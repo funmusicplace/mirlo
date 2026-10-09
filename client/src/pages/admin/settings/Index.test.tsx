@@ -107,7 +107,9 @@ function renderSettings() {
 describe("Settings", () => {
   beforeEach(() => {
     vi.mocked(api.get).mockResolvedValue(makeSettings() as any);
-    vi.mocked(api.post).mockResolvedValue({} as any);
+    vi.mocked(api.post).mockImplementation(async (_endpoint, body) => ({
+      result: body,
+    }));
     mockSnackbar.mockClear();
   });
 

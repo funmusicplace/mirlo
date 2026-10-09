@@ -49,7 +49,9 @@ describe("useAdminSettingsForm", () => {
     vi.mocked(api.get).mockReset();
     vi.mocked(api.get).mockResolvedValue(STORED_SETTINGS as any);
     vi.mocked(api.post).mockReset();
-    vi.mocked(api.post).mockResolvedValue({} as any);
+    vi.mocked(api.post).mockImplementation(async (_endpoint, body) => ({
+      result: body,
+    }));
   });
 
   test("is not loaded until the featured artists are known, then saves them", async () => {
@@ -74,6 +76,34 @@ describe("useAdminSettingsForm", () => {
     expect(vi.mocked(api.post).mock.calls[0][1]).toMatchObject({
       settings: { featuredArtistIds: [4] },
     });
+  });
+
+  test("takes the settings returned by the save as the new reference values", async () => {
+    vi.mocked(api.post).mockResolvedValue({
+      result: {
+        cdnUrl: "https://cdn.nightjar.test",
+        settings: {
+          platformPercent: 7,
+          stripe: { keyConfigured: true },
+        },
+      },
+    } as any);
+    const { result } = renderSettingsForm();
+    await act(async () => featuredArtistsRequest.resolve(FEATURED_ARTISTS));
+    await waitFor(() => expect(result.current.isLoaded).toBe(true));
+
+    await act(() =>
+      result.current.saveSettings({
+        ...result.current.methods.getValues(),
+        cdnUrl: "https://cdn.typed.test",
+        stripe: { key: "sk_test_typed" },
+      })
+    );
+
+    const { defaultValues } = result.current.methods.formState;
+    expect(defaultValues?.cdnUrl).toBe("https://cdn.nightjar.test");
+    expect(result.current.methods.getValues("stripe.key")).toBe("");
+    expect(result.current.methods.getValues("stripe.keyConfigured")).toBe(true);
   });
 
   test("reports a load error when the settings cannot be fetched", async () => {
