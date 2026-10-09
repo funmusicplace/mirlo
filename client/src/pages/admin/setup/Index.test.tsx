@@ -191,6 +191,34 @@ describe("SetupGuide", () => {
     expect(nav).toHaveTextContent("stepSkipped");
   });
 
+  test("drops what was typed in a step when it is skipped", async () => {
+    renderGuide();
+    await startGuide();
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+
+    await userEvent.selectOptions(
+      screen.getByLabelText("emailProviderLabel"),
+      "smtp"
+    );
+    await userEvent.type(
+      screen.getByLabelText("emailFrom"),
+      "hello@nightjar.test"
+    );
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+
+    expect(screen.getByText("platformPolicy.description")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    );
+
+    await waitFor(() => expect(api.post).toHaveBeenCalled());
+    const body = vi.mocked(api.post).mock.calls[0][1] as {
+      settings: { emailProvider: { provider?: string; fromEmail?: string } };
+    };
+    expect(body.settings.emailProvider.provider).toBeFalsy();
+    expect(body.settings.emailProvider.fromEmail).toBeFalsy();
+  });
+
   test("does not link out of the guide from the platform policy step", async () => {
     renderGuide();
     await startGuide();

@@ -37,6 +37,24 @@ const DASHBOARD_PATH = "/admin/dashboard";
 
 const SAVED_STEP_KEYS = ["identity", "email", "platformPolicy"] as const;
 
+type SavedStepKey = (typeof SAVED_STEP_KEYS)[number];
+
+const STEP_FIELDS: Record<SavedStepKey, (keyof FormSettings)[]> = {
+  identity: ["instanceCustomization"],
+  email: ["emailProvider"],
+  platformPolicy: [
+    "platformPercent",
+    "isClosedToPublicArtistSignup",
+    "terms",
+    "privacyPolicy",
+    "cookiePolicy",
+    "contentPolicy",
+  ],
+};
+
+const isSavedStep = (key: StepKey): key is SavedStepKey =>
+  (SAVED_STEP_KEYS as readonly string[]).includes(key);
+
 const statusesFromSettings = (
   settings: FormSettings
 ): Partial<Record<StepKey, SetupStepStatus>> => ({
@@ -132,6 +150,18 @@ const SetupGuide: React.FC = () => {
   );
 
   const skipStep = () => {
+    if (isSavedStep(activeKey)) {
+      const defaults = methods.formState.defaultValues ?? {};
+      methods.reset(
+        {
+          ...methods.getValues(),
+          ...Object.fromEntries(
+            STEP_FIELDS[activeKey].map((field) => [field, defaults[field]])
+          ),
+        },
+        { keepDefaultValues: true }
+      );
+    }
     setStatuses((current) =>
       current[activeKey] === "done"
         ? current
