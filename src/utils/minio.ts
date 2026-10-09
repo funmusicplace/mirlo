@@ -37,12 +37,6 @@ export const finalArtistBackgroundBucket = "artist-banners";
 export const incomingArtistAvatarBucket = "incoming-artist-avatars";
 export const finalArtistAvatarBucket = "artist-avatars";
 
-export const incomingUserAvatarBucket = "incoming-user-avatars";
-export const finalUserAvatarBucket = "mirlo-user-avatars";
-
-export const incomingUserBannerBucket = "incoming-user-banners";
-export const finalUserBannerBucket = "mirlo-user-banners";
-
 export const incomingCoversBucket = "incoming-covers";
 export const finalCoversBucket = "trackgroup-covers";
 
@@ -81,18 +75,6 @@ const imageTypeBuckets = {
     incoming: incomingArtistBackgroundBucket,
     final: finalArtistBackgroundBucket,
     prefix: finalArtistBackgroundBucket as string | undefined,
-    queue: true,
-  },
-  userAvatar: {
-    incoming: incomingArtistAvatarBucket,
-    final: finalUserAvatarBucket,
-    prefix: finalUserAvatarBucket as string | undefined,
-    queue: true,
-  },
-  userBanner: {
-    incoming: incomingUserBannerBucket,
-    final: finalUserBannerBucket,
-    prefix: finalUserBannerBucket as string | undefined,
     queue: true,
   },
   trackGroupCover: {
@@ -1227,10 +1209,6 @@ const allLegacyBuckets = [
   finalArtistBackgroundBucket,
   incomingArtistAvatarBucket,
   finalArtistAvatarBucket,
-  incomingUserAvatarBucket,
-  finalUserAvatarBucket,
-  incomingUserBannerBucket,
-  finalUserBannerBucket,
   incomingCoversBucket,
   finalCoversBucket,
   incomingMerchImageBucket,

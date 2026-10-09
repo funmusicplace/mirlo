@@ -11,10 +11,8 @@ import {
 } from "../../../../../../auth/passport";
 import { sendMailQueue } from "../../../../../../queues/send-mail-queue";
 import { serializeProfile } from "../../../../../../serializers/artist";
-import { addSizesToImage } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
-import { finalUserAvatarBucket } from "../../../../../../utils/minio";
 import { getInstanceName } from "../../../../../../utils/settings";
 
 const sendArtistNotificationOfLabel = async (
@@ -114,23 +112,11 @@ export default function () {
             select: {
               name: true,
               email: true,
-              userAvatar: true,
             },
           },
         },
       });
-      res.json({
-        results: artistLabels.map((label) => ({
-          ...label,
-          labelUser: {
-            ...label.labelUser,
-            userAvatar: addSizesToImage(
-              finalUserAvatarBucket,
-              label.labelUser.userAvatar
-            ),
-          },
-        })),
-      });
+      res.json({ results: artistLabels });
     } catch (e) {
       console.error(`/v1/artists/{id}/labels ${e}`);
       res.status(400);

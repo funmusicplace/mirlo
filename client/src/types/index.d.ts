@@ -54,16 +54,6 @@ interface LoggedInUser {
     trackGroupId: number;
   }[];
   language?: string;
-  userAvatar?: {
-    url: string;
-    sizes?: { [key: number]: string };
-    updatedAt: string;
-  };
-  userBanner?: {
-    url: string;
-    sizes?: { [key: number]: string };
-    updatedAt: string;
-  };
   canCreateArtists?: boolean;
   merchPurchase?: MerchPurchase[];
 }
@@ -247,9 +237,7 @@ interface Notification {
     | "ARTIST_CONTACT_MESSAGE"
     | "PROFILE_MANAGER_INVITE";
   post?: Post;
-  relatedUser?: User & {
-    userAvatar?: { sizes?: { [key: number]: string } };
-  };
+  relatedUser?: User;
   artist?: Artist;
   artistId?: number;
   subscription?: ArtistUserSubscription;
@@ -275,7 +263,6 @@ interface ArtistLabel {
     name: string;
     email?: string;
     id: number;
-    userAvatar?: { sizes: string[] };
     artists?: Artist[];
   };
   isLabelApproved: boolean;

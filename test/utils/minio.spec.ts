@@ -34,8 +34,6 @@ import {
   incomingArtistAvatarBucket,
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
-  incomingUserAvatarBucket,
-  finalUserAvatarBucket,
   incomingCoversBucket,
   finalCoversBucket,
   finalPostImageBucket,
@@ -135,8 +133,6 @@ describe("minio bucket routing", () => {
     it("returns true for all standard image types that need optimization", () => {
       assert.equal(imageTypeUsesQueue("artistAvatar"), true);
       assert.equal(imageTypeUsesQueue("artistBackground"), true);
-      assert.equal(imageTypeUsesQueue("userAvatar"), true);
-      assert.equal(imageTypeUsesQueue("userBanner"), true);
       assert.equal(imageTypeUsesQueue("trackGroupCover"), true);
       assert.equal(imageTypeUsesQueue("merch"), true);
       assert.equal(imageTypeUsesQueue("image"), true);
@@ -237,16 +233,6 @@ describe("minio bucket routing", () => {
       assert.equal(bucket, incomingImageBucket);
       assert.equal(key, "img-id");
     });
-
-    it("downloadIncomingImageByType(userAvatar) reads from incoming-artist-avatars, not incoming-user-avatars", async () => {
-      // userAvatar shares the artist-avatars incoming bucket intentionally;
-      // this test guards against the old bug where the final bucket was used as incoming.
-      await downloadIncomingImageByType("userAvatar", "user-id");
-      const [bucket] = getObjectStub.firstCall.args;
-      assert.equal(bucket, incomingArtistAvatarBucket);
-      assert.notEqual(bucket, incomingUserAvatarBucket);
-      assert.notEqual(bucket, finalUserAvatarBucket);
-    });
   });
 
   // ── Image routing: consolidated mode ────────────────────────────────────────
@@ -330,13 +316,6 @@ describe("minio bucket routing", () => {
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
       assert.equal(key, `${finalCoversBucket}/cover-id-x1500.webp`);
-    });
-
-    it("uploadIncomingImageByType(userAvatar) → mirlo-images / incoming/{finalUserAvatarBucket}/{id}", async () => {
-      await uploadIncomingImageByType("userAvatar", "user-id", emptyReadable());
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${finalUserAvatarBucket}/user-id`);
     });
   });
 

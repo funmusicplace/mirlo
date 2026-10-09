@@ -292,7 +292,6 @@ export const trackGroupSingleInclude = (options: {
         id: true,
         name: true,
         urlSlug: true,
-        userAvatar: true,
         currency: true,
       },
     },
@@ -324,7 +323,6 @@ export const trackGroupSingleInclude = (options: {
                 id: true,
                 name: true,
                 urlSlug: true,
-                userAvatar: true,
                 ...(options.ownerId ? { email: true } : {}),
                 profiles: {
                   where: { isLabelProfile: true },

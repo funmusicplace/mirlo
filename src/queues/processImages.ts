@@ -242,60 +242,6 @@ export const uploadAndSendToImageQueue = async (
   return details as { jobId?: string; imageId: string };
 };
 
-export const processUserAvatar = (ctx: APIContext) => {
-  return async (userId: number) => {
-    return uploadAndSendToImageQueue(
-      ctx,
-      "userAvatar",
-      "userAvatar",
-      "avatar",
-      async (fileInfo: { filename: string }) => {
-        logger.info(`Upserting artist avatar`);
-        return prisma.userAvatar.upsert({
-          create: {
-            originalFilename: fileInfo.filename,
-            userId,
-          },
-          update: {
-            originalFilename: fileInfo.filename,
-            deletedAt: null,
-          },
-          where: {
-            userId,
-          },
-        });
-      }
-    );
-  };
-};
-
-export const processUserBanner = (ctx: APIContext) => {
-  return async (userId: number) => {
-    return uploadAndSendToImageQueue(
-      ctx,
-      "userBanner",
-      "userBanner",
-      "banner",
-      async (fileInfo: { filename: string }) => {
-        logger.info(`Upserting user banner`);
-        return prisma.userBanner.upsert({
-          create: {
-            originalFilename: fileInfo.filename,
-            userId,
-          },
-          update: {
-            originalFilename: fileInfo.filename,
-            deletedAt: null,
-          },
-          where: {
-            userId,
-          },
-        });
-      }
-    );
-  };
-};
-
 export const processProfileAvatar = (ctx: APIContext) => {
   return async (profileId: number) => {
     return uploadAndSendToImageQueue(
