@@ -1,3 +1,5 @@
+import { omit } from "lodash";
+
 export interface FormSettings {
   platformPercent?: number;
   cdnUrl?: string;
@@ -78,9 +80,10 @@ export const formToSettingsPayload = (
     instanceCustomization: {
       ...data.instanceCustomization,
     },
-    stripe: {
-      ...data.stripe,
-    },
+    stripe: omit(data.stripe ?? {}, [
+      "keyConfigured",
+      "webhookSecretConfigured",
+    ]),
     emailProvider: {
       ...data.emailProvider,
     },
