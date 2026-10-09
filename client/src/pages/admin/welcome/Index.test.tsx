@@ -185,7 +185,7 @@ describe("Welcome", () => {
         text: "#000000",
       },
     });
-    await waitFor(() => expect(assign).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(assign).toHaveBeenCalledWith("/admin/setup"));
   });
 
   test("leaves the contact email out when it is skipped", async () => {

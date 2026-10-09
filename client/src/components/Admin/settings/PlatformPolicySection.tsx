@@ -8,9 +8,10 @@ import { Link } from "react-router-dom";
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
 
-const PlatformPolicySection: React.FC<{ hideTitle?: boolean }> = ({
-  hideTitle,
-}) => {
+const PlatformPolicySection: React.FC<{
+  hideTitle?: boolean;
+  hideInvitesLink?: boolean;
+}> = ({ hideTitle, hideInvitesLink }) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const { register } = useFormContext<FormSettings>();
 
@@ -45,7 +46,13 @@ const PlatformPolicySection: React.FC<{ hideTitle?: boolean }> = ({
             <Trans
               t={t}
               i18nKey="isClosedToPublicArtistSignupHint"
-              components={{ invitesLink: <Link to="/admin/content/invites" /> }}
+              components={{
+                invitesLink: hideInvitesLink ? (
+                  <span />
+                ) : (
+                  <Link to="/admin/content/invites" />
+                ),
+              }}
             />
           </small>
         </div>

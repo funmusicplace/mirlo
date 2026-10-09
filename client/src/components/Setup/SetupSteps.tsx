@@ -94,7 +94,7 @@ const SetupSteps: React.FC = () => {
             },
           },
         });
-        window.location.assign("/");
+        window.location.assign("/admin/setup");
       } catch (e) {
         console.error(e);
         setIsError(true);

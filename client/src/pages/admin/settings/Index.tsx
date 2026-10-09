@@ -13,16 +13,20 @@ import StorageSection from "components/Admin/settings/StorageSection";
 import StripeSection from "components/Admin/settings/StripeSection";
 import TrustLevelsSection from "components/Admin/settings/TrustLevelsSection";
 import useAdminSettingsForm from "components/Admin/settings/useAdminSettingsForm";
+import Box from "components/common/Box";
 import { SideNavLayout } from "components/common/SideNav";
 import WidthContainer from "components/common/WidthContainer";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { FormProvider } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 
 const Index = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const snackbar = useSnackbar();
+  const { setupStage } = useInstanceSettings();
   const [isSaving, setIsSaving] = React.useState(false);
   const {
     methods,
@@ -67,6 +71,15 @@ const Index = () => {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(updateSettings)}>
           <SettingsActionsBar isSaving={isSaving} isDisabled={!isLoaded} />
+          {setupStage !== "done" && (
+            <Box variant="info" className="mb-6">
+              <Trans
+                t={t}
+                i18nKey="setupGuideUnfinished"
+                components={{ guideLink: <Link to="/admin/setup" /> }}
+              />
+            </Box>
+          )}
           <SideNavLayout navWidth="12rem">
             <SettingsSectionNav />
             <div className="max-w-2xl">

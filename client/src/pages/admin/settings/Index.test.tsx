@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { queryInstanceSettings } from "queries/instanceSettings";
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import api from "services/api";
+import { DEFAULT_INSTANCE_SETTINGS } from "utils/instanceSettings";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
@@ -320,6 +323,35 @@ describe("Settings", () => {
         })
       );
     });
+  });
+
+  test("links to the setup guide while the setup is not finished", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    queryClient.setQueryData(queryInstanceSettings().queryKey, {
+      ...DEFAULT_INSTANCE_SETTINGS,
+      setupStage: "guide",
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <Settings />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    expect(screen.getByText("setupGuideUnfinished")).toBeInTheDocument();
+  });
+
+  test("hides the setup guide link once the setup is done", async () => {
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    expect(screen.queryByText("setupGuideUnfinished")).not.toBeInTheDocument();
   });
 
   test("renders all section headings", async () => {
