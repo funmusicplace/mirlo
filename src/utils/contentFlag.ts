@@ -80,15 +80,9 @@ export const findFlaggedImageOwner = async (
     case "image": {
       const image = await prisma.image.findUnique({
         where: { id: imageId },
-        select: {
-          merchImage: { select: { merch: { select: { profileId: true } } } },
-          tiers: { select: { tier: { select: { profileId: true } } } },
-        },
+        select: { profileId: true },
       });
-      return {
-        profileId:
-          image?.merchImage?.merch.profileId ?? image?.tiers[0]?.tier.profileId,
-      };
+      return { profileId: image?.profileId ?? undefined };
     }
     default:
       return {};

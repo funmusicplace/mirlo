@@ -47,6 +47,7 @@ type LegacyImage = {
   url: string[];
   createdAt: Date;
   updatedAt: Date;
+  profileId: number;
   label: string;
   link: (tx: PrismaTransactionClient) => Promise<unknown>;
   remove: () => Promise<unknown>;
@@ -65,11 +66,13 @@ export const merchImages: LegacyImageSource = {
   findLegacy: async (take) => {
     const rows = await prisma.merchImage.findMany({
       where: { imageId: null },
+      include: { merch: { select: { profileId: true } } },
       orderBy: { createdAt: "asc" },
       take,
     });
     return rows.map((row) => ({
       ...row,
+      profileId: row.merch.profileId,
       label: `${row.id} (merch ${row.merchId})`,
       link: (tx) =>
         tx.merchImage.update({
@@ -189,6 +192,7 @@ export const backfillImages = async (
               id: legacy.id,
               url: legacy.url,
               dimensions: source.dimensions,
+              profileId: legacy.profileId,
               createdAt: legacy.createdAt,
               updatedAt: legacy.updatedAt,
             },

@@ -87,7 +87,7 @@ describe("scripts/backfillImages", () => {
         const reloaded = await prisma.merchImage.findUniqueOrThrow({
           where: { id: stored.id },
         });
-        return { stored: reloaded, missing, unprocessed, pending };
+        return { profile, stored: reloaded, missing, unprocessed, pending };
       };
 
       const incomingIsGone = (id: string) =>
@@ -117,7 +117,7 @@ describe("scripts/backfillImages", () => {
       });
 
       it("copies files and links a central Image with the same id, url and updatedAt", async () => {
-        const { stored, missing, unprocessed, pending } = await seed();
+        const { profile, stored, missing, unprocessed, pending } = await seed();
 
         const summary = await backfillImages(merchImages, { apply: true });
 
@@ -135,6 +135,7 @@ describe("scripts/backfillImages", () => {
           include: { image: true },
         });
         assert.equal(linked.imageId, stored.id);
+        assert.equal(linked.image?.profileId, profile.id);
         assert.deepEqual(linked.image?.url, stored.url);
         assert.equal(
           linked.image?.updatedAt.getTime(),

@@ -128,6 +128,7 @@ export async function seedMerch() {
                 id: imageId,
                 url: urls,
                 dimensions: "square",
+                profileId: merch.profileId,
                 merchImage: { create: { merchId: merch.id, position: 0 } },
               },
             });

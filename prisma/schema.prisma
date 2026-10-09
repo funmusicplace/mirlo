@@ -351,6 +351,7 @@ model Profile {
   deletedAt                           DateTime?
   subscriptionTiers                   ProfileSubscriptionTier[]
   background                          ProfileBackground?
+  images                              Image[]
   avatar                              ProfileAvatar?
   urlSlug                             String
   /// [Properties]                              @unique
@@ -516,6 +517,10 @@ model Image {
   tiers            SubscriptionTierImage[]
   merchImage       MerchImage?
   dimensions       String // e.g. "square", "banner"
+  profileId        Int?
+  profile          Profile?                @relation(fields: [profileId], references: [id])
+
+  @@index([profileId])
 }
 
 enum Interval {
