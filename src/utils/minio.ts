@@ -1232,7 +1232,7 @@ const allLegacyBuckets = [
   finalImageBucket,
 ];
 
-export const ensureAllBucketsExist = async () => {
+export const currentBuckets = () => {
   const imageBuckets = new Set<string>();
   Object.values(imageTypeBuckets).forEach(({ incoming, final }) => {
     imageBuckets.add(getImagesBucket(incoming));
@@ -1249,6 +1249,23 @@ export const ensureAllBucketsExist = async () => {
     getDownloadsBucket(trackFormatBucket),
     getDownloadsBucket(trackGroupFormatBucket),
   ]);
+
+  return { imageBuckets, audioBuckets, downloadBuckets };
+};
+
+export const bucketExists = async (bucket: string): Promise<boolean> => {
+  if (backendStorage === "backblaze" && backblazeClient) {
+    await backblazeClient.send(new HeadBucketCommand({ Bucket: bucket }));
+    return true;
+  }
+  if (minioClient) {
+    return minioClient.bucketExists(bucket);
+  }
+  return false;
+};
+
+export const ensureAllBucketsExist = async () => {
+  const { imageBuckets, audioBuckets, downloadBuckets } = currentBuckets();
 
   await Promise.all([
     ...Array.from(imageBuckets).map((b) =>
