@@ -1,12 +1,11 @@
 import { css } from "@emotion/css";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { InputEl } from "components/common/Input";
+import { slug } from "github-slugger";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-// @ts-ignore: Ignore import errors for github-slugger
-import { slug } from "github-slugger";
 
 const SlugInput = React.forwardRef<
   { focus: () => void },
