@@ -1,13 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within } from "@storybook/test";
+import {
+  HEALTHY_SETUP_STATUS,
+  TROUBLED_SETUP_STATUS,
+} from "components/Setup/status/setupStatusMocks";
 import { http, HttpResponse } from "msw";
+import type { SetupStatus } from "queries/admin";
 import { reactRouterParameters } from "storybook-addon-remix-react-router";
 
 import { USER_EXAMPLE } from "../../../../test/mocks";
 
 import SetupGuide from "./Index";
 
-const handlers = (settings: object = {}) => ({
+const handlers = (
+  settings: object = {},
+  status: SetupStatus = HEALTHY_SETUP_STATUS
+) => ({
   auth: [
     http.get("*/auth/profile", () =>
       HttpResponse.json({ result: { ...USER_EXAMPLE, isAdmin: true } })
@@ -33,6 +41,9 @@ const handlers = (settings: object = {}) => ({
     ),
     http.post("*/v1/admin/setup/complete", () =>
       HttpResponse.json({ result: {} })
+    ),
+    http.get("*/admin/setup/status", () =>
+      HttpResponse.json({ result: status })
     ),
   ],
 });
@@ -75,10 +86,29 @@ export const WelcomeWithProgress: Story = {
   },
 };
 
+export const SystemCheckStep: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(await canvas.findByRole("button", { name: "Start" }));
+  },
+};
+
+/** The worker is down, the tasks never ran, buckets are missing. */
+export const SystemCheckWithProblems: Story = {
+  parameters: { msw: { handlers: handlers({}, TROUBLED_SETUP_STATUS) } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(await canvas.findByRole("button", { name: "Start" }));
+  },
+};
+
 export const IdentityStep: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(await canvas.findByRole("button", { name: "Start" }));
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Continue" })
+    );
   },
 };
 
@@ -86,6 +116,9 @@ export const EmailStep: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(await canvas.findByRole("button", { name: "Start" }));
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Continue" })
+    );
     await userEvent.click(canvas.getByRole("button", { name: "Skip for now" }));
   },
 };
@@ -94,6 +127,9 @@ export const PlatformPolicyStep: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(await canvas.findByRole("button", { name: "Start" }));
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Continue" })
+    );
     await userEvent.click(canvas.getByRole("button", { name: "Skip for now" }));
     await userEvent.click(canvas.getByRole("button", { name: "Skip for now" }));
   },
@@ -103,6 +139,9 @@ export const DoneStep: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(await canvas.findByRole("button", { name: "Start" }));
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Continue" })
+    );
     await userEvent.click(canvas.getByRole("button", { name: "Skip for now" }));
     await userEvent.click(canvas.getByRole("button", { name: "Skip for now" }));
     await userEvent.click(canvas.getByRole("button", { name: "Skip for now" }));

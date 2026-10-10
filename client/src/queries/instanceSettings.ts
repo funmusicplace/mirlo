@@ -5,6 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { querySetupStatus } from "queries/admin";
 import { getInjectedInstanceSettings } from "utils/injectedData";
 import { DEFAULT_INSTANCE_SETTINGS } from "utils/instanceSettings";
 
@@ -46,6 +47,9 @@ export function useCompleteInstanceSetupMutation() {
     mutationFn: completeInstanceSetup,
     onSuccess(settings) {
       queryClient.setQueryData(queryInstanceSettings().queryKey, settings);
+      return queryClient.invalidateQueries({
+        queryKey: querySetupStatus().queryKey,
+      });
     },
   });
 }

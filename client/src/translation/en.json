@@ -2058,6 +2058,7 @@
     "continue": "Continue",
     "openMyPlatform": "Open my platform",
     "saveError": "Something went wrong, your answers were not saved. Try again.",
+    "completeError": "Something went wrong, the setup could not be marked as complete. Try again.",
     "loadError": "The current settings could not be loaded. Reload the page to try again.",
     "guideNavLabel": "Setup steps",
     "guideNavHeading": "Instance setup",
@@ -2071,6 +2072,7 @@
     "goToDashboard": "Go to the dashboard",
     "steps": {
       "welcome": "Welcome",
+      "systemCheck": "System check",
       "identity": "Identity",
       "email": "Email",
       "platformPolicy": "Platform policy",
@@ -2080,6 +2082,67 @@
       "done": "done",
       "skipped": "skipped",
       "todo": "to do"
+    },
+    "systemCheck": {
+      "description": "These programs were installed with your platform and cannot be changed from here. We only check that they are running correctly before going further. To find out more about what each of them do, click the info button.",
+      "loading": "Checking your server...",
+      "error": "The checks could not run. Retry now, or continue: you will be able to access them again in the dashboard.",
+      "rerun": "Re-run checks"
+    },
+    "unsavedChanges": "Some changes have not been saved and will be lost. Go back to the step and save them first.",
+    "unsavedChangesConfirm": "Some changes have not been saved and will be lost if you leave now. Leave anyway?",
+    "checks": {
+      "status": {
+        "ok": "ok",
+        "warning": "warning",
+        "error": "error"
+      },
+      "helpToggle": "What is this?",
+      "database": {
+        "help": "<postgresLink>PostgreSQL</postgresLink> is the database program installed with your platform. It stores everything: accounts, artists, music, sales. Migrations are the updates applied to its structure when the platform is upgraded.",
+        "label": "Database",
+        "ok_one": "PostgreSQL reachable, {{count}} migration applied.",
+        "ok_other": "PostgreSQL reachable, {{count}} migrations applied.",
+        "error": "The database cannot be reached."
+      },
+      "redis": {
+        "help": "<redisLink>Redis</redisLink> is a program that keeps the to-do list of the background tasks. When an artist uploads a track or an email has to go out, the task is written on this list first, and the background worker takes it from there.",
+        "label": "Job queue (Redis)",
+        "ok": "Connected.",
+        "error": "Redis cannot be reached. Uploads, emails and scheduled tasks depend on it."
+      },
+      "worker": {
+        "help": "This program runs separately in the background and takes care of the slow tasks, so the website itself stays fast: converting audio, resizing images, sending emails. If it's not running, uploads stay stuck and emails are not sent.",
+        "label": "Background worker",
+        "ok": "Running.",
+        "error": "No worker is connected. Uploads, emails and scheduled tasks will not run."
+      },
+      "scheduledTasks": {
+        "help": "These tasks run automatically at fixed times: publishing scheduled releases, sending notifications and monthly receipts. The background worker takes care of them.",
+        "label": "Scheduled tasks",
+        "ok": "Last run {{when}}.",
+        "neverRan": "Registered, but none has run yet.",
+        "disabled": "Turned off on the worker.",
+        "error": "A task failed or is overdue. Check the worker logs."
+      },
+      "publicAddress": {
+        "help": "Your platform's web address. We check that the server knows it and that the front end is registered to use it.",
+        "label": "Public address",
+        "ok": "API domain set and a client application is registered.",
+        "noDomain": "API_DOMAIN is not set in the server configuration.",
+        "noClient": "No approved client application is registered."
+      },
+      "storage": {
+        "help": "Where audio files, images and downloads are kept: either the bundled storage installed with your platform (<garageLink>Garage</garageLink>), or an S3 compatible service such as <backblazeLink>Backblaze</backblazeLink>. Files are grouped in buckets, the top level folders of this kind of storage, one per kind of file.",
+        "label": "Storage",
+        "backend": {
+          "minio": "Bundled object storage",
+          "backblaze": "S3 compatible storage"
+        },
+        "ok": "{{backend}}, every bucket is reachable.",
+        "missing_one": "{{backend}}, {{count}} bucket missing or unreachable.",
+        "missing_other": "{{backend}}, {{count}} buckets missing or unreachable."
+      }
     },
     "welcome": {
       "title": "Your instance is up. Let's finish setting it up.",

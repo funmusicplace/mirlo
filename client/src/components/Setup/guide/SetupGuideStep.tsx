@@ -55,7 +55,12 @@ const SetupGuideStep: React.FC<{
           </Button>
         )}
         {onSkip && (
-          <Button type="button" variant="transparent" onClick={onSkip}>
+          <Button
+            type="button"
+            variant="transparent"
+            disabled={!canSubmit}
+            onClick={onSkip}
+          >
             {t("skipForNow")}
           </Button>
         )}
