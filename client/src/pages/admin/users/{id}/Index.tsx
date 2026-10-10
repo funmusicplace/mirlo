@@ -126,6 +126,14 @@ const Index = () => {
                 <td>email</td>
                 <td>{user.email}</td>
               </tr>
+              {user.emailBouncedAt && (
+                <tr>
+                  <td>email bounced</td>
+                  <td>
+                    {formatDate(user.emailBouncedAt)}: {user.emailBounceReason}
+                  </td>
+                </tr>
+              )}
               <tr>
                 <td>name</td>
                 <td>{user.name}</td>
